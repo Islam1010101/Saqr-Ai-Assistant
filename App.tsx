@@ -1,5 +1,13 @@
 import React, { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { HashRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
+import React from "react";
+import ChatAssistant from "./components/ChatAssistant";
+
+const App: React.FC = () => {
+  return <ChatAssistant />;
+};
+
+export default App;
 
 import HomePage from './pages/HomePage';
 import SearchPage from './pages/SearchPage';
