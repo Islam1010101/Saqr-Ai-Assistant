@@ -1,183 +1,133 @@
-import React, { useMemo, useRef, useState } from "react";
-// لو عندك types جاهزة، استوردها. وإلا خليه محلي:
-type Msg = { role: "system" | "user" | "assistant"; content: string };
+// /components/ChatAssistant.tsx
+import React, { useState, useRef } from 'react';
+import { useLanguage } from '../App'; // لو الـ useLanguage جوه App نفس الملف، سيبه كده
+import type { ChatMessage } from '../types'; // { role: 'user' | 'assistant' | 'system'; content: string }
 
-// عدّل المسار حسب ملفك
-// مثال: export const bookData: Book[] في data/bookData.ts
-type Book = {
-  id: string;
-  title: string;
-  author?: string;
-  shelf?: number;
-  row?: number;
-  cabinet?: string;
-  summary?: string;
-  topics?: string[];
-};
-import { bookData } from "../data/bookData"; // ← تأكد من الاسم والـ export
-
-const SYSTEM_PROMPT = `
-أنت "صقر" — مساعد مكتبة مدرسة Emirates Falcon International Private School.
-- الهوية: رسمية وبسيطة، عربي/إنجليزي.
-- المهام:
-  1) مساعدة الطلاب والمعلمين في إيجاد الكتب (الموقع: رف/دولاب/صف).
-  2) اقتراح كتب مناسبة حسب الاهتمامات/الموضوعات.
-  3) تزويد معلومات مختصرة عن المدرسة والمكتبة وسياسات الاستعارة.
-  4) مساعدة أمين المكتبة بتقارير شائعة الطلب (ملخّصات نصية).
-- القواعد:
-  • لو السؤال بحث كتاب: استخدم البيانات المتاحة وأرجع العنوان + المكان + ملخص قصير.
-  • الرد يكون موجز وواضح، افصل عربي ثم English لو الطلب عام.
-  • ممنوع اختراع بيانات رف/دولاب إن لم تتوفر — اذكر أنها غير متاحة.
-`;
-
-export default function ChatAssistant() {
-  const [input, setInput] = useState("");
-  const [lang, setLang] = useState<"ar" | "en">("ar");
+const ChatAssistant: React.FC = () => {
+  const { locale, t } = useLanguage();
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      role: 'assistant',
+      content:
+        locale === 'ar'
+          ? 'أهلاً! أنا صقر، مساعد مكتبة EFIPS. اسألني عن الكتب، مواقعها على الرفوف، أو رشّح لي كتاب يناسبك 📚'
+          : 'Hi! I’m Saqr, EFIPS Library Assistant. Ask me about books, shelves/locations, or personalized recommendations 📚',
+    },
+  ]);
+  const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [history, setHistory] = useState<Msg[]>([]);
+  const listRef = useRef<HTMLDivElement>(null);
 
-  const messages = useMemo<Msg[]>(() => {
-    return [{ role: "system", content: SYSTEM_PROMPT }, ...history];
-  }, [history]);
-
-  // فلتر بحث سريع من الـ bookData
-  const quickResults = useMemo(() => {
-    const q = input.trim().toLowerCase();
-    if (!q) return [];
-    return bookData
-      .filter(b =>
-        [b.title, b.author, ...(b.topics ?? [])]
-          .filter(Boolean)
-          .some(v => String(v).toLowerCase().includes(q))
-      )
-      .slice(0, 5);
-  }, [input]);
-
-  const onSend = async () => {
+  const send = async () => {
     const text = input.trim();
-    if (!text) return;
-    setHistory(h => [...h, { role: "user", content: text }]);
-    setInput("");
+    if (!text || loading) return;
+
+    const next = [...messages, { role: 'user', content: text } as ChatMessage];
+    setMessages(next);
+    setInput('');
     setLoading(true);
+
     try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ messages: messages.concat({ role: "user", content: text }) }),
+      const system =
+        'You are "Saqr", a bilingual (Arabic-first) library assistant for Emirates Falcon International Private School (EFIPS). ' +
+        'Tasks: (1) answer about school/library, (2) help students pick suitable books by topic/level/interest, ' +
+        '(3) summarize books briefly, (4) be formal and clear for parents/teachers when asked, ' +
+        '(5) keep answers concise; Arabic by default unless user asks English. ' +
+        'If user asks about shelves/rows, format like: "الموقع: خزانة X — رف Y — صف Z". ' +
+        'If unsure, ask a short clarifying question.';
+
+      const resp = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system,
+          messages: next.map(m => ({ role: m.role, content: m.content })),
+          model: 'llama-3.1-70b-versatile',
+          temperature: 0.3,
+          max_tokens: 500,
+        }),
       });
-      const data = await res.json();
-      const reply = data?.reply ?? "…";
-      setHistory(h => [...h, { role: "assistant", content: reply }]);
+
+      const data = await resp.json();
+      const answer = data?.content || 'حصل خطأ في الطلب.';
+      setMessages(m => [...m, { role: 'assistant', content: answer } as ChatMessage]);
     } catch (e: any) {
-      setHistory(h => [...h, { role: "assistant", content: "حصل خطأ في الاتصال بالخادم." }]);
+      setMessages(m => [
+        ...m,
+        { role: 'assistant', content: 'فيه مشكلة بالشبكة أو السيرفر. جرّب تاني بعد شوية.' } as ChatMessage,
+      ]);
     } finally {
       setLoading(false);
+      setTimeout(() => listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' }), 0);
+    }
+  };
+
+  const onEnter = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      send();
     }
   };
 
   return (
-    <div className="w-full min-h-screen bg-gray-50">
-      {/* هيدر وهوية */}
-      <header className="sticky top-0 z-10 bg-white border-b">
-        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center gap-3">
-          <img src="/logo.png" alt="EFIPS" className="h-10 w-10 object-contain" />
-          <div className="flex flex-col">
-            <h1 className="text-xl font-bold">مساعد المكتبة — صقر</h1>
-            <p className="text-xs text-gray-500">
-              Emirates Falcon International Private School • Library Assistant
-            </p>
-          </div>
-          <div className="ml-auto flex items-center gap-2">
-            <button
-              className={`px-3 py-1 rounded ${lang === "ar" ? "bg-black text-white" : "bg-gray-200"}`}
-              onClick={() => setLang("ar")}
-            >
-              العربية
-            </button>
-            <button
-              className={`px-3 py-1 rounded ${lang === "en" ? "bg-black text-white" : "bg-gray-200"}`}
-              onClick={() => setLang("en")}
-            >
-              English
-            </button>
-          </div>
+    <div className="mx-auto max-w-3xl w-full">
+      {/* هيدر بسيط داخل الكومبوننت */}
+      <div className="flex items-center gap-3 mb-4">
+        <img
+          className="h-12 w-12 object-contain"
+          src="https://media.licdn.com/dms/image/v2/D4D0BAQH2J4sVBWyU9Q/company-logo_200_200/B4DZferhU8GgAI-/0/1751787640644/emirates_falcon_international_private_school_efips_logo?e=2147483647&v=beta&t=z8d76C6g0mI5SLMwFQS7TJ65jX8mN02QtIrFdJbxk8I"
+          alt="EFIPS"
+        />
+        <div>
+          <div className="text-lg font-bold">Saqr — EFIPS Library Assistant</div>
+          <div className="text-sm text-gray-500">{locale === 'ar' ? 'اسألني عن أي كتاب' : 'Ask me about any book'}</div>
         </div>
-      </header>
+      </div>
 
-      {/* المحتوى */}
-      <main className="max-w-5xl mx-auto px-4 py-6">
-        {/* نتائج سريعة من الداتا */}
-        {quickResults.length > 0 && (
-          <div className="mb-4 rounded-xl border bg-white">
-            <div className="px-4 py-2 border-b font-semibold">نتائج سريعة من فهرس الكتب</div>
-            <ul className="divide-y">
-              {quickResults.map(b => (
-                <li key={b.id} className="px-4 py-3 text-sm">
-                  <div className="font-medium">{b.title}</div>
-                  <div className="text-gray-500">
-                    {b.author ? `by ${b.author} • ` : ""}
-                    {b.cabinet ? `Cabinet: ${b.cabinet} • ` : ""}
-                    {typeof b.shelf === "number" ? `Shelf: ${b.shelf} • ` : ""}
-                    {typeof b.row === "number" ? `Row: ${b.row}` : ""}
-                  </div>
-                  {b.summary && <div className="text-gray-600 mt-1">{b.summary}</div>}
-                </li>
-              ))}
-            </ul>
+      {/* منطقة الرسائل */}
+      <div
+        ref={listRef}
+        className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/60 dark:bg-gray-800/60 p-4 h-[56vh] overflow-y-auto mb-3"
+      >
+        {messages.map((m, i) => (
+          <div key={i} className={`mb-3 flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div
+              className={`max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-sm leading-6 ${
+                m.role === 'user'
+                  ? 'bg-uae-green text-white'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100'
+              }`}
+            >
+              {m.content}
+            </div>
+          </div>
+        ))}
+        {loading && (
+          <div className="text-xs text-gray-500 animate-pulse">
+            {locale === 'ar' ? 'صقر بيكتب…' : 'Saqr is typing…'}
           </div>
         )}
+      </div>
 
-        {/* الشات */}
-        <div className="rounded-2xl border bg-white p-4">
-          <div className="space-y-3 max-h-[60vh] overflow-auto">
-            {history.map((m, i) => (
-              <div
-                key={i}
-                className={
-                  m.role === "user"
-                    ? "text-right"
-                    : "text-left"
-                }
-              >
-                <div
-                  className={
-                    "inline-block px-3 py-2 rounded-2xl " +
-                    (m.role === "user" ? "bg-black text-white" : "bg-gray-100")
-                  }
-                  dir={lang === "ar" ? "rtl" : "ltr"}
-                >
-                  {m.content}
-                </div>
-              </div>
-            ))}
-            {loading && <div className="text-sm text-gray-500">…جاري التفكير</div>}
-          </div>
-
-          <div className="mt-4 flex gap-2">
-            <input
-              dir={lang === "ar" ? "rtl" : "ltr"}
-              className="flex-1 rounded-xl border px-3 py-2 outline-none"
-              placeholder={lang === "ar" ? "اكتب سؤالك عن الكتب أو المكتبة…" : "Ask about books or the library…"}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && onSend()}
-            />
-            <button
-              onClick={onSend}
-              disabled={loading}
-              className="px-4 py-2 rounded-xl bg-black text-white disabled:opacity-60"
-            >
-              إرسال
-            </button>
-          </div>
-        </div>
-
-        {/* فوتر بسيط */}
-        <footer className="text-center text-xs text-gray-400 mt-6">
-          Powered by Groq • Built with Vite + React • “Saqr”
-        </footer>
-      </main>
+      {/* الإدخال */}
+      <div className="flex gap-2">
+        <textarea
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={onEnter}
+          placeholder={locale === 'ar' ? 'اكتب سؤالك…' : 'Type your question…'}
+          className="flex-1 resize-none rounded-xl border border-gray-300 dark:border-gray-600 p-3 h-14 focus:outline-none focus:ring-2 focus:ring-uae-green/60 bg-white dark:bg-gray-900"
+        />
+        <button
+          onClick={send}
+          disabled={loading || !input.trim()}
+          className="h-14 px-5 rounded-xl bg-uae-green text-white font-semibold disabled:opacity-60"
+        >
+          {locale === 'ar' ? 'إرسال' : 'Send'}
+        </button>
+      </div>
     </div>
   );
-}
+};
 
+export default ChatAssistant;
