@@ -1,112 +1,49 @@
-export const config = { runtime: "edge" }; // يشتغل كـ Edge Function على فيرسيل
+// /api/chat.ts
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+import Groq from 'groq-sdk';
 
-type Msg = { role: "system" | "user" | "assistant"; content: string };
-
-const systemPrompt = `
-You are "Saqr" (صقر), a bilingual (AR/EN) smart library assistant for
-"Emirates Falcon International Private School" library.
-- Keep answers concise and helpful.
-- If user speaks Arabic, reply in Arabic; if English, reply in English.
-- You can recommend books, help with topics, and answer about the school/library.
-- If asked about book location, format like: "Shelf: X | Cabinet: Y".
+const SYS_PROMPT = `
+You are "Saqr" — a bilingual (Arabic/English) library assistant for
+"Emirates Falcon International Private School" (EFIPS).
+- Answer briefly, friendly, and helpful.
+- If user asks about books, you can use provided "contextBooks" (JSON).
+- If user wants shelves/rows, return them clearly.
+- Keep Arabic UI-first when locale = "ar", else English-first.
+- If you don't know, say so and suggest what info you need.
 `;
 
-function toGroqMessages(messages: Msg[], locale?: "ar" | "en"): Msg[] {
-  const sys = {
-    role: "system" as const,
-    content:
-      systemPrompt +
-      (locale === "ar"
-        ? `\nPrefer Arabic responses when possible.`
-        : `\nPrefer English responses when possible.`),
-  };
-  return [sys, ...messages];
-}
-
-// قراءة ستريم SSE من Groq وإرجاع نص متدفق للواجهة
-async function streamGroqToClient(resp: Response) {
-  const reader = resp.body!.getReader();
-  const decoder = new TextDecoder();
-  const encoder = new TextEncoder();
-
-  return new ReadableStream({
-    async start(controller) {
-      let buffer = "";
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-
-        // SSE: سطور بتبدأ بـ "data:"
-        const parts = buffer.split("\n\n");
-        buffer = parts.pop() || "";
-        for (const chunk of parts) {
-          const line = chunk.trim();
-          if (!line.startsWith("data:")) continue;
-          const data = line.slice(5).trim();
-          if (data === "[DONE]") {
-            controller.close();
-            return;
-          }
-          try {
-            const json = JSON.parse(data);
-            const delta = json?.choices?.[0]?.delta?.content || "";
-            if (delta) controller.enqueue(encoder.encode(delta));
-          } catch {
-            // تجاهل أي تشانك مش JSON
-          }
-        }
-      }
-      controller.close();
-    },
-  });
-}
-
-export default async function handler(req: Request) {
-  if (req.method !== "POST") {
-    return new Response("Method Not Allowed", { status: 405 });
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) {
-    return new Response("Missing GROQ_API_KEY", { status: 500 });
-  }
-
-  let body: { messages: Msg[]; locale?: "ar" | "en" };
   try {
-    body = (await req.json()) as any;
-  } catch {
-    return new Response("Invalid JSON body", { status: 400 });
+    const { messages = [], locale = 'ar', contextBooks = [] } = req.body ?? {};
+
+    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+    const systemPreamble =
+      SYS_PROMPT +
+      `\nCurrent locale: ${locale}\n` +
+      (Array.isArray(contextBooks) && contextBooks.length
+        ? `Context books (JSON, up to 20): ${JSON.stringify(contextBooks.slice(0, 20))}`
+        : 'No contextBooks provided.');
+
+    const completion = await groq.chat.completions.create({
+      model: 'llama-3.1-70b-versatile',
+      temperature: 0.2,
+      top_p: 0.9,
+      messages: [
+        { role: 'system', content: systemPreamble },
+        // مرر تاريخ المحادثة القادم من الواجهة
+        ...messages,
+      ],
+    });
+
+    const reply = completion.choices?.[0]?.message?.content ?? '';
+    return res.status(200).json({ reply });
+  } catch (err: any) {
+    console.error('Groq error:', err?.message || err);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
-
-  const { messages = [], locale } = body;
-  const groqRes = await fetch(
-    "https://api.groq.com/openai/v1/chat/completions",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "llama-3.1-70b-versatile", // اختَر موديل Groq
-        temperature: 0.2,
-        stream: true,
-        messages: toGroqMessages(messages, locale),
-      }),
-    }
-  );
-
-  if (!groqRes.ok || !groqRes.body) {
-    const err = await groqRes.text().catch(() => "");
-    return new Response(`Groq error: ${err}`, { status: 500 });
-  }
-
-  const stream = await streamGroqToClient(groqRes);
-  return new Response(stream, {
-    headers: {
-      "Content-Type": "text/plain; charset=utf-8",
-      "Cache-Control": "no-store",
-    },
-  });
 }
