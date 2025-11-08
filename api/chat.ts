@@ -1,79 +1,63 @@
-// /api/chat.ts
-import Groq from "groq-sdk";
+// /api/chat.ts  — Vercel Edge Function
+export const config = { runtime: "edge" };
 
-// IMPORTANT: حط المفتاح في إعدادات Vercel > Project > Settings > Environment Variables
-const client = new Groq({ apiKey: process.env.GROQ_API_KEY! });
+type InMsg = { role: "system" | "user" | "assistant"; content: string };
+type InBody = { messages?: InMsg[]; locale?: "ar" | "en" };
 
-// اختياري: لو عايز تستخدم الداتا داخليًا في البرومبت
-// لو عندك /data/bookData.ts بتصدّر bookData
-import { bookData } from "../data/bookData";
-
-export const config = { runtime: "edge" }; // ينفع برضه تشيلها لو عايز Node runtime
+const SYS_PROMPT = `You are "Saqr" (صقر), a bilingual (Arabic/English) library assistant for Emirates Falcon International Private School.
+- Be concise, helpful, and formal-friendly.
+- If user asks about a book, return: brief summary + shelf/cabinet hint if provided by the client + reading level guess.
+- If user asks general school/library info, answer in the user language.
+- Default to Arabic if locale is "ar".`;
 
 export default async function handler(req: Request) {
-  if (req.method !== "POST") {
-    return new Response("Method Not Allowed", { status: 405 });
-  }
-
   try {
-    const { messages, locale } = await req.json();
+    const body = (await req.json()) as InBody;
 
-    const sys = [
-      {
-        role: "system",
-        content:
-          `You are "Saqr" — a bilingual (Arabic/English) smart library assistant for Emirates Falcon International Private School (EFIPS).
-- Answer shortly and clearly first, then elaborate if asked.
-- Be formal with teachers, friendly with students.
-- Prefer Arabic if locale=ar, else English.
-- Capabilities:
-  1) Help find books by title/author/topic.
-  2) Tell shelf & cabinet from local bookData when available.
-  3) Suggest suitable books by age/topic and give 2–3 options.
-  4) Produce short summaries (2–4 lines).
-  5) Provide simple school/library info & policies.
-- If info is missing in bookData, say you will check with the librarian and propose close matches.
-- Never invent shelf codes not in data.
-- Keep answers safe for school.
-- Assistant name is "Saqr".`,
-      },
-      {
-        role: "system",
-        content:
-          `Local catalog snapshot (bookData): ` +
-          JSON.stringify(bookData).slice(0, 15000) + // قصّ طويل لتفادي الضخامة
-          `\n(Use it for shelves/locations & quick matches.)`,
-      },
-      {
-        role: "system",
-        content:
-          locale === "ar"
-            ? "اكتب بالعربية الفصحى المبسطة ما لم يُطلب غير ذلك."
-            : "Write in clear English unless user asks Arabic.",
-      },
+    const userMsgs: InMsg[] = Array.isArray(body?.messages) ? body!.messages! : [];
+    const locale = body?.locale === "en" ? "en" : "ar";
+
+    const messages: InMsg[] = [
+      { role: "system", content: SYS_PROMPT + `\nUser locale: ${locale}` },
+      ...userMsgs,
     ];
 
-    const completion = await client.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      temperature: 0.2,
-      messages: [...sys, ...(messages ?? [])],
+    const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.GROQ_API_KEY ?? ""}`,
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        temperature: 0.4,
+        messages,
+      }),
     });
 
-    const reply =
-      completion.choices?.[0]?.message?.content ||
+    if (!groqRes.ok) {
+      const errTxt = await groqRes.text().catch(() => "");
+      return new Response(
+        JSON.stringify({ error: `Groq error ${groqRes.status}: ${errTxt}` }),
+        { status: 500, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    const data = await groqRes.json();
+    const reply: string =
+      data?.choices?.[0]?.message?.content ??
       (locale === "ar"
-        ? "عذرًا، لم أستطع توليد رد الآن."
-        : "Sorry, I couldn't generate a reply.");
+        ? "عذراً، لم أتمكن من توليد رد حالياً."
+        : "Sorry, I couldn't generate a reply right now.");
 
     return new Response(JSON.stringify({ reply }), {
-      headers: { "content-type": "application/json" },
       status: 200,
+      headers: { "Content-Type": "application/json" },
     });
-  } catch (err: any) {
-    console.error("API error:", err);
-    return new Response(JSON.stringify({ error: "Server error" }), {
-      headers: { "content-type": "application/json" },
+  } catch (e: any) {
+    return new Response(JSON.stringify({ error: e?.message || "Server error" }), {
       status: 500,
+      headers: { "Content-Type": "application/json" },
     });
   }
 }
