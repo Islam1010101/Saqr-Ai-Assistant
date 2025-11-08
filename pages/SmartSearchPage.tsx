@@ -39,42 +39,39 @@ const SmartSearchPage: React.FC = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages, isLoading]);
 
-    const handleSendMessage = async () => {
-        if (input.trim() === '' || isLoading) return;
+   const handleSendMessage = async () => {
+  if (input.trim() === '' || isLoading) return;
 
-        const userMessage: ChatMessage = { role: 'user', content: input.trim() };
-        setMessages(prev => [...prev, userMessage]);
-        const currentInput = input;
-        setInput('');
-        setIsLoading(true);
+  const userMessage: ChatMessage = { role: 'user', content: input.trim() };
+  setMessages(prev => [...prev, userMessage]);
+  const currentInput = input;
+  setInput('');
+  setIsLoading(true);
 
-        // TODO: Replace this with your actual backend endpoint for Groq or other AI model integration.
-        // The fetch call is commented out as there is no live backend.
-        // This placeholder simulates a streaming response.
-        try {
-            /*
-            const response = await fetch('/api/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    messages: [...messages, userMessage],
-                    locale: locale
-                })
-            });
-            // ... handle streaming response from backend
-            */
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [...messages, userMessage],
+        locale
+      })
+    });
 
-           try {
-  const response = await fetch('/api/chat', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      messages: [...messages, userMessage],
-      locale,
-      // لو عايز صقر يفكر من بيانات الكتب
-      // contextBooks: bookData.slice(0, 50)  // اختياري
-    }),
-  });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.error || `Bad response ${res.status}`);
+    }
+
+    const data = (await res.json()) as { reply: string };
+    setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
+  } catch (e) {
+    console.error('API call failed:', e);
+    setMessages(prev => [...prev, { role: 'assistant', content: t('error') }]);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   if (!response.ok) throw new Error('Bad response from server');
 
