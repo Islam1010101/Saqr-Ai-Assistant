@@ -1,63 +1,56 @@
-// /api/chat.ts  — Vercel Edge Function
-export const config = { runtime: "edge" };
+// /api/chat.ts
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+import Groq from 'groq-sdk';
 
-type InMsg = { role: "system" | "user" | "assistant"; content: string };
-type InBody = { messages?: InMsg[]; locale?: "ar" | "en" };
+// ملاحظة مهمة: ضيف GROQ_API_KEY في بيئة Vercel (Settings → Environment Variables)
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-const SYS_PROMPT = `You are "Saqr" (صقر), a bilingual (Arabic/English) library assistant for Emirates Falcon International Private School.
-- Be concise, helpful, and formal-friendly.
-- If user asks about a book, return: brief summary + shelf/cabinet hint if provided by the client + reading level guess.
-- If user asks general school/library info, answer in the user language.
-- Default to Arabic if locale is "ar".`;
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // السماح لـ POST فقط
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
-export default async function handler(req: Request) {
   try {
-    const body = (await req.json()) as InBody;
+    const { messages, locale } = req.body as {
+      messages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>;
+      locale?: 'ar' | 'en';
+    };
 
-    const userMsgs: InMsg[] = Array.isArray(body?.messages) ? body!.messages! : [];
-    const locale = body?.locale === "en" ? "en" : "ar";
-
-    const messages: InMsg[] = [
-      { role: "system", content: SYS_PROMPT + `\nUser locale: ${locale}` },
-      ...userMsgs,
-    ];
-
-    const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.GROQ_API_KEY ?? ""}`,
-      },
-      body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        temperature: 0.4,
-        messages,
-      }),
-    });
-
-    if (!groqRes.ok) {
-      const errTxt = await groqRes.text().catch(() => "");
-      return new Response(
-        JSON.stringify({ error: `Groq error ${groqRes.status}: ${errTxt}` }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
-      );
+    if (!process.env.GROQ_API_KEY) {
+      return res.status(500).json({ error: 'Server is missing GROQ_API_KEY' });
     }
 
-    const data = await groqRes.json();
-    const reply: string =
-      data?.choices?.[0]?.message?.content ??
-      (locale === "ar"
-        ? "عذراً، لم أتمكن من توليد رد حالياً."
-        : "Sorry, I couldn't generate a reply right now.");
+    // System prompt — هوية وطنية + دور المساعد + لغتين
+    const system = `
+You are "Saqr" — the smart library assistant for "Emirates Falcon International Private School Library".
+- Answer in ${locale === 'ar' ? 'Arabic' : 'English'} by default; keep responses brief and helpful.
+- Capabilities:
+  * Help users find books by title/author/topic.
+  * If the user asks for a book, respond with: shelf number + cabinet/row if provided + a 1–2 line summary.
+  * Recommend books by interest/age/topic when asked.
+  * Provide simple stats phrasing like "most searched/asked" (the FE will compute later).
+  * Provide school/library info politely.
+- If data is missing, say you don’t have it and suggest manual search.
+- Keep tone friendly and professional, aligned with UAE school identity.
+`;
 
-    return new Response(JSON.stringify({ reply }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
+    // نداء Groq
+    const chat = await groq.chat.completions.create({
+      model: 'llama-3.3-70b-versatile', // اختياري: استخدم موديل آخر متاح عندك
+      temperature: 0.3,
+      messages: [
+        { role: 'system', content: system },
+        // هنمرّر رسائل المستخدم كما هي
+        ...(messages || []).map(m => ({ role: m.role, content: m.content })),
+      ],
     });
+
+    const reply = chat.choices?.[0]?.message?.content?.trim() || '';
+    return res.status(200).json({ reply });
   } catch (e: any) {
-    return new Response(JSON.stringify({ error: e?.message || "Server error" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    console.error('API error:', e?.response?.data || e?.message || e);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
