@@ -64,25 +64,34 @@ const SmartSearchPage: React.FC = () => {
             // ... handle streaming response from backend
             */
 
-            // --- Placeholder Logic ---
-            const placeholderResponse = locale === 'ar'
-                ? `شكراً لسؤالك عن "${currentInput}". أنا حالياً نظام واجهة أمامية فقط. سيتم توصيلي قريباً بخدمة ذكاء اصطناعي مثل Groq لمعالجة طلبك.`
-                : `Thank you for asking about "${currentInput}". I am currently a front-end only system. I will soon be connected to an AI service like Groq to process your request.`;
-            
-            // Simulate streaming
-            setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
-            const words = placeholderResponse.split(' ');
-            let builtResponse = '';
-            for (let i = 0; i < words.length; i++) {
-                await new Promise(resolve => setTimeout(resolve, 60)); // delay between words
-                builtResponse += (i > 0 ? ' ' : '') + words[i];
-                setMessages(prev => {
-                    const newMessages = [...prev];
-                    newMessages[newMessages.length - 1].content = builtResponse;
-                    return newMessages;
-                });
-            }
-            // --- End Placeholder Logic ---
+           try {
+  const response = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messages: [...messages, userMessage],
+      locale,
+      // لو عايز صقر يفكر من بيانات الكتب
+      // contextBooks: bookData.slice(0, 50)  // اختياري
+    }),
+  });
+
+  if (!response.ok) throw new Error('Bad response from server');
+
+  const data = await response.json();
+  const reply = data.reply || t('error');
+
+  setMessages(prev => [
+    ...prev,
+    { role: 'assistant', content: reply }
+  ]);
+
+} catch (error) {
+  console.error("API call failed:", error);
+  setMessages(prev => [...prev, { role: 'assistant', content: t('error') }]);
+} finally {
+  setIsLoading(false);
+}
 
         } catch (error) {
             console.error("API call failed:", error);
