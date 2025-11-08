@@ -1,6 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useLanguage } from '../App';
-import { ChatMessage } from '../types';
+// /pages/SmartSearchPage.tsx
+import React, { useState, useRef, useEffect } from "react";
+import { useLanguage } from "../App";
+import type { ChatMessage } from "../types";
+// ملاحظة: لو بتستخدم bookData محليًا لاقتراحات، تقدر توظّفه لاحقًا
+// import { bookData } from "../data/bookData";
 
 const translations = {
   ar: {
@@ -32,17 +35,16 @@ const SmartSearchPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // إعادة رسالة الترحيب عند تغيير اللغة
+  // تحديت رسالة الترحيب عند تغيير اللغة
   useEffect(() => {
     setMessages([{ role: "assistant", content: t("saqrWelcome") }]);
   }, [locale]);
 
-  // أوتوسكرول لآخر الرسائل
+  // سحب السكрол لآخر الرسائل
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 
-  // الإرسال الحقيقي إلى /api/chat
   const handleSendMessage = async () => {
     if (input.trim() === "" || isLoading) return;
 
@@ -52,7 +54,8 @@ const SmartSearchPage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const res = await fetch("/api/chat", {
+      // نداء السيرفر `/api/chat`
+      const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -61,22 +64,18 @@ const SmartSearchPage: React.FC = () => {
         }),
       });
 
-      if (!res.ok) {
-        // نحاول نقرأ رسالة الخطأ من السيرفر لو موجودة
-        const maybeErr = await res.json().catch(() => ({}));
-        throw new Error(maybeErr?.error || `HTTP ${res.status}`);
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err?.error || `Bad response ${response.status}`);
       }
 
-      const data = (await res.json()) as { reply?: string };
-      const reply = data.reply ?? t("error");
+      const data = (await response.json()) as { reply: string };
+      const reply = data?.reply || t("error");
 
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
-    } catch (e) {
-      console.error("API call failed:", e);
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: t("error") },
-      ]);
+    } catch (error) {
+      console.error("API call failed:", error);
+      setMessages((prev) => [...prev, { role: "assistant", content: t("error") }]);
     } finally {
       setIsLoading(false);
     }
@@ -148,7 +147,6 @@ const SmartSearchPage: React.FC = () => {
                 </div>
               </div>
             )}
-
           <div ref={messagesEndRef} />
         </div>
       </div>
@@ -180,12 +178,7 @@ const SmartSearchPage: React.FC = () => {
               viewBox="0 0 24 24"
               stroke="currentColor"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
             </svg>
           </button>
         </div>
