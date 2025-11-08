@@ -1,56 +1,47 @@
-// /api/chat.ts
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import Groq from 'groq-sdk';
+// /api/chat.ts — Edge Runtime
+import Groq from "groq-sdk";
 
-// ملاحظة مهمة: ضيف GROQ_API_KEY في بيئة Vercel (Settings → Environment Variables)
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+export const config = {
+  runtime: "edge",
+};
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // السماح لـ POST فقط
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST');
-    return res.status(405).json({ error: 'Method not allowed' });
+export default async function handler(req: Request): Promise<Response> {
+  if (req.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405 });
   }
 
-  try {
-    const { messages, locale } = req.body as {
-      messages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>;
-      locale?: 'ar' | 'en';
-    };
+  if (!process.env.GROQ_API_KEY) {
+    return new Response(JSON.stringify({ error: "Missing GROQ_API_KEY" }), { status: 500 });
+  }
 
-    if (!process.env.GROQ_API_KEY) {
-      return res.status(500).json({ error: 'Server is missing GROQ_API_KEY' });
-    }
+  const { messages, locale } = await req.json();
 
-    // System prompt — هوية وطنية + دور المساعد + لغتين
-    const system = `
-You are "Saqr" — the smart library assistant for "Emirates Falcon International Private School Library".
-- Answer in ${locale === 'ar' ? 'Arabic' : 'English'} by default; keep responses brief and helpful.
-- Capabilities:
-  * Help users find books by title/author/topic.
-  * If the user asks for a book, respond with: shelf number + cabinet/row if provided + a 1–2 line summary.
-  * Recommend books by interest/age/topic when asked.
-  * Provide simple stats phrasing like "most searched/asked" (the FE will compute later).
-  * Provide school/library info politely.
-- If data is missing, say you don’t have it and suggest manual search.
-- Keep tone friendly and professional, aligned with UAE school identity.
+  const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
+  const system = `
+You are Saqr — the smart assistant of Emirates Falcon International Private School Library.
+Respond in ${locale === "ar" ? "Arabic" : "English"}.
+Keep the tone friendly, educational, and helpful.
+Provide book suggestions and library help.
+If unknown, ask user to try manual search.
 `;
 
-    // نداء Groq
+  try {
     const chat = await groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile', // اختياري: استخدم موديل آخر متاح عندك
-      temperature: 0.3,
+      model: "llama-3.3-70b-versatile",
       messages: [
-        { role: 'system', content: system },
-        // هنمرّر رسائل المستخدم كما هي
-        ...(messages || []).map(m => ({ role: m.role, content: m.content })),
+        { role: "system", content: system },
+        ...messages
       ],
+      temperature: 0.3,
     });
 
-    const reply = chat.choices?.[0]?.message?.content?.trim() || '';
-    return res.status(200).json({ reply });
-  } catch (e: any) {
-    console.error('API error:', e?.response?.data || e?.message || e);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    const reply = chat.choices?.[0]?.message?.content?.trim() || "";
+
+    return new Response(JSON.stringify({ reply }), { status: 200 });
+
+  } catch (err) {
+    console.error("Groq API Error:", err);
+    return new Response(JSON.stringify({ error: "AI request failed" }), { status: 500 });
   }
 }
