@@ -39,24 +39,31 @@ const SmartSearchPage: React.FC = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages, isLoading]);
 
-   const handleSendMessage = async () => {
-  if (input.trim() === '' || isLoading) return;
+   // داخل handleSendMessage بدل الـ Placeholder
+try {
+  const response = await fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      messages: [...messages, userMessage],
+      locale
+    })
+  });
 
-  const userMessage: ChatMessage = { role: 'user', content: input.trim() };
-  setMessages(prev => [...prev, userMessage]);
-  const currentInput = input;
-  setInput('');
-  setIsLoading(true);
+  if (!response.ok) throw new Error("Bad response from server");
 
-  try {
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages: [...messages, userMessage],
-        locale
-      })
-    });
+  const data = await response.json();
+  const reply = data.reply || t('error');
+
+  // ضيف رسالة المساعد الفعلية
+  setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
+
+} catch (error) {
+  console.error("API call failed:", error);
+  setMessages(prev => [...prev, { role: 'assistant', content: t('error') }]);
+} finally {
+  setIsLoading(false);
+}
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
