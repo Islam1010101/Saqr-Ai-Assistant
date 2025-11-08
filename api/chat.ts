@@ -28,7 +28,7 @@ If unknown, ask user to try manual search.
 
   try {
     const chat = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model: "llama3-8b-chat",
       messages: [
         { role: "system", content: system },
         ...messages
