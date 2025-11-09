@@ -75,7 +75,11 @@ const translations = {
 
 
 // --- BOOK MODAL ---
-const BookModal: React.FC<{ book: Book | null; onClose: () => void }> = ({ book, onClose }) => {
+const BookModal: React.FC<{
+  book: Book | null;
+  onClose: () => void;
+  onFilterByAuthor: (author: string) => void;
+}> = ({ book, onClose, onFilterByAuthor }) => {
     const { locale, dir } = useLanguage();
     const t_search = (key: keyof typeof translations.ar) => translations[locale][key];
     
