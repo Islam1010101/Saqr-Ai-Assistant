@@ -52,7 +52,7 @@ export const useLanguage = () => {
 };
 
 const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [locale, setLocale] = useState<Locale>('ar');
+  const [locale, setLocale] = useState<Locale>('en');
   useEffect(() => {
     document.documentElement.lang = locale;
     document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr';
