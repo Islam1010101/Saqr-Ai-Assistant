@@ -1,5 +1,11 @@
-import { Book } from '../types';
-
+export interface Book {
+  title: string;
+  author: string;
+  shelf: number | string;
+  row: number | string;
+  subjects?: string[];
+  keywords?: string[];
+}
 // Data provided by the user in bookData.txt, with syntax error fixed.
 const rawBookData = [
 { "title": "CREATING EXCELLENCE", "author": "Craig R. Hickman", "shelf": 4, "row": 1 },
@@ -2789,52 +2795,57 @@ const rawBookData = [
 { "title": "EUPHORIA", "author": "LILY KING", "shelf": 16, "row": 6 }
 ];
 
-// FIX: Process raw book data to match the Book interface and export it.
-// This resolves module export errors and downstream type errors in components.
-const processBookData = (rawData: any[]): Book[] => {
-  return rawData.map((rawBook, index) => {
-    let author = rawBook.author as string;
-    let subject = 'Uncategorized';
+const normalize = (s: string) =>
+  s
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u064B-\u0652]/g, '')      // تنوين/تشكيل عربي
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ')     // رموز
+    .replace(/\s+/g, ' ')
+    .trim();
 
-    // Regex to detect Arabic characters
-    const arabicRegex = /[\u0600-\u06FF]/;
-    const language: 'EN' | 'AR' = arabicRegex.test(rawBook.title) || arabicRegex.test(rawBook.author) ? 'AR' : 'EN';
-    
-    // Extract subject from author field if it's in the format (Topic: ...)
-    const topicMatch = author.match(/\(Topic: (.*?)\)/);
-    if (topicMatch) {
-      subject = topicMatch[1];
-      author = 'Unknown Author';
-    } else if (!author) {
-      author = 'Unknown Author';
+export type CatalogMatch =
+  | { found: true; book: Book; reason: string }
+  | { found: false };
+
+export function findInCatalog(query: string): CatalogMatch {
+  const q = normalize(query);
+
+  // 1) ماتش عنوان/مؤلف مباشر
+  const hard = books.find(
+    b =>
+      normalize(b.title) === q ||
+      normalize(b.author) === q
+  );
+  if (hard) return { found: true, book: hard, reason: 'exact' };
+
+  // 2) contains على العنوان/المؤلف/subjects/keywords
+  let best: { book: Book; score: number } | null = null;
+
+  for (const b of books) {
+    const haystack = [
+      b.title,
+      b.author,
+      ...(b.subjects ?? []),
+      ...(b.keywords ?? []),
+    ]
+      .map(normalize)
+      .join(' ');
+
+    let score = 0;
+    if (haystack.includes(q)) score += 3;
+
+    // split كلمات وسكور بسيط
+    for (const part of q.split(' ')) {
+      if (part.length > 2 && haystack.includes(part)) score += 1;
     }
 
-    // Clean up author field from potential topic-like strings if not matched
-    if (author.startsWith('(') && author.endsWith(')')) {
-        author = 'Unknown Author';
-    }
+    if (!best || score > best.score) best = { book: b, score };
+  }
 
-    // Remove trailing numbers and clean up whitespace
-    author = author.replace(/\s*\d+$/, '').trim();
-    if (author === "") {
-        author = "Unknown Author";
-    }
+  if (best && best.score >= 3) {
+    return { found: true, book: best.book, reason: 'fuzzy' };
+  }
 
-    return {
-      id: `${rawBook.shelf}-${rawBook.row}-${index + 1}`, // Generate a unique ID
-      title: rawBook.title,
-      author: author,
-      subject: subject,
-      shelf: rawBook.shelf,
-      row: rawBook.row,
-      level: 'General', // Placeholder
-      language: language,
-      summary: language === 'AR' 
-        ? `ملخص كتاب "${rawBook.title}" سيكون متاحاً قريباً.`
-        : `A summary for the book "${rawBook.title}" will be available soon.`, // Placeholder
-    };
-  });
-};
-
-export const bookData: Book[] = processBookData(rawBookData);
-
+  return { found: false };
+}
