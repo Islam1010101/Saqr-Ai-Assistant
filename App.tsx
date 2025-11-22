@@ -60,7 +60,7 @@ const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 
   const t = (k: TransKeys) => translations[locale][k];
   return (
-    <LanguageContext.Provider value={{ locale, setLocale, t, dir: locale === 'ar' ? 'rtl' : 'ltr' }}>
+    <LanguageContext.Provider value={{ locale, setLocale, t, dir: locale === 'en' ? 'rtl' : 'ltr' }}>
       {children}
     </LanguageContext.Provider>
   );
