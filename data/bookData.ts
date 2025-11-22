@@ -2795,57 +2795,49 @@ const rawBookData = [
 { "title": "EUPHORIA", "author": "LILY KING", "shelf": 16, "row": 6 }
 ];
 
+// ====== new helpers ======
 const normalize = (s: string) =>
   s
     .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[\u064B-\u0652]/g, '')      // تنوين/تشكيل عربي
-    .replace(/[^\p{L}\p{N}\s]/gu, ' ')     // رموز
-    .replace(/\s+/g, ' ')
+    .normalize("NFKD")
+    .replace(/[\u064B-\u0652]/g, "")        // remove tashkeel
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")       // remove punctuation
+    .replace(/\s+/g, " ")
     .trim();
 
-export type CatalogMatch =
-  | { found: true; book: Book; reason: string }
-  | { found: false };
-
-export function findInCatalog(query: string): CatalogMatch {
+export function searchCatalog(query: string) {
   const q = normalize(query);
 
-  // 1) ماتش عنوان/مؤلف مباشر
-  const hard = books.find(
-    b =>
-      normalize(b.title) === q ||
-      normalize(b.author) === q
-  );
-  if (hard) return { found: true, book: hard, reason: 'exact' };
+  // exact title/author match
+  const exact = bookData.find((b: any) => {
+    return normalize(b.title) === q || normalize(b.author) === q;
+  });
+  if (exact) return { found: true as const, book: exact, reason: "exact" };
 
-  // 2) contains على العنوان/المؤلف/subjects/keywords
-  let best: { book: Book; score: number } | null = null;
+  // fuzzy best match
+  let best: { book: any; score: number } | null = null;
 
-  for (const b of books) {
-    const haystack = [
+  for (const b of bookData as any[]) {
+    const hay = [
       b.title,
       b.author,
       ...(b.subjects ?? []),
       ...(b.keywords ?? []),
-    ]
-      .map(normalize)
-      .join(' ');
+    ].map(normalize).join(" ");
 
     let score = 0;
-    if (haystack.includes(q)) score += 3;
+    if (hay.includes(q)) score += 3;
 
-    // split كلمات وسكور بسيط
-    for (const part of q.split(' ')) {
-      if (part.length > 2 && haystack.includes(part)) score += 1;
+    for (const part of q.split(" ")) {
+      if (part.length > 2 && hay.includes(part)) score += 1;
     }
 
     if (!best || score > best.score) best = { book: b, score };
   }
 
   if (best && best.score >= 3) {
-    return { found: true, book: best.book, reason: 'fuzzy' };
+    return { found: true as const, book: best.book, reason: "fuzzy" };
   }
 
-  return { found: false };
+  return { found: false as const };
 }
