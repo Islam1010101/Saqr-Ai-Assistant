@@ -2869,27 +2869,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           المطلوب: أكد وجود الكتاب واذكر موقعه بدقة.
         `;
       } else {
-        systemInstructions = `
-          You are "Saqr". Book found:
-          ${inventoryDetails}
-          Task: Confirm availability and state location exactly.
-        `;
-      }
-
-    } else {
+      // === SCENARIO B: Book Does NOT Exist (الذكاء الاصطناعي يعمل هنا) ===
+      
       if (locale === 'ar') {
         systemInstructions = `
-          أنت "صقر". الطالب يسأل عن: "${userMessage}".
-          الكتاب غير موجود. اعتذر بأدب ولا تختلق مكاناً.
+          أنت "صقر"، مساعد ذكي وموسوعي في مكتبة مدرسة.
+          الطالب يسأل عن موضوع أو كتاب بعنوان: "${userMessage}".
+          
+          🔴 الحالة: بحثنا في فهرس المكتبة ولم نجد نسخة ورقية لهذا الكتاب.
+          
+          ✅ المطلوب منك (أظهر ذكاءك):
+          1. تجاهل عدم وجود الكتاب مؤقتاً، وقم بالإجابة على استفسار الطالب أو اشرح له ملخصاً عن الكتاب/الموضوع الذي يبحث عنه اعتماداً على "معلوماتك العامة الضخمة".
+          2. كن مفيداً ومرحاً، اقترح كتباً مشابهة عالمياً أو تحدث عن المؤلف.
+          3. **في نهاية الرد فقط**، أضف ملاحظة لطيفة: "ولكن للأسف، بحثت في النظام ولم أجد نسخة ورقية متوفرة في مكتبتنا حالياً."
+          4. ⛔ ممنوع منعاً باتاً اختراع "رقم رف" أو "دولاب" وهمي.
         `;
       } else {
         systemInstructions = `
-          You are "Saqr". Asking about: "${userMessage}".
-          Book NOT in inventory. Apologize and do NOT invent a location.
+          You are "Saqr", a smart and knowledgeable library assistant.
+          The student is asking about: "${userMessage}".
+          
+          🔴 Status: We searched the inventory and did NOT find a physical copy.
+          
+          ✅ Task (Show your intelligence):
+          1. Use your vast general knowledge to discuss the book/topic, provide a summary, or answer the student's question in detail.
+          2. Be helpful and engaging.
+          3. **Only at the very end**, add a polite note: "However, I searched our records and unfortunately, we don't have a physical copy available right now."
+          4. ⛔ DO NOT invent a fake Shelf or Cabinet number.
         `;
       }
     }
-
     // إرسال الطلب للذكاء الاصطناعي
     const completion = await groq.chat.completions.create({
       model: 'llama-3.3-70b-versatile',
