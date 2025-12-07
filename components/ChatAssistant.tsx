@@ -1,6 +1,6 @@
 // components/ChatAssistant.tsx
 import React, { useState, useRef } from 'react';
-import { findInCatalog } from '../data/bookData';
+import { findInCatalog } from '../api/bookData';
 
 type Message = { role: 'user'|'assistant'; content: string };
 
