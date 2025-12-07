@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { bookData } from '../data/bookData';
+import { bookData } from '../api/bookData';
 import { LogEntry } from '../types';
 import { useLanguage, useTheme } from '../App';
 
