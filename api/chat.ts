@@ -4,7 +4,7 @@ import Groq from 'groq-sdk';
 
 // ✅ التعديل هنا: بما أن الملف أصبح بجانب هذا الملف، نستخدم نقطة واحدة ./
 // ونحذف .js لأن TypeScript سيفهم الامتداد تلقائياً أثناء البناء
-import { bookData } from './bookData';
+import { books } from './bookData';
 
 // 1. Define Type Definitions (Clean & English)
 type Book = {
