@@ -2,7 +2,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Groq from 'groq-sdk';
 // Make sure this path points to your actual data file
-import { bookData } from '../data/bookData';
+import { bookData } from '../data/bookData.js';
 
 // 1. Define Type Definitions (Clean & English)
 type Book = {
