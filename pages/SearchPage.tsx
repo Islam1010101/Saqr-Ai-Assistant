@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Book } from '../api/bookData';
+// --- 1. تصحيح الاستيرادات (أهم خطوة) ---
+// تأكد أن ملف البيانات يصدر متغير اسمه bookData
+import { bookData } from '../api/bookData'; 
 import { Book } from '../types';
 import { useLanguage } from '../App';
 
@@ -83,7 +85,6 @@ const BookModal: React.FC<{
     const { locale, dir } = useLanguage();
     const t_search = (key: keyof typeof translations.ar) => translations[locale][key];
     
-    // هذه الأسطر موجودة لديك وجاهزة
     const [summary, setSummary] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
@@ -97,33 +98,25 @@ const BookModal: React.FC<{
         return () => window.removeEventListener('keydown', handleEsc);
     }, [onClose]);
 
-    // ✨ --- هذا الكود سليم والخاص بالـ AI --- ✨
+    // ✨ --- AI Summary Logic --- ✨
     useEffect(() => {
         if (!book) return;
 
         const generateSummary = async () => {
             setIsLoading(true);
-            setSummary(''); // مسح الملخص القديم
+            setSummary(''); 
 
             try {
-                // 1. نجهز "السؤال" الذي سنسأله للـ AI
                 const prompt =
                     locale === 'ar'
-                        ? `أرجو تقديم ملخص قصير جداً (سطرين فقط) باللغة العربية
-                           للكتاب التالي:
-                           العنوان: "${book.title}"
-                           المؤلف: ${book.author}`
-                        : `Please provide a very short summary (2 lines only) in English
-                           for the following book:
-                           Title: "${book.title}"
-                           Author: ${book.author}`;
+                        ? `أرجو تقديم ملخص قصير جداً (سطرين فقط) باللغة العربية للكتاب التالي: العنوان: "${book.title}" المؤلف: ${book.author}`
+                        : `Please provide a very short summary (2 lines only) in English for the following book: Title: "${book.title}" Author: ${book.author}`;
 
-                // 2. نستدعي API الشات الذي قمنا بإصلاحه
                 const response = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        messages: [{ role: 'user', content: prompt }], // نرسل السؤال فقط
+                        messages: [{ role: 'user', content: prompt }],
                         locale: locale,
                     }),
                 });
@@ -133,13 +126,11 @@ const BookModal: React.FC<{
                     throw new Error(errData.error || 'API call failed');
                 }
 
-                // 3. عند وصول الرد، نضعه في "الذاكرة" (summary)
                 const data = await response.json();
                 setSummary(data.reply || (locale === 'ar' ? 'لم يتم العثور على ملخص.' : 'No summary found.'));
 
             } catch (error) {
                 console.error("Failed to generate summary:", error);
-                // في حالة فشل الـ API، نستخدم الملخص الأصلي من ملف البيانات (إن وجد)
                 setSummary(book.summary || (locale === 'ar' ? 'عذراً، حدث خطأ أثناء جلب الملخص.' : 'Error fetching summary.'));
             } finally {
                 setIsLoading(false);
@@ -148,7 +139,7 @@ const BookModal: React.FC<{
 
         generateSummary();
 
-    }, [book, locale]); // سيعمل هذا الكود كلما تم اختيار كتاب جديد
+    }, [book, locale]); 
 
 
     if (!book) return null;
@@ -188,7 +179,6 @@ const BookModal: React.FC<{
 
                     <div className="mt-6">
                         <h4 className="font-bold text-gray-600 dark:text-gray-400 mb-2">{t_search('summary')}</h4>
-                        {/* هذا الجزء سيعمل بشكل ممتاز مع الكود الجديد */}
                         {isLoading ? (
                             <div className="space-y-2 animate-pulse">
                                 <div className="bg-gray-200 dark:bg-gray-700 h-4 rounded w-full"></div>
@@ -203,7 +193,7 @@ const BookModal: React.FC<{
                 <div className="bg-gray-50 dark:bg-gray-800/50 p-4 flex justify-end gap-3 rounded-b-2xl">
                     <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 dark:text-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors">{t_search('close')}</button>
                     
-                    {/* ✨ --- تم إصلاح الزر هنا --- ✨ */}
+                    {/* زر التوصيات المشابهة */}
                     <button 
                         onClick={() => book && onFilterByAuthor(book.author)}
                         className="px-4 py-2 text-sm font-medium text-white bg-uae-green rounded-lg hover:bg-green-800 transition-colors"
@@ -248,11 +238,13 @@ const SearchPage: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [subjectFilter, setSubjectFilter] = useState('all');
     const [authorFilter, setAuthorFilter] = useState('all');
+    // 2. استخدام bookData بشكل صحيح
     const [filteredBooks, setFilteredBooks] = useState<Book[]>(bookData);
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
+    // استخدام bookData هنا أيضاً
     const subjects = [...new Set(bookData.map(b => b.subject))].filter(Boolean).sort();
     const authors = [...new Set(bookData.map(b => b.author))].filter(a => a !== 'Unknown Author').sort();
 
@@ -294,14 +286,13 @@ const SearchPage: React.FC = () => {
         setSelectedBook(null);
     };
 
-    // ✨ --- تم إضافة الدالة هنا --- ✨
+    // ميزة التوصيات (فلترة حسب المؤلف)
     const handleFilterByAuthor = (authorName: string) => {
-      setAuthorFilter(authorName); // ضبط فلتر المؤلف
-      setSubjectFilter('all');    // إلغاء فلتر الموضوع
-      setSearchTerm('');          // إلغاء البحث النصي
-      setSelectedBook(null);      // إغلاق المودال
+      setAuthorFilter(authorName); 
+      setSubjectFilter('all');    
+      setSearchTerm('');          
+      setSelectedBook(null);      
       
-      // (اختياري) سحب الشاشة للأعلى لرؤية النتائج
       window.scrollTo(0, 0); 
     };
 
@@ -347,7 +338,6 @@ const SearchPage: React.FC = () => {
                 </div>
             )}
 
-            {/* ✨ --- تم إصلاح تمرير الـ Props هنا --- ✨ */}
             <BookModal 
               book={selectedBook} 
               onClose={handleCloseModal}
