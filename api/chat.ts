@@ -1,8 +1,10 @@
 // /api/chat.ts
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Groq from 'groq-sdk';
-// Make sure this path points to your actual data file
-import { bookData } from '../data/bookData.js';
+
+// ✅ التعديل هنا: بما أن الملف أصبح بجانب هذا الملف، نستخدم نقطة واحدة ./
+// ونحذف .js لأن TypeScript سيفهم الامتداد تلقائياً أثناء البناء
+import { bookData } from './bookData';
 
 // 1. Define Type Definitions (Clean & English)
 type Book = {
@@ -33,6 +35,7 @@ function searchInventory(query: string): Book[] {
   const normalizedQuery = normalize(query);
   const queryTokens = normalizedQuery.split(/[\s,\/\-\_,.]+/).filter(Boolean);
 
+  // Cast bookData to Book[] to ensure type safety
   return (bookData as Book[]).filter((book) => {
     // Combine searchable fields into one string
     const searchableText = [book.title, book.author, book.subject]
