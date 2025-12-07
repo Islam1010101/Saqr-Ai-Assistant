@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { book } from '../api/bookData';
+import { Book } from '../api/bookData';
 import { Book } from '../types';
 import { useLanguage } from '../App';
 
