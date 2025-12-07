@@ -36,7 +36,7 @@ function searchInventory(query: string): Book[] {
   const queryTokens = normalizedQuery.split(/[\s,\/\-\_,.]+/).filter(Boolean);
 
   // Cast bookData to Book[] to ensure type safety
-  return (bookData as Book[]).filter((book) => {
+  return (books as Book[]).filter((book) => {
     // Combine searchable fields into one string
     const searchableText = [book.title, book.author, book.subject]
       .map((field) => normalize(String(field ?? '')))
