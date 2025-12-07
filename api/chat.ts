@@ -1,15 +1,15 @@
 // /api/chat.ts
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Groq from 'groq-sdk';
-// تأكد أن المسار هنا صحيح ويشير لملف الداتا بتاعك
+// Ensure this path correctly points to your data file
 import { bookData } from '../data/bookData';
 
-// 1. تعريف نوع البيانات ليطابق ملف data/bookData.ts
+// 1. Define the Book type to match data/bookData.ts
 type Book = {
   title: string;
   author: string;
-  shelf: number; // رقم الدولاب/الخزانة
-  row: number;   // رقم الرف
+  shelf: number; // Cabinet number
+  row: number;   // Shelf row number
   subject: string;
   summary: string;
   language: 'AR' | 'EN';
@@ -17,26 +17,27 @@ type Book = {
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-// دالة تنظيف النصوص للبحث
+// Helper function: Normalize text for search (lowercase, trim)
 function normalize(s: string) {
   return (s || '').toString().toLowerCase().trim();
 }
 
-// دالة البحث في القائمة المحلية
+// Helper function: Search in the local catalog
 function searchCatalog(q: string): Book[] {
   const n = normalize(q);
-  // تقسيم جملة المستخدم لكلمات مفتاحية
+  // Split user query into tokens/keywords
   const tokens = n.split(/[\s,\/\-\_,.]+/).filter(Boolean);
 
-  // نستخدم (as Book[]) للتأكد من النوع
+  // Cast bookData to Book[] to ensure type safety
   return (bookData as Book[]).filter((b) => {
     const fields = [b.title, b.author, b.subject].map((x) => normalize(String(x ?? ''))).join(' ');
-    // البحث: هل النص موجود بالكامل؟ أو هل كل الكلمات المتفرقة موجودة؟
+    // Logic: Match full phrase OR match all individual tokens
     return fields.includes(n) || tokens.every((t) => fields.includes(t));
   });
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // Only allow POST requests
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
@@ -45,28 +46,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       locale: 'ar' | 'en';
     };
 
+    // Get the last user message
     const userText = messages[messages.length - 1]?.content || '';
     
-    // 1. البحث في قاعدة البيانات أولاً
-    // نأخذ أول نتيجة فقط لأنها الأقرب (أو يمكنك أخذ أول 3)
+    // 1. Search the database first
+    // We take the top 3 matches
     const matches = searchCatalog(userText).slice(0, 3);
 
     let systemPrompt = '';
 
     // =========================================================
-    // الحالة الأولى: الكتاب موجود في البيانات (Found)
+    // Scenario 1: Book FOUND in inventory
     // =========================================================
     if (matches.length > 0) {
-      // تجهيز بيانات الموقع من الداتا
+      // Prepare inventory details from the database
       const inventoryDetails = matches.map(b => {
-        // تنسيق المكان حسب اللغة
+        // Format location string based on locale
         const locationText = locale === 'ar' 
-          ? `دولاب رقم ${b.shelf}، رف رقم ${b.row}`
-          : `Cabinet ${b.shelf}, Shelf Row ${b.row}`;
+          ? `دولاب رقم ${b.shelf}، رف رقم ${b.row}` // Arabic format
+          : `Cabinet ${b.shelf}, Shelf Row ${b.row}`; // English format
         
-        return `- الكتاب: "${b.title}" \n  المؤلف: "${b.author}" \n  المكان في المكتبة: [${locationText}]`;
+        return `- Title: "${b.title}" \n  Author: "${b.author}" \n  Location: [${locationText}]`;
       }).join('\n\n');
 
+      // Construct System Prompt
       systemPrompt = locale === 'ar'
         ? `أنت "صقر"، أمين مكتبة مدرسة صقر الإمارات الدولية.
            المستخدم يسأل عن كتاب، وهذا الكتاب **موجود بالفعل** في مكتبتنا.
@@ -90,7 +93,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     } 
     
     // =========================================================
-    // الحالة الثانية: الكتاب غير موجود (Not Found)
+    // Scenario 2: Book NOT FOUND (Fall back to AI knowledge)
     // =========================================================
     else {
       systemPrompt = locale === 'ar'
@@ -112,17 +115,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
            3. DO NOT invent a shelf location.`;
     }
 
-    // إرسال البرومبت النهائي للـ AI
+    // Send final prompt to Groq AI
     const completion = await groq.chat.completions.create({
       model: 'llama-3.3-70b-versatile',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userText },
       ],
-      temperature: 0.6, // درجة إبداع متوسطة
+      temperature: 0.6, // Moderate creativity
       max_tokens: 600,
     });
 
+    // Handle response or fallback error
     const reply = completion.choices?.[0]?.message?.content || 
                   (locale === 'ar' ? 'عذراً، لا يوجد رد حالياً.' : 'Sorry, no response.');
 
