@@ -2789,8 +2789,19 @@ const rawBookData = [
 { "title": "EUPHORIA", "author": "LILY KING", "shelf": 16, "row": 6 }
 ];
 
-// FIX: Process raw book data to match the Book interface and export it.
-// This resolves module export errors and downstream type errors in components.
+export type Book = {
+  id?: string;
+  title: string;
+  author: string;
+  subject: string;
+  shelf: number;
+  row: number;
+  level?: string;
+  language: 'AR' | 'EN';
+  summary: string;
+};
+
+// 2. دالة معالجة البيانات (نفس الكود الخاص بك مع تحسينات بسيطة)
 const processBookData = (rawData: any[]): Book[] => {
   return rawData.map((rawBook, index) => {
     let author = rawBook.author as string;
@@ -2801,7 +2812,7 @@ const processBookData = (rawData: any[]): Book[] => {
     const language: 'EN' | 'AR' = arabicRegex.test(rawBook.title) || arabicRegex.test(rawBook.author) ? 'AR' : 'EN';
     
     // Extract subject from author field if it's in the format (Topic: ...)
-    const topicMatch = author.match(/\(Topic: (.*?)\)/);
+    const topicMatch = author ? author.match(/\(Topic: (.*?)\)/) : null;
     if (topicMatch) {
       subject = topicMatch[1];
       author = 'Unknown Author';
@@ -2809,41 +2820,45 @@ const processBookData = (rawData: any[]): Book[] => {
       author = 'Unknown Author';
     }
 
-    // Clean up author field from potential topic-like strings if not matched
+    // Clean up author field
     if (author.startsWith('(') && author.endsWith(')')) {
         author = 'Unknown Author';
     }
 
-    // Remove trailing numbers and clean up whitespace
+    // Remove trailing numbers and whitespace
     author = author.replace(/\s*\d+$/, '').trim();
     if (author === "") {
         author = "Unknown Author";
     }
 
     return {
-      id: `${rawBook.shelf}-${rawBook.row}-${index + 1}`, // Generate a unique ID
+      id: `${rawBook.shelf}-${rawBook.row}-${index + 1}`,
       title: rawBook.title,
       author: author,
       subject: subject,
       shelf: rawBook.shelf,
       row: rawBook.row,
-      level: 'General', // Placeholder
+      level: 'General',
       language: language,
       summary: language === 'AR' 
         ? `ملخص كتاب "${rawBook.title}" سيكون متاحاً قريباً.`
-        : `A summary for the book "${rawBook.title}" will be available soon.`, // Placeholder
+        : `A summary for the book "${rawBook.title}" will be available soon.`,
     };
   });
 };
 
+// 3. تصدير البيانات المعالجة (مهم جداً لملف api/chat.ts)
+// تأكد أن اسم المصفوفة فوق هو rawBookData
 export const bookData: Book[] = processBookData(rawBookData);
-export const findInCatalog = (q: string) => {
+
+// 4. تصدير دالة البحث (مهم جداً لملف components/ChatAssistant.tsx)
+// هذه الدالة هي التي كانت تسبب خطأ الـ Build
+export function findInCatalog(q: string) {
   const query = (q || '').toLowerCase().trim();
   if (!query) return [];
 
   return bookData.filter((b) => {
-    const text = `${b.title} ${b.author} ${b.subject || ''}`.toLowerCase();
+    const text = `${b.title} ${b.author} ${b.subject}`.toLowerCase();
     return text.includes(query);
   });
-};
-
+}
