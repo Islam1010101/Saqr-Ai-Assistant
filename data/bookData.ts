@@ -2837,4 +2837,13 @@ const processBookData = (rawData: any[]): Book[] => {
 };
 
 export const bookData: Book[] = processBookData(rawBookData);
+export const findInCatalog = (q: string) => {
+  const query = (q || '').toLowerCase().trim();
+  if (!query) return [];
+
+  return bookData.filter((b) => {
+    const text = `${b.title} ${b.author} ${b.subject || ''}`.toLowerCase();
+    return text.includes(query);
+  });
+};
 
