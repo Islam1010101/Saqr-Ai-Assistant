@@ -1,6 +1,4 @@
-import { Book } from '../types';
 
-// Data provided by the user in bookData.txt, with syntax error fixed.
 const rawBookData = [
 { "title": "CREATING EXCELLENCE", "author": "Craig R. Hickman", "shelf": 4, "row": 1 },
 { "title": "The Canadian SMALL BUSINESS Handbook", "author": "Susan Kennedy", "shelf": 4, "row": 1 },
