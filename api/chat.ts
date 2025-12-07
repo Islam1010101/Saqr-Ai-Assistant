@@ -1,10 +1,10 @@
 // /api/chat.ts
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Groq from 'groq-sdk';
-// Ensure this path correctly points to your data file
+// Make sure this path points to your actual data file
 import { bookData } from '../data/bookData';
 
-// 1. Define the Book type to match data/bookData.ts
+// 1. Define Type Definitions (Clean & English)
 type Book = {
   title: string;
   author: string;
@@ -17,27 +17,36 @@ type Book = {
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-// Helper function: Normalize text for search (lowercase, trim)
-function normalize(s: string) {
-  return (s || '').toString().toLowerCase().trim();
+/**
+ * Helper: Normalize text for consistent searching.
+ * Lowers case and removes extra spaces.
+ */
+function normalize(text: string) {
+  return (text || '').toString().toLowerCase().trim();
 }
 
-// Helper function: Search in the local catalog
-function searchCatalog(q: string): Book[] {
-  const n = normalize(q);
-  // Split user query into tokens/keywords
-  const tokens = n.split(/[\s,\/\-\_,.]+/).filter(Boolean);
+/**
+ * Core Logic: Search the local inventory.
+ * Returns an array of matches.
+ */
+function searchInventory(query: string): Book[] {
+  const normalizedQuery = normalize(query);
+  const queryTokens = normalizedQuery.split(/[\s,\/\-\_,.]+/).filter(Boolean);
 
-  // Cast bookData to Book[] to ensure type safety
-  return (bookData as Book[]).filter((b) => {
-    const fields = [b.title, b.author, b.subject].map((x) => normalize(String(x ?? ''))).join(' ');
-    // Logic: Match full phrase OR match all individual tokens
-    return fields.includes(n) || tokens.every((t) => fields.includes(t));
+  return (bookData as Book[]).filter((book) => {
+    // Combine searchable fields into one string
+    const searchableText = [book.title, book.author, book.subject]
+      .map((field) => normalize(String(field ?? '')))
+      .join(' ');
+    
+    // Check if the full query exists OR if all individual words exist in the book data
+    return searchableText.includes(normalizedQuery) || 
+           queryTokens.every((token) => searchableText.includes(token));
   });
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // Only allow POST requests
+  // Security: Only allow POST requests
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
@@ -46,94 +55,106 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       locale: 'ar' | 'en';
     };
 
-    // Get the last user message
-    const userText = messages[messages.length - 1]?.content || '';
+    // Get the latest message from the user
+    const userMessage = messages[messages.length - 1]?.content || '';
     
-    // 1. Search the database first
-    // We take the top 3 matches
-    const matches = searchCatalog(userText).slice(0, 3);
+    // ------------------------------------------------------------------
+    // STEP 1: Check Internal Database
+    // ------------------------------------------------------------------
+    const matches = searchInventory(userMessage).slice(0, 3); // Limit to top 3 matches
 
-    let systemPrompt = '';
+    let systemInstructions = '';
 
-    // =========================================================
-    // Scenario 1: Book FOUND in inventory
-    // =========================================================
+    // ------------------------------------------------------------------
+    // STEP 2: Construct System Prompt based on Availability
+    // ------------------------------------------------------------------
+
     if (matches.length > 0) {
-      // Prepare inventory details from the database
-      const inventoryDetails = matches.map(b => {
-        // Format location string based on locale
-        const locationText = locale === 'ar' 
-          ? `دولاب رقم ${b.shelf}، رف رقم ${b.row}` // Arabic format
-          : `Cabinet ${b.shelf}, Shelf Row ${b.row}`; // English format
+      // === SCENARIO A: Book Exists in Library ===
+      
+      // Format the location data for the AI
+      const inventoryDetails = matches.map(book => {
+        const locationStr = locale === 'ar'
+          ? `دولاب رقم ${book.shelf}، رف رقم ${book.row}`
+          : `Cabinet ${book.shelf}, Shelf Row ${book.row}`;
         
-        return `- Title: "${b.title}" \n  Author: "${b.author}" \n  Location: [${locationText}]`;
-      }).join('\n\n');
+        return `- Title: "${book.title}" | Author: "${book.author}" | Location: [${locationStr}]`;
+      }).join('\n');
 
-      // Construct System Prompt
-      systemPrompt = locale === 'ar'
-        ? `أنت "صقر"، أمين مكتبة مدرسة صقر الإمارات الدولية.
-           المستخدم يسأل عن كتاب، وهذا الكتاب **موجود بالفعل** في مكتبتنا.
-           
-           تفاصيل الكتاب من سجلاتنا:
-           ${inventoryDetails}
+      // Instructions: Confirm availability + Give Location
+      if (locale === 'ar') {
+        systemInstructions = `
+          أنت "صقر"، أمين المكتبة.
+          وجدنا الكتاب الذي يسأل عنه الطالب في السجلات:
+          ${inventoryDetails}
+          
+          المطلوب:
+          1. أخبر الطالب أن الكتاب **موجود** واذكر موقعه (الدولاب والرف) بدقة.
+          2. قدم ملخصاً بسيطاً ومشوقاً عن الكتاب من معلوماتك العامة.
+        `;
+      } else {
+        systemInstructions = `
+          You are "Saqr", the library assistant.
+          We found the book the student is asking about in our inventory:
+          ${inventoryDetails}
+          
+          Task:
+          1. Confirm the book is **available** and state its exact location (Cabinet/Shelf).
+          2. Provide a short, engaging summary of the book from your general knowledge.
+        `;
+      }
 
-           المطلوب منك:
-           1. أكد للمستخدم أن الكتاب متوفر، واذكر موقعه (الدولاب والرف) بدقة كما هو مذكور بالأعلى.
-           2. قم بكتابة ملخص شيق ومفيد عن محتوى هذا الكتاب من معلوماتك العامة (General Knowledge) لأن الملخص في النظام فارغ.
-           3. كن مشجعاً ولطيفاً مع الطلاب.`
-        : `You are "Saqr", the library assistant. The user is asking about a book that IS available in our library.
-           
-           Library Records:
-           ${inventoryDetails}
-
-           Your Task:
-           1. Confirm availability and state the exact location (Cabinet/Shelf) provided above.
-           2. Provide an engaging summary of the book's content from your own general knowledge (ignore the placeholder summary in the database).
-           3. Be encouraging to the student.`;
-    } 
-    
-    // =========================================================
-    // Scenario 2: Book NOT FOUND (Fall back to AI knowledge)
-    // =========================================================
-    else {
-      systemPrompt = locale === 'ar'
-        ? `أنت "صقر"، أمين مكتبة ذكي. المستخدم يسأل عن كتاب: "${userText}".
-           
-           🔴 تنبيه هام: بحثت في السجلات ولم أجد هذا الكتاب. الكتاب **غير متوفر** حالياً.
-           
-           المطلوب منك:
-           1. قدم معلومات مفيدة عن الكتاب (المؤلف، القصة، الفائدة) بناءً على ذاكرتك ومعلوماتك العامة.
-           2. في نهاية الرد، يجب أن تقول بوضوح ولطف: "لكن للأسف، هذه النسخة غير موجودة في مكتبة المدرسة حالياً".
-           3. ممنوع نهائياً تأليف رقم رف أو مكان للكتاب.`
-        : `You are "Saqr", a helpful library assistant. The user is asking about: "${userText}".
-           
-           🔴 IMPORTANT: This book is **NOT** in our current inventory.
-           
-           Your Task:
-           1. Provide rich details about the book (author, plot, themes) based on your general knowledge.
-           2. Clearly state at the end: "Unfortunately, this book is not currently available in our school library."
-           3. DO NOT invent a shelf location.`;
+    } else {
+      // === SCENARIO B: Book Does NOT Exist ===
+      
+      // Instructions: Discuss book content BUT apologize for unavailability.
+      // STRICT RULE: DO NOT INVENT LOCATIONS.
+      
+      if (locale === 'ar') {
+        systemInstructions = `
+          أنت "صقر"، أمين المكتبة. الطالب يسأل عن كتاب: "${userMessage}".
+          
+          🔴 تنبيه: هذا الكتاب **غير موجود** في مكتبتنا حالياً.
+          
+          المطلوب:
+          1. تحدث عن الكتاب (معلومات عامة، المؤلف، القصة) لتفيد الطالب.
+          2. ولكن في النهاية، اعتذر بوضوح وقل: "للأسف، هذا الكتاب غير متوفر في المكتبة حالياً".
+          3. ⛔ ممنوع منعاً باتاً اختراع أي أرقام رفوف أو دواليب.
+        `;
+      } else {
+        systemInstructions = `
+          You are "Saqr", the library assistant. The student is asking about: "${userMessage}".
+          
+          🔴 IMPORTANT: This book is **NOT** in our current inventory.
+          
+          Task:
+          1. Provide helpful info about the book (Author, Plot, Genre) from your general knowledge.
+          2. However, clearly state: "Unfortunately, this book is not currently available in our library."
+          3. ⛔ DO NOT invent any shelf or cabinet numbers.
+        `;
+      }
     }
 
-    // Send final prompt to Groq AI
+    // ------------------------------------------------------------------
+    // STEP 3: Send to AI (Groq)
+    // ------------------------------------------------------------------
     const completion = await groq.chat.completions.create({
       model: 'llama-3.3-70b-versatile',
       messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userText },
+        { role: 'system', content: systemInstructions },
+        { role: 'user', content: userMessage },
       ],
-      temperature: 0.6, // Moderate creativity
-      max_tokens: 600,
+      temperature: 0.5, // Keep it balanced between creative and factual
+      max_tokens: 500,
     });
 
-    // Handle response or fallback error
     const reply = completion.choices?.[0]?.message?.content || 
-                  (locale === 'ar' ? 'عذراً، لا يوجد رد حالياً.' : 'Sorry, no response.');
+                  (locale === 'ar' ? 'عذراً، لا يوجد رد.' : 'Sorry, no response.');
 
     return res.status(200).json({ reply });
 
-  } catch (err: any) {
-    console.error('API error:', err);
-    return res.status(500).json({ error: err?.message || 'Internal Server Error' });
+  } catch (error: any) {
+    console.error('Chat API Error:', error);
+    return res.status(500).json({ error: error?.message || 'Internal Server Error' });
   }
 }
