@@ -1,32 +1,37 @@
 // /api/chat.ts
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Groq from 'groq-sdk';
+// تأكد أن المسار هنا صحيح ويشير لملف الداتا بتاعك
 import { bookData } from '../data/bookData';
 
-// تعريف نوع البيانات
+// 1. تعريف نوع البيانات ليطابق ملف data/bookData.ts
 type Book = {
   title: string;
-  author?: string;
-  shelf?: number; // الدولاب
-  row?: number;   // الرف
-  subject?: string;
-  summary?: string;
+  author: string;
+  shelf: number; // رقم الدولاب/الخزانة
+  row: number;   // رقم الرف
+  subject: string;
+  summary: string;
+  language: 'AR' | 'EN';
 };
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
+// دالة تنظيف النصوص للبحث
 function normalize(s: string) {
   return (s || '').toString().toLowerCase().trim();
 }
 
+// دالة البحث في القائمة المحلية
 function searchCatalog(q: string): Book[] {
   const n = normalize(q);
-  // تقسيم النص للبحث بكلمات متفرقة
+  // تقسيم جملة المستخدم لكلمات مفتاحية
   const tokens = n.split(/[\s,\/\-\_,.]+/).filter(Boolean);
 
+  // نستخدم (as Book[]) للتأكد من النوع
   return (bookData as Book[]).filter((b) => {
     const fields = [b.title, b.author, b.subject].map((x) => normalize(String(x ?? ''))).join(' ');
-    // البحث عن تطابق كامل أو وجود كل الكلمات
+    // البحث: هل النص موجود بالكامل؟ أو هل كل الكلمات المتفرقة موجودة؟
     return fields.includes(n) || tokens.every((t) => fields.includes(t));
   });
 }
@@ -42,79 +47,84 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const userText = messages[messages.length - 1]?.content || '';
     
-    // نبحث في الداتا أولاً
-    const matches = searchCatalog(userText).slice(0, 3); // نكتفي بأفضل 3 نتائج
+    // 1. البحث في قاعدة البيانات أولاً
+    // نأخذ أول نتيجة فقط لأنها الأقرب (أو يمكنك أخذ أول 3)
+    const matches = searchCatalog(userText).slice(0, 3);
 
     let systemPrompt = '';
 
-    // ---------------------------------------------------------
-    // السيناريو الأول: الكتاب موجود في الداتا
-    // ---------------------------------------------------------
+    // =========================================================
+    // الحالة الأولى: الكتاب موجود في البيانات (Found)
+    // =========================================================
     if (matches.length > 0) {
-      // نجهز بيانات المخزون لنرسلها للذكاء الاصطناعي
+      // تجهيز بيانات الموقع من الداتا
       const inventoryDetails = matches.map(b => {
-        const loc = (b.shelf && b.row) 
-          ? (locale === 'ar' ? `رف رقم ${b.row}، دولاب رقم ${b.shelf}` : `Shelf ${b.row}, Cabinet ${b.shelf}`)
-          : (locale === 'ar' ? 'الموقع غير محدد بدقة' : 'Location not specified');
+        // تنسيق المكان حسب اللغة
+        const locationText = locale === 'ar' 
+          ? `دولاب رقم ${b.shelf}، رف رقم ${b.row}`
+          : `Cabinet ${b.shelf}, Shelf Row ${b.row}`;
         
-        return `- Title: ${b.title}, Author: ${b.author || 'Unknown'}, Location: [${loc}]`;
-      }).join('\n');
+        return `- الكتاب: "${b.title}" \n  المؤلف: "${b.author}" \n  المكان في المكتبة: [${locationText}]`;
+      }).join('\n\n');
 
       systemPrompt = locale === 'ar'
         ? `أنت "صقر"، أمين مكتبة مدرسة صقر الإمارات الدولية.
            المستخدم يسأل عن كتاب، وهذا الكتاب **موجود بالفعل** في مكتبتنا.
            
-           بيانات الكتاب من المخزون:
+           تفاصيل الكتاب من سجلاتنا:
            ${inventoryDetails}
 
            المطلوب منك:
-           1. أخبر المستخدم بأسلوب لطيف أن الكتاب متاح، واذكر موقعه (الرف والدولاب) بدقة كما هو مذكور أعلاه.
-           2. أضف نبذة مختصرة وشيقة عن محتوى الكتاب أو مؤلفه من معلوماتك العامة (General Knowledge) لتشجيع الطالب على قراءته.`
+           1. أكد للمستخدم أن الكتاب متوفر، واذكر موقعه (الدولاب والرف) بدقة كما هو مذكور بالأعلى.
+           2. قم بكتابة ملخص شيق ومفيد عن محتوى هذا الكتاب من معلوماتك العامة (General Knowledge) لأن الملخص في النظام فارغ.
+           3. كن مشجعاً ولطيفاً مع الطلاب.`
         : `You are "Saqr", the library assistant. The user is asking about a book that IS available in our library.
-           Inventory Details:
+           
+           Library Records:
            ${inventoryDetails}
 
-           Task:
-           1. Confirm the book is available and state its location exactly as provided above.
-           2. Add a brief, engaging summary about the book content or author from your general knowledge.`;
+           Your Task:
+           1. Confirm availability and state the exact location (Cabinet/Shelf) provided above.
+           2. Provide an engaging summary of the book's content from your own general knowledge (ignore the placeholder summary in the database).
+           3. Be encouraging to the student.`;
     } 
     
-    // ---------------------------------------------------------
-    // السيناريو الثاني: الكتاب غير موجود
-    // ---------------------------------------------------------
+    // =========================================================
+    // الحالة الثانية: الكتاب غير موجود (Not Found)
+    // =========================================================
     else {
       systemPrompt = locale === 'ar'
-        ? `أنت "صقر"، أمين مكتبة ذكي ومفيد. المستخدم يسأل عن كتاب: "${userText}".
+        ? `أنت "صقر"، أمين مكتبة ذكي. المستخدم يسأل عن كتاب: "${userText}".
            
-           تحذير هام: هذا الكتاب **غير موجود** في سجلات المكتبة الحالية.
+           🔴 تنبيه هام: بحثت في السجلات ولم أجد هذا الكتاب. الكتاب **غير متوفر** حالياً.
            
            المطلوب منك:
-           1. قدم معلومات ثرية عن هذا الكتاب (اسم المؤلف، سنة النشر، وعن ماذا يتحدث الكتاب) بناءً على معرفتك العامة.
-           2. في نهاية الرد، يجب أن تعتذر بوضوح وتقول: "لكن للأسف، هذا الكتاب غير متوفر في مكتبتنا حالياً".
-           3. ممنوع منعاً باتاً اختراع رقم رف أو دولاب وهمي.`
+           1. قدم معلومات مفيدة عن الكتاب (المؤلف، القصة، الفائدة) بناءً على ذاكرتك ومعلوماتك العامة.
+           2. في نهاية الرد، يجب أن تقول بوضوح ولطف: "لكن للأسف، هذه النسخة غير موجودة في مكتبة المدرسة حالياً".
+           3. ممنوع نهائياً تأليف رقم رف أو مكان للكتاب.`
         : `You are "Saqr", a helpful library assistant. The user is asking about: "${userText}".
            
-           IMPORTANT: This book is **NOT** in our current inventory.
+           🔴 IMPORTANT: This book is **NOT** in our current inventory.
            
-           Task:
-           1. Provide rich details about this book (Author, summary, genre) based on your general knowledge.
-           2. Clearly state at the end: "Unfortunately, this specific book is not currently available in our library."
-           3. Do NOT invent any shelf or cabinet numbers.`;
+           Your Task:
+           1. Provide rich details about the book (author, plot, themes) based on your general knowledge.
+           2. Clearly state at the end: "Unfortunately, this book is not currently available in our school library."
+           3. DO NOT invent a shelf location.`;
     }
 
-    // إرسال الطلب للذكاء الاصطناعي لتكوين الرد النهائي
+    // إرسال البرومبت النهائي للـ AI
     const completion = await groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile', // موديل ممتاز وسريع
+      model: 'llama-3.3-70b-versatile',
       messages: [
         { role: 'system', content: systemPrompt },
-        { role: 'user', content: userText }, // نرسل سؤال المستخدم الأصلي
+        { role: 'user', content: userText },
       ],
-      temperature: 0.5, // حرارة متوسطة لإبداع متزن
-      max_tokens: 500,
+      temperature: 0.6, // درجة إبداع متوسطة
+      max_tokens: 600,
     });
 
     const reply = completion.choices?.[0]?.message?.content || 
-                  (locale === 'ar' ? 'عذراً، حدث خطأ في الاتصال.' : 'Sorry, connection error.');
+                  (locale === 'ar' ? 'عذراً، لا يوجد رد حالياً.' : 'Sorry, no response.');
 
     return res.status(200).json({ reply });
 
