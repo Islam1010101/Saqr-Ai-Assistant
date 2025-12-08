@@ -101,7 +101,7 @@ const ReportsPage: React.FC = () => {
     }
   };
   
-  const tickColor = theme === 'dark' ? '#A0AEC0' : '#4A5568'; // gray-400 for dark, gray-700 for light
+  const tickColor = theme === 'dark' ? '#A0AEC0' : '#4A5568'; 
 
   if (!isAuthenticated) {
     return (
@@ -113,86 +113,4 @@ const ReportsPage: React.FC = () => {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 text-center border-2 bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 rounded-full focus:ring-2 focus:ring-uae-green focus:border-transparent outline-none transition"
-            placeholder={t('passwordLabel')}
-            aria-label={t('passwordLabel')}
-          />
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-          <button
-            type="submit"
-            className="w-full bg-uae-green text-white font-bold py-3 px-8 rounded-full shadow-md hover:bg-green-800 transition-transform transform hover:scale-105"
-          >
-            {t('enter')}
-          </button>
-        </form>
-      </div>
-    );
-  }
-
-  if (data.searchData.length === 0 && data.viewData.length === 0) {
-    return (
-      <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-md text-center">
-        <h1 className="text-2xl font-bold mb-4">{t('pageTitle')}</h1>
-        <p className="text-gray-500 dark:text-gray-400">{t('noData')}</p>
-      </div>
-    );
-  }
-
-  const yAxisRtl = dir === 'rtl' ? { orientation: 'right' } : {};
-
-  return (
-    <div className="space-y-8">
-      <h1 className="text-3xl font-bold text-center mb-8">{t('pageTitle')}</h1>
-
-      {data.searchData.length > 0 && (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md">
-          <h2 className="text-xl font-bold mb-4">{t('mostSearched')}</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={data.searchData} layout="vertical" margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#4A5568' : '#E2E8F0'}/>
-              <XAxis type="number" allowDecimals={false} stroke={tickColor} />
-              <YAxis dataKey="name" type="category" width={120} {...yAxisRtl} stroke={tickColor} />
-              <Tooltip 
-                cursor={{ fill: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }} 
-                contentStyle={{ backgroundColor: theme === 'dark' ? '#2D3748' : '#FFFFFF', border: `1px solid ${theme === 'dark' ? '#4A5568' : '#E2E8F0'}` }}
-              />
-              <Legend wrapperStyle={{color: tickColor}} />
-              <Bar dataKey="count" name={t('searches')} fill="#00732F" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      )}
-
-      {data.viewData.length > 0 && (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md">
-          <h2 className="text-xl font-bold mb-4">{t('mostViewed')}</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={data.viewData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="count"
-                nameKey="name"
-              >
-                {data.viewData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip 
-                 contentStyle={{ backgroundColor: theme === 'dark' ? '#2D3748' : '#FFFFFF', border: `1px solid ${theme === 'dark' ? '#4A5568' : '#E2E8F0'}` }}
-              />
-              <Legend wrapperStyle={{color: tickColor}} />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default ReportsPage;
+            className="w-full p-3 text-center border-2 bg-white dark:bg-gray-700 border-gray-2
