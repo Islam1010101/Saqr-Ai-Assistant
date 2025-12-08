@@ -2851,12 +2851,16 @@ export const bookData: Book[] = processBookData(rawBookData);
 
 // 4. تصدير دالة البحث (مهم جداً لملف components/ChatAssistant.tsx)
 // هذه الدالة هي التي كانت تسبب خطأ الـ Build
-export function findInCatalog(q: string) {
+export function findInCatalog(q: string): Book[] {
   const query = (q || '').toLowerCase().trim();
   if (!query) return [];
 
-  return bookData.filter((b) => {
+  const results = bookData.filter((b) => {
+    // نبحث في العنوان والمؤلف والموضوع
     const text = `${b.title} ${b.author} ${b.subject}`.toLowerCase();
     return text.includes(query);
   });
+
+  // ⚠️ التعديل المهم: نرجع أول 5 نتائج فقط لتوفير التوكناز
+  return results.slice(0, 5);
 }
