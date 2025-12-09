@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-// --- 1. تصحيح الاستيرادات (أهم خطوة) ---
-// تأكد أن ملف البيانات يصدر متغير اسمه bookData
-import { bookData } from '../api/bookData'; 
-import { Book } from '../types';
+// ⚠️ هام جداً: نستورد النوع (Book) والبيانات (bookData) من نفس المكان لضمان التطابق
+import { bookData, type Book } from '../api/bookData'; 
 import { useLanguage } from '../App';
 
 // Debounce Hook
@@ -238,13 +236,13 @@ const SearchPage: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [subjectFilter, setSubjectFilter] = useState('all');
     const [authorFilter, setAuthorFilter] = useState('all');
-    // 2. استخدام bookData بشكل صحيح
+    
+    // ✅ هنا لن يحدث خطأ لأن نوع Book هو نفسه المستورد مع bookData
     const [filteredBooks, setFilteredBooks] = useState<Book[]>(bookData);
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-    // استخدام bookData هنا أيضاً
     const subjects = [...new Set(bookData.map(b => b.subject))].filter(Boolean).sort();
     const authors = [...new Set(bookData.map(b => b.author))].filter(a => a !== 'Unknown Author').sort();
 
@@ -289,9 +287,9 @@ const SearchPage: React.FC = () => {
     // ميزة التوصيات (فلترة حسب المؤلف)
     const handleFilterByAuthor = (authorName: string) => {
       setAuthorFilter(authorName); 
-      setSubjectFilter('all');    
+      setSubjectFilter('all');     
       setSearchTerm('');          
-      setSelectedBook(null);      
+      setSelectedBook(null);       
       
       window.scrollTo(0, 0); 
     };
