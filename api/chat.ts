@@ -1,10 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Groq from 'groq-sdk';
-// 👇 1. استيراد بيانات الكتب الحقيقية بدلاً من كتابتها يدوياً
-// تأكد أن ملف bookData.ts موجود في نفس مجلد api
+// تأكد أن المسار صحيح لملف بيانات الكتب
 import { bookData } from './bookData';
 
-// تعريف نوع البيانات (للتأكد من توافق الأنواع)
+// ---------------------------------------------------------
+// 1. تعريف الأنواع والإعدادات
+// ---------------------------------------------------------
 type Book = {
   id: string;
   title: string;
@@ -15,50 +16,90 @@ type Book = {
   summary?: string; 
 };
 
-// إعداد عميل Groq
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-// 👇 2. دالة تنظيف النصوص (مهمة جداً للغة العربية)
-// تجعل البحث يتجاهل الهمزات (أ، إ، آ -> ا) والتاء المربوطة (ة -> هـ) والتشكيل
+// دالة مساعدة لتنظيف النصوص للمقارنة
 function normalize(text: string) {
   if (!text) return '';
-  return text
-    .toString()
-    .toLowerCase()
-    .trim()
-    // إزالة التشكيل
-    .replace(/[\u064B-\u065F]/g, '')
-    // توحيد الألفات
-    .replace(/[أإآ]/g, 'ا')
-    // توحيد الياء والألف المقصورة
-    .replace(/[ى]/g, 'ي')
-    // توحيد التاء المربوطة والهاء
-    .replace(/[ة]/g, 'ه');
+  return text.toString().toLowerCase().trim();
 }
 
-// 👇 3. منطق البحث المحسن
-function searchInventory(query: string): Book[] {
-  const q = normalize(query);
-  
-  if (!q) return [];
-  
-  // تجاهل الكلمات القصيرة جداً إلا إذا كانت أرقاماً
-  if (q.length < 2) return [];
+// ---------------------------------------------------------
+// 2. المترجم ومستخرج الأفكار (العقل المدبر 🧠)
+// ---------------------------------------------------------
+// هذه الدالة لا تترجم فقط، بل تستخرج "جوهر" الموضوع بالإنجليزية
+async function extractSmartKeywords(userText: string): Promise<string[]> {
+  try {
+    const completion = await groq.chat.completions.create({
+      model: 'llama3-8b-8192', // سريع وذكي كفاية للاستخراج
+      messages: [
+        { 
+          role: 'system', 
+          content: `
+            You are an expert Librarian AI. 
+            Task: Analyze the user's input (which might be in Arabic or English) and extract the core **English Search Keywords**.
+            
+            Rules:
+            1. If the user asks about a specific topic (e.g., "Space", "History"), include synonyms (e.g., "Astronomy", "Universe", "Past").
+            2. If the user asks about a feeling (e.g., "I'm sad"), suggest genres (e.g., "Comedy", "Self-help", "Uplifting").
+            3. Output ONLY a comma-separated list of English keywords. No explanations.
+            
+            Examples:
+            - User: "عايز حاجة عن الفضاء" -> Output: Space, Astronomy, Universe, NASA, Planets
+            - User: "روايات رعب" -> Output: Horror, Thriller, Ghosts, Mystery, Stephen King
+            - User: "Harry Potter" -> Output: Harry Potter, Rowling, Magic, Fantasy
+          ` 
+        },
+        { role: 'user', content: userText }
+      ],
+      temperature: 0.3,
+      max_tokens: 60,
+    });
 
-  return bookData.filter((book) => {
-    // تنظيف بيانات الكتاب أيضاً للمقارنة
-    const title = normalize(book.title);
-    const author = normalize(book.author);
-    const subject = normalize(book.subject);
-    const summary = normalize(book.summary || ''); // البحث في الملخص أيضاً إذا وجد
+    const text = completion.choices[0]?.message?.content || '';
+    // تنظيف النتيجة وتحويلها لمصفوفة
+    return text.split(',').map(s => normalize(s)).filter(s => s.length > 2);
+  } catch (e) {
+    console.error("Keyword extraction failed", e);
+    return [normalize(userText)];
+  }
+}
 
-    // البحث: هل الكلمة موجودة في العنوان أو المؤلف أو الموضوع؟
-    return title.includes(q) || author.includes(q) || subject.includes(q) || summary.includes(q);
+// ---------------------------------------------------------
+// 3. محرك البحث (الباحث 🔍)
+// ---------------------------------------------------------
+function searchLibrary(keywords: string[]): Book[] {
+  if (keywords.length === 0) return [];
+
+  // نستخدم Set لمنع تكرار نفس الكتاب في النتائج
+  const foundBooks = new Set<Book>();
+
+  bookData.forEach(book => {
+    // نجمع كل بيانات الكتاب في نص واحد للبحث داخله
+    const bookContent = `
+      ${normalize(book.title)} 
+      ${normalize(book.author)} 
+      ${normalize(book.subject)} 
+      ${normalize(book.summary || '')}
+    `;
+
+    // هل يحتوي الكتاب على أي من الكلمات المفتاحية؟
+    const isMatch = keywords.some(keyword => bookContent.includes(keyword));
+    
+    if (isMatch) {
+      foundBooks.add(book);
+    }
   });
+
+  // تحويل الـ Set إلى Array وإرجاع أول 6 نتائج فقط لعدم إغراق الشات
+  return Array.from(foundBooks).slice(0, 6);
 }
 
-// المعالج الرئيسي (API Handler)
+// ---------------------------------------------------------
+// 4. المعالج الرئيسي (The Handler)
+// ---------------------------------------------------------
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // السماح فقط بطلبات POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -67,49 +108,72 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const body = req.body || {};
     const messages = body.messages || [];
     const locale = body.locale || 'en'; 
-
     const userMessage = messages[messages.length - 1]?.content || '';
     
-    // 1. إجراء البحث في مكتبتك الحقيقية
-    // نزيد عدد النتائج لـ 10 لزيادة فرصة إيجاد الكتاب المناسب
-    const matches = searchInventory(userMessage).slice(0, 10);
+    // --- الخطوة 1: الفهم والترجمة ---
+    const searchKeywords = await extractSmartKeywords(userMessage);
+    console.log(`User: "${userMessage}" -> Keywords: [${searchKeywords.join(', ')}]`);
 
-    // 2. تجهيز السياق للذكاء الاصطناعي
-    const booksContext = matches.length > 0
-      ? matches.map(b => `- الكتاب: "${b.title}" | المؤلف: ${b.author} | التصنيف: ${b.subject} | مكان الكتاب: (رف ${b.shelf}، صف ${b.row})`).join('\n')
-      : "No specific books found matching this query in the library database.";
+    // --- الخطوة 2: البحث في المكتبة ---
+    const matchingBooks = searchLibrary(searchKeywords);
 
-    // 3. التعليمات (System Prompt)
-    // تمييز التعليمات بناءً على اللغة
+    // --- الخطوة 3: صياغة السياق للذكاء الاصطناعي ---
+    let systemContext = "";
+    
+    if (matchingBooks.length > 0) {
+      const booksList = matchingBooks.map(b => 
+        `- Title: "${b.title}" | Author: ${b.author} | Subject: ${b.subject} | Location: Shelf ${b.shelf}, Row ${b.row}`
+      ).join('\n');
+
+      systemContext = `
+        GREAT NEWS! We found these specific books in our library that match the user's request:
+        ${booksList}
+      `;
+    } else {
+      systemContext = `
+        RESULT: No specific physical books were found in our catalog matching "${searchKeywords.join(', ')}".
+        However, you should still be helpful and explain the topic generally.
+      `;
+    }
+
+    // --- الخطوة 4: تعليمات الشخصية (صقر) ---
     const isArabic = locale === 'ar';
-
-    const systemInstructions = `
-      You are Saqr, a smart and helpful librarian.
+    
+    const systemPrompt = `
+      You are **Saqr**, the intelligent and friendly librarian of this school.
       
-      ### LIBRARY DATABASE RESULTS (Real books we have):
-      ${booksContext}
+      ### CURRENT SITUATION:
+      User Input: "${userMessage}"
+      Database Search Results: 
+      ${systemContext}
 
-      ### User Input:
-      "${userMessage}"
+      ### YOUR MISSION:
+      1. **If books are found:** - Be enthusiastic! Say something like "I found exactly what you are looking for!".
+         - List the books clearly. **IMPORTANT:** Even if you reply in Arabic, keep the **Book Title in English** (so they can find it on the cover) but translate the description/reasoning.
+         - Mention the Location (Shelf/Row) for each book.
+         - Tell the user *why* this book is good for their request based on the title/subject.
 
-      ### INSTRUCTIONS:
-      1. **Direct Answer:** If the user asks for a book and it appears in the "LIBRARY DATABASE RESULTS" above, you MUST say "Yes, we have it!" and provide its Title, Author, and Location (Shelf/Row).
-      2. **Not Found:** If the book is NOT in the "LIBRARY DATABASE RESULTS", apologize and say it's not currently available in the physical library, but briefly define the topic using your general knowledge.
-      3. **Search Logic:** If the user describes a topic (e.g., "books about history"), look at the "subject" or "title" in the database results and recommend the best matches.
+      2. **If NO books are found:**
+         - Apologize politely that we don't have physical copies right now.
+         - Suggest the closest relevant section (e.g., "You might want to check the Science section on Shelf 5 generally").
+         - Give a brief, interesting fact about the topic to show you are smart.
+
+      3. **Tone:** Professional, encouraging, and helpful.
       4. **Language:** Reply in ${isArabic ? 'ARABIC' : 'ENGLISH'}.
     `;
 
+    // --- الخطوة 5: توليد الرد النهائي ---
     const completion = await groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+      model: 'llama-3.3-70b-versatile', // موديل قوي جداً لصياغة الردود
       messages: [
-        { role: 'system', content: systemInstructions },
+        { role: 'system', content: systemPrompt },
         { role: 'user', content: userMessage },
       ],
-      temperature: 0.3, // تقليل العشوائية لضمان دقة المعلومات
-      max_tokens: 500,
+      temperature: 0.5, // نعطيه مساحة للإبداع في الحديث
+      max_tokens: 800,
     });
 
-    const reply = completion.choices?.[0]?.message?.content || '...';
+    const reply = completion.choices?.[0]?.message?.content || 'Sorry, I am thinking...';
     return res.status(200).json({ reply });
 
   } catch (error: any) {
