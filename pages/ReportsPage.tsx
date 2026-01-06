@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { bookData } from '../api/bookData';
+import { bookData } from '../data/bookData';
 // تأكد أن LogEntry معرفة في types.ts، إذا لم تكن كذلك عرفها هنا مؤقتاً لتفادي الخطأ
 import { LogEntry } from '../types'; 
 import { useLanguage, useTheme } from '../App';
