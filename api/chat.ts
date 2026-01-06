@@ -2,24 +2,11 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Groq from 'groq-sdk';
 
 // ==========================================
-// 1. قسم البيانات (تم نقله هنا لضمان العمل)
+// 1. البيانات المحلية (تأكد أن تنسخ كل كتبك هنا أيضاً لضمان دقة البحث)
 // ==========================================
-
-type Book = {
-  id: string;
-  title: string;
-  author: string;
-  subject: string;
-  shelf: number;
-  row: number;
-  level: string;
-  language: string;
-  summary?: string;
-};
-
-// ضع كتبك هنا بدلاً من القائمة الصغيرة هذه
-const rawBookData = [
- { "title": "CREATING EXCELLENCE", "author": "Craig R. Hickman", "shelf": 4, "row": 1 },
+// ملاحظة: لكي يعمل البحث عن المكان بدقة، يفضل أن تكون قائمة الكتب هنا كاملة كما في الملف الآخر
+const localBookData = [
+{ "title": "CREATING EXCELLENCE", "author": "Craig R. Hickman", "shelf": 4, "row": 1 },
 { "title": "The Canadian SMALL BUSINESS Handbook", "author": "Susan Kennedy", "shelf": 4, "row": 1 },
 { "title": "PREPARING FOR ADOLESCENCE", "author": "James Dobson", "shelf": 4, "row": 1 },
 { "title": "Black Canadians", "author": "Joseph Mensah", "shelf": 4, "row": 1 },
@@ -2976,149 +2963,72 @@ const rawBookData = [
 { "title": "الصورة البيانية في شعر إبراهيم ناجي", "author": "د. وصال الدليمي", "shelf": 39, "row": 5 }
 ];
 
-function processBookData(rawData: any[]): Book[] {
-  return rawData.map((rawBook, index) => {
-    let author = (rawBook.author || "").toString();
-    let subject = 'Uncategorized';
-    const arabicRegex = /[\u0600-\u06FF]/;
-    const isArabic = arabicRegex.test(rawBook.title) || arabicRegex.test(author);
-    const language = isArabic ? 'AR' : 'EN';
-    
-    const topicMatch = author.match(/\(Topic: (.*?)\)/);
-    if (topicMatch) {
-      subject = topicMatch[1];
-      author = 'Unknown Author';
-    } else if (!author || author.trim() === "") {
-      author = language === 'AR' ? 'مؤلف غير معروف' : 'Unknown Author';
-    }
-
-    author = author.replace(/\s*\d+$/, '').trim();
-    if (author.startsWith('(') && author.endsWith(')')) {
-        author = author.slice(1, -1);
-    }
-
-    return {
-      id: `${rawBook.shelf}-${rawBook.row}-${index + 1}`,
-      title: rawBook.title,
-      author: author,
-      subject: subject,
-      shelf: rawBook.shelf,
-      row: rawBook.row,
-      level: 'General',
-      language: language,
-      summary: language === 'AR' 
-        ? `ملخص كتاب "${rawBook.title}" سيكون متاحاً قريباً.`
-        : `A summary for the book "${rawBook.title}" will be available soon.`,
-    };
-  });
-}
-
-// تجهيز البيانات داخل نفس الملف
-const bookData: Book[] = processBookData(rawBookData);
-
-function findInCatalog(q: string): Book[] {
+function findBooks(q: string) {
   const query = (q || '').toLowerCase().trim();
   if (!query) return [];
-  const results = bookData.filter((b) => {
-    const text = `${b.title} ${b.author} ${b.subject}`.toLowerCase();
-    return text.includes(query);
-  });
-  return results.slice(0, 5); // إرجاع أول 5 نتائج فقط
+  return localBookData.filter(b => 
+    (b.title + b.author).toLowerCase().includes(query)
+  ).slice(0, 5);
 }
 
 // ==========================================
-// 2. قسم الشات (Logic)
+// 2. كود الشات المحدث (الذكاء)
 // ==========================================
-
-const GREETINGS = [
-  'hi', 'hello', 'hey', 'salam', 'marhaba',
-  'مرحبا', 'سلام', 'هلا', 'اهلين', 'صباح', 'مساء'
-];
-
-function normalize(text: string): string {
-  return (text || '').toLowerCase().trim();
-}
-
-export default async function handler(
-  req: VercelRequest,
-  res: VercelResponse
-) {
-  // السماح بـ CORS لتجنب مشاكل المتصفح
-  res.setHeader('Access-Control-Allow-Credentials', "true");
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // إعدادات السماح (CORS)
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  );
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) {
-    return res.status(500).json({ error: 'System Error: API Key missing' });
-  }
+  if (!apiKey) return res.status(500).json({ error: 'API Key Missing' });
 
   try {
-    const body = req.body || {};
-    const messages = Array.isArray(body.messages) ? body.messages : [];
-    const locale = body.locale === 'ar' ? 'ar' : 'en';
+    const { messages = [], locale = 'en' } = req.body || {};
+    const userMsg = messages[messages.length - 1]?.content || '';
+
+    // البحث عن الكتاب وموقعه
+    const found = findBooks(userMsg);
     
-    const userMessage = messages[messages.length - 1]?.content || '';
-    const clean = normalize(userMessage);
+    // تجهيز السياق: نعطي الذكاء الاصطناعي الأماكن فقط
+    const context = found.length 
+      ? found.map(b => `- "${b.title}" by ${b.author} is located at (Shelf ${b.shelf}, Row ${b.row})`).join('\n') 
+      : 'No specific location found in the local database.';
 
-    // رد التحية محلياً
-    if (GREETINGS.some(g => clean.includes(g))) {
-      return res.status(200).json({
-        reply: locale === 'ar'
-          ? 'أهلاً بك! أنا صقر 🦅، مساعد مكتبة مدرسة صقر الإمارات. كيف أساعدك؟'
-          : 'Hello! I am Saqr 🦅, the school library assistant. How can I help you?'
-      });
-    }
-
-    // البحث في البيانات (الموجودة في نفس الملف الآن)
-    const books = findInCatalog(userMessage);
-    const context = books.length > 0
-        ? books.map(b => `- "${b.title}" by ${b.author} (Shelf: ${b.shelf}, Row: ${b.row})`).join('\n')
-        : 'No specific books found matching this query in the library catalog.';
-
-    // إرسال الطلب لـ Groq
     const groq = new Groq({ apiKey });
     
     const completion = await groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile', 
+      model: 'llama-3.3-70b-versatile',
       messages: [
         {
           role: 'system',
-          content: `You are Saqr, a school librarian. 
+          content: `You are Saqr, a smart school librarian.
           Current Language: ${locale === 'ar' ? 'Arabic' : 'English'}.
-          
-          Library Catalog Context:
+
+          Here is the location data from the library catalog:
           ${context}
+
+          **CRITICAL INSTRUCTIONS:**
+          1. **Location Queries:** If the user asks "Where is...", use the catalog data above to give the Shelf and Row.
+          2. **Summary Queries:** If the user asks for a **summary** or "what is this book about", **DO NOT** say "I cannot find it". Instead, **use your own general knowledge** to write a helpful summary of the book.
+          3. If the book is completely unknown to you and not in the catalog, apologize politely.
           
-          Instructions:
-          1. Answer based on the library context provided above.
-          2. If books are found, mention their exact Shelf and Row.
-          3. If no books are found, answer generally and politely.
-          4. Keep it short and helpful.`
+          Provide the response in ${locale === 'ar' ? 'Arabic' : 'English'}.`
         },
         ...messages
       ],
-      temperature: 0.5,
+      temperature: 0.7, // رفعنا الحرارة قليلاً للإبداع في التلخيص
       max_tokens: 500
     });
 
-    const reply = completion.choices[0]?.message?.content || 'No response.';
+    const reply = completion.choices[0]?.message?.content || 'No reply.';
     return res.status(200).json({ reply });
 
   } catch (error: any) {
-    console.error('Runtime Error:', error);
-    return res.status(500).json({ error: error.message || 'Internal Server Error' });
+    console.error(error);
+    return res.status(500).json({ error: error.message });
   }
 }
