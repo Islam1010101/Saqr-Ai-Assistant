@@ -1,47 +1,104 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Groq from 'groq-sdk';
+// استدعاء بيانات الكتب
+import { bookData } from './bookData';
 
-// لاحظ: قمت بإلغاء استيراد bookData مؤقتاً للتأكد أنه ليس سبب المشكلة
-// import { bookData } from './bookData'; 
+// ---------------------------------------------------------
+// 1. الإعدادات
+// ---------------------------------------------------------
+const GREETINGS = [
+  'hi', 'hello', 'hey', 'salam', 'marhaba', 'alo', 'hola', 
+  'مرحبا', 'سلام', 'هلا', 'اهلين', 'هاي', 'عليكم السلام', 'صباح الخير'
+];
 
+function normalize(text: string) {
+  if (!text) return '';
+  return text.toString().toLowerCase().trim();
+}
+
+// ---------------------------------------------------------
+// 2. المعالج الرئيسي
+// ---------------------------------------------------------
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   
-  // 1. السماح بطلبات POST فقط
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // 2. كشف حالة المفتاح
+  // فحص المفتاح
   const apiKey = process.env.GROQ_API_KEY;
-  let keyStatus = "MISSING";
-  if (apiKey) {
-    // نظهر أول 4 حروف وآخر 4 حروف للتأكد من صحته دون كشفه كاملاً
-    keyStatus = `Present (${apiKey.substring(0, 4)}...${apiKey.substring(apiKey.length - 4)})`;
+  if (!apiKey) {
+    return res.status(500).json({ error: "API Key missing in Vercel." });
   }
 
   try {
-    // محاولة تشغيل Groq
-    if (!apiKey) throw new Error("API Key is null/undefined");
-
+    // تشغيل Groq
     const groq = new Groq({ apiKey: apiKey });
 
-    // تجربة استدعاء بسيط جداً (بدون منطق كتب)
-    const completion = await groq.chat.completions.create({
+    // قراءة رسالة المستخدم
+    const body = req.body || {};
+    const messages = body.messages || [];
+    const locale = body.locale || 'en'; 
+    const userMessage = messages[messages.length - 1]?.content || '';
+    const cleanUserMessage = normalize(userMessage);
+
+    // --- منطق 1: التحية (Greeting) ---
+    const isGreeting = GREETINGS.includes(cleanUserMessage) || 
+                       (cleanUserMessage.length < 3 && /^[a-zA-Z\u0600-\u06FF]+$/.test(cleanUserMessage));
+
+    if (isGreeting) {
+      return res.status(200).json({ 
+        reply: locale === 'ar' 
+          ? "أهلاً بك! أنا صقر 🦅، أمين المكتبة. كيف يمكنني مساعدتك في إيجاد كتاب اليوم؟" 
+          : "Hello! I am Saqr 🦅, the librarian. How can I help you find a book today?"
+      });
+    }
+
+    // --- منطق 2: استخراج الكلمات المفتاحية ---
+    const keywordCompletion = await groq.chat.completions.create({
       model: 'llama3-8b-8192',
-      messages: [{ role: 'user', content: 'Say "System Operational"' }],
+      messages: [
+        { role: 'system', content: 'Extract 3 main English search keywords. Output ONLY comma-separated words.' },
+        { role: 'user', content: userMessage }
+      ],
+      temperature: 0,
+      max_tokens: 50,
     });
 
-    // إذا وصلنا هنا، فكل شيء سليم!
-    return res.status(200).json({ 
-      reply: `✅ TEST PASSED!\nKey Status: ${keyStatus}\nAI Reply: ${completion.choices[0]?.message?.content}` 
+    const keywordText = keywordCompletion.choices[0]?.message?.content || '';
+    const searchKeywords = keywordText.split(',').map(s => normalize(s)).filter(s => s.length > 2);
+    
+    // --- منطق 3: البحث الآمن (Safe Search) ---
+    // نتأكد أن bookData موجودة ومصفوفة لتجنب الخطأ 500
+    const safeLibrary = Array.isArray(bookData) ? bookData : [];
+    
+    const matchingBooks = safeLibrary.filter(book => {
+      const content = `${normalize(book.title)} ${normalize(book.author)} ${normalize(book.subject)}`.toLowerCase();
+      return searchKeywords.some(key => content.includes(key));
+    }).slice(0, 5);
+
+    // --- منطق 4: الرد النهائي ---
+    let systemContext = "";
+    if (matchingBooks.length > 0) {
+      const list = matchingBooks.map(b => `- "${b.title}" (Shelf ${b.shelf})`).join('\n');
+      systemContext = `Found books in library:\n${list}`;
+    } else {
+      systemContext = `No books found for "${searchKeywords}". Suggest a general topic.`;
+    }
+
+    const chatCompletion = await groq.chat.completions.create({
+      model: 'llama-3.3-70b-versatile', 
+      messages: [
+        { role: 'system', content: `You are Saqr the librarian. Reply in ${locale === 'ar' ? 'Arabic' : 'English'}.\nContext: ${systemContext}` },
+        { role: 'user', content: userMessage },
+      ],
     });
+
+    return res.status(200).json({ reply: chatCompletion.choices[0]?.message?.content });
 
   } catch (error: any) {
-    // 3. طباعة الخطأ الحقيقي للمستخدم
-    console.error("FULL ERROR:", error);
-    
-    return res.status(200).json({ 
-      reply: `❌ DIAGNOSTIC FAILURE\n\nKey Status: ${keyStatus}\nError Name: ${error.name}\nError Message: ${error.message}\n\n(صور هذه الشاشة وأرسلها لي)` 
-    });
+    console.error('SERVER ERROR:', error);
+    // حتى لو حدث خطأ، نرجعه كرسالة JSON للمستخدم ليفهم السبب
+    return res.status(500).json({ error: error.message || "Unknown Error" });
   }
 }
