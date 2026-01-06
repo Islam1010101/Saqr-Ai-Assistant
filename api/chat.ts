@@ -1,19 +1,19 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Groq from 'groq-sdk';
-// استدعاء بيانات الكتب
-import { bookData } from './bookData';
+// استدعاء دالة البحث والبيانات
+// تأكد أن المسار صحيح لملف bookData.ts
+import { findInCatalog } from './bookData'; 
 
 // ---------------------------------------------------------
-// 1. الإعدادات
+// 1. الإعدادات والتحقق من المدخلات
 // ---------------------------------------------------------
 const GREETINGS = [
   'hi', 'hello', 'hey', 'salam', 'marhaba', 'alo', 'hola', 
-  'مرحبا', 'سلام', 'هلا', 'اهلين', 'هاي', 'عليكم السلام', 'صباح الخير'
+  'مرحبا', 'سلام', 'هلا', 'اهلين', 'هاي', 'عليكم السلام', 'صباح الخير', 'مساء الخير'
 ];
 
 function normalize(text: string) {
-  if (!text) return '';
-  return text.toString().toLowerCase().trim();
+  return (text || '').toString().toLowerCase().trim();
 }
 
 // ---------------------------------------------------------
@@ -21,84 +21,87 @@ function normalize(text: string) {
 // ---------------------------------------------------------
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   
+  // منع أي طلب غير POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // فحص المفتاح
+  // التحقق من وجود مفتاح API في بيئة Vercel
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: "API Key missing in Vercel." });
+    return res.status(500).json({ error: "API Key missing. Please add GROQ_API_KEY in Vercel environment variables." });
   }
 
-  try {
-    // تشغيل Groq
-    const groq = new Groq({ apiKey: apiKey });
+  const groq = new Groq({ apiKey });
 
-    // قراءة رسالة المستخدم
+  try {
     const body = req.body || {};
     const messages = body.messages || [];
     const locale = body.locale || 'en'; 
     const userMessage = messages[messages.length - 1]?.content || '';
     const cleanUserMessage = normalize(userMessage);
 
-    // --- منطق 1: التحية (Greeting) ---
-    const isGreeting = GREETINGS.includes(cleanUserMessage) || 
-                       (cleanUserMessage.length < 3 && /^[a-zA-Z\u0600-\u06FF]+$/.test(cleanUserMessage));
+    // --- منطق 1: التعامل مع التحية (Greetings) ---
+    const isGreeting = GREETINGS.some(g => cleanUserMessage.includes(g)) || 
+                       (cleanUserMessage.length < 4 && /^[a-zA-Z\u0600-\u06FF]+$/.test(cleanUserMessage));
 
     if (isGreeting) {
-      return res.status(200).json({ 
-        reply: locale === 'ar' 
-          ? "أهلاً بك! أنا صقر 🦅، أمين المكتبة. كيف يمكنني مساعدتك في إيجاد كتاب اليوم؟" 
-          : "Hello! I am Saqr 🦅, the librarian. How can I help you find a book today?"
-      });
+      const greetingReply = locale === 'ar' 
+        ? "أهلاً بك! أنا صقر 🦅، مساعدك الذكي في مكتبة صقر الإمارات. كيف يمكنني مساعدتك في العثور على كتاب اليوم؟" 
+        : "Hello! I am Saqr 🦅, your smart assistant at Saqr Al Emarat Library. How can I help you find a book today?";
+      return res.status(200).json({ reply: greetingReply });
     }
 
-    // --- منطق 2: استخراج الكلمات المفتاحية ---
+    // --- منطق 2: استخراج الكلمات المفتاحية للبحث ---
+    // نستخدم موديل صغير وسريع لاستخراج الكلمات فقط
     const keywordCompletion = await groq.chat.completions.create({
       model: 'llama3-8b-8192',
       messages: [
-        { role: 'system', content: 'Extract 3 main English search keywords. Output ONLY comma-separated words.' },
+        { role: 'system', content: 'Extract 1 or 2 main search keywords (books, authors, or topics). Output ONLY the keywords separated by space.' },
         { role: 'user', content: userMessage }
       ],
-      temperature: 0,
-      max_tokens: 50,
+      temperature: 0.2,
+      max_tokens: 20,
     });
 
-    const keywordText = keywordCompletion.choices[0]?.message?.content || '';
-    const searchKeywords = keywordText.split(',').map(s => normalize(s)).filter(s => s.length > 2);
+    const keywords = keywordCompletion.choices[0]?.message?.content || userMessage;
     
-    // --- منطق 3: البحث الآمن (Safe Search) ---
-    // نتأكد أن bookData موجودة ومصفوفة لتجنب الخطأ 500
-    const safeLibrary = Array.isArray(bookData) ? bookData : [];
-    
-    const matchingBooks = safeLibrary.filter(book => {
-      const content = `${normalize(book.title)} ${normalize(book.author)} ${normalize(book.subject)}`.toLowerCase();
-      return searchKeywords.some(key => content.includes(key));
-    }).slice(0, 5);
+    // --- منطق 3: البحث المحلي في الكتالوج ---
+    // نستخدم الدالة التي صنعناها لتقليل حجم البيانات (أول 5 نتائج فقط)
+    const matchingBooks = findInCatalog(keywords);
 
-    // --- منطق 4: الرد النهائي ---
-    let systemContext = "";
+    // --- منطق 4: بناء السياق والرد النهائي ---
+    let context = "";
     if (matchingBooks.length > 0) {
-      const list = matchingBooks.map(b => `- "${b.title}" (Shelf ${b.shelf})`).join('\n');
-      systemContext = `Found books in library:\n${list}`;
+      const bookList = matchingBooks.map(b => `- ${b.title} by ${b.author} (Location: Shelf ${b.shelf}, Row ${b.row})`).join('\n');
+      context = `Found these books in our library:\n${bookList}\n\nAnswer the user based on these results. If they asked for a summary, provide a brief helpful one.`;
     } else {
-      systemContext = `No books found for "${searchKeywords}". Suggest a general topic.`;
+      context = "No specific books found for this query in the catalog. Ask the user for more details or suggest looking for topics like Science, History, or Literature.";
     }
 
-    const chatCompletion = await groq.chat.completions.create({
+    const finalCompletion = await groq.chat.completions.create({
       model: 'llama-3.3-70b-versatile', 
       messages: [
-        { role: 'system', content: `You are Saqr the librarian. Reply in ${locale === 'ar' ? 'Arabic' : 'English'}.\nContext: ${systemContext}` },
-        { role: 'user', content: userMessage },
+        { 
+          role: 'system', 
+          content: `You are Saqr, a helpful and friendly school librarian at Saqr Al Emarat School. 
+          Respond in ${locale === 'ar' ? 'Arabic' : 'English'}.
+          Always be professional and encouraging to students.
+          Context from our catalog:\n${context}` 
+        },
+        ...messages
       ],
+      temperature: 0.7,
+      max_tokens: 500,
     });
 
-    return res.status(200).json({ reply: chatCompletion.choices[0]?.message?.content });
+    return res.status(200).json({ reply: finalCompletion.choices[0]?.message?.content });
 
   } catch (error: any) {
-    console.error('SERVER ERROR:', error);
-    // حتى لو حدث خطأ، نرجعه كرسالة JSON للمستخدم ليفهم السبب
-    return res.status(500).json({ error: error.message || "Unknown Error" });
+    console.error('GROQ/SERVER ERROR:', error);
+    return res.status(500).json({ 
+      error: "حدث خطأ أثناء الاتصال بالخادم. يرجى المحاولة مرة أخرى.",
+      details: error.message 
+    });
   }
 }
