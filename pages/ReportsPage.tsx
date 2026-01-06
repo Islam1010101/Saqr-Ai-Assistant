@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 // تأكد أنك قمت بنقل ملف bookData.ts إلى مجلد data في الجذر
-import { bookData } from '../api/_bookData';
+import { bookData } from '../api/chat';
 import { useLanguage, useTheme } from '../App';
 
 // تعريف نوع بيانات السجلات لتجنب أخطاء البناء
