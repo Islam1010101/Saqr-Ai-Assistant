@@ -1,4 +1,6 @@
-// 1. تعريف نوع البيانات
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+
+// 1. تعريف شكل البيانات (Interface)
 export type Book = {
   id: string;
   title: string;
@@ -6,9 +8,9 @@ export type Book = {
   subject: string;
   shelf: number;
   row: number;
-  level?: string;
-  language: 'AR' | 'EN';
-  summary: string;
+  level: string;
+  language: string; // قمنا بتبسيط النوع هنا لتجنب أخطاء البناء
+  summary?: string;
 };
 
 // 2. البيانات الخام
@@ -2970,19 +2972,17 @@ const rawBookData = [
 { "title": "الصورة البيانية في شعر إبراهيم ناجي", "author": "د. وصال الدليمي", "shelf": 39, "row": 5 }
 ];
 
-// 3. دالة معالجة البيانات
-// استبدل دالة processBookData القديمة بهذا الكود المبسط:
-
+// 3. دالة معالجة البيانات (تم إصلاح الخطأ هنا)
 const processBookData = (rawData: any[]): Book[] => {
   return rawData.map((rawBook, index) => {
     let author = (rawBook.author || "").toString();
     let subject = 'Uncategorized';
 
-    // التمييز بين العربية والإنجليزية
+    // كشف اللغة
     const arabicRegex = /[\u0600-\u06FF]/;
-    
-    // التغيير هنا: حذفنا النوع الصريح (: 'EN' | 'AR') ليعمل الكود بدون أخطاء
-    const language = (arabicRegex.test(rawBook.title) || arabicRegex.test(author)) ? 'AR' : 'EN';
+    // تم إزالة النقطتين الرأسيتين التي كانت تسبب المشكلة
+    const isArabic = arabicRegex.test(rawBook.title) || arabicRegex.test(author);
+    const language = isArabic ? 'AR' : 'EN';
     
     // استخراج الموضوع
     const topicMatch = author.match(/\(Topic: (.*?)\)/);
@@ -2993,7 +2993,7 @@ const processBookData = (rawData: any[]): Book[] => {
       author = language === 'AR' ? 'مؤلف غير معروف' : 'Unknown Author';
     }
 
-    // تنظيف خانة المؤلف
+    // تنظيف اسم المؤلف
     author = author.replace(/\s*\d+$/, '').trim();
     if (author.startsWith('(') && author.endsWith(')')) {
         author = author.slice(1, -1);
@@ -3007,8 +3007,7 @@ const processBookData = (rawData: any[]): Book[] => {
       shelf: rawBook.shelf,
       row: rawBook.row,
       level: 'General',
-      // @ts-ignore
-      language: language, 
+      language: language,
       summary: language === 'AR' 
         ? `ملخص كتاب "${rawBook.title}" سيكون متاحاً قريباً.`
         : `A summary for the book "${rawBook.title}" will be available soon.`,
@@ -3016,10 +3015,8 @@ const processBookData = (rawData: any[]): Book[] => {
   });
 };
 
-// 4. تصدير البيانات النهائية
 export const bookData: Book[] = processBookData(rawBookData);
 
-// 5. دالة البحث المخصصة للاستخدام في تطبيق الويب
 export function findInCatalog(q: string): Book[] {
   const query = (q || '').toLowerCase().trim();
   if (!query) return [];
@@ -3029,6 +3026,5 @@ export function findInCatalog(q: string): Book[] {
     return text.includes(query);
   });
 
-  // نرجع أول 5 نتائج فقط للحفاظ على سرعة الاستجابة
   return results.slice(0, 5);
 }
