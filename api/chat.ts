@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Groq from 'groq-sdk';
-import { findInCatalog } from './_lib/bookData';
+import { findInCatalog } from './bookData';
 
 // ---------------------------------------
 // أدوات مساعدة
