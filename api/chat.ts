@@ -1,8 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Groq from 'groq-sdk';
-// استدعاء دالة البحث والبيانات
-// تأكد أن المسار صحيح لملف bookData.ts
-import { findInCatalog } from './bookData'; 
+// تم تعديل المسار هنا ليفهم السيرفر أن البيانات موجودة في مجلد data الخارجي
+import { findInCatalog } from '../data/bookData'; 
 
 // ---------------------------------------------------------
 // 1. الإعدادات والتحقق من المدخلات
@@ -17,19 +16,19 @@ function normalize(text: string) {
 }
 
 // ---------------------------------------------------------
-// 2. المعالج الرئيسي
+// 2. المعالج الرئيسي (Serverless Function)
 // ---------------------------------------------------------
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   
-  // منع أي طلب غير POST
+  // منع أي طلب غير POST لضمان أمان الـ API
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // التحقق من وجود مفتاح API في بيئة Vercel
+  // التحقق من وجود مفتاح API في إعدادات Vercel
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: "API Key missing. Please add GROQ_API_KEY in Vercel environment variables." });
+    return res.status(500).json({ error: "GROQ_API_KEY is missing in Vercel settings." });
   }
 
   const groq = new Groq({ apiKey });
@@ -41,66 +40,53 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const userMessage = messages[messages.length - 1]?.content || '';
     const cleanUserMessage = normalize(userMessage);
 
-    // --- منطق 1: التعامل مع التحية (Greetings) ---
+    // --- منطق 1: التعامل مع التحية لتقليل استهلاك الـ Tokens ---
     const isGreeting = GREETINGS.some(g => cleanUserMessage.includes(g)) || 
                        (cleanUserMessage.length < 4 && /^[a-zA-Z\u0600-\u06FF]+$/.test(cleanUserMessage));
 
     if (isGreeting) {
       const greetingReply = locale === 'ar' 
-        ? "أهلاً بك! أنا صقر 🦅، مساعدك الذكي في مكتبة صقر الإمارات. كيف يمكنني مساعدتك في العثور على كتاب اليوم؟" 
-        : "Hello! I am Saqr 🦅, your smart assistant at Saqr Al Emarat Library. How can I help you find a book today?";
+        ? "أهلاً بك! أنا صقر 🦅، مساعدك الذكي في مكتبة مدرسة صقر الإمارات. كيف يمكنني مساعدتك في العثور على كتاب اليوم؟" 
+        : "Hello! I am Saqr 🦅, your smart assistant at Saqr Al Emarat School Library. How can I help you find a book today?";
       return res.status(200).json({ reply: greetingReply });
     }
 
-    // --- منطق 2: استخراج الكلمات المفتاحية للبحث ---
-    // نستخدم موديل صغير وسريع لاستخراج الكلمات فقط
-    const keywordCompletion = await groq.chat.completions.create({
-      model: 'llama3-8b-8192',
-      messages: [
-        { role: 'system', content: 'Extract 1 or 2 main search keywords (books, authors, or topics). Output ONLY the keywords separated by space.' },
-        { role: 'user', content: userMessage }
-      ],
-      temperature: 0.2,
-      max_tokens: 20,
-    });
+    // --- منطق 2: البحث المحلي السريع في الكتالوج ---
+    // نمرر رسالة المستخدم مباشرة لدالة البحث التي تجلب أول 5 نتائج فقط
+    const matchingBooks = findInCatalog(userMessage);
 
-    const keywords = keywordCompletion.choices[0]?.message?.content || userMessage;
-    
-    // --- منطق 3: البحث المحلي في الكتالوج ---
-    // نستخدم الدالة التي صنعناها لتقليل حجم البيانات (أول 5 نتائج فقط)
-    const matchingBooks = findInCatalog(keywords);
-
-    // --- منطق 4: بناء السياق والرد النهائي ---
+    // --- منطق 3: بناء السياق (Context) للذكاء الاصطناعي ---
     let context = "";
-    if (matchingBooks.length > 0) {
-      const bookList = matchingBooks.map(b => `- ${b.title} by ${b.author} (Location: Shelf ${b.shelf}, Row ${b.row})`).join('\n');
-      context = `Found these books in our library:\n${bookList}\n\nAnswer the user based on these results. If they asked for a summary, provide a brief helpful one.`;
+    if (matchingBooks && matchingBooks.length > 0) {
+      const bookList = matchingBooks.map(b => `- ${b.title} (Author: ${b.author}, Location: Shelf ${b.shelf}, Row ${b.row})`).join('\n');
+      context = `The following books were found in our library catalog:\n${bookList}\n\nPlease use this information to answer the user. If they asked for a summary, provide a very brief one from your knowledge.`;
     } else {
-      context = "No specific books found for this query in the catalog. Ask the user for more details or suggest looking for topics like Science, History, or Literature.";
+      context = "No specific books found for this query in the library catalog. Be polite and suggest searching for general topics like 'Science', 'History', or 'Arabic Literature'.";
     }
 
-    const finalCompletion = await groq.chat.completions.create({
+    // --- منطق 4: الرد النهائي عبر Groq ---
+    const chatCompletion = await groq.chat.completions.create({
       model: 'llama-3.3-70b-versatile', 
       messages: [
         { 
           role: 'system', 
-          content: `You are Saqr, a helpful and friendly school librarian at Saqr Al Emarat School. 
+          content: `You are Saqr, a helpful and professional school librarian at Saqr Al Emarat School. 
           Respond in ${locale === 'ar' ? 'Arabic' : 'English'}.
-          Always be professional and encouraging to students.
-          Context from our catalog:\n${context}` 
+          Keep your answers concise and student-friendly.
+          Library Context:\n${context}` 
         },
         ...messages
       ],
-      temperature: 0.7,
-      max_tokens: 500,
+      temperature: 0.5, // تقليل العشوائية لضمان دقة المعلومات المستخرجة من الكتالوج
+      max_tokens: 600,
     });
 
-    return res.status(200).json({ reply: finalCompletion.choices[0]?.message?.content });
+    return res.status(200).json({ reply: chatCompletion.choices[0]?.message?.content });
 
   } catch (error: any) {
-    console.error('GROQ/SERVER ERROR:', error);
+    console.error('SERVER ERROR:', error);
     return res.status(500).json({ 
-      error: "حدث خطأ أثناء الاتصال بالخادم. يرجى المحاولة مرة أخرى.",
+      error: "Service Error",
       details: error.message 
     });
   }
