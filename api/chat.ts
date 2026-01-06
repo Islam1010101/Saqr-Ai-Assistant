@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Groq from 'groq-sdk';
 // تم تعديل المسار هنا ليفهم السيرفر أن البيانات موجودة في مجلد data الخارجي
-import { findInCatalog } from '../data/bookData'; 
+import { findInCatalog } from '../api/_lib/bookData'; 
 
 // ---------------------------------------------------------
 // 1. الإعدادات والتحقق من المدخلات
