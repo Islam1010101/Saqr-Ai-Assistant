@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-// ⚠️ هام جداً: نستورد النوع (Book) والبيانات (bookData) من نفس المكان لضمان التطابق
+// ⚠️ تأكد أنك نقلت ملف bookData.ts لمجلد اسمه data في الجذر (Root)
 import { bookData, type Book } from '../data/bookData'; 
 import { useLanguage } from '../App';
 
-// Debounce Hook
+// Debounce Hook لتقليل الضغط أثناء الكتابة في البحث
 const useDebounce = <T,>(value: T, delay: number): T => {
     const [debouncedValue, setDebouncedValue] = useState<T>(value);
     useEffect(() => {
@@ -17,8 +17,7 @@ const useDebounce = <T,>(value: T, delay: number): T => {
     return debouncedValue;
 };
 
-
-// Log to localStorage
+// تسجيل النشاط في المتصفح
 const logActivity = (type: 'search' | 'view', value: string) => {
     try {
         const logs: any[] = JSON.parse(localStorage.getItem('saqr_activity_logs') || '[]');
@@ -29,7 +28,7 @@ const logActivity = (type: 'search' | 'view', value: string) => {
     }
 };
 
-// --- TRANSLATIONS ---
+// --- نصوص الترجمة ---
 const translations = {
   ar: {
     pageTitle: "البحث في المكتبة",
@@ -73,8 +72,7 @@ const translations = {
   }
 };
 
-
-// --- BOOK MODAL ---
+// --- نافذة تفاصيل الكتاب (Modal) ---
 const BookModal: React.FC<{
   book: Book | null;
   onClose: () => void;
@@ -88,15 +86,13 @@ const BookModal: React.FC<{
 
     useEffect(() => {
         const handleEsc = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
-                onClose();
-            }
+            if (event.key === 'Escape') onClose();
         };
         window.addEventListener('keydown', handleEsc);
         return () => window.removeEventListener('keydown', handleEsc);
     }, [onClose]);
 
-    // ✨ --- AI Summary Logic --- ✨
+    // توليد ملخص عبر الذكاء الاصطناعي
     useEffect(() => {
         if (!book) return;
 
@@ -105,10 +101,9 @@ const BookModal: React.FC<{
             setSummary(''); 
 
             try {
-                const prompt =
-                    locale === 'ar'
-                        ? `أرجو تقديم ملخص قصير جداً (سطرين فقط) باللغة العربية للكتاب التالي: العنوان: "${book.title}" المؤلف: ${book.author}`
-                        : `Please provide a very short summary (2 lines only) in English for the following book: Title: "${book.title}" Author: ${book.author}`;
+                const prompt = locale === 'ar'
+                        ? `أرجو تقديم ملخص قصير جداً (سطرين) للكتاب: "${book.title}" للمؤلف: ${book.author}`
+                        : `Short 2-line summary for: "${book.title}" by ${book.author}`;
 
                 const response = await fetch('/api/chat', {
                     method: 'POST',
@@ -119,31 +114,23 @@ const BookModal: React.FC<{
                     }),
                 });
 
-                if (!response.ok) {
-                    const errData = await response.json().catch(() => ({}));
-                    throw new Error(errData.error || 'API call failed');
-                }
-
                 const data = await response.json();
                 setSummary(data.reply || (locale === 'ar' ? 'لم يتم العثور على ملخص.' : 'No summary found.'));
 
             } catch (error) {
-                console.error("Failed to generate summary:", error);
-                setSummary(book.summary || (locale === 'ar' ? 'عذراً، حدث خطأ أثناء جلب الملخص.' : 'Error fetching summary.'));
+                setSummary(book.summary || (locale === 'ar' ? 'حدث خطأ في جلب الملخص.' : 'Error fetching summary.'));
             } finally {
                 setIsLoading(false);
             }
         };
 
         generateSummary();
-
     }, [book, locale]); 
-
 
     if (!book) return null;
 
     return (
-        <div dir={dir} className="fixed inset-0 bg-black bg-opacity-60 z-50 flex justify-center items-center p-4" onClick={onClose}>
+        <div dir={dir} className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center p-4" onClick={onClose}>
             <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                 <div className="p-6 md:p-8">
                     <div className="flex justify-between items-start">
@@ -151,7 +138,7 @@ const BookModal: React.FC<{
                             <h2 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100">{book.title}</h2>
                             <p className="text-md text-gray-500 dark:text-gray-400 mt-1">{book.author}</p>
                         </div>
-                        <button onClick={onClose} className="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-100 transition-colors">
+                        <button onClick={onClose} className="p-1 rounded-full text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
                     </div>
@@ -169,9 +156,9 @@ const BookModal: React.FC<{
                             <h4 className="font-bold text-gray-600 dark:text-gray-400">{t_search('language')}</h4>
                             <p className="text-gray-800 dark:text-gray-200">{book.language === 'EN' ? t_search('langEN') : t_search('langAR')}</p>
                         </div>
-                        <div className="bg-uae-green/10 p-3 rounded-lg col-span-2 md:col-span-3">
-                            <h4 className="font-bold text-uae-green">{t_search('location')}</h4>
-                            <p className="text-uae-green font-semibold text-lg">{`${t_search('shelf')} ${book.shelf} – ${t_search('row')} ${book.row}`}</p>
+                        <div className="bg-green-600/10 p-3 rounded-lg col-span-2 md:col-span-3">
+                            <h4 className="font-bold text-green-700 dark:text-green-500">{t_search('location')}</h4>
+                            <p className="text-green-700 dark:text-green-400 font-semibold text-lg">{`${t_search('shelf')} ${book.shelf} – ${t_search('row')} ${book.row}`}</p>
                         </div>
                     </div>
 
@@ -180,7 +167,6 @@ const BookModal: React.FC<{
                         {isLoading ? (
                             <div className="space-y-2 animate-pulse">
                                 <div className="bg-gray-200 dark:bg-gray-700 h-4 rounded w-full"></div>
-                                <div className="bg-gray-200 dark:bg-gray-700 h-4 rounded w-5/6"></div>
                                 <div className="bg-gray-200 dark:bg-gray-700 h-4 rounded w-3/4"></div>
                             </div>
                         ) : (
@@ -189,12 +175,10 @@ const BookModal: React.FC<{
                     </div>
                 </div>
                 <div className="bg-gray-50 dark:bg-gray-800/50 p-4 flex justify-end gap-3 rounded-b-2xl">
-                    <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 dark:text-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors">{t_search('close')}</button>
-                    
-                    {/* زر التوصيات المشابهة */}
+                    <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 dark:text-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600">{t_search('close')}</button>
                     <button 
                         onClick={() => book && onFilterByAuthor(book.author)}
-                        className="px-4 py-2 text-sm font-medium text-white bg-uae-green rounded-lg hover:bg-green-800 transition-colors"
+                        className="px-4 py-2 text-sm font-medium text-white bg-green-700 rounded-lg hover:bg-green-800 transition-colors"
                     >
                         {t_search('similarRecommendations')}
                     </button>
@@ -204,32 +188,30 @@ const BookModal: React.FC<{
     );
 };
 
-
-// --- BOOK CARD ---
+// --- بطاقة الكتاب (Card) ---
 const BookCard: React.FC<{ book: Book; onClick: () => void }> = ({ book, onClick }) => {
     const { locale } = useLanguage();
     const t_search = (key: keyof typeof translations.ar) => translations[locale][key];
     return (
         <div
             onClick={onClick}
-            className="bg-white dark:bg-gray-800 rounded-2xl shadow-md hover:shadow-xl dark:hover:shadow-green-900/20 transition-all duration-300 cursor-pointer overflow-hidden flex flex-col group"
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col group border border-transparent hover:border-green-500/30"
         >
             <div className="p-5 flex-grow">
-                <h3 className="font-bold text-lg text-gray-800 dark:text-gray-100 group-hover:text-uae-green transition-colors">{book.title}</h3>
+                <h3 className="font-bold text-lg text-gray-800 dark:text-gray-100 group-hover:text-green-600 transition-colors">{book.title}</h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{book.author}</p>
-                <div className="mt-4 flex flex-wrap gap-2 text-xs">
-                    <span className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-full">{book.subject}</span>
+                <div className="mt-4">
+                    <span className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-full text-xs">{book.subject}</span>
                 </div>
             </div>
-            <div className="bg-gray-50 dark:bg-gray-700/50 text-center py-3 px-5 border-t border-gray-100 dark:border-gray-700">
-                <p className="font-semibold text-uae-green">{`${t_search('shelf')} ${book.shelf} – ${t_search('row')} ${book.row}`}</p>
+            <div className="bg-gray-50 dark:bg-gray-900/50 text-center py-3 px-5 border-t border-gray-100 dark:border-gray-700">
+                <p className="font-semibold text-green-700 dark:text-green-500">{`${t_search('shelf')} ${book.shelf} – ${t_search('row')} ${book.row}`}</p>
             </div>
         </div>
     );
 };
 
-
-// --- MAIN SEARCH PAGE COMPONENT ---
+// --- مكون صفحة البحث الرئيسي ---
 const SearchPage: React.FC = () => {
     const { locale } = useLanguage();
     const t_search = (key: keyof typeof translations.ar) => translations[locale][key];
@@ -237,35 +219,33 @@ const SearchPage: React.FC = () => {
     const [subjectFilter, setSubjectFilter] = useState('all');
     const [authorFilter, setAuthorFilter] = useState('all');
     
-    // ✅ هنا لن يحدث خطأ لأن نوع Book هو نفسه المستورد مع bookData
     const [filteredBooks, setFilteredBooks] = useState<Book[]>(bookData);
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-    const subjects = [...new Set(bookData.map(b => b.subject))].filter(Boolean).sort();
-    const authors = [...new Set(bookData.map(b => b.author))].filter(a => a !== 'Unknown Author').sort();
+    // استخراج الفلاتر الفريدة
+    const subjects = [...new Set(bookData.map((b: Book) => b.subject))].filter(Boolean).sort();
+    const authors = [...new Set(bookData.map((b: Book) => b.author))].filter(a => a !== 'Unknown Author' && a !== 'مؤلف غير معروف').sort();
 
     const handleSearch = useCallback(() => {
-        if (debouncedSearchTerm.trim()) {
-            logActivity('search', debouncedSearchTerm.trim());
-        }
-        let books = bookData;
+        let books = [...bookData];
 
         if (debouncedSearchTerm) {
-            const lowercasedTerm = debouncedSearchTerm.toLowerCase();
-            books = books.filter(book =>
-                book.title.toLowerCase().includes(lowercasedTerm) ||
-                book.author.toLowerCase().includes(lowercasedTerm) ||
-                book.subject.toLowerCase().includes(lowercasedTerm)
+            logActivity('search', debouncedSearchTerm.trim());
+            const term = debouncedSearchTerm.toLowerCase();
+            books = books.filter(b =>
+                b.title.toLowerCase().includes(term) ||
+                b.author.toLowerCase().includes(term) ||
+                b.subject.toLowerCase().includes(term)
             );
         }
 
         if (subjectFilter !== 'all') {
-            books = books.filter(book => book.subject === subjectFilter);
+            books = books.filter(b => b.subject === subjectFilter);
         }
         if (authorFilter !== 'all') {
-            books = books.filter(book => book.author === authorFilter);
+            books = books.filter(b => b.author === authorFilter);
         }
         
         setFilteredBooks(books);
@@ -280,65 +260,63 @@ const SearchPage: React.FC = () => {
         logActivity('view', book.id);
     };
 
-    const handleCloseModal = () => {
-        setSelectedBook(null);
-    };
-
-    // ميزة التوصيات (فلترة حسب المؤلف)
     const handleFilterByAuthor = (authorName: string) => {
       setAuthorFilter(authorName); 
       setSubjectFilter('all');     
       setSearchTerm('');          
       setSelectedBook(null);       
-      
       window.scrollTo(0, 0); 
     };
 
     return (
-        <div>
-            <h1 className="text-3xl font-bold text-center mb-6">{t_search('pageTitle')}</h1>
-            <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-2xl shadow-sm mb-6 sticky top-28 z-30">
+        <div className="max-w-7xl mx-auto px-4">
+            <h1 className="text-3xl font-bold text-center mb-6 text-gray-800 dark:text-white">{t_search('pageTitle')}</h1>
+            
+            {/* قسم البحث والفلاتر */}
+            <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-2xl shadow-sm mb-6 sticky top-24 z-30 border border-gray-100 dark:border-gray-700">
                 <div className="relative mb-4">
                     <input
                         type="text"
                         placeholder={t_search('searchPlaceholder')}
-                        className="w-full p-3 ps-10 text-gray-800 bg-white dark:bg-gray-700 dark:text-gray-200 border-2 border-gray-200 dark:border-gray-600 rounded-full focus:ring-2 focus:ring-uae-green focus:border-transparent outline-none transition"
+                        className="w-full p-4 ps-12 text-gray-800 bg-gray-50 dark:bg-gray-700 dark:text-gray-200 border-2 border-transparent focus:border-green-500 rounded-full outline-none transition-all shadow-inner"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
-                    <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <div className="absolute inset-y-0 start-4 flex items-center pointer-events-none">
+                        <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </div>
                 </div>
+                
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="w-full p-2 border border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-uae-green focus:border-transparent outline-none">
+                    <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="w-full p-3 rounded-xl bg-gray-50 dark:bg-gray-700 border-none focus:ring-2 focus:ring-green-500 dark:text-white">
                         <option value="all">{t_search('allSubjects')}</option>
-                        {subjects.map(s => <option key={s} value={s}>{s}</option>)}
+                        {subjects.map((s: string) => <option key={s} value={s}>{s}</option>)}
                     </select>
-                     <select value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)} className="w-full p-2 border border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-uae-green focus:border-transparent outline-none">
+                     <select value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)} className="w-full p-3 rounded-xl bg-gray-50 dark:bg-gray-700 border-none focus:ring-2 focus:ring-green-500 dark:text-white">
                         <option value="all">{t_search('allAuthors')}</option>
-                        {authors.map(a => <option key={a} value={a}>{a}</option>)}
+                        {authors.map((a: string) => <option key={a} value={a}>{a}</option>)}
                     </select>
                 </div>
             </div>
 
-            <h2 className="text-xl font-bold mb-4">{`${t_search('results')} (${filteredBooks.length})`}</h2>
+            <h2 className="text-xl font-bold mb-6 text-gray-700 dark:text-gray-300">{`${t_search('results')} (${filteredBooks.length})`}</h2>
             
+            {/* شبكة عرض الكتب */}
             {filteredBooks.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {filteredBooks.map(book => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-12">
+                    {filteredBooks.map((book: Book) => (
                         <BookCard key={book.id} book={book} onClick={() => handleBookClick(book)} />
                     ))}
                 </div>
             ) : (
-                <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-2xl shadow-sm">
-                    <p className="text-gray-600 dark:text-gray-400 text-lg">{t_search('noResults')}</p>
+                <div className="text-center py-20 bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-dashed border-gray-300 dark:border-gray-700">
+                    <p className="text-gray-500 dark:text-gray-400 text-xl">{t_search('noResults')}</p>
                 </div>
             )}
 
             <BookModal 
               book={selectedBook} 
-              onClose={handleCloseModal}
+              onClose={() => setSelectedBook(null)}
               onFilterByAuthor={handleFilterByAuthor}
             />
         </div>
