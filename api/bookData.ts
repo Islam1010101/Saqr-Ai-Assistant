@@ -3790,7 +3790,6 @@ const rawBookData = [
     "Shelf": 39,
     "Row": 5
   }
-]
 ];
 
 export type Book = {
