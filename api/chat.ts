@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Groq from 'groq-sdk';
-// تأكد أن المسار صحيح لملف بيانات الكتب
+// تأكد أن ملف bookData.ts موجود بجانب هذا الملف
 import { bookData } from './bookData';
 
 // ---------------------------------------------------------
@@ -18,6 +18,9 @@ type Book = {
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
+// قائمة التحيات لتجاهل البحث وتوفير الموارد
+const GREETINGS = ['hi', 'hello', 'hey', 'salam', 'marhaba', 'alo', 'hola', 'مرحبا', 'سلام', 'هلا', 'اهلين', 'هاي'];
+
 // دالة مساعدة لتنظيف النصوص للمقارنة
 function normalize(text: string) {
   if (!text) return '';
@@ -27,7 +30,6 @@ function normalize(text: string) {
 // ---------------------------------------------------------
 // 2. المترجم ومستخرج الأفكار (العقل المدبر 🧠)
 // ---------------------------------------------------------
-// هذه الدالة لا تترجم فقط، بل تستخرج "جوهر" الموضوع بالإنجليزية
 async function extractSmartKeywords(userText: string): Promise<string[]> {
   try {
     const completion = await groq.chat.completions.create({
@@ -91,7 +93,7 @@ function searchLibrary(keywords: string[]): Book[] {
     }
   });
 
-  // تحويل الـ Set إلى Array وإرجاع أول 6 نتائج فقط لعدم إغراق الشات
+  // تحويل الـ Set إلى Array وإرجاع أول 6 نتائج فقط
   return Array.from(foundBooks).slice(0, 6);
 }
 
@@ -99,6 +101,12 @@ function searchLibrary(keywords: string[]): Book[] {
 // 4. المعالج الرئيسي (The Handler)
 // ---------------------------------------------------------
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // التحقق من وجود مفتاح API لتجنب الخطأ 500
+  if (!process.env.GROQ_API_KEY) {
+    console.error("Critical Error: GROQ_API_KEY is missing in environment variables.");
+    return res.status(500).json({ error: "Server Configuration Error: API Key missing." });
+  }
+
   // السماح فقط بطلبات POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -109,7 +117,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const messages = body.messages || [];
     const locale = body.locale || 'en'; 
     const userMessage = messages[messages.length - 1]?.content || '';
+    const cleanUserMessage = normalize(userMessage);
     
+    // --- إصلاح مشكلة الرد العجيب على "Hi" ---
+    // إذا كانت الرسالة مجرد تحية، نرد فوراً بدون بحث
+    if (GREETINGS.includes(cleanUserMessage) || cleanUserMessage.length < 2) {
+      const welcomeMsg = locale === 'ar' 
+        ? "أهلاً بك يا صديقي! أنا صقر، أمين المكتبة الذكي. 🦅\nأخبرني، عما تبحث اليوم؟ (مثلاً: كتب عن الفضاء، روايات غموض...)" 
+        : "Hello my friend! I am Saqr, the smart librarian. 🦅\nTell me, what are you looking for today? (e.g., Space books, Mystery novels...)";
+      
+      return res.status(200).json({ reply: welcomeMsg });
+    }
+
     // --- الخطوة 1: الفهم والترجمة ---
     const searchKeywords = await extractSmartKeywords(userMessage);
     console.log(`User: "${userMessage}" -> Keywords: [${searchKeywords.join(', ')}]`);
@@ -164,12 +183,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // --- الخطوة 5: توليد الرد النهائي ---
     const completion = await groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile', // موديل قوي جداً لصياغة الردود
+      model: 'llama-3.3-70b-versatile', 
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userMessage },
       ],
-      temperature: 0.5, // نعطيه مساحة للإبداع في الحديث
+      temperature: 0.5, 
       max_tokens: 800,
     });
 
@@ -178,6 +197,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   } catch (error: any) {
     console.error('API Error:', error);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    // إرجاع رسالة خطأ واضحة بدلاً من انهيار السيرفر
+    return res.status(500).json({ error: error.message || 'Internal Server Error' });
   }
 }
