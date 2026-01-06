@@ -2970,10 +2970,6 @@ const rawBookData = [
 { "title": "الصورة البيانية في شعر إبراهيم ناجي", "author": "د. وصال الدليمي", "shelf": 39, "row": 5 }
 ];
 
-{ "title": "شعرية النص", "author": "أ.د. ثابت الألوسي", "shelf": 39, "row": 5 },
-{ "title": "الصورة البيانية في شعر إبراهيم ناجي", "author": "د. وصال الدليمي", "shelf": 39, "row": 5 }
-];
-
 // 3. دالة معالجة البيانات
 const processBookData = (rawData: any[]): Book[] => {
   return rawData.map((rawBook, index) => {
