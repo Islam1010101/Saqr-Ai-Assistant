@@ -36,40 +36,41 @@ const HomePage: React.FC = () => {
     const SAQR_MASCOT = "/saqr-full.png"; 
     
     return (
-        /* الحاوية الرئيسية باستخدام كلاس glass-panel المطور */
+        /* الحاوية الزجاجية الكبرى */
         <div className="relative flex flex-col items-center justify-center text-center min-h-[80vh] rounded-[3rem] overflow-hidden glass-panel shadow-2xl p-6 md:p-12 animate-in fade-in zoom-in duration-700">
             <BackgroundPattern />
             
             <div className="relative z-10 flex flex-col items-center max-w-5xl w-full">
                 
-                {/* قسم الشعار الرسمي - إضافة كلاس logo-smart-hover للحركة التفاعلية */}
-                <div className="relative mb-12 group cursor-pointer">
-                    <div className="absolute -inset-4 bg-green-500/10 rounded-full blur-2xl group-hover:bg-green-500/30 transition-all duration-700"></div>
+                {/* الشعار الرسمي: الكلاس logo-smart-hover سيتكفل بالاهتزاز والتحول للأبيض في الدارك مود */}
+                <div className="relative mb-12 group cursor-pointer transition-all duration-500">
+                    <div className="absolute -inset-6 bg-green-500/10 dark:bg-white/5 rounded-full blur-3xl group-hover:bg-green-500/20 dark:group-hover:bg-white/10 transition-all duration-700"></div>
                     <img 
                         src={SCHOOL_LOGO} 
                         alt="School Logo" 
-                        className="relative h-40 w-40 md:h-56 md:w-56 object-contain drop-shadow-2xl logo-smart-hover transition-all"
+                        className="relative h-40 w-40 md:h-56 md:w-56 object-contain logo-smart-hover"
                     />
                 </div>
 
                 <div className="flex flex-col lg:flex-row items-center justify-between gap-12 w-full">
                     
-                    {/* الجانب الأيسر: شخصية صقر والفقاعة الترحيبية */}
+                    {/* شخصية صقر والفقاعة الترحيبية الزجاجية */}
                     <div className="relative flex-shrink-0 animate-in slide-in-from-start duration-1000 order-2 lg:order-1">
                         <img 
                             src={SAQR_MASCOT} 
                             alt="Saqr Mascot" 
-                            className="h-64 md:h-96 object-contain drop-shadow-2xl" 
+                            className="h-64 md:h-96 object-contain drop-shadow-2xl transition-transform hover:scale-105 duration-500" 
                         />
-                        <div className="absolute -top-6 -right-6 md:-right-12 glass-panel p-4 rounded-3xl shadow-2xl border-2 border-green-700/10 text-sm font-black text-green-800 dark:text-green-400 max-w-[180px] animate-bounce">
+                        {/* فقاعة ترحيب زجاجية متناغمة */}
+                        <div className="absolute -top-6 -right-6 md:-right-12 glass-panel p-4 rounded-3xl shadow-2xl border-white/20 text-sm font-black text-green-800 dark:text-white max-w-[180px] animate-bounce">
                             {t('bubble')}
-                            <div className="absolute -bottom-2 left-6 w-4 h-4 glass-panel border-r-2 border-b-2 border-white/20 rotate-45"></div>
+                            <div className="absolute -bottom-2 left-6 w-4 h-4 glass-panel border-r-2 border-b-2 border-white/10 rotate-45"></div>
                         </div>
                     </div>
 
-                    {/* الجانب الأيمن: العناوين والأزرار الزجاجية الملونة */}
+                    {/* المحتوى النصي والأزرار الزجاجية */}
                     <div className="flex-grow text-center lg:text-start order-1 lg:order-2">
-                        <h1 className="text-3xl md:text-6xl font-black text-gray-900 dark:text-white mb-6 leading-tight tracking-tight">
+                        <h1 className="text-3xl md:text-6xl font-black text-gray-900 dark:text-white mb-6 leading-tight tracking-tight drop-shadow-sm">
                             {t('welcome')}
                         </h1>
                         
@@ -78,19 +79,17 @@ const HomePage: React.FC = () => {
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-6">
-                            {/* زر البحث اليدوي بالهوية الحمراء الزجاجية */}
                             <Link
                                 to="/search"
-                                className="glass-button-red font-black py-5 px-10 rounded-2xl active:scale-95 overflow-hidden flex items-center justify-center gap-2"
+                                className="glass-button-red font-black py-5 px-10 rounded-2xl active:scale-95 overflow-hidden flex items-center justify-center gap-2 shadow-lg"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                                 {t('manualSearch')}
                             </Link>
 
-                            {/* زر اسأل صقر بالهوية الخضراء الزجاجية */}
                             <Link
                                 to="/smart-search"
-                                className="glass-button-green font-black py-5 px-10 rounded-2xl active:scale-95 overflow-hidden flex items-center justify-center gap-2"
+                                className="glass-button-green font-black py-5 px-10 rounded-2xl active:scale-95 overflow-hidden flex items-center justify-center gap-2 shadow-lg"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
                                 {t('smartSearch')}
@@ -100,7 +99,7 @@ const HomePage: React.FC = () => {
                 </div>
             </div>
 
-            {/* لمسة جمالية سفلية تعكس ألوان الهوية */}
+            {/* خطوط الهوية السفلية */}
             <div className="absolute bottom-10 left-10 right-10 flex justify-between opacity-30 pointer-events-none">
                 <div className="h-px w-1/4 bg-gradient-to-r from-transparent to-green-700"></div>
                 <div className="h-px w-1/4 bg-gradient-to-l from-transparent to-red-600"></div>
