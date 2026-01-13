@@ -168,11 +168,11 @@ const Header: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
           <div className="flex items-center">
-            {/* تم تغيير مسار الشعار هنا إلى الشعار المفرغ */}
+            {/* إضافة كلاس rotate-6 لإمالة الشعار يميناً وتعديل المقاس */}
             <img
               src="/school-logo.png"
               alt="School Logo"
-              className="h-16 w-16 object-contain"
+              className="h-16 w-16 object-contain rotate-6 transition-transform hover:scale-110"
             />
             <div className="ms-3 hidden sm:block">
               <h1 className="text-md font-bold text-gray-800 dark:text-gray-100 leading-tight">{t('schoolName')}</h1>
