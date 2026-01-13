@@ -12,7 +12,6 @@ const useDebounce = <T,>(value: T, delay: number): T => {
     return debouncedValue;
 };
 
-// نظام تسجيل النشاط (Analytics) لمتابعة اهتمامات الطلاب
 const logActivity = (type: 'search' | 'view', value: string) => {
     try {
         const logs: any[] = JSON.parse(localStorage.getItem('saqr_activity_logs') || '[]');
@@ -43,7 +42,9 @@ const translations = {
     location: "موقع الكتاب في المكتبة",
     summary: "ملخص الكتاب (بذكاء صقر)",
     langEN: "الإنجليزية",
-    langAR: "العربية"
+    langAR: "العربية",
+    classifying: "جاري التصنيف...",
+    aiGenerated: "تصنيف ذكي"
   },
   en: {
     pageTitle: "Library Search",
@@ -64,11 +65,13 @@ const translations = {
     location: "Book Location",
     summary: "Book Summary (Saqr AI)",
     langEN: "English",
-    langAR: "Arabic"
+    langAR: "Arabic",
+    classifying: "Classifying...",
+    aiGenerated: "AI Classified"
   }
 };
 
-// --- نافذة تفاصيل الكتاب (Modal) الزجاجية الفخمة ---
+// --- نافذة تفاصيل الكتاب (Modal) الذكية ---
 const BookModal: React.FC<{
   book: Book | null;
   onClose: () => void;
@@ -77,6 +80,7 @@ const BookModal: React.FC<{
     const { locale, dir } = useLanguage();
     const t_search = (key: keyof typeof translations.ar) => translations[locale][key];
     const [summary, setSummary] = useState('');
+    const [aiSubject, setAiSubject] = useState(''); // حالة للموضوع الذكي
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
@@ -87,30 +91,50 @@ const BookModal: React.FC<{
 
     useEffect(() => {
         if (!book) return;
-        const generateSummary = async () => {
+        
+        const fetchAiInsights = async () => {
             setIsLoading(true);
             setSummary(''); 
+            setAiSubject('');
+            
             try {
+                // طلب مزدوج: تصنيف الكتاب وتوليد ملخص في طلب واحد لسرعة الأداء
+                const prompt = `Analyze the book "${book.title}" by "${book.author}". 
+                1. Provide a 1-word subject category.
+                2. Provide a 2-line summary.
+                Format exactly as: SUBJECT: [category] | SUMMARY: [summary]`;
+
                 const response = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        messages: [{ role: 'user', content: `Short 2-line summary for: "${book.title}" by ${book.author}` }],
+                        messages: [{ role: 'user', content: prompt }],
                         locale: locale,
                     }),
                 });
                 const data = await response.json();
-                setSummary(data.reply || (locale === 'ar' ? 'لم يتم العثور على ملخص.' : 'No summary found.'));
+                const reply = data.reply || "";
+
+                if (reply.includes('|')) {
+                    const [sub, sum] = reply.split('|');
+                    setAiSubject(sub.replace(/SUBJECT:/i, '').trim());
+                    setSummary(sum.replace(/SUMMARY:/i, '').trim());
+                } else {
+                    setSummary(reply);
+                }
             } catch (error) {
-                setSummary(book.summary || (locale === 'ar' ? 'حدث خطأ في جلب الملخص.' : 'Error fetching summary.'));
+                setSummary(book.summary || (locale === 'ar' ? 'حدث خطأ في جلب البيانات.' : 'Error fetching data.'));
             } finally {
                 setIsLoading(false);
             }
         };
-        generateSummary();
+        fetchAiInsights();
     }, [book, locale]); 
 
     if (!book) return null;
+
+    // تحديد هل نحتاج لاستخدام التصنيف الذكي
+    const needsAiSubject = book.subject === 'Uncategorized' || book.subject === 'غير مصنف' || !book.subject;
 
     return (
         <div dir={dir} className="fixed inset-0 bg-black/60 z-[100] flex justify-center items-center p-4 backdrop-blur-xl animate-in fade-in duration-300" onClick={onClose}>
@@ -127,10 +151,21 @@ const BookModal: React.FC<{
                     </div>
                     
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-5 mb-10">
-                        <div className="glass-panel p-5 rounded-3xl border-white/10 bg-white/30">
+                        {/* كرت الموضوع المطور بالذكاء الاصطناعي */}
+                        <div className="glass-panel p-5 rounded-3xl border-white/10 bg-white/30 relative overflow-hidden group">
                             <h4 className="font-black text-gray-500 dark:text-gray-400 text-xs uppercase mb-2 tracking-widest">{t_search('subject')}</h4>
-                            <p className="text-gray-900 dark:text-gray-100 font-black text-lg">{book.subject}</p>
+                            <div className="flex flex-col gap-1">
+                                <p className={`text-lg font-black transition-all ${isLoading && needsAiSubject ? 'animate-pulse text-gray-400' : 'text-gray-900 dark:text-gray-100'}`}>
+                                    {needsAiSubject ? (aiSubject || t_search('classifying')) : book.subject}
+                                </p>
+                                {aiSubject && needsAiSubject && (
+                                    <span className="text-[10px] font-black bg-green-700 text-white px-2 py-0.5 rounded-md self-start animate-bounce">
+                                        {t_search('aiGenerated')}
+                                    </span>
+                                )}
+                            </div>
                         </div>
+
                         <div className="glass-panel p-5 rounded-3xl border-white/10 bg-white/30">
                             <h4 className="font-black text-gray-500 dark:text-gray-400 text-xs uppercase mb-2 tracking-widest">{t_search('level')}</h4>
                             <p className="text-gray-900 dark:text-gray-100 font-black text-lg">{book.level}</p>
@@ -176,7 +211,7 @@ const BookModal: React.FC<{
     );
 };
 
-// --- بطاقة الكتاب (Card) البريميوم ---
+// --- بطاقة الكتاب (Card) ---
 const BookCard: React.FC<{ book: Book; onClick: () => void }> = ({ book, onClick }) => {
     const { locale } = useLanguage();
     const t_search = (key: keyof typeof translations.ar) => translations[locale][key];
@@ -202,7 +237,7 @@ const BookCard: React.FC<{ book: Book; onClick: () => void }> = ({ book, onClick
     );
 };
 
-// --- المكون الرئيسي لصفحة البحث الزجاجية ---
+// --- المكون الرئيسي لصفحة البحث ---
 const SearchPage: React.FC = () => {
     const { locale } = useLanguage();
     const t_search = (key: keyof typeof translations.ar) => translations[locale][key];
@@ -260,13 +295,11 @@ const SearchPage: React.FC = () => {
 
     return (
         <div className="max-w-7xl mx-auto px-4 pb-24">
-            {/* رأس الصفحة الفخم */}
             <div className="text-center mb-16 animate-in fade-in slide-in-from-top-6 duration-1000">
                 <h1 className="text-5xl md:text-7xl font-black text-gray-950 dark:text-white mb-6 tracking-tighter leading-none">{t_search('pageTitle')}</h1>
                 <div className="h-2 w-32 bg-green-700 mx-auto rounded-full shadow-[0_0_20px_rgba(0,115,47,0.4)]"></div>
             </div>
             
-            {/* حاوية البحث والفلاتر العائمة */}
             <div className="glass-panel p-8 md:p-12 rounded-[3.5rem] shadow-2xl mb-20 sticky top-24 z-30 border-white/30 backdrop-blur-2xl transition-all duration-500 hover:shadow-green-700/10">
                 <div className="relative mb-10">
                     <input
@@ -282,7 +315,6 @@ const SearchPage: React.FC = () => {
                 </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                    {/* الفلاتر الذكية */}
                     {[ 
                         { val: subjectFilter, set: setSubjectFilter, opts: subjects, all: t_search('allSubjects'), label: '' },
                         { val: authorFilter, set: setAuthorFilter, opts: authors, all: t_search('allAuthors'), label: '' },
@@ -307,7 +339,6 @@ const SearchPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* عرض النتائج */}
             <div className="flex items-center justify-between mb-12 px-6">
                 <h2 className="text-4xl font-black text-gray-950 dark:text-gray-100 tracking-tighter">{t_search('results')}</h2>
                 <div className="flex items-center gap-4">
