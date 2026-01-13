@@ -44,9 +44,9 @@ const AboutPage: React.FC = () => {
     
     return (
         <div dir={dir} className="max-w-5xl mx-auto pb-20 px-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {/* بطاقة العنوان الرئيسية */}
+            {/* بطاقة العنوان الرئيسية - إضافة إمالة الشعار الكبير */}
             <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl p-8 md:p-12 rounded-[3rem] shadow-2xl border border-white/20 dark:border-gray-700/50 mb-10 flex flex-col items-center text-center">
-                <img src={SCHOOL_LOGO} alt="Logo" className="h-32 w-32 object-contain mb-6 drop-shadow-xl" />
+                <img src={SCHOOL_LOGO} alt="Logo" className="h-32 w-32 object-contain mb-6 drop-shadow-xl rotate-6 transition-transform" />
                 <h1 className="text-3xl md:text-5xl font-black text-gray-900 dark:text-white mb-4">
                     {t('title')}
                 </h1>
@@ -103,11 +103,11 @@ const AboutPage: React.FC = () => {
                         </a>
                     </section>
                     
-                    {/* التعديل المطلوب: تغيير النص إلى E.F.I.P.S */}
+                    {/* التعديل: إمالة شعار E.F.I.P.S الصغير */}
                     <div className="bg-white p-6 rounded-[2.5rem] border border-gray-100 dark:bg-gray-800 dark:border-gray-700 text-center">
                         <p className="text-gray-400 font-bold text-xs uppercase mb-3">Powered by</p>
                         <div className="flex items-center justify-center gap-2">
-                             <img src={SCHOOL_LOGO} alt="E.F.I.P.S" className="h-8 w-8 object-contain" />
+                             <img src={SCHOOL_LOGO} alt="E.F.I.P.S" className="h-8 w-8 object-contain rotate-6 transition-transform" />
                              <span className="font-black text-gray-800 dark:text-white">E.F.I.P.S</span>
                         </div>
                     </div>
