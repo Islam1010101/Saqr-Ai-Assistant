@@ -6,17 +6,21 @@ import ReactMarkdown from 'react-markdown';
 const translations = {
   ar: {
     pageTitle: 'اسأل صقر (البحث الذكي)',
-    saqrWelcome: 'أهلاً بك! أنا صقر، مساعدك الذكي في المكتبة. كيف يمكنني خدمتك اليوم؟ يمكنك أن تطلب مني ترشيح كتاب، أو تسأل عن المكتبة.',
-    inputPlaceholder: 'اكتب رسالتك هنا...',
-    isTyping: 'صقر يفكر الآن...',
-    error: 'عذراً، حدث خطأ ما. يرجى المحاولة مرة أخرى.',
+    saqrWelcome: 'أهلاً بك! أنا صقر، مساعدك الذكي. كيف يمكنني مساعدتك في رحلتك المعرفية اليوم؟',
+    inputPlaceholder: 'اسألني عن أي كتاب أو موضوع...',
+    isTyping: 'صقر يستحضر الإجابة...',
+    error: 'عذراً، حدث خطأ تقني. يرجى المحاولة مرة أخرى.',
+    librarianStatus: 'أمين مكتبة ذكي (AI)',
+    you: 'أنت'
   },
   en: {
     pageTitle: 'Ask Saqr (Smart Search)',
-    saqrWelcome: "Hello! I'm Saqr, your smart library assistant. How can I help you today? You can ask me for book recommendations or ask about the library.",
-    inputPlaceholder: 'Type your message here...',
+    saqrWelcome: "Hello! I'm Saqr, your AI assistant. How can I help you explore the library today?",
+    inputPlaceholder: 'Ask me about any book or topic...',
     isTyping: 'Saqr is thinking...',
-    error: 'Sorry, something went wrong. Please try again.',
+    error: 'Sorry, a technical error occurred. Please try again.',
+    librarianStatus: 'AI Librarian',
+    you: 'YOU'
   },
 };
 
@@ -24,7 +28,6 @@ const SmartSearchPage: React.FC = () => {
   const { locale, dir } = useLanguage();
   const t = (key: keyof typeof translations.ar) => translations[locale][key];
 
-  // الشعارات والهوية البصرية
   const SCHOOL_LOGO = "/school-logo.png"; 
   const SAQR_AVATAR = "/saqr-avatar.png"; 
 
@@ -70,107 +73,111 @@ const SmartSearchPage: React.FC = () => {
     } catch (error) {
       setMessages((prev) => [...prev, { role: 'assistant', content: t('error') }]);
     } finally {
-      setIsLoading(true); 
-      setTimeout(() => setIsLoading(false), 500);
+      setIsLoading(false);
     }
   };
 
   return (
-    /* الحاوية الرئيسية بنظام الزجاج المطور */
-    <div dir={dir} className="flex flex-col h-[calc(100vh-12rem)] max-w-5xl mx-auto glass-panel rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/20 dark:border-gray-700/50 transition-all duration-500">
+    <div dir={dir} className="max-w-5xl mx-auto px-4 animate-in fade-in duration-1000">
       
-      {/* رأس الصفحة - إضافة الحركة الذكية للشعار */}
-      <div className="p-6 border-b border-gray-100/20 dark:border-gray-800 bg-white/20 dark:bg-gray-800/30 backdrop-blur-md flex items-center justify-between">
-        <div className="flex items-center gap-3">
-            <img 
-                src={SCHOOL_LOGO} 
-                alt="School Logo" 
-                className="w-10 h-10 object-contain rotate-6 logo-smart-hover transition-transform cursor-pointer" 
-            />
+      {/* 1. حاوية المحادثة الكبرى */}
+      <div className="flex flex-col h-[75vh] glass-panel rounded-[3.5rem] shadow-[0_30px_100px_rgba(0,0,0,0.2)] overflow-hidden border-white/30 dark:border-white/10 relative">
+        
+        {/* هيدر الدردشة المطور */}
+        <div className="p-8 border-b border-black/5 dark:border-white/10 bg-white/40 dark:bg-gray-950/40 backdrop-blur-2xl flex items-center justify-between z-10">
+          <div className="flex items-center gap-5">
+            <div className="relative">
+                <img 
+                    src={SCHOOL_LOGO} 
+                    alt="Logo" 
+                    className="w-14 h-14 object-contain rotate-12 logo-smart-hover" 
+                />
+                <span className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white rounded-full animate-pulse"></span>
+            </div>
             <div>
-                <h1 className="text-xl font-black text-gray-900 dark:text-white leading-none tracking-tight">
+                <h1 className="text-2xl font-black text-gray-950 dark:text-white tracking-tighter leading-none">
                     {t('pageTitle')}
                 </h1>
-                <p className="text-xs text-green-700 dark:text-green-400 font-bold mt-1">AI Librarian</p>
+                <p className="text-sm text-green-700 dark:text-green-400 font-black mt-2 uppercase tracking-widest">{t('librarianStatus')}</p>
             </div>
+          </div>
         </div>
-      </div>
 
-      {/* منطقة الرسائل - زجاجية وناعمة */}
-      <div className="flex-1 p-4 sm:p-8 overflow-y-auto space-y-6 scrollbar-hide bg-white/5 dark:bg-transparent">
-        {messages.map((msg, index) => (
-          <div
-            key={index}
-            className={`flex items-start gap-4 ${
-              msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'
-            } animate-in fade-in slide-in-from-bottom-2 duration-500`}
-          >
-            {/* أفاتار المساعد أو المستخدم */}
-            <div className={`w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center shadow-lg border-2 overflow-hidden transition-transform hover:scale-110 ${
-                msg.role === 'assistant' ? 'bg-white border-green-100/50' : 'bg-green-700 border-green-800 text-white font-bold text-[10px]'
-            }`}>
-              {msg.role === 'assistant' ? (
-                <img src={SAQR_AVATAR} alt="Saqr" className="w-full h-full object-cover scale-110" />
-              ) : (
-                'YOU'
-              )}
-            </div>
-
-            {/* فقاعات المحادثة الزجاجية */}
+        {/* 2. منطقة الرسائل الفاخرة */}
+        <div className="flex-1 p-6 md:p-10 overflow-y-auto space-y-8 scrollbar-hide bg-white/5">
+          {messages.map((msg, index) => (
             <div
-              className={`max-w-[80%] p-4 rounded-3xl shadow-md backdrop-blur-md border ${
-                msg.role === 'user'
-                  ? 'bg-green-700/90 text-white rounded-tr-none border-green-600'
-                  : 'glass-panel text-gray-800 dark:text-gray-100 border-white/20 dark:border-gray-700 rounded-tl-none'
-              }`}
+              key={index}
+              className={`flex items-start gap-5 ${
+                msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'
+              } animate-in fade-in slide-in-from-bottom-4 duration-700`}
             >
-              <div className="prose prose-sm dark:prose-invert break-words font-medium leading-relaxed">
-                <ReactMarkdown>{msg.content}</ReactMarkdown>
+              {/* أفاتار الهوية */}
+              <div className={`w-14 h-14 rounded-2xl flex-shrink-0 flex items-center justify-center shadow-2xl border-2 overflow-hidden transition-transform hover:scale-110 ${
+                  msg.role === 'assistant' ? 'bg-white border-green-700/20' : 'bg-green-700 border-green-800 text-white font-black text-xs'
+              }`}>
+                {msg.role === 'assistant' ? (
+                  <img src={SAQR_AVATAR} alt="Saqr" className="w-full h-full object-cover scale-110" />
+                ) : (
+                  t('you')
+                )}
+              </div>
+
+              {/* فقاعات الدردشة المطورة */}
+              <div
+                className={`max-w-[85%] p-6 rounded-[2.5rem] shadow-xl backdrop-blur-xl border-2 ${
+                  msg.role === 'user'
+                    ? 'bg-green-700 text-white rounded-tr-none border-green-600'
+                    : 'bg-white/80 dark:bg-gray-900/80 text-gray-950 dark:text-gray-100 rounded-tl-none border-white/40 dark:border-white/10'
+                }`}
+              >
+                <div className="prose prose-lg dark:prose-invert break-words font-black leading-relaxed">
+                  <ReactMarkdown>{msg.content}</ReactMarkdown>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
 
-        {/* مؤشر التحميل الزجاجي */}
-        {isLoading && (
-          <div className="flex items-center gap-4 animate-pulse">
-            <div className="w-12 h-12 rounded-full bg-white/80 border border-green-100 overflow-hidden flex items-center justify-center shadow-sm">
-                <img src={SAQR_AVATAR} alt="Thinking" className="w-full h-full object-cover opacity-50 scale-110" />
+          {/* مؤشر "صقر يفكر" */}
+          {isLoading && (
+            <div className="flex items-center gap-5 animate-in fade-in duration-300">
+              <div className="w-14 h-14 rounded-2xl bg-white/90 border-2 border-green-700/20 overflow-hidden flex items-center justify-center shadow-xl">
+                  <img src={SAQR_AVATAR} alt="Thinking" className="w-full h-full object-cover opacity-40 scale-110 animate-pulse" />
+              </div>
+              <div className="p-6 rounded-[2.5rem] bg-white/60 dark:bg-gray-900/60 border-2 border-white/40 dark:border-white/10">
+                  <div className="flex gap-2">
+                      <div className="w-3 h-3 bg-green-700 rounded-full animate-bounce"></div>
+                      <div className="w-3 h-3 bg-green-700 rounded-full animate-bounce [animation-delay:-0.2s]"></div>
+                      <div className="w-3 h-3 bg-green-700 rounded-full animate-bounce [animation-delay:-0.4s]"></div>
+                  </div>
+              </div>
             </div>
-            <div className="p-4 rounded-3xl glass-panel border border-white/20 dark:border-gray-700">
-                <div className="flex gap-1.5">
-                    <div className="w-2.5 h-2.5 bg-green-700 rounded-full animate-bounce"></div>
-                    <div className="w-2.5 h-2.5 bg-green-700 rounded-full animate-bounce [animation-delay:-0.2s]"></div>
-                    <div className="w-2.5 h-2.5 bg-green-700 rounded-full animate-bounce [animation-delay:-0.4s]"></div>
-                </div>
-            </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
 
-      {/* منطقة الإدخال الزجاجية الملونة */}
-      <div className="p-6 bg-white/20 dark:bg-gray-800/20 border-t border-white/10 dark:border-gray-700/50 backdrop-blur-xl">
-        <div className="relative group">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-            placeholder={t('inputPlaceholder')}
-            className="w-full bg-white/40 dark:bg-gray-900/40 border-2 border-white/20 dark:border-gray-700 focus:border-green-600 dark:focus:border-green-500 rounded-2xl py-4 ps-6 pe-16 text-gray-800 dark:text-white font-bold text-lg outline-none transition-all shadow-inner placeholder-gray-500 dark:placeholder-gray-400"
-            disabled={isLoading}
-          />
-          <button
-            onClick={handleSendMessage}
-            disabled={isLoading || !input.trim()}
-            /* استخدام اللون الأخضر للهوية مع تأثير زجاجي تفاعلي */
-            className="absolute inset-y-2 end-2 w-12 flex items-center justify-center bg-green-700 text-white rounded-xl shadow-lg shadow-green-700/20 hover:bg-green-800 active:scale-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 rotate-[-45deg]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-            </svg>
-          </button>
+        {/* 3. منطقة الإدخال الاحترافية */}
+        <div className="p-8 bg-white/60 dark:bg-gray-950/60 border-t border-black/5 dark:border-white/10 backdrop-blur-3xl">
+          <div className="relative group max-w-4xl mx-auto">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+              placeholder={t('inputPlaceholder')}
+              className="w-full bg-white/80 dark:bg-gray-900/80 border-2 border-transparent focus:border-green-700 rounded-[2rem] py-6 ps-8 pe-20 text-gray-950 dark:text-white font-black text-xl outline-none transition-all shadow-2xl placeholder-gray-400"
+              disabled={isLoading}
+            />
+            <button
+              onClick={handleSendMessage}
+              disabled={isLoading || !input.trim()}
+              className="absolute inset-y-3 end-3 w-16 flex items-center justify-center bg-green-700 text-white rounded-2xl shadow-[0_10px_30px_rgba(0,115,47,0.4)] hover:bg-green-800 active:scale-90 transition-all disabled:opacity-30 disabled:grayscale"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 rotate-[-45deg] rtl:rotate-[135deg]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
