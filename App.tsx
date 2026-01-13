@@ -17,7 +17,6 @@ const MouseFollower: React.FC = () => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // التأكد إذا كان المستخدم يستعمل موبايل (لمس) لإخفاء الدائرة
     const checkMobile = () => setIsMobile(window.matchMedia("(pointer: coarse)").matches);
     checkMobile();
 
@@ -86,7 +85,7 @@ export const useLanguage = () => {
 };
 
 const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [locale, setLocale] = useState<Locale>('ar'); // العربية افتراضياً
+  const [locale, setLocale] = useState<Locale>('ar'); 
   
   useEffect(() => {
     document.documentElement.lang = locale;
@@ -100,7 +99,7 @@ const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
       locale, 
       setLocale, 
       t, 
-      dir: locale === 'ar' ? 'rtl' : 'ltr' // تصحيح منطق الاتجاه
+      dir: locale === 'ar' ? 'rtl' : 'ltr' 
     }}>
       {children}
     </LanguageContext.Provider>
@@ -169,10 +168,11 @@ const Header: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
           <div className="flex items-center">
+            {/* تم تغيير مسار الشعار هنا إلى الشعار المفرغ */}
             <img
-              src="https://media.licdn.com/dms/image/v2/D4D0BAQH2J4sVBWyU9Q/company-logo_200_200/B4DZferhU8GgAI-/0/1751787640644/emirates_falcon_international_private_school_efips_logo?e=2147483647&v=beta&t=z8d76C6g0mI5SLMwFQS7TJ65jX8mN02QtIrFdJbxk8I"
+              src="/school-logo.png"
               alt="School Logo"
-              className="h-14 w-14 object-contain"
+              className="h-16 w-16 object-contain"
             />
             <div className="ms-3 hidden sm:block">
               <h1 className="text-md font-bold text-gray-800 dark:text-gray-100 leading-tight">{t('schoolName')}</h1>
@@ -223,7 +223,6 @@ const App: React.FC = () => {
       <LanguageProvider>
         <HashRouter>
           <div className="flex flex-col min-h-screen relative">
-            {/* إضافة الدائرة الخضراء */}
             <MouseFollower />
             
             <Header />
