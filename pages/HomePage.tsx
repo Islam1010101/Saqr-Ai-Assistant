@@ -4,18 +4,18 @@ import { useLanguage } from '../App';
 
 const translations = {
     ar: {
-        welcome: "أهلاً بكم في مكتبة مدرسة صقر الإمارات الدولية الخاصة",
+        welcome: "أهلاً بكم في مكتبة مدرسة صقر الإمارات",
         subWelcome: "ابحث في فهرسنا أو تحدث مع مساعدنا الذكي للعثور على ما تحتاجه بكل سهولة.",
         manualSearch: "البحث اليدوي",
         smartSearch: "اسأل صقر (AI)",
-        bubble: "أهلاً بك! أنا صقر، كيف أساعدك اليوم؟",
+        bubble: "أهلاً بك! كيف أساعدك اليوم؟",
     },
     en: {
-        welcome: "Welcome to the Emirates Falcon International Private School Library",
+        welcome: "Welcome to Saqr Al Emarat School Library",
         subWelcome: "Explore our catalog or interact with our smart assistant to find your next great read.",
         manualSearch: "Manual Search",
         smartSearch: "Ask Saqr (AI)",
-        bubble: "Hi there! I'm Saqr, how can I help you today?",
+        bubble: "Hi! How can I help you today?",
     }
 }
 
@@ -30,76 +30,82 @@ const BackgroundPattern = () => (
 
 const HomePage: React.FC = () => {
     const { locale } = useLanguage();
+    const isAr = locale === 'ar';
     const t = (key: keyof typeof translations.ar) => translations[locale][key];
     
     const SCHOOL_LOGO = "/school-logo.png"; 
     const SAQR_MASCOT = "/saqr-full.png"; 
     
     return (
-        /* الحاوية الزجاجية الكبرى */
-        <div className="relative flex flex-col items-center justify-center text-center min-h-[80vh] rounded-[3rem] overflow-hidden glass-panel shadow-2xl p-6 md:p-12 animate-in fade-in zoom-in duration-700">
-            <BackgroundPattern />
-            
-            <div className="relative z-10 flex flex-col items-center max-w-5xl w-full">
+        <div className="relative min-h-[85vh] flex items-center justify-center p-4">
+            {/* الحاوية الزجاجية الكبرى بنظام الشبكة (Grid) */}
+            <div className="relative glass-panel w-full max-w-6xl rounded-[3.5rem] overflow-hidden shadow-2xl p-8 md:p-16 animate-in fade-in zoom-in duration-700">
+                <BackgroundPattern />
                 
-                {/* الشعار الرسمي: الكلاس logo-smart-hover سيتكفل بالاهتزاز والتحول للأبيض في الدارك مود */}
-                <div className="relative mb-12 group cursor-pointer transition-all duration-500">
-                    <div className="absolute -inset-6 bg-green-500/10 dark:bg-white/5 rounded-full blur-3xl group-hover:bg-green-500/20 dark:group-hover:bg-white/10 transition-all duration-700"></div>
-                    <img 
-                        src={SCHOOL_LOGO} 
-                        alt="School Logo" 
-                        className="relative h-40 w-40 md:h-56 md:w-56 object-contain logo-smart-hover"
-                    />
-                </div>
-
-                <div className="flex flex-col lg:flex-row items-center justify-between gap-12 w-full">
+                <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                     
-                    {/* شخصية صقر والفقاعة الترحيبية الزجاجية */}
-                    <div className="relative flex-shrink-0 animate-in slide-in-from-start duration-1000 order-2 lg:order-1">
-                        <img 
-                            src={SAQR_MASCOT} 
-                            alt="Saqr Mascot" 
-                            className="h-64 md:h-96 object-contain drop-shadow-2xl transition-transform hover:scale-105 duration-500" 
-                        />
-                        {/* فقاعة ترحيب زجاجية متناغمة */}
-                        <div className="absolute -top-6 -right-6 md:-right-12 glass-panel p-4 rounded-3xl shadow-2xl border-white/20 text-sm font-black text-green-800 dark:text-white max-w-[180px] animate-bounce">
-                            {t('bubble')}
-                            <div className="absolute -bottom-2 left-6 w-4 h-4 glass-panel border-r-2 border-b-2 border-white/10 rotate-45"></div>
+                    {/* الجانب الأول: المحتوى النصي (الرسالة والأزرار) */}
+                    <div className={`flex flex-col ${isAr ? 'text-start' : 'text-start'} space-y-10 order-2 lg:order-1`}>
+                        <div className="space-y-6">
+                            <h1 className="text-4xl md:text-6xl font-black text-gray-900 dark:text-white leading-tight tracking-tight">
+                                {t('welcome')}
+                            </h1>
+                            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed max-w-lg">
+                                {t('subWelcome')}
+                            </p>
                         </div>
-                    </div>
 
-                    {/* المحتوى النصي والأزرار الزجاجية */}
-                    <div className="flex-grow text-center lg:text-start order-1 lg:order-2">
-                        <h1 className="text-3xl md:text-6xl font-black text-gray-900 dark:text-white mb-6 leading-tight tracking-tight drop-shadow-sm">
-                            {t('welcome')}
-                        </h1>
-                        
-                        <p className="text-lg md:text-2xl text-gray-600 dark:text-gray-300 font-medium mb-10 max-w-2xl leading-relaxed">
-                            {t('subWelcome')}
-                        </p>
-
-                        <div className="flex flex-col sm:flex-row gap-6">
-                            <Link
-                                to="/search"
-                                className="glass-button-red font-black py-5 px-10 rounded-2xl active:scale-95 overflow-hidden flex items-center justify-center gap-2 shadow-lg"
+                        {/* مجموعة الأزرار الزجاجية الملونة */}
+                        <div className="flex flex-wrap gap-5">
+                            <Link 
+                                to="/search" 
+                                className="glass-button-red font-black py-4 px-10 rounded-2xl active:scale-95 flex items-center gap-3 shadow-lg text-lg transition-all"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                                 {t('manualSearch')}
                             </Link>
 
-                            <Link
-                                to="/smart-search"
-                                className="glass-button-green font-black py-5 px-10 rounded-2xl active:scale-95 overflow-hidden flex items-center justify-center gap-2 shadow-lg"
+                            <Link 
+                                to="/smart-search" 
+                                className="glass-button-green font-black py-4 px-10 rounded-2xl active:scale-95 flex items-center gap-3 shadow-lg text-lg transition-all"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
                                 {t('smartSearch')}
                             </Link>
                         </div>
                     </div>
+
+                    {/* الجانب الثاني: الهوية البصرية (الشعار التفاعلي والمساعد) */}
+                    <div className="relative flex flex-col items-center justify-center order-1 lg:order-2">
+                        
+                        {/* شعار المدرسة الكبير في الخلفية بشكل جمالي - مائل 15 درجة */}
+                        <div className="absolute opacity-15 dark:opacity-10 scale-150 pointer-events-none transition-all duration-700">
+                             <img 
+                                src={SCHOOL_LOGO} 
+                                alt="Back Logo" 
+                                className="h-64 w-64 md:h-80 md:w-80 object-contain rotate-12" 
+                             />
+                        </div>
+
+                        {/* صقر المساعد كبطل للصورة */}
+                        <div className="relative group transition-all duration-500 hover:scale-105">
+                            <img 
+                                src={SAQR_MASCOT} 
+                                alt="Saqr Mascot" 
+                                className="h-72 md:h-[450px] object-contain drop-shadow-[0_20px_50px_rgba(0,115,47,0.3)]" 
+                            />
+                            
+                            {/* فقاعة الترحيب الزجاجية المنظمة */}
+                            <div className="absolute -top-4 -right-8 glass-panel p-5 rounded-3xl shadow-2xl border-white/20 text-sm font-black text-green-800 dark:text-white max-w-[160px] animate-bounce">
+                                {t('bubble')}
+                                <div className="absolute -bottom-2 left-6 w-4 h-4 glass-panel border-r-2 border-b-2 border-white/10 rotate-45"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            {/* خطوط الهوية السفلية */}
+            {/* خطوط الهوية السفلية بألوان المدرسة الرسمية */}
             <div className="absolute bottom-10 left-10 right-10 flex justify-between opacity-30 pointer-events-none">
                 <div className="h-px w-1/4 bg-gradient-to-r from-transparent to-green-700"></div>
                 <div className="h-px w-1/4 bg-gradient-to-l from-transparent to-red-600"></div>
