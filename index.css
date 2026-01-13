@@ -11,45 +11,72 @@ body {
   cursor: default;
 }
 
-/* 3. تنسيق شعار المدرسة (عالمي لجميع الصفحات) */
-/* إمالة الشعار يميناً بزاوية 6 درجات في كل الموقع */
+/* 3. التأثير الزجاجي المطور (Glassmorphism) */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.35); /* شفافية بيضاء ناعمة */
+  backdrop-filter: blur(16px) saturate(180%); /* تمويه قوي للخلفية */
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.25); /* حدود زجاجية رفيعة */
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08); /* ظل ناعم يعطي عمقاً */
+}
+
+/* التأثير الزجاجي في الوضع الليلي */
+.dark .glass-effect {
+  background: rgba(17, 24, 39, 0.5); /* شفافية داكنة */
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* 4. تنسيق شعار المدرسة والحركة الذكية */
+/* إمالة الشعار يميناً بزاوية 6 درجات كقاعدة أساسية */
 img[src="/school-logo.png"] {
-  transform: rotate(6deg) !important;
-  transition: all 0.3s ease;
+  transform: rotate(6deg);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* حركة مرنة (Springy) */
   display: inline-block;
 }
 
-/* تحسين ظهور الشعار في الوضع الليلي (Dark Mode) */
-/* يضيف خلفية بيضاء دائرية وتوهج خفيف ليبرز الشعار فوق الخلفية الداكنة */
+/* تحسين ظهور الشعار في الوضع الليلي */
 .dark img[src="/school-logo.png"] {
   background-color: rgba(255, 255, 255, 0.95);
   padding: 4px;
   border-radius: 50%;
   box-shadow: 0 0 15px rgba(255, 255, 255, 0.25);
-  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.1));
 }
 
-/* 4. شكل المؤشر عند الوقوف على الكتب، الأزرار، أو القوائم */
-a, button, .group, select, input[type="submit"], input[type="text"] {
+/* أنيميشن الاهتزاز الذكي عند الـ Hover */
+@keyframes smart-logo-hover {
+  0% { transform: rotate(6deg) scale(1); }
+  25% { transform: rotate(10deg) scale(1.1); }
+  50% { transform: rotate(4deg) scale(1.1); }
+  75% { transform: rotate(8deg) scale(1.1); }
+  100% { transform: rotate(6deg) scale(1.1); }
+}
+
+.logo-smart-hover:hover {
+  animation: smart-logo-hover 0.6s ease-in-out forwards;
+  filter: drop-shadow(0 0 15px rgba(0, 115, 47, 0.3)); /* توهج أخضر خفيف */
+}
+
+/* 5. شكل المؤشر واللمس */
+a, button, .group, select, input {
   cursor: pointer !important;
 }
 
-/* 5. إعدادات خاصة بالموبايل (Touch Feedback) */
 * {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* تأثير "النبض" عند الضغط على أي بطاقة كتاب أو زر */
+/* تأثير النبض عند الضغط */
 .active-press:active, button:active, .group:active {
   transform: scale(0.96);
   transition: transform 0.1s ease-in-out;
 }
 
-/* 6. تصميم مؤشر (Cursor) مخصص على شكل دائرة خضراء تتبع الماوس */
+/* 6. مؤشر الماوس المخصص (الدائرة الخضراء) */
 .custom-cursor {
   width: 20px;
   height: 20px;
-  background-color: #00732F; /* لون أخضر صقر الإمارات الرسمي */
+  background-color: #00732F;
   border-radius: 50%;
   position: fixed;
   pointer-events: none;
@@ -59,12 +86,12 @@ a, button, .group, select, input[type="submit"], input[type="text"] {
   mix-blend-mode: multiply;
 }
 
-/* تحسين حركة الشعار في الصفحة الرئيسية ليتناسب مع الإمالة */
+/* 7. حركة الـ Bounce المنسقة مع الميل */
 @keyframes bounce-rotate {
   0%, 100% { transform: translateY(-5%) rotate(6deg); }
   50% { transform: translateY(0) rotate(6deg); }
 }
 
 .animate-bounce-slow {
-  animation: bounce-rotate 3s infinite;
+  animation: bounce-rotate 3s infinite ease-in-out;
 }
