@@ -54,7 +54,6 @@ const AboutPage: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* معلومات المدرسة */}
                 <div className="lg:col-span-2 space-y-8">
                     <section className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-md p-8 rounded-[2.5rem] border border-white/20 dark:border-gray-700/30">
                         <h2 className="text-2xl font-black mb-6 text-gray-800 dark:text-white flex items-center gap-3">
@@ -83,7 +82,6 @@ const AboutPage: React.FC = () => {
                     </section>
                 </div>
 
-                {/* الجانب الأيمن: التوقيت والتواصل */}
                 <div className="space-y-8">
                     <section className="bg-green-700 text-white p-8 rounded-[2.5rem] shadow-xl shadow-green-700/20">
                         <h2 className="text-xl font-black mb-4 flex items-center gap-2">
@@ -105,12 +103,12 @@ const AboutPage: React.FC = () => {
                         </a>
                     </section>
                     
-                    {/* ويدجت صغيرة لترويج المساعد */}
+                    {/* التعديل المطلوب: تغيير النص إلى E.F.I.P.S */}
                     <div className="bg-white p-6 rounded-[2.5rem] border border-gray-100 dark:bg-gray-800 dark:border-gray-700 text-center">
                         <p className="text-gray-400 font-bold text-xs uppercase mb-3">Powered by</p>
                         <div className="flex items-center justify-center gap-2">
-                             <img src={SCHOOL_LOGO} alt="Saqr AI" className="h-8 w-8 object-contain" />
-                             <span className="font-black text-gray-800 dark:text-white">Saqr AI Assistant</span>
+                             <img src={SCHOOL_LOGO} alt="E.F.I.P.S" className="h-8 w-8 object-contain" />
+                             <span className="font-black text-gray-800 dark:text-white">E.F.I.P.S</span>
                         </div>
                     </div>
                 </div>
