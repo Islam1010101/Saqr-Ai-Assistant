@@ -24,7 +24,9 @@ const SmartSearchPage: React.FC = () => {
   const { locale, dir } = useLanguage();
   const t = (key: keyof typeof translations.ar) => translations[locale][key];
 
-  const SCHOOL_LOGO = "/school-logo.png"; 
+  // الشعارات والهوية البصرية
+  const SCHOOL_LOGO = "/school-logo.png"; // الشعار الرسمي (للهيدر)
+  const SAQR_AVATAR = "/saqr-avatar.png"; // وجه الشخصية (للمحادثة)
 
   const [messages, setMessages] = useState<ChatMessage[]>([
     { role: 'assistant', content: t('saqrWelcome') },
@@ -76,10 +78,10 @@ const SmartSearchPage: React.FC = () => {
   return (
     <div dir={dir} className="flex flex-col h-[calc(100vh-12rem)] max-w-5xl mx-auto bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/20 dark:border-gray-800/50">
       
-      {/* رأس الصفحة - إضافة الإمالة للشعار */}
+      {/* رأس الصفحة - الحفاظ على شعار المدرسة الرسمي المائل */}
       <div className="p-6 border-b border-gray-100 dark:border-gray-800 bg-white/50 dark:bg-gray-800/50 flex items-center justify-between">
         <div className="flex items-center gap-3">
-            <img src={SCHOOL_LOGO} alt="Logo" className="w-10 h-10 object-contain rotate-6 transition-transform" />
+            <img src={SCHOOL_LOGO} alt="School Logo" className="w-10 h-10 object-contain rotate-6 transition-transform" />
             <div>
                 <h1 className="text-xl font-black text-gray-900 dark:text-white leading-none">
                     {t('pageTitle')}
@@ -98,17 +100,18 @@ const SmartSearchPage: React.FC = () => {
               msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'
             } animate-in fade-in slide-in-from-bottom-2`}
           >
-            {/* أيقونة المساعد - إضافة الإمالة للشعار */}
-            <div className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center shadow-md border ${
-                msg.role === 'assistant' ? 'bg-white border-green-50' : 'bg-green-700 border-green-800 text-white font-bold text-xs'
+            {/* أيقونة المتحدث: وجه صقر للمساعد، وكلمة YOU للمستخدم */}
+            <div className={`w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center shadow-md border overflow-hidden ${
+                msg.role === 'assistant' ? 'bg-white border-green-100' : 'bg-green-700 border-green-800 text-white font-bold text-[10px]'
             }`}>
               {msg.role === 'assistant' ? (
-                <img src={SCHOOL_LOGO} alt="Saqr" className="w-7 h-7 object-contain rotate-6" />
+                <img src={SAQR_AVATAR} alt="Saqr" className="w-full h-full object-cover scale-110" />
               ) : (
                 'YOU'
               )}
             </div>
 
+            {/* فقاعة النص */}
             <div
               className={`max-w-[80%] p-4 rounded-3xl shadow-sm ${
                 msg.role === 'user'
@@ -123,11 +126,11 @@ const SmartSearchPage: React.FC = () => {
           </div>
         ))}
 
-        {/* مؤشر التحميل - إضافة الإمالة للشعار */}
+        {/* مؤشر التحميل - صقر يفكر */}
         {isLoading && (
           <div className="flex items-center gap-4 animate-pulse">
-            <div className="w-10 h-10 rounded-full bg-white border border-green-100 flex items-center justify-center">
-                <img src={SCHOOL_LOGO} alt="Thinking" className="w-6 h-6 object-contain opacity-40 rotate-6" />
+            <div className="w-12 h-12 rounded-full bg-white border border-green-100 overflow-hidden flex items-center justify-center shadow-sm">
+                <img src={SAQR_AVATAR} alt="Thinking" className="w-full h-full object-cover opacity-60 scale-110" />
             </div>
             <div className="p-4 rounded-3xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
                 <div className="flex gap-1.5">
