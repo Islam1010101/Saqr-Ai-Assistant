@@ -1,1 +1,45 @@
+/* 1. أساسيات Tailwind CSS لضمان عمل الألوان والتنسيقات */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+/* 2. إعدادات الخط العام (Tajawal) ليكون متناسقاً في كل الموقع */
+body {
+  font-family: 'Tajawal', sans-serif;
+  margin: 0;
+  padding: 0;
+  /* تغيير شكل المؤشر الأساسي ليكون أنيقاً */
+  cursor: default;
+}
+
+/* 3. شكل المؤشر عند الوقوف على الكتب، الأزرار، أو القوائم */
+a, button, .group, select, input[type="submit"] {
+  cursor: pointer !important;
+}
+
+/* 4. إعدادات خاصة بالموبايل (Touch Feedback) */
+* {
+  /* إخفاء المربع الأزرق المزعج الذي يظهر عند لمس الشاشة في الأندرويد */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* تأثير "النبض" عند الضغط على أي بطاقة كتاب */
+.group:active {
+  transform: scale(0.96); /* تصغير خفيف يعطي إيحاء بالضغط الحقيقي */
+  transition: transform 0.1s ease-in-out;
+}
+
+/* 5. تصميم مؤشر (Cursor) مخصص على شكل دائرة خضراء تتبع الماوس */
+/* هذا الجزء سيعمل مع كود React الذي سأعطيك إياه في الخطوة التالية */
+.custom-cursor {
+  width: 20px;
+  height: 20px;
+  background-color: #00732F; /* لون أخضر صقر الإمارات */
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none; /* لكي لا يمنع الضغط على الأزرار */
+  z-index: 9999;
+  transition: transform 0.1s ease-out;
+  opacity: 0.5;
+  mix-blend-mode: multiply; /* يجعل الدائرة تندمج مع الألوان خلفها بشكل جمالي */
+}
