@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-// التحديث النهائي للمسار لضمان عمل السيرفر والـ Build
+// التأكد من المسار الصحيح حسب التعديل الأخير
 import { bookData, type Book } from '../api/bookData'; 
 import { useLanguage } from '../App';
 
@@ -28,13 +28,14 @@ const logActivity = (type: 'search' | 'view', value: string) => {
     }
 };
 
-// --- نصوص الترجمة ---
+// --- نصوص الترجمة المعدلة لتشمل الرف ---
 const translations = {
   ar: {
     pageTitle: "البحث في المكتبة",
-    searchPlaceholder: "ابحث عن كتاب بالعنوان، الموضوع، أو المؤلف...",
+    searchPlaceholder: "ابحث عن كتاب بالعنوان، الموضوع، أو الرف...",
     allSubjects: "كل المواضيع",
     allAuthors: "كل المؤلفين",
+    allShelves: "كل الرفوف",
     results: "نتائج البحث",
     shelf: "الرف",
     row: "الصف",
@@ -52,9 +53,10 @@ const translations = {
   },
   en: {
     pageTitle: "Library Search",
-    searchPlaceholder: "Search for a book by title, topic, or author...",
+    searchPlaceholder: "Search by title, topic, or shelf...",
     allSubjects: "All Subjects",
     allAuthors: "All Authors",
+    allShelves: "All Shelves",
     results: "Search Results",
     shelf: "Shelf",
     row: "Row",
@@ -92,14 +94,11 @@ const BookModal: React.FC<{
         return () => window.removeEventListener('keydown', handleEsc);
     }, [onClose]);
 
-    // توليد ملخص عبر الذكاء الاصطناعي
     useEffect(() => {
         if (!book) return;
-
         const generateSummary = async () => {
             setIsLoading(true);
             setSummary(''); 
-
             try {
                 const prompt = locale === 'ar'
                         ? `أرجو تقديم ملخص قصير جداً (سطرين) للكتاب: "${book.title}" للمؤلف: ${book.author}`
@@ -113,17 +112,14 @@ const BookModal: React.FC<{
                         locale: locale,
                     }),
                 });
-
                 const data = await response.json();
                 setSummary(data.reply || (locale === 'ar' ? 'لم يتم العثور على ملخص.' : 'No summary found.'));
-
             } catch (error) {
                 setSummary(book.summary || (locale === 'ar' ? 'حدث خطأ في جلب الملخص.' : 'Error fetching summary.'));
             } finally {
                 setIsLoading(false);
             }
         };
-
         generateSummary();
     }, [book, locale]); 
 
@@ -188,7 +184,7 @@ const BookModal: React.FC<{
     );
 };
 
-// --- بطاقة الكتاب (Card) مع تأثيرات اللمس الاحترافية ---
+// --- بطاقة الكتاب (Card) ---
 const BookCard: React.FC<{ book: Book; onClick: () => void }> = ({ book, onClick }) => {
     const { locale } = useLanguage();
     const t_search = (key: keyof typeof translations.ar) => translations[locale][key];
@@ -211,22 +207,25 @@ const BookCard: React.FC<{ book: Book; onClick: () => void }> = ({ book, onClick
     );
 };
 
-// --- مكون صفحة البحث الرئيسي ---
+// --- المكون الرئيسي لصفحة البحث ---
 const SearchPage: React.FC = () => {
     const { locale } = useLanguage();
     const t_search = (key: keyof typeof translations.ar) => translations[locale][key];
+    
     const [searchTerm, setSearchTerm] = useState('');
     const [subjectFilter, setSubjectFilter] = useState('all');
     const [authorFilter, setAuthorFilter] = useState('all');
+    const [shelfFilter, setShelfFilter] = useState('all'); // إضافة حالة الرف
     
     const [filteredBooks, setFilteredBooks] = useState<Book[]>(bookData);
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-    // استخراج الفلاتر الفريدة مع تعريف النوع الصريح
+    // استخراج الفلاتر الفريدة بشكل ديناميكي من البيانات
     const subjects = [...new Set(bookData.map((b: Book) => b.subject))].filter(Boolean).sort();
     const authors = [...new Set(bookData.map((b: Book) => b.author))].filter(a => a !== 'Unknown Author' && a !== 'مؤلف غير معروف').sort();
+    const shelves = [...new Set(bookData.map((b: Book) => b.shelf.toString()))].sort((a, b) => parseInt(a) - parseInt(b));
 
     const handleSearch = useCallback(() => {
         let books = [...bookData];
@@ -237,19 +236,17 @@ const SearchPage: React.FC = () => {
             books = books.filter(b =>
                 b.title.toLowerCase().includes(term) ||
                 b.author.toLowerCase().includes(term) ||
-                b.subject.toLowerCase().includes(term)
+                b.subject.toLowerCase().includes(term) ||
+                b.shelf.toString().includes(term)
             );
         }
 
-        if (subjectFilter !== 'all') {
-            books = books.filter(b => b.subject === subjectFilter);
-        }
-        if (authorFilter !== 'all') {
-            books = books.filter(b => b.author === authorFilter);
-        }
+        if (subjectFilter !== 'all') books = books.filter(b => b.subject === subjectFilter);
+        if (authorFilter !== 'all') books = books.filter(b => b.author === authorFilter);
+        if (shelfFilter !== 'all') books = books.filter(b => b.shelf.toString() === shelfFilter);
         
         setFilteredBooks(books);
-    }, [debouncedSearchTerm, subjectFilter, authorFilter]);
+    }, [debouncedSearchTerm, subjectFilter, authorFilter, shelfFilter]);
     
     useEffect(() => {
         handleSearch();
@@ -263,6 +260,7 @@ const SearchPage: React.FC = () => {
     const handleFilterByAuthor = (authorName: string) => {
       setAuthorFilter(authorName); 
       setSubjectFilter('all');     
+      setShelfFilter('all');
       setSearchTerm('');          
       setSelectedBook(null);       
       window.scrollTo({ top: 0, behavior: 'smooth' }); 
@@ -275,7 +273,6 @@ const SearchPage: React.FC = () => {
                 <div className="h-1.5 w-20 bg-green-700 mx-auto rounded-full"></div>
             </div>
             
-            {/* قسم البحث والفلاتر المطور */}
             <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl p-5 sm:p-8 rounded-[2rem] shadow-xl mb-10 sticky top-24 z-30 border border-white/20 dark:border-gray-700/50">
                 <div className="relative mb-6">
                     <input
@@ -290,20 +287,29 @@ const SearchPage: React.FC = () => {
                     </div>
                 </div>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* تعديل الفلاتر لتصبح ثلاثية الأعمدة */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="relative">
                         <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="w-full p-4 rounded-xl bg-gray-50/80 dark:bg-gray-900/50 border-none focus:ring-2 focus:ring-green-600 dark:text-white appearance-none font-bold cursor-pointer">
                             <option value="all">{t_search('allSubjects')}</option>
                             {subjects.map((s: string) => <option key={s} value={s}>{s}</option>)}
                         </select>
-                        <div className="absolute inset-y-0 end-4 flex items-center pointer-events-none text-gray-400">▼</div>
+                        <div className="absolute inset-y-0 end-4 flex items-center pointer-events-none text-gray-400 text-xs">▼</div>
                     </div>
                     <div className="relative">
                         <select value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)} className="w-full p-4 rounded-xl bg-gray-50/80 dark:bg-gray-900/50 border-none focus:ring-2 focus:ring-green-600 dark:text-white appearance-none font-bold cursor-pointer">
                             <option value="all">{t_search('allAuthors')}</option>
                             {authors.map((a: string) => <option key={a} value={a}>{a}</option>)}
                         </select>
-                        <div className="absolute inset-y-0 end-4 flex items-center pointer-events-none text-gray-400">▼</div>
+                        <div className="absolute inset-y-0 end-4 flex items-center pointer-events-none text-gray-400 text-xs">▼</div>
+                    </div>
+                    {/* إضافة فلتر الرف هنا */}
+                    <div className="relative">
+                        <select value={shelfFilter} onChange={(e) => setShelfFilter(e.target.value)} className="w-full p-4 rounded-xl bg-gray-50/80 dark:bg-gray-900/50 border-none focus:ring-2 focus:ring-green-600 dark:text-white appearance-none font-bold cursor-pointer">
+                            <option value="all">{t_search('allShelves')}</option>
+                            {shelves.map((s: string) => <option key={s} value={s}>{t_search('shelf')} {s}</option>)}
+                        </select>
+                        <div className="absolute inset-y-0 end-4 flex items-center pointer-events-none text-gray-400 text-xs">▼</div>
                     </div>
                 </div>
             </div>
@@ -313,7 +319,6 @@ const SearchPage: React.FC = () => {
                 <span className="bg-green-700 text-white px-4 py-1.5 rounded-full text-sm font-black shadow-lg shadow-green-700/20">{filteredBooks.length}</span>
             </div>
             
-            {/* شبكة عرض الكتب المطورة */}
             {filteredBooks.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
                     {filteredBooks.map((book: Book) => (
