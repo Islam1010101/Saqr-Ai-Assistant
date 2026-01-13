@@ -9,26 +9,28 @@ body {
   margin: 0;
   padding: 0;
   cursor: default;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.4s ease;
+  scroll-behavior: smooth; /* حركة انسيابية عند التنقل */
 }
 
 /* 3. نظام الحاويات الزجاجية (Glass Panels) */
 .glass-panel {
   background: rgba(255, 255, 255, 0.45);
-  backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(20px) saturate(160%); /* تمويه عميق للاحترافية */
   -webkit-backdrop-filter: blur(20px) saturate(160%);
   border: 1px solid rgba(255, 255, 255, 0.4);
   box-shadow: 0 8px 32px 0 rgba(0, 115, 47, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* تحسين الدارك مود للحاويات */
+/* تحسين الدارك مود للحاويات - زجاج داكن عميق */
 .dark .glass-panel {
-  background: rgba(17, 24, 39, 0.6);
+  background: rgba(17, 24, 39, 0.65);
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
 }
 
-/* 4. الأزرار الزجاجية بهوية المدرسة (Buttons) */
+/* 4. الأزرار الزجاجية بهوية المدرسة الرسمية */
 .glass-button-red {
   background: rgba(239, 68, 68, 0.1);
   backdrop-filter: blur(8px);
@@ -57,28 +59,29 @@ body {
   transform: translateY(-3px);
 }
 
-.dark .glass-button-green { background: rgba(0, 115, 47, 0.15); color: #10b981; }
-.dark .glass-button-red { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+.dark .glass-button-green { background: rgba(0, 115, 47, 0.2); color: #10b981; }
+.dark .glass-button-red { background: rgba(239, 68, 68, 0.2); color: #f87171; }
 
-/* 5. الشعار والهوية البصرية - تعديل الميل إلى 15 درجة */
+/* 5. الشعار والهوية البصرية - ثبات ميل 15 درجة */
 img[src="/school-logo.png"] {
-  transform: rotate(15deg); /* زيادة الميل لليمين */
+  transform: rotate(15deg);
   transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   display: inline-block;
 }
 
-/* الشعار في الدارك مود: أبيض بالكامل وخلفية شفافة */
+/* الشعار في الدارك مود: تحول للأبيض وشفافية كاملة */
 .dark img[src="/school-logo.png"],
 .dark img[alt="E.F.I.P.S"],
-.dark img[alt="School Logo"] {
-  filter: brightness(0) invert(1) !important; /* تحويل اللون لأبيض */
+.dark img[alt="School Logo"],
+.dark img[alt="Back Logo"] {
+  filter: brightness(0) invert(1) !important; /* لون أبيض صافي */
   background-color: transparent !important;
   padding: 0 !important;
   border-radius: 0 !important;
   box-shadow: none !important;
 }
 
-/* أنيميشن الاهتزاز الذكي (Smart Wobble) متوافق مع ميل 15 درجة */
+/* أنيميشن الاهتزاز الذكي (Smart Wobble) */
 @keyframes smart-logo-hover {
   0% { transform: rotate(15deg) scale(1); }
   25% { transform: rotate(22deg) scale(1.15); }
@@ -91,7 +94,6 @@ img[src="/school-logo.png"] {
   filter: drop-shadow(0 0 15px rgba(0, 115, 47, 0.4));
 }
 
-/* تعديل التوهج في الدارك مود ليتناسب مع الشعار الأبيض */
 .dark .logo-smart-hover:hover {
   filter: brightness(0) invert(1) drop-shadow(0 0 12px rgba(255, 255, 255, 0.5)) !important;
 }
@@ -111,11 +113,6 @@ img[src="/school-logo.png"] {
 
 a, button, .group, select, input { cursor: pointer !important; }
 
-.active-press:active, button:active, .group:active {
-  transform: scale(0.95);
-  transition: transform 0.1s ease-in-out;
-}
-
 /* 7. حركة الـ Bounce المنسقة مع ميل 15 درجة */
 @keyframes bounce-rotate {
   0%, 100% { transform: translateY(-5%) rotate(15deg); }
@@ -124,4 +121,9 @@ a, button, .group, select, input { cursor: pointer !important; }
 
 .animate-bounce-slow {
   animation: bounce-rotate 3s infinite ease-in-out;
+}
+
+/* إخفاء شريط التمرير بشكل جمالي */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
