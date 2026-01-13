@@ -21,13 +21,14 @@ body {
   box-shadow: 0 8px 32px 0 rgba(0, 115, 47, 0.05);
 }
 
+/* تحسين الدارك مود للحاويات */
 .dark .glass-panel {
   background: rgba(17, 24, 39, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
 }
 
-/* 4. الأزرار الزجاجية بهوية المدرسة */
+/* 4. الأزرار الزجاجية بهوية المدرسة (Buttons) */
 .glass-button-red {
   background: rgba(239, 68, 68, 0.1);
   backdrop-filter: blur(8px);
@@ -59,39 +60,38 @@ body {
 .dark .glass-button-green { background: rgba(0, 115, 47, 0.15); color: #10b981; }
 .dark .glass-button-red { background: rgba(239, 68, 68, 0.15); color: #f87171; }
 
-/* 5. الشعار والهوية البصرية */
-/* الحالة العادية: الشعار بألوانه الأصلية مع الميل */
+/* 5. الشعار والهوية البصرية - تعديل الميل إلى 15 درجة */
 img[src="/school-logo.png"] {
-  transform: rotate(6deg);
+  transform: rotate(15deg); /* زيادة الميل لليمين */
   transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   display: inline-block;
 }
 
-/* --- التعديل الجديد: الشعار في الدارك مود --- */
-/* تحويل الشعار للون الأبيض بالكامل مع الحفاظ على الشفافية */
+/* الشعار في الدارك مود: أبيض بالكامل وخلفية شفافة */
 .dark img[src="/school-logo.png"],
 .dark img[alt="E.F.I.P.S"],
 .dark img[alt="School Logo"] {
-  filter: brightness(0) invert(1) !important; /* تحويل الألوان لأبيض */
-  background-color: transparent !important; /* إزالة أي خلفية بيضاء */
+  filter: brightness(0) invert(1) !important; /* تحويل اللون لأبيض */
+  background-color: transparent !important;
   padding: 0 !important;
   border-radius: 0 !important;
   box-shadow: none !important;
 }
 
+/* أنيميشن الاهتزاز الذكي (Smart Wobble) متوافق مع ميل 15 درجة */
 @keyframes smart-logo-hover {
-  0% { transform: rotate(6deg) scale(1); }
-  25% { transform: rotate(10deg) scale(1.1); }
-  50% { transform: rotate(2deg) scale(1.1); }
-  100% { transform: rotate(6deg) scale(1.1); }
+  0% { transform: rotate(15deg) scale(1); }
+  25% { transform: rotate(22deg) scale(1.15); }
+  50% { transform: rotate(8deg) scale(1.15); }
+  100% { transform: rotate(15deg) scale(1.1); }
 }
 
 .logo-smart-hover:hover {
   animation: smart-logo-hover 0.6s ease-in-out forwards;
-  /* توهج أبيض خفيف في الدارك مود لتمييز الشعار الأبيض */
-  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+  filter: drop-shadow(0 0 15px rgba(0, 115, 47, 0.4));
 }
 
+/* تعديل التوهج في الدارك مود ليتناسب مع الشعار الأبيض */
 .dark .logo-smart-hover:hover {
   filter: brightness(0) invert(1) drop-shadow(0 0 12px rgba(255, 255, 255, 0.5)) !important;
 }
@@ -116,10 +116,10 @@ a, button, .group, select, input { cursor: pointer !important; }
   transition: transform 0.1s ease-in-out;
 }
 
-/* 7. حركة الـ Bounce المنسقة */
+/* 7. حركة الـ Bounce المنسقة مع ميل 15 درجة */
 @keyframes bounce-rotate {
-  0%, 100% { transform: translateY(-5%) rotate(6deg); }
-  50% { transform: translateY(0) rotate(6deg); }
+  0%, 100% { transform: translateY(-5%) rotate(15deg); }
+  50% { transform: translateY(0) rotate(15deg); }
 }
 
 .animate-bounce-slow {
