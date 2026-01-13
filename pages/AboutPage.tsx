@@ -16,7 +16,7 @@ const translations = {
         hoursTitle: "ساعات العمل",
         hours: "من الاثنين إلى الجمعة، من 8:30 صباحًا حتى 2:00 ظهرًا (الجمعة حتى 11:30 صباحًا)",
         contactTitle: "تواصل معنا",
-        contactEmail: "البريد الإلكتروني: islam.ahmed@falcon_school.com",
+        contactEmail: "البريد الإلكتروني: islam.ahmed@falcon-school.com",
     },
     en: {
         title: "About the Emirates Falcon International School Library",
