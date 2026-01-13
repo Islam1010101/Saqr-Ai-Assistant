@@ -14,8 +14,9 @@ interface ChartData {
   count: number;
 }
 
-// ألوان الهوية البصرية (تدرجات الأخضر والألوان المساندة)
-const COLORS = ['#00732F', '#059669', '#10B981', '#34D399', '#6EE7B7'];
+// ألوان الهوية المطورة (تدرجات مدرسة صقر الإمارات)
+const COLORS = ['#00732F', '#059669', '#10B981', '#34D399', '#064E3B'];
+const BLUE_GRADIENT = '#2563EB';
 
 const translations = {
   ar: {
@@ -28,11 +29,12 @@ const translations = {
     shelfStats: "إحصائيات توزيع الرفوف",
     shelfName: "الرف",
     bookCount: "عدد الكتب",
-    printBtn: "طباعة التقرير / تصدير PDF",
-    passwordPrompt: "يرجى إدخال كلمة المرور للوصول إلى تقارير المسؤول.",
+    printBtn: "تصدير التقرير النهائي (PDF)",
+    passwordPrompt: "يرجى إدخال كلمة المرور للوصول إلى لوحة التقارير الذكية.",
     passwordLabel: "كلمة المرور",
-    enter: "دخول",
-    wrongPassword: "كلمة المرور غير صحيحة"
+    enter: "دخول آمن",
+    wrongPassword: "كلمة المرور غير صحيحة",
+    liveStats: "إحصائيات مباشرة من قاعدة البيانات"
   },
   en: {
     pageTitle: "Saqr Library Reports",
@@ -44,11 +46,12 @@ const translations = {
     shelfStats: "Bookshelf Distribution",
     shelfName: "Shelf",
     bookCount: "Books",
-    printBtn: "Print / Export PDF",
-    passwordPrompt: "Please enter the password to access Admin reports.",
+    printBtn: "Export Final Report (PDF)",
+    passwordPrompt: "Enter the secure password to access Analytics.",
     passwordLabel: "Password",
-    enter: "Enter",
-    wrongPassword: "Incorrect Password"
+    enter: "Secure Access",
+    wrongPassword: "Incorrect Password",
+    liveStats: "Live Database Analytics"
   }
 };
 
@@ -130,142 +133,178 @@ const ReportsPage: React.FC = () => {
   const gridColor = theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
   const yAxisRtl = dir === 'rtl' ? { orientation: 'right' } as const : { orientation: 'left' } as const;
 
-  // واجهة الدخول الزجاجية
+  // واجهة الدخول الزجاجية الفخمة
   if (!isAuthenticated) {
     return (
-      <div className="glass-panel p-10 rounded-[3rem] shadow-2xl text-center max-w-md mx-auto mt-20 animate-in zoom-in duration-500 border-white/20">
-        <h1 className="text-3xl font-black mb-4 text-gray-900 dark:text-white tracking-tighter">{t('pageTitle')}</h1>
-        <p className="mb-8 text-gray-500 dark:text-gray-400 font-bold">{t('passwordPrompt')}</p>
-        <form onSubmit={handleLogin} className="space-y-5">
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-5 text-center bg-white/40 dark:bg-gray-900/40 text-gray-900 dark:text-white border-2 border-transparent focus:border-green-600 rounded-2xl outline-none transition-all shadow-inner font-bold"
-            placeholder={t('passwordLabel')}
-          />
-          {error && <p className="text-red-500 text-sm font-black animate-bounce">{error}</p>}
-          <button type="submit" className="glass-button-green w-full py-5 rounded-2xl font-black shadow-lg">
-            {t('enter')}
-          </button>
-        </form>
+      <div className="flex items-center justify-center min-h-[70vh] px-4">
+        <div className="glass-panel p-10 md:p-14 rounded-[3.5rem] shadow-2xl text-center max-w-lg w-full animate-in zoom-in duration-700 border-white/30 dark:border-white/10">
+          <div className="mb-8 flex flex-col items-center">
+             <img src="/school-logo.png" alt="Logo" className="h-28 w-28 object-contain mb-6 drop-shadow-xl rotate-12" />
+             <h1 className="text-4xl font-black text-gray-950 dark:text-white tracking-tighter">{t('pageTitle')}</h1>
+             <div className="h-1.5 w-16 bg-green-700 rounded-full mt-4 shadow-lg"></div>
+          </div>
+          
+          <p className="mb-10 text-gray-600 dark:text-gray-400 font-bold text-lg leading-relaxed">{t('passwordPrompt')}</p>
+          
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div className="relative">
+                <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full p-6 text-center bg-white/60 dark:bg-gray-900/60 text-gray-950 dark:text-white border-2 border-transparent focus:border-green-600 rounded-[2rem] outline-none transition-all shadow-inner font-black text-2xl tracking-widest placeholder:tracking-normal placeholder:text-gray-400"
+                    placeholder={t('passwordLabel')}
+                />
+            </div>
+            {error && <p className="text-red-500 text-base font-black animate-shake">{error}</p>}
+            
+            <button type="submit" className="glass-button-green w-full py-6 rounded-[2rem] font-black text-xl shadow-2xl transition-all active:scale-95">
+              {t('enter')}
+            </button>
+          </form>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-12 pb-20 px-4">
-      {/* رأس الصفحة الزجاجي */}
-      <div className="flex flex-col md:flex-row justify-between items-center gap-6 border-b border-white/10 pb-10 animate-in fade-in slide-in-from-top-4 duration-700">
+    <div className="max-w-7xl mx-auto space-y-12 pb-20 px-4 animate-in fade-in duration-1000">
+      
+      {/* هيدر الصفحة المطور */}
+      <div className="flex flex-col md:flex-row justify-between items-center gap-8 border-b border-white/10 pb-12 print:hidden">
         <div className="text-center md:text-start">
-          <h1 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-2 tracking-tighter">{t('pageTitle')}</h1>
-          <div className="flex items-center gap-2 justify-center md:justify-start">
-            <span className="w-3 h-3 bg-green-600 rounded-full animate-pulse"></span>
-            <p className="text-green-700 dark:text-green-400 font-black">{isAr ? 'إحصائيات مباشرة من قاعدة البيانات' : 'Live Database Analytics'}</p>
+          <h1 className="text-4xl md:text-6xl font-black text-gray-950 dark:text-white mb-4 tracking-tighter">{t('pageTitle')}</h1>
+          <div className="flex items-center gap-3 justify-center md:justify-start">
+            <span className="relative flex h-4 w-4">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-4 w-4 bg-green-600"></span>
+            </span>
+            <p className="text-green-800 dark:text-green-400 font-black text-lg">{t('liveStats')}</p>
           </div>
         </div>
+        
         <button 
           onClick={handlePrint}
-          className="print:hidden glass-button-green flex items-center gap-3 px-10 py-5 rounded-2xl font-black shadow-xl"
+          className="glass-button-black flex items-center gap-4 px-12 py-6 rounded-[2rem] font-black shadow-2xl text-lg transition-all active:scale-95"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+          </svg>
           {t('printBtn')}
         </button>
       </div>
 
+      {/* شبكة التقارير الرئيسية */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        {/* مخطط الرفوف الزجاجي */}
-        <div className="glass-panel p-8 rounded-[3rem] shadow-xl border-white/10 overflow-hidden">
-          <h2 className="text-2xl font-black mb-10 text-gray-800 dark:text-white flex items-center gap-3">
-            <span className="w-2 h-8 bg-green-700 rounded-full shadow-[0_0_10px_rgba(0,115,47,0.4)]"></span>
+        
+        {/* مخطط الرفوف (لون أخضر مدرسة صقر) */}
+        <div className="glass-panel p-10 rounded-[3.5rem] shadow-2xl border-white/20 hover:shadow-green-700/5 transition-all">
+          <h2 className="text-3xl font-black mb-12 text-gray-900 dark:text-white flex items-center gap-4">
+            <span className="w-2.5 h-10 bg-green-700 rounded-full shadow-[0_0_15px_rgba(0,115,47,0.4)]"></span>
             {t('shelfStats')}
           </h2>
-          <div style={{ width: '100%', height: 350 }}>
+          <div style={{ width: '100%', height: 400 }}>
             <ResponsiveContainer>
               <BarChart data={data.shelfData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor}/>
-                <XAxis dataKey="name" stroke={tickColor} fontSize={12} tick={{fontWeight: 'bold'}} label={{ value: t('shelfName'), position: 'insideBottom', offset: -5, fill: tickColor, fontWeight: 'bold' }} />
-                <YAxis stroke={tickColor} fontSize={12} tick={{fontWeight: 'bold'}} />
+                <CartesianGrid strokeDasharray="4 4" vertical={false} stroke={gridColor}/>
+                <XAxis dataKey="name" stroke={tickColor} fontSize={14} tick={{fontWeight: '900'}} />
+                <YAxis stroke={tickColor} fontSize={14} tick={{fontWeight: '900'}} />
                 <Tooltip 
-                  contentStyle={{ borderRadius: '20px', border: 'none', background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(10px)', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', fontWeight: 'bold' }} 
+                  cursor={{fill: 'rgba(0,115,47,0.05)'}}
+                  contentStyle={{ borderRadius: '24px', border: 'none', background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(20px)', boxShadow: '0 20px 40px rgba(0,0,0,0.15)', fontWeight: '900', padding: '15px' }} 
                 />
-                <Bar dataKey="count" name={t('bookCount')} fill="#00732F" radius={[12, 12, 0, 0]} />
+                <Bar dataKey="count" name={t('bookCount')} fill="#00732F" radius={[15, 15, 0, 0]} barSize={40} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* مخطط الكلمات الأكثر بحثاً - أزرق هوية صقر المساعد */}
-        <div className="glass-panel p-8 rounded-[3rem] shadow-xl border-white/10 overflow-hidden">
-          <h2 className="text-2xl font-black mb-10 text-gray-800 dark:text-white flex items-center gap-3">
-            <span className="w-2 h-8 bg-blue-600 rounded-full shadow-[0_0_10px_rgba(37,99,235,0.4)]"></span>
+        {/* مخطط الأكثر بحثاً (لون أزرق ذكاء اصطناعي) */}
+        <div className="glass-panel p-10 rounded-[3.5rem] shadow-2xl border-white/20">
+          <h2 className="text-3xl font-black mb-12 text-gray-900 dark:text-white flex items-center gap-4">
+            <span className="w-2.5 h-10 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.4)]"></span>
             {t('mostSearched')}
           </h2>
-          <div style={{ width: '100%', height: 350 }}>
+          <div style={{ width: '100%', height: 400 }}>
             <ResponsiveContainer>
               <BarChart data={data.searchData} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={gridColor}/>
+                <CartesianGrid strokeDasharray="4 4" horizontal={false} stroke={gridColor}/>
                 <XAxis type="number" hide />
-                <YAxis dataKey="name" type="category" stroke={tickColor} width={100} fontSize={12} tick={{fontWeight: 'bold'}} {...yAxisRtl} />
-                <Tooltip cursor={{ fill: 'rgba(0,0,0,0.05)' }} contentStyle={{ borderRadius: '20px', border: 'none', background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(10px)' }} />
-                <Bar dataKey="count" name={t('searches')} fill="#2563EB" radius={[0, 12, 12, 0]} />
+                <YAxis dataKey="name" type="category" stroke={tickColor} width={120} fontSize={14} tick={{fontWeight: '900'}} {...yAxisRtl} />
+                <Tooltip 
+                  cursor={{fill: 'rgba(37,99,235,0.05)'}}
+                  contentStyle={{ borderRadius: '24px', border: 'none', background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(20px)', fontWeight: '900' }} 
+                />
+                <Bar dataKey="count" name={t('searches')} fill={BLUE_GRADIENT} radius={[0, 15, 15, 0]} barSize={30} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
       </div>
 
-      {/* مخطط الكتب الأكثر مشاهدة الزجاجي (دائري) */}
-      <div className="glass-panel p-10 rounded-[3rem] shadow-xl border-white/10 overflow-hidden">
-        <h2 className="text-2xl font-black mb-10 text-gray-800 dark:text-white flex items-center gap-3 text-center justify-center">
-            <span className="w-2 h-8 bg-orange-500 rounded-full shadow-[0_0_10px_rgba(249,115,22,0.4)]"></span>
+      {/* مخطط الكتب الأكثر مشاهدة (دائري فخم) */}
+      <div className="glass-panel p-12 rounded-[3.5rem] shadow-2xl border-white/20">
+        <h2 className="text-3xl font-black mb-12 text-gray-900 dark:text-white flex items-center gap-4 justify-center text-center">
+            <span className="w-2.5 h-10 bg-orange-500 rounded-full shadow-[0_0_15px_rgba(249,115,22,0.4)]"></span>
             {t('mostViewed')}
         </h2>
-        <div style={{ width: '100%', height: 450 }}>
+        <div style={{ width: '100%', height: 500 }}>
           <ResponsiveContainer>
             <PieChart>
               <Pie
                 data={data.viewData}
                 cx="50%" cy="50%"
-                innerRadius={90} outerRadius={140}
-                paddingAngle={8}
+                innerRadius={100} outerRadius={160}
+                paddingAngle={10}
                 dataKey="count"
                 stroke="none"
-                label={({ name, percent }: any) => `${name.substring(0,15)}... (${(percent * 100).toFixed(0)}%)`}
+                label={({ name, percent }: any) => `${name.substring(0,18)}... (${(percent * 100).toFixed(0)}%)`}
               >
                 {data.viewData.map((_entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip contentStyle={{ borderRadius: '20px', border: 'none', fontWeight: 'bold' }} />
-              <Legend verticalAlign="bottom" iconType="circle" wrapperStyle={{ fontWeight: 'bold', paddingTop: '20px' }} />
+              <Tooltip contentStyle={{ borderRadius: '24px', border: 'none', fontWeight: '900', boxShadow: '0 15px 30px rgba(0,0,0,0.1)' }} />
+              <Legend verticalAlign="bottom" iconType="circle" wrapperStyle={{ fontWeight: '900', paddingTop: '40px', fontSize: '16px' }} />
             </PieChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      {/* تقرير الطباعة الرسمي */}
-      <div className="hidden print:block mt-20 p-10 bg-white text-black rounded-none">
-        <h2 className="text-3xl font-black mb-8 border-b-8 border-green-700 pb-4 flex justify-between items-center">
-          <span>{isAr ? 'بيانات جرد الرفوف التفصيلية' : 'Detailed Inventory Report'}</span>
-          <span className="text-lg opacity-50">E.F.I.P.S Library</span>
-        </h2>
-        <table className="w-full text-start border-collapse">
+      {/* التقرير الرسمي للطباعة (مخفي برمجياً ويظهر عند الطلب) */}
+      <div className="hidden print:block mt-20 p-12 bg-white text-black rounded-none border-[10px] border-green-700">
+        <div className="flex justify-between items-start mb-12">
+            <div>
+                <h2 className="text-5xl font-black mb-4 uppercase tracking-tighter text-green-700">Library Audit Report</h2>
+                <p className="text-2xl font-bold text-gray-500">{new Date().toLocaleDateString(locale)}</p>
+            </div>
+            <img src="/school-logo.png" alt="School Logo" className="h-32 w-32 object-contain" />
+        </div>
+        
+        <table className="w-full text-start border-collapse text-xl">
           <thead>
-            <tr className="bg-gray-100">
-              <th className="p-5 border-2 border-gray-200 text-start font-black">{t('shelfName')}</th>
-              <th className="p-5 border-2 border-gray-200 text-start font-black">{t('bookCount')}</th>
+            <tr className="bg-green-700 text-white">
+              <th className="p-8 border-2 border-green-800 text-start font-black">{t('shelfName')}</th>
+              <th className="p-8 border-2 border-green-800 text-start font-black">{t('bookCount')}</th>
             </tr>
           </thead>
           <tbody>
             {data.shelfData.map(s => (
-              <tr key={s.name} className="hover:bg-gray-50">
-                <td className="p-5 border-2 border-gray-200 font-bold">{t('shelf')} {s.name}</td>
-                <td className="p-5 border-2 border-gray-200 font-black text-green-700">{s.count}</td>
+              <tr key={s.name} className="even:bg-gray-50">
+                <td className="p-8 border-2 border-gray-200 font-bold">{isAr ? 'الرف رقم' : 'Shelf No.'} {s.name}</td>
+                <td className="p-8 border-2 border-gray-200 font-black text-green-700 text-3xl">{s.count}</td>
               </tr>
             ))}
           </tbody>
         </table>
+        
+        <div className="mt-20 flex justify-between items-end">
+            <div className="text-center">
+                <div className="w-48 h-0.5 bg-black mb-2"></div>
+                <p className="font-bold">Librarian Signature</p>
+            </div>
+            <p className="font-black opacity-20 text-4xl italic">E.F.I.P.S CONFIDENTIAL</p>
+        </div>
       </div>
     </div>
   );
