@@ -5,54 +5,92 @@ import { useLanguage } from '../App';
 const translations = {
     ar: {
         welcome: "أهلاً بكم في مكتبة مدرسة صقر الإمارات الدولية الخاصة",
-        subWelcome: "ابحث في فهرسنا أو تحدث مع مساعدنا الذكي للعثور على ما تحتاجه.",
-        manualSearch: "بحث يدوي",
-        smartSearch: "اسأل صقر",
+        subWelcome: "ابحث في فهرسنا أو تحدث مع مساعدنا الذكي للعثور على ما تحتاجه بكل سهولة.",
+        manualSearch: "البحث اليدوي",
+        smartSearch: "اسأل صقر (AI)",
     },
     en: {
         welcome: "Welcome to the Emirates Falcon International Private School Library",
-        subWelcome: "Search our catalog or talk to our smart assistant to find what you need.",
+        subWelcome: "Explore our catalog or interact with our smart assistant to find your next great read.",
         manualSearch: "Manual Search",
-        smartSearch: "Ask Saqr",
+        smartSearch: "Ask Saqr (AI)",
     }
 }
 
-// A subtle geometric pattern for the background
+// خلفية هندسية مطورة تتناسب مع الهوية المفرغة الجديدة
 const BackgroundPattern = () => (
-    <div className="absolute inset-0 z-0 opacity-10 dark:opacity-[0.07]" style={{
+    <div className="absolute inset-0 z-0 opacity-20 pointer-events-none" style={{
         backgroundImage: `
-            radial-gradient(circle at top right, rgba(0, 115, 47, 0.1), transparent 50%),
-            radial-gradient(circle at bottom left, rgba(255, 0, 0, 0.05), transparent 50%)
+            radial-gradient(circle at 20% 20%, rgba(0, 115, 47, 0.15), transparent 40%),
+            radial-gradient(circle at 80% 80%, rgba(239, 68, 68, 0.1), transparent 40%)
         `,
     }}></div>
 );
-
 
 const HomePage: React.FC = () => {
     const { locale } = useLanguage();
     const t = (key: keyof typeof translations.ar) => translations[locale][key];
     
+    // استخدام الشعار المفرغ الجديد
+    const SCHOOL_LOGO = "/school-logo.png"; 
+    
     return (
-        <div className="relative flex flex-col items-center justify-center text-center h-full min-h-[70vh] rounded-2xl overflow-hidden bg-white dark:bg-gray-800 shadow-lg p-8">
+        <div className="relative flex flex-col items-center justify-center text-center min-h-[80vh] rounded-[3rem] overflow-hidden bg-white/40 dark:bg-gray-900/40 backdrop-blur-xl border border-white/20 dark:border-gray-800/50 shadow-2xl p-6 md:p-12 animate-in fade-in zoom-in duration-700">
             <BackgroundPattern />
-            <div className="relative z-10 flex flex-col items-center">
-                <img src="https://media.licdn.com/dms/image/v2/D4D0BAQH2J4sVBWyU9Q/company-logo_200_200/B4DZferhU8GgAI-/0/1751787640644/emirates_falcon_international_private_school_efips_logo?e=2147483647&v=beta&t=z8d76C6g0mI5SLMwFQS7TJ65jX8mN02QtIrFdJbxk8I" alt="School Logo" className="h-48 w-48 md:h-64 md:w-64 object-contain mb-8"/>
-                <h1 className="text-3xl md:text-5xl font-bold text-gray-800 dark:text-gray-100 mb-3 leading-snug">{t('welcome')}</h1>
-                <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mb-8">{t('subWelcome')}</p>
-                <div className="flex flex-col sm:flex-row gap-4">
+            
+            <div className="relative z-10 flex flex-col items-center max-w-4xl">
+                {/* الشعار المفرغ بحجم كبير وواضح */}
+                <div className="relative mb-10 group">
+                    <div className="absolute -inset-4 bg-green-500/10 rounded-full blur-2xl group-hover:bg-green-500/20 transition-all duration-500"></div>
+                    <img 
+                        src={SCHOOL_LOGO} 
+                        alt="School Logo" 
+                        className="relative h-48 w-48 md:h-72 md:w-72 object-contain drop-shadow-2xl animate-bounce-slow"
+                        onError={(e) => {
+                            // حماية في حال لم يتم رفع الصورة بعد
+                            e.currentTarget.src = "https://media.licdn.com/dms/image/v2/D4D0BAQH2J4sVBWyU9Q/company-logo_200_200/B4DZferhU8GgAI-/0/1751787640644/emirates_falcon_international_private_school_efips_logo?e=2147483647&v=beta&t=z8d76C6g0mI5SLMwFQS7TJ65jX8mN02QtIrFdJbxk8I";
+                        }}
+                    />
+                </div>
+
+                <h1 className="text-3xl md:text-6xl font-black text-gray-900 dark:text-white mb-6 leading-tight tracking-tight">
+                    {t('welcome')}
+                </h1>
+                
+                <p className="text-lg md:text-2xl text-gray-600 dark:text-gray-300 font-medium mb-12 max-w-2xl leading-relaxed">
+                    {t('subWelcome')}
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-6 w-full sm:w-auto">
+                    {/* زر البحث اليدوي */}
                     <Link
                         to="/search"
-                        className="bg-uae-red text-white font-bold py-3 px-8 rounded-full shadow-md hover:bg-red-700 transition-transform transform hover:scale-105"
+                        className="group relative bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-black py-5 px-10 rounded-2xl shadow-xl hover:shadow-2xl transition-all active:scale-95 overflow-hidden border border-gray-100 dark:border-gray-700"
                     >
-                        {t('manualSearch')}
+                        <div className="absolute inset-0 bg-gray-100 dark:bg-gray-700 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                        <span className="relative z-10 flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                            {t('manualSearch')}
+                        </span>
                     </Link>
-                     <Link
+
+                    {/* زر اسأل صقر - اللون الأخضر الرسمي */}
+                    <Link
                         to="/smart-search"
-                        className="bg-uae-green text-white font-bold py-3 px-8 rounded-full shadow-md hover:bg-green-800 transition-transform transform hover:scale-105"
+                        className="group relative bg-green-700 text-white font-black py-5 px-10 rounded-2xl shadow-xl shadow-green-700/20 hover:bg-green-800 transition-all active:scale-95 overflow-hidden"
                     >
-                        {t('smartSearch')}
+                        <span className="relative z-10 flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+                            {t('smartSearch')}
+                        </span>
                     </Link>
                 </div>
+            </div>
+
+            {/* لمسة جمالية سفلية */}
+            <div className="absolute bottom-10 left-10 right-10 flex justify-between opacity-20 pointer-events-none">
+                <div className="h-px w-1/4 bg-gradient-to-r from-transparent to-green-700"></div>
+                <div className="h-px w-1/4 bg-gradient-to-l from-transparent to-red-600"></div>
             </div>
         </div>
     );
