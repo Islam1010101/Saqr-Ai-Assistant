@@ -1,92 +1,127 @@
-/* 1. أساسيات Tailwind CSS لضمان عمل الألوان والتنسيقات */
+/* 1. أساسيات Tailwind CSS */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* 2. إعدادات الخط العام (Tajawal) ليكون متناسقاً في كل الموقع */
+/* 2. الإعدادات العامة والخط */
 body {
   font-family: 'Tajawal', sans-serif;
   margin: 0;
   padding: 0;
   cursor: default;
+  transition: background-color 0.3s ease;
 }
 
-/* 3. التأثير الزجاجي المطور (Glassmorphism) */
-.glass-effect {
-  background: rgba(255, 255, 255, 0.35); /* شفافية بيضاء ناعمة */
-  backdrop-filter: blur(16px) saturate(180%); /* تمويه قوي للخلفية */
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.25); /* حدود زجاجية رفيعة */
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08); /* ظل ناعم يعطي عمقاً */
+/* 3. نظام الحاويات الزجاجية (Glass Panels) */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 32px 0 rgba(0, 115, 47, 0.05);
 }
 
-/* التأثير الزجاجي في الوضع الليلي */
-.dark .glass-effect {
-  background: rgba(17, 24, 39, 0.5); /* شفافية داكنة */
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+/* تحسين الدارك مود للحاويات */
+.dark .glass-panel {
+  background: rgba(17, 24, 39, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
 }
 
-/* 4. تنسيق شعار المدرسة والحركة الذكية */
-/* إمالة الشعار يميناً بزاوية 6 درجات كقاعدة أساسية */
+/* 4. الأزرار الزجاجية بهوية المدرسة (Buttons) */
+
+/* زر البحث اليدوي - الهوية الحمراء */
+.glass-button-red {
+  background: rgba(239, 68, 68, 0.1);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.glass-button-red:hover {
+  background: #ef4444;
+  color: white !important;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+  transform: translateY(-3px);
+}
+
+/* زر اسأل صقر - الهوية الخضراء */
+.glass-button-green {
+  background: rgba(0, 115, 47, 0.1);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 115, 47, 0.3);
+  color: #00732f;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.glass-button-green:hover {
+  background: #00732f;
+  color: white !important;
+  box-shadow: 0 0 20px rgba(0, 115, 47, 0.4);
+  transform: translateY(-3px);
+}
+
+/* تعديلات الأزرار في الدارك مود */
+.dark .glass-button-green {
+  background: rgba(0, 115, 47, 0.15);
+  color: #10b981;
+}
+.dark .glass-button-red {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+/* 5. الشعار والحركة التفاعلية الذكية */
 img[src="/school-logo.png"] {
-  transform: rotate(6deg);
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* حركة مرنة (Springy) */
+  transform: rotate(6deg); /* الحفاظ على الميل المطلوب */
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   display: inline-block;
 }
 
-/* تحسين ظهور الشعار في الوضع الليلي */
+/* توهج الشعار في الدارك مود */
 .dark img[src="/school-logo.png"] {
   background-color: rgba(255, 255, 255, 0.95);
   padding: 4px;
   border-radius: 50%;
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
 }
 
-/* أنيميشن الاهتزاز الذكي عند الـ Hover */
+/* أنيميشن الاهتزاز الذكي (Smart Wobble) */
 @keyframes smart-logo-hover {
   0% { transform: rotate(6deg) scale(1); }
   25% { transform: rotate(10deg) scale(1.1); }
-  50% { transform: rotate(4deg) scale(1.1); }
-  75% { transform: rotate(8deg) scale(1.1); }
+  50% { transform: rotate(2deg) scale(1.1); }
   100% { transform: rotate(6deg) scale(1.1); }
 }
 
 .logo-smart-hover:hover {
   animation: smart-logo-hover 0.6s ease-in-out forwards;
-  filter: drop-shadow(0 0 15px rgba(0, 115, 47, 0.3)); /* توهج أخضر خفيف */
+  filter: drop-shadow(0 0 15px rgba(0, 115, 47, 0.4));
 }
 
-/* 5. شكل المؤشر واللمس */
-a, button, .group, select, input {
-  cursor: pointer !important;
-}
-
-* {
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* تأثير النبض عند الضغط */
-.active-press:active, button:active, .group:active {
-  transform: scale(0.96);
-  transition: transform 0.1s ease-in-out;
-}
-
-/* 6. مؤشر الماوس المخصص (الدائرة الخضراء) */
+/* 6. المؤشر التفاعلي واللمس */
 .custom-cursor {
   width: 20px;
   height: 20px;
-  background-color: #00732F;
+  background-color: #00732f;
   border-radius: 50%;
   position: fixed;
   pointer-events: none;
   z-index: 9999;
-  transition: transform 0.1s ease-out;
-  opacity: 0.5;
   mix-blend-mode: multiply;
+  opacity: 0.6;
 }
 
-/* 7. حركة الـ Bounce المنسقة مع الميل */
+a, button, .group, select, input {
+  cursor: pointer !important;
+}
+
+/* تأثير النبض عند الضغط */
+.active-press:active, button:active, .group:active {
+  transform: scale(0.95);
+  transition: transform 0.1s ease-in-out;
+}
+
+/* 7. حركة الـ Bounce المنسقة */
 @keyframes bounce-rotate {
   0%, 100% { transform: translateY(-5%) rotate(6deg); }
   50% { transform: translateY(0) rotate(6deg); }
