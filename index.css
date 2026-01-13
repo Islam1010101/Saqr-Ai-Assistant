@@ -8,38 +8,63 @@ body {
   font-family: 'Tajawal', sans-serif;
   margin: 0;
   padding: 0;
-  /* تغيير شكل المؤشر الأساسي ليكون أنيقاً */
   cursor: default;
 }
 
-/* 3. شكل المؤشر عند الوقوف على الكتب، الأزرار، أو القوائم */
-a, button, .group, select, input[type="submit"] {
+/* 3. تنسيق شعار المدرسة (عالمي لجميع الصفحات) */
+/* إمالة الشعار يميناً بزاوية 6 درجات في كل الموقع */
+img[src="/school-logo.png"] {
+  transform: rotate(6deg) !important;
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+/* تحسين ظهور الشعار في الوضع الليلي (Dark Mode) */
+/* يضيف خلفية بيضاء دائرية وتوهج خفيف ليبرز الشعار فوق الخلفية الداكنة */
+.dark img[src="/school-logo.png"] {
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 4px;
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.25);
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.1));
+}
+
+/* 4. شكل المؤشر عند الوقوف على الكتب، الأزرار، أو القوائم */
+a, button, .group, select, input[type="submit"], input[type="text"] {
   cursor: pointer !important;
 }
 
-/* 4. إعدادات خاصة بالموبايل (Touch Feedback) */
+/* 5. إعدادات خاصة بالموبايل (Touch Feedback) */
 * {
-  /* إخفاء المربع الأزرق المزعج الذي يظهر عند لمس الشاشة في الأندرويد */
   -webkit-tap-highlight-color: transparent;
 }
 
-/* تأثير "النبض" عند الضغط على أي بطاقة كتاب */
-.group:active {
-  transform: scale(0.96); /* تصغير خفيف يعطي إيحاء بالضغط الحقيقي */
+/* تأثير "النبض" عند الضغط على أي بطاقة كتاب أو زر */
+.active-press:active, button:active, .group:active {
+  transform: scale(0.96);
   transition: transform 0.1s ease-in-out;
 }
 
-/* 5. تصميم مؤشر (Cursor) مخصص على شكل دائرة خضراء تتبع الماوس */
-/* هذا الجزء سيعمل مع كود React الذي سأعطيك إياه في الخطوة التالية */
+/* 6. تصميم مؤشر (Cursor) مخصص على شكل دائرة خضراء تتبع الماوس */
 .custom-cursor {
   width: 20px;
   height: 20px;
-  background-color: #00732F; /* لون أخضر صقر الإمارات */
+  background-color: #00732F; /* لون أخضر صقر الإمارات الرسمي */
   border-radius: 50%;
   position: fixed;
-  pointer-events: none; /* لكي لا يمنع الضغط على الأزرار */
+  pointer-events: none;
   z-index: 9999;
   transition: transform 0.1s ease-out;
   opacity: 0.5;
-  mix-blend-mode: multiply; /* يجعل الدائرة تندمج مع الألوان خلفها بشكل جمالي */
+  mix-blend-mode: multiply;
+}
+
+/* تحسين حركة الشعار في الصفحة الرئيسية ليتناسب مع الإمالة */
+@keyframes bounce-rotate {
+  0%, 100% { transform: translateY(-5%) rotate(6deg); }
+  50% { transform: translateY(0) rotate(6deg); }
+}
+
+.animate-bounce-slow {
+  animation: bounce-rotate 3s infinite;
 }
