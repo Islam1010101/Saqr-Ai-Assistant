@@ -17,6 +17,7 @@ const translations = {
         hours: "من الاثنين إلى الجمعة، من 8:30 صباحًا حتى 2:00 ظهرًا (الجمعة حتى 11:30 صباحًا)",
         contactTitle: "تواصل مع أمين المكتبة",
         contactEmail: "islam.ahmed@falcon-school.com",
+        schoolWebsite: "زيارة الموقع الرسمي للمدرسة",
     },
     en: {
         title: "About Saqr Library",
@@ -33,6 +34,7 @@ const translations = {
         hours: "Monday to Friday, 8:30 AM - 2:00 PM (Fridays until 11:30 AM)",
         contactTitle: "Contact Librarian",
         contactEmail: "islam.ahmed@falcon-school.com",
+        schoolWebsite: "Visit Official School Website",
     }
 }
 
@@ -55,7 +57,7 @@ const AboutPage: React.FC = () => {
         <div dir={dir} className="relative max-w-5xl mx-auto pb-20 px-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <BackgroundPattern />
 
-            {/* بطاقة العنوان الرئيسية - زجاجية بالكامل مع الشعار التفاعلي */}
+            {/* بطاقة العنوان الرئيسية */}
             <div className="relative z-10 glass-panel p-8 md:p-12 rounded-[3rem] shadow-2xl mb-10 flex flex-col items-center text-center overflow-hidden">
                 <img 
                     src={SCHOOL_LOGO} 
@@ -71,7 +73,7 @@ const AboutPage: React.FC = () => {
             <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2 space-y-8">
                     
-                    {/* قسم عن المدرسة - زجاجي */}
+                    {/* قسم عن المدرسة - إضافة الرابط هنا */}
                     <section className="glass-panel p-8 rounded-[2.5rem] overflow-hidden">
                         <h2 className="text-2xl font-black mb-6 text-gray-800 dark:text-white flex items-center gap-3">
                             <span className="w-2 h-8 bg-green-700 rounded-full shadow-[0_0_10px_rgba(0,115,47,0.3)]"></span>
@@ -81,9 +83,27 @@ const AboutPage: React.FC = () => {
                             <p>{t('p1')}</p>
                             <p>{t('p2')}</p>
                         </div>
+
+                        {/* رابط موقع المدرسة الرسمي المطور */}
+                        <div className="mt-8 pt-6 border-t border-white/10 flex justify-center lg:justify-start">
+                            <a 
+                                href="https://www.falcon-school.com" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="glass-button-black inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-black transition-all hover:gap-5"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9-9c1.657 0 3 4.03 3 9s-1.343 9-3 9m0-18c-1.657 0-3 4.03-3 9s1.343 9-3 9" />
+                                </svg>
+                                <span>{t('schoolWebsite')}</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 rotate-[-45deg] rtl:rotate-[135deg] opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                </svg>
+                            </a>
+                        </div>
                     </section>
 
-                    {/* قسم الخدمات - زجاجي */}
+                    {/* قسم الخدمات */}
                     <section className="glass-panel p-8 rounded-[2.5rem] overflow-hidden">
                         <h2 className="text-2xl font-black mb-6 text-gray-800 dark:text-white flex items-center gap-3">
                             <span className="w-2 h-8 bg-green-700 rounded-full shadow-[0_0_10px_rgba(0,115,47,0.3)]"></span>
@@ -101,7 +121,6 @@ const AboutPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-8">
-                    {/* بطاقات جانبية ملونة بالهوية الرسمية (الأخضر والأسود) */}
                     <section className="bg-green-700 text-white p-8 rounded-[2.5rem] shadow-xl shadow-green-700/30 transition-transform hover:scale-[1.02]">
                         <h2 className="text-xl font-black mb-4 flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -122,7 +141,6 @@ const AboutPage: React.FC = () => {
                         </a>
                     </section>
                     
-                    {/* قسم Powered by الزجاجي مع إمالة شعار E.F.I.P.S */}
                     <div className="glass-panel p-6 rounded-[2.5rem] text-center overflow-hidden">
                         <p className="text-gray-400 dark:text-gray-500 font-bold text-xs uppercase mb-3 tracking-widest">Powered by</p>
                         <div className="flex items-center justify-center gap-2">
