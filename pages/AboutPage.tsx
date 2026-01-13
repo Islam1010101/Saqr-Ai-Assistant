@@ -54,102 +54,109 @@ const AboutPage: React.FC = () => {
     const SCHOOL_LOGO = "/school-logo.png"; 
     
     return (
-        <div dir={dir} className="relative max-w-5xl mx-auto pb-20 px-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div dir={dir} className="relative max-w-6xl mx-auto pb-20 px-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <BackgroundPattern />
 
-            {/* بطاقة العنوان الرئيسية */}
-            <div className="relative z-10 glass-panel p-8 md:p-12 rounded-[3rem] shadow-2xl mb-10 flex flex-col items-center text-center overflow-hidden">
-                <img 
-                    src={SCHOOL_LOGO} 
-                    alt="Logo" 
-                    className="h-32 w-32 object-contain mb-6 drop-shadow-xl logo-smart-hover transition-all cursor-pointer" 
-                />
-                <h1 className="text-3xl md:text-5xl font-black text-gray-900 dark:text-white mb-4">
+            {/* 1. بطاقة العنوان الكبرى - بتأثير الشعار المائل */}
+            <div className="relative z-10 glass-panel p-10 md:p-16 rounded-[3.5rem] shadow-2xl mb-12 flex flex-col items-center text-center overflow-hidden border-white/30 dark:border-white/10">
+                <div className="relative mb-8">
+                    <img 
+                        src={SCHOOL_LOGO} 
+                        alt="Logo" 
+                        className="h-32 md:h-40 w-auto object-contain drop-shadow-2xl logo-smart-hover cursor-pointer" 
+                    />
+                </div>
+                <h1 className="text-4xl md:text-6xl font-black text-gray-950 dark:text-white mb-6 tracking-tight">
                     {t('title')}
                 </h1>
-                <div className="h-1.5 w-20 bg-green-700 rounded-full"></div>
+                <div className="h-2 w-24 bg-green-700 rounded-full shadow-[0_0_15px_rgba(0,115,47,0.4)]"></div>
             </div>
 
+            {/* 2. شبكة المحتوى المنسقة */}
             <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                {/* الجانب الرئيسي: معلومات المدرسة والخدمات */}
                 <div className="lg:col-span-2 space-y-8">
                     
-                    {/* قسم عن المدرسة - إضافة الرابط هنا */}
-                    <section className="glass-panel p-8 rounded-[2.5rem] overflow-hidden">
-                        <h2 className="text-2xl font-black mb-6 text-gray-800 dark:text-white flex items-center gap-3">
-                            <span className="w-2 h-8 bg-green-700 rounded-full shadow-[0_0_10px_rgba(0,115,47,0.3)]"></span>
+                    {/* قسم عن المدرسة مع زر الموقع المونوكروم */}
+                    <section className="glass-panel p-8 md:p-10 rounded-[3rem] border-white/20">
+                        <h2 className="text-3xl font-black mb-8 text-gray-900 dark:text-white flex items-center gap-4">
+                            <span className="w-2.5 h-10 bg-green-700 rounded-full"></span>
                             {t('aboutSchoolTitle')}
                         </h2>
-                        <div className="space-y-4 text-lg leading-relaxed text-gray-600 dark:text-gray-300 font-medium">
+                        <div className="space-y-6 text-xl leading-relaxed text-gray-800 dark:text-gray-200 font-medium">
                             <p>{t('p1')}</p>
                             <p>{t('p2')}</p>
                         </div>
 
-                        {/* رابط موقع المدرسة الرسمي المطور */}
-                        <div className="mt-8 pt-6 border-t border-white/10 flex justify-center lg:justify-start">
+                        {/* زر الموقع الرسمي - مونوكروم ذكي */}
+                        <div className="mt-10 pt-8 border-t border-black/5 dark:border-white/10 flex justify-center lg:justify-start">
                             <a 
                                 href="https://www.falcon-school.com" 
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                className="glass-button-black inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-black transition-all hover:gap-5"
+                                className="glass-button-black inline-flex items-center gap-4 px-10 py-5 rounded-2xl font-black text-lg shadow-xl hover:gap-6 group active:scale-95"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9-9c1.657 0 3 4.03 3 9s-1.343 9-3 9m0-18c-1.657 0-3 4.03-3 9s1.343 9-3 9" />
                                 </svg>
                                 <span>{t('schoolWebsite')}</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 rotate-[-45deg] rtl:rotate-[135deg] opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 rotate-[-45deg] rtl:rotate-[135deg] opacity-40 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                 </svg>
                             </a>
                         </div>
                     </section>
 
-                    {/* قسم الخدمات */}
-                    <section className="glass-panel p-8 rounded-[2.5rem] overflow-hidden">
-                        <h2 className="text-2xl font-black mb-6 text-gray-800 dark:text-white flex items-center gap-3">
-                            <span className="w-2 h-8 bg-green-700 rounded-full shadow-[0_0_10px_rgba(0,115,47,0.3)]"></span>
+                    {/* قسم الخدمات بكروت زجاجية صغيرة */}
+                    <section className="glass-panel p-8 md:p-10 rounded-[3rem]">
+                        <h2 className="text-3xl font-black mb-8 text-gray-900 dark:text-white flex items-center gap-4">
+                            <span className="w-2.5 h-10 bg-green-700 rounded-full"></span>
                             {t('servicesTitle')}
                         </h2>
-                        <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <ul className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             {[1, 2, 3, 4, 5].map((i) => (
-                                <li key={i} className="flex items-center gap-3 glass-panel p-4 rounded-2xl border-white/10">
-                                    <span className="flex-shrink-0 w-8 h-8 bg-green-700/10 text-green-700 dark:text-green-400 rounded-full flex items-center justify-center font-bold">✓</span>
-                                    <span className="text-gray-700 dark:text-gray-200 font-bold text-sm">{(t as any)(`service${i}`)}</span>
+                                <li key={i} className="flex items-center gap-4 bg-white/40 dark:bg-gray-800/40 backdrop-blur-md p-5 rounded-2xl border border-white/20 shadow-sm hover:shadow-md transition-all">
+                                    <span className="flex-shrink-0 w-10 h-10 bg-green-700 text-white rounded-full flex items-center justify-center font-bold shadow-lg shadow-green-700/20">✓</span>
+                                    <span className="text-gray-900 dark:text-gray-100 font-black text-base">{(t as any)(`service${i}`)}</span>
                                 </li>
                             ))}
                         </ul>
                     </section>
                 </div>
 
+                {/* الجانب الجانبي: البطاقات الملونة */}
                 <div className="space-y-8">
-                    <section className="bg-green-700 text-white p-8 rounded-[2.5rem] shadow-xl shadow-green-700/30 transition-transform hover:scale-[1.02]">
-                        <h2 className="text-xl font-black mb-4 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <section className="bg-green-700 text-white p-10 rounded-[3rem] shadow-2xl shadow-green-700/30 transition-all hover:scale-[1.03]">
+                        <h2 className="text-2xl font-black mb-6 flex items-center gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                             {t('hoursTitle')}
                         </h2>
-                        <p className="text-green-50 font-bold leading-relaxed">
+                        <p className="text-green-50 font-black text-lg leading-relaxed">
                             {t('hours')}
                         </p>
                     </section>
 
-                    <section className="bg-gray-900 text-white p-8 rounded-[2.5rem] shadow-xl transition-transform hover:scale-[1.02]">
-                        <h2 className="text-xl font-black mb-4 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                    <section className="bg-gray-950 text-white p-10 rounded-[3rem] shadow-2xl transition-all hover:scale-[1.03]">
+                        <h2 className="text-2xl font-black mb-6 flex items-center gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                             {t('contactTitle')}
                         </h2>
-                        <a href={`mailto:${t('contactEmail')}`} className="block bg-white/10 p-4 rounded-2xl hover:bg-white/20 transition-all font-bold text-sm break-all text-center border border-white/10">
+                        <a href={`mailto:${t('contactEmail')}`} className="block bg-white/10 p-5 rounded-2xl hover:bg-white/20 transition-all font-black text-base break-all text-center border border-white/10 tracking-tight">
                             {t('contactEmail')}
                         </a>
                     </section>
                     
-                    <div className="glass-panel p-6 rounded-[2.5rem] text-center overflow-hidden">
-                        <p className="text-gray-400 dark:text-gray-500 font-bold text-xs uppercase mb-3 tracking-widest">Powered by</p>
-                        <div className="flex items-center justify-center gap-2">
+                    {/* Powered By Section */}
+                    <div className="glass-panel p-8 rounded-[3rem] text-center border-white/30">
+                        <p className="text-gray-500 dark:text-gray-400 font-black text-xs uppercase mb-4 tracking-[0.2em]">Powered by</p>
+                        <div className="flex items-center justify-center gap-3">
                              <img 
                                 src={SCHOOL_LOGO} 
                                 alt="E.F.I.P.S" 
-                                className="h-8 w-8 object-contain logo-smart-hover transition-transform cursor-pointer" 
+                                className="h-10 w-10 object-contain logo-smart-hover" 
                              />
-                             <span className="font-black text-gray-800 dark:text-white tracking-tighter">E.F.I.P.S</span>
+                             <span className="font-black text-2xl text-gray-950 dark:text-white tracking-tighter">E.F.I.P.S</span>
                         </div>
                     </div>
                 </div>
