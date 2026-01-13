@@ -85,7 +85,8 @@ export const useLanguage = () => {
 };
 
 const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [locale, setLocale] = useState<Locale>('ar'); 
+  // تم تغيير القيمة الافتراضية هنا إلى 'en'
+  const [locale, setLocale] = useState<Locale>('en'); 
   
   useEffect(() => {
     document.documentElement.lang = locale;
@@ -154,8 +155,10 @@ const Header: React.FC = () => {
       <Link
         to={path}
         onClick={onClick}
-        className={`block md:inline-block px-4 py-2 rounded-xl text-sm font-bold transition-all active:scale-95 ${
-          active ? 'bg-uae-green text-white shadow-lg shadow-green-900/20' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+        className={`block md:inline-block px-4 py-2 rounded-xl text-sm font-black transition-all active:scale-95 ${
+          active 
+            ? 'bg-green-700 text-white shadow-lg shadow-green-900/20' 
+            : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
         }`}
       >
         {label}
@@ -164,50 +167,52 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-40 dark:bg-gray-800/80 border-b border-gray-100 dark:border-gray-700">
+    <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-40 dark:bg-gray-950/80 border-b border-gray-100 dark:border-white/10">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center justify-between h-24">
           <div className="flex items-center">
-            {/* إضافة كلاس rotate-6 لإمالة الشعار يميناً وتعديل المقاس */}
+            {/* الشعار المائل والمحمي من الدارك مود */}
             <img
               src="/school-logo.png"
               alt="School Logo"
-              className="h-16 w-16 object-contain rotate-6 transition-transform hover:scale-110"
+              className="h-16 w-16 object-contain rotate-[15deg] transition-transform hover:scale-110 logo-smart-hover"
             />
-            <div className="ms-3 hidden sm:block">
-              <h1 className="text-md font-bold text-gray-800 dark:text-gray-100 leading-tight">{t('schoolName')}</h1>
-              <p className="text-xs text-uae-green font-bold">{t('library')}</p>
+            <div className="ms-4 hidden md:block">
+              <h1 className="text-lg font-black text-gray-950 dark:text-white leading-tight tracking-tighter">{t('schoolName')}</h1>
+              <p className="text-sm text-green-700 font-black uppercase tracking-widest">{t('library')}</p>
             </div>
           </div>
 
-          <div className="hidden md:flex items-center gap-1">
+          {/* القائمة الرئيسية */}
+          <div className="hidden md:flex items-center gap-2">
             {links.map(l => (
               <NavItem key={l.path} path={l.path} label={l.label} />
             ))}
-            <div className="h-6 w-[1px] bg-gray-200 dark:bg-gray-700 mx-2"></div>
-            <button onClick={() => setLocale(locale === 'ar' ? 'en' : 'ar')} className="px-3 py-2 text-sm font-bold text-uae-green hover:bg-green-50 rounded-lg transition-colors">
+            <div className="h-6 w-[1.5px] bg-gray-200 dark:bg-white/10 mx-3"></div>
+            <button onClick={() => setLocale(locale === 'ar' ? 'en' : 'ar')} className="px-4 py-2 text-sm font-black text-green-700 hover:bg-green-50 dark:hover:bg-white/5 rounded-xl transition-all">
               {translations[locale].toggleLang}
             </button>
-            <button onClick={toggleTheme} className="h-10 w-10 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+            <button onClick={toggleTheme} className="h-12 w-12 flex items-center justify-center rounded-2xl bg-gray-50 dark:bg-white/5 hover:scale-105 transition-all shadow-sm">
               {theme === 'light' ? '🌙' : '☀️'}
             </button>
           </div>
 
-          <div className="md:hidden flex items-center gap-2">
-            <button onClick={toggleTheme} className="h-10 w-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+          <div className="md:hidden flex items-center gap-3">
+            <button onClick={toggleTheme} className="h-10 w-10 rounded-xl bg-gray-100 dark:bg-white/10 flex items-center justify-center">
               {theme === 'light' ? '🌙' : '☀️'}
             </button>
-            <button onClick={() => setOpen(v => !v)} className="p-2 text-gray-600 dark:text-gray-300 text-2xl">☰</button>
+            <button onClick={() => setOpen(v => !v)} className="p-2 text-gray-950 dark:text-white text-3xl">☰</button>
           </div>
         </div>
       </div>
 
+      {/* القائمة الجانبية للموبايل */}
       {open && (
-        <div className="md:hidden bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 px-4 py-4 space-y-2 animate-in fade-in slide-in-from-top-4">
+        <div className="md:hidden bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-100 dark:border-white/10 px-6 py-6 space-y-3 animate-in fade-in slide-in-from-top-4">
           {links.map(l => (
             <NavItem key={l.path} path={l.path} label={l.label} onClick={() => setOpen(false)} />
           ))}
-          <button onClick={() => { setLocale(locale === 'ar' ? 'en' : 'ar'); setOpen(false); }} className="w-full text-start px-4 py-2 text-sm font-bold text-uae-green">
+          <button onClick={() => { setLocale(locale === 'ar' ? 'en' : 'ar'); setOpen(false); }} className="w-full text-start px-4 py-3 text-base font-black text-green-700 border-t border-gray-100 dark:border-white/5 mt-4">
             {translations[locale].toggleLang}
           </button>
         </div>
@@ -222,12 +227,12 @@ const App: React.FC = () => {
     <ThemeProvider>
       <LanguageProvider>
         <HashRouter>
-          <div className="flex flex-col min-h-screen relative">
+          <div className="flex flex-col min-h-screen relative overflow-x-hidden">
             <MouseFollower />
             
             <Header />
             
-            <main className="flex-grow container mx-auto p-4 sm:p-6 lg:p-8">
+            <main className="flex-grow container mx-auto p-4 sm:p-6 lg:p-10">
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/search" element={<SearchPage />} />
@@ -238,8 +243,8 @@ const App: React.FC = () => {
               </Routes>
             </main>
 
-            <footer className="py-6 text-center text-xs text-gray-400 dark:text-gray-600">
-              &copy; {new Date().getFullYear()} {translations.ar.schoolName}
+            <footer className="py-10 text-center text-sm text-gray-400 dark:text-gray-500 font-black tracking-tight border-t border-gray-50 dark:border-white/5">
+              &copy; {new Date().getFullYear()} {translations.en.schoolName}
             </footer>
           </div>
         </HashRouter>
