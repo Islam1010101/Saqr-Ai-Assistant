@@ -1,4 +1,4 @@
-/* 1. استيراد الخطوط - يجب أن يكون أول سطر دائماً */
+/* 1. استيراد الخطوط الوطنية */
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap');
 
 /* 2. أساسيات Tailwind */
@@ -6,16 +6,17 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 3. الهوية البصرية الوطنية والمتغيرات */
+/* 3. الهوية البصرية والمتغيرات الاستراتيجية */
 :root {
   --mouse-x: 50%;
   --mouse-y: 50%;
   --uae-red: 220, 38, 38;      /* الأحمر الوطني */
   --uae-green: 0, 115, 47;    /* الأخضر الوطني */
-  --uae-black: 2, 6, 23;      /* الأسود العميق */
+  --uae-black: 2, 6, 23;      /* الأسود الملكي (Slate-950) */
+  --glass-border: rgba(255, 255, 255, 0.15);
 }
 
-/* تحسينات السلوك العام */
+/* تحسينات السلوك والنصوص المستقيمة */
 html {
   scroll-behavior: smooth;
   -webkit-tap-highlight-color: transparent;
@@ -28,51 +29,54 @@ body {
   padding: 0;
   background-color: #f8fafc;
   color: #0f172a;
-  transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background-color 0.5s ease;
   line-height: 1.6;
+  /* إلغاء أي ميلان افتراضي للخطوط بطلبك */
+  font-style: normal !important;
 }
 
-/* الوضع الداكن الفخم */
+/* الوضع الداكن النخبوي */
 .dark body {
-  background-color: #020617;
-  color: #f8fafc;
+  background-color: #020617; /* عمق الأسود الملكي */
+  color: #f1f5f9;
 }
 
-/* --- 4. نظام الزجاج الوطني (Falcon National Glass) --- */
+/* --- 4. نظام الزجاج المطور (Zero-Border Glass) --- */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(25px) saturate(180%);
-  -webkit-backdrop-filter: blur(25px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(30px) saturate(190%);
+  -webkit-backdrop-filter: blur(30px) saturate(190%);
+  /* تم جعل الحدود شفافة جداً لإخفاء الحواف الرمادية */
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.08);
 }
 
 .dark .glass-panel {
-  background: rgba(15, 23, 42, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.4);
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.4);
 }
 
-/* --- 5. نظام الشعارات (Identity Tilt & Color) --- */
+/* إصدار بدون حدود نهائياً (للصفحة الرئيسية) */
+.border-none {
+  border: none !important;
+}
+
+/* --- 5. هندسة الشعارات (Identity Tilt) --- */
 .logo-tilt-right {
-  transform: rotate(12deg);
-  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.logo-tilt-right:hover {
-  transform: rotate(18deg) scale(1.1);
+  transform: rotate(6deg); /* الميلان المعتمد في الهيدر */
+  transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .logo-white-filter {
   transition: filter 0.5s ease;
 }
 
-/* قلب الشعارات للأبيض في الدارك مود */
 .dark .logo-white-filter {
-  filter: brightness(0) invert(1) drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+  filter: brightness(0) invert(1) drop-shadow(0 0 15px rgba(255, 255, 255, 0.1));
 }
 
-/* --- 6. تأثير الإضاءة التفاعلي (Spotlight) --- */
+/* --- 6. تأثير الإضاءة التفاعلي (Elite Spotlight) --- */
 .glass-card-interactive {
   position: relative;
   z-index: 1;
@@ -84,10 +88,10 @@ body {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  padding: 2px; 
+  padding: 1.5px; 
   background: radial-gradient(
-    600px circle at var(--mouse-x) var(--mouse-y),
-    rgba(var(--uae-red), 0.4),
+    800px circle at var(--mouse-x) var(--mouse-y),
+    rgba(var(--uae-red), 0.35),
     transparent 40%
   );
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -96,90 +100,82 @@ body {
   mask-composite: exclude;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.5s ease;
 }
 
 .glass-card-interactive:hover::before {
   opacity: 1;
 }
 
-/* --- 7. أزرار النخبة الإماراتية (National Elite Buttons) --- */
+/* --- 7. أزرار النخبة (National Elite Buttons) --- */
+/* الزر الأحمر */
 .glass-button-red {
-  @apply px-8 py-4 rounded-2xl font-black transition-all duration-300 backdrop-blur-md flex items-center justify-center gap-3;
-  background: rgba(var(--uae-red), 0.1);
-  border: 2px solid rgba(var(--uae-red), 0.3);
+  @apply px-10 py-5 rounded-[2rem] font-black transition-all duration-500 flex items-center justify-center gap-3;
+  background: rgba(var(--uae-red), 0.08);
+  border: 2px solid rgba(var(--uae-red), 0.2);
   color: rgb(var(--uae-red));
 }
 
 .glass-button-red:hover {
   background: rgb(var(--uae-red));
   color: #ffffff;
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 15px 30px rgba(var(--uae-red), 0.4);
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(var(--uae-red), 0.3);
 }
 
-.glass-button-green {
-  @apply px-8 py-4 rounded-2xl font-black transition-all duration-300 backdrop-blur-md flex items-center justify-center gap-3;
-  background: rgba(var(--uae-green), 0.1);
-  border: 2px solid rgba(var(--uae-green), 0.3);
-  color: rgb(var(--uae-green));
-}
-
-.glass-button-green:hover {
-  background: rgb(var(--uae-green));
+/* الزر الأسود (للمكتبة الإنجليزية) */
+.glass-button-black {
+  @apply px-10 py-5 rounded-[2rem] font-black transition-all duration-500 flex items-center justify-center gap-3;
+  background: rgba(var(--uae-black), 0.9);
   color: #ffffff;
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 15px 30px rgba(var(--uae-green), 0.4);
 }
 
-/* --- 8. أنيميشن الانفجار والتلاشي (Knowledge Burst) --- */
+.glass-button-black:hover {
+  background: #000000;
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+}
+
+/* --- 8. الأنيميشن المتطور (Knowledge Flow) --- */
 @keyframes knowledge-burst {
-  0% { 
-    transform: translate(0, 0) scale(0.5); 
-    opacity: 0; 
-  }
-  20% { 
-    opacity: 1; 
-  }
-  100% { 
-    transform: translate(var(--tx), var(--ty)) scale(1.2); 
-    opacity: 0; 
-  }
+  0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
+  15% { opacity: 1; }
+  100% { transform: translate(var(--tx), var(--ty)) scale(1.1); opacity: 0; }
 }
 
 .animate-burst {
-  animation: knowledge-burst 1.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: knowledge-burst 1.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
 
-/* --- 9. أدوات مساعدة إضافية --- */
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-/* تأثير الظهور التدريجي للعناصر */
 .animate-fade-up {
-  animation: fade-in-up 0.8s ease-out forwards;
+  animation: fade-in-up 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
 @keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(30px); }
+  from { opacity: 0; transform: translateY(40px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* المؤشر الكريستالي الاحترافي */
-@media (hover: hover) and (pointer: fine) {
-  .custom-cursor {
-    position: fixed;
-    width: 24px;
-    height: 24px;
-    background-color: rgba(var(--uae-red), 0.1);
-    border: 2px solid rgba(var(--uae-red), 0.5);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 10000;
-    will-change: transform;
-    backdrop-filter: blur(4px);
-    transition: width 0.3s, height 0.3s, background-color 0.3s;
-  }
+/* --- 9. تحسينات تجربة المستخدم --- */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* تعطيل الخط المائل في كل مكان لضمان الحدة بطلبك */
+i, em, .italic {
+  font-style: normal !important;
+}
+
+/* تأثير التموج المائي (Ripple) */
+.ripple-effect {
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  animation: ripple-animation 0.8s linear;
+  pointer-events: none;
+}
+
+@keyframes ripple-animation {
+  to { transform: scale(4); opacity: 0; }
 }
 
 img {
@@ -187,4 +183,9 @@ img {
   height: auto;
   user-select: none;
   -webkit-user-drag: none;
+}
+
+/* استجابة الخطوط للشاشات الكبيرة */
+@media (min-width: 1500px) {
+  body { font-size: 18px; }
 }
