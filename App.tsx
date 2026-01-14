@@ -74,7 +74,7 @@ const Header: React.FC = () => {
     <header className="glass-panel sticky top-2 sm:top-4 z-40 p-2 sm:p-4 flex flex-wrap justify-between items-center mx-2 sm:mx-4 rounded-2xl sm:rounded-3xl border-white/20 backdrop-blur-xl">
       <div className="flex items-center gap-2 sm:gap-4 ml-1 sm:ml-0">
         <img src="/school-logo.png" alt="Logo" className="h-8 w-8 sm:h-12 sm:w-12 object-contain logo-white-filter" />
-        <span className="font-black text-gray-950 dark:text-white hidden xs:block text-xs sm:text-base tracking-tighter">Saqr Library</span>
+        <span className="font-black text-gray-950 dark:text-white hidden xs:block text-xs sm:text-base tracking-tighter">E.F.I.P.S Library</span>
       </div>
       
       <nav className="flex items-center gap-0.5 sm:gap-2">
