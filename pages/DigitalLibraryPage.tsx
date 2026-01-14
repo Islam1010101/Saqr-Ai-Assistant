@@ -1,5 +1,3 @@
-عايزها شبه تنسيق الصفحة الرئيسية
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../App';
