@@ -18,7 +18,17 @@ const DigitalLibraryPage: React.FC = () => {
     const [ripples, setRipples] = useState<{ id: number, x: number, y: number }[]>([]);
     const [inspirations, setInspirations] = useState<{ id: number, x: number, y: number, item: typeof READING_INSPIRATIONS[0], tx: string, ty: string }[]>([]);
 
-    // دالة تتبع الماوس لتأثير توهج الحواف (لأجهزة اللابتوب)
+    // دالة لتسجيل النشاط لصفحة التقارير
+    const logSectionView = (sectionName: string) => {
+        const logs = JSON.parse(localStorage.getItem('saqr_activity_logs') || '[]');
+        logs.push({
+            timestamp: Date.now(),
+            type: 'view',
+            value: sectionName
+        });
+        localStorage.setItem('saqr_activity_logs', JSON.stringify(logs));
+    };
+
     const handleMouseMove = (e: React.MouseEvent) => {
         const rect = e.currentTarget.getBoundingClientRect();
         const x = e.clientX - rect.left;
@@ -27,12 +37,15 @@ const DigitalLibraryPage: React.FC = () => {
         (e.currentTarget as HTMLElement).style.setProperty("--mouse-y", `${y}px`);
     };
 
-    const handleInteraction = (e: React.MouseEvent | React.TouchEvent, isMascot: boolean = false) => {
+    const handleInteraction = (e: React.MouseEvent | React.TouchEvent, isMascot: boolean = false, sectionName?: string) => {
         const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
         const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
         const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
         const rippleId = Date.now();
         setRipples(prev => [...prev, { id: rippleId, x: clientX - rect.left, y: clientY - rect.top }]);
+
+        // إذا كان الضغط على قسم، نسجل النشاط للتقارير
+        if (sectionName) logSectionView(sectionName);
 
         if (isMascot) {
             const newInspirations = READING_INSPIRATIONS.sort(() => 0.5 - Math.random()).slice(0, 3).map((item, i) => ({
@@ -81,9 +94,7 @@ const DigitalLibraryPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* شبكة المكتبات (أصبحت الآن روابط داخلية بالكامل) */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12">
-                
                 {/* المكتبة العربية */}
                 <section className="space-y-6 sm:space-y-8">
                     <h2 className="text-2xl sm:text-3xl font-black text-gray-950 dark:text-white flex items-center gap-3">
@@ -91,8 +102,12 @@ const DigitalLibraryPage: React.FC = () => {
                         {isAr ? 'المكتبة العربية' : 'Arabic Library'}
                     </h2>
                     <div className="grid gap-4 sm:gap-5">
-                        <Link to="/digital-library/arabic" onMouseMove={handleMouseMove} onMouseDown={handleInteraction}
-                            className="glass-panel glass-card-interactive group relative overflow-hidden p-5 sm:p-6 rounded-2xl sm:rounded-3xl border-red-500/40 bg-red-500/5 transition-all flex items-center gap-4 sm:gap-6">
+                        <Link 
+                            to="/digital-library/arabic" 
+                            onMouseMove={handleMouseMove} 
+                            onMouseDown={(e) => handleInteraction(e, false, isAr ? 'المكتبة العربية' : 'Arabic Library')}
+                            className="glass-panel glass-card-interactive group relative overflow-hidden p-5 sm:p-6 rounded-2xl sm:rounded-3xl border-red-500/40 bg-red-500/5 transition-all flex items-center gap-4 sm:gap-6"
+                        >
                             {ripples.map(r => <span key={r.id} className="ripple-effect border-red-500/20" style={{ left: r.x, top: r.y }} />)}
                             <div className="text-3xl sm:text-4xl shrink-0 z-10 animate-bounce">🏛️</div>
                             <div className="flex-1 min-w-0 z-10">
@@ -108,15 +123,19 @@ const DigitalLibraryPage: React.FC = () => {
                     </div>
                 </section>
 
-                {/* المكتبة الإنجليزية (تم تحويلها لرابط داخلي) */}
+                {/* المكتبة الإنجليزية */}
                 <section className="space-y-6 sm:space-y-8">
                     <h2 className="text-2xl sm:text-3xl font-black text-gray-950 dark:text-white flex items-center gap-3">
                         <span className="w-2 h-8 sm:h-10 bg-blue-600 rounded-full shadow-lg"></span>
                         {isAr ? 'المكتبة الإنجليزية' : 'English Library'}
                     </h2>
                     <div className="grid gap-4 sm:gap-5">
-                        <Link to="/digital-library/english" onMouseMove={handleMouseMove} onMouseDown={handleInteraction}
-                            className="glass-panel glass-card-interactive group relative overflow-hidden p-5 sm:p-6 rounded-2xl sm:rounded-3xl border-red-500/40 bg-red-500/5 transition-all flex items-center gap-4 sm:gap-6">
+                        <Link 
+                            to="/digital-library/english" 
+                            onMouseMove={handleMouseMove} 
+                            onMouseDown={(e) => handleInteraction(e, false, isAr ? 'المكتبة الإنجليزية' : 'English Library')}
+                            className="glass-panel glass-card-interactive group relative overflow-hidden p-5 sm:p-6 rounded-2xl sm:rounded-3xl border-red-500/40 bg-red-500/5 transition-all flex items-center gap-4 sm:gap-6"
+                        >
                             {ripples.map(r => <span key={r.id} className="ripple-effect border-red-500/20" style={{ left: r.x, top: r.y }} />)}
                             <div className="text-3xl sm:text-4xl shrink-0 z-10 animate-bounce">🏛️</div>
                             <div className="flex-1 min-w-0 z-10">
