@@ -3,10 +3,16 @@ import { useLanguage } from '../App';
 import { ChatMessage } from '../types';
 import ReactMarkdown from 'react-markdown'; 
 
+// استيراد البيانات الرقمية لتزويد الـ AI بها كسياق
+const DIGITAL_COLLECTION_SUMMARY = `
+Arabic Digital Books: مجموعه روايات أجاثا كريستي, أرض الإله, أرض النفاق, أكواريل, الفيل الأزرق, نائب عزارئيل, المكتبة الخضراء, روايات تشارلز ديكنز (أوقات عصيبة، أوليفر تويست، الآمال الكبيرة، دايفيد كوبرفيلد، دمبي وولده، قصة مدينتين، مذكرات بكوك), مسرحيات شيكسبير (ترويض النمرة، جعجعة بدون طحن، هملت), سلسلة رجل المستحيل، سلسلة ما وراء الطبيعة، سلسلة الشياطين الـ13, كتب إسلامية (تفسير ابن كثير، أنبياء الله، قصص الحيوان في القرآن، شرح الأربعين النووية، صحيح البخاري ومسلم), كتب تنمية بشرية (الأب الغني والأب الفقير، الرقص مع الحياة، المفاتيح العشرة للنجاح، خوارق اللاشعور، قوة الآن، أربعون، كيف تكسب الأصدقاء).
+English Digital Books: Me Before You (Jojo Moyes), The Great Gatsby, The Kite Runner, And Then There Were NONE (Agatha Christie), Tales of the Unexpected, Sherlock Holmes (Hound of the Baskervilles), The Girl on the Train, The Silent Patient, and short stories by Tolstoy, Chekhov, Shirley Jackson, Roald Dahl, and Edgar Allan Poe.
+`;
+
 const translations = {
   ar: {
     pageTitle: 'اسأل صقر (البحث الذكي)',
-    saqrWelcome: 'أهلاً بك! أنا صقر، مساعدك الذكي. كيف يمكنني مساعدتك في رحلتك المعرفية اليوم؟',
+    saqrWelcome: 'أهلاً بك! أنا صقر، مساعدك الذكي. كيف يمكنني مساعدتك في رحلتك المعرفية عبر مكتبتنا الورقية والإلكترونية اليوم؟',
     inputPlaceholder: 'اسألني عن أي كتاب أو موضوع...',
     isTyping: 'صقر يستحضر الإجابة...',
     error: 'عذراً، حدث خطأ تقني. يرجى المحاولة مرة أخرى.',
@@ -15,7 +21,7 @@ const translations = {
   },
   en: {
     pageTitle: 'Ask Saqr (Smart Search)',
-    saqrWelcome: "Hello! I'm Saqr, your AI assistant. How can I help you explore the library today?",
+    saqrWelcome: "Hello! I'm Saqr, your AI assistant. How can I help you explore our physical and digital library today?",
     inputPlaceholder: 'Ask me about any book or topic...',
     isTyping: 'Saqr is thinking...',
     error: 'Sorry, a technical error occurred. Please try again.',
@@ -39,13 +45,10 @@ const SmartSearchPage: React.FC = () => {
   const [ripples, setRipples] = useState<{ id: number, x: number, y: number }[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // دالة تتبع الماوس لتأثير توهج الحواف الزجاجية (لأجهزة اللابتوب)
   const handleMouseMove = (e: React.MouseEvent) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    (e.currentTarget as HTMLElement).style.setProperty("--mouse-x", `${x}px`);
-    (e.currentTarget as HTMLElement).style.setProperty("--mouse-y", `${y}px`);
+    (e.currentTarget as HTMLElement).style.setProperty("--mouse-x", `${e.clientX - rect.left}px`);
+    (e.currentTarget as HTMLElement).style.setProperty("--mouse-y", `${e.clientY - rect.top}px`);
   };
 
   useEffect(() => {
@@ -60,11 +63,9 @@ const SmartSearchPage: React.FC = () => {
     const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
     const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const x = clientX - rect.left;
-    const y = clientY - rect.top;
-
+    
     const rippleId = Date.now();
-    setRipples(prev => [...prev, { id: rippleId, x, y }]);
+    setRipples(prev => [...prev, { id: rippleId, x: clientX - rect.left, y: clientY - rect.top }]);
     setTimeout(() => {
         setRipples(prev => prev.filter(r => r.id !== rippleId));
         if (callback) callback();
@@ -80,11 +81,16 @@ const SmartSearchPage: React.FC = () => {
     setIsLoading(true);
 
     try {
+      // إرسال الرسالة مع تزويد الـ AI بمعلومات المكتبة الرقمية
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: [...messages, userMessage],
+          messages: [
+            { role: 'system', content: `You are Saqr, the AI librarian for Emirates Falcon School. You have access to both physical books and a Digital Library. Digital Collection Info: ${DIGITAL_COLLECTION_SUMMARY}` },
+            ...messages, 
+            userMessage
+          ],
           locale,
         }),
       });
@@ -92,9 +98,7 @@ const SmartSearchPage: React.FC = () => {
       if (!response.ok) throw new Error('Bad response');
 
       const data = (await response.json()) as { reply?: string };
-      const reply = data.reply || t('error');
-
-      setMessages((prev) => [...prev, { role: 'assistant', content: reply }]);
+      setMessages((prev) => [...prev, { role: 'assistant', content: data.reply || t('error') }]);
     } catch (error) {
       setMessages((prev) => [...prev, { role: 'assistant', content: t('error') }]);
     } finally {
@@ -105,13 +109,10 @@ const SmartSearchPage: React.FC = () => {
   return (
     <div dir={dir} className="max-w-5xl mx-auto px-2 sm:px-4 animate-in fade-in duration-1000 pb-10 relative">
       
-      {/* 1. حاوية المحادثة الكبرى مع تأثير توهج الحواف */}
       <div 
         onMouseMove={handleMouseMove}
         className="flex flex-col h-[75vh] sm:h-[80vh] glass-panel glass-card-interactive rounded-[2.5rem] sm:rounded-[3.5rem] shadow-2xl overflow-hidden border-white/30 dark:border-white/10 relative"
       >
-        
-        {/* هيدر الدردشة التفاعلي */}
         <div 
           onMouseDown={(e) => handleInteraction(e)}
           className="relative overflow-hidden p-6 sm:p-8 border-b border-black/5 dark:border-white/10 bg-white/40 dark:bg-gray-950/40 backdrop-blur-2xl flex items-center justify-between z-10"
@@ -119,12 +120,7 @@ const SmartSearchPage: React.FC = () => {
           {ripples.map(r => <span key={r.id} className="ripple-effect border-red-500/30" style={{ left: r.x, top: r.y }} />)}
           <div className="flex items-center gap-4 sm:gap-5 relative z-10">
             <div className="relative">
-                {/* شعار المدرسة مع فلتر التبييض للوضع المظلم */}
-                <img 
-                  src={SCHOOL_LOGO} 
-                  alt="Logo" 
-                  className="w-12 h-12 sm:w-14 sm:h-14 object-contain rotate-12 logo-smart-hover logo-white-filter" 
-                />
+                <img src={SCHOOL_LOGO} alt="Logo" className="w-12 h-12 sm:w-14 sm:h-14 object-contain rotate-12 logo-smart-hover logo-white-filter" />
                 <span className="absolute bottom-0 right-0 w-3 h-3 sm:w-4 sm:h-4 bg-red-600 border-2 border-white rounded-full animate-pulse"></span>
             </div>
             <div>
@@ -134,7 +130,6 @@ const SmartSearchPage: React.FC = () => {
           </div>
         </div>
 
-        {/* 2. منطقة الرسائل */}
         <div className="flex-1 p-4 sm:p-10 overflow-y-auto space-y-6 sm:space-y-8 scrollbar-hide bg-white/5 relative z-0">
           {messages.map((msg, index) => (
             <div
@@ -186,7 +181,6 @@ const SmartSearchPage: React.FC = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* 3. منطقة الإدخال مع توهج الحواف */}
         <div className="p-4 sm:p-8 bg-white/60 dark:bg-gray-950/60 border-t border-black/5 dark:border-white/10 backdrop-blur-3xl relative z-10">
           <div 
             onMouseMove={handleMouseMove}
