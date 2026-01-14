@@ -1,16 +1,17 @@
 import React, { useState, useEffect, createContext, useContext, ReactNode, useRef } from 'react';
 import { HashRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 
+// استيراد الصفحات
 import HomePage from './pages/HomePage';
 import SearchPage from './pages/SearchPage';
 import SmartSearchPage from './pages/SmartSearchPage';
 import ReportsPage from './pages/ReportsPage';
 import AboutPage from './pages/AboutPage';
-import DigitalLibraryPage from './pages/DigitalLibraryPage'; // استيراد الصفحة الجديدة
+import DigitalLibraryPage from './pages/DigitalLibraryPage';
 
 import type { Locale } from './types';
 
-// -------- 1. مكون تتبع الماوس الأحمر (عالي الأداء) --------
+// -------- 1. مكون تتبع الماوس الكريستالي (عالي الأداء) --------
 const MouseFollower: React.FC = () => {
   const cursorRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
@@ -21,6 +22,7 @@ const MouseFollower: React.FC = () => {
 
     const handleMouseMove = (e: MouseEvent) => {
       if (cursorRef.current) {
+        // استخدام translate3d لتفعيل تسريع الـ GPU وضمان Zero Latency
         cursorRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-50%, -50%)`;
       }
     };
@@ -48,7 +50,7 @@ const MouseFollower: React.FC = () => {
   );
 };
 
-// -------- 2. إعدادات اللغة --------
+// -------- 2. سياق اللغة (AR/EN) --------
 const LanguageContext = createContext<any>(null);
 export const useLanguage = () => useContext(LanguageContext);
 
@@ -67,7 +69,7 @@ const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   );
 };
 
-// -------- 3. إعدادات المظهر --------
+// -------- 3. سياق المظهر (Light/Dark) --------
 const ThemeContext = createContext<any>(null);
 export const useTheme = () => useContext(ThemeContext);
 
@@ -88,7 +90,7 @@ const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   );
 };
 
-// -------- 4. الهيدر (Header) --------
+// -------- 4. الهيدر الذكي (Header) --------
 const Header: React.FC = () => {
   const { locale, setLocale } = useLanguage();
   const { theme, toggleTheme } = useTheme();
@@ -98,7 +100,6 @@ const Header: React.FC = () => {
     { path: '/', label: locale === 'ar' ? 'الرئيسية' : 'Home' },
     { path: '/search', label: locale === 'ar' ? 'بحث' : 'Search' },
     { path: '/smart-search', label: locale === 'ar' ? 'صقر AI' : 'Saqr AI' },
-    // إضافة رابط المكتبة الإلكترونية الجديد هنا
     { path: '/digital-library', label: locale === 'ar' ? 'المكتبة الإلكترونية' : 'E-Library' },
     { path: '/reports', label: locale === 'ar' ? 'تقارير' : 'Reports' },
     { path: '/about', label: locale === 'ar' ? 'حول' : 'About' },
@@ -107,16 +108,21 @@ const Header: React.FC = () => {
   return (
     <header className="glass-panel sticky top-0 z-40 p-4 flex justify-between items-center m-4 rounded-3xl border-white/20">
       <div className="flex items-center gap-4">
-        <img src="/school-logo.png" alt="Logo" className="h-12 w-12 object-contain rotate-[15deg] logo-smart-hover" />
-        <span className="font-black text-gray-950 dark:text-white hidden md:block">Saqr Library</span>
+        {/* الشعار مع فلتر التبييض التلقائي للدارك مود */}
+        <img 
+          src="/school-logo.png" 
+          alt="Logo" 
+          className="h-12 w-12 object-contain logo-smart-hover logo-white-filter" 
+        />
+        <span className="font-black text-gray-950 dark:text-white hidden lg:block tracking-tighter">Saqr Library</span>
       </div>
       
-      <nav className="flex items-center gap-2">
+      <nav className="flex items-center gap-1 sm:gap-2">
         {links.map(l => (
           <Link 
             key={l.path} 
             to={l.path} 
-            className={`px-4 py-2 rounded-xl text-[10px] sm:text-xs font-black transition-all active:scale-90 ${
+            className={`px-3 sm:px-4 py-2 rounded-xl text-[9px] sm:text-xs font-black transition-all active:scale-90 ${
               location.pathname === l.path 
                 ? 'bg-red-600 text-white shadow-lg shadow-red-900/20' 
                 : 'text-gray-600 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5'
@@ -146,28 +152,32 @@ const Header: React.FC = () => {
   );
 };
 
-// -------- 5. المكون الرئيسي (App) --------
+// -------- 5. المكون الرئيسي للتطبيق (App) --------
 const App: React.FC = () => {
   return (
     <ThemeProvider>
       <LanguageProvider>
         <HashRouter>
           <div className="min-h-screen relative bg-slate-50 dark:bg-slate-950 transition-colors duration-500 overflow-x-hidden">
+            {/* المؤشر الكريستالي */}
             <MouseFollower />
+            
+            {/* الهيدر الزجاجي */}
             <Header />
             
+            {/* المحتوى الرئيسي */}
             <main className="container mx-auto p-4 sm:p-6 lg:p-10">
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/smart-search" element={<SmartSearchPage />} />
+                <Route path="/digital-library" element={<DigitalLibraryPage />} />
                 <Route path="/reports" element={<ReportsPage />} />
                 <Route path="/about" element={<AboutPage />} />
-                {/* المسار الجديد للمكتبة الإلكترونية */}
-                <Route path="/digital-library" element={<DigitalLibraryPage />} />
               </Routes>
             </main>
 
+            {/* الفوتر الرسمي للمدرسة */}
             <footer className="py-10 text-center text-[10px] text-gray-400 dark:text-gray-500 font-black tracking-widest uppercase">
               &copy; {new Date().getFullYear()} Emirates Falcon International Private School
             </footer>
