@@ -70,12 +70,12 @@ const HomePage: React.FC = () => {
                     className="fixed pointer-events-none z-[200] glass-panel px-4 py-2 rounded-xl border-white/40 shadow-2xl animate-in fade-in zoom-in duration-300"
                     style={{ left: tooltip.x, top: tooltip.y, transform: 'translate(-50%, -100%)' }}
                 >
-                    <p className="text-xs font-black text-slate-900 dark:text-white whitespace-nowrap">{tooltip.text}</p>
+                    <p className="text-[10px] font-black text-slate-900 dark:text-white whitespace-nowrap">{tooltip.text}</p>
                 </div>
             )}
 
-            {/* الكارت الرئيسي - تم ضبط الحواف الناعمة والحدود الشفافة */}
-            <div className="relative z-10 glass-panel w-full max-w-6xl h-fit md:min-h-[65vh] rounded-[3.5rem] md:rounded-[4.5rem] overflow-hidden shadow-[0_40px_120px_rgba(0,0,0,0.15)] border border-white/20 dark:border-white/5 bg-white/80 dark:bg-slate-900/80 backdrop-blur-3xl">
+            {/* الكارت الرئيسي - تم حذف الحدود تماماً (Border-none) */}
+            <div className="relative z-10 glass-panel w-full max-w-6xl h-fit md:min-h-[65vh] rounded-[3.5rem] md:rounded-[4.5rem] overflow-hidden shadow-[0_40px_120px_rgba(0,0,0,0.12)] border-none bg-white/80 dark:bg-slate-900/80 backdrop-blur-3xl">
                 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 h-full p-10 md:p-20 items-center relative z-10">
                     
@@ -94,7 +94,7 @@ const HomePage: React.FC = () => {
                                 to="/search" 
                                 onMouseMove={(e) => handleButtonMouseMove(e, t('manualDesc'))}
                                 onMouseLeave={() => setTooltip(null)}
-                                className="glass-panel border border-slate-200 dark:border-white/10 hover:border-red-600 hover:shadow-[0_0_25px_rgba(220,38,38,0.4)] py-5 px-8 text-lg font-black rounded-[2rem] text-slate-900 dark:text-white transition-all duration-500 active:scale-95"
+                                className="glass-panel border-2 border-slate-200 dark:border-white/10 hover:border-red-600 hover:shadow-[0_0_25px_rgba(220,38,38,0.4)] py-5 px-8 text-lg font-black rounded-[2rem] text-slate-900 dark:text-white transition-all duration-500 active:scale-95"
                             >
                                 {t('manualSearch')}
                             </Link>
@@ -103,7 +103,7 @@ const HomePage: React.FC = () => {
                                 to="/smart-search" 
                                 onMouseMove={(e) => handleButtonMouseMove(e, t('smartDesc'))}
                                 onMouseLeave={() => setTooltip(null)}
-                                className="glass-panel border border-slate-200 dark:border-white/10 hover:border-green-600 hover:shadow-[0_0_25px_rgba(0,115,47,0.4)] py-5 px-8 text-lg font-black rounded-[2rem] text-slate-900 dark:text-white transition-all duration-500 active:scale-95"
+                                className="glass-panel border-2 border-slate-200 dark:border-white/10 hover:border-green-600 hover:shadow-[0_0_25px_rgba(0,115,47,0.4)] py-5 px-8 text-lg font-black rounded-[2rem] text-slate-900 dark:text-white transition-all duration-500 active:scale-95"
                             >
                                 {t('smartSearch')}
                             </Link>
@@ -125,12 +125,12 @@ const HomePage: React.FC = () => {
                             onTouchStart={handleMascotInteraction}
                             className={`relative group cursor-pointer touch-manipulation flex items-center justify-center w-full max-w-[500px] transition-transform duration-300 ${isMascotClicked ? 'scale-110 rotate-2' : 'hover:scale-105'}`}
                         >
-                            {/* الشعار الوطني مائل لليمين خلف الشخصية */}
-                            <div className="absolute inset-0 flex items-center justify-center z-0 pointer-events-none transition-transform duration-1000 group-hover:scale-110 group-hover:rotate-12">
+                            {/* الشعار الوطني مائل لليمين بشكل بارز */}
+                            <div className="absolute inset-0 flex items-center justify-center z-0 pointer-events-none transition-transform duration-1000 group-hover:scale-110">
                                 <img 
                                     src="/school-logo.png" 
                                     alt="Seal" 
-                                    className="h-[120%] w-[120%] object-contain opacity-[0.06] dark:opacity-[0.12] blur-[1px] logo-white-filter rotate-6" 
+                                    className="h-[120%] w-[120%] object-contain opacity-[0.06] dark:opacity-[0.1] blur-[1px] logo-white-filter rotate-12" 
                                 />
                             </div>
 
