@@ -37,6 +37,15 @@ const DigitalLibraryPage: React.FC = () => {
         { title: "Epic Library", desc: "Unlimited digital books for students", icon: "🚀", link: "#" },
     ];
 
+    // دالة تتبع الماوس لتأثير توهج الحواف (لأجهزة اللابتوب)
+    const handleMouseMove = (e: React.MouseEvent) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        (e.currentTarget as HTMLElement).style.setProperty("--mouse-x", `${x}px`);
+        (e.currentTarget as HTMLElement).style.setProperty("--mouse-y", `${y}px`);
+    };
+
     const handleInteraction = (e: React.MouseEvent | React.TouchEvent, isMascot: boolean = false) => {
         const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
         const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
@@ -70,7 +79,7 @@ const DigitalLibraryPage: React.FC = () => {
     return (
         <div dir={dir} className="max-w-7xl mx-auto px-4 py-6 sm:py-10 animate-in fade-in relative">
             
-            {/* --- طبقة العناصر التحفيزية (متجاوبة الحجم) --- */}
+            {/* طبقة العناصر التحفيزية */}
             {inspirations.map(insp => (
                 <div
                     key={insp.id}
@@ -84,8 +93,11 @@ const DigitalLibraryPage: React.FC = () => {
                 </div>
             ))}
 
-            {/* قسم الهيرو: متجاوب (طولي للموبايل، عرضي للتابلت) */}
-            <div className="glass-panel relative overflow-hidden rounded-[2.5rem] sm:rounded-[3.5rem] p-8 sm:p-12 md:p-16 mb-10 sm:mb-16 border-white/20 flex flex-col md:flex-row items-center gap-8 sm:gap-12">
+            {/* قسم الهيرو مع تفعيل توهج الحواف */}
+            <div 
+                onMouseMove={handleMouseMove}
+                className="glass-panel glass-card-interactive relative overflow-hidden rounded-[2.5rem] sm:rounded-[3.5rem] p-8 sm:p-12 md:p-16 mb-10 sm:mb-16 border-white/20 flex flex-col md:flex-row items-center gap-8 sm:gap-12"
+            >
                 {ripples.map(r => <span key={r.id} className="ripple-effect border-red-500/30 opacity-50" style={{ left: r.x, top: r.y }} />)}
                 
                 <div className="flex-1 text-center md:text-start relative z-10 space-y-4 sm:space-y-6">
@@ -98,9 +110,13 @@ const DigitalLibraryPage: React.FC = () => {
                 </div>
 
                 <div className="relative flex items-center justify-center scale-90 sm:scale-100">
-                    {/* الشعار في الخلفية */}
-                    <div className="absolute opacity-10 scale-125 sm:scale-150 pointer-events-none transition-all">
-                        <img src="/school-logo.png" alt="Back Logo" className="h-48 w-48 sm:h-64 sm:w-64 md:h-80 md:w-80 object-contain rotate-[15deg]" />
+                    <div className="absolute opacity-10 dark:opacity-20 scale-125 sm:scale-150 pointer-events-none transition-all duration-700">
+                        {/* شعار المدرسة مع فلتر التبييض للوضع المظلم */}
+                        <img 
+                            src="/school-logo.png" 
+                            alt="Back Logo" 
+                            className="h-48 w-48 sm:h-64 sm:w-64 md:h-80 md:w-80 object-contain rotate-[15deg] logo-white-filter" 
+                        />
                     </div>
 
                     <div 
@@ -117,7 +133,6 @@ const DigitalLibraryPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* شبكة المكتبات (1 عمود للموبايل، 2 للتابلت فما فوق) */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12">
                 
                 {/* المكتبة العربية */}
@@ -128,14 +143,20 @@ const DigitalLibraryPage: React.FC = () => {
                     </h2>
                     <div className="grid gap-4 sm:gap-5">
                         {arabicResources.map((item, i) => (
-                            <a key={i} href={item.link} target="_blank" rel="noopener noreferrer" className={`glass-panel group relative overflow-hidden p-5 sm:p-6 rounded-2xl sm:rounded-3xl border-white/10 hover:border-red-500/30 transition-all flex items-center gap-4 sm:gap-6 ${i === 0 ? 'border-red-500/40 bg-red-500/5' : ''}`} onMouseDown={handleInteraction} onTouchStart={handleInteraction}>
+                            <a 
+                                key={i} href={item.link} target="_blank" rel="noopener noreferrer" 
+                                onMouseMove={handleMouseMove}
+                                onMouseDown={handleInteraction} 
+                                onTouchStart={handleInteraction}
+                                className={`glass-panel glass-card-interactive group relative overflow-hidden p-5 sm:p-6 rounded-2xl sm:rounded-3xl border-white/10 hover:border-red-500/30 transition-all flex items-center gap-4 sm:gap-6 ${i === 0 ? 'border-red-500/40 bg-red-500/5' : ''}`} 
+                            >
                                 {ripples.map(r => <span key={r.id} className="ripple-effect border-red-500/20" style={{ left: r.x, top: r.y }} />)}
-                                <div className="text-3xl sm:text-4xl shrink-0">{item.icon}</div>
-                                <div className="flex-1 min-w-0">
+                                <div className="text-3xl sm:text-4xl shrink-0 z-10">{item.icon}</div>
+                                <div className="flex-1 min-w-0 z-10">
                                     <h3 className="text-base sm:text-xl font-black text-gray-900 dark:text-white group-hover:text-red-600 truncate">{item.title}</h3>
                                     <p className="text-[10px] sm:text-sm text-gray-500 font-medium line-clamp-1">{item.desc}</p>
                                 </div>
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 text-gray-400 shrink-0 z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                             </a>
                         ))}
                     </div>
@@ -149,14 +170,20 @@ const DigitalLibraryPage: React.FC = () => {
                     </h2>
                     <div className="grid gap-4 sm:gap-5">
                         {englishResources.map((item, i) => (
-                            <a key={i} href={item.link} target="_blank" rel="noopener noreferrer" className={`glass-panel group relative overflow-hidden p-5 sm:p-6 rounded-2xl sm:rounded-3xl border-white/10 hover:border-red-500/30 transition-all flex items-center gap-4 sm:gap-6 ${i === 0 ? 'border-red-500/40 bg-red-500/5' : ''}`} onMouseDown={handleInteraction} onTouchStart={handleInteraction}>
+                            <a 
+                                key={i} href={item.link} target="_blank" rel="noopener noreferrer" 
+                                onMouseMove={handleMouseMove}
+                                onMouseDown={handleInteraction} 
+                                onTouchStart={handleInteraction}
+                                className={`glass-panel glass-card-interactive group relative overflow-hidden p-5 sm:p-6 rounded-2xl sm:rounded-3xl border-white/10 hover:border-red-500/30 transition-all flex items-center gap-4 sm:gap-6 ${i === 0 ? 'border-red-500/40 bg-red-500/5' : ''}`} 
+                            >
                                 {ripples.map(r => <span key={r.id} className="ripple-effect border-red-500/20" style={{ left: r.x, top: r.y }} />)}
-                                <div className="text-3xl sm:text-4xl shrink-0">{item.icon}</div>
-                                <div className="flex-1 min-w-0">
+                                <div className="text-3xl sm:text-4xl shrink-0 z-10">{item.icon}</div>
+                                <div className="flex-1 min-w-0 z-10">
                                     <h3 className="text-base sm:text-xl font-black text-gray-900 dark:text-white group-hover:text-red-600 truncate">{item.title}</h3>
                                     <p className="text-[10px] sm:text-sm text-gray-500 font-medium line-clamp-1">{item.desc}</p>
                                 </div>
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 text-gray-400 shrink-0 z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                             </a>
                         ))}
                     </div>
