@@ -41,48 +41,73 @@ const translations = {
   }
 };
 
-// --- نافذة تفاصيل الكتاب (Modal) ---
+// --- نافذة تفاصيل الكتاب (الكتلة الواحدة بدون سكرول) ---
 const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
     if (!book) return null;
+    const isAiClassified = !book.subject || book.subject === "Unknown";
+
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 backdrop-blur-2xl animate-in fade-in duration-300" onClick={onClose}>
-            <div className="glass-panel w-full max-w-xl p-8 md:p-12 rounded-[3rem] border-white/40 shadow-2xl relative animate-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
-                <button onClick={onClose} className="absolute top-8 end-8 p-2 bg-red-600 text-white rounded-full hover:scale-110 transition-all">
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M6 18L18 6M6 6l12 12" /></svg>
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 sm:p-6 backdrop-blur-3xl animate-in fade-in duration-300" onClick={onClose}>
+            <div 
+                className="glass-panel w-full max-w-4xl rounded-[3.5rem] border-2 border-white/50 dark:border-white/10 shadow-[0_50px_100px_rgba(0,0,0,0.3)] overflow-hidden relative animate-in zoom-in-95 duration-300 flex flex-col md:flex-row bg-white/90 dark:bg-slate-950/90"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <button onClick={onClose} className="absolute top-6 end-6 z-50 p-3 bg-red-600 text-white rounded-full hover:scale-110 active:scale-90 transition-all shadow-xl">
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}><path d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
-                <span className="inline-block bg-green-600/10 text-green-700 px-4 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest mb-4">{book.subject === 'Unknown' ? t('aiSubject') : book.subject}</span>
-                <h2 className="text-3xl font-black text-slate-950 dark:text-white mb-2 leading-tight">{book.title}</h2>
-                <p className="text-xl text-slate-500 font-bold mb-8">{book.author}</p>
-                <div className="bg-slate-950 text-white p-8 rounded-[2rem] flex justify-around text-center shadow-xl">
-                    <div><p className="text-[10px] opacity-50 uppercase mb-1">{t('shelf')}</p><p className="text-3xl font-black">{book.shelf}</p></div>
-                    <div className="w-px h-12 bg-white/10"></div>
-                    <div><p className="text-[10px] opacity-50 uppercase mb-1">{t('row')}</p><p className="text-3xl font-black">{book.row}</p></div>
+
+                <div className="flex-1 p-10 md:p-14 flex flex-col justify-center border-b md:border-b-0 md:border-e border-white/20">
+                    <div className="mb-6">
+                         <span className={`inline-block px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] mb-4 ${isAiClassified ? 'bg-red-600 text-white shadow-lg' : 'bg-green-600 text-white shadow-lg'}`}>
+                            {isAiClassified ? t('aiSubject') : book.subject}
+                         </span>
+                        <h2 className="text-4xl md:text-5xl font-black text-slate-950 dark:text-white leading-[1.1] tracking-tighter mb-4">{book.title}</h2>
+                        <p className="text-xl md:text-2xl text-slate-500 dark:text-slate-400 font-bold italic">By {book.author}</p>
+                    </div>
+                    <div className="bg-slate-50 dark:bg-white/5 p-8 rounded-[2.5rem] border-2 border-dashed border-slate-200 dark:border-white/10">
+                        <p className="text-slate-800 dark:text-slate-200 text-xl md:text-2xl font-medium leading-relaxed italic">"{book.summary || 'Exploring this resource provides deep strategic insights into its core subject matter.'}"</p>
+                    </div>
+                </div>
+
+                <div className="w-full md:w-[350px] bg-slate-950 dark:bg-black p-10 md:p-14 flex flex-col justify-center items-center text-center text-white relative overflow-hidden">
+                    <img src="/school-logo.png" className="absolute opacity-5 scale-150 rotate-12 pointer-events-none" alt="" />
+                    <div className="relative z-10 space-y-12">
+                        <div>
+                            <p className="text-[11px] font-black text-green-500 uppercase tracking-[0.3em] mb-4">Location Data</p>
+                            <div className="space-y-4">
+                                <div><p className="text-xs opacity-50 uppercase tracking-widest mb-1">{t('shelf')}</p><p className="text-6xl font-black tracking-tighter">{book.shelf}</p></div>
+                                <div className="h-px w-12 bg-white/20 mx-auto"></div>
+                                <div><p className="text-xs opacity-50 uppercase tracking-widest mb-1">{t('row')}</p><p className="text-6xl font-black tracking-tighter">{book.row}</p></div>
+                            </div>
+                        </div>
+                        <button onClick={onClose} className="w-full bg-white text-slate-950 font-black py-4 px-8 rounded-2xl hover:bg-green-500 hover:text-white transition-all active:scale-95 text-sm uppercase tracking-widest shadow-2xl">{t('close')}</button>
+                    </div>
                 </div>
             </div>
         </div>
     );
 };
 
-// --- بطاقة الكتاب (بدون أيقونات + تأثير الضغط) ---
+// --- بطاقة الكتاب (5 كروت في الصف + توهج تفاعلي) ---
 const BookCard = React.memo(({ book, onClick, t }: { book: Book; onClick: () => void; t: any }) => {
-    const displaySubject = useMemo(() => (!book.subject || book.subject === "Unknown" ? t('aiSubject') : book.subject), [book.subject, t]);
+    const isAi = !book.subject || book.subject === "Unknown";
     return (
         <div 
             onClick={onClick}
-            className="group relative glass-panel bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border-2 border-white/30 dark:border-white/5 rounded-[2rem] transition-all duration-150 cursor-pointer flex flex-col h-full overflow-hidden shadow-lg active:scale-95 active:shadow-inner hover:border-red-600/40"
+            className="group relative glass-panel bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border-2 border-white/30 dark:border-white/5 rounded-[2.5rem] transition-all duration-300 cursor-pointer flex flex-col h-full overflow-hidden shadow-lg active:scale-95 hover:border-red-600/50 hover:shadow-[0_0_30px_rgba(220,38,38,0.3)]"
         >
-            <div className="p-6 flex-grow">
-                 <span className={`inline-block px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest mb-4 ${book.subject === 'Unknown' ? 'bg-red-600/10 text-red-600' : 'bg-green-600/10 text-green-700'}`}>
-                    {displaySubject}
+            <div className="p-7 flex-grow">
+                 <span className={`inline-block px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest mb-5 ${isAi ? 'bg-red-600 text-white' : 'bg-green-600 text-white'}`}>
+                    {isAi ? t('aiSubject') : book.subject}
                  </span>
-                <h3 className="font-black text-lg text-slate-950 dark:text-white leading-tight mb-2 tracking-tighter group-hover:text-red-600 transition-colors line-clamp-2">
+                <h3 className="font-black text-lg text-slate-950 dark:text-white leading-tight mb-3 tracking-tighter group-hover:text-red-600 transition-colors line-clamp-2">
                     {book.title}
                 </h3>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 font-bold">{book.author}</p>
             </div>
-            <div className="bg-white/40 dark:bg-black/20 py-4 px-6 border-t border-white/10 mt-auto">
+            <div className="bg-white/40 dark:bg-black/20 py-5 px-7 border-t border-white/10 mt-auto">
                 <p className="font-black text-slate-900 dark:text-white text-[10px] uppercase tracking-tighter">
-                    S:{book.shelf} — R:{book.row}
+                    Shelf {book.shelf} — Row {book.row}
                 </p>
             </div>
         </div>
@@ -98,7 +123,7 @@ const SearchPage: React.FC = () => {
     const [authorFilter, setAuthorFilter] = useState('all');
     const [shelfFilter, setShelfFilter] = useState('all');
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
-    const [visibleCount, setVisibleCount] = useState(24);
+    const [visibleCount, setVisibleCount] = useState(20); // 20 تقبل القسمة على 5
 
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
@@ -122,24 +147,22 @@ const SearchPage: React.FC = () => {
     return (
         <div dir={dir} className="max-w-7xl mx-auto px-4 pb-24 relative z-10">
             
-            {/* شريط البحث النخبوي المصغر */}
+            {/* شريط البحث المطور */}
             <div className="sticky top-24 z-50 mb-10 animate-fade-up">
-                <div className="glass-panel p-4 md:p-5 rounded-[2.5rem] shadow-2xl border-white/40 dark:border-white/5 backdrop-blur-3xl">
-                    <div className="flex flex-col md:flex-row gap-3">
-                        {/* حقل البحث */}
-                        <div className="flex-[2] relative">
+                <div className="glass-panel p-5 rounded-[2.5rem] shadow-2xl border-white/40 dark:border-white/5 backdrop-blur-3xl">
+                    <div className="flex flex-col md:flex-row gap-4">
+                        <div className="flex-[2] relative group">
                             <input
                                 type="text"
                                 placeholder={t('searchPlaceholder')}
-                                className="w-full p-4 ps-12 bg-slate-100/50 dark:bg-black/40 text-slate-950 dark:text-white border-2 border-transparent focus:border-red-600 rounded-2xl outline-none transition-all font-black text-base shadow-inner"
+                                className="w-full p-5 ps-14 bg-slate-100/50 dark:bg-black/40 text-slate-950 dark:text-white border-2 border-transparent focus:border-red-600 rounded-[1.5rem] md:rounded-[2rem] outline-none transition-all font-black text-lg shadow-inner"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
-                            <svg className="absolute start-4 top-1/2 -translate-y-1/2 h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                            <svg className="absolute start-5 top-1/2 -translate-y-1/2 h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                         </div>
                         
-                        {/* الفلاتر الذكية */}
-                        <div className="flex-[3] grid grid-cols-3 gap-2">
+                        <div className="flex-[3] grid grid-cols-3 gap-3">
                             {[
                                 { val: subjectFilter, set: setSubjectFilter, options: filters.subjects, label: t('allSubjects') },
                                 { val: authorFilter, set: setAuthorFilter, options: filters.authors, label: t('allAuthors') },
@@ -147,10 +170,10 @@ const SearchPage: React.FC = () => {
                             ].map((f, i) => (
                                 <select 
                                     key={i} value={f.val} onChange={(e) => f.set(e.target.value)}
-                                    className="p-3 rounded-xl bg-white/80 dark:bg-slate-800 border-2 border-slate-100 dark:border-white/5 font-black text-[10px] md:text-xs cursor-pointer outline-none focus:border-green-600 transition-all shadow-sm"
+                                    className="p-4 rounded-2xl bg-white/80 dark:bg-slate-800 border-2 border-slate-100 dark:border-white/5 font-black text-[10px] md:text-sm cursor-pointer outline-none focus:border-green-600 transition-all shadow-sm appearance-none"
                                 >
                                     <option value="all">{f.label}</option>
-                                    {f.options.map(o => <option key={o} value={o}>{i === 2 ? `${t('shelf')} ${o}` : o}</option>)}
+                                    {f.options.map(o => <option key={o} value={o}>{i === 2 ? `S: ${o}` : o}</option>)}
                                 </select>
                             ))}
                         </div>
@@ -158,8 +181,8 @@ const SearchPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* شبكة الكتب */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 animate-fade-up">
+            {/* شبكة الكتب المحدثة بـ 5 أعمدة */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 animate-fade-up">
                 {filteredBooks.slice(0, visibleCount).map((book) => (
                     <BookCard 
                         key={book.id} book={book} t={t}
@@ -170,10 +193,13 @@ const SearchPage: React.FC = () => {
 
             <BookModal book={selectedBook} onClose={() => setSelectedBook(null)} t={t} />
 
-            {/* عرض المزيد */}
+            {/* زر عرض المزيد */}
             {filteredBooks.length > visibleCount && (
-                <div className="mt-12 text-center">
-                    <button onClick={() => setVisibleCount(prev => prev + 24)} className="bg-slate-950 text-white dark:bg-white dark:text-black px-10 py-3 rounded-xl font-black text-sm shadow-xl active:scale-90 transition-all uppercase tracking-widest">
+                <div className="mt-16 text-center">
+                    <button 
+                        onClick={() => setVisibleCount(prev => prev + 20)} 
+                        className="bg-slate-950 text-white dark:bg-white dark:text-black px-16 py-4 rounded-2xl font-black text-lg shadow-2xl hover:scale-105 active:scale-90 transition-all uppercase tracking-[0.2em]"
+                    >
                         Load More
                     </button>
                 </div>
