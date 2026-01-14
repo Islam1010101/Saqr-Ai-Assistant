@@ -73,7 +73,7 @@ const translations = {
   }
 };
 
-// --- نافذة تفاصيل الكتاب (Modal) مع استعادة منطق الذكاء الاصطناعي ---
+// --- نافذة تفاصيل الكتاب (Modal) ---
 const BookModal: React.FC<{
   book: Book | null;
   onClose: () => void;
@@ -87,41 +87,35 @@ const BookModal: React.FC<{
     const [isLoading, setIsLoading] = useState(false);
     const [ripples, setRipples] = useState<{ id: number, x: number, y: number }[]>([]);
 
+    // دالة تتبع الماوس لتأثير الحواف الزجاجية
+    const handleMouseMove = (e: React.MouseEvent) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        (e.currentTarget as HTMLElement).style.setProperty("--mouse-x", `${x}px`);
+        (e.currentTarget as HTMLElement).style.setProperty("--mouse-y", `${y}px`);
+    };
+
     useEffect(() => {
         if (!book) return;
-        
         const fetchAiInsights = async () => {
             setIsLoading(true); setSummary(''); setAiSubject('');
             try {
-                // صياغة البرومبت لاستخراج الموضوع والملخص معاً
-                const prompt = `Analyze the book: "${book.title}" by "${book.author}". 
-                1. Provide a concise category/subject. 
-                2. Provide a 2-line engaging summary. 
-                Format the response exactly as: SUBJECT: [category] | SUMMARY: [summary]`;
-
+                const prompt = `Analyze the book: "${book.title}" by "${book.author}". 1. Category 2. 2-line summary. Format: SUBJECT: [cat] | SUMMARY: [sum]`;
                 const response = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ messages: [{ role: 'user', content: prompt }], locale }),
                 });
-
                 const data = await response.json();
                 const reply = data.reply || "";
-
                 if (reply.includes('|')) {
                     const [sub, sum] = reply.split('|');
                     setAiSubject(sub.replace(/SUBJECT:/i, '').trim());
                     setSummary(sum.replace(/SUMMARY:/i, '').trim());
-                } else {
-                    setSummary(reply);
-                }
-            } catch (error) {
-                setSummary(book.summary || t_search('noResults'));
-            } finally {
-                setIsLoading(false);
-            }
+                } else { setSummary(reply); }
+            } catch (error) { setSummary(book.summary || t_search('noResults')); } finally { setIsLoading(false); }
         };
-
         fetchAiInsights();
         logActivity('view', book.id);
     }, [book, locale]);
@@ -130,7 +124,6 @@ const BookModal: React.FC<{
         const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
         const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
         const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-        
         const rippleId = Date.now();
         setRipples(prev => [...prev, { id: rippleId, x: clientX - rect.left, y: clientY - rect.top }]);
         setTimeout(() => {
@@ -140,13 +133,16 @@ const BookModal: React.FC<{
     };
 
     if (!book) return null;
-    // تحديد إذا كان الكتاب يحتاج لتصنيف ذكي (إذا كان غير معروف أو غير مصنف)
     const needsAiSubject = !book.subject || book.subject === 'Uncategorized' || book.subject === 'غير مصنف';
 
     return (
         <div dir={dir} className="fixed inset-0 bg-black/70 z-[100] flex justify-center items-end sm:items-center p-0 sm:p-4 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}>
-            <div className="glass-panel rounded-t-[2.5rem] sm:rounded-[2.5rem] w-full max-w-2xl max-h-[95vh] overflow-y-auto shadow-2xl transform animate-in slide-in-from-bottom sm:zoom-in-95 border-white/20" onClick={(e) => e.stopPropagation()}>
-                <div className="p-6 sm:p-10">
+            <div 
+                onMouseMove={handleMouseMove}
+                className="glass-panel glass-card-interactive rounded-t-[2.5rem] sm:rounded-[2.5rem] w-full max-w-2xl max-h-[95vh] overflow-y-auto shadow-2xl transform animate-in slide-in-from-bottom sm:zoom-in-95 border-white/20" 
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="p-6 sm:p-10 relative z-10">
                     <div className="flex justify-between items-start mb-6">
                         <div>
                             <h2 className="text-2xl sm:text-3xl font-black text-gray-950 dark:text-white leading-tight">{book.title}</h2>
@@ -192,7 +188,7 @@ const BookModal: React.FC<{
                     </div>
                 </div>
 
-                <div className="p-6 flex flex-col sm:flex-row gap-3 bg-black/5 dark:bg-white/5 border-t border-white/10">
+                <div className="p-6 flex flex-col sm:flex-row gap-3 bg-black/5 dark:bg-white/5 border-t border-white/10 relative z-10">
                     <button 
                         onMouseDown={(e) => handleInteraction(e, onClose)}
                         className="relative overflow-hidden flex-1 glass-button-red py-4 rounded-xl font-black"
@@ -213,9 +209,17 @@ const BookModal: React.FC<{
     );
 };
 
-// --- بطاقة الكتاب (Card) ---
+// --- بطاقة الكتاب (Card) مع توهج الحواف ---
 const BookCard = React.memo(({ book, onClick, t_search }: { book: Book; onClick: () => void; t_search: any }) => {
     const [ripples, setRipples] = useState<{ id: number, x: number, y: number }[]>([]);
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        (e.currentTarget as HTMLElement).style.setProperty("--mouse-x", `${x}px`);
+        (e.currentTarget as HTMLElement).style.setProperty("--mouse-y", `${y}px`);
+    };
 
     const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
         const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
@@ -229,13 +233,15 @@ const BookCard = React.memo(({ book, onClick, t_search }: { book: Book; onClick:
 
     return (
         <div 
+            onMouseMove={handleMouseMove}
             onMouseDown={handleInteraction}
             onClick={onClick}
-            className="relative overflow-hidden glass-panel rounded-[1.5rem] hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col group active:scale-95 border-white/20 h-full"
+            className="relative overflow-hidden glass-panel glass-card-interactive rounded-[1.5rem] hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col group active:scale-95 border-white/20 h-full"
         >
-            <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute inset-0 pointer-events-none z-0">
                 {ripples.map(r => <span key={r.id} className="ripple-effect border-red-500/30" style={{ left: r.x, top: r.y }} />)}
             </div>
+            
             <div className="p-5 flex-grow relative z-10">
                 <h3 className="font-black text-lg text-gray-950 dark:text-white group-hover:text-red-600 transition-colors line-clamp-2 leading-tight mb-2 tracking-tighter">{book.title}</h3>
                 <p className="text-sm text-green-700 dark:text-green-400 font-black mb-4">{book.author}</p>
@@ -263,6 +269,12 @@ const SearchPage: React.FC = () => {
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
     const debouncedSearchTerm = useDebounce(searchTerm, 400);
+
+    const handleMouseMoveMain = (e: React.MouseEvent) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        e.currentTarget.style.setProperty("--mouse-x", `${e.clientX - rect.left}px`);
+        e.currentTarget.style.setProperty("--mouse-y", `${e.clientY - rect.top}px`);
+    };
 
     const filters = useMemo(() => ({
         subjects: [...new Set(bookData.map(b => b.subject))].filter(Boolean).sort(),
@@ -294,8 +306,11 @@ const SearchPage: React.FC = () => {
                 <div className="h-1.5 w-20 bg-red-600 mx-auto rounded-full shadow-[0_0_15px_rgba(239,68,68,0.3)]"></div>
             </div>
             
-            <div className="glass-panel p-6 md:p-8 rounded-[2.5rem] shadow-xl mb-10 sticky top-24 z-30 border-white/30 backdrop-blur-xl transition-all">
-                <div className="relative mb-6">
+            <div 
+                onMouseMove={handleMouseMoveMain}
+                className="glass-panel glass-card-interactive p-6 md:p-8 rounded-[2.5rem] shadow-xl mb-10 sticky top-24 z-30 border-white/30 backdrop-blur-xl transition-all"
+            >
+                <div className="relative mb-6 z-10">
                     <input
                         type="text"
                         placeholder={t_search('searchPlaceholder')}
@@ -308,7 +323,7 @@ const SearchPage: React.FC = () => {
                     </div>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
                     <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="w-full p-4 rounded-xl bg-white/30 dark:bg-gray-800/60 border border-white/10 dark:text-white font-black cursor-pointer appearance-none">
                         <option value="all">{t_search('allSubjects')}</option>
                         {filters.subjects.map(s => <option key={s} value={s}>{s}</option>)}
