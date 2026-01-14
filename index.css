@@ -4,104 +4,106 @@
 @tailwind utilities;
 
 /* 2. الإعدادات العامة والخط */
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@200;300;400;500;700;800;900&display=swap');
+
+:root {
+  --mouse-x: 50%;
+  --mouse-y: 50%;
+}
+
 body {
   font-family: 'Tajawal', sans-serif;
   margin: 0;
   padding: 0;
-  /* إخفاء الماوس الافتراضي لتجربة الماوس الكريستالي */
-  cursor: none !important; 
-  transition: background-color 0.4s ease;
+  transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   scroll-behavior: smooth;
   overflow-x: hidden;
   background-color: #f8fafc;
+  /* تحسين المؤشر: يظهر فقط على الأجهزة التي تدعم الماوس */
+}
+
+@media (hover: hover) and (pointer: fine) {
+  body, a, button, input, select, .group {
+    cursor: none !important;
+  }
 }
 
 .dark body {
-  background-color: #0f172a;
+  background-color: #020617; /* لون أعمق للدارك مود لزيادة تباين الزجاج */
 }
 
-/* حل مشكلة الثقل: إخفاء المؤشر عن جميع العناصر التفاعلية */
-a, button, input, select, .group {
-  cursor: none !important;
-}
-
-/* --- 3. نظام الحاويات الزجاجية (Deep Super Glass) --- */
+/* --- 3. نظام الحاويات الزجاجية المطوّر (Falcon Deep Glass) --- */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.45);
-  backdrop-filter: blur(30px) saturate(200%);
-  -webkit-backdrop-filter: blur(30px) saturate(200%);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(25px) saturate(180%);
+  -webkit-backdrop-filter: blur(25px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   box-shadow: 
-    0 20px 50px rgba(0, 0, 0, 0.05),
-    inset 0 0 15px rgba(255, 255, 255, 0.2);
-  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    0 15px 35px rgba(0, 0, 0, 0.05),
+    inset 0 0 20px rgba(255, 255, 255, 0.3);
 }
 
 .dark .glass-panel {
-  background: rgba(30, 41, 59, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
 }
 
-/* --- 4. تأثير توهج الحواف الزجاجية للابتوب (Crystal Spotlight Border) --- */
+/* --- 4. تأثير توهج الحواف الزجاجي (Falcon Spotlight) --- */
 .glass-card-interactive {
   position: relative;
+  z-index: 1;
 }
 
-/* طبقة الإضاءة التي تتبع الماوس على الحواف فقط لإعطاء انطباع الزجاج */
+/* تحسين أداء الإضاءة باستخدام Radial Gradient أكثر نعومة */
 .glass-card-interactive::before {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  padding: 2px; /* سمك الحافة المتوهجة */
+  padding: 1.5px; 
   background: radial-gradient(
-    600px circle at var(--mouse-x) var(--mouse-y),
-    rgba(239, 68, 68, 0.6), /* توهج أحمر كريستالي */
+    400px circle at var(--mouse-x) var(--mouse-y),
+    rgba(239, 68, 68, 0.5), /* توهج صقر الأحمر */
     transparent 40%
   );
-  -webkit-mask: 
-    linear-gradient(#fff 0 0) content-box, 
-    linear-gradient(#fff 0 0);
-  mask: 
-    linear-gradient(#fff 0 0) content-box, 
-    linear-gradient(#fff 0 0);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.5s ease;
-  z-index: 20;
+  transition: opacity 0.4s ease;
 }
 
 .glass-card-interactive:hover::before {
   opacity: 1;
 }
 
-/* --- 5. نظام الشعارات (تبييض تلقائي في الدارك مود) --- */
-/* الشعار الأساسي وحركته الذكية */
-img[src="/school-logo.png"] {
-  transform: rotate(15deg);
-  transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+/* --- 5. نظام الشعارات الذكي --- */
+.logo-white-filter {
+  transition: all 0.5s ease;
+}
+
+.dark .logo-white-filter {
+  filter: brightness(0) invert(1) drop-shadow(0 0 10px rgba(255,255,255,0.2));
+  opacity: 1;
+}
+
+.logo-smart-hover {
+  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .logo-smart-hover:hover {
-  transform: rotate(0deg) scale(1.1);
-  filter: drop-shadow(0 0 25px rgba(220, 38, 38, 0.3));
+  transform: rotate(0deg) scale(1.15) translateY(-5px);
+  filter: drop-shadow(0 15px 30px rgba(220, 38, 38, 0.4));
 }
 
-/* تبييض الشعار في الدارك مود لضمان الوضوح في أي صفحة */
-.dark .logo-white-filter {
-  filter: brightness(0) invert(1);
-  opacity: 0.9;
-  transition: filter 0.5s ease, opacity 0.5s ease;
-}
-
-/* 6. أزرار الهوية (Elite Red & Green) */
+/* --- 6. أزرار النخبة (Elite Branding Buttons) --- */
 .glass-button-red {
   background: rgba(239, 68, 68, 0.1);
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(239, 68, 68, 0.3);
   color: #dc2626;
   transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
 }
@@ -109,13 +111,14 @@ img[src="/school-logo.png"] {
 .glass-button-red:hover {
   background: #dc2626;
   color: white !important;
-  box-shadow: 0 15px 30px rgba(220, 38, 38, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(220, 38, 38, 0.4);
 }
 
 .glass-button-green {
   background: rgba(0, 115, 47, 0.1);
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(0, 115, 47, 0.3);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(0, 115, 47, 0.3);
   color: #00732f;
   transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
 }
@@ -123,93 +126,70 @@ img[src="/school-logo.png"] {
 .glass-button-green:hover {
   background: #00732f;
   color: white !important;
-  box-shadow: 0 15px 30px rgba(0, 115, 47, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(0, 115, 47, 0.3);
 }
 
-/* 7. المؤشر الكريستالي الأحمر السريع (High Performance Cursor) */
+/* --- 7. المؤشر الكريستالي عالي الأداء --- */
 .custom-cursor {
   position: fixed;
-  width: 24px;
-  height: 24px;
-  background-color: rgba(239, 68, 68, 0.15);
-  border: 1.5px solid rgba(239, 68, 68, 0.5);
+  width: 20px;
+  height: 20px;
+  background-color: rgba(239, 68, 68, 0.2);
+  border: 2px solid rgba(239, 68, 68, 0.6);
   border-radius: 50%;
   pointer-events: none;
   z-index: 10000;
   transform: translate3d(-100px, -100px, 0); 
-  transition: 
-    width 0.3s cubic-bezier(0.23, 1, 0.32, 1),
-    height 0.3s cubic-bezier(0.23, 1, 0.32, 1),
-    background-color 0.3s ease;
   backdrop-filter: blur(4px);
-  box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
+  transition: width 0.2s ease, height 0.2s ease, background-color 0.3s ease;
   will-change: transform;
-  backface-visibility: hidden;
 }
 
-.custom-cursor-active {
-  width: 45px;
-  height: 45px;
-  background-color: rgba(239, 68, 68, 0.25);
-  border-color: rgba(239, 68, 68, 0.8);
-  box-shadow: 0 0 25px rgba(239, 68, 68, 0.4);
+/* --- 8. أنيميشن النبض (Falcon Pulse) --- */
+@keyframes falcon-ping {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.4); opacity: 0.3; }
+  100% { transform: scale(1.8); opacity: 0; }
 }
 
-/* 8. نظام النبض الكريستالي الأحمر (Elite Crystal Ripple) */
+.falcon-status-pulse {
+  animation: falcon-ping 2s infinite ease-out;
+}
+
+/* --- 9. تأثير التموج الكريستالي --- */
 @keyframes crystal-ripple {
-  0% {
-    transform: translate3d(-50%, -50%, 0) scale(0);
-    opacity: 1;
-    border-width: 10px;
-  }
-  100% {
-    transform: translate3d(-50%, -50%, 0) scale(5);
-    opacity: 0;
-    border-width: 1px;
-    filter: blur(4px);
-  }
+  0% { transform: translate3d(-50%, -50%, 0) scale(0); opacity: 1; }
+  100% { transform: translate3d(-50%, -50%, 0) scale(4); opacity: 0; filter: blur(2px); }
 }
 
 .ripple-effect {
   position: absolute;
-  border-style: solid;
-  border-color: rgba(239, 68, 68, 0.6);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  background: rgba(239, 68, 68, 0.05);
   border-radius: 50%;
   pointer-events: none;
-  z-index: 99;
-  will-change: transform, opacity;
-  animation: crystal-ripple 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  z-index: 0;
+  animation: crystal-ripple 0.7s ease-out forwards;
 }
 
-/* 9. أنيميشن كروت المعرفة (Cinematic Float) */
-@keyframes glass-float {
-  0% {
-    transform: translate3d(-50%, -50%, 0) scale(0.4) rotate(-12deg);
-    opacity: 0;
-    filter: blur(15px);
-  }
-  40% {
-    opacity: 1;
-    transform: translate3d(-50%, -50%, 0) scale(1.05) rotate(0deg);
-    filter: blur(0px);
-  }
-  100% {
-    transform: translate3d(calc(-50% + var(--tx)), calc(-50% + var(--ty)), 0) scale(0.9) rotate(8deg);
-    opacity: 0;
-    filter: blur(3px);
-  }
+/* --- 10. تحسينات التمرير والقراءة --- */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* تأثير ظهور النصوص بشكل تدريجي (Smooth Typing Look) */
+.prose p {
+  animation: fade-in-up 0.5s ease-out forwards;
 }
 
-.animate-glass-float {
-  animation: glass-float 2.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  will-change: transform, opacity;
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* تحسينات القراءة */
-.scrollbar-hide::-webkit-scrollbar { display: none; }
-.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-
-.knowledge-tag {
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  letter-spacing: -0.01em;
+/* تحسين استجابة الصور */
+img {
+  max-width: 100%;
+  height: auto;
+  user-select: none;
 }
