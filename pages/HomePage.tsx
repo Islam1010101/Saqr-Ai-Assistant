@@ -46,7 +46,7 @@ const translations = {
 const KNOWLEDGE_CARDS = [
     { icon: "📜", textAr: "بحث رقمي", textEn: "Digital Research" },
     { icon: "💡", textAr: "فكرة مبتكرة", textEn: "Innovative Idea" },
-    { icon: "🤖", textAr: "ذكاء صقر", textEn: "Saqr AI" },
+    { icon: "🤖", textAr: "التحدث معي", textEn: "Chat With Me" },
     { icon: "📚", textAr: "مصادر المعرفة", textEn: "Knowledge Sources" },
     { icon: "🌍", textAr: "رؤية مستقبلية", textEn: "Future Vision" },
     { icon: "🔍", textAr: "استكشاف حر", textEn: "Free Exploration" }
