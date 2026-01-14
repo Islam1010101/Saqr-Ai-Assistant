@@ -1,5 +1,5 @@
 import React, { useState, useEffect, createContext, useContext, ReactNode, useRef } from 'react';
-import { HashRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { HashRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 
 // استيراد الصفحات
 import HomePage from './pages/HomePage';
@@ -11,11 +11,76 @@ import DigitalLibraryPage from './pages/DigitalLibraryPage';
 
 // استيراد الصفحات الداخلية للمكتبات
 import ArabicLibraryInternalPage from './pages/ArabicLibraryInternalPage';
-import EnglishLibraryInternalPage from './pages/EnglishLibraryInternalPage'; // الصفحة الجديدة
+import EnglishLibraryInternalPage from './pages/EnglishLibraryInternalPage';
 
 import type { Locale } from './types';
 
-// -------- 1. مكون تتبع الماوس الكريستالي (عالي الأداء) --------
+// -------- 1. مكون صقر العائم (Floating AI Assistant) --------
+const FloatingSaqr: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { dir } = useLanguage();
+  const [ripples, setRipples] = useState<{ id: number, x: number, y: number }[]>([]);
+
+  // إخفاء المكون تماماً إذا كان المستخدم في الصفحة الرئيسية
+  if (location.pathname === '/') return null;
+
+  const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
+    const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+
+    const rippleId = Date.now();
+    setRipples(prev => [...prev, { id: rippleId, x, y }]);
+    
+    // الانتقال لصفحة البحث الذكي بعد تأثير التفاعل
+    setTimeout(() => {
+      setRipples(prev => prev.filter(r => r.id !== rippleId));
+      navigate('/smart-search');
+    }, 400);
+  };
+
+  return (
+    <div 
+      className={`fixed bottom-8 ${dir === 'rtl' ? 'left-8' : 'right-8'} z-50 animate-in fade-in slide-in-from-bottom-10 duration-700`}
+    >
+      <button
+        onMouseDown={handleInteraction}
+        onTouchStart={handleInteraction}
+        className="group relative w-16 h-16 sm:w-20 sm:h-20 glass-panel rounded-2xl sm:rounded-3xl border-white/40 shadow-2xl flex items-center justify-center overflow-hidden hover:scale-110 active:scale-95 transition-all duration-300"
+      >
+        {/* تأثير التموج الأحمر الكريستالي */}
+        {ripples.map(r => (
+          <span key={r.id} className="ripple-effect border-red-500/40" style={{ left: r.x, top: r.y }} />
+        ))}
+        
+        {/* صورة أفاتار صقر */}
+        <img 
+          src="/saqr-avatar.png" 
+          alt="Saqr AI" 
+          className="w-full h-full object-cover p-1 group-hover:rotate-6 transition-transform" 
+        />
+
+        {/* نقطة التنبيه النابضة (Status Indicator) */}
+        <span className="absolute -top-1 -right-1 flex h-4 w-4">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-4 w-4 bg-red-600 border-2 border-white"></span>
+        </span>
+      </button>
+      
+      {/* نص توضيحي عند الحوم بالماوس (Tooltip) */}
+      <div className={`absolute bottom-full mb-4 ${dir === 'rtl' ? 'left-0' : 'right-0'} opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap`}>
+        <div className="glass-panel px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest text-red-600 border-red-500/20 shadow-xl">
+           {dir === 'rtl' ? 'اسأل صقر AI' : 'Ask Saqr AI'}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// -------- 2. مكون تتبع الماوس الكريستالي (عالي الأداء) --------
 const MouseFollower: React.FC = () => {
   const cursorRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
@@ -53,7 +118,7 @@ const MouseFollower: React.FC = () => {
   );
 };
 
-// -------- 2. سياق اللغة (AR/EN) --------
+// -------- 3. سياق اللغة (AR/EN) --------
 const LanguageContext = createContext<any>(null);
 export const useLanguage = () => useContext(LanguageContext);
 
@@ -72,7 +137,7 @@ const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   );
 };
 
-// -------- 3. سياق المظهر (Light/Dark) --------
+// -------- 4. سياق المظهر (Light/Dark) --------
 const ThemeContext = createContext<any>(null);
 export const useTheme = () => useContext(ThemeContext);
 
@@ -93,7 +158,7 @@ const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   );
 };
 
-// -------- 4. الهيدر الذكي (Header) --------
+// -------- 5. الهيدر الذكي (Header) --------
 const Header: React.FC = () => {
   const { locale, setLocale } = useLanguage();
   const { theme, toggleTheme } = useTheme();
@@ -154,15 +219,21 @@ const Header: React.FC = () => {
   );
 };
 
-// -------- 5. المكون الرئيسي للتطبيق (App) --------
+// -------- 6. المكون الرئيسي للتطبيق (App) --------
 const App: React.FC = () => {
   return (
     <ThemeProvider>
       <LanguageProvider>
         <HashRouter>
           <div className="min-h-screen relative bg-slate-50 dark:bg-slate-950 transition-colors duration-500 overflow-x-hidden">
+            {/* المؤشر الكريستالي */}
             <MouseFollower />
+            
+            {/* الهيدر الزجاجي */}
             <Header />
+            
+            {/* استدعاء صقر العائم ليكون متاحاً في كل الصفحات (عدا الرئيسية) */}
+            <FloatingSaqr />
             
             <main className="container mx-auto p-4 sm:p-6 lg:p-10">
               <Routes>
@@ -170,11 +241,8 @@ const App: React.FC = () => {
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/smart-search" element={<SmartSearchPage />} />
                 <Route path="/digital-library" element={<DigitalLibraryPage />} />
-                
-                {/* مسارات المكتبات الداخلية (يتم الوصول إليها من صفحة المكتبة الإلكترونية فقط) */}
                 <Route path="/digital-library/arabic" element={<ArabicLibraryInternalPage />} />
                 <Route path="/digital-library/english" element={<EnglishLibraryInternalPage />} />
-                
                 <Route path="/reports" element={<ReportsPage />} />
                 <Route path="/about" element={<AboutPage />} />
               </Routes>
