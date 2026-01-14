@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom'; // استيراد Link للانتقال الداخلي
+import { Link } from 'react-router-dom'; // استيراد Link للانتقال الداخلي الشامل
 import { useLanguage } from '../App';
 
+// --- قائمة العبارات التحفيزية للقراءة ---
 const READING_INSPIRATIONS = [
     { icon: "📖", textAr: "اقرأ لترتقي", textEn: "Read to Rise" },
     { icon: "✨", textAr: "مغامرة جديدة في كل صفحة", textEn: "Adventure on every page" },
@@ -17,6 +18,7 @@ const DigitalLibraryPage: React.FC = () => {
     const [ripples, setRipples] = useState<{ id: number, x: number, y: number }[]>([]);
     const [inspirations, setInspirations] = useState<{ id: number, x: number, y: number, item: typeof READING_INSPIRATIONS[0], tx: string, ty: string }[]>([]);
 
+    // دالة تتبع الماوس لتأثير توهج الحواف (لأجهزة اللابتوب)
     const handleMouseMove = (e: React.MouseEvent) => {
         const rect = e.currentTarget.getBoundingClientRect();
         const x = e.clientX - rect.left;
@@ -49,7 +51,7 @@ const DigitalLibraryPage: React.FC = () => {
 
     return (
         <div dir={dir} className="max-w-7xl mx-auto px-4 py-6 sm:py-10 animate-in fade-in relative">
-            {/* طبقة العناصر التحفيزية */}
+            {/* طبقة العناصر التحفيزية المتطايرة */}
             {inspirations.map(insp => (
                 <div key={insp.id} className="fixed pointer-events-none z-[100] bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl px-4 py-2 rounded-full flex items-center gap-2 border-2 border-red-500/30 shadow-xl animate-glass-float"
                     style={{ left: insp.x, top: insp.y, '--tx': insp.tx, '--ty': insp.ty } as any}>
@@ -58,7 +60,7 @@ const DigitalLibraryPage: React.FC = () => {
                 </div>
             ))}
 
-            {/* قسم الهيرو */}
+            {/* قسم الهيرو التفاعلي */}
             <div onMouseMove={handleMouseMove} className="glass-panel glass-card-interactive relative overflow-hidden rounded-[2.5rem] sm:rounded-[3.5rem] p-8 sm:p-12 md:p-16 mb-10 sm:mb-16 border-white/20 flex flex-col md:flex-row items-center gap-8 sm:gap-12">
                 {ripples.map(r => <span key={r.id} className="ripple-effect border-red-500/30 opacity-50" style={{ left: r.x, top: r.y }} />)}
                 <div className="flex-1 text-center md:text-start relative z-10 space-y-4 sm:space-y-6">
@@ -79,8 +81,10 @@ const DigitalLibraryPage: React.FC = () => {
                 </div>
             </div>
 
+            {/* شبكة المكتبات (أصبحت الآن روابط داخلية بالكامل) */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12">
-                {/* المكتبة العربية (الآن توجه لصفحة داخلية) */}
+                
+                {/* المكتبة العربية */}
                 <section className="space-y-6 sm:space-y-8">
                     <h2 className="text-2xl sm:text-3xl font-black text-gray-950 dark:text-white flex items-center gap-3">
                         <span className="w-2 h-8 sm:h-10 bg-green-700 rounded-full shadow-lg"></span>
@@ -93,10 +97,10 @@ const DigitalLibraryPage: React.FC = () => {
                             <div className="text-3xl sm:text-4xl shrink-0 z-10 animate-bounce">🏛️</div>
                             <div className="flex-1 min-w-0 z-10">
                                 <h3 className="text-base sm:text-xl font-black text-gray-900 dark:text-white group-hover:text-red-600 truncate">
-                                    {isAr ? 'تصفح أقسام المكتبة العربية' : 'Browse Arabic Sections'}
+                                    {isAr ? 'تصفح المكتبة العربية' : 'Explore Arabic Library'}
                                 </h3>
                                 <p className="text-[10px] sm:text-sm text-gray-500 font-medium line-clamp-1">
-                                    {isAr ? 'أدب للشباب، كتب إسلامية، تنمية بشرية والمزيد' : 'Youth Lit, Islamic Books, Development and more'}
+                                    {isAr ? 'أدب، كتب إسلامية، وتنمية بشرية' : 'Lit, Islamic Books, and Self-Dev'}
                                 </p>
                             </div>
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 text-red-600 shrink-0 z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
@@ -104,24 +108,27 @@ const DigitalLibraryPage: React.FC = () => {
                     </div>
                 </section>
 
-                {/* المكتبة الإنجليزية */}
+                {/* المكتبة الإنجليزية (تم تحويلها لرابط داخلي) */}
                 <section className="space-y-6 sm:space-y-8">
                     <h2 className="text-2xl sm:text-3xl font-black text-gray-950 dark:text-white flex items-center gap-3">
                         <span className="w-2 h-8 sm:h-10 bg-blue-600 rounded-full shadow-lg"></span>
                         {isAr ? 'المكتبة الإنجليزية' : 'English Library'}
                     </h2>
                     <div className="grid gap-4 sm:gap-5">
-                        <a href="https://sites.google.com/falcon-school.com/digital-library-efips/english-library" target="_blank" rel="noopener noreferrer" 
-                            onMouseMove={handleMouseMove} onMouseDown={handleInteraction} onTouchStart={handleInteraction}
-                            className="glass-panel glass-card-interactive group relative overflow-hidden p-5 sm:p-6 rounded-2xl sm:rounded-3xl border-white/10 hover:border-red-500/30 transition-all flex items-center gap-4 sm:gap-6 border-red-500/40 bg-red-500/5">
+                        <Link to="/digital-library/english" onMouseMove={handleMouseMove} onMouseDown={handleInteraction}
+                            className="glass-panel glass-card-interactive group relative overflow-hidden p-5 sm:p-6 rounded-2xl sm:rounded-3xl border-red-500/40 bg-red-500/5 transition-all flex items-center gap-4 sm:gap-6">
                             {ripples.map(r => <span key={r.id} className="ripple-effect border-red-500/20" style={{ left: r.x, top: r.y }} />)}
                             <div className="text-3xl sm:text-4xl shrink-0 z-10 animate-bounce">🏛️</div>
                             <div className="flex-1 min-w-0 z-10">
-                                <h3 className="text-base sm:text-xl font-black text-gray-900 dark:text-white group-hover:text-red-600 truncate">Digital Library E.F.I.P.S - English Library</h3>
-                                <p className="text-[10px] sm:text-sm text-gray-500 font-medium line-clamp-1">Official school digital resources - English Section</p>
+                                <h3 className="text-base sm:text-xl font-black text-gray-900 dark:text-white group-hover:text-red-600 truncate">
+                                    {isAr ? 'تصفح المكتبة الإنجليزية' : 'Explore English Library'}
+                                </h3>
+                                <p className="text-[10px] sm:text-sm text-gray-500 font-medium line-clamp-1">
+                                    {isAr ? 'روايات عالمية، دراما، وقصص قصيرة' : 'Global Novels, Drama, and Short Stories'}
+                                </p>
                             </div>
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 text-red-600 shrink-0 z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-                        </a>
+                        </Link>
                     </div>
                 </section>
             </div>
