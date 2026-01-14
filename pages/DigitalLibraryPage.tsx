@@ -17,8 +17,8 @@ const translations = {
         desc: "رحلة استثنائية بين كنوز الأدب العربي والعالمي بلمسة وطنية مبتكرة.",
         arabicLib: "المكتبة العربية",
         englishLib: "المكتبة الإنجليزية",
-        arabicDesc: "تضم 41 عنواناً من روائع الأدب العربي، التراث، وتطوير الذات.",
-        englishDesc: "تضم 26 عنواناً من الروايات العالمية، الألغاز، ومجموعة هاري بوتر.",
+        arabicDesc: "تضم روائع الأدب العربي، التراث، وتطوير الذات.",
+        englishDesc: "تضم الروايات العالمية و الألغاز.",
         bubble: "اضغط للإلهام!"
     },
     en: {
@@ -26,8 +26,8 @@ const translations = {
         desc: "An exceptional journey through Arabic and Global literature with a UAE touch.",
         arabicLib: "Arabic Library",
         englishLib: "English Library",
-        arabicDesc: "Includes 41 titles of Arabic literature, heritage, and self-dev.",
-        englishDesc: "Includes 26 titles of global novels, puzzles, and Harry Potter.",
+        arabicDesc: "Arabic literature, heritage, and self-dev.",
+        englishDesc: "global novels and puzzles.",
         bubble: "Click for Magic!"
     }
 };
