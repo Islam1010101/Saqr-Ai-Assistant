@@ -16,7 +16,7 @@ interface ChartData {
 
 const COLORS = ['#00732F', '#059669', '#10B981', '#34D399', '#064E3B'];
 const BLUE_GRADIENT = '#2563EB';
-const SCHOOL_LOGO = "/school-logo.png"; // تعريف ثابت للشعار
+const SCHOOL_LOGO = "/school-logo.png"; 
 
 const translations = {
   ar: {
@@ -29,8 +29,8 @@ const translations = {
     shelfStats: "إحصائيات توزيع الرفوف",
     shelfName: "الرف",
     bookCount: "عدد الكتب",
-    printBtn: "تصدير التقرير (PDF)",
-    passwordPrompt: "يرجى إدخال كلمة المرور للوصول إلى لوحة التقارير.",
+    printBtn: "تصدير التقرير النهائي (PDF)",
+    passwordPrompt: "يرجى إدخال كلمة المرور للوصول إلى التقارير.",
     passwordLabel: "كلمة المرور",
     enter: "دخول آمن",
     wrongPassword: "كلمة المرور غير صحيحة",
@@ -47,8 +47,8 @@ const translations = {
     shelfStats: "Bookshelf Distribution",
     shelfName: "Shelf",
     bookCount: "Books",
-    printBtn: "Export Report (PDF)",
-    passwordPrompt: "Enter password to access Library Analytics.",
+    printBtn: "Export Official Report (PDF)",
+    passwordPrompt: "Enter the secure password to access Analytics.",
     passwordLabel: "Password",
     enter: "Secure Login",
     wrongPassword: "Incorrect Password",
@@ -110,6 +110,7 @@ const ReportsPage: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [ripples, setRipples] = useState<{ id: number, x: number, y: number }[]>([]);
 
   useEffect(() => {
     const auth = sessionStorage.getItem('reports_authenticated') === 'true';
@@ -117,8 +118,22 @@ const ReportsPage: React.FC = () => {
     if (auth) setData(processLogs());
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleInteraction = (e: React.MouseEvent | React.TouchEvent, callback: () => void) => {
+    const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+
+    const rippleId = Date.now();
+    setRipples(prev => [...prev, { id: rippleId, x, y }]);
+    setTimeout(() => {
+        setRipples(prev => prev.filter(r => r.id !== rippleId));
+        callback();
+    }, 400);
+  };
+
+  const handleLogin = () => {
     if (password === '101110') { 
       sessionStorage.setItem('reports_authenticated', 'true');
       setIsAuthenticated(true);
@@ -135,6 +150,7 @@ const ReportsPage: React.FC = () => {
   const gridColor = theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
   const yAxisRtl = dir === 'rtl' ? { orientation: 'right' } as const : { orientation: 'left' } as const;
 
+  // واجهة الدخول
   if (!isAuthenticated) {
     return (
       <div className="flex items-center justify-center min-h-[70vh] px-4">
@@ -142,31 +158,40 @@ const ReportsPage: React.FC = () => {
           <div className="mb-8 flex flex-col items-center">
              <img src={SCHOOL_LOGO} alt="Logo" className="h-28 w-28 object-contain mb-6 drop-shadow-xl rotate-12" />
              <h1 className="text-4xl font-black text-gray-950 dark:text-white tracking-tighter">{t('pageTitle')}</h1>
-             <div className="h-1.5 w-16 bg-green-700 rounded-full mt-4"></div>
+             <div className="h-1.5 w-16 bg-green-700 rounded-full mt-4 shadow-lg"></div>
           </div>
+          
           <p className="mb-10 text-gray-600 dark:text-gray-400 font-bold text-lg leading-relaxed">{t('passwordPrompt')}</p>
-          <form onSubmit={handleLogin} className="space-y-6">
+          
+          <div className="space-y-6">
             <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full p-6 text-center bg-white/60 dark:bg-gray-900/60 text-gray-950 dark:text-white border-2 border-transparent focus:border-green-600 rounded-[2rem] outline-none transition-all shadow-inner font-black text-2xl tracking-widest placeholder:tracking-normal"
+                onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                className="w-full p-6 text-center bg-white/60 dark:bg-gray-900/60 text-gray-950 dark:text-white border-2 border-transparent focus:border-green-600 rounded-[2rem] outline-none transition-all shadow-inner font-black text-2xl tracking-widest placeholder:tracking-normal placeholder:text-gray-400"
                 placeholder={t('passwordLabel')}
             />
-            {error && <p className="text-red-500 font-black">{error}</p>}
-            <button type="submit" className="glass-button-green w-full py-6 rounded-[2rem] font-black text-xl shadow-2xl transition-all active:scale-95">
-              {t('enter')}
+            {error && <p className="text-red-500 font-black animate-shake">{error}</p>}
+            
+            <button 
+                onMouseDown={(e) => handleInteraction(e, handleLogin)}
+                onTouchStart={(e) => handleInteraction(e, handleLogin)}
+                className="relative overflow-hidden glass-button-red w-full py-6 rounded-[2rem] font-black text-xl shadow-2xl transition-all"
+            >
+              {ripples.map(r => <span key={r.id} className="ripple-effect border-red-500/30" style={{ left: r.x, top: r.y }} />)}
+              <span className="relative z-10">{t('enter')}</span>
             </button>
-          </form>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-12 pb-20 px-4">
+    <div className="max-w-7xl mx-auto space-y-12 pb-20 px-4 animate-in fade-in duration-1000">
       
-      {/* هيدر المتصفح (يختفي عند الطباعة) */}
+      {/* هيدر الصفحة المطور (يختفي عند الطباعة) */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-8 border-b border-white/10 pb-12 print:hidden">
         <div className="text-center md:text-start">
           <h1 className="text-4xl md:text-6xl font-black text-gray-950 dark:text-white mb-4 tracking-tighter">{t('pageTitle')}</h1>
@@ -178,16 +203,22 @@ const ReportsPage: React.FC = () => {
             <p className="text-green-800 dark:text-green-400 font-black text-lg">{t('liveStats')}</p>
           </div>
         </div>
-        <button onClick={handlePrint} className="glass-button-black flex items-center gap-4 px-12 py-6 rounded-[2rem] font-black shadow-2xl text-lg transition-all active:scale-95">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
-          {t('printBtn')}
+        
+        <button 
+          onMouseDown={(e) => handleInteraction(e, handlePrint)}
+          onTouchStart={(e) => handleInteraction(e, handlePrint)}
+          className="relative overflow-hidden glass-button-red flex items-center gap-4 px-12 py-6 rounded-[2rem] font-black shadow-2xl text-lg transition-all"
+        >
+          {ripples.map(r => <span key={r.id} className="ripple-effect border-red-500/40" style={{ left: r.x, top: r.y }} />)}
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+          <span className="relative z-10">{t('printBtn')}</span>
         </button>
       </div>
 
       {/* الرسوم البيانية (تختفي عند الطباعة) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 print:hidden">
         <div className="glass-panel p-10 rounded-[3.5rem] shadow-2xl border-white/20">
-          <h2 className="text-3xl font-black mb-12 text-gray-900 dark:text-white flex items-center gap-4"><span className="w-2.5 h-10 bg-green-700 rounded-full"></span>{t('shelfStats')}</h2>
+          <h2 className="text-3xl font-black mb-12 text-gray-900 dark:text-white flex items-center gap-4"><span className="w-2.5 h-10 bg-green-700 rounded-full shadow-[0_0_15px_rgba(0,115,47,0.4)]"></span>{t('shelfStats')}</h2>
           <div style={{ width: '100%', height: 400 }}>
             <ResponsiveContainer>
               <BarChart data={data.shelfData}>
@@ -202,7 +233,7 @@ const ReportsPage: React.FC = () => {
         </div>
 
         <div className="glass-panel p-10 rounded-[3.5rem] shadow-2xl border-white/20">
-          <h2 className="text-3xl font-black mb-12 text-gray-900 dark:text-white flex items-center gap-4"><span className="w-2.5 h-10 bg-blue-600 rounded-full"></span>{t('mostSearched')}</h2>
+          <h2 className="text-3xl font-black mb-12 text-gray-900 dark:text-white flex items-center gap-4"><span className="w-2.5 h-10 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.4)]"></span>{t('mostSearched')}</h2>
           <div style={{ width: '100%', height: 400 }}>
             <ResponsiveContainer>
               <BarChart data={data.searchData} layout="vertical">
@@ -217,10 +248,10 @@ const ReportsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* --- قسم التقرير الرسمي للطباعة فقط (هذا الجزء هو المخصص للـ PDF) --- */}
+      {/* --- قسم التقرير الرسمي للطباعة فقط --- */}
       <div className="hidden print:block mt-10 p-12 bg-white text-black rounded-none border-[12px] border-green-700 min-h-[1000px]">
         
-        {/* هيدر التقرير مع شعار المدرسة */}
+        {/* هيدر التقرير مع الشعار المائل */}
         <div className="flex justify-between items-center mb-12 pb-8 border-b-4 border-gray-100">
             <div className="flex items-center gap-6">
                 <img src={SCHOOL_LOGO} alt="Saqr Logo" className="h-40 w-40 object-contain rotate-6" />
@@ -249,17 +280,18 @@ const ReportsPage: React.FC = () => {
             </div>
             <div className="p-8 bg-gray-50 rounded-[2rem] border-2 border-gray-100 flex flex-col justify-center text-center">
                  <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-2">Authenticated By</p>
-                 <p className="text-2xl font-black">Saqr AI Analytics</p>
+                 <p className="text-2xl font-black">Saqr AI Analytics System</p>
+                 <p className="text-xs text-gray-400 mt-2">Generated by Islam Soliman</p>
             </div>
         </div>
 
-        {/* جدول الجرد التفصيلي */}
+        {/* جدول الجرد */}
         <table className="w-full text-start border-collapse text-xl">
           <thead>
             <tr className="bg-green-700 text-white">
               <th className="p-8 border-2 border-green-800 text-start font-black">{t('shelfName')}</th>
               <th className="p-8 border-2 border-green-800 text-start font-black">{t('bookCount')}</th>
-              <th className="p-8 border-2 border-green-800 text-start font-black">Status</th>
+              <th className="p-8 border-2 border-green-800 text-start font-black">Audit Status</th>
             </tr>
           </thead>
           <tbody>
@@ -273,16 +305,16 @@ const ReportsPage: React.FC = () => {
           </tbody>
         </table>
 
-        {/* فوتر التقرير مع الأختام */}
+        {/* فوتر التقرير مع الختم الرسمي */}
         <div className="mt-32 flex justify-between items-end">
             <div className="text-center">
                 <div className="w-64 h-0.5 bg-black mb-4"></div>
-                <p className="font-black text-xl uppercase">School Librarian</p>
-                <p className="text-gray-400 font-bold text-sm">Official Signature Required</p>
+                <p className="font-black text-xl uppercase tracking-widest">Librarian Signature</p>
+                <p className="text-gray-400 font-bold text-sm italic">{isAr ? 'إسلام سليمان' : 'Islam Soliman'}</p>
             </div>
-            <div className="flex flex-col items-center opacity-30">
-                <img src={SCHOOL_LOGO} alt="Stamp" className="h-24 w-24 object-contain grayscale mb-2" />
-                <p className="font-black text-2xl italic tracking-widest">OFFICIAL SEAL</p>
+            <div className="flex flex-col items-center opacity-40">
+                <img src={SCHOOL_LOGO} alt="Stamp" className="h-28 w-28 object-contain grayscale mb-2" />
+                <p className="font-black text-xl italic tracking-tighter">E.F.I.P.S SEAL</p>
             </div>
         </div>
       </div>
