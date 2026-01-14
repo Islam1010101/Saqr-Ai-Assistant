@@ -71,7 +71,7 @@ const translations = {
   }
 };
 
-// --- نافذة تفاصيل الكتاب (Modal) - متجاوبة تماماً ---
+// --- نافذة تفاصيل الكتاب (Modal) الذكية والتفاعلية ---
 const BookModal: React.FC<{
   book: Book | null;
   onClose: () => void;
@@ -82,12 +82,22 @@ const BookModal: React.FC<{
     const [summary, setSummary] = useState('');
     const [aiSubject, setAiSubject] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [ripples, setRipples] = useState<{ id: number, x: number, y: number }[]>([]);
 
-    useEffect(() => {
-        const handleEsc = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose(); };
-        window.addEventListener('keydown', handleEsc);
-        return () => window.removeEventListener('keydown', handleEsc);
-    }, [onClose]);
+    const handleInteraction = (e: React.MouseEvent | React.TouchEvent, callback: () => void) => {
+        const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+        const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
+        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+
+        const rippleId = Date.now();
+        setRipples(prev => [...prev, { id: rippleId, x, y }]);
+        setTimeout(() => {
+            setRipples(prev => prev.filter(r => r.id !== rippleId));
+            callback();
+        }, 300);
+    };
 
     useEffect(() => {
         if (!book) return;
@@ -124,29 +134,23 @@ const BookModal: React.FC<{
                             <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-gray-950 dark:text-white leading-tight">{book.title}</h2>
                             <p className="text-base sm:text-lg text-green-700 dark:text-green-400 font-black mt-1">{book.author}</p>
                         </div>
-                        <button onClick={onClose} className="p-2 sm:p-3 rounded-full bg-black/5 dark:bg-white/10 hover:bg-red-500 hover:text-white transition-all">
+                        <button onClick={onClose} className="p-2 sm:p-3 rounded-full bg-black/5 dark:bg-white/10 hover:bg-red-500 hover:text-white transition-all active:scale-90">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
                     </div>
                     
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5 mb-6">
-                        <div className="glass-panel p-3 sm:p-5 rounded-2xl sm:rounded-3xl border-white/10 bg-white/30">
-                            <h4 className="font-black text-gray-500 dark:text-gray-400 text-[10px] sm:text-xs uppercase mb-1 tracking-widest">{t_search('subject')}</h4>
+                        <div className="glass-panel p-3 sm:p-5 rounded-2xl border-white/10 bg-white/30">
+                            <h4 className="font-black text-gray-500 text-[10px] uppercase mb-1 tracking-widest">{t_search('subject')}</h4>
                             <p className={`text-sm sm:text-base font-black ${isLoading && needsAiSubject ? 'animate-pulse text-gray-400' : 'text-gray-950 dark:text-gray-100'}`}>
                                 {needsAiSubject ? (aiSubject || t_search('classifying')) : book.subject}
                             </p>
                         </div>
-                        <div className="glass-panel p-3 sm:p-5 rounded-2xl sm:rounded-3xl border-white/10 bg-white/30">
-                            <h4 className="font-black text-gray-500 dark:text-gray-400 text-[10px] sm:text-xs uppercase mb-1 tracking-widest">{t_search('level')}</h4>
-                            <p className="text-sm sm:text-base text-gray-950 dark:text-gray-100 font-black">{book.level}</p>
-                        </div>
-                        <div className="glass-panel p-3 sm:p-5 rounded-2xl sm:rounded-3xl border-white/10 bg-white/30">
-                            <h4 className="font-black text-gray-500 dark:text-gray-400 text-[10px] sm:text-xs uppercase mb-1 tracking-widest">{t_search('language')}</h4>
-                            <p className="text-sm sm:text-base text-gray-950 dark:text-gray-100 font-black">{book.language === 'EN' ? t_search('langEN') : t_search('langAR')}</p>
-                        </div>
+                        <div className="glass-panel p-3 sm:p-5 rounded-2xl border-white/10 bg-white/30 text-gray-950 dark:text-gray-100 font-black text-sm sm:text-base">{book.level}</div>
+                        <div className="glass-panel p-3 sm:p-5 rounded-2xl border-white/10 bg-white/30 text-gray-950 dark:text-gray-100 font-black text-sm sm:text-base">{book.language === 'EN' ? t_search('langEN') : t_search('langAR')}</div>
                     </div>
 
-                    <div className="bg-green-700 p-5 sm:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] border border-green-600 shadow-xl mb-6">
+                    <div className="bg-green-700 p-5 sm:p-8 rounded-[1.5rem] border border-green-600 shadow-xl mb-6">
                         <h4 className="text-xs sm:text-sm font-black text-green-50 mb-1 flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
                             {t_search('location')}
@@ -155,7 +159,7 @@ const BookModal: React.FC<{
                     </div>
 
                     <div className="space-y-2">
-                        <h4 className="font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest text-[10px] sm:text-xs">{t_search('summary')}</h4>
+                        <h4 className="font-black text-gray-400 uppercase tracking-widest text-[10px] sm:text-xs">{t_search('summary')}</h4>
                         {isLoading ? (
                             <div className="space-y-2 animate-pulse">
                                 <div className="bg-black/10 dark:bg-white/10 h-3 rounded-full w-full"></div>
@@ -168,26 +172,63 @@ const BookModal: React.FC<{
                 </div>
 
                 <div className="p-5 sm:p-8 flex flex-col sm:flex-row justify-end gap-3 bg-black/5 dark:bg-white/5 border-t border-white/10 backdrop-blur-md">
-                    <button onClick={onClose} className="w-full sm:w-auto glass-button-red px-6 py-3 rounded-xl font-black text-sm active:scale-95">{t_search('close')}</button>
-                    <button onClick={() => book && onFilterByAuthor(book.author)} className="w-full sm:w-auto glass-button-green px-6 py-3 rounded-xl font-black text-sm shadow-lg active:scale-95">{t_search('similarRecommendations')}</button>
+                    <button 
+                        onMouseDown={(e) => handleInteraction(e, onClose)}
+                        onTouchStart={(e) => handleInteraction(e, onClose)}
+                        className="relative overflow-hidden w-full sm:w-auto glass-button-red px-6 py-3 rounded-xl font-black text-sm"
+                    >
+                        {ripples.map(r => <span key={r.id} className="ripple-effect border-red-500/30" style={{ left: r.x, top: r.y }} />)}
+                        {t_search('close')}
+                    </button>
+                    <button 
+                        onMouseDown={(e) => handleInteraction(e, () => book && onFilterByAuthor(book.author))}
+                        onTouchStart={(e) => handleInteraction(e, () => book && onFilterByAuthor(book.author))}
+                        className="relative overflow-hidden w-full sm:w-auto glass-button-green px-6 py-3 rounded-xl font-black text-sm shadow-lg"
+                    >
+                        {ripples.map(r => <span key={r.id} className="ripple-effect border-white/30" style={{ left: r.x, top: r.y }} />)}
+                        {t_search('similarRecommendations')}
+                    </button>
                 </div>
             </div>
         </div>
     );
 };
 
-// --- بطاقة الكتاب (Card) - متجاوبة ---
+// --- بطاقة الكتاب (Card) مع التموج الكريستالي ---
 const BookCard: React.FC<{ book: Book; onClick: () => void }> = ({ book, onClick }) => {
     const { locale } = useLanguage();
     const t_search = (key: keyof typeof translations.ar) => translations[locale][key];
+    const [ripples, setRipples] = useState<{ id: number, x: number, y: number }[]>([]);
+
+    const handleCardInteraction = (e: React.MouseEvent | React.TouchEvent) => {
+        const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+        const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
+        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+
+        const rippleId = Date.now();
+        setRipples(prev => [...prev, { id: rippleId, x, y }]);
+        setTimeout(() => {
+            setRipples(prev => prev.filter(r => r.id !== rippleId));
+            onClick(); // فتح المودال بعد بدء الأنيميشن
+        }, 250);
+    };
+
     return (
-        <div onClick={onClick} className="glass-panel rounded-[1.5rem] sm:rounded-[2rem] hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col group active:scale-95 border-white/20">
-            <div className="p-5 sm:p-7 flex-grow">
+        <div 
+            onMouseDown={handleCardInteraction}
+            onTouchStart={handleCardInteraction}
+            className="relative overflow-hidden glass-panel rounded-[1.5rem] sm:rounded-[2rem] hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col group active:scale-95 border-white/20"
+        >
+            {ripples.map(r => <span key={r.id} className="ripple-effect border-green-500/20" style={{ left: r.x, top: r.y }} />)}
+            
+            <div className="p-5 sm:p-7 flex-grow relative z-10">
                 <h3 className="font-black text-lg sm:text-xl text-gray-950 dark:text-white group-hover:text-green-700 transition-colors line-clamp-2 leading-tight mb-2">{book.title}</h3>
                 <p className="text-sm sm:text-base text-green-700/80 dark:text-green-400/80 font-black mb-4">{book.author}</p>
                 <span className="bg-green-700/10 text-green-700 dark:bg-green-700/20 dark:text-green-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">{book.subject}</span>
             </div>
-            <div className="bg-white/40 dark:bg-black/40 py-3 px-5 sm:px-7 border-t border-white/10">
+            <div className="bg-white/40 dark:bg-black/40 py-3 px-5 sm:px-7 border-t border-white/10 relative z-10">
                 <p className="font-black text-gray-900 dark:text-white text-xs sm:text-sm tracking-tighter flex items-center gap-2">
                     <span className="w-1.5 h-1.5 bg-green-700 rounded-full"></span>
                     {`${t_search('shelf')} ${book.shelf} – ${t_search('row')} ${book.row}`}
@@ -227,17 +268,13 @@ const SearchPage: React.FC = () => {
     
     useEffect(() => { handleSearch(); }, [handleSearch]);
 
-    const handleBookClick = (book: Book) => { setSelectedBook(book); logActivity('view', book.id); };
-
     return (
         <div className="max-w-7xl mx-auto px-4 pb-12">
-            {/* عنوان الصفحة - أصغر على الموبايل */}
             <div className="text-center mb-8 sm:mb-12 animate-in fade-in duration-700">
                 <h1 className="text-3xl sm:text-5xl md:text-6xl font-black text-gray-950 dark:text-white mb-4 tracking-tighter">{t_search('pageTitle')}</h1>
                 <div className="h-1.5 w-16 sm:w-24 bg-green-700 mx-auto rounded-full"></div>
             </div>
             
-            {/* حاوية البحث - متجاوبة مع Padding أقل */}
             <div className="glass-panel p-4 sm:p-8 md:p-10 rounded-[2rem] sm:rounded-[3.5rem] shadow-xl mb-10 sticky top-20 sm:top-24 z-30 border-white/30 backdrop-blur-xl">
                 <div className="relative mb-6 sm:mb-8">
                     <input
@@ -286,7 +323,7 @@ const SearchPage: React.FC = () => {
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
                 {filteredBooks.map((book: Book) => (
-                    <BookCard key={book.id} book={book} onClick={() => handleBookClick(book)} />
+                    <BookCard key={book.id} book={book} onClick={() => setSelectedBook(book)} />
                 ))}
             </div>
 
