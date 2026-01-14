@@ -63,6 +63,7 @@ const Header: React.FC = () => {
 
   const links = [
     { path: '/', label: locale === 'ar' ? 'الرئيسية' : 'Home', icon: '🏠' },
+    { path: '/search', label: locale === 'ar' ? 'البحث اليدوي' : 'Search', icon: '🔍' },
     { path: '/digital-library', label: locale === 'ar' ? 'المكتبة' : 'E-Library', icon: '📚' },
     { path: '/smart-search', label: locale === 'ar' ? 'صقر AI' : 'Ask Saqr', icon: '🤖' },
     { path: '/reports', label: locale === 'ar' ? 'التقارير' : 'Stats', icon: '📊' },
@@ -71,30 +72,36 @@ const Header: React.FC = () => {
 
   return (
     <header className="sticky top-4 z-[60] px-4 md:px-8">
-      <div className="glass-panel mx-auto max-w-6xl p-2 rounded-[2rem] border-white/40 dark:border-white/10 flex justify-between items-center shadow-xl">
+      <div className="glass-panel mx-auto max-w-7xl p-2 rounded-[2rem] border-white/20 dark:border-white/5 flex justify-between items-center shadow-xl">
         
-        {/* الشعار مائل لليمين مع الدارك مود */}
+        {/* الشعار مائل لليمين مع الاسم الجديد */}
         <Link to="/" className="flex items-center gap-3 ps-3 group">
-          <img src="/school-logo.png" alt="EFIIPS" className="h-9 w-9 object-contain logo-white-filter logo-tilt-right" />
+          <img 
+            src="/school-logo.png" 
+            alt="EFIIPS" 
+            className="h-10 w-10 object-contain logo-white-filter rotate-6 transition-transform duration-700 group-hover:scale-110" 
+          />
           <div className="hidden lg:block leading-none">
-            <span className="font-black text-gray-950 dark:text-white text-[11px] tracking-tight block">EFIIPS LIBRARY</span>
-            <span className="text-[8px] font-bold text-red-600 uppercase tracking-widest">National Vision 2026</span>
+            <span className="font-black text-gray-950 dark:text-white text-[10px] md:text-[11px] tracking-tight block uppercase">
+              {locale === 'ar' ? 'مكتبة مدرسة صقر الإمارات' : 'Saqr Al Emarat School Library'}
+            </span>
+            <div className="h-0.5 w-6 bg-red-600 rounded-full mt-1 transition-all group-hover:w-full"></div>
           </div>
         </Link>
         
-        {/* القائمة - تدعم التمرير على الموبايل لضمان ظهور كل الروابط */}
-        <nav className="flex items-center bg-black/5 dark:bg-white/5 rounded-full p-1 gap-0.5 overflow-x-auto no-scrollbar max-w-[55vw] sm:max-w-none">
+        {/* القائمة - تم إضافة البحث اليدوي */}
+        <nav className="flex items-center bg-black/5 dark:bg-white/5 rounded-full p-1 gap-0.5 overflow-x-auto no-scrollbar max-w-[50vw] sm:max-w-none">
           {links.map(l => (
             <Link 
               key={l.path} 
               to={l.path} 
-              className={`px-4 py-2 rounded-full text-[10px] md:text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${
+              className={`px-4 py-2 rounded-full text-[9px] md:text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${
                 location.pathname === l.path 
-                  ? 'bg-red-600 text-white shadow-md' 
+                  ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950 shadow-md' 
                   : 'text-slate-500 dark:text-slate-400 hover:bg-white/10'
               }`}
             >
-              <span className="hidden md:inline">{l.icon}</span>
+              <span>{l.icon}</span>
               {l.label}
             </Link>
           ))}
@@ -104,14 +111,14 @@ const Header: React.FC = () => {
         <div className="flex items-center gap-1 pe-2">
           <button 
             onClick={() => setLocale(locale === 'ar' ? 'en' : 'ar')} 
-            className="w-8 h-8 flex items-center justify-center text-red-600 font-black text-[9px] border border-red-600/20 rounded-full hover:bg-red-600 hover:text-white transition-all"
+            className="w-9 h-9 flex items-center justify-center text-slate-900 dark:text-white font-black text-[9px] border border-slate-200 dark:border-white/10 rounded-full hover:border-red-600 transition-all active:scale-90"
           >
             {locale === 'ar' ? 'EN' : 'AR'}
           </button>
           
           <button 
             onClick={toggleTheme} 
-            className="w-8 h-8 flex items-center justify-center bg-slate-100 dark:bg-white/10 rounded-full text-sm shadow-sm"
+            className="w-9 h-9 flex items-center justify-center bg-white dark:bg-white/5 rounded-full text-sm shadow-sm border border-slate-100 dark:border-white/5"
           >
             {theme === 'light' ? '🌙' : '☀️'}
           </button>
@@ -152,7 +159,7 @@ const App: React.FC = () => {
         <HashRouter>
           <div className="min-h-screen bg-slate-50 dark:bg-[#020617] transition-colors duration-700 flex flex-col selection:bg-red-600/30">
             
-            {/* الهالات الضوئية الوطنية في الخلفية */}
+            {/* الهالات الضوئية الخلفية */}
             <div className="fixed inset-0 z-0 pointer-events-none opacity-40 overflow-hidden">
               <div className="absolute top-[-10%] right-[-10%] w-[45%] h-[45%] bg-red-600/10 blur-[140px] rounded-full"></div>
               <div className="absolute bottom-[-10%] left-[-10%] w-[45%] h-[45%] bg-green-600/10 blur-[140px] rounded-full"></div>
@@ -174,8 +181,7 @@ const App: React.FC = () => {
               </Routes>
             </main>
 
-            {/* فوتر بسيط ونظيف جداً بطلبك */}
-            <footer className="relative z-10 py-6 text-center border-t border-slate-200 dark:border-white/5 mx-8">
+            <footer className="relative z-10 py-8 text-center border-t border-slate-200 dark:border-white/5 mx-8 mt-12">
                 <p className="font-black text-[9px] tracking-[0.4em] uppercase text-slate-400 dark:text-slate-600">
                     &copy; 2026 Emirates Falcon International Private School
                 </p>
