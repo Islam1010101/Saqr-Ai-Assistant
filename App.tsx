@@ -13,7 +13,7 @@ import EnglishLibraryInternalPage from './pages/EnglishLibraryInternalPage';
 
 import type { Locale } from './types';
 
-// -------- 1. مساعد صقر العائم (UAE Identity Assistant) --------
+// -------- 1. مساعد صقر العائم (UAE Floating Assistant) --------
 const FloatingSaqr: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -40,14 +40,12 @@ const FloatingSaqr: React.FC = () => {
       <button
         onMouseDown={handleInteraction}
         onTouchStart={handleInteraction}
-        className="group relative w-16 h-16 md:w-20 md:h-20 glass-panel rounded-[2rem] border-red-600/20 shadow-2xl flex items-center justify-center overflow-hidden hover:scale-110 active:scale-90 transition-all duration-500"
+        className="group relative w-16 h-16 md:w-20 md:h-20 glass-panel rounded-[2rem] border-red-600/20 shadow-[0_20px_50px_rgba(220,38,38,0.3)] flex items-center justify-center overflow-hidden hover:scale-110 active:scale-90 transition-all duration-500"
       >
         {ripples.map(r => (
           <span key={r.id} className="ripple-effect bg-red-600/20" style={{ left: r.x, top: r.y }} />
         ))}
-        <img src="/saqr-avatar.png" alt="Saqr AI" className="w-[80%] h-[80%] object-contain group-hover:rotate-12 transition-transform duration-500" />
-        
-        {/* مؤشر النشاط الوطني (أخضر) */}
+        <img src="/saqr-avatar.png" alt="Saqr AI" className="w-[85%] h-[85%] object-contain group-hover:rotate-12 transition-transform duration-500" />
         <span className="absolute top-2 right-2 flex h-3 w-3">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
           <span className="relative inline-flex rounded-full h-3 w-3 bg-green-600 border-2 border-white dark:border-slate-900"></span>
@@ -57,7 +55,7 @@ const FloatingSaqr: React.FC = () => {
   );
 };
 
-// -------- 2. الهيدر الوطني المطور (Smart UAE Header) --------
+// -------- 2. الهيدر الوطني المطور (Smart Navigation) --------
 const Header: React.FC = () => {
   const { locale, setLocale } = useLanguage();
   const { theme, toggleTheme } = useTheme();
@@ -66,31 +64,34 @@ const Header: React.FC = () => {
   const links = [
     { path: '/', label: locale === 'ar' ? 'الرئيسية' : 'Home', icon: '🏠' },
     { path: '/digital-library', label: locale === 'ar' ? 'المكتبة' : 'E-Library', icon: '📚' },
-    { path: '/smart-search', label: locale === 'ar' ? 'اسأل صقر' : 'Ask Saqr', icon: '🤖' },
+    { path: '/smart-search', label: locale === 'ar' ? 'صقر AI' : 'Ask Saqr', icon: '🤖' },
+    { path: '/reports', label: locale === 'ar' ? 'التقارير' : 'Stats', icon: '📊' },
+    { path: '/about', label: locale === 'ar' ? 'عن المكتبة' : 'About', icon: 'ℹ️' },
   ];
 
   return (
-    <header className="sticky top-6 z-[60] px-4 md:px-12">
-      <div className="glass-panel mx-auto max-w-7xl p-2 md:p-3 rounded-[2.5rem] border-white/40 dark:border-white/10 flex justify-between items-center shadow-xl">
+    <header className="sticky top-4 z-[60] px-4 md:px-8">
+      <div className="glass-panel mx-auto max-w-6xl p-2 rounded-[2rem] border-white/40 dark:border-white/10 flex justify-between items-center shadow-xl">
         
-        {/* الشعار مائل لليمين */}
-        <Link to="/" className="flex items-center gap-3 ps-4 group">
-          <img src="/school-logo.png" alt="Logo" className="h-10 w-10 md:h-12 md:w-12 object-contain logo-white-filter logo-tilt-right" />
+        {/* الشعار مائل لليمين مع الدارك مود */}
+        <Link to="/" className="flex items-center gap-3 ps-3 group">
+          <img src="/school-logo.png" alt="EFIIPS" className="h-9 w-9 object-contain logo-white-filter logo-tilt-right" />
           <div className="hidden lg:block leading-none">
-            <span className="font-black text-gray-950 dark:text-white text-sm tracking-tight block">EFIIPS LIBRARY</span>
-            <span className="text-[9px] font-bold text-red-600 uppercase tracking-widest">National Excellence</span>
+            <span className="font-black text-gray-950 dark:text-white text-[11px] tracking-tight block">EFIIPS LIBRARY</span>
+            <span className="text-[8px] font-bold text-red-600 uppercase tracking-widest">National Vision 2026</span>
           </div>
         </Link>
         
-        <nav className="flex items-center bg-black/5 dark:bg-white/5 rounded-full p-1.5 gap-1 overflow-x-auto no-scrollbar max-w-[50vw] sm:max-w-none">
+        {/* القائمة - تدعم التمرير على الموبايل لضمان ظهور كل الروابط */}
+        <nav className="flex items-center bg-black/5 dark:bg-white/5 rounded-full p-1 gap-0.5 overflow-x-auto no-scrollbar max-w-[55vw] sm:max-w-none">
           {links.map(l => (
             <Link 
               key={l.path} 
               to={l.path} 
-              className={`px-5 py-2.5 rounded-full text-xs md:text-sm font-black transition-all flex items-center gap-2 whitespace-nowrap ${
+              className={`px-4 py-2 rounded-full text-[10px] md:text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${
                 location.pathname === l.path 
-                  ? 'bg-red-600 text-white shadow-lg' 
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-white/10'
+                  ? 'bg-red-600 text-white shadow-md' 
+                  : 'text-slate-500 dark:text-slate-400 hover:bg-white/10'
               }`}
             >
               <span className="hidden md:inline">{l.icon}</span>
@@ -99,17 +100,18 @@ const Header: React.FC = () => {
           ))}
         </nav>
         
-        <div className="flex items-center gap-2 pe-2">
+        {/* أدوات التحكم */}
+        <div className="flex items-center gap-1 pe-2">
           <button 
             onClick={() => setLocale(locale === 'ar' ? 'en' : 'ar')} 
-            className="w-10 h-10 flex items-center justify-center text-red-600 font-black text-xs border-2 border-red-600/20 rounded-full hover:bg-red-600 hover:text-white transition-all"
+            className="w-8 h-8 flex items-center justify-center text-red-600 font-black text-[9px] border border-red-600/20 rounded-full hover:bg-red-600 hover:text-white transition-all"
           >
             {locale === 'ar' ? 'EN' : 'AR'}
           </button>
           
           <button 
             onClick={toggleTheme} 
-            className="w-10 h-10 flex items-center justify-center bg-slate-100 dark:bg-white/10 rounded-full hover:rotate-45 transition-transform text-xl shadow-sm"
+            className="w-8 h-8 flex items-center justify-center bg-slate-100 dark:bg-white/10 rounded-full text-sm shadow-sm"
           >
             {theme === 'light' ? '🌙' : '☀️'}
           </button>
@@ -119,7 +121,7 @@ const Header: React.FC = () => {
   );
 };
 
-// -------- 3. سياق اللغة والثيم (Core Logic) --------
+// -------- 3. سياق اللغة والثيم (Core) --------
 const LanguageContext = createContext<any>(null);
 export const useLanguage = () => useContext(LanguageContext);
 const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -142,7 +144,7 @@ const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   return <ThemeContext.Provider value={{ theme, toggleTheme: () => setTheme(prev => prev === 'light' ? 'dark' : 'light') }}>{children}</ThemeContext.Provider>;
 };
 
-// -------- 4. الهيكل الرئيسي (App Component) --------
+// -------- 4. المكون الرئيسي (App Component) --------
 const App: React.FC = () => {
   return (
     <ThemeProvider>
@@ -159,7 +161,7 @@ const App: React.FC = () => {
             <Header />
             <FloatingSaqr />
             
-            <main className="flex-1 relative z-10 container mx-auto p-4 md:p-10">
+            <main className="flex-1 relative z-10 container mx-auto p-3 md:p-8">
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/search" element={<SearchPage />} />
@@ -172,9 +174,9 @@ const App: React.FC = () => {
               </Routes>
             </main>
 
-            {/* فوتر بسيط ونظيف (Copyright Only) */}
-            <footer className="relative z-10 py-8 text-center border-t border-slate-200 dark:border-white/5 mx-12">
-                <p className="font-black text-[10px] tracking-[0.4em] uppercase text-slate-400 dark:text-slate-600">
+            {/* فوتر بسيط ونظيف جداً بطلبك */}
+            <footer className="relative z-10 py-6 text-center border-t border-slate-200 dark:border-white/5 mx-8">
+                <p className="font-black text-[9px] tracking-[0.4em] uppercase text-slate-400 dark:text-slate-600">
                     &copy; 2026 Emirates Falcon International Private School
                 </p>
             </footer>
