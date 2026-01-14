@@ -6,17 +6,27 @@ const DigitalLibraryPage: React.FC = () => {
     const isAr = locale === 'ar';
     const [ripples, setRipples] = useState<{ id: number, x: number, y: number }[]>([]);
 
-    // مصفوفة المصادر الرقمية
+    // مصفوفة المصادر الرقمية مع الروابط الرسمية المضافة
     const arabicResources = [
+        { 
+            title: "Digital Library E.F.I.P.S - المكتبة العربية", 
+            desc: "المكتبة الرسمية لمدرسة صقر الإمارات - القسم العربي", 
+            icon: "🏛️", 
+            link: "https://sites.google.com/falcon-school.com/digital-library-efips/المكتبة-العربية?authuser=0" 
+        },
         { title: "منصة ألف للتعليم", desc: "تعلم تفاعلي باللغة العربية", icon: "💎", link: "#" },
         { title: "مكتبة نور", desc: "آلاف الكتب العربية المجانية", icon: "📚", link: "#" },
-        { title: "مجلة ماجد الرقمية", desc: "محتوى ترفيهي وتعليمي للأطفال", icon: "🎨", link: "#" },
     ];
 
     const englishResources = [
+        { 
+            title: "Digital Library E.F.I.P.S - English Library", 
+            desc: "Official school digital resources - English Section", 
+            icon: "🏛️", 
+            link: "https://sites.google.com/falcon-school.com/digital-library-efips/english-library" 
+        },
         { title: "Oxford Owl", desc: "Free eBook library for kids", icon: "🦉", link: "#" },
         { title: "Epic Library", desc: "Unlimited digital books for students", icon: "🚀", link: "#" },
-        { title: "National Geographic Kids", desc: "Explore the world around you", icon: "🌍", link: "#" },
     ];
 
     const handleInteraction = (e: React.MouseEvent) => {
@@ -29,26 +39,33 @@ const DigitalLibraryPage: React.FC = () => {
     return (
         <div dir={dir} className="max-w-7xl mx-auto px-4 py-8 animate-in fade-in duration-1000">
             
-            {/* قسم الهيرو: صورة صقر الجديدة والعنوان */}
+            {/* قسم الهيرو: صورة صقر مع شعار المدرسة في الخلفية */}
             <div className="glass-panel relative overflow-hidden rounded-[3.5rem] p-10 md:p-16 mb-16 border-white/20 flex flex-col md:flex-row items-center gap-10">
                 {ripples.map(r => <span key={r.id} className="ripple-effect border-red-500/30" style={{ left: r.x, top: r.y }} />)}
                 
                 <div className="flex-1 text-center md:text-start relative z-10">
                     <h1 className="text-4xl md:text-6xl font-black text-gray-950 dark:text-white mb-6 tracking-tighter leading-tight">
-                        {isAr ? 'بوابة صقر للمصادر الرقمية' : 'Saqr Digital Resource Portal'}
+                        {isAr ? 'بوابة E.F.I.P.S الرقمية' : 'E.F.I.P.S Digital Portal'}
                     </h1>
                     <p className="text-xl text-gray-600 dark:text-gray-400 font-bold max-w-xl">
-                        {isAr ? 'استكشف عالمًا من المعرفة عبر أفضل المنصات التعليمية العربية والعالمية.' : 'Explore a world of knowledge through the best Arabic and International platforms.'}
+                        {isAr ? 'استكشف عالمًا من المعرفة عبر بوابة مدرسة صقر الإمارات للمصادر الرقمية.' : 'Explore a world of knowledge through the Emirates Falcon Digital Portal.'}
                     </p>
                 </div>
 
-                <div className="relative group cursor-pointer" onMouseDown={handleInteraction}>
-                    {/* مكان صورة شخصية صقر الجديدة */}
-                    <img 
-                        src="/saqr-digital.png" 
-                        alt="Saqr Digital" 
-                        className="h-64 md:h-80 object-contain drop-shadow-[0_20px_50px_rgba(239,68,68,0.3)] transform transition-transform group-hover:scale-110"
-                    />
+                {/* حاوية الشخصية مع الشعار في الخلفية */}
+                <div className="relative flex items-center justify-center">
+                    {/* الشعار في الخلفية (شبه الصفحة الرئيسية) */}
+                    <div className="absolute opacity-15 dark:opacity-10 scale-150 pointer-events-none transition-all duration-700">
+                        <img src="/school-logo.png" alt="Back Logo" className="h-64 w-64 md:h-80 md:w-80 object-contain rotate-[15deg]" />
+                    </div>
+
+                    <div className="relative group cursor-pointer z-10" onMouseDown={handleInteraction}>
+                        <img 
+                            src="/saqr-digital.png" 
+                            alt="Saqr Digital" 
+                            className="h-64 md:h-80 object-contain drop-shadow-[0_20px_50px_rgba(239,68,68,0.3)] transform transition-transform group-hover:scale-110"
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -65,11 +82,11 @@ const DigitalLibraryPage: React.FC = () => {
                         {arabicResources.map((item, i) => (
                             <a 
                                 key={i} href={item.link} target="_blank" rel="noopener noreferrer"
-                                className="glass-panel group relative overflow-hidden p-6 rounded-3xl border-white/10 hover:border-red-500/30 transition-all flex items-center gap-6"
+                                className={`glass-panel group relative overflow-hidden p-6 rounded-3xl border-white/10 hover:border-red-500/30 transition-all flex items-center gap-6 ${i === 0 ? 'border-red-500/40 bg-red-500/5' : ''}`}
                                 onMouseDown={handleInteraction}
                             >
                                 {ripples.map(r => <span key={r.id} className="ripple-effect border-red-500/20" style={{ left: r.x, top: r.y }} />)}
-                                <div className="text-4xl">{item.icon}</div>
+                                <div className={`text-4xl ${i === 0 ? 'animate-bounce' : ''}`}>{item.icon}</div>
                                 <div className="flex-1">
                                     <h3 className="text-xl font-black text-gray-900 dark:text-white group-hover:text-red-600 transition-colors">{item.title}</h3>
                                     <p className="text-sm text-gray-500 font-medium">{item.desc}</p>
@@ -90,11 +107,11 @@ const DigitalLibraryPage: React.FC = () => {
                         {englishResources.map((item, i) => (
                             <a 
                                 key={i} href={item.link} target="_blank" rel="noopener noreferrer"
-                                className="glass-panel group relative overflow-hidden p-6 rounded-3xl border-white/10 hover:border-red-500/30 transition-all flex items-center gap-6"
+                                className={`glass-panel group relative overflow-hidden p-6 rounded-3xl border-white/10 hover:border-red-500/30 transition-all flex items-center gap-6 ${i === 0 ? 'border-red-500/40 bg-red-500/5' : ''}`}
                                 onMouseDown={handleInteraction}
                             >
                                 {ripples.map(r => <span key={r.id} className="ripple-effect border-red-500/20" style={{ left: r.x, top: r.y }} />)}
-                                <div className="text-4xl">{item.icon}</div>
+                                <div className={`text-4xl ${i === 0 ? 'animate-bounce' : ''}`}>{item.icon}</div>
                                 <div className="flex-1">
                                     <h3 className="text-xl font-black text-gray-900 dark:text-white group-hover:text-red-600 transition-colors">{item.title}</h3>
                                     <p className="text-sm text-gray-500 font-medium">{item.desc}</p>
