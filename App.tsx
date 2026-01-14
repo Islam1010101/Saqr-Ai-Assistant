@@ -8,6 +8,8 @@ import SmartSearchPage from './pages/SmartSearchPage';
 import ReportsPage from './pages/ReportsPage';
 import AboutPage from './pages/AboutPage';
 import DigitalLibraryPage from './pages/DigitalLibraryPage';
+// استيراد الصفحة الداخلية الجديدة للمكتبة العربية
+import ArabicLibraryInternalPage from './pages/ArabicLibraryInternalPage';
 
 import type { Locale } from './types';
 
@@ -96,6 +98,7 @@ const Header: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
 
+  // الروابط الأساسية فقط (بدون الروابط الداخلية للأقسام)
   const links = [
     { path: '/', label: locale === 'ar' ? 'الرئيسية' : 'Home' },
     { path: '/search', label: locale === 'ar' ? 'بحث' : 'Search' },
@@ -172,6 +175,8 @@ const App: React.FC = () => {
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/smart-search" element={<SmartSearchPage />} />
                 <Route path="/digital-library" element={<DigitalLibraryPage />} />
+                {/* المسار الجديد لأقسام المكتبة العربية - تم تعريفه هنا ليتم الانتقال إليه داخلياً */}
+                <Route path="/digital-library/arabic" element={<ArabicLibraryInternalPage />} />
                 <Route path="/reports" element={<ReportsPage />} />
                 <Route path="/about" element={<AboutPage />} />
               </Routes>
