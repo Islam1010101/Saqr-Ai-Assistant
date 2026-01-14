@@ -52,7 +52,7 @@ const translations = {
         read: "قراءة المصدر",
         bioTitle: "نبذة عن المؤلف",
         summaryTitle: "ملخص صقر الذكي",
-        back: "العودة للبوابة",
+        back: "العودة",
         close: "إغلاق",
         locationLabel: "الموقع الرقمي"
     },
@@ -62,11 +62,11 @@ const translations = {
         allSubjects: "Subjects",
         allAuthors: "Authors",
         read: "Read Source",
-        bioTitle: "Author Biography",
+        bioTitle: "Author Bio",
         summaryTitle: "Saqr AI Summary",
-        back: "Back to Portal",
+        back: "Back",
         close: "Close",
-        locationLabel: "Digital Location"
+        locationLabel: "Digital Portal"
     }
 };
 
@@ -114,9 +114,6 @@ const BookCard = React.memo(({ book, onClick, t, onAuthorHover }: { book: Book; 
             <h3 className="font-black text-xl text-slate-950 dark:text-white leading-tight mb-2 tracking-tighter group-hover:text-red-600 transition-colors line-clamp-2">{book.title}</h3>
             <p onMouseMove={(e) => onAuthorHover(e, book.bio)} onMouseLeave={(e) => onAuthorHover(e, null)} className="text-[11px] text-slate-500 dark:text-slate-400 font-bold hover:text-red-600 transition-all inline-block">By {book.author}</p>
         </div>
-        <div className="bg-white/40 dark:bg-black/20 py-4 px-8 border-t border-white/10 mt-auto">
-            <p className="font-black text-slate-900 dark:text-white text-[10px] uppercase tracking-[0.3em] opacity-30 text-center">English Collection</p>
-        </div>
     </div>
 ));
 
@@ -128,6 +125,7 @@ const EnglishLibraryInternalPage: React.FC = () => {
 
     const [searchTerm, setSearchTerm] = useState('');
     const [subjectFilter, setSubjectFilter] = useState('all');
+    const [authorFilter, setAuthorFilter] = useState('all');
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
     const [tooltip, setTooltip] = useState<{ text: string, x: number, y: number } | null>(null);
 
@@ -138,6 +136,7 @@ const EnglishLibraryInternalPage: React.FC = () => {
 
     const filters = useMemo(() => ({
         subjects: ["all", ...new Set(ENGLISH_LIBRARY_DATABASE.map(b => b.subject))].sort(),
+        authors: ["all", ...new Set(ENGLISH_LIBRARY_DATABASE.map(b => b.author))].sort(),
     }), []);
 
     const filteredBooks = useMemo(() => {
@@ -145,9 +144,10 @@ const EnglishLibraryInternalPage: React.FC = () => {
         return ENGLISH_LIBRARY_DATABASE.filter(b => {
             const matchesTerm = !term || b.title.toLowerCase().includes(term) || b.author.toLowerCase().includes(term);
             const matchesSub = subjectFilter === 'all' || b.subject === subjectFilter;
-            return matchesTerm && matchesSub;
+            const matchesAuth = authorFilter === 'all' || b.author === authorFilter;
+            return matchesTerm && matchesSub && matchesAuth;
         });
-    }, [searchTerm, subjectFilter]);
+    }, [searchTerm, subjectFilter, authorFilter]);
 
     return (
         <div dir={dir} className="max-w-7xl mx-auto px-4 pb-24 relative z-10">
@@ -167,6 +167,7 @@ const EnglishLibraryInternalPage: React.FC = () => {
                 <div className="h-1.5 w-24 bg-slate-900 mx-auto mt-6 rounded-full opacity-60"></div>
             </div>
 
+            {/* شريط البحث المطور بالفلاتر المزدوجة */}
             <div className="sticky top-24 z-50 mb-12 animate-fade-up">
                 <div className="glass-panel p-3 rounded-[1.5rem] shadow-lg border-white/40 dark:border-white/5 backdrop-blur-2xl max-w-4xl mx-auto">
                     <div className="flex flex-col md:flex-row gap-2">
@@ -174,10 +175,13 @@ const EnglishLibraryInternalPage: React.FC = () => {
                             <input type="text" placeholder={t('searchPlaceholder')} className="w-full p-3 ps-10 bg-slate-100/50 dark:bg-black/40 text-slate-950 dark:text-white border-2 border-transparent focus:border-slate-900 rounded-xl outline-none transition-all font-black text-sm shadow-inner" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                             <svg className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-900 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                         </div>
-                        <div className="flex-1 relative">
-                            <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="w-full p-3 rounded-lg bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 font-black text-[10px] cursor-pointer outline-none focus:border-slate-900 appearance-none text-center shadow-sm">
-                                {filters.subjects.map(s => <option key={s} value={s}>{s === 'all' ? t('allSubjects') : s}</option>)}
-                            </select>
+                        <div className="flex-[3] grid grid-cols-2 gap-2">
+                            {[{ val: subjectFilter, set: setSubjectFilter, opts: filters.subjects, lbl: t('allSubjects') }, { val: authorFilter, set: setAuthorFilter, opts: filters.authors, lbl: t('allAuthors') }].map((f, i) => (
+                                <select key={i} value={f.val} onChange={(e) => f.set(e.target.value)} className="p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 font-black text-[8px] md:text-[10px] cursor-pointer outline-none focus:border-slate-900 appearance-none text-center shadow-sm">
+                                    <option value="all">{f.lbl}</option>
+                                    {f.opts.map(o => o !== "all" && <option key={o} value={o}>{o}</option>)}
+                                </select>
+                            ))}
                         </div>
                     </div>
                 </div>
