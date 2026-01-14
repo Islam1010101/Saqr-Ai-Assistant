@@ -56,7 +56,6 @@ const translations = {
     }
 };
 
-// --- نافذة تفاصيل الكتاب (كتلة واحدة بدون سكرول) ---
 const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
     if (!book) return null;
     return (
@@ -70,27 +69,25 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
                     <div className="mb-6">
                         <span className="inline-block px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest mb-4 bg-green-600 text-white shadow-md">{book.subject}</span>
                         <h2 className="text-3xl md:text-5xl font-black text-slate-950 dark:text-white leading-tight mb-2 tracking-tighter">{book.title}</h2>
-                        <p className="text-lg text-slate-500 font-bold italic">By {book.author}</p>
+                        <p className="text-lg text-slate-500 font-bold">By {book.author}</p>
                     </div>
                     
-                    {/* نبذة المؤلف في المودال */}
                     <div className="mb-6 p-5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/5">
                          <p className="text-[9px] text-green-700 dark:text-green-400 font-black uppercase mb-2 tracking-widest">{t('bioTitle')}</p>
-                         <p className="text-sm font-medium leading-relaxed text-slate-600 dark:text-slate-300 italic">"{book.bio}"</p>
+                         <p className="text-sm font-medium leading-relaxed text-slate-600 dark:text-slate-300">"{book.bio}"</p>
                     </div>
 
                     <div className="bg-slate-100/50 dark:bg-white/5 p-6 rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-white/10">
                         <p className="text-[10px] text-red-600 font-black uppercase mb-3 tracking-widest flex items-center gap-2"><span className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></span> {t('summaryTitle')}</p>
-                        <p className="text-slate-800 dark:text-slate-200 text-lg font-medium leading-relaxed italic">"{book.summary}"</p>
+                        <p className="text-slate-800 dark:text-slate-200 text-lg font-medium leading-relaxed">"{book.summary}"</p>
                     </div>
                 </div>
 
                 <div className="w-full md:w-[300px] bg-slate-950 dark:bg-black p-10 flex flex-col justify-center items-center text-center text-white relative">
                     <div className="space-y-10 relative z-10 w-full">
                         <div>
-                            <p className="text-[10px] font-black text-green-500 uppercase tracking-[0.3em] mb-6">{t('locationLabel')}</p>
-                            <p className="text-lg font-black text-white bg-white/5 p-4 rounded-2xl border border-white/10 mb-8 tracking-tighter italic uppercase text-xs opacity-40 tracking-[0.3em]">National Library System</p>
-                            <a href={book.driveLink} target="_blank" rel="noopener noreferrer" className="w-full bg-red-600 text-white font-black py-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-red-700 active:scale-95 shadow-xl transition-all"><span className="text-sm uppercase tracking-widest">{t('read')}</span></a>
+                            <p className="text-[10px] font-black text-green-500 uppercase tracking-[0.3em] mb-8">{t('locationLabel')}</p>
+                            <a href={book.driveLink} target="_blank" rel="noopener noreferrer" className="w-full bg-red-600 text-white font-black py-5 rounded-2xl flex items-center justify-center gap-3 hover:bg-red-700 active:scale-95 shadow-xl transition-all"><span className="text-sm uppercase tracking-widest">{t('read')}</span></a>
                         </div>
                         <button onClick={onClose} className="w-full bg-white text-slate-950 font-black py-3 rounded-xl active:scale-95 text-[10px] uppercase tracking-widest transition-all">{t('close')}</button>
                     </div>
@@ -100,27 +97,22 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
     );
 };
 
-// --- بطاقة الكتاب (4 كروت + تلميح نبذة المؤلف) ---
 const BookCard = React.memo(({ book, onClick, t, onAuthorHover }: { book: any; onClick: () => void; t: any; onAuthorHover: (e: React.MouseEvent, bio: string | null) => void }) => (
     <div 
         onClick={onClick} 
         className="group relative glass-panel bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border border-white/30 dark:border-white/5 rounded-[2rem] transition-all duration-300 cursor-pointer flex flex-col h-full overflow-hidden shadow-md active:scale-95 hover:border-green-600/50 hover:shadow-[0_0_25px_rgba(5,150,105,0.3)]"
     >
-        <div className="p-7 flex-grow text-start">
+        <div className="p-8 flex-grow text-start">
              <span className="inline-block px-2.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest mb-4 bg-green-600 text-white shadow-sm">{book.subject}</span>
             <h3 className="font-black text-xl text-slate-950 dark:text-white leading-tight mb-2 tracking-tighter group-hover:text-green-700 transition-colors line-clamp-2">{book.title}</h3>
             
-            {/* منطقة المؤلف التفاعلية مع الهنت */}
             <p 
                 onMouseMove={(e) => onAuthorHover(e, book.bio)}
                 onMouseLeave={(e) => onAuthorHover(e, null)}
-                className="text-[11px] text-slate-500 dark:text-slate-400 font-bold italic opacity-70 hover:opacity-100 hover:text-red-600 transition-all inline-block"
+                className="text-[11px] text-slate-500 dark:text-slate-400 font-bold hover:text-red-600 transition-all inline-block"
             >
                 By {book.author}
             </p>
-        </div>
-        <div className="bg-white/40 dark:bg-black/20 py-4 px-7 border-t border-white/5 mt-auto">
-            <p className="font-black text-slate-900 dark:text-white text-[10px] uppercase tracking-[0.2em] opacity-30 text-center">Certified Resource</p>
         </div>
     </div>
 ));
@@ -135,8 +127,6 @@ const ArabicLibraryInternalPage: React.FC = () => {
     const [subjectFilter, setSubjectFilter] = useState('all');
     const [authorFilter, setAuthorFilter] = useState('all');
     const [selectedBook, setSelectedBook] = useState<any>(null);
-    
-    // حالة الهنت العائم
     const [tooltip, setTooltip] = useState<{ text: string, x: number, y: number } | null>(null);
 
     const handleAuthorHover = (e: React.MouseEvent, bio: string | null) => {
@@ -161,8 +151,6 @@ const ArabicLibraryInternalPage: React.FC = () => {
 
     return (
         <div dir={dir} className="max-w-7xl mx-auto px-4 pb-24 relative z-10">
-            
-            {/* التلميح العائم (Bio Tooltip) */}
             {tooltip && (
                 <div 
                     className="fixed pointer-events-none z-[200] glass-panel px-5 py-3 rounded-2xl border-white/40 shadow-2xl animate-in fade-in zoom-in duration-300 max-w-xs"
