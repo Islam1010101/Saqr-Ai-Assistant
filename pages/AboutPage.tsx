@@ -12,12 +12,11 @@ const translations = {
         service2: "مساحات هادئة للمطالعة والبحث",
         service3: "ورش عمل وفعاليات قرائية رقمية",
         service4: "مساعدة بحثية عبر المساعد صقر",
-        service5: "الوصول إلى المصادر الرقمية",
+        service5: "الوصول إلى قواعد البيانات والمصادر الرقمية",
         hoursTitle: "ساعات العمل",
         hours: "من الاثنين إلى الجمعة، من 8:30 صباحًا حتى 2:00 ظهرًا",
         contactTitle: "تواصل مع أمين المكتبة",
         contactEmail: "islam.ahmed@falcon-school.com",
-        schoolWebsite: "زيارة الموقع الرسمي للمدرسة",
     },
     en: {
         title: "About Saqr Library",
@@ -34,7 +33,6 @@ const translations = {
         hours: "Monday to Friday, 8:30 AM - 2:00 PM",
         contactTitle: "Contact Librarian",
         contactEmail: "islam.ahmed@falcon-school.com",
-        schoolWebsite: "Visit Official School Website",
     }
 }
 
@@ -52,7 +50,6 @@ const AboutPage: React.FC = () => {
     const t = (key: keyof typeof translations.ar) => translations[locale][key];
     const [ripples, setRipples] = useState<{ id: number, x: number, y: number }[]>([]);
 
-    // دالة إنشاء تأثير التموج الكريستالي
     const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
         const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
         const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
@@ -79,11 +76,7 @@ const AboutPage: React.FC = () => {
             >
                 {ripples.map(r => <span key={r.id} className="ripple-effect border-green-500/20" style={{ left: r.x, top: r.y }} />)}
                 <div className="relative mb-8">
-                    <img 
-                        src={SCHOOL_LOGO} 
-                        alt="Logo" 
-                        className="h-32 md:h-40 w-auto object-contain drop-shadow-2xl logo-smart-hover transition-transform hover:scale-110" 
-                    />
+                    <img src={SCHOOL_LOGO} alt="Logo" className="h-32 md:h-40 w-auto object-contain drop-shadow-2xl logo-smart-hover transition-transform hover:scale-110" />
                 </div>
                 <h1 className="text-4xl md:text-6xl font-black text-gray-950 dark:text-white mb-6 tracking-tight relative z-10">
                     {t('title')}
@@ -91,11 +84,9 @@ const AboutPage: React.FC = () => {
                 <div className="h-2 w-24 bg-green-700 rounded-full shadow-[0_0_15px_rgba(0,115,47,0.4)] relative z-10"></div>
             </div>
 
-            {/* 2. شبكة المحتوى */}
             <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
-                
                 <div className="lg:col-span-2 space-y-8">
-                    {/* قسم عن المدرسة */}
+                    {/* قسم عن المدرسة - تم حذف الزر من هنا بناءً على طلبك */}
                     <section className="glass-panel p-8 md:p-10 rounded-[3rem] border-white/20 overflow-hidden relative">
                         <h2 className="text-3xl font-black mb-8 text-gray-900 dark:text-white flex items-center gap-4">
                             <span className="w-2.5 h-10 bg-green-700 rounded-full"></span>
@@ -104,23 +95,6 @@ const AboutPage: React.FC = () => {
                         <div className="space-y-6 text-xl leading-relaxed text-gray-800 dark:text-gray-200 font-medium">
                             <p>{t('p1')}</p>
                             <p>{t('p2')}</p>
-                        </div>
-
-                        <div className="mt-10 pt-8 border-t border-black/5 dark:border-white/10 flex justify-center lg:justify-start">
-                            <a 
-                                href="https://www.falcon-school.com" 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                onMouseDown={handleInteraction}
-                                onTouchStart={handleInteraction}
-                                className="glass-button-black relative overflow-hidden inline-flex items-center gap-4 px-10 py-5 rounded-2xl font-black text-lg shadow-xl hover:gap-6 group transition-all"
-                            >
-                                {ripples.map(r => <span key={r.id} className="ripple-effect border-white/40" style={{ left: r.x, top: r.y }} />)}
-                                <span className="relative z-10 flex items-center gap-4">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9-9c1.657 0 3 4.03 3 9s-1.343 9-3 9m0-18c-1.657 0-3 4.03-3 9s1.343 9-3 9" /></svg>
-                                    {t('schoolWebsite')}
-                                </span>
-                            </a>
                         </div>
                     </section>
 
@@ -147,8 +121,8 @@ const AboutPage: React.FC = () => {
                     </section>
                 </div>
 
-                {/* الجانب الجانبي */}
                 <div className="space-y-8">
+                    {/* ساعات العمل */}
                     <section className="bg-green-700 text-white p-10 rounded-[3rem] shadow-2xl shadow-green-700/30 transition-all hover:scale-[1.03]">
                         <h2 className="text-2xl font-black mb-6 flex items-center gap-3">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -157,6 +131,7 @@ const AboutPage: React.FC = () => {
                         <p className="text-green-50 font-black text-lg leading-relaxed">{t('hours')}</p>
                     </section>
 
+                    {/* تواصل مع أمين المكتبة */}
                     <section className="bg-gray-950 text-white p-10 rounded-[3rem] shadow-2xl transition-all hover:scale-[1.03]">
                         <h2 className="text-2xl font-black mb-6 flex items-center gap-3">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
@@ -165,13 +140,31 @@ const AboutPage: React.FC = () => {
                         <a href={`mailto:${t('contactEmail')}`} className="block bg-white/10 p-5 rounded-2xl hover:bg-white/20 transition-all font-black text-base break-all text-center border border-white/10">{t('contactEmail')}</a>
                     </section>
                     
-                    <div className="glass-panel p-8 rounded-[3rem] text-center border-white/30 overflow-hidden relative">
-                        <p className="text-gray-500 dark:text-gray-400 font-black text-xs uppercase mb-4 tracking-[0.2em]">Powered by</p>
-                        <div className="flex items-center justify-center gap-3">
-                             <img src={SCHOOL_LOGO} alt="E.F.I.P.S" className="h-10 w-10 object-contain logo-smart-hover" />
-                             <span className="font-black text-2xl text-gray-950 dark:text-white tracking-tighter">E.F.I.P.S</span>
+                    {/* الكرت الجديد: Powered By كـ Hyperlink تفاعلي */}
+                    <a 
+                        href="https://www.falcon-school.com" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        onMouseDown={handleInteraction}
+                        onTouchStart={handleInteraction}
+                        className="glass-panel p-8 rounded-[3rem] text-center border-white/30 overflow-hidden relative block hover:shadow-2xl hover:shadow-green-700/10 transition-all group"
+                    >
+                        {/* تأثير التموج الكريستالي عند الضغط */}
+                        {ripples.map(r => <span key={r.id} className="ripple-effect border-green-500/20" style={{ left: r.x, top: r.y }} />)}
+                        
+                        <p className="text-gray-500 dark:text-gray-400 font-black text-xs uppercase mb-4 tracking-[0.2em] group-hover:text-green-700 transition-colors">Powered by</p>
+                        <div className="flex items-center justify-center gap-3 relative z-10">
+                             <img src={SCHOOL_LOGO} alt="E.F.I.P.S" className="h-10 w-10 object-contain logo-smart-hover group-hover:scale-110 transition-transform" />
+                             <span className="font-black text-2xl text-gray-950 dark:text-white tracking-tighter group-hover:text-green-700 transition-colors">E.F.I.P.S</span>
                         </div>
-                    </div>
+                        
+                        {/* أيقونة رابط صغير تظهر عند الوقوف على الكرت */}
+                        <div className="mt-3 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                        </div>
+                    </a>
                 </div>
             </div>
         </div>
