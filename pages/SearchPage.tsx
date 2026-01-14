@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { bookData, type Book } from '../api/bookData'; 
 import { useLanguage } from '../App';
 
-// Debounce Hook ثابت ومحسن
+// Debounce Hook لضمان سلاسة البحث
 const useDebounce = <T,>(value: T, delay: number): T => {
     const [debouncedValue, setDebouncedValue] = useState<T>(value);
     useEffect(() => {
@@ -18,7 +18,7 @@ const logActivity = (type: 'search' | 'view', value: string) => {
         try {
             const logs: any[] = JSON.parse(localStorage.getItem('saqr_activity_logs') || '[]');
             logs.push({ timestamp: Date.now(), type, value });
-            localStorage.setItem('saqr_activity_logs', JSON.stringify(logs.slice(-100))); // حفظ آخر 100 سجل فقط للأداء
+            localStorage.setItem('saqr_activity_logs', JSON.stringify(logs.slice(-100))); 
         } catch (e) { console.error(e); }
     }, 0);
 };
@@ -71,11 +71,17 @@ const translations = {
   }
 };
 
-// --- بطاقة الكتاب (Card) مع خاصية Memo للأداء ---
-const BookCard = React.memo(({ book, onClick, t_search }: { book: Book; onClick: () => void; t_search: any }) => {
+// --- نافذة تفاصيل الكتاب (Modal) بتموجات حمراء ---
+const BookModal: React.FC<{
+  book: Book | null;
+  onClose: () => void;
+  onFilterByAuthor: (author: string) => void;
+}> = ({ book, onClose, onFilterByAuthor }) => {
+    const { locale, dir } = useLanguage();
+    const t_search = (key: keyof typeof translations.ar) => translations[locale][key];
     const [ripples, setRipples] = useState<{ id: number, x: number, y: number }[]>([]);
 
-    const handleCardInteraction = (e: React.MouseEvent | React.TouchEvent) => {
+    const handleInteraction = (e: React.MouseEvent | React.TouchEvent, callback: () => void) => {
         const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
         const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
         const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
@@ -84,24 +90,78 @@ const BookCard = React.memo(({ book, onClick, t_search }: { book: Book; onClick:
         setRipples(prev => [...prev, { id: rippleId, x: clientX - rect.left, y: clientY - rect.top }]);
         setTimeout(() => {
             setRipples(prev => prev.filter(r => r.id !== rippleId));
-            onClick();
-        }, 250);
+            callback();
+        }, 300);
+    };
+
+    if (!book) return null;
+
+    return (
+        <div dir={dir} className="fixed inset-0 bg-black/70 z-[100] flex justify-center items-end sm:items-center p-0 sm:p-4 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}>
+            <div className="glass-panel rounded-t-[2.5rem] sm:rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-2xl transform animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 border-white/20" onClick={(e) => e.stopPropagation()}>
+                <div className="p-8">
+                    <h2 className="text-3xl font-black text-gray-950 dark:text-white mb-2">{book.title}</h2>
+                    <p className="text-xl text-red-600 font-black mb-6">{book.author}</p>
+                    
+                    <div className="bg-red-600 p-6 rounded-2xl shadow-xl mb-6 text-white">
+                        <p className="text-xs font-black uppercase opacity-80 mb-1">{t_search('location')}</p>
+                        <p className="text-2xl font-black">{t_search('shelf')} {book.shelf} – {t_search('row')} {book.row}</p>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <button 
+                            onMouseDown={(e) => handleInteraction(e, onClose)}
+                            className="relative overflow-hidden flex-1 glass-button-red py-4 rounded-xl font-black"
+                        >
+                            {ripples.map(r => <span key={r.id} className="ripple-effect border-red-500/30" style={{ left: r.x, top: r.y }} />)}
+                            {t_search('close')}
+                        </button>
+                        <button 
+                            onMouseDown={(e) => handleInteraction(e, () => onFilterByAuthor(book.author))}
+                            className="relative overflow-hidden flex-1 bg-gray-900 text-white py-4 rounded-xl font-black"
+                        >
+                            {ripples.map(r => <span key={r.id} className="ripple-effect border-white/20" style={{ left: r.x, top: r.y }} />)}
+                            {t_search('similarRecommendations')}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// --- بطاقة الكتاب (Card) مع حل مشكلة النقرات ---
+const BookCard = React.memo(({ book, onClick, t_search }: { book: Book; onClick: () => void; t_search: any }) => {
+    const [ripples, setRipples] = useState<{ id: number, x: number, y: number }[]>([]);
+
+    const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
+        const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+        const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
+        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+        
+        const rippleId = Date.now();
+        setRipples(prev => [...prev, { id: rippleId, x: clientX - rect.left, y: clientY - rect.top }]);
+        setTimeout(() => setRipples(prev => prev.filter(r => r.id !== rippleId)), 800);
     };
 
     return (
         <div 
-            onMouseDown={handleCardInteraction}
+            onMouseDown={handleInteraction}
+            onClick={onClick} // النقرة الآن فورية ومستقلة لضمان فتح المودال
             className="relative overflow-hidden glass-panel rounded-[1.5rem] hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col group active:scale-95 border-white/20 h-full"
         >
-            {ripples.map(r => <span key={r.id} className="ripple-effect border-red-500/30" style={{ left: r.x, top: r.y }} />)}
+            <div className="absolute inset-0 pointer-events-none">
+                {ripples.map(r => <span key={r.id} className="ripple-effect border-red-500/30" style={{ left: r.x, top: r.y }} />)}
+            </div>
+            
             <div className="p-5 flex-grow relative z-10">
                 <h3 className="font-black text-lg text-gray-950 dark:text-white group-hover:text-red-600 transition-colors line-clamp-2 leading-tight mb-2">{book.title}</h3>
-                <p className="text-sm text-green-700/80 dark:text-green-400/80 font-black mb-4">{book.author}</p>
+                <p className="text-sm text-green-700 dark:text-green-400 font-black mb-4">{book.author}</p>
                 <span className="bg-red-600/10 text-red-600 dark:bg-red-600/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">{book.subject}</span>
             </div>
             <div className="bg-white/40 dark:bg-black/40 py-3 px-5 border-t border-white/10 relative z-10">
                 <p className="font-black text-gray-900 dark:text-white text-xs tracking-tighter flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 bg-red-600 rounded-full"></span>
+                    <span className="w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse"></span>
                     {`${t_search('shelf')} ${book.shelf} – ${t_search('row')} ${book.row}`}
                 </p>
             </div>
@@ -117,42 +177,32 @@ const SearchPage: React.FC = () => {
     const [subjectFilter, setSubjectFilter] = useState('all');
     const [authorFilter, setAuthorFilter] = useState('all');
     const [shelfFilter, setShelfFilter] = useState('all');
-    const [visibleCount, setVisibleCount] = useState(24); // للتحميل التدريجي
+    const [visibleCount, setVisibleCount] = useState(24);
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
     const debouncedSearchTerm = useDebounce(searchTerm, 400);
 
-    // حساب الخيارات المتاحة مرة واحدة فقط لتحسين الأداء
     const filters = useMemo(() => ({
         subjects: [...new Set(bookData.map(b => b.subject))].filter(Boolean).sort(),
         authors: [...new Set(bookData.map(b => b.author))].filter(a => a !== 'Unknown Author').sort(),
         shelves: [...new Set(bookData.map(b => b.shelf.toString()))].sort((a, b) => parseInt(a) - parseInt(b))
     }), []);
 
-    // المنطق الأساسي للفلترة - دورة واحدة سريعة جداً
     const filteredBooks = useMemo(() => {
         const term = debouncedSearchTerm.toLowerCase().trim();
-        
         return bookData.filter(b => {
-            const matchesTerm = !term || 
-                b.title.toLowerCase().includes(term) || 
-                b.author.toLowerCase().includes(term) || 
-                b.shelf.toString().includes(term);
-            
+            const matchesTerm = !term || b.title.toLowerCase().includes(term) || b.author.toLowerCase().includes(term) || b.shelf.toString().includes(term);
             const matchesSub = subjectFilter === 'all' || b.subject === subjectFilter;
             const matchesAuth = authorFilter === 'all' || b.author === authorFilter;
             const matchesShelf = shelfFilter === 'all' || b.shelf.toString() === shelfFilter;
-
             return matchesTerm && matchesSub && matchesAuth && matchesShelf;
         });
     }, [debouncedSearchTerm, subjectFilter, authorFilter, shelfFilter]);
 
-    // تسجيل البحث في الخلفية
     useEffect(() => {
         if (debouncedSearchTerm) logActivity('search', debouncedSearchTerm);
     }, [debouncedSearchTerm]);
 
-    // إعادة تصفير العداد عند تغير الفلاتر
     useEffect(() => { setVisibleCount(24); }, [debouncedSearchTerm, subjectFilter, authorFilter, shelfFilter]);
 
     return (
@@ -222,6 +272,8 @@ const SearchPage: React.FC = () => {
                     <p className="text-gray-400 text-2xl font-black">{t_search('noResults')}</p>
                 </div>
             )}
+
+            <BookModal book={selectedBook} onClose={() => setSelectedBook(null)} onFilterByAuthor={(a) => { setAuthorFilter(a); setSelectedBook(null); window.scrollTo({top:0, behavior:'smooth'}); }} />
         </div>
     );
 };
