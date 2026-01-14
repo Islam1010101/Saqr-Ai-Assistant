@@ -1,8 +1,7 @@
 import React, { useState, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../App';
 
-// --- قائمة العبارات التحفيزية للقراءة (تأثير الانفجار) ---
 const READING_INSPIRATIONS = [
     { icon: "📖", textAr: "اقرأ لترتقي", textEn: "Read to Rise" },
     { icon: "✨", textAr: "مغامرة في كل صفحة", textEn: "Adventure in every page" },
@@ -12,11 +11,56 @@ const READING_INSPIRATIONS = [
     { icon: "💖", textAr: "أحب القراءة", textEn: "I Love Reading" }
 ];
 
+const translations = {
+    ar: {
+        title: "بوابة المعرفة الرقمية",
+        desc: "رحلة استثنائية بين كنوز الأدب العربي والعالمي بلمسة وطنية مبتكرة.",
+        arabicLib: "المكتبة العربية",
+        englishLib: "المكتبة الإنجليزية",
+        arabicDesc: "تضم 41 عنواناً من روائع الأدب العربي، التراث، وتطوير الذات.",
+        englishDesc: "تضم 26 عنواناً من الروايات العالمية، الألغاز، ومجموعة هاري بوتر.",
+        bubble: "اضغط للإلهام!"
+    },
+    en: {
+        title: "Digital Knowledge Portal",
+        desc: "An exceptional journey through Arabic and Global literature with a UAE touch.",
+        arabicLib: "Arabic Library",
+        englishLib: "English Library",
+        arabicDesc: "Includes 41 titles of Arabic literature, heritage, and self-dev.",
+        englishDesc: "Includes 26 titles of global novels, puzzles, and Harry Potter.",
+        bubble: "Click for Magic!"
+    }
+};
+
 const DigitalLibraryPage: React.FC = () => {
     const { locale, dir } = useLanguage();
+    const navigate = useNavigate();
     const isAr = locale === 'ar';
+    const t = (key: keyof typeof translations.ar) => translations[locale][key];
+
+    const [burstCard, setBurstCard] = useState<{ id: number, tx: string, ty: string, item: typeof READING_INSPIRATIONS[0] } | null>(null);
+    const [tooltip, setTooltip] = useState<{ text: string, x: number, y: number } | null>(null);
     const [ripples, setRipples] = useState<{ id: number, x: number, y: number }[]>([]);
-    const [bursts, setBursts] = useState<{ id: number, tx: string, ty: string, item: typeof READING_INSPIRATIONS[0] }[]>([]);
+
+    const handleSingleBurst = (e: React.MouseEvent | React.TouchEvent) => {
+        const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+        const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
+        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+        
+        const rippleId = Date.now();
+        setRipples(prev => [...prev, { id: rippleId, x: clientX - rect.left, y: clientY - rect.top }]);
+
+        const randomItem = READING_INSPIRATIONS[Math.floor(Math.random() * READING_INSPIRATIONS.length)];
+        setBurstCard({
+            id: rippleId,
+            item: randomItem,
+            tx: `${(Math.random() - 0.5) * 40}px`,
+            ty: `-160px`
+        });
+
+        setTimeout(() => setBurstCard(null), 1500);
+        setTimeout(() => setRipples(prev => prev.filter(r => r.id !== rippleId)), 800);
+    };
 
     const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         const rect = e.currentTarget.getBoundingClientRect();
@@ -24,148 +68,109 @@ const DigitalLibraryPage: React.FC = () => {
         e.currentTarget.style.setProperty("--mouse-y", `${e.clientY - rect.top}px`);
     }, []);
 
-    const handleBurstInteraction = (e: React.MouseEvent | React.TouchEvent) => {
-        const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
-        const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
-        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-        const rippleId = Date.now();
-        
-        setRipples(prev => [...prev, { id: rippleId, x: clientX - rect.left, y: clientY - rect.top }]);
-
-        // إطلاق تأثير الانفجار
-        const newBursts = READING_INSPIRATIONS.sort(() => 0.5 - Math.random()).slice(0, 4).map((item, i) => ({
-            id: rippleId + i,
-            item,
-            tx: `${(i % 2 === 0 ? 1 : -1) * (Math.random() * 150 + 100)}px`, 
-            ty: `${(i < 2 ? -1 : 1) * (Math.random() * 150 + 100)}px`
-        }));
-        
-        setBursts(newBursts);
-        setTimeout(() => setBursts([]), 2000);
-        setTimeout(() => setRipples(prev => prev.filter(r => r.id !== rippleId)), 1000);
+    const handleTooltip = (e: React.MouseEvent, text: string) => {
+        setTooltip({ text, x: e.clientX, y: e.clientY - 40 });
     };
 
     return (
-        <div dir={dir} className="max-w-7xl mx-auto px-4 py-8 md:py-16 animate-fade-up relative">
+        <div dir={dir} className="max-w-7xl mx-auto px-4 py-8 md:py-12 animate-fade-up relative pb-24 flex items-center justify-center min-h-[75vh]">
             
-            {/* الهيرو (بوابة صقر الرقمية) */}
+            {/* الهنت العائم */}
+            {tooltip && (
+                <div 
+                    className="fixed pointer-events-none z-[200] glass-panel px-4 py-2 rounded-xl border-white/40 shadow-2xl animate-in fade-in zoom-in duration-300"
+                    style={{ left: tooltip.x, top: tooltip.y, transform: 'translate(-50%, -100%)' }}
+                >
+                    <p className="text-xs font-black text-slate-900 dark:text-white whitespace-nowrap">{tooltip.text}</p>
+                </div>
+            )}
+
+            {/* الحاوية الموحدة (الكتلة الواحدة) */}
             <div 
-                onMouseMove={handleMouseMove} 
-                className="glass-panel glass-card-interactive relative overflow-hidden rounded-[3.5rem] md:rounded-[5rem] p-10 md:p-24 mb-16 md:mb-24 border-white/40 dark:border-white/5 flex flex-col lg:grid lg:grid-cols-2 items-center gap-12 shadow-2xl"
+                onMouseMove={handleMouseMove}
+                className="relative z-10 glass-panel w-full max-w-6xl rounded-[3.5rem] md:rounded-[4.5rem] overflow-hidden shadow-[0_40px_120px_rgba(0,0,0,0.15)] border-2 border-white/40 dark:border-white/10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl"
             >
-                {/* خلفية الهالة الوطنية */}
-                <div className="absolute inset-0 pointer-events-none opacity-20">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-red-600/20 blur-[100px] rounded-full"></div>
-                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-green-600/20 blur-[100px] rounded-full"></div>
-                </div>
-
-                <div className="text-center lg:text-start space-y-8 relative z-10 order-2 lg:order-1">
-                    <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-green-600/10 border border-green-600/20 text-green-700 dark:text-green-400 text-[10px] font-black uppercase tracking-[0.3em]">
-                        <span className="w-2 h-2 bg-green-600 rounded-full animate-pulse"></span>
-                        EFIIPS Digital Gateway
-                    </div>
-                    <h1 className="text-4xl md:text-6xl xl:text-7xl font-black text-slate-950 dark:text-white leading-[1.1] tracking-tighter">
-                        {isAr ? 'بوابة المعرفة الرقمية' : 'Digital Knowledge Portal'}
-                    </h1>
-                    <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 font-bold leading-relaxed max-w-xl">
-                        {isAr ? 'رحلة استثنائية بانتظارك بين كنوز الأدب العربي والعالمي بلمسة وطنية مبتكرة.' : 'An exceptional journey awaits you through Arabic and Global literature with an innovative UAE touch.'}
-                    </p>
-                </div>
-
-                {/* قسم صقر الرقمي التفاعلي */}
-                <div className="relative flex items-center justify-center order-1 lg:order-2 scale-110">
-                    <div className="absolute opacity-10 dark:opacity-20 scale-150 pointer-events-none transition-all duration-1000">
-                        <img src="/school-logo.png" alt="EFIPS" className="h-64 w-64 md:h-96 md:w-96 object-contain logo-tilt-right logo-white-filter" />
-                    </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 p-10 md:p-20 items-center">
                     
-                    <div 
-                        className="relative group cursor-pointer z-10 touch-manipulation hover:scale-105 active:scale-90 transition-transform duration-500" 
-                        onMouseDown={handleBurstInteraction}
-                    >
-                        {/* كروت الانفجار المتلاشية */}
-                        {bursts.map(burst => (
-                            <div key={burst.id} 
-                                className="absolute inset-0 m-auto w-fit h-fit z-[100] glass-panel px-5 py-2.5 rounded-2xl flex items-center gap-3 border-red-500/30 shadow-2xl animate-burst"
-                                style={{ '--tx': burst.tx, '--ty': burst.ty } as any}>
-                                <span className="text-2xl">{burst.item.icon}</span>
-                                <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tighter whitespace-nowrap">
-                                    {isAr ? burst.item.textAr : burst.item.textEn}
-                                </span>
-                            </div>
-                        ))}
-
-                        {/* تأثير التموج */}
-                        {ripples.map(r => <span key={r.id} className="ripple-effect bg-red-600/10" style={{ left: r.x, top: r.y, width: '250px', height: '250px' }} />)}
-
-                        <img src="/saqr-digital.png" alt="Saqr" className="h-64 sm:h-80 md:h-[480px] object-contain drop-shadow-[0_40px_80px_rgba(239,68,68,0.3)] relative z-10" />
-                        
-                        <div className="absolute -top-4 -right-4 glass-panel p-5 rounded-2xl shadow-2xl border-white/40 text-xs font-black text-red-700 dark:text-white animate-bounce z-20">
-                            {isAr ? 'اضغط للإلهام!' : 'Click for Magic!'}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* شبكة المكتبات - تباين فائق وفخامة */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16">
-                
-                {/* المكتبة العربية (الأصالة الخضراء) */}
-                <section className="space-y-8">
-                    <div className="flex items-center gap-5 px-6">
-                        <span className="w-4 h-12 bg-green-700 rounded-full shadow-[0_0_25px_rgba(0,115,47,0.5)] logo-tilt-right"></span>
-                        <h2 className="text-3xl md:text-4xl font-black text-slate-950 dark:text-white tracking-tighter">
-                            {isAr ? 'المكتبة العربية' : 'Arabic Library'}
-                        </h2>
-                    </div>
-                    
-                    <Link 
-                        to="/digital-library/arabic" 
-                        onMouseMove={handleMouseMove} 
-                        className="glass-panel glass-card-interactive group relative overflow-hidden p-10 md:p-14 rounded-[3.5rem] border-green-600/30 flex items-center gap-8 shadow-xl hover:shadow-[0_40px_80px_rgba(0,0,0,0.1)] transition-all active:scale-[0.98]"
-                    >
-                        <div className="text-6xl md:text-8xl shrink-0 z-10 grayscale group-hover:grayscale-0 transition-all duration-700">🏛️</div>
-                        <div className="flex-1 min-w-0 z-10 space-y-4">
-                            <h3 className="text-2xl md:text-4xl font-black text-slate-950 dark:text-white group-hover:text-green-700 transition-colors leading-tight">
-                                {isAr ? 'تصفح الكنوز العربية' : 'Explore Arabic Treasures'}
-                            </h3>
-                            <p className="text-base md:text-xl text-slate-500 dark:text-slate-400 font-bold leading-relaxed">
-                                {isAr ? 'روائع الأدب، التراث، وتطوير الذات (41 عنوان)' : 'Literature, Heritage, and Self-Dev (41 Titles)'}
+                    {/* الجانب النصي والأزرار */}
+                    <div className="flex flex-col text-start space-y-10 order-2 lg:order-1 relative z-20">
+                        <div className="space-y-6">
+                            <h1 className="text-4xl md:text-6xl font-black text-slate-950 dark:text-white leading-[1.1] tracking-tighter">
+                                {t('title')}
+                            </h1>
+                            <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 font-bold max-w-md leading-relaxed">
+                                {t('desc')}
                             </p>
-                            <div className="inline-flex items-center gap-3 text-green-700 font-black text-xs uppercase tracking-widest mt-4">
-                                Enter Library <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-                            </div>
                         </div>
-                    </Link>
-                </section>
 
-                {/* المكتبة الإنجليزية (العالمية الزرقاء) */}
-                <section className="space-y-8">
-                    <div className="flex items-center gap-5 px-6">
-                        <span className="w-4 h-12 bg-blue-600 rounded-full shadow-[0_0_25px_rgba(37,99,235,0.5)] logo-tilt-right"></span>
-                        <h2 className="text-3xl md:text-4xl font-black text-slate-950 dark:text-white tracking-tighter">
-                            {isAr ? 'المكتبة الإنجليزية' : 'English Library'}
-                        </h2>
+                        {/* الأزرار الموحدة داخل الكارت */}
+                        <div className="flex flex-wrap gap-5">
+                            {/* زر المكتبة العربية - توهج أخضر */}
+                            <button 
+                                onClick={() => navigate('/digital-library/arabic')}
+                                onMouseMove={(e) => handleTooltip(e, t('arabicDesc'))}
+                                onMouseLeave={() => setTooltip(null)}
+                                className="glass-panel border-2 border-slate-200 dark:border-white/10 hover:border-green-600 hover:shadow-[0_0_30px_rgba(5,150,105,0.4)] py-5 px-10 text-lg font-black rounded-[2rem] text-slate-900 dark:text-white transition-all duration-500 active:scale-95"
+                            >
+                                {t('arabicLib')}
+                            </button>
+
+                            {/* زر المكتبة الإنجليزية - توهج أسود/داكن (بديل الأزرق) */}
+                            <button 
+                                onClick={() => navigate('/digital-library/english')}
+                                onMouseMove={(e) => handleTooltip(e, t('englishDesc'))}
+                                onMouseLeave={() => setTooltip(null)}
+                                className="glass-panel border-2 border-slate-200 dark:border-white/10 hover:border-slate-950 dark:hover:border-white hover:shadow-[0_0_30px_rgba(0,0,0,0.3)] py-5 px-10 text-lg font-black rounded-[2rem] text-slate-900 dark:text-white transition-all duration-500 active:scale-95"
+                            >
+                                {t('englishLib')}
+                            </button>
+                        </div>
                     </div>
-                    
-                    <Link 
-                        to="/digital-library/english" 
-                        onMouseMove={handleMouseMove} 
-                        className="glass-panel glass-card-interactive group relative overflow-hidden p-10 md:p-14 rounded-[3.5rem] border-blue-600/30 flex items-center gap-8 shadow-xl hover:shadow-[0_40px_80px_rgba(0,0,0,0.1)] transition-all active:scale-[0.98]"
-                    >
-                        <div className="text-6xl md:text-8xl shrink-0 z-10 grayscale group-hover:grayscale-0 transition-all duration-700">📚</div>
-                        <div className="flex-1 min-w-0 z-10 space-y-4">
-                            <h3 className="text-2xl md:text-4xl font-black text-slate-950 dark:text-white group-hover:text-blue-600 transition-colors leading-tight">
-                                {isAr ? 'تصفح الروائع العالمية' : 'Explore Global Masterpieces'}
-                            </h3>
-                            <p className="text-base md:text-xl text-slate-500 dark:text-slate-400 font-bold leading-relaxed">
-                                {isAr ? 'روايات عالمية، ألغاز، وهاري بوتر (26 عنوان)' : 'Global Novels, Puzzles, and Harry Potter (26 Titles)'}
-                            </p>
-                            <div className="inline-flex items-center gap-3 text-blue-600 font-black text-xs uppercase tracking-widest mt-4">
-                                Enter Library <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+
+                    {/* قسم "صقر الرقمي" */}
+                    <div className="relative flex items-center justify-center order-1 lg:order-2">
+                        <div 
+                            onMouseDown={handleSingleBurst}
+                            onTouchStart={handleSingleBurst}
+                            className="relative group cursor-pointer touch-manipulation flex items-center justify-center w-full max-w-[450px]"
+                        >
+                            {/* الشعار المائل خلف الشخصية */}
+                            <div className="absolute inset-0 flex items-center justify-center z-0 pointer-events-none transition-transform duration-1000 group-hover:scale-110 group-hover:rotate-6">
+                                <img 
+                                    src="/school-logo.png" 
+                                    alt="Seal" 
+                                    className="h-[110%] w-[110%] object-contain opacity-[0.06] dark:opacity-[0.12] blur-[1px] logo-white-filter logo-tilt-right" 
+                                />
+                            </div>
+
+                            {/* كارت المعلومة المتطاير */}
+                            {burstCard && (
+                                <div
+                                    key={burstCard.id}
+                                    className="absolute z-[100] glass-panel px-6 py-3 rounded-2xl flex items-center gap-3 border-red-500/30 shadow-2xl animate-burst"
+                                    style={{ '--tx': burstCard.tx, '--ty': burstCard.ty } as any}
+                                >
+                                    <span className="text-2xl">{burstCard.item.icon}</span>
+                                    <span className="text-xs font-black text-slate-950 dark:text-white uppercase tracking-tighter whitespace-nowrap">
+                                        {isAr ? burstCard.item.textAr : burstCard.item.textEn}
+                                    </span>
+                                </div>
+                            )}
+
+                            {/* تأثير التموج */}
+                            {ripples.map(r => (
+                                <span key={r.id} className="ripple-effect bg-red-600/10" style={{ left: r.x, top: r.y, width: '200px', height: '200px' }} />
+                            ))}
+
+                            <img src="/saqr-digital.png" alt="Saqr" className="h-64 md:h-[480px] object-contain drop-shadow-[0_30px_60px_rgba(239,68,68,0.25)] relative z-10 transition-transform duration-700 group-hover:scale-[1.02]" />
+                            
+                            <div className="absolute -top-4 -right-4 md:top-0 md:right-0 glass-panel p-5 rounded-[2.5rem] shadow-2xl border-white/40 text-[10px] md:text-xs font-black text-red-700 dark:text-white animate-bounce z-20">
+                                {t('bubble')}
+                                <div className="absolute -bottom-1.5 left-8 w-4 h-4 glass-panel rotate-45 bg-inherit border-r-2 border-b-2 border-white/20"></div>
                             </div>
                         </div>
-                    </Link>
-                </section>
+                    </div>
+                </div>
             </div>
         </div>
     );
