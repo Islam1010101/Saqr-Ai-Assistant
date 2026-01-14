@@ -18,7 +18,7 @@ const translations = {
   ar: {
     pageTitle: 'المساعد الذكي (صقر AI)',
     saqrWelcome: 'أهلاً بك في منصة المعرفة الوطنية! أنا صقر، مساعدك الذكي. كيف يمكنني إرشادك اليوم بين كنوزنا الرقمية ؟',
-    inputPlaceholder: 'اسأل عن هاري بوتر، أساطير ما وراء الطبيعة، أو كتب التنمية...',
+    inputPlaceholder: 'ماذا تريد أن تقرآ ؟ كيف اساعدك في الاختيار...',
     isTyping: 'صقر يحلل البيانات...',
     error: 'عذراً، واجهت مشكلة في الاتصال. حاول مرة أخرى.',
     librarianStatus: 'أمين مكتبة مدرسة صقر الإمارات الذكي',
@@ -28,7 +28,7 @@ const translations = {
   en: {
     pageTitle: 'Smart Assistant (Saqr AI)',
     saqrWelcome: "Welcome to the national knowledge platform! I'm Saqr, your AI guide. How can I help you explore our digital treasures today ?",
-    inputPlaceholder: 'Ask about Harry Potter, Ma Waraa Al Tabiaa, or Self-dev books...',
+    inputPlaceholder: 'What would you like to read? How can I help you choose?...',
     isTyping: 'Saqr is processing...',
     error: 'Sorry, connection error. Please try again.',
     librarianStatus: 'Saqr Smart School Librarian',
