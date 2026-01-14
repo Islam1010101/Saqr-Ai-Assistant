@@ -50,6 +50,15 @@ const AboutPage: React.FC = () => {
     const t = (key: keyof typeof translations.ar) => translations[locale][key];
     const [ripples, setRipples] = useState<{ id: number, x: number, y: number }[]>([]);
 
+    // دالة تتبع الماوس لتأثير توهج الحواف الزجاجية
+    const handleMouseMove = (e: React.MouseEvent) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        (e.currentTarget as HTMLElement).style.setProperty("--mouse-x", `${x}px`);
+        (e.currentTarget as HTMLElement).style.setProperty("--mouse-y", `${y}px`);
+    };
+
     const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
         const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
         const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
@@ -68,19 +77,24 @@ const AboutPage: React.FC = () => {
         <div dir={dir} className="relative max-w-6xl mx-auto pb-20 px-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
             <BackgroundPattern />
 
-            {/* 1. بطاقة العنوان الكبرى */}
+            {/* 1. بطاقة العنوان الكبرى - تفاعلية */}
             <div 
+                onMouseMove={handleMouseMove}
                 onMouseDown={handleInteraction}
                 onTouchStart={handleInteraction}
-                className="relative z-10 glass-panel p-10 md:p-16 rounded-[3.5rem] shadow-2xl mb-12 flex flex-col items-center text-center overflow-hidden border-white/30 dark:border-white/10 cursor-pointer"
+                className="relative z-10 glass-panel glass-card-interactive p-10 md:p-16 rounded-[3.5rem] shadow-2xl mb-12 flex flex-col items-center text-center overflow-hidden border-white/30 dark:border-white/10 cursor-pointer"
             >
-                {/* تموج أحمر عند النقر */}
                 {ripples.map(r => <span key={r.id} className="ripple-effect border-red-500/30" style={{ left: r.x, top: r.y }} />)}
                 
                 <div className="relative mb-8">
-                    <img src={SCHOOL_LOGO} alt="Logo" className="h-32 md:h-40 w-auto object-contain drop-shadow-2xl logo-smart-hover transition-transform hover:scale-110" />
+                    {/* الشعار مع فلتر التبييض للوضع المظلم */}
+                    <img 
+                        src={SCHOOL_LOGO} 
+                        alt="Logo" 
+                        className="h-32 md:h-40 w-auto object-contain drop-shadow-2xl logo-smart-hover logo-white-filter transition-transform hover:scale-110" 
+                    />
                 </div>
-                <h1 className="text-4xl md:text-6xl font-black text-gray-950 dark:text-white mb-6 tracking-tight relative z-10">
+                <h1 className="text-4xl md:text-6xl font-black text-gray-950 dark:text-white mb-6 tracking-tight relative z-10 leading-tight">
                     {t('title')}
                 </h1>
                 <div className="h-2 w-24 bg-green-700 rounded-full shadow-[0_0_15px_rgba(0,115,47,0.4)] relative z-10"></div>
@@ -88,8 +102,11 @@ const AboutPage: React.FC = () => {
 
             <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2 space-y-8">
-                    {/* قسم عن المدرسة */}
-                    <section className="glass-panel p-8 md:p-10 rounded-[3rem] border-white/20 overflow-hidden relative">
+                    {/* قسم عن المدرسة - تفاعلي */}
+                    <section 
+                        onMouseMove={handleMouseMove}
+                        className="glass-panel glass-card-interactive p-8 md:p-10 rounded-[3rem] border-white/20 overflow-hidden relative"
+                    >
                         <h2 className="text-3xl font-black mb-8 text-gray-900 dark:text-white flex items-center gap-4">
                             <span className="w-2.5 h-10 bg-green-700 rounded-full"></span>
                             {t('aboutSchoolTitle')}
@@ -100,8 +117,11 @@ const AboutPage: React.FC = () => {
                         </div>
                     </section>
 
-                    {/* قسم الخدمات بكروت تفاعلية بتموج أحمر */}
-                    <section className="glass-panel p-8 md:p-10 rounded-[3rem]">
+                    {/* قسم الخدمات */}
+                    <section 
+                        onMouseMove={handleMouseMove}
+                        className="glass-panel glass-card-interactive p-8 md:p-10 rounded-[3rem]"
+                    >
                         <h2 className="text-3xl font-black mb-8 text-gray-900 dark:text-white flex items-center gap-4">
                             <span className="w-2.5 h-10 bg-green-700 rounded-full"></span>
                             {t('servicesTitle')}
@@ -139,28 +159,34 @@ const AboutPage: React.FC = () => {
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                             {t('contactTitle')}
                         </h2>
-                        <a href={`mailto:${t('contactEmail')}`} className="block bg-white/10 p-5 rounded-2xl hover:bg-white/20 transition-all font-black text-base break-all text-center border border-white/10">{t('contactEmail')}</a>
+                        <a href={`mailto:${t('contactEmail')}`} className="block bg-white/10 p-5 rounded-2xl hover:bg-white/20 transition-all font-black text-sm sm:text-base break-all text-center border border-white/10">
+                            {t('contactEmail')}
+                        </a>
                     </section>
                     
-                    {/* كرت Powered By: رابط تفاعلي بتموج أحمر */}
+                    {/* كرت Powered By - تفاعلي */}
                     <a 
                         href="https://www.falcon-school.com" 
                         target="_blank" 
                         rel="noopener noreferrer"
+                        onMouseMove={handleMouseMove}
                         onMouseDown={handleInteraction}
                         onTouchStart={handleInteraction}
-                        className="glass-panel p-8 rounded-[3rem] text-center border-white/30 overflow-hidden relative block hover:shadow-2xl hover:shadow-red-500/20 transition-all group active:scale-95"
+                        className="glass-panel glass-card-interactive p-8 rounded-[3rem] text-center border-white/30 overflow-hidden relative block hover:shadow-2xl hover:shadow-red-500/20 transition-all group active:scale-95"
                     >
-                        {/* تأثير التموج الأحمر الحصري */}
                         {ripples.map(r => <span key={r.id} className="ripple-effect border-red-600/40" style={{ left: r.x, top: r.y }} />)}
                         
-                        <p className="text-gray-500 dark:text-gray-400 font-black text-xs uppercase mb-4 tracking-[0.2em] group-hover:text-red-600 transition-colors">Powered by</p>
+                        <p className="text-gray-500 dark:text-gray-400 font-black text-xs uppercase mb-4 tracking-[0.2em] group-hover:text-red-600 transition-colors relative z-10">Powered by</p>
                         <div className="flex items-center justify-center gap-3 relative z-10">
-                             <img src={SCHOOL_LOGO} alt="E.F.I.P.S" className="h-10 w-10 object-contain logo-smart-hover group-hover:scale-110 transition-transform" />
+                             <img 
+                                src={SCHOOL_LOGO} 
+                                alt="E.F.I.P.S" 
+                                className="h-10 w-10 object-contain logo-smart-hover logo-white-filter group-hover:scale-110 transition-transform" 
+                             />
                              <span className="font-black text-2xl text-gray-950 dark:text-white tracking-tighter group-hover:text-red-600 transition-colors">E.F.I.P.S</span>
                         </div>
                         
-                        <div className="mt-3 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="mt-3 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity relative z-10">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                             </svg>
