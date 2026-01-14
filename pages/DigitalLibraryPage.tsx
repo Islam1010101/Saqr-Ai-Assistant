@@ -3,13 +3,20 @@ import { useLanguage } from '../App';
 
 const DigitalLibraryPage: React.FC = () => {
     const { locale, dir } = useLanguage();
+    const isAr = locale === 'ar';
     const [ripples, setRipples] = useState<{ id: number, x: number, y: number }[]>([]);
 
-    const resources = [
-        { id: 1, titleAr: "الكتب الإلكترونية", titleEn: "E-Books", icon: "📚", color: "bg-blue-500" },
-        { id: 2, titleAr: "قواعد بيانات الأبحاث", titleEn: "Research Databases", icon: "🔬", color: "bg-purple-500" },
-        { id: 3, titleAr: "المصادر السمعية", titleEn: "Audiobooks", icon: "🎧", color: "bg-orange-500" },
-        { id: 4, titleAr: "المجلات العلمية", titleEn: "Digital Magazines", icon: "📰", color: "bg-emerald-500" },
+    // مصفوفة المصادر الرقمية
+    const arabicResources = [
+        { title: "منصة ألف للتعليم", desc: "تعلم تفاعلي باللغة العربية", icon: "💎", link: "#" },
+        { title: "مكتبة نور", desc: "آلاف الكتب العربية المجانية", icon: "📚", link: "#" },
+        { title: "مجلة ماجد الرقمية", desc: "محتوى ترفيهي وتعليمي للأطفال", icon: "🎨", link: "#" },
+    ];
+
+    const englishResources = [
+        { title: "Oxford Owl", desc: "Free eBook library for kids", icon: "🦉", link: "#" },
+        { title: "Epic Library", desc: "Unlimited digital books for students", icon: "🚀", link: "#" },
+        { title: "National Geographic Kids", desc: "Explore the world around you", icon: "🌍", link: "#" },
     ];
 
     const handleInteraction = (e: React.MouseEvent) => {
@@ -20,33 +27,84 @@ const DigitalLibraryPage: React.FC = () => {
     };
 
     return (
-        <div dir={dir} className="max-w-7xl mx-auto px-4 py-10 animate-in fade-in duration-1000">
-            <header className="text-center mb-16">
-                <h1 className="text-4xl md:text-6xl font-black text-gray-950 dark:text-white mb-6 tracking-tighter">
-                    {locale === 'ar' ? 'بوابة المعرفة الرقمية' : 'Digital Knowledge Portal'}
-                </h1>
-                <div className="h-1.5 w-24 bg-red-600 mx-auto rounded-full shadow-[0_0_15px_rgba(239,68,68,0.4)]"></div>
-            </header>
+        <div dir={dir} className="max-w-7xl mx-auto px-4 py-8 animate-in fade-in duration-1000">
+            
+            {/* قسم الهيرو: صورة صقر الجديدة والعنوان */}
+            <div className="glass-panel relative overflow-hidden rounded-[3.5rem] p-10 md:p-16 mb-16 border-white/20 flex flex-col md:flex-row items-center gap-10">
+                {ripples.map(r => <span key={r.id} className="ripple-effect border-red-500/30" style={{ left: r.x, top: r.y }} />)}
+                
+                <div className="flex-1 text-center md:text-start relative z-10">
+                    <h1 className="text-4xl md:text-6xl font-black text-gray-950 dark:text-white mb-6 tracking-tighter leading-tight">
+                        {isAr ? 'بوابة صقر للمصادر الرقمية' : 'Saqr Digital Resource Portal'}
+                    </h1>
+                    <p className="text-xl text-gray-600 dark:text-gray-400 font-bold max-w-xl">
+                        {isAr ? 'استكشف عالمًا من المعرفة عبر أفضل المنصات التعليمية العربية والعالمية.' : 'Explore a world of knowledge through the best Arabic and International platforms.'}
+                    </p>
+                </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                {resources.map((item) => (
-                    <div 
-                        key={item.id}
-                        onMouseDown={handleInteraction}
-                        className="glass-panel relative overflow-hidden p-8 rounded-[2.5rem] border-white/20 hover:scale-105 transition-all cursor-pointer group"
-                    >
-                        {ripples.map(r => <span key={r.id} className="ripple-effect border-red-500/30" style={{ left: r.x, top: r.y }} />)}
-                        <div className={`w-16 h-16 ${item.color} text-white rounded-2xl flex items-center justify-center text-3xl mb-6 shadow-lg rotate-3 group-hover:rotate-0 transition-transform`}>
-                            {item.icon}
-                        </div>
-                        <h3 className="text-xl font-black text-gray-900 dark:text-white">
-                            {locale === 'ar' ? item.titleAr : item.titleEn}
-                        </h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 font-bold uppercase tracking-widest">
-                            {locale === 'ar' ? 'دخول سريع' : 'Quick Access'}
-                        </p>
+                <div className="relative group cursor-pointer" onMouseDown={handleInteraction}>
+                    {/* مكان صورة شخصية صقر الجديدة */}
+                    <img 
+                        src="/saqr-digital.png" 
+                        alt="Saqr Digital" 
+                        className="h-64 md:h-80 object-contain drop-shadow-[0_20px_50px_rgba(239,68,68,0.3)] transform transition-transform group-hover:scale-110"
+                    />
+                </div>
+            </div>
+
+            {/* شبكة المكتبات */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                
+                {/* 1. المكتبة العربية */}
+                <section className="space-y-8">
+                    <h2 className="text-3xl font-black text-gray-950 dark:text-white flex items-center gap-4">
+                        <span className="w-2.5 h-10 bg-green-700 rounded-full shadow-[0_0_15px_rgba(0,115,47,0.4)]"></span>
+                        {isAr ? 'المكتبة العربية' : 'Arabic Library'}
+                    </h2>
+                    <div className="grid gap-5">
+                        {arabicResources.map((item, i) => (
+                            <a 
+                                key={i} href={item.link} target="_blank" rel="noopener noreferrer"
+                                className="glass-panel group relative overflow-hidden p-6 rounded-3xl border-white/10 hover:border-red-500/30 transition-all flex items-center gap-6"
+                                onMouseDown={handleInteraction}
+                            >
+                                {ripples.map(r => <span key={r.id} className="ripple-effect border-red-500/20" style={{ left: r.x, top: r.y }} />)}
+                                <div className="text-4xl">{item.icon}</div>
+                                <div className="flex-1">
+                                    <h3 className="text-xl font-black text-gray-900 dark:text-white group-hover:text-red-600 transition-colors">{item.title}</h3>
+                                    <p className="text-sm text-gray-500 font-medium">{item.desc}</p>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400 group-hover:text-red-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                            </a>
+                        ))}
                     </div>
-                ))}
+                </section>
+
+                {/* 2. المكتبة الإنجليزية */}
+                <section className="space-y-8">
+                    <h2 className="text-3xl font-black text-gray-950 dark:text-white flex items-center gap-4">
+                        <span className="w-2.5 h-10 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.4)]"></span>
+                        {isAr ? 'المكتبة الإنجليزية' : 'English Library'}
+                    </h2>
+                    <div className="grid gap-5">
+                        {englishResources.map((item, i) => (
+                            <a 
+                                key={i} href={item.link} target="_blank" rel="noopener noreferrer"
+                                className="glass-panel group relative overflow-hidden p-6 rounded-3xl border-white/10 hover:border-red-500/30 transition-all flex items-center gap-6"
+                                onMouseDown={handleInteraction}
+                            >
+                                {ripples.map(r => <span key={r.id} className="ripple-effect border-red-500/20" style={{ left: r.x, top: r.y }} />)}
+                                <div className="text-4xl">{item.icon}</div>
+                                <div className="flex-1">
+                                    <h3 className="text-xl font-black text-gray-900 dark:text-white group-hover:text-red-600 transition-colors">{item.title}</h3>
+                                    <p className="text-sm text-gray-500 font-medium">{item.desc}</p>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400 group-hover:text-red-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                            </a>
+                        ))}
+                    </div>
+                </section>
+
             </div>
         </div>
     );
