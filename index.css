@@ -25,7 +25,7 @@ a, button, input, select, .group {
   cursor: none !important;
 }
 
-/* 3. نظام الحاويات الزجاجية (Deep Super Glass) */
+/* --- 3. نظام الحاويات الزجاجية (Deep Super Glass) --- */
 .glass-panel {
   background: rgba(255, 255, 255, 0.45);
   backdrop-filter: blur(30px) saturate(200%);
@@ -43,7 +43,61 @@ a, button, input, select, .group {
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
 }
 
-/* 4. أزرار الهوية (Elite Red & Green) */
+/* --- 4. تأثير توهج الحواف الزجاجية للابتوب (Crystal Spotlight Border) --- */
+.glass-card-interactive {
+  position: relative;
+}
+
+/* طبقة الإضاءة التي تتبع الماوس على الحواف فقط لإعطاء انطباع الزجاج */
+.glass-card-interactive::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px; /* سمك الحافة المتوهجة */
+  background: radial-gradient(
+    600px circle at var(--mouse-x) var(--mouse-y),
+    rgba(239, 68, 68, 0.6), /* توهج أحمر كريستالي */
+    transparent 40%
+  );
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  z-index: 20;
+}
+
+.glass-card-interactive:hover::before {
+  opacity: 1;
+}
+
+/* --- 5. نظام الشعارات (تبييض تلقائي في الدارك مود) --- */
+/* الشعار الأساسي وحركته الذكية */
+img[src="/school-logo.png"] {
+  transform: rotate(15deg);
+  transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.logo-smart-hover:hover {
+  transform: rotate(0deg) scale(1.1);
+  filter: drop-shadow(0 0 25px rgba(220, 38, 38, 0.3));
+}
+
+/* تبييض الشعار في الدارك مود لضمان الوضوح في أي صفحة */
+.dark .logo-white-filter {
+  filter: brightness(0) invert(1);
+  opacity: 0.9;
+  transition: filter 0.5s ease, opacity 0.5s ease;
+}
+
+/* 6. أزرار الهوية (Elite Red & Green) */
 .glass-button-red {
   background: rgba(239, 68, 68, 0.1);
   backdrop-filter: blur(15px);
@@ -72,18 +126,7 @@ a, button, input, select, .group {
   box-shadow: 0 15px 30px rgba(0, 115, 47, 0.2);
 }
 
-/* 5. الشعار (Smart Motion) */
-img[src="/school-logo.png"] {
-  transform: rotate(15deg);
-  transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.logo-smart-hover:hover {
-  transform: rotate(0deg) scale(1.1);
-  filter: drop-shadow(0 0 25px rgba(220, 38, 38, 0.3));
-}
-
-/* 6. المؤشر الكريستالي الأحمر السريع (High Performance Cursor) */
+/* 7. المؤشر الكريستالي الأحمر السريع (High Performance Cursor) */
 .custom-cursor {
   position: fixed;
   width: 24px;
@@ -93,16 +136,13 @@ img[src="/school-logo.png"] {
   border-radius: 50%;
   pointer-events: none;
   z-index: 10000;
-  /* الموضع الافتراضي */
   transform: translate3d(-100px, -100px, 0); 
-  /* تحسين الأداء: الانتقال فقط للحجم واللون، وليس للموضع */
   transition: 
     width 0.3s cubic-bezier(0.23, 1, 0.32, 1),
     height 0.3s cubic-bezier(0.23, 1, 0.32, 1),
     background-color 0.3s ease;
   backdrop-filter: blur(4px);
   box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
-  /* إجبار المتصفح على استخدام GPU */
   will-change: transform;
   backface-visibility: hidden;
 }
@@ -115,7 +155,7 @@ img[src="/school-logo.png"] {
   box-shadow: 0 0 25px rgba(239, 68, 68, 0.4);
 }
 
-/* 7. نظام النبض الكريستالي الأحمر (Elite Crystal Ripple) */
+/* 8. نظام النبض الكريستالي الأحمر (Elite Crystal Ripple) */
 @keyframes crystal-ripple {
   0% {
     transform: translate3d(-50%, -50%, 0) scale(0);
@@ -141,7 +181,7 @@ img[src="/school-logo.png"] {
   animation: crystal-ripple 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-/* 8. أنيميشن كروت المعرفة (Cinematic Float) */
+/* 9. أنيميشن كروت المعرفة (Cinematic Float) */
 @keyframes glass-float {
   0% {
     transform: translate3d(-50%, -50%, 0) scale(0.4) rotate(-12deg);
