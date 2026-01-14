@@ -8,175 +8,148 @@ body {
   font-family: 'Tajawal', sans-serif;
   margin: 0;
   padding: 0;
-  cursor: default;
+  cursor: none !important; /* إخفاء الماوس الافتراضي لتفعيل الماوس الكريستالي */
   transition: background-color 0.4s ease;
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
-/* 3. نظام الحاويات الزجاجية (Glass Panels) */
+/* 3. نظام الحاويات الزجاجية المطورة (Super Glass) */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.45);
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 8px 32px 0 rgba(0, 115, 47, 0.05);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(25px) saturate(180%);
+  -webkit-backdrop-filter: blur(25px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .dark .glass-panel {
-  background: rgba(17, 24, 39, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
 }
 
-/* 4. الأزرار الزجاجية بهوية المدرسة الرسمية */
-.glass-button-black {
-  background: rgba(0, 0, 0, 0.05);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  color: #000;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.glass-button-black:hover {
-  background: #000;
-  color: #fff !important;
-  transform: translateY(-3px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-}
-.dark .glass-button-black {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
-}
-.dark .glass-button-black:hover {
-  background: #fff;
-  color: #000 !important;
-  box-shadow: 0 10px 25px rgba(255, 255, 255, 0.2);
-}
-
+/* 4. أزرار الهوية الرسمية (Premium States) */
 .glass-button-red {
-  background: rgba(239, 68, 68, 0.1);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #ef4444;
+  background: rgba(239, 68, 68, 0.08);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #dc2626;
+  transition: all 0.4s ease;
 }
+
 .glass-button-red:hover {
-  background: #ef4444;
+  background: #dc2626;
   color: white !important;
+  box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
 }
 
 .glass-button-green {
-  background: rgba(0, 115, 47, 0.1);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(0, 115, 47, 0.3);
+  background: rgba(0, 115, 47, 0.08);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 115, 47, 0.2);
   color: #00732f;
+  transition: all 0.4s ease;
 }
+
 .glass-button-green:hover {
   background: #00732f;
   color: white !important;
+  box-shadow: 0 10px 25px rgba(0, 115, 47, 0.3);
 }
 
-.dark .glass-button-green { background: rgba(0, 115, 47, 0.2); color: #10b981; }
-.dark .glass-button-red { background: rgba(239, 68, 68, 0.2); color: #f87171; }
-
-/* 5. الشعار والهوية البصرية - ثبات ميل 15 درجة */
+/* 5. الشعار (Smart Identity) */
 img[src="/school-logo.png"] {
   transform: rotate(15deg);
-  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  display: inline-block;
+  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.dark img[src="/school-logo.png"],
-.dark img[alt="E.F.I.P.S"],
-.dark img[alt="School Logo"],
-.dark img[alt="Back Logo"] {
-  filter: brightness(0) invert(1) !important;
-  background-color: transparent !important;
+.logo-smart-hover:hover {
+  transform: rotate(0deg) scale(1.15);
+  filter: drop-shadow(0 0 15px rgba(0, 115, 47, 0.3));
 }
 
-/* 6. المؤشر التفاعلي واللمس */
-a, button, .group, select, input { cursor: pointer !important; }
-
-/* المؤشر المخصص (Mouse Follower) باللون الأحمر */
+/* 6. المؤشر الكريستالي المطور (Red Aura Cursor) */
 .custom-cursor {
   position: fixed;
-  width: 40px;
-  height: 40px;
-  background-color: rgba(239, 68, 68, 0.15); /* أحمر شفاف */
-  border: 2px solid rgba(239, 68, 68, 0.4); /* إطار أحمر كريستالي */
+  width: 32px;
+  height: 32px;
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 2px solid rgba(239, 68, 68, 0.5);
   border-radius: 50%;
   pointer-events: none;
-  z-index: 9999;
-  transition: width 0.3s, height 0.3s, background-color 0.3s;
+  z-index: 10000;
+  transition: transform 0.1s ease-out, width 0.3s, height 0.3s, background-color 0.3s;
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* 7. حركة الـ Bounce المنسقة مع ميل 15 درجة */
-@keyframes bounce-rotate {
-  0%, 100% { transform: translateY(-5%) rotate(15deg); }
-  50% { transform: translateY(0) rotate(15deg); }
-}
-.animate-bounce-slow {
-  animation: bounce-rotate 3s infinite ease-in-out;
-}
-
-/* 8. أنيميشن انسياب الكروت (النسخة المطورة للوضوح) */
-@keyframes glass-float {
-  0% {
-    transform: translate(-50%, -50%) scale(0.3) rotate(-5deg);
-    opacity: 0;
-    filter: blur(10px);
-  }
-  30% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1.1) rotate(0deg);
-    filter: blur(0px);
-  }
-  100% {
-    transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0.9) rotate(5deg);
-    opacity: 0;
-    filter: blur(2px);
-  }
+/* حالة المؤشر عند المرور فوق العناصر التفاعلية */
+.custom-cursor-active {
+  width: 50px;
+  height: 50px;
+  background-color: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.8);
+  transform: translate(-50%, -50%) scale(1.2);
 }
 
-.animate-glass-float {
-  animation: glass-float 2.2s cubic-bezier(0.19, 1, 0.22, 1) forwards;
-  will-change: transform, opacity, filter;
-}
-
-/* 9. نظام التفاعل اللمسي (Red Crystal Ripple) */
+/* 7. نظام النبض الكريستالي الأحمر (Red Crystal Ripple) */
 @keyframes crystal-ripple {
   0% {
     transform: translate(-50%, -50%) scale(0);
-    opacity: 0.8;
-    border-width: 6px;
+    opacity: 1;
+    border-width: 8px;
   }
   100% {
-    transform: translate(-50%, -50%) scale(4);
+    transform: translate(-50%, -50%) scale(5);
     opacity: 0;
     border-width: 1px;
+    filter: blur(2px);
   }
 }
 
 .ripple-effect {
   position: absolute;
   border-style: solid;
-  border-color: rgba(239, 68, 68, 0.4); /* تم التغيير للأحمر الكريستالي */
+  border-color: rgba(239, 68, 68, 0.5);
   border-radius: 50%;
   pointer-events: none;
-  z-index: 50;
-  animation: crystal-ripple 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  z-index: 99;
+  animation: crystal-ripple 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.dark .ripple-effect {
-  border-color: rgba(248, 113, 113, 0.3); /* أحمر فاتح للوضع الليلي */
+/* 8. أنيميشن انسياب كروت المعرفة (Ultra Smooth) */
+@keyframes glass-float {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5) rotate(-10deg);
+    opacity: 0;
+    filter: blur(15px);
+  }
+  40% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.1) rotate(0deg);
+    filter: blur(0px);
+  }
+  100% {
+    transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0.9) rotate(10deg);
+    opacity: 0;
+    filter: blur(4px);
+  }
 }
 
-/* تخصيص إضافي لكروت المعرفة لضمان القراءة */
-.knowledge-card {
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  letter-spacing: -0.02em;
+.animate-glass-float {
+  animation: glass-float 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: transform, opacity;
 }
 
+/* إخفاء السكرول بار مع الحفاظ على الوظيفة */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
