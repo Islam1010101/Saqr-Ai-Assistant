@@ -55,8 +55,18 @@ body {
   box-shadow: 0 15px 30px rgba(220, 38, 38, 0.3);
 }
 
-.glass-button-red:active {
-  transform: translateY(0) scale(0.95);
+.glass-button-green {
+  background: rgba(0, 115, 47, 0.1);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(0, 115, 47, 0.3);
+  color: #00732f;
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.glass-button-green:hover {
+  background: #00732f;
+  color: white !important;
+  box-shadow: 0 15px 30px rgba(0, 115, 47, 0.2);
 }
 
 /* 5. الشعار المطور (Smart Motion) */
@@ -81,7 +91,6 @@ img[src="/school-logo.png"] {
   border-radius: 50%;
   pointer-events: none;
   z-index: 10000;
-  /* توسيط مطلق لتجنب الاهتزاز */
   transform: translate(-50%, -50%);
   transition: 
     width 0.3s cubic-bezier(0.23, 1, 0.32, 1),
@@ -91,7 +100,7 @@ img[src="/school-logo.png"] {
   box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
 }
 
-/* حالة المؤشر عند التفاعل مع الروابط والأزرار */
+/* حالة المؤشر عند التفاعل */
 .custom-cursor-active {
   width: 45px;
   height: 45px;
@@ -159,7 +168,6 @@ img[src="/school-logo.png"] {
   scrollbar-width: none;
 }
 
-/* وسم المعرفة الذكي */
 .knowledge-tag {
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   letter-spacing: -0.01em;
