@@ -42,7 +42,6 @@ const HomePage: React.FC = () => {
     const [burstCard, setBurstCard] = useState<{ id: number, tx: string, ty: string, item: typeof KNOWLEDGE_CARDS[0] } | null>(null);
     const [isMascotClicked, setIsMascotClicked] = useState(false);
     
-    // حالة الهنت العائم مع الإحداثيات
     const [tooltip, setTooltip] = useState<{ text: string, x: number, y: number } | null>(null);
 
     const handleMascotInteraction = useCallback((e: React.MouseEvent | React.TouchEvent) => {
@@ -59,19 +58,17 @@ const HomePage: React.FC = () => {
         setTimeout(() => setBurstCard(null), 1500);
     }, []);
 
-    // تحديث موقع الهنت العائم
     const handleButtonMouseMove = (e: React.MouseEvent, text: string) => {
         setTooltip({
             text,
             x: e.clientX,
-            y: e.clientY - 40 // يظهر فوق المؤشر بـ 40 بكسل
+            y: e.clientY - 40
         });
     };
 
     return (
         <div className="relative h-[calc(100vh-140px)] flex items-center justify-center p-4 overflow-hidden select-none animate-fade-up">
             
-            {/* الهنت العائم - يظهر فوق الماوس ويتلاشى */}
             {tooltip && (
                 <div 
                     className="fixed pointer-events-none z-[200] glass-panel px-4 py-2 rounded-xl border-white/40 shadow-2xl animate-in fade-in zoom-in duration-300"
@@ -83,7 +80,8 @@ const HomePage: React.FC = () => {
                 </div>
             )}
 
-            <div className="relative z-10 glass-panel w-full max-w-6xl h-fit md:min-h-[65vh] rounded-[3.5rem] md:rounded-[4.5rem] overflow-hidden shadow-[0_40px_120px_rgba(0,0,0,0.2)] border-2 border-white/40 dark:border-white/5">
+            {/* الكارت الرئيسي (تم إزالة border-2 والحواف الرمادية) */}
+            <div className="relative z-10 glass-panel w-full max-w-6xl h-fit md:min-h-[65vh] rounded-[3.5rem] md:rounded-[4.5rem] overflow-hidden shadow-[0_40px_120px_rgba(0,0,0,0.2)]">
                 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 h-full p-10 md:p-20 items-center relative z-10">
                     
@@ -98,7 +96,6 @@ const HomePage: React.FC = () => {
                         </div>
 
                         <div className="flex flex-wrap gap-5">
-                            {/* 1. البحث اليدوي */}
                             <Link 
                                 to="/search" 
                                 onMouseMove={(e) => handleButtonMouseMove(e, t('manualDesc'))}
@@ -108,7 +105,6 @@ const HomePage: React.FC = () => {
                                 {t('manualSearch')}
                             </Link>
                             
-                            {/* 2. اسأل صقر AI */}
                             <Link 
                                 to="/smart-search" 
                                 onMouseMove={(e) => handleButtonMouseMove(e, t('smartDesc'))}
@@ -118,7 +114,6 @@ const HomePage: React.FC = () => {
                                 {t('smartSearch')}
                             </Link>
 
-                            {/* 3. المكتبة الرقمية - تم حذف الأيقونة بطلبك */}
                             <Link 
                                 to="/digital-library" 
                                 onMouseMove={(e) => handleButtonMouseMove(e, t('digitalDesc'))}
@@ -136,11 +131,12 @@ const HomePage: React.FC = () => {
                             onTouchStart={handleMascotInteraction}
                             className={`relative group cursor-pointer touch-manipulation flex items-center justify-center w-full max-w-[500px] transition-transform duration-300 ${isMascotClicked ? 'scale-110 rotate-2' : 'hover:scale-105'}`}
                         >
+                            {/* الشعار الوطني (تمت الإمالة لليمين عبر rotate-6) */}
                             <div className="absolute inset-0 flex items-center justify-center z-0 pointer-events-none transition-transform duration-1000 group-hover:scale-110">
                                 <img 
                                     src="/school-logo.png" 
                                     alt="Seal" 
-                                    className="h-[120%] w-[120%] object-contain opacity-[0.07] dark:opacity-[0.12] blur-[2px] logo-white-filter" 
+                                    className="h-[120%] w-[120%] object-contain opacity-[0.07] dark:opacity-[0.12] blur-[2px] logo-white-filter rotate-6" 
                                 />
                             </div>
 
@@ -157,7 +153,6 @@ const HomePage: React.FC = () => {
                                 </div>
                             )}
 
-                            {/* الشخصية تحافظ على التباين والألوان عند الضغط (تم إزالة brightness-125) */}
                             <img 
                                 src="/saqr-full.png" 
                                 alt="Saqr" 
