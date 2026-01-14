@@ -47,7 +47,7 @@ const SmartSearchPage: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
-  // دالة إنشاء تأثير التموج الكريستالي
+  // دالة إنشاء تأثير التموج الكريستالي الأحمر
   const handleInteraction = (e: React.MouseEvent | React.TouchEvent, callback?: () => void) => {
     const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
     const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
@@ -60,7 +60,7 @@ const SmartSearchPage: React.FC = () => {
     setTimeout(() => {
         setRipples(prev => prev.filter(r => r.id !== rippleId));
         if (callback) callback();
-    }, 300);
+    }, 350);
   };
 
   const handleSendMessage = async () => {
@@ -100,21 +100,21 @@ const SmartSearchPage: React.FC = () => {
       {/* 1. حاوية المحادثة الكبرى */}
       <div className="flex flex-col h-[75vh] sm:h-[80vh] glass-panel rounded-[2.5rem] sm:rounded-[3.5rem] shadow-2xl overflow-hidden border-white/30 dark:border-white/10 relative">
         
-        {/* هيدر الدردشة التفاعلي */}
+        {/* هيدر الدردشة التفاعلي بتموجات حمراء */}
         <div 
           onMouseDown={(e) => handleInteraction(e)}
           onTouchStart={(e) => handleInteraction(e)}
           className="relative overflow-hidden p-6 sm:p-8 border-b border-black/5 dark:border-white/10 bg-white/40 dark:bg-gray-950/40 backdrop-blur-2xl flex items-center justify-between z-10 cursor-pointer"
         >
-          {ripples.map(r => <span key={r.id} className="ripple-effect border-green-500/20" style={{ left: r.x, top: r.y }} />)}
+          {ripples.map(r => <span key={r.id} className="ripple-effect border-red-500/30" style={{ left: r.x, top: r.y }} />)}
           <div className="flex items-center gap-4 sm:gap-5 relative z-10">
             <div className="relative">
                 <img src={SCHOOL_LOGO} alt="Logo" className="w-12 h-12 sm:w-14 sm:h-14 object-contain rotate-12 logo-smart-hover" />
-                <span className="absolute bottom-0 right-0 w-3 h-3 sm:w-4 sm:h-4 bg-green-500 border-2 border-white rounded-full animate-pulse"></span>
+                <span className="absolute bottom-0 right-0 w-3 h-3 sm:w-4 sm:h-4 bg-red-600 border-2 border-white rounded-full animate-pulse"></span>
             </div>
             <div>
                 <h1 className="text-xl sm:text-2xl font-black text-gray-950 dark:text-white tracking-tighter leading-none">{t('pageTitle')}</h1>
-                <p className="text-[10px] sm:text-xs text-green-700 dark:text-green-400 font-black mt-1 uppercase tracking-widest">{t('librarianStatus')}</p>
+                <p className="text-[10px] sm:text-xs text-red-600 font-black mt-1 uppercase tracking-widest">{t('librarianStatus')}</p>
             </div>
           </div>
         </div>
@@ -126,15 +126,15 @@ const SmartSearchPage: React.FC = () => {
               key={index}
               className={`flex items-start gap-3 sm:gap-5 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'} animate-in fade-in slide-in-from-bottom-4 duration-700`}
             >
-              {/* أفاتار الهوية */}
+              {/* أفاتار الهوية بتموج أحمر */}
               <div 
                 onMouseDown={(e) => handleInteraction(e)}
                 onTouchStart={(e) => handleInteraction(e)}
                 className={`relative overflow-hidden w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex-shrink-0 flex items-center justify-center shadow-xl border-2 transition-transform active:scale-90 ${
-                  msg.role === 'assistant' ? 'bg-white border-green-700/20' : 'bg-green-700 border-green-800 text-white font-black text-[10px]'
+                  msg.role === 'assistant' ? 'bg-white border-red-500/20' : 'bg-red-600 border-red-700 text-white font-black text-[10px]'
                 }`}
               >
-                {ripples.map(r => <span key={r.id} className="ripple-effect border-green-500/30" style={{ left: r.x, top: r.y }} />)}
+                {ripples.map(r => <span key={r.id} className="ripple-effect border-red-500/30" style={{ left: r.x, top: r.y }} />)}
                 {msg.role === 'assistant' ? (
                   <img src={SAQR_AVATAR} alt="Saqr" className="w-full h-full object-cover scale-110" />
                 ) : (
@@ -146,7 +146,7 @@ const SmartSearchPage: React.FC = () => {
               <div
                 className={`max-w-[85%] sm:max-w-[75%] p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2.5rem] shadow-lg backdrop-blur-xl border-2 ${
                   msg.role === 'user'
-                    ? 'bg-green-700 text-white rounded-tr-none border-green-600'
+                    ? 'bg-red-600 text-white rounded-tr-none border-red-500'
                     : 'bg-white/80 dark:bg-gray-900/80 text-gray-950 dark:text-gray-100 rounded-tl-none border-white/40 dark:border-white/10'
                 }`}
               >
@@ -157,17 +157,17 @@ const SmartSearchPage: React.FC = () => {
             </div>
           ))}
 
-          {/* مؤشر التحميل */}
+          {/* مؤشر التحميل بألوان حمراء */}
           {isLoading && (
             <div className="flex items-center gap-3 sm:gap-5 animate-in fade-in duration-300">
-              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-white/90 border-2 border-green-700/20 flex items-center justify-center shadow-lg">
+              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-white/90 border-2 border-red-500/20 flex items-center justify-center shadow-lg">
                   <img src={SAQR_AVATAR} alt="Thinking" className="w-full h-full object-cover opacity-40 animate-pulse" />
               </div>
               <div className="p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2.5rem] bg-white/60 dark:bg-gray-900/60 border-2 border-white/40">
                   <div className="flex gap-1.5 sm:gap-2">
-                      <div className="w-2 h-2 sm:w-3 sm:h-3 bg-green-700 rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 sm:w-3 sm:h-3 bg-green-700 rounded-full animate-bounce [animation-delay:-0.2s]"></div>
-                      <div className="w-2 h-2 sm:w-3 sm:h-3 bg-green-700 rounded-full animate-bounce [animation-delay:-0.4s]"></div>
+                      <div className="w-2 h-2 sm:w-3 sm:h-3 bg-red-600 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 sm:w-3 sm:h-3 bg-red-600 rounded-full animate-bounce [animation-delay:-0.2s]"></div>
+                      <div className="w-2 h-2 sm:w-3 sm:h-3 bg-red-600 rounded-full animate-bounce [animation-delay:-0.4s]"></div>
                   </div>
               </div>
             </div>
@@ -175,7 +175,7 @@ const SmartSearchPage: React.FC = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* 3. منطقة الإدخال الاحترافية */}
+        {/* 3. منطقة الإدخال الاحترافية بتموج أحمر */}
         <div className="p-4 sm:p-8 bg-white/60 dark:bg-gray-950/60 border-t border-black/5 dark:border-white/10 backdrop-blur-3xl">
           <div className="relative group max-w-4xl mx-auto">
             <input
@@ -184,13 +184,13 @@ const SmartSearchPage: React.FC = () => {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
               placeholder={t('inputPlaceholder')}
-              className="w-full bg-white/80 dark:bg-gray-900/80 border-2 border-transparent focus:border-green-700 rounded-2xl sm:rounded-[2rem] py-4 sm:py-6 ps-6 sm:ps-8 pe-16 sm:pe-24 text-gray-950 dark:text-white font-black text-base sm:text-xl outline-none transition-all shadow-xl placeholder-gray-400"
+              className="w-full bg-white/80 dark:bg-gray-900/80 border-2 border-transparent focus:border-red-600 rounded-2xl sm:rounded-[2rem] py-4 sm:py-6 ps-6 sm:ps-8 pe-16 sm:pe-24 text-gray-950 dark:text-white font-black text-base sm:text-xl outline-none transition-all shadow-xl placeholder-gray-400"
               disabled={isLoading}
             />
             <button
               onClick={(e) => handleInteraction(e, handleSendMessage)}
               disabled={isLoading || !input.trim()}
-              className="absolute inset-y-2 sm:inset-y-3 end-2 sm:end-3 w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center bg-green-700 text-white rounded-xl sm:rounded-2xl shadow-xl hover:bg-green-800 active:scale-90 transition-all disabled:opacity-30 overflow-hidden"
+              className="absolute inset-y-2 sm:inset-y-3 end-2 sm:end-3 w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center bg-red-600 text-white rounded-xl sm:rounded-2xl shadow-xl hover:bg-red-700 active:scale-90 transition-all disabled:opacity-30 overflow-hidden"
             >
               {ripples.map(r => <span key={r.id} className="ripple-effect border-white/40" style={{ left: r.x, top: r.y }} />)}
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 sm:h-8 sm:w-8 rotate-[-45deg] rtl:rotate-[135deg] relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
