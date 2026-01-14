@@ -116,10 +116,9 @@ a, button, .group, select, input { cursor: pointer !important; }
   30% {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1.1) rotate(0deg);
-    filter: blur(0px); /* هنا الكرت يصبح حاداً جداً */
+    filter: blur(0px);
   }
   100% {
-    /* الانطلاق للهدف مع الحفاظ على وضوح النص لأطول فترة */
     transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0.9) rotate(5deg);
     opacity: 0;
     filter: blur(2px);
@@ -129,6 +128,34 @@ a, button, .group, select, input { cursor: pointer !important; }
 .animate-glass-float {
   animation: glass-float 2.2s cubic-bezier(0.19, 1, 0.22, 1) forwards;
   will-change: transform, opacity, filter;
+}
+
+/* 9. نظام التفاعل اللمسي (Crystal Ripple) */
+@keyframes crystal-ripple {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0.8;
+    border-width: 6px;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(4);
+    opacity: 0;
+    border-width: 1px;
+  }
+}
+
+.ripple-effect {
+  position: absolute;
+  border-style: solid;
+  border-color: rgba(0, 115, 47, 0.3); /* لون أخضر هوية المدرسة */
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 50;
+  animation: crystal-ripple 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+.dark .ripple-effect {
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 /* تخصيص إضافي لكروت المعرفة لضمان القراءة */
