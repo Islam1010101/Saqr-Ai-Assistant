@@ -12,17 +12,6 @@ const useDebounce = <T,>(value: T, delay: number): T => {
     return debouncedValue;
 };
 
-const logActivity = (type: 'search' | 'view', value: string) => {
-    if (!value) return;
-    setTimeout(() => {
-        try {
-            const logs: any[] = JSON.parse(localStorage.getItem('saqr_activity_logs') || '[]');
-            logs.push({ timestamp: Date.now(), type, value });
-            localStorage.setItem('saqr_activity_logs', JSON.stringify(logs.slice(-100))); 
-        } catch (e) { console.error(e); }
-    }, 0);
-};
-
 const translations = {
   ar: {
     pageTitle: "البحث في الفهرس الورقي",
@@ -69,7 +58,7 @@ const translations = {
   }
 };
 
-// --- نافذة تفاصيل الكتاب (تم تصحيح الألوان للأخضر بالكامل + خلفية فاتحة) ---
+// --- نافذة تفاصيل الكتاب (تباين عالي + خطوط واضحة) ---
 const BookModal: React.FC<{
   book: Book | null;
   onClose: () => void;
@@ -96,14 +85,13 @@ const BookModal: React.FC<{
                 const response = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ messages: [{ role: 'user', content: `Summarize "${book.title}" in 2 lines.` }], locale }),
+                    body: JSON.stringify({ messages: [{ role: 'user', content: `Summarize "${book.title}" briefly.` }], locale }),
                 });
                 const data = await response.json();
                 setSummary(data.reply || "");
             } catch (error) { setSummary(book.summary || ""); } finally { setIsLoading(false); }
         };
         fetchAiInsights();
-        logActivity('view', book.id);
     }, [book, locale]);
 
     const handleInteraction = (e: React.MouseEvent | React.TouchEvent, callback: () => void) => {
@@ -121,60 +109,60 @@ const BookModal: React.FC<{
     if (!book) return null;
 
     return (
-        <div dir={dir} className="fixed inset-0 bg-black/60 z-[100] flex justify-center items-end sm:items-center p-0 sm:p-4 backdrop-blur-md animate-in fade-in" onClick={onClose}>
+        <div dir={dir} className="fixed inset-0 bg-slate-950/80 z-[100] flex justify-center items-end sm:items-center p-0 sm:p-4 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}>
             <div 
                 onMouseMove={handleMouseMove}
-                className="glass-panel glass-card-interactive bg-white/80 dark:bg-gray-900/90 rounded-t-[3rem] sm:rounded-[3rem] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl border-white/40" 
+                className="glass-panel glass-card-interactive bg-white/95 dark:bg-slate-900/95 rounded-t-[3rem] sm:rounded-[3rem] w-full max-w-2xl max-h-[92vh] overflow-y-auto shadow-2xl border-white/40" 
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="p-8 sm:p-12 relative z-10">
                     <div className="flex justify-between items-start mb-8">
-                        <div>
-                            <h2 className="text-3xl font-black text-gray-950 dark:text-white leading-tight">{book.title}</h2>
-                            <p className="text-xl text-green-700 font-black mt-2">{book.author}</p>
+                        <div className="flex-1">
+                            <h2 className="text-3xl sm:text-4xl font-black text-slate-950 dark:text-white leading-tight tracking-tight">{book.title}</h2>
+                            <p className="text-xl sm:text-2xl text-green-700 dark:text-green-400 font-black mt-2">{book.author}</p>
                         </div>
-                        <button onClick={onClose} className="p-3 rounded-full bg-green-600/10 text-green-700 hover:bg-green-700 hover:text-white transition-all">
-                            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
+                        <button onClick={onClose} className="p-4 rounded-2xl bg-green-600/10 text-green-700 hover:bg-green-700 hover:text-white transition-all active:scale-90">
+                            <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-                        <div className="glass-panel p-5 rounded-2xl border-green-600/10 bg-green-600/5">
-                            <h4 className="font-black text-green-800/50 text-[10px] uppercase mb-1 tracking-widest">{t_search('subject')}</h4>
-                            <p className="text-sm font-black text-gray-950 dark:text-white">{book.subject}</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                        <div className="glass-panel p-5 rounded-2xl border-green-600/20 bg-green-600/5">
+                            <h4 className="font-black text-slate-500 dark:text-slate-400 text-[11px] uppercase mb-1 tracking-widest">{t_search('subject')}</h4>
+                            <p className="text-base font-black text-slate-950 dark:text-white">{book.subject}</p>
                         </div>
-                        <div className="glass-panel p-5 rounded-2xl border-green-600/10 bg-green-600/5 font-black text-sm flex flex-col justify-center">
-                            <span className="text-[10px] text-green-800/50 uppercase">{t_search('level')}</span>
-                            {book.level}
+                        <div className="glass-panel p-5 rounded-2xl border-green-600/20 bg-green-600/5">
+                            <h4 className="font-black text-slate-500 dark:text-slate-400 text-[11px] uppercase mb-1 tracking-widest">{t_search('level')}</h4>
+                            <p className="text-base font-black text-slate-950 dark:text-white">{book.level}</p>
                         </div>
-                        <div className="glass-panel p-5 rounded-2xl border-green-600/10 bg-green-600/5 font-black text-sm flex flex-col justify-center">
-                            <span className="text-[10px] text-green-800/50 uppercase">Language</span>
-                            {book.language === 'EN' ? t_search('langEN') : t_search('langAR')}
+                        <div className="glass-panel p-5 rounded-2xl border-green-600/20 bg-green-600/5">
+                            <h4 className="font-black text-slate-500 dark:text-slate-400 text-[11px] uppercase mb-1 tracking-widest">Language</h4>
+                            <p className="text-base font-black text-slate-950 dark:text-white">{book.language === 'EN' ? t_search('langEN') : t_search('langAR')}</p>
                         </div>
                     </div>
 
-                    <div className="bg-green-700 p-8 rounded-[2rem] shadow-xl mb-8 text-white">
-                        <p className="text-xs font-black uppercase opacity-70 mb-1">{t_search('location')}</p>
-                        <p className="text-3xl font-black">{t_search('shelf')} {book.shelf} – {t_search('row')} {book.row}</p>
+                    <div className="bg-green-700 p-8 rounded-[2rem] shadow-xl mb-8 text-white flex flex-col items-center sm:items-start">
+                        <p className="text-sm font-black uppercase opacity-80 mb-1">{t_search('location')}</p>
+                        <p className="text-3xl sm:text-4xl font-black tracking-tighter">{t_search('shelf')} {book.shelf} – {t_search('row')} {book.row}</p>
                     </div>
 
                     <div className="space-y-3">
-                        <h4 className="font-black text-green-700 uppercase tracking-widest text-xs">{t_search('summary')}</h4>
-                        <p className="text-gray-800 dark:text-gray-200 leading-relaxed text-lg font-medium italic">"{summary || book.summary}"</p>
+                        <h4 className="font-black text-green-700 dark:text-green-400 uppercase tracking-widest text-xs sm:text-sm">{t_search('summary')}</h4>
+                        <p className="text-slate-800 dark:text-slate-200 leading-relaxed text-lg sm:text-xl font-medium italic bg-slate-50 dark:bg-white/5 p-6 rounded-2xl">"{summary || book.summary || '...'}"</p>
                     </div>
                 </div>
 
-                <div className="p-8 flex flex-col sm:flex-row gap-4 bg-green-600/5 border-t border-green-600/10 relative z-10">
+                <div className="p-8 flex flex-col sm:flex-row gap-4 bg-slate-50 dark:bg-white/5 border-t border-slate-200 dark:border-white/10 relative z-10">
                     <button 
                         onMouseDown={(e) => handleInteraction(e, onClose)}
-                        className="relative overflow-hidden flex-1 glass-button-green py-5 rounded-2xl font-black text-lg"
+                        className="relative overflow-hidden flex-1 glass-button-green py-5 rounded-2xl font-black text-xl"
                     >
                         {ripples.map(r => <span key={r.id} className="ripple-effect !border-green-600/40" style={{ left: r.x, top: r.y }} />)}
                         {t_search('close')}
                     </button>
                     <button 
                         onMouseDown={(e) => handleInteraction(e, () => onFilterByAuthor(book.author))}
-                        className="relative overflow-hidden flex-1 bg-gray-950 text-white py-5 rounded-2xl font-black text-lg active:scale-95 transition-all"
+                        className="relative overflow-hidden flex-1 bg-slate-950 text-white dark:bg-white dark:text-slate-950 py-5 rounded-2xl font-black text-xl active:scale-95 transition-all"
                     >
                         {ripples.map(r => <span key={r.id} className="ripple-effect border-white/20" style={{ left: r.x, top: r.y }} />)}
                         {t_search('similarRecommendations')}
@@ -185,15 +173,9 @@ const BookModal: React.FC<{
     );
 };
 
-// --- بطاقة الكتاب (فاتحة جداً + خضراء) ---
+// --- بطاقة الكتاب (نص ضخم وواضح + متوافقة مع الموبايل) ---
 const BookCard = React.memo(({ book, onClick, t_search }: { book: Book; onClick: () => void; t_search: any }) => {
     const [ripples, setRipples] = useState<{ id: number, x: number, y: number }[]>([]);
-
-    const handleMouseMove = (e: React.MouseEvent) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        e.currentTarget.style.setProperty("--mouse-x", `${e.clientX - rect.left}px`);
-        e.currentTarget.style.setProperty("--mouse-y", `${e.clientY - rect.top}px`);
-    };
 
     const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
         const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
@@ -204,26 +186,25 @@ const BookCard = React.memo(({ book, onClick, t_search }: { book: Book; onClick:
 
     return (
         <div 
-            onMouseMove={handleMouseMove}
             onMouseDown={handleInteraction}
             onClick={onClick}
-            className="relative overflow-hidden glass-panel bg-white/70 dark:bg-gray-800/60 border-white/40 rounded-[2rem] hover:shadow-2xl transition-all duration-500 cursor-pointer flex flex-col group active:scale-95 h-full"
+            className="relative overflow-hidden glass-panel bg-white/90 dark:bg-slate-800/80 border-white/50 dark:border-white/10 rounded-[2rem] hover:shadow-2xl transition-all duration-500 cursor-pointer flex flex-col group active:scale-[0.98] h-full"
         >
             <div className="absolute inset-0 pointer-events-none z-0">
                 {ripples.map(r => <span key={r.id} className="ripple-effect !border-green-600/30" style={{ left: r.x, top: r.y }} />)}
             </div>
             
-            <div className="p-6 flex-grow relative z-10">
-                <div className="flex justify-between items-start mb-4">
-                     <span className="bg-green-600/10 text-green-700 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider">{book.subject}</span>
-                     <span className="text-2xl group-hover:rotate-12 transition-transform">📖</span>
+            <div className="p-7 flex-grow relative z-10">
+                <div className="flex justify-between items-start mb-5">
+                     <span className="bg-green-600/10 text-green-800 dark:text-green-400 px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider border border-green-600/20">{book.subject}</span>
+                     <span className="text-3xl group-hover:rotate-12 transition-transform">📖</span>
                 </div>
-                <h3 className="font-black text-xl text-gray-950 dark:text-white group-hover:text-green-700 transition-colors line-clamp-2 leading-tight mb-2 tracking-tighter">{book.title}</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 font-bold mb-4">{book.author}</p>
+                <h3 className="font-black text-xl sm:text-2xl text-slate-950 dark:text-white group-hover:text-green-700 dark:group-hover:text-green-400 transition-colors line-clamp-2 leading-tight mb-2 tracking-tight">{book.title}</h3>
+                <p className="text-base text-slate-600 dark:text-slate-400 font-bold mb-4">{book.author}</p>
             </div>
-            <div className="bg-green-600/5 py-4 px-6 border-t border-green-600/10 relative z-10">
-                <p className="font-black text-green-900 dark:text-green-400 text-xs tracking-tighter flex items-center gap-2">
-                    <span className="w-2 h-2 bg-green-600 rounded-full animate-pulse shadow-[0_0_10px_rgba(5,150,105,0.6)]"></span>
+            <div className="bg-green-600/5 dark:bg-white/5 py-4 px-7 border-t border-green-600/10 dark:border-white/5 relative z-10">
+                <p className="font-black text-slate-900 dark:text-white text-sm tracking-tight flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 bg-green-600 rounded-full animate-pulse shadow-[0_0_12px_rgba(5,150,105,0.7)]"></span>
                     {`${t_search('shelf')} ${book.shelf} – ${t_search('row')} ${book.row}`}
                 </p>
             </div>
@@ -232,7 +213,7 @@ const BookCard = React.memo(({ book, onClick, t_search }: { book: Book; onClick:
 });
 
 const SearchPage: React.FC = () => {
-    const { locale } = useLanguage();
+    const { locale, dir } = useLanguage();
     const t_search = (key: keyof typeof translations.ar) => translations[locale][key];
     
     const [searchTerm, setSearchTerm] = useState('');
@@ -243,12 +224,6 @@ const SearchPage: React.FC = () => {
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
     const debouncedSearchTerm = useDebounce(searchTerm, 400);
-
-    const handleMouseMoveMain = (e: React.MouseEvent) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        e.currentTarget.style.setProperty("--mouse-x", `${e.clientX - rect.left}px`);
-        e.currentTarget.style.setProperty("--mouse-y", `${e.clientY - rect.top}px`);
-    };
 
     const filters = useMemo(() => ({
         subjects: [...new Set(bookData.map(b => b.subject))].filter(Boolean).sort(),
@@ -270,66 +245,71 @@ const SearchPage: React.FC = () => {
     useEffect(() => { setVisibleCount(24); }, [debouncedSearchTerm, subjectFilter, authorFilter, shelfFilter]);
 
     return (
-        <div className="max-w-7xl mx-auto px-4 pb-12 animate-in fade-in duration-1000">
+        <div dir={dir} className="max-w-7xl mx-auto px-4 pb-20 animate-in fade-in duration-1000">
             <div className="text-center mb-12">
-                <h1 className="text-4xl sm:text-6xl font-black text-gray-950 dark:text-white mb-4 tracking-tighter">{t_search('pageTitle')}</h1>
-                <div className="h-2 w-32 bg-green-700 mx-auto rounded-full shadow-[0_0_20px_rgba(5,150,105,0.4)]"></div>
+                <h1 className="text-4xl sm:text-6xl md:text-7xl font-black text-slate-950 dark:text-white mb-4 tracking-tighter">{t_search('pageTitle')}</h1>
+                <div className="h-2.5 w-32 bg-green-700 mx-auto rounded-full shadow-[0_0_25px_rgba(5,150,105,0.5)]"></div>
             </div>
             
-            {/* شريط البحث والفلاتر الفاتح */}
-            <div 
-                onMouseMove={handleMouseMoveMain}
-                className="glass-panel glass-card-interactive bg-white/80 dark:bg-gray-900/70 p-6 md:p-10 rounded-[3rem] shadow-2xl mb-12 sticky top-24 z-30 border-green-600/20 backdrop-blur-3xl"
-            >
+            {/* بار البحث والفلاتر - مصمم للوضوح الفائق */}
+            <div className="glass-panel bg-white/95 dark:bg-slate-900/90 p-6 md:p-12 rounded-[3.5rem] shadow-2xl mb-16 sticky top-24 z-30 border-green-600/30 backdrop-blur-3xl">
                 <div className="relative mb-8 z-10">
                     <input
                         type="text"
                         placeholder={t_search('searchPlaceholder')}
-                        className="w-full p-5 sm:p-6 ps-14 sm:ps-20 text-gray-950 bg-white/70 dark:bg-gray-950/60 dark:text-white border-2 border-transparent focus:border-green-600 rounded-[2rem] outline-none transition-all font-black text-lg sm:text-2xl shadow-inner"
+                        className="w-full p-6 sm:p-8 ps-16 sm:ps-24 text-slate-950 bg-slate-100/50 dark:bg-slate-950/50 dark:text-white border-2 border-transparent focus:border-green-600 rounded-[2.5rem] outline-none transition-all font-black text-xl sm:text-3xl shadow-inner placeholder-slate-400"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
-                    <div className="absolute inset-y-0 start-6 sm:start-8 flex items-center pointer-events-none">
-                        <svg className="w-6 h-6 sm:w-10 sm:h-10 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <div className="absolute inset-y-0 start-8 sm:start-10 flex items-center pointer-events-none">
+                        <svg className="w-8 h-8 sm:w-12 sm:h-12 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </div>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 relative z-10">
-                    <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="w-full p-5 rounded-2xl bg-green-600/5 border border-green-600/10 dark:text-white font-black cursor-pointer appearance-none hover:bg-green-600/10 transition-colors">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+                    {/* Selects بتباين عالي للوضع الداكن والفاتح */}
+                    <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="w-full p-5 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-950 dark:text-white border-2 border-slate-200 dark:border-white/10 font-black text-lg cursor-pointer appearance-none">
                         <option value="all">{t_search('allSubjects')}</option>
                         {filters.subjects.map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
-                    <select value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)} className="w-full p-5 rounded-2xl bg-green-600/5 border border-green-600/10 dark:text-white font-black cursor-pointer appearance-none hover:bg-green-600/10 transition-colors">
+                    <select value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)} className="w-full p-5 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-950 dark:text-white border-2 border-slate-200 dark:border-white/10 font-black text-lg cursor-pointer appearance-none">
                         <option value="all">{t_search('allAuthors')}</option>
                         {filters.authors.map(a => <option key={a} value={a}>{a}</option>)}
                     </select>
-                    <select value={shelfFilter} onChange={(e) => setShelfFilter(e.target.value)} className="w-full p-5 rounded-2xl bg-green-600/5 border border-green-600/10 dark:text-white font-black cursor-pointer appearance-none hover:bg-green-600/10 transition-colors">
+                    <select value={shelfFilter} onChange={(e) => setShelfFilter(e.target.value)} className="w-full p-5 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-950 dark:text-white border-2 border-slate-200 dark:border-white/10 font-black text-lg cursor-pointer appearance-none">
                         <option value="all">{t_search('allShelves')}</option>
                         {filters.shelves.map(s => <option key={s} value={s}>{t_search('shelf')} {s}</option>)}
                     </select>
                 </div>
             </div>
 
-            <div className="flex items-center justify-between mb-10 px-6">
-                <h2 className="text-3xl sm:text-4xl font-black text-gray-950 dark:text-gray-100 tracking-tighter">{t_search('results')}</h2>
-                <span className="bg-green-700 text-white px-8 py-2.5 rounded-full text-2xl font-black shadow-lg">{filteredBooks.length}</span>
+            <div className="flex items-center justify-between mb-12 px-8">
+                <h2 className="text-3xl sm:text-5xl font-black text-slate-950 dark:text-white tracking-tighter">{t_search('results')}</h2>
+                <span className="bg-green-700 text-white px-10 py-3 rounded-full text-2xl sm:text-3xl font-black shadow-xl">{filteredBooks.length}</span>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10 px-2 sm:px-0">
                 {filteredBooks.slice(0, visibleCount).map((book) => (
                     <BookCard key={book.id} book={book} onClick={() => setSelectedBook(book)} t_search={t_search} />
                 ))}
             </div>
 
             {filteredBooks.length > visibleCount && (
-                <div className="mt-20 text-center">
+                <div className="mt-24 text-center">
                     <button 
                         onClick={() => setVisibleCount(prev => prev + 24)}
-                        className="relative overflow-hidden glass-button-green px-16 py-6 rounded-3xl font-black text-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all"
+                        className="relative overflow-hidden glass-button-green px-20 py-7 rounded-[2.5rem] font-black text-2xl sm:text-3xl shadow-2xl hover:scale-105 active:scale-95 transition-all"
                     >
                          {ripples.map(r => <span key={r.id} className="ripple-effect !border-green-600/40" style={{ left: r.x, top: r.y }} />)}
                         {t_search('loadMore')}
                     </button>
+                </div>
+            )}
+
+            {filteredBooks.length === 0 && (
+                <div className="glass-panel bg-white/95 dark:bg-slate-900/90 text-center py-32 rounded-[4rem] border-4 border-dashed border-slate-200 dark:border-white/10">
+                    <div className="text-9xl mb-8 opacity-20">🔍</div>
+                    <p className="text-slate-400 dark:text-slate-500 text-3xl font-black">{t_search('noResults')}</p>
                 </div>
             )}
 
