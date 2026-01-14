@@ -11,7 +11,7 @@ const translations = {
         smartSearch: "اسأل صقر (AI)",
         smartDesc: "تحدث مع صقر للحصول على ترشيحات ذكية",
         digitalLibrary: "المكتبة الإلكترونية",
-        digitalDesc: "الوصول إلى المصادر الرقمية للمدرسة",
+        digitalDesc: "الوصول إلى المصادر الرقمية والكتب التفاعلية",
         bubble: "اضغط لاستلهام فكرة!",
         copyright: "مدرسة صقر الإمارات الدولية الخاصة"
     },
@@ -23,7 +23,7 @@ const translations = {
         smartSearch: "Ask Saqr (AI)",
         smartDesc: "Chat with Saqr for AI recommendations",
         digitalLibrary: "Digital Library",
-        digitalDesc: "Access online school resources",
+        digitalDesc: "Access digital resources and interactive books",
         bubble: "Click for an idea!",
         copyright: "Emirates Falcon International Private School"
     }
@@ -89,7 +89,7 @@ const HomePage: React.FC = () => {
         <div className="relative min-h-[85vh] flex flex-col items-center justify-center p-4 overflow-hidden">
             <BackgroundPattern />
 
-            {/* طبقة كروت المعرفة */}
+            {/* طبقة كروت المعرفة المتطايرة */}
             {cards.map(card => (
                 <div
                     key={card.id}
@@ -97,7 +97,7 @@ const HomePage: React.FC = () => {
                     style={{ left: card.x, top: card.y, '--tx': card.tx, '--ty': card.ty } as any}
                 >
                     <span className="text-2xl">{card.item.icon}</span>
-                    <span className="text-lg font-black text-gray-950 dark:text-white uppercase">
+                    <span className="text-lg font-black text-gray-950 dark:text-white uppercase tracking-tighter">
                         {isAr ? card.item.textAr : card.item.textEn}
                     </span>
                 </div>
@@ -117,33 +117,48 @@ const HomePage: React.FC = () => {
                         </div>
 
                         <div className="flex flex-wrap gap-6">
-                            {/* البحث اليدوي بتموج أحمر */}
+                            {/* الزر الجديد: المكتبة الإلكترونية (أسود/أبيض) */}
+                            <div className="relative group w-full sm:w-auto">
+                                <Link 
+                                    to="/digital-library" 
+                                    onMouseDown={(e) => handleInteraction(e)}
+                                    className="relative overflow-hidden bg-gray-950 text-white dark:bg-white dark:text-gray-950 font-black py-4 px-8 rounded-2xl active:scale-95 flex items-center justify-center gap-3 shadow-2xl transition-all duration-300 group-hover:scale-105"
+                                >
+                                    {ripples.map(r => (
+                                        <span key={r.id} className="ripple-effect border-red-500/40" style={{ left: r.x, top: r.y }} />
+                                    ))}
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                    </svg>
+                                    <span className="relative z-10">{t('digitalLibrary')}</span>
+                                </Link>
+                                <div className="absolute -bottom-16 start-0 scale-0 group-hover:scale-100 transition-all duration-300 origin-top z-50 pointer-events-none">
+                                    <div className="glass-panel px-4 py-2 rounded-xl border-gray-950/20 dark:border-white/20 shadow-2xl whitespace-nowrap">
+                                        <p className="text-xs font-black text-gray-950 dark:text-gray-400 uppercase tracking-wider">{t('digitalDesc')}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* البحث اليدوي */}
                             <div className="relative group">
                                 <Link 
                                     to="/search" 
                                     onMouseDown={(e) => handleInteraction(e)}
-                                    onTouchStart={(e) => handleInteraction(e)}
                                     className="relative overflow-hidden glass-button-red font-black py-4 px-8 rounded-2xl active:scale-95 flex items-center gap-3 shadow-lg text-lg transition-all"
                                 >
                                     {ripples.map(r => (
                                         <span key={r.id} className="ripple-effect border-red-500/40" style={{ left: r.x, top: r.y }} />
                                     ))}
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                                     <span className="relative z-10">{t('manualSearch')}</span>
                                 </Link>
-                                <div className="absolute -bottom-16 start-0 scale-0 group-hover:scale-100 transition-all duration-300 origin-top z-50 pointer-events-none">
-                                    <div className="glass-panel px-4 py-2 rounded-xl border-red-500/30 shadow-2xl whitespace-nowrap">
-                                        <p className="text-xs font-black text-red-600 dark:text-red-400 uppercase tracking-wider">{t('manualDesc')}</p>
-                                    </div>
-                                </div>
                             </div>
 
-                            {/* البحث الذكي بتموج أحمر */}
+                            {/* البحث الذكي */}
                             <div className="relative group">
                                 <Link 
                                     to="/smart-search" 
                                     onMouseDown={(e) => handleInteraction(e)}
-                                    onTouchStart={(e) => handleInteraction(e)}
                                     className="relative overflow-hidden glass-button-green font-black py-4 px-8 rounded-2xl active:scale-95 flex items-center gap-3 shadow-lg text-lg transition-all"
                                 >
                                     {ripples.map(r => (
@@ -152,15 +167,11 @@ const HomePage: React.FC = () => {
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
                                     <span className="relative z-10">{t('smartSearch')}</span>
                                 </Link>
-                                <div className="absolute -bottom-16 start-0 scale-0 group-hover:scale-100 transition-all duration-300 origin-top z-50 pointer-events-none">
-                                    <div className="glass-panel px-4 py-2 rounded-xl border-red-500/30 shadow-2xl whitespace-nowrap">
-                                        <p className="text-xs font-black text-red-600 dark:text-red-400 uppercase tracking-wider">{t('smartDesc')}</p>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
 
+                    {/* قسم شخصية صقر التفاعلية */}
                     <div className="relative flex flex-col items-center justify-center order-1 lg:order-2">
                         <div className="absolute opacity-15 dark:opacity-10 scale-150 pointer-events-none transition-all duration-700">
                              <img src="/school-logo.png" alt="Back Logo" className="h-64 w-64 md:h-80 md:w-80 object-contain rotate-[15deg]" />
@@ -171,7 +182,6 @@ const HomePage: React.FC = () => {
                             onTouchStart={(e) => handleInteraction(e, true)}
                             className="relative group cursor-pointer transition-all duration-500 hover:scale-105 active:scale-95 touch-manipulation"
                         >
-                            {/* تموج صقر الأحمر */}
                             {ripples.map(r => (
                                 <span key={r.id} className="ripple-effect border-red-500/40" style={{ left: r.x, top: r.y, width: '300px', height: '300px' }} />
                             ))}
@@ -184,14 +194,6 @@ const HomePage: React.FC = () => {
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <div className="mt-12 text-center relative z-10">
-                <p className="text-gray-500 dark:text-gray-400 font-black tracking-tight uppercase text-xs">
-                    © 2026 <a href="https://www.falcon-school.com" target="_blank" rel="noopener noreferrer" className="mx-1 text-gray-950 dark:text-white hover:text-red-600 transition-colors underline-offset-4 hover:underline decoration-red-600/30">
-                        {t('copyright')}
-                    </a>
-                </p>
             </div>
         </div>
     );
