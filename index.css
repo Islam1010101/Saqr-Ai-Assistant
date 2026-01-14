@@ -8,7 +8,7 @@ body {
   font-family: 'Tajawal', sans-serif;
   margin: 0;
   padding: 0;
-  /* إخفاء الماوس الافتراضي لتفعيل تجربة الماوس الكريستالي الفاخرة */
+  /* إخفاء الماوس الافتراضي لتجربة الماوس الكريستالي */
   cursor: none !important; 
   transition: background-color 0.4s ease;
   scroll-behavior: smooth;
@@ -20,12 +20,16 @@ body {
   background-color: #0f172a;
 }
 
-/* 3. نظام الحاويات الزجاجية المطورة (Deep Super Glass) */
+/* حل مشكلة الثقل: إخفاء المؤشر عن جميع العناصر التفاعلية */
+a, button, input, select, .group {
+  cursor: none !important;
+}
+
+/* 3. نظام الحاويات الزجاجية (Deep Super Glass) */
 .glass-panel {
   background: rgba(255, 255, 255, 0.45);
   backdrop-filter: blur(30px) saturate(200%);
   -webkit-backdrop-filter: blur(30px) saturate(200%);
-  /* إطار أبيض داخلي رقيق لزيادة واقعية الزجاج */
   border: 1px solid rgba(255, 255, 255, 0.6);
   box-shadow: 
     0 20px 50px rgba(0, 0, 0, 0.05),
@@ -39,7 +43,7 @@ body {
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
 }
 
-/* 4. أزرار الهوية الرسمية (Elite States) */
+/* 4. أزرار الهوية (Elite Red & Green) */
 .glass-button-red {
   background: rgba(239, 68, 68, 0.1);
   backdrop-filter: blur(15px);
@@ -51,7 +55,6 @@ body {
 .glass-button-red:hover {
   background: #dc2626;
   color: white !important;
-  transform: translateY(-2px);
   box-shadow: 0 15px 30px rgba(220, 38, 38, 0.3);
 }
 
@@ -69,11 +72,10 @@ body {
   box-shadow: 0 15px 30px rgba(0, 115, 47, 0.2);
 }
 
-/* 5. الشعار المطور (Smart Motion) */
+/* 5. الشعار (Smart Motion) */
 img[src="/school-logo.png"] {
   transform: rotate(15deg);
   transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
-  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
 }
 
 .logo-smart-hover:hover {
@@ -81,7 +83,7 @@ img[src="/school-logo.png"] {
   filter: drop-shadow(0 0 25px rgba(220, 38, 38, 0.3));
 }
 
-/* 6. المؤشر الكريستالي الأحمر (Red Aura Cursor) */
+/* 6. المؤشر الكريستالي الأحمر السريع (High Performance Cursor) */
 .custom-cursor {
   position: fixed;
   width: 24px;
@@ -91,16 +93,20 @@ img[src="/school-logo.png"] {
   border-radius: 50%;
   pointer-events: none;
   z-index: 10000;
-  transform: translate(-50%, -50%);
+  /* الموضع الافتراضي */
+  transform: translate3d(-100px, -100px, 0); 
+  /* تحسين الأداء: الانتقال فقط للحجم واللون، وليس للموضع */
   transition: 
     width 0.3s cubic-bezier(0.23, 1, 0.32, 1),
     height 0.3s cubic-bezier(0.23, 1, 0.32, 1),
     background-color 0.3s ease;
   backdrop-filter: blur(4px);
   box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
+  /* إجبار المتصفح على استخدام GPU */
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
-/* حالة المؤشر عند التفاعل */
 .custom-cursor-active {
   width: 45px;
   height: 45px;
@@ -112,12 +118,12 @@ img[src="/school-logo.png"] {
 /* 7. نظام النبض الكريستالي الأحمر (Elite Crystal Ripple) */
 @keyframes crystal-ripple {
   0% {
-    transform: translate(-50%, -50%) scale(0);
+    transform: translate3d(-50%, -50%, 0) scale(0);
     opacity: 1;
     border-width: 10px;
   }
   100% {
-    transform: translate(-50%, -50%) scale(5);
+    transform: translate3d(-50%, -50%, 0) scale(5);
     opacity: 0;
     border-width: 1px;
     filter: blur(4px);
@@ -135,20 +141,20 @@ img[src="/school-logo.png"] {
   animation: crystal-ripple 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-/* 8. أنيميشن انسياب كروت المعرفة (Cinematic Float) */
+/* 8. أنيميشن كروت المعرفة (Cinematic Float) */
 @keyframes glass-float {
   0% {
-    transform: translate(-50%, -50%) scale(0.4) rotate(-12deg);
+    transform: translate3d(-50%, -50%, 0) scale(0.4) rotate(-12deg);
     opacity: 0;
     filter: blur(15px);
   }
   40% {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1.05) rotate(0deg);
+    transform: translate3d(-50%, -50%, 0) scale(1.05) rotate(0deg);
     filter: blur(0px);
   }
   100% {
-    transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0.9) rotate(8deg);
+    transform: translate3d(calc(-50% + var(--tx)), calc(-50% + var(--ty)), 0) scale(0.9) rotate(8deg);
     opacity: 0;
     filter: blur(3px);
   }
@@ -159,14 +165,9 @@ img[src="/school-logo.png"] {
   will-change: transform, opacity;
 }
 
-/* تحسينات القراءة والتنقل */
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
+/* تحسينات القراءة */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
 .knowledge-tag {
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
