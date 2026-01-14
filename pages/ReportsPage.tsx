@@ -3,22 +3,31 @@ import { BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContaine
 import { bookData } from '../api/bookData'; 
 import { useLanguage, useTheme } from '../App';
 
-// --- مصفوفة تعريف الكتب الرقمية للتقارير (تشمل الـ 35 عربية والـ 26 إنجليزية) ---
+// --- مصفوفة تعريف الكتب الرقمية للتقارير (تشمل الـ 41 عربية والـ 26 إنجليزية) ---
 const ARABIC_DIGITAL_TITLES: Record<string, string> = {
     "AR_1": "مجموعة روايات أجاثا كريستي", "AR_2": "أرض الإله", "AR_3": "أرض النفاق", "AR_4": "أكواريل",
-    "AR_5": "الفيل الأزرق", "AR_6": "نائب عزارئيل", "AR_7": "المكتبة الخضراء للأطفال", "AR_21": "تفسير ابن كثير",
-    "AR_18": "سلسلة رجل المستحيل", "AR_19": "سلسلة ما وراء الطبيعة", "AR_20": "سلسلة الشياطين ال13",
-    "AR_27": "صحيح البخاري", "AR_28": "صحيح مسلم", "AR_33": "قوة الآن", "AR_34": "أربعون"
-    // يتم التعرف على البقية تلقائياً عبر المعرفات
+    "AR_5": "الفيل الأزرق", "AR_6": "نائب عزارئيل", "AR_7": "المكتبة الخضراء للأطفال", "AR_8": "أوقات عصيبة",
+    "AR_9": "أوليفر تويست", "AR_10": "الآمال الكبيرة", "AR_11": "ترويض النمرة", "AR_12": "جعجعة بدون طحن",
+    "AR_13": "دايفيد كوبرفيلد", "AR_14": "دمبي وولده", "AR_15": "قصة مدينتين", "AR_16": "هملت",
+    "AR_17": "مذكرات بكوك", "AR_18": "سلسلة رجل المستحيل", "AR_19": "سلسلة ما وراء الطبيعة", "AR_20": "سلسلة الشياطين الـ13",
+    "AR_21": "تفسير ابن كثير", "AR_22": "أنبياء الله", "AR_23": "قصص الأنبياء (الشعراوي)", "AR_24": "قصص الأنبياء للأطفال",
+    "AR_25": "قصص الحيوان في القرآن", "AR_26": "شرح الأربعين النووية", "AR_27": "صحيح البخاري", "AR_28": "صحيح مسلم",
+    "AR_29": "الأب الغني والأب الفقير", "AR_30": "الرقص مع الحياة", "AR_31": "المفاتيح العشرة للنجاح", "AR_32": "خوارق اللاشعور",
+    "AR_33": "قوة الآن", "AR_34": "أربعون", "AR_35": "كيف تكسب الأصدقاء",
+    // العناوين الجديدة المضافة
+    "AR_36": "حكايات الغرفة 207", "AR_37": "يوتوبيا", "AR_38": "خلف أسوار العقل", 
+    "AR_39": "إنهم يأتون ليلاً", "AR_40": "الذين كانوا", "AR_41": "ألف اختراع واختراع"
 };
 
 const ENGLISH_DIGITAL_TITLES: Record<string, string> = {
     "EN_1": "Me Before You", "EN_2": "The Great Gatsby", "EN_3": "The Kite Runner", "EN_4": "And Then There Were NONE",
-    "EN_15": "Lateral Thinking Puzzles", "EN_16": "Murdle", "EN_17": "Sherlock Puzzles", "EN_18": "What is the Name of This Book",
-    // إضافة كتب هاري بوتر الجديدة للتحليل
+    "EN_5": "Tales of the Unexpected", "EN_6": "Hound of the Baskervilles", "EN_7": "Girl on the Train", "EN_8": "The Silent Patient",
+    "EN_9": "Land Needed?", "EN_10": "The Bet", "EN_11": "Death of Ivan Ilyich", "EN_12": "The Lottery",
+    "EN_13": "The Landlady", "EN_14": "Tell-Tale Heart", "EN_15": "Lateral Thinking", "EN_16": "Murdle",
+    "EN_17": "Sherlock Puzzles", "EN_18": "Name of This Book",
     "EN_19": "HP: Deathly Hallows", "EN_20": "HP: Half Blood Prince", "EN_21": "HP: Order Of Phoenix",
     "EN_22": "HP: Goblet Of Fire", "EN_23": "HP: Prisoner Of Azkaban", "EN_24": "HP: Chamber Of Secrets",
-    "EN_25": "HP: Sorcers Stone", "EN_26": "Fantastic Beasts"
+    "EN_25": "HP: Sorcerers Stone", "EN_26": "Fantastic Beasts"
 };
 
 const SCHOOL_LOGO = "/school-logo.png"; 
@@ -63,7 +72,6 @@ const ReportsPage: React.FC = () => {
   const [error, setError] = useState(false);
   const [ripples, setRipples] = useState<{ id: number, x: number, y: number }[]>([]);
 
-  // تأكيد الدخول بالرقم السري 101110
   const handleLogin = () => {
     if (password === '101110') { 
       sessionStorage.setItem('saqr_admin_auth', 'true');
@@ -80,7 +88,6 @@ const ReportsPage: React.FC = () => {
     if (auth) setIsAuthenticated(true);
   }, []);
 
-  // دالة معالجة البيانات (تشمل الكتب الجديدة)
   const data = useMemo(() => {
     const logs = JSON.parse(localStorage.getItem('saqr_activity_logs') || '[]');
     const searchCounts: Record<string, number> = {};
@@ -93,7 +100,8 @@ const ReportsPage: React.FC = () => {
 
     const viewData = Object.entries(viewCounts).map(([id, count]) => {
       const pBook = bookData.find(b => b.id === id);
-      return { name: pBook?.title || ARABIC_DIGITAL_TITLES[id] || ENGLISH_DIGITAL_TITLES[id] || id, count };
+      const title = pBook?.title || ARABIC_DIGITAL_TITLES[id] || ENGLISH_DIGITAL_TITLES[id] || id;
+      return { name: title, count };
     }).sort((a, b) => b.count - a.count).slice(0, 10);
 
     const shelfData = bookData.reduce((acc: any[], b) => {
@@ -114,7 +122,6 @@ const ReportsPage: React.FC = () => {
     setRipples(prev => [...prev, { id: Date.now(), x: e.clientX - rect.left, y: e.clientY - rect.top }]);
   };
 
-  // واجهة قفل الأمان (كلمة المرور 101110)
   if (!isAuthenticated) {
     return (
       <div className="flex items-center justify-center min-h-[75vh] px-4">
@@ -146,8 +153,6 @@ const ReportsPage: React.FC = () => {
 
   return (
     <div dir={dir} className="max-w-7xl mx-auto space-y-12 pb-20 px-4 animate-in fade-in duration-1000">
-      
-      {/* الهيدر الأخضر */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-8 border-b border-green-600/10 pb-12 print:hidden">
         <div>
           <h1 className="text-4xl md:text-5xl font-black text-gray-950 dark:text-white mb-4 tracking-tighter">{t('pageTitle')}</h1>
@@ -163,7 +168,6 @@ const ReportsPage: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 print:hidden">
-        {/* إحصائيات المشاهدات - تشمل هاري بوتر */}
         <div className="glass-panel p-10 rounded-[3.5rem] shadow-2xl border-white/40 bg-white/70 dark:bg-gray-900/40">
           <h2 className="text-2xl font-black mb-10 text-gray-900 dark:text-white flex items-center gap-4"><span className="w-2.5 h-10 bg-green-600 rounded-full shadow-[0_0_15px_green]"></span>{t('mostViewed')}</h2>
           <div style={{ width: '100%', height: 400 }}>
@@ -179,7 +183,6 @@ const ReportsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* إحصائيات البحث */}
         <div className="glass-panel p-10 rounded-[3.5rem] shadow-2xl border-white/40 bg-white/70 dark:bg-gray-900/40">
           <h2 className="text-2xl font-black mb-10 text-gray-900 dark:text-white flex items-center gap-4"><span className="w-2.5 h-10 bg-blue-600 rounded-full shadow-[0_0_15px_blue]"></span>{t('mostSearched')}</h2>
           <div style={{ width: '100%', height: 400 }}>
@@ -196,7 +199,6 @@ const ReportsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* تقرير جرد الرفوف */}
       <div className="glass-panel p-10 rounded-[3.5rem] shadow-2xl border-white/40 bg-white/70 dark:bg-gray-900/40 print:hidden">
          <h2 className="text-2xl font-black mb-10 text-gray-900 dark:text-white flex items-center gap-4"><span className="w-2.5 h-10 bg-green-700 rounded-full"></span>{t('shelfStats')}</h2>
           <div style={{ width: '100%', height: 350 }}>
