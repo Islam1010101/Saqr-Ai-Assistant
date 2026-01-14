@@ -1,8 +1,8 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useLanguage } from '../App';
+import { useNavigate } from 'react-router-dom';
 
-// --- 1. تعريف واجهة البيانات (TypeScript Interface) ---
+// --- 1. تعريف واجهة البيانات ---
 interface Book {
   id: number;
   title: string;
@@ -13,7 +13,7 @@ interface Book {
   summary: string;
 }
 
-// --- 2. قاعدة البيانات المنقحة (26 عنواناً) ---
+// --- 2. قاعدة البيانات الكاملة (26 عنواناً) ---
 const ENGLISH_LIBRARY_DATABASE: Book[] = [
   { id: 1, title: "Me Before You", author: "Jojo Moyes", subject: "Drama", driveLink: "https://drive.google.com/file/d/1eDq03Myjh56IRtLx1LIRJHa39PLnMvgf/view", bio: "A popular British romance novelist known for her emotionally resonant stories that explore love and life-altering decisions.", summary: "A heart-wrenching story of a young woman who becomes a caregiver for a wealthy man, leading to an unexpected bond." },
   { id: 2, title: "The Great Gatsby", author: "F. Scott Fitzgerald", subject: "Drama", driveLink: "https://drive.google.com/file/d/1NjrAuiFno2Aa-z6WYkRI17oD2Hxkvs-M/view", bio: "A legendary American novelist of the Jazz Age, famous for his critiques of the American Dream and high society.", summary: "Set in the 1920s, this masterpiece follows Jay Gatsby's obsessive pursuit of wealth and the woman he loves." },
@@ -45,26 +45,80 @@ const ENGLISH_LIBRARY_DATABASE: Book[] = [
 
 const translations = {
     ar: {
-        pageTitle: "روائع المكتبة الإنجليزية الوطنية",
-        searchPlaceholder: "ابحث عن عنوان، مؤلف، أو تصنيف أدبي...",
-        allSubjects: "جميع التصنيفات",
-        results: "مؤلف عالمي متاح",
-        read: "قراءة المحتوى الرقمي",
-        bio: "نبذة عن الكاتب",
-        summaryTitle: "تلخيص صقر AI الذكي",
-        back: "العودة للبوابة الرقمية"
+        pageTitle: "المكتبة الإنجليزية",
+        searchPlaceholder: "ابحث عن عنوان أو كاتب...",
+        allSubjects: "المواضيع",
+        allAuthors: "المؤلفين",
+        read: "قراءة المصدر",
+        bioTitle: "نبذة عن المؤلف",
+        summaryTitle: "ملخص صقر الذكي",
+        back: "العودة للبوابة",
+        close: "إغلاق",
+        locationLabel: "الموقع الرقمي"
     },
     en: {
-        pageTitle: "National English Library Masterpieces",
-        searchPlaceholder: "Search title, author, or literary genre...",
-        allSubjects: "All Genres",
-        results: "Global Authors Available",
-        read: "Read Digital Content",
-        bio: "Author Biography",
-        summaryTitle: "Saqr AI Smart Summary",
-        back: "Back to Digital Portal"
+        pageTitle: "English Library",
+        searchPlaceholder: "Search title or author...",
+        allSubjects: "Subjects",
+        allAuthors: "Authors",
+        read: "Read Source",
+        bioTitle: "Author Biography",
+        summaryTitle: "Saqr AI Summary",
+        back: "Back to Portal",
+        close: "Close",
+        locationLabel: "Digital Location"
     }
 };
+
+const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
+    if (!book) return null;
+    return (
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 backdrop-blur-3xl animate-in fade-in duration-300" onClick={onClose}>
+            <div className="glass-panel w-full max-w-4xl rounded-[3rem] border-2 border-white/50 dark:border-white/10 shadow-2xl overflow-hidden relative animate-in zoom-in-95 duration-300 flex flex-col md:flex-row bg-white/95 dark:bg-slate-950/95" onClick={(e) => e.stopPropagation()}>
+                <button onClick={onClose} className="absolute top-6 end-6 z-50 p-2.5 bg-red-600 text-white rounded-full hover:scale-110 active:scale-90 transition-all shadow-lg">
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}><path d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+                <div className="flex-1 p-10 md:p-14 flex flex-col justify-center border-b md:border-b-0 md:border-e border-slate-200 dark:border-white/10 text-start">
+                    <div className="mb-6">
+                        <span className="inline-block px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest mb-4 bg-slate-900 text-white shadow-md">{book.subject}</span>
+                        <h2 className="text-3xl md:text-5xl font-black text-slate-950 dark:text-white leading-tight mb-2 tracking-tighter">{book.title}</h2>
+                        <p className="text-lg text-slate-500 font-bold">By {book.author}</p>
+                    </div>
+                    <div className="mb-6 p-5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/5">
+                         <p className="text-[9px] text-slate-600 dark:text-slate-400 font-black uppercase mb-2 tracking-widest">{t('bioTitle')}</p>
+                         <p className="text-sm font-medium leading-relaxed text-slate-600 dark:text-slate-300">"{book.bio}"</p>
+                    </div>
+                    <div className="bg-slate-100/50 dark:bg-white/5 p-6 rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-white/10">
+                        <p className="text-[10px] text-red-600 font-black uppercase mb-3 tracking-widest flex items-center gap-2"><span className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></span> {t('summaryTitle')}</p>
+                        <p className="text-slate-800 dark:text-slate-200 text-lg font-medium leading-relaxed">"{book.summary}"</p>
+                    </div>
+                </div>
+                <div className="w-full md:w-[300px] bg-slate-950 dark:bg-black p-10 flex flex-col justify-center items-center text-center text-white relative">
+                    <div className="space-y-10 relative z-10 w-full">
+                        <div>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-8">{t('locationLabel')}</p>
+                            <a href={book.driveLink} target="_blank" rel="noopener noreferrer" className="w-full bg-red-600 text-white font-black py-5 rounded-2xl flex items-center justify-center gap-3 hover:bg-red-700 active:scale-95 shadow-xl transition-all"><span className="text-sm uppercase tracking-widest">{t('read')}</span></a>
+                        </div>
+                        <button onClick={onClose} className="w-full bg-white text-slate-950 font-black py-3 rounded-xl active:scale-95 text-[10px] uppercase tracking-widest transition-all">{t('close')}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const BookCard = React.memo(({ book, onClick, t, onAuthorHover }: { book: Book; onClick: () => void; t: any; onAuthorHover: (e: React.MouseEvent, bio: string | null) => void }) => (
+    <div onClick={onClick} className="group relative glass-panel bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border border-white/30 dark:border-white/5 rounded-[2.5rem] transition-all duration-300 cursor-pointer flex flex-col h-full overflow-hidden shadow-md active:scale-95 hover:border-slate-950/40 hover:shadow-[0_0_25px_rgba(0,0,0,0.25)]">
+        <div className="p-8 flex-grow text-start">
+             <span className="inline-block px-2.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest mb-5 bg-slate-950 text-white shadow-sm">{book.subject}</span>
+            <h3 className="font-black text-xl text-slate-950 dark:text-white leading-tight mb-2 tracking-tighter group-hover:text-red-600 transition-colors line-clamp-2">{book.title}</h3>
+            <p onMouseMove={(e) => onAuthorHover(e, book.bio)} onMouseLeave={(e) => onAuthorHover(e, null)} className="text-[11px] text-slate-500 dark:text-slate-400 font-bold hover:text-red-600 transition-all inline-block">By {book.author}</p>
+        </div>
+        <div className="bg-white/40 dark:bg-black/20 py-4 px-8 border-t border-white/10 mt-auto">
+            <p className="font-black text-slate-900 dark:text-white text-[10px] uppercase tracking-[0.3em] opacity-30 text-center">English Collection</p>
+        </div>
+    </div>
+));
 
 const EnglishLibraryInternalPage: React.FC = () => {
     const { locale, dir } = useLanguage();
@@ -74,188 +128,68 @@ const EnglishLibraryInternalPage: React.FC = () => {
 
     const [searchTerm, setSearchTerm] = useState('');
     const [subjectFilter, setSubjectFilter] = useState('all');
-    const [selectedBio, setSelectedBio] = useState<Book | null>(null);
+    const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+    const [tooltip, setTooltip] = useState<{ text: string, x: number, y: number } | null>(null);
 
-    // استخراج التصنيفات الفريدة
-    const subjects = useMemo(() => ['all', ...new Set(ENGLISH_LIBRARY_DATABASE.map(b => b.subject))].sort(), []);
+    const handleAuthorHover = (e: React.MouseEvent, bio: string | null) => {
+        if (!bio) { setTooltip(null); return; }
+        setTooltip({ text: bio, x: e.clientX, y: e.clientY - 40 });
+    };
 
-    // منطق الفلترة
-    const filteredContent = useMemo(() => {
+    const filters = useMemo(() => ({
+        subjects: ["all", ...new Set(ENGLISH_LIBRARY_DATABASE.map(b => b.subject))].sort(),
+    }), []);
+
+    const filteredBooks = useMemo(() => {
         const term = searchTerm.toLowerCase().trim();
-        return ENGLISH_LIBRARY_DATABASE.filter(item => {
-            const matchesSearch = !term || item.title.toLowerCase().includes(term) || item.author.toLowerCase().includes(term);
-            const matchesSub = subjectFilter === 'all' || item.subject === subjectFilter;
-            return matchesSearch && matchesSub;
+        return ENGLISH_LIBRARY_DATABASE.filter(b => {
+            const matchesTerm = !term || b.title.toLowerCase().includes(term) || b.author.toLowerCase().includes(term);
+            const matchesSub = subjectFilter === 'all' || b.subject === subjectFilter;
+            return matchesTerm && matchesSub;
         });
     }, [searchTerm, subjectFilter]);
 
-    const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        e.currentTarget.style.setProperty("--mouse-x", `${e.clientX - rect.left}px`);
-        e.currentTarget.style.setProperty("--mouse-y", `${e.clientY - rect.top}px`);
-    }, []);
-
     return (
-        <div dir={dir} className="max-w-7xl mx-auto px-4 py-8 animate-fade-up relative z-10 pb-32">
-            
-            {/* زر العودة النخبوي */}
-            <button 
-                onClick={() => navigate(-1)} 
-                className="mb-12 flex items-center gap-3 text-slate-500 hover:text-red-600 font-black transition-all group px-4 py-2 rounded-xl hover:bg-red-600/5 w-fit"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 transform group-hover:-translate-x-1 ${isAr ? '' : 'rotate-180'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                    <path d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                <span className="tracking-tighter uppercase text-sm">{t('back')}</span>
-            </button>
-
-            {/* الهيرو (العنوان الوطني مائل لليمين) */}
-            <div className="text-center mb-16 relative">
-                <h1 className="text-5xl sm:text-7xl font-black text-slate-950 dark:text-white mb-6 tracking-tighter leading-none">
-                    {t('pageTitle')}
-                </h1>
-                <div className="flex items-center justify-center gap-4 opacity-80">
-                    <div className="h-1.5 w-16 bg-red-600 rounded-full"></div>
-                    <div className="h-1.5 w-32 bg-blue-600 rounded-full logo-tilt-right shadow-[0_0_15px_rgba(37,99,235,0.4)]"></div>
-                </div>
-            </div>
-
-            {/* شريط البحث المركزي الضخم (Deep Glass) */}
-            <div 
-                onMouseMove={handleMouseMove}
-                className="glass-panel glass-card-interactive p-8 md:p-14 rounded-[3.5rem] md:rounded-[4.5rem] shadow-2xl mb-24 sticky top-28 z-40 border-white/40 dark:border-white/5 backdrop-blur-3xl"
-            >
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10">
-                    <div className="lg:col-span-2 relative group">
-                        <input 
-                            type="text" 
-                            placeholder={t('searchPlaceholder')}
-                            className="w-full p-6 md:p-8 ps-16 md:ps-20 bg-slate-100/50 dark:bg-black/40 text-slate-950 dark:text-white border-2 border-transparent focus:border-red-600 rounded-[2.5rem] md:rounded-[3rem] outline-none transition-all font-black text-xl md:text-3xl shadow-inner placeholder-slate-400"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <svg className="absolute start-6 top-1/2 -translate-y-1/2 h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
-                            <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </div>
-                    
-                    <div className="relative">
-                        <select 
-                            value={subjectFilter} 
-                            onChange={(e) => setSubjectFilter(e.target.value)} 
-                            className="w-full p-6 md:p-8 rounded-[2.5rem] bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-white/5 font-black text-xl cursor-pointer focus:border-red-600 outline-none transition-all shadow-sm appearance-none"
-                        >
-                            {subjects.map(s => (
-                                <option key={s} value={s} className="text-black">
-                                    {s === 'all' ? t('allSubjects') : s}
-                                </option>
-                            ))}
-                        </select>
-                        <div className="absolute end-8 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M19 9l-7 7-7-7" /></svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* عداد النتائج مع تأثير النبض */}
-            <div className="flex items-center justify-between mb-12 px-8">
-                <h2 className="text-3xl sm:text-5xl font-black text-slate-950 dark:text-white tracking-tighter flex items-center gap-4">
-                    Results
-                    <span className="h-3 w-3 bg-red-600 rounded-full animate-ping"></span>
-                </h2>
-                <div className="bg-blue-600 text-white px-10 py-3 rounded-2xl text-xl sm:text-3xl font-black shadow-xl ring-4 ring-blue-600/10 rotate-[1deg]">
-                    {filteredContent.length} {t('results')}
-                </div>
-            </div>
-
-            {/* شبكة الكتب الكريستالية */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-14">
-                {filteredContent.map((item) => (
-                    <div 
-                        key={item.id} 
-                        onMouseMove={handleMouseMove}
-                        className="glass-panel glass-card-interactive group relative overflow-hidden p-8 md:p-10 rounded-[3rem] border-white/40 dark:border-white/5 flex flex-col justify-between hover:scale-[1.03] transition-all duration-500 h-full shadow-lg hover:shadow-[0_40px_80px_rgba(0,0,0,0.12)]"
-                    >
-                        <div className="relative z-10">
-                            <div className="flex justify-between items-start mb-8">
-                                <span className="bg-red-600 text-white px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-md">
-                                    {item.subject}
-                                </span>
-                                <span className="text-4xl grayscale group-hover:grayscale-0 group-hover:rotate-12 transition-all duration-500">📚</span>
-                            </div>
-                            
-                            <h2 className="text-2xl md:text-3xl font-black text-slate-950 dark:text-white mb-3 group-hover:text-red-600 transition-colors leading-[1.1] tracking-tighter line-clamp-2 h-16">
-                                {item.title}
-                            </h2>
-                            <p className="text-green-700 dark:text-green-400 font-black text-base mb-8 uppercase tracking-tight">{item.author}</p>
-                            
-                            {/* Saqr AI Summary (Spotlight Design) */}
-                            <div className="bg-slate-50/80 dark:bg-white/5 p-7 rounded-[2.5rem] border border-slate-100 dark:border-white/10 mb-10 relative group-hover:bg-white transition-all">
-                                <p className="text-[10px] text-red-600 font-black uppercase mb-4 flex items-center gap-2 tracking-widest">
-                                    <span className="w-2 h-2 bg-red-600 rounded-full animate-pulse shadow-lg"></span>
-                                    {t('summaryTitle')}
-                                </p>
-                                <p className="text-slate-800 dark:text-slate-300 font-medium italic text-lg leading-relaxed line-clamp-3">
-                                    "{item.summary}"
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* أزرار الأكشن */}
-                        <div className="flex flex-col gap-4 z-10">
-                            <button 
-                                onClick={() => setSelectedBio(item)}
-                                className="w-full bg-slate-100 dark:bg-white/5 border-2 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white font-black py-4 rounded-2xl hover:bg-slate-950 hover:text-white dark:hover:bg-white dark:hover:text-black transition-all text-xs uppercase tracking-widest active:scale-95"
-                            >
-                                {t('bio')}
-                            </button>
-                            <a 
-                                href={item.driveLink} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="relative overflow-hidden w-full bg-gray-950 text-white dark:bg-white dark:text-slate-950 font-black py-5 rounded-[2rem] flex items-center justify-center gap-4 shadow-xl active:scale-95 transition-all group/btn"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                                    <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                                </svg>
-                                <span className="uppercase text-sm tracking-widest">{t('read')}</span>
-                            </a>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            {/* مودال نبذة المؤلف العالمي */}
-            {selectedBio && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 backdrop-blur-3xl animate-in fade-in duration-300" onClick={() => setSelectedBio(null)}>
-                    <div className="glass-panel w-full max-w-xl p-12 md:p-16 rounded-[4rem] border-white/30 dark:border-white/5 shadow-2xl relative animate-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
-                        <button onClick={() => setSelectedBio(null)} className="absolute top-10 end-10 p-3 bg-red-600 text-white rounded-full hover:scale-110 transition-transform shadow-xl">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M6 18L18 6M6 6l12 12" /></svg>
-                        </button>
-                        
-                        <div className="flex flex-col items-center text-center">
-                            <div className="text-5xl mb-6 logo-tilt-right">✒️</div>
-                            <h3 className="text-4xl font-black text-slate-950 dark:text-white mb-3 tracking-tighter leading-none">{selectedBio.author}</h3>
-                            <p className="text-red-600 font-black uppercase text-[10px] tracking-[0.4em] mb-10 border-b-2 border-red-600/20 pb-2">Global Author Biography</p>
-                            <p className="text-slate-800 dark:text-slate-200 text-xl leading-relaxed font-medium italic bg-slate-50 dark:bg-white/5 p-8 rounded-3xl border border-slate-100 dark:border-white/5">
-                                "{selectedBio.bio}"
-                            </p>
-                        </div>
-
-                        <div className="mt-12 pt-8 border-t border-slate-100 dark:border-white/10 flex flex-col items-center gap-4">
-                            <img src="/school-logo.png" alt="EFIIPS" className="h-14 opacity-20 logo-white-filter" />
-                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Emirates Falcon National Library</p>
-                        </div>
-                    </div>
+        <div dir={dir} className="max-w-7xl mx-auto px-4 pb-24 relative z-10">
+            {tooltip && (
+                <div className="fixed pointer-events-none z-[200] glass-panel px-5 py-3 rounded-2xl border-white/40 shadow-2xl animate-in fade-in zoom-in duration-300 max-w-xs" style={{ left: tooltip.x, top: tooltip.y, transform: 'translate(-50%, -100%)' }}>
+                    <p className="text-[10px] font-black text-red-600 uppercase mb-1 tracking-widest">{t('bioTitle')}</p>
+                    <p className="text-xs font-bold text-slate-900 dark:text-white leading-relaxed">{tooltip.text}</p>
                 </div>
             )}
 
-            {/* تذيل بسيط ونظيف */}
-            <footer className="mt-32 flex flex-col items-center gap-4 opacity-30 hover:opacity-100 transition-opacity duration-700">
-                <img src="/school-logo.png" alt="EFIIPS" className="h-20 grayscale logo-white-filter" />
-                <p className="font-black text-[10px] uppercase tracking-[0.4em] text-gray-500 dark:text-gray-400">Emirates Falcon International Private School</p>
-            </footer>
+            <div className="text-center mt-8 mb-12 relative animate-fade-up">
+                <button onClick={() => navigate(-1)} className="absolute start-0 top-1/2 -translate-y-1/2 flex items-center gap-2 text-slate-400 hover:text-red-600 transition-colors group">
+                    <svg className={`h-5 w-5 transform group-hover:-translate-x-1 ${isAr ? '' : 'rotate-180'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                    <span className="text-[10px] font-black uppercase tracking-widest">{t('back')}</span>
+                </button>
+                <h1 className="text-5xl sm:text-7xl font-black text-slate-950 dark:text-white tracking-tighter leading-none">{t('pageTitle')}</h1>
+                <div className="h-1.5 w-24 bg-slate-900 mx-auto mt-6 rounded-full opacity-60"></div>
+            </div>
+
+            <div className="sticky top-24 z-50 mb-12 animate-fade-up">
+                <div className="glass-panel p-3 rounded-[1.5rem] shadow-lg border-white/40 dark:border-white/5 backdrop-blur-2xl max-w-4xl mx-auto">
+                    <div className="flex flex-col md:flex-row gap-2">
+                        <div className="flex-[2] relative">
+                            <input type="text" placeholder={t('searchPlaceholder')} className="w-full p-3 ps-10 bg-slate-100/50 dark:bg-black/40 text-slate-950 dark:text-white border-2 border-transparent focus:border-slate-900 rounded-xl outline-none transition-all font-black text-sm shadow-inner" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                            <svg className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-900 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                        </div>
+                        <div className="flex-1 relative">
+                            <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="w-full p-3 rounded-lg bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 font-black text-[10px] cursor-pointer outline-none focus:border-slate-900 appearance-none text-center shadow-sm">
+                                {filters.subjects.map(s => <option key={s} value={s}>{s === 'all' ? t('allSubjects') : s}</option>)}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 animate-fade-up">
+                {filteredBooks.map((book) => (
+                    <BookCard key={book.id} book={book} t={t} onClick={() => setSelectedBook(book)} onAuthorHover={handleAuthorHover} />
+                ))}
+            </div>
+
+            <BookModal book={selectedBook} onClose={() => setSelectedBook(null)} t={t} />
         </div>
     );
 };
