@@ -16,7 +16,7 @@ const translations = {
         copyright: "مدرسة صقر الإمارات الدولية الخاصة"
     },
     en: {
-        welcome: "Welcome to Saqr Al Emarat School Library",
+        welcome: "Welcome to Emirates Falcon Int'l Private School Library",
         subWelcome: "Interact with our smart assistant to find your next great read.",
         manualSearch: "Manual Search",
         manualDesc: "Find books by shelf number or title",
