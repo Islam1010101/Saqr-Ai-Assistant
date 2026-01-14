@@ -173,8 +173,9 @@ const HomePage: React.FC = () => {
 
                     {/* قسم شخصية صقر التفاعلية */}
                     <div className="relative flex flex-col items-center justify-center order-1 lg:order-2">
-                        <div className="absolute opacity-15 dark:opacity-10 scale-150 pointer-events-none transition-all duration-700">
-                             <img src="/school-logo.png" alt="Back Logo" className="h-64 w-64 md:h-80 md:w-80 object-contain rotate-[15deg]" />
+                        {/* الشعار في الخلفية مع فلتر التبييض التلقائي */}
+                        <div className="absolute opacity-15 dark:opacity-20 scale-150 pointer-events-none transition-all duration-700">
+                             <img src="/school-logo.png" alt="Back Logo" className="h-64 w-64 md:h-80 md:w-80 object-contain rotate-[15deg] logo-white-filter" />
                         </div>
 
                         <div 
