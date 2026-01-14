@@ -3,36 +3,44 @@ import { useLanguage } from '../App';
 import { ChatMessage } from '../types';
 import ReactMarkdown from 'react-markdown'; 
 
-// --- تحديث قاعدة بيانات السياق لتشمل العناوين الجديدة والقديمة ---
+// --- تحديث قاعدة المعرفة لتشمل الـ 41 كتاباً عربياً والـ 26 إنجليزياً ---
 const DIGITAL_COLLECTION_SUMMARY = `
-Arabic Digital Library (35 Books): مجموعه روايات أجاثا كريستي, أرض الإله, أرض النفاق, أكواريل, الفيل الأزرق, نائب عزارئيل, المكتبة الخضراء, روايات تشارلز ديكنز, مسرحيات شيكسبير, سلسلة رجل المستحيل، سلسلة ما وراء الطبيعة، سلسلة الشياطين الـ13, كتب إسلامية (ابن كثير، أنبياء الله، صحيح البخاري ومسلم), كتب تنمية بشرية (إبراهيم الفقي، علي الوردي، الشقيري).
+Arabic Digital Collection (41 Titles):
+- Literature/Mystery: أجاثا كريستي، أحمد مراد (أرض الإله، الفيل الأزرق)، يوسف السباعي (أرض النفاق، نائب عزرائيل)، أحمد خالد توفيق (أكواريل، حكايات الغرفة 207، يوتوبيا).
+- Classics: تشارلز ديكنز (7 روايات)، ويليام شيكسبير (ترويض النمرة، هملت، جعجعة بدون طحن).
+- Series: رجل المستحيل (نبيل فاروق)، ما وراء الطبيعة (أحمد خالد توفيق)، الشياطين الـ13، الذين كانوا، خلف أسوار العقل.
+- Islamic/Heritage: تفسير ابن كثير، أنبياء الله (أحمد بهجت)، قصص الحيوان في القرآن، شرح الأربعين النووية، صحيح البخاري ومسلم، ألف اختراع واختراع (التراث الإسلامي).
+- Self-Development: أحمد الشقيري (أربعون)، إبراهيم الفقي، علي الوردي، الأب الغني والأب الفقير، الرقص مع الحياة، قوة الآن، كيف تكسب الأصدقاء.
+- Children: المكتبة الخضراء، قصص الأنبياء للأطفال.
 
-English Digital Library (26 Books): 
-- Drama/Mystery: Me Before You, The Great Gatsby, The Kite Runner, And Then There Were NONE, Tales of the Unexpected, Sherlock Holmes, The Girl on the Train, The Silent Patient.
-- Short Stories/Philosophy: Leo Tolstoy, Anton Chekhov, Shirley Jackson, Roald Dahl, Edgar Allan Poe.
-- Puzzles (New): Great Lateral Thinking Puzzles (Paul Sloane), Murdle (G.T. Karber), Sherlock Holmes Puzzle Collection, What is the Name of This Book (Raymond Smullyan).
-- Fantasy (New): Full Harry Potter Series (Sorcerer's Stone, Chamber of Secrets, Prisoner of Azkaban, Goblet of Fire, Order of the Phoenix, Half-Blood Prince, Deathly Hallows) and Fantastic Beasts And Where To Find Them by J.K. Rowling.
+English Digital Collection (26 Titles):
+- Drama/Mystery: Me Before You, The Great Gatsby, The Kite Runner, And Then There Were NONE, Tales of the Unexpected, Sherlock Holmes (Hound of the Baskervilles), The Girl on the Train, The Silent Patient.
+- Stories/Philosophy: Leo Tolstoy, Anton Chekhov, Shirley Jackson, Roald Dahl, Edgar Allan Poe.
+- Puzzles: Great Lateral Thinking Puzzles, Murdle, Sherlock Holmes Puzzle Collection, What is the Name of This Book.
+- Fantasy: Full Harry Potter Series (7 Books) & Fantastic Beasts by J.K. Rowling.
 
-IMPORTANT: If a student asks about these books, you MUST mention they are available in the "E.F.I.P.S Digital Library" section.
+INSTRUCTIONS for Saqr: 
+1. You are the AI librarian for Emirates Falcon International Private School (EFIPS).
+2. If a student asks about these books, tell them they are available to read NOW in the "Digital Library" (المكتبة الرقمية) section of our portal.
 `;
 
 const translations = {
   ar: {
     pageTitle: 'اسأل صقر (البحث الذكي)',
-    saqrWelcome: 'أهلاً بك! أنا صقر، مساعدك الذكي. كيف يمكنني مساعدتك في رحلتك المعرفية عبر مكتبتنا الورقية والآن "المكتبة الرقمية المطورة"؟',
-    inputPlaceholder: 'اسألني عن أي كتاب، سلسلة هاري بوتر، أو حتى الألغاز...',
-    isTyping: 'صقر يستحضر الإجابة من مصادرنا...',
+    saqrWelcome: 'أهلاً بك! أنا صقر، مساعدك الذكي. كيف يمكنني مساعدتك في استكشاف الـ 41 عنواناً عربياً والـ 26 عنواناً إنجليزياً في مكتبتنا الرقمية اليوم؟',
+    inputPlaceholder: 'اسأل عن هاري بوتر، روايات أحمد خالد توفيق، أو الألغاز...',
+    isTyping: 'صقر يستحضر الإجابة...',
     error: 'عذراً، حدث خطأ تقني. يرجى المحاولة مرة أخرى.',
-    librarianStatus: 'أمين مكتبة المدرسة الذكي (AI)',
+    librarianStatus: 'أمين مكتبة مدرسة صقر الإمارات (AI)',
     you: 'أنت'
   },
   en: {
     pageTitle: 'Ask Saqr (Smart Search)',
-    saqrWelcome: "Hello! I'm Saqr, your AI assistant. How can I help you explore our physical and the newly upgraded Digital Library today?",
-    inputPlaceholder: 'Ask about Harry Potter, Puzzles, or any book...',
+    saqrWelcome: "Hello! I'm Saqr. I can help you find any of our 41 Arabic or 26 English digital titles. How can I assist you today?",
+    inputPlaceholder: 'Ask about Harry Potter, Utopia, or Puzzles...',
     isTyping: 'Saqr is thinking...',
     error: 'Sorry, a technical error occurred. Please try again.',
-    librarianStatus: 'THE AI School Librarian',
+    librarianStatus: 'Saqr School Librarian (AI)',
     you: 'YOU'
   },
 };
@@ -93,7 +101,7 @@ const SmartSearchPage: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [
-            { role: 'system', content: `You are Saqr, the AI librarian for Emirates Falcon School (EFIPS). When referring to digital books, explicitly tell the user to check the "Digital Library" page. Knowledge Base: ${DIGITAL_COLLECTION_SUMMARY}` },
+            { role: 'system', content: `You are Saqr, the AI for Emirates Falcon School. Be helpful and professional. Knowledge Base: ${DIGITAL_COLLECTION_SUMMARY}` },
             ...messages, 
             userMessage
           ],
@@ -119,7 +127,7 @@ const SmartSearchPage: React.FC = () => {
         onMouseMove={handleMouseMove}
         className="flex flex-col h-[75vh] sm:h-[80vh] glass-panel glass-card-interactive rounded-[2.5rem] sm:rounded-[3.5rem] shadow-2xl overflow-hidden border-green-600/20 relative"
       >
-        {/* هيدر الدردشة الأخضر */}
+        {/* هيدر الدردشة الأخضر الملكي */}
         <div 
           onMouseDown={(e) => handleInteraction(e)}
           className="relative overflow-hidden p-6 sm:p-8 border-b border-green-600/10 bg-green-600/5 backdrop-blur-2xl flex items-center justify-between z-10"
@@ -128,7 +136,7 @@ const SmartSearchPage: React.FC = () => {
           <div className="flex items-center gap-4 sm:gap-5 relative z-10">
             <div className="relative">
                 <img src={SCHOOL_LOGO} alt="Logo" className="w-12 h-12 sm:w-14 sm:h-14 object-contain rotate-12 logo-white-filter" />
-                <span className="absolute bottom-0 right-0 w-3 h-3 sm:w-4 sm:h-4 bg-green-600 border-2 border-white rounded-full animate-pulse shadow-[0_0_10px_green]"></span>
+                <span className="absolute bottom-0 right-0 w-3 h-3 sm:w-4 sm:h-4 bg-green-600 border-2 border-white rounded-full animate-pulse"></span>
             </div>
             <div>
                 <h1 className="text-xl sm:text-2xl font-black text-gray-950 dark:text-white tracking-tighter leading-none">{t('pageTitle')}</h1>
@@ -188,7 +196,7 @@ const SmartSearchPage: React.FC = () => {
         </div>
 
         {/* منطقة الإدخال الخضراء */}
-        <div className="p-4 sm:p-8 bg-white/60 dark:bg-gray-950/60 border-t border-green-600/10 backdrop-blur-3xl relative z-10">
+        <div className="p-4 sm:p-8 bg-white/60 dark:bg-gray-950/60 border-t border-green-600/10 backdrop-blur-3xl relative z-10 text-start">
           <div 
             onMouseMove={handleMouseMove}
             className="relative group max-w-4xl mx-auto glass-card-interactive rounded-2xl sm:rounded-[2rem]"
