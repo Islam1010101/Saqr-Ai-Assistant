@@ -8,8 +8,10 @@ import SmartSearchPage from './pages/SmartSearchPage';
 import ReportsPage from './pages/ReportsPage';
 import AboutPage from './pages/AboutPage';
 import DigitalLibraryPage from './pages/DigitalLibraryPage';
-// استيراد الصفحة الداخلية الجديدة للمكتبة العربية
+
+// استيراد الصفحات الداخلية للمكتبات
 import ArabicLibraryInternalPage from './pages/ArabicLibraryInternalPage';
+import EnglishLibraryInternalPage from './pages/EnglishLibraryInternalPage'; // الصفحة الجديدة
 
 import type { Locale } from './types';
 
@@ -24,7 +26,6 @@ const MouseFollower: React.FC = () => {
 
     const handleMouseMove = (e: MouseEvent) => {
       if (cursorRef.current) {
-        // استخدام translate3d لتفعيل تسريع الـ GPU وضمان Zero Latency
         cursorRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-50%, -50%)`;
       }
     };
@@ -98,7 +99,6 @@ const Header: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
 
-  // الروابط الأساسية فقط (بدون الروابط الداخلية للأقسام)
   const links = [
     { path: '/', label: locale === 'ar' ? 'الرئيسية' : 'Home' },
     { path: '/search', label: locale === 'ar' ? 'بحث' : 'Search' },
@@ -111,7 +111,6 @@ const Header: React.FC = () => {
   return (
     <header className="glass-panel sticky top-0 z-40 p-4 flex justify-between items-center m-4 rounded-3xl border-white/20">
       <div className="flex items-center gap-4">
-        {/* الشعار مع فلتر التبييض التلقائي للدارك مود */}
         <img 
           src="/school-logo.png" 
           alt="Logo" 
@@ -162,27 +161,25 @@ const App: React.FC = () => {
       <LanguageProvider>
         <HashRouter>
           <div className="min-h-screen relative bg-slate-50 dark:bg-slate-950 transition-colors duration-500 overflow-x-hidden">
-            {/* المؤشر الكريستالي */}
             <MouseFollower />
-            
-            {/* الهيدر الزجاجي */}
             <Header />
             
-            {/* المحتوى الرئيسي */}
             <main className="container mx-auto p-4 sm:p-6 lg:p-10">
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/smart-search" element={<SmartSearchPage />} />
                 <Route path="/digital-library" element={<DigitalLibraryPage />} />
-                {/* المسار الجديد لأقسام المكتبة العربية - تم تعريفه هنا ليتم الانتقال إليه داخلياً */}
+                
+                {/* مسارات المكتبات الداخلية (يتم الوصول إليها من صفحة المكتبة الإلكترونية فقط) */}
                 <Route path="/digital-library/arabic" element={<ArabicLibraryInternalPage />} />
+                <Route path="/digital-library/english" element={<EnglishLibraryInternalPage />} />
+                
                 <Route path="/reports" element={<ReportsPage />} />
                 <Route path="/about" element={<AboutPage />} />
               </Routes>
             </main>
 
-            {/* الفوتر الرسمي للمدرسة */}
             <footer className="py-10 text-center text-[10px] text-gray-400 dark:text-gray-500 font-black tracking-widest uppercase">
               &copy; {new Date().getFullYear()} Emirates Falcon International Private School
             </footer>
