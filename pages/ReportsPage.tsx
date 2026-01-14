@@ -14,14 +14,14 @@ interface ChartData {
   count: number;
 }
 
-// ألوان الهوية المطورة (تدرجات مدرسة صقر الإمارات)
 const COLORS = ['#00732F', '#059669', '#10B981', '#34D399', '#064E3B'];
 const BLUE_GRADIENT = '#2563EB';
+const SCHOOL_LOGO = "/school-logo.png"; // تعريف ثابت للشعار
 
 const translations = {
   ar: {
     pageTitle: "تقارير مكتبة صقر الإمارات",
-    noData: "لا توجد بيانات متاحة لعرضها. يرجى استخدام البحث أولاً.",
+    noData: "لا توجد بيانات متاحة لعرضها.",
     mostSearched: "أكثر المصطلحات بحثاً",
     searches: "عمليات البحث",
     mostViewed: "أكثر الكتب مشاهدة",
@@ -29,16 +29,17 @@ const translations = {
     shelfStats: "إحصائيات توزيع الرفوف",
     shelfName: "الرف",
     bookCount: "عدد الكتب",
-    printBtn: "تصدير التقرير النهائي (PDF)",
-    passwordPrompt: "يرجى إدخال كلمة المرور للوصول إلى لوحة التقارير الذكية.",
+    printBtn: "تصدير التقرير (PDF)",
+    passwordPrompt: "يرجى إدخال كلمة المرور للوصول إلى لوحة التقارير.",
     passwordLabel: "كلمة المرور",
     enter: "دخول آمن",
     wrongPassword: "كلمة المرور غير صحيحة",
-    liveStats: "إحصائيات مباشرة من قاعدة البيانات"
+    liveStats: "إحصائيات مباشرة من قاعدة البيانات",
+    officialReport: "تقرير جرد المكتبة الرسمي"
   },
   en: {
     pageTitle: "Saqr Library Reports",
-    noData: "No data available. Please use the search feature first.",
+    noData: "No data available.",
     mostSearched: "Most Searched Terms",
     searches: "Searches",
     mostViewed: "Most Viewed Books",
@@ -46,12 +47,13 @@ const translations = {
     shelfStats: "Bookshelf Distribution",
     shelfName: "Shelf",
     bookCount: "Books",
-    printBtn: "Export Final Report (PDF)",
-    passwordPrompt: "Enter the secure password to access Analytics.",
+    printBtn: "Export Report (PDF)",
+    passwordPrompt: "Enter password to access Library Analytics.",
     passwordLabel: "Password",
-    enter: "Secure Access",
+    enter: "Secure Login",
     wrongPassword: "Incorrect Password",
-    liveStats: "Live Database Analytics"
+    liveStats: "Live Database Analytics",
+    officialReport: "Official Library Audit Report"
   }
 };
 
@@ -133,31 +135,25 @@ const ReportsPage: React.FC = () => {
   const gridColor = theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
   const yAxisRtl = dir === 'rtl' ? { orientation: 'right' } as const : { orientation: 'left' } as const;
 
-  // واجهة الدخول الزجاجية الفخمة
   if (!isAuthenticated) {
     return (
       <div className="flex items-center justify-center min-h-[70vh] px-4">
-        <div className="glass-panel p-10 md:p-14 rounded-[3.5rem] shadow-2xl text-center max-w-lg w-full animate-in zoom-in duration-700 border-white/30 dark:border-white/10">
+        <div className="glass-panel p-10 md:p-14 rounded-[3.5rem] shadow-2xl text-center max-w-lg w-full border-white/30 dark:border-white/10">
           <div className="mb-8 flex flex-col items-center">
-             <img src="/school-logo.png" alt="Logo" className="h-28 w-28 object-contain mb-6 drop-shadow-xl rotate-12" />
+             <img src={SCHOOL_LOGO} alt="Logo" className="h-28 w-28 object-contain mb-6 drop-shadow-xl rotate-12" />
              <h1 className="text-4xl font-black text-gray-950 dark:text-white tracking-tighter">{t('pageTitle')}</h1>
-             <div className="h-1.5 w-16 bg-green-700 rounded-full mt-4 shadow-lg"></div>
+             <div className="h-1.5 w-16 bg-green-700 rounded-full mt-4"></div>
           </div>
-          
           <p className="mb-10 text-gray-600 dark:text-gray-400 font-bold text-lg leading-relaxed">{t('passwordPrompt')}</p>
-          
           <form onSubmit={handleLogin} className="space-y-6">
-            <div className="relative">
-                <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full p-6 text-center bg-white/60 dark:bg-gray-900/60 text-gray-950 dark:text-white border-2 border-transparent focus:border-green-600 rounded-[2rem] outline-none transition-all shadow-inner font-black text-2xl tracking-widest placeholder:tracking-normal placeholder:text-gray-400"
-                    placeholder={t('passwordLabel')}
-                />
-            </div>
-            {error && <p className="text-red-500 text-base font-black animate-shake">{error}</p>}
-            
+            <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full p-6 text-center bg-white/60 dark:bg-gray-900/60 text-gray-950 dark:text-white border-2 border-transparent focus:border-green-600 rounded-[2rem] outline-none transition-all shadow-inner font-black text-2xl tracking-widest placeholder:tracking-normal"
+                placeholder={t('passwordLabel')}
+            />
+            {error && <p className="text-red-500 font-black">{error}</p>}
             <button type="submit" className="glass-button-green w-full py-6 rounded-[2rem] font-black text-xl shadow-2xl transition-all active:scale-95">
               {t('enter')}
             </button>
@@ -168,9 +164,9 @@ const ReportsPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-12 pb-20 px-4 animate-in fade-in duration-1000">
+    <div className="max-w-7xl mx-auto space-y-12 pb-20 px-4">
       
-      {/* هيدر الصفحة المطور */}
+      {/* هيدر المتصفح (يختفي عند الطباعة) */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-8 border-b border-white/10 pb-12 print:hidden">
         <div className="text-center md:text-start">
           <h1 className="text-4xl md:text-6xl font-black text-gray-950 dark:text-white mb-4 tracking-tighter">{t('pageTitle')}</h1>
@@ -182,59 +178,38 @@ const ReportsPage: React.FC = () => {
             <p className="text-green-800 dark:text-green-400 font-black text-lg">{t('liveStats')}</p>
           </div>
         </div>
-        
-        <button 
-          onClick={handlePrint}
-          className="glass-button-black flex items-center gap-4 px-12 py-6 rounded-[2rem] font-black shadow-2xl text-lg transition-all active:scale-95"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-          </svg>
+        <button onClick={handlePrint} className="glass-button-black flex items-center gap-4 px-12 py-6 rounded-[2rem] font-black shadow-2xl text-lg transition-all active:scale-95">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
           {t('printBtn')}
         </button>
       </div>
 
-      {/* شبكة التقارير الرئيسية */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        
-        {/* مخطط الرفوف (لون أخضر مدرسة صقر) */}
-        <div className="glass-panel p-10 rounded-[3.5rem] shadow-2xl border-white/20 hover:shadow-green-700/5 transition-all">
-          <h2 className="text-3xl font-black mb-12 text-gray-900 dark:text-white flex items-center gap-4">
-            <span className="w-2.5 h-10 bg-green-700 rounded-full shadow-[0_0_15px_rgba(0,115,47,0.4)]"></span>
-            {t('shelfStats')}
-          </h2>
+      {/* الرسوم البيانية (تختفي عند الطباعة) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 print:hidden">
+        <div className="glass-panel p-10 rounded-[3.5rem] shadow-2xl border-white/20">
+          <h2 className="text-3xl font-black mb-12 text-gray-900 dark:text-white flex items-center gap-4"><span className="w-2.5 h-10 bg-green-700 rounded-full"></span>{t('shelfStats')}</h2>
           <div style={{ width: '100%', height: 400 }}>
             <ResponsiveContainer>
               <BarChart data={data.shelfData}>
                 <CartesianGrid strokeDasharray="4 4" vertical={false} stroke={gridColor}/>
                 <XAxis dataKey="name" stroke={tickColor} fontSize={14} tick={{fontWeight: '900'}} />
                 <YAxis stroke={tickColor} fontSize={14} tick={{fontWeight: '900'}} />
-                <Tooltip 
-                  cursor={{fill: 'rgba(0,115,47,0.05)'}}
-                  contentStyle={{ borderRadius: '24px', border: 'none', background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(20px)', boxShadow: '0 20px 40px rgba(0,0,0,0.15)', fontWeight: '900', padding: '15px' }} 
-                />
+                <Tooltip contentStyle={{ borderRadius: '24px', border: 'none', fontWeight: '900' }} />
                 <Bar dataKey="count" name={t('bookCount')} fill="#00732F" radius={[15, 15, 0, 0]} barSize={40} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* مخطط الأكثر بحثاً (لون أزرق ذكاء اصطناعي) */}
         <div className="glass-panel p-10 rounded-[3.5rem] shadow-2xl border-white/20">
-          <h2 className="text-3xl font-black mb-12 text-gray-900 dark:text-white flex items-center gap-4">
-            <span className="w-2.5 h-10 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.4)]"></span>
-            {t('mostSearched')}
-          </h2>
+          <h2 className="text-3xl font-black mb-12 text-gray-900 dark:text-white flex items-center gap-4"><span className="w-2.5 h-10 bg-blue-600 rounded-full"></span>{t('mostSearched')}</h2>
           <div style={{ width: '100%', height: 400 }}>
             <ResponsiveContainer>
               <BarChart data={data.searchData} layout="vertical">
                 <CartesianGrid strokeDasharray="4 4" horizontal={false} stroke={gridColor}/>
                 <XAxis type="number" hide />
                 <YAxis dataKey="name" type="category" stroke={tickColor} width={120} fontSize={14} tick={{fontWeight: '900'}} {...yAxisRtl} />
-                <Tooltip 
-                  cursor={{fill: 'rgba(37,99,235,0.05)'}}
-                  contentStyle={{ borderRadius: '24px', border: 'none', background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(20px)', fontWeight: '900' }} 
-                />
+                <Tooltip contentStyle={{ borderRadius: '24px', border: 'none', fontWeight: '900' }} />
                 <Bar dataKey="count" name={t('searches')} fill={BLUE_GRADIENT} radius={[0, 15, 15, 0]} barSize={30} />
               </BarChart>
             </ResponsiveContainer>
@@ -242,68 +217,73 @@ const ReportsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* مخطط الكتب الأكثر مشاهدة (دائري فخم) */}
-      <div className="glass-panel p-12 rounded-[3.5rem] shadow-2xl border-white/20">
-        <h2 className="text-3xl font-black mb-12 text-gray-900 dark:text-white flex items-center gap-4 justify-center text-center">
-            <span className="w-2.5 h-10 bg-orange-500 rounded-full shadow-[0_0_15px_rgba(249,115,22,0.4)]"></span>
-            {t('mostViewed')}
-        </h2>
-        <div style={{ width: '100%', height: 500 }}>
-          <ResponsiveContainer>
-            <PieChart>
-              <Pie
-                data={data.viewData}
-                cx="50%" cy="50%"
-                innerRadius={100} outerRadius={160}
-                paddingAngle={10}
-                dataKey="count"
-                stroke="none"
-                label={({ name, percent }: any) => `${name.substring(0,18)}... (${(percent * 100).toFixed(0)}%)`}
-              >
-                {data.viewData.map((_entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip contentStyle={{ borderRadius: '24px', border: 'none', fontWeight: '900', boxShadow: '0 15px 30px rgba(0,0,0,0.1)' }} />
-              <Legend verticalAlign="bottom" iconType="circle" wrapperStyle={{ fontWeight: '900', paddingTop: '40px', fontSize: '16px' }} />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* التقرير الرسمي للطباعة (مخفي برمجياً ويظهر عند الطلب) */}
-      <div className="hidden print:block mt-20 p-12 bg-white text-black rounded-none border-[10px] border-green-700">
-        <div className="flex justify-between items-start mb-12">
-            <div>
-                <h2 className="text-5xl font-black mb-4 uppercase tracking-tighter text-green-700">Library Audit Report</h2>
-                <p className="text-2xl font-bold text-gray-500">{new Date().toLocaleDateString(locale)}</p>
-            </div>
-            <img src="/school-logo.png" alt="School Logo" className="h-32 w-32 object-contain" />
-        </div>
+      {/* --- قسم التقرير الرسمي للطباعة فقط (هذا الجزء هو المخصص للـ PDF) --- */}
+      <div className="hidden print:block mt-10 p-12 bg-white text-black rounded-none border-[12px] border-green-700 min-h-[1000px]">
         
+        {/* هيدر التقرير مع شعار المدرسة */}
+        <div className="flex justify-between items-center mb-12 pb-8 border-b-4 border-gray-100">
+            <div className="flex items-center gap-6">
+                <img src={SCHOOL_LOGO} alt="Saqr Logo" className="h-40 w-40 object-contain rotate-6" />
+                <div>
+                    <h2 className="text-4xl font-black uppercase tracking-tighter text-green-700 leading-none">Emirates Falcon</h2>
+                    <p className="text-xl font-bold text-gray-500 mt-2">International Private School</p>
+                </div>
+            </div>
+            <div className="text-end">
+                <h3 className="text-2xl font-black text-gray-900 mb-1">{t('officialReport')}</h3>
+                <p className="text-lg font-bold text-gray-400 italic">Report Date: {new Date().toLocaleDateString(locale)}</p>
+            </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-12 mb-16">
+            <div className="p-8 bg-gray-50 rounded-[2rem] border-2 border-gray-100">
+                <h4 className="text-xl font-black mb-4 text-green-700 uppercase">Library Capacity Summary</h4>
+                <div className="flex justify-between items-center py-3 border-b border-gray-200">
+                    <span className="font-bold">Total Active Shelves:</span>
+                    <span className="font-black text-2xl">{data.shelfData.length}</span>
+                </div>
+                <div className="flex justify-between items-center py-3">
+                    <span className="font-bold">Total Cataloged Items:</span>
+                    <span className="font-black text-2xl text-green-700">{bookData.length}</span>
+                </div>
+            </div>
+            <div className="p-8 bg-gray-50 rounded-[2rem] border-2 border-gray-100 flex flex-col justify-center text-center">
+                 <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-2">Authenticated By</p>
+                 <p className="text-2xl font-black">Saqr AI Analytics</p>
+            </div>
+        </div>
+
+        {/* جدول الجرد التفصيلي */}
         <table className="w-full text-start border-collapse text-xl">
           <thead>
             <tr className="bg-green-700 text-white">
               <th className="p-8 border-2 border-green-800 text-start font-black">{t('shelfName')}</th>
               <th className="p-8 border-2 border-green-800 text-start font-black">{t('bookCount')}</th>
+              <th className="p-8 border-2 border-green-800 text-start font-black">Status</th>
             </tr>
           </thead>
           <tbody>
             {data.shelfData.map(s => (
-              <tr key={s.name} className="even:bg-gray-50">
-                <td className="p-8 border-2 border-gray-200 font-bold">{isAr ? 'الرف رقم' : 'Shelf No.'} {s.name}</td>
-                <td className="p-8 border-2 border-gray-200 font-black text-green-700 text-3xl">{s.count}</td>
+              <tr key={s.name} className="even:bg-gray-50 border-b border-gray-100">
+                <td className="p-8 border-x border-gray-200 font-bold">{isAr ? 'الرف رقم' : 'Shelf Number'} {s.name}</td>
+                <td className="p-8 border-x border-gray-200 font-black text-green-700 text-3xl">{s.count}</td>
+                <td className="p-8 border-x border-gray-200 font-bold text-gray-400 italic">Verified</td>
               </tr>
             ))}
           </tbody>
         </table>
-        
-        <div className="mt-20 flex justify-between items-end">
+
+        {/* فوتر التقرير مع الأختام */}
+        <div className="mt-32 flex justify-between items-end">
             <div className="text-center">
-                <div className="w-48 h-0.5 bg-black mb-2"></div>
-                <p className="font-bold">Librarian Signature</p>
+                <div className="w-64 h-0.5 bg-black mb-4"></div>
+                <p className="font-black text-xl uppercase">School Librarian</p>
+                <p className="text-gray-400 font-bold text-sm">Official Signature Required</p>
             </div>
-            <p className="font-black opacity-20 text-4xl italic">E.F.I.P.S CONFIDENTIAL</p>
+            <div className="flex flex-col items-center opacity-30">
+                <img src={SCHOOL_LOGO} alt="Stamp" className="h-24 w-24 object-contain grayscale mb-2" />
+                <p className="font-black text-2xl italic tracking-widest">OFFICIAL SEAL</p>
+            </div>
         </div>
       </div>
     </div>
