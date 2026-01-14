@@ -40,7 +40,7 @@ const translations = {
   }
 };
 
-// --- نافذة تفاصيل الكتاب (تصميم مدمج + ذكاء اصطناعي مفعل) ---
+// --- نافذة تفاصيل الكتاب (كتلة واحدة + ذكاء اصطناعي) ---
 const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
     const { locale } = useLanguage();
     const [aiSummary, setAiSummary] = useState<string>('');
@@ -56,15 +56,15 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        messages: [{ role: 'system', content: `Summarize "${book.title}" by "${book.author}" in 2 sentences. Also provide a 1-word genre in ${locale === 'ar' ? 'Arabic' : 'English'}.` }],
+                        messages: [{ role: 'system', content: `Analyze "${book.title}" by "${book.author}". Return JSON: {"summary": "2 inspiring sentences", "genre": "1-word category in ${locale === 'ar' ? 'Arabic' : 'English'}"}` }],
                         locale
                     }),
                 });
                 const data = await res.json();
-                // نفترض أن الـ AI يعيد نصاً يحتوي على التصنيف والملخص
-                setAiSummary(data.reply);
-                setAiGenre(data.genre || ''); // إذا كان الـ API يدعم فصل التصنيف
-            } catch (e) { setAiSummary(book.summary || 'Processing...'); }
+                const parsed = typeof data.reply === 'string' ? JSON.parse(data.reply) : data;
+                setAiSummary(parsed.summary || data.reply);
+                setAiGenre(parsed.genre || '');
+            } catch (e) { setAiSummary(book.summary || 'Processing resources...'); }
             finally { setIsLoading(false); }
         };
         fetchAiData();
@@ -74,43 +74,38 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
 
     return (
         <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 backdrop-blur-3xl animate-in fade-in duration-300" onClick={onClose}>
-            <div className="glass-panel w-full max-w-2xl rounded-[2.5rem] border-2 border-white/50 dark:border-white/10 shadow-2xl overflow-hidden relative animate-in zoom-in-95 flex flex-col md:flex-row bg-white/95 dark:bg-slate-950/95" onClick={(e) => e.stopPropagation()}>
-                
-                <button onClick={onClose} className="absolute top-4 end-4 z-50 p-2 bg-red-600 text-white rounded-full hover:scale-110 active:scale-90 transition-all">
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}><path d="M6 18L18 6M6 6l12 12" /></svg>
+            <div className="glass-panel w-full max-w-4xl rounded-[3.5rem] border-2 border-white/50 dark:border-white/10 shadow-2xl overflow-hidden relative animate-in zoom-in-95 flex flex-col md:flex-row bg-white/95 dark:bg-slate-950/95" onClick={(e) => e.stopPropagation()}>
+                <button onClick={onClose} className="absolute top-6 end-6 z-50 p-3 bg-red-600 text-white rounded-full hover:scale-110 active:scale-90 transition-all shadow-xl">
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}><path d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
 
-                <div className="flex-1 p-8 flex flex-col justify-center border-b md:border-b-0 md:border-e border-slate-200 dark:border-white/10">
-                    <div className="mb-4">
-                        <h2 className="text-2xl md:text-3xl font-black text-slate-950 dark:text-white leading-tight mb-2 tracking-tighter">{book.title}</h2>
-                        <p className="text-sm text-slate-500 font-bold italic">Author: {book.author}</p>
+                <div className="flex-1 p-10 md:p-14 flex flex-col justify-center border-b md:border-b-0 md:border-e border-slate-200 dark:border-white/10">
+                    <div className="mb-8">
+                        <h2 className="text-3xl md:text-5xl font-black text-slate-950 dark:text-white leading-tight mb-4 tracking-tighter">{book.title}</h2>
+                        <p className="text-xl text-slate-500 font-bold italic">Author: {book.author}</p>
                     </div>
-                    
-                    <div className="bg-slate-100/50 dark:bg-white/5 p-5 rounded-2xl border-2 border-dashed border-slate-200 dark:border-white/10">
-                        <p className="text-[8px] text-red-600 font-black uppercase mb-2 tracking-widest flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse"></span>
-                            AI Summary
+                    <div className="bg-slate-100/50 dark:bg-white/5 p-8 rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-white/10">
+                        <p className="text-[10px] text-red-600 font-black uppercase mb-4 tracking-widest flex items-center gap-2">
+                            <span className="w-2 h-2 bg-red-600 rounded-full animate-pulse shadow-lg"></span>
+                            Official AI Summary
                         </p>
-                        {isLoading ? <div className="space-y-2 animate-pulse"><div className="h-2 bg-slate-300 dark:bg-white/10 rounded w-full"></div><div className="h-2 bg-slate-300 dark:bg-white/10 rounded w-2/3"></div></div> :
-                        <p className="text-slate-800 dark:text-slate-200 text-sm md:text-base font-medium leading-relaxed italic italic">"{aiSummary || book.summary}"</p>}
+                        {isLoading ? <div className="space-y-3 animate-pulse"><div className="h-4 bg-slate-300 dark:bg-white/10 rounded w-full"></div><div className="h-4 bg-slate-300 dark:bg-white/10 rounded w-5/6"></div></div> :
+                        <p className="text-slate-800 dark:text-slate-200 text-xl font-medium leading-relaxed italic">"{aiSummary || book.summary}"</p>}
                     </div>
                 </div>
 
-                <div className="w-full md:w-[240px] bg-slate-950 dark:bg-black p-8 flex flex-col justify-center items-center text-center text-white">
-                    <div className="space-y-6 w-full">
-                        {/* التصنيف فوق الرف بطلبك */}
-                        <div className="bg-white/5 p-4 rounded-xl border border-white/10">
-                            <p className="text-[8px] font-black text-red-500 uppercase tracking-widest mb-1">{t('subjectLabel')}</p>
-                            <p className="text-lg font-black text-white">{isLoading ? '...' : (aiGenre || (book.subject !== "Unknown" ? book.subject : t('aiSubject')))}</p>
+                <div className="w-full md:w-[320px] bg-slate-950 dark:bg-black p-10 flex flex-col justify-center items-center text-center text-white relative">
+                    <div className="space-y-10 relative z-10 w-full">
+                        <div className="bg-white/5 p-6 rounded-2xl border border-white/10">
+                            <p className="text-[10px] font-black text-red-500 uppercase tracking-widest mb-3">{t('subjectLabel')}</p>
+                            <p className="text-2xl font-black text-white">{isLoading ? '...' : (aiGenre || (book.subject !== "Unknown" ? book.subject : t('aiSubject')))}</p>
                         </div>
-
-                        <div className="flex justify-center gap-6">
-                            <div><p className="text-[9px] opacity-50 uppercase">{t('shelf')}</p><p className="text-3xl font-black">{book.shelf}</p></div>
-                            <div className="w-px h-8 bg-white/20"></div>
-                            <div><p className="text-[9px] opacity-50 uppercase">{t('row')}</p><p className="text-3xl font-black">{book.row}</p></div>
+                        <div className="flex justify-center gap-8">
+                            <div><p className="text-xs opacity-50 uppercase mb-1">{t('shelf')}</p><p className="text-5xl font-black">{book.shelf}</p></div>
+                            <div className="w-px h-16 bg-white/20"></div>
+                            <div><p className="text-xs opacity-50 uppercase mb-1">{t('row')}</p><p className="text-5xl font-black">{book.row}</p></div>
                         </div>
-
-                        <button onClick={onClose} className="w-full bg-white text-slate-950 font-black py-2 rounded-lg active:scale-95 text-[9px] uppercase tracking-widest">{t('close')}</button>
+                        <button onClick={onClose} className="w-full bg-white text-slate-950 font-black py-4 rounded-xl active:scale-95 text-xs uppercase tracking-widest shadow-2xl transition-all">{t('close')}</button>
                     </div>
                 </div>
             </div>
@@ -118,23 +113,27 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
     );
 };
 
-// --- كارت الكتاب (رجيق + توهج) ---
+// --- بطاقة الكتاب (4 كروت في الصف + حجم أكبر + توهج) ---
 const BookCard = React.memo(({ book, onClick, t }: { book: Book; onClick: () => void; t: any }) => {
     const isAi = !book.subject || book.subject === "Unknown";
     return (
         <div 
             onClick={onClick} 
-            className="group relative glass-panel bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border border-white/30 dark:border-white/5 rounded-[1.5rem] transition-all duration-300 cursor-pointer flex flex-col h-full overflow-hidden shadow-sm active:scale-95 hover:border-red-600/40 hover:shadow-[0_0_20px_rgba(220,38,38,0.2)]"
+            className="group relative glass-panel bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border border-white/30 dark:border-white/5 rounded-[2.5rem] transition-all duration-300 cursor-pointer flex flex-col h-full overflow-hidden shadow-lg active:scale-95 hover:border-red-600/50 hover:shadow-[0_0_30px_rgba(220,38,38,0.3)]"
         >
-            <div className="p-4 flex-grow">
-                 <span className={`inline-block px-2 py-0.5 rounded-md text-[7px] font-black uppercase tracking-widest mb-3 ${isAi ? 'bg-red-600 text-white' : 'bg-green-600 text-white'}`}>
+            <div className="p-8 flex-grow">
+                 <span className={`inline-block px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest mb-5 ${isAi ? 'bg-red-600 text-white shadow-md' : 'bg-green-600 text-white shadow-md'}`}>
                     {isAi ? t('aiSubject') : book.subject}
                  </span>
-                <h3 className="font-black text-sm text-slate-950 dark:text-white leading-tight mb-1 tracking-tighter group-hover:text-red-600 transition-colors line-clamp-2">{book.title}</h3>
-                <p className="text-[9px] text-slate-500 dark:text-slate-400 font-bold opacity-70 italic">{book.author}</p>
+                <h3 className="font-black text-xl text-slate-950 dark:text-white leading-tight mb-3 tracking-tighter group-hover:text-red-600 transition-colors line-clamp-2">
+                    {book.title}
+                </h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 font-bold opacity-80 italic">By {book.author}</p>
             </div>
-            <div className="bg-white/40 dark:bg-black/20 py-2 px-4 border-t border-white/5 mt-auto text-center">
-                <p className="font-black text-slate-900 dark:text-white text-[8px] uppercase tracking-widest opacity-50">S:{book.shelf} — R:{book.row}</p>
+            <div className="bg-white/40 dark:bg-black/20 py-5 px-8 border-t border-white/10 mt-auto text-center">
+                <p className="font-black text-slate-900 dark:text-white text-xs uppercase tracking-widest opacity-60">
+                    Shelf {book.shelf} — Row {book.row}
+                </p>
             </div>
         </div>
     );
@@ -148,7 +147,7 @@ const SearchPage: React.FC = () => {
     const [authorFilter, setAuthorFilter] = useState('all');
     const [shelfFilter, setShelfFilter] = useState('all');
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
-    const [visibleCount, setVisibleCount] = useState(20);
+    const [visibleCount, setVisibleCount] = useState(16); // 16 تقبل القسمة على 4
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
     const filters = useMemo(() => ({
@@ -170,18 +169,18 @@ const SearchPage: React.FC = () => {
 
     return (
         <div dir={dir} className="max-w-7xl mx-auto px-4 pb-24 relative z-10">
-            <div className="sticky top-24 z-50 mb-8 animate-fade-up">
-                <div className="glass-panel p-3 rounded-[1.5rem] shadow-lg border-white/40 dark:border-white/5 backdrop-blur-2xl max-w-4xl mx-auto">
-                    <div className="flex flex-col md:flex-row gap-2">
+            <div className="sticky top-24 z-50 mb-12 animate-fade-up">
+                <div className="glass-panel p-5 rounded-[2.5rem] shadow-2xl border-white/40 dark:border-white/5 backdrop-blur-2xl">
+                    <div className="flex flex-col lg:flex-row gap-4">
                         <div className="flex-[2] relative">
-                            <input type="text" placeholder={t('searchPlaceholder')} className="w-full p-3 ps-10 bg-slate-100/50 dark:bg-black/40 text-slate-950 dark:text-white border-2 border-transparent focus:border-red-600 rounded-xl outline-none transition-all font-black text-sm shadow-inner" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-                            <svg className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                            <input type="text" placeholder={t('searchPlaceholder')} className="w-full p-5 ps-14 bg-slate-100/50 dark:bg-black/40 text-slate-950 dark:text-white border-2 border-transparent focus:border-red-600 rounded-2xl outline-none transition-all font-black text-lg shadow-inner" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                            <svg className="absolute start-5 top-1/2 -translate-y-1/2 h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                         </div>
-                        <div className="flex-[3] grid grid-cols-3 gap-2">
+                        <div className="flex-[3] grid grid-cols-3 gap-3">
                             {[{ val: subjectFilter, set: setSubjectFilter, opts: filters.subjects, lbl: t('allSubjects') }, { val: authorFilter, set: setAuthorFilter, opts: filters.authors, lbl: t('allAuthors') }, { val: shelfFilter, set: setShelfFilter, opts: filters.shelves, lbl: t('allShelves') }].map((f, i) => (
-                                <select key={i} value={f.val} onChange={(e) => f.set(e.target.value)} className="p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 font-black text-[8px] md:text-[10px] cursor-pointer outline-none focus:border-green-600 appearance-none text-center">
+                                <select key={i} value={f.val} onChange={(e) => f.set(e.target.value)} className="p-4 rounded-2xl bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-white/5 font-black text-[10px] md:text-sm cursor-pointer outline-none focus:border-green-600 appearance-none text-center">
                                     <option value="all">{f.lbl}</option>
-                                    {f.opts.map(o => <option key={o} value={o}>{i === 2 ? `S:${o}` : o}</option>)}
+                                    {f.opts.map(o => <option key={o} value={o}>{i === 2 ? `S: ${o}` : o}</option>)}
                                 </select>
                             ))}
                         </div>
@@ -189,8 +188,8 @@ const SearchPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* شبكة الـ 5 كروت */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 animate-fade-up">
+            {/* شبكة الـ 4 كروت (حجم أكبر) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 animate-fade-up">
                 {filteredBooks.slice(0, visibleCount).map((book) => (
                     <BookCard key={book.id} book={book} t={t} onClick={() => setSelectedBook(book)} />
                 ))}
@@ -199,8 +198,8 @@ const SearchPage: React.FC = () => {
             <BookModal book={selectedBook} onClose={() => setSelectedBook(null)} t={t} />
 
             {filteredBooks.length > visibleCount && (
-                <div className="mt-12 text-center">
-                    <button onClick={() => setVisibleCount(prev => prev + 20)} className="bg-slate-950 text-white dark:bg-white dark:text-black px-10 py-3 rounded-xl font-black text-xs shadow-xl hover:scale-105 active:scale-90 transition-all uppercase tracking-widest">
+                <div className="mt-20 text-center">
+                    <button onClick={() => setVisibleCount(prev => prev + 16)} className="bg-slate-950 text-white dark:bg-white dark:text-black px-16 py-4 rounded-2xl font-black text-xl shadow-2xl hover:scale-105 active:scale-90 transition-all uppercase tracking-[0.2em]">
                         Load More
                     </button>
                 </div>
