@@ -13,7 +13,7 @@ interface Book {
   summary: string;
 }
 
-// --- 2. قاعدة البيانات المنقحة بالكامل (26 عنواناً) ---
+// --- 2. قاعدة البيانات المنقحة (26 عنواناً) ---
 const ENGLISH_LIBRARY_DATABASE: Book[] = [
   { id: 1, title: "Me Before You", author: "Jojo Moyes", subject: "Drama", driveLink: "https://drive.google.com/file/d/1eDq03Myjh56IRtLx1LIRJHa39PLnMvgf/view", bio: "A popular British romance novelist known for her emotionally resonant stories that explore love and life-altering decisions.", summary: "A heart-wrenching story of a young woman who becomes a caregiver for a wealthy man, leading to an unexpected bond." },
   { id: 2, title: "The Great Gatsby", author: "F. Scott Fitzgerald", subject: "Drama", driveLink: "https://drive.google.com/file/d/1NjrAuiFno2Aa-z6WYkRI17oD2Hxkvs-M/view", bio: "A legendary American novelist of the Jazz Age, famous for his critiques of the American Dream and high society.", summary: "Set in the 1920s, this masterpiece follows Jay Gatsby's obsessive pursuit of wealth and the woman he loves." },
@@ -43,189 +43,217 @@ const ENGLISH_LIBRARY_DATABASE: Book[] = [
   { id: 26, title: "Fantastic Beasts and Where to Find Them", author: "J. K. Rowling", subject: "Fantasy", driveLink: "https://drive.google.com/file/d/1QpXRbcMHTe6_dNXgkJYmF4QE7jN0gwWF/view", bio: "Rowling wrote this guide to provide a deeper look at the creatures of her world.", summary: "An essential textbook for Hogwarts students about incredible magical creatures." }
 ];
 
+const translations = {
+    ar: {
+        pageTitle: "روائع المكتبة الإنجليزية",
+        searchPlaceholder: "ابحث عن عنوان، مؤلف، أو موضوع...",
+        allSubjects: "جميع المواضيع",
+        results: "كتاب متاح",
+        read: "قراءة المحتوى",
+        bio: "نبذة عن الكاتب",
+        summaryTitle: "تلخيص صقر AI",
+        back: "العودة للمكتبة الرقمية"
+    },
+    en: {
+        pageTitle: "English Library Masterpieces",
+        searchPlaceholder: "Search title, author, or topic...",
+        allSubjects: "All Subjects",
+        results: "Books Available",
+        read: "Read Content",
+        bio: "Author Bio",
+        summaryTitle: "Saqr AI Summary",
+        back: "Back to E-Library"
+    }
+};
+
 const EnglishLibraryInternalPage: React.FC = () => {
-  const { locale, dir } = useLanguage();
-  const isAr = locale === 'ar';
-  const navigate = useNavigate();
+    const { locale, dir } = useLanguage();
+    const navigate = useNavigate();
+    const isAr = locale === 'ar';
+    const t = (key: keyof typeof translations.ar) => translations[locale][key];
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [subjectFilter, setSubjectFilter] = useState('all');
-  const [selectedBio, setSelectedBio] = useState<Book | null>(null);
-  const [ripples, setRipples] = useState<{ id: number; x: number; y: number }[]>([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [subjectFilter, setSubjectFilter] = useState('all');
+    const [selectedBio, setSelectedBio] = useState<Book | null>(null);
+    const [ripples, setRipples] = useState<{ id: number; x: number; y: number }[]>([]);
 
-  // Memoized Subjects
-  const subjects = useMemo(() => ['all', ...new Set(ENGLISH_LIBRARY_DATABASE.map(b => b.subject))], []);
+    // استخراج المواضيع الفريدة
+    const subjects = useMemo(() => ['all', ...new Set(ENGLISH_LIBRARY_DATABASE.map(b => b.subject))].sort(), []);
 
-  // Filtered Logic
-  const filteredContent = useMemo(() => {
-    return ENGLISH_LIBRARY_DATABASE.filter(item => {
-      const term = searchTerm.toLowerCase();
-      const matchesSearch = item.title.toLowerCase().includes(term) || item.author.toLowerCase().includes(term);
-      const matchesSub = subjectFilter === 'all' || item.subject === subjectFilter;
-      return matchesSearch && matchesSub;
-    });
-  }, [searchTerm, subjectFilter]);
+    // منطق التصفية
+    const filteredContent = useMemo(() => {
+        const term = searchTerm.toLowerCase().trim();
+        return ENGLISH_LIBRARY_DATABASE.filter(item => {
+            const matchesSearch = !term || item.title.toLowerCase().includes(term) || item.author.toLowerCase().includes(term);
+            const matchesSub = subjectFilter === 'all' || item.subject === subjectFilter;
+            return matchesSearch && matchesSub;
+        });
+    }, [searchTerm, subjectFilter]);
 
-  // Handlers
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    e.currentTarget.style.setProperty("--mouse-x", `${e.clientX - rect.left}px`);
-    e.currentTarget.style.setProperty("--mouse-y", `${e.clientY - rect.top}px`);
-  }, []);
+    const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        e.currentTarget.style.setProperty("--mouse-x", `${e.clientX - rect.left}px`);
+        e.currentTarget.style.setProperty("--mouse-y", `${e.clientY - rect.top}px`);
+    }, []);
 
-  const handleInteraction = (e: React.MouseEvent, action: () => void) => {
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const rippleId = Date.now();
-    setRipples(prev => [...prev, { id: rippleId, x: e.clientX - rect.left, y: e.clientY - rect.top }]);
-    
-    // Clean up ripple after animation to save memory
-    setTimeout(() => {
-      setRipples(prev => prev.filter(r => r.id !== rippleId));
-      action();
-    }, 400);
-  };
+    const handleInteraction = (e: React.MouseEvent | React.TouchEvent, action: () => void) => {
+        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+        const rippleId = Date.now();
+        setRipples(prev => [...prev, { id: rippleId, x: e.clientX - rect.left, y: e.clientY - rect.top }]);
+        
+        setTimeout(() => {
+            setRipples(prev => prev.filter(r => r.id !== rippleId));
+            action();
+        }, 400);
+    };
 
-  return (
-    <div dir={dir} className="max-w-7xl mx-auto px-4 py-8 animate-in fade-in duration-1000 relative">
-      
-      {/* Back Button */}
-      <button 
-        onClick={() => navigate(-1)} 
-        className="mb-10 flex items-center gap-2 text-gray-500 hover:text-red-600 font-bold transition-all group"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 transform group-hover:-translate-x-1 ${isAr ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
-        {isAr ? 'العودة للمكتبة الرقمية' : 'Back to Library'}
-      </button>
-
-      {/* Smart Search & Filters */}
-      <div 
-        onMouseMove={handleMouseMove} 
-        className="glass-panel glass-card-interactive p-8 rounded-[2.5rem] shadow-2xl mb-12 border-white/30 sticky top-24 z-30 backdrop-blur-3xl"
-      >
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10">
-          <div className="lg:col-span-2 relative">
-            <input 
-              type="text" 
-              placeholder={isAr ? "ابحث عن عنوان أو مؤلف..." : "Search title or author..."}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full p-4 ps-12 rounded-2xl bg-white/50 dark:bg-gray-950/50 border-2 border-transparent focus:border-red-600 outline-none font-bold text-gray-950 dark:text-white transition-all shadow-inner"
-            />
-            <svg className="absolute start-4 top-1/2 -translate-y-1/2 h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-          
-          <select 
-            value={subjectFilter} 
-            onChange={(e) => setSubjectFilter(e.target.value)} 
-            className="p-4 rounded-2xl bg-white/40 dark:bg-gray-800/60 border border-white/10 dark:text-white font-bold cursor-pointer outline-none focus:ring-2 focus:ring-red-600"
-          >
-            {subjects.map(s => (
-              <option key={s} value={s} className="text-black">
-                {s === 'all' ? (isAr ? "جميع التصنيفات" : "All Subjects") : s}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* Book Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-        {filteredContent.map((item) => (
-          <div 
-            key={item.id} 
-            onMouseMove={handleMouseMove} 
-            className="glass-panel glass-card-interactive group relative overflow-hidden p-8 rounded-[3rem] border-white/20 flex flex-col justify-between hover:scale-[1.03] transition-all duration-500 h-full shadow-lg"
-          >
-            {ripples.map(r => <span key={r.id} className="ripple-effect border-red-500/20" style={{ left: r.x, top: r.y }} />)}
-            
-            <div className="relative z-10">
-              <div className="flex justify-between items-start mb-5">
-                <span className="bg-red-600 text-white px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md">
-                  {item.subject}
-                </span>
-                <span className="text-3xl filter grayscale group-hover:grayscale-0 transition-all duration-500">📖</span>
-              </div>
-              
-              <h2 className="text-2xl font-black text-gray-950 dark:text-white mb-2 group-hover:text-red-600 transition-colors leading-tight line-clamp-2 h-14">
-                {item.title}
-              </h2>
-              <p className="text-green-700 dark:text-green-400 font-bold text-sm mb-4">{item.author}</p>
-              
-              {/* Saqr AI Summary */}
-              <div className="bg-black/5 dark:bg-white/5 p-5 rounded-[1.5rem] border border-white/10 mb-6">
-                <p className="text-[9px] text-red-600 font-black uppercase mb-2 flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse shadow-[0_0_10px_rgba(220,38,38,0.5)]"></span>
-                  Saqr AI Summary
-                </p>
-                <p className="text-gray-700 dark:text-gray-300 font-medium italic text-sm leading-relaxed line-clamp-3">
-                  "{item.summary}"
-                </p>
-              </div>
-            </div>
-
-            {/* Buttons */}
-            <div className="flex flex-col gap-3 z-10">
-              <button 
-                onClick={(e) => handleInteraction(e, () => setSelectedBio(item))}
-                className="w-full bg-white/40 dark:bg-white/5 border border-red-500/30 text-gray-900 dark:text-white font-bold py-3 rounded-2xl hover:bg-red-600 hover:text-white transition-all text-xs active:scale-95"
-              >
-                {isAr ? "نبذة عن الكاتب" : "Author Bio"}
-              </button>
-              
-              <a 
-                href={item.driveLink} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                onMouseDown={(e) => handleInteraction(e, () => {})}
-                className="w-full bg-gray-950 text-white dark:bg-white dark:text-gray-950 font-black py-4 rounded-[1.5rem] flex items-center justify-center gap-3 shadow-xl active:scale-95 transition-all group/btn"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
-                <span>{isAr ? "اقرأ المحتوى" : "Read Content"}</span>
-              </a>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Author Bio Modal */}
-      {selectedBio && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 backdrop-blur-xl animate-in fade-in duration-300">
-          <div className="glass-panel w-full max-w-lg p-10 rounded-[3rem] border-white/20 shadow-2xl relative animate-in zoom-in-95">
+    return (
+        <div dir={dir} className="max-w-7xl mx-auto px-4 py-8 animate-in fade-in duration-1000 relative">
+            {/* زر العودة */}
             <button 
-              onClick={() => setSelectedBio(null)} 
-              className="absolute top-6 end-6 p-2 bg-red-600 text-white rounded-full hover:scale-110 transition-transform"
+                onClick={() => navigate(-1)} 
+                className="mb-10 flex items-center gap-2 text-gray-500 hover:text-red-600 font-bold transition-all group"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 transform group-hover:-translate-x-1 ${isAr ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                {t('back')}
             </button>
-            <h3 className="text-3xl font-black text-gray-950 dark:text-white mb-2">{selectedBio.author}</h3>
-            <p className="text-red-600 font-black uppercase text-xs tracking-widest mb-6">Historical Bio (AI Verified)</p>
-            <p className="text-gray-800 dark:text-gray-200 text-lg leading-relaxed font-medium italic">"{selectedBio.bio}"</p>
-            
-            <div className="mt-8 pt-6 border-t border-black/5 dark:border-white/10 flex justify-center">
-              <img src="/school-logo.png" alt="EFIIPS" className="h-10 opacity-30 logo-white-filter" />
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* Branding Footer */}
-      <footer className="mt-24 flex flex-col items-center gap-4 opacity-20 grayscale hover:opacity-100 transition-opacity duration-700">
-        <img src="/school-logo.png" alt="EFIIPS Logo" className="h-24 w-auto logo-white-filter" />
-        <div className="text-center">
-          <p className="font-black text-[10px] uppercase tracking-[0.3em] text-gray-500">Emirates Falcon International Private School</p>
-          <p className="text-[8px] font-bold text-gray-400 mt-1 uppercase tracking-widest">Innovation • Excellence • Leadership</p>
+            {/* الهيرو (العنوان) */}
+            <div className="text-center mb-16">
+                <h1 className="text-5xl sm:text-7xl font-black text-slate-950 dark:text-white mb-6 tracking-tighter leading-none">
+                    {t('pageTitle')}
+                </h1>
+                <div className="h-2.5 w-32 bg-blue-600 mx-auto rounded-full shadow-[0_10px_30px_rgba(37,99,235,0.4)]"></div>
+            </div>
+
+            {/* شريط البحث المطور */}
+            <div 
+                onMouseMove={handleMouseMove}
+                className="glass-panel glass-card-interactive p-8 md:p-14 rounded-[3.5rem] shadow-2xl mb-20 sticky top-24 z-30 border-blue-600/20 dark:border-white/10 backdrop-blur-3xl"
+            >
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10">
+                    <div className="lg:col-span-2 relative">
+                        <input 
+                            type="text" 
+                            placeholder={t('searchPlaceholder')}
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full p-6 md:p-8 ps-16 md:ps-20 bg-slate-100/50 dark:bg-black/40 text-slate-950 dark:text-white border-2 border-transparent focus:border-red-600 rounded-[2.5rem] outline-none transition-all font-black text-xl md:text-3xl shadow-inner placeholder-slate-400"
+                        />
+                        <svg className="absolute start-6 top-1/2 -translate-y-1/2 h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    
+                    <select 
+                        value={subjectFilter} 
+                        onChange={(e) => setSubjectFilter(e.target.value)} 
+                        className="p-6 rounded-[2.5rem] bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-white/5 font-black text-xl cursor-pointer focus:border-red-600 outline-none transition-all"
+                    >
+                        {subjects.map(s => (
+                            <option key={s} value={s} className="text-black">
+                                {s === 'all' ? t('allSubjects') : s}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            </div>
+
+            {/* عداد النتائج */}
+            <div className="flex items-center justify-between mb-12 px-6 sm:px-10">
+                <h2 className="text-3xl sm:text-5xl font-black text-slate-950 dark:text-white tracking-tighter">Results</h2>
+                <div className="bg-red-600 text-white px-8 py-2 rounded-2xl text-xl sm:text-3xl font-black shadow-xl ring-4 ring-red-600/20">
+                    {filteredContent.length} {t('results')}
+                </div>
+            </div>
+
+            {/* شبكة الكتب */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                {filteredContent.map((item) => (
+                    <div 
+                        key={item.id} 
+                        onMouseMove={handleMouseMove}
+                        className="glass-panel glass-card-interactive group relative overflow-hidden p-8 rounded-[3rem] border-white/20 flex flex-col justify-between hover:scale-[1.03] transition-all duration-500 h-full shadow-lg"
+                    >
+                        {ripples.map(r => <span key={r.id} className="ripple-effect bg-red-600/10" style={{ left: r.x, top: r.y }} />)}
+                        
+                        <div className="relative z-10">
+                            <div className="flex justify-between items-start mb-6">
+                                <span className="bg-red-600 text-white px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md">
+                                    {item.subject}
+                                </span>
+                                <span className="text-3xl filter grayscale group-hover:grayscale-0 transition-all duration-500">📖</span>
+                            </div>
+                            
+                            <h2 className="text-2xl font-black text-gray-950 dark:text-white mb-2 group-hover:text-red-600 transition-colors leading-tight line-clamp-2 h-16 tracking-tighter">
+                                {item.title}
+                            </h2>
+                            <p className="text-green-700 dark:text-green-400 font-black text-sm mb-6">{item.author}</p>
+                            
+                            {/* Saqr AI Summary */}
+                            <div className="bg-black/5 dark:bg-white/5 p-6 rounded-[2rem] border border-white/10 mb-8">
+                                <p className="text-[10px] text-red-600 font-black uppercase mb-3 flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></span>
+                                    {t('summaryTitle')}
+                                </p>
+                                <p className="text-gray-700 dark:text-gray-300 font-medium italic text-base leading-relaxed line-clamp-3">
+                                    "{item.summary}"
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col gap-4 z-10">
+                            <button 
+                                onClick={(e) => handleInteraction(e as any, () => setSelectedBio(item))}
+                                className="w-full bg-white/40 dark:bg-white/5 border border-red-500/30 text-gray-900 dark:text-white font-black py-4 rounded-2xl hover:bg-red-600 hover:text-white transition-all text-sm active:scale-95 shadow-sm"
+                            >
+                                {t('bio')}
+                            </button>
+                            <a 
+                                href={item.driveLink} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                onMouseDown={(e) => handleInteraction(e as any, () => {})}
+                                className="relative overflow-hidden w-full bg-gray-950 text-white dark:bg-white dark:text-gray-950 font-black py-5 rounded-[2rem] flex items-center justify-center gap-4 shadow-xl active:scale-95 transition-all group/btn"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                </svg>
+                                <span>{t('read')}</span>
+                            </a>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Author Bio Modal */}
+            {selectedBio && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 backdrop-blur-2xl animate-in fade-in duration-300" onClick={() => setSelectedBio(null)}>
+                    <div className="glass-panel w-full max-w-lg p-12 rounded-[3.5rem] border-white/20 shadow-2xl relative animate-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
+                        <button onClick={() => setSelectedBio(null)} className="absolute top-8 end-8 p-2 bg-red-600 text-white rounded-full hover:scale-110 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                        <h3 className="text-3xl font-black text-gray-950 dark:text-white mb-2">{selectedBio.author}</h3>
+                        <p className="text-red-600 font-black uppercase text-xs tracking-widest mb-8">Author Biography (AI Verified)</p>
+                        <p className="text-gray-800 dark:text-gray-200 text-xl leading-relaxed font-medium italic">"{selectedBio.bio}"</p>
+                        <div className="mt-10 pt-8 border-t border-black/5 dark:border-white/10 flex justify-center">
+                            <img src="/school-logo.png" alt="EFIIPS" className="h-12 opacity-30 logo-white-filter" />
+                        </div>
+                    </div>
+                </div>
+            )}
+            
+            {/* Branding Footer */}
+            <footer className="mt-32 flex flex-col items-center gap-4 opacity-20 hover:opacity-100 transition-opacity duration-700">
+                <img src="/school-logo.png" alt="EFIIPS" className="h-20 grayscale logo-white-filter" />
+                <p className="font-black text-[10px] uppercase tracking-[0.4em] text-gray-500 dark:text-gray-400">Emirates Falcon International Private School</p>
+            </footer>
         </div>
-      </footer>
-    </div>
-  );
+    );
 };
 
 export default EnglishLibraryInternalPage;
