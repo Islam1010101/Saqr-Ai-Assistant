@@ -97,6 +97,19 @@ img[src="/school-logo.png"] {
 /* 6. المؤشر التفاعلي واللمس */
 a, button, .group, select, input { cursor: pointer !important; }
 
+/* المؤشر المخصص (Mouse Follower) باللون الأحمر */
+.custom-cursor {
+  position: fixed;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(239, 68, 68, 0.15); /* أحمر شفاف */
+  border: 2px solid rgba(239, 68, 68, 0.4); /* إطار أحمر كريستالي */
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transition: width 0.3s, height 0.3s, background-color 0.3s;
+}
+
 /* 7. حركة الـ Bounce المنسقة مع ميل 15 درجة */
 @keyframes bounce-rotate {
   0%, 100% { transform: translateY(-5%) rotate(15deg); }
@@ -130,7 +143,7 @@ a, button, .group, select, input { cursor: pointer !important; }
   will-change: transform, opacity, filter;
 }
 
-/* 9. نظام التفاعل اللمسي (Crystal Ripple) */
+/* 9. نظام التفاعل اللمسي (Red Crystal Ripple) */
 @keyframes crystal-ripple {
   0% {
     transform: translate(-50%, -50%) scale(0);
@@ -147,7 +160,7 @@ a, button, .group, select, input { cursor: pointer !important; }
 .ripple-effect {
   position: absolute;
   border-style: solid;
-  border-color: rgba(0, 115, 47, 0.3); /* لون أخضر هوية المدرسة */
+  border-color: rgba(239, 68, 68, 0.4); /* تم التغيير للأحمر الكريستالي */
   border-radius: 50%;
   pointer-events: none;
   z-index: 50;
@@ -155,7 +168,7 @@ a, button, .group, select, input { cursor: pointer !important; }
 }
 
 .dark .ripple-effect {
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(248, 113, 113, 0.3); /* أحمر فاتح للوضع الليلي */
 }
 
 /* تخصيص إضافي لكروت المعرفة لضمان القراءة */
