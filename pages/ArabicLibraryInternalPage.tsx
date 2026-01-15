@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 // --- قاعدة البيانات الكاملة (23 مصدراً رقمياً) ---
 const ARABIC_LIBRARY_DATABASE = [
-  { id: "AR_1", title: "مجموعة روايات أجاثا كريستي", author: "أجاثا كريستي", subject: "قصص بوليسية", publisher: "الأجيال للترجمة والنشر", driveLink: "https://drive.google.com/drive/folders/1PZk0vPQrKXIgE0WmUXlEMcSzt_d94Q6u", bio: "ملكة الجريمة عالمياً، صاحبة الشخصيات الخالدة مثل هيركيول بوارو.", summary: "أضخم مجموعة لروايات التحقيق والغموض التي تتميز بحبكة عبقرية ونهايات صادمة." },
+    { id: "AR_1", title: "مجموعة روايات أجاثا كريستي", author: "أجاثا كريستي", subject: "قصص بوليسية", publisher: "الأجيال للترجمة والنشر", driveLink: "https://drive.google.com/drive/folders/1PZk0vPQrKXIgE0WmUXlEMcSzt_d94Q6u", bio: "ملكة الجريمة عالمياً، صاحبة الشخصيات الخالدة مثل هيركيول بوارو.", summary: "أضخم مجموعة لروايات التحقيق والغموض التي تتميز بحبكة عبقرية ونهايات صادمة." },
     { id: "AR_2", title: "أرض الإله", author: "أحمد مراد", subject: "أدب تاريخي", publisher: "دار الشروق", driveLink: "https://drive.google.com/file/d/1Q-dT9-g292nqv1N_PvlB2TnZMBdQGpio/view", bio: "كاتب ومصور مصري معاصر، تميز برواياته التي تمزج بين التاريخ والغموض.", summary: "رحلة تاريخية مثيرة في زمن الفراعنة تكشف أسراراً مخفية حول خروج بني إسرائيل." },
     { id: "AR_3", title: "أرض النفاق", author: "يوسف السباعي", subject: "أدب خيالي", publisher: "مكتبة مصر", driveLink: "https://drive.google.com/file/d/14KCqI_ffiUg8if8uqs_vQ-oJIXBEsKD3/view", bio: "فارس الرومانسية المصرية، وزير ثقافة سابق، اشتهر بأسلوبه الساخر.", summary: "رواية رمزية ساخرة تنتقد الأخلاق الاجتماعية عبر فكرة بيع الأخلاق في دكاكين متخصصة." },
     { id: "AR_4", title: "أكواريل", author: "أحمد خالد توفيق", subject: "أدب خيالي", publisher: "دار سما للنشر والتوزيع", driveLink: "https://drive.google.com/file/d/1NLK9-pE6uoHU8po8BC8731KIZ3oc0qU5/view", bio: "عراب أدب الرعب العربي، أول كاتب عربي برع في أدب الإثارة للشباب.", summary: "مجموعة قصصية مشوقة تأخذنا إلى عوالم من الغموض الطبي والنفسي بأسلوب العراب الفريد." },
@@ -46,31 +46,30 @@ const ARABIC_LIBRARY_DATABASE = [
     { id: "AR_40", title: "الذين كانوا", author: "نبيل فاروق", subject: "أدب خيالي", publisher: "سبارك للنشر والتوزيع", driveLink: "https://drive.google.com/file/d/1dDnEc6sG2LKVQDKlIw6ZL0x4lNKJtNOs/view", bio: "أديب الملايين الذي أثرى المكتبة العربية بمئات روايات الجيب.", summary: "قصص خيالية مثيرة حول حضارات بائدة وكائنات مجهولة تعود للظهور." },
     { id: "AR_41", title: "ألف اختراع واختراع", author: "رولاند جاكسون", subject: "التراث العربي", publisher: "ناشونال جيوجرافيك", driveLink: "https://drive.google.com/file/d/1_4IKkimJy1MmApcRz_0HA9_wKWy6H-Mp", bio: "باحث ومؤرخ اهتم بإبراز الإسهامات العلمية للحضارة الإسلامية.", summary: "موسوعة مصورة مذهلة تستعرض الإنجازات العلمية الإسلامية التي شكلت عالمنا الحديث." }
 ];
-
 const translations = {
     ar: {
         pageTitle: "المكتبة العربية",
         searchPlaceholder: "ابحث عن عنوان أو كاتب...",
         allSubjects: "المواضيع",
         allAuthors: "المؤلفين",
-        read: "قراءة المصدر",
+        read: "قراءة المحتوى",
         bioTitle: "نبذة عن المؤلف",
         summaryTitle: "ملخص صقر الذكي",
         back: "العودة للبوابة",
         close: "إغلاق",
-        locationLabel: "الموقع الرقمي"
+        locationLabel: "EFIPS"
     },
     en: {
         pageTitle: "Arabic Library",
         searchPlaceholder: "Search title or author...",
         allSubjects: "Subjects",
         allAuthors: "Authors",
-        read: "Read Source",
+        read: "Read The Content",
         bioTitle: "Author Biography",
         summaryTitle: "Saqr AI Summary",
         back: "Back to Portal",
         close: "Close",
-        locationLabel: "Digital Location"
+        locationLabel: "EFIPS"
     }
 };
 
@@ -92,12 +91,12 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
                     
                     <div className="mb-6 p-5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/5 text-start">
                          <p className="text-[9px] text-green-700 dark:text-green-400 font-black uppercase mb-2 tracking-widest">{t('bioTitle')}</p>
-                         <p className="text-sm font-medium leading-relaxed text-slate-600 dark:text-slate-300 italic">"{book.bio}"</p>
+                         <p className="text-sm font-bold leading-relaxed text-slate-600 dark:text-slate-300">{book.bio}</p>
                     </div>
 
                     <div className="bg-slate-100/50 dark:bg-white/5 p-6 rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-white/10 text-start">
                         <p className="text-[10px] text-red-600 font-black uppercase mb-3 tracking-widest flex items-center gap-2"><span className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></span> {t('summaryTitle')}</p>
-                        <p className="text-slate-800 dark:text-slate-200 text-lg font-medium leading-relaxed italic">"{book.summary}"</p>
+                        <p className="text-slate-800 dark:text-slate-200 text-lg font-bold leading-relaxed">"{book.summary}"</p>
                     </div>
                 </div>
 
@@ -118,13 +117,12 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
 const BookCard = React.memo(({ book, onClick, t, onAuthorHover }: { book: any; onClick: () => void; t: any; onAuthorHover: (e: React.MouseEvent, bio: string | null) => void }) => (
     <div 
         onClick={onClick} 
-        className="group relative glass-panel bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border border-white/30 dark:border-white/5 rounded-[2.5rem] transition-all duration-300 cursor-pointer flex flex-col h-full overflow-hidden shadow-lg active:scale-95 hover:border-green-600/50 hover:shadow-[0_0_30px_rgba(5,150,105,0.3)]"
+        className="group relative glass-panel bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border border-white/30 dark:border-white/5 rounded-[2rem] transition-all duration-300 cursor-pointer flex flex-col h-full overflow-hidden shadow-lg active:scale-95 hover:border-green-600/50 hover:shadow-[0_0_30px_rgba(5,150,105,0.3)]"
     >
         <div className="p-8 flex-grow text-start">
              <span className="inline-block px-2.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest mb-4 bg-green-600 text-white shadow-sm">{book.subject}</span>
-            <h3 className="font-black text-xl text-slate-950 dark:text-white leading-tight mb-2 tracking-tighter group-hover:text-green-700 transition-colors line-clamp-2">{book.title}</h3>
+            <h2 className="font-black text-xl text-slate-950 dark:text-white leading-relaxed mb-2 tracking-tighter group-hover:text-green-700 transition-colors line-clamp-2">{book.title}</h2>
             
-            {/* تم نقل النبذة للهنت العائم وتوضيح اسم المؤلف فقط */}
             <p 
                 onMouseMove={(e) => onAuthorHover(e, book.bio)}
                 onMouseLeave={(e) => onAuthorHover(e, null)}
@@ -134,7 +132,7 @@ const BookCard = React.memo(({ book, onClick, t, onAuthorHover }: { book: any; o
             </p>
         </div>
         <div className="bg-white/40 dark:bg-black/20 py-4 px-8 border-t border-white/10 mt-auto text-center">
-            <p className="font-black text-slate-900 dark:text-white text-[10px] uppercase tracking-[0.4em] opacity-40">National Library System</p>
+            <p className="font-black text-slate-900 dark:text-white text-[10px] uppercase tracking-[0.4em] opacity-40">{t('locationLabel')}</p>
         </div>
     </div>
 ));
@@ -151,17 +149,9 @@ const ArabicLibraryInternalPage: React.FC = () => {
     const [selectedBook, setSelectedBook] = useState<any>(null);
     const [tooltip, setTooltip] = useState<{ text: string, x: number, y: number } | null>(null);
 
-    // دالة التعامل مع الهنت العائم
     const handleAuthorHover = (e: React.MouseEvent, bio: string | null) => {
-        if (!bio) {
-            setTooltip(null);
-            return;
-        }
-        setTooltip({
-            text: bio,
-            x: e.clientX,
-            y: e.clientY - 40 // يظهر فوق الماوس قليلاً
-        });
+        if (!bio) { setTooltip(null); return; }
+        setTooltip({ text: bio, x: e.clientX, y: e.clientY - 40 });
     };
 
     const filters = useMemo(() => ({
@@ -181,8 +171,6 @@ const ArabicLibraryInternalPage: React.FC = () => {
 
     return (
         <div dir={dir} className="max-w-7xl mx-auto px-4 pb-24 relative z-10">
-            
-            {/* الهنت العائم لمؤلف الكتاب (فقط للشاشات التي تستخدم الماوس) */}
             {tooltip && (
                 <div 
                     className="fixed pointer-events-none z-[200] glass-panel px-5 py-3 rounded-2xl border-white/40 shadow-2xl animate-in fade-in zoom-in duration-300 max-w-xs"
@@ -221,7 +209,6 @@ const ArabicLibraryInternalPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* شبكة الكروت: متجاوبة تماماً للجوال واللوحيات */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 animate-fade-up">
                 {filteredBooks.map((book) => (
                     <BookCard 
