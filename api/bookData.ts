@@ -18,7 +18,7 @@ const rawBookData = [
 { "title": "PREPARING FOR ADOLESCENCE", "author": "James Dobson", "shelf": 4, "row": 1 },
 { "title": "Black Canadians", "author": "Joseph Mensah", "shelf": 4, "row": 1 },
 { "title": "HOW TO STOP THE ONE YOU LOVE FROM DRINKING", "author": "Mary Ellen Pinkham", "shelf": 4, "row": 1 },
-{ "title": "To Buy Almost Any Drug Without A Prescription", "author": "", "shelf": 4, "row": 1 },
+{ "title": "To Buy Almost Any Drug Without A Prescription", "author": "James H. Johnson", "shelf": 4, "row": 1 },
 { "title": "PSYCHOLOGICAL SYMPTOMS", "author": "Frank J. Bruno", "shelf": 4, "row": 1 },
 { "title": "A WALK DOWN WALL STREET", "author": "Burton Malkiel", "shelf": 4, "row": 1 },
 { "title": "PRINCIPLE-CENTERED LEADERSHIP", "author": "STEPHEN R. COVEY", "shelf": 4, "row": 1 },
