@@ -4,8 +4,8 @@ import { useLanguage } from '../App';
 const translations = {
     ar: {
         pageTitle: "تقارير المكتبة",
-        secureTitle: "بوابة الوصول الاستراتيجي",
-        passPlaceholder: "أدخل الرمز السري للوصول",
+        secureTitle: "الاحصاءات والتقارير",
+        passPlaceholder: "أدخل الرمز السري للدخول",
         authBtn: "تحقق من الهوية",
         errorPass: "الرمز غير صحيح، يرجى المحاولة مرة أخرى",
         printReport: "طباعة تقرير",
@@ -16,8 +16,8 @@ const translations = {
     },
     en: {
         pageTitle: "Library Reports",
-        secureTitle: "Strategic Access Gateway",
-        passPlaceholder: "Enter security code to access",
+        secureTitle: "Statistics & reports",
+        passPlaceholder: "Enter pin code to access",
         authBtn: "Verify Identity",
         errorPass: "Incorrect code, please try again",
         printReport: "Print Report",
