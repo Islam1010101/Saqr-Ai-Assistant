@@ -50,6 +50,7 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
 
     useEffect(() => {
         if (!book) { setAiSummary(''); setAiGenre(''); return; }
+        
         const fetchAiData = async () => {
             setIsLoading(true);
             try {
@@ -57,16 +58,33 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        messages: [{ role: 'system', content: `Analyze "${book.title}" by "${book.author}". Return JSON: {"summary": "2 sentences", "genre": "1-word category in ${locale === 'ar' ? 'Arabic' : 'English'}"}` }],
+                        messages: [{ 
+                            role: 'system', 
+                            content: `You are Saqr AI Librarian. Research the book titled "${book.title}" written by "${book.author}". Provide a 2-sentence inspiring summary and a 1-word category. Respond in ${locale === 'ar' ? 'Arabic' : 'English'}. Return ONLY a JSON object: {"summary": "...", "genre": "..."}` 
+                        }],
                         locale
                     }),
                 });
+                
                 const data = await res.json();
-                const parsed = typeof data.reply === 'string' ? JSON.parse(data.reply) : data;
-                setAiSummary(parsed.summary || data.reply);
-                setAiGenre(parsed.genre || '');
-            } catch (e) { setAiSummary(book.summary || 'Resource processing...'); }
-            finally { setIsLoading(false); }
+                let replyText = data.reply || "";
+                
+                // تنظيف الاستجابة من علامات المارك داون في حال أرسلها الذكاء الاصطناعي
+                replyText = replyText.replace(/```json|```/gi, '').trim();
+                
+                try {
+                    const parsed = JSON.parse(replyText);
+                    setAiSummary(parsed.summary || "");
+                    setAiGenre(parsed.genre || "");
+                } catch (parseErr) {
+                    // إذا لم يكن JSON صحيحاً، استخدم الرد كنص مباشر للسامري
+                    setAiSummary(replyText);
+                }
+            } catch (e) { 
+                setAiSummary(book.summary || 'Summary unavailable at the moment.'); 
+            } finally { 
+                setIsLoading(false); 
+            }
         };
         fetchAiData();
     }, [book, locale]);
@@ -90,8 +108,16 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                             <span className="w-2 h-2 bg-red-600 rounded-full animate-pulse shadow-lg"></span>
                             {t('officialAi')}
                         </p>
-                        {isLoading ? <div className="space-y-3 animate-pulse"><div className="h-4 bg-slate-300 dark:bg-white/10 rounded w-full"></div><div className="h-4 bg-slate-300 dark:bg-white/10 rounded w-5/6"></div></div> :
-                        <p className="text-slate-800 dark:text-slate-200 text-lg md:text-xl font-medium leading-relaxed">"{aiSummary || book.summary}"</p>}
+                        {isLoading ? (
+                            <div className="space-y-3 animate-pulse">
+                                <div className="h-4 bg-slate-300 dark:bg-white/10 rounded w-full"></div>
+                                <div className="h-4 bg-slate-300 dark:bg-white/10 rounded w-5/6"></div>
+                            </div>
+                        ) : (
+                            <p className="text-slate-800 dark:text-slate-200 text-lg md:text-xl font-medium leading-relaxed">
+                                "{aiSummary || book.summary || 'Fetching best summary...'}"
+                            </p>
+                        )}
                     </div>
                 </div>
 
@@ -169,7 +195,6 @@ const SearchPage: React.FC = () => {
 
     return (
         <div dir={dir} className="max-w-7xl mx-auto px-4 pb-24 relative z-10">
-            {/* شريط البحث المطور للاستجابة */}
             <div className="sticky top-24 z-50 mb-10 animate-fade-up">
                 <div className="glass-panel p-3 md:p-4 rounded-[2rem] shadow-xl border-none backdrop-blur-3xl max-w-5xl mx-auto">
                     <div className="flex flex-col gap-3">
@@ -189,7 +214,6 @@ const SearchPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* شبكة البطاقات الاستجابة (Responsive Grid) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 animate-fade-up">
                 {filteredBooks.slice(0, visibleCount).map((book) => (
                     <BookCard key={book.id} book={book} t={t} onClick={() => setSelectedBook(book)} />
@@ -203,12 +227,6 @@ const SearchPage: React.FC = () => {
                     <button onClick={() => setVisibleCount(prev => prev + 16)} className="bg-slate-950 text-white dark:bg-white dark:text-black px-10 md:px-16 py-4 rounded-xl md:rounded-2xl font-black text-lg md:text-xl shadow-2xl hover:scale-105 active:scale-90 transition-all uppercase tracking-widest">
                         Load More
                     </button>
-                </div>
-            )}
-            
-            {filteredBooks.length === 0 && (
-                <div className="mt-20 text-center opacity-40">
-                    <p className="text-2xl font-black text-slate-400 uppercase tracking-widest">{t('noResults')}</p>
                 </div>
             )}
         </div>
