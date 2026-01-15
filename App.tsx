@@ -55,58 +55,62 @@ const FloatingSaqr: React.FC = () => {
   );
 };
 
-// -------- 2. هيدر EFIPS المتطور (Responsive Header) --------
+// -------- 2. هيدر EFIPS المطور (Mobile Horizontal Scroll Edition) --------
 const Header: React.FC = () => {
   const { locale, setLocale } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
 
+  // كافة الروابط بما فيها التقارير وعن المكتبة
   const links = [
     { path: '/', label: locale === 'en' ? 'Home' : 'الرئيسية', icon: '🏠' },
     { path: '/search', label: locale === 'en' ? 'Search' : 'البحث', icon: '🔍' },
     { path: '/digital-library', label: locale === 'en' ? 'E-Lib' : 'المكتبة', icon: '📚' },
     { path: '/smart-search', label: locale === 'en' ? 'Saqr AI' : 'صقر AI', icon: '🤖' },
+    { path: '/reports', label: locale === 'en' ? 'Stats' : 'التقارير', icon: '📊' },
+    { path: '/about', label: locale === 'en' ? 'About' : 'عن المكتبة', icon: 'ℹ️' },
   ];
 
   return (
     <header className="sticky top-4 z-[60] px-3 md:px-8">
-      <div className="glass-panel mx-auto max-w-7xl p-1.5 md:p-3 rounded-full border-white/20 dark:border-white/5 flex justify-between items-center shadow-xl backdrop-blur-2xl">
+      <div className="glass-panel mx-auto max-w-7xl p-1.5 md:p-3 rounded-full border-white/20 dark:border-white/5 flex items-center justify-between shadow-xl backdrop-blur-2xl overflow-hidden">
         
-        {/* Identity & School Name */}
+        {/* Logo & School Name */}
         <Link to="/" className="flex items-center gap-2 md:gap-3 ps-2 md:ps-4 group flex-shrink-0">
           <img 
             src="/school-logo.png" 
             alt="EFIPS" 
             className="h-8 w-8 md:h-11 md:w-11 object-contain logo-white-filter rotate-6 transition-transform group-hover:scale-110" 
           />
-          <div className="hidden lg:block leading-none text-start max-w-[180px] xl:max-w-none">
-            <span className="font-black text-slate-950 dark:text-white text-[9px] md:text-[11px] tracking-tight block uppercase break-words">
+          <div className="hidden sm:block leading-none text-start max-w-[120px] md:max-w-none">
+            <span className="font-black text-slate-950 dark:text-white text-[8px] md:text-[10px] tracking-tight block uppercase">
               {locale === 'en' ? "Emirates Falcon Int'l. Private School" : "مدرسة صقر الإمارات الدولية الخاصة"}
             </span>
-            <div className="h-0.5 w-6 bg-red-600 rounded-full mt-1 group-hover:w-full transition-all"></div>
           </div>
         </Link>
         
-        {/* Compact Navigation */}
-        <nav className="flex items-center bg-black/5 dark:bg-white/5 rounded-full p-1 gap-0.5 md:gap-1 overflow-x-auto no-scrollbar">
-          {links.map(l => (
-            <Link 
-              key={l.path} 
-              to={l.path} 
-              className={`px-3 md:px-5 py-2 md:py-2.5 rounded-full text-[9px] md:text-xs font-black transition-all flex items-center gap-1.5 whitespace-nowrap ${
-                location.pathname === l.path 
-                  ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950 shadow-lg' 
-                  : 'text-slate-500 dark:text-slate-400 hover:text-red-600'
-              }`}
-            >
-              <span className="text-xs md:text-sm">{l.icon}</span>
-              <span className={l.path === '/' ? 'inline' : 'hidden sm:inline'}>{l.label}</span>
-            </Link>
-          ))}
+        {/* القائمة القابلة للسحب يميناً ويساراً على الموبايل */}
+        <nav className="flex items-center bg-black/5 dark:bg-white/5 rounded-full p-1 mx-2 overflow-x-auto no-scrollbar flex-nowrap flex-1 lg:flex-none">
+          <div className="flex items-center gap-0.5 md:gap-1 flex-nowrap">
+            {links.map(l => (
+              <Link 
+                key={l.path} 
+                to={l.path} 
+                className={`px-3 md:px-5 py-2 md:py-2.5 rounded-full text-[9px] md:text-xs font-black transition-all flex items-center gap-1.5 whitespace-nowrap ${
+                  location.pathname === l.path 
+                    ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950 shadow-lg' 
+                    : 'text-slate-500 dark:text-slate-400 hover:text-red-600'
+                }`}
+              >
+                <span className="text-xs md:text-sm">{l.icon}</span>
+                <span>{l.label}</span>
+              </Link>
+            ))}
+          </div>
         </nav>
         
-        {/* Quick Tools */}
-        <div className="flex items-center gap-1.5 pe-2 md:pe-4">
+        {/* Tools */}
+        <div className="flex items-center gap-1.5 pe-2 md:pe-4 flex-shrink-0">
           <button 
             onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')} 
             className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-slate-950 dark:text-white font-black text-[9px] md:text-xs border border-slate-200 dark:border-white/10 rounded-full hover:border-red-600 transition-all"
@@ -126,7 +130,7 @@ const Header: React.FC = () => {
   );
 };
 
-// -------- 3. سياق اللغة والثيم (Default: English) --------
+// -------- 3. سياق اللغة والثيم (Core) --------
 const LanguageContext = createContext<any>(null);
 export const useLanguage = () => useContext(LanguageContext);
 const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
