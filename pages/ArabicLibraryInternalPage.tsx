@@ -56,7 +56,7 @@ const translations = {
         read: "قراءة المحتوى",
         bioTitle: "حول المؤلف",
         summaryTitle: "ملخص صقر الذكي",
-        back: "العودة للبوابة",
+        back: "العودة",
         close: "إغلاق",
         locationLabel: "EFIPS"
     },
@@ -68,7 +68,7 @@ const translations = {
         read: "Read Content",
         bioTitle: "About Author",
         summaryTitle: "Saqr AI Summary",
-        back: "Back to Portal",
+        back: "Back",
         close: "Close",
         locationLabel: "EFIPS"
     }
@@ -77,33 +77,33 @@ const translations = {
 const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any; onAuthorHover: (e: React.MouseEvent, bio: string | null) => void }> = ({ book, onClose, t, onAuthorHover }) => {
     if (!book) return null;
     return (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 backdrop-blur-3xl animate-in fade-in duration-300" onClick={onClose}>
-            <div className="glass-panel w-full max-w-4xl rounded-[2.5rem] md:rounded-[3.5rem] border-none shadow-2xl overflow-y-auto max-h-[90vh] md:overflow-hidden relative animate-in zoom-in-95 duration-300 flex flex-col md:flex-row bg-white/95 dark:bg-slate-950/95" onClick={(e) => e.stopPropagation()}>
-                <button onClick={onClose} className="absolute top-4 end-4 md:top-6 md:end-6 z-50 p-2.5 bg-red-600 text-white rounded-full hover:scale-110 active:scale-90 transition-all shadow-lg">
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 backdrop-blur-3xl animate-in fade-in duration-500" onClick={onClose}>
+            <div className="glass-panel w-full max-w-4xl rounded-[3rem] border-none shadow-2xl overflow-y-auto max-h-[90vh] md:overflow-hidden relative animate-in zoom-in-95 duration-500 flex flex-col md:flex-row bg-white/95 dark:bg-slate-950/95" onClick={(e) => e.stopPropagation()}>
+                <button onClick={onClose} className="absolute top-6 end-6 z-50 p-2.5 bg-red-600 text-white rounded-full hover:scale-110 active:scale-90 transition-all shadow-lg">
                     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}><path d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
                 
-                <div className="flex-1 p-8 md:p-14 flex flex-col justify-center border-b md:border-b-0 md:border-e border-slate-200 dark:border-white/10 text-start">
-                    <div className="mb-8">
-                        <span className="inline-block px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest mb-5 bg-green-600 text-white shadow-md">{book.subject}</span>
-                        <h2 className="text-3xl md:text-5xl font-black text-slate-950 dark:text-white leading-[1.1] mb-2 tracking-tighter">{book.title}</h2>
+                <div className="flex-1 p-10 md:p-14 flex flex-col justify-center border-b md:border-b-0 md:border-e border-slate-200 dark:border-white/10 text-start">
+                    <div className="mb-10">
+                        <span className="inline-block px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest mb-6 bg-green-600 text-white shadow-md">{book.subject}</span>
+                        <h2 className="text-3xl md:text-5xl font-black text-slate-950 dark:text-white leading-[1.1] mb-3 tracking-tighter">{book.title}</h2>
                         <p 
                             onMouseMove={(e) => onAuthorHover(e, book.bio)}
                             onMouseLeave={(e) => onAuthorHover(e, null)}
-                            className="text-lg text-slate-500 font-bold hover:text-red-600 transition-colors inline-block cursor-help border-b-2 border-dotted border-slate-300"
+                            className="text-xl text-slate-500 font-bold hover:text-red-600 transition-colors inline-block cursor-help border-b-2 border-dotted border-slate-300"
                         >
                             By {book.author}
                         </p>
                     </div>
 
-                    <div className="bg-slate-100/50 dark:bg-white/5 p-6 md:p-8 rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-white/10">
+                    <div className="bg-slate-100/50 dark:bg-white/5 p-8 rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-white/10">
                         <p className="text-[10px] text-red-600 font-black uppercase mb-4 tracking-widest flex items-center gap-2"><span className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></span> {t('summaryTitle')}</p>
-                        <p className="text-slate-800 dark:text-slate-200 text-lg md:text-xl font-bold leading-relaxed">{book.summary}</p>
+                        <p className="text-slate-800 dark:text-slate-200 text-xl font-black leading-relaxed">{book.summary}</p>
                     </div>
                 </div>
 
-                <div className="w-full md:w-[320px] bg-slate-950 dark:bg-black p-8 md:p-10 flex flex-col justify-center items-center text-center text-white relative">
-                    <div className="space-y-8 md:space-y-10 relative z-10 w-full">
+                <div className="w-full md:w-[300px] bg-slate-950 dark:bg-black p-10 flex flex-col justify-center items-center text-center text-white relative">
+                    <div className="space-y-10 relative z-10 w-full">
                         <div>
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-8">{t('locationLabel')}</p>
                             <a href={book.driveLink} target="_blank" rel="noopener noreferrer" className="w-full bg-red-600 text-white font-black py-5 rounded-2xl flex items-center justify-center gap-3 hover:bg-red-700 active:scale-95 shadow-xl transition-all"><span className="text-sm uppercase tracking-widest">{t('read')}</span></a>
@@ -172,11 +172,11 @@ const ArabicLibraryInternalPage: React.FC = () => {
         <div dir={dir} className="max-w-7xl mx-auto px-4 pb-24 relative z-10 text-start">
             {tooltip && (
                 <div 
-                    className="fixed pointer-events-none z-[200] glass-panel px-5 py-3 rounded-2xl border-white/40 shadow-2xl animate-in fade-in zoom-in duration-300 max-w-xs"
+                    className="fixed pointer-events-none z-[200] glass-panel px-5 py-3 rounded-2xl border-white/40 shadow-2xl animate-in fade-in zoom-in duration-200 max-w-xs transition-opacity"
                     style={{ left: tooltip.x, top: tooltip.y, transform: 'translate(-50%, -100%)' }}
                 >
                     <p className="text-[10px] font-black text-red-600 uppercase mb-1 tracking-widest">{t('bioTitle')}</p>
-                    <p className="text-xs font-bold text-slate-900 dark:text-white leading-relaxed">{tooltip.text}</p>
+                    <p className="text-xs font-black text-slate-900 dark:text-white leading-relaxed">{tooltip.text}</p>
                 </div>
             )}
 
