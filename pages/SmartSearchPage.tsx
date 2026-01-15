@@ -116,7 +116,7 @@ const SmartSearchPage: React.FC = () => {
   };
 
   return (
-    <div dir={dir} className="max-w-6xl mx-auto px-2 sm:px-6 pt-4 md:pt-10 pb-20 animate-fade-up relative">
+    <div dir={dir} className="max-w-6xl mx-auto px-2 sm:px-6 pt-4 md:pt-10 pb-20 animate-fade-up relative text-start antialiased">
       
       <div 
         onMouseMove={handleMouseMove}
