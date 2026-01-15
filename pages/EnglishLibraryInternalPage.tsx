@@ -13,7 +13,7 @@ interface Book {
   summary: string;
 }
 
-// --- 2. قاعدة البيانات المعدلة (33 عنواناً) ---
+// --- 2. قاعدة البيانات المعدلة (34 عنواناً) ---
 const ENGLISH_LIBRARY_DATABASE: Book[] = [
   { id: 1, title: "Me Before You", author: "Jojo Moyes", subject: "Drama", driveLink: "https://drive.google.com/file/d/1eDq03Myjh56IRtLx1LIRJHa39PLnMvgf/view", bio: "British author famous for her emotionally resonant romantic stories.", summary: "A heart-wrenching story of a young woman who becomes a caregiver for a wealthy man." },
   { id: 2, title: "The Great Gatsby", author: "Scott Fitzgerald", subject: "Drama", driveLink: "https://drive.google.com/file/d/1NjrAuiFno2Aa-z6WYkRI17oD2Hxkvs-M/view", bio: "A master of the Jazz Age, famous for his critiques of the American Dream.", summary: " Jay Gatsby's obsessive pursuit of wealth and the woman he loves in the 1920s." },
@@ -48,6 +48,7 @@ const ENGLISH_LIBRARY_DATABASE: Book[] = [
   { id: 31, title: "Mindset", author: "Carol S. Dweck", subject: "H.D", driveLink: "https://drive.google.com/file/d/1I3Qw2AiQoRmwMD4wekClIY1Xw78nYGqu/view", bio: "Stanford psychologist who discovered the power of the growth mindset.", summary: "A look at how our beliefs about our abilities dictate our success." },
   { id: 32, title: "The 5 Second Rule", author: "Mel Robbins", subject: "H.D", driveLink: "https://drive.google.com/file/d/1TywPMLWwsIJn56Ip6cyiE_X7j9ahj6hR/view", bio: "One of the world's most booked motivational speakers and TV hosts.", summary: "A simple tool to stop hesitating and start taking action in 5 seconds." },
   { id: 33, title: "The 7 Habits of Highly Effective People", author: "Stephen R. Covey", subject: "H.D", driveLink: "https://drive.google.com/file/d/14KC3CukTeGBiExQOygOi9-4ES5MgYCXV/view", bio: "A world-renowned authority on leadership and family dynamics.", summary: "Seven principles for solving personal and professional problems." }
+  { id: 34, title: "Who Will Cry When You Die?", author: "Robin Sharma", subject: "H.D", driveLink: "https://drive.google.com/file/d/1j9pgm1Kug2IAZ5JdXzG2pb6fCwvSBPYf/view?usp=drive_link", bio: "He is a Helper and a Writer.", summary: "Live your life so well that when you are gone, people will miss you and remember you with love." }
 ];
 
 const translations = {
