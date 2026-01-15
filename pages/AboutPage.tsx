@@ -95,14 +95,14 @@ const AboutPage: React.FC = () => {
 
                 {/* كارت تواصل مع أمين المكتبة (Hyperlink) */}
                 <a 
-                    href="mailto:islam.soliman@falcon-school.com"
+                    href="mailto:islam.ahmed@falcon-school.com"
                     className="lg:col-span-5 glass-panel p-8 md:p-12 rounded-[3rem] border-none shadow-[0_30px_80px_rgba(0,0,0,0.1)] flex flex-col justify-center items-center text-center transition-all duration-500 hover:shadow-[0_40px_100px_rgba(220,38,38,0.2)] active:scale-95 group bg-white/80 dark:bg-slate-900/80 cursor-pointer"
                 >
                     <div className="w-16 h-16 bg-red-600/10 rounded-full flex items-center justify-center mb-8 text-red-600 shadow-inner group-hover:scale-110 transition-transform">
                         <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M3 8l7.89 5.26a2 2 0 002.22 0L22 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                     </div>
                     <h2 className="text-2xl md:text-3xl font-black text-slate-950 dark:text-white mb-4 tracking-tighter uppercase">{t('contactLink')}</h2>
-                    <p className="text-red-600 font-black text-sm tracking-widest transition-all group-hover:tracking-[0.2em] break-all px-2 border-b-2 border-transparent group-hover:border-red-600">islam.soliman@falcon-school.com</p>
+                    <p className="text-red-600 font-black text-sm tracking-widest transition-all group-hover:tracking-[0.2em] break-all px-2 border-b-2 border-transparent group-hover:border-red-600">islam.ahmed@falcon-school.com</p>
                 </a>
 
                 {/* خدمات المكتبة المدرسية */}
