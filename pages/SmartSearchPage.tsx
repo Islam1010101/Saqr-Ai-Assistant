@@ -33,6 +33,13 @@ const translations = {
   },
 };
 
+// --- دالة التتبع والتحليل لصفحة التقارير ---
+const trackActivity = (type: 'searched' | 'digital' | 'ai', label: string) => {
+    const logs = JSON.parse(localStorage.getItem('efips_activity_logs') || '[]');
+    logs.push({ type, label, date: new Date().toISOString() });
+    localStorage.setItem('efips_activity_logs', JSON.stringify(logs));
+};
+
 const SmartSearchPage: React.FC = () => {
   const { locale, dir } = useLanguage();
   const isAr = locale === 'ar';
@@ -77,6 +84,10 @@ const SmartSearchPage: React.FC = () => {
 
   const handleSendMessage = async () => {
     if (input.trim() === '' || isLoading) return;
+
+    // --- تنفيذ التتبع والتحليل هنا ---
+    trackActivity('ai', input.trim());
+
     const userMessage: ChatMessage = { role: 'user', content: input.trim() };
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
@@ -107,12 +118,10 @@ const SmartSearchPage: React.FC = () => {
   return (
     <div dir={dir} className="max-w-6xl mx-auto px-2 sm:px-6 pt-4 md:pt-10 pb-20 animate-fade-up relative">
       
-      {/* الكارت الذكي الموحد - بدون عناوين خارجية أو ملصقات زائدة */}
       <div 
         onMouseMove={handleMouseMove}
         className="flex flex-col h-[82vh] glass-panel rounded-[2.5rem] md:rounded-[4.5rem] shadow-[0_40px_100px_rgba(0,0,0,0.12)] overflow-hidden border-none relative transition-all duration-500"
       >
-        {/* بار الهوية النخبوي */}
         <div className="relative p-5 sm:p-8 border-b border-slate-200 dark:border-white/5 bg-white/60 dark:bg-slate-900/60 backdrop-blur-3xl flex items-center justify-between z-20">
           <div className="flex items-center gap-4">
             <div className="relative">
@@ -126,7 +135,6 @@ const SmartSearchPage: React.FC = () => {
           </div>
         </div>
 
-        {/* منطقة الرسائل الاستجابية */}
         <div className="flex-1 p-4 sm:p-10 overflow-y-auto space-y-8 bg-slate-50/10 dark:bg-black/10 relative z-10 no-scrollbar">
           {messages.map((msg, index) => (
             <div key={index} className={`flex items-start gap-3 sm:gap-6 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'} animate-fade-up`}>
@@ -156,14 +164,13 @@ const SmartSearchPage: React.FC = () => {
               <div className="px-5 py-3 rounded-full bg-green-600/5 flex gap-1.5">
                   <div className="w-1.5 h-1.5 bg-green-600 rounded-full animate-bounce"></div>
                   <div className="w-1.5 h-1.5 bg-green-600 rounded-full animate-bounce [animation-delay:-0.2s]"></div>
-                  <div className="w-1.5 h-1.5 bg-green-600 rounded-full animate-bounce [animation-delay:-0.4s]"></div>
+                  <div className="h-1.5 w-1.5 bg-green-600 rounded-full animate-bounce [animation-delay:-0.4s]"></div>
               </div>
             </div>
           )}
           <div ref={messagesEndRef} />
         </div>
 
-        {/* حقل الإدخال الذكي */}
         <div className="p-4 sm:p-8 bg-white/80 dark:bg-slate-900/80 border-t border-slate-200 dark:border-white/5 backdrop-blur-3xl z-20">
           <div className="max-w-4xl mx-auto relative">
             <input
@@ -180,7 +187,7 @@ const SmartSearchPage: React.FC = () => {
               disabled={isLoading || !input.trim()}
               className="absolute inset-y-2 sm:inset-y-3 end-2 sm:end-3 w-12 h-12 sm:w-20 sm:h-20 flex items-center justify-center bg-red-600 text-white rounded-[1.4rem] sm:rounded-[2.2rem] shadow-xl hover:bg-red-700 active:scale-90 transition-all disabled:opacity-10 overflow-hidden"
             >
-              {ripples.map(r => <span key={r.id} className="ripple-effect bg-white/20" style={{ left: r.x, top: r.y }} />)}
+              {ripples.map(r => <span key={r.id} className="ripple-effect bg-white/30" style={{ left: r.x, top: r.y }} />)}
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 sm:h-9 sm:w-9 rotate-[-45deg] rtl:rotate-[135deg]" fill="none" viewBox="0 0 24 24" strokeWidth={3.5} stroke="currentColor">
                 <path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
               </svg>
