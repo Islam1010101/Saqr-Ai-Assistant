@@ -13,7 +13,7 @@ const useDebounce = <T,>(value: T, delay: number): T => {
 
 const translations = {
   ar: {
-    pageTitle: "الفهرس الوطني الذكي",
+    pageTitle: "مكتبة مدرسة صقر الإمارات",
     searchPlaceholder: "ابحث عن عنوان أو مؤلف...",
     allSubjects: "المواضيع",
     allAuthors: "المؤلفين",
@@ -27,7 +27,7 @@ const translations = {
     officialAi: "ملخص صقر AI الرسمي"
   },
   en: {
-    pageTitle: "National Smart Index",
+    pageTitle: "Index for Falcon School Library",
     searchPlaceholder: "Search title or author...",
     allSubjects: "Subjects",
     allAuthors: "Authors",
