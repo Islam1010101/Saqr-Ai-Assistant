@@ -48,7 +48,7 @@ const ENGLISH_LIBRARY_DATABASE: Book[] = [
   { id: 31, title: "Mindset", author: "Carol S. Dweck", subject: "H.D", driveLink: "https://drive.google.com/file/d/1I3Qw2AiQoRmwMD4wekClIY1Xw78nYGqu/view", bio: "Stanford psychologist who discovered the power of the growth mindset.", summary: "A look at how our beliefs about our abilities dictate our success." },
   { id: 32, title: "The 5 Second Rule", author: "Mel Robbins", subject: "H.D", driveLink: "https://drive.google.com/file/d/1TywPMLWwsIJn56Ip6cyiE_X7j9ahj6hR/view", bio: "One of the world's most booked motivational speakers and TV hosts.", summary: "A simple tool to stop hesitating and start taking action in 5 seconds." },
   { id: 33, title: "The 7 Habits of Highly Effective People", author: "Stephen R. Covey", subject: "H.D", driveLink: "https://drive.google.com/file/d/14KC3CukTeGBiExQOygOi9-4ES5MgYCXV/view", bio: "A world-renowned authority on leadership and family dynamics.", summary: "Seven principles for solving personal and professional problems." },
-  { id: 34, title: "Who Will Cry When You Die?", author: "Robin Sharma", subject: "H.D", driveLink: "https://drive.google.com/file/d/1j9pgm1Kug2IAZ5JdXzG2pb6fCwvSBPYf/view?usp=drive_link", bio: "He is a Helper and a Writer.", summary: "Live your life so well that when you are gone, people will miss you and remember you with love." }
+  { id: 34, title: "Who Will Cry When You Die?", author: "Robin Sharma", subject: "H.D", driveLink: "https://drive.google.com/file/d/1j9pgm1Kug2IAZ5JdXzG2pb6fCwvSBPYf/view", bio: "He is a Helper and a Writer.", summary: "Live your life so well that when you are gone, people will miss you and remember you with love." }
 ];
 
 const translations = {
@@ -78,6 +78,13 @@ const translations = {
     }
 };
 
+// --- دالة التتبع والتحليل لصفحة التقارير ---
+const trackActivity = (type: 'searched' | 'digital' | 'ai', label: string) => {
+    const logs = JSON.parse(localStorage.getItem('efips_activity_logs') || '[]');
+    logs.push({ type, label, date: new Date().toISOString() });
+    localStorage.setItem('efips_activity_logs', JSON.stringify(logs));
+};
+
 const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any; onAuthorHover: (e: React.MouseEvent, bio: string | null) => void }> = ({ book, onClose, t, onAuthorHover }) => {
     if (!book) return null;
     return (
@@ -101,7 +108,15 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any; onAu
                     <div className="space-y-10 relative z-10 w-full">
                         <div>
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-8">{t('locationLabel')}</p>
-                            <a href={book.driveLink} target="_blank" rel="noopener noreferrer" className="w-full bg-red-600 text-white font-black py-5 rounded-2xl flex items-center justify-center gap-3 hover:bg-red-700 active:scale-95 shadow-xl transition-all"><span className="text-sm uppercase tracking-widest">{t('read')}</span></a>
+                            <a 
+                                href={book.driveLink} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                onClick={() => trackActivity('digital', book.title)}
+                                className="w-full bg-red-600 text-white font-black py-5 rounded-2xl flex items-center justify-center gap-3 hover:bg-red-700 active:scale-95 shadow-xl transition-all"
+                            >
+                                <span className="text-sm uppercase tracking-widest">{t('read')}</span>
+                            </a>
                         </div>
                         <button onClick={onClose} className="w-full bg-white text-slate-950 font-black py-3 rounded-xl active:scale-95 text-[10px] uppercase tracking-widest transition-all">{t('close')}</button>
                     </div>
@@ -112,10 +127,16 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any; onAu
 };
 
 const BookCard = React.memo(({ book, onClick, t, onAuthorHover }: { book: Book; onClick: () => void; t: any; onAuthorHover: (e: React.MouseEvent, bio: string | null) => void }) => (
-    <div onClick={onClick} className="group relative glass-panel bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border-none rounded-[2rem] md:rounded-[2.5rem] transition-all duration-300 cursor-pointer flex flex-col h-full overflow-hidden shadow-md active:scale-95 hover:shadow-[0_40px_80px_rgba(0,0,0,0.12)]">
+    <div 
+        onClick={() => {
+            trackActivity('searched', book.title);
+            onClick();
+        }} 
+        className="group relative glass-panel bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border-none rounded-[2rem] md:rounded-[2.5rem] transition-all duration-300 cursor-pointer flex flex-col h-full overflow-hidden shadow-md active:scale-95 hover:shadow-[0_40px_80px_rgba(0,0,0,0.12)]"
+    >
         <div className="p-6 md:p-8 flex-grow text-start">
              <span className="inline-block px-2.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest mb-4 bg-slate-950 text-white shadow-sm">{book.subject}</span>
-            <h2 className="font-black text-xl md:text-2xl text-slate-950 dark:text-white leading-relaxed mb-3 tracking-tighter group-hover:text-red-600 transition-colors line-clamp-2">{book.title}</h2>
+            <h2 className="font-black text-xl md:text-2xl text-slate-950 dark:text-white leading-relaxed mb-3 tracking-tighter group-hover:text-green-700 transition-colors line-clamp-2">{book.title}</h2>
             <p onMouseMove={(e) => onAuthorHover(e, book.bio)} onMouseLeave={(e) => onAuthorHover(e, null)} className="text-[11px] md:text-xs text-slate-500 dark:text-slate-400 font-black hover:text-red-600 transition-all inline-block underline decoration-dotted underline-offset-4 cursor-help uppercase tracking-tight">By {book.author}</p>
         </div>
         <div className="bg-white/40 dark:bg-black/20 py-4 px-6 md:px-8 border-t border-white/10 mt-auto text-center">
@@ -183,7 +204,7 @@ const EnglishLibraryInternalPage: React.FC = () => {
                         </div>
                         <div className="grid grid-cols-2 gap-2 flex-[3]">
                             {[{ val: subjectFilter, set: setSubjectFilter, opts: filters.subjects, lbl: t('allSubjects') }, { val: authorFilter, set: setAuthorFilter, opts: filters.authors, lbl: t('allAuthors') }].map((f, i) => (
-                                <select key={i} value={f.val} onChange={(e) => f.set(e.target.value)} className="p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 font-black text-[10px] md:text-xs cursor-pointer outline-none focus:border-green-600 appearance-none text-center shadow-sm">
+                                <select key={i} value={f.val} onChange={(e) => f.set(e.target.value)} className="p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 font-black text-[10px] md:text-xs cursor-pointer outline-none focus:border-slate-900 appearance-none text-center shadow-sm">
                                     <option value="all">{f.lbl}</option>
                                     {f.opts.map(o => o !== "all" && <option key={o} value={o}>{o}</option>)}
                                 </select>
