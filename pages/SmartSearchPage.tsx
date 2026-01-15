@@ -9,14 +9,14 @@ You are Saqr, the official AI librarian for Saqr Al Emarat International Private
 Your Primary Duty: When asked about any book or content, you MUST inform the user that it is available in our "Digital Library" section and guide them to go there to read it.
 Collection Overview:
 - 41 Arabic Digital Titles: (Classic stories, Islamic Heritage, Modern Novels).
-- 33 English Digital Titles: (Harry Potter series, Agatha Christie, Puzzles, and H.D/Productivity books).
+- 34 English Digital Titles: (Harry Potter series, Agatha Christie, Puzzles, and H.D/Productivity books).
 School Environment: American Curriculum.
 Librarian: Islam Soliman.
 `;
 
 const translations = {
   ar: {
-    saqrWelcome: 'أهلاً بك! أنا صقر، مساعدك الذكي. كيف يمكنني إرشادك اليوم للوصول إلى كتبنا المتاحة في المكتبة الرقمية ؟',
+    saqrWelcome: 'أهلاً بك! أنا صقر، مساعدك الذكي. كيف يمكنني مساعدتك اليوم ؟',
     inputPlaceholder: 'اسألني عن أي كتاب أو موضوع...',
     isTyping: 'صقر يحلل البيانات...',
     error: 'عذراً، واجهت مشكلة في الاتصال. حاول مرة أخرى.',
@@ -24,7 +24,7 @@ const translations = {
     you: 'أنت'
   },
   en: {
-    saqrWelcome: "Welcome! I'm Saqr, your smart guide. How can I direct you to our digital collection today ?",
+    saqrWelcome: "Welcome! I'm Saqr, your smart guide. How can I direct you today ?",
     inputPlaceholder: 'Ask about any book or subject...',
     isTyping: 'Saqr is processing...',
     error: 'Sorry, connection error. Please try again.',
