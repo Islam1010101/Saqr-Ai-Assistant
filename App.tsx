@@ -36,26 +36,26 @@ const FloatingSaqr: React.FC = () => {
   };
 
   return (
-    <div className={`fixed bottom-8 ${dir === 'rtl' ? 'left-8' : 'right-8'} z-50 animate-fade-up`}>
+    <div className={`fixed bottom-6 ${dir === 'rtl' ? 'left-6' : 'right-6'} z-50 animate-fade-up`}>
       <button
         onMouseDown={handleInteraction}
         onTouchStart={handleInteraction}
-        className="group relative w-20 h-20 md:w-24 md:h-24 glass-panel rounded-[2.5rem] border-red-600/20 shadow-[0_25px_60px_rgba(220,38,38,0.35)] flex items-center justify-center overflow-hidden hover:scale-110 active:scale-90 transition-all duration-500"
+        className="group relative w-16 h-16 md:w-20 md:h-20 glass-panel rounded-[1.8rem] border-red-600/20 shadow-2xl flex items-center justify-center overflow-hidden hover:scale-110 active:scale-90 transition-all duration-500"
       >
         {ripples.map(r => (
           <span key={r.id} className="ripple-effect bg-red-600/20" style={{ left: r.x, top: r.y }} />
         ))}
-        <img src="/saqr-avatar.png" alt="Saqr AI" className="w-[85%] h-[85%] object-contain group-hover:rotate-12 transition-transform duration-500" />
-        <span className="absolute top-3 right-3 flex h-4 w-4">
+        <img src="/saqr-avatar.png" alt="Saqr" className="w-[80%] h-[80%] object-contain transition-transform group-hover:rotate-12" />
+        <span className="absolute top-2 right-2 flex h-3 w-3">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-4 w-4 bg-green-600 border-2 border-white dark:border-slate-900"></span>
+          <span className="relative inline-flex rounded-full h-3 w-3 bg-green-600 border-2 border-white dark:border-slate-900"></span>
         </span>
       </button>
     </div>
   );
 };
 
-// -------- 2. الهيدر الوطني المطور (Default English View) --------
+// -------- 2. هيدر EFIPS المتطور (Responsive Header) --------
 const Header: React.FC = () => {
   const { locale, setLocale } = useLanguage();
   const { theme, toggleTheme } = useTheme();
@@ -63,62 +63,60 @@ const Header: React.FC = () => {
 
   const links = [
     { path: '/', label: locale === 'en' ? 'Home' : 'الرئيسية', icon: '🏠' },
-    { path: '/search', label: locale === 'en' ? 'Manual Search' : 'البحث اليدوي', icon: '🔍' },
-    { path: '/digital-library', label: locale === 'en' ? 'Digital Library' : 'المكتبة الرقمية', icon: '📚' },
-    { path: '/smart-search', label: locale === 'en' ? 'Ask Saqr (AI)' : 'صقر AI', icon: '🤖' },
-    { path: '/reports', label: locale === 'en' ? 'Stats' : 'التقارير', icon: '📊' },
-    { path: '/about', label: locale === 'en' ? 'About' : 'عن المكتبة', icon: 'ℹ️' },
+    { path: '/search', label: locale === 'en' ? 'Search' : 'البحث', icon: '🔍' },
+    { path: '/digital-library', label: locale === 'en' ? 'E-Lib' : 'المكتبة', icon: '📚' },
+    { path: '/smart-search', label: locale === 'en' ? 'Saqr AI' : 'صقر AI', icon: '🤖' },
   ];
 
   return (
-    <header className="sticky top-6 z-[60] px-6 md:px-12">
-      <div className="glass-panel mx-auto max-w-7xl p-3 md:p-4 rounded-[2.5rem] md:rounded-full border-white/20 dark:border-white/5 flex justify-between items-center shadow-2xl backdrop-blur-3xl">
+    <header className="sticky top-4 z-[60] px-3 md:px-8">
+      <div className="glass-panel mx-auto max-w-7xl p-1.5 md:p-3 rounded-full border-white/20 dark:border-white/5 flex justify-between items-center shadow-xl backdrop-blur-2xl">
         
-        {/* EFIPS Logo & Identity */}
-        <Link to="/" className="flex items-center gap-4 ps-4 group">
+        {/* Identity & School Name */}
+        <Link to="/" className="flex items-center gap-2 md:gap-3 ps-2 md:ps-4 group flex-shrink-0">
           <img 
             src="/school-logo.png" 
             alt="EFIPS" 
-            className="h-12 w-12 md:h-14 md:w-14 object-contain logo-white-filter rotate-6 transition-transform duration-700 group-hover:scale-110" 
+            className="h-8 w-8 md:h-11 md:w-11 object-contain logo-white-filter rotate-6 transition-transform group-hover:scale-110" 
           />
-          <div className="hidden xl:block leading-none text-start">
-            <span className="font-black text-slate-950 dark:text-white text-xs md:text-sm tracking-tight block uppercase">
-              {locale === 'en' ? 'Saqr Al Emarat School Library' : 'مكتبة مدرسة صقر الإمارات'}
+          <div className="hidden lg:block leading-none text-start max-w-[180px] xl:max-w-none">
+            <span className="font-black text-slate-950 dark:text-white text-[9px] md:text-[11px] tracking-tight block uppercase break-words">
+              {locale === 'en' ? "Emirates Falcon Int'l. Private School" : "مدرسة صقر الإمارات الدولية الخاصة"}
             </span>
-            <div className="h-0.5 w-8 bg-red-600 rounded-full mt-1.5 transition-all group-hover:w-full"></div>
+            <div className="h-0.5 w-6 bg-red-600 rounded-full mt-1 group-hover:w-full transition-all"></div>
           </div>
         </Link>
         
-        {/* Navigation Links */}
-        <nav className="flex items-center bg-black/5 dark:bg-white/5 rounded-full p-1.5 gap-1 overflow-x-auto no-scrollbar max-w-[50vw] sm:max-w-none">
+        {/* Compact Navigation */}
+        <nav className="flex items-center bg-black/5 dark:bg-white/5 rounded-full p-1 gap-0.5 md:gap-1 overflow-x-auto no-scrollbar">
           {links.map(l => (
             <Link 
               key={l.path} 
               to={l.path} 
-              className={`px-6 py-3 rounded-full text-xs md:text-sm font-black transition-all flex items-center gap-2.5 whitespace-nowrap ${
+              className={`px-3 md:px-5 py-2 md:py-2.5 rounded-full text-[9px] md:text-xs font-black transition-all flex items-center gap-1.5 whitespace-nowrap ${
                 location.pathname === l.path 
-                  ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950 shadow-xl scale-105' 
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-white/20 hover:text-red-600'
+                  ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950 shadow-lg' 
+                  : 'text-slate-500 dark:text-slate-400 hover:text-red-600'
               }`}
             >
-              <span className="text-base">{l.icon}</span>
-              {l.label}
+              <span className="text-xs md:text-sm">{l.icon}</span>
+              <span className={l.path === '/' ? 'inline' : 'hidden sm:inline'}>{l.label}</span>
             </Link>
           ))}
         </nav>
         
-        {/* Tools */}
-        <div className="flex items-center gap-2 pe-4">
+        {/* Quick Tools */}
+        <div className="flex items-center gap-1.5 pe-2 md:pe-4">
           <button 
             onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')} 
-            className="w-11 h-11 flex items-center justify-center text-slate-950 dark:text-white font-black text-xs border-2 border-slate-200 dark:border-white/10 rounded-full hover:border-red-600 hover:text-red-600 transition-all active:scale-90"
+            className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-slate-950 dark:text-white font-black text-[9px] md:text-xs border border-slate-200 dark:border-white/10 rounded-full hover:border-red-600 transition-all"
           >
             {locale === 'en' ? 'AR' : 'EN'}
           </button>
           
           <button 
             onClick={toggleTheme} 
-            className="w-11 h-11 flex items-center justify-center bg-white dark:bg-white/10 rounded-full text-lg shadow-md border border-slate-100 dark:border-white/5 hover:scale-110 transition-transform"
+            className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-white dark:bg-white/10 rounded-full text-xs md:text-sm shadow-sm border border-slate-100 dark:border-white/5"
           >
             {theme === 'light' ? '🌙' : '☀️'}
           </button>
@@ -128,23 +126,16 @@ const Header: React.FC = () => {
   );
 };
 
-// -------- 3. سياق اللغة والثيم (Core Engine - Default to English) --------
+// -------- 3. سياق اللغة والثيم (Default: English) --------
 const LanguageContext = createContext<any>(null);
 export const useLanguage = () => useContext(LanguageContext);
 const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // تم تغيير اللغة الافتراضية إلى 'en'
   const [locale, setLocale] = useState<Locale>('en'); 
-  
   useEffect(() => {
     document.documentElement.lang = locale;
     document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr';
   }, [locale]);
-
-  return (
-    <LanguageContext.Provider value={{ locale, setLocale, dir: locale === 'ar' ? 'rtl' : 'ltr' }}>
-      {children}
-    </LanguageContext.Provider>
-  );
+  return <LanguageContext.Provider value={{ locale, setLocale, dir: locale === 'ar' ? 'rtl' : 'ltr' }}>{children}</LanguageContext.Provider>;
 };
 
 const ThemeContext = createContext<any>(null);
@@ -174,7 +165,7 @@ const App: React.FC = () => {
             <Header />
             <FloatingSaqr />
             
-            <main className="flex-1 relative z-10 container mx-auto p-4 md:p-12">
+            <main className="flex-1 relative z-10 container mx-auto p-3 md:p-10">
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/search" element={<SearchPage />} />
@@ -187,9 +178,9 @@ const App: React.FC = () => {
               </Routes>
             </main>
 
-            <footer className="relative z-10 py-10 text-center border-t border-slate-200 dark:border-white/5 mx-12 mt-16">
-                <p className="font-black text-[10px] tracking-[0.4em] uppercase text-slate-500 dark:text-slate-600">
-                    &copy; 2026 Emirates Falcon International Private School
+            <footer className="relative z-10 py-8 text-center border-t border-slate-200 dark:border-white/5 mx-6 md:mx-12 mt-10">
+                <p className="font-black text-[8px] md:text-[10px] tracking-[0.3em] uppercase text-slate-400 dark:text-slate-600">
+                    &copy; 2026 Emirates Falcon Int'l. Private School
                 </p>
             </footer>
           </div>
