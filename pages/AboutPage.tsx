@@ -145,14 +145,14 @@ const AboutPage: React.FC = () => {
                     </div>
 
                     <a 
-                        href="mailto:islam.soliman@falcon-school.com"
+                        href="mailto:islam.ahmed@falcon-school.com"
                         className="lg:col-span-5 glass-panel p-8 md:p-12 rounded-[3rem] bg-white/80 dark:bg-slate-900/80 flex flex-col justify-center items-center text-center group hover:shadow-[0_0_60px_rgba(220,38,38,0.3)] transition-all duration-500 active:scale-95 border-2 border-transparent hover:border-red-600/20"
                     >
                         <div className="w-20 h-20 bg-red-600/10 rounded-full flex items-center justify-center mb-6 text-red-600 group-hover:scale-110 transition-transform group-hover:bg-red-600/20 shadow-inner">
                             <svg className="h-10 w-10 group-hover:animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M3 8l7.89 5.26a2 2 0 002.22 0L22 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                         </div>
                         <h2 className="text-2xl font-black mb-4 uppercase drop-shadow-sm">{t('contactLink')}</h2>
-                        <p className="text-red-600 font-black text-sm tracking-widest break-all group-hover:underline group-hover:tracking-[0.1em] transition-all">islam.soliman@falcon-school.com</p>
+                        <p className="text-red-600 font-black text-sm tracking-widest break-all group-hover:underline group-hover:tracking-[0.1em] transition-all">islam.ahmed@falcon-school.com</p>
                     </a>
                 </section>
             </div>
