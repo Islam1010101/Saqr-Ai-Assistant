@@ -13,8 +13,8 @@ const READING_INSPIRATIONS = [
 
 const translations = {
     ar: {
-        title: "بوابة المعرفة الرقمية",
-        desc: "رحلة استثنائية بين كنوز الأدب العربي والعالمي بلمسة وطنية مبتكرة.",
+        title: "المكتبة الرقمية",
+        desc: "المكتبة في كفّ يدك.. تبني اليومَ فِكْرَ غدِك.",
         arabicLib: "المكتبة العربية",
         englishLib: "المكتبة الإنجليزية",
         arabicDesc: "تضم روائع الأدب العربي، التراث، وتطوير الذات.",
@@ -22,8 +22,8 @@ const translations = {
         bubble: "اضغط للإلهام!"
     },
     en: {
-        title: "Digital Knowledge Portal",
-        desc: "An exceptional journey through Arabic and Global literature with a UAE touch.",
+        title: "The Digital Library",
+        desc: "The library held in your hand, building a mind so grand.",
         arabicLib: "Arabic Library",
         englishLib: "English Library",
         arabicDesc: "Arabic literature, heritage, and self-dev.",
