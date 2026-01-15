@@ -4,7 +4,7 @@ import { useLanguage } from '../App';
 const translations = {
     ar: {
         pageTitle: "تقارير المكتبة",
-        secureTitle: "الاحصاءات والتقارير",
+        secureTitle: "الإحصاءات والتقارير",
         passPlaceholder: "أدخل الرمز السري للدخول",
         authBtn: "تحقق من الهوية",
         errorPass: "الرمز غير صحيح، يرجى المحاولة مرة أخرى",
