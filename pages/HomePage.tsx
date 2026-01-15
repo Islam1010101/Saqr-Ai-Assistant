@@ -15,7 +15,7 @@ const translations = {
         bubble: "اضغط للإلهام!"
     },
     en: {
-        welcome: "Future of Knowledge at Saqr School",
+        welcome: "Future of Knowledge at E.F.I.P.S",
         subWelcome: "Your smart gateway to access digital and physical knowledge resources.",
         manualSearch: "Manual Search",
         manualDesc: "Find physical books in the paper index by shelf number or title.",
