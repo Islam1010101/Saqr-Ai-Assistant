@@ -36,7 +36,7 @@ const getDynamicStats = () => {
 const translations = {
     ar: {
         pageTitle: "تقارير نظام صقر الإمارات",
-        secureTitle: "مركز استخلاص البيانات",
+        secureTitle: "مركز تقارير البوابة",
         passPlaceholder: "الرمز السري",
         authBtn: "تحليل النتائج",
         printReport: "طباعة تقرير A4 المعتمد",
@@ -49,7 +49,7 @@ const translations = {
     },
     en: {
         pageTitle: "EFIPS Automated Reports",
-        secureTitle: "Data Extraction Center",
+        secureTitle: "Portal Reports Center",
         passPlaceholder: "Pin Code",
         authBtn: "Extract Results",
         printReport: "Print Official A4 Report",
