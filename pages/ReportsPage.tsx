@@ -36,9 +36,9 @@ const getDynamicStats = () => {
 const translations = {
     ar: {
         pageTitle: "تقارير نظام صقر الإمارات",
-        secureTitle: "مركز تقارير البوابة",
+        secureTitle: "مركز التقارير",
         passPlaceholder: "الرمز السري",
-        authBtn: "تحليل النتائج",
+        authBtn: "دخول",
         printReport: "طباعة تقرير A4 المعتمد",
         searchedBooks: "أكثر الكتب بحثاً في الفهرس",
         digitalReads: "تفاعل الطلاب مع المكتبة الرقمية",
@@ -49,9 +49,9 @@ const translations = {
     },
     en: {
         pageTitle: "EFIPS Automated Reports",
-        secureTitle: "Portal Reports Center",
+        secureTitle: "The Reports Center",
         passPlaceholder: "Pin Code",
-        authBtn: "Extract Results",
+        authBtn: "Enter",
         printReport: "Print Official A4 Report",
         searchedBooks: "Most Searched (Manual Index)",
         digitalReads: "Digital Library Engagement",
