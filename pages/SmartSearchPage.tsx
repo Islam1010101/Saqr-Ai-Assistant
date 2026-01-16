@@ -3,37 +3,36 @@ import { useLanguage } from '../App';
 import { ChatMessage } from '../types';
 import ReactMarkdown from 'react-markdown'; 
 
-// --- قاعدة المعرفة الوطنية للمساعد "صقر" (محدثة للتوجيه) ---
+// --- قاعدة المعرفة الوطنية للمساعد "صقر" (محدثة للبحث الخارجي والذكاء) ---
 const DIGITAL_COLLECTION_SUMMARY = `
 You are Saqr, the official AI librarian for Saqr Al Emarat International Private School (EFIPS).
-Your Primary Duty: When asked about any book or content, you MUST inform the user that it is available in our "Digital Library" section and guide them to go there to read it.
-Collection Overview:
-- 41 Arabic Digital Titles: (Classic stories, Islamic Heritage, Modern Novels).
-- 34 English Digital Titles: (Harry Potter series, Agatha Christie, Puzzles, and H.D/Productivity books).
-School Environment: American Curriculum.
+Your Intelligent Search Strategy:
+1. INTERNAL CHECK: Always check the EFIPS Library Index (Physical/Digital) first.
+2. EXTERNAL KNOWLEDGE: If the book is NOT found in our database, use your own intelligence and Internet knowledge to provide a full summary, author biography, and key insights.
+3. HYBRID GUIDANCE: Even if providing external info, try to suggest related physical areas like Shelf 40 (Audio Summaries) or Cabinet 41 (National Identity) if the topic matches.
+Strict Rule: DO NOT mention specific numbers of books in our digital collection.
 Librarian: Islam Soliman.
 `;
 
 const translations = {
   ar: {
-    saqrWelcome: 'أهلاً بك! أنا صقر، مساعدك الذكي. كيف يمكنني مساعدتك اليوم ؟',
+    saqrWelcome: 'أهلاً بك! أنا صقر، مساعدك الذكي. كيف يمكنني إرشادك اليوم لاكتشاف الكتب، سواء في مكتبتنا أو من معارفي العالمية ؟',
     inputPlaceholder: 'اسألني عن أي كتاب أو موضوع...',
-    isTyping: 'صقر يحلل البيانات...',
+    isTyping: 'صقر يبحث ويحلل...',
     error: 'عذراً، واجهت مشكلة في الاتصال. حاول مرة أخرى.',
     librarianStatus: 'مساعد مكتبة صقر الإمارات الذكي',
     you: 'أنت'
   },
   en: {
-    saqrWelcome: "Welcome! I'm Saqr, your smart guide. How can I direct you today ?",
+    saqrWelcome: "Welcome! I'm Saqr, your smart guide. How can I help you find information today, from our library or my global knowledge?",
     inputPlaceholder: 'Ask about any book or subject...',
-    isTyping: 'Saqr is processing...',
+    isTyping: 'Saqr is searching...',
     error: 'Sorry, connection error. Please try again.',
     librarianStatus: 'Saqr Smart School Librarian',
     you: 'YOU'
   },
 };
 
-// --- دالة التتبع والتحليل لصفحة التقارير ---
 const trackActivity = (type: 'searched' | 'digital' | 'ai', label: string) => {
     const logs = JSON.parse(localStorage.getItem('efips_activity_logs') || '[]');
     logs.push({ type, label, date: new Date().toISOString() });
@@ -42,7 +41,6 @@ const trackActivity = (type: 'searched' | 'digital' | 'ai', label: string) => {
 
 const SmartSearchPage: React.FC = () => {
   const { locale, dir } = useLanguage();
-  const isAr = locale === 'ar';
   const t = (key: keyof typeof translations.ar) => translations[locale][key];
 
   const SCHOOL_LOGO = "/school-logo.png"; 
@@ -85,7 +83,6 @@ const SmartSearchPage: React.FC = () => {
   const handleSendMessage = async () => {
     if (input.trim() === '' || isLoading) return;
 
-    // --- تنفيذ التتبع والتحليل هنا ---
     trackActivity('ai', input.trim());
 
     const userMessage: ChatMessage = { role: 'user', content: input.trim() };
@@ -99,7 +96,7 @@ const SmartSearchPage: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [
-            { role: 'system', content: `You are Saqr at EFIPS. Professionally guide students to the Digital Library for any reading requests. ${DIGITAL_COLLECTION_SUMMARY}` },
+            { role: 'system', content: `You are Saqr at EFIPS. Search school resources first. If not found, use your extensive external intelligence to answer. ${DIGITAL_COLLECTION_SUMMARY}` },
             ...messages, 
             userMessage
           ],
@@ -116,7 +113,7 @@ const SmartSearchPage: React.FC = () => {
   };
 
   return (
-    <div dir={dir} className="max-w-6xl mx-auto px-2 sm:px-6 pt-4 md:pt-10 pb-20 animate-fade-up relative text-start antialiased">
+    <div dir={dir} className="max-w-6xl mx-auto px-2 sm:px-6 pt-4 md:pt-10 pb-20 animate-fade-up relative text-start antialiased font-black">
       
       <div 
         onMouseMove={handleMouseMove}
