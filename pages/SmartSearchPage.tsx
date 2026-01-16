@@ -3,60 +3,48 @@ import { useLanguage } from '../App';
 import { ChatMessage } from '../types';
 import ReactMarkdown from 'react-markdown'; 
 
-// --- قاعدة المعرفة الوطنية الشاملة (1-41) للمساعد صقر ---
+// --- قاعدة المعرفة الوطنية الشاملة (منطق البحث والتوافر) ---
 const DIGITAL_COLLECTION_SUMMARY = `
 You are Saqr, the official AI librarian for Saqr Al Emarat International Private School (EFIPS).
-Your Goal: Guide students to the EXACT cabinet while using your global intelligence.
+Your Response Protocol:
+1. IF FOUND PHYSICALLY: Direct the student to the specific Cabinet (1-41).
+2. IF FOUND DIGITALLY: Guide them to the "Digital Library" section.
+3. IF NOT FOUND LOCALLY: 
+   - Provide a full summary and author info from your AI knowledge.
+   - AT THE VERY END OF YOUR RESPONSE, YOU MUST ADD THIS EXACT DISCLAIMER: 
+     "علماً بأن هذا الكتاب غير متوفر حالياً ضمن مقتنيات مكتبة مدرسة صقر الإمارات." 
+     (In English: "Please note that this book is not currently available in the EFIPS Library collection.")
 
-Complete EFIPS Cabinet Mapping:
-- Cabinets 1 & 2: General Knowledge, Encyclopedias, Guinness Records, Programming.
-- Cabinets 2 & 3: Psychology, Philosophy.
-- Cabinets 3, 4 & 5: Social Sciences, Economics, Law, Politics.
-- Cabinet 6: Translation, Dictionaries.
-- Cabinets 6 & 7: Math, Chemistry, Physics, Biology, Geology, Animals.
-- Cabinets 7-11: Engineering, Programming, Applications, Healthy Eating, Animal Husbandry, Home Economics.
-- Cabinet 12: Arts, Drawing, Sports, Cinema, Music.
-- Cabinets 13-19: English Literature & Novels (Adults & High School).
-- Cabinets 20 & 21: Biographies, History, Geography.
-- Cabinet 22: Disney Works.
-- Cabinet 23: Animals.
-- Cabinet 24: Physics, Anthropology, Earth/Space, Math.
-- Cabinet 25: Social Sciences, Sports.
-- Cabinet 26: Other Languages, Music, Tricks/Games, Magazines.
-- Cabinets 27 & 28: Stories/Books for Grades 4-6.
-- Cabinet 29: Youth Encyclopedias, Reading Class books.
-- Cabinet 30: Stories/Books for Grades 7-9, Grammar books.
-- Cabinet 31: Islamic Religion (Arabic).
-- Cabinet 32: Literary Criticism, Arabic History/Biographies.
-- Cabinet 33: Arts, Theater, Arabic Novels, Arabic Poetry.
-- Cabinet 35: Stories for Grades 7-9, specific Islamic/Science books, Ajaj Magazine.
-- Cabinet 36: Stories for Levels 4-6, Self-learning books.
-- Cabinet 37: Books/Stories for Levels 1-3, Suitable Islamic stories.
-- Cabinet 38: Kalima Publishing House, Science books.
-- Cabinet 39: Arabic World Encyclopedia, Psychology, Education, Arabic Grammar.
-- Cabinet 40: QR Code Audio Summaries.
-- Cabinet 41: UAE National Identity, Rulers, and Heritage.
+Cabinet Map for Reference:
+- 1-2: General Info/Programming. | 2-3: Psychology/Philosophy.
+- 3-5: Social Sciences/Politics. | 6: Translation.
+- 6-7: Math/Sciences/Animals. | 7-11: Engineering/Healthy Food.
+- 12: Arts/Sports/Music. | 13-19: English Novels (Adults/High School).
+- 20-21: History/Geography. | 22: Disney. | 23: Animals (Youth).
+- 24: Space/Physics. | 25: Social Sciences/Sports (Youth).
+- 26: Languages/Magazines. | 27-28: Grades 4-6 Stories.
+- 29: Youth Encyclopedias. | 30: Grades 7-9 Stories.
+- 31: Islamic (Arabic). | 32: Arabic History. | 33: Arabic Arts/Poetry.
+- 35: Grades 7-9 (Science/Islamic). | 36: Levels 4-6. | 37: Levels 1-3.
+- 38: Kalima Publishing. | 39: Arabic World Encyclopedia.
+- 40: Audio Summaries (QR). | 41: UAE Identity & Rulers.
 
-Search Protocol:
-1. SCHOOL FIRST: Check local cabinets/Digital Library.
-2. GLOBAL INTELLIGENCE: If not found, use your extensive AI knowledge to provide full summaries/answers from the Internet.
-3. HYBRID: Always suggest a related cabinet even when answering from global knowledge.
-Constraint: NO book counts. Librarian: Islam Soliman.
+Strict Rule: NO book counts. Search school first. Librarian: Islam Soliman.
 `;
 
 const translations = {
   ar: {
-    saqrWelcome: 'أهلاً بك! أنا صقر، دليلك الذكي في عالم المعرفة. اسألني عن أي كتاب أو موضوع وسأرشدك لمكانه في مكتبتنا أو ألخصه لك من معارفي ؟',
-    inputPlaceholder: 'ابحث عن موضوع، مرحلة دراسية، أو رقم دولاب...',
-    isTyping: 'صقر يحلل خريطة المعرفة...',
+    saqrWelcome: 'أهلاً بك! أنا صقر. هل تبحث عن كتاب معين في مكتبتنا أم تود استكشاف معلومات من معارفي العالمية ؟',
+    inputPlaceholder: 'اسأل عن كتاب، مؤلف، أو موضوع بحثي...',
+    isTyping: 'صقر يراجع الرفوف والبيانات...',
     error: 'عذراً، واجهت مشكلة في الاتصال. حاول مرة أخرى.',
     librarianStatus: 'مساعد مكتبة صقر الإمارات الذكي',
     you: 'أنت'
   },
   en: {
-    saqrWelcome: "Welcome! I'm Saqr, your smart guide. Ask me about any book or topic, and I'll find it in our library or summarize it using my global knowledge!",
-    inputPlaceholder: 'Search for a topic, grade level, or cabinet...',
-    isTyping: 'Saqr is analyzing the knowledge map...',
+    saqrWelcome: "Welcome! I'm Saqr. Are you looking for a specific book in our library or want to explore my global knowledge?",
+    inputPlaceholder: 'Search for a book, author, or research topic...',
+    isTyping: 'Saqr is checking shelves...',
     error: 'Sorry, connection error. Please try again.',
     librarianStatus: 'Saqr Smart School Librarian',
     you: 'YOU'
@@ -126,7 +114,7 @@ const SmartSearchPage: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [
-            { role: 'system', content: `You are Saqr at EFIPS. Professionally guide students to specific cabinets (1-41) and use your AI intelligence for external summaries. ${DIGITAL_COLLECTION_SUMMARY}` },
+            { role: 'system', content: `You are Saqr at EFIPS. Check local shelves (1-41) and digital library first. If not found, provide info then state it's not in the collection. ${DIGITAL_COLLECTION_SUMMARY}` },
             ...messages, 
             userMessage
           ],
