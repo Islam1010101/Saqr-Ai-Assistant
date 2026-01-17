@@ -67,7 +67,7 @@ const Header: React.FC = () => {
     { path: '/search', label: locale === 'en' ? 'Search' : 'البحث', icon: '🔍' },
     { path: '/digital-library', label: locale === 'en' ? 'E-Lib' : 'المكتبة', icon: '📚' },
     { path: '/smart-search', label: locale === 'en' ? 'Saqr AI' : 'صقر AI', icon: '🤖' },
-    { path: '/reports', label: locale === 'en' ? 'Stats' : 'التقارير', icon: '📊' },
+    { path: '/reports', label: locale === 'en' ? 'Reports' : 'التقارير', icon: '📊' },
     { path: '/about', label: locale === 'en' ? 'About' : 'عن المكتبة', icon: 'ℹ️' },
   ];
 
