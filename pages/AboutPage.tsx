@@ -4,10 +4,10 @@ import { useLanguage } from '../App';
 const translations = {
     ar: {
         schoolHistory: "عن مدرسة صقر الإمارات الدولية الخاصة",
-        historyText: "تأسست مدرسة صقر الإمارات في عام 2007، حيث بدأنا كمدرسة صغيرة تضم عدداً قليلاً من الطلاب والمعلمين. واليوم، نفخر بنمو المدرسة لتضم أكثر من 1000 طالب وطالبة عبر أربعة مبانٍ متطورة، متمسكين بشعارنا: 'التميز ليس غاية، بل أسلوب حياة'.",
+        historyText: "تأسست مدرسة صقر الإمارات في عام 2007، حيث بدأنا كمدرسة صغيرة تضم عدداً قليلاً من الطلاب والمعلمين. واليوم، نفخر بنمو المدرسة لتضم أكثر من 1300 طالب وطالبة عبر أربعة مبانٍ متطورة، متمسكين بشعارنا: 'التميز ليس غاية، بل أسلوب حياة'.",
         
         librarySection: "عن مكتبة صقر الإمارات الدولية الخاصة",
-        libraryIntro: "تقع قاعة المكتبة المركزية في مبنى الأولاد، وتحتوي على أكثر من 7000 كتاب في كافة فروع المعرفة، مقسمة إلى 5 أجنحة تخصصية:",
+        libraryIntro: "تقع قاعة المكتبة المركزية في مبنى الأولاد، وتحتوي على أكثر من 15000 كتاب في كافة فروع المعرفة، مقسمة إلى 5 أجنحة تخصصية:",
         
         wing1: "الجناح الأول: قسم البالغين",
         wing1Desc: "مقسم حسب تصنيف ديوي العشري، ويحتوي على مراجع إنجليزية متخصصة للباحثين والمعلمين والاختصاصيين.",
@@ -34,10 +34,10 @@ const translations = {
     },
     en: {
         schoolHistory: "About Emirates Falcon Int'l. Private School",
-        historyText: "Founded in 2007, EFIPS has grown to serve over 1000 students across four advanced buildings. Driven by our motto 'Distinction is not a goal, but a way of life', we continue to strive for excellence every day.",
+        historyText: "Founded in 2007, EFIPS has grown to serve over 1300 students across four advanced buildings. Driven by our motto 'Distinction is not a goal, but a way of life', we continue to strive for excellence every day.",
         
         librarySection: "About EFIPS Library",
-        libraryIntro: "Located in the Boys' Building, our central library houses over 7,000 books across all fields of knowledge, organized into 5 specialized wings:",
+        libraryIntro: "Located in the Boys' Building, our central library houses over 15,000 books across all fields of knowledge, organized into 5 specialized wings:",
         
         wing1: "1st Wing: Adult Section",
         wing1Desc: "Organized by Dewey Decimal Classification, featuring English resources for researchers, teachers, and specialists.",
