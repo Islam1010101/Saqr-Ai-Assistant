@@ -92,91 +92,88 @@ const FeedbackPage: React.FC = () => {
         e.preventDefault();
         const form = e.currentTarget;
         const data = new FormData(form);
-        
         try {
             const response = await fetch(FORMSPREE_URL, {
                 method: 'POST',
                 body: data,
                 headers: { 'Accept': 'application/json' }
             });
-
             if (response.ok) {
                 playSuccessSound();
                 setSubmitted(true);
                 form.reset();
             }
         } catch (error) {
-            alert(locale === 'ar' ? "حدث خطأ في الاتصال" : "Connection Error");
+            alert(locale === 'ar' ? "حدث خطأ" : "Error");
         }
     };
 
-    // كلاس موحد مع حشوات رأسية إضافية py-5 لمنع تقطع الخط العربي
-    const inputClass = "w-full p-4 md:p-6 py-5 md:py-6 rounded-[1.8rem] md:rounded-[2.5rem] bg-white dark:bg-white/5 border-2 border-slate-100 dark:border-white/5 focus:border-red-600 dark:focus:border-green-600 outline-none font-bold transition-all shadow-sm text-slate-900 dark:text-white leading-[1.6] mb-1";
+    // كلاس الحقول: تم إزالة uppercase و tracking وتطبيقها شرطياً
+    const inputClass = `w-full p-4 md:p-5 rounded-[1.5rem] md:rounded-[2rem] bg-white dark:bg-white/5 border-2 border-slate-100 dark:border-white/5 focus:border-red-600 dark:focus:border-green-600 outline-none font-bold transition-all shadow-sm text-slate-900 dark:text-white leading-relaxed mb-1`;
 
     return (
-        <div dir={dir} className="max-w-6xl mx-auto px-4 py-8 md:py-20 animate-fade-up relative z-10 pb-24 text-start antialiased font-black">
+        <div dir={dir} className="max-w-6xl mx-auto px-4 py-8 md:py-16 animate-fade-up relative z-10 pb-20 text-start antialiased font-black">
             
-            {/* Header Section - هندسة بصرية للخط العربي الثقيل */}
-            <div className="text-center mb-10 md:mb-20 relative">
-                <div className="absolute inset-0 flex justify-center -z-10 opacity-20 blur-[100px] pointer-events-none">
-                    <div className="w-48 md:w-80 h-48 md:h-80 bg-green-600 rounded-full translate-x-12"></div>
-                    <div className="w-48 md:w-80 h-48 md:h-80 bg-red-600 rounded-full -translate-x-12"></div>
+            <div className="text-center mb-10 md:mb-14 relative">
+                <div className="absolute inset-0 flex justify-center -z-10 opacity-20 blur-[60px] md:blur-[100px]">
+                    <div className="w-40 md:w-64 h-40 md:h-64 bg-green-600 rounded-full translate-x-10 md:translate-x-20"></div>
+                    <div className="w-40 md:w-64 h-40 md:h-64 bg-red-600 rounded-full -translate-x-10 md:-translate-x-20"></div>
                 </div>
                 
-                <h1 className="text-4xl sm:text-5xl md:text-8xl font-black text-slate-950 dark:text-white tracking-tighter uppercase mb-6 leading-[1.3]">
+                <h1 className={`text-3xl sm:text-4xl md:text-7xl font-black text-slate-950 dark:text-white mb-3 md:mb-6 leading-tight ${locale === 'en' ? 'uppercase tracking-tighter' : ''}`}>
                     {t('pageTitle')}
                 </h1>
                 
-                <div className="flex justify-center items-center gap-3 mb-8">
-                    <div className="h-1.5 w-16 bg-red-600 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.5)]"></div>
-                    <div className="h-1.5 w-16 bg-green-600 rounded-full shadow-[0_0_20px_rgba(16,185,129,0.5)]"></div>
+                <div className="flex justify-center items-center gap-2 md:gap-4 mb-5 md:mb-8">
+                    <div className="h-1 md:h-2 w-8 md:w-16 bg-red-600 rounded-full"></div>
+                    <div className="h-1 md:h-2 w-8 md:w-16 bg-green-600 rounded-full"></div>
                 </div>
 
-                <p className="text-xl md:text-3xl text-slate-700 dark:text-slate-300 font-black max-w-4xl mx-auto px-2 leading-[1.8]">
-                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-red-700 via-slate-900 dark:via-white to-green-700">
+                <p className="text-lg sm:text-xl md:text-3xl text-slate-700 dark:text-slate-300 font-black max-w-4xl mx-auto px-2 leading-relaxed">
+                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-red-600 via-slate-900 dark:via-white to-green-600">
                         {t('subTitle')}
                     </span>
                 </p>
             </div>
 
             {submitted ? (
-                <div className="glass-panel p-10 md:p-20 rounded-[3rem] md:rounded-[5rem] text-center bg-green-600/5 border-2 border-green-600/20 shadow-2xl animate-in zoom-in duration-700">
-                    <div className="text-7xl md:text-9xl mb-8 animate-bounce">🇦🇪</div>
-                    <h2 className="text-2xl md:text-4xl font-black text-green-700 dark:text-green-400 mb-8 leading-loose">{t('successMsg')}</h2>
-                    <button onClick={() => setSubmitted(false)} className="px-12 py-5 bg-slate-950 dark:bg-white text-white dark:text-slate-950 rounded-2xl font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl">
-                        {locale === 'ar' ? "إرسال مقترح جديد" : "Send More"}
+                <div className="glass-panel p-8 md:p-16 rounded-[2.5rem] md:rounded-[4rem] text-center bg-green-600/5 border-2 border-green-600/20 shadow-2xl animate-in zoom-in duration-500">
+                    <div className="text-5xl md:text-7xl mb-6">🇦🇪</div>
+                    <h2 className="text-xl md:text-3xl font-black text-green-700 dark:text-green-400 mb-6 leading-relaxed">{t('successMsg')}</h2>
+                    <button onClick={() => setSubmitted(false)} className="px-8 py-4 bg-slate-950 dark:bg-white text-white dark:text-slate-950 rounded-2xl font-black uppercase tracking-widest text-[10px] md:text-xs shadow-lg">
+                        {locale === 'ar' ? "إرسال المزيد" : "Send More"}
                     </button>
                 </div>
             ) : (
-                <form onSubmit={handleSubmit} className="glass-panel p-6 sm:p-10 md:p-16 rounded-[2.5rem] md:rounded-[4.5rem] bg-white/80 dark:bg-slate-950/90 shadow-[0_80px_160px_rgba(0,0,0,0.2)] border border-white/20 relative overflow-hidden group">
-                    <div className="absolute -top-40 -left-40 w-96 h-96 bg-green-600/5 blur-[120px] rounded-full group-hover:bg-green-600/10 transition-all duration-1000"></div>
+                <form onSubmit={handleSubmit} className="glass-panel p-5 sm:p-8 md:p-14 rounded-[2.5rem] md:rounded-[4.5rem] bg-white/80 dark:bg-slate-950/80 shadow-2xl border border-white/10 relative overflow-hidden group">
+                    <div className="absolute -top-40 -right-40 w-80 h-80 bg-green-600/5 blur-[120px] rounded-full"></div>
                     
-                    <div className="mb-10 relative z-10 space-y-3">
-                        <label className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-red-600 ms-5">{t('affiliationLabel')}</label>
+                    <div className="mb-6 md:mb-10 relative z-10 space-y-2">
+                        <label className={`text-[10px] md:text-xs font-black text-red-600 ms-2 ${locale === 'en' ? 'uppercase tracking-widest' : ''}`}>{t('affiliationLabel')}</label>
                         <select 
                             name="Membership" 
                             onChange={(e) => {
                                 setIsInternal(e.target.value === "Internal");
                                 setUserCategory(e.target.value === "Internal" ? "Student" : "External_Student");
                             }}
-                            className={inputClass + " cursor-pointer bg-slate-50/50 dark:bg-white/5"}
+                            className={`${inputClass} cursor-pointer`}
                         >
                             <option value="Internal">{t('internal')}</option>
                             <option value="External">{t('external')}</option>
                         </select>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 mb-10 relative z-10">
-                        <div className="space-y-3">
-                            <label className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-slate-400 ms-5">{t('nameLabel')}</label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 mb-6 md:mb-10 relative z-10">
+                        <div className="space-y-2">
+                            <label className={`text-[10px] md:text-xs font-black text-slate-400 ms-2 ${locale === 'en' ? 'uppercase tracking-widest' : ''}`}>{t('nameLabel')}</label>
                             <input name="Full_Name" required type="text" className={inputClass} />
                         </div>
-                        <div className="space-y-3">
-                            <label className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-slate-400 ms-5">{t('categoryLabel')}</label>
+                        <div className="space-y-2">
+                            <label className={`text-[10px] md:text-xs font-black text-slate-400 ms-2 ${locale === 'en' ? 'uppercase tracking-widest' : ''}`}>{t('categoryLabel')}</label>
                             <select 
                                 name="User_Category" 
                                 onChange={(e) => setUserCategory(e.target.value)}
-                                className={inputClass + " cursor-pointer"}
+                                className={`${inputClass} cursor-pointer`}
                             >
                                 {isInternal ? (
                                     <>
@@ -195,38 +192,39 @@ const FeedbackPage: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="space-y-8 md:space-y-12 mb-10 relative z-10 animate-fade-up">
+                    <div className="space-y-6 md:space-y-10 mb-8 md:mb-12 relative z-10 animate-fade-up">
                         {userCategory.includes("Student") && (
-                            <div className="space-y-3">
-                                <label className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-green-600 ms-5">{t('gradeLabel')}</label>
-                                <select name="Grade" className={inputClass + " text-xl"}>
+                            <div className="space-y-2">
+                                <label className={`text-[10px] md:text-xs font-black text-green-600 ms-2 ${locale === 'en' ? 'uppercase tracking-widest' : ''}`}>{t('gradeLabel')}</label>
+                                <select name="Grade" className={`${inputClass} text-xl md:text-2xl`}>
                                     {Array.from({length: 12}, (_, i) => i + 1).map(g => <option key={g} value={g}>{locale === 'ar' ? `الصف ${g}` : `Grade ${g}`}</option>)}
                                 </select>
                             </div>
                         )}
 
+                        {/* بقية الحقول الديناميكية - معلم، إداري، ولي أمر */}
                         {userCategory === "Teacher" && (
-                            <div className="space-y-3">
-                                <label className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-green-600 ms-5">{t('specializationLabel')}</label>
+                            <div className="space-y-2">
+                                <label className={`text-[10px] md:text-xs font-black text-green-600 ms-2 ${locale === 'en' ? 'uppercase tracking-widest' : ''}`}>{t('specializationLabel')}</label>
                                 <input name="Specialization" required type="text" className={inputClass} />
                             </div>
                         )}
 
                         {userCategory === "Admin" && (
-                            <div className="space-y-3">
-                                <label className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-green-600 ms-5">{t('deptLabel')}</label>
+                            <div className="space-y-2">
+                                <label className={`text-[10px] md:text-xs font-black text-green-600 ms-2 ${locale === 'en' ? 'uppercase tracking-widest' : ''}`}>{t('deptLabel')}</label>
                                 <input name="Department" required type="text" className={inputClass} />
                             </div>
                         )}
 
                         {userCategory === "Parent" && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
-                                <div className="space-y-3">
-                                    <label className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-green-600 ms-5">{t('jobLabel')}</label>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
+                                <div className="space-y-2">
+                                    <label className={`text-[10px] md:text-xs font-black text-green-600 ms-2 ${locale === 'en' ? 'uppercase tracking-widest' : ''}`}>{t('jobLabel')}</label>
                                     <input name="Parent_Job" required type="text" className={inputClass} />
                                 </div>
-                                <div className="space-y-3">
-                                    <label className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-green-600 ms-5">{t('sonsGradeLabel')}</label>
+                                <div className="space-y-2">
+                                    <label className={`text-[10px] md:text-xs font-black text-green-600 ms-2 ${locale === 'en' ? 'uppercase tracking-widest' : ''}`}>{t('sonsGradeLabel')}</label>
                                     <select name="Son_Grade" className={inputClass}>
                                         {Array.from({length: 12}, (_, i) => i + 1).map(g => <option key={g} value={g}>{locale === 'ar' ? `الصف ${g}` : `Grade ${g}`}</option>)}
                                     </select>
@@ -234,27 +232,20 @@ const FeedbackPage: React.FC = () => {
                             </div>
                         )}
 
-                        {!isInternal && (
-                            <div className="space-y-3 animate-fade-down">
-                                <label className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-red-600 ms-5">{t('fromOutsideLabel')}</label>
-                                <input name="Discovery_Path" required type="text" className={inputClass + " bg-red-50/20 dark:bg-red-900/5"} />
-                            </div>
-                        )}
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                             {isInternal && (
                                 <>
-                                    <div className="p-6 md:p-8 rounded-[2rem] bg-white dark:bg-white/5 border border-slate-100 dark:border-white/10 shadow-sm">
-                                        <label className="text-[9px] md:text-[11px] font-black uppercase mb-4 block text-red-600 tracking-widest">{t('ratingService')}</label>
-                                        <select name="Service_Rating" className="w-full bg-transparent font-black text-lg outline-none dark:text-white leading-[1.8]">
+                                    <div className="p-4 md:p-6 rounded-[1.5rem] md:rounded-[2.5rem] bg-white dark:bg-white/5 shadow-lg border border-slate-100 dark:border-white/5">
+                                        <label className={`text-[9px] md:text-[10px] font-black mb-3 block text-red-600 ${locale === 'en' ? 'uppercase tracking-widest' : ''}`}>{t('ratingService')}</label>
+                                        <select name="Service_Rating" className="w-full bg-transparent font-black text-base md:text-lg outline-none dark:text-white leading-relaxed">
                                             <option value="5">⭐⭐⭐⭐⭐ {t('optExcellent')}</option>
                                             <option value="4">⭐⭐⭐⭐ {t('optVeryGood')}</option>
                                             <option value="3">⭐⭐⭐ {t('optAverage')}</option>
                                         </select>
                                     </div>
-                                    <div className="p-6 md:p-8 rounded-[2rem] bg-white dark:bg-white/5 border border-slate-100 dark:border-white/10 shadow-sm">
-                                        <label className="text-[9px] md:text-[11px] font-black uppercase mb-4 block text-red-600 tracking-widest">{t('ratingStaff')}</label>
-                                        <select name="Staff_Rating" className="w-full bg-transparent font-black text-lg outline-none dark:text-white leading-[1.8]">
+                                    <div className="p-4 md:p-6 rounded-[1.5rem] md:rounded-[2.5rem] bg-white dark:bg-white/5 shadow-lg border border-slate-100 dark:border-white/5">
+                                        <label className={`text-[9px] md:text-[10px] font-black mb-3 block text-red-600 ${locale === 'en' ? 'uppercase tracking-widest' : ''}`}>{t('ratingStaff')}</label>
+                                        <select name="Staff_Rating" className="w-full bg-transparent font-black text-base md:text-lg outline-none dark:text-white leading-relaxed">
                                             <option value="5">⭐⭐⭐⭐⭐ {t('optExcellent')}</option>
                                             <option value="4">⭐⭐⭐⭐ {t('optVeryGood')}</option>
                                             <option value="3">⭐⭐⭐ {t('optAverage')}</option>
@@ -262,9 +253,9 @@ const FeedbackPage: React.FC = () => {
                                     </div>
                                 </>
                             )}
-                            <div className="p-6 md:p-8 rounded-[2rem] bg-white dark:bg-white/5 border border-slate-100 dark:border-white/10 shadow-sm">
-                                <label className="text-[9px] md:text-[11px] font-black uppercase mb-4 block text-green-600 tracking-widest">{t('ratingSaqr')}</label>
-                                <select name="Saqr_Rating" className="w-full bg-transparent font-black text-lg outline-none dark:text-white leading-[1.8]">
+                            <div className="p-4 md:p-6 rounded-[1.5rem] md:rounded-[2.5rem] bg-white dark:bg-white/5 shadow-lg border border-slate-100 dark:border-white/5">
+                                <label className={`text-[9px] md:text-[10px] font-black mb-3 block text-green-600 ${locale === 'en' ? 'uppercase tracking-widest' : ''}`}>{t('ratingSaqr')}</label>
+                                <select name="Saqr_Rating" className="w-full bg-transparent font-black text-base md:text-lg outline-none dark:text-white leading-relaxed">
                                     <option value="5">⭐⭐⭐⭐⭐ {t('optSmart')}</option>
                                     <option value="4">⭐⭐⭐⭐ {t('optUseful')}</option>
                                     <option value="3">⭐⭐⭐ {t('optAverage')}</option>
@@ -272,31 +263,27 @@ const FeedbackPage: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div className="space-y-3">
-                                <label className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-slate-400 ms-5">{t('devSuggestions')}</label>
-                                <textarea name="Dev_Ideas" rows={3} className={inputClass + " resize-none p-6 md:p-8 leading-loose"}></textarea>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
+                            <div className="space-y-2">
+                                <label className={`text-[10px] md:text-xs font-black text-slate-400 ms-2 ${locale === 'en' ? 'uppercase tracking-widest' : ''}`}>{t('devSuggestions')}</label>
+                                <textarea name="Dev_Ideas" rows={2} className={`${inputClass} resize-none`}></textarea>
                             </div>
-                            <div className="space-y-3">
-                                <label className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-slate-400 ms-5">{t('bookSuggestions')}</label>
-                                <textarea name="Book_Requests" rows={3} className={inputClass + " resize-none p-6 md:p-8 leading-loose"}></textarea>
+                            <div className="space-y-2">
+                                <label className={`text-[10px] md:text-xs font-black text-slate-400 ms-2 ${locale === 'en' ? 'uppercase tracking-widest' : ''}`}>{t('bookSuggestions')}</label>
+                                <textarea name="Book_Requests" rows={2} className={`${inputClass} resize-none`}></textarea>
                             </div>
                         </div>
                     </div>
 
-                    <button type="submit" className="w-full bg-slate-950 dark:bg-white text-white dark:text-slate-950 py-7 md:py-12 rounded-[2.5rem] md:rounded-[4rem] font-black uppercase tracking-[0.5em] text-sm md:text-2xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] hover:bg-red-700 hover:text-white transition-all active:scale-[0.98]">
+                    <button type="submit" className={`w-full bg-slate-950 dark:bg-white text-white dark:text-slate-950 py-5 md:py-8 rounded-2xl md:rounded-[2.5rem] font-black text-xs md:text-base shadow-2xl hover:bg-red-600 hover:text-white transition-all ${locale === 'en' ? 'uppercase tracking-[0.4em] md:tracking-[0.6em]' : ''}`}>
                         {t('submitBtn')}
                     </button>
                 </form>
             )}
 
-            <div className="mt-16 md:mt-24 text-center">
-                <div className="flex justify-center gap-3 mb-6 opacity-30">
-                    <div className="w-16 h-1.5 bg-red-600 rounded-full"></div>
-                    <div className="w-16 h-1.5 bg-green-600 rounded-full"></div>
-                </div>
-                <p className="text-[9px] md:text-sm font-black uppercase tracking-[0.8em] mb-3 text-slate-400 opacity-70">EFIPS LIBRARY 2026</p>
-                <p className="font-black text-slate-950 dark:text-white uppercase text-xs md:text-xl tracking-widest border-b-4 border-red-600 inline-block pb-2">Official Librarian: Islam Ahmed</p>
+            <div className="mt-12 md:mt-20 text-center opacity-60">
+                <p className={`text-[8px] md:text-[10px] font-black text-slate-400 mb-2 ${locale === 'en' ? 'uppercase tracking-widest' : ''}`}>EFIPS Library • 2026</p>
+                <p className="font-black text-slate-900 dark:text-white text-[10px] md:text-xs">Official Librarian: Islam Ahmed</p>
             </div>
         </div>
     );
