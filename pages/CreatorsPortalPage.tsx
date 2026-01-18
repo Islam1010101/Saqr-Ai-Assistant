@@ -14,7 +14,7 @@ const translations = {
         pageTitle: "بوابة المبدعين",
         subTitle: "المس المبدع لتستمد منه ومضات الإلهام",
         status: "هذا الركن الإبداعي تحت الإنشاء",
-        comingSoon: "نجهز لكم منصة تليق بعباقرة صقر الإمارات 2026",
+        comingSoon: "نجهز لكم منصة تليق بمبدعي مدرسة صقر الإمارات 2026",
         quotes: [
             "الابتكار هو رؤية ما يراه الجميع، والتفكير بما لم يفكر به أحد",
             "بصمتك المبدعة هي هديتك الفريدة للعالم",
@@ -28,7 +28,7 @@ const translations = {
         pageTitle: "Creators' Portal",
         subTitle: "Touch the creator to spark inspiration cards",
         status: "This creative corner is under construction",
-        comingSoon: "Preparing a platform worthy of EFIPS geniuses 2026",
+        comingSoon: "Preparing a platform worthy of EFIPS Students' talents 2026",
         quotes: [
             "Creativity is intelligence having fun",
             "Innovation is seeing what everybody has seen and thinking what nobody has thought",
