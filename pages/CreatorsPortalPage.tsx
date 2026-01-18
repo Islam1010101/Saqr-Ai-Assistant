@@ -146,7 +146,7 @@ const CreatorsPortalPage: React.FC = () => {
 
             <div className="mt-20 opacity-30">
                  <p className="text-[10px] font-black uppercase tracking-[0.8em] mb-2">EFIPS Library • Talent Portal • 2026</p>
-                 <p className="font-black text-slate-950 dark:text-white uppercase text-xs border-b-2 border-red-600 inline-block pb-1">Official Librarian: Islam Soliman</p>
+                 <p className="font-black text-slate-950 dark:text-white uppercase text-xs border-b-2 border-red-600 inline-block pb-1">Official Librarian: Islam Ahmed</p>
             </div>
         </div>
     );
