@@ -11,6 +11,7 @@ import DigitalLibraryPage from './pages/DigitalLibraryPage';
 import ArabicLibraryInternalPage from './pages/ArabicLibraryInternalPage';
 import EnglishLibraryInternalPage from './pages/EnglishLibraryInternalPage';
 import FeedbackPage from './pages/FeedbackPage'; // الإضافة الجديدة ✍️
+import CreatorsPortalPage from './pages/CreatorsPortalPage'; // إضافة بوابة المبدعين 🎨
 
 import type { Locale } from './types';
 
@@ -67,8 +68,9 @@ const Header: React.FC = () => {
     { path: '/search', label: locale === 'en' ? 'Search' : 'البحث', icon: '🔍' },
     { path: '/digital-library', label: locale === 'en' ? 'E-Lib' : 'المكتبة', icon: '📚' },
     { path: '/smart-search', label: locale === 'en' ? 'Saqr AI' : 'صقر AI', icon: '🤖' },
+    { path: '/creators', label: locale === 'en' ? 'Creators' : 'المبدعين', icon: '🎨' }, // إضافة الرابط الجديد هنا
     { path: '/reports', label: locale === 'en' ? 'Reports' : 'التقارير', icon: '📊' },
-    { path: '/feedback', label: locale === 'en' ? 'Feedback' : 'المقترحات', icon: '✍️' }, // الإضافة الجديدة في القائمة
+    { path: '/feedback', label: locale === 'en' ? 'Feedback' : 'المقترحات', icon: '✍️' }, 
     { path: '/about', label: locale === 'en' ? 'About' : 'عن المكتبة', icon: 'ℹ️' },
   ];
 
@@ -175,8 +177,9 @@ const App: React.FC = () => {
                 <Route path="/digital-library" element={<DigitalLibraryPage />} />
                 <Route path="/digital-library/arabic" element={<ArabicLibraryInternalPage />} />
                 <Route path="/digital-library/english" element={<EnglishLibraryInternalPage />} />
+                <Route path="/creators" element={<CreatorsPortalPage />} /> {/* مسار بوابة المبدعين */}
                 <Route path="/reports" element={<ReportsPage />} />
-                <Route path="/feedback" element={<FeedbackPage />} /> {/* إضافة مسار المقترحات */}
+                <Route path="/feedback" element={<FeedbackPage />} /> 
                 <Route path="/about" element={<AboutPage />} />
               </Routes>
             </main>
