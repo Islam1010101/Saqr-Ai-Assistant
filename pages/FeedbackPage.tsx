@@ -15,7 +15,7 @@ const translations = {
         jobLabel: "الوظيفة / المسمى الوظيفي",
         fromOutsideLabel: "كيف تعرفت عن مكتبتنا الرقمية؟",
         ratingService: "تقييم خدمات المكتبة",
-        ratingStaff: "تقييم أداء أمين المكتبة (إسلام أحمد)",
+        ratingStaff: "تقييم أداء أمين المكتبة (إسلام سليمان)",
         ratingSaqr: "تقييم ذكاء صقر AI",
         devSuggestions: "مقترحات تطوير الخدمات",
         bookSuggestions: "كتب تود إضافتها رقمياً",
@@ -49,7 +49,7 @@ const translations = {
         jobLabel: "Job Title",
         fromOutsideLabel: "How did you hear about us?",
         ratingService: "Library Services Rating",
-        ratingStaff: "Librarian Performance (Islam Ahmed)",
+        ratingStaff: "Librarian Performance (Islam Soliman)",
         ratingSaqr: "Saqr AI Intelligence",
         devSuggestions: "Development Suggestions",
         bookSuggestions: "Titles to add Digitally",
@@ -106,31 +106,29 @@ const FeedbackPage: React.FC = () => {
                 form.reset();
             }
         } catch (error) {
-            alert("Error");
+            alert(locale === 'ar' ? "حدث خطأ في الاتصال" : "Connection Error");
         }
     };
 
     return (
-        <div dir={dir} className="max-w-6xl mx-auto px-4 py-12 md:py-20 animate-fade-up relative z-10 pb-32 text-start antialiased font-black">
+        <div dir={dir} className="max-w-6xl mx-auto px-4 py-8 md:py-20 animate-fade-up relative z-10 pb-24 text-start antialiased font-black">
             
-            {/* Catchy Header Section */}
-            <div className="text-center mb-16 relative">
-                <div className="absolute inset-0 flex justify-center -z-10 opacity-30 blur-[120px]">
-                    <div className="w-60 h-60 bg-green-600 rounded-full translate-x-32"></div>
-                    <div className="w-60 h-60 bg-red-600 rounded-full -translate-x-32"></div>
+            {/* Responsive Header Section */}
+            <div className="text-center mb-10 md:mb-16 relative">
+                <div className="absolute inset-0 flex justify-center -z-10 opacity-30 blur-[80px]">
+                    <div className="w-40 md:w-60 h-40 md:h-60 bg-green-600 rounded-full translate-x-10 md:translate-x-32"></div>
+                    <div className="w-40 md:w-60 h-40 md:h-60 bg-red-600 rounded-full -translate-x-10 md:-translate-x-32"></div>
                 </div>
-                <h1 className="text-5xl md:text-8xl font-black text-slate-950 dark:text-white tracking-tighter uppercase mb-6 drop-shadow-2xl">
+                <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-slate-950 dark:text-white tracking-tighter uppercase mb-4 drop-shadow-xl leading-tight">
                     {t('pageTitle')}
                 </h1>
                 
-                {/* الخطوط الملونة تحت العنوان */}
-                <div className="flex justify-center items-center gap-3 mb-10">
-                    <div className="h-1.5 w-16 bg-red-600 rounded-full shadow-[0_0_15px_rgba(220,38,38,0.5)]"></div>
-                    <div className="h-1.5 w-16 bg-green-600 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.5)]"></div>
+                <div className="flex justify-center items-center gap-2 md:gap-3 mb-6">
+                    <div className="h-1 w-10 md:w-16 bg-red-600 rounded-full"></div>
+                    <div className="h-1 w-10 md:w-16 bg-green-600 rounded-full"></div>
                 </div>
 
-                {/* الجملة الكاتشي الجديدة */}
-                <p className="text-2xl md:text-3xl text-slate-700 dark:text-slate-300 font-black max-w-4xl mx-auto leading-snug px-4">
+                <p className="text-lg md:text-2xl lg:text-3xl text-slate-700 dark:text-slate-300 font-black max-w-4xl mx-auto leading-snug px-2">
                     <span className="bg-clip-text text-transparent bg-gradient-to-r from-red-600 via-slate-900 dark:via-white to-green-600">
                         {t('subTitle')}
                     </span>
@@ -138,46 +136,44 @@ const FeedbackPage: React.FC = () => {
             </div>
 
             {submitted ? (
-                <div className="glass-panel p-16 rounded-[4rem] text-center bg-green-600/5 border-2 border-green-600/20 shadow-2xl animate-in zoom-in duration-500">
-                    <div className="w-24 h-24 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg animate-bounce">
-                        <span className="text-5xl text-white">🇦🇪</span>
-                    </div>
-                    <h2 className="text-3xl font-black text-green-700 dark:text-green-400 mb-8">{t('successMsg')}</h2>
-                    <button onClick={() => setSubmitted(false)} className="px-12 py-5 bg-slate-950 dark:bg-white text-white dark:text-slate-950 rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 transition-all">
-                        {locale === 'ar' ? "إرسال المزيد من الأفكار" : "Send More Ideas"}
+                <div className="glass-panel p-8 md:p-16 rounded-[2rem] md:rounded-[4rem] text-center bg-green-600/5 border-2 border-green-600/20 shadow-2xl animate-in zoom-in duration-500">
+                    <div className="text-5xl md:text-7xl mb-6 animate-bounce">🇦🇪</div>
+                    <h2 className="text-2xl md:text-3xl font-black text-green-700 dark:text-green-400 mb-8">{t('successMsg')}</h2>
+                    <button onClick={() => setSubmitted(false)} className="px-8 py-4 bg-red-600 text-white rounded-xl font-black uppercase tracking-widest text-[10px] hover:scale-105 transition-transform shadow-xl">
+                        {locale === 'ar' ? "إرسال فكرة جديدة" : "Send More Ideas"}
                     </button>
                 </div>
             ) : (
-                <form onSubmit={handleSubmit} className="glass-panel p-8 md:p-14 rounded-[4.5rem] bg-white/70 dark:bg-slate-950/70 shadow-[0_80px_150px_rgba(0,0,0,0.25)] border border-white/20 relative overflow-hidden group">
-                    <div className="absolute -top-40 -left-40 w-80 h-80 bg-green-600/10 blur-[120px] rounded-full"></div>
+                <form onSubmit={handleSubmit} className="glass-panel p-5 md:p-14 rounded-[2rem] md:rounded-[4rem] bg-white/80 dark:bg-slate-950/80 shadow-[0_40px_100px_rgba(0,0,0,0.15)] border border-white/10 relative overflow-hidden group">
+                    <div className="absolute -top-40 -right-40 w-80 h-80 bg-green-600/5 blur-[120px] rounded-full"></div>
                     
-                    {/* اختيار العضوية */}
-                    <div className="mb-12 relative z-10 space-y-3">
-                        <label className="text-[11px] font-black uppercase tracking-[0.3em] text-red-600 ms-6">{t('affiliationLabel')}</label>
+                    {/* Membership Section */}
+                    <div className="mb-8 relative z-10 space-y-2">
+                        <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-red-600 ms-2">{t('affiliationLabel')}</label>
                         <select 
                             name="Membership" 
                             onChange={(e) => {
                                 setIsInternal(e.target.value === "Internal");
                                 setUserCategory(e.target.value === "Internal" ? "Student" : "External_Student");
                             }}
-                            className="w-full p-6 rounded-3xl bg-slate-100 dark:bg-white/5 border-2 border-transparent focus:border-green-600 outline-none font-black text-base transition-all shadow-inner text-slate-900 dark:text-white cursor-pointer"
+                            className="w-full p-4 md:p-6 rounded-2xl md:rounded-3xl bg-slate-100 dark:bg-white/5 border-2 border-transparent focus:border-green-600 outline-none font-black text-sm md:text-base transition-all shadow-inner text-slate-900 dark:text-white cursor-pointer"
                         >
                             <option value="Internal">{t('internal')}</option>
                             <option value="External">{t('external')}</option>
                         </select>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10 relative z-10">
-                        <div className="space-y-3">
-                            <label className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 ms-6">{t('nameLabel')}</label>
-                            <input name="Full_Name" required type="text" className="w-full p-6 rounded-3xl bg-white dark:bg-black/40 border-2 border-transparent focus:border-red-600 outline-none font-bold transition-all shadow-sm text-slate-950 dark:text-white" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 mb-8 relative z-10">
+                        <div className="space-y-2">
+                            <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400 ms-2">{t('nameLabel')}</label>
+                            <input name="Full_Name" required type="text" className="w-full p-4 md:p-6 rounded-2xl md:rounded-3xl bg-white dark:bg-black/40 border-2 border-transparent focus:border-red-600 outline-none font-bold transition-all shadow-sm text-slate-950 dark:text-white" />
                         </div>
-                        <div className="space-y-3">
-                            <label className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 ms-6">{t('categoryLabel')}</label>
+                        <div className="space-y-2">
+                            <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400 ms-2">{t('categoryLabel')}</label>
                             <select 
                                 name="User_Category" 
                                 onChange={(e) => setUserCategory(e.target.value)}
-                                className="w-full p-6 rounded-3xl bg-white dark:bg-black/40 border-2 border-transparent focus:border-red-600 outline-none font-black transition-all shadow-sm text-slate-950 dark:text-white cursor-pointer"
+                                className="w-full p-4 md:p-6 rounded-2xl md:rounded-3xl bg-white dark:bg-black/40 border-2 border-transparent focus:border-red-600 outline-none font-black transition-all shadow-sm text-slate-950 dark:text-white cursor-pointer"
                             >
                                 {isInternal ? (
                                     <>
@@ -196,40 +192,40 @@ const FeedbackPage: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="space-y-10 mb-10 relative z-10 animate-fade-up">
-                        {/* حقول ديناميكية */}
+                    <div className="space-y-6 md:space-y-10 mb-8 relative z-10 animate-fade-up">
+                        {/* Dynamic Fields */}
                         {userCategory.includes("Student") && (
-                            <div className="space-y-3 animate-fade-down">
-                                <label className="text-[11px] font-black uppercase tracking-[0.2em] text-green-600 ms-6">{t('gradeLabel')}</label>
-                                <select name="Grade" className="w-full p-6 rounded-3xl bg-slate-100 dark:bg-white/5 font-black text-xl outline-none dark:text-white">
+                            <div className="space-y-2 animate-fade-down">
+                                <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-green-600 ms-2">{t('gradeLabel')}</label>
+                                <select name="Grade" className="w-full p-4 md:p-6 rounded-2xl md:rounded-3xl bg-slate-100 dark:bg-white/5 font-black text-lg md:text-xl outline-none dark:text-white">
                                     {Array.from({length: 12}, (_, i) => i + 1).map(g => <option key={g} value={g}>{locale === 'ar' ? `الصف ${g}` : `Grade ${g}`}</option>)}
                                 </select>
                             </div>
                         )}
 
                         {userCategory === "Teacher" && (
-                            <div className="space-y-3 animate-fade-down">
-                                <label className="text-[11px] font-black uppercase tracking-[0.2em] text-green-600 ms-6">{t('specializationLabel')}</label>
-                                <input name="Specialization" required type="text" className="w-full p-6 rounded-3xl bg-slate-100 dark:bg-white/5 font-bold outline-none dark:text-white" />
+                            <div className="space-y-2 animate-fade-down">
+                                <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-green-600 ms-2">{t('specializationLabel')}</label>
+                                <input name="Specialization" required type="text" className="w-full p-4 md:p-6 rounded-2xl md:rounded-3xl bg-slate-100 dark:bg-white/5 font-bold outline-none dark:text-white" />
                             </div>
                         )}
 
                         {userCategory === "Admin" && (
-                            <div className="space-y-3 animate-fade-down">
-                                <label className="text-[11px] font-black uppercase tracking-[0.2em] text-green-600 ms-6">{t('deptLabel')}</label>
-                                <input name="Department" required type="text" className="w-full p-6 rounded-3xl bg-slate-100 dark:bg-white/5 font-bold outline-none dark:text-white" />
+                            <div className="space-y-2 animate-fade-down">
+                                <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-green-600 ms-2">{t('deptLabel')}</label>
+                                <input name="Department" required type="text" className="w-full p-4 md:p-6 rounded-2xl md:rounded-3xl bg-slate-100 dark:bg-white/5 font-bold outline-none dark:text-white" />
                             </div>
                         )}
 
                         {userCategory === "Parent" && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fade-down">
-                                <div className="space-y-3">
-                                    <label className="text-[11px] font-black uppercase tracking-[0.2em] text-green-600 ms-6">{t('jobLabel')}</label>
-                                    <input name="Parent_Job" required type="text" className="w-full p-6 rounded-3xl bg-slate-100 dark:bg-white/5 font-bold outline-none dark:text-white" />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 animate-fade-down">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-green-600 ms-2">{t('jobLabel')}</label>
+                                    <input name="Parent_Job" required type="text" className="w-full p-4 md:p-6 rounded-2xl md:rounded-3xl bg-slate-100 dark:bg-white/5 font-bold outline-none dark:text-white" />
                                 </div>
-                                <div className="space-y-3">
-                                    <label className="text-[11px] font-black uppercase tracking-[0.2em] text-green-600 ms-6">{t('sonsGradeLabel')}</label>
-                                    <select name="Son_Grade" className="w-full p-6 rounded-3xl bg-slate-100 dark:bg-white/5 font-black outline-none dark:text-white">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-green-600 ms-2">{t('sonsGradeLabel')}</label>
+                                    <select name="Son_Grade" className="w-full p-4 md:p-6 rounded-2xl md:rounded-3xl bg-slate-100 dark:bg-white/5 font-black outline-none dark:text-white">
                                         {Array.from({length: 12}, (_, i) => i + 1).map(g => <option key={g} value={g}>{locale === 'ar' ? `الصف ${g}` : `Grade ${g}`}</option>)}
                                     </select>
                                 </div>
@@ -237,27 +233,27 @@ const FeedbackPage: React.FC = () => {
                         )}
 
                         {!isInternal && (
-                            <div className="space-y-3 animate-fade-down">
-                                <label className="text-[11px] font-black uppercase tracking-[0.2em] text-red-600 ms-6">{t('fromOutsideLabel')}</label>
-                                <input name="Discovery_Path" required type="text" className="w-full p-6 rounded-3xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 outline-none font-bold dark:text-white shadow-inner" />
+                            <div className="space-y-2 animate-fade-down">
+                                <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-red-600 ms-2">{t('fromOutsideLabel')}</label>
+                                <input name="Discovery_Path" required type="text" className="w-full p-4 md:p-6 rounded-2xl md:rounded-3xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 outline-none font-bold dark:text-white shadow-inner" />
                             </div>
                         )}
 
-                        {/* التقييمات */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {/* Ratings - Grid adjustment for Tablet/Mobile */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                             {isInternal && (
                                 <>
-                                    <div className="p-6 rounded-[2.5rem] bg-white dark:bg-white/5 shadow-xl border border-slate-100 dark:border-white/5">
-                                        <label className="text-[10px] font-black uppercase mb-4 block text-red-600">{t('ratingService')}</label>
-                                        <select name="Service_Rating" className="w-full bg-transparent font-black text-lg outline-none dark:text-white">
+                                    <div className="p-4 md:p-6 rounded-[1.5rem] md:rounded-[2.5rem] bg-white dark:bg-white/5 shadow-lg border border-slate-100 dark:border-white/5">
+                                        <label className="text-[9px] md:text-[10px] font-black uppercase mb-3 block text-red-600 tracking-widest">{t('ratingService')}</label>
+                                        <select name="Service_Rating" className="w-full bg-transparent font-black text-base md:text-lg outline-none dark:text-white">
                                             <option value="5">⭐⭐⭐⭐⭐ {t('optExcellent')}</option>
                                             <option value="4">⭐⭐⭐⭐ {t('optVeryGood')}</option>
                                             <option value="3">⭐⭐⭐ {t('optAverage')}</option>
                                         </select>
                                     </div>
-                                    <div className="p-6 rounded-[2.5rem] bg-white dark:bg-white/5 shadow-xl border border-slate-100 dark:border-white/5">
-                                        <label className="text-[10px] font-black uppercase mb-4 block text-red-600">{t('ratingStaff')}</label>
-                                        <select name="Staff_Rating" className="w-full bg-transparent font-black text-lg outline-none dark:text-white">
+                                    <div className="p-4 md:p-6 rounded-[1.5rem] md:rounded-[2.5rem] bg-white dark:bg-white/5 shadow-lg border border-slate-100 dark:border-white/5">
+                                        <label className="text-[9px] md:text-[10px] font-black uppercase mb-3 block text-red-600 tracking-widest">{t('ratingStaff')}</label>
+                                        <select name="Staff_Rating" className="w-full bg-transparent font-black text-base md:text-lg outline-none dark:text-white">
                                             <option value="5">⭐⭐⭐⭐⭐ {t('optExcellent')}</option>
                                             <option value="4">⭐⭐⭐⭐ {t('optVeryGood')}</option>
                                             <option value="3">⭐⭐⭐ {t('optAverage')}</option>
@@ -265,9 +261,9 @@ const FeedbackPage: React.FC = () => {
                                     </div>
                                 </>
                             )}
-                            <div className="p-6 rounded-[2.5rem] bg-white dark:bg-white/5 shadow-xl border border-slate-100 dark:border-white/5">
-                                <label className="text-[10px] font-black uppercase mb-4 block text-green-600">{t('ratingSaqr')}</label>
-                                <select name="Saqr_Rating" className="w-full bg-transparent font-black text-lg outline-none dark:text-white">
+                            <div className="p-4 md:p-6 rounded-[1.5rem] md:rounded-[2.5rem] bg-white dark:bg-white/5 shadow-lg border border-slate-100 dark:border-white/5">
+                                <label className="text-[9px] md:text-[10px] font-black uppercase mb-3 block text-green-600 tracking-widest">{t('ratingSaqr')}</label>
+                                <select name="Saqr_Rating" className="w-full bg-transparent font-black text-base md:text-lg outline-none dark:text-white">
                                     <option value="5">⭐⭐⭐⭐⭐ {t('optSmart')}</option>
                                     <option value="4">⭐⭐⭐⭐ {t('optUseful')}</option>
                                     <option value="3">⭐⭐⭐ {t('optAverage')}</option>
@@ -275,28 +271,33 @@ const FeedbackPage: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* حقول التطوير */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div className="space-y-3">
-                                <label className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 ms-6">{t('devSuggestions')}</label>
-                                <textarea name="Dev_Ideas" rows={2} className="w-full p-6 rounded-[2.5rem] bg-white dark:bg-black/40 border-2 border-transparent focus:border-green-600 outline-none font-bold transition-all shadow-inner resize-none dark:text-white"></textarea>
+                        {/* Suggestions - Stack on Mobile */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
+                            <div className="space-y-2">
+                                <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400 ms-2">{t('devSuggestions')}</label>
+                                <textarea name="Dev_Ideas" rows={2} className="w-full p-4 md:p-6 rounded-2xl md:rounded-[2.5rem] bg-white dark:bg-black/40 border-2 border-transparent focus:border-green-600 outline-none font-bold transition-all shadow-inner resize-none dark:text-white"></textarea>
                             </div>
-                            <div className="space-y-3">
-                                <label className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 ms-6">{t('bookSuggestions')}</label>
-                                <textarea name="Book_Requests" rows={2} className="w-full p-6 rounded-[2.5rem] bg-white dark:bg-black/40 border-2 border-transparent focus:border-green-600 outline-none font-bold transition-all shadow-inner resize-none dark:text-white"></textarea>
+                            <div className="space-y-2">
+                                <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400 ms-2">{t('bookSuggestions')}</label>
+                                <textarea name="Book_Requests" rows={2} className="w-full p-4 md:p-6 rounded-2xl md:rounded-[2.5rem] bg-white dark:bg-black/40 border-2 border-transparent focus:border-green-600 outline-none font-bold transition-all shadow-inner resize-none dark:text-white"></textarea>
                             </div>
                         </div>
                     </div>
 
-                    <button type="submit" className="w-full bg-slate-950 dark:bg-white text-white dark:text-slate-950 py-8 rounded-[2.5rem] font-black uppercase tracking-[0.5em] text-sm md:text-base shadow-[0_40px_100px_rgba(220,38,38,0.2)] hover:bg-red-600 hover:text-white hover:scale-[1.01] transition-all relative z-10">
+                    <div className="space-y-2 mb-8 md:mb-12 relative z-10">
+                        <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400 ms-2">{t('msgLabel')}</label>
+                        <textarea name="Personal_Message" rows={3} className="w-full p-4 md:p-6 rounded-2xl md:rounded-[3rem] bg-white dark:bg-black/40 border-2 border-transparent focus:border-red-600 outline-none font-bold transition-all shadow-inner resize-none dark:text-white"></textarea>
+                    </div>
+
+                    <button type="submit" className="w-full bg-slate-950 dark:bg-white text-white dark:text-slate-950 py-5 md:py-8 rounded-2xl md:rounded-[2.5rem] font-black uppercase tracking-[0.3em] md:tracking-[0.5em] text-xs md:text-base shadow-[0_20px_60px_rgba(220,38,38,0.2)] hover:bg-red-600 hover:text-white hover:scale-[1.01] active:scale-95 transition-all relative z-10">
                         {t('submitBtn')}
                     </button>
                 </form>
             )}
 
-            <div className="mt-24 text-center">
-                <p className="text-[10px] font-black uppercase tracking-[0.8em] mb-2 text-slate-400 opacity-50">EFIPS Library Digital Legacy • 2026</p>
-                <p className="font-black text-slate-900 dark:text-white uppercase text-xs tracking-widest">Official Librarian: Islam Ahmed</p>
+            <div className="mt-12 md:mt-24 text-center">
+                <p className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.4em] md:tracking-[0.8em] mb-2 text-slate-400 opacity-50">EFIPS Library Digital Sovereignty • 2026</p>
+                <p className="font-black text-slate-900 dark:text-white uppercase text-[10px] md:text-xs tracking-widest">Official Librarian: Islam Soliman</p>
             </div>
         </div>
     );
