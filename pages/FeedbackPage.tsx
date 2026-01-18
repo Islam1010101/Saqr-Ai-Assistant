@@ -9,7 +9,7 @@ const translations = {
         roleLabel: "المرحلة الدراسية أو الوظيفة",
         affiliationLabel: "هل أنت عضو في المدرسة؟",
         internal: "نعم، عضو في المدرسة (طالب/معلم/إداري)",
-        external: "لا، زائر من الخارج",
+        external: "لا، خارج المدرسة",
         fromOutsideLabel: "كيف تعرفت على بوابة صقر؟",
         ratingService: "تقييم خدمات المكتبة",
         ratingStaff: "تقييم أداء أمين المكتبة (إسلام أحمد)",
