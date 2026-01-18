@@ -111,24 +111,25 @@ const FeedbackPage: React.FC = () => {
     };
 
     return (
-        <div dir={dir} className="max-w-6xl mx-auto px-4 py-8 md:py-20 animate-fade-up relative z-10 pb-24 text-start antialiased font-black">
+        <div dir={dir} className="max-w-6xl mx-auto px-4 py-6 md:py-16 animate-fade-up relative z-10 pb-20 text-start antialiased font-black leading-relaxed">
             
-            {/* Responsive Header Section */}
-            <div className="text-center mb-10 md:mb-16 relative">
-                <div className="absolute inset-0 flex justify-center -z-10 opacity-30 blur-[80px]">
-                    <div className="w-40 md:w-60 h-40 md:h-60 bg-green-600 rounded-full translate-x-10 md:translate-x-32"></div>
-                    <div className="w-40 md:w-60 h-40 md:h-60 bg-red-600 rounded-full -translate-x-10 md:-translate-x-32"></div>
+            {/* Header Section - توحيد الأبعاد البصرية */}
+            <div className="text-center mb-8 md:mb-14 relative">
+                <div className="absolute inset-0 flex justify-center -z-10 opacity-20 blur-[60px] md:blur-[100px]">
+                    <div className="w-40 md:w-64 h-40 md:h-64 bg-green-600 rounded-full translate-x-10 md:translate-x-20"></div>
+                    <div className="w-40 md:w-64 h-40 md:h-64 bg-red-600 rounded-full -translate-x-10 md:-translate-x-20"></div>
                 </div>
-                <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-slate-950 dark:text-white tracking-tighter uppercase mb-4 drop-shadow-xl leading-tight">
+                
+                <h1 className="text-3xl sm:text-4xl md:text-7xl font-black text-slate-950 dark:text-white tracking-tighter uppercase mb-3 md:mb-6 leading-tight">
                     {t('pageTitle')}
                 </h1>
                 
-                <div className="flex justify-center items-center gap-2 md:gap-3 mb-6">
-                    <div className="h-1 w-10 md:w-16 bg-red-600 rounded-full"></div>
-                    <div className="h-1 w-10 md:w-16 bg-green-600 rounded-full"></div>
+                <div className="flex justify-center items-center gap-2 md:gap-4 mb-5 md:mb-8">
+                    <div className="h-1 md:h-2 w-8 md:w-16 bg-red-600 rounded-full shadow-lg shadow-red-600/20"></div>
+                    <div className="h-1 md:h-2 w-8 md:w-16 bg-green-600 rounded-full shadow-lg shadow-green-600/20"></div>
                 </div>
 
-                <p className="text-lg md:text-2xl lg:text-3xl text-slate-700 dark:text-slate-300 font-black max-w-4xl mx-auto leading-snug px-2">
+                <p className="text-lg sm:text-xl md:text-3xl text-slate-700 dark:text-slate-300 font-black max-w-4xl mx-auto px-2 leading-relaxed">
                     <span className="bg-clip-text text-transparent bg-gradient-to-r from-red-600 via-slate-900 dark:via-white to-green-600">
                         {t('subTitle')}
                     </span>
@@ -136,44 +137,44 @@ const FeedbackPage: React.FC = () => {
             </div>
 
             {submitted ? (
-                <div className="glass-panel p-8 md:p-16 rounded-[2rem] md:rounded-[4rem] text-center bg-green-600/5 border-2 border-green-600/20 shadow-2xl animate-in zoom-in duration-500">
-                    <div className="text-5xl md:text-7xl mb-6 animate-bounce">🇦🇪</div>
-                    <h2 className="text-2xl md:text-3xl font-black text-green-700 dark:text-green-400 mb-8">{t('successMsg')}</h2>
-                    <button onClick={() => setSubmitted(false)} className="px-8 py-4 bg-red-600 text-white rounded-xl font-black uppercase tracking-widest text-[10px] hover:scale-105 transition-transform shadow-xl">
-                        {locale === 'ar' ? "إرسال فكرة جديدة" : "Send More Ideas"}
+                <div className="glass-panel p-8 md:p-16 rounded-[2.5rem] md:rounded-[4rem] text-center bg-green-600/5 border-2 border-green-600/20 shadow-2xl animate-in zoom-in duration-500">
+                    <div className="text-5xl md:text-7xl mb-6">🇦🇪</div>
+                    <h2 className="text-xl md:text-3xl font-black text-green-700 dark:text-green-400 mb-6 leading-relaxed">{t('successMsg')}</h2>
+                    <button onClick={() => setSubmitted(false)} className="px-8 py-4 bg-slate-950 dark:bg-white text-white dark:text-slate-950 rounded-2xl font-black uppercase tracking-widest text-[10px] md:text-xs shadow-lg active:scale-95 transition-all">
+                        {locale === 'ar' ? "إرسال المزيد" : "Send More"}
                     </button>
                 </div>
             ) : (
-                <form onSubmit={handleSubmit} className="glass-panel p-5 md:p-14 rounded-[2rem] md:rounded-[4rem] bg-white/80 dark:bg-slate-950/80 shadow-[0_40px_100px_rgba(0,0,0,0.15)] border border-white/10 relative overflow-hidden group">
+                /* النموذج الموحد الأبعاد لعام 2026 */
+                <form onSubmit={handleSubmit} className="glass-panel p-5 sm:p-8 md:p-14 rounded-[2.5rem] md:rounded-[4.5rem] bg-white/80 dark:bg-slate-950/80 shadow-2xl border border-white/10 relative overflow-hidden group">
                     <div className="absolute -top-40 -right-40 w-80 h-80 bg-green-600/5 blur-[120px] rounded-full"></div>
                     
-                    {/* Membership Section */}
-                    <div className="mb-8 relative z-10 space-y-2">
-                        <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-red-600 ms-2">{t('affiliationLabel')}</label>
+                    <div className="mb-6 md:mb-10 relative z-10 space-y-2">
+                        <label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-red-600 ms-2">{t('affiliationLabel')}</label>
                         <select 
                             name="Membership" 
                             onChange={(e) => {
                                 setIsInternal(e.target.value === "Internal");
                                 setUserCategory(e.target.value === "Internal" ? "Student" : "External_Student");
                             }}
-                            className="w-full p-4 md:p-6 rounded-2xl md:rounded-3xl bg-slate-100 dark:bg-white/5 border-2 border-transparent focus:border-green-600 outline-none font-black text-sm md:text-base transition-all shadow-inner text-slate-900 dark:text-white cursor-pointer"
+                            className="w-full p-4 md:p-6 rounded-2xl md:rounded-3xl bg-slate-100 dark:bg-white/5 border-2 border-transparent focus:border-green-600 outline-none font-black text-sm md:text-lg transition-all shadow-inner text-slate-900 dark:text-white cursor-pointer leading-normal"
                         >
                             <option value="Internal">{t('internal')}</option>
                             <option value="External">{t('external')}</option>
                         </select>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 mb-8 relative z-10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 mb-6 md:mb-10 relative z-10">
                         <div className="space-y-2">
-                            <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400 ms-2">{t('nameLabel')}</label>
-                            <input name="Full_Name" required type="text" className="w-full p-4 md:p-6 rounded-2xl md:rounded-3xl bg-white dark:bg-black/40 border-2 border-transparent focus:border-red-600 outline-none font-bold transition-all shadow-sm text-slate-950 dark:text-white" />
+                            <label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-400 ms-2">{t('nameLabel')}</label>
+                            <input name="Full_Name" required type="text" className="w-full p-4 md:p-6 rounded-2xl md:rounded-3xl bg-white dark:bg-black/40 border-2 border-transparent focus:border-red-600 outline-none font-bold transition-all shadow-sm text-slate-950 dark:text-white leading-normal" />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400 ms-2">{t('categoryLabel')}</label>
+                            <label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-400 ms-2">{t('categoryLabel')}</label>
                             <select 
                                 name="User_Category" 
                                 onChange={(e) => setUserCategory(e.target.value)}
-                                className="w-full p-4 md:p-6 rounded-2xl md:rounded-3xl bg-white dark:bg-black/40 border-2 border-transparent focus:border-red-600 outline-none font-black transition-all shadow-sm text-slate-950 dark:text-white cursor-pointer"
+                                className="w-full p-4 md:p-6 rounded-2xl md:rounded-3xl bg-white dark:bg-black/40 border-2 border-transparent focus:border-red-600 outline-none font-black transition-all shadow-sm text-slate-950 dark:text-white cursor-pointer leading-normal"
                             >
                                 {isInternal ? (
                                     <>
@@ -192,40 +193,39 @@ const FeedbackPage: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="space-y-6 md:space-y-10 mb-8 relative z-10 animate-fade-up">
-                        {/* Dynamic Fields */}
+                    <div className="space-y-6 md:space-y-10 mb-8 md:mb-12 relative z-10 animate-fade-up">
                         {userCategory.includes("Student") && (
-                            <div className="space-y-2 animate-fade-down">
-                                <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-green-600 ms-2">{t('gradeLabel')}</label>
-                                <select name="Grade" className="w-full p-4 md:p-6 rounded-2xl md:rounded-3xl bg-slate-100 dark:bg-white/5 font-black text-lg md:text-xl outline-none dark:text-white">
+                            <div className="space-y-2">
+                                <label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-green-600 ms-2">{t('gradeLabel')}</label>
+                                <select name="Grade" className="w-full p-4 md:p-6 rounded-2xl md:rounded-3xl bg-slate-100 dark:bg-white/5 font-black text-lg md:text-2xl outline-none dark:text-white leading-normal">
                                     {Array.from({length: 12}, (_, i) => i + 1).map(g => <option key={g} value={g}>{locale === 'ar' ? `الصف ${g}` : `Grade ${g}`}</option>)}
                                 </select>
                             </div>
                         )}
 
                         {userCategory === "Teacher" && (
-                            <div className="space-y-2 animate-fade-down">
-                                <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-green-600 ms-2">{t('specializationLabel')}</label>
-                                <input name="Specialization" required type="text" className="w-full p-4 md:p-6 rounded-2xl md:rounded-3xl bg-slate-100 dark:bg-white/5 font-bold outline-none dark:text-white" />
+                            <div className="space-y-2">
+                                <label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-green-600 ms-2">{t('specializationLabel')}</label>
+                                <input name="Specialization" required type="text" className="w-full p-4 md:p-6 rounded-2xl md:rounded-3xl bg-slate-100 dark:bg-white/5 font-bold outline-none dark:text-white leading-normal" />
                             </div>
                         )}
 
                         {userCategory === "Admin" && (
-                            <div className="space-y-2 animate-fade-down">
-                                <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-green-600 ms-2">{t('deptLabel')}</label>
-                                <input name="Department" required type="text" className="w-full p-4 md:p-6 rounded-2xl md:rounded-3xl bg-slate-100 dark:bg-white/5 font-bold outline-none dark:text-white" />
+                            <div className="space-y-2">
+                                <label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-green-600 ms-2">{t('deptLabel')}</label>
+                                <input name="Department" required type="text" className="w-full p-4 md:p-6 rounded-2xl md:rounded-3xl bg-slate-100 dark:bg-white/5 font-bold outline-none dark:text-white leading-normal" />
                             </div>
                         )}
 
                         {userCategory === "Parent" && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 animate-fade-down">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
                                 <div className="space-y-2">
-                                    <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-green-600 ms-2">{t('jobLabel')}</label>
-                                    <input name="Parent_Job" required type="text" className="w-full p-4 md:p-6 rounded-2xl md:rounded-3xl bg-slate-100 dark:bg-white/5 font-bold outline-none dark:text-white" />
+                                    <label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-green-600 ms-2">{t('jobLabel')}</label>
+                                    <input name="Parent_Job" required type="text" className="w-full p-4 md:p-6 rounded-2xl md:rounded-3xl bg-slate-100 dark:bg-white/5 font-bold outline-none dark:text-white leading-normal" />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-green-600 ms-2">{t('sonsGradeLabel')}</label>
-                                    <select name="Son_Grade" className="w-full p-4 md:p-6 rounded-2xl md:rounded-3xl bg-slate-100 dark:bg-white/5 font-black outline-none dark:text-white">
+                                    <label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-green-600 ms-2">{t('sonsGradeLabel')}</label>
+                                    <select name="Son_Grade" className="w-full p-4 md:p-6 rounded-2xl md:rounded-3xl bg-slate-100 dark:bg-white/5 font-black outline-none dark:text-white leading-normal">
                                         {Array.from({length: 12}, (_, i) => i + 1).map(g => <option key={g} value={g}>{locale === 'ar' ? `الصف ${g}` : `Grade ${g}`}</option>)}
                                     </select>
                                 </div>
@@ -233,27 +233,26 @@ const FeedbackPage: React.FC = () => {
                         )}
 
                         {!isInternal && (
-                            <div className="space-y-2 animate-fade-down">
-                                <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-red-600 ms-2">{t('fromOutsideLabel')}</label>
-                                <input name="Discovery_Path" required type="text" className="w-full p-4 md:p-6 rounded-2xl md:rounded-3xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 outline-none font-bold dark:text-white shadow-inner" />
+                            <div className="space-y-2">
+                                <label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-red-600 ms-2">{t('fromOutsideLabel')}</label>
+                                <input name="Discovery_Path" required type="text" className="w-full p-4 md:p-6 rounded-2xl md:rounded-3xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 outline-none font-bold dark:text-white shadow-inner leading-normal" />
                             </div>
                         )}
 
-                        {/* Ratings - Grid adjustment for Tablet/Mobile */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                             {isInternal && (
                                 <>
-                                    <div className="p-4 md:p-6 rounded-[1.5rem] md:rounded-[2.5rem] bg-white dark:bg-white/5 shadow-lg border border-slate-100 dark:border-white/5">
-                                        <label className="text-[9px] md:text-[10px] font-black uppercase mb-3 block text-red-600 tracking-widest">{t('ratingService')}</label>
-                                        <select name="Service_Rating" className="w-full bg-transparent font-black text-base md:text-lg outline-none dark:text-white">
+                                    <div className="p-5 md:p-8 rounded-[2rem] md:rounded-[3rem] bg-white dark:bg-white/5 shadow-xl border border-slate-100 dark:border-white/5">
+                                        <label className="text-[9px] md:text-[11px] font-black uppercase mb-3 block text-red-600 tracking-widest leading-none">{t('ratingService')}</label>
+                                        <select name="Service_Rating" className="w-full bg-transparent font-black text-base md:text-xl outline-none dark:text-white leading-normal">
                                             <option value="5">⭐⭐⭐⭐⭐ {t('optExcellent')}</option>
                                             <option value="4">⭐⭐⭐⭐ {t('optVeryGood')}</option>
                                             <option value="3">⭐⭐⭐ {t('optAverage')}</option>
                                         </select>
                                     </div>
-                                    <div className="p-4 md:p-6 rounded-[1.5rem] md:rounded-[2.5rem] bg-white dark:bg-white/5 shadow-lg border border-slate-100 dark:border-white/5">
-                                        <label className="text-[9px] md:text-[10px] font-black uppercase mb-3 block text-red-600 tracking-widest">{t('ratingStaff')}</label>
-                                        <select name="Staff_Rating" className="w-full bg-transparent font-black text-base md:text-lg outline-none dark:text-white">
+                                    <div className="p-5 md:p-8 rounded-[2rem] md:rounded-[3rem] bg-white dark:bg-white/5 shadow-xl border border-slate-100 dark:border-white/5">
+                                        <label className="text-[9px] md:text-[11px] font-black uppercase mb-3 block text-red-600 tracking-widest leading-none">{t('ratingStaff')}</label>
+                                        <select name="Staff_Rating" className="w-full bg-transparent font-black text-base md:text-xl outline-none dark:text-white leading-normal">
                                             <option value="5">⭐⭐⭐⭐⭐ {t('optExcellent')}</option>
                                             <option value="4">⭐⭐⭐⭐ {t('optVeryGood')}</option>
                                             <option value="3">⭐⭐⭐ {t('optAverage')}</option>
@@ -261,9 +260,9 @@ const FeedbackPage: React.FC = () => {
                                     </div>
                                 </>
                             )}
-                            <div className="p-4 md:p-6 rounded-[1.5rem] md:rounded-[2.5rem] bg-white dark:bg-white/5 shadow-lg border border-slate-100 dark:border-white/5">
-                                <label className="text-[9px] md:text-[10px] font-black uppercase mb-3 block text-green-600 tracking-widest">{t('ratingSaqr')}</label>
-                                <select name="Saqr_Rating" className="w-full bg-transparent font-black text-base md:text-lg outline-none dark:text-white">
+                            <div className="p-5 md:p-8 rounded-[2rem] md:rounded-[3rem] bg-white dark:bg-white/5 shadow-xl border border-slate-100 dark:border-white/5">
+                                <label className="text-[9px] md:text-[11px] font-black uppercase mb-3 block text-green-600 tracking-widest leading-none">{t('ratingSaqr')}</label>
+                                <select name="Saqr_Rating" className="w-full bg-transparent font-black text-base md:text-xl outline-none dark:text-white leading-normal">
                                     <option value="5">⭐⭐⭐⭐⭐ {t('optSmart')}</option>
                                     <option value="4">⭐⭐⭐⭐ {t('optUseful')}</option>
                                     <option value="3">⭐⭐⭐ {t('optAverage')}</option>
@@ -271,33 +270,31 @@ const FeedbackPage: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Suggestions - Stack on Mobile */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-10">
                             <div className="space-y-2">
-                                <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400 ms-2">{t('devSuggestions')}</label>
-                                <textarea name="Dev_Ideas" rows={2} className="w-full p-4 md:p-6 rounded-2xl md:rounded-[2.5rem] bg-white dark:bg-black/40 border-2 border-transparent focus:border-green-600 outline-none font-bold transition-all shadow-inner resize-none dark:text-white"></textarea>
+                                <label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-400 ms-2">{t('devSuggestions')}</label>
+                                <textarea name="Dev_Ideas" rows={2} className="w-full p-5 md:p-8 rounded-[1.8rem] md:rounded-[3rem] bg-white dark:bg-black/40 border-2 border-transparent focus:border-green-600 outline-none font-bold transition-all shadow-inner resize-none dark:text-white leading-relaxed"></textarea>
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400 ms-2">{t('bookSuggestions')}</label>
-                                <textarea name="Book_Requests" rows={2} className="w-full p-4 md:p-6 rounded-2xl md:rounded-[2.5rem] bg-white dark:bg-black/40 border-2 border-transparent focus:border-green-600 outline-none font-bold transition-all shadow-inner resize-none dark:text-white"></textarea>
+                                <label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-400 ms-2">{t('bookSuggestions')}</label>
+                                <textarea name="Book_Requests" rows={2} className="w-full p-5 md:p-8 rounded-[1.8rem] md:rounded-[3rem] bg-white dark:bg-black/40 border-2 border-transparent focus:border-green-600 outline-none font-bold transition-all shadow-inner resize-none dark:text-white leading-relaxed"></textarea>
                             </div>
                         </div>
                     </div>
 
-                    <div className="space-y-2 mb-8 md:mb-12 relative z-10">
-                        <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400 ms-2">{t('msgLabel')}</label>
-                        <textarea name="Personal_Message" rows={3} className="w-full p-4 md:p-6 rounded-2xl md:rounded-[3rem] bg-white dark:bg-black/40 border-2 border-transparent focus:border-red-600 outline-none font-bold transition-all shadow-inner resize-none dark:text-white"></textarea>
-                    </div>
-
-                    <button type="submit" className="w-full bg-slate-950 dark:bg-white text-white dark:text-slate-950 py-5 md:py-8 rounded-2xl md:rounded-[2.5rem] font-black uppercase tracking-[0.3em] md:tracking-[0.5em] text-xs md:text-base shadow-[0_20px_60px_rgba(220,38,38,0.2)] hover:bg-red-600 hover:text-white hover:scale-[1.01] active:scale-95 transition-all relative z-10">
+                    <button type="submit" className="w-full bg-slate-950 dark:bg-white text-white dark:text-slate-950 py-5 md:py-9 rounded-[1.8rem] md:rounded-[3.5rem] font-black uppercase tracking-[0.3em] md:tracking-[0.6em] text-xs md:text-lg shadow-2xl hover:bg-red-600 hover:text-white transition-all active:scale-95 leading-none">
                         {t('submitBtn')}
                     </button>
                 </form>
             )}
 
             <div className="mt-12 md:mt-24 text-center">
-                <p className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.4em] md:tracking-[0.8em] mb-2 text-slate-400 opacity-50">EFIPS Library Digital Sovereignty • 2026</p>
-                <p className="font-black text-slate-900 dark:text-white uppercase text-[10px] md:text-xs tracking-widest">Official Librarian: Islam Ahmed</p>
+                <div className="flex justify-center gap-2 mb-4 opacity-40">
+                    <div className="w-8 h-1 bg-red-600"></div>
+                    <div className="w-8 h-1 bg-green-600"></div>
+                </div>
+                <p className="text-[8px] md:text-[11px] font-black uppercase tracking-[0.3em] md:tracking-[0.8em] mb-2 text-slate-400 opacity-60 leading-none">EFIPS Library Digital Sovereignty • 2026</p>
+                <p className="font-black text-slate-900 dark:text-white uppercase text-[10px] md:text-sm tracking-widest border-b-2 border-red-600 inline-block pb-1 leading-none">Official Librarian: Islam Ahmed</p>
             </div>
         </div>
     );
