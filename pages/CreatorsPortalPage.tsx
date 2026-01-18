@@ -151,7 +151,7 @@ const CreatorsPortalPage: React.FC = () => {
             </div>
 
             <div className="mt-20 opacity-30 hover:opacity-60 transition-opacity duration-500">
-                 <p className="text-[10px] font-black uppercase tracking-[0.8em] mb-2">EFIPS Library • Innovation Hub • 2026</p>
+                 <p className="text-[10px] font-black uppercase tracking-[0.8em] mb-2">EFIPS Library 2026</p>
                  <p className="font-black text-slate-950 dark:text-white uppercase text-xs border-b-2 border-red-600 inline-block pb-1">Official Librarian: Islam Ahmed</p>
             </div>
         </div>
