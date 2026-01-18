@@ -10,6 +10,7 @@ import AboutPage from './pages/AboutPage';
 import DigitalLibraryPage from './pages/DigitalLibraryPage';
 import ArabicLibraryInternalPage from './pages/ArabicLibraryInternalPage';
 import EnglishLibraryInternalPage from './pages/EnglishLibraryInternalPage';
+import FeedbackPage from './pages/FeedbackPage'; // الإضافة الجديدة ✍️
 
 import type { Locale } from './types';
 
@@ -61,21 +62,20 @@ const Header: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
 
-  // كافة الروابط بما فيها التقارير وعن المكتبة
   const links = [
     { path: '/', label: locale === 'en' ? 'Home' : 'الرئيسية', icon: '🏠' },
     { path: '/search', label: locale === 'en' ? 'Search' : 'البحث', icon: '🔍' },
     { path: '/digital-library', label: locale === 'en' ? 'E-Lib' : 'المكتبة', icon: '📚' },
     { path: '/smart-search', label: locale === 'en' ? 'Saqr AI' : 'صقر AI', icon: '🤖' },
     { path: '/reports', label: locale === 'en' ? 'Reports' : 'التقارير', icon: '📊' },
+    { path: '/feedback', label: locale === 'en' ? 'Feedback' : 'المقترحات', icon: '✍️' }, // الإضافة الجديدة في القائمة
     { path: '/about', label: locale === 'en' ? 'About' : 'عن المكتبة', icon: 'ℹ️' },
   ];
 
   return (
     <header className="sticky top-4 z-[60] px-3 md:px-8">
-      <div className="glass-panel mx-auto max-w-7xl p-1.5 md:p-3 rounded-full border-white/20 dark:border-white/5 flex items-center justify-between shadow-xl backdrop-blur-2xl overflow-hidden">
+      <div className="glass-panel mx-auto max-w-7xl p-1.5 md:p-3 rounded-full border-white/20 dark:border-white/5 flex items-center justify-between shadow-xl backdrop-blur-2xl overflow-hidden font-black">
         
-        {/* Logo & School Name */}
         <Link to="/" className="flex items-center gap-2 md:gap-3 ps-2 md:ps-4 group flex-shrink-0">
           <img 
             src="/school-logo.png" 
@@ -89,7 +89,6 @@ const Header: React.FC = () => {
           </div>
         </Link>
         
-        {/* القائمة القابلة للسحب يميناً ويساراً على الموبايل */}
         <nav className="flex items-center bg-black/5 dark:bg-white/5 rounded-full p-1 mx-2 overflow-x-auto no-scrollbar flex-nowrap flex-1 lg:flex-none">
           <div className="flex items-center gap-0.5 md:gap-1 flex-nowrap">
             {links.map(l => (
@@ -109,7 +108,6 @@ const Header: React.FC = () => {
           </div>
         </nav>
         
-        {/* Tools */}
         <div className="flex items-center gap-1.5 pe-2 md:pe-4 flex-shrink-0">
           <button 
             onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')} 
@@ -178,6 +176,7 @@ const App: React.FC = () => {
                 <Route path="/digital-library/arabic" element={<ArabicLibraryInternalPage />} />
                 <Route path="/digital-library/english" element={<EnglishLibraryInternalPage />} />
                 <Route path="/reports" element={<ReportsPage />} />
+                <Route path="/feedback" element={<FeedbackPage />} /> {/* إضافة مسار المقترحات */}
                 <Route path="/about" element={<AboutPage />} />
               </Routes>
             </main>
