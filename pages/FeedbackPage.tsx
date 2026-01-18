@@ -295,7 +295,7 @@ const FeedbackPage: React.FC = () => {
                     <div className="w-16 h-1.5 bg-red-600 rounded-full"></div>
                     <div className="w-16 h-1.5 bg-green-600 rounded-full"></div>
                 </div>
-                <p className="text-[9px] md:text-sm font-black uppercase tracking-[0.8em] mb-3 text-slate-400 opacity-70">EFIPS LIBRARY • KNOWLEDGE LEGACY • 2026</p>
+                <p className="text-[9px] md:text-sm font-black uppercase tracking-[0.8em] mb-3 text-slate-400 opacity-70">EFIPS LIBRARY 2026</p>
                 <p className="font-black text-slate-950 dark:text-white uppercase text-xs md:text-xl tracking-widest border-b-4 border-red-600 inline-block pb-2">Official Librarian: Islam Ahmed</p>
             </div>
         </div>
