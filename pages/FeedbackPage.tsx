@@ -15,7 +15,7 @@ const translations = {
         jobLabel: "الوظيفة / المسمى الوظيفي",
         fromOutsideLabel: "كيف تعرفت عن مكتبتنا الرقمية؟",
         ratingService: "تقييم خدمات المكتبة",
-        ratingStaff: "تقييم أداء أمين المكتبة (إسلام سليمان)",
+        ratingStaff: "تقييم أداء أمين المكتبة (إسلام أحمد)",
         ratingSaqr: "تقييم ذكاء صقر AI",
         devSuggestions: "مقترحات تطوير الخدمات",
         bookSuggestions: "كتب تود إضافتها رقمياً",
@@ -49,7 +49,7 @@ const translations = {
         jobLabel: "Job Title",
         fromOutsideLabel: "How did you hear about us?",
         ratingService: "Library Services Rating",
-        ratingStaff: "Librarian Performance (Islam Soliman)",
+        ratingStaff: "Librarian Performance (Islam Ahmed)",
         ratingSaqr: "Saqr AI Intelligence",
         devSuggestions: "Development Suggestions",
         bookSuggestions: "Titles to add Digitally",
@@ -297,7 +297,7 @@ const FeedbackPage: React.FC = () => {
 
             <div className="mt-12 md:mt-24 text-center">
                 <p className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.4em] md:tracking-[0.8em] mb-2 text-slate-400 opacity-50">EFIPS Library Digital Sovereignty • 2026</p>
-                <p className="font-black text-slate-900 dark:text-white uppercase text-[10px] md:text-xs tracking-widest">Official Librarian: Islam Soliman</p>
+                <p className="font-black text-slate-900 dark:text-white uppercase text-[10px] md:text-xs tracking-widest">Official Librarian: Islam Ahmed</p>
             </div>
         </div>
     );
