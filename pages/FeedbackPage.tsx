@@ -4,7 +4,7 @@ import { useLanguage } from '../App';
 const translations = {
     ar: {
         pageTitle: "مركز التطوير والابتكار",
-        subTitle: "شاركنا أفكارك لتطوير مكتبة صقر الإمارات الرقمية لعام 2026",
+        subTitle: "شاركنا أفكارك لتطوير مكتبة مدرسة صقر الإمارات الرقمية لعام 2026",
         nameLabel: "الاسم الكامل",
         roleLabel: "المرحلة الدراسية أو الوظيفة",
         affiliationLabel: "هل أنت عضو في المدرسة؟",
@@ -33,7 +33,7 @@ const translations = {
     },
     en: {
         pageTitle: "Innovation & Development Center",
-        subTitle: "Share your ideas to develop Saqr Library for 2026",
+        subTitle: "Share your ideas to develop E.F.I.P.S Library for 2026",
         nameLabel: "Full Name",
         roleLabel: "Grade Level or Job Title",
         affiliationLabel: "Are you a school member?",
