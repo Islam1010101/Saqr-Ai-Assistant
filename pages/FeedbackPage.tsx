@@ -4,7 +4,7 @@ import { useLanguage } from '../App';
 const translations = {
     ar: {
         pageTitle: "بوابة الابتكار والتميز",
-        subTitle: "القراءة ذكاء، والتطوير شراكة.. بصمتك اليوم ترسم مستقبل مكتبتنا الرقمية",
+        subTitle: "القراءة ذكاء، والتطوير شراكة.. بصمتك اليوم ترسم مستقبل خدماتنا",
         nameLabel: "الاسم الكامل",
         affiliationLabel: "الصفة المدرسية",
         categoryLabel: "الفئة",
@@ -38,7 +38,7 @@ const translations = {
     },
     en: {
         pageTitle: "Innovation & Excellence Portal",
-        subTitle: "Reading is Intelligence, Development is Partnership.. Your footprint today shapes the future of our digital library.",
+        subTitle: "Reading is Intelligence, Development is Partnership.. Your footprint today shapes the future of our Library Services.",
         nameLabel: "Full Name",
         affiliationLabel: "School Affiliation",
         categoryLabel: "Category",
