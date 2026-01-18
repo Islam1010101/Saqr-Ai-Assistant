@@ -19,6 +19,17 @@ const translations = {
         msgLabel: "ملاحظات إضافية",
         submitBtn: "إرسال البيانات",
         successMsg: "شكراً لمساهمتك! رأيك سيصل لأمين المكتبة فوراً.",
+        // خيارات القوائم المنسدلة المترجمة
+        optExcellent: "الممتازة",
+        optVeryGood: "جيدة جداً",
+        optAverage: "متوسطة",
+        optNeedsDev: "تحتاج تطوير",
+        optOutstanding: "متميز جداً",
+        optHelpful: "متعاون للغاية",
+        optGood: "جيد",
+        optFair: "مقبول",
+        optSmart: "ذكي جداً",
+        optUseful: "مفيد"
     },
     en: {
         pageTitle: "Innovation & Development Center",
@@ -37,6 +48,17 @@ const translations = {
         msgLabel: "Additional Notes",
         submitBtn: "Submit Data",
         successMsg: "Thank you! Your feedback will reach the Librarian instantly.",
+        // English Dropdown Options
+        optExcellent: "Excellent",
+        optVeryGood: "Very Good",
+        optAverage: "Average",
+        optNeedsDev: "Needs Development",
+        optOutstanding: "Outstanding",
+        optHelpful: "Very Helpful",
+        optGood: "Good",
+        optFair: "Fair",
+        optSmart: "Very Smart",
+        optUseful: "Useful"
     }
 };
 
@@ -126,25 +148,24 @@ const FeedbackPage: React.FC = () => {
                     </div>
 
                     <div className="space-y-10 mb-10 relative z-10 animate-fade-up">
-                        {/* تظهر التقييمات فقط لعضو المدرسة */}
                         {isInternal ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in slide-in-from-top duration-500">
                                 <div className="bg-slate-50 dark:bg-white/5 p-6 rounded-[2.5rem] border border-slate-100 dark:border-white/5">
                                     <label className="text-[10px] font-black uppercase tracking-widest mb-4 block text-red-600">{t('ratingService')}</label>
                                     <select name="Library_Service_Rating" className="w-full p-3 rounded-xl bg-white dark:bg-slate-900 border-none font-black text-sm outline-none dark:text-white">
-                                        <option value="5">⭐⭐⭐⭐⭐ الممتازة</option>
-                                        <option value="4">⭐⭐⭐⭐ جيدة جداً</option>
-                                        <option value="3">⭐⭐⭐ متوسطة</option>
-                                        <option value="2">⭐⭐ تحتاج تطوير</option>
+                                        <option value="5">⭐⭐⭐⭐⭐ {t('optExcellent')}</option>
+                                        <option value="4">⭐⭐⭐⭐ {t('optVeryGood')}</option>
+                                        <option value="3">⭐⭐⭐ {t('optAverage')}</option>
+                                        <option value="2">⭐⭐ {t('optNeedsDev')}</option>
                                     </select>
                                 </div>
                                 <div className="bg-slate-50 dark:bg-white/5 p-6 rounded-[2.5rem] border border-slate-100 dark:border-white/5">
                                     <label className="text-[10px] font-black uppercase tracking-widest mb-4 block text-red-600">{t('ratingStaff')}</label>
                                     <select name="Librarian_Rating" className="w-full p-3 rounded-xl bg-white dark:bg-slate-900 border-none font-black text-sm outline-none dark:text-white">
-                                        <option value="5">⭐⭐⭐⭐⭐ متميز جداً</option>
-                                        <option value="4">⭐⭐⭐⭐ متعاون للغاية</option>
-                                        <option value="3">⭐⭐⭐ جيد</option>
-                                        <option value="2">⭐⭐ يحتاج تطوير</option>
+                                        <option value="5">⭐⭐⭐⭐⭐ {t('optOutstanding')}</option>
+                                        <option value="4">⭐⭐⭐⭐ {t('optHelpful')}</option>
+                                        <option value="3">⭐⭐⭐ {t('optGood')}</option>
+                                        <option value="2">⭐⭐ {t('optFair')}</option>
                                     </select>
                                 </div>
                                 <div className="md:col-span-2 space-y-3">
@@ -153,22 +174,20 @@ const FeedbackPage: React.FC = () => {
                                 </div>
                             </div>
                         ) : (
-                            /* يظهر للزائر الخارجي فقط */
                             <div className="space-y-3 animate-in slide-in-from-top duration-500">
                                 <label className="text-[11px] font-black uppercase tracking-widest text-red-600 ms-5">{t('fromOutsideLabel')}</label>
                                 <input name="Discovery_Source" required type="text" className="w-full p-5 rounded-3xl bg-red-50 dark:bg-red-950/20 border-2 border-red-200 focus:border-red-600 outline-none font-bold transition-all shadow-inner text-slate-900 dark:text-white" />
                             </div>
                         )}
 
-                        {/* حقول مشتركة تظهر للجميع حسب طلبك (باقي الحاجات) */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="bg-slate-50 dark:bg-white/5 p-6 rounded-[2.5rem] border border-slate-100 dark:border-white/5">
                                 <label className="text-[10px] font-black uppercase tracking-widest mb-4 block text-red-600">{t('ratingSaqr')}</label>
                                 <select name="Saqr_AI_Performance" className="w-full p-3 rounded-xl bg-white dark:bg-slate-900 border-none font-black text-sm outline-none dark:text-white">
-                                    <option value="5">⭐⭐⭐⭐⭐ ذكي جداً</option>
-                                    <option value="4">⭐⭐⭐⭐ مفيد</option>
-                                    <option value="3">⭐⭐⭐ متوسط</option>
-                                    <option value="2">⭐⭐ يحتاج تطوير</option>
+                                    <option value="5">⭐⭐⭐⭐⭐ {t('optSmart')}</option>
+                                    <option value="4">⭐⭐⭐⭐ {t('optUseful')}</option>
+                                    <option value="3">⭐⭐⭐ {locale === 'ar' ? 'متوسط' : 'Average'}</option>
+                                    <option value="2">⭐⭐ {t('optNeedsDev')}</option>
                                 </select>
                             </div>
                             <div className="space-y-3">
@@ -191,7 +210,7 @@ const FeedbackPage: React.FC = () => {
 
             <div className="mt-24 text-center opacity-40 hover:opacity-100 transition-opacity duration-700">
                 <p className="text-[10px] font-black uppercase tracking-[0.6em] mb-2 text-slate-400">EFIPS Library Tech Center • 2026</p>
-                <p className="font-black text-slate-950 dark:text-white text-xs tracking-tight">OFFICIAL LIBRARIAN: ISLAM SOLIMAN</p>
+                <p className="font-black text-slate-950 dark:text-white text-xs tracking-tight uppercase">OFFICIAL LIBRARIAN: ISLAM SOLIMAN</p>
             </div>
         </div>
     );
