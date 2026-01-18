@@ -4,7 +4,7 @@ import { useLanguage } from '../App';
 const translations = {
     ar: {
         pageTitle: "مركز التطوير والابتكار",
-        subTitle: "شاركنا أفكارك لتطوير مكتبة صقر الإمارات الرقمية لعام 2026",
+        subTitle: "شاركنا أفكارك لتطوير مكتبة مدرسة صقر الإمارات الرقمية لعام 2026",
         nameLabel: "الاسم الكامل",
         affiliationLabel: "هل أنت عضو في المدرسة؟",
         categoryLabel: "الفئة",
@@ -13,7 +13,7 @@ const translations = {
         jobLabel: "المسمى الوظيفي",
         fromOutsideLabel: "كيف تعرفت على بوابة صقر؟",
         ratingService: "تقييم خدمات المكتبة",
-        ratingStaff: "تقييم أداء أمين المكتبة (إسلام سليمان)",
+        ratingStaff: "تقييم أداء أمين المكتبة (إسلام أحمد)",
         ratingSaqr: "تقييم ذكاء المساعد صقر AI",
         devSuggestions: "مقترحات لتطوير خدمات المكتبة",
         bookSuggestions: "عناوين تود إضافتها للمكتبة الرقمية",
@@ -40,7 +40,7 @@ const translations = {
     },
     en: {
         pageTitle: "Innovation & Development Center",
-        subTitle: "Share your ideas to develop Saqr Library for 2026",
+        subTitle: "Share your ideas to develop E.F.I.P.S Library for 2026",
         nameLabel: "Full Name",
         affiliationLabel: "Are you a school member?",
         categoryLabel: "Category",
@@ -49,7 +49,7 @@ const translations = {
         jobLabel: "Job Title",
         fromOutsideLabel: "How did you hear about Saqr Portal?",
         ratingService: "Library Services Rating",
-        ratingStaff: "Librarian Performance Rating (Islam Soliman)",
+        ratingStaff: "Librarian Performance Rating (Islam Ahmed)",
         ratingSaqr: "Saqr AI Intelligence Rating",
         devSuggestions: "Suggestions for Library Development",
         bookSuggestions: "Titles to add to Digital Library",
@@ -275,7 +275,7 @@ const FeedbackPage: React.FC = () => {
 
             <div className="mt-24 text-center opacity-40 hover:opacity-100 transition-opacity duration-700">
                 <p className="text-[10px] font-black uppercase tracking-[0.6em] mb-2 text-slate-400">EFIPS Library Tech Center • 2026</p>
-                <p className="font-black text-slate-950 dark:text-white text-xs tracking-tight uppercase">OFFICIAL LIBRARIAN: ISLAM SOLIMAN</p>
+                <p className="font-black text-slate-950 dark:text-white text-xs tracking-tight uppercase">OFFICIAL LIBRARIAN: ISLAM AHMED</p>
             </div>
         </div>
     );
