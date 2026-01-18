@@ -4,7 +4,7 @@ import { useLanguage } from '../App';
 const translations = {
     ar: {
         pageTitle: "بوابة الابتكار والتميز",
-        subTitle: "نحو مكتبة ذكية تليق بمدرسة صقر الإمارات 2026",
+        subTitle: "القراءة ذكاء، والتطوير شراكة.. بصمتك اليوم ترسم مستقبل مكتبتنا الرقمية",
         nameLabel: "الاسم الكامل",
         affiliationLabel: "الصفة المدرسية",
         categoryLabel: "الفئة",
@@ -13,7 +13,7 @@ const translations = {
         specializationLabel: "التخصص الدراسي",
         deptLabel: "القسم / الإدارة",
         jobLabel: "الوظيفة / المسمى الوظيفي",
-        fromOutsideLabel: "كيف عرفت عن مكتبتنا الرقمية؟",
+        fromOutsideLabel: "كيف تعرفت عن مكتبتنا الرقمية؟",
         ratingService: "تقييم خدمات المكتبة",
         ratingStaff: "تقييم أداء أمين المكتبة (إسلام أحمد)",
         ratingSaqr: "تقييم ذكاء صقر AI",
@@ -21,7 +21,7 @@ const translations = {
         bookSuggestions: "كتب تود إضافتها رقمياً",
         msgLabel: "رسالة إضافية لأمين المكتبة",
         submitBtn: "إرسال المقترح",
-        successMsg: "تم الاستلام بنجاح! شكراً لمساهمتك الوطنية.",
+        successMsg: "تم الاستلام بنجاح! شكراً لمساهمتك في رسم المستقبل.",
         internal: "من أسرة المدرسة",
         external: "زائر خارجي",
         student: "طالب",
@@ -38,7 +38,7 @@ const translations = {
     },
     en: {
         pageTitle: "Innovation & Excellence Portal",
-        subTitle: "Towards a smart library for EFIPS 2026",
+        subTitle: "Reading is Intelligence, Development is Partnership.. Your footprint today shapes the future of our digital library.",
         nameLabel: "Full Name",
         affiliationLabel: "School Affiliation",
         categoryLabel: "Category",
@@ -55,7 +55,7 @@ const translations = {
         bookSuggestions: "Titles to add Digitally",
         msgLabel: "Message to the Librarian",
         submitBtn: "Submit Feedback",
-        successMsg: "Received successfully! Thank you for your contribution.",
+        successMsg: "Received successfully! Thank you for shaping the future.",
         internal: "School Member",
         external: "Outside Visitor",
         student: "Student",
@@ -106,50 +106,52 @@ const FeedbackPage: React.FC = () => {
                 form.reset();
             }
         } catch (error) {
-            alert("Connection Error");
+            alert("Error");
         }
     };
 
     return (
         <div dir={dir} className="max-w-6xl mx-auto px-4 py-12 md:py-20 animate-fade-up relative z-10 pb-32 text-start antialiased font-black">
             
-            {/* UAE Themed Header */}
+            {/* Catchy Header Section */}
             <div className="text-center mb-16 relative">
-                <div className="absolute inset-0 flex justify-center -z-10 opacity-20 blur-[100px]">
-                    <div className="w-40 h-40 bg-green-600 rounded-full translate-x-20"></div>
-                    <div className="w-40 h-40 bg-red-600 rounded-full -translate-x-20"></div>
+                <div className="absolute inset-0 flex justify-center -z-10 opacity-30 blur-[120px]">
+                    <div className="w-60 h-60 bg-green-600 rounded-full translate-x-32"></div>
+                    <div className="w-60 h-60 bg-red-600 rounded-full -translate-x-32"></div>
                 </div>
                 <h1 className="text-5xl md:text-8xl font-black text-slate-950 dark:text-white tracking-tighter uppercase mb-6 drop-shadow-2xl">
                     {t('pageTitle')}
                 </h1>
-                <div className="flex justify-center items-center gap-2 mb-8">
-                    <div className="h-1.5 w-12 bg-red-600 rounded-full"></div>
-                    <div className="h-1.5 w-12 bg-green-600 rounded-full"></div>
-                    <div className="h-1.5 w-12 bg-slate-400 rounded-full"></div>
+                
+                {/* الخطوط الملونة تحت العنوان */}
+                <div className="flex justify-center items-center gap-3 mb-10">
+                    <div className="h-1.5 w-16 bg-red-600 rounded-full shadow-[0_0_15px_rgba(220,38,38,0.5)]"></div>
+                    <div className="h-1.5 w-16 bg-green-600 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.5)]"></div>
                 </div>
-                <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-400 font-bold max-w-3xl mx-auto uppercase tracking-tighter italic">
-                    {t('subTitle')}
+
+                {/* الجملة الكاتشي الجديدة */}
+                <p className="text-2xl md:text-3xl text-slate-700 dark:text-slate-300 font-black max-w-4xl mx-auto leading-snug px-4">
+                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-red-600 via-slate-900 dark:via-white to-green-600">
+                        {t('subTitle')}
+                    </span>
                 </p>
             </div>
 
             {submitted ? (
-                <div className="glass-panel p-16 rounded-[4rem] text-center bg-green-600/5 border-2 border-green-600/20 shadow-[0_0_50px_rgba(16,185,129,0.2)] animate-in zoom-in duration-500">
+                <div className="glass-panel p-16 rounded-[4rem] text-center bg-green-600/5 border-2 border-green-600/20 shadow-2xl animate-in zoom-in duration-500">
                     <div className="w-24 h-24 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg animate-bounce">
                         <span className="text-5xl text-white">🇦🇪</span>
                     </div>
                     <h2 className="text-3xl font-black text-green-700 dark:text-green-400 mb-8">{t('successMsg')}</h2>
-                    <button onClick={() => setSubmitted(false)} className="px-12 py-5 bg-slate-950 dark:bg-white text-white dark:text-slate-950 rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 transition-all shadow-xl">
-                        {locale === 'ar' ? "إرسال رأي آخر" : "Submit Again"}
+                    <button onClick={() => setSubmitted(false)} className="px-12 py-5 bg-slate-950 dark:bg-white text-white dark:text-slate-950 rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 transition-all">
+                        {locale === 'ar' ? "إرسال المزيد من الأفكار" : "Send More Ideas"}
                     </button>
                 </div>
             ) : (
-                <form onSubmit={handleSubmit} className="glass-panel p-8 md:p-14 rounded-[4.5rem] bg-white/70 dark:bg-slate-950/70 shadow-[0_60px_120px_rgba(0,0,0,0.2)] border border-white/20 relative overflow-hidden group">
-                    
-                    {/* Floating Glows */}
+                <form onSubmit={handleSubmit} className="glass-panel p-8 md:p-14 rounded-[4.5rem] bg-white/70 dark:bg-slate-950/70 shadow-[0_80px_150px_rgba(0,0,0,0.25)] border border-white/20 relative overflow-hidden group">
                     <div className="absolute -top-40 -left-40 w-80 h-80 bg-green-600/10 blur-[120px] rounded-full"></div>
-                    <div className="absolute -bottom-40 -right-40 w-80 h-80 bg-red-600/10 blur-[120px] rounded-full"></div>
-
-                    {/* Affiliation Dropdown */}
+                    
+                    {/* اختيار العضوية */}
                     <div className="mb-12 relative z-10 space-y-3">
                         <label className="text-[11px] font-black uppercase tracking-[0.3em] text-red-600 ms-6">{t('affiliationLabel')}</label>
                         <select 
@@ -158,7 +160,7 @@ const FeedbackPage: React.FC = () => {
                                 setIsInternal(e.target.value === "Internal");
                                 setUserCategory(e.target.value === "Internal" ? "Student" : "External_Student");
                             }}
-                            className="w-full p-6 rounded-3xl bg-slate-100 dark:bg-white/5 border-2 border-transparent focus:border-green-600 outline-none font-black text-sm md:text-base transition-all shadow-inner text-slate-900 dark:text-white cursor-pointer"
+                            className="w-full p-6 rounded-3xl bg-slate-100 dark:bg-white/5 border-2 border-transparent focus:border-green-600 outline-none font-black text-base transition-all shadow-inner text-slate-900 dark:text-white cursor-pointer"
                         >
                             <option value="Internal">{t('internal')}</option>
                             <option value="External">{t('external')}</option>
@@ -168,10 +170,8 @@ const FeedbackPage: React.FC = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10 relative z-10">
                         <div className="space-y-3">
                             <label className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 ms-6">{t('nameLabel')}</label>
-                            <input name="User_Name" required type="text" className="w-full p-6 rounded-3xl bg-white dark:bg-black/40 border-2 border-transparent focus:border-red-600 outline-none font-bold transition-all shadow-sm text-slate-950 dark:text-white" />
+                            <input name="Full_Name" required type="text" className="w-full p-6 rounded-3xl bg-white dark:bg-black/40 border-2 border-transparent focus:border-red-600 outline-none font-bold transition-all shadow-sm text-slate-950 dark:text-white" />
                         </div>
-
-                        {/* الفئة المخصصة بناءً على التبعية */}
                         <div className="space-y-3">
                             <label className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 ms-6">{t('categoryLabel')}</label>
                             <select 
@@ -196,56 +196,43 @@ const FeedbackPage: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* حقول ديناميكية ذكية لعام 2026 */}
                     <div className="space-y-10 mb-10 relative z-10 animate-fade-up">
-                        
-                        {/* 1. مسار الطالب (مرحلة فقط) */}
+                        {/* حقول ديناميكية */}
                         {userCategory.includes("Student") && (
                             <div className="space-y-3 animate-fade-down">
                                 <label className="text-[11px] font-black uppercase tracking-[0.2em] text-green-600 ms-6">{t('gradeLabel')}</label>
-                                <select name="Specific_Grade" className="w-full p-6 rounded-3xl bg-slate-100 dark:bg-white/5 font-black text-xl border-none outline-none dark:text-white">
+                                <select name="Grade" className="w-full p-6 rounded-3xl bg-slate-100 dark:bg-white/5 font-black text-xl outline-none dark:text-white">
                                     {Array.from({length: 12}, (_, i) => i + 1).map(g => <option key={g} value={g}>{locale === 'ar' ? `الصف ${g}` : `Grade ${g}`}</option>)}
                                 </select>
                             </div>
                         )}
 
-                        {/* 2. مسار المعلم (تخصص) */}
                         {userCategory === "Teacher" && (
                             <div className="space-y-3 animate-fade-down">
                                 <label className="text-[11px] font-black uppercase tracking-[0.2em] text-green-600 ms-6">{t('specializationLabel')}</label>
-                                <input name="Teacher_Field" required type="text" placeholder="Arabic, Math, Science..." className="w-full p-6 rounded-3xl bg-slate-100 dark:bg-white/5 font-bold border-none outline-none dark:text-white" />
+                                <input name="Specialization" required type="text" className="w-full p-6 rounded-3xl bg-slate-100 dark:bg-white/5 font-bold outline-none dark:text-white" />
                             </div>
                         )}
 
-                        {/* 3. مسار الإداري (قسم) */}
                         {userCategory === "Admin" && (
                             <div className="space-y-3 animate-fade-down">
                                 <label className="text-[11px] font-black uppercase tracking-[0.2em] text-green-600 ms-6">{t('deptLabel')}</label>
-                                <input name="Admin_Dept" required type="text" className="w-full p-6 rounded-3xl bg-slate-100 dark:bg-white/5 font-bold border-none outline-none dark:text-white" />
+                                <input name="Department" required type="text" className="w-full p-6 rounded-3xl bg-slate-100 dark:bg-white/5 font-bold outline-none dark:text-white" />
                             </div>
                         )}
 
-                        {/* 4. مسار ولي الأمر (وظيفة + صف ابنه) */}
                         {userCategory === "Parent" && (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fade-down">
                                 <div className="space-y-3">
                                     <label className="text-[11px] font-black uppercase tracking-[0.2em] text-green-600 ms-6">{t('jobLabel')}</label>
-                                    <input name="Parent_Job" required type="text" className="w-full p-6 rounded-3xl bg-slate-100 dark:bg-white/5 font-bold border-none outline-none dark:text-white" />
+                                    <input name="Parent_Job" required type="text" className="w-full p-6 rounded-3xl bg-slate-100 dark:bg-white/5 font-bold outline-none dark:text-white" />
                                 </div>
                                 <div className="space-y-3">
                                     <label className="text-[11px] font-black uppercase tracking-[0.2em] text-green-600 ms-6">{t('sonsGradeLabel')}</label>
-                                    <select name="Son_Grade" className="w-full p-6 rounded-3xl bg-slate-100 dark:bg-white/5 font-black border-none outline-none dark:text-white">
+                                    <select name="Son_Grade" className="w-full p-6 rounded-3xl bg-slate-100 dark:bg-white/5 font-black outline-none dark:text-white">
                                         {Array.from({length: 12}, (_, i) => i + 1).map(g => <option key={g} value={g}>{locale === 'ar' ? `الصف ${g}` : `Grade ${g}`}</option>)}
                                     </select>
                                 </div>
-                            </div>
-                        )}
-
-                        {/* 5. مسار الخارجي الموظف */}
-                        {userCategory === "External_Employee" && (
-                            <div className="space-y-3 animate-fade-down">
-                                <label className="text-[11px] font-black uppercase tracking-[0.2em] text-red-600 ms-6">{t('jobLabel')}</label>
-                                <input name="External_Job" required type="text" className="w-full p-6 rounded-3xl bg-slate-100 dark:bg-white/5 font-bold border-none outline-none dark:text-white" />
                             </div>
                         )}
 
@@ -256,12 +243,12 @@ const FeedbackPage: React.FC = () => {
                             </div>
                         )}
 
-                        {/* التقييمات الجمالية */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {/* التقييمات */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {isInternal && (
                                 <>
                                     <div className="p-6 rounded-[2.5rem] bg-white dark:bg-white/5 shadow-xl border border-slate-100 dark:border-white/5">
-                                        <label className="text-[10px] font-black uppercase mb-4 block text-red-600 tracking-widest">{t('ratingService')}</label>
+                                        <label className="text-[10px] font-black uppercase mb-4 block text-red-600">{t('ratingService')}</label>
                                         <select name="Service_Rating" className="w-full bg-transparent font-black text-lg outline-none dark:text-white">
                                             <option value="5">⭐⭐⭐⭐⭐ {t('optExcellent')}</option>
                                             <option value="4">⭐⭐⭐⭐ {t('optVeryGood')}</option>
@@ -269,7 +256,7 @@ const FeedbackPage: React.FC = () => {
                                         </select>
                                     </div>
                                     <div className="p-6 rounded-[2.5rem] bg-white dark:bg-white/5 shadow-xl border border-slate-100 dark:border-white/5">
-                                        <label className="text-[10px] font-black uppercase mb-4 block text-red-600 tracking-widest">{t('ratingStaff')}</label>
+                                        <label className="text-[10px] font-black uppercase mb-4 block text-red-600">{t('ratingStaff')}</label>
                                         <select name="Staff_Rating" className="w-full bg-transparent font-black text-lg outline-none dark:text-white">
                                             <option value="5">⭐⭐⭐⭐⭐ {t('optExcellent')}</option>
                                             <option value="4">⭐⭐⭐⭐ {t('optVeryGood')}</option>
@@ -279,8 +266,8 @@ const FeedbackPage: React.FC = () => {
                                 </>
                             )}
                             <div className="p-6 rounded-[2.5rem] bg-white dark:bg-white/5 shadow-xl border border-slate-100 dark:border-white/5">
-                                <label className="text-[10px] font-black uppercase mb-4 block text-green-600 tracking-widest">{t('ratingSaqr')}</label>
-                                <select name="Saqr_AI_Rating" className="w-full bg-transparent font-black text-lg outline-none dark:text-white">
+                                <label className="text-[10px] font-black uppercase mb-4 block text-green-600">{t('ratingSaqr')}</label>
+                                <select name="Saqr_Rating" className="w-full bg-transparent font-black text-lg outline-none dark:text-white">
                                     <option value="5">⭐⭐⭐⭐⭐ {t('optSmart')}</option>
                                     <option value="4">⭐⭐⭐⭐ {t('optUseful')}</option>
                                     <option value="3">⭐⭐⭐ {t('optAverage')}</option>
@@ -288,7 +275,7 @@ const FeedbackPage: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* حقول التطوير المشتركة */}
+                        {/* حقول التطوير */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="space-y-3">
                                 <label className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 ms-6">{t('devSuggestions')}</label>
@@ -296,31 +283,20 @@ const FeedbackPage: React.FC = () => {
                             </div>
                             <div className="space-y-3">
                                 <label className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 ms-6">{t('bookSuggestions')}</label>
-                                <textarea name="Requested_Books" rows={2} className="w-full p-6 rounded-[2.5rem] bg-white dark:bg-black/40 border-2 border-transparent focus:border-green-600 outline-none font-bold transition-all shadow-inner resize-none dark:text-white"></textarea>
+                                <textarea name="Book_Requests" rows={2} className="w-full p-6 rounded-[2.5rem] bg-white dark:bg-black/40 border-2 border-transparent focus:border-green-600 outline-none font-bold transition-all shadow-inner resize-none dark:text-white"></textarea>
                             </div>
                         </div>
                     </div>
 
-                    <div className="space-y-3 mb-12 relative z-10">
-                        <label className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 ms-6">{t('msgLabel')}</label>
-                        <textarea name="Personal_Message" rows={3} className="w-full p-6 rounded-[3rem] bg-white dark:bg-black/40 border-2 border-transparent focus:border-red-600 outline-none font-bold transition-all shadow-inner resize-none dark:text-white"></textarea>
-                    </div>
-
-                    <button type="submit" className="w-full bg-slate-950 dark:bg-white text-white dark:text-slate-950 py-8 rounded-[2.5rem] font-black uppercase tracking-[0.5em] text-sm md:text-base shadow-[0_30px_60px_rgba(0,0,0,0.2)] hover:bg-red-600 hover:text-white hover:scale-[1.01] active:scale-95 transition-all relative z-10 overflow-hidden">
+                    <button type="submit" className="w-full bg-slate-950 dark:bg-white text-white dark:text-slate-950 py-8 rounded-[2.5rem] font-black uppercase tracking-[0.5em] text-sm md:text-base shadow-[0_40px_100px_rgba(220,38,38,0.2)] hover:bg-red-600 hover:text-white hover:scale-[1.01] transition-all relative z-10">
                         {t('submitBtn')}
                     </button>
                 </form>
             )}
 
-            {/* Footer Branding with Flag Colors */}
             <div className="mt-24 text-center">
-                <div className="flex justify-center gap-3 mb-6 opacity-30">
-                    <div className="w-10 h-1.5 bg-red-600"></div>
-                    <div className="w-10 h-1.5 bg-green-600"></div>
-                    <div className="w-10 h-1.5 bg-slate-400"></div>
-                </div>
-                <p className="text-[10px] font-black uppercase tracking-[0.7em] mb-2 text-slate-400">EFIPS Library Digital Sovereignty • 2026</p>
-                <p className="font-black text-slate-900 dark:text-white uppercase text-xs tracking-widest underline decoration-red-600 underline-offset-8">Official Librarian: Islam Ahmed</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.8em] mb-2 text-slate-400 opacity-50">EFIPS Library Digital Legacy • 2026</p>
+                <p className="font-black text-slate-900 dark:text-white uppercase text-xs tracking-widest">Official Librarian: Islam Ahmed</p>
             </div>
         </div>
     );
