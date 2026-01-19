@@ -19,7 +19,7 @@ const translations = {
         wing4: "الجناح الرابع: قسم الصغار",
         wing4Desc: "مخصص لطلاب مرحلة الـ KG والصفوف من الأول إلى الثالث، مع مجموعة مختارة من القصص والكتب التفاعلية.",
         wing5: "الجناح الخامس: الجناح الخاص",
-        wing5Desc: "يضم رف رقم 40 (الملخصات المسموعة عبر QR Code) ودولاب رقم 41 (المحتوى الوطني وكتب الهوية الوطنية الإماراتية).",
+        wing5Desc: "يضم دولاب رقم 40 (الملخصات المسموعة عبر QR Code) ودولاب رقم 41 (المحتوى الوطني وكتب الهوية الوطنية الإماراتية).",
 
         libServices: "خدماتنا المكتبية",
         servicesList: "جلسات قراءة جماعية وفردية • أوراق عمل • ورش عمل إبداعية • إعارة داخلية وخارجية • مسابقات ثقافية • خدمات صقر الذكي AI.",
@@ -50,7 +50,7 @@ const translations = {
         wing4: "4th Wing: Children's Section",
         wing4Desc: "Dedicated to KG and Grades 1-3, featuring age-appropriate stories and interactive books.",
         wing5: "5th Wing: Special Wing",
-        wing5Desc: "Home to Shelf 40 (Audio Summaries via QR) and Cabinet 41 (UAE National Identity & Heritage content).",
+        wing5Desc: "Home to Shelf 40 (Audio Summaries via QR) and Shelf 41 (UAE National Identity & Heritage content).",
 
         libServices: "Our Library Services",
         servicesList: "Group & Individual Reading • Worksheets • Creative Workshops • Internal/External Lending • Competitions • Saqr AI Services.",
