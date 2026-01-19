@@ -177,7 +177,10 @@ const SearchPage: React.FC = () => {
     const [subjectFilter, setSubjectFilter] = useState('all');
     const [authorFilter, setAuthorFilter] = useState('all');
     const [shelfFilter, setShelfFilter] = useState('all');
-    const [sortBy, setSortBy] = useState('none'); // الحالة الجديدة للفرز
+    
+    // ضبط الترتيب الأبجدي كخيار افتراضي
+    const [sortBy, setSortBy] = useState('alphabetical'); 
+    
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
     const [visibleCount, setVisibleCount] = useState(16);
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
@@ -198,7 +201,7 @@ const SearchPage: React.FC = () => {
             return matchesTerm && matchesSub && matchesAuth && matchesShelf;
         });
 
-        // منطق الفرز المضاف
+        // منطق الفرز المقتصر على الأبجدية واسم المؤلف
         if (sortBy === 'alphabetical') {
             result = [...result].sort((a, b) => a.title.localeCompare(b.title, locale));
         } else if (sortBy === 'author') {
@@ -217,7 +220,7 @@ const SearchPage: React.FC = () => {
                             <input type="text" placeholder={t('searchPlaceholder')} className="w-full p-4 ps-12 bg-slate-100/50 dark:bg-black/40 text-slate-950 dark:text-white border-2 border-transparent focus:border-red-600 rounded-xl md:rounded-2xl outline-none transition-all font-black text-base shadow-inner" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                             <svg className="absolute start-4 top-1/2 -translate-y-1/2 h-5 w-5 text-red-600 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                         </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2"> {/* تم التعديل إلى 4 أعمدة */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                             <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 font-black text-[10px] md:text-xs cursor-pointer outline-none focus:border-red-600 appearance-none text-center shadow-sm">
                                 <option value="none">{t('sortBy')}</option>
                                 <option value="alphabetical">{t('alphabetical')}</option>
