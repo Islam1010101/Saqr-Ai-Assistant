@@ -18,6 +18,10 @@ const translations = {
     allSubjects: "المواضيع",
     allAuthors: "المؤلفين",
     allShelves: "الرفوف",
+    sortBy: "فرز حسب",
+    alphabetical: "أبجدياً (العنوان)",
+    authorName: "اسم المؤلف",
+    none: "تلقائي",
     shelf: "الرف",
     row: "الصف",
     noResults: "لا توجد نتائج.",
@@ -32,6 +36,10 @@ const translations = {
     allSubjects: "Subjects",
     allAuthors: "Authors",
     allShelves: "Shelves",
+    sortBy: "Sort By",
+    alphabetical: "Alphabetical",
+    authorName: "Author Name",
+    none: "Default",
     shelf: "Shelf",
     row: "Row",
     noResults: "No results found.",
@@ -68,8 +76,6 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                 
                 const data = await res.json();
                 let replyText = data.reply || "";
-                
-                // تنظيف الاستجابة من علامات المارك داون في حال أرسلها الذكاء الاصطناعي
                 replyText = replyText.replace(/```json|```/gi, '').trim();
                 
                 try {
@@ -77,7 +83,6 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                     setAiSummary(parsed.summary || "");
                     setAiGenre(parsed.genre || "");
                 } catch (parseErr) {
-                    // إذا لم يكن JSON صحيحاً، استخدم الرد كنص مباشر للسامري
                     setAiSummary(replyText);
                 }
             } catch (e) { 
@@ -98,7 +103,7 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}><path d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
 
-                <div className="flex-1 p-8 md:p-14 flex flex-col justify-center border-b md:border-b-0 md:border-e border-slate-200 dark:border-white/10 text-start">
+                <div className="flex-1 p-8 md:p-14 flex flex-col justify-center border-b md:border-b-0 md:border-e border-slate-200 dark:border-white/10 text-start font-black">
                     <div className="mb-6">
                         <h2 className="text-3xl md:text-5xl font-black text-slate-950 dark:text-white leading-tight mb-2 tracking-tighter">{book.title}</h2>
                         <p className="text-lg text-slate-500 font-bold uppercase tracking-tight">{book.author}</p>
@@ -121,7 +126,7 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                     </div>
                 </div>
 
-                <div className="w-full md:w-[320px] bg-slate-950 dark:bg-black p-8 md:p-10 flex flex-col justify-center items-center text-center text-white relative">
+                <div className="w-full md:w-[320px] bg-slate-950 dark:bg-black p-8 md:p-10 flex flex-col justify-center items-center text-center text-white relative font-black">
                     <div className="space-y-8 md:space-y-10 relative z-10 w-full">
                         <div className="bg-white/5 p-6 rounded-2xl border border-white/10">
                             <p className="text-[10px] font-black text-red-500 uppercase tracking-widest mb-3">{t('subjectLabel')}</p>
@@ -147,7 +152,7 @@ const BookCard = React.memo(({ book, onClick, t }: { book: Book; onClick: () => 
             onClick={onClick} 
             className="group relative glass-panel bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border-none rounded-[2rem] transition-all duration-300 cursor-pointer flex flex-col h-full overflow-hidden shadow-md active:scale-95 hover:shadow-[0_20px_50px_rgba(220,38,38,0.15)]"
         >
-            <div className="p-8 flex-grow text-start">
+            <div className="p-8 flex-grow text-start font-black">
                  <span className={`inline-block px-3 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest mb-4 ${isAi ? 'bg-red-600 text-white shadow-md' : 'bg-green-600 text-white shadow-md'}`}>
                     {isAi ? t('aiSubject') : book.subject}
                  </span>
@@ -156,7 +161,7 @@ const BookCard = React.memo(({ book, onClick, t }: { book: Book; onClick: () => 
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-tight">By {book.author}</p>
             </div>
-            <div className="bg-white/40 dark:bg-black/20 py-4 px-8 border-t border-white/5 mt-auto text-center">
+            <div className="bg-white/40 dark:bg-black/20 py-4 px-8 border-t border-white/5 mt-auto text-center font-black">
                 <p className="font-black text-slate-900 dark:text-white text-[10px] uppercase tracking-widest opacity-40">
                     S: {book.shelf} — R: {book.row}
                 </p>
@@ -172,6 +177,7 @@ const SearchPage: React.FC = () => {
     const [subjectFilter, setSubjectFilter] = useState('all');
     const [authorFilter, setAuthorFilter] = useState('all');
     const [shelfFilter, setShelfFilter] = useState('all');
+    const [sortBy, setSortBy] = useState('none'); // الحالة الجديدة للفرز
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
     const [visibleCount, setVisibleCount] = useState(16);
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
@@ -184,17 +190,26 @@ const SearchPage: React.FC = () => {
 
     const filteredBooks = useMemo(() => {
         const term = debouncedSearchTerm.toLowerCase().trim();
-        return bookData.filter(b => {
+        let result = bookData.filter(b => {
             const matchesTerm = !term || b.title.toLowerCase().includes(term) || b.author.toLowerCase().includes(term);
             const matchesSub = subjectFilter === 'all' || b.subject === subjectFilter;
             const matchesAuth = authorFilter === 'all' || b.author === authorFilter;
             const matchesShelf = shelfFilter === 'all' || b.shelf.toString() === shelfFilter;
             return matchesTerm && matchesSub && matchesAuth && matchesShelf;
         });
-    }, [debouncedSearchTerm, subjectFilter, authorFilter, shelfFilter]);
+
+        // منطق الفرز المضاف
+        if (sortBy === 'alphabetical') {
+            result = [...result].sort((a, b) => a.title.localeCompare(b.title, locale));
+        } else if (sortBy === 'author') {
+            result = [...result].sort((a, b) => a.author.localeCompare(b.author, locale));
+        }
+
+        return result;
+    }, [debouncedSearchTerm, subjectFilter, authorFilter, shelfFilter, sortBy, locale]);
 
     return (
-        <div dir={dir} className="max-w-7xl mx-auto px-4 pb-24 relative z-10">
+        <div dir={dir} className="max-w-7xl mx-auto px-4 pb-24 relative z-10 font-black">
             <div className="sticky top-24 z-50 mb-10 animate-fade-up">
                 <div className="glass-panel p-3 md:p-4 rounded-[2rem] shadow-xl border-none backdrop-blur-3xl max-w-5xl mx-auto">
                     <div className="flex flex-col gap-3">
@@ -202,13 +217,24 @@ const SearchPage: React.FC = () => {
                             <input type="text" placeholder={t('searchPlaceholder')} className="w-full p-4 ps-12 bg-slate-100/50 dark:bg-black/40 text-slate-950 dark:text-white border-2 border-transparent focus:border-red-600 rounded-xl md:rounded-2xl outline-none transition-all font-black text-base shadow-inner" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                             <svg className="absolute start-4 top-1/2 -translate-y-1/2 h-5 w-5 text-red-600 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                         </div>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                            {[{ val: subjectFilter, set: setSubjectFilter, opts: filters.subjects, lbl: t('allSubjects') }, { val: authorFilter, set: setAuthorFilter, opts: filters.authors, lbl: t('allAuthors') }, { val: shelfFilter, set: setShelfFilter, opts: filters.shelves, lbl: t('allShelves') }].map((f, i) => (
-                                <select key={i} value={f.val} onChange={(e) => f.set(e.target.value)} className={`p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 font-black text-[10px] md:text-xs cursor-pointer outline-none focus:border-red-600 appearance-none text-center shadow-sm ${i === 2 ? 'col-span-2 md:col-span-1' : ''}`}>
-                                    <option value="all">{f.lbl}</option>
-                                    {f.opts.map(o => <option key={o} value={o}>{i === 2 ? `S: ${o}` : o}</option>)}
-                                </select>
-                            ))}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2"> {/* تم التعديل إلى 4 أعمدة */}
+                            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 font-black text-[10px] md:text-xs cursor-pointer outline-none focus:border-red-600 appearance-none text-center shadow-sm">
+                                <option value="none">{t('sortBy')}</option>
+                                <option value="alphabetical">{t('alphabetical')}</option>
+                                <option value="author">{t('authorName')}</option>
+                            </select>
+                            <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 font-black text-[10px] md:text-xs cursor-pointer outline-none focus:border-red-600 appearance-none text-center shadow-sm">
+                                <option value="all">{t('allSubjects')}</option>
+                                {filters.subjects.map(o => <option key={o} value={o}>{o}</option>)}
+                            </select>
+                            <select value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)} className="p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 font-black text-[10px] md:text-xs cursor-pointer outline-none focus:border-red-600 appearance-none text-center shadow-sm">
+                                <option value="all">{t('allAuthors')}</option>
+                                {filters.authors.map(o => <option key={o} value={o}>{o}</option>)}
+                            </select>
+                            <select value={shelfFilter} onChange={(e) => setShelfFilter(e.target.value)} className="p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 font-black text-[10px] md:text-xs cursor-pointer outline-none focus:border-red-600 appearance-none text-center shadow-sm col-span-2 md:col-span-1">
+                                <option value="all">{t('allShelves')}</option>
+                                {filters.shelves.map(o => <option key={o} value={o}>{`S: ${o}`}</option>)}
+                            </select>
                         </div>
                     </div>
                 </div>
