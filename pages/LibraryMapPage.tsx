@@ -1,5 +1,14 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useLanguage } from '../App';
+
+// --- واجهة الجزيئات الطائرة ---
+interface VisualEffect {
+    id: number;
+    x: number;
+    y: number;
+    icon: string;
+    velocity: { x: number; y: number };
+}
 
 // --- قاعدة البيانات الشاملة (58 دولاباً) ---
 const ShelfS_DB = [
@@ -59,23 +68,23 @@ const ShelfS_DB = [
 
 const translations = {
     ar: {
-        pageTitle: "خريطة المكتبة",
-        subTitle: "ابحث عن أي قسم داخل المكتبة أو اضغط على الرقم الذي يمثل الدولاب",
-        searchPlaceholder: "ابحث عن القسم ...",
+        pageTitle: "رادار خريطة المكتبة",
+        subTitle: "نظام التوجيه التكتيكي: ابحث عن أي قسم أو اضغط على الرقم",
+        searchPlaceholder: "ابحث عن قسم (مثلاً: تاريخ، ديزني)...",
         wing1: "جناح الباحثين والبالغين",
         wing2: "جناح الشباب والعلوم",
         wing3: "جناح اللغة العربية",
-        wing4: "الجناح الخاص",
+        wing4: "الجناح الملكي الخاص",
         wing5: "جناح الصغار والأطفال"
     },
     en: {
-        pageTitle: "Library Map",
-        subTitle: "Search for any section within the library or click on the number that represents the Shelf",
-        searchPlaceholder: "Search for a section",
+        pageTitle: "Falcon Radar Map",
+        subTitle: "Tactical Guidance: Search for a section or touch a number",
+        searchPlaceholder: "Search for a section (e.g., History, Disney)...",
         wing1: "Adults & Researchers",
         wing2: "Youth & Sciences",
         wing3: "Arabic Language",
-        wing4: "The Special Wing",
+        wing4: "Royal Special Wing",
         wing5: "Children's Wing"
     }
 };
@@ -85,6 +94,31 @@ const LibraryMapPage: React.FC = () => {
     const t = (key: keyof typeof translations.ar) => translations[locale][key];
     const [selected, setSelected] = useState<number | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
+    const [effects, setEffects] = useState<VisualEffect[]>([]);
+
+    // --- منطق إنتاج المؤثرات الطائرة ---
+    const spawnEffect = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+        const icons = ["🔍", "📖", "📚", "✨"];
+        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+        const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+        const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
+
+        const newEffects: VisualEffect[] = Array.from({ length: 3 }).map(() => ({
+            id: Math.random(),
+            x: clientX - rect.left,
+            y: clientY - rect.top,
+            icon: icons[Math.floor(Math.random() * icons.length)],
+            velocity: {
+                x: (Math.random() - 0.5) * 10,
+                y: (Math.random() - 0.5) * 10 - 5
+            }
+        }));
+
+        setEffects(prev => [...prev, ...newEffects].slice(-20));
+        setTimeout(() => {
+            setEffects(current => current.filter(eff => !newEffects.find(ne => ne.id === eff.id)));
+        }, 1000);
+    }, []);
 
     const getWingTheme = (wing: number) => {
         switch(wing) {
@@ -148,22 +182,45 @@ const LibraryMapPage: React.FC = () => {
     return (
         <div dir={dir} className="max-w-[1600px] mx-auto px-4 py-8 md:py-20 animate-fade-up relative z-10 pb-96 font-black antialiased overflow-x-hidden" onClick={() => setSelected(null)}>
             
-            {/* 1. قسم الواجهة المحسن */}
+            {/* 1. قسم الواجهة المحسن مع المؤثرات */}
             <div className="relative mb-16 md:mb-40" onClick={(e) => e.stopPropagation()}>
                 <div className="glass-panel p-6 md:p-24 rounded-[3rem] md:rounded-[8rem] bg-white/70 dark:bg-slate-950/80 backdrop-blur-[60px] shadow-3xl flex flex-col-reverse lg:flex-row items-center gap-8 md:gap-32 border-2 border-white/20 overflow-hidden">
                     <div className="flex-1 text-center lg:text-start space-y-6 md:space-y-16 relative z-10">
                         <h1 className="text-5xl md:text-[10rem] font-black text-slate-950 dark:text-white leading-[0.8] tracking-tighter uppercase">
-                            Library<br/>
-                            <span className="text-red-600 animate-pulse">MAP</span>
+                            FALCON<br/>
+                            <span className="text-red-600 animate-pulse">RADAR</span>
                         </h1>
                         <p className="text-lg md:text-7xl text-slate-800 dark:text-slate-200 font-bold italic max-w-4xl mx-auto lg:mx-0 leading-tight opacity-90">
                             {t('subTitle')}
                         </p>
                     </div>
-                    <div className="flex-1 relative w-full max-w-sm lg:max-w-[650px]">
+
+                    {/* حاوية الصورة مع نظام الجزيئات */}
+                    <div 
+                        className="flex-1 relative w-full max-w-sm lg:max-w-[650px] cursor-pointer touch-none"
+                        onMouseMove={spawnEffect}
+                        onTouchMove={spawnEffect}
+                    >
                         <div className="relative z-10 rounded-[2.5rem] md:rounded-[7rem] overflow-hidden shadow-2xl border-4 md:border-[12px] border-white dark:border-white/10 group bg-white/10 backdrop-blur-sm">
-                            <img src="/library-hero.png" alt="Researcher" className="w-full aspect-[4/5] object-cover object-top transition-transform duration-1000 group-hover:scale-110" onError={(e) => { (e.target as HTMLImageElement).src = '/school-logo.png'; }} />
+                            <img src="/library-hero.png" alt="Researcher" className="w-full aspect-[4/5] object-cover object-top transition-transform duration-1000 group-hover:scale-110 pointer-events-none" onError={(e) => { (e.target as HTMLImageElement).src = '/school-logo.png'; }} />
                         </div>
+                        
+                        {/* رندر الجزيئات الطائرة */}
+                        {effects.map(eff => (
+                            <span 
+                                key={eff.id} 
+                                className="absolute pointer-events-none text-2xl md:text-5xl animate-particle-float"
+                                style={{ 
+                                    left: eff.x, 
+                                    top: eff.y, 
+                                    '--tx': `${eff.velocity.x * 20}px`, 
+                                    '--ty': `${eff.velocity.y * 20}px` 
+                                } as any}
+                            >
+                                {eff.icon}
+                            </span>
+                        ))}
+                        
                         <div className="absolute -inset-10 bg-red-600/10 blur-[120px] rounded-full -z-10 animate-pulse"></div>
                     </div>
                 </div>
@@ -201,6 +258,16 @@ const LibraryMapPage: React.FC = () => {
             <div className="mt-40 text-center opacity-30">
                 <p className="font-black text-slate-950 dark:text-white text-sm md:text-[5rem] italic tracking-tighter uppercase">EFIPS Library Mapping • 2026</p>
             </div>
+
+            {/* أنيميشن الجزيئات */}
+            <style>{`
+                @keyframes particle-float {
+                    0% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
+                    100% { transform: translate(var(--tx), var(--ty)) scale(0) rotate(360deg); opacity: 0; }
+                }
+                .animate-particle-float { animation: particle-float 1s ease-out forwards; }
+                .glass-panel { backdrop-filter: blur(50px); }
+            `}</style>
         </div>
     );
 };
