@@ -56,9 +56,11 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
     const [aiGenre, setAiGenre] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
-    // دالة للتحقق مما إذا كان النص هو نص احتياطي (Placeholder)
+    // دالة محسنة للتحقق من النصوص المؤقتة
     const isPlaceholder = (text: string) => {
-        return !text || text.toLowerCase().includes('available soon') || text.includes('ستتوفر قريباً');
+        if (!text) return true;
+        const low = text.toLowerCase();
+        return low.includes('available soon') || low.includes('soon') || low.includes('قريبا') || low.includes('ستتوفر');
     };
 
     useEffect(() => {
@@ -73,7 +75,8 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                     body: JSON.stringify({
                         messages: [{ 
                             role: 'system', 
-                            content: `Provide a real inspiring 2-sentence summary for the book "${book.title}" by "${book.author}". If you don't know the specific book, provide an inspiring general summary based on its title. Language: ${locale === 'ar' ? 'Arabic' : 'English'}. Return JSON: {"summary": "...", "genre": "..."}` 
+                            // البرومبت الجديد يركز على توليد محتوى بناء على العنوان والمؤلف فقط
+                            content: `Generate an insightful and inspiring 2-sentence summary for the book titled "${book.title}" by author "${book.author}". Base your description strictly on the book's subject matter. Language: ${locale === 'ar' ? 'Arabic' : 'English'}. Return JSON ONLY: {"summary": "...", "genre": "..."}` 
                         }],
                         locale
                     }),
@@ -82,20 +85,19 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                 let replyText = (data.reply || "").replace(/```json|```/gi, '').trim();
                 const parsed = JSON.parse(replyText);
                 
-                // التأكد من أن الملخص القادم من AI ليس فارغاً
                 if (parsed.summary && !isPlaceholder(parsed.summary)) {
                     setAiSummary(parsed.summary);
                 } else {
-                    throw new Error("Invalid AI Summary");
+                    throw new Error("AI returned placeholder");
                 }
                 setAiGenre(parsed.genre);
             } catch (e) { 
-                // في حالة الفشل، إذا كان النص الأصلي placeholder، نعرض نصاً ملهماً عاماً بدلاً من "available soon"
-                if (isPlaceholder(book.summary || '')) {
-                    setAiSummary(locale === 'ar' ? "هذا الكتاب يعد رحلة معرفية فريدة تفتح آفاقاً جديدة للقارئ في مجاله." : "This book offers a unique intellectual journey, opening new horizons for the reader in its field.");
-                } else {
-                    setAiSummary(book.summary || '');
-                }
+                // في حالة الخطأ أو وجود placeholder أصلي، نعطي وصفاً ملهماً عاماً يليق بالعنوان والمؤلف
+                const fallback = locale === 'ar' 
+                    ? `يعتبر كتاب "${book.title}" للمؤلف "${book.author}" إضافة قيمة للمكتبة، حيث يقدم رؤى متميزة تثري فكر القارئ.`
+                    : `The book "${book.title}" by "${book.author}" is a valuable library resource, offering profound insights that enrich the reader's perspective.`;
+                
+                setAiSummary(isPlaceholder(book.summary || '') ? fallback : (book.summary || ''));
             }
             finally { setIsLoading(false); }
         };
@@ -118,7 +120,7 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                            <span className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.5)]"></span> {t('officialAi')}
                         </p>
                         <p className="text-slate-800 dark:text-slate-200 text-lg md:text-xl font-medium leading-relaxed italic">
-                           {isLoading ? "..." : `"${aiSummary || book.summary}"`}
+                           {isLoading ? "..." : `"${aiSummary}"`}
                         </p>
                     </div>
                 </div>
@@ -149,7 +151,6 @@ const BookCard = React.memo(({ book, onClick, t }: { book: Book; onClick: () => 
             className="group relative glass-panel bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border-none rounded-[2rem] transition-all duration-500 cursor-pointer flex flex-col h-full overflow-hidden shadow-lg hover:shadow-2xl dark:hover:shadow-red-600/10 active:scale-95 hover:-translate-y-2"
         >
             <div className={`absolute top-0 start-0 w-1.5 h-full ${isAi ? 'bg-red-600 shadow-[2px_0_15px_rgba(220,38,38,0.4)]' : 'bg-green-600 shadow-[2px_0_15px_rgba(34,197,94,0.4)]'}`}></div>
-            
             <div className="p-7 md:p-9 flex-grow text-start font-black">
                  <span className={`inline-block px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest mb-5 ${isAi ? 'bg-red-600 text-white shadow-lg shadow-red-600/20' : 'bg-green-600 text-white shadow-lg shadow-green-600/20'}`}>
                     {isAi ? t('aiSubject') : book.subject}
@@ -162,7 +163,6 @@ const BookCard = React.memo(({ book, onClick, t }: { book: Book; onClick: () => 
                     <p className="text-xs text-slate-600 dark:text-slate-400 font-bold uppercase tracking-tight truncate">{book.author}</p>
                 </div>
             </div>
-
             <div className="bg-slate-50/50 dark:bg-black/40 py-4 px-8 border-t border-slate-100 dark:border-white/5 mt-auto flex items-center justify-between">
                 <div className="flex gap-4 items-center">
                     <div className="flex items-center gap-1.5">
