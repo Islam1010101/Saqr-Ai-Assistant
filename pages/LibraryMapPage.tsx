@@ -59,21 +59,21 @@ const CABINETS_DB = [
 
 const translations = {
     ar: {
-        pageTitle: "خريطة مكتبة صقر ",
-        subTitle: "المس رقم الدولاب لمعاينة المحتوى التكتيكي فوراً",
-        wing1: "قسم البالغين والباحثين",
-        wing2: "قسم الشباب والعلوم",
-        wing3: "قسم اللغة العربية",
-        wing4: "القسم الخاص (إسلام أحمد)",
-        wing5: "قسم الصغار والأطفال"
+        pageTitle: "خريطة مكتبة صقر",
+        subTitle: "نظام التوجيه التكتيكي: اضغط على الدولاب لمعاينة محتوياته",
+        wing1: "جناح الباحثين (Adults)",
+        wing2: "جناح الشباب (Youth)",
+        wing3: "جناح اللغة العربية",
+        wing4: "الجناح الخاص الملكي",
+        wing5: "جناح الصغار (Children)"
     },
     en: {
-        pageTitle: "Falcon Library Map",
-        subTitle: "Touch a cabinet number to view contents instantly",
-        wing1: "Adults & Researchers",
-        wing2: "Youth & Sciences",
-        wing3: "Arabic Language",
-        wing4: "Special Wing",
+        pageTitle: "Falcon Library Radar",
+        subTitle: "Tactical Guidance: Click a cabinet to inspect content",
+        wing1: "Adults Wing",
+        wing2: "Youth Wing",
+        wing3: "Arabic Wing",
+        wing4: "Royal Special Wing",
         wing5: "Children's Wing"
     }
 };
@@ -85,67 +85,73 @@ const LibraryMapPage: React.FC = () => {
 
     const getWingTheme = (wing: number) => {
         switch(wing) {
-            case 1: return "border-red-600 shadow-red-600/20 text-red-600 bg-red-600/5";
-            case 2: return "border-blue-500 shadow-blue-500/20 text-blue-500 bg-blue-500/5";
-            case 3: return "border-green-600 shadow-green-600/20 text-green-600 bg-green-600/5";
-            case 4: return "border-yellow-500 shadow-yellow-500/40 text-yellow-600 bg-yellow-500/10";
-            case 5: return "border-purple-500 shadow-purple-500/20 text-purple-600 bg-purple-500/5";
-            default: return "border-slate-200 bg-transparent";
+            case 1: return { color: "text-red-600", border: "border-red-600", bg: "bg-red-600/10", glow: "shadow-[0_0_20px_rgba(220,38,38,0.3)]", handle: "bg-red-600" };
+            case 2: return { color: "text-blue-500", border: "border-blue-500", bg: "bg-blue-500/10", glow: "shadow-[0_0_20px_rgba(59,130,246,0.3)]", handle: "bg-blue-500" };
+            case 3: return { color: "text-green-600", border: "border-green-600", bg: "bg-green-600/10", glow: "shadow-[0_0_20px_rgba(34,197,94,0.3)]", handle: "bg-green-600" };
+            case 4: return { color: "text-yellow-500", border: "border-yellow-500", bg: "bg-yellow-500/10", glow: "shadow-[0_0_30px_rgba(234,179,8,0.4)]", handle: "bg-yellow-500" };
+            case 5: return { color: "text-purple-500", border: "border-purple-500", bg: "bg-purple-500/10", glow: "shadow-[0_0_20px_rgba(168,85,247,0.3)]", handle: "bg-purple-500" };
+            default: return { color: "text-slate-400", border: "border-slate-300", bg: "bg-transparent", glow: "", handle: "bg-slate-300" };
         }
     };
 
-    const renderGrid = (title: string, wingId: number, start: number, end: number) => (
-        <div className="mb-20 md:mb-32 animate-fade-up relative">
-            <div className="flex items-center gap-4 mb-10 ps-2">
-                <div className={`w-2 h-10 md:w-5 md:h-20 rounded-full ${getWingTheme(wingId).split(' ')[0].replace('border', 'bg')}`}></div>
-                <h2 className="text-2xl md:text-6xl font-black text-slate-950 dark:text-white tracking-tighter uppercase">{title}</h2>
-            </div>
-            
-            <div className={`grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-4 md:gap-10 p-6 md:p-20 glass-panel rounded-[3rem] md:rounded-[6rem] border-2 ${getWingTheme(wingId).split(' ').slice(0,2).join(' ')} shadow-2xl bg-white/30 dark:bg-black/10`}>
-                {CABINETS_DB.filter(c => c.id >= start && c.id <= end).map((c) => (
-                    <div key={c.id} className="relative flex items-center justify-center">
-                        <button
-                            onClick={() => setSelected(selected === c.id ? null : c.id)}
-                            className={`relative h-16 w-16 md:h-32 md:w-32 rounded-2xl md:rounded-[3.5rem] text-xl md:text-6xl font-black transition-all duration-500 border-4 flex items-center justify-center z-10
-                                ${selected === c.id 
-                                    ? 'bg-slate-950 dark:bg-white text-white dark:text-black border-red-600 scale-110 shadow-[0_0_40px_rgba(220,38,38,0.6)]' 
-                                    : `bg-white dark:bg-slate-900/80 ${getWingTheme(c.wing)} hover:scale-110`
-                                }
-                            `}
-                        >
-                            {c.id}
-                        </button>
+    const renderGrid = (title: string, wingId: number, start: number, end: number) => {
+        const theme = getWingTheme(wingId);
+        return (
+            <div className="mb-20 md:mb-40 animate-fade-up relative">
+                <div className="flex items-center gap-4 mb-12 ps-4">
+                    <div className={`w-3 h-12 md:w-6 md:h-24 rounded-full ${theme.handle} shadow-lg`}></div>
+                    <h2 className="text-3xl md:text-7xl font-black text-slate-950 dark:text-white tracking-tighter uppercase">{title}</h2>
+                </div>
+                
+                <div className={`grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-4 md:gap-12 p-8 md:p-24 glass-panel rounded-[3rem] md:rounded-[6rem] border-2 border-white/20 shadow-2xl bg-white/20 dark:bg-black/20`}>
+                    {CABINETS_DB.filter(c => c.id >= start && c.id <= end).map((c) => (
+                        <div key={c.id} className="relative flex items-center justify-center">
+                            {/* زر على شكل "دولاب" واقعي */}
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setSelected(selected === c.id ? null : c.id); }}
+                                className={`relative w-16 h-24 md:w-32 md:h-48 rounded-xl md:rounded-[2rem] text-xl md:text-6xl font-black transition-all duration-500 border-x-4 flex items-center justify-center z-10 overflow-hidden shadow-xl
+                                    ${selected === c.id 
+                                        ? 'bg-slate-950 dark:bg-white text-white dark:text-black border-red-600 scale-110 z-50 ring-8 ring-red-600/20' 
+                                        : `bg-white dark:bg-slate-900 ${theme.border} ${theme.color} hover:scale-105`
+                                    }
+                                `}
+                            >
+                                {/* مقبض الدولاب (The Handle) */}
+                                <div className={`absolute top-1/2 -translate-y-1/2 ${dir === 'rtl' ? 'left-2' : 'right-2'} w-1 h-8 md:w-2 md:h-16 rounded-full opacity-40 ${theme.handle}`}></div>
+                                {c.id}
+                            </button>
 
-                        {/* الكرت العائم (Floating Label) - يظهر فقط عند الضغط */}
-                        {selected === c.id && (
-                            <div className="absolute bottom-full mb-6 z-[100] animate-in slide-in-from-bottom-4 fade-in zoom-in duration-300 pointer-events-none">
-                                <div className={`glass-panel p-5 md:p-10 rounded-[2rem] md:rounded-[3rem] border-4 ${getWingTheme(c.wing).split(' ')[0]} bg-white/95 dark:bg-slate-950 shadow-[0_30px_100px_rgba(0,0,0,0.4)] min-w-[200px] md:min-w-[450px] text-center backdrop-blur-3xl`}>
-                                    <h4 className="text-[10px] md:text-xl font-black text-red-600 uppercase tracking-widest mb-2">Cabinet #{c.id}</h4>
-                                    <p className="text-sm md:text-4xl font-black text-slate-950 dark:text-white leading-tight tracking-tight">
-                                        {locale === 'ar' ? c.ar : c.en}
-                                    </p>
-                                    {/* مثلث الكرت العائم */}
-                                    <div className={`absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 rotate-45 border-r-4 border-b-4 ${getWingTheme(c.wing).split(' ')[0]} bg-inherit`}></div>
+                            {/* البطاقة العائمة (HUD) - صلبة لمنع التداخل */}
+                            {selected === c.id && (
+                                <div className="absolute bottom-full mb-10 z-[200] animate-in slide-in-from-bottom-6 fade-in zoom-in duration-300 pointer-events-none">
+                                    <div className={`p-8 md:p-14 rounded-[2.5rem] md:rounded-[4.5rem] border-4 ${theme.border} bg-white dark:bg-slate-950 shadow-[0_50px_120px_rgba(0,0,0,0.6)] min-w-[280px] md:min-w-[600px] text-center relative`}>
+                                        <div className={`inline-block px-6 py-2 rounded-full ${theme.handle} text-white text-xs md:text-2xl font-black mb-6 uppercase tracking-widest`}>
+                                            Cabinet #{c.id}
+                                        </div>
+                                        <p className="text-xl md:text-6xl font-black text-slate-950 dark:text-white leading-tight tracking-tight drop-shadow-sm">
+                                            {locale === 'ar' ? c.ar : c.en}
+                                        </p>
+                                        {/* سهم البطاقة الملون */}
+                                        <div className={`absolute -bottom-4 left-1/2 -translate-x-1/2 w-8 h-8 rotate-45 border-r-4 border-b-4 ${theme.border} bg-inherit`}></div>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
-                    </div>
-                ))}
+                            )}
+                        </div>
+                    ))}
+                </div>
             </div>
-        </div>
-    );
+        );
+    };
 
     return (
-        <div dir={dir} className="max-w-7xl mx-auto px-4 py-8 md:py-20 animate-fade-up relative z-10 pb-60 font-black antialiased overflow-x-hidden" onClick={() => setSelected(null)}>
+        <div dir={dir} className="max-w-7xl mx-auto px-4 py-8 md:py-20 animate-fade-up relative z-10 pb-96 font-black antialiased overflow-x-hidden" onClick={() => setSelected(null)}>
             
-            {/* عنوان الصفحة الصافي */}
-            <div className="text-center mb-20 md:mb-40" onClick={(e) => e.stopPropagation()}>
-                <h1 className="text-5xl md:text-[10rem] font-black text-slate-950 dark:text-white tracking-tighter uppercase mb-6 leading-none drop-shadow-2xl">{t('pageTitle')}</h1>
-                <p className="text-lg md:text-5xl text-red-600 dark:text-red-500 font-bold italic max-w-6xl mx-auto leading-relaxed opacity-90">{t('subTitle')}</p>
-                <div className="h-2 w-32 md:w-80 bg-red-600 mx-auto mt-12 rounded-full shadow-[0_0_40px_rgba(220,38,38,0.5)] animate-pulse"></div>
+            <div className="text-center mb-24 md:mb-56" onClick={(e) => e.stopPropagation()}>
+                <h1 className="text-6xl md:text-[12rem] font-black text-slate-950 dark:text-white tracking-tighter uppercase mb-6 leading-none drop-shadow-2xl">MAP</h1>
+                <p className="text-xl md:text-6xl text-red-600 dark:text-red-500 font-bold italic max-w-6xl mx-auto leading-relaxed">{t('subTitle')}</p>
+                <div className="h-3 w-40 md:w-[30rem] bg-red-600 mx-auto mt-12 rounded-full shadow-[0_0_50px_rgba(220,38,38,0.5)]"></div>
             </div>
 
-            {/* شبكات الأجنحة */}
             <div onClick={(e) => e.stopPropagation()}>
                 {renderGrid(t('wing1'), 1, 1, 21)}
                 {renderGrid(t('wing2'), 2, 22, 30)}
@@ -154,15 +160,9 @@ const LibraryMapPage: React.FC = () => {
                 {renderGrid(t('wing5'), 5, 42, 58)}
             </div>
 
-            {/* الفوتر الملكي */}
             <div className="mt-40 text-center opacity-30">
-                <p className="font-black text-slate-950 dark:text-white text-sm md:text-6xl italic tracking-tighter uppercase">EFIPS Tactical Radar • 2026</p>
+                <p className="font-black text-slate-950 dark:text-white text-sm md:text-6xl italic tracking-tighter uppercase">EFIPS Tactical Mapping System • 2026</p>
             </div>
-
-            <style>{`
-                .glass-panel { backdrop-filter: blur(40px); background: rgba(255, 255, 255, 0.05); }
-                button:active { transform: scale(0.9); }
-            `}</style>
         </div>
     );
 };
