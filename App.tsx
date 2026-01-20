@@ -73,7 +73,7 @@ const Header: React.FC = () => {
     { path: '/creators', label: locale === 'en' ? 'Creators' : 'المبدعين', icon: '🎨' },
     { path: '/reports', label: locale === 'en' ? 'Reports' : 'التقارير', icon: '📊' },
     { path: '/feedback', label: locale === 'en' ? 'Ideas' : 'المقترحات', icon: '✍️' }, 
-    { path: '/about', label: locale === 'en' ? 'About' : 'عننا', icon: 'ℹ️' },
+    { path: '/about', label: locale === 'en' ? 'About' : 'عنا', icon: 'ℹ️' },
   ];
 
   return (
