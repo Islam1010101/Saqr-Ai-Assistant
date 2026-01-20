@@ -43,7 +43,7 @@ const FloatingSaqr: React.FC = () => {
       <button
         onMouseDown={handleInteraction}
         onTouchStart={handleInteraction}
-        className="group relative w-14 h-14 md:w-16 md:h-16 glass-panel rounded-[1.8rem] border-2 border-red-600/30 dark:border-red-500/40 shadow-xl flex items-center justify-center overflow-hidden hover:scale-110 active:scale-95 transition-all duration-500 bg-white/60 dark:bg-slate-900/60"
+        className="group relative w-14 h-14 md:w-16 md:h-16 glass-panel rounded-[1.8rem] border-2 border-red-600/30 dark:border-red-500/40 shadow-xl flex items-center justify-center overflow-hidden hover:scale-110 active:scale-95 transition-all duration-500 bg-white/40 dark:bg-slate-900/60"
       >
         {ripples.map(r => (
           <span key={r.id} className="ripple-effect bg-red-600/40" style={{ left: r.x, top: r.y }} />
@@ -78,11 +78,11 @@ const Header: React.FC = () => {
 
   return (
     <header className="sticky top-4 z-[60] px-4 md:px-10">
-      {/* تم جعل الحاوية overflow-visible لضمان عدم قص الهنت العلوي */}
       <div className="glass-panel mx-auto max-w-[98rem] p-1.5 md:p-2.5 rounded-full border border-white/20 dark:border-white/5 flex items-center justify-between shadow-2xl backdrop-blur-3xl bg-white/95 dark:bg-slate-950/90 font-black transition-all relative overflow-visible">
         
         <Link to="/" className="flex items-center gap-2 md:gap-3 ps-4 md:ps-6 group flex-shrink-0">
-          <img src="/school-logo.png" alt="EFIPS" className="h-8 w-8 md:h-11 md:w-11 object-contain logo-smart-filter rotate-3 transition-all group-hover:scale-110" />
+          {/* تم زيادة الميل لليمين هنا عبر rotate-12 */}
+          <img src="/school-logo.png" alt="EFIPS" className="h-8 w-8 md:h-11 md:w-11 object-contain logo-smart-filter rotate-12 transition-all group-hover:scale-110" />
           <div className="hidden xl:block leading-none text-start">
             <span className="font-black text-slate-950 dark:text-white text-[7px] md:text-[9.5px] tracking-tighter block uppercase opacity-80 group-hover:text-red-600 transition-colors">
               {locale === 'en' ? "Emirates Falcon Int'l Private School" : "مدرسة صقر الإمارات الدولية الخاصة"}
@@ -90,7 +90,6 @@ const Header: React.FC = () => {
           </div>
         </Link>
         
-        {/* شريط الأيقونات: يدعم السكرول الأفقي في الجوال + ظهور الهنت فوقه */}
         <nav className="flex items-center bg-black/5 dark:bg-white/5 rounded-full p-1 mx-2 overflow-x-auto no-scrollbar lg:overflow-visible">
           <div className="flex items-center gap-1">
             {links.map(l => (
@@ -99,11 +98,9 @@ const Header: React.FC = () => {
                    onMouseLeave={() => setActiveHint(null)}
                    onTouchStart={(e) => { e.stopPropagation(); setActiveHint(activeHint === l.path ? null : l.path); }}>
                 
-                {/* الهنت الذكي: يظهر فوق الأيقونة مباشرة (Above the bar) */}
                 <div className={`absolute bottom-[calc(100%+15px)] left-1/2 -translate-x-1/2 px-4 py-2 ${l.color} text-white text-[10px] rounded-2xl transition-all duration-300 pointer-events-none whitespace-nowrap shadow-2xl z-[150] 
-                                ${activeHint === l.path ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-2 scale-90'}`}>
+                                ${activeHint === l.path ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-2 scale-90'}`}>
                   {l.hint}
-                  {/* مثلث يشير للأسفل */}
                   <div className={`absolute -bottom-1 left-1/2 -translate-x-1/2 w-2.5 h-2.5 ${l.color} rotate-45`}></div>
                 </div>
 
@@ -124,7 +121,7 @@ const Header: React.FC = () => {
         </nav>
         
         <div className="flex items-center gap-1.5 pe-4 md:pe-6 flex-shrink-0">
-          <button onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')} className="w-8 h-8 md:w-11 md:h-11 flex items-center justify-center text-slate-950 dark:text-white font-black text-[9px] md:text-[10px] border border-slate-200 dark:border-white/10 rounded-full hover:border-red-600 transition-all active:scale-90">
+          <button onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')} className="w-8 h-8 md:w-11 md:h-11 flex items-center justify-center text-slate-950 dark:text-white font-black text-[9px] md:text-[10px] border border-slate-200 dark:border-white/10 rounded-full hover:border-red-600 transition-all active:scale-90 shadow-sm">
             {locale === 'en' ? 'AR' : 'EN'}
           </button>
           <button onClick={toggleTheme} className="w-8 h-8 md:w-11 md:h-11 flex items-center justify-center bg-slate-100 dark:bg-white/10 rounded-full text-[10px] md:text-sm shadow-inner transition-all hover:scale-110">
@@ -166,6 +163,7 @@ const App: React.FC = () => {
       <LanguageProvider>
         <HashRouter>
           <div className="min-h-screen bg-slate-50 dark:bg-[#020617] transition-colors duration-700 flex flex-col selection:bg-red-600/30 relative" onClick={() => {}}>
+            
             <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-50">
               <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-red-600/10 dark:bg-red-500/20 blur-[150px] rounded-full animate-pulse"></div>
               <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] bg-green-600/10 dark:bg-green-500/20 blur-[150px] rounded-full animate-pulse [animation-delay:2s]"></div>
