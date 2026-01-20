@@ -60,7 +60,7 @@ const ShelfS_DB = [
 const translations = {
     ar: {
         pageTitle: "خريطة المكتبة",
-        subTitle: "ابحث عن أي قسم أو اضغط على الرقم",
+        subTitle: "ابحث عن أي قسم داخل المكتبة أو اضغط على الرقم الذي يمثل الدولاب",
         searchPlaceholder: "ابحث عن القسم ...",
         wing1: "جناح الباحثين والبالغين",
         wing2: "جناح الشباب والعلوم",
@@ -70,7 +70,7 @@ const translations = {
     },
     en: {
         pageTitle: "Library Map",
-        subTitle: "Search for a section or touch a number",
+        subTitle: "Search for any section within the library or click on the number that represents the Shelf",
         searchPlaceholder: "Search for a section",
         wing1: "Adults & Researchers",
         wing2: "Youth & Sciences",
