@@ -191,7 +191,7 @@ const App: React.FC = () => {
             <footer className="relative z-10 py-10 text-center border-t border-slate-200 dark:border-white/5 mx-6 md:mx-20 mt-10 group">
                 <div className="h-1 w-16 bg-red-600 mx-auto mb-6 rounded-full shadow-[0_0_15px_rgba(220,38,38,0.4)] group-hover:w-32 transition-all duration-700"></div>
                 <p className="font-black text-[9px] md:text-xs tracking-[0.4em] uppercase text-slate-500 dark:text-slate-400">
-                    EFIPS Digital Sovereignty • Innovation Hub • 2026
+                    EFIPS • Library • 2026
                 </p>
                 <p className="mt-2 font-black text-slate-900 dark:text-white text-[8px] md:text-[10px] opacity-40 uppercase">
                     &copy; Emirates Falcon Int'l. Private School
