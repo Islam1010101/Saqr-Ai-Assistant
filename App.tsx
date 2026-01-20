@@ -58,75 +58,69 @@ const FloatingSaqr: React.FC = () => {
   );
 };
 
-// -------- 2. هيدر EFIPS المتناسق (Compact & Clear Desktop) --------
+// -------- 2. هيدر EFIPS المتناسق (Reordered & Tooltip Enabled) --------
 const Header: React.FC = () => {
   const { locale, setLocale } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
 
+  // الترتيب الجديد حسب طلبك مع إضافة الـ Hint
   const links = [
-    { path: '/', label: locale === 'en' ? 'Home' : 'الرئيسية', icon: '🏠' },
-    { path: '/search', label: locale === 'en' ? 'Search' : 'البحث', icon: '🔍' },
-    { path: '/map', label: locale === 'en' ? 'Map' : 'الخريطة', icon: '🗺️' },
-    { path: '/digital-library', label: locale === 'en' ? 'Digital' : 'المكتبة', icon: '📚' },
-    { path: '/smart-search', label: locale === 'en' ? 'AI' : 'صقر AI', icon: '🤖' },
-    { path: '/creators', label: locale === 'en' ? 'Creators' : 'المبدعين', icon: '🎨' },
-    { path: '/reports', label: locale === 'en' ? 'Reports' : 'التقارير', icon: '📊' },
-    { path: '/feedback', label: locale === 'en' ? 'Ideas' : 'المقترحات', icon: '✍️' }, 
-    { path: '/about', label: locale === 'en' ? 'About' : 'عنا', icon: 'ℹ️' },
+    { path: '/', label: locale === 'en' ? 'Home' : 'الرئيسية', icon: '🏠', hint: locale === 'en' ? 'Gateway' : 'بوابة العودة' },
+    { path: '/search', label: locale === 'en' ? 'Physical' : 'البحث في المكتبة', icon: '🔍', hint: locale === 'en' ? 'Shelf Index' : 'فهرس الكتب الورقية' },
+    { path: '/smart-search', label: locale === 'en' ? 'Ask Saqr' : 'اسأل صقر', icon: '🤖', hint: locale === 'en' ? 'AI Assistant' : 'المساعد الذكي' },
+    { path: '/digital-library', label: locale === 'en' ? 'Digital' : 'المكتبة الرقمية', icon: '📚', hint: locale === 'en' ? 'E-Books' : 'كنوز الكتب الرقمية' },
+    { path: '/creators', label: locale === 'en' ? 'Creators' : 'بوابة المبدعين', icon: '🎨', hint: locale === 'en' ? 'Student Work' : 'إبداعات طلابنا' },
+    { path: '/feedback', label: locale === 'en' ? 'Ideas' : 'مقترحات', icon: '✍️', hint: locale === 'en' ? 'Your Voice' : 'رأيك يهمنا' }, 
+    { path: '/reports', label: locale === 'en' ? 'Reports' : 'تقارير', icon: '📊', hint: locale === 'en' ? 'Statistics' : 'أرقام وإحصائيات' },
+    { path: '/map', label: locale === 'en' ? 'Map' : 'خريطة المكتبة', icon: '🗺️', hint: locale === 'en' ? 'Radar View' : 'موقع الأرفف' },
+    { path: '/about', label: locale === 'en' ? 'About' : 'عنا', icon: 'ℹ️', hint: locale === 'en' ? 'Our Story' : 'من نحن؟' },
   ];
 
   return (
     <header className="sticky top-4 z-[60] px-3 md:px-6">
       <div className="glass-panel mx-auto max-w-[95rem] p-1.5 md:p-2 rounded-full border border-white/20 dark:border-white/10 flex items-center justify-between shadow-2xl backdrop-blur-3xl bg-white/90 dark:bg-slate-950/90 font-black transition-all">
         
-        {/* اللوجو والاسم - حجم متناسق للديسكتوب */}
         <Link to="/" className="flex items-center gap-2 md:gap-3 ps-3 md:ps-5 group flex-shrink-0">
-          <img 
-            src="/school-logo.png" 
-            alt="EFIPS" 
-            className="h-8 w-8 md:h-11 md:w-11 object-contain logo-white-filter rotate-6 transition-all group-hover:scale-110" 
-          />
-          <div className="hidden xl:block leading-none text-start max-w-[180px] lg:max-w-none">
+          <img src="/school-logo.png" alt="EFIPS" className="h-8 w-8 md:h-11 md:w-11 object-contain logo-white-filter rotate-6 transition-all group-hover:scale-110" />
+          <div className="hidden xl:block leading-none text-start">
             <span className="font-black text-slate-950 dark:text-white text-[9px] md:text-[11px] tracking-tight block uppercase opacity-90 transition-colors group-hover:text-red-600">
               {locale === 'en' ? "Emirates Falcon Int'l Private School" : "مدرسة صقر الإمارات الدولية الخاصة"}
             </span>
           </div>
         </Link>
         
-        {/* قائمة التنقل - محسنة لتظهر بالكامل على الديسكتوب */}
         <nav className="flex items-center bg-black/5 dark:bg-white/5 rounded-full p-1 mx-1 md:mx-2 overflow-x-auto no-scrollbar lg:overflow-visible flex-nowrap">
           <div className="flex items-center gap-0.5 md:gap-1">
             {links.map(l => (
-              <Link 
-                key={l.path} 
-                to={l.path} 
-                className={`px-3 lg:px-4 py-2 md:py-2.5 rounded-full text-[9px] lg:text-[12px] font-black transition-all flex items-center gap-1.5 whitespace-nowrap ${
-                  location.pathname === l.path 
-                    ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950 shadow-lg' 
-                    : 'text-slate-500 dark:text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-white/5'
-                }`}
-              >
-                <span className="text-xs md:text-sm">{l.icon}</span>
-                <span className="hidden md:inline">{l.label}</span>
-              </Link>
+              <div key={l.path} className="relative group/nav">
+                {/* الـ Tooltip (الهنت) */}
+                <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1 bg-slate-950 dark:bg-white text-white dark:text-slate-950 text-[10px] rounded-lg opacity-0 group-hover/nav:opacity-100 transition-all pointer-events-none whitespace-nowrap shadow-xl z-[70] translate-y-2 group-hover/nav:translate-y-0 border border-white/10">
+                  {l.hint}
+                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-inherit rotate-45"></div>
+                </div>
+
+                <Link 
+                  to={l.path} 
+                  className={`px-3 lg:px-4 py-2 md:py-2.5 rounded-full text-[9px] lg:text-[12px] font-black transition-all flex items-center gap-1.5 whitespace-nowrap ${
+                    location.pathname === l.path 
+                      ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950 shadow-lg' 
+                      : 'text-slate-500 dark:text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-white/5'
+                  }`}
+                >
+                  <span className="text-xs md:text-sm">{l.icon}</span>
+                  <span className="hidden md:inline">{l.label}</span>
+                </Link>
+              </div>
             ))}
           </div>
         </nav>
         
-        {/* أزرار الإعدادات - حجم مدمج */}
         <div className="flex items-center gap-1.5 pe-2 md:pe-4 flex-shrink-0">
-          <button 
-            onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')} 
-            className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-slate-950 dark:text-white font-black text-[10px] md:text-xs border border-slate-200 dark:border-white/10 rounded-full hover:border-red-600 transition-all active:scale-90"
-          >
+          <button onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')} className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-slate-950 dark:text-white font-black text-[10px] md:text-xs border border-slate-200 dark:border-white/10 rounded-full hover:border-red-600 transition-all active:scale-90">
             {locale === 'en' ? 'AR' : 'EN'}
           </button>
-          
-          <button 
-            onClick={toggleTheme} 
-            className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-slate-100 dark:bg-white/10 rounded-full text-xs md:text-sm shadow-inner border border-transparent hover:border-white/20 transition-all"
-          >
+          <button onClick={toggleTheme} className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-slate-100 dark:bg-white/10 rounded-full text-xs md:text-sm shadow-inner border border-transparent hover:border-white/20 transition-all">
             {theme === 'light' ? '🌙' : '☀️'}
           </button>
         </div>
