@@ -19,7 +19,7 @@ const translations = {
         englishLib: "المكتبة الإنجليزية",
         arabicDesc: "تضم روائع الأدب العربي، التراث، وتطوير الذات.",
         englishDesc: "تضم الروايات العالمية والألغاز.",
-        bubble: "المسني للإلهام!"
+        bubble: "اضغط للإلهام!"
     },
     en: {
         title: "The Digital Library",
