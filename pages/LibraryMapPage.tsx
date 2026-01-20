@@ -59,9 +59,9 @@ const ShelfS_DB = [
 
 const translations = {
     ar: {
-        pageTitle: "رادار خريطة المكتبة",
-        subTitle: "نظام التوجيه التكتيكي: ابحث عن أي قسم أو اضغط على الرقم",
-        searchPlaceholder: "ابحث عن قسم (مثلاً: تاريخ، ديزني)...",
+        pageTitle: "خريطة المكتبة",
+        subTitle: "ابحث عن أي قسم أو اضغط على الرقم",
+        searchPlaceholder: "ابحث عن القسم ...",
         wing1: "جناح الباحثين والبالغين",
         wing2: "جناح الشباب والعلوم",
         wing3: "جناح اللغة العربية",
@@ -69,9 +69,9 @@ const translations = {
         wing5: "جناح الصغار والأطفال"
     },
     en: {
-        pageTitle: "Falcon Radar Map",
-        subTitle: "Tactical Guidance: Search for a section or touch a number",
-        searchPlaceholder: "Search for a section (e.g., History, Disney)...",
+        pageTitle: "Library Map",
+        subTitle: "Search for a section or touch a number",
+        searchPlaceholder: "Search for a section",
         wing1: "Adults & Researchers",
         wing2: "Youth & Sciences",
         wing3: "Arabic Language",
