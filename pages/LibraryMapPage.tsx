@@ -60,7 +60,7 @@ const ShelfS_DB = [
 const translations = {
     ar: {
         pageTitle: "خريطة مكتبة صقر",
-        subTitle: "نظام التوجيه التكتيكي: ابحث عن أي قسم أو المس الدولاب",
+        subTitle: " ابحث عن أي قسم أو اضغط على رقم الدولاب",
         searchPlaceholder: "ابحث عن قسم (مثلاً: تاريخ، ديزني، روايات)...",
         wing1: "جناح الباحثين والبالغين",
         wing2: "جناح الشباب والعلوم",
@@ -70,7 +70,7 @@ const translations = {
     },
     en: {
         pageTitle: "Saqr Library Radar",
-        subTitle: "Tactical Guidance: Search for a section or touch a cabinet",
+        subTitle: "Search for a section or touch a Shelf",
         searchPlaceholder: "Search for a section (e.g., History, Disney, Novels)...",
         wing1: "Adults & Researchers",
         wing2: "Youth & Sciences",
