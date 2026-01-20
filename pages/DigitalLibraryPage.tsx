@@ -19,7 +19,7 @@ const translations = {
         englishLib: "المكتبة الإنجليزية",
         arabicDesc: "روائع الأدب العربي، التراث، وتطوير الذات.",
         englishDesc: "أحدث الروايات العالمية، القصص، والألغاز.",
-        bubble: "اضغط للإلهام!"
+        bubble: "المسني للإلهام!"
     },
     en: {
         title: "Digital Library",
@@ -110,21 +110,22 @@ const DigitalLibraryPage: React.FC = () => {
                 </div>
 
                 {/* صقر مع الشعار الذكي خلفه */}
-                <div className="lg:col-span-5 flex justify-center order-1 lg:order-2 relative">
+                <div className="lg:col-span-5 flex justify-center order-1 lg:order-2 relative z-[30]">
                     <div onClick={handleMascotInteraction} className={`relative cursor-pointer transition-transform duration-500 ${isMascotClicked ? 'scale-110' : 'hover:scale-105'}`}>
                         
-                        {/* شعار المدرسة: يتغير حسب المود */}
+                        {/* شعار المدرسة الذكي */}
                         <div className="absolute inset-0 flex items-center justify-center -z-10 pointer-events-none transition-all duration-1000">
                             <img 
                                 src="/school-logo.png" 
                                 alt="Seal" 
-                                className="w-[130%] h-[130%] object-contain rotate-12 blur-[1px] opacity-10 dark:opacity-20 dark:logo-white-filter" 
+                                className="w-[130%] h-[130%] object-contain rotate-12 blur-[1px] opacity-10 dark:opacity-20 logo-smart-filter" 
                             />
                         </div>
 
+                        {/* كروت الانفجار الذكية - تظهر فوق كل شيء */}
                         {bursts.map((burst) => (
                             <div key={burst.id} 
-                                className="absolute z-50 bg-white dark:bg-slate-900 px-6 py-3 md:px-10 md:py-5 rounded-[2rem] border-4 border-red-600/30 shadow-2xl animate-burst-long pointer-events-none flex items-center gap-4"
+                                className="absolute z-[100] bg-white dark:bg-slate-900 px-6 py-3 md:px-10 md:py-5 rounded-[2rem] border-4 border-red-600/30 shadow-[0_30px_60px_rgba(0,0,0,0.3)] animate-burst-long pointer-events-none flex items-center gap-4"
                                 style={{ '--tx': `${burst.tx}px`, '--ty': `${burst.ty}px`, '--rot': `${burst.rot}deg` } as any}>
                                 <span className="text-2xl md:text-6xl">{burst.item.icon}</span>
                                 <span className="text-xs md:text-3xl font-black text-slate-950 dark:text-white uppercase whitespace-nowrap">{isAr ? burst.item.textAr : burst.item.textEn}</span>
@@ -153,8 +154,8 @@ const DigitalLibraryPage: React.FC = () => {
                 @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
                 .glass-panel { backdrop-filter: blur(50px); background: rgba(255, 255, 255, 0.05); }
                 
-                /* هذا الكلاس يعمل فقط في الدارك مود بسبب الـ prefix في الكود بالأعلى */
-                .logo-white-filter { filter: brightness(0) invert(1); }
+                /* تفعيل الفلتر الأبيض فقط في الدارك مود */
+                .dark .logo-smart-filter { filter: brightness(0) invert(1); }
             `}</style>
         </div>
     );
