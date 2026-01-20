@@ -58,53 +58,59 @@ const FloatingSaqr: React.FC = () => {
   );
 };
 
-// -------- 2. هيدر EFIPS الرشيق الملون (Smart Reorder & Tinted Hints) --------
+// -------- 2. هيدر EFIPS الرشيق (Slim Reordered & Touch Hints) --------
 const Header: React.FC = () => {
   const { locale, setLocale } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
+  const [activeHint, setActiveHint] = useState<string | null>(null);
 
-  // الترتيب المطلوب مع ميزة الألوان لكل قسم
+  // الترتيب المنظم مع ألوان الهوية (أحمر، أخضر، رمادي ملكي)
   const links = [
-    { path: '/', label: locale === 'en' ? 'Home' : 'الرئيسية', icon: '🏠', hint: locale === 'en' ? 'Gateway' : 'بوابة العودة', color: 'bg-slate-600' },
-    { path: '/search', label: locale === 'en' ? 'Search' : 'البحث بالمكتبة', icon: '🔍', hint: locale === 'en' ? 'Shelf Index' : 'فهرس الكتب', color: 'bg-red-600' },
-    { path: '/smart-search', label: locale === 'en' ? 'Saqr AI' : 'اسأل صقر', icon: '🤖', hint: locale === 'en' ? 'AI Guide' : 'المساعد الذكي', color: 'bg-green-600' },
-    { path: '/digital-library', label: locale === 'en' ? 'Digital' : 'المكتبة الرقمية', icon: '📚', hint: locale === 'en' ? 'E-Books' : 'كنوز رقمية', color: 'bg-blue-600' },
-    { path: '/creators', label: locale === 'en' ? 'Creators' : 'بوابة المبدعين', icon: '🎨', hint: locale === 'en' ? 'Talents' : 'إبداعات طلابنا', color: 'bg-purple-600' },
-    { path: '/feedback', label: locale === 'en' ? 'Ideas' : 'مقترحات', icon: '✍️', hint: locale === 'en' ? 'Contact' : 'رأيك يهمنا', color: 'bg-yellow-600' }, 
-    { path: '/reports', label: locale === 'en' ? 'Reports' : 'تقارير', icon: '📊', hint: locale === 'en' ? 'Stats' : 'أرقام المكتبة', color: 'bg-cyan-600' },
-    { path: '/map', label: locale === 'en' ? 'Map' : 'خريطة المكتبة', icon: '🗺️', hint: locale === 'en' ? 'Radar' : 'مواقع الأرفف', color: 'bg-orange-600' },
-    { path: '/about', label: locale === 'en' ? 'About' : 'عنا', icon: 'ℹ️', hint: locale === 'en' ? 'Story' : 'من نحن؟', color: 'bg-pink-600' },
+    { path: '/', label: locale === 'en' ? 'Home' : 'الرئيسية', icon: '🏠', hint: locale === 'en' ? 'Gateway' : 'بوابة العودة', color: 'bg-slate-800' },
+    { path: '/search', label: locale === 'en' ? 'Physical' : 'البحث بالمكتبة', icon: '🔍', hint: locale === 'en' ? 'Books' : 'فهرس الكتب', color: 'bg-red-600' },
+    { path: '/smart-search', label: locale === 'en' ? 'AI Saqr' : 'اسأل صقر', icon: '🤖', hint: locale === 'en' ? 'AI Chat' : 'المساعد الذكي', color: 'bg-green-600' },
+    { path: '/digital-library', label: locale === 'en' ? 'Digital' : 'المكتبة الرقمية', icon: '📚', hint: locale === 'en' ? 'E-Books' : 'كنوز رقمية', color: 'bg-slate-900' },
+    { path: '/creators', label: locale === 'en' ? 'Talents' : 'بوابة المبدعين', icon: '🎨', hint: locale === 'en' ? 'Gallery' : 'إبداعات طلابنا', color: 'bg-red-600' },
+    { path: '/feedback', label: locale === 'en' ? 'Ideas' : 'مقترحات', icon: '✍️', hint: locale === 'en' ? 'Voice' : 'رأيك يهمنا', color: 'bg-green-600' }, 
+    { path: '/reports', label: locale === 'en' ? 'Stats' : 'تقارير', icon: '📊', hint: locale === 'en' ? 'Data' : 'أرقام المكتبة', color: 'bg-slate-800' },
+    { path: '/map', label: locale === 'en' ? 'Radar' : 'خريطة المكتبة', icon: '🗺️', hint: locale === 'en' ? 'Map' : 'مواقع الأرفف', color: 'bg-red-600' },
+    { path: '/about', label: locale === 'en' ? 'About' : 'عنا', icon: 'ℹ️', hint: locale === 'en' ? 'Info' : 'من نحن؟', color: 'bg-green-700' },
   ];
 
   return (
     <header className="sticky top-2 z-[60] px-3 md:px-8">
       <div className="glass-panel mx-auto max-w-[98rem] p-0.5 md:p-1 rounded-full border border-white/20 dark:border-white/5 flex items-center justify-between shadow-2xl backdrop-blur-3xl bg-white/95 dark:bg-slate-950/90 font-black transition-all">
         
-        {/* اللوجو والاسم - حجم رشيق جداً للديسكتوب */}
-        <Link to="/" className="flex items-center gap-1 md:gap-2 ps-3 md:ps-4 group flex-shrink-0">
-          <img src="/school-logo.png" alt="EFIPS" className="h-6 w-6 md:h-8 md:w-8 object-contain logo-white-filter rotate-3 transition-all group-hover:scale-110" />
+        {/* اللوجو والاسم - حجم رشيق وتناسق عربي فائق */}
+        <Link to="/" className="flex items-center gap-1.5 md:gap-2.5 ps-3 md:ps-4 group flex-shrink-0">
+          <img src="/school-logo.png" alt="EFIPS" className="h-7 w-7 md:h-9 md:w-9 object-contain logo-smart-filter rotate-3 transition-all group-hover:scale-110" />
           <div className="hidden xl:block leading-none text-start">
-            <span className="font-black text-slate-950 dark:text-white text-[7px] md:text-[9px] tracking-tighter block uppercase opacity-80">
+            <span className="font-black text-slate-950 dark:text-white text-[7px] md:text-[9.5px] tracking-tighter block uppercase opacity-80">
               {locale === 'en' ? "Emirates Falcon Int'l" : "صقر الإمارات الدولية"}
             </span>
           </div>
         </Link>
         
-        {/* قائمة التنقل - نحافة قصوى وتناسق عربي/إنجليزي */}
-        <nav className="flex items-center bg-black/5 dark:bg-white/5 rounded-full p-0.5 mx-1 overflow-x-auto no-scrollbar lg:overflow-visible">
+        {/* قائمة التنقل - نحيفة (Slim) */}
+        <nav className="flex items-center bg-black/5 dark:bg-white/5 rounded-full p-0.5 mx-1 md:mx-2 overflow-x-auto no-scrollbar lg:overflow-visible">
           <div className="flex items-center gap-0.5">
             {links.map(l => (
-              <div key={l.path} className="relative group/nav">
-                {/* الـ Hint الملون - يظهر تحت المؤشر مباشرة */}
-                <div className={`absolute top-[calc(100%+8px)] left-1/2 -translate-x-1/2 px-3 py-1 ${l.color} text-white text-[9px] rounded-lg opacity-0 group-hover/nav:opacity-100 transition-all pointer-events-none whitespace-nowrap shadow-xl z-[70] translate-y-[-5px] group-hover/nav:translate-y-0`}>
+              <div key={l.path} className="relative group/nav" 
+                   onMouseEnter={() => setActiveHint(l.path)} 
+                   onMouseLeave={() => setActiveHint(null)}
+                   onTouchStart={() => setActiveHint(l.path)}>
+                
+                {/* الـ Hint تحت الزر - مطابق للهوية البصرية */}
+                <div className={`absolute top-[calc(100%+10px)] left-1/2 -translate-x-1/2 px-3 py-1.5 ${l.color} text-white text-[9px] rounded-xl transition-all duration-300 pointer-events-none whitespace-nowrap shadow-2xl z-[70] 
+                                ${activeHint === l.path ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-2 scale-90'}`}>
                   <div className={`absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 ${l.color} rotate-45`}></div>
                   {l.hint}
                 </div>
 
                 <Link 
                   to={l.path} 
-                  className={`px-3 lg:px-4 py-1.5 rounded-full text-[9px] md:text-[10px] lg:text-[11px] font-black transition-all flex items-center gap-1 whitespace-nowrap ${
+                  className={`px-3 lg:px-4 py-1.5 md:py-2 rounded-full text-[9px] md:text-[10px] font-black transition-all flex items-center gap-1.5 whitespace-nowrap ${
                     location.pathname === l.path 
                       ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950 shadow-lg' 
                       : 'text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-white'
@@ -119,11 +125,11 @@ const Header: React.FC = () => {
         </nav>
         
         {/* أزرار الإعدادات - حجم مدمج */}
-        <div className="flex items-center gap-1 pe-2 md:pe-4">
-          <button onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')} className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center text-slate-950 dark:text-white font-black text-[8px] md:text-[10px] border border-slate-200 dark:border-white/10 rounded-full hover:border-red-600 transition-all shadow-sm">
+        <div className="flex items-center gap-1 pe-2 md:pe-4 flex-shrink-0">
+          <button onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')} className="w-7 h-7 md:w-9 md:h-9 flex items-center justify-center text-slate-950 dark:text-white font-black text-[9px] md:text-[10px] border border-slate-200 dark:border-white/10 rounded-full hover:border-red-600 transition-all active:scale-90 shadow-sm">
             {locale === 'en' ? 'AR' : 'EN'}
           </button>
-          <button onClick={toggleTheme} className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center bg-slate-100 dark:bg-white/10 rounded-full text-[10px] md:text-xs shadow-inner transition-all">
+          <button onClick={toggleTheme} className="w-7 h-7 md:w-9 md:h-9 flex items-center justify-center bg-slate-100 dark:bg-white/10 rounded-full text-[10px] md:text-xs shadow-inner border border-transparent hover:border-white/20 transition-all">
             {theme === 'light' ? '🌙' : '☀️'}
           </button>
         </div>
@@ -161,7 +167,7 @@ const App: React.FC = () => {
     <ThemeProvider>
       <LanguageProvider>
         <HashRouter>
-          <div className="min-h-screen bg-slate-50 dark:bg-[#020617] transition-colors duration-700 flex flex-col selection:bg-red-600/30 relative">
+          <div className="min-h-screen bg-slate-50 dark:bg-[#020617] transition-colors duration-700 flex flex-col selection:bg-red-600/30 relative" onClick={() => {}}>
             
             <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-50">
               <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-red-600/10 dark:bg-red-500/20 blur-[150px] rounded-full animate-pulse"></div>
@@ -171,7 +177,7 @@ const App: React.FC = () => {
             <Header />
             <FloatingSaqr />
             
-            <main className="flex-1 relative z-10 container mx-auto p-2 md:p-8 lg:p-12">
+            <main className="flex-1 relative z-10 container mx-auto p-3 md:p-8 lg:p-12">
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/search" element={<SearchPage />} />
@@ -187,7 +193,7 @@ const App: React.FC = () => {
               </Routes>
             </main>
 
-            <footer className="relative z-10 py-10 text-center border-t border-slate-200 dark:border-white/5 mx-6 md:mx-40 mt-10 group">
+            <footer className="relative z-10 py-12 text-center border-t border-slate-200 dark:border-white/5 mx-6 md:mx-20 mt-10 group">
                 <div className="h-1 w-16 bg-red-600 mx-auto mb-6 rounded-full shadow-[0_0_15px_rgba(220,38,38,0.4)] group-hover:w-32 transition-all duration-700"></div>
                 <p className="font-black text-[9px] md:text-xs tracking-[0.4em] uppercase text-slate-500 dark:text-slate-400">
                     EFIPS • Library • 2026
@@ -203,6 +209,7 @@ const App: React.FC = () => {
                 .no-scrollbar::-webkit-scrollbar { display: none; }
                 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
                 .glass-panel { border: 1px solid rgba(255, 255, 255, 0.1); }
+                .logo-smart-filter { dark:filter: brightness(0) invert(1); }
             `}</style>
           </div>
         </HashRouter>
