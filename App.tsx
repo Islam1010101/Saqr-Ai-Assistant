@@ -12,6 +12,7 @@ import ArabicLibraryInternalPage from './pages/ArabicLibraryInternalPage';
 import EnglishLibraryInternalPage from './pages/EnglishLibraryInternalPage';
 import FeedbackPage from './pages/FeedbackPage';
 import CreatorsPortalPage from './pages/CreatorsPortalPage';
+import LibraryMapPage from './pages/LibraryMapPage'; // استيراد صفحة الخريطة الجديدة 🗺️
 
 import type { Locale } from './types';
 
@@ -66,6 +67,7 @@ const Header: React.FC = () => {
   const links = [
     { path: '/', label: locale === 'en' ? 'Home' : 'الرئيسية', icon: '🏠' },
     { path: '/search', label: locale === 'en' ? 'Search' : 'البحث', icon: '🔍' },
+    { path: '/map', label: locale === 'en' ? 'Map' : 'الخريطة', icon: '🗺️' }, // الرابط الجديد للخريطة
     { path: '/digital-library', label: locale === 'en' ? 'E-Lib' : 'المكتبة', icon: '📚' },
     { path: '/smart-search', label: locale === 'en' ? 'Saqr AI' : 'صقر AI', icon: '🤖' },
     { path: '/creators', label: locale === 'en' ? 'Creators' : 'المبدعين', icon: '🎨' },
@@ -78,7 +80,6 @@ const Header: React.FC = () => {
     <header className="sticky top-3 z-[60] px-4 md:px-8">
       <div className="glass-panel mx-auto max-w-7xl p-1.5 md:p-2 rounded-full border border-white/20 dark:border-white/10 flex items-center justify-between shadow-2xl backdrop-blur-3xl bg-white/80 dark:bg-slate-950/85 font-black">
         
-        {/* اللوجو بحجم رشيق */}
         <Link to="/" className="flex items-center gap-2 md:gap-3 ps-2 md:ps-4 group flex-shrink-0">
           <img 
             src="/school-logo.png" 
@@ -92,7 +93,6 @@ const Header: React.FC = () => {
           </div>
         </Link>
         
-        {/* قائمة التنقل - تمرير أفقي حتى على الديسكتوب لتوفير المساحة */}
         <nav className="flex items-center bg-black/5 dark:bg-white/5 rounded-full p-1 mx-2 overflow-x-auto no-scrollbar flex-nowrap max-w-[50%] md:max-w-none">
           <div className="flex items-center gap-0.5 md:gap-1.5 flex-nowrap">
             {links.map(l => (
@@ -112,7 +112,6 @@ const Header: React.FC = () => {
           </div>
         </nav>
         
-        {/* أزرار الإعدادات بحجم أصغر */}
         <div className="flex items-center gap-1.5 pe-2 md:pe-4 flex-shrink-0">
           <button 
             onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')} 
@@ -164,7 +163,6 @@ const App: React.FC = () => {
         <HashRouter>
           <div className="min-h-screen bg-slate-50 dark:bg-[#020617] transition-colors duration-700 flex flex-col selection:bg-red-600/30 relative">
             
-            {/* نظام التوهج الخلفي الموحد */}
             <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-50 dark:opacity-70">
               <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-red-600/10 dark:bg-red-500/20 blur-[150px] rounded-full animate-pulse"></div>
               <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] bg-green-600/10 dark:bg-green-500/20 blur-[150px] rounded-full animate-pulse [animation-delay:2s]"></div>
@@ -177,6 +175,7 @@ const App: React.FC = () => {
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/search" element={<SearchPage />} />
+                <Route path="/map" element={<LibraryMapPage />} /> {/* المسار الجديد للخريطة */}
                 <Route path="/smart-search" element={<SmartSearchPage />} />
                 <Route path="/digital-library" element={<DigitalLibraryPage />} />
                 <Route path="/digital-library/arabic" element={<ArabicLibraryInternalPage />} />
@@ -203,7 +202,6 @@ const App: React.FC = () => {
                 .animate-float { animation: float 6s ease-in-out infinite; }
                 .no-scrollbar::-webkit-scrollbar { display: none; }
                 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-                .glass-panel { border: 1px solid rgba(255, 255, 255, 0.1); }
             `}</style>
           </div>
         </HashRouter>
