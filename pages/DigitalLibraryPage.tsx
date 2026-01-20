@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../App';
 
 const READING_INSPIRATIONS = [
@@ -42,6 +42,7 @@ interface BurstItem {
 
 const DigitalLibraryPage: React.FC = () => {
     const { locale, dir } = useLanguage();
+    const navigate = useNavigate();
     const isAr = locale === 'ar';
     const t = (key: keyof typeof translations.ar) => translations[locale][key];
 
@@ -75,7 +76,7 @@ const DigitalLibraryPage: React.FC = () => {
     return (
         <div dir={dir} className="max-w-7xl mx-auto px-4 py-8 md:py-16 flex flex-col items-center gap-12 md:gap-24 animate-fade-up font-black antialiased relative">
             
-            {/* 1. قسم الترحيب العلوي (Hero) */}
+            {/* 1. قسم الترحيب العلوي */}
             <div className="text-center space-y-6 md:space-y-10 max-w-5xl relative z-20">
                 <h1 className="text-5xl md:text-[9rem] font-black text-slate-950 dark:text-white tracking-tighter leading-none drop-shadow-2xl">
                     {t('title')}
@@ -86,38 +87,41 @@ const DigitalLibraryPage: React.FC = () => {
                 <div className="h-2 w-40 md:w-80 bg-red-600 mx-auto rounded-full shadow-[0_0_30px_rgba(220,38,38,0.5)] animate-pulse"></div>
             </div>
 
-            {/* 2. مركز العمليات الرقمي (Cards + Mascot) */}
+            {/* 2. مركز العمليات الرقمي */}
             <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-10 md:gap-20 items-center">
                 
-                {/* الجانب الأيسر: كروت المكتبات الضخمة */}
+                {/* الكروت الزجاجية */}
                 <div className="lg:col-span-7 flex flex-col gap-6 md:gap-10 order-2 lg:order-1">
                     <Link to="/digital-library/arabic" className="group glass-panel p-8 md:p-14 rounded-[3rem] md:rounded-[4.5rem] border-2 border-green-600/20 hover:border-green-600 transition-all duration-700 shadow-2xl hover:shadow-green-600/20 flex flex-col md:flex-row items-center gap-8 md:gap-12">
-                        <div className="text-6xl md:text-[7rem] group-hover:scale-110 transition-transform duration-500 group-hover:rotate-6">📖</div>
-                        <div className="text-center md:text-start flex-1 space-y-2">
+                        <div className="text-6xl md:text-[7rem] group-hover:scale-110 transition-transform duration-500">📖</div>
+                        <div className="text-center md:text-start flex-1">
                             <h3 className="text-2xl md:text-6xl text-slate-950 dark:text-white tracking-tight">{t('arabicLib')}</h3>
                             <p className="text-sm md:text-2xl text-slate-500 dark:text-slate-400 font-bold opacity-80">{t('arabicDesc')}</p>
                         </div>
                     </Link>
 
                     <Link to="/digital-library/english" className="group glass-panel p-8 md:p-14 rounded-[3rem] md:rounded-[4.5rem] border-2 border-red-600/20 hover:border-red-600 transition-all duration-700 shadow-2xl hover:shadow-red-600/20 flex flex-col md:flex-row items-center gap-8 md:gap-12">
-                        <div className="text-6xl md:text-[7rem] group-hover:scale-110 transition-transform duration-500 group-hover:-rotate-6">🌍</div>
-                        <div className="text-center md:text-start flex-1 space-y-2">
+                        <div className="text-6xl md:text-[7rem] group-hover:scale-110 transition-transform duration-500">🌍</div>
+                        <div className="text-center md:text-start flex-1">
                             <h3 className="text-2xl md:text-6xl text-slate-950 dark:text-white tracking-tight">{t('englishLib')}</h3>
                             <p className="text-sm md:text-2xl text-slate-500 dark:text-slate-400 font-bold opacity-80">{t('englishDesc')}</p>
                         </div>
                     </Link>
                 </div>
 
-                {/* الجانب الأيمن: صقر الرقمي مع الانفجارات */}
+                {/* صقر مع الشعار الذكي خلفه */}
                 <div className="lg:col-span-5 flex justify-center order-1 lg:order-2 relative">
                     <div onClick={handleMascotInteraction} className={`relative cursor-pointer transition-transform duration-500 ${isMascotClicked ? 'scale-110' : 'hover:scale-105'}`}>
                         
-                        {/* شعار المدرسة المائل في الخلفية */}
-                        <div className="absolute inset-0 flex items-center justify-center -z-10 pointer-events-none opacity-5 dark:opacity-15 transition-all duration-1000">
-                            <img src="/school-logo.png" alt="Seal" className="w-[130%] h-[130%] object-contain rotate-12 logo-white-filter blur-[2px]" />
+                        {/* شعار المدرسة: يتغير حسب المود */}
+                        <div className="absolute inset-0 flex items-center justify-center -z-10 pointer-events-none transition-all duration-1000">
+                            <img 
+                                src="/school-logo.png" 
+                                alt="Seal" 
+                                className="w-[130%] h-[130%] object-contain rotate-12 blur-[1px] opacity-10 dark:opacity-20 dark:logo-white-filter" 
+                            />
                         </div>
 
-                        {/* كروت الانفجار الرقمية (5 ثوانٍ) */}
                         {bursts.map((burst) => (
                             <div key={burst.id} 
                                 className="absolute z-50 bg-white dark:bg-slate-900 px-6 py-3 md:px-10 md:py-5 rounded-[2rem] border-4 border-red-600/30 shadow-2xl animate-burst-long pointer-events-none flex items-center gap-4"
@@ -131,16 +135,10 @@ const DigitalLibraryPage: React.FC = () => {
                         
                         <div className="absolute -top-6 -right-6 md:-top-12 md:-right-12 glass-panel p-4 md:p-10 rounded-[2.5rem] md:rounded-[4.5rem] shadow-3xl border-red-500/30 text-xs md:text-3xl font-black text-red-600 dark:text-white animate-bounce z-20 backdrop-blur-3xl">
                             {t('bubble')}
-                            <div className="absolute -bottom-2 md:-bottom-5 left-8 md:left-16 w-5 h-5 md:w-10 md:h-10 glass-panel rotate-45 bg-inherit border-r-4 border-b-4 border-red-500/20"></div>
+                            <div className="absolute -bottom-2 md:-bottom-5 left-8 md:left-16 w-5 h-5 md:w-10 md:h-10 glass-panel rotate-45 bg-inherit border-r-2 border-b-2 border-red-500/20"></div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            {/* الفوتر الرقمي الملكي */}
-            <div className="mt-12 md:mt-20 opacity-30 text-center">
-                <p className="font-black text-slate-950 dark:text-white text-sm md:text-5xl italic tracking-tighter uppercase">EFIPS Digital Gateway • 2026</p>
-                <div className="h-1.5 w-32 md:w-64 bg-green-600 mx-auto mt-6 rounded-full shadow-[0_0_20px_rgba(34,197,94,0.5)]"></div>
             </div>
 
             <style>{`
@@ -154,7 +152,9 @@ const DigitalLibraryPage: React.FC = () => {
                 .animate-float { animation: float 6s ease-in-out infinite; }
                 @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
                 .glass-panel { backdrop-filter: blur(50px); background: rgba(255, 255, 255, 0.05); }
-                .logo-white-filter { filter: brightness(0) invert(1) opacity(0.15); }
+                
+                /* هذا الكلاس يعمل فقط في الدارك مود بسبب الـ prefix في الكود بالأعلى */
+                .logo-white-filter { filter: brightness(0) invert(1); }
             `}</style>
         </div>
     );
