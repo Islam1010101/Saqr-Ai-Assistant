@@ -14,7 +14,7 @@ const translations = {
         digitalDesc: "عالم من الكتب والروايات الرقمية.",
         bubble: "اضغط للإلهام!",
         visitorsLabel: "إجمالي التفاعل",
-        homelandTitle: "لمحات من الموطن 🇦🇪"
+        homelandTitle: "لمحات من الموطن"
     },
     en: {
         welcome: "Future of Knowledge at E.F.I.P.S",
@@ -27,7 +27,7 @@ const translations = {
         digitalDesc: "World of digital books and novels.",
         bubble: "Touch for inspiration!",
         visitorsLabel: "Total Engagement",
-        homelandTitle: "Hints From Homeland 🇦🇪"
+        homelandTitle: "Hints From Homeland"
     }
 };
 
