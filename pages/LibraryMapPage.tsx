@@ -199,7 +199,7 @@ const LibraryMapPage: React.FC = () => {
             </div>
 
             <div className="mt-40 text-center opacity-30">
-                <p className="font-black text-slate-950 dark:text-white text-sm md:text-[5rem] italic tracking-tighter uppercase">EFIPS Tactical Mapping • 2026</p>
+                <p className="font-black text-slate-950 dark:text-white text-sm md:text-[5rem] italic tracking-tighter uppercase">EFIPS Library Mapping • 2026</p>
             </div>
         </div>
     );
