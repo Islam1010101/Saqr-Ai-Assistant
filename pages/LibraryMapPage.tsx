@@ -1,32 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useLanguage } from '../App';
 
-const translations = {
-    ar: {
-        pageTitle: "رادار خريطة المكتبة",
-        subTitle: "نظام تحديد المواقع الذكي لمقتنيات صقر الإمارات (58 دولاباً)",
-        contentTitle: "المحتوى التكتيكي للقسم",
-        selectPrompt: "برجاء اختيار رقم الدولاب للمعاينة",
-        wing1: "الجناح الأول: البالغين والباحثين",
-        wing2: "الجناح الثاني: قسم الشباب والعلوم",
-        wing3: "الجناح الثالث: اللغة العربية",
-        wing4: "الجناح الرابع: القسم الخاص",
-        wing5: "الجناح الخامس: قسم الأطفال"
-    },
-    en: {
-        pageTitle: "Library Radar Map",
-        subTitle: "Smart Positioning System for EFIPS Resources (58 Cabinets)",
-        contentTitle: "Tactical Section Content",
-        selectPrompt: "Please select a cabinet number to inspect",
-        wing1: "1st Wing: Adults & Researchers",
-        wing2: "2nd Wing: Youth & Sciences",
-        wing3: "3rd Wing: Arabic Language",
-        wing4: "4th Wing: Special Section",
-        wing5: "5th Wing: Children's Section"
-    }
-};
-
-// --- قاعدة البيانات المحدثة حسب تقسيمتك الدقيقة ---
+// --- قاعدة البيانات الشاملة (58 دولاباً) ---
 const CABINETS_DB = [
     // الجناح 1 (1-21)
     { id: 1, wing: 1, ar: "معارف عامة", en: "General Knowledge" },
@@ -82,14 +57,31 @@ const CABINETS_DB = [
     }))
 ];
 
+const translations = {
+    ar: {
+        pageTitle: "خريطة صقر الرادارية",
+        subTitle: "المس رقم الدولاب لمعاينة المحتوى التكتيكي فوراً",
+        wing1: "قسم البالغين والباحثين",
+        wing2: "قسم الشباب والعلوم",
+        wing3: "قسم اللغة العربية",
+        wing4: "القسم الخاص (إسلام أحمد)",
+        wing5: "قسم الصغار والأطفال"
+    },
+    en: {
+        pageTitle: "Saqr Radar Map",
+        subTitle: "Touch a cabinet number to view contents instantly",
+        wing1: "Adults & Researchers",
+        wing2: "Youth & Sciences",
+        wing3: "Arabic Language",
+        wing4: "Special Wing",
+        wing5: "Children's Wing"
+    }
+};
+
 const LibraryMapPage: React.FC = () => {
     const { locale, dir } = useLanguage();
     const t = (key: keyof typeof translations.ar) => translations[locale][key];
     const [selected, setSelected] = useState<number | null>(null);
-
-    const activeCabinet = useMemo(() => 
-        CABINETS_DB.find(c => c.id === selected) || { ar: t('selectPrompt'), en: t('selectPrompt') }
-    , [selected, t]);
 
     const getWingTheme = (wing: number) => {
         switch(wing) {
@@ -103,73 +95,74 @@ const LibraryMapPage: React.FC = () => {
     };
 
     const renderGrid = (title: string, wingId: number, start: number, end: number) => (
-        <div className="mb-16 md:mb-32 animate-fade-up">
-            <div className="flex items-center gap-4 mb-8 md:mb-12 ps-2">
-                <div className={`w-2 h-10 md:w-4 md:h-20 rounded-full ${getWingTheme(wingId).split(' ')[0].replace('border', 'bg')}`}></div>
-                <h2 className="text-xl md:text-6xl font-black text-slate-950 dark:text-white uppercase tracking-tighter">{title}</h2>
+        <div className="mb-20 md:mb-32 animate-fade-up relative">
+            <div className="flex items-center gap-4 mb-10 ps-2">
+                <div className={`w-2 h-10 md:w-5 md:h-20 rounded-full ${getWingTheme(wingId).split(' ')[0].replace('border', 'bg')}`}></div>
+                <h2 className="text-2xl md:text-6xl font-black text-slate-950 dark:text-white tracking-tighter uppercase">{title}</h2>
             </div>
-            <div className={`grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3 md:gap-8 p-6 md:p-16 glass-panel rounded-[2.5rem] md:rounded-[5rem] border-2 ${getWingTheme(wingId).split(' ').slice(0,2).join(' ')} shadow-2xl`}>
+            
+            <div className={`grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-4 md:gap-10 p-6 md:p-20 glass-panel rounded-[3rem] md:rounded-[6rem] border-2 ${getWingTheme(wingId).split(' ').slice(0,2).join(' ')} shadow-2xl bg-white/30 dark:bg-black/10`}>
                 {CABINETS_DB.filter(c => c.id >= start && c.id <= end).map((c) => (
-                    <button
-                        key={c.id}
-                        onClick={() => setSelected(c.id)}
-                        className={`relative h-16 w-16 md:h-28 md:w-28 rounded-2xl md:rounded-[3.5rem] text-xl md:text-5xl font-black transition-all duration-500 border-4 flex items-center justify-center
-                            ${selected === c.id 
-                                ? 'bg-slate-950 dark:bg-white text-white dark:text-black border-red-600 scale-125 z-20 shadow-[0_0_50px_rgba(220,38,38,0.5)]' 
-                                : `bg-white dark:bg-slate-900/80 ${getWingTheme(c.wing)} hover:scale-110`
-                            }
-                        `}
-                    >
-                        {c.id}
-                    </button>
+                    <div key={c.id} className="relative flex items-center justify-center">
+                        <button
+                            onClick={() => setSelected(selected === c.id ? null : c.id)}
+                            className={`relative h-16 w-16 md:h-32 md:w-32 rounded-2xl md:rounded-[3.5rem] text-xl md:text-6xl font-black transition-all duration-500 border-4 flex items-center justify-center z-10
+                                ${selected === c.id 
+                                    ? 'bg-slate-950 dark:bg-white text-white dark:text-black border-red-600 scale-110 shadow-[0_0_40px_rgba(220,38,38,0.6)]' 
+                                    : `bg-white dark:bg-slate-900/80 ${getWingTheme(c.wing)} hover:scale-110`
+                                }
+                            `}
+                        >
+                            {c.id}
+                        </button>
+
+                        {/* الكرت العائم (Floating Label) - يظهر فقط عند الضغط */}
+                        {selected === c.id && (
+                            <div className="absolute bottom-full mb-6 z-[100] animate-in slide-in-from-bottom-4 fade-in zoom-in duration-300 pointer-events-none">
+                                <div className={`glass-panel p-5 md:p-10 rounded-[2rem] md:rounded-[3rem] border-4 ${getWingTheme(c.wing).split(' ')[0]} bg-white/95 dark:bg-slate-950 shadow-[0_30px_100px_rgba(0,0,0,0.4)] min-w-[200px] md:min-w-[450px] text-center backdrop-blur-3xl`}>
+                                    <h4 className="text-[10px] md:text-xl font-black text-red-600 uppercase tracking-widest mb-2">Cabinet #{c.id}</h4>
+                                    <p className="text-sm md:text-4xl font-black text-slate-950 dark:text-white leading-tight tracking-tight">
+                                        {locale === 'ar' ? c.ar : c.en}
+                                    </p>
+                                    {/* مثلث الكرت العائم */}
+                                    <div className={`absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 rotate-45 border-r-4 border-b-4 ${getWingTheme(c.wing).split(' ')[0]} bg-inherit`}></div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 ))}
             </div>
         </div>
     );
 
     return (
-        <div dir={dir} className="max-w-7xl mx-auto px-4 py-8 md:py-20 animate-fade-up relative z-10 pb-40 font-black antialiased overflow-x-hidden">
+        <div dir={dir} className="max-w-7xl mx-auto px-4 py-8 md:py-20 animate-fade-up relative z-10 pb-60 font-black antialiased overflow-x-hidden" onClick={() => setSelected(null)}>
             
-            {/* عنوان الصفحة */}
-            <div className="text-center mb-16 md:mb-32">
-                <h1 className="text-4xl md:text-[9rem] font-black text-slate-950 dark:text-white tracking-tighter uppercase mb-6 leading-none drop-shadow-2xl">{t('pageTitle')}</h1>
-                <p className="text-lg md:text-4xl text-red-600 dark:text-red-500 font-bold italic max-w-5xl mx-auto leading-relaxed">{t('subTitle')}</p>
-                <div className="h-1.5 md:h-3 w-32 md:w-64 bg-red-600 mx-auto mt-12 rounded-full shadow-[0_0_30px_rgba(220,38,38,0.6)] animate-pulse"></div>
+            {/* عنوان الصفحة الصافي */}
+            <div className="text-center mb-20 md:mb-40" onClick={(e) => e.stopPropagation()}>
+                <h1 className="text-5xl md:text-[10rem] font-black text-slate-950 dark:text-white tracking-tighter uppercase mb-6 leading-none drop-shadow-2xl">{t('pageTitle')}</h1>
+                <p className="text-lg md:text-5xl text-red-600 dark:text-red-500 font-bold italic max-w-6xl mx-auto leading-relaxed opacity-90">{t('subTitle')}</p>
+                <div className="h-2 w-32 md:w-80 bg-red-600 mx-auto mt-12 rounded-full shadow-[0_0_40px_rgba(220,38,38,0.5)] animate-pulse"></div>
             </div>
 
-            {/* شاشة المعلومات المثبتة (HUD) */}
-            <div className="sticky top-24 z-[100] mb-20 md:mb-40 px-2 md:px-0">
-                <div className={`glass-panel p-6 md:p-16 rounded-[2.5rem] md:rounded-[6.5rem] border-4 transition-all duration-700 backdrop-blur-3xl shadow-[0_40px_100px_rgba(0,0,0,0.3)]
-                    ${selected ? 'border-red-600 bg-white/95 dark:bg-slate-950/90' : 'border-slate-200 dark:border-white/5 opacity-90'}
-                `}>
-                    <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16">
-                        <div className={`h-24 w-24 md:h-56 md:w-56 rounded-[2.5rem] md:rounded-[5rem] flex items-center justify-center text-5xl md:text-[9rem] font-black text-white shadow-2xl transition-all
-                            ${selected ? 'bg-red-600 animate-pulse' : 'bg-slate-300 dark:bg-slate-800'}
-                        `}>
-                            {selected || "?"}
-                        </div>
-                        <div className="text-center md:text-start flex-1 space-y-3 md:space-y-6">
-                            <h3 className="text-xs md:text-3xl font-black text-red-600 uppercase tracking-[0.3em]">{t('contentTitle')}</h3>
-                            <p className="text-2xl md:text-7xl text-slate-950 dark:text-white leading-[1.1] tracking-tighter">
-                                {selected ? (locale === 'ar' ? activeCabinet.ar : activeCabinet.en) : t('selectPrompt')}
-                            </p>
-                        </div>
-                    </div>
-                </div>
+            {/* شبكات الأجنحة */}
+            <div onClick={(e) => e.stopPropagation()}>
+                {renderGrid(t('wing1'), 1, 1, 21)}
+                {renderGrid(t('wing2'), 2, 22, 30)}
+                {renderGrid(t('wing3'), 3, 31, 39)}
+                {renderGrid(t('wing4'), 4, 40, 41)}
+                {renderGrid(t('wing5'), 5, 42, 58)}
             </div>
 
-            {/* الأجنحة الخمسة المنسقة */}
-            {renderGrid(t('wing1'), 1, 1, 21)}
-            {renderGrid(t('wing2'), 2, 22, 30)}
-            {renderGrid(t('wing3'), 3, 31, 39)}
-            {renderGrid(t('wing4'), 4, 40, 41)}
-            {renderGrid(t('wing5'), 5, 42, 58)}
-
-            {/* الفوتر */}
+            {/* الفوتر الملكي */}
             <div className="mt-40 text-center opacity-30">
-                <p className="font-black text-slate-950 dark:text-white text-sm md:text-5xl italic tracking-tighter uppercase">EFIPS Tactical Mapping System • 2026</p>
-                <div className="h-2 w-48 md:w-[40rem] bg-gradient-to-r from-transparent via-red-600 to-transparent mx-auto mt-10 rounded-full"></div>
+                <p className="font-black text-slate-950 dark:text-white text-sm md:text-6xl italic tracking-tighter uppercase">EFIPS Tactical Radar • 2026</p>
             </div>
+
+            <style>{`
+                .glass-panel { backdrop-filter: blur(40px); background: rgba(255, 255, 255, 0.05); }
+                button:active { transform: scale(0.9); }
+            `}</style>
         </div>
     );
 };
