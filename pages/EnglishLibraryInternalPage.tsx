@@ -11,9 +11,10 @@ interface Book {
   driveLink: string;
   bio: string;
   summary: string;
+  publisher?: string;
 }
 
-// --- 2. قاعدة البيانات ---
+// --- 2. قاعدة البيانات الكاملة (39 عنواناً) ---
 const ENGLISH_LIBRARY_DATABASE: Book[] = [
   { id: 1, title: "Me Before You", author: "Jojo Moyes", subject: "Drama", driveLink: "https://drive.google.com/file/d/1eDq03Myjh56IRtLx1LIRJHa39PLnMvgf/view", bio: "British author famous for her emotionally resonant romantic stories.", summary: "A heart-wrenching story of a young woman who becomes a caregiver for a wealthy man." },
   { id: 2, title: "The Great Gatsby", author: "Scott Fitzgerald", subject: "Drama", driveLink: "https://drive.google.com/file/d/1NjrAuiFno2Aa-z6WYkRI17oD2Hxkvs-M/view", bio: "A master of the Jazz Age, famous for his critiques of the American Dream.", summary: " Jay Gatsby's obsessive pursuit of wealth and the woman he loves in the 1920s." },
@@ -104,35 +105,27 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any; onAu
     return (
         <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 backdrop-blur-3xl animate-in fade-in duration-500" onClick={onClose}>
             <div className="glass-panel w-full max-w-4xl rounded-[3rem] border-none shadow-2xl overflow-y-auto max-h-[90vh] md:overflow-hidden relative animate-in zoom-in-95 duration-500 flex flex-col md:flex-row bg-white/95 dark:bg-slate-950/95" onClick={(e) => e.stopPropagation()}>
-                <button onClick={onClose} className="absolute top-6 end-6 z-50 p-2.5 bg-red-600 text-white rounded-full hover:scale-110 active:scale-90 transition-all shadow-lg">
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}><path d="M6 18L18 6M6 6l12 12" /></svg>
+                <button onClick={onClose} className="absolute top-4 end-4 md:top-6 md:end-6 z-50 p-2.5 bg-red-600 text-white rounded-full hover:scale-110 active:scale-90 transition-all shadow-lg">
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}><path d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
-                <div className="flex-1 p-10 md:p-14 flex flex-col justify-center border-b md:border-b-0 md:border-e border-slate-200 dark:border-white/10 text-start">
-                    <div className="mb-10">
-                        <span className="inline-block px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest mb-6 bg-slate-900 text-white shadow-md">{book.subject}</span>
+                <div className="flex-1 p-8 md:p-14 flex flex-col justify-center border-b md:border-b-0 md:border-e border-slate-200 dark:border-white/10 text-start font-black">
+                    <div className="mb-8">
+                        <span className="inline-block px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest mb-6 bg-red-600 text-white shadow-md">{book.subject}</span>
                         <h2 className="text-3xl md:text-5xl font-black text-slate-950 dark:text-white leading-[1.1] mb-3 tracking-tighter">{book.title}</h2>
-                        <p onMouseMove={(e) => onAuthorHover(e, book.bio)} onMouseLeave={(e) => onAuthorHover(e, null)} className="text-xl text-slate-500 font-bold hover:text-red-600 transition-colors inline-block cursor-help border-b-2 border-dotted border-slate-300 uppercase tracking-tight">By {book.author}</p>
+                        <p onMouseMove={(e) => onAuthorHover(e, book.bio)} onMouseLeave={(e) => onAuthorHover(e, null)} className="text-xl text-red-600 dark:text-red-500 font-bold hover:text-slate-950 dark:hover:text-white transition-colors inline-block cursor-help border-b-2 border-dotted border-slate-300">By {book.author}</p>
                     </div>
-                    <div className="bg-slate-100/50 dark:bg-white/5 p-8 rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-white/10">
-                        <p className="text-[10px] text-red-600 font-black uppercase mb-4 tracking-widest flex items-center gap-2"><span className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></span> {t('summaryTitle')}</p>
-                        <p className="text-slate-800 dark:text-slate-200 text-xl font-bold leading-relaxed">{book.summary}</p>
+                    <div className="bg-slate-100/50 dark:bg-white/5 p-8 rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-white/10 text-start">
+                        <p className="text-[10px] text-red-600 font-black uppercase mb-3 tracking-widest flex items-center gap-2"><span className="w-2.5 h-2.5 bg-red-600 rounded-full animate-pulse shadow-lg"></span> {t('summaryTitle')}</p>
+                        <p className="text-slate-800 dark:text-slate-200 text-lg md:text-xl font-medium leading-relaxed italic">"{book.summary}"</p>
                     </div>
                 </div>
-                <div className="w-full md:w-[300px] bg-slate-950 dark:bg-black p-10 flex flex-col justify-center items-center text-center text-white relative font-black">
+                <div className="w-full md:w-[320px] bg-slate-950 dark:bg-black p-10 flex flex-col justify-center items-center text-center text-white relative font-black">
                     <div className="space-y-10 relative z-10 w-full">
                         <div>
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-8">{t('locationLabel')}</p>
-                            <a 
-                                href={book.driveLink} 
-                                target="_blank" 
-                                rel="noopener noreferrer" 
-                                onClick={() => trackActivity('digital', book.title)}
-                                className="w-full bg-red-600 text-white font-black py-5 rounded-2xl flex items-center justify-center gap-3 hover:bg-red-700 active:scale-95 shadow-xl transition-all"
-                            >
-                                <span className="text-sm uppercase tracking-widest">{t('read')}</span>
-                            </a>
+                            <a href={book.driveLink} target="_blank" rel="noopener noreferrer" onClick={() => trackActivity('digital', book.title)} className="w-full bg-red-600 text-white font-black py-6 rounded-2xl flex items-center justify-center gap-3 hover:bg-red-700 active:scale-95 shadow-xl transition-all shadow-red-600/20"><span className="text-sm md:text-xl uppercase tracking-widest">{t('read')}</span></a>
                         </div>
-                        <button onClick={onClose} className="w-full bg-white text-slate-950 font-black py-3 rounded-xl active:scale-95 text-[10px] uppercase tracking-widest transition-all">{t('close')}</button>
+                        <button onClick={onClose} className="w-full bg-white text-slate-950 font-black py-4 rounded-xl active:scale-95 text-xs uppercase tracking-widest transition-all">{t('close')}</button>
                     </div>
                 </div>
             </div>
@@ -141,20 +134,22 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any; onAu
 };
 
 const BookCard = React.memo(({ book, onClick, t, onAuthorHover }: { book: Book; onClick: () => void; t: any; onAuthorHover: (e: React.MouseEvent, bio: string | null) => void }) => (
-    <div 
-        onClick={() => {
-            trackActivity('searched', book.title);
-            onClick();
-        }} 
-        className="group relative glass-panel bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border-none rounded-[2rem] md:rounded-[2.5rem] transition-all duration-300 cursor-pointer flex flex-col h-full overflow-hidden shadow-md active:scale-95 hover:shadow-[0_40px_80px_rgba(0,0,0,0.12)]"
-    >
-        <div className="p-6 md:p-8 flex-grow text-start">
-             <span className="inline-block px-2.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest mb-4 bg-slate-950 text-white shadow-sm">{book.subject}</span>
-            <h2 className="font-black text-xl md:text-2xl text-slate-950 dark:text-white leading-relaxed mb-3 tracking-tighter group-hover:text-green-700 transition-colors line-clamp-2">{book.title}</h2>
-            <p onMouseMove={(e) => onAuthorHover(e, book.bio)} onMouseLeave={(e) => onAuthorHover(e, null)} className="text-[11px] md:text-xs text-slate-500 dark:text-slate-400 font-black hover:text-red-600 transition-all inline-block underline decoration-dotted underline-offset-4 cursor-help uppercase tracking-tight">By {book.author}</p>
+    <div onClick={() => { trackActivity('searched', book.title); onClick(); }} className="group relative glass-panel bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border-none rounded-[2.5rem] transition-all duration-500 cursor-pointer flex flex-col h-full overflow-hidden shadow-lg hover:shadow-2xl dark:hover:shadow-red-600/10 active:scale-95 hover:-translate-y-2">
+        
+        {/* حافة النيون الجانبية - هوية المكتبة الإنجليزية حمراء */}
+        <div className="absolute top-0 start-0 w-1.5 h-full bg-red-600 shadow-[2px_0_15px_rgba(220,38,38,0.4)]"></div>
+
+        <div className="p-7 md:p-9 flex-grow text-start font-black">
+             <span className="inline-block px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest mb-5 bg-red-600 text-white shadow-lg shadow-red-600/20">{book.subject}</span>
+            <h2 className="font-black text-xl md:text-2xl text-slate-950 dark:text-white leading-tight mb-3 tracking-tighter group-hover:text-red-600 transition-colors line-clamp-2 drop-shadow-sm">{book.title}</h2>
+            <div className="flex items-center gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
+                <span className="text-base">👤</span>
+                <p onMouseMove={(e) => onAuthorHover(e, book.bio)} onMouseLeave={(e) => onAuthorHover(e, null)} className="text-xs text-slate-500 dark:text-slate-400 font-bold hover:text-red-600 transition-all inline-block underline decoration-dotted underline-offset-4 cursor-help">By {book.author}</p>
+            </div>
         </div>
-        <div className="bg-white/40 dark:bg-black/20 py-4 px-6 md:px-8 border-t border-white/10 mt-auto text-center font-black">
-            <p className="font-black text-slate-900 dark:text-white text-[10px] uppercase tracking-[0.4em] opacity-40">{t('locationLabel')}</p>
+        <div className="bg-slate-50/50 dark:bg-black/40 py-4 px-8 border-t border-slate-100 dark:border-white/5 mt-auto flex items-center justify-between font-black">
+            <p className="font-black text-slate-900 dark:text-white text-[11px] uppercase tracking-[0.4em] opacity-30 group-hover:opacity-100 group-hover:text-red-600 transition-all">{t('locationLabel')}</p>
+            <div className="text-[14px] opacity-30 group-hover:opacity-100 group-hover:text-red-600 transition-all">➔</div>
         </div>
     </div>
 ));
@@ -168,7 +163,7 @@ const EnglishLibraryInternalPage: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [subjectFilter, setSubjectFilter] = useState('all');
     const [authorFilter, setAuthorFilter] = useState('all');
-    const [sortBy, setSortBy] = useState('none'); // حالة الفرز الجديدة
+    const [sortBy, setSortBy] = useState('alphabetical'); // ضبط الأبجدي كافتراضي
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
     const [tooltip, setTooltip] = useState<{ text: string, x: number, y: number } | null>(null);
 
@@ -191,55 +186,54 @@ const EnglishLibraryInternalPage: React.FC = () => {
             return matchesTerm && matchesSub && matchesAuth;
         });
 
-        // منطق الفرز المضاف حديثاً
         if (sortBy === 'alphabetical') {
-            result.sort((a, b) => a.title.localeCompare(b.title));
+            result = [...result].sort((a, b) => a.title.localeCompare(b.title));
         } else if (sortBy === 'author') {
-            result.sort((a, b) => a.author.localeCompare(b.author));
+            result = [...result].sort((a, b) => a.author.localeCompare(b.author));
         } else if (sortBy === 'subject') {
-            result.sort((a, b) => a.subject.localeCompare(b.subject));
+            result = [...result].sort((a, b) => a.subject.localeCompare(b.subject));
         }
 
         return result;
     }, [searchTerm, subjectFilter, authorFilter, sortBy]);
 
     return (
-        <div dir={dir} className="max-w-7xl mx-auto px-4 pb-24 relative z-10 text-start font-black">
+        <div dir={dir} className="max-w-7xl mx-auto px-4 pb-32 relative z-10 text-start antialiased font-black">
             {tooltip && (
-                <div className="fixed pointer-events-none z-[200] glass-panel px-5 py-3 rounded-2xl border-white/40 shadow-2xl animate-in fade-in zoom-in duration-200 max-w-xs transition-opacity" style={{ left: tooltip.x, top: tooltip.y, transform: 'translate(-50%, -100%)' }}>
-                    <p className="text-[10px] font-black text-red-600 uppercase mb-1 tracking-widest">{t('bioTitle')}</p>
+                <div className="fixed pointer-events-none z-[200] glass-panel px-6 py-3 rounded-2xl border-white/40 shadow-2xl animate-in fade-in zoom-in duration-200 max-w-xs transition-opacity" style={{ left: tooltip.x, top: tooltip.y, transform: 'translate(-50%, -100%)' }}>
+                    <p className="text-[10px] font-black text-red-600 uppercase mb-2 tracking-widest">{t('bioTitle')}</p>
                     <p className="text-xs font-black text-slate-900 dark:text-white leading-relaxed">{tooltip.text}</p>
                 </div>
             )}
 
-            <div className="text-center mt-8 mb-12 relative animate-fade-up">
-                <button onClick={() => navigate(-1)} className="absolute start-0 top-1/2 -translate-y-1/2 flex items-center gap-2 text-slate-400 hover:text-red-600 transition-colors group">
-                    <svg className={`h-5 w-5 transform group-hover:-translate-x-1 ${isAr ? '' : 'rotate-180'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-                    <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">{t('back')}</span>
+            <div className="text-center mt-12 mb-16 md:mb-24 relative animate-fade-up">
+                <button onClick={() => navigate(-1)} className="absolute start-0 top-1/2 -translate-y-1/2 flex items-center gap-3 text-slate-400 hover:text-red-600 transition-colors group">
+                    <svg className={`h-7 w-7 transform group-hover:-translate-x-1 ${isAr ? '' : 'rotate-180'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}><path d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                    <span className="text-xs font-black uppercase tracking-widest hidden sm:inline">{t('back')}</span>
                 </button>
-                <h1 className="text-4xl sm:text-7xl font-black text-slate-950 dark:text-white tracking-tighter leading-none">{t('pageTitle')}</h1>
-                <div className="h-1.5 w-24 bg-slate-900 mx-auto mt-6 rounded-full opacity-60"></div>
+                <h1 className="text-5xl md:text-9xl font-black text-slate-950 dark:text-white tracking-tighter leading-none drop-shadow-2xl">{t('pageTitle')}</h1>
+                <div className="h-2 w-32 bg-red-600 mx-auto mt-8 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.5)]"></div>
             </div>
 
-            <div className="sticky top-24 z-50 mb-12 animate-fade-up">
-                <div className="glass-panel p-3 md:p-4 rounded-[1.5rem] md:rounded-[2rem] shadow-xl border-none backdrop-blur-3xl max-w-5xl mx-auto">
-                    <div className="flex flex-col md:flex-row gap-2 md:gap-3">
+            <div className="sticky top-20 z-50 mb-16 animate-fade-up">
+                <div className="glass-panel p-3 md:p-5 rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl border-none backdrop-blur-3xl max-w-6xl mx-auto bg-white/90 dark:bg-slate-900/80">
+                    <div className="flex flex-col md:flex-row gap-3 md:gap-4">
                         <div className="flex-[2] relative">
-                            <input type="text" placeholder={t('searchPlaceholder')} className="w-full p-3 md:p-4 ps-12 bg-slate-100/50 dark:bg-black/40 text-slate-950 dark:text-white border-2 border-transparent focus:border-slate-900 rounded-xl md:rounded-2xl outline-none transition-all font-black text-sm md:text-base shadow-inner" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-                            <svg className="absolute start-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-950 dark:text-white opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                            <input type="text" placeholder={t('searchPlaceholder')} className="w-full p-4 ps-14 bg-slate-100/50 dark:bg-black/40 text-slate-950 dark:text-white border-2 border-transparent focus:border-red-600 rounded-2xl md:rounded-3xl outline-none transition-all font-black text-base shadow-inner" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                            <svg className="absolute start-5 top-1/2 -translate-y-1/2 h-6 w-6 text-red-600 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                         </div>
                         <div className="grid grid-cols-3 gap-2 flex-[4]">
-                            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 font-black text-[9px] md:text-xs cursor-pointer outline-none focus:border-slate-900 appearance-none text-center shadow-sm">
+                            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="p-3 rounded-xl md:rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 font-black text-[10px] md:text-xs cursor-pointer outline-none focus:border-red-600 appearance-none text-center shadow-md">
                                 <option value="none">{t('sortBy')}</option>
                                 <option value="alphabetical">{t('alphabetical')}</option>
                                 <option value="author">{t('authorSort')}</option>
                                 <option value="subject">{t('subjectSort')}</option>
                             </select>
-                            <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 font-black text-[10px] md:text-xs cursor-pointer outline-none focus:border-slate-900 appearance-none text-center shadow-sm">
+                            <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="p-3 rounded-xl md:rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 font-black text-[10px] md:text-xs cursor-pointer outline-none focus:border-red-600 appearance-none text-center shadow-md">
                                 <option value="all">{t('allSubjects')}</option>
                                 {filters.subjects.map(o => o !== "all" && <option key={o} value={o}>{o}</option>)}
                             </select>
-                            <select value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)} className="p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 font-black text-[10px] md:text-xs cursor-pointer outline-none focus:border-slate-900 appearance-none text-center shadow-sm">
+                            <select value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)} className="p-3 rounded-xl md:rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 font-black text-[10px] md:text-xs cursor-pointer outline-none focus:border-red-600 appearance-none text-center shadow-md">
                                 <option value="all">{t('allAuthors')}</option>
                                 {filters.authors.map(o => o !== "all" && <option key={o} value={o}>{o}</option>)}
                             </select>
@@ -248,7 +242,7 @@ const EnglishLibraryInternalPage: React.FC = () => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 animate-fade-up">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 md:gap-12 animate-fade-up">
                 {filteredBooks.map((book) => (
                     <BookCard key={book.id} book={book} t={t} onClick={() => setSelectedBook(book)} onAuthorHover={handleAuthorHover} />
                 ))}
