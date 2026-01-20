@@ -184,8 +184,8 @@ const LibraryMapPage: React.FC = () => {
                     
                     <div className="flex-1 text-center lg:text-start space-y-8 md:space-y-16">
                         <h1 className="text-6xl md:text-[11rem] font-black text-slate-950 dark:text-white leading-[0.8] tracking-tighter uppercase drop-shadow-2xl">
-                            FALCON<br/>
-                            <span className="text-red-600">RADAR</span>
+                           Lirary<br/>
+                            <span className="text-red-600">Map</span>
                         </h1>
                         <p className="text-lg md:text-6xl text-slate-700 dark:text-slate-300 font-bold italic max-w-4xl leading-tight opacity-80">
                             {t('subTitle')}
