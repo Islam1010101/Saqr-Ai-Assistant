@@ -43,7 +43,7 @@ const FloatingSaqr: React.FC = () => {
       <button
         onMouseDown={handleInteraction}
         onTouchStart={handleInteraction}
-        className="group relative w-14 h-14 md:w-16 md:h-16 glass-panel rounded-[1.8rem] border-2 border-red-600/30 dark:border-red-500/40 shadow-xl flex items-center justify-center overflow-hidden hover:scale-110 active:scale-95 transition-all duration-500 bg-white/40 dark:bg-slate-900/60"
+        className="group relative w-14 h-14 md:w-16 md:h-16 glass-panel rounded-[1.8rem] border-2 border-red-600/30 dark:border-red-500/40 shadow-xl flex items-center justify-center overflow-hidden hover:scale-110 active:scale-95 transition-all duration-500 bg-white/60 dark:bg-slate-900/60"
       >
         {ripples.map(r => (
           <span key={r.id} className="ripple-effect bg-red-600/40" style={{ left: r.x, top: r.y }} />
@@ -58,21 +58,22 @@ const FloatingSaqr: React.FC = () => {
   );
 };
 
-// -------- 2. هيدر EFIPS الفخم الرشيق (Mobile Scroll & Above Hints) --------
+// -------- 2. هيدر EFIPS الفخم الرشيق (Bottom Hint Version) --------
 const Header: React.FC = () => {
   const { locale, setLocale } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const [activeHint, setActiveHint] = useState<string | null>(null);
 
+  // الروابط بألوان الهوية الرسمية (أحمر، أخضر، رمادي ملكي)
   const links = [
     { path: '/search', label: locale === 'en' ? 'Search' : 'البحث بالمكتبة', icon: '🔍', hint: locale === 'en' ? 'Shelf Index' : 'فهرس الكتب', color: 'bg-red-600' },
     { path: '/smart-search', label: locale === 'en' ? 'Ask Saqr' : 'اسأل صقر', icon: '🤖', hint: locale === 'en' ? 'AI Guide' : 'المساعد الذكي', color: 'bg-green-600' },
     { path: '/digital-library', label: locale === 'en' ? 'Digital' : 'المكتبة الرقمية', icon: '📚', hint: locale === 'en' ? 'E-Books' : 'كنوز رقمية', color: 'bg-slate-900' },
     { path: '/creators', label: locale === 'en' ? 'Creators' : 'بوابة المبدعين', icon: '🎨', hint: locale === 'en' ? 'Talents' : 'إبداعات طلابنا', color: 'bg-red-600' },
     { path: '/feedback', label: locale === 'en' ? 'Ideas' : 'مقترحات', icon: '✍️', hint: locale === 'en' ? 'Contact' : 'رأيك يهمنا', color: 'bg-green-600' }, 
-    { path: '/reports', label: locale === 'en' ? 'Reports' : 'تقارير', icon: '📊', hint: locale === 'en' ? 'Stats' : 'أرقام المكتبة', color: 'bg-slate-800' },
-    { path: '/map', label: locale === 'en' ? 'Map' : 'خريطة المكتبة', icon: '🗺️', hint: locale === 'en' ? 'Map View' : 'موقع الأرفف', color: 'bg-red-600' },
+    { path: '/reports', label: locale === 'en' ? 'Reports' : 'تقارير', icon: '📊', hint: locale === 'en' ? 'Statistics' : 'أرقام المكتبة', color: 'bg-slate-800' },
+    { path: '/map', label: locale === 'en' ? 'Map' : 'خريطة المكتبة', icon: '🗺️', hint: locale === 'en' ? 'Map View' : 'موقع الرفوف', color: 'bg-red-600' },
     { path: '/about', label: locale === 'en' ? 'About' : 'عنا', icon: 'ℹ️', hint: locale === 'en' ? 'Story' : 'من نحن؟', color: 'bg-green-700' },
   ];
 
@@ -80,8 +81,8 @@ const Header: React.FC = () => {
     <header className="sticky top-4 z-[60] px-4 md:px-10">
       <div className="glass-panel mx-auto max-w-[98rem] p-1.5 md:p-2.5 rounded-full border border-white/20 dark:border-white/5 flex items-center justify-between shadow-2xl backdrop-blur-3xl bg-white/95 dark:bg-slate-950/90 font-black transition-all relative overflow-visible">
         
+        {/* اللوجو الذكي مائل لليمين بزاوية 12 */}
         <Link to="/" className="flex items-center gap-2 md:gap-3 ps-4 md:ps-6 group flex-shrink-0">
-          {/* تم زيادة الميل لليمين هنا عبر rotate-12 */}
           <img src="/school-logo.png" alt="EFIPS" className="h-8 w-8 md:h-11 md:w-11 object-contain logo-smart-filter rotate-12 transition-all group-hover:scale-110" />
           <div className="hidden xl:block leading-none text-start">
             <span className="font-black text-slate-950 dark:text-white text-[7px] md:text-[9.5px] tracking-tighter block uppercase opacity-80 group-hover:text-red-600 transition-colors">
@@ -90,7 +91,8 @@ const Header: React.FC = () => {
           </div>
         </Link>
         
-        <nav className="flex items-center bg-black/5 dark:bg-white/5 rounded-full p-1 mx-2 overflow-x-auto no-scrollbar lg:overflow-visible">
+        {/* شريط الأيقونات: سكرول أفقي + الهنت أسفل الكلمة */}
+        <nav className="flex items-center bg-black/5 dark:bg-white/5 rounded-full p-1 mx-2 overflow-x-auto no-scrollbar lg:overflow-visible overflow-y-visible">
           <div className="flex items-center gap-1">
             {links.map(l => (
               <div key={l.path} className="relative group/nav" 
@@ -98,10 +100,12 @@ const Header: React.FC = () => {
                    onMouseLeave={() => setActiveHint(null)}
                    onTouchStart={(e) => { e.stopPropagation(); setActiveHint(activeHint === l.path ? null : l.path); }}>
                 
-                <div className={`absolute bottom-[calc(100%+15px)] left-1/2 -translate-x-1/2 px-4 py-2 ${l.color} text-white text-[10px] rounded-2xl transition-all duration-300 pointer-events-none whitespace-nowrap shadow-2xl z-[150] 
+                {/* الهنت الذكي: يظهر تحت الكلمة مباشرة (Below) */}
+                <div className={`absolute top-[calc(100%+12px)] left-1/2 -translate-x-1/2 px-4 py-2 ${l.color} text-white text-[10px] rounded-2xl transition-all duration-300 pointer-events-none whitespace-nowrap shadow-2xl z-[150] 
                                 ${activeHint === l.path ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-2 scale-90'}`}>
+                  {/* مثلث يشير للأعلى */}
+                  <div className={`absolute -top-1 left-1/2 -translate-x-1/2 w-2.5 h-2.5 ${l.color} rotate-45`}></div>
                   {l.hint}
-                  <div className={`absolute -bottom-1 left-1/2 -translate-x-1/2 w-2.5 h-2.5 ${l.color} rotate-45`}></div>
                 </div>
 
                 <Link 
@@ -120,6 +124,7 @@ const Header: React.FC = () => {
           </div>
         </nav>
         
+        {/* أزرار الإعدادات */}
         <div className="flex items-center gap-1.5 pe-4 md:pe-6 flex-shrink-0">
           <button onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')} className="w-8 h-8 md:w-11 md:h-11 flex items-center justify-center text-slate-950 dark:text-white font-black text-[9px] md:text-[10px] border border-slate-200 dark:border-white/10 rounded-full hover:border-red-600 transition-all active:scale-90 shadow-sm">
             {locale === 'en' ? 'AR' : 'EN'}
@@ -133,7 +138,7 @@ const Header: React.FC = () => {
   );
 };
 
-// -------- 3. سياق اللغة والثيم --------
+// -------- 3. سياق اللغة والثيم (بدون تغيير) --------
 const LanguageContext = createContext<any>(null);
 export const useLanguage = () => useContext(LanguageContext);
 const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
