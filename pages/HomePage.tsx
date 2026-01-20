@@ -7,38 +7,35 @@ const translations = {
         welcome: "مستقبل المعرفة في صقر الإمارات",
         subWelcome: "بوابتك الذكية للوصول إلى كنوز المعرفة الرقمية والورقية بأسلوب عصري.",
         manualSearch: "البحث اليدوي",
-        manualDesc: "ابحث عن الكتب المطبوعة في مكتبة المدرسة عبر رقم الرف أو العنوان.",
+        manualDesc: "تصفح الفهرس الورقي عبر رقم الرف.",
         smartSearch: "اسأل صقر (AI)",
-        smartDesc: "مساعدك الذكي الذي يحلل استفساراتك ويقترح عليك أفضل المصادر الرقمية.",
+        smartDesc: "مساعدك الذكي للبحث والاستفسار.",
         digitalLibrary: "المكتبة الإلكترونية",
-        digitalDesc: "تصفح وحمل مئات الروايات والكتب الرقمية العالمية في أي وقت.",
+        digitalDesc: "عالم من الكتب والروايات الرقمية.",
         bubble: "المسني للإلهام!",
-        visitorsLabel: "إجمالي التفاعل مع البوابة",
+        visitorsLabel: "إجمالي التفاعل",
         homelandTitle: "تعرف على وطني 🇦🇪"
     },
     en: {
         welcome: "Future of Knowledge at E.F.I.P.S",
         subWelcome: "Your smart gateway to access digital and physical knowledge resources.",
         manualSearch: "Manual Search",
-        manualDesc: "Find physical books in the School's Library by shelf number or title.",
+        manualDesc: "Browse physical index by shelf number.",
         smartSearch: "Ask Saqr (AI)",
-        smartDesc: "Your smart assistant that analyzes queries and suggests best digital resources.",
+        smartDesc: "Your smart AI research assistant.",
         digitalLibrary: "Digital Library",
-        digitalDesc: "Browse and download hundreds of global digital novels and books.",
+        digitalDesc: "World of digital books and novels.",
         bubble: "Touch for inspiration!",
-        visitorsLabel: "Total Portal Engagement",
+        visitorsLabel: "Total Engagement",
         homelandTitle: "Know My Homeland 🇦🇪"
     }
 };
 
-// --- قاعدة بيانات حقائق عن دولة الإمارات (تتغير يومياً) ---
 const HOMELAND_FACTS = [
     { ar: "تأسست دولة الإمارات العربية المتحدة في الثاني من ديسمبر عام 1971م على يد الشيخ زايد بن سلطان آل نهيان، طيب الله ثراه.", en: "The UAE was founded on Dec 2, 1971, by Sheikh Zayed bin Sultan Al Nahyan." },
     { ar: "هل تعلم أن برج خليفة في دبي هو أطول بناء شيده الإنسان في العالم بارتفاع 828 متراً؟", en: "Did you know Burj Khalifa is the tallest man-made structure in the world at 828m?" },
-    { ar: "تعتبر 'نخلة جميرا' أكبر جزيرة اصطناعية في العالم، ويمكن رؤيتها من الفضاء الخارجي.", en: "Palm Jumeirah is the world's largest man-made island, visible from space." },
     { ar: "مسبار الأمل الإماراتي هو أول مهمة عربية تصل إلى مدار كوكب المريخ لاستكشاف غلافه الجوي.", en: "The Hope Probe is the first Arab mission to reach Mars to explore its atmosphere." },
-    { ar: "تضم دولة الإمارات سبع إمارات متحدة هي: أبوظبي، دبي، الشارقة، عجمان، أم القيوين، رأس الخيمة، والفجيرة.", en: "The UAE consists of seven emirates: Abu Dhabi, Dubai, Sharjah, Ajman, Umm Al Quwain, Ras Al Khaimah, and Fujairah." },
-    { ar: "تشتهر الإمارات بشجرة 'الغاف' التي تعد رمزاً للصمود والصبر في بيئة الصحراء، وهي الشجرة الوطنية للدولة.", en: "The Ghaf tree is the UAE national tree, symbolizing resilience in the desert." }
+    { ar: "تعتبر 'نخلة جميرا' أكبر جزيرة اصطناعية في العالم، ويمكن رؤيتها من الفضاء الخارجي.", en: "Palm Jumeirah is the world's largest man-made island, visible from space." }
 ];
 
 const KNOWLEDGE_CARDS = [
@@ -46,13 +43,10 @@ const KNOWLEDGE_CARDS = [
     { icon: "💡", textAr: "فكرة مبتكرة", textEn: "Innovative Idea" },
     { icon: "🤖", textAr: "ذكاء صقر", textEn: "Saqr AI" },
     { icon: "📚", textAr: "مصادر المعرفة", textEn: "Knowledge Sources" },
-    { icon: "🇦🇪", textAr: "هوية وطنية", textEn: "UAE Identity" },
-    { icon: "🚀", textAr: "طموح 2026", textEn: "2026 Ambition" }
+    { icon: "🇦🇪", textAr: "هوية وطنية", textEn: "UAE Identity" }
 ];
 
-interface BurstItem {
-    id: number; tx: number; ty: number; rot: number; item: typeof KNOWLEDGE_CARDS[0];
-}
+interface BurstItem { id: number; tx: number; ty: number; rot: number; item: typeof KNOWLEDGE_CARDS[0]; }
 
 const HomePage: React.FC = () => {
     const { locale } = useLanguage();
@@ -63,7 +57,6 @@ const HomePage: React.FC = () => {
     const [isMascotClicked, setIsMascotClicked] = useState(false);
     const [visitorCount, setVisitorCount] = useState(0);
 
-    // اختيار معلومة الوطن بناءً على اليوم
     const dailyFact = useMemo(() => {
         const day = new Date().getDate();
         return HOMELAND_FACTS[day % HOMELAND_FACTS.length];
@@ -75,23 +68,23 @@ const HomePage: React.FC = () => {
         localStorage.setItem('efips_total_visitors', newCount.toString());
         let start = 0;
         const timer = setInterval(() => {
-            start += newCount / 100;
+            start += newCount / 80;
             if (start >= newCount) { setVisitorCount(newCount); clearInterval(timer); } 
             else { setVisitorCount(Math.floor(start)); }
         }, 16);
         return () => clearInterval(timer);
     }, []);
 
-    const handleMascotInteraction = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    const handleMascotInteraction = useCallback(() => {
         setIsMascotClicked(true);
         setTimeout(() => setIsMascotClicked(false), 300);
         const id = Date.now();
         const newBursts: BurstItem[] = Array.from({ length: 2 }).map((_, i) => ({
-            id: Date.now() + i,
+            id: id + i,
             item: KNOWLEDGE_CARDS[Math.floor(Math.random() * KNOWLEDGE_CARDS.length)],
-            tx: (Math.random() - 0.5) * (window.innerWidth < 768 ? 120 : 350), 
-            ty: -80 - Math.random() * 150,
-            rot: (Math.random() - 0.5) * 40
+            tx: (Math.random() - 0.5) * (window.innerWidth < 768 ? 100 : 250), 
+            ty: -60 - Math.random() * 100,
+            rot: (Math.random() - 0.5) * 30
         }));
         setBursts(prev => [...prev, ...newBursts]);
         newBursts.forEach(b => { setTimeout(() => { setBursts(current => current.filter(item => item.id !== b.id)); }, 5000); });
@@ -100,86 +93,94 @@ const HomePage: React.FC = () => {
     }, []);
 
     return (
-        <div className="relative min-h-[calc(100vh-140px)] flex flex-col items-center justify-center p-3 md:p-10 overflow-hidden select-none animate-fade-up font-black antialiased">
+        <div className="max-w-7xl mx-auto px-4 py-6 md:py-12 flex flex-col items-center gap-10 md:gap-20 animate-fade-up font-black antialiased">
             
-            {/* الحاوية الملكية العلوية */}
-            <div className="relative z-10 glass-panel w-full max-w-7xl rounded-[3.5rem] md:rounded-[6rem] overflow-hidden shadow-3xl border-none bg-white/80 dark:bg-slate-950/75 backdrop-blur-3xl transition-all duration-700">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 p-6 md:p-24 items-center">
-                    
-                    <div className="flex flex-col text-center lg:text-start space-y-10 md:space-y-20 order-2 lg:order-1 relative z-20">
-                        <div className="space-y-4 md:space-y-10">
-                            <h1 className="text-4xl md:text-8xl lg:text-9xl font-black text-slate-950 dark:text-white leading-[1.1] tracking-tighter drop-shadow-2xl">{t('welcome')}</h1>
-                            <p className="text-base md:text-4xl text-slate-600 dark:text-slate-400 font-bold max-w-3xl mx-auto lg:mx-0 leading-relaxed opacity-90 italic">{t('subWelcome')}</p>
+            {/* 1. قسم الترحيب الرئيسي */}
+            <div className="text-center space-y-4 md:space-y-8 max-w-4xl">
+                <h1 className="text-4xl md:text-8xl font-black text-slate-950 dark:text-white tracking-tighter leading-tight drop-shadow-xl">
+                    {t('welcome')}
+                </h1>
+                <p className="text-base md:text-3xl text-slate-600 dark:text-slate-400 font-bold opacity-80 leading-relaxed italic">
+                    {t('subWelcome')}
+                </p>
+                <div className="h-1.5 w-32 bg-red-600 mx-auto rounded-full shadow-[0_0_20px_rgba(220,38,38,0.5)]"></div>
+            </div>
+
+            {/* 2. مركز العمليات (Mascot + Action Cards) */}
+            <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-16 items-center">
+                
+                {/* الجانب الأيسر: كروت التنقل */}
+                <div className="lg:col-span-7 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 order-2 lg:order-1">
+                    <Link to="/search" className="group glass-panel p-6 md:p-10 rounded-[2.5rem] border-2 border-red-600/20 hover:border-red-600 transition-all duration-500 shadow-xl hover:shadow-red-600/20">
+                        <div className="text-4xl md:text-6xl mb-4 group-hover:scale-110 transition-transform">🔍</div>
+                        <h3 className="text-xl md:text-3xl text-slate-950 dark:text-white mb-2">{t('manualSearch')}</h3>
+                        <p className="text-xs md:text-lg text-slate-500 dark:text-slate-400 font-bold">{t('manualDesc')}</p>
+                    </Link>
+
+                    <Link to="/smart-search" className="group glass-panel p-6 md:p-10 rounded-[2.5rem] border-2 border-green-600/20 hover:border-green-600 transition-all duration-500 shadow-xl hover:shadow-green-600/20">
+                        <div className="text-4xl md:text-6xl mb-4 group-hover:scale-110 transition-transform">🤖</div>
+                        <h3 className="text-xl md:text-3xl text-slate-950 dark:text-white mb-2">{t('smartSearch')}</h3>
+                        <p className="text-xs md:text-lg text-slate-500 dark:text-slate-400 font-bold">{t('smartDesc')}</p>
+                    </Link>
+
+                    <Link to="/digital-library" className="md:col-span-2 group glass-panel p-6 md:p-10 rounded-[2.5rem] border-2 border-blue-600/20 hover:border-blue-600 transition-all duration-500 shadow-xl flex items-center gap-6">
+                        <div className="text-4xl md:text-7xl group-hover:rotate-12 transition-transform">📚</div>
+                        <div className="text-start">
+                            <h3 className="text-xl md:text-4xl text-slate-950 dark:text-white mb-1">{t('digitalLibrary')}</h3>
+                            <p className="text-xs md:text-xl text-slate-500 dark:text-slate-400 font-bold">{t('digitalDesc')}</p>
                         </div>
+                    </Link>
+                </div>
 
-                        <div className="flex flex-col sm:flex-row flex-wrap justify-center lg:justify-start gap-4 md:gap-8">
-                            <Link to="/search" className="glass-panel border-4 border-slate-200 dark:border-white/10 hover:border-red-600 dark:hover:border-red-500 hover:shadow-[0_0_40px_rgba(220,38,38,0.3)] py-5 md:py-10 px-8 md:px-16 text-lg md:text-4xl font-black rounded-3xl md:rounded-[4rem] text-slate-900 dark:text-white transition-all active:scale-95 text-center flex items-center justify-center gap-4">🔍 {t('manualSearch')}</Link>
-                            <Link to="/smart-search" className="glass-panel border-4 border-slate-200 dark:border-white/10 hover:border-green-600 dark:hover:border-green-500 hover:shadow-[0_0_40px_rgba(34,197,94,0.3)] py-5 md:py-10 px-8 md:px-16 text-lg md:text-4xl font-black rounded-3xl md:rounded-[4rem] text-slate-900 dark:text-white transition-all active:scale-95 text-center flex items-center justify-center gap-4">🤖 {t('smartSearch')}</Link>
-                        </div>
-                    </div>
-
-                    <div className="relative flex items-center justify-center order-1 lg:order-2 px-6 md:px-0">
-                        <div onMouseDown={handleMascotInteraction} onTouchStart={handleMascotInteraction}
-                            className={`relative group cursor-pointer touch-manipulation flex items-center justify-center w-full max-w-[300px] md:max-w-[650px] transition-transform duration-500 ${isMascotClicked ? 'scale-110' : 'hover:scale-105'}`}>
-                            
-                            {bursts.map((burst) => (
-                                <div key={burst.id} className="absolute z-[100] glass-panel px-4 md:px-12 py-3 md:py-6 rounded-2xl md:rounded-[4rem] flex items-center gap-3 md:gap-6 border-red-500/40 shadow-3xl animate-burst-long pointer-events-none"
-                                    style={{ '--tx': `${burst.tx}px`, '--ty': `${burst.ty}px`, '--rot': `${burst.rot}deg` } as any}>
-                                    <span className="text-2xl md:text-7xl">{burst.item.icon}</span>
-                                    <span className="text-xs md:text-3xl font-black text-slate-950 dark:text-white uppercase tracking-tighter whitespace-nowrap">{isAr ? burst.item.textAr : burst.item.textEn}</span>
-                                </div>
-                            ))}
-
-                            <img src="/saqr-full.png" alt="Saqr" className="h-56 sm:h-80 md:h-[750px] object-contain drop-shadow-[0_40px_80px_rgba(220,38,38,0.25)] dark:drop-shadow-[0_0_100px_rgba(255,255,255,0.05)] relative z-10 animate-float" />
-                            
-                            <div className="absolute -top-6 md:-top-16 -right-6 md:-right-20 glass-panel p-4 md:p-10 rounded-3xl md:rounded-[5rem] shadow-3xl border-red-500/30 text-xs md:text-4xl font-black text-red-600 dark:text-white animate-bounce z-20 backdrop-blur-2xl">
-                                {t('bubble')}
-                                <div className="absolute -bottom-2 md:-bottom-5 left-8 md:left-16 w-4 md:w-10 h-4 md:h-10 glass-panel rotate-45 bg-inherit border-r-4 border-b-4 border-red-500/20"></div>
+                {/* الجانب الأيمن: صقر التفاعلي */}
+                <div className="lg:col-span-5 flex justify-center order-1 lg:order-2 relative">
+                    <div onClick={handleMascotInteraction} className={`relative cursor-pointer transition-transform duration-500 ${isMascotClicked ? 'scale-110' : 'hover:scale-105'}`}>
+                        {/* توهج خلفي ملكي */}
+                        <div className="absolute inset-0 bg-red-600/10 blur-[100px] rounded-full animate-pulse"></div>
+                        
+                        {/* كروت الانفجار */}
+                        {bursts.map((burst) => (
+                            <div key={burst.id} className="absolute z-50 glass-panel px-4 py-2 md:px-8 md:py-4 rounded-full border-red-500/30 shadow-2xl animate-burst-long pointer-events-none"
+                                style={{ '--tx': `${burst.tx}px`, '--ty': `${burst.ty}px`, '--rot': `${burst.rot}deg` } as any}>
+                                <span className="text-xl md:text-4xl mr-2">{burst.item.icon}</span>
+                                <span className="text-[10px] md:text-xl font-black text-slate-900 dark:text-white uppercase">{isAr ? burst.item.textAr : burst.item.textEn}</span>
                             </div>
+                        ))}
+
+                        <img src="/saqr-full.png" alt="Saqr" className="h-64 md:h-[600px] object-contain drop-shadow-[0_30px_60px_rgba(220,38,38,0.2)] animate-float" />
+                        
+                        <div className="absolute -top-4 -right-4 md:-top-10 md:-right-10 glass-panel p-3 md:p-6 rounded-3xl border-red-500/30 shadow-3xl text-[10px] md:text-xl font-black text-red-600 dark:text-white animate-bounce">
+                            {t('bubble')}
+                            <div className="absolute -bottom-2 left-8 w-4 h-4 glass-panel rotate-45 bg-inherit border-r-2 border-b-2 border-red-500/20"></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* --- قسم: تعرف على وطني (The Homeland Banner) --- */}
-            <div className="mt-16 md:mt-32 w-full max-w-6xl mx-auto animate-fade-up delay-300 px-4 md:px-0">
-                <div className="glass-panel p-8 md:p-20 rounded-[3rem] md:rounded-[6rem] bg-gradient-to-br from-yellow-500/20 via-white/5 to-red-600/10 border-4 border-yellow-500/40 dark:bg-slate-900/60 shadow-[0_0_80px_rgba(234,179,8,0.2)] relative overflow-hidden group">
-                    <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-green-600 via-white to-red-600 opacity-60"></div>
-                    
-                    <div className="relative z-10 flex flex-col lg:flex-row items-center gap-10 md:gap-20">
-                        <div className="relative flex-shrink-0">
-                            <div className="w-24 h-24 md:w-48 md:h-48 bg-yellow-400 rounded-3xl md:rounded-[3rem] flex items-center justify-center text-5xl md:text-9xl shadow-[0_0_50px_rgba(234,179,8,0.5)] animate-pulse">
-                                🇦🇪
-                            </div>
-                            <div className="absolute -inset-4 bg-yellow-500/20 blur-3xl rounded-full animate-pulse -z-10"></div>
-                        </div>
-
-                        <div className="text-center lg:text-start flex-1 space-y-4 md:space-y-8">
-                            <h3 className="text-xl md:text-5xl font-black text-yellow-600 dark:text-yellow-400 uppercase tracking-[0.3em] drop-shadow-sm">
-                                {t('homelandTitle')}
-                            </h3>
-                            <p className="text-2xl md:text-6xl text-slate-950 dark:text-white leading-[1.2] font-black tracking-tight">
-                                {isAr ? dailyFact.ar : dailyFact.en}
-                            </p>
+            {/* 3. قسم: تعرف على وطني (توهج ذهبي) */}
+            <div className="w-full max-w-6xl animate-fade-up">
+                <div className="glass-panel p-6 md:p-12 rounded-[2.5rem] md:rounded-[4rem] border-2 border-yellow-500/30 dark:bg-slate-900/40 shadow-[0_0_50px_rgba(234,179,8,0.1)] relative overflow-hidden group">
+                    <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 md:gap-12">
+                        <div className="w-20 h-20 md:w-32 md:h-32 bg-yellow-400 rounded-[2rem] flex items-center justify-center text-4xl md:text-7xl shadow-2xl animate-pulse">🇦🇪</div>
+                        <div className="text-center md:text-start flex-1">
+                            <h3 className="text-sm md:text-2xl font-black text-yellow-600 dark:text-yellow-400 uppercase tracking-widest mb-2">{t('homelandTitle')}</h3>
+                            <p className="text-lg md:text-4xl text-slate-950 dark:text-white leading-tight font-black">{isAr ? dailyFact.ar : dailyFact.en}</p>
                         </div>
                     </div>
-
-                    {/* شعار نيون خلفي خفي */}
-                    <div className="absolute -bottom-10 -right-10 text-[15rem] opacity-5 select-none pointer-events-none group-hover:rotate-12 transition-transform duration-1000">🇦🇪</div>
                 </div>
             </div>
 
-            {/* --- عداد الزوار النيون الملكي (تحت البانر الوطني) --- */}
-            <div className="mt-12 md:mt-24 mb-20 relative z-10 animate-fade-up delay-700">
-                <div className="glass-panel px-10 md:px-24 py-6 md:py-12 rounded-full border-4 border-green-600/30 dark:bg-slate-900/60 shadow-[0_0_60px_rgba(34,197,94,0.1)] flex flex-col md:flex-row items-center gap-4 md:gap-12 group hover:border-green-600 transition-all duration-700">
-                    <div className="flex items-center gap-6">
-                        <span className="relative flex h-5 w-5 md:h-8 md:w-8">
+            {/* 4. عداد الزوار (الفوتر الملكي) */}
+            <div className="w-full max-w-2xl animate-fade-up">
+                <div className="glass-panel px-8 py-4 md:py-8 rounded-full border-2 border-green-600/30 flex flex-col md:flex-row items-center justify-center gap-2 md:gap-6 group">
+                    <div className="flex items-center gap-3">
+                        <span className="relative flex h-3 w-3 md:h-5 md:w-5">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-5 w-5 md:h-8 md:w-8 bg-green-600 shadow-[0_0_15px_rgba(34,197,94,1)]"></span>
+                            <span className="relative inline-flex rounded-full h-3 w-3 md:h-5 md:w-5 bg-green-600"></span>
                         </span>
-                        <p className="text-sm md:text-3xl font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">{t('visitorsLabel')}</p>
+                        <p className="text-[10px] md:text-xl font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">{t('visitorsLabel')}</p>
                     </div>
-                    <div className="text-5xl md:text-[7rem] font-black text-green-700 dark:text-green-500 drop-shadow-[0_0_20px_rgba(34,197,94,0.4)] tabular-nums group-hover:scale-110 transition-transform duration-500">
+                    <div className="text-3xl md:text-6xl font-black text-green-700 dark:text-green-500 tabular-nums">
                         {visitorCount.toLocaleString()}
                     </div>
                 </div>
@@ -194,7 +195,8 @@ const HomePage: React.FC = () => {
                 }
                 .animate-burst-long { animation: burst-long 5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
                 .animate-float { animation: float 6s ease-in-out infinite; }
-                @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-25px); } }
+                @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
+                .glass-panel { backdrop-filter: blur(40px); background: rgba(255, 255, 255, 0.05); }
             `}</style>
         </div>
     );
