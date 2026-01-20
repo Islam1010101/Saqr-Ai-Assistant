@@ -73,7 +73,7 @@ const Header: React.FC = () => {
     { path: '/creators', label: locale === 'en' ? 'Creators' : 'بوابة المبدعين', icon: '🎨', hint: locale === 'en' ? 'Talents' : 'إبداعات طلابنا', color: 'bg-red-600' },
     { path: '/feedback', label: locale === 'en' ? 'Ideas' : 'مقترحات', icon: '✍️', hint: locale === 'en' ? 'Contact' : 'رأيك يهمنا', color: 'bg-green-600' }, 
     { path: '/reports', label: locale === 'en' ? 'Stats' : 'تقارير', icon: '📊', hint: locale === 'en' ? 'Statistics' : 'أرقام المكتبة', color: 'bg-slate-800' },
-    { path: '/map', label: locale === 'en' ? 'Radar' : 'خريطة المكتبة', icon: '🗺️', hint: locale === 'en' ? 'Shelf Map' : 'موقع الرفوف', color: 'bg-red-600' },
+    { path: '/map', label: locale === 'en' ? 'Map' : 'خريطة المكتبة', icon: '🗺️', hint: locale === 'en' ? 'Shelf Map' : 'موقع الرفوف', color: 'bg-red-600' },
     { path: '/about', label: locale === 'en' ? 'About' : 'عنا', icon: 'ℹ️', hint: locale === 'en' ? 'Story' : 'من نحن؟', color: 'bg-green-700' },
   ];
 
