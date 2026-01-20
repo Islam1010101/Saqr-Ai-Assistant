@@ -59,7 +59,7 @@ const CABINETS_DB = [
 
 const translations = {
     ar: {
-        pageTitle: "خريطة صقر الرادارية",
+        pageTitle: "خريطة مكتبة صقر ",
         subTitle: "المس رقم الدولاب لمعاينة المحتوى التكتيكي فوراً",
         wing1: "قسم البالغين والباحثين",
         wing2: "قسم الشباب والعلوم",
@@ -68,7 +68,7 @@ const translations = {
         wing5: "قسم الصغار والأطفال"
     },
     en: {
-        pageTitle: "Saqr Radar Map",
+        pageTitle: "Falcon Library Map",
         subTitle: "Touch a cabinet number to view contents instantly",
         wing1: "Adults & Researchers",
         wing2: "Youth & Sciences",
