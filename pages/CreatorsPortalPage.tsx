@@ -13,7 +13,7 @@ interface QuoteCard {
 const translations = {
     ar: {
         pageTitle: "بوابة المبدعين",
-        subTitle: "المس المبدع لتستمد منه ومضات الإلهام",
+        subTitle: "اضغط على المبدع لتستمد منه ومضات الإلهام",
         status: "الركن الإبداعي تحت التطوير",
         comingSoon: "نجهز لكم منصة تليق بمبدعي مدرسة صقر الإمارات 2026",
         quotes: [
