@@ -68,7 +68,7 @@ const translations = {
         wing5: "جناح الصغار (Children)"
     },
     en: {
-        pageTitle: "Falcon Library Radar",
+        pageTitle: "Falcon Library Map",
         subTitle: "Tactical Guidance: Click a cabinet to inspect content",
         wing1: "Adults Wing",
         wing2: "Youth Wing",
