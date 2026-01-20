@@ -60,7 +60,8 @@ const ShelfS_DB = [
 const translations = {
     ar: {
         pageTitle: "خريطة مكتبة صقر",
-        subTitle: "نظام التوجيه التكتيكي: المس الدولاب لمعاينة محتوياته",
+        subTitle: "نظام التوجيه التكتيكي: ابحث عن أي قسم أو المس الدولاب",
+        searchPlaceholder: "ابحث عن قسم (مثلاً: تاريخ، ديزني، روايات)...",
         wing1: "جناح الباحثين والبالغين",
         wing2: "جناح الشباب والعلوم",
         wing3: "جناح اللغة العربية",
@@ -69,7 +70,8 @@ const translations = {
     },
     en: {
         pageTitle: "Saqr Library Radar",
-        subTitle: "Tactical Guidance: Click a cabinet to inspect contents",
+        subTitle: "Tactical Guidance: Search for a section or touch a cabinet",
+        searchPlaceholder: "Search for a section (e.g., History, Disney, Novels)...",
         wing1: "Adults & Researchers",
         wing2: "Youth & Sciences",
         wing3: "Arabic Language",
@@ -82,15 +84,16 @@ const LibraryMapPage: React.FC = () => {
     const { locale, dir } = useLanguage();
     const t = (key: keyof typeof translations.ar) => translations[locale][key];
     const [selected, setSelected] = useState<number | null>(null);
+    const [searchQuery, setSearchQuery] = useState("");
 
     const getWingTheme = (wing: number) => {
         switch(wing) {
-            case 1: return { color: "text-red-600", border: "border-red-600", handle: "bg-red-600", shadow: "shadow-red-600/30" };
-            case 2: return { color: "text-blue-500", border: "border-blue-500", handle: "bg-blue-500", shadow: "shadow-blue-500/30" };
-            case 3: return { color: "text-green-600", border: "border-green-600", handle: "bg-green-600", shadow: "shadow-green-600/30" };
-            case 4: return { color: "text-yellow-500", border: "border-yellow-500", handle: "bg-yellow-500", shadow: "shadow-yellow-500/50" };
-            case 5: return { color: "text-purple-500", border: "border-purple-500", handle: "bg-purple-500", shadow: "shadow-purple-500/30" };
-            default: return { color: "text-slate-400", border: "border-slate-300", handle: "bg-slate-300", shadow: "" };
+            case 1: return { color: "text-red-600", border: "border-red-600", handle: "bg-red-600" };
+            case 2: return { color: "text-blue-500", border: "border-blue-500", handle: "bg-blue-500" };
+            case 3: return { color: "text-green-600", border: "border-green-600", handle: "bg-green-600" };
+            case 4: return { color: "text-yellow-500", border: "border-yellow-500", handle: "bg-yellow-500" };
+            case 5: return { color: "text-purple-500", border: "border-purple-500", handle: "bg-purple-500" };
+            default: return { color: "text-slate-400", border: "border-slate-300", handle: "bg-slate-300" };
         }
     };
 
@@ -100,40 +103,45 @@ const LibraryMapPage: React.FC = () => {
             <div className="mb-20 md:mb-40 animate-fade-up px-2 md:px-0">
                 <div className="flex items-center gap-4 mb-10 ps-4">
                     <div className={`w-3 h-12 md:w-5 md:h-20 rounded-full ${theme.handle} shadow-xl animate-pulse`}></div>
-                    <h2 className="text-3xl md:text-7xl font-black text-slate-950 dark:text-white tracking-tighter uppercase">{title}</h2>
+                    <h2 className="text-3xl md:text-7xl font-black text-slate-950 dark:text-white uppercase tracking-tighter">{title}</h2>
                 </div>
                 
                 <div className={`grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3 md:gap-10 p-6 md:p-20 glass-panel rounded-[3rem] md:rounded-[6rem] border-2 border-white/20 shadow-2xl bg-white/30 dark:bg-black/10 backdrop-blur-3xl`}>
-                    {ShelfS_DB.filter(c => c.id >= start && c.id <= end).map((c) => (
-                        <div key={c.id} className="relative flex items-center justify-center">
-                            <button
-                                onClick={(e) => { e.stopPropagation(); setSelected(selected === c.id ? null : c.id); }}
-                                className={`relative w-full aspect-[2/3] rounded-2xl md:rounded-[3.5rem] text-2xl md:text-[6rem] font-black transition-all duration-500 border-x-4 flex items-center justify-center z-10 overflow-hidden
-                                    ${selected === c.id 
-                                        ? 'bg-slate-950 dark:bg-white text-white dark:text-black border-red-600 scale-125 z-50 ring-4 md:ring-[12px] ring-red-600/30 shadow-[0_0_60px_rgba(220,38,38,0.5)]' 
-                                        : `bg-white dark:bg-slate-900/90 ${theme.border} ${theme.color} hover:scale-110 shadow-lg`
-                                    }
-                                `}
-                            >
-                                <div className={`absolute top-1/2 -translate-y-1/2 ${dir === 'rtl' ? 'left-1 md:left-3' : 'right-1 md:right-3'} w-1 h-10 md:w-2.5 md:h-24 rounded-full opacity-40 ${theme.handle}`}></div>
-                                {c.id}
-                            </button>
+                    {ShelfS_DB.filter(c => c.id >= start && c.id <= end).map((c) => {
+                        const isMatch = searchQuery && (c.ar.includes(searchQuery) || c.en.toLowerCase().includes(searchQuery.toLowerCase()));
+                        
+                        return (
+                            <div key={c.id} className="relative flex items-center justify-center">
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setSelected(selected === c.id ? null : c.id); }}
+                                    className={`relative w-full aspect-[2/3] rounded-xl md:rounded-[3.5rem] text-2xl md:text-[6rem] font-black transition-all duration-500 border-x-4 flex items-center justify-center z-10 overflow-hidden
+                                        ${selected === c.id || isMatch
+                                            ? 'bg-slate-950 dark:bg-white text-white dark:text-black border-red-600 scale-125 z-50 ring-4 md:ring-[12px] ring-red-600/30 shadow-[0_0_60px_rgba(220,38,38,0.5)]' 
+                                            : `bg-white dark:bg-slate-900/90 ${theme.border} ${theme.color} hover:scale-110 shadow-lg ${searchQuery ? 'opacity-20' : ''}`
+                                        }
+                                    `}
+                                >
+                                    <div className={`absolute top-1/2 -translate-y-1/2 ${dir === 'rtl' ? 'left-1 md:left-3' : 'right-1 md:right-3'} w-1 h-10 md:w-2.5 md:h-24 rounded-full opacity-40 ${theme.handle}`}></div>
+                                    {c.id}
+                                    {isMatch && <span className="absolute inset-0 bg-red-600/10 animate-pulse"></span>}
+                                </button>
 
-                            {selected === c.id && (
-                                <div className="absolute bottom-full mb-10 z-[200] animate-in slide-in-from-bottom-8 fade-in zoom-in duration-300 pointer-events-none w-[260px] md:w-[650px]">
-                                    <div className={`p-8 md:p-16 rounded-[2.5rem] md:rounded-[5rem] border-4 ${theme.border} bg-white dark:bg-[#020617] shadow-[0_60px_150px_rgba(0,0,0,0.9)] text-center relative overflow-hidden`}>
-                                        <div className={`inline-block px-10 py-2 md:px-16 md:py-4 rounded-full ${theme.handle} text-white text-xs md:text-4xl font-black mb-8 uppercase shadow-2xl`}>
-                                            Shelf #{c.id}
+                                {selected === c.id && (
+                                    <div className="absolute bottom-full mb-10 z-[200] animate-in slide-in-from-bottom-8 fade-in zoom-in duration-300 pointer-events-none w-[280px] md:w-[650px]">
+                                        <div className={`p-8 md:p-16 rounded-[2.5rem] md:rounded-[5rem] border-4 ${theme.border} bg-white dark:bg-[#020617] shadow-[0_60px_150px_rgba(0,0,0,0.9)] text-center relative overflow-hidden`}>
+                                            <div className={`inline-block px-10 py-2 md:px-16 md:py-4 rounded-full ${theme.handle} text-white text-xs md:text-4xl font-black mb-8 uppercase shadow-2xl`}>
+                                                Shelf #{c.id}
+                                            </div>
+                                            <p className="text-2xl md:text-[5rem] font-black text-slate-950 dark:text-white leading-tight tracking-tight drop-shadow-md">
+                                                {locale === 'ar' ? c.ar : c.en}
+                                            </p>
+                                            <div className={`absolute -bottom-4 left-1/2 -translate-x-1/2 w-10 h-10 rotate-45 border-r-4 border-b-4 ${theme.border} bg-inherit`}></div>
                                         </div>
-                                        <p className="text-2xl md:text-[5rem] font-black text-slate-950 dark:text-white leading-tight tracking-tight drop-shadow-md">
-                                            {locale === 'ar' ? c.ar : c.en}
-                                        </p>
-                                        <div className={`absolute -bottom-4 left-1/2 -translate-x-1/2 w-10 h-10 rotate-45 border-r-4 border-b-4 ${theme.border} bg-inherit`}></div>
                                     </div>
-                                </div>
-                            )}
-                        </div>
-                    ))}
+                                )}
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
         );
@@ -142,10 +150,9 @@ const LibraryMapPage: React.FC = () => {
     return (
         <div dir={dir} className="max-w-[1600px] mx-auto px-4 py-8 md:py-20 animate-fade-up relative z-10 pb-96 font-black antialiased overflow-x-hidden" onClick={() => setSelected(null)}>
             
-            {/* 1. قسم الواجهة الفخم (High-Definition Hero Section) */}
-            <div className="relative mb-24 md:mb-60" onClick={(e) => e.stopPropagation()}>
+            {/* 1. الهيرو سيكشن الملكي */}
+            <div className="relative mb-20 md:mb-40" onClick={(e) => e.stopPropagation()}>
                 <div className="glass-panel p-6 md:p-24 rounded-[4rem] md:rounded-[8rem] bg-white/70 dark:bg-slate-950/80 backdrop-blur-[60px] shadow-[0_80px_150px_rgba(0,0,0,0.3)] flex flex-col-reverse lg:flex-row items-center gap-10 md:gap-32 border-2 border-white/20">
-                    
                     <div className="flex-1 text-center lg:text-start space-y-10 md:space-y-20 relative z-10">
                         <h1 className="text-6xl md:text-[10rem] font-black text-slate-950 dark:text-white leading-[0.8] tracking-tighter uppercase drop-shadow-2xl">
                             FALCON<br/>
@@ -154,29 +161,37 @@ const LibraryMapPage: React.FC = () => {
                         <p className="text-xl md:text-7xl text-slate-800 dark:text-slate-200 font-bold italic max-w-4xl mx-auto lg:mx-0 leading-tight">
                             {t('subTitle')}
                         </p>
-                        <div className="h-3 w-48 md:w-[40rem] bg-red-600 mx-auto lg:mx-0 rounded-full shadow-[0_0_60px_rgba(220,38,38,0.6)] animate-pulse"></div>
                     </div>
-
                     <div className="flex-1 relative w-full max-w-lg lg:max-w-[700px]">
                         <div className="relative z-10 rounded-[3.5rem] md:rounded-[7rem] overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.5)] border-4 md:border-[12px] border-white dark:border-white/10 group bg-slate-900">
-                            {/* الصورة مع معالجة الوضوح والامتداد */}
-                            <img 
-                                src="/library-hero.png" 
-                                alt="Researcher" 
-                                className="w-full aspect-[4/5] object-cover object-top transition-transform duration-1000 group-hover:scale-110" 
-                                onError={(e) => { (e.target as HTMLImageElement).src = '/school-logo.png'; }}
-                            />
-                            {/* طبقة تظليل فنية سفلية */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+                            <img src="/library-hero.png" alt="Researcher" className="w-full aspect-[4/5] object-cover object-top transition-transform duration-1000 group-hover:scale-110" onError={(e) => { (e.target as HTMLImageElement).src = '/school-logo.png'; }} />
                         </div>
-                        {/* توهج نيون خلفي عميق */}
                         <div className="absolute -inset-10 bg-red-600/10 blur-[150px] rounded-full -z-10 animate-pulse"></div>
-                        <div className="absolute -inset-20 bg-yellow-500/5 blur-[200px] rounded-full -z-20"></div>
                     </div>
                 </div>
             </div>
 
-            {/* 2. شبكات الأجنحة */}
+            {/* 2. شريط البحث الراداري الذكي (الجديد) */}
+            <div className="sticky top-24 z-[100] mb-20 md:mb-40 max-w-6xl mx-auto px-4" onClick={(e) => e.stopPropagation()}>
+                <div className="relative group">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-red-600 via-yellow-500 to-green-600 rounded-[3rem] blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+                    <div className="relative glass-panel bg-white/90 dark:bg-slate-950/90 rounded-[3rem] p-4 md:p-8 flex items-center gap-6 border-2 border-white/20 shadow-2xl">
+                        <span className="text-3xl md:text-7xl animate-pulse">📡</span>
+                        <input 
+                            type="text" 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder={t('searchPlaceholder')}
+                            className="flex-1 bg-transparent border-none outline-none text-2xl md:text-6xl font-black text-slate-950 dark:text-white placeholder:text-slate-300 dark:placeholder:text-slate-700"
+                        />
+                        {searchQuery && (
+                            <button onClick={() => setSearchQuery("")} className="text-2xl md:text-5xl opacity-50 hover:opacity-100 transition-opacity">✖</button>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* 3. شبكات الأجنحة */}
             <div onClick={(e) => e.stopPropagation()}>
                 {renderGrid(t('wing1'), 1, 1, 21)}
                 {renderGrid(t('wing2'), 2, 22, 30)}
