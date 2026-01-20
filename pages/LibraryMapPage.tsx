@@ -69,8 +69,8 @@ const ShelfS_DB = [
 const translations = {
     ar: {
         pageTitle: "خريطة المكتبة",
-        subTitle: "ابحث عن أي قسم أو اضغط على الرقم",
-        searchPlaceholder: "ابحث عن قسم (مثلاً: تاريخ، ديزني)...",
+        subTitle: "ابحث عن أي قسم داخل المكتبة أو اضغط على الرقم الذي يمثل الدولاب",
+        searchPlaceholder: "ابحث عن القسم ...",
         wing1: "جناح الباحثين والبالغين",
         wing2: "جناح الشباب والعلوم",
         wing3: "جناح اللغة العربية",
@@ -79,8 +79,8 @@ const translations = {
     },
     en: {
         pageTitle: "Library Map",
-        subTitle: "Search for a section or touch a number",
-        searchPlaceholder: "Search for a section (e.g., History, Disney)...",
+        subTitle: "Search for any section within the library or click on the number that represents the Shelf",
+        searchPlaceholder: "Search for a section",
         wing1: "Adults & Researchers",
         wing2: "Youth & Sciences",
         wing3: "Arabic Language",
@@ -96,7 +96,7 @@ const LibraryMapPage: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [effects, setEffects] = useState<VisualEffect[]>([]);
 
-    // --- منطق إنتاج المؤثرات الطائرة ---
+    // --- منطق إنتاج المؤثرات الطائرة (أمام الصورة) ---
     const spawnEffect = useCallback((e: React.MouseEvent | React.TouchEvent) => {
         const icons = ["🔍", "📖", "📚", "✨"];
         const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
@@ -109,12 +109,12 @@ const LibraryMapPage: React.FC = () => {
             y: clientY - rect.top,
             icon: icons[Math.floor(Math.random() * icons.length)],
             velocity: {
-                x: (Math.random() - 0.5) * 10,
-                y: (Math.random() - 0.5) * 10 - 5
+                x: (Math.random() - 0.5) * 12,
+                y: (Math.random() - 0.5) * 12 - 6
             }
         }));
 
-        setEffects(prev => [...prev, ...newEffects].slice(-20));
+        setEffects(prev => [...prev, ...newEffects].slice(-25));
         setTimeout(() => {
             setEffects(current => current.filter(eff => !newEffects.find(ne => ne.id === eff.id)));
         }, 1000);
@@ -182,7 +182,7 @@ const LibraryMapPage: React.FC = () => {
     return (
         <div dir={dir} className="max-w-[1600px] mx-auto px-4 py-8 md:py-20 animate-fade-up relative z-10 pb-96 font-black antialiased overflow-x-hidden" onClick={() => setSelected(null)}>
             
-            {/* 1. قسم الواجهة المحسن مع المؤثرات */}
+            {/* 1. قسم الواجهة مع المؤثرات (بدون إطار) */}
             <div className="relative mb-16 md:mb-40" onClick={(e) => e.stopPropagation()}>
                 <div className="glass-panel p-6 md:p-24 rounded-[3rem] md:rounded-[8rem] bg-white/70 dark:bg-slate-950/80 backdrop-blur-[60px] shadow-3xl flex flex-col-reverse lg:flex-row items-center gap-8 md:gap-32 border-2 border-white/20 overflow-hidden">
                     <div className="flex-1 text-center lg:text-start space-y-6 md:space-y-16 relative z-10">
@@ -195,26 +195,32 @@ const LibraryMapPage: React.FC = () => {
                         </p>
                     </div>
 
-                    {/* حاوية الصورة مع نظام الجزيئات */}
+                    {/* حاوية الصورة بدون إطار مع نظام الجزيئات الأمامي */}
                     <div 
                         className="flex-1 relative w-full max-w-sm lg:max-w-[650px] cursor-pointer touch-none"
                         onMouseMove={spawnEffect}
                         onTouchMove={spawnEffect}
                     >
-                        <div className="relative z-10 rounded-[2.5rem] md:rounded-[7rem] overflow-hidden shadow-2xl border-4 md:border-[12px] border-white dark:border-white/10 group bg-white/10 backdrop-blur-sm">
-                            <img src="/library-hero.png" alt="Researcher" className="w-full aspect-[4/5] object-cover object-top transition-transform duration-1000 group-hover:scale-110 pointer-events-none" onError={(e) => { (e.target as HTMLImageElement).src = '/school-logo.png'; }} />
+                        {/* الصورة بدون أي حدود أو إطار زجاجي إضافي */}
+                        <div className="relative z-10 rounded-[2.5rem] md:rounded-[7rem] overflow-hidden">
+                            <img 
+                                src="/library-hero.png" 
+                                alt="Researcher" 
+                                className="w-full aspect-[4/5] object-cover object-top transition-transform duration-1000 group-hover:scale-110 pointer-events-none" 
+                                onError={(e) => { (e.target as HTMLImageElement).src = '/school-logo.png'; }} 
+                            />
                         </div>
                         
-                        {/* رندر الجزيئات الطائرة */}
+                        {/* رندر الجزيئات الطائرة (أمام الصورة) */}
                         {effects.map(eff => (
                             <span 
                                 key={eff.id} 
-                                className="absolute pointer-events-none text-2xl md:text-5xl animate-particle-float"
+                                className="absolute pointer-events-none text-3xl md:text-6xl animate-particle-float z-[50]"
                                 style={{ 
                                     left: eff.x, 
                                     top: eff.y, 
-                                    '--tx': `${eff.velocity.x * 20}px`, 
-                                    '--ty': `${eff.velocity.y * 20}px` 
+                                    '--tx': `${eff.velocity.x * 25}px`, 
+                                    '--ty': `${eff.velocity.y * 25}px` 
                                 } as any}
                             >
                                 {eff.icon}
@@ -259,13 +265,12 @@ const LibraryMapPage: React.FC = () => {
                 <p className="font-black text-slate-950 dark:text-white text-sm md:text-[5rem] italic tracking-tighter uppercase">EFIPS Library Mapping • 2026</p>
             </div>
 
-            {/* أنيميشن الجزيئات */}
             <style>{`
                 @keyframes particle-float {
                     0% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
                     100% { transform: translate(var(--tx), var(--ty)) scale(0) rotate(360deg); opacity: 0; }
                 }
-                .animate-particle-float { animation: particle-float 1s ease-out forwards; }
+                .animate-particle-float { animation: particle-float 1.2s ease-out forwards; }
                 .glass-panel { backdrop-filter: blur(50px); }
             `}</style>
         </div>
