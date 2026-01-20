@@ -58,54 +58,56 @@ const FloatingSaqr: React.FC = () => {
   );
 };
 
-// -------- 2. هيدر EFIPS المتناسق (Reordered & Tooltip Enabled) --------
+// -------- 2. هيدر EFIPS الرشيق (Slim Version & Bottom Hints) --------
 const Header: React.FC = () => {
   const { locale, setLocale } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
 
-  // الترتيب الجديد حسب طلبك مع إضافة الـ Hint
+  // الترتيب المنظم والـ Hints
   const links = [
     { path: '/', label: locale === 'en' ? 'Home' : 'الرئيسية', icon: '🏠', hint: locale === 'en' ? 'Gateway' : 'بوابة العودة' },
-    { path: '/search', label: locale === 'en' ? 'Physical' : 'البحث في المكتبة', icon: '🔍', hint: locale === 'en' ? 'Shelf Index' : 'فهرس الكتب الورقية' },
-    { path: '/smart-search', label: locale === 'en' ? 'Ask Saqr' : 'اسأل صقر', icon: '🤖', hint: locale === 'en' ? 'AI Assistant' : 'المساعد الذكي' },
+    { path: '/search', label: locale === 'en' ? 'Physical' : 'البحث بالمكتبة', icon: '🔍', hint: locale === 'en' ? 'Books Index' : 'فهرس الكتب الورقية' },
+    { path: '/smart-search', label: locale === 'en' ? 'Ask Saqr' : 'اسأل صقر', icon: '🤖', hint: locale === 'en' ? 'AI Guide' : 'المساعد الذكي' },
     { path: '/digital-library', label: locale === 'en' ? 'Digital' : 'المكتبة الرقمية', icon: '📚', hint: locale === 'en' ? 'E-Books' : 'كنوز الكتب الرقمية' },
     { path: '/creators', label: locale === 'en' ? 'Creators' : 'بوابة المبدعين', icon: '🎨', hint: locale === 'en' ? 'Student Work' : 'إبداعات طلابنا' },
     { path: '/feedback', label: locale === 'en' ? 'Ideas' : 'مقترحات', icon: '✍️', hint: locale === 'en' ? 'Your Voice' : 'رأيك يهمنا' }, 
     { path: '/reports', label: locale === 'en' ? 'Reports' : 'تقارير', icon: '📊', hint: locale === 'en' ? 'Statistics' : 'أرقام وإحصائيات' },
-    { path: '/map', label: locale === 'en' ? 'Map' : 'خريطة المكتبة', icon: '🗺️', hint: locale === 'en' ? 'Radar View' : 'موقع الأرفف' },
+    { path: '/map', label: locale === 'en' ? 'Map' : 'خريطة المكتبة', icon: '🗺️', hint: locale === 'en' ? 'Radar View' : 'مواقع الرفوف' },
     { path: '/about', label: locale === 'en' ? 'About' : 'عنا', icon: 'ℹ️', hint: locale === 'en' ? 'Our Story' : 'من نحن؟' },
   ];
 
   return (
-    <header className="sticky top-4 z-[60] px-3 md:px-6">
-      <div className="glass-panel mx-auto max-w-[95rem] p-1.5 md:p-2 rounded-full border border-white/20 dark:border-white/10 flex items-center justify-between shadow-2xl backdrop-blur-3xl bg-white/90 dark:bg-slate-950/90 font-black transition-all">
+    <header className="sticky top-3 z-[60] px-3 md:px-6">
+      <div className="glass-panel mx-auto max-w-[95rem] p-1 md:p-1.5 rounded-full border border-white/20 dark:border-white/10 flex items-center justify-between shadow-2xl backdrop-blur-3xl bg-white/90 dark:bg-slate-950/90 font-black transition-all">
         
-        <Link to="/" className="flex items-center gap-2 md:gap-3 ps-3 md:ps-5 group flex-shrink-0">
-          <img src="/school-logo.png" alt="EFIPS" className="h-8 w-8 md:h-11 md:w-11 object-contain logo-white-filter rotate-6 transition-all group-hover:scale-110" />
+        {/* اللوجو والاسم - الحفاظ عليه كما هو */}
+        <Link to="/" className="flex items-center gap-1.5 md:gap-2.5 ps-3 md:ps-4 group flex-shrink-0">
+          <img src="/school-logo.png" alt="EFIPS" className="h-7 w-7 md:h-9 md:w-9 object-contain logo-white-filter rotate-6 transition-all group-hover:scale-110" />
           <div className="hidden xl:block leading-none text-start">
-            <span className="font-black text-slate-950 dark:text-white text-[9px] md:text-[11px] tracking-tight block uppercase opacity-90 transition-colors group-hover:text-red-600">
+            <span className="font-black text-slate-950 dark:text-white text-[8px] md:text-[10px] tracking-tight block uppercase opacity-80">
               {locale === 'en' ? "Emirates Falcon Int'l Private School" : "مدرسة صقر الإمارات الدولية الخاصة"}
             </span>
           </div>
         </Link>
         
-        <nav className="flex items-center bg-black/5 dark:bg-white/5 rounded-full p-1 mx-1 md:mx-2 overflow-x-auto no-scrollbar lg:overflow-visible flex-nowrap">
-          <div className="flex items-center gap-0.5 md:gap-1">
+        {/* قائمة التنقل - نحيفة (Slim) */}
+        <nav className="flex items-center bg-black/5 dark:bg-white/5 rounded-full p-0.5 mx-1 md:mx-2 overflow-x-auto no-scrollbar lg:overflow-visible flex-nowrap">
+          <div className="flex items-center gap-0.5">
             {links.map(l => (
               <div key={l.path} className="relative group/nav">
-                {/* الـ Tooltip (الهنت) */}
-                <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1 bg-slate-950 dark:bg-white text-white dark:text-slate-950 text-[10px] rounded-lg opacity-0 group-hover/nav:opacity-100 transition-all pointer-events-none whitespace-nowrap shadow-xl z-[70] translate-y-2 group-hover/nav:translate-y-0 border border-white/10">
+                {/* الـ Hint (الهنت) تحت الزر مباشرة */}
+                <div className="absolute top-[calc(100%+10px)] left-1/2 -translate-x-1/2 px-3 py-1.5 bg-slate-950 dark:bg-white text-white dark:text-slate-950 text-[10px] rounded-xl opacity-0 group-hover/nav:opacity-100 transition-all pointer-events-none whitespace-nowrap shadow-2xl z-[70] translate-y-[-10px] group-hover/nav:translate-y-0 border border-white/10">
+                  <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-inherit rotate-45"></div>
                   {l.hint}
-                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-inherit rotate-45"></div>
                 </div>
 
                 <Link 
                   to={l.path} 
-                  className={`px-3 lg:px-4 py-2 md:py-2.5 rounded-full text-[9px] lg:text-[12px] font-black transition-all flex items-center gap-1.5 whitespace-nowrap ${
+                  className={`px-3 lg:px-4 py-1.5 md:py-2 rounded-full text-[9px] lg:text-[11px] font-black transition-all flex items-center gap-1.5 whitespace-nowrap ${
                     location.pathname === l.path 
                       ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950 shadow-lg' 
-                      : 'text-slate-500 dark:text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-white/5'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-red-600 hover:bg-white dark:hover:bg-white/5'
                   }`}
                 >
                   <span className="text-xs md:text-sm">{l.icon}</span>
@@ -116,11 +118,12 @@ const Header: React.FC = () => {
           </div>
         </nav>
         
-        <div className="flex items-center gap-1.5 pe-2 md:pe-4 flex-shrink-0">
-          <button onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')} className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-slate-950 dark:text-white font-black text-[10px] md:text-xs border border-slate-200 dark:border-white/10 rounded-full hover:border-red-600 transition-all active:scale-90">
+        {/* أزرار الإعدادات - حجم رشيق */}
+        <div className="flex items-center gap-1 pe-2 md:pe-4 flex-shrink-0">
+          <button onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')} className="w-7 h-7 md:w-9 md:h-9 flex items-center justify-center text-slate-950 dark:text-white font-black text-[9px] md:text-xs border border-slate-200 dark:border-white/10 rounded-full hover:border-red-600 transition-all active:scale-90 shadow-sm">
             {locale === 'en' ? 'AR' : 'EN'}
           </button>
-          <button onClick={toggleTheme} className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-slate-100 dark:bg-white/10 rounded-full text-xs md:text-sm shadow-inner border border-transparent hover:border-white/20 transition-all">
+          <button onClick={toggleTheme} className="w-7 h-7 md:w-9 md:h-9 flex items-center justify-center bg-slate-100 dark:bg-white/10 rounded-full text-xs md:text-sm shadow-inner border border-transparent hover:border-white/20 transition-all">
             {theme === 'light' ? '🌙' : '☀️'}
           </button>
         </div>
