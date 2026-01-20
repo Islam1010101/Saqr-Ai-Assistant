@@ -3,7 +3,7 @@ import { useLanguage } from '../App';
 
 const translations = {
     ar: {
-        pageTitle: "رادار خريطة المكتبة",
+        pageTitle: "خريطة المكتبة",
         subTitle: "نظام تحديد المواقع الذكي لمقتنيات صقر الإمارات",
         contentTitle: "المحتوى التكتيكي للقسم",
         selectPrompt: "برجاء اختيار رقم الدولاب للمعاينة",
@@ -14,7 +14,7 @@ const translations = {
         wing5: "جناح الأطفال والصغار"
     },
     en: {
-        pageTitle: "Library Radar Map",
+        pageTitle: "Library's Map",
         subTitle: "Smart Positioning System for EFIPS Resources",
         contentTitle: "Tactical Section Content",
         selectPrompt: "Please select a cabinet number to inspect",
