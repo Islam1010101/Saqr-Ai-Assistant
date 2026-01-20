@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useLanguage } from '../App';
 
 // --- قاعدة البيانات الشاملة (58 دولاباً) ---
-const CABINETS_DB = [
+const ShelfS_DB = [
     // الجناح 1 (1-21)
     { id: 1, wing: 1, ar: "معارف عامة", en: "General Knowledge" },
     { id: 2, wing: 1, ar: "معارف عامة / فلسفة وعلم نفس", en: "Gen. Knowledge / Philosophy & Psych" },
@@ -60,7 +60,7 @@ const CABINETS_DB = [
 const translations = {
     ar: {
         pageTitle: "خريطة مكتبة صقر",
-        subTitle: "نظام التوجيه التكتيكي: اضغط على الدولاب لمعاينة محتوياته",
+        subTitle: "اضغط على الدولاب لمعاينة محتوياته",
         wing1: "جناح الباحثين (Adults)",
         wing2: "جناح الشباب (Youth)",
         wing3: "جناح اللغة العربية",
@@ -69,7 +69,7 @@ const translations = {
     },
     en: {
         pageTitle: "Falcon Library Map",
-        subTitle: "Tactical Guidance: Click a cabinet to inspect content",
+        subTitle: "Click a Shelf to inspect content",
         wing1: "Adults Wing",
         wing2: "Youth Wing",
         wing3: "Arabic Wing",
@@ -104,7 +104,7 @@ const LibraryMapPage: React.FC = () => {
                 </div>
                 
                 <div className={`grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-4 md:gap-12 p-8 md:p-24 glass-panel rounded-[3rem] md:rounded-[6rem] border-2 border-white/20 shadow-2xl bg-white/20 dark:bg-black/20`}>
-                    {CABINETS_DB.filter(c => c.id >= start && c.id <= end).map((c) => (
+                    {ShelfS_DB.filter(c => c.id >= start && c.id <= end).map((c) => (
                         <div key={c.id} className="relative flex items-center justify-center">
                             {/* زر على شكل "دولاب" واقعي */}
                             <button
@@ -126,7 +126,7 @@ const LibraryMapPage: React.FC = () => {
                                 <div className="absolute bottom-full mb-10 z-[200] animate-in slide-in-from-bottom-6 fade-in zoom-in duration-300 pointer-events-none">
                                     <div className={`p-8 md:p-14 rounded-[2.5rem] md:rounded-[4.5rem] border-4 ${theme.border} bg-white dark:bg-slate-950 shadow-[0_50px_120px_rgba(0,0,0,0.6)] min-w-[280px] md:min-w-[600px] text-center relative`}>
                                         <div className={`inline-block px-6 py-2 rounded-full ${theme.handle} text-white text-xs md:text-2xl font-black mb-6 uppercase tracking-widest`}>
-                                            Cabinet #{c.id}
+                                            Shelf #{c.id}
                                         </div>
                                         <p className="text-xl md:text-6xl font-black text-slate-950 dark:text-white leading-tight tracking-tight drop-shadow-sm">
                                             {locale === 'ar' ? c.ar : c.en}
@@ -161,7 +161,7 @@ const LibraryMapPage: React.FC = () => {
             </div>
 
             <div className="mt-40 text-center opacity-30">
-                <p className="font-black text-slate-950 dark:text-white text-sm md:text-6xl italic tracking-tighter uppercase">EFIPS Tactical Mapping System • 2026</p>
+                <p className="font-black text-slate-950 dark:text-white text-sm md:text-6xl italic tracking-tighter uppercase">EFIPS Library • 2026</p>
             </div>
         </div>
     );
