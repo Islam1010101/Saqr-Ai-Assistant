@@ -87,7 +87,7 @@ const Header: React.FC = () => {
           />
           <div className="hidden lg:block leading-none text-start">
             <span className="font-black text-slate-950 dark:text-white text-[9px] tracking-tight block uppercase opacity-80">
-              {locale === 'en' ? "EFIPS" : "مدرسة صقر"}
+              {locale === 'en' ? "Emirates Falcon Int'l Private School" : "مدرسة صقر الإمارات الدولية الخاصة"}
             </span>
           </div>
         </Link>
