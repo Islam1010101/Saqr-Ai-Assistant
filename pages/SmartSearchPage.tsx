@@ -23,7 +23,7 @@ const translations = {
     inputPlaceholder: 'اسأل عن كتاب، مؤلف، أو موضوع بحثي...',
     isTyping: 'صقر يراجع الرفوف والبيانات...',
     error: 'عذراً، واجهت مشكلة في الاتصال. حاول مرة أخرى.',
-    librarianStatus: 'بوابة صقر للذكاء الاصطناعي',
+    librarianStatus: 'اسأل صقر',
     you: 'أنت'
   },
   en: {
@@ -31,7 +31,7 @@ const translations = {
     inputPlaceholder: 'Search for a book, author, or research topic...',
     isTyping: 'Saqr is checking shelves...',
     error: 'Sorry, connection error. Please try again.',
-    librarianStatus: 'Saqr AI Intelligence Portal',
+    librarianStatus: 'Ask Saqr',
     you: 'YOU'
   },
 };
