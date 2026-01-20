@@ -65,7 +65,7 @@ const translations = {
         wing1: "جناح الباحثين والبالغين",
         wing2: "جناح الشباب والعلوم",
         wing3: "جناح اللغة العربية",
-        wing4: "الجناح الملكي الخاص",
+        wing4: "الجناح الخاص",
         wing5: "جناح الصغار والأطفال"
     },
     en: {
@@ -75,7 +75,7 @@ const translations = {
         wing1: "Adults & Researchers",
         wing2: "Youth & Sciences",
         wing3: "Arabic Language",
-        wing4: "Royal Special Wing",
+        wing4: "The Special Wing",
         wing5: "Children's Wing"
     }
 };
