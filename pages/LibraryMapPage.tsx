@@ -68,23 +68,23 @@ const ShelfS_DB = [
 
 const translations = {
     ar: {
-        pageTitle: "رادار خريطة المكتبة",
-        subTitle: "نظام التوجيه التكتيكي: ابحث عن أي قسم أو اضغط على الرقم",
+        pageTitle: "خريطة المكتبة",
+        subTitle: "ابحث عن أي قسم أو اضغط على الرقم",
         searchPlaceholder: "ابحث عن قسم (مثلاً: تاريخ، ديزني)...",
         wing1: "جناح الباحثين والبالغين",
         wing2: "جناح الشباب والعلوم",
         wing3: "جناح اللغة العربية",
-        wing4: "الجناح الملكي الخاص",
+        wing4: "الجناح الخاص",
         wing5: "جناح الصغار والأطفال"
     },
     en: {
-        pageTitle: "Falcon Radar Map",
-        subTitle: "Tactical Guidance: Search for a section or touch a number",
+        pageTitle: "Library Map",
+        subTitle: "Search for a section or touch a number",
         searchPlaceholder: "Search for a section (e.g., History, Disney)...",
         wing1: "Adults & Researchers",
         wing2: "Youth & Sciences",
         wing3: "Arabic Language",
-        wing4: "Royal Special Wing",
+        wing4: "Special Wing",
         wing5: "Children's Wing"
     }
 };
