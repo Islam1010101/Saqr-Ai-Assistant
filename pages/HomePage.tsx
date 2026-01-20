@@ -12,7 +12,7 @@ const translations = {
         smartDesc: "مساعدك الذكي الذي يحلل استفساراتك ويقترح عليك أفضل المصادر الرقمية.",
         digitalLibrary: "المكتبة الإلكترونية",
         digitalDesc: "تصفح وحمل مئات الروايات والكتب الرقمية العالمية في أي وقت.",
-        bubble: "المسني للإلهام!"
+        bubble: "اضغط للإلهام!"
     },
     en: {
         welcome: "Future of Knowledge at E.F.I.P.S",
