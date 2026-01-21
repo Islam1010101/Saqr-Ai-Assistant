@@ -16,6 +16,15 @@ import LibraryMapPage from './pages/LibraryMapPage';
 
 import type { Locale } from './types';
 
+// واجهة تعريف الروابط لضمان سلامة الكود
+interface NavLink {
+  path: string;
+  label: string;
+  icon: string;
+  hint: string;
+  color: string;
+}
+
 // -------- 1. مساعد صقر العائم --------
 const FloatingSaqr: React.FC = () => {
   const location = useLocation();
@@ -58,7 +67,7 @@ const FloatingSaqr: React.FC = () => {
   );
 };
 
-// -------- 2. هيدر EFIPS الرشيق (Icons Only Desktop & Cursor Follow Hints) --------
+// -------- 2. هيدر EFIPS الفخم (Icons Only & Cursor Tracking) --------
 const Header: React.FC = () => {
   const { locale, setLocale } = useLanguage();
   const { theme, toggleTheme } = useTheme();
@@ -66,13 +75,13 @@ const Header: React.FC = () => {
   const [activeHint, setActiveHint] = useState<string | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-  const links = [
+  const links: NavLink[] = [
     { path: '/search', label: locale === 'en' ? 'Search' : 'البحث بالمكتبة', icon: '🔍', hint: locale === 'en' ? 'Shelf Index' : 'فهرس الكتب', color: 'bg-red-600' },
     { path: '/smart-search', label: locale === 'en' ? 'Ask Saqr' : 'اسأل صقر', icon: '🤖', hint: locale === 'en' ? 'AI Guide' : 'المساعد الذكي', color: 'bg-green-600' },
     { path: '/digital-library', label: locale === 'en' ? 'Digital' : 'المكتبة الرقمية', icon: '📚', hint: locale === 'en' ? 'E-Books' : 'كنوز رقمية', color: 'bg-slate-900' },
     { path: '/creators', label: locale === 'en' ? 'Creators' : 'بوابة المبدعين', icon: '🎨', hint: locale === 'en' ? 'Talents' : 'إبداعات طلابنا', color: 'bg-red-600' },
     { path: '/feedback', label: locale === 'en' ? 'Ideas' : 'مقترحات', icon: '✍️', hint: locale === 'en' ? 'Contact' : 'رأيك يهمنا', color: 'bg-green-600' }, 
-    { path: '/reports', label: locale === 'en' ? 'Reports' : 'تقارير', icon: '📊', hint: locale === 'en' ? 'Statistics' : 'أرقام المكتبة', color: 'bg-slate-800' },
+    { path: '/reports', label: locale === 'en' ? 'Reports' : 'تقارير', icon: '📊', hint: locale === 'en' ? 'Stats' : 'أرقام المكتبة', color: 'bg-slate-800' },
     { path: '/map', label: locale === 'en' ? 'Lib's Map' : 'خريطة المكتبة', icon: '🗺️', hint: locale === 'en' ? 'Map View' : 'موقع الأرفف', color: 'bg-red-600' },
     { path: '/about', label: locale === 'en' ? 'About' : 'عنا', icon: 'ℹ️', hint: locale === 'en' ? 'Story' : 'من نحن؟', color: 'bg-green-700' },
   ];
@@ -96,7 +105,7 @@ const Header: React.FC = () => {
         
         <nav className="flex items-center bg-black/5 dark:bg-white/5 rounded-full p-1 mx-2 overflow-x-auto no-scrollbar lg:overflow-visible overflow-y-visible">
           <div className="flex items-center gap-1">
-            {links.map(l => (
+            {links.map((l) => (
               <div key={l.path} className="relative group/nav" 
                    onMouseEnter={() => setActiveHint(l.path)} 
                    onMouseLeave={() => setActiveHint(null)}
@@ -107,8 +116,8 @@ const Header: React.FC = () => {
                 {activeHint === l.path && (
                   <div className={`fixed z-[999] px-4 py-2 ${l.color} text-white text-[10px] rounded-2xl shadow-2xl pointer-events-none transition-opacity duration-300 whitespace-nowrap animate-in fade-in zoom-in`}
                        style={{ 
-                         left: mousePos.x, 
-                         top: mousePos.y + 25, 
+                         left: `${mousePos.x}px`, 
+                         top: `${mousePos.y + 25}px`, 
                          transform: 'translateX(-50%)' 
                        }}>
                     <div className={`absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 ${l.color} rotate-45`}></div>
@@ -125,8 +134,8 @@ const Header: React.FC = () => {
                   }`}
                 >
                   <span className="text-sm md:text-xl">{l.icon}</span>
-                  {/* إخفاء النص في الديسكتوب واللابتوب */}
-                  <span className="md:hidden">{l.label}</span>
+                  {/* إخفاء النص في الديسكتوب واللابتوب وإبقاؤه في الجوال */}
+                  <span className="md:hidden ms-1.5">{l.label}</span>
                 </Link>
               </div>
             ))}
@@ -213,6 +222,8 @@ const App: React.FC = () => {
                 .no-scrollbar::-webkit-scrollbar { display: none; }
                 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
                 .glass-panel { border: 1px solid rgba(255, 255, 255, 0.1); }
+                
+                /* الشعار يصبح أبيض في الدارك مود فقط */
                 .dark .logo-smart-filter { filter: brightness(0) invert(1); }
             `}</style>
           </div>
