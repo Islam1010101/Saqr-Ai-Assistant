@@ -16,7 +16,7 @@ import LibraryMapPage from './pages/LibraryMapPage';
 
 import type { Locale } from './types';
 
-// واجهة تعريف الروابط لضمان سلامة الكود
+// واجهة تعريف الروابط لضمان سلامة النوع (Type Safety)
 interface NavLink {
   path: string;
   label: string;
@@ -67,7 +67,7 @@ const FloatingSaqr: React.FC = () => {
   );
 };
 
-// -------- 2. هيدر EFIPS الفخم (Icons Only & Cursor Tracking) --------
+// -------- 2. هيدر EFIPS الرشيق المصحح --------
 const Header: React.FC = () => {
   const { locale, setLocale } = useLanguage();
   const { theme, toggleTheme } = useTheme();
@@ -82,7 +82,8 @@ const Header: React.FC = () => {
     { path: '/creators', label: locale === 'en' ? 'Creators' : 'بوابة المبدعين', icon: '🎨', hint: locale === 'en' ? 'Talents' : 'إبداعات طلابنا', color: 'bg-red-600' },
     { path: '/feedback', label: locale === 'en' ? 'Ideas' : 'مقترحات', icon: '✍️', hint: locale === 'en' ? 'Contact' : 'رأيك يهمنا', color: 'bg-green-600' }, 
     { path: '/reports', label: locale === 'en' ? 'Reports' : 'تقارير', icon: '📊', hint: locale === 'en' ? 'Stats' : 'أرقام المكتبة', color: 'bg-slate-800' },
-    { path: '/map', label: locale === 'en' ? 'Lib's Map' : 'خريطة المكتبة', icon: '🗺️', hint: locale === 'en' ? 'Map View' : 'موقع الأرفف', color: 'bg-red-600' },
+    // تم تصحيح التنصيص في Lib's Map لضمان نجاح الـ Build
+    { path: '/map', label: locale === 'en' ? "Lib's Map" : 'خريطة المكتبة', icon: '🗺️', hint: locale === 'en' ? 'Map View' : 'موقع الأرفف', color: 'bg-red-600' },
     { path: '/about', label: locale === 'en' ? 'About' : 'عنا', icon: 'ℹ️', hint: locale === 'en' ? 'Story' : 'من نحن؟', color: 'bg-green-700' },
   ];
 
@@ -112,7 +113,6 @@ const Header: React.FC = () => {
                    onMouseMove={handleMouseMove}
                    onTouchStart={(e) => { e.stopPropagation(); setActiveHint(activeHint === l.path ? null : l.path); }}>
                 
-                {/* الهنت الذكي: يتبع موقع المؤشر (Desktop) ويظهر أسفله مباشرة */}
                 {activeHint === l.path && (
                   <div className={`fixed z-[999] px-4 py-2 ${l.color} text-white text-[10px] rounded-2xl shadow-2xl pointer-events-none transition-opacity duration-300 whitespace-nowrap animate-in fade-in zoom-in`}
                        style={{ 
@@ -134,7 +134,6 @@ const Header: React.FC = () => {
                   }`}
                 >
                   <span className="text-sm md:text-xl">{l.icon}</span>
-                  {/* إخفاء النص في الديسكتوب واللابتوب وإبقاؤه في الجوال */}
                   <span className="md:hidden ms-1.5">{l.label}</span>
                 </Link>
               </div>
@@ -155,7 +154,7 @@ const Header: React.FC = () => {
   );
 };
 
-// -------- 3. سياق اللغة والثيم --------
+// -------- 3. سياق اللغة والثيم (بدون تغيير) --------
 const LanguageContext = createContext<any>(null);
 export const useLanguage = () => useContext(LanguageContext);
 const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -185,7 +184,6 @@ const App: React.FC = () => {
       <LanguageProvider>
         <HashRouter>
           <div className="min-h-screen bg-slate-50 dark:bg-[#020617] transition-colors duration-700 flex flex-col selection:bg-red-600/30 relative" onClick={() => {}}>
-            
             <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-50">
               <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-red-600/10 dark:bg-red-500/20 blur-[150px] rounded-full animate-pulse"></div>
               <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] bg-green-600/10 dark:bg-green-500/20 blur-[150px] rounded-full animate-pulse [animation-delay:2s]"></div>
@@ -222,8 +220,6 @@ const App: React.FC = () => {
                 .no-scrollbar::-webkit-scrollbar { display: none; }
                 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
                 .glass-panel { border: 1px solid rgba(255, 255, 255, 0.1); }
-                
-                /* الشعار يصبح أبيض في الدارك مود فقط */
                 .dark .logo-smart-filter { filter: brightness(0) invert(1); }
             `}</style>
           </div>
