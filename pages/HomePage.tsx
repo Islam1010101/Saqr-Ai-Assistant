@@ -17,7 +17,7 @@ const translations = {
         homelandTitle: "لمحات من الموطن"
     },
     en: {
-        welcome: "Future of Knowledge at E.F.I.P.S",
+        welcome: "Future of Knowledge at Falcon Int'l School",
         subWelcome: "Your smart gateway to access digital and physical knowledge resources.",
         manualSearch: "Manual Search",
         manualDesc: "Browse physical index by shelf number.",
@@ -78,16 +78,26 @@ const HomePage: React.FC = () => {
     const handleMascotInteraction = useCallback(() => {
         setIsMascotClicked(true);
         setTimeout(() => setIsMascotClicked(false), 300);
+        
         const id = Date.now();
-        const newBursts: BurstItem[] = Array.from({ length: 2 }).map((_, i) => ({
+        // توليد كروت الانفجار بنفس نظام المكتبة الرقمية
+        const newBursts: BurstItem[] = Array.from({ length: 3 }).map((_, i) => ({
             id: id + i,
             item: KNOWLEDGE_CARDS[Math.floor(Math.random() * KNOWLEDGE_CARDS.length)],
-            tx: (Math.random() - 0.5) * (window.innerWidth < 768 ? 80 : 200), 
-            ty: -100 - Math.random() * 100,
-            rot: (Math.random() - 0.5) * 40
+            tx: (Math.random() - 0.5) * (window.innerWidth < 768 ? 140 : 350), 
+            ty: -120 - Math.random() * 150,
+            rot: (Math.random() - 0.5) * 60
         }));
+
         setBursts(prev => [...prev, ...newBursts]);
-        newBursts.forEach(b => { setTimeout(() => { setBursts(current => current.filter(item => item.id !== b.id)); }, 5000); });
+        
+        // الاختفاء بعد 5 ثواني بالضبط
+        newBursts.forEach(b => { 
+            setTimeout(() => { 
+                setBursts(current => current.filter(item => item.id !== b.id)); 
+            }, 5000); 
+        });
+
         const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
         audio.volume = 0.05; audio.play().catch(() => {});
     }, []);
@@ -131,26 +141,22 @@ const HomePage: React.FC = () => {
                     </Link>
                 </div>
 
-                {/* صقر مع الشعار المائل في الخلفية */}
+                {/* صقر مع الشعار ونظام الانفجار الملكي */}
                 <div className="lg:col-span-5 flex justify-center order-1 lg:order-2 relative">
                     <div onClick={handleMascotInteraction} className={`relative cursor-pointer transition-transform duration-500 ${isMascotClicked ? 'scale-110' : 'hover:scale-105'}`}>
                         
                         {/* شعار المدرسة المائل في الخلفية */}
                         <div className="absolute inset-0 flex items-center justify-center -z-10 pointer-events-none opacity-10 dark:opacity-20 transition-all duration-1000">
-                            <img 
-                                src="/school-logo.png" 
-                                alt="Background Logo" 
-                                className="w-[120%] h-[120%] object-contain rotate-[15deg] logo-white-filter" 
-                            />
+                            <img src="/school-logo.png" alt="Seal" className="w-[120%] h-[120%] object-contain rotate-[15deg] logo-white-filter blur-[1px]" />
                         </div>
 
-                        {/* كروت الانفجار المحسنة (أكثر وضوحاً) */}
+                        {/* كروت الانفجار: تظهر فوق كل شيء (z-[100]) وبحركة المكتبة الرقمية */}
                         {bursts.map((burst) => (
                             <div key={burst.id} 
-                                className={`absolute z-[100] bg-white dark:bg-slate-900 px-6 py-3 rounded-2xl border-4 ${burst.item.color} shadow-2xl animate-burst-long pointer-events-none flex items-center gap-3`}
+                                className={`absolute z-[100] bg-white dark:bg-slate-900 px-6 py-3 rounded-2xl border-4 ${burst.item.color} shadow-[0_30px_60px_rgba(0,0,0,0.3)] animate-burst-long pointer-events-none flex items-center gap-3`}
                                 style={{ '--tx': `${burst.tx}px`, '--ty': `${burst.ty}px`, '--rot': `${burst.rot}deg` } as any}>
-                                <span className="text-2xl md:text-4xl">{burst.item.icon}</span>
-                                <span className="text-[10px] md:text-xl font-black text-slate-950 dark:text-white uppercase whitespace-nowrap">{isAr ? burst.item.textAr : burst.item.textEn}</span>
+                                <span className="text-2xl md:text-5xl">{burst.item.icon}</span>
+                                <span className="text-[10px] md:text-2xl font-black text-slate-950 dark:text-white uppercase whitespace-nowrap">{isAr ? burst.item.textAr : burst.item.textEn}</span>
                             </div>
                         ))}
 
@@ -164,12 +170,10 @@ const HomePage: React.FC = () => {
                 </div>
             </div>
 
-            {/* 3. قسم: تعرف على وطني (ألوان الهوية الوطنية الرسمية) */}
+            {/* باقي الأقسام (الموطن والعداد) */}
             <div className="w-full max-w-6xl animate-fade-up">
-                <div className="glass-panel p-8 md:p-14 rounded-[3rem] md:rounded-[5.5rem] border-l-8 border-green-600 border-r-8 border-red-600 bg-white dark:bg-slate-950 shadow-[0_0_60px_rgba(0,0,0,0.1)] dark:shadow-green-900/10 relative overflow-hidden group">
-                    {/* خلفية بتوهج وطني خفيف */}
+                <div className="glass-panel p-8 md:p-14 rounded-[3rem] md:rounded-[5.5rem] border-l-8 border-green-600 border-r-8 border-red-600 bg-white dark:bg-slate-950 shadow-[0_0_60px_rgba(0,0,0,0.1)] relative overflow-hidden group">
                     <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-green-600/5 via-white/5 to-red-600/5 -z-10"></div>
-                    
                     <div className="relative z-10 flex flex-col md:flex-row items-center gap-10">
                         <div className="w-24 h-24 md:w-36 md:h-36 bg-slate-100 dark:bg-white/10 rounded-[2.5rem] flex items-center justify-center text-5xl md:text-8xl shadow-xl animate-pulse border-4 border-yellow-500/30">🇦🇪</div>
                         <div className="text-center md:text-start flex-1">
@@ -184,7 +188,6 @@ const HomePage: React.FC = () => {
                 </div>
             </div>
 
-            {/* 4. عداد الزوار */}
             <div className="w-full max-w-2xl animate-fade-up pb-10">
                 <div className="glass-panel px-10 py-6 md:py-10 rounded-full border-2 border-green-600/30 flex flex-col md:flex-row items-center justify-center gap-4 group">
                     <div className="flex items-center gap-4">
@@ -210,8 +213,8 @@ const HomePage: React.FC = () => {
                 .animate-burst-long { animation: burst-long 5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
                 .animate-float { animation: float 6s ease-in-out infinite; }
                 @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
-                .glass-panel { backdrop-filter: blur(40px); background: rgba(255, 255, 255, 0.05); }
-                .logo-white-filter { dark:filter: brightness(0) invert(1) opacity(0.2); }
+                .glass-panel { backdrop-filter: blur(50px); background: rgba(255, 255, 255, 0.05); }
+                .logo-white-filter { dark:filter: brightness(0) invert(1); }
             `}</style>
         </div>
     );
