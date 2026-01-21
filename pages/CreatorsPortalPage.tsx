@@ -1,12 +1,12 @@
 import React, { useState, useCallback } from 'react';
 import { useLanguage } from '../App';
 
-interface QuoteCard {
+interface QuoteBurst {
     id: number;
     text: string;
-    top: string;
-    left: string;
-    isVaporizing: boolean;
+    tx: number;
+    ty: number;
+    rot: number;
     color: string;
 }
 
@@ -16,6 +16,7 @@ const translations = {
         subTitle: "اضغط على المبدع لتستمد منه ومضات الإلهام",
         status: "الركن الإبداعي تحت التطوير",
         comingSoon: "نجهز لكم منصة تليق بمبدعي مدرسة صقر الإمارات 2026",
+        bubble: "المسني للابتكار!",
         quotes: [
             "الابتكار هو رؤية ما يراه الجميع، والتفكير بما لم يفكر به أحد",
             "بصمتك المبدعة هي هديتك الفريدة للعالم",
@@ -30,6 +31,7 @@ const translations = {
         subTitle: "Touch the creator to spark inspiration cards",
         status: "Creative Hub Under Development",
         comingSoon: "Preparing a platform worthy of EFIPS Students' talents 2026",
+        bubble: "Touch for Magic!",
         quotes: [
             "Creativity is intelligence having fun",
             "Innovation is seeing what everybody has seen and thinking what nobody has thought",
@@ -44,130 +46,121 @@ const translations = {
 
 const CreatorsPortalPage: React.FC = () => {
     const { locale, dir } = useLanguage();
+    const isAr = locale === 'ar';
     const t = (key: keyof typeof translations.ar) => translations[locale][key];
     
-    const [activeQuotes, setActiveQuotes] = useState<QuoteCard[]>([]);
+    const [bursts, setBursts] = useState<QuoteBurst[]>([]);
+    const [isMascotClicked, setIsMascotClicked] = useState(false);
 
-    const spawnQuote = () => {
+    const spawnQuote = useCallback(() => {
+        setIsMascotClicked(true);
+        setTimeout(() => setIsMascotClicked(false), 300);
+
         const quotesList = translations[locale].quotes;
         const randomText = quotesList[Math.floor(Math.random() * quotesList.length)];
-        
-        // إحداثيات ذكية تمنع خروج الكروت عن الشاشة في الجوال
-        const randomTop = Math.floor(Math.random() * 40 + 15) + "%";
-        const randomLeft = Math.floor(Math.random() * 40 + 5) + "%";
-        const newId = Date.now();
+        const id = Date.now();
 
-        const newQuote: QuoteCard = {
-            id: newId,
+        // إحداثيات مطابقة تماماً للصفحة الرئيسية والمكتبة الرقمية
+        const newBurst: QuoteBurst = {
+            id,
             text: randomText,
-            top: randomTop,
-            left: randomLeft,
-            isVaporizing: false,
-            color: Math.random() > 0.5 ? 'bg-yellow-500' : 'bg-red-600'
+            tx: (Math.random() - 0.5) * (window.innerWidth < 768 ? 140 : 350),
+            ty: -120 - Math.random() * 150,
+            rot: (Math.random() - 0.5) * 50,
+            color: Math.random() > 0.5 ? 'border-red-600' : 'border-green-600'
         };
 
-        setActiveQuotes(prev => [...prev, newQuote]);
+        setBursts(prev => [...prev, newBurst]);
 
-        // تبخير الكارت بعد 4 ثوانٍ ليختفي تماماً عند الثانية الخامسة
+        // الاختفاء التام بعد 5 ثوانٍ بالضبط
         setTimeout(() => {
-            setActiveQuotes(prev => 
-                prev.map(q => q.id === newId ? { ...q, isVaporizing: true } : q)
-            );
-            setTimeout(() => {
-                setActiveQuotes(prev => prev.filter(q => q.id !== newId));
-            }, 1000);
-        }, 4000);
+            setBursts(current => current.filter(b => b.id !== id));
+        }, 5000);
         
         const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
-        audio.volume = 0.05;
-        audio.play().catch(() => {});
-    };
+        audio.volume = 0.05; audio.play().catch(() => {});
+    }, [locale]);
 
     return (
-        <div dir={dir} className="max-w-7xl mx-auto px-4 py-8 md:py-20 animate-fade-up relative z-10 text-center antialiased font-black min-h-screen flex flex-col overflow-hidden">
+        <div dir={dir} className="max-w-7xl mx-auto px-4 py-8 md:py-16 flex flex-col items-center gap-12 md:gap-24 animate-fade-up font-black antialiased relative">
             
-            {/* توهج خلفي ملكي للدارك مود */}
-            <div className="absolute inset-0 -z-10 pointer-events-none overflow-hidden">
-                <div className="absolute top-1/4 left-1/4 w-[40rem] h-[40rem] bg-red-600/5 dark:bg-red-500/10 blur-[150px] rounded-full animate-pulse"></div>
-                <div className="absolute bottom-1/4 right-1/4 w-[40rem] h-[40rem] bg-green-600/5 dark:bg-green-500/10 blur-[150px] rounded-full animate-pulse delay-700"></div>
-            </div>
-
-            {/* العنوان الإمبراطوري */}
-            <div className="mb-10 md:mb-20">
-                <h1 className="text-4xl md:text-9xl font-black text-slate-950 dark:text-white tracking-tighter uppercase mb-6 drop-shadow-2xl">
+            {/* 1. قسم الترحيب (نفس ترتيب الرئيسية) */}
+            <div className="text-center space-y-6 md:space-y-10 max-w-5xl relative z-20">
+                <h1 className="text-5xl md:text-[9.5rem] font-black text-slate-950 dark:text-white tracking-tighter leading-none drop-shadow-2xl">
                     {t('pageTitle')}
                 </h1>
-                <p className="text-lg md:text-4xl text-slate-600 dark:text-slate-400 font-bold opacity-90 italic px-6 leading-tight">
+                <p className="text-lg md:text-4xl text-slate-600 dark:text-slate-400 font-bold opacity-80 leading-relaxed italic max-w-3xl mx-auto">
                     {t('subTitle')}
                 </p>
+                <div className="h-2 w-40 md:w-80 bg-red-600 mx-auto rounded-full shadow-[0_0_30px_rgba(220,38,38,0.5)] animate-pulse"></div>
             </div>
 
-            {/* منطقة الإبداع (المركزية) */}
-            <div className="relative w-full flex-1 min-h-[400px] md:min-h-[700px] flex items-center justify-center py-10 md:py-20">
+            {/* 2. مركز التفاعل الإبداعي */}
+            <div className="relative flex items-center justify-center w-full min-h-[400px] md:min-h-[700px]">
                 
-                {/* كروت الإلهام (Neon Card Style) */}
-                {activeQuotes.map((quote) => (
-                    <div 
-                        key={quote.id}
-                        style={{ top: quote.top, left: quote.left }}
-                        className={`absolute z-50 p-6 md:p-12 rounded-[2rem] md:rounded-[4rem] bg-white/95 dark:bg-slate-900/90 backdrop-blur-2xl border border-white/20 shadow-3xl w-[220px] sm:w-[320px] md:w-[550px] transition-all duration-[1000ms] ease-out
-                        ${quote.isVaporizing 
-                            ? 'opacity-0 -translate-y-40 scale-150 blur-[50px] rotate-12' 
-                            : 'opacity-100 translate-y-0 scale-100 blur-0 animate-in zoom-in fade-in duration-500 shadow-[0_0_50px_rgba(234,179,8,0.2)]'
-                        }`}
-                    >
-                        {/* حافة النيون الجانبية */}
-                        <div className={`absolute top-0 start-0 w-2 h-full ${quote.color} shadow-[2px_0_20px_rgba(234,179,8,0.5)]`}></div>
-                        
-                        <span className="text-3xl md:text-7xl mb-4 block animate-bounce">✨</span>
-                        <p className="text-slate-900 dark:text-white text-sm md:text-4xl font-black leading-tight tracking-tight">
-                            {quote.text}
-                        </p>
+                <div onClick={spawnQuote} className={`relative cursor-pointer transition-transform duration-500 ${isMascotClicked ? 'scale-110' : 'hover:scale-105'}`}>
+                    
+                    {/* شعار المدرسة المائل (12 درجة) والذكي */}
+                    <div className="absolute inset-0 flex items-center justify-center -z-10 pointer-events-none transition-all duration-1000">
+                        <img 
+                            src="/school-logo.png" 
+                            alt="Seal" 
+                            className="w-[140%] h-[140%] object-contain rotate-12 blur-[1px] opacity-10 dark:opacity-20 logo-smart-filter" 
+                        />
                     </div>
-                ))}
 
-                {/* الشخصية المبدعة بتوهج نيون دارك */}
-                <div 
-                    className="relative w-64 h-64 sm:w-96 sm:h-96 md:w-[45rem] md:h-[45rem] cursor-pointer select-none group active:scale-95 transition-all duration-500 animate-float"
-                    onClick={spawnQuote}
-                >
-                    {/* هالة نيون خلف الشخصية */}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-red-600/20 via-yellow-400/10 to-green-600/20 rounded-full blur-[100px] opacity-40 dark:opacity-60 animate-pulse"></div>
+                    {/* كروت الانفجار الإبداعي - تظهر فوق كل شيء (z-[100]) ولمدة 5 ثوانٍ */}
+                    {bursts.map((burst) => (
+                        <div key={burst.id} 
+                            className={`absolute z-[100] bg-white dark:bg-slate-900 px-6 py-4 md:px-12 md:py-8 rounded-[2rem] md:rounded-[4rem] border-4 ${burst.color} shadow-[0_30px_80px_rgba(0,0,0,0.3)] animate-burst-long pointer-events-none flex flex-col items-center gap-4 w-[240px] md:w-[600px]`}
+                            style={{ '--tx': `${burst.tx}px`, '--ty': `${burst.ty}px`, '--rot': `${burst.rot}deg` } as any}>
+                            <span className="text-3xl md:text-7xl animate-bounce">💡</span>
+                            <p className="text-xs md:text-4xl font-black text-slate-950 dark:text-white text-center leading-tight">
+                                {burst.text}
+                            </p>
+                        </div>
+                    ))}
+
+                    <img src="/creators-mascot.png" alt="EFIPS Creator" className="h-72 md:h-[750px] object-contain drop-shadow-[0_40px_100px_rgba(234,179,8,0.2)] relative z-10 animate-float" />
                     
-                    <img 
-                        src="/creators-mascot.png" 
-                        alt="EFIPS Creator" 
-                        className="w-full h-full object-contain drop-shadow-[0_40px_100px_rgba(0,0,0,0.3)] dark:drop-shadow-[0_0_80px_rgba(255,255,255,0.1)] transition-transform duration-700 group-hover:scale-110 group-active:rotate-3"
-                    />
-                    
-                    {/* توهج المصباح الذكي */}
-                    <div className="absolute top-[12%] right-[22%] w-24 h-24 md:w-48 md:h-48 bg-yellow-400 blur-[60px] md:blur-[120px] opacity-50 animate-pulse group-hover:opacity-100 transition-opacity"></div>
+                    <div className="absolute -top-6 -right-6 md:-top-16 md:-right-16 glass-panel p-4 md:p-10 rounded-[2.5rem] md:rounded-[4.5rem] shadow-3xl border-yellow-500/30 text-xs md:text-3xl font-black text-yellow-600 dark:text-white animate-bounce z-20 backdrop-blur-3xl">
+                        {t('bubble')}
+                        <div className="absolute -bottom-2 md:-bottom-5 left-8 md:left-16 w-5 h-5 md:w-10 md:h-10 glass-panel rotate-45 bg-inherit border-r-2 border-b-2 border-yellow-500/20"></div>
+                    </div>
                 </div>
             </div>
 
-            {/* بانر تحت الإنشاء (Neon Glass) */}
-            <div className="glass-panel max-w-5xl mx-auto p-8 md:p-20 rounded-[3rem] md:rounded-[6rem] border-2 border-white/10 bg-white/30 dark:bg-slate-950/60 shadow-3xl mt-12 relative overflow-hidden backdrop-blur-xl mb-20 group">
-                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-red-600 via-yellow-400 to-green-600 shadow-[0_0_20px_rgba(220,38,38,0.5)]"></div>
-                
+            {/* 3. بانر حالة التطوير */}
+            <div className="glass-panel w-full max-w-5xl p-8 md:p-20 rounded-[3.5rem] md:rounded-[7rem] border-2 border-white/10 bg-white/40 dark:bg-slate-950/60 shadow-3xl backdrop-blur-3xl relative overflow-hidden group">
+                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-red-600 via-yellow-400 to-green-600"></div>
                 <h2 className="text-2xl md:text-7xl text-red-600 dark:text-red-500 font-black mb-6 flex items-center justify-center gap-6">
                     <span className="animate-spin-slow text-3xl md:text-7xl">⚙️</span> {t('status')}
                 </h2>
-                <p className="text-base md:text-4xl text-slate-800 dark:text-slate-200 font-black leading-tight px-4 opacity-80 group-hover:opacity-100 transition-opacity">
+                <p className="text-base md:text-4xl text-slate-800 dark:text-slate-200 font-black leading-tight opacity-80 group-hover:opacity-100 transition-opacity">
                     {t('comingSoon')}
                 </p>
             </div>
 
-            {/* الفوتر الملكي */}
-            <div className="mt-auto opacity-30 hover:opacity-100 transition-all duration-700 pb-10">
-                 <p className="text-[10px] md:text-xl font-black uppercase tracking-[0.6em] mb-4 text-slate-400">EFIPS • CREATORS • 2026</p>
-                 <div className="h-1.5 w-32 md:w-64 bg-gradient-to-r from-transparent via-red-600 to-transparent mx-auto rounded-full shadow-[0_0_20px_rgba(220,38,38,0.5)]"></div>
+            {/* الفوتر */}
+            <div className="mt-12 md:mt-20 opacity-30 text-center pb-10">
+                <p className="font-black text-slate-950 dark:text-white text-sm md:text-5xl italic tracking-tighter uppercase">EFIPS Creative Gateway • 2026</p>
+                <div className="h-1.5 w-32 md:w-64 bg-green-600 mx-auto mt-6 rounded-full shadow-[0_0_20px_rgba(34,197,94,0.5)]"></div>
             </div>
 
             <style>{`
-                @keyframes float { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-30px) rotate(2deg); } }
+                @keyframes burst-long {
+                    0% { transform: translate(0, 0) scale(0.4) rotate(0deg); opacity: 0; filter: blur(10px); }
+                    10% { transform: translate(var(--tx), var(--ty)) scale(1.1) rotate(var(--rot)); opacity: 1; filter: blur(0px); }
+                    85% { transform: translate(calc(var(--tx) * 1.05), calc(var(--ty) * 1.05)) scale(1); opacity: 1; filter: blur(0px); }
+                    100% { transform: translate(calc(var(--tx) * 1.1), calc(var(--ty) - 50px)) scale(1.3) rotate(calc(var(--rot) * 1.8)); opacity: 0; filter: blur(40px); }
+                }
+                .animate-burst-long { animation: burst-long 5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
                 .animate-float { animation: float 6s ease-in-out infinite; }
+                @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-30px); } }
                 .animate-spin-slow { animation: spin 12s linear infinite; }
                 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+                .glass-panel { backdrop-filter: blur(50px); background: rgba(255, 255, 255, 0.05); }
+                .dark .logo-smart-filter { filter: brightness(0) invert(1); }
             `}</style>
         </div>
     );
