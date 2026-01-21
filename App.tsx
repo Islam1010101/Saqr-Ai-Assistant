@@ -83,7 +83,7 @@ const Header: React.FC = () => {
     { path: '/feedback', label: locale === 'en' ? 'Ideas' : 'مقترحات', icon: '✍️', hint: locale === 'en' ? 'Contact' : 'رأيك يهمنا', color: 'bg-green-600' }, 
     { path: '/reports', label: locale === 'en' ? 'Reports' : 'تقارير', icon: '📊', hint: locale === 'en' ? 'Stats' : 'أرقام المكتبة', color: 'bg-slate-800' },
     // تم تصحيح التنصيص في Lib's Map لضمان نجاح الـ Build
-    { path: '/map', label: locale === 'en' ? "Lib's Map" : 'خريطة المكتبة', icon: '🗺️', hint: locale === 'en' ? 'Map View' : 'موقع الأرفف', color: 'bg-red-600' },
+    { path: '/map', label: locale === 'en' ? "Lib's Map" : 'خريطة المكتبة', icon: '🗺️', hint: locale === 'en' ? 'Shelf Cont' : 'محتويات الأرفف', color: 'bg-red-600' },
     { path: '/about', label: locale === 'en' ? 'About' : 'عنا', icon: 'ℹ️', hint: locale === 'en' ? 'Story' : 'من نحن؟', color: 'bg-green-700' },
   ];
 
