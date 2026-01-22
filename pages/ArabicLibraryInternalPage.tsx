@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useLanguage } from '../App';
 import { useNavigate } from 'react-router-dom';
 
-// --- قاعدة البيانات الكاملة (46 مصدراً رقمياً) ---
+// --- قاعدة البيانات الكاملة (محدثة بالـ audioId والمصادر) ---
 const ARABIC_LIBRARY_DATABASE = [
     { id: "AR_1", title: "مجموعة روايات أجاثا كريستي", author: "أجاثا كريستي", subject: "قصص بوليسية", publisher: "ناشرون متعددون", driveLink: "https://drive.google.com/drive/folders/1PZk0vPQrKXIgE0WmUXlEMcSzt_d94Q6u", bio: "ملكة الجريمة عالمياً، صاحبة الشخصيات الخالدة مثل هيركيول بوارو.", summary: "أضخم مجموعة لروايات التحقيق والغموض التي تتميز بحبكة عبقرية ونهايات صادمة." },
     { id: "AR_2", title: "أرض الإله", author: "أحمد مراد", subject: "أدب تاريخي", publisher: "دار الشروق", driveLink: "https://drive.google.com/file/d/1Q-dT9-g292nqv1N_PvlB2TnZMBdQGpio/view", bio: "كاتب ومصور مصري معاصر، تميز برواياته التي تمزج بين التاريخ والغموض.", summary: "رحلة تاريخية مثيرة في زمن الفراعنة تكشف أسراراً مخفية حول خروج بني إسرائيل.", audioId: "1ncWNo301Fb1HKwQU8QS_F-_uG4TMGteJ" },
@@ -65,14 +65,16 @@ const translations = {
         alphabetical: "أبجدياً (العنوان)",
         authorSort: "المؤلف",
         subjectSort: "الموضوع",
-        none: "تلقائي",
         read: "قراءة المحتوى",
+        listen: "استمع للملخص",
         bioTitle: "حول المؤلف",
         summaryTitle: "ملخص صقر الذكي",
         back: "العودة",
         close: "إغلاق",
         locationLabel: "EFIPS",
-        publisherLabel: "الناشر"
+        publisherLabel: "الناشر",
+        audioBadge: "ملخص صوتي",
+        audioOnly: "صوتيات فقط"
     },
     en: {
         pageTitle: "Arabic Library",
@@ -83,14 +85,16 @@ const translations = {
         alphabetical: "Alphabetical (Title)",
         authorSort: "Author",
         subjectSort: "Subject",
-        none: "Default",
         read: "Read Content",
+        listen: "Audio Summary",
         bioTitle: "About Author",
         summaryTitle: "Saqr AI Summary",
         back: "Back",
         close: "Close",
         locationLabel: "EFIPS",
-        publisherLabel: "Publisher"
+        publisherLabel: "Publisher",
+        audioBadge: "Audio Summary",
+        audioOnly: "Audio Only"
     }
 };
 
@@ -100,28 +104,42 @@ const trackActivity = (type: 'searched' | 'digital' | 'ai', label: string) => {
     localStorage.setItem('efips_activity_logs', JSON.stringify(logs));
 };
 
+// --- نافذة الكتاب المحدثة بمشغل الصوت ---
 const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any; onAuthorHover: (e: React.MouseEvent, bio: string | null) => void }> = ({ book, onClose, t, onAuthorHover }) => {
     if (!book) return null;
+    const audioUrl = book.audioId ? `https://docs.google.com/uc?export=download&id=${book.audioId}` : null;
+
     return (
         <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 backdrop-blur-3xl animate-in fade-in duration-500" onClick={onClose}>
             <div className="glass-panel w-full max-w-4xl rounded-[3rem] border-none shadow-2xl overflow-y-auto max-h-[90vh] md:overflow-hidden relative animate-in zoom-in-95 duration-500 flex flex-col md:flex-row bg-white/95 dark:bg-slate-950/95" onClick={(e) => e.stopPropagation()}>
                 <button onClick={onClose} className="absolute top-4 end-4 md:top-6 md:end-6 z-50 p-2.5 bg-red-600 text-white rounded-full hover:scale-110 active:scale-90 transition-all shadow-lg">
                     <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}><path d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
-                <div className="flex-1 p-8 md:p-14 flex flex-col justify-center border-b md:border-b-0 md:border-e border-slate-200 dark:border-white/10 text-start font-black">
+                <div className="flex-1 p-8 md:p-14 flex flex-col justify-center border-b md:border-b-0 md:border-e border-slate-200 dark:border-white/10 text-start font-black overflow-y-auto">
                     <div className="mb-8">
                         <span className="inline-block px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest mb-6 bg-green-600 text-white shadow-md">{book.subject}</span>
                         <h2 className="text-3xl md:text-5xl font-black text-slate-950 dark:text-white leading-[1.1] mb-3 tracking-tighter">{book.title}</h2>
-                        <p onMouseMove={(e) => onAuthorHover(e, book.bio)} onMouseLeave={(e) => onAuthorHover(e, null)} className="text-xl text-red-600 dark:text-red-500 font-bold hover:text-slate-950 dark:hover:text-white transition-colors inline-block cursor-help border-b-2 border-dotted border-slate-300">By {book.author}</p>
-                         <div className="flex items-center gap-2 mt-6">
-                            <svg className="w-5 h-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
-                            <span className="text-xs md:text-base font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">{t('publisherLabel')}: <span className="text-slate-950 dark:text-white">{book.publisher}</span></span>
-                        </div>
+                        <p onMouseMove={(e) => onAuthorHover(e, book.bio)} onMouseLeave={(e) => onAuthorHover(e, null)} className="text-xl text-red-600 dark:text-red-500 font-bold hover:text-slate-950 dark:hover:white transition-colors inline-block cursor-help border-b-2 border-dotted border-slate-300">By {book.author}</p>
                     </div>
-                    <div className="bg-slate-100/50 dark:bg-white/5 p-8 rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-white/10 text-start">
+                    
+                    <div className="bg-slate-100/50 dark:bg-white/5 p-6 rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-white/10 text-start mb-6">
                         <p className="text-[10px] text-red-600 font-black uppercase mb-3 tracking-widest flex items-center gap-2"><span className="w-2.5 h-2.5 bg-red-600 rounded-full animate-pulse shadow-lg"></span> {t('summaryTitle')}</p>
                         <p className="text-slate-800 dark:text-slate-200 text-lg md:text-xl font-medium leading-relaxed italic">"{book.summary}"</p>
                     </div>
+
+                    {audioUrl && (
+                        <div className="p-6 rounded-[2rem] bg-red-600/5 border border-red-600/20 animate-fade-up">
+                            <div className="flex items-center gap-3 mb-4">
+                                <span className="text-2xl animate-bounce">🎧</span>
+                                <span className="text-xs md:text-sm font-black text-red-600 uppercase tracking-widest">{t('listen')}</span>
+                            </div>
+                            <audio controls className="w-full h-10 custom-audio-player">
+                                <source src={audioUrl} type="audio/mpeg" />
+                                <source src={audioUrl} type="audio/mp4" />
+                                متصفحك لا يدعم المشغل.
+                            </audio>
+                        </div>
+                    )}
                 </div>
                 <div className="w-full md:w-[320px] bg-slate-950 dark:bg-black p-10 flex flex-col justify-center items-center text-center text-white relative font-black">
                     <div className="space-y-10 relative z-10 w-full">
@@ -137,27 +155,40 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any; onAut
     );
 };
 
+// --- كارت الكتاب المطور بالأنيميشن الصوتي والشارات ---
 const BookCard = React.memo(({ book, onClick, t, onAuthorHover }: { book: any; onClick: () => void; t: any; onAuthorHover: (e: React.MouseEvent, bio: string | null) => void }) => (
-    <div onClick={() => { trackActivity('searched', book.title); onClick(); }} className="group relative glass-panel bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border-none rounded-[2.5rem] transition-all duration-500 cursor-pointer flex flex-col h-full overflow-hidden shadow-lg hover:shadow-2xl dark:hover:shadow-green-600/10 active:scale-95 hover:-translate-y-2">
+    <div onClick={() => { trackActivity('searched', book.title); onClick(); }} 
+         className={`group relative glass-panel bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border-none rounded-[2.5rem] transition-all duration-500 cursor-pointer flex flex-col h-full overflow-hidden shadow-lg hover:shadow-2xl active:scale-95 hover:-translate-y-2 
+         ${book.audioId ? 'ring-2 ring-red-600/20 dark:ring-red-500/10 shadow-[0_20px_50px_rgba(220,38,38,0.05)]' : ''}`}>
         
-        {/* حافة النيون الجانبية - هوية المكتبة العربية خضراء */}
-        <div className="absolute top-0 start-0 w-1.5 h-full bg-green-600 shadow-[2px_0_15px_rgba(34,197,94,0.4)]"></div>
+        <div className={`absolute top-0 start-0 w-1.5 h-full ${book.audioId ? 'bg-red-600 shadow-[2px_0_15px_rgba(220,38,38,0.4)]' : 'bg-green-600 shadow-[2px_0_15px_rgba(34,197,94,0.4)]'}`}></div>
 
-        <div className="p-7 md:p-9 flex-grow text-start font-black">
-             <span className="inline-block px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest mb-5 bg-green-600 text-white shadow-lg shadow-green-600/20">{book.subject}</span>
-            <h2 className="font-black text-xl md:text-2xl text-slate-950 dark:text-white leading-tight mb-3 tracking-tighter group-hover:text-green-700 transition-colors line-clamp-2 drop-shadow-sm">{book.title}</h2>
+        <div className="p-7 md:p-9 flex-grow text-start font-black relative">
+            {book.audioId && (
+                <div className="absolute top-6 end-6 flex items-center gap-2">
+                    <div className="flex gap-0.5 h-4 items-end mb-1">
+                        <div className="w-1 bg-red-600 rounded-full animate-eq-1"></div>
+                        <div className="w-1 bg-red-600 rounded-full animate-eq-2"></div>
+                        <div className="w-1 bg-red-600 rounded-full animate-eq-3"></div>
+                    </div>
+                    <span className="text-[7px] md:text-[9px] font-black uppercase tracking-tighter text-red-600 animate-pulse">{t('audioBadge')}</span>
+                </div>
+            )}
+
+            <span className={`inline-block px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest mb-5 text-white shadow-lg ${book.audioId ? 'bg-red-600 shadow-red-600/20' : 'bg-green-600 shadow-green-600/20'}`}>{book.subject}</span>
+            <h2 className="font-black text-xl md:text-2xl text-slate-950 dark:text-white leading-tight mb-3 tracking-tighter group-hover:text-green-700 dark:group-hover:text-red-500 transition-colors line-clamp-2 drop-shadow-sm">{book.title}</h2>
             <div className="flex items-center gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
                 <span className="text-base">👤</span>
                 <p onMouseMove={(e) => onAuthorHover(e, book.bio)} onMouseLeave={(e) => onAuthorHover(e, null)} className="text-xs text-slate-500 dark:text-slate-400 font-bold hover:text-red-600 transition-all inline-block underline decoration-dotted underline-offset-4 cursor-help">By {book.author}</p>
             </div>
         </div>
         
-        <div className="bg-slate-50/50 dark:bg-black/40 py-4 px-8 border-t border-slate-100 dark:border-white/5 mt-auto flex items-center justify-between font-black">
+        <div className="bg-slate-50/50 dark:bg-black/40 py-4 px-8 border-t border-slate-100 dark:border-white/5 mt-auto flex items-center justify-between font-black text-[10px]">
              <div className="flex items-center gap-2 opacity-50">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
-                <span className="text-[10px] font-black uppercase tracking-widest truncate max-w-[150px]">{book.publisher}</span>
+                <span className="font-black uppercase tracking-widest truncate max-w-[120px]">{book.publisher}</span>
             </div>
-            <p className="font-black text-slate-900 dark:text-white text-[11px] uppercase tracking-[0.4em] opacity-30 group-hover:opacity-100 group-hover:text-green-600 transition-all">{t('locationLabel')}</p>
+            <p className="font-black text-slate-900 dark:text-white uppercase tracking-[0.4em] opacity-30 group-hover:opacity-100 group-hover:text-red-600 transition-all">{t('locationLabel')}</p>
         </div>
     </div>
 ));
@@ -171,9 +202,10 @@ const ArabicLibraryInternalPage: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [subjectFilter, setSubjectFilter] = useState('all');
     const [authorFilter, setAuthorFilter] = useState('all');
-    const [sortBy, setSortBy] = useState('alphabetical'); // ضبط الأبجدي كافتراضي
+    const [sortBy, setSortBy] = useState('alphabetical');
     const [selectedBook, setSelectedBook] = useState<any>(null);
     const [tooltip, setTooltip] = useState<{ text: string, x: number, y: number } | null>(null);
+    const [showAudioOnly, setShowAudioOnly] = useState(false); // حالة الفلتر الصوتي الجديد
 
     const handleAuthorHover = (e: React.MouseEvent, bio: string | null) => {
         if (!bio || window.innerWidth < 768) { setTooltip(null); return; }
@@ -191,19 +223,16 @@ const ArabicLibraryInternalPage: React.FC = () => {
             const matchesTerm = !term || b.title.includes(term) || b.author.includes(term);
             const matchesSub = subjectFilter === 'all' || b.subject === subjectFilter;
             const matchesAuth = authorFilter === 'all' || b.author === authorFilter;
-            return matchesTerm && matchesSub && matchesAuth;
+            const matchesAudio = showAudioOnly ? !!b.audioId : true; // منطق الفلترة الصوتية
+            return matchesTerm && matchesSub && matchesAuth && matchesAudio;
         });
 
-        if (sortBy === 'alphabetical') {
-            result = [...result].sort((a, b) => a.title.localeCompare(b.title, locale));
-        } else if (sortBy === 'author') {
-            result = [...result].sort((a, b) => a.author.localeCompare(b.author, locale));
-        } else if (sortBy === 'subject') {
-            result = [...result].sort((a, b) => a.subject.localeCompare(b.subject, locale));
-        }
+        if (sortBy === 'alphabetical') result = [...result].sort((a, b) => a.title.localeCompare(b.title, locale));
+        else if (sortBy === 'author') result = [...result].sort((a, b) => a.author.localeCompare(b.author, locale));
+        else if (sortBy === 'subject') result = [...result].sort((a, b) => a.subject.localeCompare(b.subject, locale));
 
         return result;
-    }, [searchTerm, subjectFilter, authorFilter, sortBy, locale]);
+    }, [searchTerm, subjectFilter, authorFilter, sortBy, showAudioOnly, locale]);
 
     return (
         <div dir={dir} className="max-w-7xl mx-auto px-4 pb-32 relative z-10 text-start antialiased font-black">
@@ -219,28 +248,43 @@ const ArabicLibraryInternalPage: React.FC = () => {
                     <svg className={`h-7 w-7 transform group-hover:-translate-x-1 ${isAr ? '' : 'rotate-180'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}><path d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                     <span className="text-xs font-black uppercase tracking-widest hidden sm:inline">{t('back')}</span>
                 </button>
-                <h1 className="text-5xl md:text-9xl font-black text-slate-950 dark:text-white tracking-tighter leading-none drop-shadow-2xl">{t('pageTitle')}</h1>
-                <div className="h-2 w-32 bg-green-600 mx-auto mt-8 rounded-full shadow-[0_0_20px_rgba(34,197,94,0.5)]"></div>
+                <h1 className="text-5xl md:text-[8rem] font-black text-slate-950 dark:text-white tracking-tighter leading-none drop-shadow-2xl">{t('pageTitle')}</h1>
+                <div className="h-2 w-32 bg-green-600 mx-auto mt-8 rounded-full shadow-[0_0_20px_rgba(34,197,94,0.5)] animate-pulse"></div>
             </div>
 
+            {/* شريط البحث والفلاتر المطور بالفلتر الصوتي */}
             <div className="sticky top-20 z-50 mb-16 animate-fade-up">
                 <div className="glass-panel p-3 md:p-5 rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl border-none backdrop-blur-3xl max-w-6xl mx-auto bg-white/90 dark:bg-slate-900/80">
-                    <div className="flex flex-col md:flex-row gap-3 md:gap-4">
-                        <div className="flex-[2] relative">
+                    <div className="flex flex-col md:flex-row gap-3 md:gap-4 items-center">
+                        <div className="flex-[3] w-full relative">
                             <input type="text" placeholder={t('searchPlaceholder')} className="w-full p-4 ps-14 bg-slate-100/50 dark:bg-black/40 text-slate-950 dark:text-white border-2 border-transparent focus:border-red-600 rounded-2xl md:rounded-3xl outline-none transition-all font-black text-base shadow-inner" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                             <svg className="absolute start-5 top-1/2 -translate-y-1/2 h-6 w-6 text-green-600 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                         </div>
-                        <div className="grid grid-cols-3 gap-2 flex-[3]">
+                        
+                        <div className="flex-[4] w-full grid grid-cols-2 md:grid-cols-4 gap-2">
+                            {/* زر فلتر الصوتيات فقط */}
+                            <button 
+                                onClick={() => setShowAudioOnly(!showAudioOnly)}
+                                className={`p-3 rounded-xl md:rounded-2xl font-black text-[10px] md:text-xs transition-all flex items-center justify-center gap-2 border shadow-md
+                                ${showAudioOnly 
+                                    ? 'bg-red-600 text-white border-red-600 shadow-red-600/30' 
+                                    : 'bg-white dark:bg-slate-800 text-slate-500 border-slate-100 dark:border-white/5 hover:border-red-600'}`}
+                            >
+                                <span className={showAudioOnly ? 'animate-pulse' : ''}>🎧</span>
+                                {t('audioOnly')}
+                            </button>
+
                             <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="p-3 rounded-xl md:rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 font-black text-[10px] md:text-xs cursor-pointer outline-none focus:border-red-600 appearance-none text-center shadow-md">
-                                <option value="none">{t('sortBy')}</option>
                                 <option value="alphabetical">{t('alphabetical')}</option>
                                 <option value="author">{t('authorSort')}</option>
                                 <option value="subject">{t('subjectSort')}</option>
                             </select>
+                            
                             <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="p-3 rounded-xl md:rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 font-black text-[10px] md:text-xs cursor-pointer outline-none focus:border-green-600 appearance-none text-center shadow-md">
                                 <option value="all">{t('allSubjects')}</option>
                                 {filters.subjects.map(o => o !== "all" && <option key={o} value={o}>{o}</option>)}
                             </select>
+                            
                             <select value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)} className="p-3 rounded-xl md:rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 font-black text-[10px] md:text-xs cursor-pointer outline-none focus:border-green-600 appearance-none text-center shadow-md">
                                 <option value="all">{t('allAuthors')}</option>
                                 {filters.authors.map(o => o !== "all" && <option key={o} value={o}>{o}</option>)}
@@ -257,6 +301,15 @@ const ArabicLibraryInternalPage: React.FC = () => {
             </div>
 
             <BookModal book={selectedBook} onClose={() => setSelectedBook(null)} t={t} onAuthorHover={handleAuthorHover} />
+
+            <style>{`
+                @keyframes eq { 0%, 100% { height: 4px; } 50% { height: 16px; } }
+                .animate-eq-1 { animation: eq 0.6s ease-in-out infinite; }
+                .animate-eq-2 { animation: eq 0.8s ease-in-out infinite 0.2s; }
+                .animate-eq-3 { animation: eq 0.7s ease-in-out infinite 0.4s; }
+                .custom-audio-player { filter: sepia(100%) saturate(300%) hue-rotate(320deg) brightness(100%); opacity: 0.9; }
+                .custom-audio-player::-webkit-media-controls-panel { background-color: rgba(220, 38, 38, 0.1); }
+            `}</style>
         </div>
     );
 };
