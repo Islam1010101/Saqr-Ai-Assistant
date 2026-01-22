@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 // --- قاعدة البيانات الكاملة ---
 const ARABIC_LIBRARY_DATABASE = [
-    { id: "AR_1", title: "مجموعة روايات أجاثا كريستي", author: "أجاثا كريستي", subject: "قصص بوليسية", publisher: "ناشرون متعددون", driveLink: "https://drive.google.com/drive/folders/1PZk0vPQrKXIgE0WmUXlEMcSzt_d94Q6u", bio: "ملكة الجريمة عالمياً، صاحبة الشخصيات الخالدة مثل هيركيول بوارو.", summary: "أضخم مجموعة لروايات التحقيق والغموض التي تتميز بحبكة عبقرية ونهايات صادمة." },
+     { id: "AR_1", title: "مجموعة روايات أجاثا كريستي", author: "أجاثا كريستي", subject: "قصص بوليسية", publisher: "ناشرون متعددون", driveLink: "https://drive.google.com/drive/folders/1PZk0vPQrKXIgE0WmUXlEMcSzt_d94Q6u", bio: "ملكة الجريمة عالمياً، صاحبة الشخصيات الخالدة مثل هيركيول بوارو.", summary: "أضخم مجموعة لروايات التحقيق والغموض التي تتميز بحبكة عبقرية ونهايات صادمة." },
     { id: "AR_2", title: "أرض الإله", author: "أحمد مراد", subject: "أدب تاريخي", publisher: "دار الشروق", driveLink: "https://drive.google.com/file/d/1Q-dT9-g292nqv1N_PvlB2TnZMBdQGpio/view", bio: "كاتب ومصور مصري معاصر، تميز برواياته التي تمزج بين التاريخ والغموض.", summary: "رحلة تاريخية مثيرة في زمن الفراعنة تكشف أسراراً مخفية حول خروج بني إسرائيل.", audioId: "1ncWNo301Fb1HKwQU8QS_F-_uG4TMGteJ" },
     { id: "AR_3", title: "أرض النفاق", author: "يوسف السباعي", subject: "أدب خيالي", publisher: "مكتبة مصر", driveLink: "https://drive.google.com/file/d/14KCqI_ffiUg8if8uqs_vQ-oJIXBEsKD3/view", bio: "فارس الرومانسية المصرية، وزير ثقافة سابق، اشتهر بأسلوبه الساخر.", summary: "رواية رمزية ساخرة تنتقد الأخلاق الاجتماعية عبر فكرة بيع الأخلاق في دكاكين متخصصة." },
     { id: "AR_4", title: "أكواريل", author: "أحمد خالد توفيق", subject: "أدب خيالي", publisher: "دار سما للنشر والتوزيع", driveLink: "https://drive.google.com/file/d/1NLK9-pE6uoHU8po8BC8731KIZ3oc0qU5/view", bio: "عراب أدب الرعب العربي، أول كاتب عربي برع في أدب الإثارة للشباب.", summary: "مجموعة قصصية مشوقة تأخذنا إلى عوالم من الغموض الطبي والنفسي بأسلوب العراب الفريد.", audioId: "1OgNHBycENTAJtg8UsJQ7MttVvSUJhrv3" },
@@ -74,7 +74,8 @@ const translations = {
         locationLabel: "EFIPS",
         publisherLabel: "الناشر",
         audioBadge: "صوتي",
-        audioOnly: "صوتيات فقط"
+        audioOnly: "صوتيات فقط",
+        externalLink: "مشكلة في التشغيل؟ افتح الملف هنا"
     },
     en: {
         pageTitle: "Arabic Library",
@@ -94,7 +95,8 @@ const translations = {
         locationLabel: "EFIPS",
         publisherLabel: "Publisher",
         audioBadge: "Audio",
-        audioOnly: "Audio Only"
+        audioOnly: "Audio Only",
+        externalLink: "Issue playing? Open file here"
     }
 };
 
@@ -104,16 +106,16 @@ const trackActivity = (type: 'searched' | 'digital' | 'ai', label: string) => {
     localStorage.setItem('efips_activity_logs', JSON.stringify(logs));
 };
 
-// --- نافذة الكتاب المتوافقة مع الجوال ---
 const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any; onAuthorHover: (e: React.MouseEvent, bio: string | null) => void }> = ({ book, onClose, t, onAuthorHover }) => {
     if (!book) return null;
-    const audioUrl = book.audioId ? `https://drive.google.com/uc?export=open&id=${book.audioId}` : null;
+    
+    // الرابط المباشر الأقوى لتجاوز قيود جوجل درايف
+    const audioUrl = book.audioId ? `https://docs.google.com/uc?id=${book.audioId}&export=download` : null;
 
     return (
         <div className="fixed inset-0 z-[150] flex items-center justify-center p-2 sm:p-4 backdrop-blur-3xl animate-in fade-in duration-500" onClick={onClose}>
             <div className="glass-panel w-full max-w-4xl rounded-[2rem] sm:rounded-[3rem] border-none shadow-2xl overflow-y-auto max-h-[92vh] md:overflow-hidden relative animate-in zoom-in-95 duration-500 flex flex-col md:flex-row bg-white/95 dark:bg-slate-950/95" onClick={(e) => e.stopPropagation()}>
                 
-                {/* زر الإغلاق الذكي */}
                 <button onClick={onClose} className="absolute top-3 end-3 sm:top-6 sm:end-6 z-50 p-2 bg-red-600 text-white rounded-full hover:scale-110 active:scale-90 transition-all shadow-lg">
                     <svg className="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}><path d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
@@ -138,11 +140,17 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any; onAut
                                 <span className="text-xl sm:text-2xl animate-bounce">🎧</span>
                                 <span className="text-[10px] sm:text-sm font-black text-red-600 uppercase tracking-widest">{t('listen')}</span>
                             </div>
-                            <audio key={book.id} controls className="w-full h-10 custom-audio-player">
+                            
+                            <audio key={book.id} controls preload="auto" className="w-full h-10 custom-audio-player">
                                 <source src={audioUrl} type="audio/mpeg" />
                                 <source src={audioUrl} type="audio/mp4" />
                                 متصفحك لا يدعم المشغل.
                             </audio>
+                            
+                            {/* رابط احتياطي في حال فشل التشغيل المباشر */}
+                            <a href={`https://drive.google.com/file/d/${book.audioId}/view`} target="_blank" rel="noopener noreferrer" className="mt-3 block text-center text-[8px] sm:text-[10px] text-slate-400 hover:text-red-600 underline">
+                                {t('externalLink')}
+                            </a>
                         </div>
                     )}
                 </div>
@@ -161,7 +169,7 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any; onAut
     );
 };
 
-// --- كارت الكتاب المتوافق مع شاشات اللمس ---
+// --- باقي الصفحة كما هي بدون تغييرات في الأبعاد ---
 const BookCard = React.memo(({ book, onClick, t, onAuthorHover }: { book: any; onClick: () => void; t: any; onAuthorHover: (e: React.MouseEvent, bio: string | null) => void }) => (
     <div onClick={() => { trackActivity('searched', book.title); onClick(); }} 
          className={`group relative glass-panel bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border-none rounded-[2rem] sm:rounded-[2.5rem] transition-all duration-500 cursor-pointer flex flex-col h-full overflow-hidden shadow-lg hover:shadow-2xl active:scale-[0.98] md:active:scale-95 hover:-translate-y-1 md:hover:-translate-y-2 
@@ -199,7 +207,6 @@ const BookCard = React.memo(({ book, onClick, t, onAuthorHover }: { book: any; o
     </div>
 ));
 
-// --- الصفحة الرئيسية بتوافقية كاملة ---
 const ArabicLibraryInternalPage: React.FC = () => {
     const { locale, dir } = useLanguage();
     const navigate = useNavigate();
@@ -257,7 +264,6 @@ const ArabicLibraryInternalPage: React.FC = () => {
                 <div className="h-1.5 sm:h-2 w-20 sm:w-32 bg-green-600 mx-auto mt-6 sm:mt-8 rounded-full shadow-[0_0_20px_rgba(34,197,94,0.5)] animate-pulse"></div>
             </div>
 
-            {/* شريط البحث والفلاتر - متوافق كلياً مع الجوال */}
             <div className="sticky top-16 sm:top-20 z-50 mb-10 sm:mb-16 animate-fade-up px-1 sm:px-0">
                 <div className="glass-panel p-2 sm:p-5 rounded-[1.5rem] sm:rounded-[3.5rem] shadow-2xl border-none backdrop-blur-3xl max-w-6xl mx-auto bg-white/90 dark:bg-slate-900/80">
                     <div className="flex flex-col lg:flex-row gap-2 sm:gap-4 items-center">
@@ -272,18 +278,15 @@ const ArabicLibraryInternalPage: React.FC = () => {
                                 ${showAudioOnly ? 'bg-red-600 text-white border-red-600 shadow-red-600/30' : 'bg-white dark:bg-slate-800 text-slate-500 border-slate-100 dark:border-white/5 hover:border-red-600'}`}>
                                 <span className={showAudioOnly ? 'animate-pulse' : ''}>🎧</span> {t('audioOnly')}
                             </button>
-
                             <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="p-2.5 sm:p-3 rounded-lg sm:rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 font-black text-[8px] sm:text-xs cursor-pointer outline-none focus:border-red-600 appearance-none text-center shadow-md">
                                 <option value="alphabetical">{t('alphabetical')}</option>
                                 <option value="author">{t('authorSort')}</option>
                                 <option value="subject">{t('subjectSort')}</option>
                             </select>
-                            
                             <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="p-2.5 sm:p-3 rounded-lg sm:rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 font-black text-[8px] sm:text-xs cursor-pointer outline-none focus:border-green-600 appearance-none text-center shadow-md">
                                 <option value="all">{t('allSubjects')}</option>
                                 {filters.subjects.map(o => o !== "all" && <option key={o} value={o}>{o}</option>)}
                             </select>
-                            
                             <select value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)} className="p-2.5 sm:p-3 rounded-lg sm:rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 font-black text-[8px] sm:text-xs cursor-pointer outline-none focus:border-green-600 appearance-none text-center shadow-md">
                                 <option value="all">{t('allAuthors')}</option>
                                 {filters.authors.map(o => o !== "all" && <option key={o} value={o}>{o}</option>)}
@@ -306,9 +309,7 @@ const ArabicLibraryInternalPage: React.FC = () => {
                 .animate-eq-1 { animation: eq 0.6s ease-in-out infinite; }
                 .animate-eq-2 { animation: eq 0.8s ease-in-out infinite 0.2s; }
                 .animate-eq-3 { animation: eq 0.7s ease-in-out infinite 0.4s; }
-                .custom-audio-player { filter: sepia(100%) saturate(300%) hue-rotate(320deg) brightness(100%); opacity: 0.9; }
-                .custom-audio-player::-webkit-media-controls-panel { background-color: rgba(220, 38, 38, 0.1); }
-                @media (max-width: 480px) { .custom-audio-player { height: 35px; } }
+                .custom-audio-player { width: 100%; height: 35px; border-radius: 50px; }
             `}</style>
         </div>
     );
