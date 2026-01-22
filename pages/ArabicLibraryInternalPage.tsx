@@ -55,6 +55,7 @@ const ARABIC_LIBRARY_DATABASE = [
     { id: "AR_49", title: "جلسات نفسية", author: "محمد إبراهيم", subject: "تنمية بشرية", publisher: "عصير الكتب", driveLink: "https://drive.google.com/file/d/1rvbFWFmgQ65Ufub-6tC-AeuqCYiNOW82/view?usp=drive_link", bio: "كاتب وأخصائي في علم النفس،​​ ​​يتميز الدكتور محمد إبراهيم بقدرته على تبسيط المفاهيم النفسية وتقديمها بأسلوب سلس ومباشر، مما يجعله قريبًا من القراء الباحثين عن فهم أعمق لذواتهم وتحقيق السكينة النفسية", summary: "يحتوي هذا الكتاب المكون من 120 صفحة على مجموعة من الجلسات النفسية التي تهدف إلى تحسين الصحة النفسية وتعزيز الرفاهية. حيث يقدم أساليب فعالة للتعامل مع التوتر والقلق، بالإضافة إلى تمارين تنمية الذات التي تساعدك على فهم مشاعرك وتطوير مهاراتك الشخصية." }
 ];
 
+
 const translations = {
     ar: {
         pageTitle: "المكتبة العربية",
@@ -63,7 +64,7 @@ const translations = {
         alphabetical: "أبجدياً",
         authorSort: "المؤلف",
         subjectSort: "الموضوع",
-        audioSort: "الصوتيات",
+        audioSort: "الصوتيات أولاً",
         allAuthors: "كل المؤلفين",
         allSubjects: "كل الموضوعات",
         audioOnly: "صوتيات فقط",
@@ -100,11 +101,12 @@ const translations = {
 
 // --- 3. مكونات التصميم المحدثة ---
 
-const SchoolLogo = ({ className }: { className?: string }) => (
+// الشعار مع دعم كامل للدارك مود وفرض الأبيض في المودال
+const SchoolLogo = ({ forceWhite = false, className = "" }: { forceWhite?: boolean; className?: string }) => (
     <img 
         src="/school-logo.png" 
         alt="School Logo" 
-        className={`h-8 w-auto rotate-[12deg] logo-white-filter transition-all duration-500 ${className}`}
+        className={`h-8 w-auto rotate-[12deg] transition-all duration-500 ${forceWhite ? 'brightness-0 invert' : 'logo-white-filter'} ${className}`}
     />
 );
 
@@ -131,8 +133,9 @@ const SaqrAudioPlayer: React.FC<{ audioSrc: string; t: any }> = ({ audioSrc, t }
         }
     };
 
-    const changeSpeed = () => {
-        const nextSpeed = speed >= 2 ? 0.5 : speed + 0.5;
+    const handleSpeed = () => {
+        const speeds = [1, 1.5, 2, 0.5];
+        const nextSpeed = speeds[(speeds.indexOf(speed) + 1) % speeds.length];
         setSpeed(nextSpeed);
         if (audioRef.current) audioRef.current.playbackRate = nextSpeed;
     };
@@ -142,24 +145,22 @@ const SaqrAudioPlayer: React.FC<{ audioSrc: string; t: any }> = ({ audioSrc, t }
             <h4 className="text-[10px] font-black text-red-600 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
                 <span className="text-lg">🎧</span> {t('listen')}
             </h4>
-            <div className="p-6 rounded-[2.5rem] bg-white/40 dark:bg-white/5 backdrop-blur-2xl border border-white/20 shadow-inner flex flex-col gap-4">
+            <div className="p-5 rounded-[2.5rem] bg-white/40 dark:bg-white/5 backdrop-blur-2xl border border-white/20 shadow-inner flex items-center gap-4">
                 <audio ref={audioRef} src={audioSrc} onTimeUpdate={() => setProgress((audioRef.current!.currentTime / audioRef.current!.duration) * 100)} onEnded={() => setIsPlaying(false)} />
                 
-                <div className="flex items-center gap-5">
-                    <button onClick={togglePlay} className="w-16 h-16 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all">
-                        {isPlaying ? <span className="text-2xl">⏸</span> : <span className="text-2xl ps-1">▶</span>}
-                    </button>
-                    
-                    <div className="flex-1">
-                        <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                            <div className="h-full bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.5)] transition-all duration-300" style={{ width: `${progress}%` }} />
-                        </div>
+                <button onClick={togglePlay} className="w-14 h-14 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all">
+                    {isPlaying ? <span className="text-xl">⏸</span> : <span className="text-xl ps-1">▶</span>}
+                </button>
+                
+                <div className="flex-1">
+                    <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                        <div className="h-full bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.5)] transition-all duration-300" style={{ width: `${progress}%` }} />
                     </div>
-
-                    <button onClick={changeSpeed} className="px-4 py-2 rounded-xl bg-slate-950 text-white text-[10px] font-black hover:bg-red-600 transition-colors uppercase tracking-widest min-w-[60px]">
-                        {speed}x
-                    </button>
                 </div>
+
+                <button onClick={handleSpeed} className="px-3 py-2 rounded-xl bg-slate-900 text-white text-[9px] font-black hover:bg-red-600 transition-colors uppercase">
+                    {speed}x
+                </button>
             </div>
         </div>
     );
@@ -225,10 +226,10 @@ const ArabicLibraryInternalPage: React.FC = () => {
                     <span className="text-2xl">←</span> {t('back')}
                 </button>
                 <h1 className="text-4xl md:text-[6rem] font-black text-slate-950 dark:text-white tracking-tighter leading-none">{t('pageTitle')}</h1>
-                <div className="h-2 w-32 bg-green-600 mx-auto mt-8 rounded-full shadow-lg" />
+                <div className="h-2 w-32 bg-[#00732f] mx-auto mt-8 rounded-full shadow-lg" />
             </div>
 
-            {/* البحث والفرز */}
+            {/* شريط البحث والفرز */}
             <div className="sticky top-6 z-50 mb-16 px-2 md:px-0">
                 <div className="glass-panel p-4 md:p-6 rounded-[2.5rem] md:rounded-[4rem] bg-white/80 dark:bg-slate-900/80 border-none shadow-2xl flex flex-col gap-4">
                     <div className="relative">
@@ -237,15 +238,15 @@ const ArabicLibraryInternalPage: React.FC = () => {
                     </div>
                     
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <select value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)} className="p-3 px-4 rounded-2xl bg-white dark:bg-slate-800 font-black text-[10px] cursor-pointer outline-none border border-white/10">
+                        <select value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)} className="p-3 px-4 rounded-2xl bg-white dark:bg-slate-800 font-black text-[10px] cursor-pointer outline-none border border-white/10 shadow-sm">
                             <option value="all">{t('allAuthors')}</option>
                             {authors.filter(a => a !== "all").map(a => <option key={a} value={a}>{a}</option>)}
                         </select>
-                        <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="p-3 px-4 rounded-2xl bg-white dark:bg-slate-800 font-black text-[10px] cursor-pointer outline-none border border-white/10">
+                        <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="p-3 px-4 rounded-2xl bg-white dark:bg-slate-800 font-black text-[10px] cursor-pointer outline-none border border-white/10 shadow-sm">
                             <option value="all">{t('allSubjects')}</option>
                             {subjects.filter(s => s !== "all").map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
-                        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="p-3 px-4 rounded-2xl bg-white dark:bg-slate-800 font-black text-[10px] cursor-pointer outline-none border border-white/10">
+                        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="p-3 px-4 rounded-2xl bg-white dark:bg-slate-800 font-black text-[10px] cursor-pointer outline-none border border-white/10 shadow-sm">
                             <option value="alphabetical">{t('alphabetical')}</option>
                             <option value="author">{t('authorSort')}</option>
                             <option value="subject">{t('subjectSort')}</option>
@@ -256,15 +257,16 @@ const ArabicLibraryInternalPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* الكروت */}
+            {/* شبكة الكتب */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 md:gap-10">
                 {filteredBooks.map((book) => (
                     <div key={book.id} onClick={() => setSelectedBook(book)} className="group relative glass-panel rounded-[2.5rem] p-1 cursor-pointer transition-all duration-500 hover:-translate-y-3 h-full animate-fade-up border-none shadow-lg">
                         <div className="relative overflow-hidden rounded-[2.4rem] bg-white/20 dark:bg-slate-900/40 backdrop-blur-md h-full flex flex-col">
-                            <div className={`absolute top-0 start-0 w-1.5 h-full ${book.audioId ? 'bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.4)]' : 'bg-green-600 shadow-[0_0_15px_rgba(0,115,47,0.4)]'}`} />
+                            <div className={`absolute top-0 start-0 w-1.5 h-full ${book.audioId ? 'bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.4)]' : 'bg-[#00732f] shadow-[0_0_15px_rgba(0,115,47,0.4)]'}`} />
+                            
                             <div className="p-8 relative z-10 flex-grow text-start">
                                 <div className="flex justify-between items-start mb-4">
-                                    <span className={`inline-block px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest text-white ${book.audioId ? 'bg-red-600 shadow-md' : 'bg-green-600 shadow-md'}`}>{book.subject}</span>
+                                    <span className={`inline-block px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest text-white ${book.audioId ? 'bg-red-600' : 'bg-[#00732f]'}`}>{book.subject}</span>
                                     {book.audioId && <AudioWaveIcon />}
                                 </div>
                                 <h2 className="font-black text-xl md:text-2xl text-slate-950 dark:text-white leading-tight mb-4 group-hover:text-red-600 transition-colors line-clamp-2">{book.title}</h2>
@@ -288,7 +290,7 @@ const ArabicLibraryInternalPage: React.FC = () => {
                         <div className="flex-1 p-8 md:p-14 text-start">
                             <h2 className="text-3xl md:text-5xl font-black text-slate-950 dark:text-white leading-tight mb-2 tracking-tighter">{selectedBook.title}</h2>
                             <p onMouseMove={(e) => handleAuthorHover(e, selectedBook.bio)} onMouseLeave={(e) => handleAuthorHover(e, null)} className="text-xl text-red-600 font-bold mb-8 cursor-help inline-block border-b-2 border-dotted border-red-200">By {selectedBook.author}</p>
-                            <div className="p-6 rounded-[2rem] bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-inner">
+                            <div className="p-6 rounded-[2rem] bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-inner">
                                 <p className="text-[10px] text-green-600 font-black uppercase tracking-widest mb-3 flex items-center gap-2"><span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> {t('summaryTitle')}</p>
                                 <p className="text-slate-800 dark:text-slate-200 text-lg leading-relaxed">{selectedBook.summary}</p>
                             </div>
@@ -296,13 +298,17 @@ const ArabicLibraryInternalPage: React.FC = () => {
                         </div>
 
                         <div className="w-full md:w-[320px] bg-slate-950 p-10 flex flex-col justify-center items-center text-white border-s border-white/10 shrink-0">
-                            <div className="space-y-10 w-full text-center flex flex-col items-center">
+                            <div className="space-y-12 w-full text-center flex flex-col items-center">
+                                {/* الشعار الأبيض دائماً فوق الزر */}
                                 <div className="flex flex-col items-center gap-2">
-                                    <SchoolLogo className="h-12 w-auto" />
-                                    <span className="text-[9px] font-black text-red-500 uppercase tracking-[0.4em]">{t('exclusive')}</span>
+                                    <SchoolLogo forceWhite={true} className="h-16 w-auto mb-2" />
+                                    <span className="text-[10px] font-black text-white uppercase tracking-[0.5em]">{t('exclusive')}</span>
                                 </div>
-                                <a href={selectedBook.driveLink} target="_blank" rel="noreferrer" className="w-full block bg-red-600 text-white font-black py-5 rounded-2xl hover:bg-red-700 transition-all text-center uppercase tracking-widest shadow-xl shadow-red-600/20">{t('read')}</a>
-                                <button onClick={() => setSelectedBook(null)} className="w-full bg-white/10 text-white border border-white/20 font-black py-3 rounded-xl hover:bg-white hover:text-black transition-all text-xs uppercase tracking-[0.2em]">{t('close')}</button>
+                                
+                                <div className="w-full space-y-4">
+                                    <a href={selectedBook.driveLink} target="_blank" rel="noreferrer" className="w-full block bg-red-600 text-white font-black py-5 rounded-2xl hover:bg-red-700 transition-all text-center uppercase tracking-widest shadow-xl shadow-red-600/20">{t('read')}</a>
+                                    <button onClick={() => setSelectedBook(null)} className="w-full bg-white/10 text-white border border-white/20 font-black py-4 rounded-xl hover:bg-white hover:text-black transition-all text-xs uppercase tracking-widest">{t('close')}</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -314,7 +320,12 @@ const ArabicLibraryInternalPage: React.FC = () => {
                 .animate-audio-bar-1 { animation: audio-bar 0.6s ease-in-out infinite; }
                 .animate-audio-bar-2 { animation: audio-bar 0.8s ease-in-out infinite 0.2s; }
                 .animate-audio-bar-3 { animation: audio-bar 0.7s ease-in-out infinite 0.4s; }
+                
+                /* فرض عدم ميلان الخطوط نهائياً */
                 * { font-style: normal !important; }
+                
+                .logo-white-filter { transition: filter 0.5s ease; }
+                .dark .logo-white-filter { filter: brightness(0) invert(1); }
             `}</style>
         </div>
     );
