@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useLanguage } from '../App';
 import { useNavigate } from 'react-router-dom';
 
@@ -66,7 +66,7 @@ const translations = {
         authorSort: "المؤلف",
         subjectSort: "الموضوع",
         read: "قراءة المحتوى",
-        listen: "مشغل صقر الصوتي",
+        listen: "مشغل صقر الذكي",
         bioTitle: "حول المؤلف",
         summaryTitle: "ملخص صقر الذكي",
         back: "العودة",
@@ -74,7 +74,8 @@ const translations = {
         locationLabel: "EFIPS",
         publisherLabel: "الناشر",
         audioBadge: "صوتي",
-        audioOnly: "صوتيات فقط"
+        audioOnly: "صوتيات فقط",
+        errorAudio: "تعذر التشغيل المباشر، جرب فتح الرابط"
     },
     en: {
         pageTitle: "Arabic Library",
@@ -86,7 +87,7 @@ const translations = {
         authorSort: "Author",
         subjectSort: "Subject",
         read: "Read Content",
-        listen: "Saqr Audio Player",
+        listen: "Saqr Smart Player",
         bioTitle: "About Author",
         summaryTitle: "Saqr AI Summary",
         back: "Back",
@@ -94,69 +95,99 @@ const translations = {
         locationLabel: "EFIPS",
         publisherLabel: "Publisher",
         audioBadge: "Audio",
-        audioOnly: "Audio Only"
+        audioOnly: "Audio Only",
+        errorAudio: "Direct play failed, try external link"
     }
 };
 
-const trackActivity = (type: 'searched' | 'digital' | 'ai', label: string) => {
-    const logs = JSON.parse(localStorage.getItem('efips_activity_logs') || '[]');
-    logs.push({ type, label, date: new Date().toISOString() });
-    localStorage.setItem('efips_activity_logs', JSON.stringify(logs));
+// --- مكون مشغل صقر المخصص (Custom Audio UI) ---
+const CustomAudioPlayer: React.FC<{ audioId: string }> = ({ audioId }) => {
+    const audioRef = useRef<HTMLAudioElement>(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [progress, setProgress] = useState(0);
+    const streamUrl = `https://docs.google.com/uc?export=download&id=${audioId}`;
+
+    const togglePlay = () => {
+        if (audioRef.current) {
+            if (isPlaying) audioRef.current.pause();
+            else audioRef.current.play();
+            setIsPlaying(!isPlaying);
+        }
+    };
+
+    const handleTimeUpdate = () => {
+        if (audioRef.current) {
+            const current = audioRef.current.currentTime;
+            const duration = audioRef.current.duration;
+            setProgress((current / duration) * 100);
+        }
+    };
+
+    return (
+        <div className="w-full p-4 sm:p-6 rounded-[2rem] bg-white dark:bg-slate-900 border-2 border-red-600/20 shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <audio ref={audioRef} src={streamUrl} onTimeUpdate={handleTimeUpdate} onEnded={() => setIsPlaying(false)} />
+            
+            <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-600 rounded-full flex items-center justify-center shadow-lg shadow-red-600/40 animate-pulse">
+                            <span className="text-white text-xl">🎧</span>
+                        </div>
+                        <span className="text-[10px] sm:text-xs font-black text-red-600 uppercase tracking-widest animate-pulse">Now Playing</span>
+                    </div>
+                    <button onClick={togglePlay} className="w-12 h-12 sm:w-16 sm:h-16 bg-red-600 text-white rounded-full flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-xl shadow-red-600/30">
+                        {isPlaying ? (
+                            <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                        ) : (
+                            <svg className="w-6 h-6 sm:w-8 sm:h-8 ps-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        )}
+                    </button>
+                </div>
+
+                {/* شريط التقدم النيوني */}
+                <div className="relative h-2 sm:h-3 w-full bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
+                    <div className="absolute top-0 left-0 h-full bg-gradient-to-r from-red-600 to-green-600 transition-all duration-300" style={{ width: `${progress}%` }}></div>
+                </div>
+                
+                <div className="flex justify-between items-center text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-tighter">
+                    <span>Live Stream</span>
+                    <a href={`https://drive.google.com/file/d/${audioId}/view`} target="_blank" rel="noopener noreferrer" className="hover:text-red-600 underline transition-colors">External Link ↗</a>
+                </div>
+            </div>
+        </div>
+    );
 };
 
+// --- نافذة الكتاب ---
 const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any; onAuthorHover: (e: React.MouseEvent, bio: string | null) => void }> = ({ book, onClose, t, onAuthorHover }) => {
     if (!book) return null;
-    
-    // مشغل جوجل المدمج (الخيار الأكثر استقراراً للعمل داخل الموقع)
-    const audioPreviewUrl = book.audioId ? `https://drive.google.com/file/d/${book.audioId}/preview` : null;
-
     return (
         <div className="fixed inset-0 z-[150] flex items-center justify-center p-2 sm:p-4 backdrop-blur-3xl animate-in fade-in duration-500" onClick={onClose}>
             <div className="glass-panel w-full max-w-4xl rounded-[2rem] sm:rounded-[3rem] border-none shadow-2xl overflow-y-auto max-h-[92vh] md:overflow-hidden relative animate-in zoom-in-95 duration-500 flex flex-col md:flex-row bg-white/95 dark:bg-slate-950/95" onClick={(e) => e.stopPropagation()}>
-                
                 <button onClick={onClose} className="absolute top-3 end-3 sm:top-6 sm:end-6 z-50 p-2 bg-red-600 text-white rounded-full hover:scale-110 active:scale-90 transition-all shadow-lg">
                     <svg className="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}><path d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
 
                 <div className="flex-1 p-6 sm:p-14 flex flex-col justify-center border-b md:border-b-0 md:border-e border-slate-200 dark:border-white/10 text-start font-black overflow-y-auto">
-                    <div className="mb-6">
-                        <span className="inline-block px-3 py-1 rounded-lg text-[8px] sm:text-[9px] font-black uppercase tracking-widest mb-4 bg-green-600 text-white shadow-md">{book.subject}</span>
-                        <h2 className="text-2xl sm:text-5xl font-black text-slate-950 dark:text-white leading-[1.1] mb-2 tracking-tighter">{book.title}</h2>
-                        <p onMouseMove={(e) => onAuthorHover(e, book.bio)} onMouseLeave={(e) => onAuthorHover(e, null)} className="text-lg sm:text-xl text-red-600 dark:text-red-500 font-bold hover:text-slate-950 transition-colors inline-block cursor-help border-b-2 border-dotted border-slate-300">By {book.author}</p>
+                    <div className="mb-6 sm:mb-8">
+                        <span className="inline-block px-3 py-1 rounded-lg text-[8px] sm:text-[9px] font-black uppercase tracking-widest mb-4 sm:mb-6 bg-green-600 text-white shadow-md">{book.subject}</span>
+                        <h2 className="text-2xl sm:text-5xl font-black text-slate-950 dark:text-white leading-[1.1] mb-2 sm:mb-3 tracking-tighter">{book.title}</h2>
+                        <p onMouseMove={(e) => onAuthorHover(e, book.bio)} onMouseLeave={(e) => onAuthorHover(e, null)} className="text-lg sm:text-xl text-red-600 dark:text-red-500 font-bold hover:text-slate-950 dark:hover:white transition-colors cursor-help border-b-2 border-dotted border-slate-300">By {book.author}</p>
                     </div>
                     
                     <div className="bg-slate-100/50 dark:bg-white/5 p-5 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-white/10 text-start mb-6">
-                        <p className="text-[9px] sm:text-[10px] text-red-600 font-black uppercase mb-2 tracking-widest flex items-center gap-2">
-                            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-red-600 rounded-full animate-pulse shadow-lg"></span> {t('summaryTitle')}
-                        </p>
-                        <p className="text-slate-800 dark:text-slate-200 text-base sm:text-lg font-medium leading-relaxed italic line-clamp-6 sm:line-clamp-none">"{book.summary}"</p>
+                        <p className="text-[9px] sm:text-[10px] text-red-600 font-black uppercase mb-2 sm:mb-3 tracking-widest flex items-center gap-2"><span className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-red-600 rounded-full animate-pulse shadow-lg"></span> {t('summaryTitle')}</p>
+                        <p className="text-slate-800 dark:text-slate-200 text-base sm:text-xl font-medium leading-relaxed italic line-clamp-6 sm:line-clamp-none">"{book.summary}"</p>
                     </div>
 
-                    {audioPreviewUrl && (
-                        <div className="p-2 sm:p-4 rounded-[1.5rem] sm:rounded-[2rem] bg-red-600/5 border border-red-600/20 animate-fade-up">
-                            <div className="flex items-center gap-3 mb-3">
-                                <span className="text-xl animate-bounce">🎧</span>
-                                <span className="text-[10px] sm:text-xs font-black text-red-600 uppercase tracking-widest">{t('listen')}</span>
-                            </div>
-                            
-                            {/* استخدام Iframe Player المدمج لضمان عمل زر البلاي داخل الموقع */}
-                            <div className="w-full h-20 sm:h-24 rounded-xl overflow-hidden shadow-inner bg-black/5">
-                                <iframe 
-                                    src={audioPreviewUrl} 
-                                    className="w-full h-full border-none"
-                                    allow="autoplay"
-                                    title="Saqr Audio Player"
-                                />
-                            </div>
-                        </div>
-                    )}
+                    {book.audioId && <CustomAudioPlayer audioId={book.audioId} />}
                 </div>
 
                 <div className="w-full md:w-[280px] lg:w-[320px] bg-slate-950 dark:bg-black p-8 sm:p-10 flex flex-col justify-center items-center text-center text-white relative font-black shrink-0">
                     <div className="space-y-6 sm:space-y-10 relative z-10 w-full">
                         <div>
                             <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-6 sm:mb-8">{t('locationLabel')}</p>
-                            <a href={book.driveLink} target="_blank" rel="noopener noreferrer" onClick={() => trackActivity('digital', book.title)} className="w-full bg-red-600 text-white font-black py-4 sm:py-6 rounded-2xl flex items-center justify-center gap-3 hover:bg-red-700 active:scale-95 shadow-xl transition-all"><span className="text-sm sm:text-xl uppercase tracking-widest">{t('read')}</span></a>
+                            <a href={book.driveLink} target="_blank" rel="noopener noreferrer" className="w-full bg-red-600 text-white font-black py-4 sm:py-6 rounded-2xl flex items-center justify-center gap-3 hover:bg-red-700 active:scale-95 shadow-xl transition-all shadow-red-600/30"><span className="text-sm sm:text-xl uppercase tracking-widest">{t('read')}</span></a>
                         </div>
                         <button onClick={onClose} className="w-full bg-white/10 text-white border border-white/20 font-black py-3 sm:py-4 rounded-xl active:scale-95 text-[10px] sm:text-xs uppercase tracking-widest transition-all hover:bg-white hover:text-black">{t('close')}</button>
                     </div>
@@ -166,9 +197,9 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any; onAut
     );
 };
 
-// --- مكون الكارت مع أنيميشن الصوت ---
+// --- كارت الكتاب مع أنيميشن الصوت ---
 const BookCard = React.memo(({ book, onClick, t, onAuthorHover }: { book: any; onClick: () => void; t: any; onAuthorHover: (e: React.MouseEvent, bio: string | null) => void }) => (
-    <div onClick={() => { trackActivity('searched', book.title); onClick(); }} 
+    <div onClick={onClick} 
          className={`group relative glass-panel bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border-none rounded-[2rem] sm:rounded-[2.5rem] transition-all duration-500 cursor-pointer flex flex-col h-full overflow-hidden shadow-lg hover:shadow-2xl active:scale-[0.98] md:active:scale-95 hover:-translate-y-1 md:hover:-translate-y-2 
          ${book.audioId ? 'ring-2 ring-red-600/20 dark:ring-red-500/10 shadow-[0_15px_40px_rgba(220,38,38,0.05)]' : ''}`}>
         
@@ -185,9 +216,8 @@ const BookCard = React.memo(({ book, onClick, t, onAuthorHover }: { book: any; o
                     <span className="text-[7px] sm:text-[9px] font-black uppercase tracking-tighter text-red-600">{t('audioBadge')}</span>
                 </div>
             )}
-
-            <span className={`inline-block px-2.5 py-0.5 rounded-full text-[7px] font-black uppercase tracking-widest mb-4 text-white shadow-lg ${book.audioId ? 'bg-red-600' : 'bg-green-600'}`}>{book.subject}</span>
-            <h2 className="font-black text-lg sm:text-2xl text-slate-950 dark:text-white leading-tight mb-2 tracking-tighter line-clamp-2">{book.title}</h2>
+            <span className={`inline-block px-2.5 py-0.5 rounded-full text-[7px] sm:text-[8px] font-black uppercase tracking-widest mb-4 text-white shadow-lg ${book.audioId ? 'bg-red-600' : 'bg-green-600'}`}>{book.subject}</span>
+            <h2 className="font-black text-lg sm:text-2xl text-slate-950 dark:text-white leading-tight mb-2 sm:mb-3 tracking-tighter line-clamp-2">{book.title}</h2>
             <div className="flex items-center gap-2 opacity-70 group-hover:opacity-100 transition-opacity">
                 <span className="text-sm">👤</span>
                 <p onMouseMove={(e) => onAuthorHover(e, book.bio)} onMouseLeave={(e) => onAuthorHover(e, null)} className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-bold hover:text-red-600 transition-all inline-block underline decoration-dotted underline-offset-4 cursor-help">By {book.author}</p>
@@ -196,8 +226,8 @@ const BookCard = React.memo(({ book, onClick, t, onAuthorHover }: { book: any; o
         
         <div className="bg-slate-50/50 dark:bg-black/40 py-3 sm:py-4 px-6 sm:px-8 border-t border-slate-100 dark:border-white/5 mt-auto flex items-center justify-between font-black text-[9px] sm:text-[10px]">
              <div className="flex items-center gap-2 opacity-50">
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
-                <span className="truncate max-w-[100px]">{book.publisher}</span>
+                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                <span className="truncate max-w-[100px] sm:max-w-[120px]">{book.publisher}</span>
             </div>
             <p className="font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] opacity-30 group-hover:opacity-100 transition-all">EFIPS</p>
         </div>
@@ -255,12 +285,13 @@ const ArabicLibraryInternalPage: React.FC = () => {
             <div className="text-center mt-8 sm:mt-12 mb-10 sm:mb-24 relative animate-fade-up">
                 <button onClick={() => navigate(-1)} className="absolute start-0 top-1/2 -translate-y-1/2 flex items-center gap-2 text-slate-400 hover:text-red-600 transition-colors group">
                     <svg className={`h-6 w-6 transform group-hover:-translate-x-1 ${isAr ? '' : 'rotate-180'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}><path d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-                    <span className="text-[10px] font-black uppercase tracking-widest hidden xs:inline">{t('back')}</span>
+                    <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest hidden xs:inline">{t('back')}</span>
                 </button>
                 <h1 className="text-3xl sm:text-5xl md:text-[8rem] font-black text-slate-950 dark:text-white tracking-tighter leading-none drop-shadow-2xl">{t('pageTitle')}</h1>
-                <div className="h-1.5 w-20 sm:w-32 bg-green-600 mx-auto mt-6 rounded-full shadow-[0_0_20px_rgba(34,197,94,0.5)] animate-pulse"></div>
+                <div className="h-1.5 sm:h-2 w-20 sm:w-32 bg-green-600 mx-auto mt-6 sm:mt-8 rounded-full shadow-[0_0_20px_rgba(34,197,94,0.5)] animate-pulse"></div>
             </div>
 
+            {/* شريط البحث والفلاتر */}
             <div className="sticky top-16 sm:top-20 z-50 mb-10 sm:mb-16 animate-fade-up px-1 sm:px-0">
                 <div className="glass-panel p-2 sm:p-5 rounded-[1.5rem] sm:rounded-[3.5rem] shadow-2xl border-none backdrop-blur-3xl max-w-6xl mx-auto bg-white/90 dark:bg-slate-900/80">
                     <div className="flex flex-col lg:flex-row gap-2 sm:gap-4 items-center">
