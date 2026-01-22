@@ -1,191 +1,150 @@
-/* 1. استيراد الخطوط الوطنية */
-@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap');
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { bookData, type Book } from '../api/bookData'; 
+import { useLanguage } from '../App';
 
-/* 2. أساسيات Tailwind */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+// --- مساعدات التصميم ---
 
-/* 3. الهوية البصرية والمتغيرات الاستراتيجية */
-:root {
-  --mouse-x: 50%;
-  --mouse-y: 50%;
-  --uae-red: 220, 38, 38;      /* الأحمر الوطني */
-  --uae-green: 0, 115, 47;    /* الأخضر الوطني */
-  --uae-black: 2, 6, 23;      /* الأسود الملكي (Slate-950) */
-  --glass-border: rgba(255, 255, 255, 0.15);
-}
+// إضافة تأثير اللمعة (Reflection)
+const ReflectionLayer = () => (
+  <div className="absolute inset-0 pointer-events-none z-20">
+    <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-white/5 to-transparent opacity-30" />
+    <div className="absolute -top-[100%] -left-[100%] w-[300%] h-[300%] bg-[linear-gradient(45deg,transparent_45%,rgba(255,255,255,0.1)_50%,transparent_55%)] animate-[shine_10s_infinite] opacity-50" />
+  </div>
+);
 
-/* تحسينات السلوك والنصوص المستقيمة */
-html {
-  scroll-behavior: smooth;
-  -webkit-tap-highlight-color: transparent;
-  overflow-x: hidden;
-}
+// --- Component: BookCard (المطور بكلاساتك الملكية) ---
+const BookCard = React.memo(({ book, onClick, t }: { book: Book; onClick: () => void; t: any }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const isAi = !book.subject || book.subject === "Unknown";
 
-body {
-  font-family: 'Tajawal', sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #f8fafc;
-  color: #0f172a;
-  transition: background-color 0.5s ease;
-  line-height: 1.6;
-  /* إلغاء أي ميلان افتراضي للخطوط بطلبك */
-  font-style: normal !important;
-}
+  // تفعيل تأثير Spotlight (Elite Spotlight) اللي في ملف CSS بتاعك
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    cardRef.current.style.setProperty('--mouse-x', `${x}px`);
+    cardRef.current.style.setProperty('--mouse-y', `${y}px`);
+  };
 
-/* الوضع الداكن النخبوي */
-.dark body {
-  background-color: #020617; /* عمق الأسود الملكي */
-  color: #f1f5f9;
-}
+  return (
+    <div 
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onClick={onClick} 
+      className="group relative glass-panel glass-card-interactive rounded-[2.5rem] p-1 cursor-pointer transition-all duration-500 hover:-translate-y-3 animate-fade-up border-none"
+    >
+      <div className="relative overflow-hidden rounded-[2.4rem] bg-white/5 dark:bg-slate-900/20 h-full flex flex-col">
+        <ReflectionLayer />
+        
+        {/* مؤشر الهوية الجانبي */}
+        <div className={`absolute top-0 start-0 w-2 h-full z-30 ${isAi ? 'bg-red-600' : 'bg-[#00732f]'}`} />
 
-/* --- 4. نظام الزجاج المطور (Zero-Border Glass) --- */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(30px) saturate(190%);
-  -webkit-backdrop-filter: blur(30px) saturate(190%);
-  /* تم جعل الحدود شفافة جداً لإخفاء الحواف الرمادية */
-  border: 1px solid var(--glass-border);
-  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.08);
-}
+        <div className="p-8 relative z-10 flex-grow text-start">
+           <span className={`inline-block px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] mb-6 shadow-sm
+                          ${isAi ? 'bg-red-600 text-white' : 'bg-[#00732f] text-white'}`}>
+              {isAi ? t('aiSubject') : book.subject}
+           </span>
+          
+          <h3 className="font-black text-2xl text-slate-950 dark:text-white leading-[1.1] mb-4 tracking-tighter group-hover:text-red-600 transition-colors line-clamp-2">
+              {book.title}
+          </h3>
+          
+          <div className="flex items-center gap-3 opacity-60 group-hover:opacity-100 transition-all">
+              <span className="text-xl">👤</span>
+              <p className="text-xs font-bold uppercase tracking-widest">{book.author}</p>
+          </div>
+        </div>
 
-.dark .glass-panel {
-  background: rgba(15, 23, 42, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.4);
-}
-
-/* إصدار بدون حدود نهائياً (للصفحة الرئيسية) */
-.border-none {
-  border: none !important;
-}
-
-/* --- 5. هندسة الشعارات (Identity Tilt) --- */
-.logo-tilt-right {
-  transform: rotate(6deg); /* الميلان المعتمد في الهيدر */
-  transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.logo-white-filter {
-  transition: filter 0.5s ease;
-}
-
-.dark .logo-white-filter {
-  filter: brightness(0) invert(1) drop-shadow(0 0 15px rgba(255, 255, 255, 0.1));
-}
-
-/* --- 6. تأثير الإضاءة التفاعلي (Elite Spotlight) --- */
-.glass-card-interactive {
-  position: relative;
-  z-index: 1;
-  overflow: hidden;
-}
-
-.glass-card-interactive::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1.5px; 
-  background: radial-gradient(
-    800px circle at var(--mouse-x) var(--mouse-y),
-    rgba(var(--uae-red), 0.35),
-    transparent 40%
+        {/* التذييل (Footer) */}
+        <div className="bg-black/5 dark:bg-white/5 py-5 px-8 border-t border-white/10 mt-auto flex items-center justify-between relative z-10 backdrop-blur-md">
+            <div className="flex gap-6 items-center">
+                <div className="text-center">
+                  <p className="text-[9px] text-red-600 font-black uppercase mb-1">{t('shelf')}</p>
+                  <p className="text-lg font-black dark:text-white leading-none">{book.shelf}</p>
+                </div>
+                <div className="w-px h-8 bg-slate-400/20" />
+                <div className="text-center">
+                  <p className="text-[9px] text-[#00732f] font-black uppercase mb-1">{t('row')}</p>
+                  <p className="text-lg font-black dark:text-white leading-none">{book.row}</p>
+                </div>
+            </div>
+            <div className="w-10 h-10 rounded-full border border-red-600/20 flex items-center justify-center text-red-600 group-hover:bg-red-600 group-hover:text-white transition-all shadow-lg">
+              <span className="text-sm font-black">➔</span>
+            </div>
+        </div>
+      </div>
+    </div>
   );
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-}
+});
 
-.glass-card-interactive:hover::before {
-  opacity: 1;
-}
+// --- Component: SearchPage (الرئيسي) ---
+const SearchPage: React.FC = () => {
+    const { locale, dir } = useLanguage();
+    const t = (key: string) => (translations as any)[locale][key];
+    
+    // ... (باقي الـ State والـ Memo من كودك الأصلي)
 
-/* --- 7. أزرار النخبة (National Elite Buttons) --- */
-/* الزر الأحمر */
-.glass-button-red {
-  @apply px-10 py-5 rounded-[2rem] font-black transition-all duration-500 flex items-center justify-center gap-3;
-  background: rgba(var(--uae-red), 0.08);
-  border: 2px solid rgba(var(--uae-red), 0.2);
-  color: rgb(var(--uae-red));
-}
+    return (
+        <div dir={dir} className="max-w-7xl mx-auto px-6 pb-40 relative z-10 antialiased">
+            
+            {/* الهيدر البحثي المطور */}
+            <div className="sticky top-6 z-[100] mb-20">
+                <div className="glass-panel p-4 md:p-6 rounded-[3.5rem] shadow-2xl bg-white/80 dark:bg-slate-900/80">
+                    <div className="flex flex-col gap-4">
+                        <div className="relative group">
+                            <input 
+                              type="text" 
+                              placeholder={t('searchPlaceholder')} 
+                              className="w-full p-6 ps-16 bg-white dark:bg-black/40 text-slate-950 dark:text-white border-2 border-transparent focus:border-red-600 rounded-[2.5rem] outline-none transition-all font-black text-lg shadow-inner shadow-black/5" 
+                              onChange={(e) => setSearchTerm(e.target.value)} 
+                            />
+                            <svg className="absolute start-6 top-1/2 -translate-y-1/2 h-7 w-7 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                        </div>
 
-.glass-button-red:hover {
-  background: rgb(var(--uae-red));
-  color: #ffffff;
-  transform: translateY(-5px);
-  box-shadow: 0 20px 40px rgba(var(--uae-red), 0.3);
-}
+                        {/* الفلاتر بشكل نخبوي */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            {[ 
+                              { val: sortBy, set: setSortBy, opt: 'sortBy', data: ['alphabetical', 'author'] },
+                              { val: subjectFilter, set: setSubjectFilter, opt: 'allSubjects', data: filters.subjects },
+                              { val: authorFilter, set: setAuthorFilter, opt: 'allAuthors', data: filters.authors },
+                              { val: shelfFilter, set: setShelfFilter, opt: 'allShelves', data: filters.shelves, prefix: 'S: ' }
+                            ].map((filter, i) => (
+                              <select 
+                                key={i}
+                                value={filter.val}
+                                onChange={(e) => filter.set(e.target.value)}
+                                className="p-4 rounded-2xl bg-white/50 dark:bg-slate-800/50 border border-white/20 font-black text-[11px] cursor-pointer outline-none focus:border-red-600 appearance-none text-center backdrop-blur-md hover:bg-white transition-all shadow-sm"
+                              >
+                                <option value="all">{t(filter.opt)}</option>
+                                {filter.data.map((o: any) => <option key={o} value={o}>{filter.prefix ? `${filter.prefix}${o}` : o}</option>)}
+                              </select>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-/* الزر الأسود (للمكتبة الإنجليزية) */
-.glass-button-black {
-  @apply px-10 py-5 rounded-[2rem] font-black transition-all duration-500 flex items-center justify-center gap-3;
-  background: rgba(var(--uae-black), 0.9);
-  color: #ffffff;
-}
+            {/* شبكة الكتب مع انيميشن الإزاحة */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
+                {filteredBooks.slice(0, visibleCount).map((book) => (
+                    <BookCard key={book.id} book={book} t={t} onClick={() => setSelectedBook(book)} />
+                ))}
+            </div>
 
-.glass-button-black:hover {
-  background: #000000;
-  transform: translateY(-5px) scale(1.02);
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-}
+            {/* زر Explore More باستخدام كلاسك المجهز */}
+            {filteredBooks.length > visibleCount && (
+                <div className="mt-32 text-center">
+                    <button 
+                      onClick={() => setVisibleCount(prev => prev + 16)} 
+                      className="glass-button-black dark:glass-button-red mx-auto text-xl tracking-[0.3em]"
+                    >
+                        EXPLORE MORE
+                    </button>
+                </div>
+            )}
 
-/* --- 8. الأنيميشن المتطور (Knowledge Flow) --- */
-@keyframes knowledge-burst {
-  0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
-  15% { opacity: 1; }
-  100% { transform: translate(var(--tx), var(--ty)) scale(1.1); opacity: 0; }
-}
-
-.animate-burst {
-  animation: knowledge-burst 1.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-}
-
-.animate-fade-up {
-  animation: fade-in-up 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-}
-
-@keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(40px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* --- 9. تحسينات تجربة المستخدم --- */
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-/* تعطيل الخط المائل في كل مكان لضمان الحدة بطلبك */
-i, em, .italic {
-  font-style: normal !important;
-}
-
-/* تأثير التموج المائي (Ripple) */
-.ripple-effect {
-  position: absolute;
-  border-radius: 50%;
-  transform: scale(0);
-  animation: ripple-animation 0.8s linear;
-  pointer-events: none;
-}
-
-@keyframes ripple-animation {
-  to { transform: scale(4); opacity: 0; }
-}
-
-img {
-  max-width: 100%;
-  height: auto;
-  user-select: none;
-  -webkit-user-drag: none;
-}
-
-/* استجابة الخطوط للشاشات الكبيرة */
-@media (min-width: 1500px) {
-  body { font-size: 18px; }
-}
+            <BookModal book={selectedBook} onClose={() => setSelectedBook(null)} t={t} />
+        </div>
+    );
+};
