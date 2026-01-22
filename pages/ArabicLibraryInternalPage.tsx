@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useLanguage } from '../App';
 import { useNavigate } from 'react-router-dom';
 
-// --- بيانات الكتب (كما هي في كودك) ---
+// --- 1. قاعدة البيانات (Database) ---
 const ARABIC_LIBRARY_DATABASE = [
     { id: "AR_1", title: "مجموعة روايات أجاثا كريستي", author: "أجاثا كريستي", subject: "قصص بوليسية", publisher: "ناشرون متعددون", driveLink: "https://drive.google.com/drive/folders/1PZk0vPQrKXIgE0WmUXlEMcSzt_d94Q6u", bio: "ملكة الجريمة عالمياً، صاحبة الشخصيات الخالدة مثل هيركيول بوارو.", summary: "أضخم مجموعة لروايات التحقيق والغموض التي تتميز بحبكة عبقرية ونهايات صادمة." },
     { id: "AR_2", title: "أرض الإله", author: "أحمد مراد", subject: "أدب تاريخي", publisher: "دار الشروق", driveLink: "https://drive.google.com/file/d/1Q-dT9-g292nqv1N_PvlB2TnZMBdQGpio/view", bio: "كاتب ومصور مصري معاصر، تميز برواياته التي تمزج بين التاريخ والغموض.", summary: "رحلة تاريخية مثيرة في زمن الفراعنة تكشف أسراراً مخفية حول خروج بني إسرائيل.", audioId: "/audio/أرض الإله.mp3" },
@@ -55,24 +55,64 @@ const ARABIC_LIBRARY_DATABASE = [
     { id: "AR_49", title: "جلسات نفسية", author: "محمد إبراهيم", subject: "تنمية بشرية", publisher: "عصير الكتب", driveLink: "https://drive.google.com/file/d/1rvbFWFmgQ65Ufub-6tC-AeuqCYiNOW82/view?usp=drive_link", bio: "كاتب وأخصائي في علم النفس،​​ ​​يتميز الدكتور محمد إبراهيم بقدرته على تبسيط المفاهيم النفسية وتقديمها بأسلوب سلس ومباشر، مما يجعله قريبًا من القراء الباحثين عن فهم أعمق لذواتهم وتحقيق السكينة النفسية", summary: "يحتوي هذا الكتاب المكون من 120 صفحة على مجموعة من الجلسات النفسية التي تهدف إلى تحسين الصحة النفسية وتعزيز الرفاهية. حيث يقدم أساليب فعالة للتعامل مع التوتر والقلق، بالإضافة إلى تمارين تنمية الذات التي تساعدك على فهم مشاعرك وتطوير مهاراتك الشخصية." }
 ];
 
-// --- مكون شعار المدرسة المطور ---
+// --- 2. كائن الترجمة (المتغير اللي كان ناقص) ---
+const translations = {
+    ar: {
+        pageTitle: "المكتبة العربية",
+        searchPlaceholder: "ابحث عن عنوان أو كاتب...",
+        allSubjects: "المواضيع",
+        allAuthors: "المؤلفين",
+        sortBy: "فرز حسب",
+        alphabetical: "أبجدياً",
+        authorSort: "المؤلف",
+        subjectSort: "الموضوع",
+        read: "قراءة المحتوى",
+        listen: "تلخيص صقر الصوتي",
+        summaryTitle: "ملخص صقر AI الذكي",
+        back: "العودة",
+        close: "إغلاق",
+        audioBadge: "صوتي",
+        playing: "جاري التشغيل",
+        paused: "موقف مؤقت",
+    },
+    en: {
+        pageTitle: "Arabic Library",
+        searchPlaceholder: "Search title or author...",
+        allSubjects: "Subjects",
+        allAuthors: "Authors",
+        sortBy: "Sort By",
+        alphabetical: "Alphabetical",
+        authorSort: "Author",
+        subjectSort: "Subject",
+        read: "Read Content",
+        listen: "Saqr Audio Summary",
+        summaryTitle: "Saqr AI Summary",
+        back: "Back",
+        close: "Close",
+        audioBadge: "Audio",
+        playing: "Playing Now",
+        paused: "Paused",
+    }
+};
+
+// --- 3. مكونات التصميم (UI Components) ---
+
+// شعار المدرسة المائل (بناءً على طلبك)
 const SchoolLogo = () => (
     <img 
-        src="/logo.png" // تأكد من وجود شعار المدرسة في مسار public/logo.png
-        alt="School Logo"
-        className="h-8 w-auto logo-tilt-right logo-white-filter opacity-80 group-hover:opacity-100 transition-all duration-500"
+        src="/logo.png" 
+        alt="School Logo" 
+        className="h-7 w-auto logo-tilt-right logo-white-filter opacity-70 group-hover:opacity-100 transition-all duration-500"
     />
 );
 
-// --- طبقة الانعكاس الزجاجي ---
-const GlassReflection = () => (
-    <div className="absolute inset-0 pointer-events-none z-20">
+const ReflectionLayer = () => (
+    <div className="absolute inset-0 pointer-events-none z-20 overflow-hidden rounded-[inherit]">
         <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-white/5 to-transparent opacity-30" />
-        <div className="absolute -top-[100%] -left-[100%] w-[300%] h-[300%] bg-[linear-gradient(45deg,transparent_45%,rgba(255,255,255,0.1)_50%,transparent_55%)] animate-[shine_10s_infinite] opacity-40" />
+        <div className="absolute -top-[100%] -left-[100%] w-[300%] h-[300%] bg-[linear-gradient(45deg,transparent_45%,rgba(255,255,255,0.1)_50%,transparent_55%)] animate-[shine_10s_infinite] opacity-30" />
     </div>
 );
 
-// --- مشغل الصوت (Saqr Player) ---
 const SaqrAudioPlayer: React.FC<{ audioSrc: string; t: any }> = ({ audioSrc, t }) => {
     const audioRef = useRef<HTMLAudioElement>(null);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -87,136 +127,115 @@ const SaqrAudioPlayer: React.FC<{ audioSrc: string; t: any }> = ({ audioSrc, t }
     };
 
     return (
-        <div className="mt-4 p-4 rounded-2xl bg-white/10 dark:bg-black/20 backdrop-blur-md border border-white/10 shadow-inner">
+        <div className="mt-4 p-4 rounded-2xl bg-white/10 dark:bg-black/20 backdrop-blur-md border border-white/10">
             <audio ref={audioRef} src={audioSrc} onTimeUpdate={() => setProgress((audioRef.current!.currentTime / audioRef.current!.duration) * 100)} onEnded={() => setIsPlaying(false)} />
             <div className="flex items-center gap-4">
                 <button onClick={togglePlay} className="w-10 h-10 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
                     {isPlaying ? "⏸" : "▶"}
                 </button>
                 <div className="flex-1 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                    <div className="h-full bg-red-600 shadow-[0_0_10px_rgba(220,38,38,0.5)]" style={{ width: `${progress}%` }} />
+                    <div className="h-full bg-red-600" style={{ width: `${progress}%` }} />
                 </div>
             </div>
         </div>
     );
 };
 
-// --- المودال المربوط بالذكاء الاصطناعي ---
+// --- 4. نافذة تفاصيل الكتاب (Modal) ---
 const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
     const { locale } = useLanguage();
-    const [aiContent, setAiContent] = useState({ summary: '', genre: '' });
+    const [aiSummary, setAiSummary] = useState('');
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (!book) return;
         setLoading(true);
-        // محاكاة طلب الـ AI (أو ربطه بـ API حقيقي)
-        const fetchAISummary = async () => {
+        // استدعاء AI الفعلي
+        const fetchAI = async () => {
             try {
                 const res = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        messages: [{ role: 'system', content: `Analyze the book "${book.title}" and provide a summary and genre in ${locale === 'ar' ? 'Arabic' : 'English'}. Return JSON.` }]
+                    body: JSON.stringify({
+                        messages: [{ role: 'system', content: `Summarize the book "${book.title}" in 2 sentences. Language: ${locale === 'ar' ? 'Arabic' : 'English'}` }]
                     })
                 });
                 const data = await res.json();
-                const parsed = JSON.parse(data.reply.replace(/```json|```/g, ''));
-                setAiContent(parsed);
+                setAiSummary(data.reply);
             } catch {
-                setAiContent({ summary: book.summary, genre: book.subject });
+                setAiSummary(book.summary);
             } finally { setLoading(false); }
         };
-        fetchAISummary();
+        fetchAI();
     }, [book, locale]);
 
     if (!book) return null;
 
     return (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 backdrop-blur-3xl animate-fade-up" onClick={onClose}>
-            <div className="relative w-full max-w-4xl glass-panel rounded-[3rem] overflow-hidden flex flex-col md:flex-row shadow-2xl animate-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
-                <button onClick={onClose} className="absolute top-6 end-6 z-50 p-2 bg-red-600 text-white rounded-full hover:rotate-90 transition-all">
+            <div className="relative w-full max-w-4xl glass-panel rounded-[3rem] overflow-hidden flex flex-col md:flex-row shadow-2xl bg-white/90 dark:bg-slate-950/90" onClick={(e) => e.stopPropagation()}>
+                <button onClick={onClose} className="absolute top-6 end-6 z-50 p-2 bg-red-600 text-white rounded-full hover:rotate-90 transition-all shadow-xl">
                     <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
-                
                 <div className="flex-1 p-8 md:p-14 text-start">
-                    <h2 className="text-3xl md:text-5xl font-black text-slate-950 dark:text-white mb-2">{book.title}</h2>
+                    <h2 className="text-3xl md:text-5xl font-black text-slate-950 dark:text-white leading-none mb-2">{book.title}</h2>
                     <p className="text-xl text-red-600 font-bold mb-8">By {book.author}</p>
                     <div className="p-6 rounded-[2rem] bg-white/40 dark:bg-white/5 border border-white/20">
-                        <p className="text-[10px] text-green-600 font-black uppercase tracking-widest mb-2">✨ {t('summaryTitle')}</p>
+                        <p className="text-[10px] text-green-600 font-black uppercase tracking-widest mb-2 flex items-center gap-2">
+                           <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> {t('summaryTitle')}
+                        </p>
                         <p className="text-slate-800 dark:text-slate-200 text-lg leading-relaxed italic">
-                            {loading ? "جاري التحليل عبر ذكاء صقر..." : `"${aiContent.summary || book.summary}"`}
+                            {loading ? "..." : `"${aiSummary || book.summary}"`}
                         </p>
                     </div>
                     {book.audioId && <SaqrAudioPlayer audioSrc={book.audioId} t={t} />}
                 </div>
-
-                <div className="w-full md:w-[300px] bg-slate-950/90 p-10 flex flex-col justify-center items-center text-white border-s border-white/10">
-                    <div className="space-y-8 w-full text-center">
-                        <div className="bg-red-600/20 p-6 rounded-[2rem] border border-red-600/30">
-                            <p className="text-[10px] font-black text-red-500 uppercase tracking-widest mb-1">{t('subjectSort')}</p>
-                            <p className="text-lg font-black">{loading ? '...' : (aiContent.genre || book.subject)}</p>
-                        </div>
-                        <a href={book.driveLink} target="_blank" rel="noreferrer" className="w-full block bg-white text-black font-black py-4 rounded-2xl hover:bg-red-600 hover:text-white transition-all text-sm uppercase tracking-widest">
-                            {t('read')}
-                        </a>
-                    </div>
+                <div className="w-full md:w-[280px] bg-slate-950 p-10 flex flex-col justify-center items-center text-white border-s border-white/10">
+                    <a href={book.driveLink} target="_blank" rel="noreferrer" className="w-full bg-red-600 text-white font-black py-5 rounded-2xl hover:bg-red-700 transition-all text-center uppercase tracking-widest shadow-xl shadow-red-600/20">
+                        {t('read')}
+                    </a>
                 </div>
             </div>
         </div>
     );
 };
 
-// --- كارت الكتاب الزجاجي المطور ---
-const BookCard = React.memo(({ book, onClick, t }: { book: any; onClick: () => void; t: any }) => {
-    const cardRef = useRef<HTMLDivElement>(null);
-    
-    const handleMouseMove = (e: React.MouseEvent) => {
-        if (!cardRef.current) return;
-        const rect = cardRef.current.getBoundingClientRect();
-        cardRef.current.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
-        cardRef.current.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
-    };
-
-    return (
-        <div 
-            ref={cardRef} onMouseMove={handleMouseMove} onClick={onClick}
-            className="group relative glass-panel glass-card-interactive rounded-[2.5rem] p-1 cursor-pointer transition-all duration-500 hover:-translate-y-3 h-full animate-fade-up border-none"
-        >
-            <div className="relative overflow-hidden rounded-[2.4rem] bg-white/20 dark:bg-slate-900/40 backdrop-blur-md h-full flex flex-col">
-                <GlassReflection />
-                <div className={`absolute top-0 start-0 w-1.5 h-full ${book.audioId ? 'bg-red-600' : 'bg-[#00732f]'}`} />
-                
-                <div className="p-8 relative z-10 flex-grow text-start">
-                    <span className={`inline-block px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest mb-4 text-white shadow-lg ${book.audioId ? 'bg-red-600' : 'bg-[#00732f]'}`}>
-                        {book.subject}
-                    </span>
-                    <h2 className="font-black text-xl md:text-2xl text-slate-950 dark:text-white leading-tight mb-4 group-hover:text-red-600 transition-colors line-clamp-2">
-                        {book.title}
-                    </h2>
-                    <div className="flex items-center gap-2 opacity-60">
-                        <span className="text-sm">👤</span>
-                        <p className="text-[10px] font-bold uppercase">{book.author}</p>
-                    </div>
-                </div>
-
-                <div className="bg-black/5 dark:bg-white/5 py-5 px-8 border-t border-white/10 mt-auto flex items-center justify-between relative z-10">
-                    <div className="flex items-center gap-2 opacity-40 group-hover:opacity-100 transition-all">
-                        <p className="text-[9px] font-black uppercase">SAQR LIBRARY</p>
-                    </div>
-                    {/* مكان شعار المدرسة المائل والذكي */}
-                    <SchoolLogo />
+// --- 5. كارت الكتاب (Card) ---
+const BookCard = React.memo(({ book, onClick, t }: { book: any; onClick: () => void; t: any }) => (
+    <div onClick={onClick} className="group relative glass-panel glass-card-interactive rounded-[2.5rem] p-1 cursor-pointer transition-all duration-500 hover:-translate-y-3 h-full animate-fade-up border-none shadow-lg hover:shadow-2xl">
+        <div className="relative overflow-hidden rounded-[2.4rem] bg-white/20 dark:bg-slate-900/40 backdrop-blur-md h-full flex flex-col">
+            <ReflectionLayer />
+            <div className={`absolute top-0 start-0 w-1.5 h-full ${book.audioId ? 'bg-red-600' : 'bg-[#00732f]'}`} />
+            
+            <div className="p-7 md:p-9 relative z-10 flex-grow text-start">
+                <span className={`inline-block px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest mb-4 text-white ${book.audioId ? 'bg-red-600' : 'bg-[#00732f]'}`}>
+                    {book.subject}
+                </span>
+                <h2 className="font-black text-xl md:text-2xl text-slate-950 dark:text-white leading-tight mb-4 group-hover:text-red-600 transition-colors line-clamp-2">
+                    {book.title}
+                </h2>
+                <div className="flex items-center gap-2 opacity-60">
+                    <span className="text-sm">👤</span>
+                    <p className="text-[10px] font-bold uppercase truncate tracking-widest">{book.author}</p>
                 </div>
             </div>
-        </div>
-    );
-});
 
-// --- المكون الرئيسي ---
+            <div className="bg-black/5 dark:bg-white/5 py-4 px-8 border-t border-white/10 mt-auto flex items-center justify-between relative z-10">
+                <div className="text-[8px] font-black opacity-30 group-hover:opacity-100 transition-all uppercase tracking-widest text-red-600">
+                    Saqr Digital
+                </div>
+                {/* شعار المدرسة مكان EFIPS */}
+                <SchoolLogo />
+            </div>
+        </div>
+    </div>
+));
+
+// --- 6. الصفحة الرئيسية (Main Page) ---
 const ArabicLibraryInternalPage: React.FC = () => {
     const { locale, dir } = useLanguage();
     const navigate = useNavigate();
-    const t = (key: any) => (translations as any)[locale][key];
+    const t = (key: keyof typeof translations.ar) => translations[locale][key];
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedBook, setSelectedBook] = useState<any>(null);
 
@@ -226,32 +245,28 @@ const ArabicLibraryInternalPage: React.FC = () => {
     }, [searchTerm]);
 
     return (
-        <div dir={dir} className="max-w-7xl mx-auto px-4 pb-32 relative z-10 font-black antialiased">
-            {/* الهيدر والعنوان */}
+        <div dir={dir} className="max-w-7xl mx-auto px-4 pb-40 relative z-10 font-black antialiased">
             <div className="text-center mt-12 mb-20 animate-fade-up">
-                <button onClick={() => navigate(-1)} className="absolute start-0 top-0 text-slate-400 hover:text-red-600 transition-all flex items-center gap-2">
+                <button onClick={() => navigate(-1)} className="absolute start-0 top-0 text-slate-400 hover:text-red-600 flex items-center gap-2 transition-all">
                     <span className="text-2xl">←</span> {t('back')}
                 </button>
-                <h1 className="text-4xl md:text-[6rem] font-black text-slate-950 dark:text-white tracking-tighter leading-none">{t('pageTitle')}</h1>
+                <h1 className="text-4xl md:text-[6rem] font-black text-slate-950 dark:text-white tracking-tighter leading-none">
+                    {t('pageTitle')}
+                </h1>
                 <div className="h-2 w-32 bg-[#00732f] mx-auto mt-8 rounded-full shadow-lg" />
             </div>
 
-            {/* بار البحث الزجاجي */}
-            <div className="sticky top-6 z-50 mb-16 px-2 md:px-0">
-                <div className="glass-panel p-4 md:p-6 rounded-[3rem] shadow-2xl bg-white/80 dark:bg-slate-900/80 border-none">
-                    <div className="relative">
-                        <input 
-                            type="text" 
-                            placeholder={t('searchPlaceholder')} 
-                            className="w-full p-5 ps-16 bg-white dark:bg-black/40 text-slate-950 dark:text-white rounded-[2rem] outline-none border-2 border-transparent focus:border-red-600 transition-all text-lg font-black"
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <span className="absolute start-6 top-1/2 -translate-y-1/2 text-2xl opacity-40">🔍</span>
-                    </div>
+            <div className="sticky top-6 z-50 mb-16">
+                <div className="glass-panel p-4 md:p-6 rounded-[3rem] bg-white/80 dark:bg-slate-900/80 border-none shadow-2xl">
+                    <input 
+                        type="text" 
+                        placeholder={t('searchPlaceholder')} 
+                        className="w-full p-5 ps-10 bg-white dark:bg-black/40 text-slate-950 dark:text-white rounded-[2rem] outline-none border-2 border-transparent focus:border-red-600 transition-all text-lg font-black"
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
                 </div>
             </div>
 
-            {/* شبكة الكروت المتجاوبة */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 md:gap-10">
                 {filteredBooks.map((book) => (
                     <BookCard key={book.id} book={book} t={t} onClick={() => setSelectedBook(book)} />
