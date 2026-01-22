@@ -1,8 +1,8 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useLanguage } from '../App';
 import { useNavigate } from 'react-router-dom';
 
-// --- 1. تعريف واجهة البيانات ---
+// --- 1. تعريف واجهة البيانات وقاعدة البيانات ---
 interface Book {
   id: number;
   title: string;
@@ -12,9 +12,9 @@ interface Book {
   bio: string;
   summary: string;
   publisher?: string;
+  audioId?: string; // أضفت هذا الحقل لدعم التمييز الصوتي
 }
 
-// --- 2. قاعدة البيانات الكاملة (39 عنواناً) ---
 const ENGLISH_LIBRARY_DATABASE: Book[] = [
   { id: 1, title: "Me Before You", author: "Jojo Moyes", subject: "Drama", driveLink: "https://drive.google.com/file/d/1eDq03Myjh56IRtLx1LIRJHa39PLnMvgf/view", bio: "British author famous for her emotionally resonant romantic stories.", summary: "A heart-wrenching story of a young woman who becomes a caregiver for a wealthy man." },
   { id: 2, title: "The Great Gatsby", author: "Scott Fitzgerald", subject: "Drama", driveLink: "https://drive.google.com/file/d/1NjrAuiFno2Aa-z6WYkRI17oD2Hxkvs-M/view", bio: "A master of the Jazz Age, famous for his critiques of the American Dream.", summary: " Jay Gatsby's obsessive pursuit of wealth and the woman he loves in the 1920s." },
@@ -57,198 +57,281 @@ const ENGLISH_LIBRARY_DATABASE: Book[] = [
   { id: 39, title: "Wonder", author: "R.J. Palacio", subject: "Drama", driveLink: "https://drive.google.com/file/d/1t5wMyRze_1cVCDfdlUbScSQEgiKlLEAd/view?usp=drive_link", bio: "R.J. Palacio is a famous American author best known for writing the inspiring best-selling novel Wonder.", summary: "Is a heartwarming novel about August Pullman, a young boy born with a facial difference. After being homeschooled for years, he starts the fifth grade at a private middle school. The story follows Auggie’s journey as he tries to fit in and shows how his courage affects his classmates and the whole community. It is a beautiful story that teaches readers about the importance of kindness, friendship, and accepting people for who they are." }
 ];
 
+
 const translations = {
     ar: {
         pageTitle: "المكتبة الإنجليزية",
         searchPlaceholder: "ابحث عن عنوان أو كاتب...",
-        allSubjects: "المواضيع",
-        allAuthors: "المؤلفين",
         sortBy: "فرز حسب",
-        alphabetical: "أبجدياً (العنوان)",
+        alphabetical: "العنوان",
         authorSort: "المؤلف",
         subjectSort: "الموضوع",
-        none: "تلقائي",
+        audioSort: "الصوتيات أولاً",
+        allAuthors: "كل المؤلفين",
+        allSubjects: "كل الموضوعات",
+        audioOnly: "صوتيات فقط",
         read: "قراءة المحتوى",
-        bioTitle: "حول المؤلف",
-        summaryTitle: "ملخص صقر الذكي",
+        listen: "تلخيص صقر الصوتي",
+        summaryTitle: "ملخص صقر الرقمي",
         back: "العودة",
         close: "إغلاق",
-        locationLabel: "EFIPS"
+        bioTitle: "نبذة عن المؤلف",
+        exclusive: "حصرياً",
+        speed: "السرعة"
     },
     en: {
         pageTitle: "English Library",
         searchPlaceholder: "Search title or author...",
-        allSubjects: "Subjects",
-        allAuthors: "Authors",
         sortBy: "Sort By",
-        alphabetical: "Alphabetical (Title)",
+        alphabetical: "Title",
         authorSort: "Author",
         subjectSort: "Subject",
-        none: "Default",
+        audioSort: "Audio First",
+        allAuthors: "All Authors",
+        allSubjects: "All Subjects",
+        audioOnly: "Audio Only",
         read: "Read Content",
-        bioTitle: "Author Bio",
-        summaryTitle: "Saqr AI Summary",
+        listen: "Saqr Audio Summary",
+        summaryTitle: "Saqr Digital Summary",
         back: "Back",
         close: "Close",
-        locationLabel: "EFIPS"
+        bioTitle: "About Author",
+        exclusive: "Exclusively",
+        speed: "Speed"
     }
 };
 
-const trackActivity = (type: 'searched' | 'digital' | 'ai', label: string) => {
-    const logs = JSON.parse(localStorage.getItem('efips_activity_logs') || '[]');
-    logs.push({ type, label, date: new Date().toISOString() });
-    localStorage.setItem('efips_activity_logs', JSON.stringify(logs));
-};
+// --- 3. المكونات الفرعية (Sub-components) ---
 
-const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any; onAuthorHover: (e: React.MouseEvent, bio: string | null) => void }> = ({ book, onClose, t, onAuthorHover }) => {
-    if (!book) return null;
+const SchoolLogo = ({ forceWhite = false, className = "" }: { forceWhite?: boolean, className?: string }) => (
+    <img 
+        src="/school-logo.png" 
+        alt="School Logo" 
+        className={`h-8 w-auto rotate-[15deg] transition-all duration-500 ${forceWhite ? 'brightness-0 invert' : 'dark:brightness-0 dark:invert'} ${className}`}
+    />
+);
+
+const AudioWaveIcon = () => (
+    <div className="flex gap-0.5 items-end h-4">
+        <div className="w-0.5 bg-red-600 animate-audio-bar-1"></div>
+        <div className="w-0.5 bg-red-600 animate-audio-bar-2"></div>
+        <div className="w-0.5 bg-red-600 animate-audio-bar-3"></div>
+        <div className="w-0.5 bg-red-600 animate-audio-bar-2"></div>
+    </div>
+);
+
+const SaqrAudioPlayer: React.FC<{ audioSrc: string; t: any }> = ({ audioSrc, t }) => {
+    const audioRef = useRef<HTMLAudioElement>(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [progress, setProgress] = useState(0);
+    const [speed, setSpeed] = useState(1);
+
+    const togglePlay = () => {
+        if (audioRef.current) {
+            if (isPlaying) audioRef.current.pause();
+            else audioRef.current.play();
+            setIsPlaying(!isPlaying);
+        }
+    };
+
+    const handleSpeed = () => {
+        const speeds = [1, 1.5, 2, 0.5];
+        const nextSpeed = speeds[(speeds.indexOf(speed) + 1) % speeds.length];
+        setSpeed(nextSpeed);
+        if (audioRef.current) audioRef.current.playbackRate = nextSpeed;
+    };
+
     return (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 backdrop-blur-3xl animate-in fade-in duration-500" onClick={onClose}>
-            <div className="glass-panel w-full max-w-4xl rounded-[3rem] border-none shadow-2xl overflow-y-auto max-h-[90vh] md:overflow-hidden relative animate-in zoom-in-95 duration-500 flex flex-col md:flex-row bg-white/95 dark:bg-slate-950/95" onClick={(e) => e.stopPropagation()}>
-                <button onClick={onClose} className="absolute top-4 end-4 md:top-6 md:end-6 z-50 p-2.5 bg-red-600 text-white rounded-full hover:scale-110 active:scale-90 transition-all shadow-lg">
-                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}><path d="M6 18L18 6M6 6l12 12" /></svg>
+        <div className="mt-8 animate-fade-up">
+            <h4 className="text-[10px] font-black text-red-600 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                <span className="text-lg">🎧</span> {t('listen')}
+            </h4>
+            <div className="p-5 rounded-[2.5rem] bg-white/40 dark:bg-white/5 backdrop-blur-2xl border border-white/20 shadow-inner flex items-center gap-4">
+                <audio ref={audioRef} src={audioSrc} onTimeUpdate={() => setProgress((audioRef.current!.currentTime / audioRef.current!.duration) * 100)} onEnded={() => setIsPlaying(false)} />
+                <button onClick={togglePlay} className="w-14 h-14 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all">
+                    {isPlaying ? <span className="text-xl">⏸</span> : <span className="text-xl ps-1">▶</span>}
                 </button>
-                <div className="flex-1 p-8 md:p-14 flex flex-col justify-center border-b md:border-b-0 md:border-e border-slate-200 dark:border-white/10 text-start font-black">
-                    <div className="mb-8">
-                        <span className="inline-block px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest mb-6 bg-red-600 text-white shadow-md">{book.subject}</span>
-                        <h2 className="text-3xl md:text-5xl font-black text-slate-950 dark:text-white leading-[1.1] mb-3 tracking-tighter">{book.title}</h2>
-                        <p onMouseMove={(e) => onAuthorHover(e, book.bio)} onMouseLeave={(e) => onAuthorHover(e, null)} className="text-xl text-red-600 dark:text-red-500 font-bold hover:text-slate-950 dark:hover:text-white transition-colors inline-block cursor-help border-b-2 border-dotted border-slate-300">By {book.author}</p>
-                    </div>
-                    <div className="bg-slate-100/50 dark:bg-white/5 p-8 rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-white/10 text-start">
-                        <p className="text-[10px] text-red-600 font-black uppercase mb-3 tracking-widest flex items-center gap-2"><span className="w-2.5 h-2.5 bg-red-600 rounded-full animate-pulse shadow-lg"></span> {t('summaryTitle')}</p>
-                        <p className="text-slate-800 dark:text-slate-200 text-lg md:text-xl font-medium leading-relaxed italic">"{book.summary}"</p>
-                    </div>
+                <div className="flex-1 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.5)] transition-all duration-300" style={{ width: `${progress}%` }} />
                 </div>
-                <div className="w-full md:w-[320px] bg-slate-950 dark:bg-black p-10 flex flex-col justify-center items-center text-center text-white relative font-black">
-                    <div className="space-y-10 relative z-10 w-full">
-                        <div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-8">{t('locationLabel')}</p>
-                            <a href={book.driveLink} target="_blank" rel="noopener noreferrer" onClick={() => trackActivity('digital', book.title)} className="w-full bg-red-600 text-white font-black py-6 rounded-2xl flex items-center justify-center gap-3 hover:bg-red-700 active:scale-95 shadow-xl transition-all shadow-red-600/20"><span className="text-sm md:text-xl uppercase tracking-widest">{t('read')}</span></a>
-                        </div>
-                        <button onClick={onClose} className="w-full bg-white text-slate-950 font-black py-4 rounded-xl active:scale-95 text-xs uppercase tracking-widest transition-all">{t('close')}</button>
-                    </div>
-                </div>
+                <button onClick={handleSpeed} className="px-3 py-2 rounded-xl bg-slate-900 text-white text-[9px] font-black hover:bg-red-600 transition-colors uppercase">{speed}x</button>
             </div>
         </div>
     );
 };
 
-const BookCard = React.memo(({ book, onClick, t, onAuthorHover }: { book: Book; onClick: () => void; t: any; onAuthorHover: (e: React.MouseEvent, bio: string | null) => void }) => (
-    <div onClick={() => { trackActivity('searched', book.title); onClick(); }} className="group relative glass-panel bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border-none rounded-[2.5rem] transition-all duration-500 cursor-pointer flex flex-col h-full overflow-hidden shadow-lg hover:shadow-2xl dark:hover:shadow-red-600/10 active:scale-95 hover:-translate-y-2">
-        
-        {/* حافة النيون الجانبية - هوية المكتبة الإنجليزية حمراء */}
-        <div className="absolute top-0 start-0 w-1.5 h-full bg-red-600 shadow-[2px_0_15px_rgba(220,38,38,0.4)]"></div>
-
-        <div className="p-7 md:p-9 flex-grow text-start font-black">
-             <span className="inline-block px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest mb-5 bg-red-600 text-white shadow-lg shadow-red-600/20">{book.subject}</span>
-            <h2 className="font-black text-xl md:text-2xl text-slate-950 dark:text-white leading-tight mb-3 tracking-tighter group-hover:text-red-600 transition-colors line-clamp-2 drop-shadow-sm">{book.title}</h2>
-            <div className="flex items-center gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
-                <span className="text-base">👤</span>
-                <p onMouseMove={(e) => onAuthorHover(e, book.bio)} onMouseLeave={(e) => onAuthorHover(e, null)} className="text-xs text-slate-500 dark:text-slate-400 font-bold hover:text-red-600 transition-all inline-block underline decoration-dotted underline-offset-4 cursor-help">By {book.author}</p>
-            </div>
-        </div>
-        <div className="bg-slate-50/50 dark:bg-black/40 py-4 px-8 border-t border-slate-100 dark:border-white/5 mt-auto flex items-center justify-between font-black">
-            <p className="font-black text-slate-900 dark:text-white text-[11px] uppercase tracking-[0.4em] opacity-30 group-hover:opacity-100 group-hover:text-red-600 transition-all">{t('locationLabel')}</p>
-            <div className="text-[14px] opacity-30 group-hover:opacity-100 group-hover:text-red-600 transition-all">➔</div>
-        </div>
-    </div>
-));
+// --- 4. الصفحة الرئيسية والمكونات الرئيسية ---
 
 const EnglishLibraryInternalPage: React.FC = () => {
     const { locale, dir } = useLanguage();
     const navigate = useNavigate();
-    const isAr = locale === 'ar';
     const t = (key: keyof typeof translations.ar) => translations[locale][key];
 
     const [searchTerm, setSearchTerm] = useState('');
-    const [subjectFilter, setSubjectFilter] = useState('all');
-    const [authorFilter, setAuthorFilter] = useState('all');
-    const [sortBy, setSortBy] = useState('alphabetical'); // ضبط الأبجدي كافتراضي
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+    const [authorFilter, setAuthorFilter] = useState('all');
+    const [subjectFilter, setSubjectFilter] = useState('all');
+    const [audioOnly, setAudioOnly] = useState(false);
+    const [sortBy, setSortBy] = useState('alphabetical');
     const [tooltip, setTooltip] = useState<{ text: string, x: number, y: number } | null>(null);
 
-    const handleAuthorHover = (e: React.MouseEvent, bio: string | null) => {
-        if (!bio || window.innerWidth < 768) { setTooltip(null); return; }
-        setTooltip({ text: bio, x: e.clientX, y: e.clientY - 40 });
-    };
-
-    const filters = useMemo(() => ({
-        subjects: ["all", ...new Set(ENGLISH_LIBRARY_DATABASE.map(b => b.subject))].sort(),
-        authors: ["all", ...new Set(ENGLISH_LIBRARY_DATABASE.map(b => b.author))].sort()
-    }), []);
+    // استخراج الفلاتر الفريدة من البيانات
+    const authors = useMemo(() => ["all", ...new Set(ENGLISH_LIBRARY_DATABASE.map(b => b.author))].sort(), []);
+    const subjects = useMemo(() => ["all", ...new Set(ENGLISH_LIBRARY_DATABASE.map(b => b.subject))].sort(), []);
 
     const filteredBooks = useMemo(() => {
         const term = searchTerm.toLowerCase().trim();
         let result = ENGLISH_LIBRARY_DATABASE.filter(b => {
-            const matchesTerm = !term || b.title.toLowerCase().includes(term) || b.author.toLowerCase().includes(term);
-            const matchesSub = subjectFilter === 'all' || b.subject === subjectFilter;
-            const matchesAuth = authorFilter === 'all' || b.author === authorFilter;
-            return matchesTerm && matchesSub && matchesAuth;
+            const matchesSearch = b.title.toLowerCase().includes(term) || b.author.toLowerCase().includes(term);
+            const matchesAuthor = authorFilter === 'all' || b.author === authorFilter;
+            const matchesSubject = subjectFilter === 'all' || b.subject === subjectFilter;
+            const matchesAudio = audioOnly ? !!b.audioId : true;
+            return matchesSearch && matchesAuthor && matchesSubject && matchesAudio;
         });
 
-        if (sortBy === 'alphabetical') {
-            result = [...result].sort((a, b) => a.title.localeCompare(b.title));
-        } else if (sortBy === 'author') {
-            result = [...result].sort((a, b) => a.author.localeCompare(b.author));
-        } else if (sortBy === 'subject') {
-            result = [...result].sort((a, b) => a.subject.localeCompare(b.subject));
-        }
+        if (sortBy === 'author') result = [...result].sort((a, b) => a.author.localeCompare(b.author));
+        else if (sortBy === 'subject') result = [...result].sort((a, b) => a.subject.localeCompare(b.subject));
+        else if (sortBy === 'audio') result = [...result].sort((a, b) => (b.audioId ? 1 : 0) - (a.audioId ? 1 : 0));
+        else result = [...result].sort((a, b) => a.title.localeCompare(b.title));
 
         return result;
-    }, [searchTerm, subjectFilter, authorFilter, sortBy]);
+    }, [searchTerm, authorFilter, subjectFilter, audioOnly, sortBy]);
+
+    const handleAuthorHover = (e: React.MouseEvent, bio: string | null) => {
+        if (!bio || window.innerWidth < 768) { setTooltip(null); return; }
+        setTooltip({ text: bio, x: e.clientX, y: e.clientY });
+    };
 
     return (
-        <div dir={dir} className="max-w-7xl mx-auto px-4 pb-32 relative z-10 text-start antialiased font-black">
+        <div dir={dir} className="max-w-7xl mx-auto px-4 pb-40 relative z-10 font-black antialiased">
+            
+            {/* Glass Bio Tooltip */}
             {tooltip && (
-                <div className="fixed pointer-events-none z-[200] glass-panel px-6 py-3 rounded-2xl border-white/40 shadow-2xl animate-in fade-in zoom-in duration-200 max-w-xs transition-opacity" style={{ left: tooltip.x, top: tooltip.y, transform: 'translate(-50%, -100%)' }}>
+                <div 
+                    className="fixed pointer-events-none z-[300] bg-white/10 dark:bg-black/40 backdrop-blur-2xl border border-white/20 p-6 rounded-[2rem] shadow-2xl animate-in fade-in zoom-in duration-200 max-w-xs"
+                    style={{ left: tooltip.x + 20, top: tooltip.y + 20, transform: locale === 'ar' ? 'translateX(-100%)' : 'none' }}
+                >
                     <p className="text-[10px] font-black text-red-600 uppercase mb-2 tracking-widest">{t('bioTitle')}</p>
-                    <p className="text-xs font-black text-slate-900 dark:text-white leading-relaxed">{tooltip.text}</p>
+                    <p className="text-xs font-bold text-slate-900 dark:text-white leading-relaxed">{tooltip.text}</p>
                 </div>
             )}
 
-            <div className="text-center mt-12 mb-16 md:mb-24 relative animate-fade-up">
-                <button onClick={() => navigate(-1)} className="absolute start-0 top-1/2 -translate-y-1/2 flex items-center gap-3 text-slate-400 hover:text-red-600 transition-colors group">
-                    <svg className={`h-7 w-7 transform group-hover:-translate-x-1 ${isAr ? '' : 'rotate-180'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}><path d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-                    <span className="text-xs font-black uppercase tracking-widest hidden sm:inline">{t('back')}</span>
+            {/* العنوان العلوي */}
+            <div className="text-center mt-12 mb-20 animate-fade-up">
+                <button onClick={() => navigate(-1)} className="absolute start-0 top-0 text-slate-400 hover:text-red-600 flex items-center gap-2 transition-all">
+                    <span className="text-2xl">←</span> {t('back')}
                 </button>
-                <h1 className="text-5xl md:text-9xl font-black text-slate-950 dark:text-white tracking-tighter leading-none drop-shadow-2xl">{t('pageTitle')}</h1>
-                <div className="h-2 w-32 bg-red-600 mx-auto mt-8 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.5)]"></div>
+                <h1 className="text-4xl md:text-[6rem] font-black text-slate-950 dark:text-white tracking-tighter leading-none">{t('pageTitle')}</h1>
+                <div className="h-2 w-32 bg-red-600 mx-auto mt-8 rounded-full shadow-lg" />
             </div>
 
-            <div className="sticky top-20 z-50 mb-16 animate-fade-up">
-                <div className="glass-panel p-3 md:p-5 rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl border-none backdrop-blur-3xl max-w-6xl mx-auto bg-white/90 dark:bg-slate-900/80">
-                    <div className="flex flex-col md:flex-row gap-3 md:gap-4">
-                        <div className="flex-[2] relative">
-                            <input type="text" placeholder={t('searchPlaceholder')} className="w-full p-4 ps-14 bg-slate-100/50 dark:bg-black/40 text-slate-950 dark:text-white border-2 border-transparent focus:border-red-600 rounded-2xl md:rounded-3xl outline-none transition-all font-black text-base shadow-inner" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-                            <svg className="absolute start-5 top-1/2 -translate-y-1/2 h-6 w-6 text-red-600 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                        </div>
-                        <div className="grid grid-cols-3 gap-2 flex-[4]">
-                            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="p-3 rounded-xl md:rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 font-black text-[10px] md:text-xs cursor-pointer outline-none focus:border-red-600 appearance-none text-center shadow-md">
-                                <option value="none">{t('sortBy')}</option>
-                                <option value="alphabetical">{t('alphabetical')}</option>
-                                <option value="author">{t('authorSort')}</option>
-                                <option value="subject">{t('subjectSort')}</option>
-                            </select>
-                            <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="p-3 rounded-xl md:rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 font-black text-[10px] md:text-xs cursor-pointer outline-none focus:border-red-600 appearance-none text-center shadow-md">
-                                <option value="all">{t('allSubjects')}</option>
-                                {filters.subjects.map(o => o !== "all" && <option key={o} value={o}>{o}</option>)}
-                            </select>
-                            <select value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)} className="p-3 rounded-xl md:rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 font-black text-[10px] md:text-xs cursor-pointer outline-none focus:border-red-600 appearance-none text-center shadow-md">
-                                <option value="all">{t('allAuthors')}</option>
-                                {filters.authors.map(o => o !== "all" && <option key={o} value={o}>{o}</option>)}
-                            </select>
-                        </div>
+            {/* شريط البحث والفلترة المطور */}
+            <div className="sticky top-6 z-50 mb-16 px-2 md:px-0">
+                <div className="glass-panel p-4 md:p-6 rounded-[2.5rem] md:rounded-[4rem] bg-white/80 dark:bg-slate-900/80 border-none shadow-2xl flex flex-col gap-4">
+                    <div className="relative">
+                        <input 
+                            type="text" 
+                            placeholder={t('searchPlaceholder')} 
+                            className="w-full p-5 ps-12 bg-white dark:bg-black/40 text-slate-950 dark:text-white rounded-[1.5rem] md:rounded-[2.5rem] outline-none border-2 border-transparent focus:border-red-600 transition-all font-black text-lg"
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        <span className="absolute start-5 top-1/2 -translate-y-1/2 opacity-40 text-xl">🔍</span>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <select value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)} className="p-3 px-4 rounded-2xl bg-white dark:bg-slate-800 font-black text-[10px] cursor-pointer outline-none border border-white/10 shadow-sm">
+                            <option value="all">{t('allAuthors')}</option>
+                            {authors.filter(a => a !== "all").map(a => <option key={a} value={a}>{a}</option>)}
+                        </select>
+                        <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="p-3 px-4 rounded-2xl bg-white dark:bg-slate-800 font-black text-[10px] cursor-pointer outline-none border border-white/10 shadow-sm">
+                            <option value="all">{t('allSubjects')}</option>
+                            {subjects.filter(s => s !== "all").map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="p-3 px-4 rounded-2xl bg-white dark:bg-slate-800 font-black text-[10px] cursor-pointer outline-none border border-white/10 shadow-sm">
+                            <option value="alphabetical">{t('alphabetical')}</option>
+                            <option value="author">{t('authorSort')}</option>
+                            <option value="subject">{t('subjectSort')}</option>
+                            <option value="audio">{t('audioSort')}</option>
+                        </select>
+                        <button onClick={() => setAudioOnly(!audioOnly)} className={`p-3 px-4 rounded-2xl font-black text-[10px] transition-all border ${audioOnly ? 'bg-red-600 text-white border-red-600 shadow-lg shadow-red-600/30' : 'bg-white dark:bg-slate-800 text-slate-500 border-white/10'}`}>🎧 {t('audioOnly')}</button>
                     </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 md:gap-12 animate-fade-up">
+            {/* عرض الكتب */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 md:gap-10">
                 {filteredBooks.map((book) => (
-                    <BookCard key={book.id} book={book} t={t} onClick={() => setSelectedBook(book)} onAuthorHover={handleAuthorHover} />
+                    <div key={book.id} onClick={() => setSelectedBook(book)} className="group relative glass-panel rounded-[2.5rem] p-1 cursor-pointer transition-all duration-500 hover:-translate-y-3 h-full animate-fade-up border-none shadow-lg">
+                        <div className="relative overflow-hidden rounded-[2.4rem] bg-white/20 dark:bg-slate-900/40 backdrop-blur-md h-full flex flex-col">
+                            {/* حافة الهوية */}
+                            <div className={`absolute top-0 start-0 w-1.5 h-full ${book.audioId ? 'bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.4)]' : 'bg-slate-400'}`} />
+                            
+                            <div className="p-8 relative z-10 flex-grow text-start">
+                                <div className="flex justify-between items-start mb-4">
+                                    <span className={`inline-block px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest text-white ${book.audioId ? 'bg-red-600 shadow-md' : 'bg-slate-500 shadow-md'}`}>{book.subject}</span>
+                                    {book.audioId && <AudioWaveIcon />}
+                                </div>
+                                <h2 className="font-black text-xl md:text-2xl text-slate-950 dark:text-white leading-tight mb-4 group-hover:text-red-600 transition-colors line-clamp-2">{book.title}</h2>
+                                <div className="flex items-center gap-2 opacity-60"><span className="text-sm">👤</span><p className="text-[10px] font-bold uppercase truncate tracking-widest">{book.author}</p></div>
+                            </div>
+                            <div className="bg-black/5 dark:bg-white/5 py-5 px-8 border-t border-white/10 mt-auto flex items-center justify-between relative z-10">
+                                <div className="text-[8px] font-black opacity-30 uppercase tracking-widest text-red-600">Saqr English</div>
+                                <SchoolLogo className="group-hover:rotate-[20deg]" />
+                            </div>
+                        </div>
+                    </div>
                 ))}
             </div>
 
-            <BookModal book={selectedBook} onClose={() => setSelectedBook(null)} t={t} onAuthorHover={handleAuthorHover} />
+            {/* نافذة تفاصيل الكتاب (Modal) */}
+            {selectedBook && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 backdrop-blur-3xl animate-fade-up" onClick={() => setSelectedBook(null)}>
+                    <div className="relative w-full max-w-4xl glass-panel rounded-[3rem] overflow-hidden flex flex-col md:flex-row shadow-2xl bg-white/95 dark:bg-slate-950/95" onClick={(e) => e.stopPropagation()}>
+                        <button onClick={() => setSelectedBook(null)} className="absolute top-6 end-6 z-50 p-2 bg-red-600 text-white rounded-full hover:rotate-90 transition-all shadow-xl"><svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M6 18L18 6M6 6l12 12" /></svg></button>
+                        
+                        <div className="flex-1 p-8 md:p-14 text-start">
+                            <h2 className="text-3xl md:text-5xl font-black text-slate-950 dark:text-white leading-tight mb-2 tracking-tighter">{selectedBook.title}</h2>
+                            <p 
+                                onMouseMove={(e) => handleAuthorHover(e, selectedBook.bio)} 
+                                onMouseLeave={(e) => handleAuthorHover(e, null)}
+                                className="text-xl text-red-600 font-bold mb-8 cursor-help inline-block border-b-2 border-dotted border-red-200"
+                            >
+                                By {selectedBook.author}
+                            </p>
+                            <div className="p-6 rounded-[2rem] bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-inner">
+                                <p className="text-[10px] text-green-600 font-black uppercase tracking-widest mb-3 flex items-center gap-2"><span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> {t('summaryTitle')}</p>
+                                <p className="text-slate-800 dark:text-slate-200 text-lg leading-relaxed">{selectedBook.summary}</p>
+                            </div>
+                            {selectedBook.audioId && <SaqrAudioPlayer audioSrc={selectedBook.audioId} t={t} />}
+                        </div>
+
+                        <div className="w-full md:w-[320px] bg-slate-950 p-10 flex flex-col justify-center items-center text-white border-s border-white/10 shrink-0">
+                            <div className="space-y-12 w-full text-center flex flex-col items-center">
+                                {/* الشعار الأبيض الملكي فوق الزر */}
+                                <div className="flex flex-col items-center gap-2">
+                                    <SchoolLogo forceWhite={true} className="h-16 w-auto mb-2" />
+                                    <span className="text-[10px] font-black text-white uppercase tracking-[0.5em]">{t('exclusive')}</span>
+                                </div>
+                                
+                                <div className="w-full space-y-4">
+                                    <a href={selectedBook.driveLink} target="_blank" rel="noreferrer" className="w-full block bg-red-600 text-white font-black py-5 rounded-2xl hover:bg-red-700 transition-all text-center uppercase tracking-widest shadow-xl shadow-red-600/20">{t('read')}</a>
+                                    <button onClick={() => setSelectedBook(null)} className="w-full bg-white/10 text-white border border-white/20 font-black py-4 rounded-xl hover:bg-white hover:text-black transition-all text-xs uppercase tracking-widest">{t('close')}</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <style>{`
+                @keyframes audio-bar { 0%, 100% { height: 4px; } 50% { height: 14px; } }
+                .animate-audio-bar-1 { animation: audio-bar 0.6s ease-in-out infinite; }
+                .animate-audio-bar-2 { animation: audio-bar 0.8s ease-in-out infinite 0.2s; }
+                .animate-audio-bar-3 { animation: audio-bar 0.7s ease-in-out infinite 0.4s; }
+                
+                /* منع أي ميلان للخطوط نهائياً في هذه الصفحة */
+                * { font-style: normal !important; }
+            `}</style>
         </div>
     );
 };
