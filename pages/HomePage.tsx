@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../App';
 
@@ -12,8 +12,7 @@ const translations = {
         smartDesc: "مساعدك الذكي للبحث والاستفسار.",
         digitalLibrary: "المكتبة الإلكترونية",
         digitalDesc: "عالم من الكتب والروايات الرقمية.",
-        bubble: "اضغط للإلهام!",
-        visitorsLabel: "إجمالي التفاعل",
+        bubble: "أهلاً بك في صقر!",
         homelandTitle: "لمحات من الموطن"
     },
     en: {
@@ -25,8 +24,7 @@ const translations = {
         smartDesc: "Your smart AI research assistant.",
         digitalLibrary: "Digital Library",
         digitalDesc: "World of digital books and novels.",
-        bubble: "Touch for inspiration!",
-        visitorsLabel: "Total Engagement",
+        bubble: "Welcome to Saqr!",
         homelandTitle: "Hints From Homeland"
     }
 };
@@ -37,158 +35,99 @@ const HOMELAND_FACTS = [
     { ar: "مسبار الأمل الإماراتي هو أول مهمة عربية تصل إلى مدار كوكب المريخ لاستكشاف غلافه الجوي.", en: "The Hope Probe is the first Arab mission to reach Mars to explore its atmosphere." },
     { ar: "تعتبر 'نخلة جميرا' أكبر جزيرة اصطناعية في العالم، ويمكن رؤيتها من الفضاء الخارجي.", en: "Palm Jumeirah is the world's largest man-made island, visible from space." },
     { ar: "متحف اللوفر أبوظبي هو أول متحف عالمي في العالم العربي.", en: "Louvre Abu Dhabi is the first universal museum in the Arab world." },
-    { ar: "ميناء جبل علي هو أكبر ميناء من صنع الإنسان في العالم.", en: "Jebel Ali Port is the largest man-made harbor in the world." },
-    { ar: "عين دبي هي أكبر وأطول عجلة مشاهدة في العالم.", en: "Ain Dubai is the world's largest and tallest observation wheel." },
     { ar: "تعتبر الإمارات واحدة من أكثر الدول أماناً في العالم.", en: "The UAE is considered one of the safest countries in the world." },
     { ar: "شجرة الغاف هي الشجرة الوطنية ورمز للصمود في الصحراء.", en: "The Ghaf tree is the national tree and a symbol of resilience in the desert." },
     { ar: "تضم الدولة متحف المستقبل الذي يعد أيقونة معمارية فريدة.", en: "The country hosts the Museum of the Future, a unique architectural icon." },
     { ar: "جامع الشيخ زايد الكبير يضم واحدة من أكبر الثريات والسجادات في العالم.", en: "Sheikh Zayed Grand Mosque houses one of the world's largest chandeliers and carpets." },
-        
 ];
-
-const KNOWLEDGE_CARDS = [
-    { icon: "📜", textAr: "بحث رقمي", textEn: "Digital Research", color: "border-red-600" },
-    { icon: "💡", textAr: "فكرة مبتكرة", textEn: "Innovative Idea", color: "border-yellow-500" },
-    { icon: "🤖", textAr: "ذكاء صقر", textEn: "Saqr AI", color: "border-green-600" },
-    { icon: "📚", textAr: "مصادر المعرفة", textEn: "Knowledge Sources", color: "border-blue-600" },
-    { icon: "🇦🇪", textAr: "هوية وطنية", textEn: "UAE Identity", color: "border-red-500" }
-];
-
-interface BurstItem { id: number; tx: number; ty: number; rot: number; item: typeof KNOWLEDGE_CARDS[0]; }
 
 const HomePage: React.FC = () => {
     const { locale } = useLanguage();
     const isAr = locale === 'ar';
     const t = (key: keyof typeof translations.ar) => translations[locale][key];
     
-    const [bursts, setBursts] = useState<BurstItem[]>([]);
     const [isMascotClicked, setIsMascotClicked] = useState(false);
-    const [visitorCount, setVisitorCount] = useState(0);
 
     const dailyFact = useMemo(() => {
         const day = new Date().getDate();
         return HOMELAND_FACTS[day % HOMELAND_FACTS.length];
     }, []);
 
-    useEffect(() => {
-        const storedCount = parseInt(localStorage.getItem('efips_total_visitors') || '1240');
-        const newCount = storedCount + 1;
-        localStorage.setItem('efips_total_visitors', newCount.toString());
-        let start = 0;
-        const timer = setInterval(() => {
-            start += newCount / 80;
-            if (start >= newCount) { setVisitorCount(newCount); clearInterval(timer); } 
-            else { setVisitorCount(Math.floor(start)); }
-        }, 16);
-        return () => clearInterval(timer);
-    }, []);
-
     const handleMascotInteraction = useCallback(() => {
         setIsMascotClicked(true);
         setTimeout(() => setIsMascotClicked(false), 300);
-        
-        const id = Date.now();
-        // توليد كروت الانفجار بنفس نظام المكتبة الرقمية
-        const newBursts: BurstItem[] = Array.from({ length: 3 }).map((_, i) => ({
-            id: id + i,
-            item: KNOWLEDGE_CARDS[Math.floor(Math.random() * KNOWLEDGE_CARDS.length)],
-            tx: (Math.random() - 0.5) * (window.innerWidth < 768 ? 140 : 350), 
-            ty: -120 - Math.random() * 150,
-            rot: (Math.random() - 0.5) * 60
-        }));
-
-        setBursts(prev => [...prev, ...newBursts]);
-        
-        // الاختفاء بعد 5 ثواني بالضبط
-        newBursts.forEach(b => { 
-            setTimeout(() => { 
-                setBursts(current => current.filter(item => item.id !== b.id)); 
-            }, 5000); 
-        });
-
-        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
-        audio.volume = 0.05; audio.play().catch(() => {});
+        // تم إلغاء نظام الانفجار التفاعلي بطلبك لتركيز التصميم
     }, []);
 
     return (
-        <div className="max-w-7xl mx-auto px-4 py-6 md:py-12 flex flex-col items-center gap-10 md:gap-20 animate-fade-up font-black antialiased relative">
+        <div className="max-w-7xl mx-auto px-4 py-8 md:py-16 flex flex-col items-center gap-12 md:gap-24 animate-fade-up font-black antialiased relative overflow-x-hidden">
             
-            {/* 1. قسم الترحيب الرئيسي */}
-            <div className="text-center space-y-4 md:space-y-8 max-w-4xl relative z-20">
-                <h1 className="text-4xl md:text-8xl font-black text-slate-950 dark:text-white tracking-tighter leading-tight drop-shadow-2xl">
+            {/* 1. قسم الترحيب - تم ضبط التباعد وإلغاء الميلان */}
+            <div className="text-center space-y-6 md:space-y-10 max-w-5xl relative z-20">
+                <h1 className="text-4xl md:text-8xl font-black text-slate-950 dark:text-white tracking-tighter leading-[1.1] drop-shadow-2xl">
                     {t('welcome')}
                 </h1>
-                <p className="text-base md:text-3xl text-slate-600 dark:text-slate-400 font-bold opacity-80 leading-relaxed italic">
+                <p className="text-base md:text-3xl text-slate-600 dark:text-slate-400 font-bold opacity-80 leading-relaxed max-w-3xl mx-auto">
                     {t('subWelcome')}
                 </p>
-                <div className="h-1.5 w-32 bg-red-600 mx-auto rounded-full shadow-[0_0_20px_rgba(220,38,38,0.5)]"></div>
+                <div className="h-2 w-40 bg-red-600 mx-auto rounded-full shadow-[0_0_25px_rgba(220,38,38,0.6)]"></div>
             </div>
 
-            {/* 2. مركز العمليات */}
+            {/* 2. الأزرار الرئيسية */}
             <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-16 items-center">
                 
                 <div className="lg:col-span-7 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 order-2 lg:order-1">
-                    <Link to="/search" className="group glass-panel p-6 md:p-10 rounded-[2.5rem] border-2 border-red-600/20 hover:border-red-600 transition-all duration-500 shadow-xl">
-                        <div className="text-4xl md:text-6xl mb-4 group-hover:scale-110 transition-transform">🔍</div>
-                        <h3 className="text-xl md:text-3xl text-slate-950 dark:text-white mb-2">{t('manualSearch')}</h3>
-                        <p className="text-xs md:text-lg text-slate-500 dark:text-slate-400 font-bold">{t('manualDesc')}</p>
+                    <Link to="/search" className="group glass-panel p-8 md:p-12 rounded-[3rem] border-2 border-red-600/20 hover:border-red-600 transition-all duration-500 shadow-2xl">
+                        <div className="text-5xl md:text-7xl mb-6 group-hover:scale-110 transition-transform">🔍</div>
+                        <h3 className="text-2xl md:text-4xl text-slate-950 dark:text-white mb-3">{t('manualSearch')}</h3>
+                        <p className="text-sm md:text-xl text-slate-500 dark:text-slate-400 font-bold leading-relaxed">{t('manualDesc')}</p>
                     </Link>
 
-                    <Link to="/smart-search" className="group glass-panel p-6 md:p-10 rounded-[2.5rem] border-2 border-green-600/20 hover:border-green-600 transition-all duration-500 shadow-xl">
-                        <div className="text-4xl md:text-6xl mb-4 group-hover:scale-110 transition-transform">🤖</div>
-                        <h3 className="text-xl md:text-3xl text-slate-950 dark:text-white mb-2">{t('smartSearch')}</h3>
-                        <p className="text-xs md:text-lg text-slate-500 dark:text-slate-400 font-bold">{t('smartDesc')}</p>
+                    <Link to="/smart-search" className="group glass-panel p-8 md:p-12 rounded-[3rem] border-2 border-green-600/20 hover:border-green-600 transition-all duration-500 shadow-2xl">
+                        <div className="text-5xl md:text-7xl mb-6 group-hover:scale-110 transition-transform">🤖</div>
+                        <h3 className="text-2xl md:text-4xl text-slate-950 dark:text-white mb-3">{t('smartSearch')}</h3>
+                        <p className="text-sm md:text-xl text-slate-500 dark:text-slate-400 font-bold leading-relaxed">{t('smartDesc')}</p>
                     </Link>
 
-                    <Link to="/digital-library" className="md:col-span-2 group glass-panel p-6 md:p-10 rounded-[2.5rem] border-2 border-blue-600/20 hover:border-blue-600 transition-all duration-500 shadow-xl flex items-center gap-6">
-                        <div className="text-4xl md:text-7xl group-hover:rotate-12 transition-transform">📚</div>
-                        <div className="text-start">
-                            <h3 className="text-xl md:text-4xl text-slate-950 dark:text-white mb-1">{t('digitalLibrary')}</h3>
-                            <p className="text-xs md:text-xl text-slate-500 dark:text-slate-400 font-bold">{t('digitalDesc')}</p>
+                    <Link to="/digital-library" className="md:col-span-2 group glass-panel p-8 md:p-14 rounded-[3.5rem] border-2 border-blue-600/20 hover:border-blue-600 transition-all duration-500 shadow-2xl flex flex-col md:flex-row items-center gap-8 text-center md:text-start">
+                        <div className="text-6xl md:text-8xl group-hover:rotate-6 transition-transform">📚</div>
+                        <div className="space-y-2">
+                            <h3 className="text-2xl md:text-5xl text-slate-950 dark:text-white font-black">{t('digitalLibrary')}</h3>
+                            <p className="text-sm md:text-2xl text-slate-500 dark:text-slate-400 font-bold leading-relaxed">{t('digitalDesc')}</p>
                         </div>
                     </Link>
                 </div>
 
-                {/* صقر مع الشعار ونظام الانفجار الملكي */}
+                {/* صقر مع الشعار المائل */}
                 <div className="lg:col-span-5 flex justify-center order-1 lg:order-2 relative">
-                    <div onClick={handleMascotInteraction} className={`relative cursor-pointer transition-transform duration-500 ${isMascotClicked ? 'scale-110' : 'hover:scale-105'}`}>
+                    <div onClick={handleMascotInteraction} className={`relative cursor-pointer transition-transform duration-700 ${isMascotClicked ? 'scale-110' : 'hover:scale-105'}`}>
                         
-                        {/* شعار المدرسة المائل في الخلفية */}
+                        {/* الشعار المائل في الخلفية */}
                         <div className="absolute inset-0 flex items-center justify-center -z-10 pointer-events-none opacity-10 dark:opacity-20 transition-all duration-1000">
-                            <img src="/school-logo.png" alt="Seal" className="w-[120%] h-[120%] object-contain rotate-[15deg] logo-white-filter blur-[1px]" />
+                            <img src="/school-logo.png" alt="Seal" className="w-[130%] h-[130%] object-contain rotate-[15deg] logo-white-filter blur-[2px]" />
                         </div>
 
-                        {/* كروت الانفجار: تظهر فوق كل شيء (z-[100]) وبحركة المكتبة الرقمية */}
-                        {bursts.map((burst) => (
-                            <div key={burst.id} 
-                                className={`absolute z-[100] bg-white dark:bg-slate-900 px-6 py-3 rounded-2xl border-4 ${burst.item.color} shadow-[0_30px_60px_rgba(0,0,0,0.3)] animate-burst-long pointer-events-none flex items-center gap-3`}
-                                style={{ '--tx': `${burst.tx}px`, '--ty': `${burst.ty}px`, '--rot': `${burst.rot}deg` } as any}>
-                                <span className="text-2xl md:text-5xl">{burst.item.icon}</span>
-                                <span className="text-[10px] md:text-2xl font-black text-slate-950 dark:text-white uppercase whitespace-nowrap">{isAr ? burst.item.textAr : burst.item.textEn}</span>
-                            </div>
-                        ))}
-
-                        <img src="/saqr-full.png" alt="Saqr" className="h-64 md:h-[600px] object-contain drop-shadow-[0_30px_60px_rgba(220,38,38,0.25)] relative z-10 animate-float" />
+                        <img src="/saqr-full.png" alt="Saqr" className="h-72 md:h-[650px] object-contain drop-shadow-[0_40px_80px_rgba(220,38,38,0.3)] relative z-10 animate-float" />
                         
-                        <div className="absolute -top-4 -right-4 md:-top-10 md:-right-10 glass-panel p-3 md:p-6 rounded-3xl border-red-500/30 shadow-3xl text-[10px] md:text-xl font-black text-red-600 dark:text-white animate-bounce z-20">
+                        <div className="absolute -top-4 -right-4 md:-top-10 md:-right-10 glass-panel p-4 md:p-8 rounded-[2rem] border-red-500/30 shadow-3xl text-xs md:text-2xl font-black text-red-600 dark:text-white animate-bounce z-20">
                             {t('bubble')}
-                            <div className="absolute -bottom-2 left-8 w-4 h-4 glass-panel rotate-45 bg-inherit border-r-2 border-b-2 border-red-500/20"></div>
+                            <div className="absolute -bottom-2 left-8 w-5 h-5 glass-panel rotate-45 bg-inherit border-r-2 border-b-2 border-red-500/20"></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* باقي الأقسام (الموطن والعداد) */}
-            <div className="w-full max-w-6xl animate-fade-up">
-                <div className="glass-panel p-8 md:p-14 rounded-[3rem] md:rounded-[5.5rem] border-l-8 border-green-600 border-r-8 border-red-600 bg-white dark:bg-slate-950 shadow-[0_0_60px_rgba(0,0,0,0.1)] relative overflow-hidden group">
-                    <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-green-600/5 via-white/5 to-red-600/5 -z-10"></div>
-                    <div className="relative z-10 flex flex-col md:flex-row items-center gap-10">
-                        <div className="w-24 h-24 md:w-36 md:h-36 bg-slate-100 dark:bg-white/10 rounded-[2.5rem] flex items-center justify-center text-5xl md:text-8xl shadow-xl animate-pulse border-4 border-yellow-500/30">🇦🇪</div>
-                        <div className="text-center md:text-start flex-1">
-                            <h3 className="text-lg md:text-4xl font-black text-red-600 dark:text-red-500 uppercase tracking-widest mb-3 flex items-center justify-center md:justify-start gap-3">
+            {/* 3. قسم لمحات من الموطن - تم تحسين تباعد الأسطر */}
+            <div className="w-full max-w-6xl animate-fade-up mb-16">
+                <div className="glass-panel p-10 md:p-20 rounded-[4rem] md:rounded-[6rem] border-l-[12px] border-green-600 border-r-[12px] border-red-600 bg-white dark:bg-slate-950 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-green-600/5 via-transparent to-red-600/5 -z-10"></div>
+                    <div className="relative z-10 flex flex-col md:flex-row items-center gap-12">
+                        <div className="w-28 h-28 md:w-44 md:h-44 bg-slate-100 dark:bg-white/10 rounded-[3rem] flex items-center justify-center text-6xl md:text-9xl shadow-2xl animate-pulse border-4 border-yellow-500/30 shrink-0">🇦🇪</div>
+                        <div className="text-center md:text-start flex-1 space-y-6">
+                            <h3 className="text-xl md:text-5xl font-black text-red-600 dark:text-red-500 uppercase tracking-widest flex items-center justify-center md:justify-start gap-4">
                                 {t('homelandTitle')}
                             </h3>
-                            <p className="text-xl md:text-5xl text-slate-950 dark:text-white leading-tight font-black tracking-tight italic border-b-4 border-green-600 pb-4">
+                            <p className="text-2xl md:text-6xl text-slate-950 dark:text-white leading-[1.3] font-black tracking-tight border-b-8 border-green-600/30 pb-8">
                                 {isAr ? dailyFact.ar : dailyFact.en}
                             </p>
                         </div>
@@ -196,33 +135,23 @@ const HomePage: React.FC = () => {
                 </div>
             </div>
 
-            <div className="w-full max-w-2xl animate-fade-up pb-10">
-                <div className="glass-panel px-10 py-6 md:py-10 rounded-full border-2 border-green-600/30 flex flex-col md:flex-row items-center justify-center gap-4 group">
-                    <div className="flex items-center gap-4">
-                        <span className="relative flex h-4 w-4 md:h-6 md:w-6">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-4 w-4 md:h-6 md:w-6 bg-green-600 shadow-[0_0_10px_rgba(34,197,94,1)]"></span>
-                        </span>
-                        <p className="text-xs md:text-2xl font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">{t('visitorsLabel')}</p>
-                    </div>
-                    <div className="text-4xl md:text-[5rem] font-black text-green-700 dark:text-green-500 tabular-nums">
-                        {visitorCount.toLocaleString()}
-                    </div>
-                </div>
-            </div>
-
             <style>{`
-                @keyframes burst-long {
-                    0% { transform: translate(0, 0) scale(0.4) rotate(0deg); opacity: 0; filter: blur(10px); }
-                    10% { transform: translate(var(--tx), var(--ty)) scale(1.1) rotate(var(--rot)); opacity: 1; filter: blur(0px); }
-                    85% { transform: translate(calc(var(--tx) * 1.05), calc(var(--ty) * 1.05)) scale(1); opacity: 1; filter: blur(0px); }
-                    100% { transform: translate(calc(var(--tx) * 1.1), calc(var(--ty) - 50px)) scale(1.3) rotate(calc(var(--rot) * 1.5)); opacity: 0; filter: blur(40px); }
+                /* فرض الخط المستقيم في كل مكان لإلغاء أي ميلان افتراضي */
+                * { font-style: normal !important; }
+
+                .animate-float { animation: float 8s ease-in-out infinite; }
+                @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-30px); } }
+                
+                .glass-panel { 
+                    backdrop-filter: blur(60px); 
+                    background: rgba(255, 255, 255, 0.03); 
                 }
-                .animate-burst-long { animation: burst-long 5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-                .animate-float { animation: float 6s ease-in-out infinite; }
-                @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
-                .glass-panel { backdrop-filter: blur(50px); background: rgba(255, 255, 255, 0.05); }
-                .logo-white-filter { dark:filter: brightness(0) invert(1); }
+                
+                .logo-white-filter { transition: filter 0.5s ease; }
+                .dark .logo-white-filter { filter: brightness(0) invert(1); }
+
+                /* زيادة تباعد الأسطر للنصوص الطويلة لسهولة القراءة */
+                p { line-height: 1.8 !important; }
             `}</style>
         </div>
     );
