@@ -45,7 +45,7 @@ const KNOWLEDGE_CARDS = [
     { icon: "📜", textAr: "بحث رقمي", textEn: "Research", color: "border-red-600" },
     { icon: "💡", textAr: "بحث في مكتبة المدرسة", textEn: "Search In Library", color: "border-yellow-500" },
     { icon: "🤖", textAr: "ذكاء صقر", textEn: "Saqr AI", color: "border-green-600" },
-    { icon: "📚", textAr: "كتب الكترونية", textEn: "E-Books", color: "border-blue-600" },
+    { icon: "📚", textAr: "كتب الكترونية", textEn: "E-Books", color: "border-black-600" },
     { icon: "🇦🇪", textAr: "الهوية الوطنية", textEn: "N.Identity", color: "border-red-500" }
 ];
 
