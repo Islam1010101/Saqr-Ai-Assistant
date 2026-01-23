@@ -54,6 +54,7 @@ const ARABIC_LIBRARY_DATABASE = [
     { id: "AR_48", title: "وادي الذئاب المنسية", author: "عمرو عبدالحميد", subject: "أدب خيالي", publisher: "عصير الكتب", driveLink: "https://drive.google.com/file/d/1UeaCT1D75jpzjESxUw-ztusUvBrXXV4Q/view?usp=drive_link", bio: "عمرو عبد الحميد هو كاتب وطبيب مصري بارز، يُعد من أشهر روائيي الفنتازيا والخيال في الوطن العربي، وقد حققت رواياته شهرة واسعة خاصة رواية أرض زيكولا وسلسلة قواعد جارتين", summary: "تبدأ أحداث هذا الجزء بعد سنوات من نهاية أحداث أماريتا. المحرك الأساسي للقصة هذه المرة ليس خالد الأب، بل ابنه يامن، الذي يجد نفسه مدفوعاً لخوض مغامرة كبرى في عالم زيكولا وأماريتا.", audioId: "/audio/Wolf.mp3" },
     { id: "AR_49", title: "جلسات نفسية", author: "محمد إبراهيم", subject: "تنمية بشرية", publisher: "عصير الكتب", driveLink: "https://drive.google.com/file/d/1rvbFWFmgQ65Ufub-6tC-AeuqCYiNOW82/view?usp=drive_link", bio: "كاتب وأخصائي في علم النفس،​​ ​​يتميز الدكتور محمد إبراهيم بقدرته على تبسيط المفاهيم النفسية وتقديمها بأسلوب سلس ومباشر، مما يجعله قريبًا من القراء الباحثين عن فهم أعمق لذواتهم وتحقيق السكينة النفسية", summary: "يحتوي هذا الكتاب المكون من 120 صفحة على مجموعة من الجلسات النفسية التي تهدف إلى تحسين الصحة النفسية وتعزيز الرفاهية. حيث يقدم أساليب فعالة للتعامل مع التوتر والقلق، بالإضافة إلى تمارين تنمية الذات التي تساعدك على فهم مشاعرك وتطوير مهاراتك الشخصية." }
 ];
+
 const translations = {
     ar: {
         pageTitle: "المكتبة العربية",
@@ -73,6 +74,7 @@ const translations = {
         close: "إغلاق",
         bioTitle: "نبذة عن المؤلف",
         exclusive: "حصرياً",
+        topicLabel: "الموضوع"
     },
     en: {
         pageTitle: "Arabic Library",
@@ -92,6 +94,7 @@ const translations = {
         close: "Close",
         bioTitle: "About Author",
         exclusive: "Exclusively",
+        topicLabel: "Topic"
     }
 };
 
@@ -149,7 +152,7 @@ const SaqrAudioPlayer: React.FC<{ audioSrc: string; t: any }> = ({ audioSrc, t }
                         <div className="h-full bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.5)] transition-all duration-300" style={{ width: `${progress}%` }} />
                     </div>
                 </div>
-                <button onClick={handleSpeed} className="px-3 py-2 rounded-xl bg-slate-900 text-white text-[10px] font-black hover:bg-red-600 transition-colors uppercase min-w-[50px]">
+                <button onClick={handleSpeed} className="px-3 py-2 rounded-xl bg-slate-900 text-white text-[9px] font-black hover:bg-red-600 transition-colors uppercase min-w-[50px]">
                     {speed}x
                 </button>
             </div>
@@ -157,8 +160,97 @@ const SaqrAudioPlayer: React.FC<{ audioSrc: string; t: any }> = ({ audioSrc, t }
     );
 };
 
-// --- 4. الصفحة الرئيسية والمكونات ---
+// --- 4. نافذة تفاصيل الكتاب (الذكاء الاصطناعي المطور) ---
+const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
+    const { locale } = useLanguage();
+    const [aiContent, setAiContent] = useState({ summary: '', topic: '' });
+    const [loading, setLoading] = useState(false);
+    const [tooltip, setTooltip] = useState<{ text: string, x: number, y: number } | null>(null);
 
+    useEffect(() => {
+        if (!book) return;
+        setLoading(true);
+        const fetchAiInsight = async () => {
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        messages: [{
+                            role: 'system',
+                            content: `Analyze the book "${book.title}" ${book.author ? `by "${book.author}"` : ""}. Provide: 1. A 2-sentence inspiring summary. 2. A 1-word clear Subject (Topic). Language: ${locale === 'ar' ? 'Arabic' : 'English'}. Return JSON: {"summary": "...", "topic": "..."}`
+                        }]
+                    })
+                });
+                const data = await res.json();
+                const parsed = JSON.parse(data.reply.replace(/```json|```/g, '').trim());
+                setAiContent(parsed);
+            } catch {
+                setAiContent({ summary: book.summary, topic: book.subject });
+            } finally { setLoading(false); }
+        };
+        fetchAiInsight();
+    }, [book, locale]);
+
+    if (!book) return null;
+
+    const handleAuthorTrigger = (e: React.MouseEvent | React.TouchEvent, bio: string | null) => {
+        if (!bio) { setTooltip(null); return; }
+        const pos = 'touches' in e ? e.touches[0] : (e as React.MouseEvent);
+        setTooltip({ text: bio, x: pos.clientX, y: pos.clientY });
+    };
+
+    return (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-2 sm:p-4 backdrop-blur-3xl animate-fade-up" onClick={onClose}>
+            {tooltip && (
+                <div className="fixed pointer-events-none z-[300] bg-white/10 dark:bg-black/40 backdrop-blur-3xl border border-white/20 p-5 rounded-[2rem] shadow-2xl animate-in fade-in zoom-in duration-200 max-w-[280px]" style={{ left: tooltip.x + 15, top: tooltip.y + 15, transform: locale === 'ar' ? 'translateX(-100%)' : 'none' }}>
+                    <p className="text-[10px] font-black text-red-600 uppercase mb-2 tracking-widest">{t('bioTitle')}</p>
+                    <p className="text-xs font-bold text-slate-900 dark:text-white leading-relaxed">{tooltip.text}</p>
+                </div>
+            )}
+            <div className="relative w-full max-w-4xl glass-panel rounded-[2.5rem] sm:rounded-[3rem] overflow-hidden flex flex-col md:flex-row shadow-2xl bg-white/95 dark:bg-slate-950/95 max-h-[95vh] overflow-y-auto md:overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                <button onClick={onClose} className="absolute top-4 end-4 sm:top-6 sm:end-6 z-50 p-2 bg-red-600 text-white rounded-full hover:rotate-90 transition-all shadow-xl active:scale-90">
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+                
+                <div className="flex-1 p-6 sm:p-14 text-start">
+                    <h2 className="text-2xl sm:text-5xl font-black text-slate-950 dark:text-white leading-loose mb-2 tracking-tighter py-2">{book.title}</h2>
+                    <p onMouseMove={(e) => handleAuthorTrigger(e, book.bio)} onTouchStart={(e) => handleAuthorTrigger(e, book.bio)} onMouseLeave={() => setTooltip(null)} className="text-lg sm:text-xl text-red-600 font-bold mb-8 cursor-help inline-block border-b-2 border-dotted border-red-200">By {book.author}</p>
+                    
+                    <div className="p-6 rounded-[2.5rem] bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-inner relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 text-4xl">✨</div>
+                        <p className="text-[10px] text-green-600 font-black uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <span className={`w-2 h-2 rounded-full ${loading ? 'animate-ping bg-red-500' : 'bg-green-500'}`}></span> {t('summaryTitle')}
+                        </p>
+                        <p className="text-slate-800 dark:text-slate-200 text-base sm:text-xl leading-loose font-normal">
+                            {loading ? "..." : `"${aiContent.summary || book.summary}"`}
+                        </p>
+                    </div>
+                    {book.audioId && <SaqrAudioPlayer audioSrc={book.audioId} t={t} />}
+                </div>
+
+                <div className="w-full md:w-[320px] bg-slate-950 p-10 flex flex-col justify-center items-center text-white border-s border-white/10 shrink-0">
+                    <div className="space-y-10 w-full text-center flex flex-col items-center">
+                        <div className="bg-red-600/20 p-8 rounded-[2.5rem] border border-red-600/30 w-full text-center">
+                            <p className="text-[10px] font-black text-red-500 uppercase tracking-widest mb-2">{t('topicLabel')}</p>
+                            <p className="text-2xl font-black leading-loose">{loading ? '...' : (aiContent.topic || book.subject)}</p>
+                        </div>
+                        <div className="flex flex-col items-center gap-2">
+                            <SchoolLogo forceWhite={true} className="h-16 w-auto mb-2" />
+                            <span className="text-[10px] font-black text-white uppercase tracking-[0.5em]">{t('exclusive')}</span>
+                        </div>
+                        <div className="w-full space-y-4">
+                            <a href={book.driveLink} target="_blank" rel="noreferrer" className="w-full block bg-red-600 text-white font-black py-5 rounded-2xl hover:bg-red-700 transition-all text-center uppercase tracking-widest shadow-xl shadow-red-600/20">{t('read')}</a>
+                            <button onClick={onClose} className="w-full bg-white/10 text-white border border-white/20 font-black py-4 rounded-xl hover:bg-white hover:text-black transition-all text-xs uppercase tracking-widest">{t('close')}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// --- 5. الصفحة الرئيسية ---
 const ArabicLibraryInternalPage: React.FC = () => {
     const { locale, dir } = useLanguage();
     const navigate = useNavigate();
@@ -168,9 +260,8 @@ const ArabicLibraryInternalPage: React.FC = () => {
     const [selectedBook, setSelectedBook] = useState<any>(null);
     const [authorFilter, setAuthorFilter] = useState('all');
     const [subjectFilter, setSubjectFilter] = useState('all');
-    const [audioOnly, setAudioOnly] = useState(false);
     const [sortBy, setSortBy] = useState('alphabetical');
-    const [tooltip, setTooltip] = useState<{ text: string, x: number, y: number } | null>(null);
+    const [audioOnly, setAudioOnly] = useState(false);
 
     const authors = useMemo(() => ["all", ...new Set(ARABIC_LIBRARY_DATABASE.map(b => b.author))].sort(), []);
     const subjects = useMemo(() => ["all", ...new Set(ARABIC_LIBRARY_DATABASE.map(b => b.subject))].sort(), []);
@@ -193,36 +284,8 @@ const ArabicLibraryInternalPage: React.FC = () => {
         return result;
     }, [searchTerm, authorFilter, subjectFilter, audioOnly, sortBy, locale]);
 
-    // معالج الـ Tooltip المحسن للجوال والديسك توب
-    const handleAuthorTrigger = (e: React.MouseEvent | React.TouchEvent, bio: string | null) => {
-        if (!bio) { setTooltip(null); return; }
-        
-        let clientX, clientY;
-        if ('touches' in e) {
-            clientX = e.touches[0].clientX;
-            clientY = e.touches[0].clientY;
-        } else {
-            clientX = (e as React.MouseEvent).clientX;
-            clientY = (e as React.MouseEvent).clientY;
-        }
-
-        setTooltip({ text: bio, x: clientX, y: clientY });
-    };
-
     return (
         <div dir={dir} className="max-w-7xl mx-auto px-4 pb-40 relative z-10 font-black antialiased">
-            
-            {/* Glass Bio Tooltip */}
-            {tooltip && (
-                <div 
-                    className="fixed pointer-events-none z-[300] bg-white/10 dark:bg-black/40 backdrop-blur-2xl border border-white/20 p-5 rounded-[2rem] shadow-2xl animate-in fade-in zoom-in duration-200 max-w-[280px] sm:max-w-xs"
-                    style={{ left: tooltip.x + 15, top: tooltip.y + 15, transform: locale === 'ar' ? 'translateX(-100%)' : 'none' }}
-                >
-                    <p className="text-[9px] font-black text-red-600 uppercase mb-2 tracking-widest">{t('bioTitle')}</p>
-                    <p className="text-xs font-bold text-slate-900 dark:text-white leading-relaxed">{tooltip.text}</p>
-                </div>
-            )}
-
             <div className="text-center mt-12 mb-20 animate-fade-up">
                 <button onClick={() => navigate(-1)} className="absolute start-0 top-0 text-slate-400 hover:text-red-600 flex items-center gap-2 transition-all">
                     <span className="text-2xl">←</span> {t('back')}
@@ -231,51 +294,39 @@ const ArabicLibraryInternalPage: React.FC = () => {
                 <div className="h-2 w-32 bg-[#00732f] mx-auto mt-8 rounded-full shadow-lg" />
             </div>
 
-            {/* شريط البحث والفرز */}
             <div className="sticky top-6 z-50 mb-16 px-2 md:px-0">
-                <div className="glass-panel p-4 md:p-6 rounded-[2.5rem] md:rounded-[4rem] bg-white/80 dark:bg-slate-900/80 border-none shadow-2xl flex flex-col gap-4">
+                <div className="glass-panel p-4 md:p-6 rounded-[2.5rem] md:rounded-[4rem] bg-white/80 dark:bg-slate-900/80 border border-white/20 shadow-2xl flex flex-col gap-4">
                     <div className="relative">
                         <input type="text" placeholder={t('searchPlaceholder')} className="w-full p-5 ps-12 bg-white dark:bg-black/40 text-slate-950 dark:text-white rounded-[1.5rem] md:rounded-[2.5rem] outline-none border-2 border-transparent focus:border-red-600 transition-all font-black text-lg" onChange={(e) => setSearchTerm(e.target.value)} />
                         <span className="absolute start-5 top-1/2 -translate-y-1/2 opacity-40 text-xl">🔍</span>
                     </div>
-                    
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <select value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)} className="p-3 px-4 rounded-2xl bg-white dark:bg-slate-800 font-black text-[10px] cursor-pointer outline-none border border-white/10 shadow-sm">
-                            <option value="all">{t('allAuthors')}</option>
-                            {authors.filter(a => a !== "all").map(a => <option key={a} value={a}>{a}</option>)}
-                        </select>
-                        <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="p-3 px-4 rounded-2xl bg-white dark:bg-slate-800 font-black text-[10px] cursor-pointer outline-none border border-white/10 shadow-sm">
-                            <option value="all">{t('allSubjects')}</option>
-                            {subjects.filter(s => s !== "all").map(s => <option key={s} value={s}>{s}</option>)}
-                        </select>
-                        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="p-3 px-4 rounded-2xl bg-white dark:bg-slate-800 font-black text-[10px] cursor-pointer outline-none border border-white/10 shadow-sm">
-                            <option value="alphabetical">{t('alphabetical')}</option>
-                            <option value="author">{t('authorSort')}</option>
-                            <option value="subject">{t('subjectSort')}</option>
-                            <option value="audio">{t('audioSort')}</option>
-                        </select>
-                        <button onClick={() => setAudioOnly(!audioOnly)} className={`p-3 px-4 rounded-2xl font-black text-[10px] transition-all border ${audioOnly ? 'bg-red-600 text-white border-red-600 shadow-lg shadow-red-600/30' : 'bg-white dark:bg-slate-800 text-slate-500 border-white/10'}`}>🎧 {t('audioOnly')}</button>
+                        <select value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)} className="p-3 rounded-2xl bg-white dark:bg-slate-800 font-black text-[10px] cursor-pointer border border-white/10"><option value="all">{t('allAuthors')}</option>{authors.filter(a => a !== "all").map(a => <option key={a} value={a}>{a}</option>)}</select>
+                        <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="p-3 rounded-2xl bg-white dark:bg-slate-800 font-black text-[10px] cursor-pointer border border-white/10"><option value="all">{t('allSubjects')}</option>{subjects.filter(s => s !== "all").map(s => <option key={s} value={s}>{s}</option>)}</select>
+                        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="p-3 rounded-2xl bg-white dark:bg-slate-800 font-black text-[10px] cursor-pointer border border-white/10"><option value="alphabetical">{t('alphabetical')}</option><option value="author">{t('authorSort')}</option><option value="subject">{t('subjectSort')}</option><option value="audio">{t('audioSort')}</option></select>
+                        <button onClick={() => setAudioOnly(!audioOnly)} className={`p-3 rounded-2xl font-black text-[10px] transition-all border ${audioOnly ? 'bg-red-600 text-white' : 'bg-white dark:bg-slate-800 text-slate-500 border-white/10'}`}>🎧 {t('audioOnly')}</button>
                     </div>
                 </div>
             </div>
 
-            {/* شبكة الكتب */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8 md:gap-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-10">
                 {filteredBooks.map((book) => (
                     <div key={book.id} onClick={() => setSelectedBook(book)} className="group relative glass-panel rounded-[2.5rem] p-1 cursor-pointer transition-all duration-500 hover:-translate-y-3 h-full animate-fade-up border-none shadow-lg">
-                        <div className="relative overflow-hidden rounded-[2.4rem] bg-white/20 dark:bg-slate-900/40 backdrop-blur-md h-full flex flex-col">
+                        <div className="relative overflow-hidden rounded-[2.4rem] bg-white/20 dark:bg-slate-900/40 backdrop-blur-md h-full flex flex-col border border-white/20">
                             <div className={`absolute top-0 start-0 w-1.5 h-full ${book.audioId ? 'bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.4)]' : 'bg-[#00732f] shadow-[0_0_15px_rgba(0,115,47,0.4)]'}`} />
-                            
-                            <div className="p-7 sm:p-8 relative z-10 flex-grow text-start">
+                            <div className="p-7 sm:p-9 relative z-10 flex-grow text-start">
                                 <div className="flex justify-between items-start mb-4">
-                                    <span className={`inline-block px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest text-white ${book.audioId ? 'bg-red-600 shadow-md' : 'bg-[#00732f] shadow-md'}`}>{book.subject}</span>
+                                    <span className={`inline-block px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest text-white ${book.audioId ? 'bg-red-600' : 'bg-[#00732f]'}`}>{book.subject}</span>
                                     {book.audioId && <AudioWaveIcon />}
                                 </div>
-                                <h2 className="font-black text-xl md:text-2xl text-slate-950 dark:text-white leading-tight mb-4 group-hover:text-red-600 transition-colors line-clamp-2">{book.title}</h2>
-                                <div className="flex items-center gap-2 opacity-60"><span className="text-sm">👤</span><p className="text-[10px] font-bold uppercase truncate tracking-widest">{book.author}</p></div>
+                                <h2 className="font-black text-xl sm:text-2xl text-slate-950 dark:text-white leading-loose mb-4 group-hover:text-red-600 transition-colors line-clamp-2 py-1">{book.title}</h2>
+                                <div className="flex items-center gap-2 opacity-60"><span className="text-sm">👤</span><p className="text-[10px] font-bold uppercase truncate tracking-widest leading-loose py-1">{book.author}</p></div>
                             </div>
+                            {/* منطقة الناشر والشعار المحدثة */}
                             <div className="bg-black/5 dark:bg-white/5 py-4 sm:py-5 px-6 sm:px-8 border-t border-white/10 mt-auto flex items-center justify-between relative z-10">
-                                <div className="text-[8px] font-black opacity-30 uppercase tracking-widest text-red-600">Saqr Digital</div>
+                                <div className="text-[8px] font-black uppercase tracking-widest text-slate-950 dark:text-white opacity-40 group-hover:opacity-100 transition-all truncate max-w-[150px]">
+                                    {book.publisher}
+                                </div>
                                 <SchoolLogo className="group-hover:rotate-[15deg] h-6 sm:h-8" />
                             </div>
                         </div>
@@ -283,55 +334,14 @@ const ArabicLibraryInternalPage: React.FC = () => {
                 ))}
             </div>
 
-            {/* المودال المطور */}
-            {selectedBook && (
-                <div className="fixed inset-0 z-[200] flex items-center justify-center p-2 sm:p-4 backdrop-blur-3xl animate-fade-up" onClick={() => setSelectedBook(null)}>
-                    <div className="relative w-full max-w-4xl glass-panel rounded-[2.5rem] sm:rounded-[3rem] overflow-hidden flex flex-col md:flex-row shadow-2xl bg-white/95 dark:bg-slate-950/95 max-h-[95vh] overflow-y-auto md:overflow-hidden" onClick={(e) => e.stopPropagation()}>
-                        <button onClick={() => setSelectedBook(null)} className="absolute top-4 end-4 sm:top-6 sm:end-6 z-50 p-2 bg-red-600 text-white rounded-full hover:rotate-90 transition-all shadow-xl"><svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M6 18L18 6M6 6l12 12" /></svg></button>
-                        
-                        <div className="flex-1 p-6 sm:p-8 md:p-14 text-start">
-                            <h2 className="text-2xl sm:text-3xl md:text-5xl font-black text-slate-950 dark:text-white leading-tight mb-2 tracking-tighter">{selectedBook.title}</h2>
-                            <p 
-                                onMouseMove={(e) => handleAuthorTrigger(e, selectedBook.bio)} 
-                                onTouchStart={(e) => handleAuthorTrigger(e, selectedBook.bio)}
-                                onMouseLeave={() => setTooltip(null)}
-                                className="text-lg sm:text-xl text-red-600 font-bold mb-6 sm:mb-8 cursor-help inline-block border-b-2 border-dotted border-red-200"
-                            >
-                                By {selectedBook.author}
-                            </p>
-                            <div className="p-5 sm:p-6 rounded-[2rem] bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-inner">
-                                <p className="text-[10px] text-green-600 font-black uppercase tracking-widest mb-3 flex items-center gap-2"><span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> {t('summaryTitle')}</p>
-                                <p className="text-slate-800 dark:text-slate-200 text-base sm:text-lg leading-relaxed">{selectedBook.summary}</p>
-                            </div>
-                            {selectedBook.audioId && <SaqrAudioPlayer audioSrc={selectedBook.audioId} t={t} />}
-                        </div>
-
-                        <div className="w-full md:w-[320px] bg-slate-950 p-8 sm:p-10 flex flex-col justify-center items-center text-white border-s border-white/10 shrink-0">
-                            <div className="space-y-8 sm:space-y-12 w-full text-center flex flex-col items-center">
-                                <div className="flex flex-col items-center gap-2">
-                                    <SchoolLogo forceWhite={true} className="h-12 sm:h-16 w-auto mb-2" />
-                                    <span className="text-[9px] font-black text-white uppercase tracking-[0.5em]">{t('exclusive')}</span>
-                                </div>
-                                
-                                <div className="w-full space-y-4">
-                                    <a href={selectedBook.driveLink} target="_blank" rel="noreferrer" className="w-full block bg-red-600 text-white font-black py-4 sm:py-5 rounded-2xl hover:bg-red-700 transition-all text-center uppercase tracking-widest shadow-xl shadow-red-600/20">{t('read')}</a>
-                                    <button onClick={() => setSelectedBook(null)} className="w-full bg-white/10 text-white border border-white/20 font-black py-3 sm:py-4 rounded-xl hover:bg-white hover:text-black transition-all text-xs uppercase tracking-widest">{t('close')}</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <BookModal book={selectedBook} onClose={() => setSelectedBook(null)} t={t} />
 
             <style>{`
                 @keyframes audio-bar { 0%, 100% { height: 4px; } 50% { height: 14px; } }
                 .animate-audio-bar-1 { animation: audio-bar 0.6s ease-in-out infinite; }
                 .animate-audio-bar-2 { animation: audio-bar 0.8s ease-in-out infinite 0.2s; }
                 .animate-audio-bar-3 { animation: audio-bar 0.7s ease-in-out infinite 0.4s; }
-                
-                /* منع أي ميلان للخطوط نهائياً */
                 * { font-style: normal !important; }
-                
                 .logo-white-filter { transition: filter 0.5s ease; }
                 .dark .logo-white-filter { filter: brightness(0) invert(1); }
             `}</style>
