@@ -44,7 +44,7 @@ const HOMELAND_FACTS = [
 const KNOWLEDGE_CARDS = [
     { icon: "📜", textAr: "بحث رقمي", textEn: "Research", color: "border-red-600" },
     { icon: "💡", textAr: "ابتكار", textEn: "Ideas", color: "border-yellow-500" },
-    { icon: "🤖", textAr: "ذكاء صقر", textEn: "AI", color: "border-green-600" },
+    { icon: "🤖", textAr: "ذكاء صقر", textEn: "Saqr AI", color: "border-green-600" },
     { icon: "📚", textAr: "معرفة", textEn: "Books", color: "border-blue-600" },
     { icon: "🇦🇪", textAr: "هوية", textEn: "Identity", color: "border-red-500" }
 ];
@@ -69,25 +69,23 @@ const HomePage: React.FC = () => {
         setTimeout(() => setIsMascotClicked(false), 300);
         
         const id = Date.now();
-        // توليد كروت الانفجار - بحجم أصغر ومسافات تناسب الجوال
         const newBursts: BurstItem[] = Array.from({ length: 3 }).map((_, i) => ({
             id: id + i,
             item: KNOWLEDGE_CARDS[Math.floor(Math.random() * KNOWLEDGE_CARDS.length)],
-            tx: (Math.random() - 0.5) * (window.innerWidth < 768 ? 100 : 250), 
-            ty: -80 - Math.random() * 100,
-            rot: (Math.random() - 0.5) * 40
+            tx: (Math.random() - 0.5) * (window.innerWidth < 768 ? 120 : 280), 
+            ty: -100 - Math.random() * 120,
+            rot: (Math.random() - 0.5) * 30
         }));
 
         setBursts(prev => [...prev, ...newBursts]);
         
-        // الاختفاء السريع بعد ثانية ونصف (لضمان انتهاء الأنيميشن)
+        // بقاء الكروت لفترة كافية (2.5 ثانية) ليتمكن المستخدم من قراءتها
         newBursts.forEach(b => { 
             setTimeout(() => { 
                 setBursts(current => current.filter(item => item.id !== b.id)); 
-            }, 1500); 
+            }, 2500); 
         });
 
-        // صوت تفاعل خفيف جداً
         const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
         audio.volume = 0.03; audio.play().catch(() => {});
     }, []);
@@ -106,7 +104,7 @@ const HomePage: React.FC = () => {
                 <div className="h-2 w-40 bg-red-600 mx-auto rounded-full shadow-[0_0_25px_rgba(220,38,38,0.6)]"></div>
             </div>
 
-            {/* 2. مركز العمليات (الأزرار) */}
+            {/* 2. مركز العمليات */}
             <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-16 items-center">
                 
                 <div className="lg:col-span-7 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 order-2 lg:order-1">
@@ -131,21 +129,21 @@ const HomePage: React.FC = () => {
                     </Link>
                 </div>
 
-                {/* صقر مع نظام الانفجار المطور */}
+                {/* صقر مع نظام الانفجار المطور بدون Blur */}
                 <div className="lg:col-span-5 flex justify-center order-1 lg:order-2 relative">
                     <div onClick={handleMascotInteraction} className={`relative cursor-pointer transition-transform duration-700 ${isMascotClicked ? 'scale-110' : 'hover:scale-105'}`}>
                         
                         <div className="absolute inset-0 flex items-center justify-center -z-10 pointer-events-none opacity-10 dark:opacity-20 transition-all duration-1000">
-                            <img src="/school-logo.png" alt="Seal" className="w-[130%] h-[130%] object-contain rotate-[15deg] logo-white-filter blur-[2px]" />
+                            <img src="/school-logo.png" alt="Seal" className="w-[130%] h-[130%] object-contain rotate-[15deg] logo-white-filter" />
                         </div>
 
-                        {/* الكروت المتطايرة الصغيرة */}
+                        {/* الكروت المتطايرة: أصبحت صلبة وواضحة جداً وتدوم لفترة أطول */}
                         {bursts.map((burst) => (
                             <div key={burst.id} 
-                                className={`absolute z-[100] bg-white/90 dark:bg-slate-900/90 px-3 py-1.5 md:px-5 md:py-2.5 rounded-xl border-2 ${burst.item.color} shadow-xl animate-burst-short pointer-events-none flex items-center gap-2`}
+                                className={`absolute z-[100] bg-white dark:bg-slate-900 px-4 py-2 md:px-6 md:py-3 rounded-2xl border-[3px] ${burst.item.color} shadow-[0_20px_40px_rgba(0,0,0,0.3)] animate-burst-steady pointer-events-none flex items-center gap-3`}
                                 style={{ '--tx': `${burst.tx}px`, '--ty': `${burst.ty}px`, '--rot': `${burst.rot}deg` } as any}>
-                                <span className="text-sm md:text-2xl">{burst.item.icon}</span>
-                                <span className="text-[9px] md:text-sm font-black text-slate-950 dark:text-white uppercase whitespace-nowrap">{isAr ? burst.item.textAr : burst.item.textEn}</span>
+                                <span className="text-base md:text-3xl">{burst.item.icon}</span>
+                                <span className="text-[10px] md:text-lg font-black text-slate-950 dark:text-white uppercase whitespace-nowrap">{isAr ? burst.item.textAr : burst.item.textEn}</span>
                             </div>
                         ))}
 
@@ -178,16 +176,17 @@ const HomePage: React.FC = () => {
             </div>
 
             <style>{`
+                /* إلغاء الميلان تماماً بطلبك */
                 * { font-style: normal !important; }
 
-                /* أنيميشن الانفجار السريع والقصير */
-                @keyframes burst-short {
-                    0% { transform: translate(0, 0) scale(0.5) rotate(0deg); opacity: 0; filter: blur(5px); }
-                    15% { transform: translate(var(--tx), var(--ty)) scale(1.1) rotate(var(--rot)); opacity: 1; filter: blur(0px); }
-                    80% { transform: translate(calc(var(--tx) * 1.1), calc(var(--ty) * 1.1)) scale(1); opacity: 1; }
-                    100% { transform: translate(calc(var(--tx) * 1.2), calc(var(--ty) - 20px)) scale(0.8) rotate(calc(var(--rot) * 1.2)); opacity: 0; filter: blur(10px); }
+                /* أنيميشن جديد: مستقر، واضح، وبدون Blur */
+                @keyframes burst-steady {
+                    0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
+                    10% { transform: translate(var(--tx), var(--ty)) scale(1.1) rotate(var(--rot)); opacity: 1; }
+                    85% { transform: translate(var(--tx), var(--ty)) scale(1) rotate(var(--rot)); opacity: 1; }
+                    100% { transform: translate(var(--tx), calc(var(--ty) - 30px)) scale(0.8) rotate(var(--rot)); opacity: 0; }
                 }
-                .animate-burst-short { animation: burst-short 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+                .animate-burst-steady { animation: burst-steady 2.2s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
 
                 .animate-float { animation: float 8s ease-in-out infinite; }
                 @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-30px); } }
