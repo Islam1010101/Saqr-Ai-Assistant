@@ -54,8 +54,6 @@ const ARABIC_LIBRARY_DATABASE = [
     { id: "AR_48", title: "وادي الذئاب المنسية", author: "عمرو عبدالحميد", subject: "أدب خيالي", publisher: "عصير الكتب", driveLink: "https://drive.google.com/file/d/1UeaCT1D75jpzjESxUw-ztusUvBrXXV4Q/view?usp=drive_link", bio: "عمرو عبد الحميد هو كاتب وطبيب مصري بارز، يُعد من أشهر روائيي الفنتازيا والخيال في الوطن العربي، وقد حققت رواياته شهرة واسعة خاصة رواية أرض زيكولا وسلسلة قواعد جارتين", summary: "تبدأ أحداث هذا الجزء بعد سنوات من نهاية أحداث أماريتا. المحرك الأساسي للقصة هذه المرة ليس خالد الأب، بل ابنه يامن، الذي يجد نفسه مدفوعاً لخوض مغامرة كبرى في عالم زيكولا وأماريتا.", audioId: "/audio/Wolf.mp3" },
     { id: "AR_49", title: "جلسات نفسية", author: "محمد إبراهيم", subject: "تنمية بشرية", publisher: "عصير الكتب", driveLink: "https://drive.google.com/file/d/1rvbFWFmgQ65Ufub-6tC-AeuqCYiNOW82/view?usp=drive_link", bio: "كاتب وأخصائي في علم النفس،​​ ​​يتميز الدكتور محمد إبراهيم بقدرته على تبسيط المفاهيم النفسية وتقديمها بأسلوب سلس ومباشر، مما يجعله قريبًا من القراء الباحثين عن فهم أعمق لذواتهم وتحقيق السكينة النفسية", summary: "يحتوي هذا الكتاب المكون من 120 صفحة على مجموعة من الجلسات النفسية التي تهدف إلى تحسين الصحة النفسية وتعزيز الرفاهية. حيث يقدم أساليب فعالة للتعامل مع التوتر والقلق، بالإضافة إلى تمارين تنمية الذات التي تساعدك على فهم مشاعرك وتطوير مهاراتك الشخصية." }
 ];
-
-
 const translations = {
     ar: {
         pageTitle: "المكتبة العربية",
@@ -75,7 +73,6 @@ const translations = {
         close: "إغلاق",
         bioTitle: "نبذة عن المؤلف",
         exclusive: "حصرياً",
-        speed: "السرعة"
     },
     en: {
         pageTitle: "Arabic Library",
@@ -95,13 +92,11 @@ const translations = {
         close: "Close",
         bioTitle: "About Author",
         exclusive: "Exclusively",
-        speed: "Speed"
     }
 };
 
-// --- 3. مكونات التصميم المحدثة ---
+// --- 3. المكونات المحدثة ---
 
-// الشعار مع دعم كامل للدارك مود وفرض الأبيض في المودال
 const SchoolLogo = ({ forceWhite = false, className = "" }: { forceWhite?: boolean; className?: string }) => (
     <img 
         src="/school-logo.png" 
@@ -134,8 +129,7 @@ const SaqrAudioPlayer: React.FC<{ audioSrc: string; t: any }> = ({ audioSrc, t }
     };
 
     const handleSpeed = () => {
-        const speeds = [1, 1.5, 2, 0.5];
-        const nextSpeed = speeds[(speeds.indexOf(speed) + 1) % speeds.length];
+        const nextSpeed = speed === 2 ? 0.5 : speed + 0.5;
         setSpeed(nextSpeed);
         if (audioRef.current) audioRef.current.playbackRate = nextSpeed;
     };
@@ -143,22 +137,19 @@ const SaqrAudioPlayer: React.FC<{ audioSrc: string; t: any }> = ({ audioSrc, t }
     return (
         <div className="mt-8 animate-fade-up">
             <h4 className="text-[10px] font-black text-red-600 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                <span className="text-lg">🎧</span> {t('listen')}
+                <span className="text-xl">🎧</span> {t('listen')}
             </h4>
-            <div className="p-5 rounded-[2.5rem] bg-white/40 dark:bg-white/5 backdrop-blur-2xl border border-white/20 shadow-inner flex items-center gap-4">
+            <div className="p-6 rounded-[2.5rem] bg-white/40 dark:bg-white/5 backdrop-blur-2xl border border-white/20 shadow-xl flex items-center gap-4 sm:gap-6">
                 <audio ref={audioRef} src={audioSrc} onTimeUpdate={() => setProgress((audioRef.current!.currentTime / audioRef.current!.duration) * 100)} onEnded={() => setIsPlaying(false)} />
-                
-                <button onClick={togglePlay} className="w-14 h-14 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all">
-                    {isPlaying ? <span className="text-xl">⏸</span> : <span className="text-xl ps-1">▶</span>}
+                <button onClick={togglePlay} className="w-14 h-14 sm:w-16 sm:h-16 shrink-0 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg hover:scale-105 active:scale-90 transition-all">
+                    {isPlaying ? <span className="text-2xl">⏸</span> : <span className="text-2xl ps-1">▶</span>}
                 </button>
-                
                 <div className="flex-1">
-                    <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                         <div className="h-full bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.5)] transition-all duration-300" style={{ width: `${progress}%` }} />
                     </div>
                 </div>
-
-                <button onClick={handleSpeed} className="px-3 py-2 rounded-xl bg-slate-900 text-white text-[9px] font-black hover:bg-red-600 transition-colors uppercase">
+                <button onClick={handleSpeed} className="px-3 py-2 rounded-xl bg-slate-900 text-white text-[10px] font-black hover:bg-red-600 transition-colors uppercase min-w-[50px]">
                     {speed}x
                 </button>
             </div>
@@ -202,21 +193,32 @@ const ArabicLibraryInternalPage: React.FC = () => {
         return result;
     }, [searchTerm, authorFilter, subjectFilter, audioOnly, sortBy, locale]);
 
-    const handleAuthorHover = (e: React.MouseEvent, bio: string | null) => {
-        if (!bio || window.innerWidth < 768) { setTooltip(null); return; }
-        setTooltip({ text: bio, x: e.clientX, y: e.clientY });
+    // معالج الـ Tooltip المحسن للجوال والديسك توب
+    const handleAuthorTrigger = (e: React.MouseEvent | React.TouchEvent, bio: string | null) => {
+        if (!bio) { setTooltip(null); return; }
+        
+        let clientX, clientY;
+        if ('touches' in e) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else {
+            clientX = (e as React.MouseEvent).clientX;
+            clientY = (e as React.MouseEvent).clientY;
+        }
+
+        setTooltip({ text: bio, x: clientX, y: clientY });
     };
 
     return (
         <div dir={dir} className="max-w-7xl mx-auto px-4 pb-40 relative z-10 font-black antialiased">
             
-            {/* Glass Tooltip */}
+            {/* Glass Bio Tooltip */}
             {tooltip && (
                 <div 
-                    className="fixed pointer-events-none z-[300] bg-white/10 dark:bg-black/40 backdrop-blur-2xl border border-white/20 p-6 rounded-[2rem] shadow-2xl animate-in fade-in zoom-in duration-200 max-w-xs"
-                    style={{ left: tooltip.x + 20, top: tooltip.y + 20, transform: locale === 'ar' ? 'translateX(-100%)' : 'none' }}
+                    className="fixed pointer-events-none z-[300] bg-white/10 dark:bg-black/40 backdrop-blur-2xl border border-white/20 p-5 rounded-[2rem] shadow-2xl animate-in fade-in zoom-in duration-200 max-w-[280px] sm:max-w-xs"
+                    style={{ left: tooltip.x + 15, top: tooltip.y + 15, transform: locale === 'ar' ? 'translateX(-100%)' : 'none' }}
                 >
-                    <p className="text-[10px] font-black text-red-600 uppercase mb-2 tracking-widest">{t('bioTitle')}</p>
+                    <p className="text-[9px] font-black text-red-600 uppercase mb-2 tracking-widest">{t('bioTitle')}</p>
                     <p className="text-xs font-bold text-slate-900 dark:text-white leading-relaxed">{tooltip.text}</p>
                 </div>
             )}
@@ -258,56 +260,62 @@ const ArabicLibraryInternalPage: React.FC = () => {
             </div>
 
             {/* شبكة الكتب */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 md:gap-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8 md:gap-10">
                 {filteredBooks.map((book) => (
                     <div key={book.id} onClick={() => setSelectedBook(book)} className="group relative glass-panel rounded-[2.5rem] p-1 cursor-pointer transition-all duration-500 hover:-translate-y-3 h-full animate-fade-up border-none shadow-lg">
                         <div className="relative overflow-hidden rounded-[2.4rem] bg-white/20 dark:bg-slate-900/40 backdrop-blur-md h-full flex flex-col">
                             <div className={`absolute top-0 start-0 w-1.5 h-full ${book.audioId ? 'bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.4)]' : 'bg-[#00732f] shadow-[0_0_15px_rgba(0,115,47,0.4)]'}`} />
                             
-                            <div className="p-8 relative z-10 flex-grow text-start">
+                            <div className="p-7 sm:p-8 relative z-10 flex-grow text-start">
                                 <div className="flex justify-between items-start mb-4">
-                                    <span className={`inline-block px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest text-white ${book.audioId ? 'bg-red-600' : 'bg-[#00732f]'}`}>{book.subject}</span>
+                                    <span className={`inline-block px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest text-white ${book.audioId ? 'bg-red-600 shadow-md' : 'bg-[#00732f] shadow-md'}`}>{book.subject}</span>
                                     {book.audioId && <AudioWaveIcon />}
                                 </div>
                                 <h2 className="font-black text-xl md:text-2xl text-slate-950 dark:text-white leading-tight mb-4 group-hover:text-red-600 transition-colors line-clamp-2">{book.title}</h2>
                                 <div className="flex items-center gap-2 opacity-60"><span className="text-sm">👤</span><p className="text-[10px] font-bold uppercase truncate tracking-widest">{book.author}</p></div>
                             </div>
-                            <div className="bg-black/5 dark:bg-white/5 py-5 px-8 border-t border-white/10 mt-auto flex items-center justify-between relative z-10">
+                            <div className="bg-black/5 dark:bg-white/5 py-4 sm:py-5 px-6 sm:px-8 border-t border-white/10 mt-auto flex items-center justify-between relative z-10">
                                 <div className="text-[8px] font-black opacity-30 uppercase tracking-widest text-red-600">Saqr Digital</div>
-                                <SchoolLogo className="group-hover:rotate-[15deg]" />
+                                <SchoolLogo className="group-hover:rotate-[15deg] h-6 sm:h-8" />
                             </div>
                         </div>
                     </div>
                 ))}
             </div>
 
-            {/* المودال */}
+            {/* المودال المطور */}
             {selectedBook && (
-                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 backdrop-blur-3xl animate-fade-up" onClick={() => setSelectedBook(null)}>
-                    <div className="relative w-full max-w-4xl glass-panel rounded-[3rem] overflow-hidden flex flex-col md:flex-row shadow-2xl bg-white/95 dark:bg-slate-950/95" onClick={(e) => e.stopPropagation()}>
-                        <button onClick={() => setSelectedBook(null)} className="absolute top-6 end-6 z-50 p-2 bg-red-600 text-white rounded-full hover:rotate-90 transition-all shadow-xl"><svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M6 18L18 6M6 6l12 12" /></svg></button>
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-2 sm:p-4 backdrop-blur-3xl animate-fade-up" onClick={() => setSelectedBook(null)}>
+                    <div className="relative w-full max-w-4xl glass-panel rounded-[2.5rem] sm:rounded-[3rem] overflow-hidden flex flex-col md:flex-row shadow-2xl bg-white/95 dark:bg-slate-950/95 max-h-[95vh] overflow-y-auto md:overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                        <button onClick={() => setSelectedBook(null)} className="absolute top-4 end-4 sm:top-6 sm:end-6 z-50 p-2 bg-red-600 text-white rounded-full hover:rotate-90 transition-all shadow-xl"><svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M6 18L18 6M6 6l12 12" /></svg></button>
                         
-                        <div className="flex-1 p-8 md:p-14 text-start">
-                            <h2 className="text-3xl md:text-5xl font-black text-slate-950 dark:text-white leading-tight mb-2 tracking-tighter">{selectedBook.title}</h2>
-                            <p onMouseMove={(e) => handleAuthorHover(e, selectedBook.bio)} onMouseLeave={(e) => handleAuthorHover(e, null)} className="text-xl text-red-600 font-bold mb-8 cursor-help inline-block border-b-2 border-dotted border-red-200">By {selectedBook.author}</p>
-                            <div className="p-6 rounded-[2rem] bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-inner">
+                        <div className="flex-1 p-6 sm:p-8 md:p-14 text-start">
+                            <h2 className="text-2xl sm:text-3xl md:text-5xl font-black text-slate-950 dark:text-white leading-tight mb-2 tracking-tighter">{selectedBook.title}</h2>
+                            <p 
+                                onMouseMove={(e) => handleAuthorTrigger(e, selectedBook.bio)} 
+                                onTouchStart={(e) => handleAuthorTrigger(e, selectedBook.bio)}
+                                onMouseLeave={() => setTooltip(null)}
+                                className="text-lg sm:text-xl text-red-600 font-bold mb-6 sm:mb-8 cursor-help inline-block border-b-2 border-dotted border-red-200"
+                            >
+                                By {selectedBook.author}
+                            </p>
+                            <div className="p-5 sm:p-6 rounded-[2rem] bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-inner">
                                 <p className="text-[10px] text-green-600 font-black uppercase tracking-widest mb-3 flex items-center gap-2"><span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> {t('summaryTitle')}</p>
-                                <p className="text-slate-800 dark:text-slate-200 text-lg leading-relaxed">{selectedBook.summary}</p>
+                                <p className="text-slate-800 dark:text-slate-200 text-base sm:text-lg leading-relaxed">{selectedBook.summary}</p>
                             </div>
                             {selectedBook.audioId && <SaqrAudioPlayer audioSrc={selectedBook.audioId} t={t} />}
                         </div>
 
-                        <div className="w-full md:w-[320px] bg-slate-950 p-10 flex flex-col justify-center items-center text-white border-s border-white/10 shrink-0">
-                            <div className="space-y-12 w-full text-center flex flex-col items-center">
-                                {/* الشعار الأبيض دائماً فوق الزر */}
+                        <div className="w-full md:w-[320px] bg-slate-950 p-8 sm:p-10 flex flex-col justify-center items-center text-white border-s border-white/10 shrink-0">
+                            <div className="space-y-8 sm:space-y-12 w-full text-center flex flex-col items-center">
                                 <div className="flex flex-col items-center gap-2">
-                                    <SchoolLogo forceWhite={true} className="h-16 w-auto mb-2" />
-                                    <span className="text-[10px] font-black text-white uppercase tracking-[0.5em]">{t('exclusive')}</span>
+                                    <SchoolLogo forceWhite={true} className="h-12 sm:h-16 w-auto mb-2" />
+                                    <span className="text-[9px] font-black text-white uppercase tracking-[0.5em]">{t('exclusive')}</span>
                                 </div>
                                 
                                 <div className="w-full space-y-4">
-                                    <a href={selectedBook.driveLink} target="_blank" rel="noreferrer" className="w-full block bg-red-600 text-white font-black py-5 rounded-2xl hover:bg-red-700 transition-all text-center uppercase tracking-widest shadow-xl shadow-red-600/20">{t('read')}</a>
-                                    <button onClick={() => setSelectedBook(null)} className="w-full bg-white/10 text-white border border-white/20 font-black py-4 rounded-xl hover:bg-white hover:text-black transition-all text-xs uppercase tracking-widest">{t('close')}</button>
+                                    <a href={selectedBook.driveLink} target="_blank" rel="noreferrer" className="w-full block bg-red-600 text-white font-black py-4 sm:py-5 rounded-2xl hover:bg-red-700 transition-all text-center uppercase tracking-widest shadow-xl shadow-red-600/20">{t('read')}</a>
+                                    <button onClick={() => setSelectedBook(null)} className="w-full bg-white/10 text-white border border-white/20 font-black py-3 sm:py-4 rounded-xl hover:bg-white hover:text-black transition-all text-xs uppercase tracking-widest">{t('close')}</button>
                                 </div>
                             </div>
                         </div>
@@ -321,7 +329,7 @@ const ArabicLibraryInternalPage: React.FC = () => {
                 .animate-audio-bar-2 { animation: audio-bar 0.8s ease-in-out infinite 0.2s; }
                 .animate-audio-bar-3 { animation: audio-bar 0.7s ease-in-out infinite 0.4s; }
                 
-                /* فرض عدم ميلان الخطوط نهائياً */
+                /* منع أي ميلان للخطوط نهائياً */
                 * { font-style: normal !important; }
                 
                 .logo-white-filter { transition: filter 0.5s ease; }
