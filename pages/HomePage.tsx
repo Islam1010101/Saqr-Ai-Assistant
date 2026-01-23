@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../App';
 
@@ -41,11 +41,22 @@ const HOMELAND_FACTS = [
     { ar: "جامع الشيخ زايد الكبير يضم واحدة من أكبر الثريات والسجادات في العالم.", en: "Sheikh Zayed Grand Mosque houses one of the world's largest chandeliers and carpets." },
 ];
 
+const KNOWLEDGE_CARDS = [
+    { icon: "📜", textAr: "بحث رقمي", textEn: "Research", color: "border-red-600" },
+    { icon: "💡", textAr: "ابتكار", textEn: "Ideas", color: "border-yellow-500" },
+    { icon: "🤖", textAr: "ذكاء صقر", textEn: "AI", color: "border-green-600" },
+    { icon: "📚", textAr: "معرفة", textEn: "Books", color: "border-blue-600" },
+    { icon: "🇦🇪", textAr: "هوية", textEn: "Identity", color: "border-red-500" }
+];
+
+interface BurstItem { id: number; tx: number; ty: number; rot: number; item: typeof KNOWLEDGE_CARDS[0]; }
+
 const HomePage: React.FC = () => {
     const { locale } = useLanguage();
     const isAr = locale === 'ar';
     const t = (key: keyof typeof translations.ar) => translations[locale][key];
     
+    const [bursts, setBursts] = useState<BurstItem[]>([]);
     const [isMascotClicked, setIsMascotClicked] = useState(false);
 
     const dailyFact = useMemo(() => {
@@ -56,13 +67,35 @@ const HomePage: React.FC = () => {
     const handleMascotInteraction = useCallback(() => {
         setIsMascotClicked(true);
         setTimeout(() => setIsMascotClicked(false), 300);
-        // تم إلغاء نظام الانفجار التفاعلي بطلبك لتركيز التصميم
+        
+        const id = Date.now();
+        // توليد كروت الانفجار - بحجم أصغر ومسافات تناسب الجوال
+        const newBursts: BurstItem[] = Array.from({ length: 3 }).map((_, i) => ({
+            id: id + i,
+            item: KNOWLEDGE_CARDS[Math.floor(Math.random() * KNOWLEDGE_CARDS.length)],
+            tx: (Math.random() - 0.5) * (window.innerWidth < 768 ? 100 : 250), 
+            ty: -80 - Math.random() * 100,
+            rot: (Math.random() - 0.5) * 40
+        }));
+
+        setBursts(prev => [...prev, ...newBursts]);
+        
+        // الاختفاء السريع بعد ثانية ونصف (لضمان انتهاء الأنيميشن)
+        newBursts.forEach(b => { 
+            setTimeout(() => { 
+                setBursts(current => current.filter(item => item.id !== b.id)); 
+            }, 1500); 
+        });
+
+        // صوت تفاعل خفيف جداً
+        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
+        audio.volume = 0.03; audio.play().catch(() => {});
     }, []);
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-8 md:py-16 flex flex-col items-center gap-12 md:gap-24 animate-fade-up font-black antialiased relative overflow-x-hidden">
             
-            {/* 1. قسم الترحيب - تم ضبط التباعد وإلغاء الميلان */}
+            {/* 1. قسم الترحيب */}
             <div className="text-center space-y-6 md:space-y-10 max-w-5xl relative z-20">
                 <h1 className="text-4xl md:text-8xl font-black text-slate-950 dark:text-white tracking-tighter leading-[1.1] drop-shadow-2xl">
                     {t('welcome')}
@@ -73,7 +106,7 @@ const HomePage: React.FC = () => {
                 <div className="h-2 w-40 bg-red-600 mx-auto rounded-full shadow-[0_0_25px_rgba(220,38,38,0.6)]"></div>
             </div>
 
-            {/* 2. الأزرار الرئيسية */}
+            {/* 2. مركز العمليات (الأزرار) */}
             <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-16 items-center">
                 
                 <div className="lg:col-span-7 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 order-2 lg:order-1">
@@ -98,14 +131,23 @@ const HomePage: React.FC = () => {
                     </Link>
                 </div>
 
-                {/* صقر مع الشعار المائل */}
+                {/* صقر مع نظام الانفجار المطور */}
                 <div className="lg:col-span-5 flex justify-center order-1 lg:order-2 relative">
                     <div onClick={handleMascotInteraction} className={`relative cursor-pointer transition-transform duration-700 ${isMascotClicked ? 'scale-110' : 'hover:scale-105'}`}>
                         
-                        {/* الشعار المائل في الخلفية */}
                         <div className="absolute inset-0 flex items-center justify-center -z-10 pointer-events-none opacity-10 dark:opacity-20 transition-all duration-1000">
                             <img src="/school-logo.png" alt="Seal" className="w-[130%] h-[130%] object-contain rotate-[15deg] logo-white-filter blur-[2px]" />
                         </div>
+
+                        {/* الكروت المتطايرة الصغيرة */}
+                        {bursts.map((burst) => (
+                            <div key={burst.id} 
+                                className={`absolute z-[100] bg-white/90 dark:bg-slate-900/90 px-3 py-1.5 md:px-5 md:py-2.5 rounded-xl border-2 ${burst.item.color} shadow-xl animate-burst-short pointer-events-none flex items-center gap-2`}
+                                style={{ '--tx': `${burst.tx}px`, '--ty': `${burst.ty}px`, '--rot': `${burst.rot}deg` } as any}>
+                                <span className="text-sm md:text-2xl">{burst.item.icon}</span>
+                                <span className="text-[9px] md:text-sm font-black text-slate-950 dark:text-white uppercase whitespace-nowrap">{isAr ? burst.item.textAr : burst.item.textEn}</span>
+                            </div>
+                        ))}
 
                         <img src="/saqr-full.png" alt="Saqr" className="h-72 md:h-[650px] object-contain drop-shadow-[0_40px_80px_rgba(220,38,38,0.3)] relative z-10 animate-float" />
                         
@@ -117,7 +159,7 @@ const HomePage: React.FC = () => {
                 </div>
             </div>
 
-            {/* 3. قسم لمحات من الموطن - تم تحسين تباعد الأسطر */}
+            {/* 3. قسم لمحات من الموطن */}
             <div className="w-full max-w-6xl animate-fade-up mb-16">
                 <div className="glass-panel p-10 md:p-20 rounded-[4rem] md:rounded-[6rem] border-l-[12px] border-green-600 border-r-[12px] border-red-600 bg-white dark:bg-slate-950 shadow-2xl relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-green-600/5 via-transparent to-red-600/5 -z-10"></div>
@@ -136,8 +178,16 @@ const HomePage: React.FC = () => {
             </div>
 
             <style>{`
-                /* فرض الخط المستقيم في كل مكان لإلغاء أي ميلان افتراضي */
                 * { font-style: normal !important; }
+
+                /* أنيميشن الانفجار السريع والقصير */
+                @keyframes burst-short {
+                    0% { transform: translate(0, 0) scale(0.5) rotate(0deg); opacity: 0; filter: blur(5px); }
+                    15% { transform: translate(var(--tx), var(--ty)) scale(1.1) rotate(var(--rot)); opacity: 1; filter: blur(0px); }
+                    80% { transform: translate(calc(var(--tx) * 1.1), calc(var(--ty) * 1.1)) scale(1); opacity: 1; }
+                    100% { transform: translate(calc(var(--tx) * 1.2), calc(var(--ty) - 20px)) scale(0.8) rotate(calc(var(--rot) * 1.2)); opacity: 0; filter: blur(10px); }
+                }
+                .animate-burst-short { animation: burst-short 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
 
                 .animate-float { animation: float 8s ease-in-out infinite; }
                 @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-30px); } }
@@ -150,7 +200,6 @@ const HomePage: React.FC = () => {
                 .logo-white-filter { transition: filter 0.5s ease; }
                 .dark .logo-white-filter { filter: brightness(0) invert(1); }
 
-                /* زيادة تباعد الأسطر للنصوص الطويلة لسهولة القراءة */
                 p { line-height: 1.8 !important; }
             `}</style>
         </div>
