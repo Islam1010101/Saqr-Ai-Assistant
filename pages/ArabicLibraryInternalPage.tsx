@@ -55,6 +55,7 @@ const ARABIC_LIBRARY_DATABASE = [
     { id: "AR_49", title: "جلسات نفسية", author: "محمد إبراهيم", subject: "تنمية بشرية", publisher: "عصير الكتب", driveLink: "https://drive.google.com/file/d/1rvbFWFmgQ65Ufub-6tC-AeuqCYiNOW82/view?usp=drive_link", bio: "كاتب وأخصائي في علم النفس،​​ ​​يتميز الدكتور محمد إبراهيم بقدرته على تبسيط المفاهيم النفسية وتقديمها بأسلوب سلس ومباشر، مما يجعله قريبًا من القراء الباحثين عن فهم أعمق لذواتهم وتحقيق السكينة النفسية", summary: "يحتوي هذا الكتاب المكون من 120 صفحة على مجموعة من الجلسات النفسية التي تهدف إلى تحسين الصحة النفسية وتعزيز الرفاهية. حيث يقدم أساليب فعالة للتعامل مع التوتر والقلق، بالإضافة إلى تمارين تنمية الذات التي تساعدك على فهم مشاعرك وتطوير مهاراتك الشخصية." }
 ];
 
+
 const translations = {
     ar: {
         pageTitle: "المكتبة العربية",
@@ -97,8 +98,6 @@ const translations = {
         topicLabel: "Topic"
     }
 };
-
-// --- 3. المكونات المحدثة ---
 
 const SchoolLogo = ({ forceWhite = false, className = "" }: { forceWhite?: boolean; className?: string }) => (
     <img 
@@ -152,7 +151,7 @@ const SaqrAudioPlayer: React.FC<{ audioSrc: string; t: any }> = ({ audioSrc, t }
                         <div className="h-full bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.5)] transition-all duration-300" style={{ width: `${progress}%` }} />
                     </div>
                 </div>
-                <button onClick={handleSpeed} className="px-3 py-2 rounded-xl bg-slate-900 text-white text-[9px] font-black hover:bg-red-600 transition-colors uppercase min-w-[50px]">
+                <button onClick={handleSpeed} className="px-3 py-2 rounded-xl bg-slate-900 text-white text-[10px] font-black hover:bg-red-600 transition-colors uppercase min-w-[50px]">
                     {speed}x
                 </button>
             </div>
@@ -160,37 +159,10 @@ const SaqrAudioPlayer: React.FC<{ audioSrc: string; t: any }> = ({ audioSrc, t }
     );
 };
 
-// --- 4. نافذة تفاصيل الكتاب (الذكاء الاصطناعي المطور) ---
+// --- 4. نافذة تفاصيل الكتاب (البيانات مباشرة بدون AI) ---
 const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
     const { locale } = useLanguage();
-    const [aiContent, setAiContent] = useState({ summary: '', topic: '' });
-    const [loading, setLoading] = useState(false);
     const [tooltip, setTooltip] = useState<{ text: string, x: number, y: number } | null>(null);
-
-    useEffect(() => {
-        if (!book) return;
-        setLoading(true);
-        const fetchAiInsight = async () => {
-            try {
-                const res = await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        messages: [{
-                            role: 'system',
-                            content: `Analyze the book "${book.title}" ${book.author ? `by "${book.author}"` : ""}. Provide: 1. A 2-sentence inspiring summary. 2. A 1-word clear Subject (Topic). Language: ${locale === 'ar' ? 'Arabic' : 'English'}. Return JSON: {"summary": "...", "topic": "..."}`
-                        }]
-                    })
-                });
-                const data = await res.json();
-                const parsed = JSON.parse(data.reply.replace(/```json|```/g, '').trim());
-                setAiContent(parsed);
-            } catch {
-                setAiContent({ summary: book.summary, topic: book.subject });
-            } finally { setLoading(false); }
-        };
-        fetchAiInsight();
-    }, [book, locale]);
 
     if (!book) return null;
 
@@ -204,7 +176,7 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-2 sm:p-4 backdrop-blur-3xl animate-fade-up" onClick={onClose}>
             {tooltip && (
                 <div className="fixed pointer-events-none z-[300] bg-white/10 dark:bg-black/40 backdrop-blur-3xl border border-white/20 p-5 rounded-[2rem] shadow-2xl animate-in fade-in zoom-in duration-200 max-w-[280px]" style={{ left: tooltip.x + 15, top: tooltip.y + 15, transform: locale === 'ar' ? 'translateX(-100%)' : 'none' }}>
-                    <p className="text-[10px] font-black text-red-600 uppercase mb-2 tracking-widest">{t('bioTitle')}</p>
+                    <p className="text-[9px] font-black text-red-600 uppercase mb-2 tracking-widest">{t('bioTitle')}</p>
                     <p className="text-xs font-bold text-slate-900 dark:text-white leading-relaxed">{tooltip.text}</p>
                 </div>
             )}
@@ -220,10 +192,10 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
                     <div className="p-6 rounded-[2.5rem] bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-inner relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-4 opacity-10 text-4xl">✨</div>
                         <p className="text-[10px] text-green-600 font-black uppercase tracking-widest mb-4 flex items-center gap-2">
-                            <span className={`w-2 h-2 rounded-full ${loading ? 'animate-ping bg-red-500' : 'bg-green-500'}`}></span> {t('summaryTitle')}
+                            <span className="w-2 h-2 bg-green-500 rounded-full"></span> {t('summaryTitle')}
                         </p>
                         <p className="text-slate-800 dark:text-slate-200 text-base sm:text-xl leading-loose font-normal">
-                            {loading ? "..." : `"${aiContent.summary || book.summary}"`}
+                            "{book.summary}"
                         </p>
                     </div>
                     {book.audioId && <SaqrAudioPlayer audioSrc={book.audioId} t={t} />}
@@ -233,7 +205,7 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
                     <div className="space-y-10 w-full text-center flex flex-col items-center">
                         <div className="bg-red-600/20 p-8 rounded-[2.5rem] border border-red-600/30 w-full text-center">
                             <p className="text-[10px] font-black text-red-500 uppercase tracking-widest mb-2">{t('topicLabel')}</p>
-                            <p className="text-2xl font-black leading-loose">{loading ? '...' : (aiContent.topic || book.subject)}</p>
+                            <p className="text-2xl font-black leading-loose">{book.subject}</p>
                         </div>
                         <div className="flex flex-col items-center gap-2">
                             <SchoolLogo forceWhite={true} className="h-16 w-auto mb-2" />
@@ -322,7 +294,6 @@ const ArabicLibraryInternalPage: React.FC = () => {
                                 <h2 className="font-black text-xl sm:text-2xl text-slate-950 dark:text-white leading-loose mb-4 group-hover:text-red-600 transition-colors line-clamp-2 py-1">{book.title}</h2>
                                 <div className="flex items-center gap-2 opacity-60"><span className="text-sm">👤</span><p className="text-[10px] font-bold uppercase truncate tracking-widest leading-loose py-1">{book.author}</p></div>
                             </div>
-                            {/* منطقة الناشر والشعار المحدثة */}
                             <div className="bg-black/5 dark:bg-white/5 py-4 sm:py-5 px-6 sm:px-8 border-t border-white/10 mt-auto flex items-center justify-between relative z-10">
                                 <div className="text-[8px] font-black uppercase tracking-widest text-slate-950 dark:text-white opacity-40 group-hover:opacity-100 transition-all truncate max-w-[150px]">
                                     {book.publisher}
@@ -333,8 +304,6 @@ const ArabicLibraryInternalPage: React.FC = () => {
                     </div>
                 ))}
             </div>
-
-            <BookModal book={selectedBook} onClose={() => setSelectedBook(null)} t={t} />
 
             <style>{`
                 @keyframes audio-bar { 0%, 100% { height: 4px; } 50% { height: 14px; } }
