@@ -55,6 +55,7 @@ const ARABIC_LIBRARY_DATABASE = [
     { id: "AR_49", title: "جلسات نفسية", author: "محمد إبراهيم", subject: "تنمية بشرية", publisher: "عصير الكتب", driveLink: "https://drive.google.com/file/d/1rvbFWFmgQ65Ufub-6tC-AeuqCYiNOW82/view?usp=drive_link", bio: "كاتب وأخصائي في علم النفس،​​ ​​يتميز الدكتور محمد إبراهيم بقدرته على تبسيط المفاهيم النفسية وتقديمها بأسلوب سلس ومباشر، مما يجعله قريبًا من القراء الباحثين عن فهم أعمق لذواتهم وتحقيق السكينة النفسية", summary: "يحتوي هذا الكتاب المكون من 120 صفحة على مجموعة من الجلسات النفسية التي تهدف إلى تحسين الصحة النفسية وتعزيز الرفاهية. حيث يقدم أساليب فعالة للتعامل مع التوتر والقلق، بالإضافة إلى تمارين تنمية الذات التي تساعدك على فهم مشاعرك وتطوير مهاراتك الشخصية." }
 ];
 
+
 const translations = {
     ar: {
         pageTitle: "المكتبة العربية",
@@ -98,14 +99,8 @@ const translations = {
     }
 };
 
-// --- 3. المكونات المحدثة ---
-
 const SchoolLogo = ({ forceWhite = false, className = "" }: { forceWhite?: boolean; className?: string }) => (
-    <img 
-        src="/school-logo.png" 
-        alt="School Logo" 
-        className={`h-8 w-auto rotate-[12deg] transition-all duration-500 ${forceWhite ? 'brightness-0 invert' : 'logo-white-filter'} ${className}`}
-    />
+    <img src="/school-logo.png" alt="Logo" className={`h-8 w-auto rotate-[12deg] transition-all duration-500 ${forceWhite ? 'brightness-0 invert' : 'logo-white-filter'} ${className}`} />
 );
 
 const AudioWaveIcon = () => (
@@ -132,16 +127,15 @@ const SaqrAudioPlayer: React.FC<{ audioSrc: string; t: any }> = ({ audioSrc, t }
     };
 
     const handleSpeed = () => {
-        const nextSpeed = speed === 2 ? 0.5 : speed + 0.5;
+        const speeds = [1, 1.5, 2, 0.5];
+        const nextSpeed = speeds[(speeds.indexOf(speed) + 1) % speeds.length];
         setSpeed(nextSpeed);
         if (audioRef.current) audioRef.current.playbackRate = nextSpeed;
     };
 
     return (
         <div className="mt-8 animate-fade-up">
-            <h4 className="text-[10px] font-black text-red-600 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                <span className="text-xl">🎧</span> {t('listen')}
-            </h4>
+            <h4 className="text-[10px] font-black text-red-600 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">🎧 {t('listen')}</h4>
             <div className="p-6 rounded-[2.5rem] bg-white/40 dark:bg-white/5 backdrop-blur-2xl border border-white/20 shadow-xl flex items-center gap-4 sm:gap-6">
                 <audio ref={audioRef} src={audioSrc} onTimeUpdate={() => setProgress((audioRef.current!.currentTime / audioRef.current!.duration) * 100)} onEnded={() => setIsPlaying(false)} />
                 <button onClick={togglePlay} className="w-14 h-14 sm:w-16 sm:h-16 shrink-0 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg hover:scale-105 active:scale-90 transition-all">
@@ -149,48 +143,19 @@ const SaqrAudioPlayer: React.FC<{ audioSrc: string; t: any }> = ({ audioSrc, t }
                 </button>
                 <div className="flex-1">
                     <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                        <div className="h-full bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.5)] transition-all duration-300" style={{ width: `${progress}%` }} />
+                        <div className="h-full bg-red-600 transition-all duration-300" style={{ width: `${progress}%` }} />
                     </div>
                 </div>
-                <button onClick={handleSpeed} className="px-3 py-2 rounded-xl bg-slate-900 text-white text-[9px] font-black hover:bg-red-600 transition-colors uppercase min-w-[50px]">
-                    {speed}x
-                </button>
+                <button onClick={handleSpeed} className="px-3 py-2 rounded-xl bg-slate-900 text-white text-[10px] font-black hover:bg-red-600 transition-colors uppercase min-w-[50px]">{speed}x</button>
             </div>
         </div>
     );
 };
 
-// --- 4. نافذة تفاصيل الكتاب (الذكاء الاصطناعي المطور) ---
+// --- 4. نافذة تفاصيل الكتاب (مباشرة بدون أي انتظار للـ AI) ---
 const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
     const { locale } = useLanguage();
-    const [aiContent, setAiContent] = useState({ summary: '', topic: '' });
-    const [loading, setLoading] = useState(false);
     const [tooltip, setTooltip] = useState<{ text: string, x: number, y: number } | null>(null);
-
-    useEffect(() => {
-        if (!book) return;
-        setLoading(true);
-        const fetchAiInsight = async () => {
-            try {
-                const res = await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        messages: [{
-                            role: 'system',
-                            content: `Analyze the book "${book.title}" ${book.author ? `by "${book.author}"` : ""}. Provide: 1. A 2-sentence inspiring summary. 2. A 1-word clear Subject (Topic). Language: ${locale === 'ar' ? 'Arabic' : 'English'}. Return JSON: {"summary": "...", "topic": "..."}`
-                        }]
-                    })
-                });
-                const data = await res.json();
-                const parsed = JSON.parse(data.reply.replace(/```json|```/g, '').trim());
-                setAiContent(parsed);
-            } catch {
-                setAiContent({ summary: book.summary, topic: book.subject });
-            } finally { setLoading(false); }
-        };
-        fetchAiInsight();
-    }, [book, locale]);
 
     if (!book) return null;
 
@@ -204,36 +169,27 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-2 sm:p-4 backdrop-blur-3xl animate-fade-up" onClick={onClose}>
             {tooltip && (
                 <div className="fixed pointer-events-none z-[300] bg-white/10 dark:bg-black/40 backdrop-blur-3xl border border-white/20 p-5 rounded-[2rem] shadow-2xl animate-in fade-in zoom-in duration-200 max-w-[280px]" style={{ left: tooltip.x + 15, top: tooltip.y + 15, transform: locale === 'ar' ? 'translateX(-100%)' : 'none' }}>
-                    <p className="text-[10px] font-black text-red-600 uppercase mb-2 tracking-widest">{t('bioTitle')}</p>
+                    <p className="text-[9px] font-black text-red-600 uppercase mb-2 tracking-widest">{t('bioTitle')}</p>
                     <p className="text-xs font-bold text-slate-900 dark:text-white leading-relaxed">{tooltip.text}</p>
                 </div>
             )}
             <div className="relative w-full max-w-4xl glass-panel rounded-[2.5rem] sm:rounded-[3rem] overflow-hidden flex flex-col md:flex-row shadow-2xl bg-white/95 dark:bg-slate-950/95 max-h-[95vh] overflow-y-auto md:overflow-hidden" onClick={(e) => e.stopPropagation()}>
-                <button onClick={onClose} className="absolute top-4 end-4 sm:top-6 sm:end-6 z-50 p-2 bg-red-600 text-white rounded-full hover:rotate-90 transition-all shadow-xl active:scale-90">
-                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-                
+                <button onClick={onClose} className="absolute top-4 end-4 sm:top-6 sm:end-6 z-50 p-2 bg-red-600 text-white rounded-full hover:rotate-90 transition-all shadow-xl active:scale-90"><svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M6 18L18 6M6 6l12 12" /></svg></button>
                 <div className="flex-1 p-6 sm:p-14 text-start">
                     <h2 className="text-2xl sm:text-5xl font-black text-slate-950 dark:text-white leading-loose mb-2 tracking-tighter py-2">{book.title}</h2>
                     <p onMouseMove={(e) => handleAuthorTrigger(e, book.bio)} onTouchStart={(e) => handleAuthorTrigger(e, book.bio)} onMouseLeave={() => setTooltip(null)} className="text-lg sm:text-xl text-red-600 font-bold mb-8 cursor-help inline-block border-b-2 border-dotted border-red-200">By {book.author}</p>
-                    
                     <div className="p-6 rounded-[2.5rem] bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-inner relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-4 opacity-10 text-4xl">✨</div>
-                        <p className="text-[10px] text-green-600 font-black uppercase tracking-widest mb-4 flex items-center gap-2">
-                            <span className={`w-2 h-2 rounded-full ${loading ? 'animate-ping bg-red-500' : 'bg-green-500'}`}></span> {t('summaryTitle')}
-                        </p>
-                        <p className="text-slate-800 dark:text-slate-200 text-base sm:text-xl leading-loose font-normal">
-                            {loading ? "..." : `"${aiContent.summary || book.summary}"`}
-                        </p>
+                        <p className="text-[10px] text-green-600 font-black uppercase tracking-widest mb-4 flex items-center gap-2"><span className="w-2 h-2 bg-green-500 rounded-full"></span> {t('summaryTitle')}</p>
+                        <p className="text-slate-800 dark:text-slate-200 text-base sm:text-xl leading-loose font-normal">"{book.summary}"</p>
                     </div>
                     {book.audioId && <SaqrAudioPlayer audioSrc={book.audioId} t={t} />}
                 </div>
-
                 <div className="w-full md:w-[320px] bg-slate-950 p-10 flex flex-col justify-center items-center text-white border-s border-white/10 shrink-0">
                     <div className="space-y-10 w-full text-center flex flex-col items-center">
                         <div className="bg-red-600/20 p-8 rounded-[2.5rem] border border-red-600/30 w-full text-center">
                             <p className="text-[10px] font-black text-red-500 uppercase tracking-widest mb-2">{t('topicLabel')}</p>
-                            <p className="text-2xl font-black leading-loose">{loading ? '...' : (aiContent.topic || book.subject)}</p>
+                            <p className="text-2xl font-black leading-loose">{book.subject}</p>
                         </div>
                         <div className="flex flex-col items-center gap-2">
                             <SchoolLogo forceWhite={true} className="h-16 w-auto mb-2" />
@@ -263,9 +219,6 @@ const ArabicLibraryInternalPage: React.FC = () => {
     const [sortBy, setSortBy] = useState('alphabetical');
     const [audioOnly, setAudioOnly] = useState(false);
 
-    const authors = useMemo(() => ["all", ...new Set(ARABIC_LIBRARY_DATABASE.map(b => b.author))].sort(), []);
-    const subjects = useMemo(() => ["all", ...new Set(ARABIC_LIBRARY_DATABASE.map(b => b.subject))].sort(), []);
-
     const filteredBooks = useMemo(() => {
         const term = searchTerm.toLowerCase().trim();
         let result = ARABIC_LIBRARY_DATABASE.filter(b => {
@@ -287,9 +240,7 @@ const ArabicLibraryInternalPage: React.FC = () => {
     return (
         <div dir={dir} className="max-w-7xl mx-auto px-4 pb-40 relative z-10 font-black antialiased">
             <div className="text-center mt-12 mb-20 animate-fade-up">
-                <button onClick={() => navigate(-1)} className="absolute start-0 top-0 text-slate-400 hover:text-red-600 flex items-center gap-2 transition-all">
-                    <span className="text-2xl">←</span> {t('back')}
-                </button>
+                <button onClick={() => navigate(-1)} className="absolute start-0 top-0 text-slate-400 hover:text-red-600 flex items-center gap-2 transition-all"><span className="text-2xl">←</span> {t('back')}</button>
                 <h1 className="text-4xl md:text-[6rem] font-black text-slate-950 dark:text-white tracking-tighter leading-none">{t('pageTitle')}</h1>
                 <div className="h-2 w-32 bg-[#00732f] mx-auto mt-8 rounded-full shadow-lg" />
             </div>
@@ -301,9 +252,9 @@ const ArabicLibraryInternalPage: React.FC = () => {
                         <span className="absolute start-5 top-1/2 -translate-y-1/2 opacity-40 text-xl">🔍</span>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <select value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)} className="p-3 rounded-2xl bg-white dark:bg-slate-800 font-black text-[10px] cursor-pointer border border-white/10"><option value="all">{t('allAuthors')}</option>{authors.filter(a => a !== "all").map(a => <option key={a} value={a}>{a}</option>)}</select>
-                        <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="p-3 rounded-2xl bg-white dark:bg-slate-800 font-black text-[10px] cursor-pointer border border-white/10"><option value="all">{t('allSubjects')}</option>{subjects.filter(s => s !== "all").map(s => <option key={s} value={s}>{s}</option>)}</select>
-                        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="p-3 rounded-2xl bg-white dark:bg-slate-800 font-black text-[10px] cursor-pointer border border-white/10"><option value="alphabetical">{t('alphabetical')}</option><option value="author">{t('authorSort')}</option><option value="subject">{t('subjectSort')}</option><option value="audio">{t('audioSort')}</option></select>
+                        <select value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)} className="p-3 rounded-2xl bg-white dark:bg-slate-800 font-black text-[10px] cursor-pointer border border-white/10 shadow-sm"><option value="all">{t('allAuthors')}</option>{[...new Set(ARABIC_LIBRARY_DATABASE.map(b => b.author))].sort().map(a => <option key={a} value={a}>{a}</option>)}</select>
+                        <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="p-3 rounded-2xl bg-white dark:bg-slate-800 font-black text-[10px] cursor-pointer border border-white/10 shadow-sm"><option value="all">{t('allSubjects')}</option>{[...new Set(ARABIC_LIBRARY_DATABASE.map(b => b.subject))].sort().map(s => <option key={s} value={s}>{s}</option>)}</select>
+                        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="p-3 rounded-2xl bg-white dark:bg-slate-800 font-black text-[10px] cursor-pointer border border-white/10 shadow-sm"><option value="alphabetical">{t('alphabetical')}</option><option value="author">{t('authorSort')}</option><option value="subject">{t('subjectSort')}</option><option value="audio">{t('audioSort')}</option></select>
                         <button onClick={() => setAudioOnly(!audioOnly)} className={`p-3 rounded-2xl font-black text-[10px] transition-all border ${audioOnly ? 'bg-red-600 text-white' : 'bg-white dark:bg-slate-800 text-slate-500 border-white/10'}`}>🎧 {t('audioOnly')}</button>
                     </div>
                 </div>
@@ -322,11 +273,8 @@ const ArabicLibraryInternalPage: React.FC = () => {
                                 <h2 className="font-black text-xl sm:text-2xl text-slate-950 dark:text-white leading-loose mb-4 group-hover:text-red-600 transition-colors line-clamp-2 py-1">{book.title}</h2>
                                 <div className="flex items-center gap-2 opacity-60"><span className="text-sm">👤</span><p className="text-[10px] font-bold uppercase truncate tracking-widest leading-loose py-1">{book.author}</p></div>
                             </div>
-                            {/* منطقة الناشر والشعار المحدثة */}
                             <div className="bg-black/5 dark:bg-white/5 py-4 sm:py-5 px-6 sm:px-8 border-t border-white/10 mt-auto flex items-center justify-between relative z-10">
-                                <div className="text-[8px] font-black uppercase tracking-widest text-slate-950 dark:text-white opacity-40 group-hover:opacity-100 transition-all truncate max-w-[150px]">
-                                    {book.publisher}
-                                </div>
+                                <div className="text-[8px] font-black uppercase tracking-widest text-slate-950 dark:text-white opacity-40 group-hover:opacity-100 transition-all truncate max-w-[150px]">{book.publisher}</div>
                                 <SchoolLogo className="group-hover:rotate-[15deg] h-6 sm:h-8" />
                             </div>
                         </div>
