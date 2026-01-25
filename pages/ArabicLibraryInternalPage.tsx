@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { useLanguage } from '../App';
 import { useNavigate } from 'react-router-dom';
 
@@ -55,7 +55,6 @@ const ARABIC_LIBRARY_DATABASE = [
     { id: "AR_49", title: "جلسات نفسية", author: "محمد إبراهيم", subject: "تنمية بشرية", publisher: "عصير الكتب", driveLink: "https://drive.google.com/file/d/1rvbFWFmgQ65Ufub-6tC-AeuqCYiNOW82/view?usp=drive_link", bio: "كاتب وأخصائي في علم النفس،​​ ​​يتميز الدكتور محمد إبراهيم بقدرته على تبسيط المفاهيم النفسية وتقديمها بأسلوب سلس ومباشر، مما يجعله قريبًا من القراء الباحثين عن فهم أعمق لذواتهم وتحقيق السكينة النفسية", summary: "يحتوي هذا الكتاب المكون من 120 صفحة على مجموعة من الجلسات النفسية التي تهدف إلى تحسين الصحة النفسية وتعزيز الرفاهية. حيث يقدم أساليب فعالة للتعامل مع التوتر والقلق، بالإضافة إلى تمارين تنمية الذات التي تساعدك على فهم مشاعرك وتطوير مهاراتك الشخصية." }
 ];
 
-
 const translations = {
     ar: {
         pageTitle: "المكتبة العربية",
@@ -100,11 +99,7 @@ const translations = {
 };
 
 const SchoolLogo = ({ forceWhite = false, className = "" }: { forceWhite?: boolean; className?: string }) => (
-    <img 
-        src="/school-logo.png" 
-        alt="School Logo" 
-        className={`h-8 w-auto rotate-[12deg] transition-all duration-500 ${forceWhite ? 'brightness-0 invert' : 'logo-white-filter'} ${className}`}
-    />
+    <img src="/school-logo.png" alt="Logo" className={`h-8 w-auto rotate-[12deg] transition-all duration-500 ${forceWhite ? 'brightness-0 invert' : 'logo-white-filter'} ${className}`} />
 );
 
 const AudioWaveIcon = () => (
@@ -138,28 +133,22 @@ const SaqrAudioPlayer: React.FC<{ audioSrc: string; t: any }> = ({ audioSrc, t }
 
     return (
         <div className="mt-8 animate-fade-up">
-            <h4 className="text-[10px] font-black text-red-600 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                <span className="text-xl">🎧</span> {t('listen')}
-            </h4>
-            <div className="p-6 rounded-[2.5rem] bg-white/40 dark:bg-white/5 backdrop-blur-2xl border border-white/20 shadow-xl flex items-center gap-4 sm:gap-6">
+            <h4 className="text-[10px] font-black text-red-600 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">🎧 {t('listen')}</h4>
+            <div className="p-5 rounded-[2.5rem] bg-white/40 dark:bg-white/5 backdrop-blur-2xl border border-white/20 shadow-xl flex items-center gap-4">
                 <audio ref={audioRef} src={audioSrc} onTimeUpdate={() => setProgress((audioRef.current!.currentTime / audioRef.current!.duration) * 100)} onEnded={() => setIsPlaying(false)} />
-                <button onClick={togglePlay} className="w-14 h-14 sm:w-16 sm:h-16 shrink-0 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg hover:scale-105 active:scale-90 transition-all">
-                    {isPlaying ? <span className="text-2xl">⏸</span> : <span className="text-2xl ps-1">▶</span>}
+                <button onClick={togglePlay} className="w-14 h-14 shrink-0 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg active:scale-90 transition-all">
+                    {isPlaying ? <span className="text-xl">⏸</span> : <span className="text-xl ps-1">▶</span>}
                 </button>
-                <div className="flex-1">
-                    <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                        <div className="h-full bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.5)] transition-all duration-300" style={{ width: `${progress}%` }} />
-                    </div>
+                <div className="flex-1 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                    <div className="h-full bg-red-600 transition-all duration-300" style={{ width: `${progress}%` }} />
                 </div>
-                <button onClick={handleSpeed} className="px-3 py-2 rounded-xl bg-slate-900 text-white text-[10px] font-black hover:bg-red-600 transition-colors uppercase min-w-[50px]">
-                    {speed}x
-                </button>
+                <button onClick={handleSpeed} className="px-3 py-2 rounded-xl bg-slate-900 text-white text-[9px] font-black hover:bg-red-600 transition-colors uppercase min-w-[50px]">{speed}x</button>
             </div>
         </div>
     );
 };
 
-// --- 4. نافذة تفاصيل الكتاب (البيانات مباشرة بدون AI) ---
+// --- 4. نافذة تفاصيل الكتاب (بدون AI كما طلبت) ---
 const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
     const { locale } = useLanguage();
     const [tooltip, setTooltip] = useState<{ text: string, x: number, y: number } | null>(null);
@@ -175,32 +164,23 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
     return (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-2 sm:p-4 backdrop-blur-3xl animate-fade-up" onClick={onClose}>
             {tooltip && (
-                <div className="fixed pointer-events-none z-[300] bg-white/10 dark:bg-black/40 backdrop-blur-3xl border border-white/20 p-5 rounded-[2rem] shadow-2xl animate-in fade-in zoom-in duration-200 max-w-[280px]" style={{ left: tooltip.x + 15, top: tooltip.y + 15, transform: locale === 'ar' ? 'translateX(-100%)' : 'none' }}>
+                <div className="fixed pointer-events-none z-[300] bg-white/10 dark:bg-black/40 backdrop-blur-3xl border border-white/20 p-5 rounded-[2rem] shadow-2xl animate-in fade-in duration-200 max-w-[280px]" style={{ left: tooltip.x + 15, top: tooltip.y + 15, transform: locale === 'ar' ? 'translateX(-100%)' : 'none' }}>
                     <p className="text-[9px] font-black text-red-600 uppercase mb-2 tracking-widest">{t('bioTitle')}</p>
                     <p className="text-xs font-bold text-slate-900 dark:text-white leading-relaxed">{tooltip.text}</p>
                 </div>
             )}
             <div className="relative w-full max-w-4xl glass-panel rounded-[2.5rem] sm:rounded-[3rem] overflow-hidden flex flex-col md:flex-row shadow-2xl bg-white/95 dark:bg-slate-950/95 max-h-[95vh] overflow-y-auto md:overflow-hidden" onClick={(e) => e.stopPropagation()}>
-                <button onClick={onClose} className="absolute top-4 end-4 sm:top-6 sm:end-6 z-50 p-2 bg-red-600 text-white rounded-full hover:rotate-90 transition-all shadow-xl active:scale-90">
-                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-                
+                <button onClick={onClose} className="absolute top-4 end-4 sm:top-6 sm:end-6 z-50 p-2 bg-red-600 text-white rounded-full hover:rotate-90 transition-all shadow-xl"><svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M6 18L18 6M6 6l12 12" /></svg></button>
                 <div className="flex-1 p-6 sm:p-14 text-start">
                     <h2 className="text-2xl sm:text-5xl font-black text-slate-950 dark:text-white leading-loose mb-2 tracking-tighter py-2">{book.title}</h2>
                     <p onMouseMove={(e) => handleAuthorTrigger(e, book.bio)} onTouchStart={(e) => handleAuthorTrigger(e, book.bio)} onMouseLeave={() => setTooltip(null)} className="text-lg sm:text-xl text-red-600 font-bold mb-8 cursor-help inline-block border-b-2 border-dotted border-red-200">By {book.author}</p>
-                    
                     <div className="p-6 rounded-[2.5rem] bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-inner relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-4 opacity-10 text-4xl">✨</div>
-                        <p className="text-[10px] text-green-600 font-black uppercase tracking-widest mb-4 flex items-center gap-2">
-                            <span className="w-2 h-2 bg-green-500 rounded-full"></span> {t('summaryTitle')}
-                        </p>
-                        <p className="text-slate-800 dark:text-slate-200 text-base sm:text-xl leading-loose font-normal">
-                            "{book.summary}"
-                        </p>
+                        <p className="text-[10px] text-green-600 font-black uppercase tracking-widest mb-4 flex items-center gap-2"><span className="w-2 h-2 bg-green-500 rounded-full"></span> {t('summaryTitle')}</p>
+                        <p className="text-slate-800 dark:text-slate-200 text-base sm:text-xl leading-loose font-normal">"{book.summary}"</p>
                     </div>
                     {book.audioId && <SaqrAudioPlayer audioSrc={book.audioId} t={t} />}
                 </div>
-
                 <div className="w-full md:w-[320px] bg-slate-950 p-10 flex flex-col justify-center items-center text-white border-s border-white/10 shrink-0">
                     <div className="space-y-10 w-full text-center flex flex-col items-center">
                         <div className="bg-red-600/20 p-8 rounded-[2.5rem] border border-red-600/30 w-full text-center">
@@ -259,9 +239,7 @@ const ArabicLibraryInternalPage: React.FC = () => {
     return (
         <div dir={dir} className="max-w-7xl mx-auto px-4 pb-40 relative z-10 font-black antialiased">
             <div className="text-center mt-12 mb-20 animate-fade-up">
-                <button onClick={() => navigate(-1)} className="absolute start-0 top-0 text-slate-400 hover:text-red-600 flex items-center gap-2 transition-all">
-                    <span className="text-2xl">←</span> {t('back')}
-                </button>
+                <button onClick={() => navigate(-1)} className="absolute start-0 top-0 text-slate-400 hover:text-red-600 flex items-center gap-2 transition-all"><span className="text-2xl">←</span> {t('back')}</button>
                 <h1 className="text-4xl md:text-[6rem] font-black text-slate-950 dark:text-white tracking-tighter leading-none">{t('pageTitle')}</h1>
                 <div className="h-2 w-32 bg-[#00732f] mx-auto mt-8 rounded-full shadow-lg" />
             </div>
@@ -295,15 +273,16 @@ const ArabicLibraryInternalPage: React.FC = () => {
                                 <div className="flex items-center gap-2 opacity-60"><span className="text-sm">👤</span><p className="text-[10px] font-bold uppercase truncate tracking-widest leading-loose py-1">{book.author}</p></div>
                             </div>
                             <div className="bg-black/5 dark:bg-white/5 py-4 sm:py-5 px-6 sm:px-8 border-t border-white/10 mt-auto flex items-center justify-between relative z-10">
-                                <div className="text-[8px] font-black uppercase tracking-widest text-slate-950 dark:text-white opacity-40 group-hover:opacity-100 transition-all truncate max-w-[150px]">
-                                    {book.publisher}
-                                </div>
+                                <div className="text-[8px] font-black uppercase tracking-widest text-slate-950 dark:text-white opacity-40 group-hover:opacity-100 transition-all truncate max-w-[150px]">{book.publisher}</div>
                                 <SchoolLogo className="group-hover:rotate-[15deg] h-6 sm:h-8" />
                             </div>
                         </div>
                     </div>
                 ))}
             </div>
+
+            {/* تم استدعاء المودال هنا ليظهر عند اختيار كتاب */}
+            <BookModal book={selectedBook} onClose={() => setSelectedBook(null)} t={t} />
 
             <style>{`
                 @keyframes audio-bar { 0%, 100% { height: 4px; } 50% { height: 14px; } }
