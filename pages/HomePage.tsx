@@ -166,7 +166,7 @@ const HomePage: React.FC = () => {
                                 📅 {isAr ? "26/01 - 30/01/2026" : "Jan 26 - Jan 30, 2026"}
                             </p>
                             <p className="text-sm md:text-lg text-slate-600 dark:text-slate-400 font-bold">
-                                📍 {isAr ? "صالة الجيم" : "Gym Hall"}
+                                📍 {isAr ? "الصالة الرياضية" : "Gym Hall"}
                             </p>
                         </div>
                         <div className="h-px w-2/3 bg-slate-200 dark:bg-white/10 mx-auto"></div>
