@@ -79,7 +79,6 @@ const HomePage: React.FC = () => {
 
         setBursts(prev => [...prev, ...newBursts]);
         
-        // بقاء الكروت لفترة كافية (2.5 ثانية) ليتمكن المستخدم من قراءتها
         newBursts.forEach(b => { 
             setTimeout(() => { 
                 setBursts(current => current.filter(item => item.id !== b.id)); 
@@ -129,15 +128,14 @@ const HomePage: React.FC = () => {
                     </Link>
                 </div>
 
-                {/* صقر مع نظام الانفجار المطور بدون Blur */}
-                <div className="lg:col-span-5 flex justify-center order-1 lg:order-2 relative">
+                {/* صقر مع إعلان معرض الكتاب */}
+                <div className="lg:col-span-5 flex flex-col items-center justify-center order-1 lg:order-2 relative gap-8">
                     <div onClick={handleMascotInteraction} className={`relative cursor-pointer transition-transform duration-700 ${isMascotClicked ? 'scale-110' : 'hover:scale-105'}`}>
                         
                         <div className="absolute inset-0 flex items-center justify-center -z-10 pointer-events-none opacity-10 dark:opacity-20 transition-all duration-1000">
                             <img src="/school-logo.png" alt="Seal" className="w-[130%] h-[130%] object-contain rotate-[15deg] logo-white-filter" />
                         </div>
 
-                        {/* الكروت المتطايرة: أصبحت صلبة وواضحة جداً وتدوم لفترة أطول */}
                         {bursts.map((burst) => (
                             <div key={burst.id} 
                                 className={`absolute z-[100] bg-white dark:bg-slate-900 px-4 py-2 md:px-6 md:py-3 rounded-2xl border-[3px] ${burst.item.color} shadow-[0_20px_40px_rgba(0,0,0,0.3)] animate-burst-steady pointer-events-none flex items-center gap-3`}
@@ -153,6 +151,30 @@ const HomePage: React.FC = () => {
                             {t('bubble')}
                             <div className="absolute -bottom-2 left-8 w-5 h-5 glass-panel rotate-45 bg-inherit border-r-2 border-b-2 border-red-500/20"></div>
                         </div>
+                    </div>
+
+                    {/* --- قسم إعلان معرض الكتاب --- */}
+                    <div className="w-full max-w-md glass-panel p-6 md:p-8 rounded-[2.5rem] border-2 border-red-600/30 shadow-3xl text-center space-y-4 relative z-30 animate-fade-up">
+                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-red-600 text-white text-[10px] md:text-xs font-black uppercase tracking-widest shadow-lg">
+                            {isAr ? "حدث الآن" : "Happening Now"}
+                        </div>
+                        <h3 className="text-xl md:text-3xl font-black text-slate-950 dark:text-white leading-tight">
+                            {isAr ? "معرض الكتاب المدرسي" : "School Book Fair"}
+                        </h3>
+                        <div className="space-y-1">
+                            <p className="text-sm md:text-xl text-red-600 dark:text-red-500 font-black">
+                                📅 {isAr ? "26/01 - 30/01/2026" : "Jan 26 - Jan 30, 2026"}
+                            </p>
+                            <p className="text-sm md:text-lg text-slate-600 dark:text-slate-400 font-bold">
+                                📍 {isAr ? "صالة الجيم" : "Gym Hall"}
+                            </p>
+                        </div>
+                        <div className="h-px w-2/3 bg-slate-200 dark:bg-white/10 mx-auto"></div>
+                        <p className="text-xs md:text-base text-slate-700 dark:text-slate-300 font-bold italic leading-relaxed">
+                            {isAr 
+                                ? "القراءة هي المفتاح الذي يفتح لك أبواب المستقبل ويسافر بك عبر الزمن." 
+                                : "Reading is the key that opens the doors of the future and takes you through time."}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -176,10 +198,8 @@ const HomePage: React.FC = () => {
             </div>
 
             <style>{`
-                /* إلغاء الميلان تماماً بطلبك */
                 * { font-style: normal !important; }
 
-                /* أنيميشن جديد: مستقر، واضح، وبدون Blur */
                 @keyframes burst-steady {
                     0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
                     10% { transform: translate(var(--tx), var(--ty)) scale(1.1) rotate(var(--rot)); opacity: 1; }
