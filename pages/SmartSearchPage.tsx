@@ -3,53 +3,55 @@ import { useLanguage } from '../App';
 import { ChatMessage } from '../types';
 import ReactMarkdown from 'react-markdown'; 
 import { bookData } from '../api/bookData'; 
+// ملاحظة: تأكد من استيراد مصفوفات المكتبة الرقمية إذا كانت في ملفات منفصلة
 
-// --- 1. بروتوكول عقل صقر الملكي المطور (تحديات مزدوجة + لغة فصحى) ---
+// --- 1. بروتوكول عقل صقر الملكي المطور (تحديات فورية + طلب الاسم) ---
 const SAQR_ELITE_PROMPT = `
-Identity: You are "Saqr" (صقر), the official Elite AI Librarian of Saqr Al Emarat International Private School (EFIPS).
-Chief Supervisor: Mr. Islam Soliman.
+Identity: You are "Saqr" (صقر), the Elite AI Librarian of Saqr Al Emarat International Private School (EFIPS).
+Lead Librarian: Mr. Islam Soliman.
 
-Intelligence Logic:
-1. CHALLENGE TYPE A (Knowledge): If a student picked a book, ask 5 progressive questions (Plot -> Critical Thinking).
-2. CHALLENGE TYPE B (Guessing): If a student wants a game, give clues about a book from EFIPS library, they must guess the title.
-3. HYBRID SEARCH: Access Physical/Digital data context first before using AI knowledge.
-4. WINNING: If they succeed, end with: [WINNER: Name, Score: Points/100].
-5. STYLE: Formal Standard Arabic (Fos'ha), No Italics, Professional & Inspiring.
-6. IDENTITY: Your name is صقر. Always use this spelling.
+Logic Protocols:
+1. CHALLENGE START: If the user says "I read a book" or "I want to challenge you", IMMEDIATELY reply in Formal Arabic asking for their Full Name to register for the Victory Medal.
+2. CHALLENGE TYPES: 
+   - A (Knowledge): Ask 5 progressive questions (Easy to Hard) about a specific book.
+   - B (Guessing): Give clues about a book from EFIPS library for them to guess.
+3. HYBRID SEARCH: You have access to Physical & Digital data. Check internal library records first.
+4. WINNING: If they pass, end with: [WINNER: Name, Points: X/100, Game: Type].
+5. STYLE: Modern Standard Arabic (Fos'ha). NO ITALICS. High-end Professionalism.
 `;
 
 const chatLabels: any = {
   ar: {
-    welcome: 'مرحباً بك في رحاب المعرفة! أنا صقر، دليلك الذكي. هل تود البحث عن كتاب، أم أنت مستعد لتحدي القراءة أو لعبة تخمين الكتب والحصول على الوسام الذهبي؟',
-    input: 'اسأل، ابدأ تحدي المعرفة، أو اطلب لعبة التخمين...',
+    welcome: 'مرحباً بك في رحاب المعرفة! أنا صقر، دليلك الذكي. هل تود البحث عن كتاب، أم أنت مستعد لتحدي القراءة أو التخمين والحصول على الميدالية الذهبية؟',
+    input: 'اسأل صقر، ابدأ التحدي، أو اطلب مساعدة دراسية...',
     status: 'أمين المكتبة الذكي (صقر)',
     online: 'متصل وجاهز لإرشادك',
-    you: 'أنت',
-    score: 'النقاط'
+    reportsTitle: 'سجل المبدعين (نتائج التحدي)',
+    you: 'أنت'
   },
   en: {
-    welcome: "Welcome! I'm Saqr, your Elite AI Librarian. Would you like to search for a book, start a reading challenge, or play the guessing game to win the Gold Medal?",
-    input: 'Search, start a challenge, or ask for the guessing game...',
+    welcome: "Welcome! I'm Saqr, your AI Librarian. Ready to find a book or start a challenge to win the Gold Medal?",
+    input: 'Search, start a challenge, or get study help...',
     status: 'Saqr AI Librarian',
     online: 'Online & Ready',
-    you: 'YOU',
-    score: 'Score'
+    reportsTitle: 'Creators Registry (Results)',
+    you: 'YOU'
   }
 };
 
-// --- 2. مكون الميدالية الذهبية الكريستالية ---
-const VictoryMedal: React.FC<{ name: string; score: string; onClose: () => void }> = ({ name, score, onClose }) => (
-  <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 backdrop-blur-3xl animate-in fade-in duration-700 p-4">
-    <div className="relative text-center animate-in zoom-in spin-in duration-1000 max-w-lg w-full">
-      <div className="text-[200px] md:text-[300px] drop-shadow-[0_0_80px_rgba(234,179,8,0.9)] leading-none mb-[-40px] animate-bounce relative z-20">🥇</div>
-      <div className="glass-panel p-8 md:p-12 rounded-[4rem] border-[6px] border-yellow-500 bg-white/10 shadow-[0_0_150px_rgba(234,179,8,0.4)] relative z-10">
-        <h1 className="text-5xl md:text-7xl font-black text-yellow-500 uppercase tracking-tighter mb-4">Winner!</h1>
-        <p className="text-xl md:text-2xl text-white font-bold mb-2">مدرسة صقر الإمارات الدولية</p>
-        <p className="text-lg text-yellow-400 font-black tracking-widest mb-6">بطل تحديات صقر</p>
-        <div className="h-px w-full bg-white/20 mb-6"></div>
-        <p className="text-3xl md:text-5xl text-white font-black mb-4">{name}</p>
-        <div className="inline-block px-10 py-3 rounded-full bg-yellow-500 text-black font-black text-2xl shadow-xl">{score}</div>
-        <button onClick={onClose} className="mt-10 block w-full py-4 bg-white/5 hover:bg-white/20 text-white font-black rounded-2xl border border-white/20 transition-all uppercase">متابعة</button>
+// --- 2. مكون الميدالية الذهبية الكريستالية العملاقة ---
+const VictoryMedal: React.FC<{ data: any; onClose: () => void }> = ({ data, onClose }) => (
+  <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/95 backdrop-blur-3xl animate-in fade-in duration-700 p-4">
+    <div className="relative text-center animate-in zoom-in spin-in duration-1000 w-full max-w-2xl">
+      <div className="text-[220px] md:text-[380px] drop-shadow-[0_0_100px_rgba(234,179,8,1)] leading-none mb-[-60px] animate-bounce relative z-20">🥇</div>
+      <div className="glass-panel p-10 md:p-16 rounded-[5rem] border-[5px] border-yellow-500 bg-white/10 shadow-[0_0_150px_rgba(234,179,8,0.4)] relative z-10">
+        <h1 className="text-5xl md:text-8xl font-black text-yellow-500 tracking-tighter mb-4 uppercase">Winner!</h1>
+        <p className="text-xl md:text-3xl text-white font-bold mb-2">مدرسة صقر الإمارات الدولية</p>
+        <p className="text-lg md:text-2xl text-yellow-400 font-black mb-8 uppercase tracking-widest">بطل تحدي القارئ المبدع</p>
+        <div className="h-1 w-full bg-white/20 my-6"></div>
+        <p className="text-4xl md:text-7xl text-white font-black mb-8 drop-shadow-xl">{data.name}</p>
+        <div className="inline-block px-12 py-4 rounded-full bg-yellow-500 text-black font-black text-3xl shadow-2xl">النقاط: {data.points}</div>
+        <button onClick={onClose} className="mt-12 block w-full py-5 bg-white/5 hover:bg-white/15 text-white font-black text-xl rounded-3xl border border-white/20 transition-all uppercase">إغلاق</button>
       </div>
     </div>
   </div>
@@ -62,7 +64,8 @@ const SmartSearchPage: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([{ role: 'assistant', content: chatLabels[locale].welcome }]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [winnerData, setWinnerData] = useState<{ name: string; score: string } | null>(null);
+  const [winnerData, setWinnerData] = useState<any>(null);
+  const [reports, setReports] = useState<any[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -76,7 +79,7 @@ const SmartSearchPage: React.FC = () => {
     setInput('');
     setIsLoading(true);
 
-    // سياق البحث الهجين
+    // البحث الهجين للسياق
     const context = `Library Context: ${JSON.stringify(bookData.filter(b => b.title.includes(userQuery)).slice(0, 2))}`;
 
     try {
@@ -92,14 +95,18 @@ const SmartSearchPage: React.FC = () => {
       let reply = data.reply || '';
 
       if (reply.includes('[WINNER:')) {
-        const match = reply.match(/\[WINNER:\s*(.*?),\s*Score:\s*(.*?)\]/);
-        if (match) setWinnerData({ name: match[1], score: match[2] });
+        const match = reply.match(/\[WINNER:\s*(.*?),\s*Points:\s*(.*?)]/);
+        if (match) {
+          const info = { name: match[1], points: match[2], date: new Date().toLocaleTimeString() };
+          setWinnerData(info);
+          setReports(prev => [info, ...prev]);
+        }
         reply = reply.replace(/\[WINNER:.*?\]/g, '');
       }
 
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
     } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'حدث خطأ في النظام.' }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: 'حدث خطأ في مزامنة صقر.' }]);
     } finally {
       setIsLoading(false);
     }
@@ -108,48 +115,46 @@ const SmartSearchPage: React.FC = () => {
   return (
     <div dir={dir} className="w-full max-w-3xl mx-auto px-4 py-4 md:py-6 h-[92dvh] flex flex-col font-black antialiased relative">
       
-      {winnerData && <VictoryMedal name={winnerData.name} score={winnerData.score} onClose={() => setWinnerData(null)} />}
+      {winnerData && <VictoryMedal data={winnerData} onClose={() => setWinnerData(null)} />}
 
-      {/* خلفية فنية نيونية مكثفة */}
+      {/* خلفية فنية نيونية Frameless */}
       <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
-          <div className="absolute top-[10%] left-[-10%] w-[500px] h-[500px] bg-red-600/10 blur-[180px] rounded-full animate-pulse"></div>
+          <div className="absolute top-[15%] left-[-10%] w-[500px] h-[500px] bg-red-600/10 blur-[180px] rounded-full animate-pulse"></div>
           <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-green-600/10 blur-[200px] rounded-full delay-1000 animate-pulse"></div>
       </div>
 
-      {/* Header العائم بدون إطار */}
-      <div className="mb-6 flex items-center justify-between px-6 py-4 glass-panel rounded-[2.5rem] border border-white/20 shadow-2xl bg-white/5 backdrop-blur-2xl">
-        <div className="flex items-center gap-4">
-          <div className="relative">
+      {/* الهيدر العائم */}
+      <div className="mb-6 flex items-center justify-between px-6 py-5 glass-panel rounded-[3rem] border border-white/20 shadow-2xl bg-white/5 backdrop-blur-2xl">
+        <div className="flex items-center gap-5">
+          <div className="relative group">
             <div className="absolute -inset-2 bg-green-500/20 rounded-full blur-lg animate-pulse"></div>
-            <img src="/school-logo.png" alt="EFIPS" className="w-10 h-10 md:w-14 object-contain logo-white-filter relative z-10" />
+            <img src="/school-logo.png" alt="EFIPS" className="w-12 h-12 md:w-16 object-contain logo-white-filter relative z-10" />
           </div>
           <div className="text-start leading-none">
-            <h2 className="text-base md:text-xl font-black text-slate-950 dark:text-white uppercase tracking-tighter">{t('status')}</h2>
-            <span className="text-[9px] text-green-500 font-bold uppercase tracking-widest">{t('online')}</span>
+            <h2 className="text-lg md:text-2xl font-black text-slate-950 dark:text-white uppercase tracking-tighter">{t('status')}</h2>
+            <span className="text-[10px] text-green-500 font-bold uppercase tracking-widest">{t('online')}</span>
           </div>
         </div>
       </div>
 
-      {/* منطقة الرسائل - كريستالية مستقلة */}
-      <div className="flex-1 overflow-y-auto space-y-8 no-scrollbar px-2 py-4 relative scroll-smooth">
+      {/* منطقة الرسائل - قطع كريستالية مستقلة */}
+      <div className="flex-1 overflow-y-auto space-y-10 no-scrollbar px-2 py-6 relative scroll-smooth">
         {messages.map((msg, index) => (
-          <div key={index} className={`flex items-start gap-4 md:gap-6 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'} animate-fade-up`}>
+          <div key={index} className={`flex items-start gap-4 md:gap-8 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'} animate-fade-up`}>
             
-            {/* وجه صقر - كبير وبارز */}
-            <div className={`relative flex-shrink-0 transition-transform duration-500 ${msg.role === 'assistant' ? 'scale-125' : 'scale-100'}`}>
-              {msg.role === 'assistant' && <div className="absolute -inset-2 bg-green-500/40 rounded-full blur-xl animate-pulse"></div>}
-              <div className={`w-12 h-12 md:w-18 md:h-18 rounded-2xl md:rounded-[2rem] flex items-center justify-center border-2 shadow-2xl relative z-10 ${
-                msg.role === 'assistant' ? 'bg-white border-green-500' : 'bg-slate-950 border-red-600/40 text-white text-[10px] md:text-xs font-black'
+            {/* وجه صقر المتوهج */}
+            <div className={`relative flex-shrink-0 transition-all duration-700 ${msg.role === 'assistant' ? 'scale-125' : 'scale-100'}`}>
+              {msg.role === 'assistant' && <div className="absolute -inset-3 bg-green-500/30 rounded-full blur-xl animate-pulse"></div>}
+              <div className={`w-14 h-14 md:w-22 md:h-22 rounded-[2.2rem] flex items-center justify-center border-2 shadow-2xl relative z-10 ${
+                msg.role === 'assistant' ? 'bg-white border-green-500 ring-4 ring-green-500/10' : 'bg-slate-950 border-red-600/40 text-white text-[10px] md:text-sm font-black uppercase'
               }`}>
                 {msg.role === 'assistant' ? <img src="/saqr-avatar.png" alt="S" className="w-[90%] h-[90%] object-contain" /> : t('you')}
               </div>
             </div>
 
-            {/* فقاعة كريستالية */}
-            <div className={`relative max-w-[85%] md:max-w-[80%] p-5 md:p-9 rounded-[2rem] md:rounded-[3.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-white/20 transition-all ${
-                msg.role === 'user' 
-                ? 'bg-slate-950 text-white rounded-tr-none' 
-                : 'bg-white/40 dark:bg-white/5 text-slate-950 dark:text-white rounded-tl-none backdrop-blur-3xl'
+            {/* الفقاعة الكريستالية */}
+            <div className={`relative max-w-[85%] md:max-w-[78%] p-6 md:p-11 rounded-[2.5rem] md:rounded-[4.5rem] shadow-2xl border border-white/20 transition-all ${
+                msg.role === 'user' ? 'bg-slate-950 text-white rounded-tr-none' : 'bg-white/40 dark:bg-white/5 text-slate-950 dark:text-white rounded-tl-none backdrop-blur-3xl'
               }`}>
               <div className={`absolute top-0 ${msg.role === 'user' ? 'end-0' : 'start-0'} w-2 h-full rounded-full ${msg.role === 'user' ? 'bg-red-600' : 'bg-green-600 shadow-[0_0_30px_rgba(34,197,94,0.6)]'}`}></div>
               <div className="prose prose-sm md:prose-xl dark:prose-invert font-black leading-loose text-start">
@@ -158,40 +163,47 @@ const SmartSearchPage: React.FC = () => {
             </div>
           </div>
         ))}
-        {isLoading && (
-          <div className="flex items-center gap-4 animate-pulse px-6">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce"></div>
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce [animation-delay:-0.2s]"></div>
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce [animation-delay:-0.4s]"></div>
-          </div>
-        )}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* شريط الإدخال - عائم وكريستالي */}
-      <div className="mt-4 pb-4 px-2">
-        <div className="max-w-3xl mx-auto relative group">
+      {/* شريط الإدخال العائم */}
+      <div className="mt-4 pb-6 px-2">
+        <div className="max-w-4xl mx-auto relative group">
           <div className="absolute -inset-2 bg-gradient-to-r from-red-600/20 via-green-600/20 to-red-600/20 rounded-[3rem] md:rounded-[6rem] blur-2xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-1000"></div>
           <input
             type="text" value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
             placeholder={t('input')}
-            className="w-full bg-white/80 dark:bg-black/40 border-2 border-white/20 focus:border-red-600 rounded-[2.5rem] md:rounded-[5rem] py-5 md:py-10 ps-8 md:ps-16 pe-20 md:pe-40 text-slate-950 dark:text-white font-black text-sm md:text-2xl outline-none transition-all shadow-[0_30px_60px_rgba(0,0,0,0.2)] backdrop-blur-3xl"
+            className="w-full bg-white/85 dark:bg-black/40 border-2 border-white/20 focus:border-red-600 rounded-[2.5rem] md:rounded-[6rem] py-6 md:py-12 ps-8 md:ps-20 pe-20 md:pe-44 text-slate-950 dark:text-white font-black text-sm md:text-2xl outline-none transition-all shadow-3xl backdrop-blur-3xl"
             disabled={isLoading}
           />
-          <button onClick={handleSendMessage} className="absolute inset-y-2.5 md:inset-y-4 end-2.5 md:end-4 w-14 h-14 md:w-24 md:h-24 flex items-center justify-center bg-red-600 text-white rounded-full shadow-2xl active:scale-95 transition-all hover:bg-red-700">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 md:h-14 md:w-14 rotate-[-45deg] rtl:rotate-[135deg]" fill="none" viewBox="0 0 24 24" strokeWidth={3.5} stroke="currentColor">
+          <button onClick={handleSendMessage} className="absolute inset-y-3 md:inset-y-5 end-3 md:end-5 w-14 h-14 md:w-28 md:h-28 flex items-center justify-center bg-red-600 text-white rounded-full shadow-2xl active:scale-95 hover:scale-105 transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 md:h-16 md:w-16 rotate-[-45deg] rtl:rotate-[135deg]" fill="none" viewBox="0 0 24 24" strokeWidth={3.5} stroke="currentColor">
               <path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
             </svg>
           </button>
         </div>
+
+        {/* التقارير المصغرة */}
+        {reports.length > 0 && (
+          <div className="mt-8 glass-panel p-6 rounded-[2.5rem] border border-white/10 animate-fade-up max-h-40 overflow-y-auto no-scrollbar">
+            <p className="text-green-500 text-[10px] font-black uppercase mb-3 tracking-widest">{t('reportsTitle')}</p>
+            {reports.map((r, i) => (
+              <div key={i} className="flex justify-between text-[11px] text-white/50 font-bold border-b border-white/5 py-2">
+                <span>👤 {r.name}</span>
+                <span className="text-yellow-500 font-black">🏆 {r.points}</span>
+                <span className="text-[9px] opacity-40">{r.date}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <style>{`
         * { font-style: normal !important; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .glass-panel { backdrop-filter: blur(50px) saturate(180%); }
+        .glass-panel { backdrop-filter: blur(60px) saturate(180%); }
         .logo-white-filter { transition: filter 0.5s ease; }
         .dark .logo-white-filter { filter: brightness(0) invert(1); }
       `}</style>
