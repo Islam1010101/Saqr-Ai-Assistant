@@ -156,7 +156,7 @@ const HomePage: React.FC = () => {
                     {/* --- قسم إعلان معرض الكتاب --- */}
                     <div className="w-full max-w-md glass-panel p-6 md:p-8 rounded-[2.5rem] border-2 border-red-600/30 shadow-3xl text-center space-y-4 relative z-30 animate-fade-up">
                         <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-red-600 text-white text-[10px] md:text-xs font-black uppercase tracking-widest shadow-lg">
-                            {isAr ? "حدث الآن" : "Happening Now"}
+                            {isAr ? "يحدث الآن" : "Happening Now"}
                         </div>
                         <h3 className="text-xl md:text-3xl font-black text-slate-950 dark:text-white leading-tight">
                             {isAr ? "معرض الكتاب المدرسي" : "School Book Fair"}
