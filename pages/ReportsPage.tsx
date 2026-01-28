@@ -107,7 +107,7 @@ const ReportsPage: React.FC = () => {
                     <h2 className="text-3xl md:text-5xl font-black mb-10 text-slate-950 dark:text-white uppercase tracking-tighter">{t('secureTitle')}</h2>
                     <input 
                         type="password" value={password} onChange={(e)=>setPassword(e.target.value)} onKeyDown={(e)=>e.key==='Enter'&&handleAuth()} 
-                        className="w-full p-6 md:p-10 rounded-[2rem] bg-slate-100 dark:bg-black/60 text-center text-4xl md:text-6xl font-black outline-none mb-10 transition-all border-0 focus:ring-4 ring-red-600/20" placeholder="••••••" 
+                        className="w-full p-6 md:p-10 rounded-[2rem] bg-slate-100 dark:bg-black/60 text-center text-4xl md:text-6xl font-black outline-none mb-10 transition-all border-0 focus:ring-4 ring-red-600/20 shadow-inner dark:text-white" placeholder="••••••" 
                     />
                     <button onClick={handleAuth} className="w-full bg-slate-950 dark:bg-white text-white dark:text-slate-950 py-6 md:py-10 rounded-[2rem] font-black text-lg md:text-3xl shadow-2xl hover:bg-red-600 hover:text-white transition-all">
                         {t('authBtn')}
@@ -126,7 +126,7 @@ const ReportsPage: React.FC = () => {
                     <div className="glass-panel w-full max-w-2xl p-8 md:p-12 rounded-[3rem] bg-white dark:bg-slate-950 shadow-3xl border-0 overflow-y-auto max-h-[80vh] text-start" onClick={e=>e.stopPropagation()}>
                         <h3 className="text-2xl font-black text-red-600 mb-6">{viewingContent.name} - {viewingContent.activity}</h3>
                         <div className="prose dark:prose-invert font-medium leading-loose whitespace-pre-wrap">{viewingContent.content}</div>
-                        <button onClick={()=>setViewingContent(null)} className="mt-10 w-full py-4 bg-slate-900 text-white rounded-2xl font-black">إغلاق</button>
+                        <button onClick={()=>setViewingContent(null)} className="mt-10 w-full py-4 bg-slate-900 text-white rounded-2xl font-black transition-all hover:bg-red-600">إغلاق</button>
                     </div>
                 </div>
             )}
@@ -162,7 +162,7 @@ const ReportsPage: React.FC = () => {
             {/* سجل أبطال التحدي المطور */}
             <div className="glass-panel p-8 md:p-14 rounded-[3.5rem] bg-white/80 dark:bg-slate-950/80 shadow-3xl border-0 relative overflow-hidden mb-16">
                 <div className="absolute top-0 start-0 w-3 h-full bg-yellow-500 shadow-[0_0_20px_rgba(234,179,8,0.4)]"></div>
-                <h2 className="text-2xl md:text-4xl font-black mb-10 flex items-center gap-6 dark:text-white">
+                <h2 className="text-2xl md:text-4xl font-black mb-10 flex items-center gap-6 dark:text-white text-start">
                     <span className="text-4xl md:text-6xl animate-pulse">🏆</span> {t('challengeResults')}
                 </h2>
                 <div className="overflow-x-auto no-scrollbar text-start">
@@ -180,14 +180,13 @@ const ReportsPage: React.FC = () => {
                                 <tr key={i} className="border-b border-slate-100 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                                     <td className="py-6 px-4 font-black text-sm md:text-xl">{c.name}</td>
                                     <td className="py-6 px-4 font-bold text-xs md:text-md opacity-80">
-                                        <span className={`px-3 py-1 rounded-full ${c.activity === 'Little Author' ? 'bg-blue-500/10 text-blue-600' : 'bg-green-500/10 text-green-600'}`}>
-                                            {c.activity === 'Little Author' ? 'المؤلف الصغير' : 'نقاش أدبي'}
+                                        <span className={`px-3 py-1 rounded-full ${c.activity?.includes('Author') ? 'bg-blue-500/10 text-blue-600' : 'bg-green-500/10 text-green-600'}`}>
+                                            {c.activity?.includes('Author') ? 'المؤلف الصغير' : 'نقاش أدبي'}
                                         </span>
                                     </td>
                                     <td className="py-6 px-4 text-center">
                                         <button onClick={()=>setViewingContent(c)} className="text-[10px] md:text-xs bg-slate-900 text-white px-4 py-2 rounded-xl hover:bg-red-600 transition-all font-black uppercase">
                                             {t('viewBtn')}
-                                        }
                                         </button>
                                     </td>
                                     <td className="py-6 px-4 text-[10px] md:text-xs opacity-50 font-bold">{c.date}</td>
@@ -204,7 +203,7 @@ const ReportsPage: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16">
                 <div className="glass-panel p-8 md:p-12 rounded-[3rem] bg-white/80 dark:bg-slate-900/60 shadow-3xl border-0 relative overflow-hidden">
                     <div className="absolute top-0 start-0 w-2 h-full bg-red-600"></div>
-                    <h2 className="text-xl md:text-3xl font-black mb-8 flex items-center gap-4 dark:text-white">
+                    <h2 className="text-xl md:text-3xl font-black mb-8 flex items-center gap-4 dark:text-white text-start">
                         <span className="text-3xl">🔍</span> {t('searchedBooks')}
                     </h2>
                     <div className="space-y-6">
@@ -215,21 +214,21 @@ const ReportsPage: React.FC = () => {
                                     <span className="text-red-600">{s.value}%</span>
                                 </div>
                                 <div className="h-2 w-full bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
-                                    <div className="h-full bg-red-600 transition-all duration-1000" style={{ width: `${s.value}%` }}></div>
+                                    <div className={`h-full ${s.color} transition-all duration-1000`} style={{ width: `${s.value}%` }}></div>
                                 </div>
                             </div>
                         ))}
                     </div>
                 </div>
 
-                <div className="glass-panel p-8 md:p-12 rounded-[3rem] bg-white/80 dark:bg-slate-900/60 shadow-3xl border-0 relative overflow-hidden">
+                <div className="glass-panel p-8 md:p-12 rounded-[3rem] bg-white/80 dark:bg-slate-900/60 shadow-3xl border-0 relative overflow-hidden text-start">
                     <div className="absolute top-0 start-0 w-2 h-full bg-green-600"></div>
-                    <h2 className="text-xl md:text-3xl font-black mb-8 flex items-center gap-4 dark:text-white text-start">
+                    <h2 className="text-xl md:text-3xl font-black mb-8 flex items-center gap-4 dark:text-white">
                         <span className="text-3xl">📚</span> {t('digitalReads')}
                     </h2>
-                    <div className="space-y-6 text-start">
+                    <div className="space-y-6">
                         {stats.digital.map((d, i) => (
-                            <div key={i} className="flex items-center gap-4">
+                            <div key={i} className="flex items-center gap-4 text-start">
                                 <div className="flex-1 h-2 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
                                     <div className="h-full bg-green-600" style={{width:`${d.value}%`}}></div>
                                 </div>
@@ -240,13 +239,13 @@ const ReportsPage: React.FC = () => {
                 </div>
             </div>
 
-            <div className="print-only mt-32 grid grid-cols-2 gap-16">
+            <div className="print-only mt-32 grid grid-cols-2 gap-16 text-start">
                 <div className="border-2 border-slate-950 p-8 rounded-[2rem] text-center">
-                    <p className="text-[10px] font-black uppercase mb-12 opacity-60 text-start">{t('librarian')}</p>
+                    <p className="text-[10px] font-black uppercase mb-12 opacity-60">أمين المكتبة المعتمد</p>
                     <p className="font-black text-2xl">Islam Soliman</p>
                 </div>
                 <div className="border-2 border-slate-950 p-8 rounded-[2rem] text-center">
-                    <p className="text-[10px] font-black uppercase mb-12 opacity-60 text-start">{t('signature')}</p>
+                    <p className="text-[10px] font-black uppercase mb-12 opacity-60">توقيع الإدارة المدرسية</p>
                 </div>
             </div>
         </div>
