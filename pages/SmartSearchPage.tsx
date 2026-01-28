@@ -40,7 +40,7 @@ const VictoryMedal: React.FC<{ data: any; onClose: () => void }> = ({ data, onCl
   <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/95 backdrop-blur-3xl animate-in fade-in duration-700 p-4 text-center">
     <div className="relative animate-in zoom-in spin-in duration-1000 w-full max-w-xl">
       <div className="text-[200px] md:text-[300px] drop-shadow-[0_0_80px_rgba(234,179,8,1)] leading-none mb-[-50px] animate-bounce relative z-20">🥇</div>
-      <div className="glass-panel p-10 md:p-14 rounded-[4rem] border-[4px] border-yellow-500 bg-white/10 shadow-2xl relative z-10">
+      <div className="glass-panel p-10 md:p-14 rounded-[4rem] border-0 bg-white/10 shadow-2xl relative z-10">
         <h1 className="text-5xl md:text-8xl font-black text-yellow-500 tracking-tighter mb-4 uppercase">EXCELLENT!</h1>
         <p className="text-xl md:text-2xl text-white font-bold mb-2 opacity-80">مدرسة صقر الإمارات الدولية</p>
         <p className="text-lg md:text-2xl text-yellow-400 font-black mb-8 uppercase tracking-widest">وسام التميز المعرفي</p>
@@ -67,7 +67,6 @@ const SmartSearchPage: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
-  // البحث الهجين (دقة عالية)
   const findLibraryContext = (query: string) => {
     const q = query.toLowerCase();
     const matches = bookData.filter(b => b.title.toLowerCase().includes(q) || b.subject?.toLowerCase().includes(q)).slice(0, 3);
@@ -95,13 +94,11 @@ const SmartSearchPage: React.FC = () => {
       const data = await response.json();
       let reply = data.reply || '';
 
-      // نظام اكتشاف الفوز لإرساله لمركز التقارير وإظهار الميدالية
       if (reply.includes('[WINNER:')) {
         const match = reply.match(/\[WINNER:\s*(.*?),\s*Score:\s*(.*?),\s*Discussion:\s*(.*?)]/);
         if (match) {
           const info = { name: match[1], score: match[2], book: match[3], date: new Date().toLocaleString() };
           setWinnerData(info);
-          // هنا يتم الإرسال البرمجي لمركز التقارير (Console log كمثال)
           console.log("Data Saved to Reports Center:", info);
         }
         reply = reply.replace(/\[WINNER:.*?\]/g, '');
@@ -120,14 +117,13 @@ const SmartSearchPage: React.FC = () => {
       
       {winnerData && <VictoryMedal data={winnerData} onClose={() => setWinnerData(null)} />}
 
-      {/* خلفية نيونية Frameless */}
       <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
           <div className="absolute top-[10%] left-[-10%] w-[500px] h-[500px] bg-red-600/10 blur-[180px] rounded-full animate-pulse"></div>
           <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-green-600/10 blur-[200px] rounded-full delay-1000 animate-pulse"></div>
       </div>
 
-      {/* الهيدر العائم الكريستالي */}
-      <div className="mb-8 flex items-center justify-between px-6 py-5 glass-panel rounded-[2.5rem] border border-white/20 shadow-2xl bg-white/5 backdrop-blur-2xl">
+      {/* الهيدر - تم حذف border-white/20 */}
+      <div className="mb-8 flex items-center justify-between px-6 py-5 glass-panel rounded-[2.5rem] border-0 shadow-2xl bg-white/5 backdrop-blur-2xl">
         <div className="flex items-center gap-5 text-start">
           <div className="relative group">
             <div className="absolute -inset-2 bg-green-500/20 rounded-full blur-lg animate-pulse"></div>
@@ -140,22 +136,21 @@ const SmartSearchPage: React.FC = () => {
         </div>
       </div>
 
-      {/* منطقة الرسائل - كريستالية عائمة */}
       <div className="flex-1 overflow-y-auto space-y-10 no-scrollbar px-2 py-4 relative scroll-smooth">
         {messages.map((msg, index) => (
           <div key={index} className={`flex items-start gap-4 md:gap-8 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'} animate-fade-up`}>
             
-            {/* وجه صقر البارز جداً */}
             <div className={`relative flex-shrink-0 transition-all duration-700 ${msg.role === 'assistant' ? 'scale-125' : 'scale-100'}`}>
               {msg.role === 'assistant' && <div className="absolute -inset-5 bg-green-500/30 rounded-full blur-2xl animate-pulse"></div>}
-              <div className={`w-14 h-14 md:w-28 md:h-28 rounded-[2.5rem] flex items-center justify-center border-2 shadow-2xl relative z-10 ${
+              <div className={`w-14 h-14 md:w-28 md:h-28 rounded-[2.5rem] flex items-center justify-center border-0 shadow-2xl relative z-10 ${
                 msg.role === 'assistant' ? 'bg-white border-green-500 ring-8 ring-green-500/10' : 'bg-slate-950 border-red-600/40 text-white text-[10px] md:text-sm font-black'
               }`}>
                 {msg.role === 'assistant' ? <img src="/saqr-avatar.png" alt="S" className="w-[90%] h-[90%] object-contain" /> : t('you')}
               </div>
             </div>
 
-            <div className={`relative max-w-[85%] md:max-w-[80%] p-6 md:p-12 rounded-[2.5rem] md:rounded-[5rem] shadow-2xl border border-white/20 transition-all ${
+            {/* فقاعة الرسالة - تم حذف border-white/20 */}
+            <div className={`relative max-w-[85%] md:max-w-[80%] p-6 md:p-12 rounded-[2.5rem] md:rounded-[5rem] shadow-2xl border-0 transition-all ${
                 msg.role === 'user' 
                 ? 'bg-slate-950 text-white rounded-tr-none shadow-red-900/10' 
                 : 'bg-white/40 dark:bg-white/5 text-slate-950 dark:text-white rounded-tl-none backdrop-blur-3xl'
@@ -167,17 +162,10 @@ const SmartSearchPage: React.FC = () => {
             </div>
           </div>
         ))}
-        {isLoading && (
-          <div className="flex items-center gap-4 animate-pulse px-12">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce"></div>
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce [animation-delay:-0.2s]"></div>
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce [animation-delay:-0.4s]"></div>
-          </div>
-        )}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* شريط الإدخال الكريستالي المحجم */}
+      {/* شريط الإدخال - تم حذف border-2 border-white/20 */}
       <div className="mt-6 pb-6 px-2">
         <div className="max-w-4xl mx-auto relative group">
           <div className="absolute -inset-2 bg-gradient-to-r from-red-600/20 via-green-600/20 to-red-600/20 rounded-[3rem] md:rounded-[6rem] blur-2xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-1000"></div>
@@ -186,7 +174,7 @@ const SmartSearchPage: React.FC = () => {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
             placeholder={t('input')}
-            className="w-full bg-white/80 dark:bg-black/40 border-2 border-white/20 focus:border-red-600 rounded-[2.5rem] md:rounded-[6.5rem] py-6 md:py-16 ps-8 md:ps-20 pe-20 md:pe-44 text-slate-950 dark:text-white font-black text-sm md:text-2xl outline-none transition-all shadow-3xl backdrop-blur-3xl placeholder:opacity-30"
+            className="w-full bg-white/80 dark:bg-black/40 border-0 focus:ring-0 rounded-[2.5rem] md:rounded-[6.5rem] py-6 md:py-16 ps-8 md:ps-20 pe-20 md:pe-44 text-slate-950 dark:text-white font-black text-sm md:text-2xl outline-none transition-all shadow-3xl backdrop-blur-3xl placeholder:opacity-30"
             disabled={isLoading}
           />
           <button onClick={handleSendMessage} className="absolute inset-y-3 md:inset-y-5 end-3 md:end-5 w-14 h-14 md:w-36 md:h-36 flex items-center justify-center bg-red-600 text-white rounded-full shadow-2xl active:scale-95 hover:scale-105 hover:bg-red-700 transition-all">
