@@ -25,14 +25,14 @@ const chatLabels: any = {
   ar: {
     welcome: 'مرحباً بك! أنا صقر، دليلك المعرفي. هل نناقش فكر أحد الكتب اليوم، أم تود استكشاف مصادرنا بدقة؟',
     input: 'ناقش صقر، ابحث عن كتاب، اطلب اقتراحات...',
-    status: 'أمين المكتبة الذكي',
+    status: 'صقر الذكي',
     online: 'نشط الآن',
     you: 'أنت'
   },
   en: {
     welcome: "Welcome! I'm Saqr, your AI Librarian. Shall we discuss a book today or explore our resources?",
     input: 'Discuss with Saqr, search, or get suggestions...',
-    status: 'AI Librarian',
+    status: 'Saqr Librarian',
     online: 'Online',
     you: 'YOU'
   }
