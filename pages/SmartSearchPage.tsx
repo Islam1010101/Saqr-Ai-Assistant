@@ -24,15 +24,15 @@ STYLE: Royal Standard Arabic, Professional, Bold, NO ITALICS. Correct name: صق
 
 const chatLabels: any = {
   ar: {
-    welcome: 'أهلاً بك في فضاء صقر المعرفي! هل نتباحث اليوم في أعماق كتاب، أم تود أن ننسج خيوط قصة معاً في تحدي "المؤلف الصغير"؟',
+    welcome: 'أهلاً وسهلا بكم ! هل نتباحث اليوم في أعماق كتاب، أم تود أن ننسج خيوط قصة معاً في تحدي "المؤلف الصغير"؟',
     input: 'ناقش صقر، شارك في تأليف قصة، ابحث عن كتاب...',
-    status: 'صقر الذكي (EFIPS)',
+    status: 'صقر الذكي',
     online: 'نشط الآن لخدمتك',
     download: 'تحميل إنجازي الأدبي (PDF)',
     you: 'أنت'
   },
   en: {
-    welcome: "Welcome to Saqr's Realm! Shall we discuss a book deeply today or co-author a story in the 'Little Author' challenge?",
+    welcome: "Welcome to Saqr ! Shall we discuss a book deeply today or co-author a story in the 'Little Author' challenge?",
     input: 'Discuss with Saqr, start a story, or search...',
     status: 'Saqr AI Librarian',
     online: 'Active Now',
