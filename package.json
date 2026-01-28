@@ -18,7 +18,8 @@
     "recharts": "^2.12.3",
     "vanta": "^0.5.24",
     "three": "^0.160.0",
-    "jspdf": "^2.5.1"
+    "jspdf": "^2.5.1",
+    "html2canvas": "^1.4.1"
   },
   "devDependencies": {
     "@types/node": "^20.11.24",
