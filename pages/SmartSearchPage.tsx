@@ -8,17 +8,19 @@ import { bookData } from '../api/bookData';
 import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
 
-// --- 1. بروتوكول عقل صقر (البلاغة الفائقة، التنوع القصصي، والدقة اللغوية) ---
+// --- 1. بروتوكول عقل صقر (البلاغة، التلخيص، وتوثيق الإبداع) ---
 const SAQR_ELITE_PROMPT = `
-Identity: You are "Saqr" (صقر), the official Elite AI Librarian of Emirates Falcon International Private School (EFIPS). 
-Supervisor: Mr. Islam Soliman. 
+Identity: You are "Saqr" (صقر), the official Elite AI Librarian of Emirates Falcon International Private School (EFIPS).
+Supervisor: Mr. Islam Soliman.
 
-Linguistic & Creative Rules:
-1. LINGUISTIC PRECISION: You must use flawless Modern Standard Arabic (Fos'ha). Ensure perfect grammar (Nahw) and correct diacritics (Tashkeel). Avoid any informalities or grammatical errors.
-2. STORY DIVERSITY: In "Little Author" mode, provide a wide variety of story themes (History of Arab Scholars, Space Adventures, Moral Values, and Future Science).
-3. CO-AUTHOR MODE: Write ONE inspiring and grammatically perfect sentence, then wait for the student.
-4. HYBRID SEARCH: Check all EFIPS records. Use normalization (ا=أ=إ) to find books. 
-5. TAGGING: For stories: [WINNER: Name, Activity: Little Author, Content: TheFullStoryText].
+Linguistic & Little Author Rules:
+1. LINGUISTIC PRECISION: Use flawless Modern Standard Arabic (Fos'ha). Ensure perfect grammar and Tashkeel.
+2. LITTLE AUTHOR CHALLENGE: 
+   - Write one sentence, then wait for the student.
+   - When the story is complete, provide a BRIEF CREATIVE SUMMARY of the story.
+   - Then, ask the student for their "Full Name" to issue their certificate.
+3. HYBRID SEARCH: Check all EFIPS records. Use normalization (ا=أ=إ) to find books.
+4. TAGGING (CRITICAL): Once you get the name, output: [WINNER: StudentName, Activity: Little Author, Content: SummaryOfTheStory].
 STYLE: Professional, Bold, NO ITALICS. Correct name: صقر.
 `;
 
@@ -28,7 +30,7 @@ const chatLabels: any = {
     input: 'ناقش صقر، شارك في تأليف قصة، أو ابحث عن كتاب...',
     status: 'صقر الذكي (EFIPS)',
     online: 'متصل وجاهز للإبداع',
-    download: 'تحميل قصتي الإبداعية (PDF)',
+    download: 'تحميل شهادة المؤلف الصغير (PDF)',
     you: 'أنت'
   },
   en: {
@@ -36,7 +38,7 @@ const chatLabels: any = {
     input: 'Start a story, discuss, or search...',
     status: 'Saqr AI Librarian',
     online: 'Online & Ready',
-    download: 'Download My Story (PDF)',
+    download: 'Download Certificate (PDF)',
     you: 'YOU'
   }
 };
@@ -66,7 +68,7 @@ const SmartSearchPage: React.FC = () => {
     const imgData = canvas.toDataURL('image/png');
     const pdf = new jsPDF('p', 'mm', 'a4');
     pdf.addImage(imgData, 'PNG', 10, 10, 190, 0);
-    pdf.save(`Saqr_Creative_Story_${winnerData.name}.pdf`);
+    pdf.save(`EFIPS_LittleAuthor_${winnerData.name}.pdf`);
   };
 
   const handleSendMessage = async () => {
@@ -112,17 +114,17 @@ const SmartSearchPage: React.FC = () => {
   return (
     <div dir={dir} className="w-full max-w-xl md:max-w-3xl mx-auto px-4 py-4 md:py-8 h-[92dvh] flex flex-col font-black antialiased relative">
       
-      {/* توهج ملكي - تم إلغاء كافة الحدود */}
+      {/* توهج ملكي بدون أطر */}
       <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden opacity-30">
           <div className="absolute top-[-5%] left-[-20%] w-[500px] h-[500px] bg-red-600/30 blur-[150px] rounded-full animate-pulse"></div>
           <div className="absolute bottom-[-5%] right-[-20%] w-[600px] h-[600px] bg-red-900/30 blur-[200px] rounded-full delay-1000 animate-pulse"></div>
       </div>
 
-      {/* الهيدر: تم إلغاء الأطر + تعديل سلوك الشعار */}
+      {/* الهيدر: تم إلغاء الأطر + شعار مدرسة صقر الإمارات */}
       <div className="mb-6 flex items-center justify-between px-6 py-5 glass-panel rounded-3xl border-0 shadow-2xl bg-white/5 backdrop-blur-3xl">
         <div className="flex items-center gap-4 text-start">
           <div className="relative group">
-            <div className="absolute -inset-2 bg-red-600/20 rounded-full blur-lg animate-pulse"></div>
+            <div className="absolute -inset-2 bg-red-600/30 rounded-full blur-lg animate-pulse"></div>
             <img 
               src="/school-logo.png" 
               alt="EFIPS" 
@@ -136,7 +138,7 @@ const SmartSearchPage: React.FC = () => {
         </div>
       </div>
 
-      {/* منطقة الرسائل: استجابة للجوال والأيباد */}
+      {/* منطقة الرسائل */}
       <div className="flex-1 overflow-y-auto space-y-8 md:space-y-12 no-scrollbar px-1 py-4 relative scroll-smooth">
         {messages.map((msg, index) => (
           <div key={index} className={`flex items-start gap-3 md:gap-8 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'} animate-fade-up`}>
@@ -158,21 +160,23 @@ const SmartSearchPage: React.FC = () => {
           </div>
         ))}
         
-        {/* زر تحميل القصة (المؤلف الصغير) كملف PDF */}
+        {/* قسم شهادة المؤلف الصغير الذكية */}
         {winnerData && winnerData.activity?.includes('Author') && (
           <div className="mt-10 animate-bounce text-center px-4">
             <button onClick={handleDownloadPDF} className="w-full md:w-auto px-10 py-5 bg-red-600 text-white font-black rounded-full shadow-3xl hover:scale-105 transition-all text-sm md:text-xl uppercase tracking-widest">
               {t('download')}
             </button>
             
+            {/* تصميم الشهادة الجذاب (Snapshot) */}
             <div className="fixed left-[-9999px] top-0">
                 <div ref={certificateRef} className="w-[800px] p-20 bg-black text-white text-center font-black border-[15px] border-red-600 rounded-[5rem] relative overflow-hidden">
                     <img src="/school-logo.png" className="w-44 mx-auto mb-10 rotate-[15deg] brightness-0 invert" alt="Logo" />
                     <h1 className="text-7xl mb-4 text-red-600 uppercase tracking-tighter">Little Author</h1>
                     <p className="text-2xl opacity-60 mb-12 uppercase tracking-[0.3em]">Emirates Falcon International School</p>
                     <div className="h-1.5 w-full bg-red-600/40 mb-12"></div>
-                    <p className="text-4xl mb-12 text-start leading-tight">يوثق "صقر" الإنجاز الأدبي للمبدع:</p>
+                    <p className="text-4xl mb-12 text-start leading-tight">بكل فخر، يوثق "صقر" الإنجاز الأدبي للمبدع:</p>
                     <h2 className="text-6xl text-yellow-500 mb-16 underline decoration-red-600 underline-offset-8 italic-none">{winnerData.name}</h2>
+                    <p className="text-2xl opacity-80 mb-6 text-start">ملخص القصة الإبداعية:</p>
                     <div className="bg-white/5 p-12 rounded-[4rem] text-3xl leading-loose text-start border-0 shadow-inner italic-none">
                         {winnerData.content}
                     </div>
@@ -184,7 +188,7 @@ const SmartSearchPage: React.FC = () => {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* شريط الإدخال: بلا أطر ومناسب للأجهزة اللوحية */}
+      {/* شريط الإدخال الكريستالي */}
       <div className="mt-4 pb-6 px-2">
         <div className="max-w-xl md:max-w-2xl mx-auto relative group">
           <div className="absolute -inset-1 bg-red-600/20 rounded-full blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-1000"></div>
