@@ -3,7 +3,7 @@ import { useLanguage } from '../App';
 import { ChatMessage } from '../types';
 import ReactMarkdown from 'react-markdown'; 
 import { jsPDF } from 'jspdf'; 
-import html2canvas from 'html2canvas'; // المكتبة الجديدة التي أضفناها للباكدج
+import html2canvas from 'html2canvas'; 
 import { bookData } from '../api/bookData'; 
 import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
@@ -52,23 +52,19 @@ const SmartSearchPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [winnerData, setWinnerData] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const certificateRef = useRef<HTMLDivElement>(null); // مرجع الشهادة المخفية
+  const certificateRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
-  // --- وظيفة التحميل الكريستالي (دعم العربية 100%) ---
   const handleDownloadPDF = async () => {
     if (!certificateRef.current) return;
-    
-    // تحويل التصميم إلى صورة عالية الدقة
     const canvas = await html2canvas(certificateRef.current, { 
       scale: 3, 
       backgroundColor: '#000000',
       useCORS: true 
     });
-    
     const imgData = canvas.toDataURL('image/png');
     const pdf = new jsPDF('p', 'mm', 'a4');
     pdf.addImage(imgData, 'PNG', 10, 10, 190, 0);
@@ -118,13 +114,11 @@ const SmartSearchPage: React.FC = () => {
   return (
     <div dir={dir} className="w-full max-w-xl mx-auto px-4 py-4 md:py-8 h-[92dvh] flex flex-col font-black antialiased relative">
       
-      {/* توهج أحمر ملكي خلفي */}
       <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden opacity-30">
           <div className="absolute top-[-5%] left-[-20%] w-[500px] h-[500px] bg-red-600/30 blur-[150px] rounded-full animate-pulse"></div>
           <div className="absolute bottom-[-5%] right-[-20%] w-[600px] h-[600px] bg-red-900/30 blur-[200px] rounded-full delay-1000 animate-pulse"></div>
       </div>
 
-      {/* هيدر كريستالي بدون إطارات + شعار مائل يميناً 30 درجة */}
       <div className="mb-6 flex items-center justify-between px-6 py-5 glass-panel rounded-3xl border-0 shadow-2xl bg-white/5 backdrop-blur-3xl">
         <div className="flex items-center gap-4 text-start">
           <div className="relative group">
@@ -132,7 +126,8 @@ const SmartSearchPage: React.FC = () => {
             <img src="/school-logo.png" alt="EFIPS" className="w-12 h-12 object-contain logo-white-filter rotate-[30deg] relative z-10 transition-transform duration-700" />
           </div>
           <div className="leading-tight text-start">
-            <h2 className="text-sm md:text-lg font-black text-white uppercase tracking-tighter leading-none py-1">{t('status')}</h2>
+            {/* تم تعديل لون النص هنا */}
+            <h2 className="text-sm md:text-lg font-black text-slate-950 dark:text-white uppercase tracking-tighter leading-none py-1">{t('status')}</h2>
             <span className="text-[8px] text-red-600 font-bold uppercase tracking-widest">{t('online')}</span>
           </div>
         </div>
@@ -149,9 +144,10 @@ const SmartSearchPage: React.FC = () => {
               </div>
             </div>
             <div className={`relative max-w-[85%] md:max-w-[75%] p-5 md:p-10 rounded-3xl shadow-2xl border-0 transition-all ${
-                msg.role === 'user' ? 'bg-slate-950 text-white rounded-tr-none' : 'bg-white/10 text-white rounded-tl-none backdrop-blur-3xl'
+                msg.role === 'user' ? 'bg-slate-950 text-white rounded-tr-none' : 'bg-white/40 dark:bg-white/10 text-slate-950 dark:text-white rounded-tl-none backdrop-blur-3xl'
               }`}>
               <div className={`absolute top-0 ${msg.role === 'user' ? 'end-0' : 'start-0'} w-1.5 h-full rounded-full bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.5)]`}></div>
+              {/* تم تعديل لون نصوص الرسائل هنا */}
               <div className="prose prose-sm md:prose-lg dark:prose-invert font-black leading-relaxed text-start italic-none">
                 <ReactMarkdown>{msg.content}</ReactMarkdown>
               </div>
@@ -159,14 +155,11 @@ const SmartSearchPage: React.FC = () => {
           </div>
         ))}
         
-        {/* زر التحميل يظهر للمؤلف الصغير فقط */}
         {winnerData && winnerData.activity?.includes('Author') && (
           <div className="mt-10 animate-bounce text-center">
             <button onClick={handleDownloadPDF} className="px-10 py-4 bg-red-600 text-white font-black rounded-full shadow-3xl hover:scale-105 transition-all text-xs uppercase tracking-widest">
               {t('download')}
             </button>
-            
-            {/* تصميم الشهادة الخفي (لدعم العربية 100% عبر Snapshot) */}
             <div className="fixed left-[-9999px] top-0">
                 <div ref={certificateRef} className="w-[800px] p-20 bg-black text-white text-center font-black border-[15px] border-red-600 rounded-[5rem] relative overflow-hidden">
                     <img src="/school-logo.png" className="w-44 mx-auto mb-10 rotate-[15deg]" alt="Logo" />
@@ -189,10 +182,11 @@ const SmartSearchPage: React.FC = () => {
       <div className="mt-4 pb-6 px-2">
         <div className="max-w-xl mx-auto relative group">
           <div className="absolute -inset-1 bg-red-600/20 rounded-full blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-1000"></div>
+          {/* تم تعديل لون نص الإدخال هنا */}
           <input
             type="text" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
             placeholder={t('input')}
-            className="w-full bg-white/10 border-0 focus:ring-0 rounded-full py-6 md:py-8 ps-10 md:ps-14 pe-20 md:pe-36 text-white font-black text-sm md:text-xl outline-none shadow-3xl backdrop-blur-3xl placeholder:opacity-30"
+            className="w-full bg-white/10 border-0 focus:ring-0 rounded-full py-6 md:py-8 ps-10 md:ps-14 pe-20 md:pe-36 text-slate-950 dark:text-white font-black text-sm md:text-xl outline-none shadow-3xl backdrop-blur-3xl placeholder:opacity-30"
             disabled={isLoading}
           />
           <button onClick={handleSendMessage} className="absolute inset-y-2 end-3 md:end-5 w-14 h-14 md:w-20 md:h-20 flex items-center justify-center bg-red-600 text-white rounded-full shadow-lg active:scale-95 hover:bg-red-700 transition-all">
