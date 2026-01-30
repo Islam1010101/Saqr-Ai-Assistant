@@ -13,7 +13,7 @@ const translations = {
         digitalLibrary: "المكتبة الإلكترونية",
         digitalDesc: "عالم من الكتب والروايات الرقمية.",
         bubble: "أهلاً بك في صقر!",
-        homelandTitle: "لمحات من الموطن"
+        homelandTitle: "لمحات من الوطن"
     },
     en: {
         welcome: "Future of Knowledge at Falcon Int'l School",
@@ -128,7 +128,6 @@ const HomePage: React.FC = () => {
                     </Link>
                 </div>
 
-                {/* صقر مع إعلان معرض الكتاب */}
                 <div className="lg:col-span-5 flex flex-col items-center justify-center order-1 lg:order-2 relative gap-8">
                     <div onClick={handleMascotInteraction} className={`relative cursor-pointer transition-transform duration-700 ${isMascotClicked ? 'scale-110' : 'hover:scale-105'}`}>
                         
@@ -153,27 +152,26 @@ const HomePage: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* --- قسم إعلان معرض الكتاب --- */}
-                    <div className="w-full max-w-md glass-panel p-6 md:p-8 rounded-[2.5rem] border-2 border-red-600/30 shadow-3xl text-center space-y-4 relative z-30 animate-fade-up">
-                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-red-600 text-white text-[10px] md:text-xs font-black uppercase tracking-widest shadow-lg">
-                            {isAr ? "يحدث الآن" : "Happening Now"}
+                    {/* --- قسم تحدي الإبداع الجديد --- */}
+                    <div className="w-full max-w-md glass-panel p-6 md:p-10 rounded-[2.5rem] border-2 border-red-600/30 shadow-3xl text-center space-y-6 relative z-30 animate-fade-up overflow-hidden">
+                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-6 py-1.5 rounded-full bg-red-600 text-white text-[10px] md:text-xs font-black uppercase tracking-widest shadow-lg">
+                            {isAr ? "تحدي المبدعين" : "Creative Challenge"}
                         </div>
-                        <h3 className="text-xl md:text-3xl font-black text-slate-950 dark:text-white leading-tight">
-                            {isAr ? "معرض الكتاب المدرسي" : "School Book Fair"}
+                        
+                        <h3 className="text-2xl md:text-4xl font-black text-slate-950 dark:text-white leading-tight tracking-tighter">
+                            {isAr ? "أطلق العنان لخيالك" : "Unleash Your Imagination"}
                         </h3>
-                        <div className="space-y-1">
-                            <p className="text-sm md:text-xl text-red-600 dark:text-red-500 font-black">
-                                📅 {isAr ? "26/01 - 30/01/2026" : "Jan 26 - Jan 30, 2026"}
-                            </p>
-                            <p className="text-sm md:text-lg text-slate-600 dark:text-slate-400 font-bold">
-                                📍 {isAr ? "الصالة الرياضية" : "Gym Hall"}
-                            </p>
-                        </div>
-                        <div className="h-px w-2/3 bg-slate-200 dark:bg-white/10 mx-auto"></div>
-                        <p className="text-xs md:text-base text-slate-700 dark:text-slate-300 font-bold italic leading-relaxed">
+
+                        <p className="text-sm md:text-xl text-slate-700 dark:text-slate-300 font-bold leading-relaxed">
                             {isAr 
-                                ? "القراءة هي المفتاح الذي يفتح لك أبواب المستقبل ويسافر بك عبر الزمن." 
-                                : "Reading is the key that opens the doors of the future and takes you through time."}
+                                ? "ناقش القصص، ألف حكايتك الخاصة مع صقر، وكن أحد الفائزين بجوائز المدرسة القيمة!" 
+                                : "Discuss stories, author your own tales with Saqr, and win valuable school prizes!"}
+                        </p>
+
+                        <div className="h-1 w-20 bg-red-600/20 mx-auto rounded-full"></div>
+
+                        <p className="text-xs md:text-lg text-red-600 dark:text-red-500 font-black uppercase tracking-tight">
+                            {isAr ? "كل ما عليك هو سؤال صقر الآن" : "Just start by asking Saqr"}
                         </p>
                     </div>
                 </div>
