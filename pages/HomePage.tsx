@@ -13,7 +13,10 @@ const translations = {
         digitalLibrary: "المكتبة الإلكترونية",
         digitalDesc: "عالم من الكتب والروايات الرقمية.",
         bubble: "أهلاً بك في صقر!",
-        homelandTitle: "لمحات من الوطن"
+        homelandTitle: "لمحات من الموطن",
+        challengeTitle: "تحدي المبدعين الصغار",
+        challengeDesc: "ناقش القصص، ألف حكايتك الخاصة مع صقر، وأثبت موهبتك لتفوز بجوائز متميزة من مدرسة صقر الإمارات!",
+        challengeCTA: "ابدأ رحلة الإبداع مع صقر الآن"
     },
     en: {
         welcome: "Future of Knowledge at Falcon Int'l School",
@@ -25,7 +28,10 @@ const translations = {
         digitalLibrary: "Digital Library",
         digitalDesc: "World of digital books and novels.",
         bubble: "Welcome to Saqr!",
-        homelandTitle: "Hints From Homeland"
+        homelandTitle: "Hints From Homeland",
+        challengeTitle: "Little Authors Challenge",
+        challengeDesc: "Discuss stories, author your own tales with Saqr, and showcase your talent to win distinguished prizes from EFIPS!",
+        challengeCTA: "Start your creative journey now"
     }
 };
 
@@ -152,27 +158,30 @@ const HomePage: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* --- قسم تحدي الإبداع الجديد --- */}
-                    <div className="w-full max-w-md glass-panel p-6 md:p-10 rounded-[2.5rem] border-2 border-red-600/30 shadow-3xl text-center space-y-6 relative z-30 animate-fade-up overflow-hidden">
-                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-6 py-1.5 rounded-full bg-red-600 text-white text-[10px] md:text-xs font-black uppercase tracking-widest shadow-lg">
-                            {isAr ? "تحدي المبدعين" : "Creative Challenge"}
+                    {/* --- قسم تحدي الإبداع المطور والبارز --- */}
+                    <div className="w-full max-w-md glass-panel p-6 md:p-10 rounded-[2.5rem] border-2 border-red-600/40 shadow-[0_0_50px_rgba(220,38,38,0.15)] text-center space-y-6 relative z-30 animate-fade-up overflow-hidden group/card">
+                        {/* وميض خلفية بسيط */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-red-600/5 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-700"></div>
+                        
+                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-6 py-1.5 rounded-full bg-red-600 text-white text-[10px] md:text-xs font-black uppercase tracking-widest shadow-[0_10px_20px_rgba(220,38,38,0.4)] z-10">
+                            {isAr ? "أطلق العنان لموهبتك" : "Show Your Talent"}
                         </div>
                         
-                        <h3 className="text-2xl md:text-4xl font-black text-slate-950 dark:text-white leading-tight tracking-tighter">
-                            {isAr ? "أطلق العنان لخيالك" : "Unleash Your Imagination"}
-                        </h3>
+                        <div className="relative z-10 space-y-4">
+                            <h3 className="text-2xl md:text-4xl font-black text-slate-950 dark:text-white leading-tight tracking-tighter">
+                                {t('challengeTitle')}
+                            </h3>
 
-                        <p className="text-sm md:text-xl text-slate-700 dark:text-slate-300 font-bold leading-relaxed">
-                            {isAr 
-                                ? "ناقش القصص، ألف حكايتك الخاصة مع صقر، وكن أحد الفائزين بجوائز المدرسة القيمة!" 
-                                : "Discuss stories, author your own tales with Saqr, and win valuable school prizes!"}
-                        </p>
+                            <p className="text-sm md:text-xl text-slate-700 dark:text-slate-300 font-bold leading-relaxed px-2">
+                                {t('challengeDesc')}
+                            </p>
 
-                        <div className="h-1 w-20 bg-red-600/20 mx-auto rounded-full"></div>
+                            <div className="h-1.5 w-24 bg-red-600/30 mx-auto rounded-full group-hover/card:w-32 transition-all duration-500"></div>
 
-                        <p className="text-xs md:text-lg text-red-600 dark:text-red-500 font-black uppercase tracking-tight">
-                            {isAr ? "كل ما عليك هو سؤال صقر الآن" : "Just start by asking Saqr"}
-                        </p>
+                            <p className="text-[10px] md:text-lg text-red-600 dark:text-red-500 font-black uppercase tracking-tight animate-pulse">
+                                {t('challengeCTA')}
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
