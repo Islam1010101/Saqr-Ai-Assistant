@@ -266,6 +266,16 @@ const FeedbackPage: React.FC = () => {
                         {t('submitBtn')}
                     </button>
                 </form>
+            )}
+
+            {/* الفوتر */}
+            <div className="mt-24 md:mt-40 text-center opacity-40">
+                <p className={`text-[10px] md:text-sm font-black text-slate-400 mb-4 ${locale === 'en' ? 'uppercase tracking-[0.5em]' : ''}`}>EFIPS Innovation Lab • 2026</p>
+                <div className="h-1 w-20 bg-red-600 mx-auto rounded-full mb-4"></div>
+                <p className="font-black text-slate-950 dark:text-white text-xs md:text-xl italic">Librarian: Islam Ahmed</p>
+            </div>
+        </div>
+    );
 };
 
 export default FeedbackPage;
