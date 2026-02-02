@@ -266,7 +266,6 @@ const FeedbackPage: React.FC = () => {
                         {t('submitBtn')}
                     </button>
                 </form>
-            )}
 };
 
 export default FeedbackPage;
