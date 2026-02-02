@@ -5,7 +5,7 @@ import { useLanguage } from '../App';
 const translations = {
     ar: {
         welcome: "بوابة المعرفة مدرسة صقر الإمارات",
-        subWelcome: "بوابتك الذكية للوصول إلى كنوز المعرفة الرقمية والورقية بأسلوب عصري.",
+        subWelcome: "بوابتك الذكية للوصول إلى المعلومات.",
         manualSearch: "البحث اليدوي",
         manualDesc: "تصفح الفهرس الورقي عبر رقم الرف.",
         smartSearch: "اسأل صقر (AI)",
@@ -20,7 +20,7 @@ const translations = {
     },
     en: {
         welcome: "Knowledge's Portal in Falcon Int'l School",
-        subWelcome: "Your smart gateway to access digital and physical knowledge resources.",
+        subWelcome: "Your smart portal to access to Knowledges.",
         manualSearch: "Manual Search",
         manualDesc: "Browse physical index by shelf number.",
         smartSearch: "Ask Saqr (AI)",
