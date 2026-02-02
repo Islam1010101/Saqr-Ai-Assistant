@@ -20,7 +20,7 @@ const translations = {
     },
     en: {
         welcome: "Knowledge's Portal in Falcon Int'l School",
-        subWelcome: "Your smart portal to access to Knowledges.",
+        subWelcome: "Your smart portal to access to the Knowledges.",
         manualSearch: "Manual Search",
         manualDesc: "Browse physical index by shelf number.",
         smartSearch: "Ask Saqr (AI)",
