@@ -4,7 +4,7 @@ import { useLanguage } from '../App';
 
 const translations = {
     ar: {
-        welcome: "مستقبل المعرفة في صقر الإمارات",
+        welcome: "بوابة المعرفة مدرسة صقر الإمارات",
         subWelcome: "بوابتك الذكية للوصول إلى كنوز المعرفة الرقمية والورقية بأسلوب عصري.",
         manualSearch: "البحث اليدوي",
         manualDesc: "تصفح الفهرس الورقي عبر رقم الرف.",
@@ -19,7 +19,7 @@ const translations = {
         challengeCTA: "ابدأ رحلة الإبداع مع صقر الآن"
     },
     en: {
-        welcome: "Future of Knowledge at Falcon Int'l School",
+        welcome: "Knowledge's Portal in Falcon Int'l School",
         subWelcome: "Your smart gateway to access digital and physical knowledge resources.",
         manualSearch: "Manual Search",
         manualDesc: "Browse physical index by shelf number.",
