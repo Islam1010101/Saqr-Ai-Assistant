@@ -15,7 +15,7 @@ const translations = {
         bubble: "أهلاً بك في صقر!",
         homelandTitle: "لمحات من الموطن",
         challengeTitle: "تحدي المبدعين الصغار",
-        challengeDesc: "ناقش القصص، ألف حكايتك الخاصة مع صقر، وأثبت موهبتك لتفوز بجوائز متميزة من مدرسة صقر الإمارات!",
+        challengeDesc: "ناقش، ابدأ قصتك الخاصة مع صقر، وأثبت موهبتك لتفوز بجوائز متميزة من مدرسة صقر الإمارات!",
         challengeCTA: "ابدأ رحلة الإبداع مع صقر الآن"
     },
     en: {
@@ -30,7 +30,7 @@ const translations = {
         bubble: "Welcome to Saqr!",
         homelandTitle: "Hints From Homeland",
         challengeTitle: "Little Authors Challenge",
-        challengeDesc: "Discuss stories, author your own tales with Saqr, and showcase your talent to win distinguished prizes from EFIPS!",
+        challengeDesc: "Discuss , author your own tales with Saqr, and showcase your talent to win distinguished prizes from EFIPS!",
         challengeCTA: "Start your creative journey now"
     }
 };
