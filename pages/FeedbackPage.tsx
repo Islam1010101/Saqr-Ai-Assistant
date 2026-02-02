@@ -124,7 +124,7 @@ const FeedbackPage: React.FC = () => {
                     <div className="h-1.5 md:h-3 w-16 md:w-32 bg-green-600 rounded-full shadow-[0_0_15px_rgba(34,197,94,0.5)]"></div>
                 </div>
 
-                <p className="text-xl sm:text-2xl md:text-5xl text-slate-700 dark:text-slate-300 font-black max-w-5xl mx-auto leading-tight italic px-4">
+                <p className="text-xl sm:text-2xl md:text-5xl text-slate-700 dark:text-slate-300 font-black max-w-5xl mx-auto leading-tight px-4">
                     <span className="bg-clip-text text-transparent bg-gradient-to-r from-red-600 via-slate-900 dark:via-white to-green-600">
                         {t('subTitle')}
                     </span>
@@ -272,7 +272,7 @@ const FeedbackPage: React.FC = () => {
             <div className="mt-24 md:mt-40 text-center opacity-40">
                 <p className={`text-[10px] md:text-sm font-black text-slate-400 mb-4 ${locale === 'en' ? 'uppercase tracking-[0.5em]' : ''}`}>EFIPS Innovation Lab • 2026</p>
                 <div className="h-1 w-20 bg-red-600 mx-auto rounded-full mb-4"></div>
-                <p className="font-black text-slate-950 dark:text-white text-xs md:text-xl italic">Librarian: Islam Ahmed</p>
+                <p className="font-black text-slate-950 dark:text-white text-xs md:text-xl">Librarian: Islam Ahmed</p>
             </div>
         </div>
     );
