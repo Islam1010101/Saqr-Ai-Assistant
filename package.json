@@ -9,6 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "react-pageflip": "^0.4.3",
+    "pdfjs-dist": "^4.0.312",
     "@vercel/node": "^3.0.0",
     "groq-sdk": "^0.3.3",
     "html2canvas": "^1.4.1",
