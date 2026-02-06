@@ -1,14 +1,9 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { useLanguage } from '../App';
 
-// --- البيانات (تم تحديث المسارات بناءً على طلبك) ---
+// --- البيانات ---
 interface StudentWork {
-    id: string;
-    title: string;
-    author: string;
-    cover: string;
-    pdfUrl: string;
-    audioUrl: string;
+    id: string; title: string; author: string; cover: string; pdfUrl: string; audioUrl: string;
 }
 
 const studentWorks: StudentWork[] = [
@@ -24,163 +19,157 @@ const studentWorks: StudentWork[] = [
     { id: "10", title: "لمار .. والسماء تهمس", author: "ألين رافع فريحات", cover: "/cover/11.jpg", pdfUrl: "/book/لمار .. والسماء التي تهمس.pdf", audioUrl: "/لمار.mp3" }
 ];
 
-const translations = {
-    ar: { title: "بوابة المبدعين", sub: "إبداعات طلاب مدرسة صقر الإمارات", author: "المؤلف الصغير", inventor: "المخترع الصغير", read: "اقرأ الكتاب", listen: "استمع للمخلص", soon: "قريباً جداً", mascot: "المسني للإلهام!" },
-    en: { title: "Creators Portal", sub: "EFIPS Student Talents", author: "Little Author", inventor: "Little Inventor", read: "Flip Book", listen: "Audio Summary", soon: "Coming Soon", mascot: "Touch Me!" }
-};
+interface QuoteBurst { id: number; text: string; tx: number; ty: number; rot: number; }
 
 const CreatorsPortalPage: React.FC = () => {
     const { locale, dir } = useLanguage();
-    const t = (key: keyof typeof translations.ar) => translations[locale][key];
     const [selectedBook, setSelectedBook] = useState<StudentWork | null>(null);
     const [playingAudio, setPlayingAudio] = useState<string | null>(null);
+    const [bursts, setBursts] = useState<QuoteBurst[]>([]);
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
-    // إصلاح مشكلة تشغيل الصوت (Handling special characters in URLs)
+    const quotes = locale === 'ar' 
+        ? ["مبدع صقر الإمارات", "خيال بلا حدود", "فكر، ابتكر، انجح", "بصمتي الفنية"] 
+        : ["EFIPS Creator", "Infinite Vision", "Think & Innovate", "My Artistic Touch"];
+
+    const spawnMagic = useCallback(() => {
+        const id = Date.now();
+        const newBurst = {
+            id,
+            text: quotes[Math.floor(Math.random() * quotes.length)],
+            tx: (Math.random() - 0.5) * 300,
+            ty: -100 - Math.random() * 150,
+            rot: (Math.random() - 0.5) * 60
+        };
+        setBursts(prev => [...prev, newBurst]);
+        setTimeout(() => setBursts(curr => curr.filter(b => b.id !== id)), 2000);
+    }, [locale]);
+
     const handleAudio = (url: string) => {
-        if (playingAudio === url) {
-            audioRef.current?.pause();
-            setPlayingAudio(null);
-        } else {
+        if (playingAudio === url) { audioRef.current?.pause(); setPlayingAudio(null); }
+        else {
             setPlayingAudio(url);
             if (audioRef.current) {
                 audioRef.current.src = encodeURI(url);
-                audioRef.current.play().catch(e => console.error("Audio Play Error:", e));
+                audioRef.current.play();
             }
         }
     };
 
     return (
-        <div dir={dir} className="min-h-screen bg-slate-50 dark:bg-slate-950 font-['Cairo'] transition-colors duration-500 overflow-x-hidden">
+        <div dir={dir} className="min-h-screen bg-[#f8fafc] dark:bg-[#020617] font-['Cairo'] transition-all duration-700 overflow-x-hidden">
             
-            {/* Header القسم العلوي */}
-            <header className="relative pt-20 pb-10 text-center px-4">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-64 bg-gradient-to-b from-green-500/10 to-transparent -z-10"></div>
-                <h1 className="text-5xl md:text-8xl font-black text-slate-900 dark:text-white mb-4 tracking-tighter">
-                    {t('title')}
-                </h1>
-                <p className="text-lg md:text-2xl text-green-600 font-bold opacity-80">{t('sub')}</p>
-                <div className="w-24 h-1.5 bg-red-600 mx-auto mt-6 rounded-full animate-bounce"></div>
+            {/* Header */}
+            <header className="relative py-16 text-center z-10">
+                <h1 className="text-7xl md:text-[10rem] font-black text-slate-900 dark:text-white opacity-10 absolute top-0 left-1/2 -translate-x-1/2 select-none tracking-[2rem]">CREATORS</h1>
+                <div className="relative">
+                    <h2 className="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-green-600 via-red-600 to-green-600 animate-gradient-x py-4">
+                        {locale === 'ar' ? 'بوابة المبدعين' : 'Creators Portal'}
+                    </h2>
+                    <p className="text-slate-500 dark:text-slate-400 font-bold tracking-[0.3em] uppercase">{locale === 'ar' ? 'مدرسة صقر الإمارات الخاصة' : 'EFIPS Private School'}</p>
+                </div>
             </header>
 
-            <main className="max-w-[1800px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-10 pb-20">
+            <main className="max-w-[1800px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
                 
-                {/* القسم الأول: جاليري المؤلف الصغير (8 أعمدة) */}
-                <section className="lg:col-span-8 space-y-10">
-                    <div className="flex items-center gap-4 border-b-4 border-green-600 pb-4">
-                        <span className="text-4xl">📚</span>
-                        <h2 className="text-4xl font-black text-slate-800 dark:text-slate-100">{t('author')}</h2>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
-                        {studentWorks.map((work) => (
-                            <div key={work.id} className="book-card group relative h-[450px] perspective-1000">
-                                <div className="relative w-full h-full transition-all duration-500 preserve-3d group-hover:rotate-y-12 shadow-2xl rounded-2xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                                    
-                                    {/* غلاف الكتاب */}
-                                    <div className="h-2/3 overflow-hidden relative">
-                                        <img src={work.cover} alt={work.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-                                        
-                                        {/* زر القراءة السريع */}
-                                        <button 
-                                            onClick={() => setSelectedBook(work)}
-                                            className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white text-slate-900 px-6 py-2 rounded-full font-black text-sm shadow-xl hover:bg-green-600 hover:text-white transition-colors"
-                                        >
-                                            {t('read')} 📖
-                                        </button>
-                                    </div>
-
-                                    {/* بيانات الكتاب */}
-                                    <div className="p-5 space-y-2">
-                                        <h3 className="text-xl font-black text-slate-900 dark:text-white truncate leading-tight">
-                                            {work.title}
-                                        </h3>
-                                        <p className="text-green-600 font-bold text-sm italic">{work.author}</p>
-                                        
-                                        {/* زر الصوت المطور */}
-                                        <button 
-                                            onClick={() => handleAudio(work.audioUrl)}
-                                            className={`w-full mt-4 flex items-center justify-center gap-3 py-3 rounded-xl font-bold transition-all ${playingAudio === work.audioUrl ? 'bg-red-600 text-white animate-pulse' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-green-100'}`}
-                                        >
-                                            {playingAudio === work.audioUrl ? '⏸️ يشتغل الآن...' : `🎧 ${t('listen')}`}
-                                        </button>
-                                    </div>
+                {/* قسم الكتب (The Little Author) */}
+                <section className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-12">
+                    {studentWorks.map((work) => (
+                        <div key={work.id} className="book-container group">
+                            <div className="relative perspective-2000 h-[450px]">
+                                {/* Book 3D Object */}
+                                <div className="book-3d group-hover:rotate-y-[-30deg] transition-transform duration-700 ease-out shadow-2xl rounded-r-lg overflow-hidden">
+                                    <img src={work.cover} alt={work.title} className="w-full h-full object-cover shadow-2xl border-l-8 border-slate-900/20" />
+                                    {/* Pages Effect */}
+                                    <div className="absolute top-0 right-0 w-[20px] h-full bg-slate-100 origin-right transform rotate-y-90 group-hover:opacity-100 opacity-0 transition-opacity"></div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-
-                {/* القسم الثاني: المخترع الصغير (4 أعمدة) */}
-                <aside className="lg:col-span-4 space-y-8">
-                    <div className="sticky top-24 space-y-8">
-                        <div className="bg-white dark:bg-slate-900 p-8 rounded-[3rem] border-4 border-red-600 shadow-3xl text-center relative overflow-hidden group">
-                            <h2 className="text-4xl font-black text-red-600 mb-8">{t('inventor')}</h2>
-                            
-                            <div className="relative inline-block">
-                                <div className="absolute -inset-4 bg-red-600/20 blur-2xl rounded-full animate-pulse"></div>
-                                <img src="/creators-mascot.png" alt="Mascot" className="h-64 md:h-96 object-contain relative z-10 animate-float" />
                                 
-                                <div className="absolute -top-5 -right-5 bg-yellow-400 text-slate-900 p-4 rounded-2xl font-black text-sm rotate-12 shadow-xl animate-bounce">
-                                    {t('mascot')}
+                                {/* Overlay Controls */}
+                                <div className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 z-20">
+                                    <button onClick={() => setSelectedBook(work)} className="bg-white text-black px-8 py-3 rounded-full font-black hover:scale-110 transition-transform shadow-2xl mb-4">
+                                        {locale === 'ar' ? 'فتح الكتاب 📖' : 'Open Book 📖'}
+                                    </button>
+                                    <button onClick={() => handleAudio(work.audioUrl)} className="bg-red-600 text-white p-4 rounded-full hover:rotate-12 transition-all">
+                                        {playingAudio === work.audioUrl ? '⏸️' : '🎧'}
+                                    </button>
                                 </div>
                             </div>
-
-                            <div className="mt-10 p-6 bg-slate-50 dark:bg-slate-800 rounded-3xl border-2 border-dashed border-red-600/30">
-                                <p className="text-3xl font-black text-slate-400 italic uppercase tracking-widest animate-pulse">
-                                    {t('soon')}
-                                </p>
-                                <div className="flex justify-center gap-4 mt-4 text-4xl">
-                                    <span>🚀</span><span>🤖</span><span>🧪</span>
-                                </div>
+                            <div className="mt-6 text-center">
+                                <h3 className="text-2xl font-black dark:text-white truncate">{work.title}</h3>
+                                <p className="text-green-600 font-bold italic">{work.author}</p>
                             </div>
                         </div>
+                    ))}
+                </section>
+
+                {/* قسم المخترع (The Little Inventor) */}
+                <aside className="lg:col-span-5 relative min-h-[800px] flex flex-col items-center justify-center">
+                    
+                    {/* شعار المدرسة بالخلفية - يميل لليمين ويتفاعل مع المود */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-full -z-10 opacity-10 dark:opacity-20 pointer-events-none transform rotate-[15deg]">
+                        <img src="/logo.png" alt="School Logo" className="w-full h-full object-contain dark:invert transition-all duration-1000" />
+                    </div>
+
+                    {/* الشخصية (بدون إطار) */}
+                    <div className="relative z-10 cursor-pointer group" onClick={spawnMagic}>
+                        {/* الكروت الطائرة */}
+                        {bursts.map(b => (
+                            <div key={b.id} 
+                                 className="absolute z-50 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md px-4 py-2 rounded-xl border-2 border-green-500 shadow-xl pointer-events-none animate-tiny-burst"
+                                 style={{ '--tx': `${b.tx}px`, '--ty': `${b.ty}px`, '--rot': `${b.rot}deg` } as any}>
+                                <p className="text-[10px] md:text-xs font-black whitespace-nowrap dark:text-white">{b.text}</p>
+                            </div>
+                        ))}
+
+                        <img src="/creators-mascot.png" alt="Mascot" className="h-[500px] md:h-[700px] object-contain animate-float drop-shadow-[0_35px_60px_rgba(220,38,38,0.3)] group-hover:scale-105 transition-transform duration-500" />
+                        
+                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-yellow-400 text-slate-900 px-6 py-3 rounded-full font-black animate-bounce shadow-2xl">
+                            {locale === 'ar' ? 'المسني للإلهام!' : 'Touch Me!'}
+                        </div>
+                    </div>
+
+                    <div className="mt-12 text-center bg-white/5 backdrop-blur-xl p-10 rounded-[3rem] border border-white/10 w-full">
+                        <h4 className="text-4xl font-black text-red-600 animate-pulse uppercase tracking-widest">{locale === 'ar' ? 'ترقبوا ابتكاراتنا' : 'Innovation Soon'}</h4>
+                        <p className="text-slate-400 mt-2 italic font-bold">The Little Inventor Lab</p>
                     </div>
                 </aside>
             </main>
 
-            {/* نظام الـ Flipbook Modal */}
+            {/* Modal التقليب (Flipbook Experience) */}
             {selectedBook && (
-                <div className="fixed inset-0 z-[1000] bg-slate-950/95 backdrop-blur-xl flex items-center justify-center p-4 md:p-10 animate-fade-in">
-                    <button onClick={() => setSelectedBook(null)} className="absolute top-6 right-6 text-white text-5xl hover:scale-110 transition-transform">✕</button>
-                    
-                    <div className="w-full max-w-6xl h-full flex flex-col items-center gap-6">
-                        <div className="bg-white rounded-xl overflow-hidden shadow-[0_0_100px_rgba(34,197,94,0.3)] w-full h-full relative">
-                            {/* Flipbook Simulation Frame */}
-                            <iframe 
-                                src={`${selectedBook.pdfUrl}#toolbar=0&navpanes=0`} 
-                                className="w-full h-full border-none"
-                                title="EFIPS Flipbook"
-                            ></iframe>
-                        </div>
-                        <h2 className="text-white text-3xl font-black">{selectedBook.title}</h2>
+                <div className="fixed inset-0 z-[1000] bg-slate-950/98 flex items-center justify-center p-4 animate-book-open">
+                    <button onClick={() => setSelectedBook(null)} className="absolute top-10 right-10 text-white text-4xl z-50 hover:rotate-90 transition-transform">✕</button>
+                    <div className="w-full max-w-5xl h-[85vh] bg-white rounded-r-2xl overflow-hidden relative shadow-[0_0_100px_rgba(255,255,255,0.1)]">
+                        <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-black/20 to-transparent z-10 shadow-inner"></div>
+                        <iframe src={`${selectedBook.pdfUrl}#toolbar=0`} className="w-full h-full border-none" />
                     </div>
                 </div>
             )}
 
-            {/* عنصر الصوت الخفي للتحكم */}
             <audio ref={audioRef} onEnded={() => setPlayingAudio(null)} />
 
             <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
+                .perspective-2000 { perspective: 2000px; }
+                .book-3d { transform-style: preserve-3d; height: 100%; position: relative; }
                 
-                .perspective-1000 { perspective: 1000px; }
-                .preserve-3d { transform-style: preserve-3d; }
-                .rotate-y-12 { transform: rotateY(-15deg) scale(1.02); }
-                
-                .animate-float { animation: float 5s ease-in-out infinite; }
-                @keyframes float { 
-                    0%, 100% { transform: translateY(0px) rotate(0deg); } 
-                    50% { transform: translateY(-20px) rotate(2deg); } 
+                @keyframes tiny-burst {
+                    0% { transform: translate(0, 0) scale(0); opacity: 0; filter: blur(10px); }
+                    30% { transform: translate(var(--tx), var(--ty)) scale(1) rotate(var(--rot)); opacity: 1; filter: blur(0px); }
+                    100% { transform: translate(calc(var(--tx)*1.5), calc(var(--ty)*1.5)) scale(0.5) rotate(calc(var(--rot)*2)); opacity: 0; filter: blur(5px); }
                 }
+                .animate-tiny-burst { animation: tiny-burst 2s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
 
-                .book-card:hover { z-index: 50; }
-                
-                /* تحسين شكل الـ Scrollbar */
-                ::-webkit-scrollbar { width: 10px; }
-                ::-webkit-scrollbar-track { background: #f1f1f1; }
-                ::-webkit-scrollbar-thumb { background: #16a34a; border-radius: 5px; }
+                @keyframes float { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-30px) rotate(2deg); } }
+                .animate-float { animation: float 6s ease-in-out infinite; }
+
+                @keyframes book-open {
+                    from { opacity: 0; transform: scale(0.8) rotateY(-40deg); }
+                    to { opacity: 1; transform: scale(1) rotateY(0); }
+                }
+                .animate-book-open { animation: book-open 0.6s cubic-bezier(0.165, 0.84, 0.44, 1); }
+
+                @keyframes gradient-x { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+                .animate-gradient-x { background-size: 200% 200%; animation: gradient-x 8s linear infinite; }
             `}</style>
         </div>
     );
