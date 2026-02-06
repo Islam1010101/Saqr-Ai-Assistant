@@ -3,7 +3,7 @@ import { useLanguage } from '../App';
 import HTMLFlipBook from 'react-pageflip';
 import * as pdfjsLib from 'pdfjs-dist';
 
-// تعيين الـ Worker من رابط مباشر ومستقر جداً
+// تعيين الـ Worker لضمان تشغيل الـ PDF بسلاسة
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
 
 const FlipBookPlayer = ({ pdfUrl, audioUrl }: { pdfUrl: string, audioUrl?: string }) => {
@@ -19,7 +19,7 @@ const FlipBookPlayer = ({ pdfUrl, audioUrl }: { pdfUrl: string, audioUrl?: strin
                 const images = [];
                 for (let i = 1; i <= pdf.numPages; i++) {
                     const page = await pdf.getPage(i);
-                    const viewport = page.getViewport({ scale: 1.5 });
+                    const viewport = page.getViewport({ scale: 1.8 });
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
                     canvas.height = viewport.height;
@@ -31,35 +31,33 @@ const FlipBookPlayer = ({ pdfUrl, audioUrl }: { pdfUrl: string, audioUrl?: strin
                 }
                 setPages(images);
                 const isMob = window.innerWidth < 768;
-                setDim({ w: isMob ? window.innerWidth * 0.85 : 450, h: isMob ? 500 : 600 });
-            } catch (e) { console.error("PDF Error", e); }
+                setDim({ w: isMob ? window.innerWidth * 0.9 : 450, h: isMob ? 550 : 650 });
+            } catch (e) { console.error("PDF Render Error", e); }
             setLoading(false);
         };
         renderPDF();
     }, [pdfUrl]);
 
     if (loading) return (
-        <div className="flex flex-col items-center justify-center p-20 text-green-500 font-bold animate-pulse">
-            <div className="w-16 h-16 border-4 border-t-transparent border-green-500 rounded-full animate-spin mb-4"></div>
-            فتح صفحات الإبداع...
+        <div className="flex flex-col items-center justify-center p-20 text-green-500 font-black animate-bounce">
+            <div className="w-16 h-16 border-8 border-t-green-500 border-slate-200 rounded-full animate-spin mb-6"></div>
+            تحميل الإبداع...
         </div>
     );
 
     return (
-        <div className="flex flex-col items-center gap-6 w-full">
-            {/* المشغل الصوتي - السامري */}
+        <div className="flex flex-col items-center gap-8 w-full animate-fade-in">
             {audioUrl && (
-                <div className="w-full max-w-md bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20 shadow-xl">
-                    <p className="text-white text-xs mb-2 text-center font-bold opacity-70 italic">استمع لملخص القصة 🎙️</p>
-                    <audio src={audioUrl} controls className="w-full h-10" />
+                <div className="w-full max-w-lg bg-gradient-to-r from-slate-800 to-slate-900 p-5 rounded-3xl border border-white/10 shadow-2xl flex flex-col items-center">
+                    <span className="text-green-400 text-sm font-black mb-3 tracking-widest uppercase">Audio Summary 🎙️</span>
+                    <audio src={audioUrl} controls className="w-full" />
                 </div>
             )}
-            
-            <div className="relative shadow-[0_50px_100px_rgba(0,0,0,0.5)] rounded-lg overflow-hidden">
+            <div className="relative shadow-[0_0_80px_rgba(0,0,0,0.6)] rounded-xl overflow-hidden">
                 {/* @ts-ignore */}
-                <HTMLFlipBook width={dim.w} height={dim.h} size="stretch" showCover={true} className="bg-slate-200">
+                <HTMLFlipBook width={dim.w} height={dim.h} size="stretch" showCover={true} className="bg-slate-300">
                     {pages.map((p, i) => (
-                        <div key={i} className="bg-white shadow-inner"><img src={p} className="w-full h-full object-contain" /></div>
+                        <div key={i} className="bg-white"><img src={p} className="w-full h-full object-contain" /></div>
                     ))}
                 </HTMLFlipBook>
             </div>
@@ -87,89 +85,97 @@ const CreatorsPortalPage: React.FC = () => {
 
     const spawnMagic = () => {
         const id = Date.now();
-        setBursts(p => [...p, { id, tx: (Math.random()-0.5)*150, ty: -120, rot: Math.random()*30 }]);
-        setTimeout(() => setBursts(c => c.filter(b => b.id !== id)), 800);
+        setBursts(p => [...p, { id, tx: (Math.random()-0.5)*200, ty: -150, rot: Math.random()*40 }]);
+        setTimeout(() => setBursts(c => c.filter(b => b.id !== id)), 1000);
     };
 
     return (
-        <div dir={dir} className="min-h-screen bg-[#f8fafc] dark:bg-[#020617] font-['Cairo'] transition-all">
+        <div dir={dir} className="min-h-screen bg-[#fcfcfc] dark:bg-[#030712] font-['Cairo'] transition-all duration-500">
             
-            <header className="py-20 text-center relative overflow-hidden">
-                <h1 className="text-5xl md:text-8xl font-black text-slate-900 dark:text-white mb-4 tracking-tight uppercase">
+            {/* Header القسم العلوي */}
+            <header className="pt-24 pb-16 text-center relative">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-64 bg-gradient-to-b from-red-600/10 to-transparent blur-3xl pointer-events-none"></div>
+                <h1 className="text-6xl md:text-9xl font-black text-slate-900 dark:text-white mb-6 tracking-tighter">
                     {locale === 'ar' ? 'بوابة المبدعين' : 'Creators Portal'}
                 </h1>
-                <div className="w-32 h-2.5 bg-red-600 mx-auto rounded-full shadow-lg shadow-red-500/40"></div>
+                <p className="text-red-600 dark:text-red-500 font-black text-xl md:text-2xl tracking-[0.2em] uppercase">The Little Author Section</p>
+                <div className="w-40 h-3 bg-red-600 mx-auto mt-6 rounded-full"></div>
             </header>
 
-            <main className="max-w-[1700px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-16 pb-32">
-                
-                {/* المؤلف الصغير */}
-                <section className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10 order-2 lg:order-1">
+            {/* Gallery Section جاليري الكتب */}
+            <main className="max-w-[1800px] mx-auto px-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
                     {studentWorks.map((work) => (
-                        <div key={work.id} className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[2.5rem] overflow-hidden shadow-2xl hover:shadow-green-500/20 transition-all duration-500">
-                            <div className="h-72 overflow-hidden relative">
-                                <img src={work.cover} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <span className="text-white font-black text-lg border-2 border-white px-6 py-2 rounded-full">عرض العمل</span>
+                        <div key={work.id} 
+                             onClick={() => setSelectedBook(work)}
+                             className="group relative cursor-pointer transform-gpu hover:scale-105 hover:-rotate-1 transition-all duration-500">
+                            <div className="aspect-[3/4] rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white dark:border-slate-800 relative">
+                                <img src={work.cover} className="w-full h-full object-cover" alt={work.title} />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80 group-hover:opacity-40 transition-opacity"></div>
+                                <div className="absolute bottom-0 p-6 w-full text-center">
+                                    <h3 className="text-white font-black text-xl mb-1 line-clamp-1">{work.title}</h3>
+                                    <p className="text-green-400 font-bold text-sm uppercase">{work.author}</p>
                                 </div>
-                            </div>
-                            <div className="p-8">
-                                <h3 className="text-2xl font-black dark:text-white mb-2 leading-tight h-16 line-clamp-2">{work.title}</h3>
-                                <p className="text-red-500 font-bold mb-6 text-sm italic underline decoration-2 underline-offset-4">{work.author}</p>
-                                <button onClick={() => setSelectedBook(work)} className="w-full bg-slate-900 dark:bg-green-600 text-white py-4 rounded-2xl font-black text-lg hover:scale-[1.02] active:scale-95 transition-all shadow-xl">
-                                    تصفح الكتاب 📖
-                                </button>
+                                <div className="absolute inset-0 border-[12px] border-white/0 group-hover:border-white/20 transition-all rounded-[2rem]"></div>
                             </div>
                         </div>
                     ))}
-                </section>
+                </div>
 
-                {/* المخترع الصغير - اللوجو خلف الشخصية */}
-                <aside className="lg:col-span-4 relative flex flex-col items-center justify-start pt-10 order-1 lg:order-2">
-                    <div className="relative w-full flex justify-center items-center">
-                        
-                        {/* اللوجو الخلفي: مائل لليمين + متفاعل مع الدارك مود */}
-                        <div className="absolute z-0 w-[140%] opacity-15 dark:opacity-30 transform rotate-[25deg] translate-x-10 pointer-events-none scale-125">
-                            <img src="/school-logo.png" className="w-full h-auto dark:invert grayscale brightness-150" alt="Background Logo" />
+                {/* Divider فاصل فني */}
+                <div className="my-32 flex items-center justify-center gap-4 opacity-30">
+                    <div className="h-px w-full bg-slate-400"></div>
+                    <div className="text-4xl italic font-black text-slate-400">INNOVATION</div>
+                    <div className="h-px w-full bg-slate-400"></div>
+                </div>
+
+                {/* Little Inventor Section المخترع الصغير في الأسفل */}
+                <section className="pb-32 relative">
+                    <div className="relative flex flex-col items-center justify-center w-full">
+                         {/* اللوجو الخلفي بتأثير فخم */}
+                         <div className="absolute z-0 w-full max-w-4xl opacity-10 dark:opacity-20 transform rotate-12 translate-x-20 pointer-events-none transition-transform duration-1000">
+                            <img src="/school-logo.png" className="w-full h-auto dark:invert grayscale brightness-125" alt="Logo BG" />
                         </div>
 
                         {/* الشخصية */}
-                        <div className="relative z-10 cursor-pointer group" onClick={spawnMagic}>
+                        <div className="relative z-10 cursor-pointer group select-none" onClick={spawnMagic}>
                             {bursts.map(b => (
-                                <div key={b.id} className="absolute z-50 bg-green-500 text-white text-xs font-black px-4 py-2 rounded-xl shadow-2xl animate-float-up"
+                                <div key={b.id} className="absolute z-50 bg-red-600 text-white text-sm font-black px-5 py-2 rounded-2xl shadow-2xl animate-burst-modern"
                                      style={{'--tx': `${b.tx}px`, '--rot': `${b.rot}deg`} as any}>
-                                    EXCELLENT! ⚡
+                                    BRAVO! 🚀
                                 </div>
                             ))}
-                            <img src="/creators-mascot.png" className="h-[400px] md:h-[650px] object-contain drop-shadow-[0_35px_60px_rgba(0,0,0,0.5)] group-hover:scale-105 transition-transform duration-500" />
+                            <img src="/creators-mascot.png" className="h-[500px] md:h-[750px] object-contain drop-shadow-[0_45px_70px_rgba(0,0,0,0.5)] group-hover:scale-110 transition-transform duration-700 ease-out" />
+                        </div>
+
+                        <div className="mt-[-40px] z-20 bg-white dark:bg-slate-900 border-8 border-red-600 p-12 rounded-[4rem] shadow-2xl text-center transform -rotate-2">
+                            <h2 className="text-5xl md:text-7xl font-black text-slate-900 dark:text-white mb-4 italic tracking-tighter">المخترع الصغير</h2>
+                            <p className="text-red-600 dark:text-red-400 font-black text-2xl animate-pulse uppercase tracking-[0.3em]">Ready to Launch Soon</p>
                         </div>
                     </div>
-                    
-                    <div className="mt-10 bg-white dark:bg-slate-900 p-10 rounded-[3rem] border-4 border-dashed border-slate-200 dark:border-slate-800 text-center shadow-inner">
-                        <h2 className="text-4xl font-black text-slate-900 dark:text-white mb-4 tracking-tighter uppercase italic underline decoration-red-600">المخترع الصغير</h2>
-                        <p className="text-slate-400 font-bold animate-pulse">Coming Soon to Innovation Lab</p>
-                    </div>
-                </aside>
+                </section>
             </main>
 
-            {/* مودال الكتاب */}
+            {/* Modal المودال المنبثق للكتاب */}
             {selectedBook && (
-                <div className="fixed inset-0 z-[9999] bg-slate-950/98 backdrop-blur-3xl flex flex-col items-center justify-center p-4">
-                    <button onClick={() => setSelectedBook(null)} className="absolute top-8 right-8 text-white bg-red-600 w-14 h-14 rounded-full text-3xl font-black shadow-2xl hover:rotate-90 transition-all">✕</button>
-                    <div className="w-full max-w-6xl h-[90vh] flex flex-col items-center justify-center overflow-y-auto">
+                <div className="fixed inset-0 z-[9999] bg-slate-950/98 backdrop-blur-3xl flex flex-col items-center justify-center p-6 animate-fade-in">
+                    <button onClick={() => setSelectedBook(null)} className="absolute top-10 right-10 bg-white text-black w-16 h-16 rounded-full text-4xl font-black shadow-2xl hover:bg-red-600 hover:text-white transition-all transform hover:rotate-90">✕</button>
+                    <div className="w-full max-w-7xl h-full flex flex-col items-center justify-center pt-20">
                          <FlipBookPlayer pdfUrl={selectedBook.pdfUrl} audioUrl={selectedBook.audioUrl} />
                     </div>
                 </div>
             )}
 
             <style>{`
-                @keyframes float-up {
+                @keyframes burst-modern {
                     0% { transform: translate(0,0) scale(0); opacity: 0; }
-                    20% { opacity: 1; transform: translate(var(--tx), -60px) scale(1.2) rotate(var(--rot)); }
-                    100% { transform: translate(calc(var(--tx) * 1.5), -150px) scale(0.5); opacity: 0; }
+                    30% { opacity: 1; transform: translate(var(--tx), -100px) scale(1.3) rotate(var(--rot)); }
+                    100% { transform: translate(calc(var(--tx) * 1.6), -200px) scale(0.4); opacity: 0; }
                 }
-                .animate-float-up { animation: float-up 0.8s ease-out forwards; }
-                .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+                .animate-burst-modern { animation: burst-modern 1s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+                .animate-fade-in { animation: fadeIn 0.5s ease-out; }
+                @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+                .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
             `}</style>
         </div>
     );
