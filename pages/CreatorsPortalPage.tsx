@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useLanguage } from '../App';
 
-// --- الأيقونات البرمجية SVG ---
+// --- 1. الأيقونات البرمجية SVG ---
 const IconPlay = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>;
 const IconStop = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>;
 const IconRead = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a4 4 0 0 0-4-4H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a4 4 0 0 1 4-4h6z"/></svg>;
@@ -106,9 +106,8 @@ const CreatorsPortalPage: React.FC = () => {
                 <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] bg-green-600/10 dark:bg-green-500/10 blur-[150px] rounded-full animate-pulse [animation-delay:2s]"></div>
             </div>
 
-            {/* الهيدر بتصغير خط الموبايل */}
             <header className="relative pt-24 md:pt-32 pb-16 text-center px-4 z-10">
-                <h1 className="text-3xl sm:text-5xl lg:text-[10rem] font-black mb-4 tracking-tighter leading-[1.1] text-slate-950 dark:text-white drop-shadow-2xl animate-fade-up">
+                <h1 className="text-4xl sm:text-6xl lg:text-[10rem] font-black mb-4 tracking-tighter leading-none text-slate-950 dark:text-white drop-shadow-2xl animate-fade-up">
                     {isAr ? 'بوابة المبدعين' : 'CREATORS PORTAL'}
                 </h1>
                 <div className="flex items-center justify-center gap-4 animate-in zoom-in duration-1000">
@@ -118,11 +117,11 @@ const CreatorsPortalPage: React.FC = () => {
                 </div>
             </header>
 
-            {/* القسم الأول: المؤلف الصغير (عرض الكتالوج) - مساحة أعرض max-w-[1920px] */}
-            <section className="relative mb-40 z-10 w-full max-w-[1920px] mx-auto">
+            {/* القسم الأول: المؤلف الصغير (مساحة أعرض 1920px) */}
+            <section className="relative mb-20 z-10 w-full max-w-[1920px] mx-auto">
                 <div className="text-center mb-16 px-4">
                     <span className="inline-block px-10 py-4 bg-white/60 dark:bg-white/5 backdrop-blur-3xl border border-white/20 rounded-[2rem] shadow-2xl animate-fade-up">
-                        <h2 className="text-xl md:text-5xl font-black text-red-600 uppercase tracking-widest flex items-center gap-4">
+                        <h2 className="text-xl md:text-5xl font-black text-red-600 uppercase tracking-widest flex items-center gap-4 leading-normal">
                            📚 {isAr ? 'قسم المؤلف الصغير' : 'The Little Author'}
                         </h2>
                     </span>
@@ -144,8 +143,8 @@ const CreatorsPortalPage: React.FC = () => {
                                     <a href={work.pdfUrl} target="_blank" rel="noopener noreferrer" className="relative aspect-[3/4.2] rounded-[3rem] overflow-hidden mb-10 block ring-8 ring-black/5 dark:ring-white/5 shadow-3xl transform group-hover:scale-[1.03] transition-all duration-700">
                                         <img src={work.cover} className="w-full h-full object-cover" alt={work.title} />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-700 flex flex-col items-center justify-end pb-12">
-                                            <div className="bg-red-600 text-white font-black px-12 py-6 rounded-[2rem] shadow-2xl scale-75 group-hover:scale-100 transition-all duration-700 flex items-center gap-4 text-xl">
-                                                {isAr ? 'تصفح العمل' : 'View PDF'} <IconRead />
+                                            <div className="bg-red-600 text-white font-black px-12 py-6 rounded-[2rem] shadow-2xl scale-75 group-hover:scale-100 transition-all duration-700 flex items-center gap-4 text-xl leading-none">
+                                                {isAr ? 'اقرأ العمل' : 'View PDF'} <IconRead />
                                             </div>
                                         </div>
                                     </a>
@@ -154,8 +153,8 @@ const CreatorsPortalPage: React.FC = () => {
                                         <p className="text-green-600 dark:text-green-400 font-bold text-lg md:text-xl mb-10 tracking-widest uppercase opacity-80">{work.author}</p>
                                         <div className="bg-slate-950/90 dark:bg-black/80 backdrop-blur-3xl p-6 rounded-[3rem] border border-white/10 shadow-inner transition-all duration-500 group-hover:border-red-600/40">
                                             <audio ref={el => { if(el) audioRefs.current.set(work.id, el); }} onEnded={() => setPlayingAudioId(null)} src={work.audioUrl} hidden />
-                                            <button onClick={() => handleAudioPlay(work.id)} className={`w-full py-5 rounded-[1.8rem] font-black text-xl flex items-center justify-center gap-5 transition-all duration-300 ${playingAudioId === id ? 'bg-red-600 text-white' : 'bg-white/5 text-white'}`}>
-                                                {playingAudioId === work.id ? <><IconStop /> <span>{isAr ? 'إيقاف' : 'Stop'}</span></> : <><IconPlay /> <span>{isAr ? 'استمع للملخص' : 'Listen Summary'}</span></>}
+                                            <button onClick={() => handleAudioPlay(work.id)} className={`w-full py-5 rounded-[1.8rem] font-black text-xl flex items-center justify-center gap-5 transition-all duration-300 ${playingAudioId === work.id ? 'bg-red-600 text-white shadow-[0_0_30px_rgba(220,38,38,0.5)]' : 'bg-white/5 text-white hover:bg-white/15'}`}>
+                                                {playingAudioId === work.id ? <><IconStop /> <span className="leading-none">{isAr ? 'إيقاف' : 'Stop'}</span></> : <><IconPlay /> <span className="leading-none">{isAr ? 'استمع للملخص' : 'Listen Summary'}</span></>}
                                             </button>
                                         </div>
                                     </div>
@@ -166,11 +165,11 @@ const CreatorsPortalPage: React.FC = () => {
                 </div>
             </section>
 
-            {/* القسم الثاني: المخترع الصغير (تم حذف الفاصل والحدود) */}
-            <section className="py-40 relative overflow-hidden bg-white/30 dark:bg-white/5 backdrop-blur-3xl">
+            {/* القسم الثاني: المخترع الصغير (بدون فاصل) */}
+            <section className="py-20 relative overflow-hidden bg-transparent">
                 <div className="max-w-7xl mx-auto flex flex-col items-center text-center px-6 relative z-10">
                     <div className="mb-24">
-                        <span className="bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 px-14 py-6 rounded-full border-2 border-yellow-500/30 text-2xl md:text-4xl font-black tracking-[0.3em] uppercase shadow-2xl leading-none">
+                        <span className="bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 px-14 py-6 rounded-full border-2 border-yellow-500/30 text-2xl md:text-4xl font-black tracking-[0.3em] uppercase shadow-2xl backdrop-blur-xl leading-none">
                              💡 {isAr ? 'قسم المخترع الصغير' : 'The Little Inventor'}
                         </span>
                     </div>
@@ -191,6 +190,18 @@ const CreatorsPortalPage: React.FC = () => {
                             <img src="/creators-mascot.png" className="h-[400px] md:h-[800px] object-contain drop-shadow-[0_40px_100px_rgba(0,0,0,0.3)] animate-float" alt="Mascot" />
                         </div>
                     </div>
+                    <div className="mt-28 relative">
+                         <h2 className="text-[10rem] md:text-[25rem] font-black text-slate-900 dark:text-white italic tracking-tighter leading-none opacity-[0.04] absolute -bottom-20 left-1/2 -translate-x-1/2 select-none uppercase">Saqr</h2>
+                        <div className="relative z-10 space-y-10 animate-fade-up px-4">
+                            <h3 className="text-5xl md:text-[11rem] font-black text-slate-950 dark:text-white tracking-tighter uppercase leading-none">
+                                {isAr ? 'قريباً' : 'COMING SOON'}
+                            </h3>
+                            <div className="w-48 md:w-64 h-3 md:h-4 bg-gradient-to-r from-red-600 via-yellow-500 to-green-600 mx-auto rounded-full shadow-2xl"></div>
+                            <p className="text-lg md:text-5xl text-slate-600 dark:text-slate-400 font-bold leading-relaxed italic max-w-4xl">
+                                {isAr ? 'منصة عرض الابتكارات والمشاريع الهندسية لطلابنا المبدعين' : 'Showcasing engineering innovations and projects for our creative students'}
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -205,6 +216,7 @@ const CreatorsPortalPage: React.FC = () => {
                 .animate-burst-steady { animation: burst-steady 2.5s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
                 .animate-float { animation: float 6s ease-in-out infinite; }
                 @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-40px); } }
+                .logo-smart-filter { transition: filter 0.5s ease; }
                 .dark .logo-smart-filter { filter: brightness(0) invert(1); }
                 * { font-style: normal !important; text-rendering: optimizeLegibility; }
                 [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] p { letter-spacing: 0 !important; }
