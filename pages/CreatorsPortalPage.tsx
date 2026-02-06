@@ -51,11 +51,9 @@ const CreatorsPortalPage: React.FC = () => {
             targetAudio?.pause();
             setPlayingAudioId(null);
         } else {
-            audioRefs.current.forEach((audio, key) => {
-                if (key !== id) {
-                    audio.pause();
-                    audio.currentTime = 0;
-                }
+            audioRefs.current.forEach((audio) => {
+                audio.pause();
+                audio.currentTime = 0;
             });
             targetAudio?.play().catch(() => {});
             setPlayingAudioId(id);
@@ -107,7 +105,7 @@ const CreatorsPortalPage: React.FC = () => {
             </div>
 
             <header className="relative pt-24 md:pt-32 pb-16 text-center px-4 z-10">
-                <h1 className="text-4xl sm:text-6xl lg:text-[10rem] font-black mb-4 tracking-tighter leading-none text-slate-950 dark:text-white drop-shadow-2xl animate-fade-up">
+                <h1 className="text-3xl sm:text-5xl lg:text-[10rem] font-black mb-4 tracking-tighter leading-[1.1] text-slate-950 dark:text-white drop-shadow-2xl animate-fade-up">
                     {isAr ? 'بوابة المبدعين' : 'CREATORS PORTAL'}
                 </h1>
                 <div className="flex items-center justify-center gap-4 animate-in zoom-in duration-1000">
@@ -117,11 +115,11 @@ const CreatorsPortalPage: React.FC = () => {
                 </div>
             </header>
 
-            {/* القسم الأول: المؤلف الصغير (مساحة أعرض 1920px) */}
-            <section className="relative mb-20 z-10 w-full max-w-[1920px] mx-auto">
+            {/* القسم الأول: المؤلف الصغير - المساحة أعرض max-w-[1920px] */}
+            <section className="relative mb-40 z-10 w-full max-w-[1920px] mx-auto">
                 <div className="text-center mb-16 px-4">
                     <span className="inline-block px-10 py-4 bg-white/60 dark:bg-white/5 backdrop-blur-3xl border border-white/20 rounded-[2rem] shadow-2xl animate-fade-up">
-                        <h2 className="text-xl md:text-5xl font-black text-red-600 uppercase tracking-widest flex items-center gap-4 leading-normal">
+                        <h2 className="text-xl md:text-5xl font-black text-red-600 uppercase tracking-widest flex items-center gap-4">
                            📚 {isAr ? 'قسم المؤلف الصغير' : 'The Little Author'}
                         </h2>
                     </span>
@@ -143,7 +141,7 @@ const CreatorsPortalPage: React.FC = () => {
                                     <a href={work.pdfUrl} target="_blank" rel="noopener noreferrer" className="relative aspect-[3/4.2] rounded-[3rem] overflow-hidden mb-10 block ring-8 ring-black/5 dark:ring-white/5 shadow-3xl transform group-hover:scale-[1.03] transition-all duration-700">
                                         <img src={work.cover} className="w-full h-full object-cover" alt={work.title} />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-700 flex flex-col items-center justify-end pb-12">
-                                            <div className="bg-red-600 text-white font-black px-12 py-6 rounded-[2rem] shadow-2xl scale-75 group-hover:scale-100 transition-all duration-700 flex items-center gap-4 text-xl leading-none">
+                                            <div className="bg-red-600 text-white font-black px-12 py-6 rounded-[2rem] shadow-2xl scale-75 group-hover:scale-100 transition-all duration-700 flex items-center gap-4 text-xl">
                                                 {isAr ? 'اقرأ العمل' : 'View PDF'} <IconRead />
                                             </div>
                                         </div>
@@ -165,7 +163,7 @@ const CreatorsPortalPage: React.FC = () => {
                 </div>
             </section>
 
-            {/* القسم الثاني: المخترع الصغير (بدون فاصل) */}
+            {/* القسم الثاني: المخترع الصغير - بدون فاصل وبخلفية مائلة */}
             <section className="py-20 relative overflow-hidden bg-transparent">
                 <div className="max-w-7xl mx-auto flex flex-col items-center text-center px-6 relative z-10">
                     <div className="mb-24">
