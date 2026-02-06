@@ -13,7 +13,7 @@ const READING_INSPIRATIONS = [
 
 const translations = {
     ar: {
-        title: "المكتبة الرقمية",
+        title: "الكتب الرقمية",
         desc: "المكتبة في كفّ يدك.. تبني اليومَ فِكْرَ غدِك بأسلوب عصري فريد.",
         arabicLib: "المكتبة العربية",
         englishLib: "المكتبة الإنجليزية",
@@ -22,7 +22,7 @@ const translations = {
         bubble: "اضغط للإلهام!"
     },
     en: {
-        title: "Digital Library",
+        title: "E-BOOKS",
         desc: "The library held in your hand, building a mind so grand and modern.",
         arabicLib: "Arabic Library",
         englishLib: "English Library",
