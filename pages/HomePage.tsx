@@ -12,6 +12,8 @@ const translations = {
         smartDesc: "مساعدك الذكي للبحث والاستفسار.",
         digitalLibrary: "المكتبة الإلكترونية",
         digitalDesc: "عالم من الكتب والروايات الرقمية.",
+        creators: "المبدعين الصغار",
+        creatorsDesc: "استكشف قصص وابتكارات زملائك المبدعين في ركن المؤلف والمخترع الصغير.",
         bubble: "أهلاً بك في صقر!",
         homelandTitle: "لمحات من الموطن",
         challengeTitle: "تحدي المبدعين الصغار",
@@ -27,6 +29,8 @@ const translations = {
         smartDesc: "Your smart AI research assistant.",
         digitalLibrary: "Digital Library",
         digitalDesc: "World of digital books and novels.",
+        creators: "Little Creators",
+        creatorsDesc: "Explore the stories and innovations of your creative peers in the author and inventor corner.",
         bubble: "Welcome to Saqr!",
         homelandTitle: "Hints From Homeland",
         challengeTitle: "Little Authors Challenge",
@@ -96,47 +100,54 @@ const HomePage: React.FC = () => {
     }, []);
 
     return (
-        <div className="max-w-7xl mx-auto px-4 py-8 md:py-16 flex flex-col items-center gap-12 md:gap-24 animate-fade-up font-black antialiased relative overflow-x-hidden">
+        // تم تكبير المساحة إلى max-w-[1600px] لتناسب اللابتوب بشكل أعرض
+        <div className="max-w-[1600px] mx-auto px-4 py-8 md:py-16 flex flex-col items-center gap-12 md:gap-24 animate-fade-up font-black antialiased relative overflow-x-hidden">
             
-            {/* 1. قسم الترحيب */}
+            {/* 1. قسم الترحيب - تصغير الخطوط على الموبايل */}
             <div className="text-center space-y-6 md:space-y-10 max-w-5xl relative z-20">
-                <h1 className="text-4xl md:text-8xl font-black text-slate-950 dark:text-white tracking-tighter leading-[1.1] drop-shadow-2xl">
+                <h1 className="text-3xl sm:text-4xl md:text-8xl font-black text-slate-950 dark:text-white tracking-tighter leading-[1.2] drop-shadow-2xl">
                     {t('welcome')}
                 </h1>
-                <p className="text-base md:text-3xl text-slate-600 dark:text-slate-400 font-bold opacity-80 leading-relaxed max-w-3xl mx-auto">
+                <p className="text-sm md:text-3xl text-slate-600 dark:text-slate-400 font-bold opacity-80 leading-relaxed max-w-3xl mx-auto">
                     {t('subWelcome')}
                 </p>
                 <div className="h-2 w-40 bg-red-600 mx-auto rounded-full shadow-[0_0_25px_rgba(220,38,38,0.6)]"></div>
             </div>
 
-            {/* 2. مركز العمليات */}
+            {/* 2. مركز العمليات - إضافة أيقونة المبدعين الصغار */}
             <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-16 items-center">
                 
-                <div className="lg:col-span-7 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 order-2 lg:order-1">
-                    <Link to="/search" className="group glass-panel p-8 md:p-12 rounded-[3rem] border-2 border-red-600/20 hover:border-red-600 transition-all duration-500 shadow-2xl">
-                        <div className="text-5xl md:text-7xl mb-6 group-hover:scale-110 transition-transform">🔍</div>
-                        <h3 className="text-2xl md:text-4xl text-slate-950 dark:text-white mb-3">{t('manualSearch')}</h3>
-                        <p className="text-sm md:text-xl text-slate-500 dark:text-slate-400 font-bold leading-relaxed">{t('manualDesc')}</p>
+                <div className="lg:col-span-7 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 order-2 lg:order-1">
+                    <Link to="/search" className="group glass-panel p-6 md:p-10 rounded-[2.5rem] border-2 border-red-600/20 hover:border-red-600 transition-all duration-500 shadow-2xl">
+                        <div className="text-4xl md:text-6xl mb-4 group-hover:scale-110 transition-transform">🔍</div>
+                        <h3 className="text-xl md:text-3xl text-slate-950 dark:text-white mb-2">{t('manualSearch')}</h3>
+                        <p className="text-[11px] md:text-lg text-slate-500 dark:text-slate-400 font-bold leading-relaxed">{t('manualDesc')}</p>
                     </Link>
 
-                    <Link to="/smart-search" className="group glass-panel p-8 md:p-12 rounded-[3rem] border-2 border-green-600/20 hover:border-green-600 transition-all duration-500 shadow-2xl">
-                        <div className="text-5xl md:text-7xl mb-6 group-hover:scale-110 transition-transform">🤖</div>
-                        <h3 className="text-2xl md:text-4xl text-slate-950 dark:text-white mb-3">{t('smartSearch')}</h3>
-                        <p className="text-sm md:text-xl text-slate-500 dark:text-slate-400 font-bold leading-relaxed">{t('smartDesc')}</p>
+                    <Link to="/smart-search" className="group glass-panel p-6 md:p-10 rounded-[2.5rem] border-2 border-green-600/20 hover:border-green-600 transition-all duration-500 shadow-2xl">
+                        <div className="text-4xl md:text-6xl mb-4 group-hover:scale-110 transition-transform">🤖</div>
+                        <h3 className="text-xl md:text-3xl text-slate-950 dark:text-white mb-2">{t('smartSearch')}</h3>
+                        <p className="text-[11px] md:text-lg text-slate-500 dark:text-slate-400 font-bold leading-relaxed">{t('smartDesc')}</p>
                     </Link>
 
-                    <Link to="/digital-library" className="md:col-span-2 group glass-panel p-8 md:p-14 rounded-[3.5rem] border-2 border-blue-600/20 hover:border-blue-600 transition-all duration-500 shadow-2xl flex flex-col md:flex-row items-center gap-8 text-center md:text-start">
-                        <div className="text-6xl md:text-8xl group-hover:rotate-6 transition-transform">📚</div>
-                        <div className="space-y-2">
-                            <h3 className="text-2xl md:text-5xl text-slate-950 dark:text-white font-black">{t('digitalLibrary')}</h3>
-                            <p className="text-sm md:text-2xl text-slate-500 dark:text-slate-400 font-bold leading-relaxed">{t('digitalDesc')}</p>
-                        </div>
+                    <Link to="/digital-library" className="group glass-panel p-6 md:p-10 rounded-[2.5rem] border-2 border-blue-600/20 hover:border-blue-600 transition-all duration-500 shadow-2xl">
+                        <div className="text-4xl md:text-6xl mb-4 group-hover:rotate-6 transition-transform">📚</div>
+                        <h3 className="text-xl md:text-3xl text-slate-950 dark:text-white mb-2">{t('digitalLibrary')}</h3>
+                        <p className="text-[11px] md:text-lg text-slate-500 dark:text-slate-400 font-bold leading-relaxed">{t('digitalDesc')}</p>
+                    </Link>
+
+                    {/* أيقونة المبدعين الصغار الجديدة */}
+                    <Link to="/creators" className="group glass-panel p-6 md:p-10 rounded-[2.5rem] border-2 border-purple-600/20 hover:border-purple-600 transition-all duration-500 shadow-2xl">
+                        <div className="text-4xl md:text-6xl mb-4 group-hover:scale-110 transition-transform">🎨</div>
+                        <h3 className="text-xl md:text-3xl text-slate-950 dark:text-white mb-2">{t('creators')}</h3>
+                        <p className="text-[11px] md:text-lg text-slate-500 dark:text-slate-400 font-bold leading-relaxed">{t('creatorsDesc')}</p>
                     </Link>
                 </div>
 
                 <div className="lg:col-span-5 flex flex-col items-center justify-center order-1 lg:order-2 relative gap-8">
                     <div onClick={handleMascotInteraction} className={`relative cursor-pointer transition-transform duration-700 ${isMascotClicked ? 'scale-110' : 'hover:scale-105'}`}>
                         
+                        {/* شعار المدرسة المائل خلف الشخصية كما في الهوم بيج */}
                         <div className="absolute inset-0 flex items-center justify-center -z-10 pointer-events-none opacity-10 dark:opacity-20 transition-all duration-1000">
                             <img src="/school-logo.png" alt="Seal" className="w-[130%] h-[130%] object-contain rotate-[15deg] logo-white-filter" />
                         </div>
@@ -158,9 +169,8 @@ const HomePage: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* --- قسم تحدي الإبداع المطور والبارز --- */}
+                    {/* قسم تحدي الإبداع المطور والبارز */}
                     <div className="w-full max-w-md glass-panel p-6 md:p-10 rounded-[2.5rem] border-2 border-red-600/40 shadow-[0_0_50px_rgba(220,38,38,0.15)] text-center space-y-6 relative z-30 animate-fade-up overflow-hidden group/card">
-                        {/* وميض خلفية بسيط */}
                         <div className="absolute inset-0 bg-gradient-to-br from-red-600/5 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-700"></div>
                         
                         <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-6 py-1.5 rounded-full bg-red-600 text-white text-[10px] md:text-xs font-black uppercase tracking-widest shadow-[0_10px_20px_rgba(220,38,38,0.4)] z-10">
@@ -168,17 +178,17 @@ const HomePage: React.FC = () => {
                         </div>
                         
                         <div className="relative z-10 space-y-4">
-                            <h3 className="text-2xl md:text-4xl font-black text-slate-950 dark:text-white leading-tight tracking-tighter">
+                            <h3 className="text-xl md:text-4xl font-black text-slate-950 dark:text-white leading-tight tracking-tighter">
                                 {t('challengeTitle')}
                             </h3>
 
-                            <p className="text-sm md:text-xl text-slate-700 dark:text-slate-300 font-bold leading-relaxed px-2">
+                            <p className="text-[11px] md:text-xl text-slate-700 dark:text-slate-300 font-bold leading-relaxed px-2">
                                 {t('challengeDesc')}
                             </p>
 
                             <div className="h-1.5 w-24 bg-red-600/30 mx-auto rounded-full group-hover/card:w-32 transition-all duration-500"></div>
 
-                            <p className="text-[10px] md:text-lg text-red-600 dark:text-red-500 font-black uppercase tracking-tight animate-pulse">
+                            <p className="text-[9px] md:text-lg text-red-600 dark:text-red-500 font-black uppercase tracking-tight animate-pulse">
                                 {t('challengeCTA')}
                             </p>
                         </div>
@@ -187,16 +197,16 @@ const HomePage: React.FC = () => {
             </div>
 
             {/* 3. قسم لمحات من الموطن */}
-            <div className="w-full max-w-6xl animate-fade-up mb-16">
-                <div className="glass-panel p-10 md:p-20 rounded-[4rem] md:rounded-[6rem] border-l-[12px] border-green-600 border-r-[12px] border-red-600 bg-white dark:bg-slate-950 shadow-2xl relative overflow-hidden">
+            <div className="w-full max-w-6xl animate-fade-up mb-16 px-2">
+                <div className="glass-panel p-8 md:p-20 rounded-[3rem] md:rounded-[6rem] border-l-[8px] md:border-l-[12px] border-green-600 border-r-[8px] md:border-r-[12px] border-red-600 bg-white dark:bg-slate-950 shadow-2xl relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-green-600/5 via-transparent to-red-600/5 -z-10"></div>
                     <div className="relative z-10 flex flex-col md:flex-row items-center gap-12">
-                        <div className="w-28 h-28 md:w-44 md:h-44 bg-slate-100 dark:bg-white/10 rounded-[3rem] flex items-center justify-center text-6xl md:text-9xl shadow-2xl animate-pulse border-4 border-yellow-500/30 shrink-0">🇦🇪</div>
-                        <div className="text-center md:text-start flex-1 space-y-6">
-                            <h3 className="text-xl md:text-5xl font-black text-red-600 dark:text-red-500 uppercase tracking-widest flex items-center justify-center md:justify-start gap-4">
+                        <div className="w-20 h-20 md:w-44 md:h-44 bg-slate-100 dark:bg-white/10 rounded-[2rem] md:rounded-[3rem] flex items-center justify-center text-4xl md:text-9xl shadow-2xl animate-pulse border-4 border-yellow-500/30 shrink-0">🇦🇪</div>
+                        <div className="text-center md:text-start flex-1 space-y-4 md:space-y-6">
+                            <h3 className="text-lg md:text-5xl font-black text-red-600 dark:text-red-500 uppercase tracking-widest flex items-center justify-center md:justify-start gap-4">
                                 {t('homelandTitle')}
                             </h3>
-                            <p className="text-2xl md:text-6xl text-slate-950 dark:text-white leading-[1.3] font-black tracking-tight border-b-8 border-green-600/30 pb-8">
+                            <p className="text-lg md:text-6xl text-slate-950 dark:text-white leading-[1.3] font-black tracking-tight border-b-4 md:border-b-8 border-green-600/30 pb-4 md:pb-8">
                                 {isAr ? dailyFact.ar : dailyFact.en}
                             </p>
                         </div>
@@ -227,6 +237,13 @@ const HomePage: React.FC = () => {
                 .dark .logo-white-filter { filter: brightness(0) invert(1); }
 
                 p { line-height: 1.8 !important; }
+                
+                /* تحسين الخطوط للأجهزة الصغيرة */
+                @media (max-width: 768px) {
+                    h1 { font-size: 2.25rem !important; }
+                    h2 { font-size: 1.5rem !important; }
+                    h3 { font-size: 1.25rem !important; }
+                }
             `}</style>
         </div>
     );
