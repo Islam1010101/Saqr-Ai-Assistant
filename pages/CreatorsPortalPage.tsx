@@ -19,29 +19,33 @@ const CreatorsPortalPage: React.FC = () => {
         { id: "10", title: locale === 'ar' ? "لمار تهمس" : "Lamar Whispers", author: locale === 'ar' ? "ألين رافع فريحات" : "Aleen Rafe", cover: "/cover/11.jpg", pdfUrl: "https://drive.google.com/file/d/1C0S0PA-yg2RDmXCB6-MlMoRLp2mp-Utw/view?usp=drive_link", audioUrl: "/audio/لمار.mp3" }
     ];
 
-    // Auto-scroll Effect for Mobile/Tablet
+    // Auto-scroll Effect (5 Seconds Interval)
     useEffect(() => {
-        const isMobile = window.innerWidth < 1024;
-        if (!isMobile) return;
+        const isMobileOrTablet = window.innerWidth < 1024;
+        if (!isMobileOrTablet) return;
 
         const interval = setInterval(() => {
             if (scrollRef.current) {
                 const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+                
+                // حساب نهاية السكرول بناءً على اتجاه اللغة
                 const isEnd = dir === 'rtl' 
-                    ? Math.abs(scrollLeft) + clientWidth >= scrollWidth - 10 
-                    : scrollLeft + clientWidth >= scrollWidth - 10;
+                    ? Math.abs(scrollLeft) + clientWidth >= scrollWidth - 20 
+                    : scrollLeft + clientWidth >= scrollWidth - 20;
 
                 if (isEnd) {
+                    // العودة للبداية
                     scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
                 } else {
-                    const step = clientWidth * 0.4; // يتحرك بنسبة 40% من عرض الشاشة كل ثانية
+                    // التحرك بمقدار عرض كارت واحد تقريباً
+                    const step = clientWidth * 0.8; 
                     scrollRef.current.scrollBy({ 
                         left: dir === 'rtl' ? -step : step, 
                         behavior: 'smooth' 
                     });
                 }
             }
-        }, 1500); // 1.5 ثانية حركة ليكون التصفح مريحاً للعين
+        }, 5000); // 5 ثواني كما طلبت
 
         return () => clearInterval(interval);
     }, [dir]);
@@ -64,7 +68,6 @@ const CreatorsPortalPage: React.FC = () => {
     return (
         <div dir={dir} className={`min-h-screen bg-[#fcfcfc] dark:bg-[#020617] ${locale === 'ar' ? 'font-["Almarai"]' : 'font-["Inter"]'} transition-colors duration-500 overflow-x-hidden`}>
             
-            {/* Main Header */}
             <header className="pt-28 pb-16 text-center px-4">
                 <h1 className="text-6xl md:text-[10rem] font-[900] text-slate-900 dark:text-white mb-2 tracking-tighter leading-none">
                     {locale === 'ar' ? 'بوابة المبدعين' : 'CREATORS PORTAL'}
@@ -72,7 +75,6 @@ const CreatorsPortalPage: React.FC = () => {
                 <div className="w-32 h-2 bg-red-600 mx-auto mt-6 rounded-full animate-pulse"></div>
             </header>
 
-            {/* Little Author Section */}
             <section className="mb-32">
                 <div className="text-center mb-12">
                     <p className="text-red-600 font-[900] text-xl md:text-3xl tracking-[0.3em] uppercase opacity-90">
@@ -81,7 +83,6 @@ const CreatorsPortalPage: React.FC = () => {
                 </div>
 
                 <div className="relative max-w-[1700px] mx-auto px-4 md:px-16">
-                    {/* Desktop Arrows Only */}
                     <button onClick={() => scroll('left')} className="absolute left-4 top-[40%] -translate-y-1/2 z-30 bg-white dark:bg-slate-800 shadow-2xl p-5 rounded-full hover:bg-red-600 hover:text-white transition-all hidden lg:block border border-slate-100 dark:border-slate-700">
                         <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
                     </button>
@@ -115,7 +116,6 @@ const CreatorsPortalPage: React.FC = () => {
                 </div>
             </section>
 
-            {/* Little Inventor Section */}
             <section className="py-20 relative overflow-hidden">
                 <div className="max-w-6xl mx-auto flex flex-col items-center relative px-6 text-center">
                     <div className="mb-12 z-20">
@@ -140,7 +140,6 @@ const CreatorsPortalPage: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Coming Soon Text: Slightly lowered as requested */}
                     <div className="z-20 mt-10 md:mt-2">
                         <h2 className="text-6xl md:text-9xl font-[1000] text-slate-900 dark:text-white italic tracking-tighter leading-none mb-8">
                             {locale === 'ar' ? 'قريباً' : 'SOON'}
