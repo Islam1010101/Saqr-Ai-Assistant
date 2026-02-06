@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useLanguage } from '../App';
 
 const CreatorsPortalPage: React.FC = () => {
@@ -19,10 +19,37 @@ const CreatorsPortalPage: React.FC = () => {
         { id: "10", title: locale === 'ar' ? "لمار تهمس" : "Lamar Whispers", author: locale === 'ar' ? "ألين رافع فريحات" : "Aleen Rafe", cover: "/cover/11.jpg", pdfUrl: "https://drive.google.com/file/d/1C0S0PA-yg2RDmXCB6-MlMoRLp2mp-Utw/view?usp=drive_link", audioUrl: "/audio/لمار.mp3" }
     ];
 
+    // Auto-scroll Effect for Mobile/Tablet
+    useEffect(() => {
+        const isMobile = window.innerWidth < 1024;
+        if (!isMobile) return;
+
+        const interval = setInterval(() => {
+            if (scrollRef.current) {
+                const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+                const isEnd = dir === 'rtl' 
+                    ? Math.abs(scrollLeft) + clientWidth >= scrollWidth - 10 
+                    : scrollLeft + clientWidth >= scrollWidth - 10;
+
+                if (isEnd) {
+                    scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+                } else {
+                    const step = clientWidth * 0.4; // يتحرك بنسبة 40% من عرض الشاشة كل ثانية
+                    scrollRef.current.scrollBy({ 
+                        left: dir === 'rtl' ? -step : step, 
+                        behavior: 'smooth' 
+                    });
+                }
+            }
+        }, 1500); // 1.5 ثانية حركة ليكون التصفح مريحاً للعين
+
+        return () => clearInterval(interval);
+    }, [dir]);
+
     const scroll = (direction: 'left' | 'right') => {
         if (scrollRef.current) {
             const { scrollLeft, clientWidth } = scrollRef.current;
-            const scrollAmount = clientWidth * (window.innerWidth < 768 ? 0.9 : 0.6);
+            const scrollAmount = clientWidth * 0.7;
             const scrollTo = direction === 'left' ? scrollLeft - scrollAmount : scrollLeft + scrollAmount;
             scrollRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
         }
@@ -48,36 +75,36 @@ const CreatorsPortalPage: React.FC = () => {
             {/* Little Author Section */}
             <section className="mb-32">
                 <div className="text-center mb-12">
-                    <p className="text-red-600 font-black text-xl md:text-3xl tracking-[0.3em] uppercase opacity-90">
+                    <p className="text-red-600 font-[900] text-xl md:text-3xl tracking-[0.3em] uppercase opacity-90">
                         {locale === 'ar' ? 'قسم المؤلف الصغير' : 'The Little Author Section'}
                     </p>
                 </div>
 
                 <div className="relative max-w-[1700px] mx-auto px-4 md:px-16">
-                    {/* Control Arrows */}
-                    <button onClick={() => scroll('left')} className="absolute left-4 top-[40%] -translate-y-1/2 z-30 bg-white dark:bg-slate-800 shadow-2xl p-5 rounded-full hover:bg-red-600 hover:text-white transition-all hidden md:block border border-slate-100 dark:border-slate-700">
+                    {/* Desktop Arrows Only */}
+                    <button onClick={() => scroll('left')} className="absolute left-4 top-[40%] -translate-y-1/2 z-30 bg-white dark:bg-slate-800 shadow-2xl p-5 rounded-full hover:bg-red-600 hover:text-white transition-all hidden lg:block border border-slate-100 dark:border-slate-700">
                         <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
                     </button>
-                    <button onClick={() => scroll('right')} className="absolute right-4 top-[40%] -translate-y-1/2 z-30 bg-white dark:bg-slate-800 shadow-2xl p-5 rounded-full hover:bg-red-600 hover:text-white transition-all hidden md:block border border-slate-100 dark:border-slate-700">
+                    <button onClick={() => scroll('right')} className="absolute right-4 top-[40%] -translate-y-1/2 z-30 bg-white dark:bg-slate-800 shadow-2xl p-5 rounded-full hover:bg-red-600 hover:text-white transition-all hidden lg:block border border-slate-100 dark:border-slate-700">
                         <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
                     </button>
 
-                    <div ref={scrollRef} className="flex overflow-x-auto gap-8 md:gap-12 pb-10 snap-x snap-mandatory no-scrollbar">
+                    <div ref={scrollRef} className="flex overflow-x-auto gap-8 md:gap-12 pb-10 snap-x snap-mandatory lg:snap-none no-scrollbar">
                         {studentWorks.map((work) => (
-                            <div key={work.id} className="w-[85vw] md:w-[380px] flex-shrink-0 snap-center">
+                            <div key={work.id} className="w-[82vw] md:w-[380px] flex-shrink-0 snap-center">
                                 <div className="group relative flex flex-col bg-white dark:bg-slate-900 rounded-[3rem] p-5 border-2 border-transparent hover:border-red-600/20 shadow-2xl transition-all duration-500 hover:-translate-y-4">
                                     <a href={work.pdfUrl} target="_blank" rel="noopener noreferrer" className="relative aspect-[3/4] rounded-[2.5rem] overflow-hidden mb-6 block cursor-pointer">
                                         <img src={work.cover} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={work.title} />
                                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                            <div className="bg-white text-black font-black px-6 py-3 rounded-2xl flex items-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-transform">
+                                            <div className="bg-white text-black font-[900] px-6 py-3 rounded-2xl flex items-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-transform">
                                                 {locale === 'ar' ? 'اقرأ الكتاب' : 'Read Book'} 📖
                                             </div>
                                         </div>
                                     </a>
                                     <div className="px-2 text-center">
                                         <h3 className="text-2xl font-[900] dark:text-white mb-2 line-clamp-1">{work.title}</h3>
-                                        <p className="text-red-600 font-bold text-base mb-6 opacity-80">{work.author}</p>
-                                        <div className="bg-slate-100 dark:bg-slate-800 p-3 rounded-2xl border border-slate-200 dark:border-slate-700">
+                                        <p className="text-red-600 font-[700] text-base mb-6 opacity-80">{work.author}</p>
+                                        <div className="bg-slate-100 dark:bg-slate-800 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-inner">
                                             <audio src={work.audioUrl} controls className="w-full h-10 custom-audio" />
                                         </div>
                                     </div>
@@ -91,49 +118,37 @@ const CreatorsPortalPage: React.FC = () => {
             {/* Little Inventor Section */}
             <section className="py-20 relative overflow-hidden">
                 <div className="max-w-6xl mx-auto flex flex-col items-center relative px-6 text-center">
-                    
-                    {/* Header: Same as Author Section */}
                     <div className="mb-12 z-20">
-                        <p className="text-red-600 font-black text-xl md:text-3xl tracking-[0.3em] uppercase opacity-90">
+                        <p className="text-red-600 font-[900] text-xl md:text-3xl tracking-[0.3em] uppercase opacity-90">
                             {locale === 'ar' ? 'قسم المخترع الصغير' : 'The Little Inventor Section'}
                         </p>
                     </div>
 
                     <div className="relative flex items-center justify-center min-h-[500px] md:min-h-[800px] w-full">
-                        
-                        {/* الشعار الخلفي: ورا الشخصية بالظبط */}
-                        <div className="absolute z-0 w-[300px] md:w-[650px] opacity-15 dark:opacity-30 pointer-events-none transition-all duration-1000 rotate-12">
-                            <img 
-                                src="/school-logo.png" 
-                                className="w-full h-auto dark:invert dark:brightness-[10]" 
-                                alt="Background Logo" 
-                            />
+                        <div className="absolute z-0 w-[320px] md:w-[650px] opacity-20 dark:opacity-30 pointer-events-none transition-all duration-1000 rotate-12">
+                            <img src="/school-logo.png" className="w-full h-auto dark:invert dark:brightness-[10]" alt="BG" />
                         </div>
 
-                        {/* Mascot */}
                         <div className="relative z-10 cursor-pointer select-none group" onClick={spawnMagic}>
                             {bursts.map(b => (
-                                <div key={b.id} className="absolute z-50 bg-red-600 text-white text-xs font-black px-5 py-2 rounded-2xl shadow-2xl animate-float-fast"
+                                <div key={b.id} className="absolute z-50 bg-red-600 text-white text-[10px] font-black px-4 py-2 rounded-xl animate-float-fast"
                                      style={{'--tx': `${b.tx}px`, '--rot': `${b.rot}deg`} as any}>
                                     BOOM! ⚡
                                 </div>
                             ))}
-                            <img 
-                                src="/creators-mascot.png" 
-                                className="h-[400px] md:h-[700px] object-contain drop-shadow-[0_40px_60px_rgba(0,0,0,0.2)] group-hover:scale-[1.05] transition-transform duration-700 ease-in-out" 
-                            />
+                            <img src="/creators-mascot.png" className="h-[420px] md:h-[750px] object-contain drop-shadow-[0_40px_60px_rgba(0,0,0,0.2)] group-hover:scale-[1.03] transition-transform duration-700" />
                         </div>
                     </div>
 
-                    {/* Coming Soon Text: Under Mascot */}
-                    <div className="z-20 -mt-10 md:-mt-20">
-                        <h2 className="text-6xl md:text-9xl font-[1000] text-slate-900 dark:text-white italic tracking-tighter leading-none mb-6">
+                    {/* Coming Soon Text: Slightly lowered as requested */}
+                    <div className="z-20 mt-10 md:mt-2">
+                        <h2 className="text-6xl md:text-9xl font-[1000] text-slate-900 dark:text-white italic tracking-tighter leading-none mb-8">
                             {locale === 'ar' ? 'قريباً' : 'SOON'}
                         </h2>
-                        <div className="flex items-center justify-center gap-6">
-                            <span className="w-16 h-1 bg-red-600"></span>
-                            <span className="text-red-600 font-black text-xl tracking-widest animate-pulse">2026</span>
-                            <span className="w-16 h-1 bg-red-600"></span>
+                        <div className="flex items-center justify-center gap-6 opacity-60">
+                            <span className="w-12 h-1 bg-red-600 rounded-full"></span>
+                            <span className="text-red-600 font-black text-xl tracking-[0.5em]">2026</span>
+                            <span className="w-12 h-1 bg-red-600 rounded-full"></span>
                         </div>
                     </div>
                 </div>
@@ -141,23 +156,16 @@ const CreatorsPortalPage: React.FC = () => {
 
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&family=Inter:wght@400;700;900&display=swap');
-                
                 .no-scrollbar::-webkit-scrollbar { display: none; }
                 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
                 @keyframes float-fast {
                     0% { transform: translate(0,0) scale(0); opacity: 0; }
                     20% { opacity: 1; transform: translate(var(--tx), -120px) scale(1.4) rotate(var(--rot)); }
                     100% { transform: translate(calc(var(--tx) * 1.8), -300px) scale(0.3); opacity: 0; }
                 }
                 .animate-float-fast { animation: float-fast 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-                
                 .custom-audio::-webkit-media-controls-panel { background-color: transparent; }
                 .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
-                
-                @media (max-width: 768px) {
-                    .custom-audio { filter: hue-rotate(180deg) invert(0.1); }
-                }
             `}</style>
         </div>
     );
