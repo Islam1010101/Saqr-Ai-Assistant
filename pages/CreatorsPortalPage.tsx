@@ -1,15 +1,15 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../App';
 import HTMLFlipBook from 'react-pageflip';
 import * as pdfjsLib from 'pdfjs-dist';
 
-// إعداد قراءة الـ PDF أونلاين
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+// استخدام CDN موثوق للـ Worker لضمان عمله أونلاين
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
 
-// --- المكون الفرعي لنظام التقليب (Flipbook) ---
 const FlipBookPlayer = ({ pdfUrl }: { pdfUrl: string }) => {
     const [pages, setPages] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
+    const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
     useEffect(() => {
         const loadPDF = async () => {
@@ -18,34 +18,60 @@ const FlipBookPlayer = ({ pdfUrl }: { pdfUrl: string }) => {
                 const loadingTask = pdfjsLib.getDocument(pdfUrl);
                 const pdf = await loadingTask.promise;
                 const imgs = [];
+                
                 for (let i = 1; i <= pdf.numPages; i++) {
                     const page = await pdf.getPage(i);
-                    const viewport = page.getViewport({ scale: 1.5 });
+                    const viewport = page.getViewport({ scale: 2 }); // جودة أعلى
                     const canvas = document.createElement('canvas');
                     const context = canvas.getContext('2d');
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
+                    
                     if (context) {
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
                         await page.render({ canvasContext: context, viewport }).promise;
-                        imgs.push(canvas.toDataURL());
+                        imgs.push(canvas.toDataURL('image/webp', 0.8));
                     }
                 }
                 setPages(imgs);
-            } catch (err) { console.error("Error loading PDF:", err); }
+                // تحديد أبعاد متناسبة للموبايل
+                const isMobile = window.innerWidth < 768;
+                setDimensions({
+                    width: isMobile ? window.innerWidth * 0.9 : 450,
+                    height: isMobile ? window.innerHeight * 0.7 : 600
+                });
+            } catch (err) {
+                console.error("PDF Load Error:", err);
+            }
             setLoading(false);
         };
         loadPDF();
     }, [pdfUrl]);
 
-    if (loading) return <div className="flex justify-center items-center h-full text-white animate-pulse text-2xl">جاري تحضير صفحات الكتاب... 📖</div>;
+    if (loading) return (
+        <div className="flex flex-col items-center justify-center h-full text-white">
+            <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p className="animate-pulse text-xl font-bold">جاري فتح صفحات الإبداع...</p>
+        </div>
+    );
 
     return (
-        <div className="flex justify-center items-center w-full h-full">
+        <div className="flex justify-center items-center w-full h-full overflow-hidden">
             {/* @ts-ignore */}
-            <HTMLFlipBook width={500} height={700} size="stretch" className="shadow-2xl">
+            <HTMLFlipBook 
+                width={dimensions.width} 
+                height={dimensions.height}
+                size="stretch"
+                minWidth={300}
+                maxWidth={1000}
+                minHeight={400}
+                maxHeight={1200}
+                showCover={true}
+                mobileScrollSupport={true}
+                className="shadow-2xl shadow-black/50"
+            >
                 {pages.map((img, index) => (
-                    <div key={index} className="bg-white shadow-inner border-l border-slate-200">
-                        <img src={img} alt={`Page ${index}`} className="w-full h-full object-contain" />
+                    <div key={index} className="bg-white shadow-inner border-l border-slate-100 overflow-hidden">
+                        <img src={img} alt={`Page ${index}`} className="w-full h-full object-fill pointer-events-none" />
                     </div>
                 ))}
             </HTMLFlipBook>
@@ -53,116 +79,120 @@ const FlipBookPlayer = ({ pdfUrl }: { pdfUrl: string }) => {
     );
 };
 
-// --- المكون الرئيسي للصفحة ---
 const CreatorsPortalPage: React.FC = () => {
     const { locale, dir } = useLanguage();
     const [selectedBook, setSelectedBook] = useState<any>(null);
     const [bursts, setBursts] = useState<any[]>([]);
-    
-    // بيانات الكتب (نفس اللي عندك)
+
     const studentWorks = [
-    { id: "1", title: "أبي نبع العطاء", author: "ياسين محمد مسعود", cover: "/cover/12.jpg", pdfUrl: "/book/أبي نبع العطاء.pdf", audioUrl: "/أبي نبع العطاء.mp3" },
-    { id: "2", title: "الصدق منجاه", author: "الصالح إسماعيل المصري", cover: "/cover/17.jpg", pdfUrl: "/book/الصدق منجاه.pdf", audioUrl: "/الصدق منجاة.mp3" },
-    { id: "3", title: "مسرحية اللغة العربية", author: "فاطمة فلاح الأحبابي", cover: "/cover/18.jpg", pdfUrl: "/book/اللغة العربية في غربة الأبناء .pdf", audioUrl: "/اللغة العربية.mp3" },
-    { id: "4", title: "حلم سيتحقق", author: "عدنان نزار", cover: "/cover/16.jpg", pdfUrl: "/book/حلم سيتحقق.pdf", audioUrl: "/حلم سيتحقق.mp3" },
-    { id: "5", title: "حين تهت وجدتني", author: "ملك مجدي الدموكي", cover: "/cover/1.jpg", pdfUrl: "/book/حين تهت وجدتني.pdf", audioUrl: "/حين تهت وجدتني.mp3" },
-    { id: "6", title: "خطوات وحكايات", author: "مريم عبدالرحمن الساعدي", cover: "/cover/14.jpg", pdfUrl: "/book/خطوات وحكايات في أرض الذهب.pdf", audioUrl: "/خطوات في ارض الذهب.mp3" },
-    { id: "7", title: "شجاعة في قلب الصحراء", author: "يمنى أيمن النجار", cover: "/cover/13.jpg", pdfUrl: "/book/شجاعة في قلب الصحراء.pdf", audioUrl: "/خطوات في ارض الذهب.mp3" },
-    { id: "8", title: "ظل نخلة", author: "محمد نور الراضي", cover: "/cover/18.jpg", pdfUrl: "/book/ظل نخلة.pdf", audioUrl: "/قصة بوسعيد.mp3" },
-    { id: "9", title: "عندما يعود الخير", author: "سهيلة صالح البلوشي", cover: "/cover/15.jpg", pdfUrl: "/book/عندما يعود الخير.pdf", audioUrl: "/عندما يعود الخير.mp3" },
-    { id: "10", title: "لمار .. والسماء تهمس", author: "ألين رافع فريحات", cover: "/cover/11.jpg", pdfUrl: "/book/لمار .. والسماء التي تهمس.pdf", audioUrl: "/لمار.mp3" }
-];
+        { id: "1", title: "أبي نبع العطاء", author: "ياسين محمد مسعود", cover: "/cover/12.jpg", pdfUrl: "/book/أبي نبع العطاء.pdf" },
+        { id: "2", title: "الصدق منجاه", author: "الصالح إسماعيل المصري", cover: "/cover/17.jpg", pdfUrl: "/book/الصدق منجاه.pdf" },
+        { id: "3", title: "مسرحية اللغة العربية", author: "فاطمة فلاح الأحبابي", cover: "/cover/18.jpg", pdfUrl: "/book/اللغة العربية في غربة الأبناء .pdf" },
+        { id: "4", title: "حلم سيتحقق", author: "عدنان نزار", cover: "/cover/16.jpg", pdfUrl: "/book/حلم سيتحقق.pdf" },
+        { id: "5", title: "حين تهت وجدتني", author: "ملك مجدي الدموكي", cover: "/cover/1.jpg", pdfUrl: "/book/حين تهت وجدتني.pdf" },
+        { id: "6", title: "خطوات وحكايات", author: "مريم عبدالرحمن الساعدي", cover: "/cover/14.jpg", pdfUrl: "/book/خطوات وحكايات في أرض الذهب.pdf" },
+        { id: "7", title: "شجاعة في قلب الصحراء", author: "يمنى أيمن النجار", cover: "/cover/13.jpg", pdfUrl: "/book/شجاعة في قلب الصحراء.pdf" },
+        { id: "8", title: "ظل نخلة", author: "محمد نور الراضي", cover: "/cover/18.jpg", pdfUrl: "/book/ظل نخلة.pdf" },
+        { id: "9", title: "عندما يعود الخير", author: "سهيلة صالح البلوشي", cover: "/cover/15.jpg", pdfUrl: "/book/عندما يعود الخير.pdf" },
+        { id: "10", title: "لمار .. والسماء تهمس", author: "ألين رافع فريحات", cover: "/cover/11.jpg", pdfUrl: "/book/لمار .. والسماء التي تهمس.pdf" }
+    ];
 
     const spawnMagic = () => {
         const id = Date.now();
-        const newBurst = {
-            id,
-            tx: (Math.random() - 0.5) * 200,
-            ty: -60 - Math.random() * 120,
-            rot: (Math.random() - 0.5) * 40
-        };
+        const newBurst = { id, tx: (Math.random() - 0.5) * 180, ty: -100 - Math.random() * 50, rot: (Math.random() - 0.5) * 30 };
         setBursts(prev => [...prev, newBurst]);
-        setTimeout(() => setBursts(curr => curr.filter(b => b.id !== id)), 1200);
+        setTimeout(() => setBursts(curr => curr.filter(b => b.id !== id)), 1000);
     };
 
     return (
-        <div dir={dir} className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-all duration-700 overflow-x-hidden font-['Cairo']">
+        <div dir={dir} className="min-h-screen bg-slate-100 dark:bg-[#0a0f1d] font-['Cairo'] transition-colors duration-500">
             
-            {/* Header */}
-            <header className="py-16 text-center">
-                <h1 className="text-6xl font-black text-slate-900 dark:text-white mb-2 tracking-tighter">
+            <header className="py-12 px-4 text-center">
+                <h1 className="text-4xl md:text-7xl font-black text-slate-900 dark:text-white mb-4 tracking-tight">
                     {locale === 'ar' ? 'بوابة المبدعين' : 'Creators Portal'}
                 </h1>
-                <div className="w-20 h-1.5 bg-red-600 mx-auto rounded-full"></div>
+                <div className="w-24 h-2 bg-gradient-to-r from-red-600 to-orange-500 mx-auto rounded-full shadow-lg shadow-red-500/20"></div>
             </header>
 
-            <main className="max-w-[1800px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-10 pb-20">
+            <main className="max-w-[1700px] mx-auto px-4 grid grid-cols-1 lg:grid-cols-12 gap-12 pb-24">
                 
-                {/* المؤلف الصغير */}
-                <section className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
+                {/* المؤلف الصغير: تصميم شبكي أنيق */}
+                <section className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 order-2 lg:order-1">
                     {studentWorks.map((work) => (
-                        <div key={work.id} className="group relative bg-white dark:bg-slate-900 rounded-2xl shadow-xl overflow-hidden hover:scale-105 transition-transform">
-                            <img src={work.cover} className="w-full h-64 object-cover" />
-                            <div className="p-5">
-                                <h3 className="text-xl font-bold dark:text-white mb-4">{work.title}</h3>
+                        <div key={work.id} className="group bg-white dark:bg-slate-900/50 backdrop-blur-md rounded-3xl border border-white/10 overflow-hidden shadow-xl hover:-translate-y-2 transition-all duration-300">
+                            <div className="relative h-60 overflow-hidden">
+                                <img src={work.cover} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                                    <p className="text-white text-sm font-bold">{work.author}</p>
+                                </div>
+                            </div>
+                            <div className="p-6">
+                                <h3 className="text-xl font-black dark:text-white mb-4 h-14 overflow-hidden line-clamp-2">{work.title}</h3>
                                 <button 
                                     onClick={() => setSelectedBook(work)}
-                                    className="w-full bg-green-600 text-white py-3 rounded-xl font-black hover:bg-green-700 transition-colors"
+                                    className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3.5 rounded-2xl font-black shadow-lg shadow-green-500/20 active:scale-95 transition-all"
                                 >
-                                    {locale === 'ar' ? 'اقرأ الكتاب 📖' : 'Read Book 📖'}
+                                    {locale === 'ar' ? 'تصفح الإبداع ✨' : 'Explore ✨'}
                                 </button>
                             </div>
                         </div>
                     ))}
                 </section>
 
-                {/* المخترع الصغير - بدون إطار + شعار مائل */}
-                <aside className="lg:col-span-4 relative flex flex-col items-center justify-center min-h-[600px]">
-                    
-                    {/* شعار المدرسة في الخلفية يميل لليمين ويتفاعل مع الدارك مود */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] opacity-10 dark:opacity-25 pointer-events-none transform rotate-[20deg] transition-all duration-1000">
-                        <img src="/saqr-digital.png" className="w-full object-contain dark:invert" alt="Logo" />
+                {/* المخترع الصغير: تركيز بصري أقوى */}
+                <aside className="lg:col-span-4 sticky top-10 h-fit flex flex-col items-center order-1 lg:order-2">
+                    <div className="relative w-full flex justify-center py-10">
+                        {/* الشعار المائل في الخلفية */}
+                        <div className="absolute inset-0 flex items-center justify-center opacity-10 dark:opacity-20 transform rotate-12 scale-110 pointer-events-none">
+                            <img src="/saqr-digital.png" className="w-full max-w-sm object-contain" />
+                        </div>
+                        
+                        {/* الشخصية */}
+                        <div className="relative z-10 cursor-pointer select-none" onClick={spawnMagic}>
+                            {bursts.map(b => (
+                                <div key={b.id} 
+                                     className="absolute z-50 bg-yellow-400 text-black text-[12px] font-black px-3 py-1.5 rounded-full shadow-xl animate-burst border-2 border-white"
+                                     style={{ '--tx': `${b.tx}px`, '--ty': `${b.ty}px`, '--rot': `${b.rot}deg` } as any}>
+                                    CREATIVE!
+                                </div>
+                            ))}
+                            <img src="/creators-mascot.png" className="h-[350px] md:h-[550px] object-contain drop-shadow-[0_25px_40px_rgba(0,0,0,0.4)] transition-transform hover:scale-105" />
+                        </div>
                     </div>
 
-                    {/* الشخصية والكروت */}
-                    <div className="relative z-10 cursor-pointer" onClick={spawnMagic}>
-                        {bursts.map(b => (
-                            <div key={b.id} 
-                                 className="absolute z-50 bg-white/90 dark:bg-slate-800 backdrop-blur-md px-3 py-1 rounded-lg border-2 border-red-500 text-[10px] font-black animate-burst shadow-2xl"
-                                 style={{ '--tx': `${b.tx}px`, '--ty': `${b.ty}px`, '--rot': `${b.rot}deg` } as any}>
-                                {locale === 'ar' ? 'مبدع ⚡' : 'Genius ⚡'}
-                            </div>
-                        ))}
-                        <img src="/creators-mascot.png" className="h-[450px] md:h-[650px] object-contain animate-float drop-shadow-[0_20px_50px_rgba(0,0,0,0.3)]" />
-                    </div>
-
-                    <div className="mt-8 text-center bg-white/40 dark:bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/20">
-                        <h2 className="text-3xl font-black text-red-600 mb-2">{locale === 'ar' ? 'المخترع الصغير' : 'Little Inventor'}</h2>
-                        <p className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest animate-pulse">Coming Soon</p>
+                    <div className="w-full bg-white dark:bg-slate-900/80 p-8 rounded-[40px] border border-white/10 shadow-2xl text-center">
+                        <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500 mb-2">
+                            {locale === 'ar' ? 'المخترع الصغير' : 'Little Inventor'}
+                        </h2>
+                        <span className="inline-block px-4 py-1 bg-red-500/10 text-red-500 rounded-full text-sm font-black tracking-widest animate-pulse">
+                            UNDER CONSTRUCTION
+                        </span>
                     </div>
                 </aside>
             </main>
 
-            {/* مودال التقليب (Flipbook Modal) */}
+            {/* مودال التقليب: ملء الشاشة مع تحسينات الموبايل */}
             {selectedBook && (
-                <div className="fixed inset-0 z-[2000] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
-                    <button onClick={() => setSelectedBook(null)} className="absolute top-6 right-6 text-white text-5xl hover:scale-125 transition-transform z-[2100]">✕</button>
-                    <div className="w-full max-w-5xl h-[85vh]">
+                <div className="fixed inset-0 z-[5000] bg-slate-950/95 backdrop-blur-2xl flex flex-col items-center justify-center">
+                    <div className="absolute top-0 w-full p-6 flex justify-between items-center z-[5100]">
+                        <h2 className="text-white text-xl font-bold truncate max-w-[70%]">{selectedBook.title}</h2>
+                        <button onClick={() => setSelectedBook(null)} className="bg-white/10 hover:bg-white/20 text-white w-12 h-12 rounded-full flex items-center justify-center text-2xl transition-all">✕</button>
+                    </div>
+                    
+                    <div className="w-full h-full max-w-6xl max-h-[85vh] p-4 flex items-center justify-center">
                         <FlipBookPlayer pdfUrl={selectedBook.pdfUrl} />
                     </div>
                 </div>
             )}
 
             <style>{`
-                @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
-                .animate-float { animation: float 5s ease-in-out infinite; }
-                
                 @keyframes burst {
                     0% { transform: translate(0,0) scale(0); opacity: 0; }
-                    20% { opacity: 1; transform: translate(var(--tx), var(--ty)) scale(1) rotate(var(--rot)); }
-                    100% { opacity: 0; transform: translate(calc(var(--tx)*1.3), calc(var(--ty)*1.3)) scale(0.4); filter: blur(3px); }
+                    50% { opacity: 1; transform: translate(var(--tx), var(--ty)) scale(1) rotate(var(--rot)); }
+                    100% { opacity: 0; transform: translate(calc(var(--tx)*1.4), calc(var(--ty)*1.4)) scale(0.2); }
                 }
-                .animate-burst { animation: burst 1.2s ease-out forwards; }
+                .animate-burst { animation: burst 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+                .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
             `}</style>
         </div>
     );
