@@ -1,14 +1,14 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useLanguage } from '../App';
 
-// --- 1. الأيقونات البرمجية SVG ---
+// --- الأيقونات البرمجية SVG لضمان الاستقرار ---
 const IconPlay = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>;
 const IconStop = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>;
 const IconRead = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a4 4 0 0 0-4-4H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a4 4 0 0 1 4-4h6z"/></svg>;
 const IconArrowLeft = () => <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>;
 const IconArrowRight = () => <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>;
 
-// بيانات البطاقات المنبثقة (مطابقة تماماً للرئيسية)
+// بيانات البطاقات المنبثقة مطابقة تماماً للرئيسية
 const MAGIC_CARDS = [
     { icon: "💡", ar: "فكرة ذكية", en: "Smart Idea", color: "border-yellow-500" },
     { icon: "🎨", ar: "إبداع", en: "Creativity", color: "border-red-600" },
@@ -51,6 +51,7 @@ const CreatorsPortalPage: React.FC = () => {
             targetAudio?.pause();
             setPlayingAudioId(null);
         } else {
+            // إيقاف وتصفير كافة الملفات الأخرى لمنع التداخل
             audioRefs.current.forEach((audio) => {
                 audio.pause();
                 audio.currentTime = 0;
@@ -104,104 +105,105 @@ const CreatorsPortalPage: React.FC = () => {
                 <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] bg-green-600/10 dark:bg-green-500/10 blur-[150px] rounded-full animate-pulse [animation-delay:2s]"></div>
             </div>
 
-            <header className="relative pt-24 md:pt-32 pb-16 text-center px-4 z-10">
-                <h1 className="text-3xl sm:text-5xl lg:text-[10rem] font-black mb-4 tracking-tighter leading-[1.1] text-slate-950 dark:text-white drop-shadow-2xl animate-fade-up">
+            <header className="relative pt-16 md:pt-32 pb-12 text-center px-4 z-10">
+                <h1 className="text-3xl sm:text-5xl lg:text-[10rem] font-black mb-4 tracking-tighter leading-tight text-slate-950 dark:text-white drop-shadow-2xl animate-fade-up">
                     {isAr ? 'بوابة المبدعين' : 'CREATORS PORTAL'}
                 </h1>
                 <div className="flex items-center justify-center gap-4 animate-in zoom-in duration-1000">
-                    <div className="h-[2px] w-12 md:w-24 bg-red-600 rounded-full shadow-[0_0_15px_rgba(220,38,38,0.5)]"></div>
-                    <div className="w-5 h-5 bg-green-600 rounded-full animate-ping"></div>
-                    <div className="h-[2px] w-12 md:w-24 bg-red-600 rounded-full shadow-[0_0_15px_rgba(220,38,38,0.5)]"></div>
+                    <div className="h-[2px] w-8 md:w-24 bg-red-600 rounded-full shadow-[0_0_15px_rgba(220,38,38,0.5)]"></div>
+                    <div className="w-4 h-4 bg-green-600 rounded-full animate-ping"></div>
+                    <div className="h-[2px] w-8 md:w-24 bg-red-600 rounded-full shadow-[0_0_15px_rgba(220,38,38,0.5)]"></div>
                 </div>
             </header>
 
-            {/* القسم الأول: المؤلف الصغير - المساحة أعرض max-w-[1920px] */}
-            <section className="relative mb-40 z-10 w-full max-w-[1920px] mx-auto">
-                <div className="text-center mb-16 px-4">
-                    <span className="inline-block px-10 py-4 bg-white/60 dark:bg-white/5 backdrop-blur-3xl border border-white/20 rounded-[2rem] shadow-2xl animate-fade-up">
-                        <h2 className="text-xl md:text-5xl font-black text-red-600 uppercase tracking-widest flex items-center gap-4">
-                           📚 {isAr ? 'قسم المؤلف الصغير' : 'The Little Author'}
-                        </h2>
-                    </span>
-                </div>
+            {/* القسم الأول والثاني مدمجين ككتلة واحدة */}
+            <div className="w-full max-w-[1920px] mx-auto relative z-10">
+                <section className="relative mb-0 pt-10">
+                    <div className="text-center mb-16 px-4">
+                        <span className="inline-block px-8 py-3 bg-white/60 dark:bg-white/5 backdrop-blur-3xl border border-white/20 rounded-[2rem] shadow-2xl animate-fade-up">
+                            <h2 className="text-lg md:text-5xl font-black text-red-600 uppercase tracking-widest flex items-center gap-3">
+                               📚 {isAr ? 'قسم المؤلف الصغير' : 'The Little Author'}
+                            </h2>
+                        </span>
+                    </div>
 
-                <div className="relative px-4 md:px-20 group/container">
-                    <button onClick={() => scroll('left')} className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl p-4 md:p-6 rounded-3xl shadow-3xl hover:bg-red-600 hover:text-white transition-all border border-white/20 active:scale-90">
-                        <IconArrowLeft />
-                    </button>
-                    <button onClick={() => scroll('right')} className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl p-4 md:p-6 rounded-3xl shadow-3xl hover:bg-red-600 hover:text-white transition-all border border-white/20 active:scale-90">
-                        <IconArrowRight />
-                    </button>
+                    <div className="relative px-4 md:px-20 group/container">
+                        <button onClick={() => scroll('left')} className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl p-4 rounded-3xl shadow-3xl hover:bg-red-600 hover:text-white transition-all border border-white/20 active:scale-90">
+                            <IconArrowLeft />
+                        </button>
+                        <button onClick={() => scroll('right')} className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl p-4 rounded-3xl shadow-3xl hover:bg-red-600 hover:text-white transition-all border border-white/20 active:scale-90">
+                            <IconArrowRight />
+                        </button>
 
-                    <div ref={scrollRef} className="flex overflow-x-auto gap-8 md:gap-14 pb-16 snap-x snap-mandatory no-scrollbar pt-6 px-12 md:px-4 scroll-smooth">
-                        {studentWorks.map((work) => (
-                            <div key={work.id} className="w-[75vw] md:w-[460px] flex-shrink-0 snap-center group">
-                                <div className="relative bg-white/40 dark:bg-white/5 backdrop-blur-3xl rounded-[4rem] p-8 border border-white/40 dark:border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.1)] transition-all duration-700 hover:-translate-y-6">
-                                    <ReflectionLayer />
-                                    <a href={work.pdfUrl} target="_blank" rel="noopener noreferrer" className="relative aspect-[3/4.2] rounded-[3rem] overflow-hidden mb-10 block ring-8 ring-black/5 dark:ring-white/5 shadow-3xl transform group-hover:scale-[1.03] transition-all duration-700">
-                                        <img src={work.cover} className="w-full h-full object-cover" alt={work.title} />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-700 flex flex-col items-center justify-end pb-12">
-                                            <div className="bg-red-600 text-white font-black px-12 py-6 rounded-[2rem] shadow-2xl scale-75 group-hover:scale-100 transition-all duration-700 flex items-center gap-4 text-xl">
-                                                {isAr ? 'اقرأ العمل' : 'View PDF'} <IconRead />
+                        <div ref={scrollRef} className="flex overflow-x-auto gap-8 md:gap-14 pb-20 snap-x snap-mandatory no-scrollbar pt-6 px-12 md:px-4 scroll-smooth">
+                            {studentWorks.map((work) => (
+                                <div key={work.id} className="w-[75vw] md:w-[460px] flex-shrink-0 snap-center group">
+                                    <div className="relative bg-white/40 dark:bg-white/5 backdrop-blur-3xl rounded-[4rem] p-8 border border-white/40 dark:border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.1)] transition-all duration-700 hover:-translate-y-6">
+                                        <ReflectionLayer />
+                                        <a href={work.pdfUrl} target="_blank" rel="noopener noreferrer" className="relative aspect-[3/4.2] rounded-[3rem] overflow-hidden mb-10 block ring-8 ring-black/5 dark:ring-white/5 shadow-3xl transform group-hover:scale-[1.03] transition-all duration-700">
+                                            <img src={work.cover} className="w-full h-full object-cover" alt={work.title} />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-700 flex flex-col items-center justify-end pb-12 text-center">
+                                                <div className="bg-red-600 text-white font-black px-12 py-6 rounded-[2rem] shadow-2xl scale-75 group-hover:scale-100 transition-all duration-700 flex items-center gap-4 text-xl">
+                                                    {isAr ? 'اقرأ العمل' : 'View PDF'} <IconRead />
+                                                </div>
                                             </div>
-                                        </div>
-                                    </a>
-                                    <div className="text-center px-2">
-                                        <h3 className="text-xl md:text-4xl font-black text-slate-900 dark:text-white mb-3 line-clamp-1 group-hover:text-red-600 transition-colors duration-500 leading-relaxed py-1">{work.title}</h3>
-                                        <p className="text-green-600 dark:text-green-400 font-bold text-lg md:text-xl mb-10 tracking-widest uppercase opacity-80">{work.author}</p>
-                                        <div className="bg-slate-950/90 dark:bg-black/80 backdrop-blur-3xl p-6 rounded-[3rem] border border-white/10 shadow-inner transition-all duration-500 group-hover:border-red-600/40">
-                                            <audio ref={el => { if(el) audioRefs.current.set(work.id, el); }} onEnded={() => setPlayingAudioId(null)} src={work.audioUrl} hidden />
-                                            <button onClick={() => handleAudioPlay(work.id)} className={`w-full py-5 rounded-[1.8rem] font-black text-xl flex items-center justify-center gap-5 transition-all duration-300 ${playingAudioId === work.id ? 'bg-red-600 text-white shadow-[0_0_30px_rgba(220,38,38,0.5)]' : 'bg-white/5 text-white hover:bg-white/15'}`}>
-                                                {playingAudioId === work.id ? <><IconStop /> <span className="leading-none">{isAr ? 'إيقاف' : 'Stop'}</span></> : <><IconPlay /> <span className="leading-none">{isAr ? 'استمع للملخص' : 'Listen Summary'}</span></>}
-                                            </button>
+                                        </a>
+                                        <div className="text-center px-2">
+                                            <h3 className="text-lg md:text-4xl font-black text-slate-900 dark:text-white mb-3 line-clamp-1 group-hover:text-red-600 transition-colors duration-500 leading-relaxed py-1">{work.title}</h3>
+                                            <p className="text-green-600 dark:text-green-400 font-bold text-base md:text-xl mb-10 tracking-widest uppercase opacity-80">{work.author}</p>
+                                            <div className="bg-slate-950/90 dark:bg-black/80 backdrop-blur-3xl p-6 rounded-[3rem] border border-white/10 shadow-inner transition-all duration-500 group-hover:border-red-600/40">
+                                                <audio ref={el => { if(el) audioRefs.current.set(work.id, el); }} onEnded={() => setPlayingAudioId(null)} src={work.audioUrl} hidden />
+                                                <button onClick={() => handleAudioPlay(work.id)} className={`w-full py-5 rounded-[1.8rem] font-black text-lg md:text-xl flex items-center justify-center gap-4 transition-all duration-300 ${playingAudioId === work.id ? 'bg-red-600 text-white shadow-[0_0_30px_rgba(220,38,38,0.5)]' : 'bg-white/5 text-white'}`}>
+                                                    {playingAudioId === work.id ? <><IconStop /> <span className="leading-none">{isAr ? 'إيقاف' : 'Stop'}</span></> : <><IconPlay /> <span className="leading-none">{isAr ? 'استمع للملخص' : 'Listen Summary'}</span></>}
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* القسم الثاني: المخترع الصغير - بدون فاصل وبخلفية مائلة */}
-            <section className="py-20 relative overflow-hidden bg-transparent">
-                <div className="max-w-7xl mx-auto flex flex-col items-center text-center px-6 relative z-10">
-                    <div className="mb-24">
-                        <span className="bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 px-14 py-6 rounded-full border-2 border-yellow-500/30 text-2xl md:text-4xl font-black tracking-[0.3em] uppercase shadow-2xl backdrop-blur-xl leading-none">
-                             💡 {isAr ? 'قسم المخترع الصغير' : 'The Little Inventor'}
-                        </span>
-                    </div>
-                    <div className="relative group cursor-pointer" onClick={spawnMagic}>
-                        {/* شعار المدرسة المائل خلف الشخصية */}
-                        <div className="absolute inset-0 flex items-center justify-center -z-10 pointer-events-none transition-all duration-1000">
-                            <img src="/school-logo.png" alt="Seal" className="w-[130%] h-[130%] object-contain rotate-12 opacity-10 dark:opacity-20 logo-smart-filter" />
-                        </div>
-                        <div className="absolute inset-0 bg-gradient-to-r from-red-600/20 via-yellow-500/20 to-green-600/20 blur-[180px] rounded-full group-hover:scale-150 transition-all duration-1000 animate-pulse"></div>
-                        <div className="relative z-10">
-                            {bursts.map(b => (
-                                <div key={b.id} className={`absolute z-[100] bg-white dark:bg-slate-900 px-6 py-4 md:px-8 md:py-5 rounded-[2rem] border-4 ${b.item.color} shadow-3xl animate-burst-steady pointer-events-none flex items-center gap-4`}
-                                     style={{'--tx': `${b.tx}px`, '--ty': `${b.ty}px`, '--rot': `${b.rot}deg`} as any}>
-                                    <span className="text-2xl md:text-4xl">{b.item.icon}</span>
-                                    <span className="text-xs md:text-2xl font-black text-slate-950 dark:text-white uppercase whitespace-nowrap">{isAr ? b.item.ar : b.item.en}</span>
-                                </div>
                             ))}
-                            <img src="/creators-mascot.png" className="h-[400px] md:h-[800px] object-contain drop-shadow-[0_40px_100px_rgba(0,0,0,0.3)] animate-float" alt="Mascot" />
                         </div>
                     </div>
-                    <div className="mt-28 relative">
-                         <h2 className="text-[10rem] md:text-[25rem] font-black text-slate-900 dark:text-white italic tracking-tighter leading-none opacity-[0.04] absolute -bottom-20 left-1/2 -translate-x-1/2 select-none uppercase">Saqr</h2>
-                        <div className="relative z-10 space-y-10 animate-fade-up px-4">
-                            <h3 className="text-5xl md:text-[11rem] font-black text-slate-950 dark:text-white tracking-tighter uppercase leading-none">
-                                {isAr ? 'قريباً' : 'COMING SOON'}
-                            </h3>
-                            <div className="w-48 md:w-64 h-3 md:h-4 bg-gradient-to-r from-red-600 via-yellow-500 to-green-600 mx-auto rounded-full shadow-2xl"></div>
-                            <p className="text-lg md:text-5xl text-slate-600 dark:text-slate-400 font-bold leading-relaxed italic max-w-4xl">
-                                {isAr ? 'منصة عرض الابتكارات والمشاريع الهندسية لطلابنا المبدعين' : 'Showcasing engineering innovations and projects for our creative students'}
-                            </p>
+                </section>
+
+                {/* قسم المخترع المدمج مباشرة */}
+                <section className="py-20 relative overflow-hidden bg-transparent mt-[-50px]">
+                    <div className="max-w-7xl mx-auto flex flex-col items-center text-center px-6 relative z-10">
+                        <div className="mb-20">
+                            <span className="bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 px-12 py-5 rounded-full border-2 border-yellow-500/30 text-xl md:text-4xl font-black tracking-widest uppercase shadow-2xl backdrop-blur-xl leading-none">
+                                 💡 {isAr ? 'قسم المخترع الصغير' : 'The Little Inventor'}
+                            </span>
+                        </div>
+                        <div className="relative group cursor-pointer" onClick={spawnMagic}>
+                            <div className="absolute inset-0 flex items-center justify-center -z-10 pointer-events-none transition-all duration-1000">
+                                <img src="/school-logo.png" alt="Seal" className="w-[130%] h-[130%] object-contain rotate-12 opacity-10 dark:opacity-20 logo-smart-filter" />
+                            </div>
+                            <div className="absolute inset-0 bg-gradient-to-r from-red-600/20 via-yellow-500/20 to-green-600/20 blur-[180px] rounded-full group-hover:scale-150 transition-all duration-1000 animate-pulse"></div>
+                            <div className="relative z-10">
+                                {bursts.map(b => (
+                                    <div key={b.id} className={`absolute z-[100] bg-white dark:bg-slate-900 px-5 py-3 md:px-8 md:py-5 rounded-[2rem] border-4 ${b.item.color} shadow-3xl animate-burst-steady pointer-events-none flex items-center gap-3`}
+                                         style={{'--tx': `${b.tx}px`, '--ty': `${b.ty}px`, '--rot': `${b.rot}deg`} as any}>
+                                        <span className="text-xl md:text-4xl">{b.item.icon}</span>
+                                        <span className="text-[10px] md:text-2xl font-black text-slate-950 dark:text-white uppercase whitespace-nowrap">{isAr ? b.item.ar : b.item.en}</span>
+                                    </div>
+                                ))}
+                                <img src="/creators-mascot.png" className="h-[350px] md:h-[800px] object-contain drop-shadow-[0_40px_100px_rgba(0,0,0,0.3)] animate-float" alt="Mascot" />
+                            </div>
+                        </div>
+                        <div className="mt-20 relative">
+                             <h2 className="text-[8rem] md:text-[25rem] font-black text-slate-900 dark:text-white italic tracking-tighter leading-none opacity-[0.04] absolute -bottom-10 left-1/2 -translate-x-1/2 select-none uppercase">Saqr</h2>
+                            <div className="relative z-10 space-y-8 animate-fade-up px-4">
+                                <h3 className="text-4xl md:text-[11rem] font-black text-slate-950 dark:text-white tracking-tighter uppercase leading-none">
+                                    {isAr ? 'قريباً' : 'COMING SOON'}
+                                </h3>
+                                <div className="w-32 md:w-64 h-2 md:h-4 bg-gradient-to-r from-red-600 via-yellow-500 to-green-600 mx-auto rounded-full shadow-2xl"></div>
+                                <p className="text-lg md:text-5xl text-slate-600 dark:text-slate-400 font-bold leading-relaxed italic max-w-4xl">
+                                    {isAr ? 'منصة عرض الابتكارات والمشاريع الهندسية لطلابنا المبدعين' : 'Showcasing engineering innovations and projects for our creative students'}
+                                </p>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            </div>
 
             <style>{`
                 .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -217,7 +219,7 @@ const CreatorsPortalPage: React.FC = () => {
                 .logo-smart-filter { transition: filter 0.5s ease; }
                 .dark .logo-smart-filter { filter: brightness(0) invert(1); }
                 * { font-style: normal !important; text-rendering: optimizeLegibility; }
-                [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] p { letter-spacing: 0 !important; }
+                [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] p, [dir="rtl"] span { letter-spacing: 0 !important; }
             `}</style>
         </div>
     );
