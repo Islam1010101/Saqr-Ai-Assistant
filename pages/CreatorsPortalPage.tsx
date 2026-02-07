@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useLanguage } from '../App';
 
 // --- الأيقونات البرمجية SVG ---
@@ -31,7 +31,8 @@ const CreatorsPortalPage: React.FC = () => {
     const scrollRef = useRef<HTMLDivElement>(null);
     const audioRefs = useRef<Map<string, HTMLAudioElement>>(new Map());
 
-    const studentWorks = [
+    // البيانات الأساسية
+    const baseWorks = [
         { id: "1", title: isAr ? "أبي نبع العطاء" : "Father: Fountain of Giving", author: isAr ? "ياسين محمد مسعود" : "Yassin Mohamed", cover: "/cover/12.jpg", pdfUrl: "https://drive.google.com/file/d/1EcOPekgKRMhnq-HTiqU5hLrVxMIl2MEV/view?usp=drive_link", audioUrl: "/audio/أبي نبع العطاء.mp3" },
         { id: "2", title: isAr ? "الصدق منجاة" : "Honesty is Salvation", author: isAr ? "الصالح إسماعيل المصري" : "Al-Saleh Ismail", cover: "/cover/17.jpg", pdfUrl: "https://drive.google.com/file/d/1WbIIcUpBd2s4on8aMSiw20KCG5fpK-IA/view?usp=drive_link", audioUrl: "/audio/الصدق منجاة.mp3" },
         { id: "3", title: isAr ? "مسرحية اللغة العربية" : "Arabic Language Play", author: isAr ? "فاطمة فلاح الأحبابي" : "Fatima Al-Ahbabi", cover: "/cover/18.jpg", pdfUrl: "https://drive.google.com/file/d/1DZk9Moh7CceSN5fpekCtxfRzNSzQiYMY/view?usp=drive_link", audioUrl: "/audio/اللغة العربية.mp3" },
@@ -43,6 +44,11 @@ const CreatorsPortalPage: React.FC = () => {
         { id: "9", title: isAr ? "عندما يعود الخير" : "When Goodness Returns", author: isAr ? "سهيلة البلوشي" : "Suhaila Al-Balooshi", cover: "/cover/15.jpg", pdfUrl: "https://drive.google.com/file/d/1mxaLmat3IEg2SItPiLjLa7U-hqrACw2e/view?usp=drive_link", audioUrl: "/audio/عندما يعود الخير.mp3" },
         { id: "10", title: isAr ? "لمار تهمس" : "Lamar Whispers", author: isAr ? "ألين رافع فريحات" : "Aleen Rafe", cover: "/cover/11.jpg", pdfUrl: "https://drive.google.com/file/d/1C0S0PA-yg2RDmXCB6-MlMoRLp2mp-Utw/view?usp=drive_link", audioUrl: "/audio/لمار.mp3" }
     ];
+
+    // ترتيب عشوائي عند التحميل
+    const studentWorks = useMemo(() => {
+        return [...baseWorks].sort(() => Math.random() - 0.5);
+    }, [locale]);
 
     const handleAudioPlay = (id: string) => {
         const targetAudio = audioRefs.current.get(id);
@@ -64,6 +70,19 @@ const CreatorsPortalPage: React.FC = () => {
         }
     };
 
+    // التمرير التلقائي (اللووب)
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (scrollRef.current) {
+                const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+                const isEnd = dir === 'rtl' ? Math.abs(scrollLeft) + clientWidth >= scrollWidth - 100 : scrollLeft + clientWidth >= scrollWidth - 100;
+                if (isEnd) scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+                else scrollRef.current.scrollBy({ left: dir === 'rtl' ? -clientWidth * 0.8 : clientWidth * 0.8, behavior: 'smooth' });
+            }
+        }, 5000);
+        return () => clearInterval(interval);
+    }, [dir]);
+
     const spawnMagic = useCallback(() => {
         const id = Date.now();
         const newBursts = Array.from({ length: 3 }).map((_, i) => ({
@@ -81,31 +100,32 @@ const CreatorsPortalPage: React.FC = () => {
 
     return (
         <div dir={dir} className="min-h-screen bg-slate-50 dark:bg-[#020617] transition-colors duration-700 font-black antialiased overflow-x-hidden relative pb-20 selection:bg-red-600/30">
-            {/* الخلفية الموحدة */}
+            {/* الخلفية */}
             <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-50">
                 <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-red-600/10 dark:bg-red-500/10 blur-[150px] rounded-full animate-pulse"></div>
                 <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] bg-green-600/10 dark:bg-green-500/10 blur-[150px] rounded-full animate-pulse [animation-delay:2s]"></div>
             </div>
 
+            {/* الهيدر */}
             <header className="relative pt-12 md:pt-32 pb-8 text-center px-4 z-10">
                 <h1 className="text-3xl sm:text-5xl lg:text-[10rem] font-black mb-4 tracking-tighter leading-tight text-slate-950 dark:text-white drop-shadow-2xl animate-fade-up">
                     {isAr ? 'بوابة المبدعين' : 'CREATORS PORTAL'}
                 </h1>
                 <div className="flex items-center justify-center gap-4">
-                    <div className="h-[2px] w-8 md:w-24 bg-red-600 rounded-full shadow-[0_0_15px_rgba(220,38,38,0.5)]"></div>
+                    <div className="h-[2px] w-8 md:w-24 bg-red-600 rounded-full"></div>
                     <div className="w-4 h-4 bg-green-600 rounded-full animate-ping"></div>
-                    <div className="h-[2px] w-8 md:w-24 bg-red-600 rounded-full shadow-[0_0_15px_rgba(220,38,38,0.5)]"></div>
+                    <div className="h-[2px] w-8 md:w-24 bg-red-600 rounded-full"></div>
                 </div>
             </header>
 
-            {/* الحاوية العريضة الموحدة */}
-            <div className="w-full max-w-[1920px] mx-auto relative z-10 space-y-0">
+            {/* الحاوية العريضة الموحدة (الكتلة الواحدة) */}
+            <div className="w-full max-w-[1920px] mx-auto relative z-10 bg-white/40 dark:bg-white/5 backdrop-blur-3xl rounded-[3rem] md:rounded-[5rem] border border-white/20 shadow-2xl py-10 md:py-20">
                 
                 {/* ركن المؤلف الصغير */}
-                <section className="relative pt-10 pb-10">
+                <section className="relative pb-10">
                     <div className="text-center mb-12 px-4">
-                        <span className="inline-block px-6 py-3 bg-white/60 dark:bg-white/5 backdrop-blur-3xl border border-white/20 rounded-2xl shadow-xl">
-                            <h2 className="text-base md:text-5xl font-black text-red-600 uppercase tracking-widest flex items-center gap-3 leading-none">
+                        <span className="inline-block px-6 py-3 bg-red-600 text-white rounded-2xl shadow-xl">
+                            <h2 className="text-sm md:text-4xl font-black uppercase tracking-widest leading-none">
                                📚 {isAr ? 'قسم المؤلف الصغير' : 'The Little Author'}
                             </h2>
                         </span>
@@ -121,13 +141,13 @@ const CreatorsPortalPage: React.FC = () => {
 
                         <div ref={scrollRef} className="flex overflow-x-auto gap-4 md:gap-14 pb-10 snap-x snap-mandatory no-scrollbar pt-6 px-10 md:px-4 scroll-smooth">
                             {studentWorks.map((work) => (
-                                <div key={work.id} className="w-[80vw] md:w-[460px] flex-shrink-0 snap-center group">
-                                    <div className="relative bg-white/40 dark:bg-white/5 backdrop-blur-3xl rounded-[3rem] p-6 md:p-8 border border-white/40 dark:border-white/10 shadow-2xl transition-all duration-700 hover:-translate-y-6">
+                                <div key={work.id} className="w-[80vw] md:w-[480px] flex-shrink-0 snap-center group">
+                                    <div className="relative bg-white/40 dark:bg-white/5 backdrop-blur-3xl rounded-[3rem] p-6 md:p-10 border border-white/40 dark:border-white/10 shadow-2xl transition-all duration-700 hover:-translate-y-6">
                                         <ReflectionLayer />
                                         <a href={work.pdfUrl} target="_blank" rel="noopener noreferrer" className="relative aspect-[3/4.2] rounded-[2rem] overflow-hidden mb-8 block ring-4 md:ring-8 ring-black/5 dark:ring-white/5 shadow-2xl transform group-hover:scale-[1.02] transition-all duration-700">
                                             <img src={work.cover} className="w-full h-full object-cover" alt={work.title} />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-700 flex flex-col items-center justify-end pb-8">
-                                                <div className="bg-red-600 text-white font-black px-8 py-4 rounded-xl shadow-2xl scale-75 group-hover:scale-100 transition-all duration-700 flex items-center gap-3 text-lg">
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-700 flex flex-col items-center justify-end pb-8 text-center px-4">
+                                                <div className="bg-red-600 text-white font-black px-8 py-4 rounded-xl shadow-2xl scale-75 group-hover:scale-100 transition-all duration-700 flex items-center gap-3 text-lg leading-none">
                                                     {isAr ? 'اقرأ العمل' : 'View PDF'} <IconRead />
                                                 </div>
                                             </div>
@@ -137,8 +157,8 @@ const CreatorsPortalPage: React.FC = () => {
                                             <p className="text-green-600 dark:text-green-400 font-bold text-xs md:text-xl uppercase opacity-80">{work.author}</p>
                                             <div className="bg-slate-950/90 dark:bg-black/80 backdrop-blur-3xl p-4 md:p-6 rounded-2xl border border-white/10 shadow-inner transition-all duration-500 group-hover:border-red-600/40">
                                                 <audio ref={el => { if(el) audioRefs.current.set(work.id, el); }} onEnded={() => setPlayingAudioId(null)} src={work.audioUrl} hidden />
-                                                <button onClick={() => handleAudioPlay(work.id)} className={`w-full py-3 md:py-5 rounded-xl font-black text-xs md:text-xl flex items-center justify-center gap-3 transition-all duration-300 ${playingAudioId === work.id ? 'bg-red-600 text-white shadow-[0_0_20px_rgba(220,38,38,0.5)]' : 'bg-white/5 text-white'}`}>
-                                                    {playingAudioId === work.id ? <><IconStop /> <span>{isAr ? 'إيقاف' : 'Stop'}</span></> : <><IconPlay /> <span>{isAr ? 'استمع للملخص' : 'Listen Summary'}</span></>}
+                                                <button onClick={() => handleAudioPlay(work.id)} className={`w-full py-3 md:py-5 rounded-xl font-black text-xs md:text-xl flex items-center justify-center gap-3 transition-all duration-300 ${playingAudioId === work.id ? 'bg-red-600 text-white shadow-[0_0_30px_rgba(220,38,38,0.5)]' : 'bg-white/5 text-white'}`}>
+                                                    {playingAudioId === work.id ? <><IconStop /> <span className="leading-none">{isAr ? 'إيقاف' : 'Stop'}</span></> : <><IconPlay /> <span className="leading-none">{isAr ? 'استمع للملخص' : 'Listen Summary'}</span></>}
                                                 </button>
                                             </div>
                                         </div>
@@ -149,11 +169,11 @@ const CreatorsPortalPage: React.FC = () => {
                     </div>
                 </section>
 
-                {/* ركن المخترع الصغير - ملتصق تماماً */}
+                {/* ركن المخترع الصغير - ملتصق وبخطوط منضبطة */}
                 <section className="relative py-10 overflow-hidden bg-transparent">
                     <div className="max-w-7xl mx-auto flex flex-col items-center text-center px-6 relative z-10">
-                        <div className="mb-12">
-                            <span className="bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 px-10 py-4 rounded-full border-2 border-yellow-500/30 text-base md:text-4xl font-black tracking-widest uppercase shadow-2xl backdrop-blur-xl leading-none">
+                        <div className="mb-10">
+                            <span className="bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 px-8 py-3 rounded-full border-2 border-yellow-500/30 text-[0.9rem] sm:text-2xl md:text-4xl font-black tracking-widest uppercase shadow-2xl backdrop-blur-xl leading-none">
                                  💡 {isAr ? 'قسم المخترع الصغير' : 'The Little Inventor'}
                             </span>
                         </div>
@@ -164,23 +184,23 @@ const CreatorsPortalPage: React.FC = () => {
                             <div className="absolute inset-0 bg-gradient-to-r from-red-600/20 via-yellow-500/20 to-green-600/20 blur-[150px] rounded-full group-hover:scale-150 transition-all duration-1000 animate-pulse"></div>
                             <div className="relative z-10">
                                 {bursts.map(b => (
-                                    <div key={b.id} className={`absolute z-[100] bg-white dark:bg-slate-900 px-4 py-2 md:px-8 md:py-5 rounded-2xl border-4 ${b.item.color} shadow-3xl animate-burst-steady pointer-events-none flex items-center gap-3`}
+                                    <div key={b.id} className={`absolute z-[100] bg-white dark:bg-slate-900 px-5 py-3 md:px-8 md:py-5 rounded-2xl border-4 ${b.item.color} shadow-3xl animate-burst-steady pointer-events-none flex items-center gap-3`}
                                          style={{'--tx': `${b.tx}px`, '--ty': `${b.ty}px`, '--rot': `${b.rot}deg`} as any}>
                                         <span className="text-xl md:text-4xl">{b.item.icon}</span>
                                         <span className="text-[10px] md:text-2xl font-black text-slate-950 dark:text-white uppercase whitespace-nowrap">{isAr ? b.item.ar : b.item.en}</span>
                                     </div>
                                 ))}
-                                <img src="/creators-mascot.png" className="h-[300px] md:h-[800px] object-contain drop-shadow-[0_40px_100px_rgba(0,0,0,0.3)] animate-float" alt="Mascot" />
+                                <img src="/creators-mascot.png" className="h-[280px] md:h-[750px] object-contain drop-shadow-[0_40px_100px_rgba(0,0,0,0.3)] animate-float" alt="Mascot" />
                             </div>
                         </div>
-                        <div className="mt-12 relative">
+                        <div className="mt-10 relative max-w-full">
                              <h2 className="text-[6rem] md:text-[25rem] font-black text-slate-900 dark:text-white italic tracking-tighter leading-none opacity-[0.04] absolute -bottom-10 left-1/2 -translate-x-1/2 select-none uppercase">Saqr</h2>
-                            <div className="relative z-10 space-y-6 animate-fade-up px-4">
-                                <h3 className="text-3xl md:text-[11rem] font-black text-slate-950 dark:text-white tracking-tighter uppercase leading-none">
+                            <div className="relative z-10 space-y-4 animate-fade-up px-2">
+                                <h3 className="text-3xl md:text-[11rem] font-black text-slate-950 dark:text-white tracking-tighter uppercase leading-tight">
                                     {isAr ? 'قريباً' : 'COMING SOON'}
                                 </h3>
-                                <div className="w-24 md:w-64 h-1.5 md:h-4 bg-gradient-to-r from-red-600 via-yellow-500 to-green-600 mx-auto rounded-full shadow-2xl"></div>
-                                <p className="text-sm md:text-5xl text-slate-600 dark:text-slate-400 font-bold leading-relaxed max-w-4xl italic">
+                                <div className="w-20 md:w-64 h-1 md:h-4 bg-gradient-to-r from-red-600 via-yellow-500 to-green-600 mx-auto rounded-full"></div>
+                                <p className="text-[0.7rem] sm:text-base md:text-5xl text-slate-600 dark:text-slate-400 font-bold leading-relaxed max-w-2xl mx-auto italic whitespace-normal">
                                     {isAr ? 'منصة عرض الابتكارات والمشاريع الهندسية لطلابنا المبدعين' : 'Showcasing engineering innovations and projects for our creative students'}
                                 </p>
                             </div>
@@ -199,7 +219,7 @@ const CreatorsPortalPage: React.FC = () => {
                 }
                 .animate-burst-steady { animation: burst-steady 2.5s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
                 .animate-float { animation: float 6s ease-in-out infinite; }
-                @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-30px); } }
+                @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-40px); } }
                 .logo-smart-filter { transition: filter 0.5s ease; }
                 .dark .logo-smart-filter { filter: brightness(0) invert(1); }
                 * { font-style: normal !important; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
