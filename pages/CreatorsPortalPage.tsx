@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '../App';
 
 // --- الأيقونات البرمجية SVG ---
@@ -7,6 +8,7 @@ const IconStop = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="cur
 const IconRead = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a4 4 0 0 0-4-4H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a4 4 0 0 1 4-4h6z"/></svg>;
 const IconArrowLeft = () => <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>;
 const IconArrowRight = () => <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>;
+const IconBrush = () => <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>;
 
 const MAGIC_CARDS = [
     { icon: "💡", ar: "فكرة ذكية", en: "Smart Idea", color: "border-yellow-500" },
@@ -111,20 +113,32 @@ const CreatorsPortalPage: React.FC = () => {
                 <h1 className="text-3xl sm:text-5xl lg:text-[10rem] font-black mb-4 tracking-tighter leading-tight text-slate-950 dark:text-white drop-shadow-2xl animate-fade-up">
                     {isAr ? 'بوابة المبدعين' : 'CREATORS PORTAL'}
                 </h1>
-                <div className="flex items-center justify-center gap-4">
+                
+                {/* زر كن مبدعاً (تمت إضافة "قريباً") */}
+                <div className="mt-8 mb-4 animate-in zoom-in duration-700">
+                    <div className="group relative inline-flex items-center gap-4 bg-gradient-to-r from-red-600 to-red-800 text-white px-10 py-5 rounded-[2.5rem] shadow-2xl transition-all cursor-wait">
+                         <div className="absolute -inset-1 bg-red-600 rounded-[2.6rem] blur opacity-30 animate-pulse"></div>
+                         <IconBrush />
+                         <span className="text-xl md:text-3xl font-black uppercase tracking-tighter">
+                            {isAr ? 'كن مبدعاً (قريباً)' : 'Be Creative (Soon)'}
+                         </span>
+                    </div>
+                </div>
+
+                <div className="flex items-center justify-center gap-4 mt-8 opacity-40">
                     <div className="h-[2px] w-8 md:w-24 bg-red-600 rounded-full"></div>
-                    <div className="w-4 h-4 bg-green-600 rounded-full animate-ping"></div>
+                    <div className="w-3 h-3 bg-green-600 rounded-full animate-ping"></div>
                     <div className="h-[2px] w-8 md:w-24 bg-red-600 rounded-full"></div>
                 </div>
             </header>
 
             {/* الحاوية العريضة الموحدة (الكتلة الواحدة) */}
-            <div className="w-full max-w-[1920px] mx-auto relative z-10 bg-white/40 dark:bg-white/5 backdrop-blur-3xl rounded-[3rem] md:rounded-[5rem] border border-white/20 shadow-2xl py-10 md:py-20">
+            <div className="w-full max-w-[1920px] mx-auto relative z-10 bg-white/40 dark:bg-white/5 backdrop-blur-3xl rounded-[3rem] md:rounded-[5rem] border border-white/20 shadow-2xl py-10 md:py-16">
                 
                 {/* ركن المؤلف الصغير */}
                 <section className="relative pb-10">
-                    <div className="text-center mb-12 px-4">
-                        <span className="inline-block px-6 py-3 bg-red-600 text-white rounded-2xl shadow-xl">
+                    <div className="text-center mb-10 px-4">
+                        <span className="inline-block px-8 py-3 bg-red-600 text-white rounded-2xl shadow-xl">
                             <h2 className="text-sm md:text-4xl font-black uppercase tracking-widest leading-none">
                                📚 {isAr ? 'قسم المؤلف الصغير' : 'The Little Author'}
                             </h2>
@@ -147,7 +161,7 @@ const CreatorsPortalPage: React.FC = () => {
                                         <a href={work.pdfUrl} target="_blank" rel="noopener noreferrer" className="relative aspect-[3/4.2] rounded-[2rem] overflow-hidden mb-8 block ring-4 md:ring-8 ring-black/5 dark:ring-white/5 shadow-2xl transform group-hover:scale-[1.02] transition-all duration-700">
                                             <img src={work.cover} className="w-full h-full object-cover" alt={work.title} />
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-700 flex flex-col items-center justify-end pb-8 text-center px-4">
-                                                <div className="bg-red-600 text-white font-black px-8 py-4 rounded-xl shadow-2xl scale-75 group-hover:scale-100 transition-all duration-700 flex items-center gap-3 text-lg leading-none">
+                                                <div className="bg-red-600 text-white font-black px-8 py-4 rounded-xl shadow-2xl scale-75 group-hover:scale-100 transition-all duration-700 flex items-center gap-3 text-lg leading-none font-black uppercase">
                                                     {isAr ? 'اقرأ العمل' : 'View PDF'} <IconRead />
                                                 </div>
                                             </div>
@@ -157,7 +171,7 @@ const CreatorsPortalPage: React.FC = () => {
                                             <p className="text-green-600 dark:text-green-400 font-bold text-xs md:text-xl uppercase opacity-80">{work.author}</p>
                                             <div className="bg-slate-950/90 dark:bg-black/80 backdrop-blur-3xl p-4 md:p-6 rounded-2xl border border-white/10 shadow-inner transition-all duration-500 group-hover:border-red-600/40">
                                                 <audio ref={el => { if(el) audioRefs.current.set(work.id, el); }} onEnded={() => setPlayingAudioId(null)} src={work.audioUrl} hidden />
-                                                <button onClick={() => handleAudioPlay(work.id)} className={`w-full py-3 md:py-5 rounded-xl font-black text-xs md:text-xl flex items-center justify-center gap-3 transition-all duration-300 ${playingAudioId === work.id ? 'bg-red-600 text-white shadow-[0_0_30px_rgba(220,38,38,0.5)]' : 'bg-white/5 text-white'}`}>
+                                                <button onClick={() => handleAudioPlay(work.id)} className={`w-full py-3 md:py-5 rounded-xl font-black text-xs md:text-xl flex items-center justify-center gap-3 transition-all duration-300 ${playingAudioId === work.id ? 'bg-red-600 text-white shadow-[0_0_30px_rgba(220,38,38,0.5)]' : 'bg-white/5 text-white hover:bg-white/10'}`}>
                                                     {playingAudioId === work.id ? <><IconStop /> <span className="leading-none">{isAr ? 'إيقاف' : 'Stop'}</span></> : <><IconPlay /> <span className="leading-none">{isAr ? 'استمع للملخص' : 'Listen Summary'}</span></>}
                                                 </button>
                                             </div>
@@ -173,7 +187,7 @@ const CreatorsPortalPage: React.FC = () => {
                 <section className="relative py-10 overflow-hidden bg-transparent">
                     <div className="max-w-7xl mx-auto flex flex-col items-center text-center px-6 relative z-10">
                         <div className="mb-10">
-                            <span className="bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 px-8 py-3 rounded-full border-2 border-yellow-500/30 text-[0.9rem] sm:text-2xl md:text-4xl font-black tracking-widest uppercase shadow-2xl backdrop-blur-xl leading-none">
+                            <span className="bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 px-8 py-3 rounded-full border-2 border-yellow-500/30 text-xs sm:text-2xl md:text-4xl font-black tracking-widest uppercase shadow-2xl backdrop-blur-xl leading-none">
                                  💡 {isAr ? 'قسم المخترع الصغير' : 'The Little Inventor'}
                             </span>
                         </div>
@@ -184,7 +198,7 @@ const CreatorsPortalPage: React.FC = () => {
                             <div className="absolute inset-0 bg-gradient-to-r from-red-600/20 via-yellow-500/20 to-green-600/20 blur-[150px] rounded-full group-hover:scale-150 transition-all duration-1000 animate-pulse"></div>
                             <div className="relative z-10">
                                 {bursts.map(b => (
-                                    <div key={b.id} className={`absolute z-[100] bg-white dark:bg-slate-900 px-5 py-3 md:px-8 md:py-5 rounded-2xl border-4 ${b.item.color} shadow-3xl animate-burst-steady pointer-events-none flex items-center gap-3`}
+                                    <div key={b.id} className={`absolute z-[100] bg-white dark:bg-slate-900 px-4 py-2 md:px-8 md:py-5 rounded-2xl border-4 ${b.item.color} shadow-3xl animate-burst-steady pointer-events-none flex items-center gap-3`}
                                          style={{'--tx': `${b.tx}px`, '--ty': `${b.ty}px`, '--rot': `${b.rot}deg`} as any}>
                                         <span className="text-xl md:text-4xl">{b.item.icon}</span>
                                         <span className="text-[10px] md:text-2xl font-black text-slate-950 dark:text-white uppercase whitespace-nowrap">{isAr ? b.item.ar : b.item.en}</span>
