@@ -18,7 +18,9 @@ const translations = {
         homelandTitle: "لمحات من الموطن",
         challengeTitle: "تحدي المبدعين الصغار",
         challengeDesc: "ناقش، ابدأ قصتك الخاصة مع صقر، وأثبت موهبتك لتفوز بجوائز متميزة من مدرسة صقر الإمارات!",
-        challengeCTA: "ابدأ رحلة الإبداع مع صقر الآن"
+        challengeCTA: "ابدأ رحلة الإبداع مع صقر الآن",
+        // النص الجديد البارز
+        comingSoonRamadan: "🌙 قريباً في رمضان: مسابقة كنز المعرفة.. ابحث عن الكنوز واربح جوائز فورية!"
     },
     en: {
         welcome: "Knowledge's Portal in Falcon Int'l School",
@@ -35,7 +37,9 @@ const translations = {
         homelandTitle: "Hints From Homeland",
         challengeTitle: "Little Authors Challenge",
         challengeDesc: "Discuss , author your own tales with Saqr, and showcase your talent to win distinguished prizes from EFIPS!",
-        challengeCTA: "Start your creative journey now"
+        challengeCTA: "Start your creative journey now",
+        // New prominent text
+        comingSoonRamadan: "🌙 Coming Soon this Ramadan: Knowledge Treasure Quest.. Find the treasures & win instant prizes!"
     }
 };
 
@@ -100,10 +104,9 @@ const HomePage: React.FC = () => {
     }, []);
 
     return (
-        // تم تكبير المساحة إلى max-w-[1600px] لتناسب اللابتوب بشكل أعرض
-        <div className="max-w-[1600px] mx-auto px-4 py-8 md:py-16 flex flex-col items-center gap-12 md:gap-24 animate-fade-up font-black antialiased relative overflow-x-hidden">
+        <div className="max-w-[1600px] mx-auto px-4 py-8 md:py-16 flex flex-col items-center gap-12 md:gap-20 animate-fade-up font-black antialiased relative overflow-x-hidden">
             
-            {/* 1. قسم الترحيب - تصغير الخطوط على الموبايل */}
+            {/* 1. قسم الترحيب */}
             <div className="text-center space-y-6 md:space-y-10 max-w-5xl relative z-20">
                 <h1 className="text-3xl sm:text-4xl md:text-8xl font-black text-slate-950 dark:text-white tracking-tighter leading-[1.2] drop-shadow-2xl">
                     {t('welcome')}
@@ -114,7 +117,17 @@ const HomePage: React.FC = () => {
                 <div className="h-2 w-40 bg-red-600 mx-auto rounded-full shadow-[0_0_25px_rgba(220,38,38,0.6)]"></div>
             </div>
 
-            {/* 2. مركز العمليات - إضافة أيقونة المبدعين الصغار */}
+            {/* إعلان مسابقة رمضان - البانر الجديد البارز */}
+            <div className="w-full max-w-4xl relative z-30 animate-in zoom-in duration-700">
+                <div className="glass-panel py-6 px-10 rounded-[2.5rem] border-2 border-yellow-500/40 bg-gradient-to-r from-yellow-500/10 via-transparent to-yellow-500/10 shadow-[0_0_40px_rgba(234,179,8,0.15)] flex items-center justify-center text-center overflow-hidden group">
+                    <div className="absolute -inset-1 bg-yellow-500/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <p className="text-lg md:text-3xl font-black text-yellow-600 dark:text-yellow-500 animate-pulse tracking-tight">
+                        {t('comingSoonRamadan')}
+                    </p>
+                </div>
+            </div>
+
+            {/* 2. مركز العمليات */}
             <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-16 items-center">
                 
                 <div className="lg:col-span-7 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 order-2 lg:order-1">
@@ -136,7 +149,6 @@ const HomePage: React.FC = () => {
                         <p className="text-[11px] md:text-lg text-slate-500 dark:text-slate-400 font-bold leading-relaxed">{t('digitalDesc')}</p>
                     </Link>
 
-                    {/* أيقونة المبدعين الصغار الجديدة */}
                     <Link to="/creators" className="group glass-panel p-6 md:p-10 rounded-[2.5rem] border-2 border-purple-600/20 hover:border-purple-600 transition-all duration-500 shadow-2xl">
                         <div className="text-4xl md:text-6xl mb-4 group-hover:scale-110 transition-transform">🎨</div>
                         <h3 className="text-xl md:text-3xl text-slate-950 dark:text-white mb-2">{t('creators')}</h3>
@@ -147,7 +159,6 @@ const HomePage: React.FC = () => {
                 <div className="lg:col-span-5 flex flex-col items-center justify-center order-1 lg:order-2 relative gap-8">
                     <div onClick={handleMascotInteraction} className={`relative cursor-pointer transition-transform duration-700 ${isMascotClicked ? 'scale-110' : 'hover:scale-105'}`}>
                         
-                        {/* شعار المدرسة المائل خلف الشخصية كما في الهوم بيج */}
                         <div className="absolute inset-0 flex items-center justify-center -z-10 pointer-events-none opacity-10 dark:opacity-20 transition-all duration-1000">
                             <img src="/school-logo.png" alt="Seal" className="w-[130%] h-[130%] object-contain rotate-[15deg] logo-white-filter" />
                         </div>
@@ -169,7 +180,6 @@ const HomePage: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* قسم تحدي الإبداع المطور والبارز */}
                     <div className="w-full max-w-md glass-panel p-6 md:p-10 rounded-[2.5rem] border-2 border-red-600/40 shadow-[0_0_50px_rgba(220,38,38,0.15)] text-center space-y-6 relative z-30 animate-fade-up overflow-hidden group/card">
                         <div className="absolute inset-0 bg-gradient-to-br from-red-600/5 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-700"></div>
                         
@@ -216,7 +226,6 @@ const HomePage: React.FC = () => {
 
             <style>{`
                 * { font-style: normal !important; }
-
                 @keyframes burst-steady {
                     0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
                     10% { transform: translate(var(--tx), var(--ty)) scale(1.1) rotate(var(--rot)); opacity: 1; }
@@ -224,21 +233,12 @@ const HomePage: React.FC = () => {
                     100% { transform: translate(var(--tx), calc(var(--ty) - 30px)) scale(0.8) rotate(var(--rot)); opacity: 0; }
                 }
                 .animate-burst-steady { animation: burst-steady 2.2s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
-
                 .animate-float { animation: float 8s ease-in-out infinite; }
                 @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-30px); } }
-                
-                .glass-panel { 
-                    backdrop-filter: blur(60px); 
-                    background: rgba(255, 255, 255, 0.03); 
-                }
-                
+                .glass-panel { backdrop-filter: blur(60px); background: rgba(255, 255, 255, 0.03); }
                 .logo-white-filter { transition: filter 0.5s ease; }
                 .dark .logo-white-filter { filter: brightness(0) invert(1); }
-
                 p { line-height: 1.8 !important; }
-                
-                /* تحسين الخطوط للأجهزة الصغيرة */
                 @media (max-width: 768px) {
                     h1 { font-size: 2.25rem !important; }
                     h2 { font-size: 1.5rem !important; }
