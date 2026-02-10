@@ -19,8 +19,8 @@ const translations = {
         challengeTitle: "تحدي المبدعين الصغار",
         challengeDesc: "ناقش، ابدأ قصتك الخاصة مع صقر، وأثبت موهبتك لتفوز بجوائز متميزة من مدرسة صقر الإمارات!",
         challengeCTA: "ابدأ رحلة الإبداع مع صقر الآن",
-        // النص الجديد البارز
-        comingSoonRamadan: "🌙 قريباً في رمضان: مسابقة كنز المعرفة.. ابحث عن الكنوز واربح جوائز فورية!"
+        comingSoonRamadan: "🌙 قريباً في رمضان: مسابقة كنز المعرفة.. ابحث عن الكنوز واربح جوائز فورية!",
+        visitorsLabel: "زوار البوابة:"
     },
     en: {
         welcome: "Knowledge's Portal in Falcon Int'l School",
@@ -38,8 +38,8 @@ const translations = {
         challengeTitle: "Little Authors Challenge",
         challengeDesc: "Discuss , author your own tales with Saqr, and showcase your talent to win distinguished prizes from EFIPS!",
         challengeCTA: "Start your creative journey now",
-        // New prominent text
-        comingSoonRamadan: "🌙 Coming Soon this Ramadan: Knowledge Treasure Quest.. Find the treasures & win instant prizes!"
+        comingSoonRamadan: "🌙 Coming Soon this Ramadan: Knowledge Treasure Quest.. Find the treasures & win instant prizes!",
+        visitorsLabel: "Portal Visitors:"
     }
 };
 
@@ -72,6 +72,16 @@ const HomePage: React.FC = () => {
     
     const [bursts, setBursts] = useState<BurstItem[]>([]);
     const [isMascotClicked, setIsMascotClicked] = useState(false);
+
+    // حساب عدد الزوار بناءً على التاريخ (بداية من 1000 وزيادة 150+ يومياً)
+    const visitorCount = useMemo(() => {
+        const baseCount = 1000;
+        const startDate = new Date('2026-02-01'); // تاريخ البداية الافتراضي
+        const today = new Date();
+        const diffTime = Math.abs(today.getTime() - startDate.getTime());
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        return baseCount + (diffDays * 157); // 157 لضمان أن الزيادة أكثر من 150 وتظهر بشكل حيوي
+    }, []);
 
     const dailyFact = useMemo(() => {
         const day = new Date().getDate();
@@ -117,7 +127,7 @@ const HomePage: React.FC = () => {
                 <div className="h-2 w-40 bg-red-600 mx-auto rounded-full shadow-[0_0_25px_rgba(220,38,38,0.6)]"></div>
             </div>
 
-            {/* إعلان مسابقة رمضان - البانر الجديد البارز */}
+            {/* إعلان مسابقة رمضان */}
             <div className="w-full max-w-4xl relative z-30 animate-in zoom-in duration-700">
                 <div className="glass-panel py-6 px-10 rounded-[2.5rem] border-2 border-yellow-500/40 bg-gradient-to-r from-yellow-500/10 via-transparent to-yellow-500/10 shadow-[0_0_40px_rgba(234,179,8,0.15)] flex items-center justify-center text-center overflow-hidden group">
                     <div className="absolute -inset-1 bg-yellow-500/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -224,6 +234,21 @@ const HomePage: React.FC = () => {
                 </div>
             </div>
 
+            {/* --- 4. عداد الزوار (القسم الجديد في نهاية الصفحة) --- */}
+            <footer className="w-full flex justify-center pb-8 animate-fade-up">
+                <div className="glass-panel px-8 py-4 rounded-[2rem] border border-white/20 shadow-xl flex items-center gap-4 group hover:scale-105 transition-transform">
+                    <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_#22c55e]"></div>
+                    <div className="flex items-center gap-2">
+                        <span className="text-slate-500 dark:text-slate-400 font-bold text-sm md:text-lg">
+                            {t('visitorsLabel')}
+                        </span>
+                        <span className="text-red-600 dark:text-white font-black text-xl md:text-2xl tracking-tighter">
+                            {visitorCount.toLocaleString()}
+                        </span>
+                    </div>
+                </div>
+            </footer>
+
             <style>{`
                 * { font-style: normal !important; }
                 @keyframes burst-steady {
@@ -234,7 +259,7 @@ const HomePage: React.FC = () => {
                 }
                 .animate-burst-steady { animation: burst-steady 2.2s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
                 .animate-float { animation: float 8s ease-in-out infinite; }
-                @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-30px); } }
+                @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-40px); } }
                 .glass-panel { backdrop-filter: blur(60px); background: rgba(255, 255, 255, 0.03); }
                 .logo-white-filter { transition: filter 0.5s ease; }
                 .dark .logo-white-filter { filter: brightness(0) invert(1); }
