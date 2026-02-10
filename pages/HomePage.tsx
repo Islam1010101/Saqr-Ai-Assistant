@@ -73,15 +73,24 @@ const HomePage: React.FC = () => {
     const [bursts, setBursts] = useState<BurstItem[]>([]);
     const [isMascotClicked, setIsMascotClicked] = useState(false);
 
-    // حساب عدد الزوار بناءً على التاريخ (بداية من 1000 وزيادة 150+ يومياً)
+    // حساب عدد الزوار بناءً على التاريخ
     const visitorCount = useMemo(() => {
         const baseCount = 1000;
-        const startDate = new Date('2026-02-01'); // تاريخ البداية الافتراضي
+        const startDate = new Date('2026-02-01');
         const today = new Date();
         const diffTime = Math.abs(today.getTime() - startDate.getTime());
         const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-        return baseCount + (diffDays * 157); // 157 لضمان أن الزيادة أكثر من 150 وتظهر بشكل حيوي
+        return baseCount + (diffDays * 157);
     }, []);
+
+    // تاريخ اليوم المحدث تلقائياً
+    const todayDate = useMemo(() => {
+        return new Date().toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    }, [locale]);
 
     const dailyFact = useMemo(() => {
         const day = new Date().getDate();
@@ -234,16 +243,28 @@ const HomePage: React.FC = () => {
                 </div>
             </div>
 
-            {/* --- 4. عداد الزوار (القسم الجديد في نهاية الصفحة) --- */}
+            {/* --- 4. عداد الزوار والتاريخ (الفوتر) --- */}
             <footer className="w-full flex justify-center pb-8 animate-fade-up">
-                <div className="glass-panel px-8 py-4 rounded-[2rem] border border-white/20 shadow-xl flex items-center gap-4 group hover:scale-105 transition-transform">
-                    <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_#22c55e]"></div>
-                    <div className="flex items-center gap-2">
-                        <span className="text-slate-500 dark:text-slate-400 font-bold text-sm md:text-lg">
+                <div className="glass-panel px-8 py-5 rounded-[2.5rem] border border-white/20 shadow-xl flex flex-col md:flex-row items-center gap-4 md:gap-8 group hover:scale-105 transition-all duration-500">
+                    {/* جزء العداد */}
+                    <div className="flex items-center gap-3">
+                        <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_#22c55e]"></div>
+                        <span className="text-slate-500 dark:text-slate-400 font-bold text-sm md:text-lg whitespace-nowrap">
                             {t('visitorsLabel')}
                         </span>
-                        <span className="text-red-600 dark:text-white font-black text-xl md:text-2xl tracking-tighter">
+                        <span className="text-red-600 dark:text-white font-black text-xl md:text-3xl tracking-tighter">
                             {visitorCount.toLocaleString()}
+                        </span>
+                    </div>
+                    
+                    {/* الفاصل العمودي */}
+                    <div className="hidden md:block h-8 w-px bg-white/10"></div>
+                    
+                    {/* جزء التاريخ */}
+                    <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
+                        <span className="text-xl md:text-2xl">📅</span>
+                        <span className="font-black text-sm md:text-xl tracking-tight uppercase">
+                            {todayDate}
                         </span>
                     </div>
                 </div>
