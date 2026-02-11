@@ -19,7 +19,7 @@ Linguistic & Little Author Rules:
    - Write one sentence, then wait for the student.
    - When the story is complete, provide a BRIEF CREATIVE SUMMARY of the story.
    - Then, ask the student for their "Full Name" to issue their certificate.
-3. HYBRID SEARCH: Check all EFIPS records. Use normalization (ا=أ=إ) to find books.
+3. HYBRID SEARCH: You MUST first verify if the book exists in the "EFIPS Library Records" provided in the context.
 4. TAGGING (CRITICAL): Once you get the name, output: [WINNER: StudentName, Activity: Little Author, Content: SummaryOfTheStory].
 STYLE: Professional, Bold, NO ITALICS. Correct name: صقر.
 `;
@@ -78,7 +78,7 @@ const SmartSearchPage: React.FC = () => {
     setInput('');
     setIsLoading(true);
 
-    // دالة تنظيف النصوص لتحسين دقة البحث بالعربي
+    // دالة تنظيف متطورة
     const normalize = (text: string) => 
       text?.toString()
           .replace(/[أإآا]/g, 'ا')
@@ -87,27 +87,39 @@ const SmartSearchPage: React.FC = () => {
           .toLowerCase()
           .trim() || '';
 
-    const q = normalize(userQuery);
+    const qNormalized = normalize(userQuery);
+    // تقطيع كلمات البحث لتوسيع نطاق البحث (Tokens)
+    const queryWords = qNormalized.split(/\s+/).filter(word => word.length > 2);
 
-    // البحث في قواعد البيانات الثلاثة
     const searchIn = (db: any[], location: string) => {
-      return db.filter(b => 
-        normalize(b.title).includes(q) || 
-        normalize(b.author).includes(q) || 
-        normalize(b.subject || b.category).includes(q)
-      ).map(b => ({ ...b, pageLocation: location }));
+      return db.filter(b => {
+        const title = normalize(b.title);
+        const author = normalize(b.author || '');
+        const subject = normalize(b.subject || b.category || '');
+        
+        // البحث عن تطابق الجملة كاملة أو أي كلمة أساسية من البحث
+        return title.includes(qNormalized) || 
+               author.includes(qNormalized) || 
+               queryWords.some(word => title.includes(word) || author.includes(word) || subject.includes(word));
+      }).map(b => ({ ...b, pageLocation: location }));
     };
 
+    // البحث في الـ 3 مصادر المطلوبة
     const foundBooks = [
-      ...searchIn(bookData, "المكتبة العامة (bookData)"),
-      ...searchIn(ARABIC_LIBRARY_DATABASE, "قسم اللغة العربية (Arabic Library Page)"),
-      ...searchIn(ENGLISH_LIBRARY_DATABASE, "قسم اللغة الإنجليزية (English Library Page)")
+      ...searchIn(bookData, "سجلات الكتب المطبوعة بالمكتبة (Physical Books)"),
+      ...searchIn(ARABIC_LIBRARY_DATABASE, "المكتبة الإلكترونية العربية (Arabic Digital Library)"),
+      ...searchIn(ENGLISH_LIBRARY_DATABASE, "المكتبة الإلكترونية الإنجليزية (English Digital Library)")
     ];
 
-    // بناء سياق البحث (Context) بناءً على النتائج
-    const searchContext = foundBooks.length > 0 
-      ? `IMPORTANT: I found these specific books in EFIPS school records matching the query "${userQuery}": ${JSON.stringify(foundBooks.slice(0, 10))}. Mention the book title, author, and its pageLocation clearly to the student.`
-      : `No specific matches found in EFIPS library databases for "${userQuery}". Use your general AI knowledge to answer, but clarify if the information is not from the school's specific library records.`;
+    // بناء سياق صارم لصقر
+    let searchContext = "";
+    if (foundBooks.length > 0) {
+      searchContext = `EFIPS LIBRARY RECORDS FOUND: The following books exist in our records: ${JSON.stringify(foundBooks.slice(0, 15))}. 
+      Your task: Confirm to the student that the book IS AVAILABLE and specify its location clearly (e.g., in Physical Library or Digital Portal).`;
+    } else {
+      searchContext = `EFIPS LIBRARY RECORDS NOT FOUND: No books matching "${userQuery}" were found in our official physical or digital databases. 
+      Your task: Inform the student politely that this specific title is not in our school records. You may then suggest similar topics from your general knowledge, but clearly state they are general recommendations and not currently in the school library database.`;
+    }
 
     try {
       const response = await fetch('/api/chat', {
