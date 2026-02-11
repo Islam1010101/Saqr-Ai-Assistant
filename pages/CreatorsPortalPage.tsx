@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom'; // تم التأكد من تفعيل الرابط
 import { useLanguage } from '../App';
 
 // --- الأيقونات البرمجية SVG ---
@@ -114,15 +114,15 @@ const CreatorsPortalPage: React.FC = () => {
                     {isAr ? 'بوابة المبدعين' : 'CREATORS PORTAL'}
                 </h1>
                 
-                {/* زر كن مبدعاً (تمت إضافة "قريباً") */}
+                {/* زر كن مبدعاً (تم ربطه بصفحة المرسم) */}
                 <div className="mt-8 mb-4 animate-in zoom-in duration-700">
-                    <div className="group relative inline-flex items-center gap-4 bg-gradient-to-r from-red-600 to-red-800 text-white px-10 py-5 rounded-[2.5rem] shadow-2xl transition-all cursor-wait">
-                         <div className="absolute -inset-1 bg-red-600 rounded-[2.6rem] blur opacity-30 animate-pulse"></div>
+                    <Link to="/creators-studio" className="group relative inline-flex items-center gap-4 bg-gradient-to-r from-red-600 to-red-800 text-white px-10 py-5 rounded-[2.5rem] shadow-2xl hover:scale-105 active:scale-95 transition-all cursor-pointer">
+                         <div className="absolute -inset-1 bg-red-600 rounded-[2.6rem] blur opacity-30 group-hover:opacity-60 animate-pulse transition-opacity"></div>
                          <IconBrush />
                          <span className="text-xl md:text-3xl font-black uppercase tracking-tighter">
-                            {isAr ? 'كن مبدعاً (قريباً)' : 'Be Creative (Soon)'}
+                            {isAr ? 'كن مبدعاً' : 'Be Creative'}
                          </span>
-                    </div>
+                    </Link>
                 </div>
 
                 <div className="flex items-center justify-center gap-4 mt-8 opacity-40">
@@ -233,7 +233,7 @@ const CreatorsPortalPage: React.FC = () => {
                 }
                 .animate-burst-steady { animation: burst-steady 2.5s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
                 .animate-float { animation: float 6s ease-in-out infinite; }
-                @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-40px); } }
+                @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-30px); } }
                 .logo-smart-filter { transition: filter 0.5s ease; }
                 .dark .logo-smart-filter { filter: brightness(0) invert(1); }
                 * { font-style: normal !important; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
