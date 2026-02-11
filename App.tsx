@@ -13,6 +13,8 @@ import EnglishLibraryInternalPage from './pages/EnglishLibraryInternalPage';
 import FeedbackPage from './pages/FeedbackPage';
 import CreatorsPortalPage from './pages/CreatorsPortalPage';
 import LibraryMapPage from './pages/LibraryMapPage';
+// --- السطر اللي كان ناقص (Import) ---
+import CreatorsStudioPage from './pages/CreatorsStudioPage'; 
 
 import type { Locale } from './types';
 
@@ -82,7 +84,6 @@ const Header: React.FC = () => {
     { path: '/creators', label: locale === 'en' ? 'Creators' : 'بوابة المبدعين', icon: '🎨', hint: locale === 'en' ? 'Talents' : 'إبداعات طلابنا', color: 'bg-red-600' },
     { path: '/feedback', label: locale === 'en' ? 'Ideas' : 'مقترحات', icon: '✍️', hint: locale === 'en' ? 'Contact' : 'رأيك يهمنا', color: 'bg-green-600' }, 
     { path: '/reports', label: locale === 'en' ? 'Reports' : 'تقارير', icon: '📊', hint: locale === 'en' ? 'Reports' : 'تقارير', color: 'bg-slate-800' },
-    // تم تصحيح التنصيص في Lib's Map لضمان نجاح الـ Build
     { path: '/map', label: locale === 'en' ? "Lib's Map" : 'خريطة المكتبة', icon: '🗺️', hint: locale === 'en' ? 'Shelf Cont' : 'محتويات الأرفف', color: 'bg-red-600' },
     { path: '/about', label: locale === 'en' ? 'About' : 'عنا', icon: 'ℹ️', hint: locale === 'en' ? 'About us' : 'من نحن؟', color: 'bg-green-700' },
   ];
@@ -202,6 +203,10 @@ const App: React.FC = () => {
                 <Route path="/digital-library/arabic" element={<ArabicLibraryInternalPage />} />
                 <Route path="/digital-library/english" element={<EnglishLibraryInternalPage />} />
                 <Route path="/creators" element={<CreatorsPortalPage />} />
+                
+                {/* --- السطر اللي كان ناقص (Route) --- */}
+                <Route path="/creators-studio" element={<CreatorsStudioPage />} />
+
                 <Route path="/reports" element={<ReportsPage />} />
                 <Route path="/feedback" element={<FeedbackPage />} /> 
                 <Route path="/about" element={<AboutPage />} />
