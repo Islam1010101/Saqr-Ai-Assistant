@@ -114,7 +114,7 @@ const CreatorsPortalPage: React.FC = () => {
                     {isAr ? 'بوابة المبدعين' : 'CREATORS PORTAL'}
                 </h1>
                 
-                {/* زر كن مبدعاً (تم ربطه بصفحة المرسم) */}
+                {/* زر كن مبدعاً (تم التأكد من الرابط لصفحة المرسم) */}
                 <div className="mt-8 mb-4 animate-in zoom-in duration-700">
                     <Link to="/creators-studio" className="group relative inline-flex items-center gap-4 bg-gradient-to-r from-red-600 to-red-800 text-white px-10 py-5 rounded-[2.5rem] shadow-2xl hover:scale-105 active:scale-95 transition-all cursor-pointer">
                          <div className="absolute -inset-1 bg-red-600 rounded-[2.6rem] blur opacity-30 group-hover:opacity-60 animate-pulse transition-opacity"></div>
@@ -167,7 +167,7 @@ const CreatorsPortalPage: React.FC = () => {
                                             </div>
                                         </a>
                                         <div className="text-center px-2 space-y-2">
-                                            <h3 className="text-base md:text-4xl font-black text-slate-900 dark:text-white line-clamp-1 group-hover:text-red-600 transition-colors leading-relaxed">{work.title}</h3>
+                                            <h3 className="text-base md:text-4xl font-black text-slate-950 dark:text-white line-clamp-1 group-hover:text-red-600 transition-colors leading-relaxed">{work.title}</h3>
                                             <p className="text-green-600 dark:text-green-400 font-bold text-xs md:text-xl uppercase opacity-80">{work.author}</p>
                                             <div className="bg-slate-950/90 dark:bg-black/80 backdrop-blur-3xl p-4 md:p-6 rounded-2xl border border-white/10 shadow-inner transition-all duration-500 group-hover:border-red-600/40">
                                                 <audio ref={el => { if(el) audioRefs.current.set(work.id, el); }} onEnded={() => setPlayingAudioId(null)} src={work.audioUrl} hidden />
