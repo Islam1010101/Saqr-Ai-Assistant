@@ -78,16 +78,47 @@ const SmartSearchPage: React.FC = () => {
     setInput('');
     setIsLoading(true);
 
-    const normalize = (text: string) => text.replace(/[أإآا]/g, 'ا').replace(/[ةه]/g, 'ه').toLowerCase().trim();
+    // دالة تنظيف النصوص لتحسين دقة البحث بالعربي
+    const normalize = (text: string) => 
+      text?.toString()
+          .replace(/[أإآا]/g, 'ا')
+          .replace(/[ةه]/g, 'ه')
+          .replace(/[ىي]/g, 'ي')
+          .toLowerCase()
+          .trim() || '';
+
     const q = normalize(userQuery);
-    const context = `Context: ${JSON.stringify(bookData.filter(b => normalize(b.title).includes(q)))} | ${JSON.stringify(ARABIC_LIBRARY_DATABASE.filter(b => normalize(b.title).includes(q)))}`;
+
+    // البحث في قواعد البيانات الثلاثة
+    const searchIn = (db: any[], location: string) => {
+      return db.filter(b => 
+        normalize(b.title).includes(q) || 
+        normalize(b.author).includes(q) || 
+        normalize(b.subject || b.category).includes(q)
+      ).map(b => ({ ...b, pageLocation: location }));
+    };
+
+    const foundBooks = [
+      ...searchIn(bookData, "المكتبة العامة (bookData)"),
+      ...searchIn(ARABIC_LIBRARY_DATABASE, "قسم اللغة العربية (Arabic Library Page)"),
+      ...searchIn(ENGLISH_LIBRARY_DATABASE, "قسم اللغة الإنجليزية (English Library Page)")
+    ];
+
+    // بناء سياق البحث (Context) بناءً على النتائج
+    const searchContext = foundBooks.length > 0 
+      ? `IMPORTANT: I found these specific books in EFIPS school records matching the query "${userQuery}": ${JSON.stringify(foundBooks.slice(0, 10))}. Mention the book title, author, and its pageLocation clearly to the student.`
+      : `No specific matches found in EFIPS library databases for "${userQuery}". Use your general AI knowledge to answer, but clarify if the information is not from the school's specific library records.`;
 
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: [{ role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${context}` }, ...messages, { role: 'user', content: userQuery }],
+          messages: [
+            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${searchContext}` }, 
+            ...messages, 
+            { role: 'user', content: userQuery }
+          ],
           locale,
         }),
       });
@@ -114,13 +145,11 @@ const SmartSearchPage: React.FC = () => {
   return (
     <div dir={dir} className="w-full max-w-xl md:max-w-3xl mx-auto px-4 py-4 md:py-8 h-[92dvh] flex flex-col font-black antialiased relative">
       
-      {/* توهج ملكي بدون أطر */}
       <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden opacity-30">
           <div className="absolute top-[-5%] left-[-20%] w-[500px] h-[500px] bg-red-600/30 blur-[150px] rounded-full animate-pulse"></div>
           <div className="absolute bottom-[-5%] right-[-20%] w-[600px] h-[600px] bg-red-900/30 blur-[200px] rounded-full delay-1000 animate-pulse"></div>
       </div>
 
-      {/* الهيدر: تم إلغاء الأطر + شعار مدرسة صقر الإمارات */}
       <div className="mb-6 flex items-center justify-between px-6 py-5 glass-panel rounded-3xl border-0 shadow-2xl bg-white/5 backdrop-blur-3xl">
         <div className="flex items-center gap-4 text-start">
           <div className="relative group">
@@ -138,7 +167,6 @@ const SmartSearchPage: React.FC = () => {
         </div>
       </div>
 
-      {/* منطقة الرسائل */}
       <div className="flex-1 overflow-y-auto space-y-8 md:space-y-12 no-scrollbar px-1 py-4 relative scroll-smooth">
         {messages.map((msg, index) => (
           <div key={index} className={`flex items-start gap-3 md:gap-8 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'} animate-fade-up`}>
@@ -160,14 +188,12 @@ const SmartSearchPage: React.FC = () => {
           </div>
         ))}
         
-        {/* قسم شهادة المؤلف الصغير الذكية */}
         {winnerData && winnerData.activity?.includes('Author') && (
           <div className="mt-10 animate-bounce text-center px-4">
             <button onClick={handleDownloadPDF} className="w-full md:w-auto px-10 py-5 bg-red-600 text-white font-black rounded-full shadow-3xl hover:scale-105 transition-all text-sm md:text-xl uppercase tracking-widest">
               {t('download')}
             </button>
             
-            {/* تصميم الشهادة الجذاب (Snapshot) */}
             <div className="fixed left-[-9999px] top-0">
                 <div ref={certificateRef} className="w-[800px] p-20 bg-black text-white text-center font-black border-[15px] border-red-600 rounded-[5rem] relative overflow-hidden">
                     <img src="/school-logo.png" className="w-44 mx-auto mb-10 rotate-[15deg] brightness-0 invert" alt="Logo" />
@@ -188,7 +214,6 @@ const SmartSearchPage: React.FC = () => {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* شريط الإدخال الكريستالي */}
       <div className="mt-4 pb-6 px-2">
         <div className="max-w-xl md:max-w-2xl mx-auto relative group">
           <div className="absolute -inset-1 bg-red-600/20 rounded-full blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-1000"></div>
