@@ -111,7 +111,7 @@ const CreatorsPortalPage: React.FC = () => {
             {/* الهيدر */}
             <header className="relative pt-12 md:pt-32 pb-8 text-center px-4 z-10">
                 <h1 className="text-3xl sm:text-5xl lg:text-[10rem] font-black mb-4 tracking-tighter leading-tight text-slate-950 dark:text-white drop-shadow-2xl animate-fade-up">
-                    {isAr ? 'بوابة المبدعين' : 'CREATORS PORTAL'}
+                    {isAr ? 'ركن المبدعين' : 'CREATORS CORNER'}
                 </h1>
                 
                 {/* زر كن مبدعاً (تم التأكد من الرابط لصفحة المرسم) */}
