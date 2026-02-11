@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { useLanguage } from '../App';
 
 // --- الأيقونات ---
@@ -22,27 +21,29 @@ const CreatorsStudioPage: React.FC = () => {
     const [studentName, setStudentName] = useState("");
     const [step, setStep] = useState<'draw' | 'result'>('draw');
 
-    // تظبيط اللوحة
+    // تظبيط أبعاد اللوحة عند التحميل أو تغيير الحجم
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        const resize = () => {
+        const handleResize = () => {
             const parent = canvas.parentElement;
             if (parent) {
-                const temp = ctx.getImageData(0,0, canvas.width, canvas.height);
+                // حفظ الرسمة الحالية قبل تغيير الحجم
+                const tempImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 canvas.width = parent.clientWidth;
                 canvas.height = parent.clientHeight;
                 ctx.lineCap = 'round';
                 ctx.lineJoin = 'round';
-                ctx.putImageData(temp, 0, 0);
+                ctx.putImageData(tempImage, 0, 0);
             }
         };
-        resize();
-        window.addEventListener('resize', resize);
-        return () => window.removeEventListener('resize', resize);
+
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
     }, []);
 
     const getPos = (e: any) => {
@@ -52,30 +53,42 @@ const CreatorsStudioPage: React.FC = () => {
         return { x: clientX - rect.left, y: clientY - rect.top };
     };
 
-    const start = (e: any) => { setIsDrawing(true); const pos = getPos(e); canvasRef.current?.getContext('2d')?.moveTo(pos.x, pos.y); };
-    const stop = () => { setIsDrawing(false); canvasRef.current?.getContext('2d')?.beginPath(); };
-    
+    const startDrawing = (e: any) => {
+        setIsDrawing(true);
+        const pos = getPos(e);
+        const ctx = canvasRef.current?.getContext('2d');
+        if (ctx) {
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+        }
+    };
+
     const draw = (e: any) => {
         if (!isDrawing) return;
         const ctx = canvasRef.current?.getContext('2d');
         if (!ctx) return;
         const pos = getPos(e);
+        
         ctx.lineWidth = lineWidth;
         ctx.strokeStyle = tool === 'eraser' ? (document.documentElement.classList.contains('dark') ? '#020617' : '#ffffff') : color;
         ctx.lineTo(pos.x, pos.y);
         ctx.stroke();
     };
 
+    const stopDrawing = () => {
+        setIsDrawing(false);
+    };
+
     const analyzeWork = () => {
         setIsAnalyzing(true);
         setSaqrFeedback(null);
         
-        // محاكاة تحليل الرؤية البصرية (AI Vision)
+        // محاكاة تحليل الرؤية البصرية بذكاء صقر
         setTimeout(() => {
             setIsAnalyzing(false);
             const feedback = mode === 'cover' 
-                ? (isAr ? "هايل! لقد تعرفت على العنوان بخط يدك الجميل. ألوان الغلاف متناسقة جداً وتعبر عن القصة بذكاء." : "Amazing! I've recognized the title in your beautiful handwriting. The cover colors are perfectly balanced.")
-                : (isAr ? "مخطط علمي عبقري! لقد قرأت الرموز الهندسية في رسمك؛ هذا الابتكار ينم عن فكر هندسي متطور." : "Genius diagram! I've read the engineering symbols in your sketch; this innovation shows advanced logic.");
+                ? (isAr ? "يا فنان! لقد تعرفت على العنوان المكتوب بخط يدك.. الألوان متناسقة جداً وتليق بغلاف كتاب عالمي. صقر فخور بك!" : "Artist! I recognized the title in your handwriting. The colors are balanced and fit for a world-class book cover.")
+                : (isAr ? "ابتكار مذهل! لقد حللت المخطط الهندسي الذي رسمته؛ توزيع العناصر ينم عن ذكاء تقني كبير. أحسنت!" : "Amazing innovation! I analyzed your engineering diagram; the element distribution shows great technical intelligence.");
             setSaqrFeedback(feedback);
             setStep('result');
             new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3').play().catch(()=>{});
@@ -83,104 +96,108 @@ const CreatorsStudioPage: React.FC = () => {
     };
 
     return (
-        <div dir={dir} className="min-h-screen bg-slate-50 dark:bg-[#020617] transition-colors duration-700 font-black relative pb-20 overflow-x-hidden selection:bg-red-600/30">
+        <div dir={dir} className="min-h-screen bg-slate-50 dark:bg-[#020617] transition-colors duration-700 font-black relative pb-20 overflow-x-hidden">
             
-            {/* الهيدر الملكي */}
             <header className="relative pt-12 md:pt-20 pb-8 text-center px-4 z-10">
                 <div className="flex flex-col items-center gap-6">
                     <div className="relative group">
-                        <div className="absolute -inset-4 bg-gradient-to-r from-red-600 via-yellow-500 to-green-600 rounded-full blur-2xl opacity-40 group-hover:opacity-100 animate-pulse transition-all"></div>
-                        <img src="unnamed.jpg" alt="Saqr Artist" className="w-32 h-32 md:w-48 md:h-48 rounded-full border-4 border-white shadow-2xl object-cover relative z-10" />
+                        <div className="absolute -inset-4 bg-gradient-to-r from-red-600 via-yellow-500 to-green-600 rounded-full blur-2xl opacity-40 animate-pulse"></div>
+                        <img src="/unnamed.jpg" alt="Saqr Artist" className="w-32 h-32 md:w-48 md:h-48 rounded-full border-4 border-white shadow-2xl object-cover relative z-10" />
                     </div>
-                    <div className="space-y-2">
-                        <h1 className="text-4xl md:text-8xl tracking-tighter text-slate-950 dark:text-white uppercase leading-none">
-                            {isAr ? 'مرسم صقر المبدع' : 'SAQR ART STUDIO'}
-                        </h1>
-                        <p className="text-red-600 dark:text-red-500 text-lg md:text-3xl italic opacity-80">
-                            {isAr ? 'ارسم.. صقر يحلل إبداعك فوراً' : 'Sketch.. Saqr analyzes your work live'}
-                        </p>
-                    </div>
+                    <h1 className="text-4xl md:text-8xl tracking-tighter text-slate-950 dark:text-white uppercase leading-none">
+                        {isAr ? 'مرسم صقر المبدع' : 'SAQR ART STUDIO'}
+                    </h1>
                 </div>
             </header>
 
-            <div className="max-w-[1920px] mx-auto px-4 md:px-10 relative z-10 grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+            <div className="max-w-[1920px] mx-auto px-4 md:px-10 relative z-10 grid grid-cols-1 xl:grid-cols-12 gap-8 items-start h-[70vh]">
                 
                 {/* 1. أدوات التحكم */}
                 <div className="xl:col-span-3 space-y-6">
-                    <div className="glass-panel p-8 rounded-[3rem] border border-white/20 shadow-2xl space-y-10">
+                    <div className="glass-panel p-6 rounded-[3rem] border border-white/20 shadow-2xl space-y-8">
                         <div className="space-y-4">
-                            <h3 className="text-red-600 text-xl md:text-2xl uppercase">{isAr ? 'نوع التحدي' : 'Challenge Mode'}</h3>
-                            <div className="flex flex-col gap-3">
-                                <button onClick={() => setMode('cover')} className={`py-4 rounded-2xl font-black transition-all ${mode === 'cover' ? 'bg-red-600 text-white shadow-lg scale-105' : 'bg-slate-100 dark:bg-white/5'}`}>{isAr ? '🎨 غلاف كتاب' : '🎨 Book Cover'}</button>
-                                <button onClick={() => setMode('innovation')} className={`py-4 rounded-2xl font-black transition-all ${mode === 'innovation' ? 'bg-green-600 text-white shadow-lg scale-105' : 'bg-slate-100 dark:bg-white/5'}`}>{isAr ? '🚀 ابتكار علمي' : '🚀 Innovation'}</button>
+                            <h3 className="text-red-600 text-xl">{isAr ? 'نوع الإبداع' : 'Type of Creativity'}</h3>
+                            <div className="flex flex-col gap-2">
+                                <button onClick={() => setMode('cover')} className={`py-4 rounded-2xl transition-all ${mode === 'cover' ? 'bg-red-600 text-white shadow-lg' : 'bg-slate-100 dark:bg-white/5'}`}>{isAr ? '🎨 غلاف كتاب' : '🎨 Book Cover'}</button>
+                                <button onClick={() => setMode('innovation')} className={`py-4 rounded-2xl transition-all ${mode === 'innovation' ? 'bg-green-600 text-white shadow-lg' : 'bg-slate-100 dark:bg-white/5'}`}>{isAr ? '🚀 ابتكار علمي' : '🚀 Innovation'}</button>
                             </div>
                         </div>
 
                         <div className="space-y-4">
-                            <h3 className="text-slate-500 text-xl uppercase">{isAr ? 'الأدوات' : 'The Brushes'}</h3>
+                            <h3 className="text-slate-500 text-lg">{isAr ? 'الأدوات' : 'Tools'}</h3>
                             <div className="flex gap-2">
-                                <button onClick={() => setTool('pen')} className={`flex-1 p-5 rounded-2xl border-2 transition-all ${tool === 'pen' ? 'border-red-600 bg-red-600/10' : 'border-transparent bg-slate-100 dark:bg-white/5'}`}><IconPen /></button>
-                                <button onClick={() => setTool('eraser')} className={`flex-1 p-5 rounded-2xl border-2 transition-all ${tool === 'eraser' ? 'border-slate-500 bg-slate-500/10' : 'border-transparent bg-slate-100 dark:bg-white/5'}`}><IconEraser /></button>
-                                <button onClick={() => canvasRef.current?.getContext('2d')?.clearRect(0,0,9000,9000)} className="p-5 rounded-2xl bg-red-500/10 text-red-600 hover:bg-red-600 hover:text-white transition-all"><IconTrash /></button>
+                                <button onClick={() => setTool('pen')} className={`flex-1 p-5 rounded-xl border-2 ${tool === 'pen' ? 'border-red-600 bg-red-600/10' : 'border-transparent bg-slate-100 dark:bg-white/5'}`}><IconPen /></button>
+                                <button onClick={() => setTool('eraser')} className={`flex-1 p-5 rounded-xl border-2 ${tool === 'eraser' ? 'border-slate-500 bg-slate-500/10' : 'border-transparent bg-slate-100 dark:bg-white/5'}`}><IconEraser /></button>
+                                <button onClick={() => canvasRef.current?.getContext('2d')?.clearRect(0,0,9000,9000)} className="p-5 rounded-xl bg-red-500/10 text-red-600 hover:bg-red-600 hover:text-white transition-all"><IconTrash /></button>
                             </div>
-                            <div className="flex items-center gap-4 bg-slate-100 dark:bg-white/5 p-4 rounded-3xl border border-white/10">
-                                <input type="color" value={color} onChange={(e) => {setColor(e.target.value); setTool('pen');}} className="w-16 h-16 rounded-full border-none cursor-pointer bg-transparent" />
-                                <span className="text-xs font-mono opacity-50 uppercase tracking-widest">{color}</span>
+                            <div className="flex items-center gap-4 bg-slate-100 dark:bg-white/5 p-4 rounded-2xl">
+                                <input type="color" value={color} onChange={(e) => {setColor(e.target.value); setTool('pen');}} className="w-12 h-12 rounded-full border-none cursor-pointer bg-transparent" />
+                                <span className="text-xs font-bold opacity-60 uppercase">{color}</span>
                             </div>
-                            <div className="space-y-2">
-                                <div className="flex justify-between text-xs opacity-50"><span>{isAr ? 'ناعم' : 'Thin'}</span><span>{isAr ? 'عريض' : 'Bold'}</span></div>
-                                <input type="range" min="2" max="60" value={lineWidth} onChange={(e) => setLineWidth(parseInt(e.target.value))} className="w-full h-2 bg-slate-200 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-red-600" />
-                            </div>
+                            <input type="range" min="2" max="50" value={lineWidth} onChange={(e) => setLineWidth(parseInt(e.target.value))} className="w-full h-2 bg-slate-200 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-red-600" />
                         </div>
                     </div>
                 </div>
 
-                {/* 2. اللوحة (قلب المرسم) */}
-                <div className="xl:col-span-6 flex flex-col gap-6">
-                    <div className="flex-1 glass-panel rounded-[4rem] border-4 border-white shadow-3xl overflow-hidden bg-white dark:bg-slate-900/40 relative min-h-[600px] cursor-crosshair group/canvas">
-                         <canvas ref={canvasRef} onMouseDown={start} onMouseMove={draw} onMouseUp={stop} onMouseLeave={stop} onTouchStart={start} onTouchMove={draw} onTouchEnd={stop} className="w-full h-full touch-none" />
-                         <div className="absolute inset-0 flex items-center justify-center -z-10 opacity-[0.03] pointer-events-none group-hover/canvas:opacity-[0.06] transition-opacity">
-                            <img src="unnamed.jpg" alt="Seal" className="w-[60%] rotate-12" />
+                {/* 2. اللوحة (التي كانت بيضاء) */}
+                <div className="xl:col-span-6 flex flex-col gap-6 h-full">
+                    <div className="flex-1 glass-panel rounded-[4rem] border-4 border-white/20 shadow-3xl overflow-hidden bg-white dark:bg-slate-900/40 relative min-h-[500px] cursor-crosshair">
+                         <canvas 
+                            ref={canvasRef} 
+                            onMouseDown={startDrawing} 
+                            onMouseMove={draw} 
+                            onMouseUp={stopDrawing} 
+                            onMouseLeave={stopDrawing}
+                            onTouchStart={startDrawing}
+                            onTouchMove={draw}
+                            onTouchEnd={stopDrawing}
+                            className="w-full h-full touch-none" 
+                         />
+                         <div className="absolute inset-0 flex items-center justify-center -z-10 opacity-[0.03] pointer-events-none">
+                            <img src="/school-logo.png" alt="EFIPS" className="w-[60%] rotate-12" />
                         </div>
                     </div>
-                    <button onClick={analyzeWork} disabled={isAnalyzing || step === 'result'} className="py-8 rounded-[3rem] bg-slate-950 dark:bg-white text-white dark:text-slate-950 font-black text-3xl md:text-5xl shadow-3xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50">
-                        {isAnalyzing ? (isAr ? 'صقر يقرأ خطوطك...' : 'Saqr is Reading...') : <div className="flex items-center justify-center gap-4"><IconMagic /> {isAr ? 'تحليل ذكاء صقر' : 'SAQR AI ANALYZE'}</div>}
+                    <button 
+                        onClick={analyzeWork} 
+                        disabled={isAnalyzing || step === 'result'} 
+                        className="py-6 rounded-[2.5rem] bg-slate-950 dark:bg-white text-white dark:text-slate-950 font-black text-3xl shadow-3xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+                    >
+                        {isAnalyzing ? (isAr ? 'صقر يقرأ إبداعك...' : 'Saqr is Scanning...') : <div className="flex items-center justify-center gap-4"><IconMagic /> {isAr ? 'اطلب رأي صقر (Live AI)' : 'Get Saqr Live Feedback'}</div>}
                     </button>
                 </div>
 
-                {/* 3. فيدباك صقر والفوز */}
-                <div className="xl:col-span-3">
-                    <div className="glass-panel p-10 rounded-[4rem] border border-white/20 shadow-2xl min-h-[500px] flex flex-col items-center justify-center text-center relative overflow-hidden h-full">
+                {/* 3. فيدباك صقر */}
+                <div className="xl:col-span-3 h-full">
+                    <div className="glass-panel p-8 rounded-[4rem] border border-white/20 shadow-2xl flex flex-col items-center justify-center text-center relative overflow-hidden h-full">
                         {step === 'draw' && (
-                            <div className="space-y-8 animate-fade-in">
-                                <img src="unnamed.jpg" className="w-48 h-48 rounded-full border-4 border-red-600 shadow-xl mx-auto animate-float object-cover" alt="Saqr" />
-                                <p className="text-slate-500 dark:text-slate-400 text-xl md:text-2xl leading-relaxed italic">
-                                    "{isAr ? 'ارسم فكرتك، اكتب اسمك بيدك، وسأخبرك برأيي الهندسي فوراً!' : 'Draw your idea, write your name, and I will give you my feedback!'}"
+                            <div className="space-y-6 animate-fade-in">
+                                <img src="/unnamed.jpg" className="w-48 h-48 rounded-full border-4 border-red-600 shadow-xl mx-auto animate-float object-cover" />
+                                <p className="text-slate-500 dark:text-slate-400 text-xl italic font-bold leading-relaxed">
+                                    "{isAr ? 'ارسم مخططك أو غلافك، وسأقوم بتحليل كل لمسة من ريشتك!' : 'Draw your cover or innovation, and I will analyze every brushstroke!'}"
                                 </p>
                             </div>
                         )}
 
                         {step === 'result' && (
-                            <div className="space-y-8 animate-fade-up w-full">
-                                <div className="relative inline-block">
-                                    <img src="unnamed.jpg" className="w-40 h-40 rounded-full border-4 border-green-600 shadow-2xl mx-auto animate-bounce object-cover" alt="Saqr Happy" />
-                                    <div className="absolute -top-2 -right-2 bg-green-600 text-white p-2 rounded-full shadow-lg">✅</div>
-                                </div>
-                                <div className="bg-slate-950 dark:bg-white text-white dark:text-slate-950 p-8 rounded-[2.5rem] shadow-2xl relative border-t-8 border-green-600">
-                                    <p className="text-xl md:text-2xl font-black leading-relaxed">{saqrFeedback}</p>
+                            <div className="space-y-6 animate-fade-up w-full">
+                                <img src="/unnamed.jpg" className="w-32 h-32 rounded-full border-4 border-green-600 shadow-2xl mx-auto animate-bounce object-cover" />
+                                <div className="bg-slate-950 dark:bg-white text-white dark:text-slate-950 p-6 rounded-[2rem] shadow-xl relative border-t-8 border-green-600">
+                                    <p className="text-lg md:text-xl leading-relaxed">{saqrFeedback}</p>
                                 </div>
                                 
-                                <div className="space-y-4 pt-4">
-                                    <p className="text-red-600 font-black">{isAr ? 'أنت مبدع! ما هو اسمك يا بطل؟' : 'You are a star! What is your name?'}</p>
+                                <div className="space-y-4">
                                     <input 
                                         type="text" 
                                         value={studentName}
                                         onChange={(e) => setStudentName(e.target.value)}
-                                        placeholder={isAr ? "اكتب اسمك هنا..." : "Your name here..."}
+                                        placeholder={isAr ? "ما هو اسمك يا مبدع؟" : "What is your name, creator?"}
                                         className="w-full bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-white/10 rounded-2xl py-4 px-6 text-xl outline-none focus:border-green-600 transition-all"
                                     />
-                                    <button onClick={() => {alert(`تم حفظ عملك يا ${studentName}!`); setStep('draw'); setSaqrFeedback(null);}} className="w-full py-5 bg-green-600 text-white rounded-3xl font-black text-xl shadow-xl hover:scale-105 transition-all">
-                                        {isAr ? 'توثيق في معرض المدرسة ✨' : 'Publish to School Gallery ✨'}
+                                    <button 
+                                        onClick={() => { alert(isAr ? `تم توثيق عملك يا ${studentName}!` : `Work saved, ${studentName}!`); setStep('draw'); setSaqrFeedback(null); }}
+                                        className="w-full py-4 bg-green-600 text-white rounded-2xl font-black text-xl shadow-xl hover:scale-105"
+                                    >
+                                        {isAr ? 'نشر في معرض المدرسة ✨' : 'Publish to Gallery ✨'}
                                     </button>
                                 </div>
                             </div>
@@ -192,10 +209,9 @@ const CreatorsStudioPage: React.FC = () => {
             <style>{`
                 .glass-panel { backdrop-filter: blur(80px); background: rgba(255, 255, 255, 0.03); }
                 .animate-float { animation: float 6s ease-in-out infinite; }
-                @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-30px); } }
-                * { font-style: normal !important; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
-                [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3 { letter-spacing: 0 !important; }
-                canvas { cursor: crosshair; }
+                @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
+                * { font-style: normal !important; }
+                canvas { cursor: crosshair; touch-action: none; }
             `}</style>
         </div>
     );
