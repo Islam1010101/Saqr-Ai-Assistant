@@ -15,12 +15,12 @@ const CreatorsStudioPage: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [isDrawing, setIsDrawing] = useState(false);
     const [color, setColor] = useState('#ef4444');
-    const [lineWidth, setLineWidth] = useState(8);
+    const [lineWidth] = useState(8);
     const [tool, setTool] = useState<'pen' | 'eraser'>('pen');
     const [studentName, setStudentName] = useState("");
     const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
 
-    // توجيه التوهج الأبيض في العنوان
+    // توجيه التوهج في العنوان
     const handleTitleHover = (e: React.MouseEvent) => {
         const rect = e.currentTarget.getBoundingClientRect();
         const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -28,54 +28,81 @@ const CreatorsStudioPage: React.FC = () => {
         setMousePos({ x, y });
     };
 
+    // إعداد الكانفاس وربطه بحجم الشاشة
     useEffect(() => {
         const resize = () => {
             const canvas = canvasRef.current;
             const container = containerRef.current;
             if (!canvas || !container) return;
-            const temp = canvas.toDataURL();
+
+            // حفظ الرسم الحالي قبل تغيير الحجم
+            const tempImage = canvas.toDataURL();
             const img = new Image();
-            img.src = temp;
+            img.src = tempImage;
+
             canvas.width = container.offsetWidth;
             canvas.height = container.offsetHeight;
+
             img.onload = () => {
                 const ctx = canvas.getContext('2d');
                 if (ctx) {
-                    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
                     ctx.drawImage(img, 0, 0);
                 }
             };
         };
+
         resize();
         window.addEventListener('resize', resize);
         return () => window.removeEventListener('resize', resize);
     }, []);
 
+    // حساب الإحداثيات بدقة متناهية
     const getCoord = (e: any) => {
-        const rect = canvasRef.current!.getBoundingClientRect();
+        const canvas = canvasRef.current;
+        if (!canvas) return { x: 0, y: 0 };
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
         const cx = e.touches ? e.touches[0].clientX : e.clientX;
         const cy = e.touches ? e.touches[0].clientY : e.clientY;
-        return { x: cx - rect.left, y: cy - rect.top };
+
+        return {
+            x: (cx - rect.left) * scaleX,
+            y: (cy - rect.top) * scaleY
+        };
     };
 
     const startDraw = (e: any) => {
-        e.preventDefault();
+        if (e.button !== 0 && !e.touches) return; // يرسم فقط بالضغط الأساسي
         const ctx = canvasRef.current?.getContext('2d');
         if (!ctx) return;
+
         setIsDrawing(true);
         const pos = getCoord(e);
         ctx.beginPath();
         ctx.moveTo(pos.x, pos.y);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
     };
 
     const drawing = (e: any) => {
         if (!isDrawing) return;
-        e.preventDefault();
         const ctx = canvasRef.current?.getContext('2d');
         if (!ctx) return;
+
         const pos = getCoord(e);
         ctx.lineWidth = lineWidth;
-        ctx.strokeStyle = tool === 'eraser' ? (document.documentElement.classList.contains('dark') ? '#01040a' : '#ffffff') : color;
+        
+        // ظبط اللون بناءً على الأداة والوضع (ليلي/نهاري)
+        if (tool === 'eraser') {
+            ctx.strokeStyle = document.documentElement.classList.contains('dark') ? '#020617' : '#ffffff';
+        } else {
+            ctx.strokeStyle = color;
+        }
+
         ctx.lineTo(pos.x, pos.y);
         ctx.stroke();
     };
@@ -98,44 +125,43 @@ const CreatorsStudioPage: React.FC = () => {
     };
 
     return (
-        <div dir={dir} className="min-h-[100dvh] bg-slate-50 dark:bg-[#01040a] transition-colors duration-700 font-black relative overflow-hidden flex flex-col pt-2 md:pt-4 antialiased">
+        <div dir={dir} className="min-h-[100dvh] bg-slate-50 dark:bg-[#01040a] transition-colors duration-700 font-black relative overflow-hidden flex flex-col pt-4 antialiased">
             
             {/* الهيدر الملكي */}
-            <header className="relative z-30 px-4 md:px-10 w-full flex flex-col items-center gap-2 mb-4">
-                <div className="flex w-full justify-between items-center max-w-[1900px] mb-2">
-                    <Link to="/creators" className="glass-panel border border-white/40 px-5 py-2 md:px-8 md:py-3 bg-white/20 dark:bg-white/5 rounded-2xl text-[10px] md:text-xs text-slate-900 dark:text-white hover:bg-red-600 transition-all shadow-xl font-black uppercase">
+            <header className="relative z-30 px-4 md:px-10 w-full flex flex-col items-center gap-2 mb-6">
+                <div className="flex w-full justify-between items-center max-w-[1800px] mb-2">
+                    <Link to="/creators" className="glass-panel border border-white/40 px-6 py-2 md:px-10 md:py-4 bg-white/20 dark:bg-white/5 rounded-2xl text-xs md:text-lg text-slate-900 dark:text-white hover:bg-red-600 transition-all shadow-xl font-black uppercase">
                         {isAr ? '⬅ بوابة المبدعين' : '⬅ Portal'}
                     </Link>
-                    <img src="/unnamed.png" alt="Saqr" className="h-10 md:h-24 object-contain animate-float drop-shadow-2xl" />
+                    <img src="/unnamed.png" alt="Saqr" className="h-12 md:h-28 object-contain animate-float drop-shadow-2xl" />
                 </div>
                 
-                {/* العنوان الأسود الملكي مع التوهج الأبيض */}
                 <div className="relative group overflow-visible" onMouseMove={handleTitleHover}>
-                    <h1 className="text-5xl md:text-[11rem] tracking-tighter uppercase leading-none cursor-default select-none royal-black-title"
+                    <h1 className="text-6xl md:text-[10rem] tracking-tighter uppercase leading-none cursor-default select-none royal-black-title"
                         style={{ '--glow-x': `${mousePos.x}%`, '--glow-y': `${mousePos.y}%` } as any}>
                         {isAr ? 'ارسم ابداعك' : 'DRAW MAGIC'}
                     </h1>
                 </div>
-                <div className="h-1 w-40 md:w-[50rem] bg-gradient-to-r from-red-600 via-yellow-500 to-green-600 rounded-full opacity-40"></div>
+                <div className="h-1.5 w-40 md:w-[60rem] bg-gradient-to-r from-red-600 via-yellow-500 to-green-600 rounded-full opacity-40 shadow-lg"></div>
             </header>
 
-            {/* الحاوية الرئيسية - محسنة جداً للكمبيوتر */}
-            <div className="flex-1 max-w-[1920px] mx-auto px-2 md:px-10 grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10 items-stretch mb-6 w-full h-full overflow-hidden">
+            {/* الحاوية الرئيسية - محسنة للكمبيوتر */}
+            <div className="flex-1 max-w-[1900px] mx-auto px-4 md:px-10 grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10 items-stretch mb-8 w-full h-full">
                 
-                {/* 1. صندوق الأدوات ( Sidebar ) */}
-                <div className="lg:col-span-1 order-2 lg:order-1 flex lg:flex-col gap-2">
-                    <div className="glass-panel-heavy p-3 md:p-6 rounded-[2.5rem] border border-white/30 shadow-2xl bg-white/80 dark:bg-slate-900/50 backdrop-blur-3xl flex lg:flex-col gap-4 w-full h-fit lg:h-full justify-center items-center">
-                        <button onClick={() => setTool('pen')} className={`p-4 md:p-8 rounded-3xl border-4 transition-all ${tool === 'pen' ? 'border-red-600 bg-red-600/10 text-red-600 scale-110 shadow-xl' : 'border-transparent bg-black/5 dark:bg-white/10 dark:text-white'}`}><IconPen /></button>
-                        <button onClick={() => setTool('eraser')} className={`p-4 md:p-8 rounded-3xl border-4 transition-all ${tool === 'eraser' ? 'border-red-600 bg-red-600/10 text-red-600 scale-110 shadow-xl' : 'border-transparent bg-black/5 dark:bg-white/10 dark:text-white'}`}><IconEraser /></button>
-                        <button onClick={() => canvasRef.current?.getContext('2d')?.clearRect(0,0,5000,5000)} className="p-4 md:p-8 rounded-3xl bg-red-500/10 text-red-600 hover:bg-red-600 hover:text-white transition-all shadow-lg"><IconTrash /></button>
-                        <div className="w-px h-10 lg:w-full lg:h-px bg-slate-400 dark:bg-white/20 my-2"></div>
-                        <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="w-10 h-10 md:w-16 md:h-16 rounded-full cursor-pointer bg-transparent border-none p-0 shadow-2xl hover:scale-125 transition-transform" />
+                {/* 1. صندوق الأدوات (Sidebar) */}
+                <div className="lg:col-span-1 order-2 lg:order-1 flex lg:flex-col gap-4">
+                    <div className="glass-panel-heavy p-4 md:p-8 rounded-[3rem] border border-white/20 shadow-2xl bg-white/70 dark:bg-slate-900/40 backdrop-blur-3xl flex lg:flex-col gap-6 w-full h-fit lg:h-full justify-center items-center">
+                        <button onClick={() => setTool('pen')} className={`p-5 md:p-10 rounded-3xl border-4 transition-all ${tool === 'pen' ? 'border-red-600 bg-red-600/10 text-red-600 scale-110 shadow-2xl' : 'border-transparent bg-black/5 dark:bg-white/10 dark:text-white'}`}><IconPen /></button>
+                        <button onClick={() => setTool('eraser')} className={`p-5 md:p-10 rounded-3xl border-4 transition-all ${tool === 'eraser' ? 'border-red-600 bg-red-600/10 text-red-600 scale-110 shadow-2xl' : 'border-transparent bg-black/5 dark:bg-white/10 dark:text-white'}`}><IconEraser /></button>
+                        <button onClick={() => canvasRef.current?.getContext('2d')?.clearRect(0,0,5000,5000)} className="p-5 md:p-10 rounded-3xl bg-red-500/10 text-red-600 hover:bg-red-600 hover:text-white transition-all shadow-lg"><IconTrash /></button>
+                        <div className="w-px h-12 lg:w-full lg:h-px bg-slate-300 dark:bg-white/10 my-4"></div>
+                        <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="w-12 h-12 md:w-20 md:h-20 rounded-full cursor-pointer bg-transparent border-none p-0 shadow-2xl hover:scale-125 transition-transform" />
                     </div>
                 </div>
 
-                {/* 2. اللوحة المركزية العملاقة */}
-                <div className="lg:col-span-11 order-1 lg:order-2 flex flex-col gap-4 h-[55vh] lg:h-full min-h-[450px]">
-                    <div ref={containerRef} className="flex-1 bg-white dark:bg-[#020617] backdrop-blur-3xl border-[8px] border-white/60 dark:border-white/5 rounded-[3.5rem] lg:rounded-[6rem] shadow-[0_50px_120px_rgba(0,0,0,0.4)] overflow-hidden relative cursor-crosshair group/canvas border-glass-shine">
+                {/* 2. اللوحة المركزية */}
+                <div className="lg:col-span-11 order-1 lg:order-2 flex flex-col gap-6 h-[50vh] lg:h-full">
+                    <div ref={containerRef} className="flex-1 bg-white dark:bg-[#020617] border-[10px] border-white dark:border-white/5 rounded-[4rem] lg:rounded-[7rem] shadow-[0_60px_150px_rgba(0,0,0,0.5)] overflow-hidden relative cursor-crosshair group/canvas border-glass-shine">
                         <canvas 
                             ref={canvasRef}
                             onMouseDown={startDraw}
@@ -147,28 +173,25 @@ const CreatorsStudioPage: React.FC = () => {
                             onTouchEnd={stop}
                             className="touch-none w-full h-full relative z-10 block"
                         />
-                        {/* الووتر مارك الملكية - في النص بظبط */}
-                        <div className="absolute inset-0 flex items-center justify-center z-0 pointer-events-none opacity-[0.05] dark:opacity-[0.1] transition-all duration-1000 group-hover/canvas:opacity-[0.15]">
-                            <img src="/school-logo.png" alt="EFIPS" className="w-[70%] md:w-[35%] object-contain rotate-[15deg] select-none" />
+                        {/* الووتر مارك الملكية */}
+                        <div className="absolute inset-0 flex items-center justify-center z-0 pointer-events-none opacity-[0.06] dark:opacity-[0.15] transition-all duration-1000 group-hover/canvas:opacity-[0.2]">
+                            <img src="/school-logo.png" alt="EFIPS" className="w-[80%] md:w-[45%] object-contain rotate-[-10deg] select-none dark:brightness-0 dark:invert" />
                         </div>
                     </div>
                     
                     {/* منطقة الاسم والتحميل */}
-                    <div className="flex flex-col md:flex-row gap-4 items-center w-full px-2 lg:px-20">
-                        <div className="relative flex-1 w-full">
-                            <input 
-                                type="text" placeholder={isAr ? "اكتب اسمك يا مبدع لحفظ اللوحة..." : "Your name to save..."}
-                                value={studentName} onChange={(e) => setStudentName(e.target.value)}
-                                className="w-full p-6 md:p-10 rounded-[2.5rem] md:rounded-[5rem] bg-white/90 dark:bg-white/5 border-4 border-slate-200 dark:border-white/10 text-slate-950 dark:text-white outline-none focus:border-red-600 transition-all font-black text-center text-xl md:text-5xl shadow-2xl placeholder:opacity-30"
-                            />
-                        </div>
+                    <div className="flex flex-col md:flex-row gap-6 items-center w-full lg:px-10">
+                        <input 
+                            type="text" placeholder={isAr ? "اكتب اسمك يا مبدع..." : "Name your masterpiece..."}
+                            value={studentName} onChange={(e) => setStudentName(e.target.value)}
+                            className="flex-1 w-full p-8 md:p-12 rounded-[3rem] md:rounded-[6rem] bg-white/80 dark:bg-white/5 border-4 border-slate-200 dark:border-white/10 text-slate-950 dark:text-white outline-none focus:border-red-600 transition-all font-black text-center text-2xl md:text-6xl shadow-2xl placeholder:opacity-20"
+                        />
                         <button 
                             onClick={downloadPNG} 
                             disabled={!studentName.trim()}
-                            className="group relative overflow-hidden py-6 md:py-10 px-12 md:px-32 rounded-[2.5rem] md:rounded-[5rem] bg-slate-950 dark:bg-white text-white dark:text-slate-950 font-black text-2xl md:text-6xl shadow-3xl hover:scale-[1.05] active:scale-95 transition-all disabled:opacity-10 disabled:grayscale cursor-pointer"
+                            className="group relative overflow-hidden py-8 md:py-12 px-16 md:px-40 rounded-[3rem] md:rounded-[6rem] bg-slate-950 dark:bg-white text-white dark:text-slate-950 font-black text-3xl md:text-7xl shadow-[0_30px_60px_rgba(0,0,0,0.3)] hover:scale-[1.03] active:scale-95 transition-all disabled:opacity-20 cursor-pointer"
                         >
-                            <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-yellow-500 to-green-600 opacity-0 group-hover:opacity-20 transition-all duration-700"></div>
-                            <span className="relative flex items-center justify-center gap-6">
+                            <span className="relative flex items-center justify-center gap-8">
                                <IconDownload /> {isAr ? 'حفظ' : 'SAVE'}
                             </span>
                         </button>
@@ -177,31 +200,23 @@ const CreatorsStudioPage: React.FC = () => {
             </div>
 
             <style>{`
-                @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-12px); } }
-                .animate-float { animation: float 6s ease-in-out infinite; }
-                .glass-panel-heavy { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(50px); border: 1px solid rgba(255, 255, 255, 0.2); }
+                @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-15px); } }
+                .animate-float { animation: float 5s ease-in-out infinite; }
+                .glass-panel-heavy { backdrop-filter: blur(80px); }
                 
                 .royal-black-title {
                     color: #000;
-                    background: radial-gradient(circle at var(--glow-x) var(--glow-y), #fff 0%, #000 30%);
+                    background: radial-gradient(circle at var(--glow-x) var(--glow-y), #fff 0%, #000 35%);
                     -webkit-background-clip: text;
                     -webkit-text-fill-color: transparent;
-                    transition: 0.1s ease-out;
+                    transition: background 0.15s ease-out;
                 }
                 .dark .royal-black-title {
-                    background: radial-gradient(circle at var(--glow-x) var(--my), #fff 0%, #333 40%, #000 100%);
+                    background: radial-gradient(circle at var(--glow-x) var(--glow-y), #fff 0%, #444 40%, #111 100%);
                 }
 
-                canvas { cursor: crosshair; touch-action: none; image-rendering: auto; }
-                .no-scrollbar::-webkit-scrollbar { display: none; }
-                * { font-style: normal !important; -webkit-font-smoothing: antialiased; }
-                [dir="rtl"] h1, [dir="rtl"] p, [dir="rtl"] input { letter-spacing: 0 !important; }
-
-                input[type="range"]::-webkit-slider-thumb {
-                    -webkit-appearance: none; appearance: none; width: 30px; height: 30px;
-                    background: #ef4444; border: 5px solid white; border-radius: 50%;
-                    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-                }
+                canvas { cursor: crosshair; touch-action: none; image-rendering: -webkit-optimize-contrast; }
+                * { font-style: normal !important; }
             `}</style>
         </div>
     );
