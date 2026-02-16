@@ -2967,6 +2967,7 @@ const localBookData = [
 { "title": "The Escape And Other Stories", "author": "W. Somerset Maugham", "shelf": 14, "row": 1 },
 { "title": "Journey To The Centre Of The Earth", "author": "JULES VERNE", "shelf": 14, "row": 1 },
 { "title": "The Mystery Of Tally-Ho Cottage", "author": "ENID BLYTON", "shelf": 14, "row": 1 },
+{ "title": "ليطمئن قلبي", "author": "أدهم الشرقاوي", "shelf": 14, "row": 1 },
 { "title": "البخلاء", "author": "الجاحظ", "shelf": 33, "row": 3 } 
 ];
 
