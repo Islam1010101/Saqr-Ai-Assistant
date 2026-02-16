@@ -2968,6 +2968,12 @@ const rawBookData = [
 { "title": "تشريح النقد", "author": "نورثروب فراي (ترجمة: محيي الدين صبحي)", "shelf": 39, "row": 5 },
 { "title": "شعرية النص", "author": "أ.د. ثابت الألوسي", "shelf": 39, "row": 5 },
 { "title": "الصورة البيانية في شعر إبراهيم ناجي", "author": "د. وصال الدليمي", "shelf": 39, "row": 5 },
+{ "title": "The Famous Five", "author": "ENID BLYTON", "shelf": 14, "row": 1 },
+{ "title": "The Wishing-Chair Again", "author": "ENID BLYTON", "shelf": 14, "row": 1 },
+{ "title": "The Grandparent", "author": "J.A.Hazaeley", "shelf": 3, "row": 1 },
+{ "title": "The Escape And Other Stories", "author": "W. Somerset Maugham", "shelf": 14, "row": 1 },
+{ "title": "Journey To The Centre Of The Earth", "author": "JULES VERNE", "shelf": 14, "row": 1 },
+{ "title": "The Mystery Of Tally-Ho Cottage", "author": "ENID BLYTON", "shelf": 14, "row": 1 },
 { "title": "البخلاء", "author": "الجاحظ", "shelf": 33, "row": 3 }  
 ];
 
