@@ -13,12 +13,11 @@ import EnglishLibraryInternalPage from './pages/EnglishLibraryInternalPage';
 import FeedbackPage from './pages/FeedbackPage';
 import CreatorsPortalPage from './pages/CreatorsPortalPage';
 import LibraryMapPage from './pages/LibraryMapPage';
-// --- السطر اللي كان ناقص (Import) ---
 import CreatorsStudioPage from './pages/CreatorsStudioPage'; 
 
 import type { Locale } from './types';
 
-// واجهة تعريف الروابط لضمان سلامة النوع (Type Safety)
+// واجهة تعريف الروابط
 interface NavLink {
   path: string;
   label: string;
@@ -27,7 +26,7 @@ interface NavLink {
   color: string;
 }
 
-// -------- 1. مساعد صقر العائم --------
+// -------- 1. مساعد صقر العائم (بدون تغيير) --------
 const FloatingSaqr: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -69,13 +68,36 @@ const FloatingSaqr: React.FC = () => {
   );
 };
 
-// -------- 2. هيدر EFIPS الرشيق المصحح --------
+// -------- 2. هيدر EFIPS الزجاجي الذكي (التعديل هنا) --------
 const Header: React.FC = () => {
   const { locale, setLocale } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const [activeHint, setActiveHint] = useState<string | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  
+  // States for Scroll Logic
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  // منطق الاختفاء عند السكرول
+  useEffect(() => {
+    const controlNavbar = () => {
+      if (typeof window !== 'undefined') {
+        // إذا نزلنا لتحت أكتر من 100 بكسل والاتجاه لأسفل -> اخفي
+        if (window.scrollY > lastScrollY && window.scrollY > 50) {
+          setIsVisible(false);
+        } else {
+          // أي حركة لفوق -> اظهر
+          setIsVisible(true);
+        }
+        setLastScrollY(window.scrollY);
+      }
+    };
+
+    window.addEventListener('scroll', controlNavbar);
+    return () => window.removeEventListener('scroll', controlNavbar);
+  }, [lastScrollY]);
 
   const links: NavLink[] = [
     { path: '/search', label: locale === 'en' ? 'Search' : 'البحث بالمكتبة', icon: '🔍', hint: locale === 'en' ? 'Library Index' : 'فهرس الكتب', color: 'bg-red-600' },
@@ -93,8 +115,9 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-4 z-[60] px-4 md:px-10">
-      <div className="glass-panel mx-auto max-w-[98rem] p-1.5 md:p-2.5 rounded-full border border-white/20 dark:border-white/5 flex items-center justify-between shadow-2xl backdrop-blur-3xl bg-white/95 dark:bg-slate-950/90 font-black transition-all relative overflow-visible">
+    <header className={`sticky top-4 z-[60] px-4 md:px-10 transition-transform duration-500 ease-in-out ${isVisible ? 'translate-y-0' : '-translate-y-32'}`}>
+      {/* تم تعديل الكلاسات هنا لزيادة الشفافية والبلور */}
+      <div className="mx-auto max-w-[98rem] p-1.5 md:p-2.5 rounded-full border border-white/30 dark:border-white/10 flex items-center justify-between shadow-2xl backdrop-blur-3xl bg-white/70 dark:bg-slate-950/70 font-black transition-all relative overflow-visible">
         
         <Link to="/" className="flex items-center gap-2 md:gap-3 ps-4 md:ps-6 group flex-shrink-0">
           <img src="/school-logo.png" alt="EFIPS" className="h-8 w-8 md:h-11 md:w-11 object-contain logo-smart-filter rotate-12 transition-all group-hover:scale-110" />
@@ -203,10 +226,7 @@ const App: React.FC = () => {
                 <Route path="/digital-library/arabic" element={<ArabicLibraryInternalPage />} />
                 <Route path="/digital-library/english" element={<EnglishLibraryInternalPage />} />
                 <Route path="/creators" element={<CreatorsPortalPage />} />
-                
-                {/* --- السطر اللي كان ناقص (Route) --- */}
                 <Route path="/creators-studio" element={<CreatorsStudioPage />} />
-
                 <Route path="/reports" element={<ReportsPage />} />
                 <Route path="/feedback" element={<FeedbackPage />} /> 
                 <Route path="/about" element={<AboutPage />} />
@@ -214,18 +234,18 @@ const App: React.FC = () => {
             </main>
 
             <footer className="relative z-10 py-12 text-center border-t border-slate-200 dark:border-white/5 mx-6 md:mx-20 mt-10 group">
-                <div className="h-1 w-16 bg-red-600 mx-auto mb-6 rounded-full shadow-[0_0_15px_rgba(220,38,38,0.4)] group-hover:w-32 transition-all duration-700"></div>
-                <p className="font-black text-[9px] md:text-xs tracking-[0.4em] uppercase text-slate-500 dark:text-slate-400">EFIPS • Library • 2026</p>
-                <p className="mt-2 font-black text-slate-900 dark:text-white text-[8px] md:text-[10px] opacity-40 uppercase">&copy; Emirates Falcon Int'l. Private School</p>
+              <div className="h-1 w-16 bg-red-600 mx-auto mb-6 rounded-full shadow-[0_0_15px_rgba(220,38,38,0.4)] group-hover:w-32 transition-all duration-700"></div>
+              <p className="font-black text-[9px] md:text-xs tracking-[0.4em] uppercase text-slate-500 dark:text-slate-400">EFIPS • Library • 2026</p>
+              <p className="mt-2 font-black text-slate-900 dark:text-white text-[8px] md:text-[10px] opacity-40 uppercase">&copy; Emirates Falcon Int'l. Private School</p>
             </footer>
 
             <style>{`
-                @keyframes float { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-12px) rotate(3deg); } }
-                .animate-float { animation: float 6s ease-in-out infinite; }
-                .no-scrollbar::-webkit-scrollbar { display: none; }
-                .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-                .glass-panel { border: 1px solid rgba(255, 255, 255, 0.1); }
-                .dark .logo-smart-filter { filter: brightness(0) invert(1); }
+              @keyframes float { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-12px) rotate(3deg); } }
+              .animate-float { animation: float 6s ease-in-out infinite; }
+              .no-scrollbar::-webkit-scrollbar { display: none; }
+              .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+              .glass-panel { border: 1px solid rgba(255, 255, 255, 0.1); }
+              .dark .logo-smart-filter { filter: brightness(0) invert(1); }
             `}</style>
           </div>
         </HashRouter>
