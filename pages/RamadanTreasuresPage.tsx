@@ -82,9 +82,9 @@ const RamadanTreasuresPage: React.FC = () => {
             
             {/* 1. زينة رمضان (بدون قص) */}
             <div className="absolute inset-0 pointer-events-none z-0">
-                {/* فوانيس متدلية بأبعاد آمنة */}
-                <div className="absolute -top-10 left-[8%] text-[3.5rem] md:text-[6rem] animate-swing origin-top opacity-90 drop-shadow-2xl filter drop-shadow(0 0 15px rgba(255,215,0,0.4))">🏮</div>
-                <div className="absolute -top-16 right-[12%] text-[2.5rem] md:text-[5rem] animate-swing-delayed origin-top opacity-80 drop-shadow-2xl">🏮</div>
+                {/* فوانيس متدلية بأبعاد آمنة (تم تعديل الموقع لتظهر كاملة) */}
+                <div className="absolute -top-2 left-[8%] text-[3.5rem] md:text-[6rem] animate-swing origin-top opacity-90 drop-shadow-2xl filter drop-shadow(0 0 15px rgba(255,215,0,0.4))">🏮</div>
+                <div className="absolute -top-4 right-[12%] text-[2.5rem] md:text-[5rem] animate-swing-delayed origin-top opacity-80 drop-shadow-2xl">🏮</div>
                 <div className="absolute top-[15%] left-[35%] text-[1.5rem] md:text-[3rem] animate-pulse opacity-50">✨</div>
                 <div className="absolute top-[20%] right-[8%] text-[1.5rem] md:text-[3rem] animate-pulse delay-700 opacity-50">🌙</div>
                 
@@ -116,14 +116,15 @@ const RamadanTreasuresPage: React.FC = () => {
                         <img src="/school-logo.png" alt="School Logo" className="w-full object-contain rotate-[12deg]" />
                     </div>
 
-                    {/* الشخصية الرمضانية (صقر) - حركة ناعمة جداً */}
+                    {/* الشخصية الرمضانية (صقر) - بدون إطار */}
                     <div className="relative z-20 w-60 md:w-[30rem] transition-all duration-500 ease-out transform group-hover:-translate-y-2 group-active:scale-[0.98] group-active:brightness-110">
                         {/* هالة نورانية خلف الشخصية */}
                         <div className="absolute inset-0 bg-yellow-500/20 blur-[80px] rounded-full scale-90 animate-pulse-slow"></div>
                         <img 
                             src="/ramadan-saqr.png" 
                             alt="Ramadan Saqr" 
-                            className="w-full h-auto object-contain drop-shadow-[0_30px_60px_rgba(0,0,0,0.3)] rounded-[3rem] border-4 border-white/40 dark:border-white/5 ring-1 ring-black/5"
+                            // تم إزالة الإطار والبوردر من هنا
+                            className="w-full h-auto object-contain drop-shadow-[0_30px_60px_rgba(0,0,0,0.3)] rounded-[3rem]"
                         />
                     </div>
                 </div>
@@ -131,8 +132,9 @@ const RamadanTreasuresPage: React.FC = () => {
                 {/* النصوص السفلية */}
                 <div className="space-y-8 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                     <div className="glass-panel inline-block px-12 py-6 rounded-full bg-yellow-500/10 dark:bg-yellow-500/5 border border-yellow-500/20 backdrop-blur-xl shadow-lg hover:shadow-yellow-500/10 transition-shadow">
+                        {/* تم تعديل النص هنا لإزالة "قريباً" */}
                         <p className="text-lg md:text-3xl text-yellow-800 dark:text-yellow-400 font-bold tracking-wider">
-                            {isAr ? 'قريباً يوم الاثنين القادم' : 'Coming Soon Next Monday'}
+                            {isAr ? 'يوم الاثنين القادم' : 'Next Monday'}
                         </p>
                     </div>
                     
