@@ -9,8 +9,8 @@ const IconTrash = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="no
 const IconDownload = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>;
 const IconReplay = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3" /></svg>;
 const IconNeon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>;
+const IconMenu = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>;
 
-// تخزين مسارات الرسم لإعادة العرض
 interface DrawPath {
     x: number;
     y: number;
@@ -32,35 +32,27 @@ const CreatorsStudioPage: React.FC = () => {
     const [lineWidth, setLineWidth] = useState(8);
     const [tool, setTool] = useState<'pen' | 'eraser'>('pen');
     const [studentName, setStudentName] = useState("");
-    const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
     const [isNeonMode, setIsNeonMode] = useState(false);
     const [isReplaying, setIsReplaying] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-    // تخزين كل حركة (The Magic History)
+    // تخزين المسارات
     const [drawingHistory, setDrawingHistory] = useState<DrawPath[][]>([]);
     const [currentPath, setCurrentPath] = useState<DrawPath[]>([]);
 
-    const handleTitleHover = (e: React.MouseEvent) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        setMousePos({ 
-            x: ((e.clientX - rect.left) / rect.width) * 100, 
-            y: ((e.clientY - rect.top) / rect.height) * 100 
-        });
-    };
-
-    // ضبط الكانفاس
+    // ضبط الكانفاس ليملأ الشاشة
     useEffect(() => {
         const resize = () => {
             const canvas = canvasRef.current;
             const container = containerRef.current;
             if (!canvas || !container) return;
-            // نحفظ الصورة الحالية قبل التغيير
+            
             const tempImage = canvas.toDataURL();
             const img = new Image();
             img.src = tempImage;
             
-            canvas.width = container.offsetWidth;
-            canvas.height = container.offsetHeight;
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
             
             img.onload = () => {
                 const ctx = canvas.getContext('2d');
@@ -79,26 +71,19 @@ const CreatorsStudioPage: React.FC = () => {
         const canvas = canvasRef.current;
         if (!canvas) return { x: 0, y: 0 };
         const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
         const cx = e.touches ? e.touches[0].clientX : e.clientX;
         const cy = e.touches ? e.touches[0].clientY : e.clientY;
-        return { x: (cx - rect.left) * scaleX, y: (cy - rect.top) * scaleY };
+        return { x: cx - rect.left, y: cy - rect.top };
     };
 
     const startDraw = (e: any) => {
         if ((e.button !== 0 && !e.touches) || isReplaying) return;
         const ctx = canvasRef.current?.getContext('2d');
         if (!ctx) return;
-        
         setIsDrawing(true);
         const pos = getCoord(e);
+        ctx.beginPath(); ctx.moveTo(pos.x, pos.y);
         
-        // إعدادات القلم
-        ctx.beginPath();
-        ctx.moveTo(pos.x, pos.y);
-        
-        // حفظ بداية المسار
         const point: DrawPath = { 
             x: pos.x, y: pos.y, 
             color: tool === 'eraser' ? '#ffffff' : color, 
@@ -113,31 +98,22 @@ const CreatorsStudioPage: React.FC = () => {
         if (!isDrawing || isReplaying) return;
         const ctx = canvasRef.current?.getContext('2d');
         if (!ctx) return;
-        
         const pos = getCoord(e);
-        
-        // إعدادات النيون واللون
         const strokeColor = tool === 'eraser' ? (document.documentElement.classList.contains('dark') ? '#020617' : '#ffffff') : color;
+        
         ctx.lineWidth = lineWidth;
         ctx.strokeStyle = strokeColor;
         
         if (isNeonMode && tool !== 'eraser') {
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = strokeColor;
+            ctx.shadowBlur = 15; ctx.shadowColor = strokeColor;
         } else {
             ctx.shadowBlur = 0;
         }
 
-        ctx.lineTo(pos.x, pos.y);
-        ctx.stroke();
+        ctx.lineTo(pos.x, pos.y); ctx.stroke();
 
-        // حفظ النقطة
         const point: DrawPath = { 
-            x: pos.x, y: pos.y, 
-            color: strokeColor, 
-            width: lineWidth, 
-            isNeon: isNeonMode,
-            type: 'line' 
+            x: pos.x, y: pos.y, color: strokeColor, width: lineWidth, isNeon: isNeonMode, type: 'line' 
         };
         setCurrentPath(prev => [...prev, point]);
     };
@@ -146,24 +122,19 @@ const CreatorsStudioPage: React.FC = () => {
         if (isDrawing) { 
             canvasRef.current?.getContext('2d')?.closePath(); 
             setIsDrawing(false);
-            // حفظ المسار الكامل في التاريخ
             setDrawingHistory(prev => [...prev, currentPath]);
         } 
     };
 
-    // --- 🔮 دالة سحر الزمن (Replay) ---
     const replayDrawing = async () => {
         if (isReplaying || drawingHistory.length === 0) return;
         setIsReplaying(true);
-        
         const canvas = canvasRef.current;
         const ctx = canvas?.getContext('2d');
         if (!canvas || !ctx) return;
 
-        // مسح الكانفاس
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // إعادة الرسم خطوة بخطوة
         for (const path of drawingHistory) {
             ctx.beginPath();
             for (let i = 0; i < path.length; i++) {
@@ -171,23 +142,14 @@ const CreatorsStudioPage: React.FC = () => {
                 if (p.type === 'move') {
                     ctx.moveTo(p.x, p.y);
                 } else {
-                    ctx.lineCap = 'round';
-                    ctx.lineJoin = 'round';
-                    ctx.lineWidth = p.width;
-                    ctx.strokeStyle = p.color;
-                    
+                    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+                    ctx.lineWidth = p.width; ctx.strokeStyle = p.color;
                     if (p.isNeon && p.color !== '#ffffff' && p.color !== '#020617') {
-                        ctx.shadowBlur = 15;
-                        ctx.shadowColor = p.color;
-                    } else {
-                        ctx.shadowBlur = 0;
-                    }
-                    
-                    ctx.lineTo(p.x, p.y);
-                    ctx.stroke();
+                        ctx.shadowBlur = 15; ctx.shadowColor = p.color;
+                    } else { ctx.shadowBlur = 0; }
+                    ctx.lineTo(p.x, p.y); ctx.stroke();
                 }
-                // سرعة الإعادة (كل ما الرقم قل كل ما كان أسرع)
-                if (i % 2 === 0) await new Promise(r => setTimeout(r, 5));
+                if (i % 3 === 0) await new Promise(r => setTimeout(r, 2));
             }
             ctx.closePath();
         }
@@ -196,122 +158,104 @@ const CreatorsStudioPage: React.FC = () => {
 
     const clearCanvas = () => {
         canvasRef.current?.getContext('2d')?.clearRect(0,0,5000,5000);
-        setDrawingHistory([]); // مسح التاريخ كمان
+        setDrawingHistory([]);
     };
 
     const downloadPNG = () => {
         if (!studentName.trim()) return;
-        const canvas = canvasRef.current;
-        if (!canvas) return;
         const link = document.createElement('a');
         link.download = `Saqr-Art-${studentName}.png`;
-        link.href = canvas.toDataURL("image/png");
+        link.href = canvasRef.current!.toDataURL("image/png");
         link.click();
     };
 
     return (
-        <div dir={dir} className="min-h-[100dvh] bg-slate-50 dark:bg-[#01040a] transition-colors duration-700 font-black relative overflow-hidden flex flex-col antialiased">
+        <div dir={dir} className="fixed inset-0 bg-white dark:bg-[#020617] transition-colors duration-700 font-black overflow-hidden antialiased">
             
-            {/* الهيدر */}
-            <header className="relative z-30 px-4 md:px-10 w-full flex flex-col items-center pt-2 md:pt-4 mb-2 md:mb-6">
-                <div className="flex w-full justify-between items-center max-w-[1800px]">
-                    <Link to="/creators" className="glass-panel border border-white/40 px-3 py-2 md:px-10 md:py-4 bg-white/20 dark:bg-white/5 rounded-xl md:rounded-2xl text-[10px] md:text-lg text-slate-900 dark:text-white hover:bg-red-600 transition-all font-black">
-                        {isAr ? '⬅ عودة' : '⬅ BACK'}
-                    </Link>
-                    <img src="/unnamed.png" alt="Saqr" className="h-8 md:h-24 object-contain animate-float" />
+            {/* اللوحة الخلفية (Full Screen) */}
+            <div ref={containerRef} className="absolute inset-0 z-0 cursor-crosshair active:cursor-grabbing">
+                <canvas 
+                    ref={canvasRef}
+                    onMouseDown={startDraw} onMouseMove={drawing} onMouseUp={stop} onMouseLeave={stop}
+                    onTouchStart={startDraw} onTouchMove={drawing} onTouchEnd={stop}
+                    className={`touch-none w-full h-full ${isReplaying ? 'pointer-events-none' : ''}`}
+                />
+                {/* الووتر مارك */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] dark:opacity-[0.05]">
+                    <img src="/school-logo.png" alt="Watermark" className="w-[30%] object-contain dark:brightness-0 dark:invert" />
                 </div>
-                
-                <div className="relative group mt-1" onMouseMove={handleTitleHover}>
-                    <h1 className="text-3xl md:text-[8rem] lg:text-[10rem] tracking-tighter uppercase leading-none cursor-default select-none royal-title-dynamic"
-                        style={{ '--glow-x': `${mousePos.x}%`, '--glow-y': `${mousePos.y}%` } as any}>
-                        {isAr ? 'ارسم ابداعك' : 'DRAW MAGIC'}
+            </div>
+
+            {/* الهيدر العائم الصغير */}
+            <header className="absolute top-4 left-0 right-0 z-40 pointer-events-none flex justify-center items-center px-4">
+                <div className="glass-panel px-6 py-2 rounded-full flex items-center gap-4 pointer-events-auto shadow-sm">
+                    <Link to="/creators" className="text-xs text-slate-500 hover:text-red-600 transition-colors uppercase font-bold">
+                        {isAr ? 'خروج' : 'Exit'}
+                    </Link>
+                    <div className="h-4 w-px bg-slate-300 dark:bg-white/20"></div>
+                    <h1 className="text-lg md:text-xl text-slate-900 dark:text-white font-bold flex items-center gap-2">
+                        {isAr ? 'ارسم ابداعك' : 'Draw Magic'}
+                        <img src="/unnamed.png" alt="Saqr" className="h-6 w-6 object-contain" />
                     </h1>
                 </div>
             </header>
 
-            {/* الحاوية الرئيسية */}
-            <main className="flex-1 flex flex-col lg:flex-row gap-2 md:gap-8 px-2 md:px-10 mb-4 max-w-[1900px] mx-auto w-full overflow-hidden">
-                
-                {/* صندوق الأدوات */}
-                <div className="flex lg:flex-col gap-2 md:gap-6 justify-center items-center lg:w-24 order-2 lg:order-1 px-2">
-                    <div className="glass-panel-heavy p-2 md:p-6 rounded-2xl md:rounded-[3rem] border border-white/20 flex lg:flex-col gap-3 md:gap-6 w-full lg:h-full justify-around items-center bg-white/50 dark:bg-slate-900/40">
-                        {/* أدوات الرسم */}
-                        <button onClick={() => setTool('pen')} className={`p-3 md:p-6 rounded-xl md:rounded-3xl border-2 md:border-4 transition-all ${tool === 'pen' ? 'border-red-600 bg-red-600/20 text-red-600 scale-110' : 'border-transparent dark:text-white'}`}><IconPen /></button>
-                        <button onClick={() => setTool('eraser')} className={`p-3 md:p-6 rounded-xl md:rounded-3xl border-2 md:border-4 transition-all ${tool === 'eraser' ? 'border-red-600 bg-red-600/20 text-red-600 scale-110' : 'border-transparent dark:text-white'}`}><IconEraser /></button>
-                        
-                        {/* زرار النيون الجديد */}
-                        <button onClick={() => setIsNeonMode(!isNeonMode)} className={`p-3 md:p-6 rounded-xl md:rounded-3xl border-2 md:border-4 transition-all ${isNeonMode ? 'border-green-400 bg-green-400/20 text-green-400 shadow-[0_0_15px_#4ade80] scale-110' : 'border-transparent dark:text-white hover:text-green-400'}`}>
-                            <IconNeon />
-                        </button>
-
-                        {/* زرار إعادة العرض (Replay) */}
-                        <button onClick={replayDrawing} disabled={isReplaying || drawingHistory.length === 0} className={`p-3 md:p-6 rounded-xl md:rounded-3xl border-2 md:border-4 transition-all ${isReplaying ? 'border-yellow-400 text-yellow-400 animate-pulse' : 'border-transparent dark:text-white hover:text-yellow-400 disabled:opacity-30'}`}>
-                            <IconReplay />
-                        </button>
-
-                        <button onClick={clearCanvas} className="p-3 md:p-6 rounded-xl md:rounded-3xl bg-red-500/10 text-red-600 hover:bg-red-600 transition-all"><IconTrash /></button>
-                        
-                        <div className="hidden lg:block w-full h-px bg-white/10 my-2"></div>
-                        <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="w-8 h-8 md:w-16 md:h-16 rounded-full cursor-pointer bg-transparent border-none p-0 shadow-xl" />
-                    </div>
+            {/* الشريط الجانبي المخفي (Smart Sidebar) */}
+            <div 
+                className={`fixed top-1/2 -translate-y-1/2 z-50 transition-all duration-500 ease-out group
+                    ${dir === 'rtl' ? 'right-0 translate-x-[85%] hover:translate-x-0' : 'left-0 -translate-x-[85%] hover:translate-x-0'}
+                    ${isSidebarOpen ? '!translate-x-0' : ''}
+                `}
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)} // للموبايل
+            >
+                {/* مقبض السحب المرئي */}
+                <div className={`absolute top-1/2 -translate-y-1/2 w-8 h-16 bg-slate-200/50 dark:bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center cursor-pointer md:hidden
+                    ${dir === 'rtl' ? '-left-6 rounded-r-none' : '-right-6 rounded-l-none'}
+                `}>
+                    <IconMenu />
                 </div>
 
-                {/* لوحة الرسم */}
-                <div className="flex-1 flex flex-col gap-3 order-1 lg:order-2 h-[65vh] md:h-full min-h-[350px]">
-                    <div ref={containerRef} className="flex-1 bg-white dark:bg-[#020617] border-4 md:border-[10px] border-white dark:border-white/5 rounded-[2rem] md:rounded-[6rem] shadow-2xl overflow-hidden relative border-glass-shine group/canvas">
-                        <canvas 
-                            ref={canvasRef}
-                            onMouseDown={startDraw} onMouseMove={drawing} onMouseUp={stop} onMouseLeave={stop}
-                            onTouchStart={startDraw} onTouchMove={drawing} onTouchEnd={stop}
-                            className={`touch-none w-full h-full relative z-10 ${isReplaying ? 'pointer-events-none' : 'cursor-crosshair'}`}
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center z-0 pointer-events-none opacity-[0.04] dark:opacity-[0.1]">
-                            <img src="/school-logo.png" alt="EFIPS" className="w-[80%] md:w-[40%] object-contain dark:brightness-0 dark:invert" />
-                        </div>
-                        
-                        {/* مؤشر التسجيل */}
-                        {!isReplaying && drawingHistory.length > 0 && (
-                            <div className="absolute top-6 left-6 w-3 h-3 bg-red-600 rounded-full animate-pulse shadow-[0_0_10px_red]"></div>
-                        )}
-                        {/* مؤشر إعادة العرض */}
-                        {isReplaying && (
-                            <div className="absolute top-6 right-6 px-4 py-1 bg-yellow-500 text-black text-xs font-black rounded-full animate-bounce">
-                                {isAr ? 'جاري إعادة الرسم...' : 'Replaying Art...'}
-                            </div>
-                        )}
-                    </div>
-                    
-                    {/* الاسم والحفظ */}
-                    <div className="flex flex-col md:flex-row gap-2 md:gap-6 items-stretch w-full">
-                        <input 
-                            type="text" placeholder={isAr ? "اسمك هنا..." : "Name..."}
-                            value={studentName} onChange={(e) => setStudentName(e.target.value)}
-                            className="flex-1 p-4 md:p-10 rounded-2xl md:rounded-[5rem] bg-white/80 dark:bg-white/5 border-2 md:border-4 border-slate-200 dark:border-white/10 text-slate-950 dark:text-white outline-none focus:border-red-600 font-black text-center text-lg md:text-5xl shadow-xl"
-                        />
-                        <button 
-                            onClick={downloadPNG} disabled={!studentName.trim() || isReplaying}
-                            className="flex items-center justify-center gap-2 md:gap-4 py-4 md:py-10 px-8 md:px-20 rounded-2xl md:rounded-[5rem] bg-slate-950 dark:bg-white text-white dark:text-slate-950 font-black text-lg md:text-6xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-20"
-                        >
-                            <IconDownload /> {isAr ? 'حفظ' : 'SAVE'}
-                        </button>
-                    </div>
+                <div className="glass-panel-heavy p-3 rounded-[2rem] border border-white/20 flex flex-col gap-4 shadow-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl m-2">
+                    <button onClick={(e) => {e.stopPropagation(); setTool('pen');}} className={`p-3 rounded-xl transition-all ${tool === 'pen' ? 'bg-red-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}><IconPen /></button>
+                    <button onClick={(e) => {e.stopPropagation(); setTool('eraser');}} className={`p-3 rounded-xl transition-all ${tool === 'eraser' ? 'bg-red-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}><IconEraser /></button>
+                    <button onClick={(e) => {e.stopPropagation(); setIsNeonMode(!isNeonMode);}} className={`p-3 rounded-xl transition-all ${isNeonMode ? 'text-green-400 bg-green-900/30 shadow-[0_0_10px_#4ade80]' : 'text-slate-400 hover:text-green-400'}`}><IconNeon /></button>
+                    <button onClick={(e) => {e.stopPropagation(); replayDrawing();}} disabled={isReplaying} className={`p-3 rounded-xl transition-all ${isReplaying ? 'text-yellow-400 animate-pulse' : 'text-slate-400 hover:text-yellow-400'}`}><IconReplay /></button>
+                    <button onClick={(e) => {e.stopPropagation(); clearCanvas();}} className="p-3 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"><IconTrash /></button>
+                    <div className="w-full h-px bg-slate-300 dark:bg-white/20"></div>
+                    <input type="color" value={color} onClick={(e) => e.stopPropagation()} onChange={(e) => setColor(e.target.value)} className="w-10 h-10 rounded-full cursor-pointer bg-transparent border-none p-0 shadow-lg hover:scale-110 transition-transform" />
                 </div>
-            </main>
+            </div>
+
+            {/* الفوتر العائم (الاسم والحفظ) */}
+            <div className="absolute bottom-6 left-0 right-0 z-40 pointer-events-none flex justify-center px-4">
+                <div className="glass-panel p-2 rounded-[2rem] flex items-center gap-2 pointer-events-auto shadow-2xl bg-white/40 dark:bg-black/40 backdrop-blur-md border border-white/20 max-w-2xl w-full">
+                    <input 
+                        type="text" placeholder={isAr ? "اسم الفنان..." : "Artist Name..."}
+                        value={studentName} onChange={(e) => setStudentName(e.target.value)}
+                        className="flex-1 px-6 py-3 rounded-[1.5rem] bg-white/70 dark:bg-white/10 border-none text-slate-900 dark:text-white outline-none placeholder:text-slate-400 font-bold text-center transition-all focus:bg-white dark:focus:bg-white/20"
+                    />
+                    <button 
+                        onClick={downloadPNG} disabled={!studentName.trim() || isReplaying}
+                        className="px-8 py-3 rounded-[1.5rem] bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black shadow-lg hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:grayscale whitespace-nowrap flex items-center gap-2"
+                    >
+                        <IconDownload /> <span className="hidden md:inline">{isAr ? 'حفظ اللوحة' : 'Save Art'}</span>
+                    </button>
+                </div>
+            </div>
+
+            {/* مؤشرات الحالة */}
+            {isReplaying && (
+                <div className="fixed top-20 right-6 px-4 py-2 glass-panel bg-yellow-500/20 border-yellow-500 text-yellow-500 rounded-full text-xs font-bold animate-pulse z-30 pointer-events-none">
+                    {isAr ? '🎥 جاري إعادة العرض...' : '🎥 Replaying...'}
+                </div>
+            )}
 
             <style>{`
-                .royal-title-dynamic {
-                    color: #000;
-                    background: radial-gradient(circle at var(--glow-x) var(--glow-y), #fff 0%, #000 40%);
-                    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-                    transition: all 0.1s ease;
-                }
-                .dark .royal-title-dynamic {
-                    color: #fff;
-                    background: radial-gradient(circle at var(--glow-x) var(--glow-y), #fff 0%, #334155 40%, #fff 100%);
-                    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-                }
+                .glass-panel { backdrop-filter: blur(10px); }
                 .glass-panel-heavy { backdrop-filter: blur(20px); }
-                canvas { touch-action: none; image-rendering: pixelated; }
+                canvas { touch-action: none; }
+                /* إزالة السكرول نهائياً */
+                body { overflow: hidden; }
                 * { font-style: normal !important; -webkit-font-smoothing: antialiased; }
             `}</style>
         </div>
