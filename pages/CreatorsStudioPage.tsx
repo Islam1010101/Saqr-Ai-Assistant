@@ -11,7 +11,6 @@ const IconReplay = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="n
 const IconNeon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>;
 const IconMenu = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>;
 
-// تخزين مسارات الرسم لإعادة العرض
 interface DrawPath {
     x: number;
     y: number;
@@ -37,7 +36,7 @@ const CreatorsStudioPage: React.FC = () => {
     const [isReplaying, setIsReplaying] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-    // تخزين كل حركة (The Magic History)
+    // تخزين المسارات
     const [drawingHistory, setDrawingHistory] = useState<DrawPath[][]>([]);
     const [currentPath, setCurrentPath] = useState<DrawPath[]>([]);
 
@@ -52,7 +51,6 @@ const CreatorsStudioPage: React.FC = () => {
             const img = new Image();
             img.src = tempImage;
             
-            // جعل الكانفاس يملأ الشاشة بالكامل
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             
@@ -79,16 +77,12 @@ const CreatorsStudioPage: React.FC = () => {
     };
 
     const startDraw = (e: any) => {
-        // منع الرسم إذا كان المستخدم يضغط بزر الماوس الأيمن أو يشاهد الإعادة
         if ((e.button !== 0 && !e.touches) || isReplaying) return;
         const ctx = canvasRef.current?.getContext('2d');
         if (!ctx) return;
-        
         setIsDrawing(true);
         const pos = getCoord(e);
-        
-        ctx.beginPath();
-        ctx.moveTo(pos.x, pos.y);
+        ctx.beginPath(); ctx.moveTo(pos.x, pos.y);
         
         const point: DrawPath = { 
             x: pos.x, y: pos.y, 
@@ -104,7 +98,6 @@ const CreatorsStudioPage: React.FC = () => {
         if (!isDrawing || isReplaying) return;
         const ctx = canvasRef.current?.getContext('2d');
         if (!ctx) return;
-        
         const pos = getCoord(e);
         const strokeColor = tool === 'eraser' ? (document.documentElement.classList.contains('dark') ? '#020617' : '#ffffff') : color;
         
@@ -112,14 +105,12 @@ const CreatorsStudioPage: React.FC = () => {
         ctx.strokeStyle = strokeColor;
         
         if (isNeonMode && tool !== 'eraser') {
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = strokeColor;
+            ctx.shadowBlur = 15; ctx.shadowColor = strokeColor;
         } else {
             ctx.shadowBlur = 0;
         }
 
-        ctx.lineTo(pos.x, pos.y);
-        ctx.stroke();
+        ctx.lineTo(pos.x, pos.y); ctx.stroke();
 
         const point: DrawPath = { 
             x: pos.x, y: pos.y, color: strokeColor, width: lineWidth, isNeon: isNeonMode, type: 'line' 
@@ -135,11 +126,9 @@ const CreatorsStudioPage: React.FC = () => {
         } 
     };
 
-    // --- 🔮 دالة سحر الزمن (Replay) ---
     const replayDrawing = async () => {
         if (isReplaying || drawingHistory.length === 0) return;
         setIsReplaying(true);
-        
         const canvas = canvasRef.current;
         const ctx = canvas?.getContext('2d');
         if (!canvas || !ctx) return;
@@ -153,20 +142,12 @@ const CreatorsStudioPage: React.FC = () => {
                 if (p.type === 'move') {
                     ctx.moveTo(p.x, p.y);
                 } else {
-                    ctx.lineCap = 'round';
-                    ctx.lineJoin = 'round';
-                    ctx.lineWidth = p.width;
-                    ctx.strokeStyle = p.color;
-                    
+                    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+                    ctx.lineWidth = p.width; ctx.strokeStyle = p.color;
                     if (p.isNeon && p.color !== '#ffffff' && p.color !== '#020617') {
-                        ctx.shadowBlur = 15;
-                        ctx.shadowColor = p.color;
-                    } else {
-                        ctx.shadowBlur = 0;
-                    }
-                    
-                    ctx.lineTo(p.x, p.y);
-                    ctx.stroke();
+                        ctx.shadowBlur = 15; ctx.shadowColor = p.color;
+                    } else { ctx.shadowBlur = 0; }
+                    ctx.lineTo(p.x, p.y); ctx.stroke();
                 }
                 if (i % 3 === 0) await new Promise(r => setTimeout(r, 2));
             }
@@ -177,7 +158,7 @@ const CreatorsStudioPage: React.FC = () => {
 
     const clearCanvas = () => {
         canvasRef.current?.getContext('2d')?.clearRect(0,0,5000,5000);
-        setDrawingHistory([]); 
+        setDrawingHistory([]);
     };
 
     const downloadPNG = () => {
@@ -192,12 +173,12 @@ const CreatorsStudioPage: React.FC = () => {
         <div dir={dir} className="fixed inset-0 bg-white dark:bg-[#020617] transition-colors duration-700 font-black overflow-hidden antialiased">
             
             {/* اللوحة الخلفية (Full Screen) */}
-            <div ref={containerRef} className="absolute inset-0 z-0 cursor-crosshair touch-none">
+            <div ref={containerRef} className="absolute inset-0 z-0 cursor-crosshair active:cursor-grabbing">
                 <canvas 
                     ref={canvasRef}
                     onMouseDown={startDraw} onMouseMove={drawing} onMouseUp={stop} onMouseLeave={stop}
                     onTouchStart={startDraw} onTouchMove={drawing} onTouchEnd={stop}
-                    className={`w-full h-full block ${isReplaying ? 'pointer-events-none' : ''}`}
+                    className={`touch-none w-full h-full ${isReplaying ? 'pointer-events-none' : ''}`}
                 />
                 {/* الووتر مارك */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] dark:opacity-[0.05]">
@@ -205,41 +186,39 @@ const CreatorsStudioPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* الهيدر العائم (في الأعلى والوسط) */}
+            {/* الهيدر العائم (بسيط وفي الوسط) */}
             <header className="absolute top-6 left-0 right-0 z-40 pointer-events-none flex justify-center items-center px-4">
-                <div className="glass-panel px-6 py-3 rounded-full flex items-center gap-6 pointer-events-auto shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-white/10">
+                <div className="glass-panel px-8 py-3 rounded-full flex items-center gap-6 pointer-events-auto shadow-sm bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border border-slate-200/50 dark:border-white/10">
                     <Link to="/creators" className="text-xs text-slate-500 hover:text-red-600 transition-colors uppercase font-bold flex items-center gap-1">
                         {isAr ? 'خروج' : 'Exit'}
                     </Link>
                     
                     <div className="h-5 w-px bg-slate-300 dark:bg-white/20"></div>
                     
-                    <h1 className="text-lg md:text-xl text-slate-900 dark:text-white font-bold flex items-center gap-3">
+                    <h1 className="text-lg text-slate-900 dark:text-white font-bold flex items-center gap-3 select-none">
                         {isAr ? 'ارسم ابداعك' : 'Draw Magic'}
                         <img src="/unnamed.png" alt="Saqr" className="h-6 w-6 object-contain" />
                     </h1>
                 </div>
             </header>
 
-            {/* الشريط الجانبي المخفي (Smart Sidebar) */}
+            {/* الشريط الجانبي "الشبح" */}
             <div 
-                className={`fixed top-1/2 -translate-y-1/2 z-50 transition-all duration-500 ease-out group
+                className={`fixed top-1/2 -translate-y-1/2 z-50 transition-all duration-300 ease-out
                     ${dir === 'rtl' ? 'right-0 translate-x-[85%] hover:translate-x-0' : 'left-0 -translate-x-[85%] hover:translate-x-0'}
                     ${isSidebarOpen ? '!translate-x-0' : ''}
                 `}
-                // لإظهار الشريط عند الضغط في الموبايل
-                onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             >
-                {/* مقبض السحب المرئي (للموبايل والتابلت) */}
-                <div className={`absolute top-1/2 -translate-y-1/2 w-8 h-16 bg-slate-200/50 dark:bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center cursor-pointer md:hidden shadow-lg
-                    ${dir === 'rtl' ? '-left-6 rounded-r-none' : '-right-6 rounded-l-none'}
+                {/* مقبض السحب (للموبايل) */}
+                <div className={`absolute top-1/2 -translate-y-1/2 w-8 h-16 bg-slate-200/80 dark:bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center cursor-pointer md:hidden shadow-md
+                    ${dir === 'rtl' ? '-left-5 rounded-r-none' : '-right-5 rounded-l-none'}
                 `}>
                     <IconMenu />
                 </div>
 
-                {/* محتوى الشريط */}
                 <div className="glass-panel-heavy p-3 rounded-[2rem] border border-white/20 flex flex-col gap-4 shadow-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl m-4"
-                     onMouseDown={(e) => e.stopPropagation()} // منع الرسم عند الضغط هنا
+                     onMouseDown={(e) => e.stopPropagation()} 
                      onTouchStart={(e) => e.stopPropagation()}
                 >
                     <button onClick={() => setTool('pen')} className={`p-3 rounded-xl transition-all ${tool === 'pen' ? 'bg-red-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}><IconPen /></button>
@@ -247,18 +226,16 @@ const CreatorsStudioPage: React.FC = () => {
                     <button onClick={() => setIsNeonMode(!isNeonMode)} className={`p-3 rounded-xl transition-all ${isNeonMode ? 'text-green-400 bg-green-900/30 shadow-[0_0_10px_#4ade80]' : 'text-slate-400 hover:text-green-400'}`}><IconNeon /></button>
                     <button onClick={() => replayDrawing()} disabled={isReplaying} className={`p-3 rounded-xl transition-all ${isReplaying ? 'text-yellow-400 animate-pulse' : 'text-slate-400 hover:text-yellow-400'}`}><IconReplay /></button>
                     <button onClick={() => clearCanvas()} className="p-3 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"><IconTrash /></button>
-                    
                     <div className="w-full h-px bg-slate-300 dark:bg-white/20"></div>
-                    
                     <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="w-10 h-10 rounded-full cursor-pointer bg-transparent border-none p-0 shadow-lg hover:scale-110 transition-transform" />
                 </div>
             </div>
 
-            {/* الفوتر العائم (الاسم والحفظ) - تم الإصلاح للكتابة */}
+            {/* الفوتر العائم (شغال 100%) */}
             <div className="absolute bottom-8 left-0 right-0 z-50 pointer-events-none flex justify-center px-4">
                 <div 
-                    className="glass-panel p-2 rounded-[2rem] flex items-center gap-2 pointer-events-auto shadow-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200 dark:border-white/10 max-w-2xl w-full"
-                    onMouseDown={(e) => e.stopPropagation()} // الحل السحري: منع وصول النقرة للكانفاس
+                    className="glass-panel p-2 rounded-[2rem] flex items-center gap-2 pointer-events-auto shadow-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200 dark:border-white/10 max-w-xl w-full"
+                    onMouseDown={(e) => e.stopPropagation()} // الحل الذهبي
                     onTouchStart={(e) => e.stopPropagation()}
                 >
                     <input 
@@ -271,9 +248,9 @@ const CreatorsStudioPage: React.FC = () => {
                     <button 
                         onClick={downloadPNG} 
                         disabled={!studentName.trim() || isReplaying}
-                        className="px-8 py-3 rounded-[1.5rem] bg-slate-950 dark:bg-white text-white dark:text-slate-950 font-black shadow-lg hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:grayscale whitespace-nowrap flex items-center gap-2"
+                        className="px-8 py-3 rounded-[1.5rem] bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-black shadow-lg hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:grayscale whitespace-nowrap flex items-center gap-2"
                     >
-                        <IconDownload /> <span className="hidden md:inline">{isAr ? 'حفظ اللوحة' : 'Save Art'}</span>
+                        <IconDownload /> <span className="hidden md:inline">{isAr ? 'حفظ' : 'Save'}</span>
                     </button>
                 </div>
             </div>
@@ -288,11 +265,9 @@ const CreatorsStudioPage: React.FC = () => {
             <style>{`
                 .glass-panel { backdrop-filter: blur(12px); }
                 .glass-panel-heavy { backdrop-filter: blur(25px); }
-                
-                /* منع تحديد النص في الصفحة بالكامل ما عدا حقول الإدخال */
-                body { user-select: none; }
+                canvas { touch-action: none; }
+                body { overflow: hidden; user-select: none; }
                 input { user-select: text; }
-                
                 * { font-style: normal !important; -webkit-font-smoothing: antialiased; }
             `}</style>
         </div>
