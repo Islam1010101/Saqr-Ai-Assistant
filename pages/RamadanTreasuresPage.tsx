@@ -105,7 +105,7 @@ const RamadanTreasuresPage: React.FC = () => {
                 
                 {/* العنوان الرئيسي */}
                 <h1 className="text-5xl md:text-[9rem] tracking-tighter text-slate-900 dark:text-white font-black ramadan-title drop-shadow-2xl animate-fade-in-up select-none leading-tight">
-                    {isAr ? 'كنوز رمضان' : 'Ramadan Treasures'}
+                    {isAr ? 'كنوز صقر الإمارات' : 'Emirates Falcon Treasures'}
                 </h1>
 
                 {/* منطقة الشخصية والشعار */}
