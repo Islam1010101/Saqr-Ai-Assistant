@@ -10,6 +10,7 @@ const IconDownload = () => <svg width="24" height="24" viewBox="0 0 24 24" fill=
 const IconReplay = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3" /></svg>;
 const IconNeon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>;
 const IconMenu = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>;
+const IconSave = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>;
 
 interface DrawPath {
     x: number;
@@ -34,7 +35,10 @@ const CreatorsStudioPage: React.FC = () => {
     const [studentName, setStudentName] = useState("");
     const [isNeonMode, setIsNeonMode] = useState(false);
     const [isReplaying, setIsReplaying] = useState(false);
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    
+    // للتحكم في ظهور الشرائط الجانبية في الموبايل
+    const [isToolsOpen, setIsToolsOpen] = useState(false);
+    const [isSaveOpen, setIsSaveOpen] = useState(false);
 
     // تخزين المسارات
     const [drawingHistory, setDrawingHistory] = useState<DrawPath[][]>([]);
@@ -170,7 +174,8 @@ const CreatorsStudioPage: React.FC = () => {
     };
 
     return (
-        <div dir={dir} className="fixed inset-0 bg-white dark:bg-[#020617] transition-colors duration-700 font-black overflow-hidden antialiased">
+        // z-[200] عشان يغطي على الهيدر والفوتر بتوع الـ App
+        <div dir={dir} className="fixed inset-0 z-[200] bg-white dark:bg-[#020617] transition-colors duration-700 font-black overflow-hidden antialiased">
             
             {/* اللوحة الخلفية (Full Screen) */}
             <div ref={containerRef} className="absolute inset-0 z-0 cursor-crosshair active:cursor-grabbing">
@@ -202,17 +207,17 @@ const CreatorsStudioPage: React.FC = () => {
                 </div>
             </header>
 
-            {/* الشريط الجانبي "الشبح" */}
+            {/* 1. الشريط الجانبي للأدوات (يمين أو شمال حسب اللغة) */}
             <div 
-                className={`fixed top-1/2 -translate-y-1/2 z-50 transition-all duration-300 ease-out
+                className={`fixed top-1/2 -translate-y-1/2 z-50 transition-all duration-300 ease-out group
                     ${dir === 'rtl' ? 'right-0 translate-x-[85%] hover:translate-x-0' : 'left-0 -translate-x-[85%] hover:translate-x-0'}
-                    ${isSidebarOpen ? '!translate-x-0' : ''}
+                    ${isToolsOpen ? '!translate-x-0' : ''}
                 `}
-                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                onClick={() => setIsToolsOpen(!isToolsOpen)}
             >
-                {/* مقبض السحب (للموبايل) */}
-                <div className={`absolute top-1/2 -translate-y-1/2 w-8 h-16 bg-slate-200/80 dark:bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center cursor-pointer md:hidden shadow-md
-                    ${dir === 'rtl' ? '-left-5 rounded-r-none' : '-right-5 rounded-l-none'}
+                {/* مقبض الأدوات */}
+                <div className={`absolute top-1/2 -translate-y-1/2 w-8 h-16 bg-slate-200/80 dark:bg-white/10 backdrop-blur-md flex items-center justify-center cursor-pointer shadow-md
+                    ${dir === 'rtl' ? '-left-8 rounded-l-full' : '-right-8 rounded-r-full'}
                 `}>
                     <IconMenu />
                 </div>
@@ -231,33 +236,48 @@ const CreatorsStudioPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* الفوتر العائم (شغال 100%) */}
-            <div className="absolute bottom-8 left-0 right-0 z-50 pointer-events-none flex justify-center px-4">
-                <div 
-                    className="glass-panel p-2 rounded-[2rem] flex items-center gap-2 pointer-events-auto shadow-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200 dark:border-white/10 max-w-xl w-full"
-                    onMouseDown={(e) => e.stopPropagation()} // الحل الذهبي
-                    onTouchStart={(e) => e.stopPropagation()}
+            {/* 2. الشريط الجانبي للحفظ والاسم (الجهة العكسية) */}
+            <div 
+                className={`fixed top-1/2 -translate-y-1/2 z-50 transition-all duration-300 ease-out group
+                    ${dir === 'rtl' ? 'left-0 -translate-x-[85%] hover:translate-x-0' : 'right-0 translate-x-[85%] hover:translate-x-0'}
+                    ${isSaveOpen ? '!translate-x-0' : ''}
+                `}
+                onClick={() => setIsSaveOpen(!isSaveOpen)}
+            >
+                {/* مقبض الحفظ */}
+                <div className={`absolute top-1/2 -translate-y-1/2 w-8 h-16 bg-slate-900 text-white backdrop-blur-md flex items-center justify-center cursor-pointer shadow-md
+                    ${dir === 'rtl' ? '-right-8 rounded-r-full' : '-left-8 rounded-l-full'}
+                `}>
+                    <IconDownload />
+                </div>
+
+                <div className="glass-panel-heavy p-5 rounded-[2rem] border border-white/20 flex flex-col gap-4 shadow-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl m-4 w-64"
+                     onMouseDown={(e) => e.stopPropagation()} 
+                     onTouchStart={(e) => e.stopPropagation()}
                 >
+                    <h3 className="text-center font-bold text-slate-900 dark:text-white text-lg">{isAr ? 'حفظ اللوحة' : 'Save Art'}</h3>
+                    
                     <input 
                         type="text" 
-                        placeholder={isAr ? "اكتب اسم الفنان..." : "Artist Name..."}
+                        placeholder={isAr ? "اسم الفنان..." : "Artist Name..."}
                         value={studentName} 
                         onChange={(e) => setStudentName(e.target.value)}
-                        className="flex-1 px-6 py-3 rounded-[1.5rem] bg-slate-100 dark:bg-white/5 border-none text-slate-900 dark:text-white outline-none placeholder:text-slate-400 font-bold text-center transition-all focus:bg-white dark:focus:bg-white/10 focus:ring-2 focus:ring-red-500/20"
+                        className="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-white/10 border-2 border-transparent focus:border-red-600 text-slate-900 dark:text-white outline-none font-bold text-center transition-all"
                     />
+                    
                     <button 
                         onClick={downloadPNG} 
                         disabled={!studentName.trim() || isReplaying}
-                        className="px-8 py-3 rounded-[1.5rem] bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-black shadow-lg hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:grayscale whitespace-nowrap flex items-center gap-2"
+                        className="w-full py-4 rounded-xl bg-gradient-to-r from-red-600 to-red-500 text-white font-black shadow-lg hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-2"
                     >
-                        <IconDownload /> <span className="hidden md:inline">{isAr ? 'حفظ' : 'Save'}</span>
+                        <IconSave /> {isAr ? 'تحميل PNG' : 'Download'}
                     </button>
                 </div>
             </div>
 
             {/* مؤشرات الحالة */}
             {isReplaying && (
-                <div className="fixed top-24 right-6 px-4 py-2 glass-panel bg-yellow-500/20 border-yellow-500 text-yellow-500 rounded-full text-xs font-bold animate-pulse z-30 pointer-events-none">
+                <div className="fixed top-24 right-1/2 translate-x-1/2 px-6 py-2 glass-panel bg-yellow-500/20 border-yellow-500 text-yellow-500 rounded-full text-xs font-bold animate-pulse z-30 pointer-events-none">
                     {isAr ? '🎥 جاري إعادة العرض...' : '🎥 Replaying...'}
                 </div>
             )}
