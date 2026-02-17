@@ -13,7 +13,9 @@ import EnglishLibraryInternalPage from './pages/EnglishLibraryInternalPage';
 import FeedbackPage from './pages/FeedbackPage';
 import CreatorsPortalPage from './pages/CreatorsPortalPage';
 import LibraryMapPage from './pages/LibraryMapPage';
-import CreatorsStudioPage from './pages/CreatorsStudioPage'; 
+import CreatorsStudioPage from './pages/CreatorsStudioPage';
+// --- هام جداً: استيراد صفحة رمضان ---
+import RamadanTreasuresPage from './pages/RamadanTreasuresPage';
 
 import type { Locale } from './types';
 
@@ -26,7 +28,7 @@ interface NavLink {
   color: string;
 }
 
-// -------- 1. مساعد صقر العائم (بدون تغيير) --------
+// -------- 1. مساعد صقر العائم --------
 const FloatingSaqr: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -68,7 +70,7 @@ const FloatingSaqr: React.FC = () => {
   );
 };
 
-// -------- 2. هيدر EFIPS الزجاجي الذكي (التعديل هنا) --------
+// -------- 2. هيدر EFIPS الزجاجي الذكي --------
 const Header: React.FC = () => {
   const { locale, setLocale } = useLanguage();
   const { theme, toggleTheme } = useTheme();
@@ -80,15 +82,12 @@ const Header: React.FC = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
-  // منطق الاختفاء عند السكرول
   useEffect(() => {
     const controlNavbar = () => {
       if (typeof window !== 'undefined') {
-        // إذا نزلنا لتحت أكتر من 100 بكسل والاتجاه لأسفل -> اخفي
         if (window.scrollY > lastScrollY && window.scrollY > 50) {
           setIsVisible(false);
         } else {
-          // أي حركة لفوق -> اظهر
           setIsVisible(true);
         }
         setLastScrollY(window.scrollY);
@@ -116,7 +115,6 @@ const Header: React.FC = () => {
 
   return (
     <header className={`sticky top-4 z-[60] px-4 md:px-10 transition-transform duration-500 ease-in-out ${isVisible ? 'translate-y-0' : '-translate-y-32'}`}>
-      {/* تم تعديل الكلاسات هنا لزيادة الشفافية والبلور */}
       <div className="mx-auto max-w-[98rem] p-1.5 md:p-2.5 rounded-full border border-white/30 dark:border-white/10 flex items-center justify-between shadow-2xl backdrop-blur-3xl bg-white/70 dark:bg-slate-950/70 font-black transition-all relative overflow-visible">
         
         <Link to="/" className="flex items-center gap-2 md:gap-3 ps-4 md:ps-6 group flex-shrink-0">
@@ -178,7 +176,7 @@ const Header: React.FC = () => {
   );
 };
 
-// -------- 3. سياق اللغة والثيم (بدون تغيير) --------
+// -------- 3. سياق اللغة والثيم --------
 const LanguageContext = createContext<any>(null);
 export const useLanguage = () => useContext(LanguageContext);
 const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -227,6 +225,10 @@ const App: React.FC = () => {
                 <Route path="/digital-library/english" element={<EnglishLibraryInternalPage />} />
                 <Route path="/creators" element={<CreatorsPortalPage />} />
                 <Route path="/creators-studio" element={<CreatorsStudioPage />} />
+                
+                {/* --- الرابط المفقود: صفحة رمضان --- */}
+                <Route path="/ramadan" element={<RamadanTreasuresPage />} />
+
                 <Route path="/reports" element={<ReportsPage />} />
                 <Route path="/feedback" element={<FeedbackPage />} /> 
                 <Route path="/about" element={<AboutPage />} />
