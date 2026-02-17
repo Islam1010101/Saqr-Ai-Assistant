@@ -19,7 +19,7 @@ const translations = {
         challengeTitle: "تحدي المبدعين الصغار",
         challengeDesc: "ناقش، ابدأ قصتك الخاصة مع صقر، وأثبت موهبتك لتفوز بجوائز متميزة من مدرسة صقر الإمارات!",
         challengeCTA: "ابدأ رحلة الإبداع مع صقر الآن",
-        ramadanButton: "🌙 انتقل إلى مسابقة كنوز رمضان", // النص الجديد للزر
+        ramadanButton: "🌙 مسابقة كنوز رمضان", // تم تعديل النص
         visitorsLabel: "زوار البوابة:"
     },
     en: {
@@ -38,7 +38,7 @@ const translations = {
         challengeTitle: "Little Authors Challenge",
         challengeDesc: "Discuss , author your own tales with Saqr, and showcase your talent to win distinguished prizes from EFIPS!",
         challengeCTA: "Start your creative journey now",
-        ramadanButton: "🌙 Go to Ramadan Treasures Quest", // النص الجديد للزر
+        ramadanButton: "🌙 Ramadan Treasures Quest", // تم تعديل النص
         visitorsLabel: "Portal Visitors:"
     }
 };
@@ -136,11 +136,11 @@ const HomePage: React.FC = () => {
                 <div className="h-2 w-40 bg-red-600 mx-auto rounded-full shadow-[0_0_25px_rgba(220,38,38,0.6)]"></div>
             </div>
 
-            {/* زر الانتقال لمسابقة رمضان (التعديل الجديد) */}
-            <div className="w-full max-w-4xl relative z-30 animate-in zoom-in duration-700 flex justify-center">
-                <Link to="/ramadan" className="group relative overflow-hidden px-10 py-5 rounded-[2.5rem] bg-gradient-to-r from-yellow-600 to-yellow-400 text-white shadow-[0_0_40px_rgba(234,179,8,0.4)] hover:scale-105 transition-transform duration-300">
+            {/* زر الانتقال لمسابقة رمضان (تعديل الحجم والنص والتوسط) */}
+            <div className="w-full relative z-30 animate-in zoom-in duration-700 flex justify-center">
+                <Link to="/ramadan" className="group relative overflow-hidden px-8 py-3 md:px-10 md:py-4 rounded-full bg-gradient-to-r from-yellow-600 to-yellow-400 text-white shadow-[0_0_30px_rgba(234,179,8,0.3)] hover:scale-105 transition-transform duration-300">
                     <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
-                    <span className="relative z-10 text-lg md:text-3xl font-black flex items-center gap-3">
+                    <span className="relative z-10 text-sm md:text-xl font-black flex items-center gap-2">
                         {t('ramadanButton')} 🏮
                     </span>
                 </Link>
