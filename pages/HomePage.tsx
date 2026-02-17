@@ -19,7 +19,7 @@ const translations = {
         challengeTitle: "تحدي المبدعين الصغار",
         challengeDesc: "ناقش، ابدأ قصتك الخاصة مع صقر، وأثبت موهبتك لتفوز بجوائز متميزة من مدرسة صقر الإمارات!",
         challengeCTA: "ابدأ رحلة الإبداع مع صقر الآن",
-        ramadanButton: "🌙 مسابقة كنوز رمضان", // تم تعديل النص
+        ramadanButton: "🌙 كنوز صقر الإمارات", // تم تعديل النص
         visitorsLabel: "زوار البوابة:"
     },
     en: {
@@ -38,7 +38,7 @@ const translations = {
         challengeTitle: "Little Authors Challenge",
         challengeDesc: "Discuss , author your own tales with Saqr, and showcase your talent to win distinguished prizes from EFIPS!",
         challengeCTA: "Start your creative journey now",
-        ramadanButton: "🌙 Ramadan Treasures Quest", // تم تعديل النص
+        ramadanButton: "🌙 EFPIS Treasures", // تم تعديل النص
         visitorsLabel: "Portal Visitors:"
     }
 };
