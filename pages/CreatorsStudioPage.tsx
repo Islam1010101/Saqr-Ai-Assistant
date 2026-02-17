@@ -3,10 +3,10 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '../App';
 
 // --- الأيقونات الملكية ---
-const IconPen = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>;
-const IconEraser = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 20H7L3 16C2.5 15.5 2.5 14.5 3 14L13 4L20 11L11 20"/></svg>;
-const IconTrash = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/></svg>;
-const IconDownload = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>;
+const IconPen = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>;
+const IconEraser = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 20H7L3 16C2.5 15.5 2.5 14.5 3 14L13 4L20 11L11 20"/></svg>;
+const IconTrash = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/></svg>;
+const IconDownload = () => <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>;
 
 const CreatorsStudioPage: React.FC = () => {
     const { locale, dir } = useLanguage();
@@ -15,7 +15,7 @@ const CreatorsStudioPage: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [isDrawing, setIsDrawing] = useState(false);
     const [color, setColor] = useState('#ef4444');
-    const [lineWidth] = useState(8);
+    const [lineWidth, setLineWidth] = useState(8);
     const [tool, setTool] = useState<'pen' | 'eraser'>('pen');
     const [studentName, setStudentName] = useState("");
     const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
@@ -98,87 +98,89 @@ const CreatorsStudioPage: React.FC = () => {
     return (
         <div dir={dir} className="min-h-[100dvh] bg-slate-50 dark:bg-[#01040a] transition-colors duration-700 font-black relative overflow-hidden flex flex-col antialiased">
             
-            {/* هيدر مضغوط للموبايل */}
-            <header className="relative z-30 px-4 md:px-10 w-full flex flex-col items-center pt-2 md:pt-4 mb-2 md:mb-6">
-                <div className="flex w-full justify-between items-center max-w-[1800px]">
-                    <Link to="/creators" className="glass-panel border border-white/40 px-3 py-2 md:px-10 md:py-4 bg-white/20 dark:bg-white/5 rounded-xl md:rounded-2xl text-[10px] md:text-lg text-slate-900 dark:text-white hover:bg-red-600 transition-all font-black">
-                        {isAr ? '⬅ عودة' : '⬅ BACK'}
+            {/* الهيدر المضغوط (Minimal Header) */}
+            <header className="relative z-30 px-4 md:px-8 w-full flex items-center justify-between py-2 md:py-3 shadow-sm bg-white/50 dark:bg-black/20 backdrop-blur-md">
+                <div className="flex items-center gap-4">
+                    <Link to="/creators" className="glass-panel border border-white/40 px-4 py-2 rounded-xl text-xs md:text-sm text-slate-900 dark:text-white hover:bg-red-600 hover:text-white transition-all font-black uppercase">
+                        {isAr ? '⬅ خروج' : '⬅ EXIT'}
                     </Link>
-                    <img src="/unnamed.png" alt="Saqr" className="h-8 md:h-24 object-contain animate-float" />
+                    <img src="/unnamed.png" alt="Saqr" className="h-8 md:h-12 object-contain" />
                 </div>
                 
-                <div className="relative group mt-1" onMouseMove={handleTitleHover}>
-                    <h1 className="text-3xl md:text-[8rem] lg:text-[10rem] tracking-tighter uppercase leading-none cursor-default select-none royal-title-dynamic"
+                <div className="relative group mx-auto absolute left-1/2 -translate-x-1/2" onMouseMove={handleTitleHover}>
+                    <h1 className="text-2xl md:text-5xl tracking-tighter uppercase leading-none cursor-default select-none royal-title-dynamic"
                         style={{ '--glow-x': `${mousePos.x}%`, '--glow-y': `${mousePos.y}%` } as any}>
                         {isAr ? 'ارسم ابداعك' : 'DRAW MAGIC'}
                     </h1>
                 </div>
+                <div className="w-16"></div> {/* Spacer for alignment */}
             </header>
 
-            {/* الحاوية الرئيسية - مساحة الرسم هي الملك */}
-            <main className="flex-1 flex flex-col lg:flex-row gap-2 md:gap-8 px-2 md:px-10 mb-4 max-w-[1900px] mx-auto w-full overflow-hidden">
+            {/* الحاوية الرئيسية - Full Screen Canvas */}
+            <main className="flex-1 flex flex-col lg:flex-row gap-0 overflow-hidden relative">
                 
-                {/* صندوق الأدوات: أفقي على الموبايل، رأسي على الكمبيوتر */}
-                <div className="flex lg:flex-col gap-2 md:gap-6 justify-center items-center lg:w-24 order-2 lg:order-1 px-2">
-                    <div className="glass-panel-heavy p-2 md:p-6 rounded-2xl md:rounded-[3rem] border border-white/20 flex lg:flex-col gap-3 md:gap-6 w-full lg:h-full justify-around items-center bg-white/50 dark:bg-slate-900/40">
-                        <button onClick={() => setTool('pen')} className={`p-3 md:p-8 rounded-xl md:rounded-3xl border-2 md:border-4 transition-all ${tool === 'pen' ? 'border-red-600 bg-red-600/20 text-red-600 scale-110' : 'border-transparent dark:text-white'}`}><IconPen /></button>
-                        <button onClick={() => setTool('eraser')} className={`p-3 md:p-8 rounded-xl md:rounded-3xl border-2 md:border-4 transition-all ${tool === 'eraser' ? 'border-red-600 bg-red-600/20 text-red-600 scale-110' : 'border-transparent dark:text-white'}`}><IconEraser /></button>
-                        <button onClick={() => canvasRef.current?.getContext('2d')?.clearRect(0,0,5000,5000)} className="p-3 md:p-8 rounded-xl md:rounded-3xl bg-red-500/10 text-red-600 hover:bg-red-600 transition-all"><IconTrash /></button>
-                        <div className="hidden lg:block w-full h-px bg-white/10 my-2"></div>
-                        <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="w-8 h-8 md:w-16 md:h-16 rounded-full cursor-pointer bg-transparent border-none p-0 shadow-xl" />
-                    </div>
+                {/* 1. شريط الأدوات الجانبي (Sidebar) */}
+                <div className="flex lg:flex-col justify-center items-center bg-white/80 dark:bg-slate-900/80 border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-white/10 z-20 shadow-xl lg:w-20 py-2 lg:py-0 px-4 lg:px-0 gap-4 lg:gap-8">
+                    <button onClick={() => setTool('pen')} className={`p-2 md:p-3 rounded-xl transition-all ${tool === 'pen' ? 'text-red-600 bg-red-100 dark:bg-red-900/30 scale-110' : 'text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}><IconPen /></button>
+                    <button onClick={() => setTool('eraser')} className={`p-2 md:p-3 rounded-xl transition-all ${tool === 'eraser' ? 'text-red-600 bg-red-100 dark:bg-red-900/30 scale-110' : 'text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}><IconEraser /></button>
+                    <button onClick={() => canvasRef.current?.getContext('2d')?.clearRect(0,0,5000,5000)} className="p-2 md:p-3 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"><IconTrash /></button>
+                    <div className="w-px h-8 lg:w-8 lg:h-px bg-slate-300 dark:bg-white/20"></div>
+                    <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="w-8 h-8 rounded-full cursor-pointer bg-transparent border-none p-0 shadow-lg hover:scale-110 transition-transform" />
+                    <div className="hidden lg:block lg:flex-1"></div>
                 </div>
 
-                {/* لوحة الرسم العملاقة */}
-                <div className="flex-1 flex flex-col gap-3 order-1 lg:order-2 h-[65vh] md:h-full min-h-[350px]">
-                    <div ref={containerRef} className="flex-1 bg-white dark:bg-[#020617] border-4 md:border-[10px] border-white dark:border-white/5 rounded-[2rem] md:rounded-[6rem] shadow-2xl overflow-hidden relative border-glass-shine group/canvas">
+                {/* 2. منطقة الرسم والتحكم (Canvas & Controls) */}
+                <div className="flex-1 flex flex-col relative bg-slate-100 dark:bg-black p-2 md:p-4 gap-2 md:gap-4">
+                    
+                    {/* اللوحة */}
+                    <div ref={containerRef} className="flex-1 bg-white dark:bg-[#020617] rounded-2xl md:rounded-3xl shadow-inner overflow-hidden relative cursor-crosshair border border-slate-200 dark:border-white/10">
                         <canvas 
                             ref={canvasRef}
                             onMouseDown={startDraw} onMouseMove={drawing} onMouseUp={stop} onMouseLeave={stop}
                             onTouchStart={startDraw} onTouchMove={drawing} onTouchEnd={stop}
                             className="touch-none w-full h-full relative z-10"
                         />
-                        <div className="absolute inset-0 flex items-center justify-center z-0 pointer-events-none opacity-[0.04] dark:opacity-[0.1]">
-                            <img src="/school-logo.png" alt="EFIPS" className="w-[80%] md:w-[40%] object-contain dark:brightness-0 dark:invert" />
+                        {/* ووتر مارك في المنتصف */}
+                        <div className="absolute inset-0 flex items-center justify-center z-0 pointer-events-none opacity-[0.03] dark:opacity-[0.08]">
+                            <img src="/school-logo.png" alt="Watermark" className="w-[30%] object-contain dark:brightness-0 dark:invert opacity-50" />
                         </div>
                     </div>
-                    
-                    {/* الاسم والحفظ - في صف واحد على الكمبيوتر */}
-                    <div className="flex flex-col md:flex-row gap-2 md:gap-6 items-stretch w-full">
+
+                    {/* شريط التحكم السفلي (الاسم والحفظ) */}
+                    <div className="h-16 md:h-20 flex gap-2 md:gap-4 shrink-0">
                         <input 
-                            type="text" placeholder={isAr ? "اسمك هنا..." : "Name..."}
+                            type="text" placeholder={isAr ? "اكتب اسمك هنا..." : "Enter your name..."}
                             value={studentName} onChange={(e) => setStudentName(e.target.value)}
-                            className="flex-1 p-4 md:p-10 rounded-2xl md:rounded-[5rem] bg-white/80 dark:bg-white/5 border-2 md:border-4 border-slate-200 dark:border-white/10 text-slate-950 dark:text-white outline-none focus:border-red-600 font-black text-center text-lg md:text-5xl shadow-xl"
+                            className="flex-[2] h-full px-6 rounded-2xl bg-white dark:bg-white/5 border-2 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white outline-none focus:border-red-600 font-black text-center text-lg md:text-2xl shadow-sm transition-all"
                         />
                         <button 
                             onClick={downloadPNG} disabled={!studentName.trim()}
-                            className="flex items-center justify-center gap-2 md:gap-4 py-4 md:py-10 px-8 md:px-20 rounded-2xl md:rounded-[5rem] bg-slate-950 dark:bg-white text-white dark:text-slate-950 font-black text-lg md:text-6xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-20"
+                            className="flex-1 h-full flex items-center justify-center gap-3 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black text-lg md:text-2xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:grayscale"
                         >
-                            <IconDownload /> {isAr ? 'حفظ' : 'SAVE'}
+                            <IconDownload /> {isAr ? 'حفظ اللوحة' : 'SAVE ART'}
                         </button>
                     </div>
                 </div>
             </main>
 
             <style>{`
-                @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
-                .animate-float { animation: float 4s ease-in-out infinite; }
-                
                 .royal-title-dynamic {
                     color: #000;
                     background: radial-gradient(circle at var(--glow-x) var(--glow-y), #fff 0%, #000 40%);
                     -webkit-background-clip: text;
                     -webkit-text-fill-color: transparent;
+                    transition: all 0.1s ease;
                 }
                 .dark .royal-title-dynamic {
                     color: #fff;
-                    background: radial-gradient(circle at var(--glow-x) var(--glow-y), #fff 0%, #334155 40%, #fff 100%);
+                    background: radial-gradient(circle at var(--glow-x) var(--glow-y), #fff 0%, #94a3b8 50%, #fff 100%);
                     -webkit-background-clip: text;
                     -webkit-text-fill-color: transparent;
                 }
-
-                canvas { cursor: crosshair; image-rendering: -webkit-optimize-contrast; }
-                .glass-panel-heavy { backdrop-filter: blur(20px); }
+                
+                .glass-panel { backdrop-filter: blur(10px); }
+                canvas { touch-action: none; image-rendering: pixelated; }
+                * { font-style: normal !important; -webkit-font-smoothing: antialiased; }
             `}</style>
         </div>
     );
