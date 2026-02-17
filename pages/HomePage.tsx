@@ -19,7 +19,7 @@ const translations = {
         challengeTitle: "تحدي المبدعين الصغار",
         challengeDesc: "ناقش، ابدأ قصتك الخاصة مع صقر، وأثبت موهبتك لتفوز بجوائز متميزة من مدرسة صقر الإمارات!",
         challengeCTA: "ابدأ رحلة الإبداع مع صقر الآن",
-        comingSoonRamadan: "🌙 قريباً في رمضان: مسابقة كنز المعرفة.. ابحث عن الكنوز واربح جوائز فورية!",
+        ramadanButton: "🌙 انتقل إلى مسابقة كنوز رمضان", // النص الجديد للزر
         visitorsLabel: "زوار البوابة:"
     },
     en: {
@@ -38,7 +38,7 @@ const translations = {
         challengeTitle: "Little Authors Challenge",
         challengeDesc: "Discuss , author your own tales with Saqr, and showcase your talent to win distinguished prizes from EFIPS!",
         challengeCTA: "Start your creative journey now",
-        comingSoonRamadan: "🌙 Coming Soon this Ramadan: Knowledge Treasure Quest.. Find the treasures & win instant prizes!",
+        ramadanButton: "🌙 Go to Ramadan Treasures Quest", // النص الجديد للزر
         visitorsLabel: "Portal Visitors:"
     }
 };
@@ -136,14 +136,14 @@ const HomePage: React.FC = () => {
                 <div className="h-2 w-40 bg-red-600 mx-auto rounded-full shadow-[0_0_25px_rgba(220,38,38,0.6)]"></div>
             </div>
 
-            {/* إعلان مسابقة رمضان */}
-            <div className="w-full max-w-4xl relative z-30 animate-in zoom-in duration-700">
-                <div className="glass-panel py-6 px-10 rounded-[2.5rem] border-2 border-yellow-500/40 bg-gradient-to-r from-yellow-500/10 via-transparent to-yellow-500/10 shadow-[0_0_40px_rgba(234,179,8,0.15)] flex items-center justify-center text-center overflow-hidden group">
-                    <div className="absolute -inset-1 bg-yellow-500/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <p className="text-lg md:text-3xl font-black text-yellow-600 dark:text-yellow-500 animate-pulse tracking-tight">
-                        {t('comingSoonRamadan')}
-                    </p>
-                </div>
+            {/* زر الانتقال لمسابقة رمضان (التعديل الجديد) */}
+            <div className="w-full max-w-4xl relative z-30 animate-in zoom-in duration-700 flex justify-center">
+                <Link to="/ramadan" className="group relative overflow-hidden px-10 py-5 rounded-[2.5rem] bg-gradient-to-r from-yellow-600 to-yellow-400 text-white shadow-[0_0_40px_rgba(234,179,8,0.4)] hover:scale-105 transition-transform duration-300">
+                    <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+                    <span className="relative z-10 text-lg md:text-3xl font-black flex items-center gap-3">
+                        {t('ramadanButton')} 🏮
+                    </span>
+                </Link>
             </div>
 
             {/* 2. مركز العمليات */}
