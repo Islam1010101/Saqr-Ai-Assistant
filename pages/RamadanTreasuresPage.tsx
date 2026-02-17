@@ -82,7 +82,7 @@ const RamadanTreasuresPage: React.FC = () => {
             
             {/* 1. زينة رمضان (بدون قص) */}
             <div className="absolute inset-0 pointer-events-none z-0">
-                {/* فوانيس متدلية بأبعاد آمنة (تم تعديل الموقع لتظهر كاملة) */}
+                {/* فوانيس متدلية بأبعاد آمنة */}
                 <div className="absolute -top-2 left-[8%] text-[3.5rem] md:text-[6rem] animate-swing origin-top opacity-90 drop-shadow-2xl filter drop-shadow(0 0 15px rgba(255,215,0,0.4))">🏮</div>
                 <div className="absolute -top-4 right-[12%] text-[2.5rem] md:text-[5rem] animate-swing-delayed origin-top opacity-80 drop-shadow-2xl">🏮</div>
                 <div className="absolute top-[15%] left-[35%] text-[1.5rem] md:text-[3rem] animate-pulse opacity-50">✨</div>
@@ -111,9 +111,13 @@ const RamadanTreasuresPage: React.FC = () => {
                 {/* منطقة الشخصية والشعار */}
                 <div className="relative w-full flex justify-center items-center py-4 md:py-8 group cursor-pointer" onClick={explodeStars} onTouchStart={explodeStars}>
                     
-                    {/* الشعار المائل (الووتر مارك) */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] md:w-[700px] opacity-[0.04] dark:opacity-[0.12] dark:brightness-150 transition-all duration-1000 group-hover:scale-105 pointer-events-none">
-                        <img src="/school-logo.png" alt="School Logo" className="w-full object-contain rotate-[12deg]" />
+                    {/* الشعار المائل (الووتر مارك) - التعديل هنا لتحويله للأبيض في الدارك مود */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] md:w-[700px] opacity-[0.04] dark:opacity-[0.12] transition-all duration-1000 group-hover:scale-105 pointer-events-none">
+                        <img 
+                            src="/school-logo.png" 
+                            alt="School Logo" 
+                            className="w-full object-contain rotate-[12deg] dark:brightness-0 dark:invert transition-all duration-700" 
+                        />
                     </div>
 
                     {/* الشخصية الرمضانية (صقر) - بدون إطار */}
@@ -132,7 +136,6 @@ const RamadanTreasuresPage: React.FC = () => {
                 {/* النصوص السفلية */}
                 <div className="space-y-8 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                     <div className="glass-panel inline-block px-12 py-6 rounded-full bg-yellow-500/10 dark:bg-yellow-500/5 border border-yellow-500/20 backdrop-blur-xl shadow-lg hover:shadow-yellow-500/10 transition-shadow">
-                        {/* تم تعديل النص هنا لإزالة "قريباً" */}
                         <p className="text-lg md:text-3xl text-yellow-800 dark:text-yellow-400 font-bold tracking-wider">
                             {isAr ? 'يوم الاثنين القادم' : 'Next Monday'}
                         </p>
