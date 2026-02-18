@@ -2967,17 +2967,19 @@ const localBookData = [
 { "title": "The Escape And Other Stories", "author": "W. Somerset Maugham", "shelf": 14, "row": 1 },
 { "title": "Journey To The Centre Of The Earth", "author": "JULES VERNE", "shelf": 14, "row": 1 },
 { "title": "The Mystery Of Tally-Ho Cottage", "author": "ENID BLYTON", "shelf": 14, "row": 1 },
+{ "title": "The Magic Watering Can", "author": "ENID BLYTON", "shelf": 14, "row": 1 },
 { "title": "ليطمئن قلبي", "author": "أدهم الشرقاوي", "shelf": 33, "row": 3 },
 { "title": "نزل جامايكا", "author": "دافنه دو مورييه", "shelf": 33, "row": 3 },
 { "title": "الأبله", "author": "دوستويفسكي", "shelf": 33, "row": 3 },
 { "title": "إمبراطورية البازلاء:حكايات شعبية من رومانيا", "author": "مايت كرمينيتس", "shelf": 38, "row": 3 },
 { "title": "Common Mistakes In English", "author": "T.J.Fitikides", "shelf": 6, "row": 1 },
-{ "title": "Part Of Me", "author": "Kimberly Willis Holt", "shelf": 16, "row": 3 }, 
+{ "title": "Part Of Me", "author": "Kimberly Willis Holt", "shelf": 16, "row": 3 },
 { "title": "سحر اليقين", "author": "نيدو كيوبين", "shelf": 39, "row": 3 }, 
 { "title": "مارتين السعيد", "author": "جان دوست", "shelf": 38, "row": 3 }, 
 { "title": "كبر دماغك", "author": "خالد صالح المنيف", "shelf": 39, "row": 2 },
 { "title": "ميلي في مصر", "author": "داغمار شيدولو", "shelf": 38, "row": 3 },
-{ "title": "البخلاء", "author": "الجاحظ", "shelf": 33, "row": 3 }   
+{ "title": "Toad Away", "author": "Morris Gleitzman", "shelf": 15, "row": 3 },
+{ "title": "البخلاء", "author": "الجاحظ", "shelf": 33, "row": 3 }  
 ];
 
 function findBooks(q: string) {
