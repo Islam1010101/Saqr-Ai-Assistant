@@ -36,6 +36,11 @@ const getChallengeReports = () => {
     return JSON.parse(localStorage.getItem('efips_challenge_reports') || '[]');
 };
 
+// 🌟 وظيفة جلب تقارير مسابقة رمضان
+const getRamadanReports = () => {
+    return JSON.parse(localStorage.getItem('saqrReports') || '[]');
+};
+
 const translations = {
     ar: {
         pageTitle: "تقارير نظام صقر الإمارات الذكي",
@@ -54,7 +59,14 @@ const translations = {
         viewBtn: "استعراض الإبداع",
         librarian: "أمين المكتبة المعتمد",
         signature: "توقيع الإدارة المدرسية",
-        errorPass: "الرمز السري غير صحيح"
+        errorPass: "الرمز السري غير صحيح",
+        // ترجمات جديدة لرمضان
+        ramadanWinnerTitle: "بطل كنوز رمضان",
+        ramadanInteractions: "إجمالي التفاعل",
+        gradeLabel: "الصف",
+        emailLabel: "البريد الإلكتروني",
+        answerLabel: "الإجابة المسجلة",
+        codeLabel: "كود الكنز"
     },
     en: {
         pageTitle: "EFIPS Smart Intelligence Reports",
@@ -73,7 +85,14 @@ const translations = {
         viewBtn: "View Creation",
         librarian: "Certified Librarian",
         signature: "Management Signature",
-        errorPass: "Invalid Pin Code"
+        errorPass: "Invalid Pin Code",
+        // ترجمات جديدة لرمضان
+        ramadanWinnerTitle: "Ramadan Treasures Champion",
+        ramadanInteractions: "Total Interactions",
+        gradeLabel: "Grade",
+        emailLabel: "Email",
+        answerLabel: "Logged Answer",
+        codeLabel: "Treasure Code"
     }
 };
 
@@ -86,11 +105,15 @@ const ReportsPage: React.FC = () => {
     const [stats, setStats] = useState(getDynamicStats());
     const [challenges, setChallenges] = useState(getChallengeReports());
     const [viewingContent, setViewingContent] = useState<any>(null);
+    
+    // 🌟 State تقارير رمضان
+    const [ramadanReports, setRamadanReports] = useState<any[]>([]);
 
     useEffect(() => {
         if (isAuthenticated) {
             setStats(getDynamicStats());
             setChallenges(getChallengeReports());
+            setRamadanReports(getRamadanReports());
         }
     }, [isAuthenticated]);
 
@@ -116,6 +139,9 @@ const ReportsPage: React.FC = () => {
             </div>
         );
     }
+
+    // جلب أحدث فائز بمسابقة رمضان
+    const ramadanWinner = ramadanReports.length > 0 ? ramadanReports[ramadanReports.length - 1] : null;
 
     return (
         <div dir={dir} className="max-w-6xl mx-auto px-4 py-8 md:py-20 animate-fade-up relative z-10 pb-40 print:p-0 font-bold antialiased">
@@ -159,16 +185,68 @@ const ReportsPage: React.FC = () => {
                 </button>
             </div>
 
+            {/* 🌟 قسم تقرير مسابقة رمضان الجديد */}
+            {ramadanWinner && (
+                <div className="glass-panel p-8 md:p-14 rounded-[3.5rem] bg-gradient-to-br from-yellow-500/10 to-yellow-600/5 dark:from-yellow-900/20 dark:to-black border border-yellow-500/30 shadow-[0_0_40px_rgba(234,179,8,0.15)] relative overflow-hidden mb-16 animate-fade-in-up">
+                    <div className="absolute top-0 start-0 w-3 h-full bg-yellow-500"></div>
+                    <div className="absolute -top-10 -right-10 text-[15rem] opacity-5">🌙</div>
+                    
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+                        <h2 className="text-2xl md:text-4xl font-black flex items-center gap-4 text-yellow-600 dark:text-yellow-500">
+                            <span className="text-4xl md:text-5xl">🌙</span> {t('ramadanWinnerTitle')}
+                        </h2>
+                        <div className="bg-white/50 dark:bg-black/50 px-6 py-3 rounded-full border border-yellow-500/30 font-bold text-sm md:text-lg dark:text-white flex gap-2 items-center">
+                            <span>📊 {t('ramadanInteractions')}:</span> 
+                            <span className="text-yellow-600 font-black">{ramadanReports.length}</span>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white/40 dark:bg-black/40 p-6 md:p-10 rounded-[2rem] backdrop-blur-sm border border-white/20 dark:border-white/5">
+                        <div className="space-y-4">
+                            <div>
+                                <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1">{t('studentName')}</p>
+                                <p className="text-xl md:text-3xl font-black text-slate-900 dark:text-white">{ramadanWinner.studentName}</p>
+                            </div>
+                            <div>
+                                <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1">{t('gradeLabel')}</p>
+                                <p className="text-lg md:text-2xl font-bold text-slate-800 dark:text-slate-200">{ramadanWinner.studentGrade}</p>
+                            </div>
+                            <div>
+                                <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1">{t('emailLabel')}</p>
+                                <p className="text-md md:text-xl font-mono text-blue-600 dark:text-blue-400">{ramadanWinner.studentEmail}</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4 border-t md:border-t-0 md:border-s border-slate-300 dark:border-slate-700 pt-6 md:pt-0 md:ps-6">
+                            <div>
+                                <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1">{t('answerLabel')}</p>
+                                <p className="text-lg md:text-2xl font-black text-green-600 dark:text-green-400">"{ramadanWinner.enteredAnswer}"</p>
+                            </div>
+                            <div>
+                                <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1">{t('codeLabel')}</p>
+                                <p className="text-md md:text-xl font-mono bg-slate-200 dark:bg-slate-800 inline-block px-3 py-1 rounded-lg text-slate-900 dark:text-white">
+                                    {ramadanWinner.enteredCode}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1">{t('dateLabel')}</p>
+                                <p className="text-sm font-bold text-slate-600 dark:text-slate-400">{new Date(ramadanWinner.timestamp).toLocaleString(locale)}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* سجل أبطال التحدي المطور */}
             <div className="glass-panel p-8 md:p-14 rounded-[3.5rem] bg-white/80 dark:bg-slate-950/80 shadow-3xl border-0 relative overflow-hidden mb-16">
-                <div className="absolute top-0 start-0 w-3 h-full bg-yellow-500 shadow-[0_0_20px_rgba(234,179,8,0.4)]"></div>
+                <div className="absolute top-0 start-0 w-3 h-full bg-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.4)]"></div>
                 <h2 className="text-2xl md:text-4xl font-black mb-10 flex items-center gap-6 dark:text-white text-start">
-                    <span className="text-4xl md:text-6xl animate-pulse">🏆</span> {t('challengeResults')}
+                    <span className="text-4xl md:text-6xl animate-pulse">🥇</span> {t('challengeResults')}
                 </h2>
                 <div className="overflow-x-auto no-scrollbar text-start">
                     <table className="w-full border-collapse min-w-[600px]">
                         <thead>
-                            <tr className="border-b border-slate-200 dark:border-white/10 text-red-600 text-xs md:text-lg font-black uppercase">
+                            <tr className="border-b border-slate-200 dark:border-white/10 text-blue-600 text-xs md:text-lg font-black uppercase">
                                 <th className="pb-6 px-4">{t('studentName')}</th>
                                 <th className="pb-6 px-4">{t('activityLabel')}</th>
                                 <th className="pb-6 px-4 text-center">{t('contentLabel')}</th>
@@ -185,7 +263,7 @@ const ReportsPage: React.FC = () => {
                                         </span>
                                     </td>
                                     <td className="py-6 px-4 text-center">
-                                        <button onClick={()=>setViewingContent(c)} className="text-[10px] md:text-xs bg-slate-900 text-white px-4 py-2 rounded-xl hover:bg-red-600 transition-all font-black uppercase">
+                                        <button onClick={()=>setViewingContent(c)} className="text-[10px] md:text-xs bg-slate-900 text-white px-4 py-2 rounded-xl hover:bg-blue-600 transition-all font-black uppercase">
                                             {t('viewBtn')}
                                         </button>
                                     </td>
