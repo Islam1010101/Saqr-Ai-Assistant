@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../App';
 
-// --- واجهة النجوم المتطايرة ---
 interface StarParticle {
     id: number;
     x: number;
@@ -20,190 +19,281 @@ const RamadanTreasuresPage: React.FC = () => {
     const [particles, setParticles] = useState<StarParticle[]>([]);
     const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
 
-    // تأثير حركة الخلفية الهادئة
+    // --- State المسابقة ---
+    const [answer, setAnswer] = useState(String());
+    const [isAnswerCorrect, setIsAnswerCorrect] = useState(false);
+    
+    const [securityCode, setSecurityCode] = useState(String());
+    const [isCodeCorrect, setIsCodeCorrect] = useState(false);
+    
+    const [winnerData, setWinnerData] = useState({ name: String(), grade: String(), email: String() });
+    const [errorMsg, setErrorMsg] = useState(String());
+
+    // --- State الفائز العام ---
+    // بنجيب الداتا من اللوكال ستوريدج عشان نعرف لو حد فاز قبل كدة
+    const [globalWinner, setGlobalWinner] = useState<{name: string, grade: string} | null>(null);
+
+    // التحقق عند تحميل الصفحة
+    useEffect(() => {
+        const savedWinner = localStorage.getItem(String(ramadanQuestWinner));
+        if (savedWinner) {
+            setGlobalWinner(JSON.parse(savedWinner));
+        }
+    }, []);
+
+    // الإجابات والكود الصحيح
+    const validAnswers = [String(مدفع رمضان), String(the iftar cannon), String(midfa al iftar)];
+    const validCode = String(1906efips2026);
+
+    const handleAnswerSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        const cleanAnswer = answer.trim().toLowerCase();
+        if (validAnswers.includes(cleanAnswer)) {
+            setIsAnswerCorrect(true);
+            setErrorMsg(String());
+            explodeStars(window.innerWidth / 2, window.innerHeight / 2, 50);
+        } else {
+            setErrorMsg(isAr ? String(إجابة خاطئة، حاول مرة أخرى يا بطل!) : String(Wrong answer, try again hero!));
+        }
+    };
+
+    const handleCodeSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (securityCode.trim() === validCode) {
+            setIsCodeCorrect(true);
+            setErrorMsg(String());
+        } else {
+            setErrorMsg(isAr ? String(كود غير صحيح!) : String(Invalid Security Code!));
+        }
+    };
+
+    const handleFinalSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (winnerData.name && winnerData.grade && winnerData.email) {
+            
+            const theWinner = { name: winnerData.name, grade: winnerData.grade };
+            
+            // 1. تسجيل الفائز في اللوكال ستوريدج عشان يقفل السؤال للجميع
+            localStorage.setItem(String(ramadanQuestWinner), JSON.stringify(theWinner));
+            setGlobalWinner(theWinner); // تحديث الشاشة فوراً
+            
+            // 2. إرسال حدث (Event) عشان صفحة التقارير تلقطه
+            const reportData = {
+                event: String(RamadanQuestWinner),
+                timestamp: new Date().toISOString(),
+                studentName: winnerData.name,
+                studentEmail: winnerData.email,
+                studentGrade: winnerData.grade,
+                enteredAnswer: answer,
+                enteredCode: securityCode
+            };
+            
+            // محاكاة إرسال البيانات (في الواقع هنا بتبعت لـ API)
+            console.log(String(NEW WINNER RECORDED:), reportData);
+            
+            // حفظ نسخة للتقارير في اللوكال ستوريدج (مؤقتاً للربط)
+            const existingReports = JSON.parse(localStorage.getItem(String(saqrReports)) || String([]));
+            localStorage.setItem(String(saqrReports), JSON.stringify([...existingReports, reportData]));
+
+            explodeStars(window.innerWidth / 2, window.innerHeight / 2, 100);
+        }
+    };
+
     const handleMouseMove = (e: React.MouseEvent) => {
         const x = (e.clientX / window.innerWidth) * 100;
         const y = (e.clientY / window.innerHeight) * 100;
         setMousePos({ x, y });
     };
 
-    // --- محرك الانفجار الناعم والبطيء ---
-    const explodeStars = (e: React.MouseEvent | React.TouchEvent) => {
-        const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
-        const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
-        
+    const explodeStars = (x: number, y: number, count: number = 30) => {
         const newParticles: StarParticle[] = [];
-        const emojis = ["🌙", "⭐", "✨", "🕌", "💫", "📿", "🏮"];
+        const emojis = [String(🌙), String(⭐), String(✨), String(🕌), String(💫), String(📿), String(🏮), String(🎉), String(🏆)];
 
-        for (let i = 0; i < 30; i++) {
+        for (let i = 0; i < count; i++) {
             newParticles.push({
                 id: Date.now() + i,
-                x: clientX,
-                y: clientY,
+                x: x,
+                y: y,
                 emoji: emojis[Math.floor(Math.random() * emojis.length)],
-                velocity: {
-                    // سرعة أبطأ وانتشار أوسع
-                    x: (Math.random() - 0.5) * 12, 
-                    y: (Math.random() - 0.5) * 12
-                },
+                velocity: { x: (Math.random() - 0.5) * 15, y: (Math.random() - 0.5) * 15 },
                 opacity: 1,
                 scale: 0.5 + Math.random() * 0.8,
                 rotation: Math.random() * 360
             });
         }
         setParticles(prev => [...prev, ...newParticles]);
-        
-        // صوت هادئ جداً
-        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
-        audio.volume = 0.2;
-        audio.play().catch(()=>{});
+        new Audio(String(https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3)).play().catch(()=>{});
     };
 
-    // فيزيائيات الحركة (ناعمة وبطيئة)
+    const handleAvatarClick = (e: React.MouseEvent | React.TouchEvent) => {
+        const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+        const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
+        explodeStars(clientX, clientY, 20);
+    };
+
     useEffect(() => {
         const interval = setInterval(() => {
             setParticles(prev => prev.map(p => ({
                 ...p,
                 x: p.x + p.velocity.x,
                 y: p.y + p.velocity.y,
-                rotation: p.rotation + 1, // دوران بطيء
-                opacity: p.opacity - 0.008, // اختفاء بطيء جداً
-                velocity: { 
-                    x: p.velocity.x * 0.98, // احتكاك ناعم
-                    y: p.velocity.y * 0.98 + 0.1 // جاذبية خفيفة جداً
-                } 
+                rotation: p.rotation + 1, 
+                opacity: p.opacity - 0.01, 
+                velocity: { x: p.velocity.x * 0.98, y: p.velocity.y * 0.98 + 0.1 } 
             })).filter(p => p.opacity > 0));
         }, 16);
         return () => clearInterval(interval);
     }, []);
 
     return (
-        <div dir={dir} onMouseMove={handleMouseMove} className="min-h-[100dvh] bg-slate-50 dark:bg-[#020617] transition-colors duration-1000 font-black relative flex flex-col items-center justify-center antialiased overflow-hidden selection:bg-yellow-500/30">
+        <div dir={dir} onMouseMove={handleMouseMove} className="min-h-[100dvh] bg-slate-50 dark:bg-[#020617] transition-colors duration-1000 font-black relative flex flex-col items-center antialiased overflow-x-hidden overflow-y-auto selection:bg-yellow-500/30 pb-20">
             
-            {/* 1. زينة رمضان (بدون قص) */}
-            <div className="absolute inset-0 pointer-events-none z-0">
-                {/* فوانيس متدلية بأبعاد آمنة */}
-                <div className="absolute -top-2 left-[8%] text-[3.5rem] md:text-[6rem] animate-swing origin-top opacity-90 drop-shadow-2xl filter drop-shadow(0 0 15px rgba(255,215,0,0.4))">🏮</div>
+            <div className="fixed inset-0 pointer-events-none z-0">
+                <div className="absolute -top-2 left-[8%] text-[3.5rem] md:text-[6rem] animate-swing origin-top opacity-90 drop-shadow-2xl">🏮</div>
                 <div className="absolute -top-4 right-[12%] text-[2.5rem] md:text-[5rem] animate-swing-delayed origin-top opacity-80 drop-shadow-2xl">🏮</div>
                 <div className="absolute top-[15%] left-[35%] text-[1.5rem] md:text-[3rem] animate-pulse opacity-50">✨</div>
                 <div className="absolute top-[20%] right-[8%] text-[1.5rem] md:text-[3rem] animate-pulse delay-700 opacity-50">🌙</div>
-                
-                {/* خلفية مضيئة ناعمة */}
                 <div className="absolute top-[-30%] right-[-20%] w-[80%] h-[80%] bg-yellow-500/10 dark:bg-yellow-600/5 blur-[180px] rounded-full animate-pulse-slow"></div>
                 <div className="absolute bottom-[-20%] left-[-20%] w-[70%] h-[70%] bg-purple-600/10 dark:bg-purple-900/10 blur-[180px] rounded-full animate-pulse-slow delay-1000"></div>
             </div>
 
-            {/* 2. زر العودة (مؤمن ضد القص) */}
-            <div className="absolute top-8 left-8 z-50">
-                <Link to="/" className="glass-panel px-6 py-3 rounded-full text-xs font-bold text-slate-900 dark:text-white hover:bg-yellow-600 hover:text-white transition-all shadow-xl uppercase flex items-center gap-2 border border-yellow-500/20 active:scale-95">
-                    <span>⬅</span> {isAr ? 'الرئيسية' : 'Home'}
+            <div className="absolute top-6 left-6 md:top-8 md:left-8 z-50">
+                <Link to="/" className="glass-panel px-5 py-2 md:px-6 md:py-3 rounded-full text-[10px] md:text-xs font-bold text-slate-900 dark:text-white hover:bg-yellow-600 hover:text-white transition-all shadow-xl uppercase flex items-center gap-2 border border-yellow-500/20 active:scale-95">
+                    <span>⬅</span> {isAr ? String(الرئيسية) : String(Home)}
                 </Link>
             </div>
 
-            {/* 3. المحتوى الرئيسي */}
-            <div className="relative z-10 flex flex-col items-center justify-center w-full max-w-6xl px-6 text-center space-y-6 md:space-y-10 py-20">
+            <div className="relative z-10 flex flex-col items-center w-full max-w-4xl px-4 pt-20 md:pt-24 space-y-6 md:space-y-10">
                 
-                {/* العنوان الرئيسي */}
-                <h1 className="text-5xl md:text-[9rem] tracking-tighter text-slate-900 dark:text-white font-black ramadan-title drop-shadow-2xl animate-fade-in-up select-none leading-tight">
-                    {isAr ? 'كنوز صقر الإمارات' : 'Emirates Falcon Treasures'}
+                <h1 className="text-4xl md:text-[7rem] tracking-tighter text-slate-900 dark:text-white font-black ramadan-title drop-shadow-2xl animate-fade-in-up text-center leading-tight">
+                    {isAr ? String(كنوز صقر الإمارات) : String(Emirates Falcon Treasures)}
                 </h1>
 
-                {/* منطقة الشخصية والشعار */}
-                <div className="relative w-full flex justify-center items-center py-4 md:py-8 group cursor-pointer" onClick={explodeStars} onTouchStart={explodeStars}>
-                    
-                    {/* الشعار المائل (الووتر مارك) - التعديل هنا لتحويله للأبيض في الدارك مود */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] md:w-[700px] opacity-[0.04] dark:opacity-[0.12] transition-all duration-1000 group-hover:scale-105 pointer-events-none">
-                        <img 
-                            src="/school-logo.png" 
-                            alt="School Logo" 
-                            className="w-full object-contain rotate-[12deg] dark:brightness-0 dark:invert transition-all duration-700" 
-                        />
+                <div className="relative w-full flex justify-center items-center py-2 group cursor-pointer" onClick={handleAvatarClick} onTouchStart={handleAvatarClick}>
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250px] md:w-[600px] opacity-[0.05] dark:opacity-[0.12] transition-all duration-1000 group-hover:scale-105 pointer-events-none">
+                        <img src="/school-logo.png" alt="School Logo" className="w-full object-contain rotate-[12deg] dark:brightness-0 dark:invert" />
                     </div>
-
-                    {/* الشخصية الرمضانية (صقر) - بدون إطار */}
-                    <div className="relative z-20 w-60 md:w-[30rem] transition-all duration-500 ease-out transform group-hover:-translate-y-2 group-active:scale-[0.98] group-active:brightness-110">
-                        {/* هالة نورانية خلف الشخصية */}
-                        <div className="absolute inset-0 bg-yellow-500/20 blur-[80px] rounded-full scale-90 animate-pulse-slow"></div>
-                        <img 
-                            src="/ramadan-saqr.png" 
-                            alt="Ramadan Saqr" 
-                            // تم إزالة الإطار والبوردر من هنا
-                            className="w-full h-auto object-contain drop-shadow-[0_30px_60px_rgba(0,0,0,0.3)] rounded-[3rem]"
-                        />
+                    <div className="relative z-20 w-48 md:w-[22rem] transition-all duration-500 ease-out transform group-hover:-translate-y-2 group-active:scale-[0.98]">
+                        <div className="absolute inset-0 bg-yellow-500/20 blur-[60px] rounded-full scale-90 animate-pulse-slow"></div>
+                        <img src="/ramadan-saqr.png" alt="Ramadan Saqr" className="w-full h-auto object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.3)] rounded-[3rem]" />
                     </div>
                 </div>
 
-                {/* النصوص السفلية */}
-                <div className="space-y-8 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                    <div className="glass-panel inline-block px-12 py-6 rounded-full bg-yellow-500/10 dark:bg-yellow-500/5 border border-yellow-500/20 backdrop-blur-xl shadow-lg hover:shadow-yellow-500/10 transition-shadow">
-                        <p className="text-lg md:text-3xl text-yellow-800 dark:text-yellow-400 font-bold tracking-wider">
-                            {isAr ? 'يوم الاثنين القادم' : 'Next Monday'}
-                        </p>
-                    </div>
+                <div className="w-full max-w-2xl animate-fade-in-up" style={{ animationDelay: String(0.3s) }}>
                     
-                    <p className="text-4xl md:text-8xl text-slate-800 dark:text-white ramadan-font leading-none pt-4 drop-shadow-xl opacity-90">
-                        {isAr ? 'رمضان كريم' : 'Ramadan Kareem'} <span className="text-yellow-500 animate-pulse">🌙</span>
-                    </p>
+                    {/* لو حد فاز خلاص، اعرض شاشة الإغلاق دي للكل */}
+                    {globalWinner ? (
+                        <div className="glass-panel p-8 md:p-12 rounded-[2.5rem] border-2 border-yellow-400 bg-yellow-500/10 text-center space-y-6 transform scale-105 transition-all">
+                            <div className="text-6xl animate-bounce">🏆</div>
+                            <h2 className="text-2xl md:text-4xl text-yellow-600 dark:text-yellow-400 font-black tracking-tight leading-snug">
+                                {isAr ? String(انتهت المهمة! لدينا فائز) : String(Quest Ended! We have a Winner)}
+                            </h2>
+                            <div className="text-xl md:text-3xl text-slate-800 dark:text-white py-4 border-y border-yellow-500/30">
+                                <p className="text-red-600 dark:text-red-400 mb-2 font-extrabold">{globalWinner.name}</p>
+                                <p className="opacity-80 text-lg md:text-2xl">{isAr ? String(الصف: ) + globalWinner.grade : String(Grade: ) + globalWinner.grade}</p>
+                            </div>
+                            <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 mt-4 bg-black/5 dark:bg-white/5 p-4 rounded-xl">
+                                {isAr ? String(انتظروا السؤال القادم قريباً..) : String(Wait for the next quest soon..)}
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="glass-panel p-6 md:p-10 rounded-[2.5rem] border border-yellow-500/30 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl shadow-2xl space-y-6">
+                            
+                            <div className="space-y-4 text-center">
+                                <h3 className="text-xl md:text-3xl text-slate-900 dark:text-white font-black leading-snug">
+                                    {isAr ? String(ماهي الطريقة التقليدية التي كانت تستخدم قديما ومازالت كتقليد لإعلام الناس بموعد الإفطار في رمضان؟) 
+                                         : String(What is the traditional method used in the past and still as a tradition to inform people of Iftar time?)}
+                                </h3>
+                                <div className="inline-block px-4 py-2 rounded-xl bg-red-600/10 border border-red-600/20 text-red-600 dark:text-red-400 text-sm md:text-base">
+                                    💡 {isAr ? String(تلميح الكنز: المكتبة - دولاب 31 - رف 3) : String(Hint: Library - Cabinet 31 - Shelf 3)}
+                                </div>
+                            </div>
+
+                            {errorMsg && <p className="text-red-500 text-center animate-pulse">{errorMsg}</p>}
+
+                            {!isAnswerCorrect && (
+                                <form onSubmit={handleAnswerSubmit} className="flex flex-col gap-4">
+                                    <input 
+                                        type="text" required
+                                        placeholder={isAr ? String(أدخل الإجابة هنا...) : String(Enter your answer...)}
+                                        value={answer} onChange={(e) => setAnswer(e.target.value)}
+                                        className="w-full p-4 rounded-2xl bg-white dark:bg-black/50 border-2 border-slate-200 dark:border-slate-700 focus:border-yellow-500 outline-none text-center text-lg dark:text-white transition-all"
+                                    />
+                                    <button type="submit" className="w-full py-4 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black text-lg hover:bg-yellow-500 dark:hover:bg-yellow-500 hover:text-white transition-colors">
+                                        {isAr ? String(تحقق من الإجابة) : String(Check Answer)}
+                                    </button>
+                                </form>
+                            )}
+
+                            {isAnswerCorrect && !isCodeCorrect && (
+                                <form onSubmit={handleCodeSubmit} className="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                    <div className="text-center text-green-600 dark:text-green-400 mb-2">✅ {isAr ? String(إجابة صحيحة! أدخل كود الكنز:) : String(Correct! Enter Treasure Code:)}</div>
+                                    <input 
+                                        type="text" required
+                                        placeholder={isAr ? String(كود الكنز...) : String(Treasure Code...)}
+                                        value={securityCode} onChange={(e) => setSecurityCode(e.target.value)}
+                                        className="w-full p-4 rounded-2xl bg-white dark:bg-black/50 border-2 border-slate-200 dark:border-slate-700 focus:border-green-500 outline-none text-center text-lg dark:text-white transition-all font-mono tracking-widest"
+                                    />
+                                    <button type="submit" className="w-full py-4 rounded-2xl bg-green-600 text-white font-black text-lg hover:bg-green-500 transition-colors">
+                                        {isAr ? String(تأكيد الكود) : String(Verify Code)}
+                                    </button>
+                                </form>
+                            )}
+
+                            {isCodeCorrect && (
+                                <form onSubmit={handleFinalSubmit} className="flex flex-col gap-4 animate-in fade-in zoom-in duration-500">
+                                    <div className="text-center text-yellow-600 dark:text-yellow-400 font-black text-xl mb-2">🎉 {isAr ? String(أنت بطل! سجل بياناتك) : String(You are a Hero! Register Data)}</div>
+                                    <input 
+                                        type="text" required placeholder={isAr ? String(الاسم الثلاثي) : String(Full Name)}
+                                        value={winnerData.name} onChange={(e) => setWinnerData({...winnerData, name: e.target.value})}
+                                        className="w-full p-4 rounded-2xl bg-white dark:bg-black/50 border-2 border-slate-200 dark:border-slate-700 outline-none dark:text-white text-center"
+                                    />
+                                    <input 
+                                        type="text" required placeholder={isAr ? String(الصف والشعبة (مثال: 5A)) : String(Grade & Section (e.g. 5A))}
+                                        value={winnerData.grade} onChange={(e) => setWinnerData({...winnerData, grade: e.target.value})}
+                                        className="w-full p-4 rounded-2xl bg-white dark:bg-black/50 border-2 border-slate-200 dark:border-slate-700 outline-none dark:text-white text-center"
+                                    />
+                                    <input 
+                                        type="email" required placeholder={isAr ? String(البريد الإلكتروني المدرسي) : String(School Email)}
+                                        value={winnerData.email} onChange={(e) => setWinnerData({...winnerData, email: e.target.value})}
+                                        className="w-full p-4 rounded-2xl bg-white dark:bg-black/50 border-2 border-slate-200 dark:border-slate-700 outline-none dark:text-white text-center" dir="ltr"
+                                    />
+                                    <button type="submit" className="w-full py-4 mt-2 rounded-2xl bg-gradient-to-r from-yellow-600 to-yellow-400 text-white font-black text-xl shadow-lg hover:scale-105 active:scale-95 transition-all">
+                                        {isAr ? String(استلام الجائزة 🎁) : String(Claim Prize 🎁)}
+                                    </button>
+                                </form>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
 
-            {/* 4. الجزيئات المتطايرة (المحسنة) */}
             {particles.map(p => (
-                <div 
-                    key={p.id} 
-                    className="fixed pointer-events-none z-[100] text-3xl md:text-5xl select-none"
-                    style={{ 
-                        left: p.x, 
-                        top: p.y, 
-                        opacity: p.opacity,
-                        transform: `translate(-50%, -50%) scale(${p.scale}) rotate(${p.rotation}deg)`,
-                        transition: 'transform 0.1s linear'
-                    }}
-                >
+                <div key={p.id} className="fixed pointer-events-none z-[100] text-2xl md:text-4xl select-none"
+                    style={{ left: p.x, top: p.y, opacity: p.opacity, transform: String(translate(-50%, -50%) scale() + p.scale + String() rotate() + p.rotation + String(deg)), transition: String(transform 0.1s linear) }}>
                     {p.emoji}
                 </div>
             ))}
 
-            <style>{`
+            <style>{String(
                 @import url('https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@700&display=swap');
-
                 .ramadan-title {
                     font-family: 'Reem Kufi', sans-serif;
                     background: linear-gradient(to bottom, #b48c1c, #d4af37, #fcd34d);
-                    -webkit-background-clip: text;
-                    -webkit-text-fill-color: transparent;
-                    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1));
+                    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
                 }
-                
-                .ramadan-font {
-                    font-family: 'Reem Kufi', sans-serif;
-                }
-
-                @keyframes swing {
-                    0%, 100% { transform: rotate(-3deg); }
-                    50% { transform: rotate(3deg); }
-                }
+                .ramadan-font { font-family: 'Reem Kufi', sans-serif; }
+                @keyframes swing { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
                 .animate-swing { animation: swing 5s ease-in-out infinite; }
                 .animate-swing-delayed { animation: swing 7s ease-in-out infinite reverse; }
-                
-                .glass-panel {
-                    backdrop-filter: blur(25px);
-                    background: rgba(255, 255, 255, 0.05);
-                    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-                }
-
-                @keyframes pulse-slow {
-                    0%, 100% { opacity: 0.4; transform: scale(0.9); }
-                    50% { opacity: 0.7; transform: scale(1.05); }
-                }
+                .glass-panel { backdrop-filter: blur(25px); }
+                @keyframes pulse-slow { 0%, 100% { opacity: 0.4; transform: scale(0.9); } 50% { opacity: 0.7; transform: scale(1.05); } }
                 .animate-pulse-slow { animation: pulse-slow 5s infinite; }
-
-                /* للغة العربية */
                 [dir="rtl"] .ramadan-font { letter-spacing: 0; }
-                
-                /* إخفاء السكرول بار للحفاظ على نظافة التصميم */
-                ::-webkit-scrollbar { width: 0px; background: transparent; }
-            `}</style>
+                ::-webkit-scrollbar { width: 6px; }
+                ::-webkit-scrollbar-track { background: transparent; }
+                ::-webkit-scrollbar-thumb { background: #d4af37; border-radius: 10px; }
+            )}</style>
         </div>
     );
 };
