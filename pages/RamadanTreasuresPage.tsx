@@ -200,7 +200,7 @@ const RamadanTreasuresPage: React.FC = () => {
                                          : "What is the traditional method used in the past and still as a tradition to inform people of Iftar time?"}
                                 </h3>
                                 <div className="inline-block px-4 py-2 rounded-xl bg-red-600/10 border border-red-600/20 text-red-600 dark:text-red-400 text-sm md:text-base">
-                                    💡 {isAr ? "تلميح الكنز: المكتبة - دولاب 31 - رف 3" : "Hint: Library - Cabinet 31 - Shelf 3"}
+                                    💡 {isAr ? "تلميح الكنز: المكتبة - دولاب 31 - رف 3" : "Hint: Library - Shelf 31 - Raw 3"}
                                 </div>
                             </div>
 
