@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../App';
 
 // --- وظيفة جلب الإحصائيات العامة ---
@@ -195,13 +195,13 @@ const ReportsPage: React.FC = () => {
                         <h2 className="text-2xl md:text-4xl font-black flex items-center gap-4 text-yellow-600 dark:text-yellow-500">
                             <span className="text-4xl md:text-5xl">🌙</span> {t('ramadanWinnerTitle')}
                         </h2>
-                        <div className="bg-white/50 dark:bg-black/50 px-6 py-3 rounded-full border border-yellow-500/30 font-bold text-sm md:text-lg dark:text-white flex gap-2 items-center">
+                        <div className="bg-white/50 dark:bg-black/50 px-6 py-3 rounded-full border border-yellow-500/30 font-bold text-sm md:text-lg dark:text-white flex gap-2 items-center z-10">
                             <span>📊 {t('ramadanInteractions')}:</span> 
                             <span className="text-yellow-600 font-black">{ramadanReports.length}</span>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white/40 dark:bg-black/40 p-6 md:p-10 rounded-[2rem] backdrop-blur-sm border border-white/20 dark:border-white/5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white/40 dark:bg-black/40 p-6 md:p-10 rounded-[2rem] backdrop-blur-sm border border-white/20 dark:border-white/5 relative z-10 text-start">
                         <div className="space-y-4">
                             <div>
                                 <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1">{t('studentName')}</p>
@@ -224,7 +224,7 @@ const ReportsPage: React.FC = () => {
                             </div>
                             <div>
                                 <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1">{t('codeLabel')}</p>
-                                <p className="text-md md:text-xl font-mono bg-slate-200 dark:bg-slate-800 inline-block px-3 py-1 rounded-lg text-slate-900 dark:text-white">
+                                <p className="text-md md:text-xl font-mono bg-slate-200 dark:bg-slate-800 inline-block px-3 py-1 rounded-lg text-slate-900 dark:text-white mt-1">
                                     {ramadanWinner.enteredCode}
                                 </p>
                             </div>
