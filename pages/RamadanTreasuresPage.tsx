@@ -41,7 +41,7 @@ const RamadanTreasuresPage: React.FC = () => {
     }, []);
 
     // الإجابات والكود الصحيح
-    const validAnswers = ["مدفع رمضان", "the iftar cannon", "midfa al iftar"];
+    const validAnswers = ["مدفع الإفطار", "the iftar cannon", "midfa al iftar"];
     const validCode = "1906efips2026";
 
     const handleAnswerSubmit = (e: React.FormEvent) => {
