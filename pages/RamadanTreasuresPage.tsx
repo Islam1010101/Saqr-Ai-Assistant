@@ -141,9 +141,10 @@ const RamadanTreasuresPage: React.FC = () => {
     }, []);
 
     return (
-        <div dir={dir} onMouseMove={handleMouseMove} className="min-h-[100dvh] bg-slate-50 dark:bg-[#020617] transition-colors duration-1000 font-black relative flex flex-col items-center antialiased overflow-x-hidden overflow-y-auto selection:bg-yellow-500/30 pb-20">
+        // التعديل السحري هنا: fixed inset-0 z-[200]
+        <div dir={dir} onMouseMove={handleMouseMove} className="fixed inset-0 z-[200] bg-slate-50 dark:bg-[#020617] transition-colors duration-1000 font-black flex flex-col items-center antialiased overflow-x-hidden overflow-y-auto selection:bg-yellow-500/30">
             
-            <div className="fixed inset-0 pointer-events-none z-0">
+            <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
                 <div className="absolute -top-2 left-[8%] text-[3.5rem] md:text-[6rem] animate-swing origin-top opacity-90 drop-shadow-2xl">🏮</div>
                 <div className="absolute -top-4 right-[12%] text-[2.5rem] md:text-[5rem] animate-swing-delayed origin-top opacity-80 drop-shadow-2xl">🏮</div>
                 <div className="absolute top-[15%] left-[35%] text-[1.5rem] md:text-[3rem] animate-pulse opacity-50">✨</div>
@@ -158,7 +159,7 @@ const RamadanTreasuresPage: React.FC = () => {
                 </Link>
             </div>
 
-            <div className="relative z-10 flex flex-col items-center w-full max-w-4xl px-4 pt-20 md:pt-24 space-y-6 md:space-y-10">
+            <div className="relative z-10 flex flex-col items-center w-full max-w-4xl px-4 pt-20 md:pt-24 pb-20 space-y-6 md:space-y-10">
                 
                 <h1 className="text-4xl md:text-[7rem] tracking-tighter text-slate-900 dark:text-white font-black ramadan-title drop-shadow-2xl animate-fade-in-up text-center leading-tight">
                     {isAr ? 'كنوز صقر الإمارات' : 'Emirates Falcon Treasures'}
