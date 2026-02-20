@@ -19,7 +19,9 @@ const translations = {
         challengeTitle: "تحدي المبدعين الصغار",
         challengeDesc: "ناقش، ابدأ قصتك الخاصة مع صقر، وأثبت موهبتك لتفوز بجوائز متميزة من مدرسة صقر الإمارات!",
         challengeCTA: "ابدأ رحلة الإبداع مع صقر الآن",
-        ramadanButton: "🌙 كنوز صقر الإمارات", // تم تعديل النص
+        ramadanButton: "🌙 كنوز صقر الإمارات", 
+        // 🌟 النص الجديد اللي هيظهر فوق الزرار
+        ramadanLiveNow: "متاحة الآن! شارك واربح 🏆",
         visitorsLabel: "زوار البوابة:"
     },
     en: {
@@ -38,7 +40,9 @@ const translations = {
         challengeTitle: "Little Authors Challenge",
         challengeDesc: "Discuss , author your own tales with Saqr, and showcase your talent to win distinguished prizes from EFIPS!",
         challengeCTA: "Start your creative journey now",
-        ramadanButton: "🌙 EFPIS Treasures", // تم تعديل النص
+        ramadanButton: "🌙 EFPIS Treasures", 
+        // 🌟 النص الجديد اللي هيظهر فوق الزرار
+        ramadanLiveNow: "Live Now! Play & Win 🏆",
         visitorsLabel: "Portal Visitors:"
     }
 };
@@ -136,9 +140,14 @@ const HomePage: React.FC = () => {
                 <div className="h-2 w-40 bg-red-600 mx-auto rounded-full shadow-[0_0_25px_rgba(220,38,38,0.6)]"></div>
             </div>
 
-            {/* زر الانتقال لمسابقة رمضان (تعديل الحجم والنص والتوسط) */}
-            <div className="w-full relative z-30 animate-in zoom-in duration-700 flex justify-center">
-                <Link to="/ramadan" className="group relative overflow-hidden px-8 py-3 md:px-10 md:py-4 rounded-full bg-gradient-to-r from-yellow-600 to-yellow-400 text-white shadow-[0_0_30px_rgba(234,179,8,0.3)] hover:scale-105 transition-transform duration-300">
+            {/* 🌟 زر الانتقال لمسابقة رمضان مع علامة "متاحة الآن" */}
+            <div className="w-full relative z-30 animate-in zoom-in duration-700 flex flex-col items-center gap-3">
+                {/* الشارة الإعلانية (Badge) */}
+                <div className="bg-red-600 text-white text-[10px] md:text-sm font-black px-4 py-1 rounded-full animate-bounce shadow-[0_5px_15px_rgba(220,38,38,0.4)] border border-white/20">
+                    {t('ramadanLiveNow')}
+                </div>
+                
+                <Link to="/ramadan" className="group relative overflow-hidden px-8 py-3 md:px-10 md:py-4 rounded-full bg-gradient-to-r from-yellow-600 to-yellow-400 text-white shadow-[0_0_30px_rgba(234,179,8,0.3)] hover:scale-105 transition-transform duration-300 border-2 border-yellow-300/50">
                     <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
                     <span className="relative z-10 text-sm md:text-xl font-black flex items-center gap-2">
                         {t('ramadanButton')} 🏮
