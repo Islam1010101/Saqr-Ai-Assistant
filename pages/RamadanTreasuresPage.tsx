@@ -20,40 +20,39 @@ const RamadanTreasuresPage: React.FC = () => {
     const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
 
     // --- State المسابقة ---
-    const [answer, setAnswer] = useState(String());
+    const [answer, setAnswer] = useState("");
     const [isAnswerCorrect, setIsAnswerCorrect] = useState(false);
     
-    const [securityCode, setSecurityCode] = useState(String());
+    const [securityCode, setSecurityCode] = useState("");
     const [isCodeCorrect, setIsCodeCorrect] = useState(false);
     
-    const [winnerData, setWinnerData] = useState({ name: String(), grade: String(), email: String() });
-    const [errorMsg, setErrorMsg] = useState(String());
+    const [winnerData, setWinnerData] = useState({ name: "", grade: "", email: "" });
+    const [errorMsg, setErrorMsg] = useState("");
 
     // --- State الفائز العام ---
-    // بنجيب الداتا من اللوكال ستوريدج عشان نعرف لو حد فاز قبل كدة
     const [globalWinner, setGlobalWinner] = useState<{name: string, grade: string} | null>(null);
 
     // التحقق عند تحميل الصفحة
     useEffect(() => {
-        const savedWinner = localStorage.getItem(String(ramadanQuestWinner));
+        const savedWinner = localStorage.getItem("ramadanQuestWinner");
         if (savedWinner) {
             setGlobalWinner(JSON.parse(savedWinner));
         }
     }, []);
 
     // الإجابات والكود الصحيح
-    const validAnswers = [String(مدفع رمضان), String(the iftar cannon), String(midfa al iftar)];
-    const validCode = String(1906efips2026);
+    const validAnswers = ["مدفع رمضان", "the iftar cannon", "midfa al iftar"];
+    const validCode = "1906efips2026";
 
     const handleAnswerSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         const cleanAnswer = answer.trim().toLowerCase();
         if (validAnswers.includes(cleanAnswer)) {
             setIsAnswerCorrect(true);
-            setErrorMsg(String());
+            setErrorMsg("");
             explodeStars(window.innerWidth / 2, window.innerHeight / 2, 50);
         } else {
-            setErrorMsg(isAr ? String(إجابة خاطئة، حاول مرة أخرى يا بطل!) : String(Wrong answer, try again hero!));
+            setErrorMsg(isAr ? "إجابة خاطئة، حاول مرة أخرى يا بطل!" : "Wrong answer, try again hero!");
         }
     };
 
@@ -61,9 +60,9 @@ const RamadanTreasuresPage: React.FC = () => {
         e.preventDefault();
         if (securityCode.trim() === validCode) {
             setIsCodeCorrect(true);
-            setErrorMsg(String());
+            setErrorMsg("");
         } else {
-            setErrorMsg(isAr ? String(كود غير صحيح!) : String(Invalid Security Code!));
+            setErrorMsg(isAr ? "كود غير صحيح!" : "Invalid Security Code!");
         }
     };
 
@@ -73,13 +72,13 @@ const RamadanTreasuresPage: React.FC = () => {
             
             const theWinner = { name: winnerData.name, grade: winnerData.grade };
             
-            // 1. تسجيل الفائز في اللوكال ستوريدج عشان يقفل السؤال للجميع
-            localStorage.setItem(String(ramadanQuestWinner), JSON.stringify(theWinner));
-            setGlobalWinner(theWinner); // تحديث الشاشة فوراً
+            // تسجيل الفائز في اللوكال ستوريدج
+            localStorage.setItem("ramadanQuestWinner", JSON.stringify(theWinner));
+            setGlobalWinner(theWinner); 
             
-            // 2. إرسال حدث (Event) عشان صفحة التقارير تلقطه
+            // إرسال حدث (Event) لصفحة التقارير
             const reportData = {
-                event: String(RamadanQuestWinner),
+                event: "RamadanQuestWinner",
                 timestamp: new Date().toISOString(),
                 studentName: winnerData.name,
                 studentEmail: winnerData.email,
@@ -88,12 +87,8 @@ const RamadanTreasuresPage: React.FC = () => {
                 enteredCode: securityCode
             };
             
-            // محاكاة إرسال البيانات (في الواقع هنا بتبعت لـ API)
-            console.log(String(NEW WINNER RECORDED:), reportData);
-            
-            // حفظ نسخة للتقارير في اللوكال ستوريدج (مؤقتاً للربط)
-            const existingReports = JSON.parse(localStorage.getItem(String(saqrReports)) || String([]));
-            localStorage.setItem(String(saqrReports), JSON.stringify([...existingReports, reportData]));
+            const existingReports = JSON.parse(localStorage.getItem("saqrReports") || "[]");
+            localStorage.setItem("saqrReports", JSON.stringify([...existingReports, reportData]));
 
             explodeStars(window.innerWidth / 2, window.innerHeight / 2, 100);
         }
@@ -107,7 +102,7 @@ const RamadanTreasuresPage: React.FC = () => {
 
     const explodeStars = (x: number, y: number, count: number = 30) => {
         const newParticles: StarParticle[] = [];
-        const emojis = [String(🌙), String(⭐), String(✨), String(🕌), String(💫), String(📿), String(🏮), String(🎉), String(🏆)];
+        const emojis = ["🌙", "⭐", "✨", "🕌", "💫", "📿", "🏮", "🎉", "🏆"];
 
         for (let i = 0; i < count; i++) {
             newParticles.push({
@@ -122,7 +117,7 @@ const RamadanTreasuresPage: React.FC = () => {
             });
         }
         setParticles(prev => [...prev, ...newParticles]);
-        new Audio(String(https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3)).play().catch(()=>{});
+        new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3').play().catch(()=>{});
     };
 
     const handleAvatarClick = (e: React.MouseEvent | React.TouchEvent) => {
@@ -159,14 +154,14 @@ const RamadanTreasuresPage: React.FC = () => {
 
             <div className="absolute top-6 left-6 md:top-8 md:left-8 z-50">
                 <Link to="/" className="glass-panel px-5 py-2 md:px-6 md:py-3 rounded-full text-[10px] md:text-xs font-bold text-slate-900 dark:text-white hover:bg-yellow-600 hover:text-white transition-all shadow-xl uppercase flex items-center gap-2 border border-yellow-500/20 active:scale-95">
-                    <span>⬅</span> {isAr ? String(الرئيسية) : String(Home)}
+                    <span>⬅</span> {isAr ? 'الرئيسية' : 'Home'}
                 </Link>
             </div>
 
             <div className="relative z-10 flex flex-col items-center w-full max-w-4xl px-4 pt-20 md:pt-24 space-y-6 md:space-y-10">
                 
                 <h1 className="text-4xl md:text-[7rem] tracking-tighter text-slate-900 dark:text-white font-black ramadan-title drop-shadow-2xl animate-fade-in-up text-center leading-tight">
-                    {isAr ? String(كنوز صقر الإمارات) : String(Emirates Falcon Treasures)}
+                    {isAr ? 'كنوز صقر الإمارات' : 'Emirates Falcon Treasures'}
                 </h1>
 
                 <div className="relative w-full flex justify-center items-center py-2 group cursor-pointer" onClick={handleAvatarClick} onTouchStart={handleAvatarClick}>
@@ -179,21 +174,20 @@ const RamadanTreasuresPage: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="w-full max-w-2xl animate-fade-in-up" style={{ animationDelay: String(0.3s) }}>
+                <div className="w-full max-w-2xl animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
                     
-                    {/* لو حد فاز خلاص، اعرض شاشة الإغلاق دي للكل */}
                     {globalWinner ? (
                         <div className="glass-panel p-8 md:p-12 rounded-[2.5rem] border-2 border-yellow-400 bg-yellow-500/10 text-center space-y-6 transform scale-105 transition-all">
                             <div className="text-6xl animate-bounce">🏆</div>
                             <h2 className="text-2xl md:text-4xl text-yellow-600 dark:text-yellow-400 font-black tracking-tight leading-snug">
-                                {isAr ? String(انتهت المهمة! لدينا فائز) : String(Quest Ended! We have a Winner)}
+                                {isAr ? 'انتهت المهمة! لدينا فائز' : 'Quest Ended! We have a Winner'}
                             </h2>
                             <div className="text-xl md:text-3xl text-slate-800 dark:text-white py-4 border-y border-yellow-500/30">
                                 <p className="text-red-600 dark:text-red-400 mb-2 font-extrabold">{globalWinner.name}</p>
-                                <p className="opacity-80 text-lg md:text-2xl">{isAr ? String(الصف: ) + globalWinner.grade : String(Grade: ) + globalWinner.grade}</p>
+                                <p className="opacity-80 text-lg md:text-2xl">{isAr ? `الصف: ${globalWinner.grade}` : `Grade: ${globalWinner.grade}`}</p>
                             </div>
                             <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 mt-4 bg-black/5 dark:bg-white/5 p-4 rounded-xl">
-                                {isAr ? String(انتظروا السؤال القادم قريباً..) : String(Wait for the next quest soon..)}
+                                {isAr ? 'انتظروا السؤال القادم قريباً..' : 'Wait for the next quest soon..'}
                             </p>
                         </div>
                     ) : (
@@ -201,11 +195,11 @@ const RamadanTreasuresPage: React.FC = () => {
                             
                             <div className="space-y-4 text-center">
                                 <h3 className="text-xl md:text-3xl text-slate-900 dark:text-white font-black leading-snug">
-                                    {isAr ? String(ماهي الطريقة التقليدية التي كانت تستخدم قديما ومازالت كتقليد لإعلام الناس بموعد الإفطار في رمضان؟) 
-                                         : String(What is the traditional method used in the past and still as a tradition to inform people of Iftar time?)}
+                                    {isAr ? "ماهي الطريقة التقليدية التي كانت تستخدم قديما ومازالت كتقليد لإعلام الناس بموعد الإفطار في رمضان؟" 
+                                         : "What is the traditional method used in the past and still as a tradition to inform people of Iftar time?"}
                                 </h3>
                                 <div className="inline-block px-4 py-2 rounded-xl bg-red-600/10 border border-red-600/20 text-red-600 dark:text-red-400 text-sm md:text-base">
-                                    💡 {isAr ? String(تلميح الكنز: المكتبة - دولاب 31 - رف 3) : String(Hint: Library - Cabinet 31 - Shelf 3)}
+                                    💡 {isAr ? "تلميح الكنز: المكتبة - دولاب 31 - رف 3" : "Hint: Library - Cabinet 31 - Shelf 3"}
                                 </div>
                             </div>
 
@@ -215,51 +209,51 @@ const RamadanTreasuresPage: React.FC = () => {
                                 <form onSubmit={handleAnswerSubmit} className="flex flex-col gap-4">
                                     <input 
                                         type="text" required
-                                        placeholder={isAr ? String(أدخل الإجابة هنا...) : String(Enter your answer...)}
+                                        placeholder={isAr ? "أدخل الإجابة هنا..." : "Enter your answer..."}
                                         value={answer} onChange={(e) => setAnswer(e.target.value)}
                                         className="w-full p-4 rounded-2xl bg-white dark:bg-black/50 border-2 border-slate-200 dark:border-slate-700 focus:border-yellow-500 outline-none text-center text-lg dark:text-white transition-all"
                                     />
                                     <button type="submit" className="w-full py-4 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black text-lg hover:bg-yellow-500 dark:hover:bg-yellow-500 hover:text-white transition-colors">
-                                        {isAr ? String(تحقق من الإجابة) : String(Check Answer)}
+                                        {isAr ? 'تحقق من الإجابة' : 'Check Answer'}
                                     </button>
                                 </form>
                             )}
 
                             {isAnswerCorrect && !isCodeCorrect && (
                                 <form onSubmit={handleCodeSubmit} className="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                    <div className="text-center text-green-600 dark:text-green-400 mb-2">✅ {isAr ? String(إجابة صحيحة! أدخل كود الكنز:) : String(Correct! Enter Treasure Code:)}</div>
+                                    <div className="text-center text-green-600 dark:text-green-400 mb-2">✅ {isAr ? 'إجابة صحيحة! أدخل كود الكنز:' : 'Correct! Enter Treasure Code:'}</div>
                                     <input 
                                         type="text" required
-                                        placeholder={isAr ? String(كود الكنز...) : String(Treasure Code...)}
+                                        placeholder={isAr ? "كود الكنز..." : "Treasure Code..."}
                                         value={securityCode} onChange={(e) => setSecurityCode(e.target.value)}
                                         className="w-full p-4 rounded-2xl bg-white dark:bg-black/50 border-2 border-slate-200 dark:border-slate-700 focus:border-green-500 outline-none text-center text-lg dark:text-white transition-all font-mono tracking-widest"
                                     />
                                     <button type="submit" className="w-full py-4 rounded-2xl bg-green-600 text-white font-black text-lg hover:bg-green-500 transition-colors">
-                                        {isAr ? String(تأكيد الكود) : String(Verify Code)}
+                                        {isAr ? 'تأكيد الكود' : 'Verify Code'}
                                     </button>
                                 </form>
                             )}
 
                             {isCodeCorrect && (
                                 <form onSubmit={handleFinalSubmit} className="flex flex-col gap-4 animate-in fade-in zoom-in duration-500">
-                                    <div className="text-center text-yellow-600 dark:text-yellow-400 font-black text-xl mb-2">🎉 {isAr ? String(أنت بطل! سجل بياناتك) : String(You are a Hero! Register Data)}</div>
+                                    <div className="text-center text-yellow-600 dark:text-yellow-400 font-black text-xl mb-2">🎉 {isAr ? 'أنت بطل! سجل بياناتك' : 'You are a Hero! Register Data'}</div>
                                     <input 
-                                        type="text" required placeholder={isAr ? String(الاسم الثلاثي) : String(Full Name)}
+                                        type="text" required placeholder={isAr ? "الاسم الثلاثي" : "Full Name"}
                                         value={winnerData.name} onChange={(e) => setWinnerData({...winnerData, name: e.target.value})}
                                         className="w-full p-4 rounded-2xl bg-white dark:bg-black/50 border-2 border-slate-200 dark:border-slate-700 outline-none dark:text-white text-center"
                                     />
                                     <input 
-                                        type="text" required placeholder={isAr ? String(الصف والشعبة (مثال: 5A)) : String(Grade & Section (e.g. 5A))}
+                                        type="text" required placeholder={isAr ? "الصف والشعبة (مثال: 5A)" : "Grade & Section (e.g. 5A)"}
                                         value={winnerData.grade} onChange={(e) => setWinnerData({...winnerData, grade: e.target.value})}
                                         className="w-full p-4 rounded-2xl bg-white dark:bg-black/50 border-2 border-slate-200 dark:border-slate-700 outline-none dark:text-white text-center"
                                     />
                                     <input 
-                                        type="email" required placeholder={isAr ? String(البريد الإلكتروني المدرسي) : String(School Email)}
+                                        type="email" required placeholder={isAr ? "البريد الإلكتروني المدرسي" : "School Email"}
                                         value={winnerData.email} onChange={(e) => setWinnerData({...winnerData, email: e.target.value})}
                                         className="w-full p-4 rounded-2xl bg-white dark:bg-black/50 border-2 border-slate-200 dark:border-slate-700 outline-none dark:text-white text-center" dir="ltr"
                                     />
                                     <button type="submit" className="w-full py-4 mt-2 rounded-2xl bg-gradient-to-r from-yellow-600 to-yellow-400 text-white font-black text-xl shadow-lg hover:scale-105 active:scale-95 transition-all">
-                                        {isAr ? String(استلام الجائزة 🎁) : String(Claim Prize 🎁)}
+                                        {isAr ? 'استلام الجائزة 🎁' : 'Claim Prize 🎁'}
                                     </button>
                                 </form>
                             )}
@@ -270,12 +264,12 @@ const RamadanTreasuresPage: React.FC = () => {
 
             {particles.map(p => (
                 <div key={p.id} className="fixed pointer-events-none z-[100] text-2xl md:text-4xl select-none"
-                    style={{ left: p.x, top: p.y, opacity: p.opacity, transform: String(translate(-50%, -50%) scale() + p.scale + String() rotate() + p.rotation + String(deg)), transition: String(transform 0.1s linear) }}>
+                    style={{ left: p.x, top: p.y, opacity: p.opacity, transform: `translate(-50%, -50%) scale(${p.scale}) rotate(${p.rotation}deg)`, transition: 'transform 0.1s linear' }}>
                     {p.emoji}
                 </div>
             ))}
 
-            <style>{String(
+            <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@700&display=swap');
                 .ramadan-title {
                     font-family: 'Reem Kufi', sans-serif;
@@ -293,7 +287,7 @@ const RamadanTreasuresPage: React.FC = () => {
                 ::-webkit-scrollbar { width: 6px; }
                 ::-webkit-scrollbar-track { background: transparent; }
                 ::-webkit-scrollbar-thumb { background: #d4af37; border-radius: 10px; }
-            )}</style>
+            `}</style>
         </div>
     );
 };
