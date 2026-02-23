@@ -78,18 +78,20 @@ const SmartSearchPage: React.FC = () => {
     setInput('');
     setIsLoading(true);
 
-    // دالة تنظيف متطورة
+    // دالة تنظيف متطورة تدعم اللغتين بفعالية
     const normalize = (text: string) => 
       text?.toString()
           .replace(/[أإآا]/g, 'ا')
           .replace(/[ةه]/g, 'ه')
           .replace(/[ىي]/g, 'ي')
-          .toLowerCase()
+          .toLowerCase() // ضروري جداً للغة الإنجليزية
           .trim() || '';
 
     const qNormalized = normalize(userQuery);
-    // تقطيع كلمات البحث لتوسيع نطاق البحث (Tokens)
-    const queryWords = qNormalized.split(/\s+/).filter(word => word.length > 2);
+    
+    // تقطيع كلمات البحث لتوسيع نطاق البحث، مع استبعاد الكلمات الشائعة اللي ملهاش لازمة في البحث (زي the, book, about)
+    const stopWords = ['the', 'book', 'about', 'summary', 'tell', 'me', 'عن', 'كتاب', 'تلخيص', 'ملخص'];
+    const queryWords = qNormalized.split(/\s+/).filter(word => word.length > 2 && !stopWords.includes(word));
 
     const searchIn = (db: any[], location: string) => {
       return db.filter(b => {
@@ -97,7 +99,7 @@ const SmartSearchPage: React.FC = () => {
         const author = normalize(b.author || '');
         const subject = normalize(b.subject || b.category || '');
         
-        // البحث عن تطابق الجملة كاملة أو أي كلمة أساسية من البحث
+        // البحث عن تطابق الجملة كاملة أو أي كلمة أساسية من البحث في العنوان أو المؤلف
         return title.includes(qNormalized) || 
                author.includes(qNormalized) || 
                queryWords.some(word => title.includes(word) || author.includes(word) || subject.includes(word));
@@ -114,11 +116,12 @@ const SmartSearchPage: React.FC = () => {
     // بناء سياق صارم لصقر
     let searchContext = "";
     if (foundBooks.length > 0) {
+      // نمرر البيانات بوضوح لصقر عشان يقدر يقرأها ويلخصها
       searchContext = `EFIPS LIBRARY RECORDS FOUND: The following books exist in our records: ${JSON.stringify(foundBooks.slice(0, 15))}. 
-      Your task: Confirm to the student that the book IS AVAILABLE and specify its location clearly (e.g., in Physical Library or Digital Portal).`;
+      Your task: The student is asking about one of these books. Confirm that the book IS AVAILABLE, specify its location clearly (Physical Library or Digital), and THEN provide the information or summary the student requested based on your general knowledge of this existing book.`;
     } else {
       searchContext = `EFIPS LIBRARY RECORDS NOT FOUND: No books matching "${userQuery}" were found in our official physical or digital databases. 
-      Your task: Inform the student politely that this specific title is not in our school records. You may then suggest similar topics from your general knowledge, but clearly state they are general recommendations and not currently in the school library database.`;
+      Your task: Inform the student politely that this specific title is not currently in our school records. You may then provide the summary/info they asked for from your general knowledge, but clearly state it is a general recommendation and not in the school library database.`;
     }
 
     try {
