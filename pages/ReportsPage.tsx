@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../App';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
-import { db } from '../../utils/firebase
+import { db } from '../../utils/firebase';
 
 const translations = {
     ar: {
