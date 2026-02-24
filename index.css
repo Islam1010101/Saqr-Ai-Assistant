@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { bookData, type Book } from '../api/bookData'; 
 import { useLanguage } from '../App';
+// 🚀 استيراد التراكر الجديد
+import { trackActivity } from '../src/utils/tracker';
 
 // --- مساعدات التصميم ---
-
-// إضافة تأثير اللمعة (Reflection)
 const ReflectionLayer = () => (
   <div className="absolute inset-0 pointer-events-none z-20">
     <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-white/5 to-transparent opacity-30" />
@@ -12,12 +12,11 @@ const ReflectionLayer = () => (
   </div>
 );
 
-// --- Component: BookCard (المطور بكلاساتك الملكية) ---
+// --- Component: BookCard ---
 const BookCard = React.memo(({ book, onClick, t }: { book: Book; onClick: () => void; t: any }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const isAi = !book.subject || book.subject === "Unknown";
 
-  // تفعيل تأثير Spotlight (Elite Spotlight) اللي في ملف CSS بتاعك
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
@@ -36,27 +35,20 @@ const BookCard = React.memo(({ book, onClick, t }: { book: Book; onClick: () => 
     >
       <div className="relative overflow-hidden rounded-[2.4rem] bg-white/5 dark:bg-slate-900/20 h-full flex flex-col">
         <ReflectionLayer />
-        
-        {/* مؤشر الهوية الجانبي */}
         <div className={`absolute top-0 start-0 w-2 h-full z-30 ${isAi ? 'bg-red-600' : 'bg-[#00732f]'}`} />
-
         <div className="p-8 relative z-10 flex-grow text-start">
            <span className={`inline-block px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] mb-6 shadow-sm
                           ${isAi ? 'bg-red-600 text-white' : 'bg-[#00732f] text-white'}`}>
               {isAi ? t('aiSubject') : book.subject}
            </span>
-          
           <h3 className="font-black text-2xl text-slate-950 dark:text-white leading-[1.1] mb-4 tracking-tighter group-hover:text-red-600 transition-colors line-clamp-2">
               {book.title}
           </h3>
-          
           <div className="flex items-center gap-3 opacity-60 group-hover:opacity-100 transition-all">
               <span className="text-xl">👤</span>
               <p className="text-xs font-bold uppercase tracking-widest">{book.author}</p>
           </div>
         </div>
-
-        {/* التذييل (Footer) */}
         <div className="bg-black/5 dark:bg-white/5 py-5 px-8 border-t border-white/10 mt-auto flex items-center justify-between relative z-10 backdrop-blur-md">
             <div className="flex gap-6 items-center">
                 <div className="text-center">
@@ -78,17 +70,52 @@ const BookCard = React.memo(({ book, onClick, t }: { book: Book; onClick: () => 
   );
 });
 
-// --- Component: SearchPage (الرئيسي) ---
+// --- Component: SearchPage ---
 const SearchPage: React.FC = () => {
     const { locale, dir } = useLanguage();
-    const t = (key: string) => (translations as any)[locale][key];
-    
-    // ... (باقي الـ State والـ Memo من كودك الأصلي)
+    const isAr = locale === 'ar';
+    const t = (key: string) => {
+        const translations: any = {
+            ar: { searchPlaceholder: "ابحث في الفهرس الذكي...", shelf: "الرف", row: "المستوى", aiSubject: "تكنولوجيا", allSubjects: "كل التخصصات", allAuthors: "كل المؤلفين", allShelves: "كل الأرفف", sortBy: "ترتيب حسب" },
+            en: { searchPlaceholder: "Search smart index...", shelf: "Shelf", row: "Row", aiSubject: "Tech", allSubjects: "All Subjects", allAuthors: "All Authors", allShelves: "All Shelves", sortBy: "Sort By" }
+        };
+        return translations[locale][key] || key;
+    };
+
+    const [searchTerm, setSearchTerm] = useState('');
+    const [visibleCount, setVisibleCount] = useState(16);
+    const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+    const [subjectFilter, setSubjectFilter] = useState('all');
+    const [authorFilter, setAuthorFilter] = useState('all');
+    const [shelfFilter, setShelfFilter] = useState('all');
+    const [sortBy, setSortBy] = useState('alphabetical');
+
+    // 🚀 دالة معالجة اختيار الكتاب مع التسجيل في فايربيز
+    const handleSelectBook = (book: Book) => {
+        setSelectedBook(book);
+        trackActivity('digital', book.title); // تسجيل تفاعل المكتبة الرقمية
+    };
+
+    const filteredBooks = useMemo(() => {
+        let results = bookData.filter(b => 
+            (b.title.toLowerCase().includes(searchTerm.toLowerCase()) || b.author.toLowerCase().includes(searchTerm.toLowerCase())) &&
+            (subjectFilter === 'all' || b.subject === subjectFilter) &&
+            (authorFilter === 'all' || b.author === authorFilter) &&
+            (shelfFilter === 'all' || b.shelf === shelfFilter)
+        );
+        if (sortBy === 'alphabetical') results.sort((a,b) => a.title.localeCompare(b.title));
+        if (sortBy === 'author') results.sort((a,b) => a.author.localeCompare(b.author));
+        return results;
+    }, [searchTerm, subjectFilter, authorFilter, shelfFilter, sortBy]);
+
+    const filters = useMemo(() => ({
+        subjects: Array.from(new Set(bookData.map(b => b.subject))).sort(),
+        authors: Array.from(new Set(bookData.map(b => b.author))).sort(),
+        shelves: Array.from(new Set(bookData.map(b => b.shelf))).sort()
+    }), []);
 
     return (
         <div dir={dir} className="max-w-7xl mx-auto px-6 pb-40 relative z-10 antialiased">
-            
-            {/* الهيدر البحثي المطور */}
             <div className="sticky top-6 z-[100] mb-20">
                 <div className="glass-panel p-4 md:p-6 rounded-[3.5rem] shadow-2xl bg-white/80 dark:bg-slate-900/80">
                     <div className="flex flex-col gap-4">
@@ -97,12 +124,16 @@ const SearchPage: React.FC = () => {
                               type="text" 
                               placeholder={t('searchPlaceholder')} 
                               className="w-full p-6 ps-16 bg-white dark:bg-black/40 text-slate-950 dark:text-white border-2 border-transparent focus:border-red-600 rounded-[2.5rem] outline-none transition-all font-black text-lg shadow-inner shadow-black/5" 
-                              onChange={(e) => setSearchTerm(e.target.value)} 
+                              onChange={(e) => {
+                                  const val = e.target.value;
+                                  setSearchTerm(val);
+                                  // 📉 تسجيل البحث في فايربيز لو أكتر من 3 حروف
+                                  if (val.length > 3) trackActivity('searched', val);
+                              }} 
                             />
                             <svg className="absolute start-6 top-1/2 -translate-y-1/2 h-7 w-7 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                         </div>
 
-                        {/* الفلاتر بشكل نخبوي */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                             {[ 
                               { val: sortBy, set: setSortBy, opt: 'sortBy', data: ['alphabetical', 'author'] },
@@ -125,26 +156,24 @@ const SearchPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* شبكة الكتب مع انيميشن الإزاحة */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
                 {filteredBooks.slice(0, visibleCount).map((book) => (
-                    <BookCard key={book.id} book={book} t={t} onClick={() => setSelectedBook(book)} />
+                    <BookCard key={book.id} book={book} t={t} onClick={() => handleSelectBook(book)} />
                 ))}
             </div>
 
-            {/* زر Explore More باستخدام كلاسك المجهز */}
             {filteredBooks.length > visibleCount && (
                 <div className="mt-32 text-center">
                     <button 
                       onClick={() => setVisibleCount(prev => prev + 16)} 
-                      className="glass-button-black dark:glass-button-red mx-auto text-xl tracking-[0.3em]"
+                      className="glass-button-black dark:glass-button-red mx-auto text-xl tracking-[0.3em] px-10 py-5 rounded-full font-black"
                     >
                         EXPLORE MORE
                     </button>
                 </div>
             )}
-
-            <BookModal book={selectedBook} onClose={() => setSelectedBook(null)} t={t} />
         </div>
     );
 };
+
+export default SearchPage;
