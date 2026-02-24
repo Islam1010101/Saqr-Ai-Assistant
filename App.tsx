@@ -1,6 +1,9 @@
 import React, { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { HashRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 
+// 🚀 تشغيل محرك فايربيز أول ما الموقع يفتح
+import './utils/firebase';
+
 // استيراد الصفحات
 import HomePage from './pages/HomePage';
 import SearchPage from './pages/SearchPage';
@@ -17,7 +20,7 @@ import CreatorsStudioPage from './pages/CreatorsStudioPage';
 // --- هام جداً: استيراد صفحة رمضان ---
 import RamadanTreasuresPage from './pages/RamadanTreasuresPage';
 
-import type { Locale } from './types';
+export type Locale = 'en' | 'ar'; // أضفت دي عشان نوع الـ Locale لو مش موجود في ملف منفصل
 
 // واجهة تعريف الروابط
 interface NavLink {
