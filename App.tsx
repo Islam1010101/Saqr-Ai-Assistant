@@ -2,7 +2,7 @@ import React, { useState, useEffect, createContext, useContext, ReactNode } from
 import { HashRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 
 // 🚀 تشغيل محرك فايربيز أول ما الموقع يفتح
-import './utils/firebase';
+import './src/utils/firebase';
 
 // استيراد الصفحات
 import HomePage from './pages/HomePage';
