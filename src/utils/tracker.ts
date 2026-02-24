@@ -1,10 +1,9 @@
 import { collection, addDoc } from 'firebase/firestore';
-import { db } from './firebase'; // تأكد إن المسار ده صح حسب مكان ملف tracker بالنسبة لملف firebase
+import { db } from './firebase'; // السطر ده صح طالما الملفين مع بعض في نفس الفولدر
 
 // 1. التراكر العام المربوط بالسحابة
 export const trackActivity = async (type: 'searched' | 'digital' | 'ai' | 'ramadan', label: string) => {
     try {
-        // رمي الداتا في كولكشن activity_logs في فايربيز
         await addDoc(collection(db, 'activity_logs'), {
             type,
             label,
@@ -18,7 +17,6 @@ export const trackActivity = async (type: 'searched' | 'digital' | 'ai' | 'ramad
 // 2. دالة تسجيل بطل كنوز رمضان في السحابة
 export const trackRamadanWinner = async (studentName: string, studentGrade: string, studentEmail: string, answer: string, code: string) => {
     try {
-        // أ. إرسال بيانات الفائز لتقارير الإدارة في السحابة
         await addDoc(collection(db, 'saqrReports'), {
             event: "RamadanQuestWinner",
             timestamp: new Date().toISOString(),
@@ -29,7 +27,7 @@ export const trackRamadanWinner = async (studentName: string, studentGrade: stri
             enteredCode: code
         });
 
-        // ب. قفل السؤال على المتصفح الحالي فوراً (عشان الشاشة تتحدث قدام الطالب إنه فاز)
+        // ب. قفل السؤال محلياً
         const theWinner = { name: studentName, grade: studentGrade };
         localStorage.setItem("ramadanQuestWinner", JSON.stringify(theWinner));
         
