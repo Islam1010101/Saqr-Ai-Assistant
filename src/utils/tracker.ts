@@ -1,29 +1,39 @@
-// 1. التراكر العام (تم إضافة ramadan للأنواع)
-export const trackActivity = (type: 'searched' | 'digital' | 'ai' | 'ramadan', label: string) => {
-    const logs = JSON.parse(localStorage.getItem('efips_activity_logs') || '[]');
-    // تسجيل آخر 1000 عملية فقط للحفاظ على سرعة المتصفح
-    if (logs.length > 1000) logs.shift(); 
-    logs.push({ type, label, date: new Date().toISOString() });
-    localStorage.setItem('efips_activity_logs', JSON.stringify(logs));
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from './firebase'; // تأكد إن المسار ده صح حسب مكان ملف tracker بالنسبة لملف firebase
+
+// 1. التراكر العام المربوط بالسحابة
+export const trackActivity = async (type: 'searched' | 'digital' | 'ai' | 'ramadan', label: string) => {
+    try {
+        // رمي الداتا في كولكشن activity_logs في فايربيز
+        await addDoc(collection(db, 'activity_logs'), {
+            type,
+            label,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error("Error saving activity to cloud:", error);
+    }
 };
 
-// 2. دالة جديدة مخصوصة لتسجيل بطل كنوز رمضان وتخزين بياناته للتقارير
-export const trackRamadanWinner = (studentName: string, studentGrade: string, studentEmail: string, answer: string, code: string) => {
-    // أ. تسجيل الفائز في تقارير صقر
-    const reportData = {
-        event: "RamadanQuestWinner",
-        timestamp: new Date().toISOString(),
-        studentName,
-        studentEmail,
-        studentGrade,
-        enteredAnswer: answer,
-        enteredCode: code
-    };
-    
-    const existingReports = JSON.parse(localStorage.getItem("saqrReports") || "[]");
-    localStorage.setItem("saqrReports", JSON.stringify([...existingReports, reportData]));
+// 2. دالة تسجيل بطل كنوز رمضان في السحابة
+export const trackRamadanWinner = async (studentName: string, studentGrade: string, studentEmail: string, answer: string, code: string) => {
+    try {
+        // أ. إرسال بيانات الفائز لتقارير الإدارة في السحابة
+        await addDoc(collection(db, 'saqrReports'), {
+            event: "RamadanQuestWinner",
+            timestamp: new Date().toISOString(),
+            studentName,
+            studentEmail,
+            studentGrade,
+            enteredAnswer: answer,
+            enteredCode: code
+        });
 
-    // ب. قفل السؤال على باقي الطلاب (تخزين الفائز العام)
-    const theWinner = { name: studentName, grade: studentGrade };
-    localStorage.setItem("ramadanQuestWinner", JSON.stringify(theWinner));
+        // ب. قفل السؤال على المتصفح الحالي فوراً (عشان الشاشة تتحدث قدام الطالب إنه فاز)
+        const theWinner = { name: studentName, grade: studentGrade };
+        localStorage.setItem("ramadanQuestWinner", JSON.stringify(theWinner));
+        
+    } catch (error) {
+        console.error("Error saving Ramadan winner to cloud:", error);
+    }
 };
