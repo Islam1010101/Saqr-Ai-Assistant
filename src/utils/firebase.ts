@@ -1,7 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 
-// 🛑 شيل دول وحط المفاتيح بتاعتك اللي جبتها من موقع فايربيز
 const firebaseConfig = {
   apiKey: "AIzaSyCIlWYb6S2ViVKs12jYPzbiFdYQit1KYCM",
   authDomain: "efips-smart-portal.firebaseapp.com",
@@ -11,8 +10,5 @@ const firebaseConfig = {
   appId: "1:652876961902:web:bfb2f4620ac519bad6ee7f"
 };
 
-// تشغيل نظام فايربيز
 const app = initializeApp(firebaseConfig);
-
-// تصدير قاعدة البيانات عشان نستخدمها في باقي صفحات الموقع
 export const db = getFirestore(app);
