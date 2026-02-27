@@ -104,7 +104,7 @@ const RamadanTreasuresPage: React.FC = () => {
                         </h2>
                         
                         <p className="text-xl md:text-2xl text-slate-800 dark:text-white py-4 border-y border-yellow-500/30 font-bold leading-relaxed">
-                            {isAr ? "موعدنا غداً مع التحدي الثاني والكنز الجديد." : "Join us tomorrow for the second challenge and a new treasure."}
+                            {isAr ? "موعدنا مع بداية الفصل الدراسي الثالث." : "Join us at the start of the third semester."}
                         </p>
                         
                         <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 mt-4 bg-black/5 dark:bg-white/5 p-4 rounded-xl">
