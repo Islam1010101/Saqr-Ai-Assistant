@@ -21,7 +21,7 @@ const translations = {
         challengeCTA: "ابدأ رحلة الإبداع مع صقر الآن",
         ramadanButton: "🌙 كنوز صقر الإمارات", 
         // 🌟 النص الجديد اللي هيظهر فوق الزرار
-        ramadanLiveNow: "متاحة الآن! شارك واربح 🏆",
+        ramadanLiveNow: "قريبًا 🏆",
         visitorsLabel: "زوار البوابة:"
     },
     en: {
@@ -42,7 +42,7 @@ const translations = {
         challengeCTA: "Start your creative journey now",
         ramadanButton: "🌙 EFPIS Treasures", 
         // 🌟 النص الجديد اللي هيظهر فوق الزرار
-        ramadanLiveNow: "Live Now! Play & Win 🏆",
+        ramadanLiveNow: "SOON 🏆",
         visitorsLabel: "Portal Visitors:"
     }
 };
