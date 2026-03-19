@@ -17,10 +17,8 @@ import FeedbackPage from './pages/FeedbackPage';
 import CreatorsPortalPage from './pages/CreatorsPortalPage';
 import LibraryMapPage from './pages/LibraryMapPage';
 import CreatorsStudioPage from './pages/CreatorsStudioPage';
-// --- هام جداً: استيراد صفحة رمضان ---
-import RamadanTreasuresPage from './pages/RamadanTreasuresPage';
 
-export type Locale = 'en' | 'ar'; // أضفت دي عشان نوع الـ Locale لو مش موجود في ملف منفصل
+export type Locale = 'en' | 'ar';
 
 // واجهة تعريف الروابط
 interface NavLink {
@@ -54,19 +52,19 @@ const FloatingSaqr: React.FC = () => {
   };
 
   return (
-    <div className={`fixed bottom-6 ${dir === 'rtl' ? 'left-6' : 'right-6'} z-50 animate-fade-up`}>
+    <div className={`fixed bottom-6 ${dir === 'rtl' ? 'left-6' : 'right-6'} z-50 animate-fade-in-up`}>
       <button
         onMouseDown={handleInteraction}
         onTouchStart={handleInteraction}
-        className="group relative w-14 h-14 md:w-16 md:h-16 glass-panel rounded-[1.8rem] border-2 border-red-600/30 dark:border-red-500/40 shadow-xl flex items-center justify-center overflow-hidden hover:scale-110 active:scale-95 transition-all duration-500 bg-white/60 dark:bg-slate-900/60"
+        className="group relative w-14 h-14 md:w-16 md:h-16 rounded-[1.8rem] border border-slate-200 dark:border-slate-700 shadow-lg flex items-center justify-center overflow-hidden hover:scale-110 hover:shadow-xl active:scale-95 transition-all duration-300 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl"
       >
         {ripples.map(r => (
-          <span key={r.id} className="ripple-effect bg-red-600/40" style={{ left: r.x, top: r.y }} />
+          <span key={r.id} className="absolute rounded-full bg-red-600/30 animate-ripple pointer-events-none" style={{ left: r.x, top: r.y, width: 20, height: 20, transform: 'translate(-50%, -50%)' }} />
         ))}
-        <img src="/saqr-avatar.png" alt="Saqr" className="w-[80%] h-[80%] object-contain animate-float" />
+        <img src="/saqr-avatar.png" alt="Saqr" className="w-[80%] h-[80%] object-contain animate-float" onError={(e) => e.currentTarget.src="https://www.efipslibrary.online/school-logo.png"} />
         <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-600 border-2 border-white dark:border-slate-900"></span>
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500 border-2 border-white dark:border-slate-800"></span>
         </span>
       </button>
     </div>
@@ -75,13 +73,13 @@ const FloatingSaqr: React.FC = () => {
 
 // -------- 2. هيدر EFIPS الزجاجي الذكي --------
 const Header: React.FC = () => {
-  const { locale, setLocale } = useLanguage();
+  const { locale, setLocale, dir } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const [activeHint, setActiveHint] = useState<string | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   
-  // States for Scroll Logic
+  // States for Scroll Logic (محافظة على نفس الأبعاد والحركة)
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -104,12 +102,12 @@ const Header: React.FC = () => {
   const links: NavLink[] = [
     { path: '/search', label: locale === 'en' ? 'Search' : 'البحث بالمكتبة', icon: '🔍', hint: locale === 'en' ? 'Library Index' : 'فهرس الكتب', color: 'bg-red-600' },
     { path: '/smart-search', label: locale === 'en' ? 'Ask Saqr' : 'اسأل صقر', icon: '🤖', hint: locale === 'en' ? 'Ask SAQR' : 'اسأل صقر', color: 'bg-green-600' },
-    { path: '/digital-library', label: locale === 'en' ? 'Digital' : 'المكتبة الرقمية', icon: '📚', hint: locale === 'en' ? 'E-Books' : 'المكتبة الرقمية', color: 'bg-slate-900' },
-    { path: '/creators', label: locale === 'en' ? 'Creators' : 'بوابة المبدعين', icon: '🎨', hint: locale === 'en' ? 'Talents' : 'إبداعات طلابنا', color: 'bg-red-600' },
-    { path: '/feedback', label: locale === 'en' ? 'Ideas' : 'مقترحات', icon: '✍️', hint: locale === 'en' ? 'Contact' : 'رأيك يهمنا', color: 'bg-green-600' }, 
-    { path: '/reports', label: locale === 'en' ? 'Reports' : 'تقارير', icon: '📊', hint: locale === 'en' ? 'Reports' : 'تقارير', color: 'bg-slate-800' },
+    { path: '/digital-library', label: locale === 'en' ? 'Digital' : 'المكتبة الرقمية', icon: '📚', hint: locale === 'en' ? 'E-Books' : 'المكتبة الرقمية', color: 'bg-slate-800' },
+    { path: '/creators', label: locale === 'en' ? 'Creators' : 'بوابة المبدعين', icon: '🎨', hint: locale === 'en' ? 'Talents' : 'إبداعات طلابنا', color: 'bg-red-500' },
+    { path: '/feedback', label: locale === 'en' ? 'Ideas' : 'مقترحات', icon: '✍️', hint: locale === 'en' ? 'Contact' : 'رأيك يهمنا', color: 'bg-green-500' }, 
+    { path: '/reports', label: locale === 'en' ? 'Reports' : 'تقارير', icon: '📊', hint: locale === 'en' ? 'Reports' : 'تقارير', color: 'bg-slate-700' },
     { path: '/map', label: locale === 'en' ? "Lib's Map" : 'خريطة المكتبة', icon: '🗺️', hint: locale === 'en' ? 'Shelf Cont' : 'محتويات الأرفف', color: 'bg-red-600' },
-    { path: '/about', label: locale === 'en' ? 'About' : 'عنا', icon: 'ℹ️', hint: locale === 'en' ? 'About us' : 'من نحن؟', color: 'bg-green-700' },
+    { path: '/about', label: locale === 'en' ? 'About' : 'عنا', icon: 'ℹ️', hint: locale === 'en' ? 'About us' : 'من نحن؟', color: 'bg-green-600' },
   ];
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -118,18 +116,18 @@ const Header: React.FC = () => {
 
   return (
     <header className={`sticky top-4 z-[60] px-4 md:px-10 transition-transform duration-500 ease-in-out ${isVisible ? 'translate-y-0' : '-translate-y-32'}`}>
-      <div className="mx-auto max-w-[98rem] p-1.5 md:p-2.5 rounded-full border border-white/30 dark:border-white/10 flex items-center justify-between shadow-2xl backdrop-blur-3xl bg-white/70 dark:bg-slate-950/70 font-black transition-all relative overflow-visible">
+      <div className="mx-auto max-w-[98rem] p-1.5 md:p-2.5 rounded-full border border-slate-200 dark:border-slate-800 flex items-center justify-between shadow-lg backdrop-blur-xl bg-white/80 dark:bg-slate-900/80 transition-all relative overflow-visible">
         
         <Link to="/" className="flex items-center gap-2 md:gap-3 ps-4 md:ps-6 group flex-shrink-0">
-          <img src="/school-logo.png" alt="EFIPS" className="h-8 w-8 md:h-11 md:w-11 object-contain logo-smart-filter rotate-12 transition-all group-hover:scale-110" />
+          <img src="https://www.efipslibrary.online/school-logo.png" alt="EFIPS" className="h-8 w-8 md:h-11 md:w-11 object-contain rotate-12 transition-transform duration-500 group-hover:scale-110 dark:invert" />
           <div className="hidden xl:block leading-none text-start">
-            <span className="font-black text-slate-950 dark:text-white text-[7px] md:text-[9.5px] tracking-tighter block uppercase opacity-80 group-hover:text-red-600 transition-colors">
+            <span className="font-bold text-slate-900 dark:text-white text-[7px] md:text-[10px] block uppercase opacity-80 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
               {locale === 'en' ? "Emirates Falcon Int'l Private School" : "مدرسة صقر الإمارات الدولية الخاصة"}
             </span>
           </div>
         </Link>
         
-        <nav className="flex items-center bg-black/5 dark:bg-white/5 rounded-full p-1 mx-2 overflow-x-auto no-scrollbar lg:overflow-visible overflow-y-visible">
+        <nav className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-full p-1 mx-2 overflow-x-auto no-scrollbar lg:overflow-visible overflow-y-visible">
           <div className="flex items-center gap-1">
             {links.map((l) => (
               <div key={l.path} className="relative group/nav" 
@@ -138,8 +136,9 @@ const Header: React.FC = () => {
                    onMouseMove={handleMouseMove}
                    onTouchStart={(e) => { e.stopPropagation(); setActiveHint(activeHint === l.path ? null : l.path); }}>
                 
+                {/* التولتيب المحدث */}
                 {activeHint === l.path && (
-                  <div className={`fixed z-[999] px-4 py-2 ${l.color} text-white text-[10px] rounded-2xl shadow-2xl pointer-events-none transition-opacity duration-300 whitespace-nowrap animate-in fade-in zoom-in`}
+                  <div className={`fixed z-[999] px-4 py-2 ${l.color} text-white text-[10px] md:text-xs font-bold rounded-xl shadow-lg pointer-events-none transition-opacity duration-200 whitespace-nowrap animate-zoom-in ${locale === 'en' ? 'tracking-wider uppercase' : ''}`}
                        style={{ 
                          left: `${mousePos.x}px`, 
                          top: `${mousePos.y + 25}px`, 
@@ -152,13 +151,13 @@ const Header: React.FC = () => {
 
                 <Link 
                   to={l.path} 
-                  className={`px-4 lg:px-5 py-2 md:py-3 rounded-full text-[9px] font-black transition-all flex items-center justify-center whitespace-nowrap ${
+                  className={`px-4 lg:px-5 py-2 md:py-3 rounded-full text-[10px] md:text-xs font-bold transition-all flex items-center justify-center whitespace-nowrap ${
                     location.pathname === l.path 
-                      ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950 shadow-lg scale-105' 
-                      : 'text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-white'
+                      ? 'bg-red-600 text-white shadow-md scale-105' 
+                      : 'text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                   }`}
                 >
-                  <span className="text-sm md:text-xl">{l.icon}</span>
+                  <span className="text-sm md:text-lg">{l.icon}</span>
                   <span className="md:hidden ms-1.5">{l.label}</span>
                 </Link>
               </div>
@@ -166,11 +165,11 @@ const Header: React.FC = () => {
           </div>
         </nav>
         
-        <div className="flex items-center gap-1.5 pe-4 md:pe-6 flex-shrink-0">
-          <button onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')} className="w-8 h-8 md:w-11 md:h-11 flex items-center justify-center text-slate-950 dark:text-white font-black text-[9px] md:text-xs border border-slate-200 dark:border-white/10 rounded-full hover:border-red-600 transition-all active:scale-90 shadow-sm">
+        <div className="flex items-center gap-2 pe-4 md:pe-6 flex-shrink-0">
+          <button onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')} className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-slate-700 dark:text-slate-200 font-bold text-[10px] md:text-xs border border-slate-300 dark:border-slate-600 rounded-full hover:border-red-600 hover:text-red-600 dark:hover:border-red-500 dark:hover:text-red-400 transition-all active:scale-90 shadow-sm bg-white dark:bg-slate-800">
             {locale === 'en' ? 'AR' : 'EN'}
           </button>
-          <button onClick={toggleTheme} className="w-8 h-8 md:w-11 md:h-11 flex items-center justify-center bg-slate-100 dark:bg-white/10 rounded-full text-[10px] md:text-sm shadow-inner transition-all hover:scale-110">
+          <button onClick={toggleTheme} className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-slate-100 dark:bg-slate-700 rounded-full text-[10px] md:text-sm shadow-inner transition-all hover:scale-110 border border-slate-200 dark:border-slate-600">
             {theme === 'light' ? '🌙' : '☀️'}
           </button>
         </div>
@@ -208,16 +207,18 @@ const App: React.FC = () => {
     <ThemeProvider>
       <LanguageProvider>
         <HashRouter>
-          <div className="min-h-screen bg-slate-50 dark:bg-[#020617] transition-colors duration-700 flex flex-col selection:bg-red-600/30 relative" onClick={() => {}}>
-            <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-50">
-              <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-red-600/10 dark:bg-red-500/20 blur-[150px] rounded-full animate-pulse"></div>
-              <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] bg-green-600/10 dark:bg-green-500/20 blur-[150px] rounded-full animate-pulse [animation-delay:2s]"></div>
+          <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans transition-colors duration-300 flex flex-col selection:bg-red-500/30 relative">
+            
+            {/* الخلفية الديناميكية الموحدة للهوية الوطنية (الأحمر والأخضر) */}
+            <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-40 dark:opacity-20">
+               <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-red-600/30 rounded-full blur-[120px]"></div>
+               <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-green-600/30 rounded-full blur-[100px]"></div>
             </div>
 
             <Header />
             <FloatingSaqr />
             
-            <main className="flex-1 relative z-10 container mx-auto p-3 md:p-8 lg:p-12">
+            <main className="flex-1 relative z-10 w-full">
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/search" element={<SearchPage />} />
@@ -229,28 +230,42 @@ const App: React.FC = () => {
                 <Route path="/creators" element={<CreatorsPortalPage />} />
                 <Route path="/creators-studio" element={<CreatorsStudioPage />} />
                 
-                {/* --- الرابط المفقود: صفحة رمضان --- */}
-                <Route path="/ramadan" element={<RamadanTreasuresPage />} />
-
                 <Route path="/reports" element={<ReportsPage />} />
                 <Route path="/feedback" element={<FeedbackPage />} /> 
                 <Route path="/about" element={<AboutPage />} />
               </Routes>
             </main>
 
-            <footer className="relative z-10 py-12 text-center border-t border-slate-200 dark:border-white/5 mx-6 md:mx-20 mt-10 group">
-              <div className="h-1 w-16 bg-red-600 mx-auto mb-6 rounded-full shadow-[0_0_15px_rgba(220,38,38,0.4)] group-hover:w-32 transition-all duration-700"></div>
-              <p className="font-black text-[9px] md:text-xs tracking-[0.4em] uppercase text-slate-500 dark:text-slate-400">EFIPS • Library • 2026</p>
-              <p className="mt-2 font-black text-slate-900 dark:text-white text-[8px] md:text-[10px] opacity-40 uppercase">&copy; Emirates Falcon Int'l. Private School</p>
+            <footer className="relative z-10 py-10 text-center border-t border-slate-200 dark:border-slate-800 mx-4 md:mx-20 mt-10">
+              <div className="h-1.5 w-16 bg-red-600 mx-auto mb-6 rounded-full shadow-[0_0_10px_rgba(220,38,38,0.5)]"></div>
+              <p className="font-bold text-[10px] md:text-xs tracking-widest uppercase text-slate-500 dark:text-slate-400">EFIPS • Library • 2026</p>
+              <p className="mt-2 font-medium text-slate-400 dark:text-slate-500 text-[9px] md:text-[10px] uppercase">&copy; Emirates Falcon Int'l. Private School</p>
             </footer>
 
             <style>{`
-              @keyframes float { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-12px) rotate(3deg); } }
+              @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+              * { font-family: 'Cairo', sans-serif !important; }
+              
+              @keyframes float { 
+                0%, 100% { transform: translateY(0px) rotate(0deg); } 
+                50% { transform: translateY(-10px) rotate(3deg); } 
+              }
               .animate-float { animation: float 6s ease-in-out infinite; }
+              
+              @keyframes ripple {
+                0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+                100% { transform: translate(-50%, -50%) scale(4); opacity: 0; }
+              }
+              .animate-ripple { animation: ripple 0.6s linear forwards; }
+              
+              @keyframes fade-in-up { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+              .animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; }
+              
+              @keyframes zoom-in { 0% { opacity: 0; transform: scale(0.9) translateX(-50%); } 100% { opacity: 1; transform: scale(1) translateX(-50%); } }
+              .animate-zoom-in { animation: zoom-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+              
               .no-scrollbar::-webkit-scrollbar { display: none; }
               .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-              .glass-panel { border: 1px solid rgba(255, 255, 255, 0.1); }
-              .dark .logo-smart-filter { filter: brightness(0) invert(1); }
             `}</style>
           </div>
         </HashRouter>
