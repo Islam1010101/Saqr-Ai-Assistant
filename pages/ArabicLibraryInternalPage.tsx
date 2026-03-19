@@ -1,9 +1,21 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { useLanguage } from '../App';
 import { useNavigate } from 'react-router-dom';
 
-// --- 1. قاعدة البيانات (Database) ---
-export const ARABIC_LIBRARY_DATABASE = [
+// --- 1. قاعدة البيانات ---
+interface Book {
+    id: string;
+    title: string;
+    author: string;
+    subject: string;
+    driveLink: string;
+    bio: string;
+    summary: string;
+    publisher?: string;
+    audioId?: string;
+}
+
+export const ARABIC_LIBRARY_DATABASE: Book[] = [
     { id: "AR_1", title: "مجموعة روايات أجاثا كريستي", author: "أجاثا كريستي", subject: "قصص بوليسية", publisher: "ناشرون متعددون", driveLink: "https://drive.google.com/drive/folders/1PZk0vPQrKXIgE0WmUXlEMcSzt_d94Q6u", bio: "ملكة الجريمة عالمياً، صاحبة الشخصيات الخالدة مثل هيركيول بوارو.", summary: "أضخم مجموعة لروايات التحقيق والغموض التي تتميز بحبكة عبقرية ونهايات صادمة." },
     { id: "AR_2", title: "أرض الإله", author: "أحمد مراد", subject: "أدب تاريخي", publisher: "دار الشروق", driveLink: "https://drive.google.com/file/d/1Q-dT9-g292nqv1N_PvlB2TnZMBdQGpio/view", bio: "كاتب ومصور مصري معاصر، تميز برواياته التي تمزج بين التاريخ والغموض.", summary: "رحلة تاريخية مثيرة في زمن الفراعنة تكشف أسراراً مخفية حول خروج بني إسرائيل.", audioId: "/audio/أرض الإله.mp3" },
     { id: "AR_3", title: "أرض النفاق", author: "يوسف السباعي", subject: "أدب خيالي", publisher: "مكتبة مصر", driveLink: "https://drive.google.com/file/d/14KCqI_ffiUg8if8uqs_vQ-oJIXBEsKD3/view", bio: "فارس الرومانسية المصرية، وزير ثقافة سابق، اشتهر بأسلوبه الساخر.", summary: "رواية رمزية ساخرة تنتقد الأخلاق الاجتماعية عبر فكرة بيع الأخلاق في دكاكين متخصصة.", audioId: "/audio/أرض النفاق.mp3" },
@@ -25,7 +37,7 @@ export const ARABIC_LIBRARY_DATABASE = [
     { id: "AR_20", title: "سلسلة الشياطين ال13", author: "محمود سالم", subject: "أدب خيالي", publisher: "هنداوي", driveLink: "https://drive.google.com/drive/folders/1OoXAgtzyZ4QK0WIIJPCU5IICwlUPED0w", bio: "أشهر من كتب الألغاز والمغامرات للشباب في العالم العربي.", summary: "مغامرات ذكية لمجموعة من الفتيان العرب يحلون أصعب الجرائم والألغاز." },
     { id: "AR_21", title: "مختصر تفسير ابن كثير", author: "ابن كثير", subject: "تفسير القرآن", publisher: "دار المعرفة", driveLink: "https://drive.google.com/drive/folders/1lLmRHktJSbAJjjX0Wdh4shjHyweQy_0h", bio: "الحافظ والمؤرخ اسماعيل بن كثير، من أعظم المفسرين في التاريخ.", summary: "تلخيص شامل لأهم تفاسير القرآن الكريم المعتمدة على المأثور والحديث الصحيح." },
     { id: "AR_22", title: "أنبياء الله", author: "أحمد بهجت", subject: "قصص الأنبياء", publisher: "دار الشروق", driveLink: "https://drive.google.com/file/d/1lYq2LekqrEL2lnWQb1ogMd5saEo43860/view?usp=drive_link", bio: "كاتب وصحفي مصري متميز بأسلوبه الإيماني والعلمي الرصين.", summary: "استعراض لقصص الأنبياء بأسلوب أدبي رفيع يجمع بين الحقيقة التاريخية والوعظ." },
-    { id: "AR_23", title: "قصص الأنبياء ومعها سيرة الرسول صلى الله عليه وسلم", author: "محمد متولي الشعراوي", subject: "قصص الأنبياء", publisher: "دار القدس", driveLink: "https://drive.google.com/file/d/1QNUYu7lHEh9FdoBD8gptW14jEmFqBspb/view?usp=drive_link", bio: "إمام الدعاة، اشتهر بخواطره الإيمانية وتفسيره الميسر للقرآن.", summary: "رحلة إيمانية في سير الأنبياء وخاتم المرسلين بأسلوب الشيخ الشعراوي العذب." },
+    { id: "AR_23", title: "قصص الأنبياء وسيرة الرسول", author: "محمد متولي الشعراوي", subject: "قصص الأنبياء", publisher: "دار القدس", driveLink: "https://drive.google.com/file/d/1QNUYu7lHEh9FdoBD8gptW14jEmFqBspb/view?usp=drive_link", bio: "إمام الدعاة، اشتهر بخواطره الإيمانية وتفسيره الميسر للقرآن.", summary: "رحلة إيمانية في سير الأنبياء وخاتم المرسلين بأسلوب الشيخ الشعراوي العذب." },
     { id: "AR_24", title: "قصص الأنبياء للأطفال", author: "محمود المصري", subject: "قصص الأنبياء", publisher: "مكتبة الصفا", driveLink: "https://drive.google.com/file/d/1t6mWRohKvE0RmqI9TcM7JqtD07bGWqkm/view?usp=drive_link", bio: "داعية إسلامي متخصص في تبسيط العلوم الشرعية للصغار.", summary: "مجموعة قصصية تربوية تعرف الأطفال بسير الأنبياء بأسلوب سهل ورسوم جذابة." },
     { id: "AR_25", title: "قصص الحيوان في القرآن", author: "أحمد بهجت", subject: "أدب إسلامي", publisher: "دار الشروق", driveLink: "https://drive.google.com/file/d/1N9pbgYG1qLrfiwLEnUeiAFL8tFdcOksr/view?usp=drive_link", bio: "أديب برع في استنطاق كائنات الطبيعة لتقديم دروس إيمانية.", summary: "حكايات ممتعة على لسان الحيوانات التي ذكرت في القرآن الكريم، تحمل حكماً بليغة." },
     { id: "AR_26", title: "شرح الأربعين النووية", author: "عبد الرؤوف المناوي", subject: "كتب سنة", publisher: "دار الضياء", driveLink: "https://drive.google.com/file/d/1L6-Q83l5OdNujMAjJ2UtxxG-a04hvyPE/view?usp=drive_link", bio: "فقيه ومحدث مصري، صاحب المصنفات العظيمة في شرح السنة.", summary: "شرح وافٍ للأحاديث الأربعين التي جمعها الإمام النووي، والتي تعد أصول الدين." },
@@ -37,31 +49,30 @@ export const ARABIC_LIBRARY_DATABASE = [
     { id: "AR_32", title: "خوارق اللاشعور", author: "علي الوردي", subject: "تنمية بشرية", publisher: "الوراق", driveLink: "https://drive.google.com/file/d/1_8qsQrkCoIDFJbFD1lB7be6JpOApErLR/view", bio: "عالم اجتماع عراقي شهير، عرف بتحليله النفسي والاجتماعي العميق.", summary: "دراسة في طبيعة النفس البشرية وتأثير اللاشعور على سلوك الفرد والمجتمع." },
     { id: "AR_33", title: "قوة الآن", author: "إيكهارت تول", subject: "تنمية بشرية", publisher: "دار علاء الدين", driveLink: "https://drive.google.com/file/d/1_jmXl_PDCqU1ElBcJZGYLoUIydM32mec/view", bio: "معلم روحي عالمي، يركز على العيش في اللحظة الحاضرة.", summary: "دليل للتنوير الروحي عبر التخلص من آلام الماضي وقلق المستقبل والعيش الآن." },
     { id: "AR_34", title: "أربعون", author: "أحمد الشقيري", subject: "تنمية بشرية", publisher: "الدار العربية للعلوم", driveLink: "https://drive.google.com/file/d/1IFeA8ElveWPYWKuiWQIhR4zdmZPSwKa0/view", bio: "إعلامي سعودي متميز، اشتهر ببرامج تحسين المجتمع فكرياً.", summary: "خواطر وتجارب شخصية كتبها الشقيري خلال خلوته، تلخص أهم دروس الحياة." },
-    { id: "AR_35", title: "كيف تكسب الأصدقاء وتؤثر في الناس", author: "ديل كارنيجي", subject: "تنمية بشرية", publisher: "الأهلية", driveLink: "https://drive.google.com/file/d/168TUXU8P_5HcFmSKkrctOOFX0HG30Vbr/view", bio: "أشهر كاتب في تطوير العلاقات الإنسانية والمهارات القيادية عالمياً.", summary: "الكتاب المرجعي في فن التواصل الاجتماعي وبناء علاقات ناجحة ومؤثرة." },
+    { id: "AR_35", title: "كيف تكسب الأصدقاء", author: "ديل كارنيجي", subject: "تنمية بشرية", publisher: "الأهلية", driveLink: "https://drive.google.com/file/d/168TUXU8P_5HcFmSKkrctOOFX0HG30Vbr/view", bio: "أشهر كاتب في تطوير العلاقات الإنسانية والمهارات القيادية عالمياً.", summary: "الكتاب المرجعي في فن التواصل الاجتماعي وبناء علاقات ناجحة ومؤثرة." },
     { id: "AR_36", title: "حكايات الغرفة 207", author: "أحمد خالد توفيق", subject: "أدب خيالي", publisher: "إصدارات دايموند", driveLink: "https://drive.google.com/file/d/1Cy8w5xDHqtIc--F2ad77sePB1tcGkr3s/view", bio: "طبيب ومؤلف مصري رائد في الرعب، له الفضل في تشكيل وعي جيل كامل.", summary: "سلسلة قصص غامضة ومخيفة تدور أحداثها داخل غرفة فندقية مسكونة بالأسرار.", audioId: "/audio/الغرفة207.mp3" },
     { id: "AR_37", title: "يوتوبيا", author: "أحمد خالد توفيق", subject: "أدب خيالي", publisher: "دار ميريت", driveLink: "https://drive.google.com/file/d/1hH9elAOnS9pRccxnFad4-vym_px-DbX1/view", bio: "العراب الذي برع في التنبؤ بالمستقبل عبر روايات الديستوبيا.", summary: "رواية سوداوية تتخيل العالم منقسم بين طبقتين: طبقة غنية منعزلة وطبقة مسحوقة.", audioId: "/audio/يوتوبيا.mp3" },
     { id: "AR_38", title: "خلف أسوار العقل", author: "نبيل فاروق", subject: "أدب خيالي", publisher: "المبدعون", driveLink: "https://drive.google.com/file/d/14p7eM2uBYrmYs3xuNRg1tNGXFBegW-ZM/view", bio: "رائد أدب الخيال العلمي، تميزت أعماله بالسرعة والتشويق الذهني.", summary: "مجموعة مقالات وقصص تتناول أسرار العقل البشري والظواهر الغريبة بأسلوب علمي.", audioId: "/audio/العقل.mp3" },
     { id: "AR_39", title: "انهم يأتون ليلا", author: "خالد أمين", subject: "أدب خيالي", publisher: "دار دون", driveLink: "https://drive.google.com/file/d/1M4LYoDVUunT7utYTqJD-6rXkAxQlrH_Y/view", bio: "كاتب مصري متميز في أدب الرعب والجريمة، يجمع بين الغموض والتشويق.", summary: "رواية رعب نفسية تدور حول مخاوف الإنسان وما يختبئ في الظلام بانتظارنا.", audioId: "/audio/انهم ياتون ليلا.mp3" },
-    { id: "AR_40", title: "الذين كانوا", author: "نبيل فاروق", subject: "أدب خيالي", publisher: "سبارك للنشر والتوزيع", driveLink: "https://drive.google.com/file/d/1dDnEc6sG2LKVQDKlIw6ZL0x4lNKJtNOs/view", bio: "أديب الملايين الذي أثرى المكتبة العربية بمئات روايات الجيب.", summary: "قصص خيالية مثيرة حول حضارات بائدة وكائنات مجهولة تعود للظهور.", audioId: "/audio/اللذين كانوا.mp3" },
+    { id: "AR_40", title: "الذين كانوا", author: "نبيل فاروق", subject: "أدب خيالي", publisher: "سبارك للنشر", driveLink: "https://drive.google.com/file/d/1dDnEc6sG2LKVQDKlIw6ZL0x4lNKJtNOs/view", bio: "أديب الملايين الذي أثرى المكتبة العربية بمئات روايات الجيب.", summary: "قصص خيالية مثيرة حول حضارات بائدة وكائنات مجهولة تعود للظهور.", audioId: "/audio/اللذين كانوا.mp3" },
     { id: "AR_41", title: "ألف اختراع واختراع", author: "رولاند جاكسون", subject: "التراث العربي", publisher: "ناشونال جيوجرافيك", driveLink: "https://drive.google.com/file/d/1_4IKkimJy1MmApcRz_0HA9_wKWy6H-Mp", bio: "باحث ومؤرخ اهتم بإبراز الإسهامات العلمية للحضارة الإسلامية.", summary: "موسوعة مصورة مذهلة تستعرض الإنجازات العلمية الإسلامية التي شكلت عالمنا الحديث." },
-    { id: "AR_42", title: "سلطان وقصص القرآن", author: "وائل عادل", subject: "أدب إسلامي", publisher: "مركز الوجدان الحضاري - وزارة الثقافة دولة قطر", driveLink: "https://drive.google.com/drive/folders/1FfcyIwRkO-Nn_Gq1RzPtDGfLG4mQwXSZ?usp=drive_link", bio: "ينطلق مركز الوجدان الحضاري من فكرة أساسية وهي: أن وجدان أي أمة هو ضميرها ومشاعرها وطريقة تكوينها الفكري والعاطفي، فالمرتكزات الكبرى لأي أمة هي وعيها وأفكارها وقيمها ومشاعرها.", summary: "تأتي هذه المجموعة القصصية من سلسلة “سلطان وقصص القرآن” لغرس القيم بوجدان الأطفال بطريقة مشوقة، عبر بطل القصص الطائر “سلطان” ، يتعلم من خلال مشاهد مختارات من قصص القرآن.." },
-    { id: "AR_43", title: "3D قصص الأنبياء", author: "متنوع", subject: "أدب إسلامي", publisher: "New Horizon", driveLink: "https://drive.google.com/drive/folders/1xZ6XqVdf_OG-tRf8068Q6VXrAPz7obQW?usp=drive_link", bio: "نحن شركة متخصصة في كتب الأطفال والمناهج التعليمية العربية والإنجليزية كما توجد لنا إصدارات وسلاسل قصص باللغة الفرنسية.", summary: "هي مجموعة كتب تضم رسوماً كرتونية بتقنيةثلاثية الأبعاد تشرح قصص الأنبياء المذكورين في القرآن الكريم بأسلوب شيق وممتع للأطفال." },
-    { id: "AR_44", title: "الفيزياء للصغار", author: "ليونيد سيكوروك", subject: "علوم", publisher: "دار مير للطباعة والنشر", driveLink: "https://drive.google.com/file/d/1l_-lECWoN0C3ARPD70oaD_4Ee3J6wb3p/view?usp=drive_link", bio: "هو مؤلف روسي معروف بكتابه المبسط في الفيزياء للأطفال بعنوان الفيزياء للصغار Physics for Kids", summary: "يُعد هذا الكتاب مثالاً لجهود تبسيط العلوم لغير المتخصصين، وحظي بترجمات وتقدير واسع النطاق، خاصة في الأوساط العربية." },
-    { id: "AR_45", title: "أعظم 100عالم غيروا العالم", author: "جون بالتشين", subject: "علوم", publisher: "دار الكتب العلمية", driveLink: "https://drive.google.com/file/d/1aOHxire8Y9UWIdV6cO0Hc1nw2VWpEBYf/view?usp=drive_link", bio: "هو كاتب ومؤلف بريطاني متخصص في تبسيط العلوم وتاريخها، ويشتهر بكتابه أعظم 100 عالم غيروا العالم الذي يُقدم سيرة وحياة واكتشافات أبرز العلماء بطريقة شيقة ومبسطة للقارئ العام", summary: "يسرد الكتاب جذور الاكتشافات العلمية الحديثة بحيث يذكر مختلف العلماء الغرب والعرب وما ساهموا في اكتشافه" },
-    { id: "AR_46", title: "أرض زيكولا", author: "عمرو عبدالحميد", subject: "أدب خيالي", publisher: "عصير الكتب", driveLink: "https://drive.google.com/file/d/1Mihna00ArISLe5SUifUemqbU3HoVIIEa/view?usp=drive_link", bio: "عمرو عبد الحميد هو كاتب وطبيب مصري بارز، يُعد من أشهر روائيي الفنتازيا والخيال في الوطن العربي، وقد حققت رواياته شهرة واسعة خاصة رواية أرض زيكولا وسلسلة قواعد جارتين", summary: "تبدأ الأحداث مع شاب يدعى خالد، من قرية البهو فريك المصرية، الذي يحاول مراراً خطبة الفتاة التي يحبها، لكن والدها يرفضه في كل مرة بحجة أنه شاب عادي ولا يملك ما يميزه. هذا الرفض يدفع خالد لخوض مغامرة لإثبات ذاته، فيقرر دخول سرداب فوريك الغامض الذي تحوم حوله الأساطير في قريته.", audioId: "/audio/Zkola.mp3" },
-    { id: "AR_47", title: "أماريتا", author: "عمرو عبدالحميد", subject: "أدب خيالي", publisher: "عصير الكتب", driveLink: "https://drive.google.com/file/d/17ultoN_mUJaG360jAp6t4JtXkQQoNKUS/view?usp=drive_link", bio: "عمرو عبد الحميد هو كاتب وطبيب مصري بارز، يُعد من أشهر روائيي الفنتازيا والخيال في الوطن العربي، وقد حققت رواياته شهرة واسعة خاصة رواية أرض زيكولا وسلسلة قواعد جارتين", summary: "تتمحور أحداث هذا الجزء حول الطبيبة أسيل، التي ضحت بمكانتها ووحدات ذكائها في الجزء الأول لمساعدة خالد على الهروب والعودة إلى عالمه. نتيجة لذلك، تُتهم أسيل بالخيانة العظمى لقوانين زيكولا، وتُجبر على الهروب من مدينتها لتبدأ رحلة شاقة من المعاناة والتشرد.", audioId: "/audio/Amarita.mp3" },
-    { id: "AR_48", title: "وادي الذئاب المنسية", author: "عمرو عبدالحميد", subject: "أدب خيالي", publisher: "عصير الكتب", driveLink: "https://drive.google.com/file/d/1UeaCT1D75jpzjESxUw-ztusUvBrXXV4Q/view?usp=drive_link", bio: "عمرو عبد الحميد هو كاتب وطبيب مصري بارز، يُعد من أشهر روائيي الفنتازيا والخيال في الوطن العربي، وقد حققت رواياته شهرة واسعة خاصة رواية أرض زيكولا وسلسلة قواعد جارتين", summary: "تبدأ أحداث هذا الجزء بعد سنوات من نهاية أحداث أماريتا. المحرك الأساسي للقصة هذه المرة ليس خالد الأب، بل ابنه يامن، الذي يجد نفسه مدفوعاً لخوض مغامرة كبرى في عالم زيكولا وأماريتا.", audioId: "/audio/Wolf.mp3" },
-    { id: "AR_49", title: "جلسات نفسية", author: "محمد إبراهيم", subject: "تنمية بشرية", publisher: "عصير الكتب", driveLink: "https://drive.google.com/file/d/1rvbFWFmgQ65Ufub-6tC-AeuqCYiNOW82/view?usp=drive_link", bio: "كاتب وأخصائي في علم النفس،​​ ​​يتميز الدكتور محمد إبراهيم بقدرته على تبسيط المفاهيم النفسية وتقديمها بأسلوب سلس ومباشر، مما يجعله قريبًا من القراء الباحثين عن فهم أعمق لذواتهم وتحقيق السكينة النفسية", summary: "يحتوي هذا الكتاب المكون من 120 صفحة على مجموعة من الجلسات النفسية التي تهدف إلى تحسين الصحة النفسية وتعزيز الرفاهية. حيث يقدم أساليب فعالة للتعامل مع التوتر والقلق، بالإضافة إلى تمارين تنمية الذات التي تساعدك على فهم مشاعرك وتطوير مهاراتك الشخصية." },
-    { id: "AR_50", title: "كليلة ودمنة", author: "عبدالله بن المقفع", subject: "أدب خيالي", publisher: "هنداوي", driveLink: "https://drive.google.com/file/d/1manKVHamsvHDO-37IxmecGeKOtKxpJhB/view?usp=drive_link", bio: "هو عبد الله بن المقفع، أديب ومفكر عبقري من العصر العباسي، اشتهر ببلاغته الاستثنائية ودوره المحوري في نقل الحكمة الفارسية والتركيز على الإصلاح الأخلاقي والسياسي من خلال النثر", summary: "هو كتاب قصصي ذو أصول هندية، تدور أحداثه على ألسنة الحيوانات والطيور لتقديم نصائح وحكم تتعلق بالسياسة، والاجتماع، والأخلاق بأسلوب رمزي مشوق.", audioId: "/audio/كليلة.mp3" }
+    { id: "AR_42", title: "سلطان وقصص القرآن", author: "وائل عادل", subject: "أدب إسلامي", publisher: "مركز الوجدان الحضاري", driveLink: "https://drive.google.com/drive/folders/1FfcyIwRkO-Nn_Gq1RzPtDGfLG4mQwXSZ?usp=drive_link", bio: "مركز الوجدان الحضاري يسعى لبناء وعي الأجيال عبر محتوى تربوي أصيل.", summary: "مجموعة قصصية لغرس القيم بوجدان الأطفال بطريقة مشوقة عبر الطائر سلطان." },
+    { id: "AR_43", title: "3D قصص الأنبياء", author: "متنوع", subject: "أدب إسلامي", publisher: "New Horizon", driveLink: "https://drive.google.com/drive/folders/1xZ6XqVdf_OG-tRf8068Q6VXrAPz7obQW?usp=drive_link", bio: "شركة متخصصة في كتب الأطفال والمناهج التعليمية بأساليب مبتكرة.", summary: "مجموعة كتب تضم رسوماً ثلاثية الأبعاد تشرح قصص الأنبياء بأسلوب ممتع للأطفال." },
+    { id: "AR_44", title: "الفيزياء للصغار", author: "ليونيد سيكوروك", subject: "علوم", publisher: "دار مير للطباعة", driveLink: "https://drive.google.com/file/d/1l_-lECWoN0C3ARPD70oaD_4Ee3J6wb3p/view?usp=drive_link", bio: "مؤلف روسي معروف بكتبه المبسطة للعلوم الموجهة للأطفال.", summary: "كتاب يبسط مفاهيم الفيزياء لغير المتخصصين وحظي بتقدير واسع في العالم العربي." },
+    { id: "AR_45", title: "أعظم 100 عالم", author: "جون بالتشين", subject: "علوم", publisher: "دار الكتب العلمية", driveLink: "https://drive.google.com/file/d/1aOHxire8Y9UWIdV6cO0Hc1nw2VWpEBYf/view?usp=drive_link", bio: "مؤلف بريطاني متخصص في تبسيط العلوم وتاريخها للقارئ العام.", summary: "يسرد جذور الاكتشافات العلمية الحديثة عبر سير أبرز العلماء العرب والغربيين." },
+    { id: "AR_46", title: "أرض زيكولا", author: "عمرو عبدالحميد", subject: "أدب خيالي", publisher: "عصير الكتب", driveLink: "https://drive.google.com/file/d/1Mihna00ArISLe5SUifUemqbU3HoVIIEa/view?usp=drive_link", bio: "كاتب وطبيب مصري بارز، يُعد من أشهر روائيي الفنتازيا في الوطن العربي.", summary: "مغامرة شاب مصري ينتقل إلى أرض زيكولا، حيث العملة هي وحدات الذكاء بدلاً من المال.", audioId: "/audio/Zkola.mp3" },
+    { id: "AR_47", title: "أماريتا", author: "عمرو عبدالحميد", subject: "أدب خيالي", publisher: "عصير الكتب", driveLink: "https://drive.google.com/file/d/17ultoN_mUJaG360jAp6t4JtXkQQoNKUS/view?usp=drive_link", bio: "كاتب مصري تميز بأسلوبه السلس في ربط الواقع بالخيال الملحمي.", summary: "الجزء الثاني من زيكولا، حيث تضطر الطبيبة أسيل للهروب وتواجه تحديات جديدة ومثيرة.", audioId: "/audio/Amarita.mp3" },
+    { id: "AR_48", title: "وادي الذئاب المنسية", author: "عمرو عبدالحميد", subject: "أدب خيالي", publisher: "عصير الكتب", driveLink: "https://drive.google.com/file/d/1UeaCT1D75jpzjESxUw-ztusUvBrXXV4Q/view?usp=drive_link", bio: "مؤلف يمتلك قاعدة جماهيرية ضخمة لأسلوبه المشوق في سرد الخيال.", summary: "يامن يخوض مغامرة كبرى في عالم زيكولا وأماريتا لإنقاذ ما يمكن إنقاذه في الجزء الثالث.", audioId: "/audio/Wolf.mp3" },
+    { id: "AR_49", title: "جلسات نفسية", author: "محمد إبراهيم", subject: "تنمية بشرية", publisher: "عصير الكتب", driveLink: "https://drive.google.com/file/d/1rvbFWFmgQ65Ufub-6tC-AeuqCYiNOW82/view?usp=drive_link", bio: "طبيب نفسي يقدم المفاهيم المعقدة بأسلوب مبسط قريب من القراء.", summary: "مجموعة جلسات نفسية تهدف لتحسين الصحة النفسية والتعامل مع التوتر بأساليب عملية." },
+    { id: "AR_50", title: "كليلة ودمنة", author: "عبدالله بن المقفع", subject: "أدب خيالي", publisher: "هنداوي", driveLink: "https://drive.google.com/file/d/1manKVHamsvHDO-37IxmecGeKOtKxpJhB/view?usp=drive_link", bio: "أديب عباسي اشتهر ببلاغته ودوره في نقل الحكمة وتطوير النثر العربي.", summary: "كتاب قصصي ذو أصول هندية تدور أحداثه على ألسنة الحيوانات لتقديم نصائح سياسية وأخلاقية.", audioId: "/audio/كليلة.mp3" }
 ];
-
 
 const translations = {
     ar: {
         pageTitle: "المكتبة العربية",
         searchPlaceholder: "ابحث عن عنوان أو كاتب...",
         sortBy: "فرز حسب",
-        alphabetical: "أبجدياً",
+        alphabetical: "العنوان",
         authorSort: "المؤلف",
         subjectSort: "الموضوع",
         audioSort: "الصوتيات أولاً",
@@ -100,15 +111,15 @@ const translations = {
 };
 
 const SchoolLogo = ({ forceWhite = false, className = "" }: { forceWhite?: boolean; className?: string }) => (
-    <img src="/school-logo.png" alt="Logo" className={`h-8 w-auto rotate-[12deg] transition-all duration-500 ${forceWhite ? 'brightness-0 invert' : 'logo-white-filter'} ${className}`} />
+    <img src="/school-logo.png" alt="Logo" className={`h-8 md:h-12 w-auto transition-all duration-500 ${forceWhite ? 'brightness-0 invert' : 'dark:brightness-0 dark:invert'} ${className}`} />
 );
 
 const AudioWaveIcon = () => (
-    <div className="flex gap-0.5 items-end h-4">
-        <div className="w-0.5 bg-red-600 animate-audio-bar-1"></div>
-        <div className="w-0.5 bg-red-600 animate-audio-bar-2"></div>
-        <div className="w-0.5 bg-red-600 animate-audio-bar-3"></div>
-        <div className="w-0.5 bg-red-600 animate-audio-bar-2"></div>
+    <div className="flex gap-[3px] items-end h-4">
+        <div className="w-1 bg-green-500 animate-audio-bar-1 rounded-t-sm"></div>
+        <div className="w-1 bg-green-500 animate-audio-bar-2 rounded-t-sm"></div>
+        <div className="w-1 bg-green-500 animate-audio-bar-3 rounded-t-sm"></div>
+        <div className="w-1 bg-green-500 animate-audio-bar-2 rounded-t-sm"></div>
     </div>
 );
 
@@ -134,82 +145,39 @@ const SaqrAudioPlayer: React.FC<{ audioSrc: string; t: any }> = ({ audioSrc, t }
     };
 
     return (
-        <div className="mt-8 animate-fade-up">
-            <h4 className="text-[10px] font-black text-red-600 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">🎧 {t('listen')}</h4>
-            <div className="p-6 rounded-[2.5rem] bg-white/40 dark:bg-white/5 backdrop-blur-2xl border border-white/20 shadow-xl flex items-center gap-4 sm:gap-6">
-                <audio ref={audioRef} src={audioSrc} onTimeUpdate={() => setProgress((audioRef.current!.currentTime / audioRef.current!.duration) * 100)} onEnded={() => setIsPlaying(false)} />
-                <button onClick={togglePlay} className="w-14 h-14 sm:w-16 sm:h-16 shrink-0 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg hover:scale-105 active:scale-90 transition-all">
-                    {isPlaying ? <span className="text-2xl">⏸</span> : <span className="text-2xl ps-1">▶</span>}
+        <div className="mt-8 animate-fade-in-up">
+            <h4 className="text-xs font-bold text-green-600 dark:text-green-500 tracking-widest mb-3 flex items-center gap-2">
+                <span className="text-lg">🎧</span> {t('listen')}
+            </h4>
+            <div className="p-4 md:p-5 rounded-[1.5rem] bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 flex items-center gap-4 shadow-sm">
+                <audio 
+                    ref={audioRef} 
+                    src={audioSrc} 
+                    onTimeUpdate={() => setProgress((audioRef.current!.currentTime / audioRef.current!.duration) * 100)} 
+                    onEnded={() => setIsPlaying(false)} 
+                />
+                <button onClick={togglePlay} className="w-12 h-12 rounded-full bg-green-600 hover:bg-green-700 text-white flex items-center justify-center shadow-md hover:shadow-lg transition-all shrink-0 active:scale-95">
+                    {isPlaying ? (
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+                    ) : (
+                        <svg className="w-5 h-5 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" strokeWidth="2" strokeLinejoin="round"/></svg>
+                    )}
                 </button>
-                <div className="flex-1">
-                    <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                        <div className="h-full bg-red-600 transition-all duration-300" style={{ width: `${progress}%` }} />
-                    </div>
+                <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                    <div className="h-full bg-green-500 transition-all duration-100" style={{ width: `${progress}%` }} />
                 </div>
-                <button onClick={handleSpeed} className="px-3 py-2 rounded-xl bg-slate-900 text-white text-[10px] font-black hover:bg-red-600 transition-colors uppercase min-w-[50px]">{speed}x</button>
+                <button onClick={handleSpeed} className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-green-100 hover:text-green-600 dark:hover:bg-slate-700 transition-colors shrink-0">
+                    {speed}x
+                </button>
             </div>
         </div>
     );
 };
 
-// --- 4. نافذة تفاصيل الكتاب (مباشرة بدون أي انتظار للـ AI) ---
-const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
-    const { locale } = useLanguage();
-    const [tooltip, setTooltip] = useState<{ text: string, x: number, y: number } | null>(null);
-
-    if (!book) return null;
-
-    const handleAuthorTrigger = (e: React.MouseEvent | React.TouchEvent, bio: string | null) => {
-        if (!bio) { setTooltip(null); return; }
-        const pos = 'touches' in e ? e.touches[0] : (e as React.MouseEvent);
-        setTooltip({ text: bio, x: pos.clientX, y: pos.clientY });
-    };
-
-    return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-2 sm:p-4 backdrop-blur-3xl animate-fade-up" onClick={onClose}>
-            {tooltip && (
-                <div className="fixed pointer-events-none z-[300] bg-white/10 dark:bg-black/40 backdrop-blur-3xl border border-white/20 p-5 rounded-[2rem] shadow-2xl animate-in fade-in zoom-in duration-200 max-w-[280px]" style={{ left: tooltip.x + 15, top: tooltip.y + 15, transform: locale === 'ar' ? 'translateX(-100%)' : 'none' }}>
-                    <p className="text-[9px] font-black text-red-600 uppercase mb-2 tracking-widest">{t('bioTitle')}</p>
-                    <p className="text-xs font-bold text-slate-900 dark:text-white leading-relaxed">{tooltip.text}</p>
-                </div>
-            )}
-            <div className="relative w-full max-w-4xl glass-panel rounded-[2.5rem] sm:rounded-[3rem] overflow-hidden flex flex-col md:flex-row shadow-2xl bg-white/95 dark:bg-slate-950/95 max-h-[95vh] overflow-y-auto md:overflow-hidden" onClick={(e) => e.stopPropagation()}>
-                <button onClick={onClose} className="absolute top-4 end-4 sm:top-6 sm:end-6 z-50 p-2 bg-red-600 text-white rounded-full hover:rotate-90 transition-all shadow-xl active:scale-90"><svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M6 18L18 6M6 6l12 12" /></svg></button>
-                <div className="flex-1 p-6 sm:p-14 text-start">
-                    <h2 className="text-2xl sm:text-5xl font-black text-slate-950 dark:text-white leading-loose mb-2 tracking-tighter py-2">{book.title}</h2>
-                    <p onMouseMove={(e) => handleAuthorTrigger(e, book.bio)} onTouchStart={(e) => handleAuthorTrigger(e, book.bio)} onMouseLeave={() => setTooltip(null)} className="text-lg sm:text-xl text-red-600 font-bold mb-8 cursor-help inline-block border-b-2 border-dotted border-red-200">By {book.author}</p>
-                    <div className="p-6 rounded-[2.5rem] bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-inner relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-4 opacity-10 text-4xl">✨</div>
-                        <p className="text-[10px] text-green-600 font-black uppercase tracking-widest mb-4 flex items-center gap-2"><span className="w-2 h-2 bg-green-500 rounded-full"></span> {t('summaryTitle')}</p>
-                        <p className="text-slate-800 dark:text-slate-200 text-base sm:text-xl leading-loose font-normal">"{book.summary}"</p>
-                    </div>
-                    {book.audioId && <SaqrAudioPlayer audioSrc={book.audioId} t={t} />}
-                </div>
-                <div className="w-full md:w-[320px] bg-slate-950 p-10 flex flex-col justify-center items-center text-white border-s border-white/10 shrink-0">
-                    <div className="space-y-10 w-full text-center flex flex-col items-center">
-                        <div className="bg-red-600/20 p-8 rounded-[2.5rem] border border-red-600/30 w-full text-center">
-                            <p className="text-[10px] font-black text-red-500 uppercase tracking-widest mb-2">{t('topicLabel')}</p>
-                            <p className="text-2xl font-black leading-loose">{book.subject}</p>
-                        </div>
-                        <div className="flex flex-col items-center gap-2">
-                            <SchoolLogo forceWhite={true} className="h-16 w-auto mb-2" />
-                            <span className="text-[10px] font-black text-white uppercase tracking-[0.5em]">{t('exclusive')}</span>
-                        </div>
-                        <div className="w-full space-y-4">
-                            <a href={book.driveLink} target="_blank" rel="noreferrer" className="w-full block bg-red-600 text-white font-black py-5 rounded-2xl hover:bg-red-700 transition-all text-center uppercase tracking-widest shadow-xl shadow-red-600/20">{t('read')}</a>
-                            <button onClick={onClose} className="w-full bg-white/10 text-white border border-white/20 font-black py-4 rounded-xl hover:bg-white hover:text-black transition-all text-xs uppercase tracking-widest">{t('close')}</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-// --- 5. الصفحة الرئيسية ---
 const ArabicLibraryInternalPage: React.FC = () => {
     const { locale, dir } = useLanguage();
     const navigate = useNavigate();
+    const isAr = locale === 'ar';
     const t = (key: keyof typeof translations.ar) => translations[locale][key];
 
     const [searchTerm, setSearchTerm] = useState('');
@@ -218,6 +186,10 @@ const ArabicLibraryInternalPage: React.FC = () => {
     const [subjectFilter, setSubjectFilter] = useState('all');
     const [sortBy, setSortBy] = useState('alphabetical');
     const [audioOnly, setAudioOnly] = useState(false);
+    const [tooltip, setTooltip] = useState<{ text: string, x: number, y: number } | null>(null);
+
+    const authors = useMemo(() => ["all", ...new Set(ARABIC_LIBRARY_DATABASE.map(b => b.author))].sort(), []);
+    const subjects = useMemo(() => ["all", ...new Set(ARABIC_LIBRARY_DATABASE.map(b => b.subject))].sort(), []);
 
     const filteredBooks = useMemo(() => {
         const term = searchTerm.toLowerCase().trim();
@@ -237,61 +209,197 @@ const ArabicLibraryInternalPage: React.FC = () => {
         return result;
     }, [searchTerm, authorFilter, subjectFilter, audioOnly, sortBy, locale]);
 
+    const handleAuthorHover = (e: React.MouseEvent, bio: string | null) => {
+        if (!bio || window.innerWidth < 768) { setTooltip(null); return; }
+        setTooltip({ text: bio, x: e.clientX, y: e.clientY });
+    };
+
     return (
-        <div dir={dir} className="max-w-7xl mx-auto px-4 pb-40 relative z-10 font-black antialiased">
-            <div className="text-center mt-12 mb-20 animate-fade-up">
-                <button onClick={() => navigate(-1)} className="absolute start-0 top-0 text-slate-400 hover:text-red-600 flex items-center gap-2 transition-all"><span className="text-2xl">←</span> {t('back')}</button>
-                <h1 className="text-4xl md:text-[6rem] font-black text-slate-950 dark:text-white tracking-tighter leading-none">{t('pageTitle')}</h1>
-                <div className="h-2 w-32 bg-[#00732f] mx-auto mt-8 rounded-full shadow-lg" />
+        <div dir={dir} className="w-full min-h-[100dvh] flex flex-col bg-slate-50 dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300 py-6 md:py-10 px-4 md:px-6">
+            
+            {/* الخلفية الديناميكية الموحدة */}
+            <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-40 dark:opacity-20">
+               <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-green-600/30 rounded-full blur-[120px]"></div>
+               <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-red-600/30 rounded-full blur-[100px]"></div>
             </div>
 
-            <div className="sticky top-6 z-50 mb-16 px-2 md:px-0">
-                <div className="glass-panel p-4 md:p-6 rounded-[2.5rem] md:rounded-[4rem] bg-white/80 dark:bg-slate-900/80 border border-white/20 shadow-2xl flex flex-col gap-4">
-                    <div className="relative">
-                        <input type="text" placeholder={t('searchPlaceholder')} className="w-full p-5 ps-12 bg-white dark:bg-black/40 text-slate-950 dark:text-white rounded-[1.5rem] md:rounded-[2.5rem] outline-none border-2 border-transparent focus:border-red-600 transition-all font-black text-lg" onChange={(e) => setSearchTerm(e.target.value)} />
-                        <span className="absolute start-5 top-1/2 -translate-y-1/2 opacity-40 text-xl">🔍</span>
+            <div className="w-full max-w-[1400px] mx-auto flex flex-col animate-fade-in-up pb-20 z-10">
+                
+                {/* Tooltip */}
+                {tooltip && (
+                    <div 
+                        className="fixed pointer-events-none z-[300] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 rounded-2xl shadow-xl animate-zoom-in max-w-xs"
+                        style={{ left: tooltip.x + 15, top: tooltip.y + 15, transform: isAr ? 'translateX(-100%)' : 'none' }}
+                    >
+                        <p className="text-[10px] font-bold text-green-600 dark:text-green-500 uppercase mb-1 tracking-widest">{t('bioTitle')}</p>
+                        <p className="text-xs font-medium text-slate-800 dark:text-slate-200 leading-relaxed">{tooltip.text}</p>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <select value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)} className="p-3 rounded-2xl bg-white dark:bg-slate-800 font-black text-[10px] cursor-pointer border border-white/10 shadow-sm"><option value="all">{t('allAuthors')}</option>{[...new Set(ARABIC_LIBRARY_DATABASE.map(b => b.author))].sort().map(a => <option key={a} value={a}>{a}</option>)}</select>
-                        <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="p-3 rounded-2xl bg-white dark:bg-slate-800 font-black text-[10px] cursor-pointer border border-white/10 shadow-sm"><option value="all">{t('allSubjects')}</option>{[...new Set(ARABIC_LIBRARY_DATABASE.map(b => b.subject))].sort().map(s => <option key={s} value={s}>{s}</option>)}</select>
-                        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="p-3 rounded-2xl bg-white dark:bg-slate-800 font-black text-[10px] cursor-pointer border border-white/10 shadow-sm"><option value="alphabetical">{t('alphabetical')}</option><option value="author">{t('authorSort')}</option><option value="subject">{t('subjectSort')}</option><option value="audio">{t('audioSort')}</option></select>
-                        <button onClick={() => setAudioOnly(!audioOnly)} className={`p-3 rounded-2xl font-black text-[10px] transition-all border ${audioOnly ? 'bg-red-600 text-white' : 'bg-white dark:bg-slate-800 text-slate-500 border-white/10'}`}>🎧 {t('audioOnly')}</button>
-                    </div>
+                )}
+
+                {/* الهيدر */}
+                <div className="relative text-center mb-10 md:mb-16">
+                    <button onClick={() => navigate(-1)} className="absolute start-0 top-1/2 -translate-y-1/2 text-slate-500 hover:text-green-600 dark:text-slate-400 dark:hover:text-green-400 flex items-center gap-2 transition-colors font-bold text-sm md:text-base">
+                        <svg className="w-5 h-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                        {t('back')}
+                    </button>
+                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white tracking-tight inline-block relative">
+                        {t('pageTitle')}
+                        <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-16 h-1.5 bg-green-600 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.5)]"></div>
+                    </h1>
                 </div>
-            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-10">
-                {filteredBooks.map((book) => (
-                    <div key={book.id} onClick={() => setSelectedBook(book)} className="group relative glass-panel rounded-[2.5rem] p-1 cursor-pointer transition-all duration-500 hover:-translate-y-3 h-full animate-fade-up border-none shadow-lg">
-                        <div className="relative overflow-hidden rounded-[2.4rem] bg-white/20 dark:bg-slate-900/40 backdrop-blur-md h-full flex flex-col border border-white/20">
-                            <div className={`absolute top-0 start-0 w-1.5 h-full ${book.audioId ? 'bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.4)]' : 'bg-[#00732f] shadow-[0_0_15px_rgba(0,115,47,0.4)]'}`} />
-                            <div className="p-7 sm:p-9 relative z-10 flex-grow text-start">
-                                <div className="flex justify-between items-start mb-4">
-                                    <span className={`inline-block px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest text-white ${book.audioId ? 'bg-red-600' : 'bg-[#00732f]'}`}>{book.subject}</span>
-                                    {book.audioId && <AudioWaveIcon />}
-                                </div>
-                                <h2 className="font-black text-xl sm:text-2xl text-slate-950 dark:text-white leading-loose mb-4 group-hover:text-red-600 transition-colors line-clamp-2 py-1">{book.title}</h2>
-                                <div className="flex items-center gap-2 opacity-60"><span className="text-sm">👤</span><p className="text-[10px] font-bold uppercase truncate tracking-widest leading-loose py-1">{book.author}</p></div>
+                {/* شريط البحث والفلاتر (Sticky) */}
+                <div className="sticky top-4 md:top-6 z-[100] mb-8 md:mb-12">
+                    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-800 shadow-sm rounded-3xl md:rounded-[2.5rem] p-4 md:p-6 transition-all">
+                        <div className="flex flex-col gap-4">
+                            
+                            <div className="relative group">
+                                <input 
+                                    type="text" 
+                                    placeholder={t('searchPlaceholder')} 
+                                    className="w-full py-4 px-6 ps-12 md:ps-14 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-green-500 dark:focus:border-green-500 rounded-2xl outline-none transition-colors text-slate-900 dark:text-white font-medium text-sm md:text-base placeholder-slate-400"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)} 
+                                />
+                                <svg className="absolute start-4 top-1/2 -translate-y-1/2 h-5 w-5 md:h-6 md:w-6 text-slate-400 group-focus-within:text-green-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                             </div>
-                            <div className="bg-black/5 dark:bg-white/5 py-4 sm:py-5 px-6 sm:px-8 border-t border-white/10 mt-auto flex items-center justify-between relative z-10">
-                                <div className="text-[8px] font-black uppercase tracking-widest text-slate-950 dark:text-white opacity-40 group-hover:opacity-100 transition-all truncate max-w-[150px]">{book.publisher}</div>
-                                <SchoolLogo className="group-hover:rotate-[15deg] h-6 sm:h-8" />
+                            
+                            <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
+                                <select value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)} className="w-full py-3 px-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs cursor-pointer outline-none focus:border-green-500 transition-colors appearance-none text-center">
+                                    <option value="all">{t('allAuthors')}</option>
+                                    {authors.filter(a => a !== "all").map(a => <option key={a} value={a}>{a}</option>)}
+                                </select>
+                                <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="w-full py-3 px-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs cursor-pointer outline-none focus:border-green-500 transition-colors appearance-none text-center">
+                                    <option value="all">{t('allSubjects')}</option>
+                                    {subjects.filter(s => s !== "all").map(s => <option key={s} value={s}>{s}</option>)}
+                                </select>
+                                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="w-full py-3 px-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs cursor-pointer outline-none focus:border-green-500 transition-colors appearance-none text-center lg:col-span-2">
+                                    <option value="alphabetical">{t('alphabetical')}</option>
+                                    <option value="author">{t('authorSort')}</option>
+                                    <option value="subject">{t('subjectSort')}</option>
+                                    <option value="audio">{t('audioSort')}</option>
+                                </select>
+                                <button 
+                                    onClick={() => setAudioOnly(!audioOnly)} 
+                                    className={`w-full py-3 px-4 rounded-xl font-bold text-xs transition-colors border col-span-2 lg:col-span-1 flex justify-center items-center gap-2 ${audioOnly ? 'bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 border-green-200 dark:border-green-500/30' : 'bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'}`}
+                                >
+                                    🎧 {t('audioOnly')}
+                                </button>
                             </div>
                         </div>
                     </div>
-                ))}
+                </div>
+
+                {/* شبكة الكتب */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
+                    {filteredBooks.map((book) => (
+                        <div key={book.id} onClick={() => setSelectedBook(book)} className="group bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-green-500/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden cursor-pointer h-full relative">
+                            
+                            <div className={`absolute top-0 start-0 w-1.5 h-full transition-colors duration-300 ${book.audioId ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600'}`}></div>
+
+                            <div className="p-6 md:p-8 flex-1 flex flex-col text-start">
+                                <div className="flex justify-between items-center mb-4">
+                                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border
+                                        ${book.audioId ? 'bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 border-green-200 dark:border-green-500/20' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600'}`}>
+                                        {book.subject}
+                                    </span>
+                                    {book.audioId && <AudioWaveIcon />}
+                                </div>
+                                
+                                <h3 className="font-black text-lg md:text-xl text-slate-900 dark:text-white leading-snug mb-3 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors line-clamp-2">
+                                    {book.title}
+                                </h3>
+                                
+                                <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-auto truncate flex items-center gap-2">
+                                    <span className="text-lg">👤</span> {book.author}
+                                </p>
+                            </div>
+
+                            <div className="bg-slate-50 dark:bg-slate-900/50 px-6 py-4 flex justify-between items-center border-t border-slate-100 dark:border-slate-700">
+                                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-widest uppercase">Digital Index</span>
+                                <div className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-600 flex items-center justify-center text-slate-400 group-hover:bg-green-600 group-hover:border-green-600 group-hover:text-white transition-colors">
+                                    <svg className="w-4 h-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {filteredBooks.length === 0 && (
+                    <div className="text-center py-20">
+                        <p className="text-xl font-bold text-slate-500 dark:text-slate-400">لا توجد كتب مطابقة لبحثك.</p>
+                    </div>
+                )}
             </div>
 
-            <BookModal book={selectedBook} onClose={() => setSelectedBook(null)} t={t} />
+            {/* نافذة تفاصيل الكتاب (Modal) */}
+            {selectedBook && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 backdrop-blur-sm bg-slate-900/40 dark:bg-black/60 animate-fade-in" onClick={() => setSelectedBook(null)}>
+                    <div className="relative w-full max-w-4xl bg-white dark:bg-slate-800 rounded-[2rem] md:rounded-[3rem] shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] border border-slate-200 dark:border-slate-700 animate-zoom-in" onClick={(e) => e.stopPropagation()}>
+                        
+                        <button onClick={() => setSelectedBook(null)} className={`absolute top-4 ${isAr ? 'left-4' : 'right-4'} z-50 p-2 md:p-3 bg-slate-100 hover:bg-green-100 dark:bg-slate-700 dark:hover:bg-green-900/30 text-slate-500 hover:text-green-600 transition-colors rounded-full`}>
+                            <svg className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                        
+                        <div className="flex-1 p-6 md:p-10 lg:p-12 overflow-y-auto no-scrollbar flex flex-col">
+                            <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight mb-2">{selectedBook.title}</h2>
+                            <p 
+                                onMouseMove={(e) => handleAuthorHover(e, selectedBook.bio)} 
+                                onMouseLeave={(e) => handleAuthorHover(e, null)}
+                                className="text-lg md:text-xl text-slate-500 dark:text-slate-400 font-medium mb-8 cursor-help inline-block border-b border-dashed border-slate-300 dark:border-slate-600 w-max pb-1"
+                            >
+                                بقلم: {selectedBook.author}
+                            </p>
+                            
+                            <div className="bg-slate-50 dark:bg-slate-900/50 p-6 md:p-8 rounded-3xl border border-slate-100 dark:border-slate-700 flex-1">
+                                <p className="text-xs text-green-600 dark:text-green-500 font-bold uppercase tracking-widest mb-3 flex items-center gap-2">
+                                    <span className="text-base">✨</span> {t('summaryTitle')}
+                                </p>
+                                <p className="text-slate-800 dark:text-slate-200 text-base md:text-lg font-medium leading-[1.8]">
+                                    {selectedBook.summary}
+                                </p>
+                            </div>
+
+                            {selectedBook.audioId && <SaqrAudioPlayer audioSrc={selectedBook.audioId} t={t} />}
+                        </div>
+
+                        <div className="w-full md:w-72 lg:w-80 bg-slate-50 dark:bg-slate-900 p-6 md:p-10 flex flex-col justify-center items-center border-t md:border-t-0 md:border-s border-slate-200 dark:border-slate-700 shrink-0">
+                            <div className="w-full text-center flex flex-col items-center gap-2 mb-8">
+                                <span className="text-xs font-bold text-slate-400 tracking-widest">{t('exclusive')}</span>
+                                <SchoolLogo className="h-12 w-auto mt-2" />
+                            </div>
+                            
+                            <div className="w-full flex flex-col gap-4">
+                                <a href={selectedBook.driveLink} target="_blank" rel="noreferrer" className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-full transition-colors text-center text-sm md:text-base shadow-md hover:shadow-lg flex justify-center items-center gap-2">
+                                    {t('read')}
+                                </a>
+                                <button onClick={() => setSelectedBook(null)} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-bold py-4 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-sm">
+                                    {t('close')}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <style>{`
-                @keyframes audio-bar { 0%, 100% { height: 4px; } 50% { height: 14px; } }
-                .animate-audio-bar-1 { animation: audio-bar 0.6s ease-in-out infinite; }
-                .animate-audio-bar-2 { animation: audio-bar 0.8s ease-in-out infinite 0.2s; }
-                .animate-audio-bar-3 { animation: audio-bar 0.7s ease-in-out infinite 0.4s; }
-                * { font-style: normal !important; }
-                .logo-white-filter { transition: filter 0.5s ease; }
-                .dark .logo-white-filter { filter: brightness(0) invert(1); }
+                @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+                * { font-family: 'Cairo', sans-serif !important; }
+                .no-scrollbar::-webkit-scrollbar { display: none; }
+                
+                @keyframes audio-bar { 0%, 100% { height: 4px; } 50% { height: 16px; } }
+                .animate-audio-bar-1 { animation: audio-bar 0.8s ease-in-out infinite; }
+                .animate-audio-bar-2 { animation: audio-bar 1s ease-in-out infinite 0.2s; }
+                .animate-audio-bar-3 { animation: audio-bar 0.9s ease-in-out infinite 0.4s; }
+                
+                @keyframes fade-in-up { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+                .animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; }
+                
+                @keyframes zoom-in { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
+                .animate-zoom-in { animation: zoom-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+                
+                @keyframes fade-in { 0% { opacity: 0; } 100% { opacity: 1; } }
+                .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
             `}</style>
         </div>
     );
