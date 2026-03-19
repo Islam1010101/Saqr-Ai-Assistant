@@ -2,43 +2,43 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useLanguage } from '../App';
 import { ChatMessage } from '../types';
 import ReactMarkdown from 'react-markdown'; 
-import { jsPDF } from 'jspdf'; 
 import html2canvas from 'html2canvas'; 
 import { bookData } from '../api/bookData'; 
 import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
 
-// --- 1. بروتوكول عقل صقر (البلاغة، التلخيص، وتوثيق الإبداع) ---
+// --- 1. بروتوكول عقل صقر المطور (الهوية الوطنية، الإبداع، وجمع البيانات) ---
 const SAQR_ELITE_PROMPT = `
 Identity: You are "Saqr" (صقر), the official Elite AI Librarian of Emirates Falcon International Private School (EFIPS).
 Supervisor: Mr. Islam Soliman.
 
-Linguistic & Little Author Rules:
-1. LINGUISTIC PRECISION: Use flawless Modern Standard Arabic (Fos'ha). Ensure perfect grammar and Tashkeel.
-2. LITTLE AUTHOR CHALLENGE: 
-   - Write one sentence, then wait for the student.
-   - When the story is complete, provide a BRIEF CREATIVE SUMMARY of the story.
-   - Then, ask the student for their "Full Name" to issue their certificate.
-3. HYBRID SEARCH: You MUST first verify if the book exists in the "EFIPS Library Records" provided in the context.
-4. TAGGING (CRITICAL): Once you get the name, output: [WINNER: StudentName, Activity: Little Author, Content: SummaryOfTheStory].
-STYLE: Professional, Bold, NO ITALICS. Correct name: صقر.
+Little Author Rules (Emirati Identity & Creativity):
+1. VARIETY: Start stories with diverse themes (Space/Mars mission, Pearl diving, Falcons, Zayed's Legacy, Future Cities, or Desert Adventures). 
+2. INTERACTION: Write one creative sentence, then wait for the student. Provide a "Creative Hint" to inspire their next sentence.
+3. ENDING: When the student says "The story is finished" or "انتهت القصة":
+   - Provide a BEAUTIFUL CREATIVE SUMMARY.
+   - Ask for: 1. Full Name (الاسم الكامل), 2. Grade Level (المستوى الدراسي).
+4. TAGGING (CRITICAL): Once you get both, output: 
+   [WINNER: StudentName, Grade: StudentGrade, Activity: Little Author, Content: SummaryOfTheStory].
+
+STYLE: Flawless Modern Standard Arabic or English. Professional, Bold, NO ITALICS.
 `;
 
 const chatLabels: any = {
   ar: {
-    welcome: 'أهلاً بك معكم صقر المساعد الذكي للمكتبة! هل نؤلف قصة معاً اليوم في تحدي "المؤلف الصغير" لتوثيق إبداعك، أم نتباحث في أعماق أحد الكتب؟',
+    welcome: 'أهلاً بك معكم صقر! هل نؤلف قصة معاً اليوم في تحدي "المؤلف الصغير"؟ سنبحر في قصص من وحي الإمارات وإبداعاتكم، ومع كل خطوة سأعطيك تلميحاً ملهماً!',
     input: 'ناقش صقر، شارك في تأليف قصة، أو ابحث عن كتاب...',
     status: 'صقر الذكي (EFIPS)',
     online: 'متصل وجاهز للإبداع',
-    download: 'تحميل شهادة المؤلف الصغير (PDF)',
+    download: 'تحميل شهادة الإبداع (JPG)',
     you: 'أنت'
   },
   en: {
-    welcome: "Welcome! I'm Saqr, your AI Librarian. Shall we co-author a story in the 'Little Author' challenge or discuss a book?",
+    welcome: "Welcome! I'm Saqr. Shall we co-author a story in the 'Little Author' challenge? Let's explore stories inspired by UAE heritage and your imagination!",
     input: 'Start a story, discuss, or search...',
     status: 'Saqr AI Librarian',
     online: 'Online & Ready',
-    download: 'Download Certificate (PDF)',
+    download: 'Download Certificate (JPG)',
     you: 'YOU'
   }
 };
@@ -58,17 +58,20 @@ const SmartSearchPage: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
-  const handleDownloadPDF = async () => {
+  // دالة تحميل الشهادة كصورة JPG بوضوح عالٍ ودعم كامل للعربية
+  const handleDownloadJPG = async () => {
     if (!certificateRef.current) return;
     const canvas = await html2canvas(certificateRef.current, { 
       scale: 3, 
-      backgroundColor: '#000000',
-      useCORS: true 
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      logging: false
     });
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    pdf.addImage(imgData, 'PNG', 10, 10, 190, 0);
-    pdf.save(`EFIPS_LittleAuthor_${winnerData.name}.pdf`);
+    const imgData = canvas.toDataURL('image/jpeg', 1.0);
+    const link = document.createElement('a');
+    link.href = imgData;
+    link.download = `EFIPS_LittleAuthor_${winnerData.name}.jpg`;
+    link.click();
   };
 
   const handleSendMessage = async () => {
@@ -78,62 +81,31 @@ const SmartSearchPage: React.FC = () => {
     setInput('');
     setIsLoading(true);
 
-    // دالة تنظيف متطورة تدعم اللغتين بفعالية
-    const normalize = (text: string) => 
-      text?.toString()
-          .replace(/[أإآا]/g, 'ا')
-          .replace(/[ةه]/g, 'ه')
-          .replace(/[ىي]/g, 'ي')
-          .toLowerCase() // ضروري جداً للغة الإنجليزية
-          .trim() || '';
-
+    const normalize = (text: string) => text?.toString().replace(/[أإآا]/g, 'ا').replace(/[ةه]/g, 'ه').replace(/[ىي]/g, 'ي').toLowerCase().trim() || '';
     const qNormalized = normalize(userQuery);
-    
-    // تقطيع كلمات البحث لتوسيع نطاق البحث، مع استبعاد الكلمات الشائعة اللي ملهاش لازمة في البحث (زي the, book, about)
-    const stopWords = ['the', 'book', 'about', 'summary', 'tell', 'me', 'عن', 'كتاب', 'تلخيص', 'ملخص'];
+    const stopWords = ['the', 'book', 'about', 'summary', 'عن', 'كتاب', 'تلخيص'];
     const queryWords = qNormalized.split(/\s+/).filter(word => word.length > 2 && !stopWords.includes(word));
 
     const searchIn = (db: any[], location: string) => {
       return db.filter(b => {
         const title = normalize(b.title);
         const author = normalize(b.author || '');
-        const subject = normalize(b.subject || b.category || '');
-        
-        // البحث عن تطابق الجملة كاملة أو أي كلمة أساسية من البحث في العنوان أو المؤلف
-        return title.includes(qNormalized) || 
-               author.includes(qNormalized) || 
-               queryWords.some(word => title.includes(word) || author.includes(word) || subject.includes(word));
+        return title.includes(qNormalized) || author.includes(qNormalized) || queryWords.some(word => title.includes(word));
       }).map(b => ({ ...b, pageLocation: location }));
     };
 
-    // البحث في الـ 3 مصادر المطلوبة
-    const foundBooks = [
-      ...searchIn(bookData, "سجلات الكتب المطبوعة بالمكتبة (Physical Books)"),
-      ...searchIn(ARABIC_LIBRARY_DATABASE, "المكتبة الإلكترونية العربية (Arabic Digital Library)"),
-      ...searchIn(ENGLISH_LIBRARY_DATABASE, "المكتبة الإلكترونية الإنجليزية (English Digital Library)")
-    ];
+    const foundBooks = [...searchIn(bookData, "Physical Books"), ...searchIn(ARABIC_LIBRARY_DATABASE, "Arabic Digital Library"), ...searchIn(ENGLISH_LIBRARY_DATABASE, "English Digital Library")];
 
-    // بناء سياق صارم لصقر
-    let searchContext = "";
-    if (foundBooks.length > 0) {
-      // نمرر البيانات بوضوح لصقر عشان يقدر يقرأها ويلخصها
-      searchContext = `EFIPS LIBRARY RECORDS FOUND: The following books exist in our records: ${JSON.stringify(foundBooks.slice(0, 15))}. 
-      Your task: The student is asking about one of these books. Confirm that the book IS AVAILABLE, specify its location clearly (Physical Library or Digital), and THEN provide the information or summary the student requested based on your general knowledge of this existing book.`;
-    } else {
-      searchContext = `EFIPS LIBRARY RECORDS NOT FOUND: No books matching "${userQuery}" were found in our official physical or digital databases. 
-      Your task: Inform the student politely that this specific title is not currently in our school records. You may then provide the summary/info they asked for from your general knowledge, but clearly state it is a general recommendation and not in the school library database.`;
-    }
+    let searchContext = foundBooks.length > 0 
+      ? `EFIPS RECORDS FOUND: ${JSON.stringify(foundBooks.slice(0, 10))}` 
+      : `NOT FOUND in school records. Use general knowledge but state it's a general info.`;
 
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: [
-            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${searchContext}` }, 
-            ...messages, 
-            { role: 'user', content: userQuery }
-          ],
+          messages: [{ role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${searchContext}` }, ...messages, { role: 'user', content: userQuery }],
           locale,
         }),
       });
@@ -141,9 +113,9 @@ const SmartSearchPage: React.FC = () => {
       let reply = data.reply || '';
 
       if (reply.includes('[WINNER:')) {
-        const match = reply.match(/\[WINNER:\s*(.*?),\s*Activity:\s*(.*?),\s*Content:\s*(.*?)]/s);
+        const match = reply.match(/\[WINNER:\s*(.*?),\s*Grade:\s*(.*?),\s*Activity:\s*(.*?),\s*Content:\s*(.*?)]/s);
         if (match) {
-          const info = { name: match[1], activity: match[2], content: match[3], date: new Date().toLocaleDateString('ar-EG') };
+          const info = { name: match[1], grade: match[2], activity: match[3], content: match[4], date: new Date().toLocaleDateString('ar-EG') };
           setWinnerData(info);
           localStorage.setItem('efips_challenge_reports', JSON.stringify([info, ...JSON.parse(localStorage.getItem('efips_challenge_reports') || '[]')]));
         }
@@ -159,7 +131,6 @@ const SmartSearchPage: React.FC = () => {
 
   return (
     <div dir={dir} className="w-full max-w-xl md:max-w-3xl mx-auto px-4 py-4 md:py-8 h-[92dvh] flex flex-col font-black antialiased relative">
-      
       <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden opacity-30">
           <div className="absolute top-[-5%] left-[-20%] w-[500px] h-[500px] bg-red-600/30 blur-[150px] rounded-full animate-pulse"></div>
           <div className="absolute bottom-[-5%] right-[-20%] w-[600px] h-[600px] bg-red-900/30 blur-[200px] rounded-full delay-1000 animate-pulse"></div>
@@ -169,11 +140,7 @@ const SmartSearchPage: React.FC = () => {
         <div className="flex items-center gap-4 text-start">
           <div className="relative group">
             <div className="absolute -inset-2 bg-red-600/30 rounded-full blur-lg animate-pulse"></div>
-            <img 
-              src="/school-logo.png" 
-              alt="EFIPS" 
-              className="w-12 h-12 md:w-16 object-contain rotate-[30deg] relative z-10 transition-all duration-700 dark:brightness-0 dark:invert" 
-            />
+            <img src="https://www.efipslibrary.online/school-logo.png" alt="EFIPS" className="w-12 h-12 md:w-16 object-contain rotate-[30deg] relative z-10 transition-all duration-700 dark:brightness-0 dark:invert" />
           </div>
           <div className="leading-tight text-start">
             <h2 className="text-sm md:text-xl font-black text-slate-950 dark:text-white uppercase tracking-tighter leading-none py-1">{t('status')}</h2>
@@ -186,15 +153,11 @@ const SmartSearchPage: React.FC = () => {
         {messages.map((msg, index) => (
           <div key={index} className={`flex items-start gap-3 md:gap-8 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'} animate-fade-up`}>
             <div className={`relative flex-shrink-0 transition-all duration-700 ${msg.role === 'assistant' ? 'scale-110' : 'scale-100'}`}>
-              <div className={`w-10 h-10 md:w-16 rounded-2xl flex items-center justify-center border-0 shadow-lg relative z-10 ${
-                msg.role === 'assistant' ? 'bg-white' : 'bg-slate-950 text-white text-[9px] md:text-xs font-black uppercase'
-              }`}>
+              <div className={`w-10 h-10 md:w-16 rounded-2xl flex items-center justify-center border-0 shadow-lg relative z-10 ${msg.role === 'assistant' ? 'bg-white' : 'bg-slate-950 text-white text-[9px] md:text-xs font-black uppercase'}`}>
                 {msg.role === 'assistant' ? <img src="/saqr-avatar.png" alt="S" className="w-[85%] h-[85%] object-contain" /> : t('you')}
               </div>
             </div>
-            <div className={`relative max-w-[85%] md:max-w-[80%] p-5 md:p-10 rounded-[2.5rem] shadow-2xl border-0 transition-all ${
-                msg.role === 'user' ? 'bg-slate-950 text-white rounded-tr-none' : 'bg-white/40 dark:bg-white/10 text-slate-950 dark:text-white rounded-tl-none backdrop-blur-3xl'
-              }`}>
+            <div className={`relative max-w-[85%] md:max-w-[80%] p-5 md:p-10 rounded-[2.5rem] shadow-2xl border-0 transition-all ${msg.role === 'user' ? 'bg-slate-950 text-white rounded-tr-none' : 'bg-white/40 dark:bg-white/10 text-slate-950 dark:text-white rounded-tl-none backdrop-blur-3xl'}`}>
               <div className={`absolute top-0 ${msg.role === 'user' ? 'end-0' : 'start-0'} w-1.5 h-full rounded-full bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.5)]`}></div>
               <div className="prose prose-sm md:prose-xl dark:prose-invert font-black leading-relaxed text-start italic-none">
                 <ReactMarkdown>{msg.content}</ReactMarkdown>
@@ -203,25 +166,44 @@ const SmartSearchPage: React.FC = () => {
           </div>
         ))}
         
-        {winnerData && winnerData.activity?.includes('Author') && (
+        {winnerData && (
           <div className="mt-10 animate-bounce text-center px-4">
-            <button onClick={handleDownloadPDF} className="w-full md:w-auto px-10 py-5 bg-red-600 text-white font-black rounded-full shadow-3xl hover:scale-105 transition-all text-sm md:text-xl uppercase tracking-widest">
+            <button onClick={handleDownloadJPG} className="w-full md:w-auto px-10 py-5 bg-red-600 text-white font-black rounded-full shadow-3xl hover:scale-105 transition-all text-sm md:text-xl uppercase tracking-widest">
               {t('download')}
             </button>
             
+            {/* الشهادة المحدثة كصورة JPG مع دعم اللغة العربية */}
             <div className="fixed left-[-9999px] top-0">
-                <div ref={certificateRef} className="w-[800px] p-20 bg-black text-white text-center font-black border-[15px] border-red-600 rounded-[5rem] relative overflow-hidden">
-                    <img src="/school-logo.png" className="w-44 mx-auto mb-10 rotate-[15deg] brightness-0 invert" alt="Logo" />
-                    <h1 className="text-7xl mb-4 text-red-600 uppercase tracking-tighter">Little Author</h1>
-                    <p className="text-2xl opacity-60 mb-12 uppercase tracking-[0.3em]">Emirates Falcon International School</p>
-                    <div className="h-1.5 w-full bg-red-600/40 mb-12"></div>
-                    <p className="text-4xl mb-12 text-start leading-tight">بكل فخر، يوثق "صقر" الإنجاز الأدبي للمبدع:</p>
-                    <h2 className="text-6xl text-yellow-500 mb-16 underline decoration-red-600 underline-offset-8 italic-none">{winnerData.name}</h2>
-                    <p className="text-2xl opacity-80 mb-6 text-start">ملخص القصة الإبداعية:</p>
-                    <div className="bg-white/5 p-12 rounded-[4rem] text-3xl leading-loose text-start border-0 shadow-inner italic-none">
-                        {winnerData.content}
+                <div ref={certificateRef} className="w-[800px] min-h-[1100px] p-0 bg-white text-slate-900 text-center relative overflow-hidden flex flex-col items-center justify-between border-[15px] border-red-600 rounded-[2rem]">
+                    <div className="absolute top-0 left-0 w-full h-4 bg-red-600"></div>
+                    
+                    <div className="p-12 w-full flex flex-col items-center">
+                        <img src="https://www.efipslibrary.online/school-logo.png" className="w-40 mb-6" alt="Logo" />
+                        <h3 className="text-xl font-bold text-slate-400 uppercase tracking-widest">Emirates Falcon International School</h3>
+                        <h1 className="text-6xl font-black my-8 text-red-600">شهادة المؤلف الصغير</h1>
+                        
+                        <div className="w-32 h-1.5 bg-red-600 mb-10"></div>
+                        
+                        <p className="text-2xl font-bold mb-4">يفخر "صقر" بتوثيق الإنجاز الأدبي للمبدع:</p>
+                        <h2 className="text-6xl font-black text-slate-950 mb-2 underline decoration-red-600 underline-offset-8 decoration-4">{winnerData.name}</h2>
+                        <p className="text-3xl font-black text-red-600 mb-12">{winnerData.grade}</p>
+                        
+                        <div className="bg-slate-50 p-10 rounded-[3rem] border-2 border-slate-100 text-right w-full relative">
+                            <span className="absolute -top-5 right-10 bg-white px-4 text-red-600 font-bold uppercase text-sm">ملخص القصة</span>
+                            <p className="text-2xl leading-[1.8] font-bold text-slate-800">{winnerData.content}</p>
+                        </div>
                     </div>
-                    <p className="mt-20 text-xl opacity-30 tracking-widest uppercase">Certified by Saqr AI Librarian - {winnerData.date}</p>
+
+                    <div className="p-12 w-full flex justify-between items-end border-t border-slate-100">
+                        <div className="text-right">
+                           <p className="text-sm text-slate-400 uppercase font-bold">Documented By</p>
+                           <p className="text-xl font-black text-red-600">صقر - المساعد الذكي</p>
+                        </div>
+                        <div className="text-left">
+                           <p className="text-xl font-black">{winnerData.date}</p>
+                           <p className="text-xs uppercase tracking-widest text-slate-400">Official EFIPS Certificate</p>
+                        </div>
+                    </div>
                 </div>
             </div>
           </div>
@@ -245,7 +227,8 @@ const SmartSearchPage: React.FC = () => {
       </div>
 
       <style>{`
-        * { font-style: normal !important; border: 0 !important; }
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&display=swap');
+        * { font-style: normal !important; border: 0 !important; font-family: 'Cairo', sans-serif !important; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .glass-panel { backdrop-filter: blur(60px) saturate(200%); }
       `}</style>
