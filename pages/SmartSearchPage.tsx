@@ -7,27 +7,31 @@ import { bookData } from '../api/bookData';
 import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
 
-// --- 1. بروتوكول عقل صقر النهائي ---
+// --- 1. بروتوكول عقل صقر النهائي (تم تعديل التعليمات بصرامة) ---
 const SAQR_ELITE_PROMPT = `
 Identity: You are "Saqr" (صقر), the official Elite AI Librarian of Emirates Falcon International Private School (EFIPS).
 
 Instructions for Books & Search:
-1. If the user asks about a book, ALWAYS use the "EFIPS LIBRARY RECORDS FOUND" context provided at the end of this prompt to answer.
+1. If the user asks about a book, ALWAYS check the "EFIPS LIBRARY RECORDS FOUND" context provided at the end of this prompt.
+2. If found, tell them EXACTLY where it is based on the data. For Physical Library (المكتبة العادية), mention the shelf or row number if available. For Digital Libraries, specify if it's the Arabic or English Digital Library.
+3. If the user searches in Arabic for an English book (e.g., "هاري بوتر"), use your AI knowledge to recognize they mean "Harry Potter", and answer accordingly.
 
-Instructions for "Little Author" Challenge:
+Instructions for "Little Author" Challenge (STRICT RULES):
 1. UAE THEMES: Start stories inspired by UAE identity (Space, Pearl Diving, Desert Heritage, Falcons, Zayed's legacy).
-2. INTERACTION: Write ONLY ONE short sentence to continue the plot. Let the student lead the imagination. 
-   - DO NOT give hints or suggest what happens next.
-   - DO NOT ask "Are you finished?" or "What happens next?". Just flow with their story naturally.
-3. LANGUAGE CORRECTION (CRITICAL): If the student makes spelling or grammar mistakes (Arabic or English), politely point out the mistake and correct it before writing your sentence.
+2. INTERACTION: Write ONLY ONE short sentence to continue the plot naturally. 
+   - DO NOT give hints. DO NOT suggest what happens next.
+   - DO NOT ask "Are you finished?", "What happens next?", or ANY questions. Just write your sentence and wait.
+   - Use plain, clear text. DO NOT use weird symbols, markdown asterisks, or formatting in the story.
+3. SILENT CORRECTION: Check the student's text for spelling/grammar errors. ONLY IF there is an actual mistake, politely point it out and provide the correct word, then write your sentence to continue the story. If there are NO errors, JUST continue the story. NEVER ask if there are errors.
 4. ENDING THE STORY: 
-   - Wait patiently until the student explicitly says "انتهت" (finished/done).
-   - Once they say it is finished, DO NOT output the certificate tag. Instead, praise their story and EXPLICITLY ASK: "ما هو اسمك الكامل؟ وما هو مستواك الدراسي؟" (What is your full name and grade level?).
+   - Wait patiently until the student explicitly types "انتهت" or "finished".
+   - DO NOT output the WINNER tag yet. 
+   - Praise their story, then EXPLICITLY ASK: "ما هو اسمك الكامل؟ وما هو مستواك الدراسي؟" (What is your full name and grade level?).
 5. ISSUING THE CERTIFICATE: 
-   - ONLY AFTER the student replies with their Name and Grade, you must output this EXACT format at the very end of your message:
-   [WINNER: {Student Name} | Grade: {Student Grade} | Content: {Write a brilliantly summarized and flawlessly corrected 2-3 sentence version of the story they just wrote}]
+   - ONLY AFTER the student replies with their Name and Grade, output this EXACT format at the very end of your message:
+   [WINNER: {Student Name} | Grade: {Student Grade} | Content: {Write a beautifully summarized, grammatically flawless, plain-text summary of the full story they wrote. No weird symbols.}]
 
-Style: Professional, empathetic, uses flawless Fos'ha Arabic or English based on user input. NO ITALICS.
+Style: Professional, empathetic, uses flawless Fos'ha Arabic or English based on user input. NO emojis in the certificate content.
 `;
 
 const localization: any = {
@@ -40,7 +44,7 @@ const localization: any = {
     you: 'أنت',
     certSchool: 'مدرسة الإمارات فالكون الدولية الخاصة',
     certChallenge: 'تحدي المؤلف الصغير',
-    certTitle: 'شـهـادة إبـداع أدبـي',
+    certTitle: 'شهادة إبداع أدبي',
     certSubtitle: 'يفخر "صقر" المساعد الذكي بتوثيق الإنجاز الأدبي للمبدع(ة):',
     certGrade: 'المستوى الدراسي:',
     certStory: 'القصة المبدعة',
@@ -87,18 +91,19 @@ const SmartSearchPage: React.FC = () => {
   const handleDownloadJPG = async () => {
     if (!certificateRef.current) return;
     
-    // إظهار الشهادة في الخلفية للالتقاط لضمان عدم القص
+    // إظهار الشهادة في الخلفية للالتقاط
     certificateRef.current.style.left = '0';
     certificateRef.current.style.top = '0';
     certificateRef.current.style.position = 'fixed';
     certificateRef.current.style.zIndex = '-9999';
 
+    // استخدام الارتفاع التلقائي للشهادة (scrollHeight) لضمان عدم قص القصة الطويلة
     const canvas = await html2canvas(certificateRef.current, { 
       scale: 3, 
       backgroundColor: '#ffffff',
       useCORS: true,
       windowWidth: 1123, 
-      windowHeight: 794
+      height: certificateRef.current.scrollHeight
     });
 
     certificateRef.current.style.left = '-9999px';
@@ -136,17 +141,15 @@ const SmartSearchPage: React.FC = () => {
         const title = normalize(b?.title || '');
         const author = normalize(b?.author || '');
         
-        // إذا كان الاستعلام يطابق العنوان أو الكاتب تماماً
         if (title.includes(qNormalized) || author.includes(qNormalized)) return true;
-        // أو إذا تطابقت كلمات رئيسية
         return queryWords.length > 0 && queryWords.some(word => title.includes(word) || author.includes(word));
       }).map(b => ({ ...b, pageLocation: location }));
     };
 
     const foundBooks = [
-      ...searchIn(bookData, "سجلات الكتب المطبوعة بالمكتبة (Physical Books)"),
-      ...searchIn(ARABIC_LIBRARY_DATABASE, "المكتبة الإلكترونية العربية (Arabic Digital Library)"),
-      ...searchIn(ENGLISH_LIBRARY_DATABASE, "المكتبة الإلكترونية الإنجليزية (English Digital Library)")
+      ...searchIn(bookData, "المكتبة العادية (Physical Library)"),
+      ...searchIn(ARABIC_LIBRARY_DATABASE, "المكتبة الرقمية العربية (Arabic Digital Library)"),
+      ...searchIn(ENGLISH_LIBRARY_DATABASE, "المكتبة الرقمية الإنجليزية (English Digital Library)")
     ];
 
     let searchContext = "";
@@ -218,7 +221,7 @@ const SmartSearchPage: React.FC = () => {
               />
             </div>
             <div className="leading-tight text-start">
-              <h2 className="text-base md:text-xl font-bold uppercase tracking-wide text-slate-800 dark:text-white leading-none mb-1">{t('status')}</h2>
+              <h2 className="text-base md:text-xl font-bold uppercase text-slate-800 dark:text-white leading-none mb-1">{t('status')}</h2>
               <span className="text-[10px] md:text-xs text-green-600 dark:text-green-400 font-bold uppercase flex items-center gap-1">
                 <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> {t('online')}
               </span>
@@ -254,7 +257,7 @@ const SmartSearchPage: React.FC = () => {
           {/* زر تحميل الشهادة */}
           {winnerData && (
             <div className="mt-8 mb-4 flex justify-center w-full animate-bounce">
-              <button onClick={handleDownloadJPG} className="flex items-center gap-3 w-full md:w-auto px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-full shadow-xl transition-transform transform hover:scale-105 uppercase tracking-widest text-sm md:text-base">
+              <button onClick={handleDownloadJPG} className="flex items-center gap-3 w-full md:w-auto px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-full shadow-xl transition-transform transform hover:scale-105 uppercase text-sm md:text-base">
                 <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                 <span>{t('download')}</span>
               </button>
@@ -294,7 +297,8 @@ const SmartSearchPage: React.FC = () => {
 
       {/* --- تصميم الشهادة العرضية للتصدير --- */}
       <div className="fixed left-[-9999px] top-0 pointer-events-none">
-          <div ref={certificateRef} dir={locale === 'ar' ? 'rtl' : 'ltr'} className="w-[1123px] h-[794px] bg-white text-slate-900 relative overflow-hidden flex flex-col font-sans border-[20px] border-double border-red-700">
+          {/* إزالة الارتفاع الثابت وجعله min-h ليتمكن من التمدد إذا كانت القصة طويلة */}
+          <div ref={certificateRef} dir={locale === 'ar' ? 'rtl' : 'ltr'} className="w-[1123px] min-h-[794px] h-fit bg-white text-slate-900 relative overflow-hidden flex flex-col font-sans border-[20px] border-double border-red-700 pb-12">
               
               <div className="absolute top-0 right-0 w-80 h-80 bg-red-50 rounded-bl-full -z-10"></div>
               <div className="absolute bottom-0 left-0 w-80 h-80 bg-red-50 rounded-tr-full -z-10"></div>
@@ -302,44 +306,46 @@ const SmartSearchPage: React.FC = () => {
               {/* رأس الشهادة */}
               <div className="flex justify-between items-center p-10 border-b-2 border-slate-100">
                  <div className="flex items-center gap-6">
-                     <img src="https://www.efipslibrary.online/school-logo.png" className="w-32 object-contain" alt="EFIPS Logo" />
+                     <img src="https://www.efipslibrary.online/school-logo.png" className="w-24 object-contain" alt="EFIPS Logo" />
                      <div>
-                         <h3 className="text-3xl font-bold text-slate-800">{t('certSchool')}</h3>
-                         <h4 className="text-lg font-bold text-slate-400 uppercase tracking-widest mt-1" dir="ltr">EFIPS</h4>
+                         {/* تم إزالة tracking-widest من العربي لمنع تقطع الحروف */}
+                         <h3 className="text-2xl font-bold text-slate-800">{t('certSchool')}</h3>
+                         <h4 className="text-base font-bold text-slate-400 uppercase mt-1" dir="ltr">EFIPS</h4>
                      </div>
                  </div>
                  <div className="text-left">
-                     <div className="px-8 py-3 bg-red-600 text-white font-bold rounded-full text-xl shadow-sm border-2 border-red-700">{t('certChallenge')}</div>
+                     <div className="px-8 py-3 bg-red-600 text-white font-bold rounded-full text-lg shadow-sm border-2 border-red-700">{t('certChallenge')}</div>
                  </div>
               </div>
 
               {/* محتوى الشهادة */}
-              <div className="flex-1 flex flex-col items-center justify-center text-center px-24">
-                  <h1 className="text-6xl font-black text-red-700 mb-6 tracking-wide">{t('certTitle')}</h1>
-                  <p className="text-3xl font-medium text-slate-600 mb-10">{t('certSubtitle')}</p>
+              <div className="flex-1 flex flex-col items-center justify-center text-center px-16 mt-8">
+                  {/* تصغير أحجام الخطوط لتكون أكثر تناسقاً */}
+                  <h1 className="text-5xl font-black text-red-700 mb-6">{t('certTitle')}</h1>
+                  <p className="text-2xl font-medium text-slate-600 mb-8">{t('certSubtitle')}</p>
                   
-                  <h2 className="text-7xl font-black text-slate-900 mb-4 pb-2 border-b-4 border-red-600 px-12 inline-block leading-tight">{winnerData?.name}</h2>
-                  <p className="text-4xl font-bold text-slate-500 mb-12">{t('certGrade')} <span className="text-red-600">{winnerData?.grade}</span></p>
+                  <h2 className="text-5xl font-black text-slate-900 mb-4 pb-2 border-b-4 border-red-600 px-12 inline-block leading-tight">{winnerData?.name}</h2>
+                  <p className="text-3xl font-bold text-slate-500 mb-10">{t('certGrade')} <span className="text-red-600">{winnerData?.grade}</span></p>
                   
-                  <div className="bg-slate-50 p-10 rounded-3xl border border-slate-200 w-full text-start relative shadow-inner">
-                      <span className={`absolute -top-5 ${locale === 'ar' ? 'right-12' : 'left-12'} bg-white px-6 py-1 text-red-700 font-bold text-xl border border-slate-200 rounded-full`}>{t('certStory')}</span>
-                      <p className={`text-3xl leading-[1.8] font-medium text-slate-800 mt-4 ${locale === 'ar' ? 'text-justify' : 'text-left'}`}>{winnerData?.content}</p>
+                  <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200 w-full text-start relative shadow-inner mb-8">
+                      <span className={`absolute -top-4 ${locale === 'ar' ? 'right-10' : 'left-10'} bg-white px-6 py-1 text-red-700 font-bold text-lg border border-slate-200 rounded-full`}>{t('certStory')}</span>
+                      <p className={`text-2xl leading-[1.8] font-medium text-slate-800 mt-4 ${locale === 'ar' ? 'text-justify' : 'text-left'} whitespace-pre-wrap`}>{winnerData?.content}</p>
                   </div>
               </div>
 
               {/* تذييل الشهادة */}
-              <div className="flex justify-between items-end p-10 border-t-2 border-slate-100">
-                  <div className="text-center w-72">
-                     <p className="text-xl font-bold text-slate-500 mb-2">{t('certDate')}</p>
-                     <p className="text-2xl font-black text-slate-900">{winnerData?.date}</p>
+              <div className="flex justify-between items-end px-16 pt-8 border-t-2 border-slate-100 mt-auto">
+                  <div className="text-center w-64">
+                     <p className="text-lg font-bold text-slate-500 mb-2">{t('certDate')}</p>
+                     <p className="text-xl font-black text-slate-900">{winnerData?.date}</p>
                   </div>
                   <div className="text-center flex flex-col items-center flex-1">
-                     <img src="https://www.efipslibrary.online/school-logo.png" className="w-20 opacity-20 mb-2 grayscale" alt="Stamp" />
-                     <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">{t('certOfficial')}</p>
+                     <img src="https://www.efipslibrary.online/school-logo.png" className="w-16 opacity-20 mb-2 grayscale" alt="Stamp" />
+                     <p className="text-xs font-bold text-slate-400 uppercase">{t('certOfficial')}</p>
                   </div>
-                  <div className="text-center w-72">
-                     <p className="text-xl font-bold text-slate-500 mb-2">{t('certAI')}</p>
-                     <p className="text-3xl font-black text-red-700">{t('certSaqr')}</p>
+                  <div className="text-center w-64">
+                     <p className="text-lg font-bold text-slate-500 mb-2">{t('certAI')}</p>
+                     <p className="text-2xl font-black text-red-700">{t('certSaqr')}</p>
                   </div>
               </div>
           </div>
