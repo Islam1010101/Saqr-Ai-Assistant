@@ -60,7 +60,7 @@ const ShelfS_DB = [
 const translations = {
     ar: {
         pageTitle: "خريطة المكتبة",
-        subTitle: "اكتشف عوالم المعرفة.. تتبع المؤشر للتفاصيل",
+        subTitle: "اكتشف أماكن موضوعات الكتب من خلال أرقام الرفوف وتتبعها في المكتبة",
         searchPlaceholder: "ابحث عن قسم (تاريخ، علوم)...",
         wing1: "جناح الباحثين والبالغين",
         wing2: "جناح الشباب والعلوم",
@@ -70,7 +70,7 @@ const translations = {
     },
     en: {
         pageTitle: "Library Map",
-        subTitle: "Discover worlds of knowledge.. Follow cursor for details",
+        subTitle: "Discover the locations of book subjects by using shelf numbers and track them in the library.",
         searchPlaceholder: "Search for a section...",
         wing1: "Adults & Researchers",
         wing2: "Youth & Sciences",
