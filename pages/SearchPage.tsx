@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { createPortal } from 'react-dom'; 
 import { bookData, type Book } from '../api/bookData'; 
 import { useLanguage } from '../App';
 
@@ -17,9 +16,9 @@ const translations = {
   ar: {
     pageTitle: "مكتبة مدرسة صقر الإمارات",
     searchPlaceholder: "ابحث عن عنوان أو مؤلف...",
-    allSubjects: "جميع المواضيع",
-    allAuthors: "جميع المؤلفين",
-    allShelves: "جميع الرفوف",
+    allSubjects: "المواضيع",
+    allAuthors: "المؤلفين",
+    allShelves: "الرفوف",
     sortBy: "فرز حسب",
     alphabetical: "أبجدياً",
     authorName: "المؤلف",
@@ -29,16 +28,15 @@ const translations = {
     noResults: "لا توجد نتائج.",
     aiSubject: "تصنيف صقر الذكي",
     close: "إغلاق",
-    subjectLabel: "الموضوع",
-    officialAi: "تحليل صقر الذكي",
-    exploreMore: "استكشف المزيد"
+    subjectLabel: "الموضوع", // تم التغيير من المجال المعرفي
+    officialAi: "تحليل صقر الذكي"
   },
   en: {
     pageTitle: "Falcon School Library Index",
     searchPlaceholder: "Search title or author...",
-    allSubjects: "All Subjects",
-    allAuthors: "All Authors",
-    allShelves: "All Shelves",
+    allSubjects: "Subjects",
+    allAuthors: "Authors",
+    allShelves: "Shelves",
     sortBy: "Sort By",
     alphabetical: "Alphabetical",
     authorName: "Author",
@@ -48,47 +46,27 @@ const translations = {
     noResults: "No results found.",
     aiSubject: "Saqr AI Classified",
     close: "Close",
-    subjectLabel: "Topic",
-    officialAi: "Saqr AI Analysis",
-    exploreMore: "EXPLORE MORE"
+    subjectLabel: "Topic", // تم التغيير من Field
+    officialAi: "Saqr AI Analysis"
   }
 };
 
-// --- 2. Component: BookModal (التوسيط المطلق والسحب الاحترافي) ---
+// --- 2. مكونات التصميم الزجاجي المطور ---
+const ReflectionLayer = () => (
+  <div className="absolute inset-0 pointer-events-none z-20 overflow-hidden rounded-[inherit]">
+    <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-white/5 to-transparent opacity-40" />
+    <div className="absolute -top-[100%] -left-[100%] w-[300%] h-[300%] bg-[linear-gradient(45deg,transparent_45%,rgba(255,255,255,0.15)_50%,transparent_55%)] animate-[shine_10s_infinite] opacity-30" />
+  </div>
+);
+
+// --- 3. Component: BookModal (الذكاء الاصطناعي المطور) ---
 const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
-    const { locale, dir } = useLanguage();
+    const { locale } = useLanguage();
     const [aiContent, setAiContent] = useState({ summary: '', genre: '' });
     const [loading, setLoading] = useState(false);
 
-    // --- منطق السحب المطور (Pointer Events) لضمان الاستجابة على كل الأجهزة ---
-    const [offset, setOffset] = useState({ x: 0, y: 0 });
-    const [isDragging, setIsDragging] = useState(false);
-    const modalRef = useRef<HTMLDivElement>(null);
-
-    const onPointerDown = (e: React.PointerEvent) => {
-        setIsDragging(true);
-        // التقاط المؤشر لضمان استمرار السحب حتى لو خرج الماوس/الإصبع عن الشريط
-        (e.target as HTMLElement).setPointerCapture(e.pointerId);
-    };
-
-    const onPointerMove = (e: React.PointerEvent) => {
-        if (!isDragging) return;
-        setOffset(prev => ({
-            x: prev.x + e.movementX,
-            y: prev.y + e.movementY
-        }));
-    };
-
-    const onPointerUp = (e: React.PointerEvent) => {
-        setIsDragging(false);
-        (e.target as HTMLElement).releasePointerCapture(e.pointerId);
-    };
-
     useEffect(() => {
-        if (!book) {
-            setOffset({ x: 0, y: 0 });
-            return;
-        }
+        if (!book) return;
         
         const fetchAiDeepDive = async () => {
             setLoading(true);
@@ -119,126 +97,111 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
 
     if (!book) return null;
 
-    const modalPortal = (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center pointer-events-none">
-            {/* الخلفية المعتمة */}
-            <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-md pointer-events-auto animate-fade-in" onClick={onClose} />
-            
-            {/* النافذة المنبثقة */}
-            <div 
-                ref={modalRef}
-                dir={dir}
-                className="relative w-[92%] max-w-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl border border-white/20 dark:border-white/5 overflow-hidden flex flex-col max-h-[85vh] pointer-events-auto animate-zoom-in"
-                style={{ 
-                    transform: `translate(${offset.x}px, ${offset.y}px)`,
-                    touchAction: 'none' // تمنع تداخل سحب الصفحة مع سحب النافذة
-                }}
-            >
-                {/* شريط السحب العلوي (Drag Handle) */}
-                <div 
-                    className="w-full pt-6 pb-2 flex justify-center cursor-grab active:cursor-grabbing select-none"
-                    onPointerDown={onPointerDown}
-                    onPointerMove={onPointerMove}
-                    onPointerUp={onPointerUp}
-                    onPointerCancel={onPointerUp}
-                >
-                    <div className="w-16 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full" />
-                </div>
-
-                {/* زر الإغلاق */}
-                <button onClick={onClose} className={`absolute top-5 ${locale === 'ar' ? 'left-5' : 'right-5'} z-50 p-2 md:p-3 bg-slate-100/50 hover:bg-red-500 dark:bg-slate-800/50 dark:hover:bg-red-600 hover:text-white transition-all rounded-full shadow-lg backdrop-blur-md`}>
-                    <svg className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+    return (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-3 md:p-8 backdrop-blur-3xl animate-in fade-in duration-500" onClick={onClose}>
+            <div className="relative w-full max-w-5xl bg-white/80 dark:bg-slate-950/90 backdrop-blur-3xl rounded-[2.5rem] md:rounded-[4rem] border border-white/20 shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[92vh] overflow-y-auto md:overflow-hidden animate-in zoom-in-95 duration-300" onClick={(e) => e.stopPropagation()}>
+                
+                <button onClick={onClose} className="absolute top-5 end-5 z-50 p-3 bg-red-600 text-white rounded-full hover:rotate-90 transition-transform shadow-lg active:scale-90">
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
 
-                <div className="p-6 md:p-10 lg:p-12 overflow-y-auto no-scrollbar flex flex-col items-center text-center">
-                    <span className="inline-block px-4 py-1.5 rounded-full bg-red-600/10 text-red-600 text-[10px] font-black uppercase tracking-widest mb-6 border border-red-600/20 shadow-sm">Saqr AI Insight</span>
-                    <h2 className="text-2xl md:text-4xl text-slate-950 dark:text-white font-black leading-tight mb-2 tracking-tight">{book.title}</h2>
-                    <p className="text-base md:text-xl text-slate-500 dark:text-slate-400 font-bold mb-8 opacity-70">By {book.author}</p>
+                <div className="flex-1 p-8 md:p-16 text-start">
+                    <span className="inline-block px-4 py-1.5 rounded-full bg-red-600/10 text-red-600 text-[10px] font-black uppercase tracking-widest mb-4">Saqr AI Insight</span>
+                    <h2 className="text-3xl md:text-6xl text-slate-950 dark:text-white font-black leading-tight mb-4 tracking-tighter py-1">{book.title}</h2>
+                    <p className="text-xl md:text-2xl text-red-600 font-bold mb-10 opacity-80">By {book.author}</p>
                     
-                    <div className="w-full max-w-lg bg-white/50 dark:bg-white/5 backdrop-blur-md p-6 md:p-8 rounded-[2rem] mb-8 border border-white/20 dark:border-white/5 shadow-inner">
-                        <div className="text-center mb-6">
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{t('subjectLabel')}</p>
-                            <p className="text-xl md:text-2xl font-black text-slate-900 dark:text-white leading-tight">
-                                {loading ? '...' : (aiContent.genre || book.subject)}
-                            </p>
+                    <div className="glass-panel p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] border border-white/30 bg-white/40 dark:bg-white/5 relative shadow-inner overflow-hidden">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 text-5xl">✨</div>
+                        <div className="flex items-center gap-3 mb-6">
+                           <span className={`w-3 h-3 rounded-full ${loading ? 'animate-ping bg-red-500' : 'bg-green-500'}`}></span>
+                           <p className="text-xs text-green-600 dark:text-green-400 font-black uppercase tracking-[0.2em]">{t('officialAi')}</p>
                         </div>
-                        <div className="w-full h-px bg-slate-200 dark:bg-white/10 mb-6"></div>
-                        <div className="flex justify-center gap-10 md:gap-20 w-full">
-                            <div className="text-center">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{t('shelf')}</p>
-                                <p className="text-4xl md:text-5xl font-black text-red-600">{book.shelf}</p>
-                            </div>
-                            <div className="w-px bg-slate-200 dark:bg-white/10"></div>
-                            <div className="text-center">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{t('row')}</p>
-                                <p className="text-4xl md:text-5xl font-black text-green-600">{book.row}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="w-full bg-slate-50/80 dark:bg-slate-800/50 backdrop-blur-sm p-6 md:p-8 rounded-[2rem] border border-slate-100 dark:border-white/5 relative text-start mb-8 shadow-sm">
-                        <div className="flex items-center gap-3 mb-4">
-                           <span className={`w-2.5 h-2.5 rounded-full ${loading ? 'animate-ping bg-red-600' : 'bg-green-600'}`}></span>
-                           <p className="text-[10px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest">{t('officialAi')}</p>
-                        </div>
-                        <p className="text-slate-800 dark:text-slate-200 text-base md:text-xl font-bold leading-relaxed">
-                           {loading ? <span className="animate-pulse">...</span> : `"${aiContent.summary}"`}
+                        {/* نص الملخص: مستقيم، واضح، ومتناسب */}
+                        <p className="text-slate-800 dark:text-slate-100 text-lg md:text-2xl font-medium leading-relaxed" style={{ fontStyle: 'normal' }}>
+                           {loading ? "..." : `"${aiContent.summary}"`}
                         </p>
                     </div>
+                </div>
 
-                    <button onClick={onClose} className="w-full max-w-xs mx-auto bg-slate-950 dark:bg-white text-white dark:text-slate-950 font-black py-4 md:py-5 rounded-full hover:bg-red-600 dark:hover:bg-red-600 hover:text-white transition-all uppercase tracking-widest text-xs shadow-xl active:scale-95">
-                        {t('close')}
-                    </button>
+                <div className="w-full md:w-[350px] bg-slate-950/95 dark:bg-black/80 p-8 md:p-12 flex flex-col justify-center items-center text-white border-s border-white/10 backdrop-blur-xl">
+                    <div className="space-y-10 w-full text-center">
+                        <div className="bg-gradient-to-br from-red-600/20 to-transparent p-8 rounded-[2.5rem] border border-red-600/30 shadow-lg">
+                            <p className="text-[10px] font-black text-red-500 uppercase tracking-widest mb-3">{t('subjectLabel')}</p>
+                            <p className="text-2xl font-black leading-tight py-1">{loading ? '...' : (aiContent.genre || book.subject)}</p>
+                        </div>
+                        <div className="flex justify-center gap-12">
+                            <div><p className="text-[10px] opacity-40 mb-2 uppercase tracking-widest">{t('shelf')}</p><p className="text-5xl font-black">{book.shelf}</p></div>
+                            <div className="w-px h-16 bg-white/10"></div>
+                            <div><p className="text-[10px] opacity-40 mb-2 uppercase tracking-widest">{t('row')}</p><p className="text-5xl font-black">{book.row}</p></div>
+                        </div>
+                        <button onClick={onClose} className="w-full bg-white text-black font-black py-5 rounded-[1.5rem] hover:bg-red-600 hover:text-white transition-all transform active:scale-95 shadow-[0_10px_30px_rgba(255,255,255,0.1)] uppercase tracking-widest text-xs">{t('close')}</button>
+                    </div>
                 </div>
             </div>
         </div>
     );
-
-    return createPortal(modalPortal, document.body);
 };
 
-// --- 3. Component: BookCard (البطاقة الزجاجية) ---
+// --- 4. Component: BookCard (المحسن للجوال) ---
 const BookCard = React.memo(({ book, onClick, t }: { book: Book; onClick: () => void; t: any }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
   const isAi = !book.subject || book.subject === "Unknown";
 
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!cardRef.current || window.innerWidth < 768) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    cardRef.current.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+    cardRef.current.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+  };
+
   return (
-    <div onClick={onClick} className="group bg-white/60 dark:bg-white/5 backdrop-blur-xl rounded-[2.5rem] border border-white/20 dark:border-white/5 hover:border-red-600/50 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 flex flex-col overflow-hidden cursor-pointer h-full relative">
-      <div className={`absolute top-0 start-0 w-2 h-full transition-all duration-500 ${isAi ? 'bg-red-600' : 'bg-green-600'}`}></div>
+    <div 
+      ref={cardRef} onMouseMove={handleMouseMove} onClick={onClick} 
+      className="group relative glass-panel glass-card-interactive rounded-[2.5rem] p-1 cursor-pointer transition-all duration-500 hover:-translate-y-3 animate-fade-up border-none h-full active:scale-[0.98]"
+    >
+      <div className="relative overflow-hidden rounded-[2.4rem] bg-white/20 dark:bg-slate-900/40 backdrop-blur-2xl h-full flex flex-col border border-white/20 shadow-[inset_0_0_20px_rgba(255,255,255,0.05)]">
+        <ReflectionLayer />
+        
+        <div className={`absolute top-0 start-0 w-2 h-full z-30 transition-all duration-500 group-hover:w-3 ${isAi ? 'bg-red-600 shadow-[4px_0_15px_rgba(220,38,38,0.3)]' : 'bg-[#00732f] shadow-[4px_0_15px_rgba(0,115,47,0.3)]'}`} />
 
-      <div className="p-8 flex-1 flex flex-col text-start">
-        <span className={`self-start px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-wider mb-5 border
-            ${isAi ? 'bg-red-50 dark:bg-red-600/10 text-red-600 border-red-200/50' : 'bg-green-50 dark:bg-green-600/10 text-green-600 border-green-200/50'}`}>
-            {isAi ? t('aiSubject') : book.subject}
-        </span>
-        <h3 className="font-black text-xl md:text-2xl text-slate-950 dark:text-white leading-tight mb-4 group-hover:text-red-600 transition-colors line-clamp-2">
-            {book.title}
-        </h3>
-        <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-auto truncate flex items-center gap-2">
-            <span className="text-lg opacity-50">👤</span> {book.author}
-        </p>
-      </div>
-
-      <div className="bg-white/40 dark:bg-white/5 px-8 py-5 flex justify-between items-center border-t border-white/20 dark:border-white/5">
-        <div className="flex gap-8 items-center">
-            <div className="text-center">
-                <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest">{t('shelf')}</p>
-                <p className="text-xl font-black text-slate-900 dark:text-white mt-1">{book.shelf}</p>
-            </div>
-            <div className="w-px h-8 bg-slate-200 dark:bg-white/10"></div>
-            <div className="text-center">
-                <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest">{t('row')}</p>
-                <p className="text-xl font-black text-slate-900 dark:text-white mt-1">{book.row}</p>
-            </div>
+        <div className="p-7 md:p-9 relative z-10 flex-grow text-start">
+           <span className={`inline-block px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.15em] mb-6 shadow-sm border border-white/20
+                          ${isAi ? 'bg-red-600 text-white' : 'bg-[#00732f] text-white'}`}>
+              {isAi ? t('aiSubject') : book.subject}
+           </span>
+          
+          <h3 className="font-black text-xl md:text-2xl text-slate-950 dark:text-white leading-relaxed mb-4 tracking-tighter group-hover:text-red-600 transition-colors line-clamp-2 py-0.5">
+              {book.title}
+          </h3>
+          
+          <div className="flex items-center gap-3 opacity-60 group-hover:opacity-100 transition-all">
+              <span className="text-lg">👤</span>
+              <p className="text-[11px] font-bold uppercase tracking-wider truncate">{book.author}</p>
+          </div>
         </div>
-        <div className="w-9 h-9 rounded-full border border-white/30 dark:border-white/10 flex items-center justify-center text-slate-400 group-hover:bg-red-600 group-hover:text-white transition-all">
-            <svg className="w-4 h-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+
+        <div className="bg-black/5 dark:bg-white/5 py-5 px-8 border-t border-white/10 mt-auto flex items-center justify-between relative z-10 backdrop-blur-3xl">
+            <div className="flex gap-6 items-center">
+                <div className="text-center">
+                  <p className="text-[9px] text-red-600 font-black mb-1">S</p>
+                  <p className="text-lg font-black dark:text-white leading-none">{book.shelf}</p>
+                </div>
+                <div className="w-px h-8 bg-slate-400/30" />
+                <div className="text-center">
+                  <p className="text-[9px] text-[#00732f] font-black mb-1">R</p>
+                  <p className="text-lg font-black dark:text-white leading-none">{book.row}</p>
+                </div>
+            </div>
+            <div className="w-10 h-10 rounded-full border border-red-600/20 flex items-center justify-center text-red-600 group-hover:bg-red-600 group-hover:text-white transition-all transform group-hover:scale-110 shadow-lg">
+              <span className="text-sm font-black">➔</span>
+            </div>
         </div>
       </div>
     </div>
   );
 });
 
-// --- 4. Main Component: SearchPage ---
+// --- 5. Main Component: SearchPage ---
 const SearchPage: React.FC = () => {
     const { locale, dir } = useLanguage();
     const t = (key: string) => (translations as any)[locale][key] || key;
@@ -251,25 +214,6 @@ const SearchPage: React.FC = () => {
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
     const [visibleCount, setVisibleCount] = useState(16);
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
-
-    // نظام إخفاء/إظهار شريط البحث بالتمرير
-    const [isSearchVisible, setIsSearchVisible] = useState(true);
-    const [lastScrollY, setLastScrollY] = useState(0);
-
-    useEffect(() => {
-        const handleScroll = () => {
-            const currentScrollY = window.scrollY;
-            if (currentScrollY > lastScrollY && currentScrollY > 100) {
-                setIsSearchVisible(false);
-            } else {
-                setIsSearchVisible(true);
-            }
-            setLastScrollY(currentScrollY);
-        };
-
-        window.addEventListener('scroll', handleScroll, { passive: true });
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, [lastScrollY]);
 
     const filters = useMemo(() => ({
         subjects: [...new Set(bookData.map(b => b.subject))].filter(s => s !== "Unknown").sort(),
@@ -296,100 +240,66 @@ const SearchPage: React.FC = () => {
     }, [debouncedSearchTerm, subjectFilter, authorFilter, shelfFilter, sortBy, locale]);
 
     return (
-        <div dir={dir} className="w-full min-h-[100dvh] flex flex-col py-6 md:py-10 px-4 md:px-6 relative">
+        <div dir={dir} className="max-w-7xl mx-auto px-4 md:px-6 pb-40 relative z-10 antialiased font-black">
             
-            {/* الخلفية الديناميكية */}
-            <div className="fixed inset-0 overflow-hidden -z-10 pointer-events-none opacity-50 dark:opacity-30">
-               <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-red-600/10 dark:bg-red-500/20 blur-[150px] rounded-full animate-pulse"></div>
-               <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] bg-green-600/10 dark:bg-green-500/20 blur-[150px] rounded-full animate-pulse [animation-delay:2s]"></div>
-            </div>
-
-            <div className="w-full max-w-[1400px] mx-auto flex flex-col animate-fade-in-up pb-20">
-                
-                <div className="text-center mb-12 md:mb-20">
-                    <h1 className="text-4xl md:text-7xl font-black text-slate-950 dark:text-white tracking-tighter uppercase">{t('pageTitle')}</h1>
-                    <div className="h-1.5 w-24 bg-red-600 mx-auto mt-6 rounded-full shadow-lg"></div>
-                </div>
-
-                {/* بار البحث الزجاجي المتجاوب مع التمرير */}
-                <div className={`sticky z-[100] transition-all duration-500 ease-in-out mb-12 md:mb-20 ${isSearchVisible ? 'top-4 md:top-8 translate-y-0 opacity-100' : 'top-0 -translate-y-[150%] opacity-0 pointer-events-none'}`}>
-                    <div className="bg-white/70 dark:bg-slate-950/70 backdrop-blur-2xl border border-white/30 dark:border-white/10 shadow-2xl rounded-[2.5rem] md:rounded-[4rem] p-5 md:p-8 transition-all">
-                        <div className="flex flex-col gap-5">
-                            <div className="relative group">
-                                <input 
-                                  type="text" 
-                                  placeholder={t('searchPlaceholder')} 
-                                  className="w-full py-5 px-8 ps-16 md:ps-20 bg-black/5 dark:bg-white/5 border border-transparent focus:border-red-600 focus:bg-white dark:focus:bg-slate-900 rounded-3xl outline-none transition-all text-slate-950 dark:text-white font-bold text-base md:text-xl placeholder-slate-400 shadow-inner" 
-                                  value={searchTerm}
-                                  onChange={(e) => setSearchTerm(e.target.value)} 
-                                />
-                                <svg className="absolute start-6 top-1/2 -translate-y-1/2 h-6 w-6 md:h-8 md:w-8 text-slate-400 group-focus-within:text-red-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                            </div>
-                            
-                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-                                {[
-                                    { id: 'sortBy', val: sortBy, set: setSortBy, opts: ['alphabetical', 'author'] },
-                                    { id: 'allSubjects', val: subjectFilter, set: setSubjectFilter, opts: filters.subjects },
-                                    { id: 'allAuthors', val: authorFilter, set: setAuthorFilter, opts: filters.authors },
-                                    { id: 'allShelves', val: shelfFilter, set: setShelfFilter, opts: filters.shelves, pre: 'Shelf ' }
-                                ].map((filter) => (
-                                    <div key={filter.id} className="relative group">
-                                        <select 
-                                            value={filter.val} 
-                                            onChange={(e) => filter.set(e.target.value)} 
-                                            className="w-full py-4 px-6 rounded-2xl bg-black/5 dark:bg-white/5 border border-transparent hover:border-red-600 text-slate-950 dark:text-white font-black text-xs md:text-sm cursor-pointer appearance-none outline-none transition-all shadow-sm"
-                                        >
-                                            <option value={filter.id === 'sortBy' ? 'alphabetical' : 'all'}>{t(filter.id)}</option>
-                                            {filter.opts.map(o => <option key={o} value={o}>{filter.pre && locale === 'en' ? `${filter.pre}${o}` : o}</option>)}
-                                        </select>
-                                        <div className="absolute end-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-hover:text-red-600 transition-colors">
-                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+            {/* بار البحث الزجاجي - مع تجاوب للموبايل */}
+            <div className="sticky top-4 md:top-6 z-[100] mb-12 md:mb-20 animate-fade-up">
+                <div className="glass-panel p-4 md:p-6 rounded-[2.5rem] md:rounded-[4rem] bg-white/80 dark:bg-slate-900/80 border border-white/20 shadow-2xl backdrop-blur-3xl">
+                    <div className="flex flex-col gap-4">
+                        <div className="relative group">
+                            <input 
+                              type="text" 
+                              placeholder={t('searchPlaceholder')} 
+                              className="w-full p-5 md:p-7 ps-14 md:ps-20 bg-white/50 dark:bg-black/40 text-slate-950 dark:text-white border-2 border-transparent focus:border-red-600 rounded-[2rem] md:rounded-[3rem] outline-none transition-all text-base md:text-xl shadow-inner shadow-black/5 font-black" 
+                              value={searchTerm}
+                              onChange={(e) => setSearchTerm(e.target.value)} 
+                            />
+                            <svg className="absolute start-6 md:start-8 top-1/2 -translate-y-1/2 h-6 w-6 md:h-8 md:w-8 text-red-600 opacity-70 group-focus-within:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                        </div>
+                        
+                        {/* شبكة الفلاتر - متجاوبة */}
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
+                            {[
+                                { id: 'sortBy', val: sortBy, set: setSortBy, opts: ['alphabetical', 'author'] },
+                                { id: 'allSubjects', val: subjectFilter, set: setSubjectFilter, opts: filters.subjects },
+                                { id: 'allAuthors', val: authorFilter, set: setAuthorFilter, opts: filters.authors },
+                                { id: 'allShelves', val: shelfFilter, set: setShelfFilter, opts: filters.shelves, pre: 'S: ' }
+                            ].map((filter) => (
+                                <div key={filter.id} className="relative group">
+                                    <select 
+                                        value={filter.val} 
+                                        onChange={(e) => filter.set(e.target.value)} 
+                                        className="w-full p-3 md:p-4 rounded-xl md:rounded-2xl bg-white/40 dark:bg-slate-800/60 border border-white/20 font-black text-[10px] md:text-xs cursor-pointer appearance-none text-center backdrop-blur-md hover:bg-white dark:hover:bg-slate-700 transition-all shadow-sm outline-none focus:border-red-600"
+                                    >
+                                        <option value={filter.id === 'sortBy' ? 'alphabetical' : 'all'}>{t(filter.id)}</option>
+                                        {filter.opts.map(o => <option key={o} value={o}>{filter.pre ? `${filter.pre}${o}` : o}</option>)}
+                                    </select>
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-30 group-hover:opacity-100 transition-opacity">▼</div>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>
-
-                {filteredBooks.length === 0 ? (
-                    <div className="flex-1 flex flex-col items-center justify-center py-20 text-slate-400 opacity-30">
-                        <span className="text-9xl mb-6">🔍</span>
-                        <p className="font-black text-2xl uppercase tracking-widest">{t('noResults')}</p>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 md:gap-10">
-                        {filteredBooks.slice(0, visibleCount).map((book) => (
-                            <BookCard key={book.id} book={book} t={t} onClick={() => setSelectedBook(book)} />
-                        ))}
-                    </div>
-                )}
-
-                {filteredBooks.length > visibleCount && (
-                    <div className="mt-20 text-center">
-                        <button 
-                            onClick={() => setVisibleCount(prev => prev + 16)} 
-                            className="bg-slate-950 dark:bg-white text-white dark:text-slate-950 font-black rounded-full px-12 py-5 hover:bg-red-600 dark:hover:bg-red-600 hover:text-white shadow-2xl hover:-translate-y-2 transition-all text-sm md:text-lg uppercase tracking-[0.3em] active:scale-95"
-                        >
-                            {t('exploreMore')}
-                        </button>
-                    </div>
-                )}
             </div>
 
-            <BookModal book={selectedBook} onClose={() => setSelectedBook(null)} t={t} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-10">
+                {filteredBooks.slice(0, visibleCount).map((book) => (
+                    <BookCard key={book.id} book={book} t={t} onClick={() => setSelectedBook(book)} />
+                ))}
+            </div>
 
-            <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
-                * { font-family: 'Cairo', sans-serif !important; }
-                .no-scrollbar::-webkit-scrollbar { display: none; }
-                @keyframes fade-in-up { 0% { opacity: 0; transform: translateY(30px); } 100% { opacity: 1; transform: translateY(0); } }
-                .animate-fade-in-up { animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-                @keyframes fade-in { 0% { opacity: 0; } 100% { opacity: 1; } }
-                .animate-fade-in { animation: fade-in 0.4s ease-out forwards; }
-                @keyframes zoom-in { 0% { opacity: 0; transform: scale(0.92); } 100% { opacity: 1; transform: scale(1); } }
-                .animate-zoom-in { animation: zoom-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-            `}</style>
+            {filteredBooks.length > visibleCount && (
+                <div className="mt-24 md:mt-32 text-center">
+                    <button 
+                        onClick={() => setVisibleCount(prev => prev + 16)} 
+                        className="glass-button-red mx-auto px-12 md:px-20 py-5 md:py-6 text-lg md:text-xl tracking-[0.3em] shadow-2xl hover:scale-105 active:scale-95 transition-all"
+                    >
+                        EXPLORE MORE
+                    </button>
+                </div>
+            )}
+
+            <BookModal book={selectedBook} onClose={() => setSelectedBook(null)} t={t} />
         </div>
     );
 };
