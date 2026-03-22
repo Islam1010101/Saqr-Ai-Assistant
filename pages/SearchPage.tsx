@@ -53,7 +53,7 @@ const translations = {
   }
 };
 
-// --- 2. Component: BookModal (النافذة المنبثقة للذكاء الاصطناعي - مجمعة في الوسط) ---
+// --- 2. Component: BookModal (النافذة المنبثقة للذكاء الاصطناعي - مجمعة في الوسط تماماً) ---
 const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
     const { locale, dir } = useLanguage();
     const [aiContent, setAiContent] = useState({ summary: '', genre: '' });
@@ -92,9 +92,8 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
     if (!book) return null;
 
     return (
-        <div dir={dir} className="fixed inset-0 z-[200] flex items-center justify-center p-4 backdrop-blur-sm bg-slate-900/40 dark:bg-black/60 animate-fade-in" onClick={onClose}>
-            {/* تم تغيير max-w-4xl إلى max-w-3xl ليتناسب مع العرض المجمع في الوسط وإزالة تقسيم flex-row */}
-            <div className="relative w-full max-w-3xl bg-white dark:bg-slate-800 rounded-[2rem] md:rounded-[3rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border border-slate-200 dark:border-slate-700 animate-zoom-in" onClick={(e) => e.stopPropagation()}>
+        <div dir={dir} className="fixed inset-0 z-[200] grid place-items-center p-4 backdrop-blur-sm bg-slate-900/40 dark:bg-black/60 animate-fade-in" onClick={onClose}>
+            <div className="relative w-full max-w-3xl mx-auto my-auto bg-white dark:bg-slate-800 rounded-[2rem] md:rounded-[3rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border border-slate-200 dark:border-slate-700 animate-zoom-in" onClick={(e) => e.stopPropagation()}>
                 
                 {/* زر الإغلاق */}
                 <button onClick={onClose} className={`absolute top-4 ${locale === 'ar' ? 'left-4' : 'right-4'} z-50 p-2 md:p-3 bg-slate-100 hover:bg-red-100 dark:bg-slate-700 dark:hover:bg-red-900/30 text-slate-500 hover:text-red-600 transition-colors rounded-full`}>
@@ -126,7 +125,7 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                             <div className="w-px bg-slate-200 dark:bg-slate-700"></div>
                             <div className="text-center">
                                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">{t('row')}</p>
-                                <p className="text-4xl md:text-5xl font-black text-blue-600 dark:text-blue-500">{book.row}</p>
+                                <p className="text-4xl md:text-5xl font-black text-green-600 dark:text-green-500">{book.row}</p>
                             </div>
                         </div>
                     </div>
@@ -142,7 +141,7 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                         </p>
                     </div>
 
-                    <button onClick={onClose} className="w-full max-w-xs bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold py-4 rounded-full hover:bg-red-600 dark:hover:bg-red-600 hover:text-white transition-colors uppercase tracking-widest text-sm">
+                    <button onClick={onClose} className="w-full max-w-xs mx-auto bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold py-4 rounded-full hover:bg-red-600 dark:hover:bg-red-600 hover:text-white transition-colors uppercase tracking-widest text-sm">
                         {t('close')}
                     </button>
                 </div>
@@ -159,11 +158,11 @@ const BookCard = React.memo(({ book, onClick, t }: { book: Book; onClick: () => 
     <div onClick={onClick} className="group bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-red-500/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden cursor-pointer h-full relative">
       
       {/* الخط الجانبي */}
-      <div className={`absolute top-0 start-0 w-1.5 h-full transition-colors duration-300 ${isAi ? 'bg-red-500' : 'bg-blue-500'}`}></div>
+      <div className={`absolute top-0 start-0 w-1.5 h-full transition-colors duration-300 ${isAi ? 'bg-red-500' : 'bg-green-500'}`}></div>
 
       <div className="p-6 md:p-8 flex-1 flex flex-col text-start">
         <span className={`self-start px-3 py-1 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-wider mb-4 border
-            ${isAi ? 'bg-red-50 dark:bg-red-500/10 text-red-600 border-red-200 dark:border-red-500/20' : 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 border-blue-200 dark:border-blue-500/20'}`}>
+            ${isAi ? 'bg-red-50 dark:bg-red-500/10 text-red-600 border-red-200 dark:border-red-500/20' : 'bg-green-50 dark:bg-green-500/10 text-green-600 border-green-200 dark:border-green-500/20'}`}>
             {isAi ? t('aiSubject') : book.subject}
         </span>
         
@@ -239,10 +238,10 @@ const SearchPage: React.FC = () => {
     return (
         <div dir={dir} className="w-full min-h-[100dvh] flex flex-col bg-slate-50 dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300 py-6 md:py-10 px-4 md:px-6">
             
-            {/* الخلفية الديناميكية الموحدة */}
+            {/* الخلفية الديناميكية الموحدة بألوان الهوية */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-40 dark:opacity-20">
                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-red-500/20 rounded-full blur-[120px]"></div>
-               <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-blue-500/10 rounded-full blur-[100px]"></div>
+               <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-green-500/10 rounded-full blur-[100px]"></div>
             </div>
 
             <div className="w-full max-w-[1400px] mx-auto flex flex-col animate-fade-in-up pb-20">
