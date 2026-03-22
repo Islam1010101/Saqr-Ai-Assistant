@@ -53,7 +53,7 @@ const translations = {
   }
 };
 
-// --- 2. Component: BookModal (توسيط مطلق ومتجاوب تماماً) ---
+// --- 2. Component: BookModal (التوسيط الإجباري المطلق - The Nuclear Centering) ---
 const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
     const { locale, dir } = useLanguage();
     const [aiContent, setAiContent] = useState({ summary: '', genre: '' });
@@ -92,21 +92,25 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
     if (!book) return null;
 
     return (
-        // استخدام حاوية بخصائص صارمة لضمان التوسيط في منتصف الشاشة وتغطية الفوتر
-        <div
-            dir={dir}
-            className="fixed inset-0 z-[9999] flex items-center justify-center min-h-screen p-4 md:p-8 backdrop-blur-md bg-slate-950/60 animate-fade-in"
-            onClick={onClose}
-        >
+        <>
+            {/* 1. طبقة الخلفية المعتمة (مفصلة لضمان التغطية الكاملة لكل الشاشة) */}
             <div 
-                className="relative w-[95%] md:w-full max-w-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl border border-white/20 dark:border-white/5 overflow-hidden flex flex-col max-h-[90vh] animate-zoom-in" 
+                className="fixed inset-0 z-[9998] backdrop-blur-md bg-slate-950/60 animate-fade-in" 
+                onClick={onClose} 
+            />
+
+            {/* 2. النافذة المنبثقة (توسيط جبري دقيق عبر inset-0 و m-auto و h-fit) */}
+            <div 
+                dir={dir}
+                className="fixed inset-0 m-auto h-fit z-[9999] w-[95%] max-w-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl border border-white/20 dark:border-white/5 overflow-hidden flex flex-col max-h-[85vh] animate-zoom-in" 
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* زر الإغلاق المطور */}
+                {/* زر الإغلاق */}
                 <button onClick={onClose} className={`absolute top-5 ${locale === 'ar' ? 'left-5' : 'right-5'} z-50 p-2 md:p-3 bg-slate-100/50 hover:bg-red-500 dark:bg-slate-800/50 dark:hover:bg-red-600 hover:text-white transition-all rounded-full shadow-lg backdrop-blur-md`}>
                     <svg className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
 
+                {/* المحتوى الداخلي */}
                 <div className="p-6 md:p-10 lg:p-12 overflow-y-auto no-scrollbar flex flex-col items-center text-center">
                     <span className="inline-block px-4 py-1.5 rounded-full bg-red-600/10 text-red-600 text-[10px] font-black uppercase tracking-widest mb-6 border border-red-600/20 shadow-sm">Saqr AI Insight</span>
                     <h2 className="text-2xl md:text-4xl text-slate-950 dark:text-white font-black leading-tight mb-2 tracking-tight">{book.title}</h2>
@@ -152,7 +156,7 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                     </button>
                 </div>
             </div>
-        </div>
+        </>
     );
 };
 
@@ -211,15 +215,13 @@ const SearchPage: React.FC = () => {
     const [visibleCount, setVisibleCount] = useState(16);
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-    // إضافة حالة لتتبع ظهور شريط البحث بناءً على حركة التمرير
+    // حالة لتتبع ظهور شريط البحث بناءً على حركة التمرير
     const [isSearchVisible, setIsSearchVisible] = useState(true);
     const [lastScrollY, setLastScrollY] = useState(0);
 
     useEffect(() => {
         const handleScroll = () => {
             const currentScrollY = window.scrollY;
-            // إخفاء الشريط عند النزول للأسفل، وإظهاره عند الصعود
-            // زيادة الـ offset قليلاً لتجنب الإخفاء غير المقصود
             if (currentScrollY > lastScrollY && currentScrollY > 100) {
                 setIsSearchVisible(false);
             } else {
