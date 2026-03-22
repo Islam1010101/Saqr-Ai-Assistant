@@ -54,68 +54,39 @@ const translations = {
   }
 };
 
-// --- 2. Component: BookModal (قابلة للسحب بدعم قوي للمس والماوس) ---
+// --- 2. Component: BookModal (التوسيط المطلق والسحب الاحترافي) ---
 const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
     const { locale, dir } = useLanguage();
     const [aiContent, setAiContent] = useState({ summary: '', genre: '' });
     const [loading, setLoading] = useState(false);
 
-    // --- منطق السحب المُحدّث (Drag Logic) ---
-    const [position, setPosition] = useState({ x: 0, y: 0 });
+    // --- منطق السحب المطور (Pointer Events) لضمان الاستجابة على كل الأجهزة ---
+    const [offset, setOffset] = useState({ x: 0, y: 0 });
     const [isDragging, setIsDragging] = useState(false);
-    const dragStart = useRef({ x: 0, y: 0 });
+    const modalRef = useRef<HTMLDivElement>(null);
 
-    const handleDragStart = (clientX: number, clientY: number) => {
+    const onPointerDown = (e: React.PointerEvent) => {
         setIsDragging(true);
-        dragStart.current = {
-            x: clientX - position.x,
-            y: clientY - position.y
-        };
+        // التقاط المؤشر لضمان استمرار السحب حتى لو خرج الماوس/الإصبع عن الشريط
+        (e.target as HTMLElement).setPointerCapture(e.pointerId);
     };
 
-    const handleDragMove = (clientX: number, clientY: number) => {
+    const onPointerMove = (e: React.PointerEvent) => {
         if (!isDragging) return;
-        setPosition({
-            x: clientX - dragStart.current.x,
-            y: clientY - dragStart.current.y
-        });
+        setOffset(prev => ({
+            x: prev.x + e.movementX,
+            y: prev.y + e.movementY
+        }));
     };
 
-    const handleDragEnd = () => {
+    const onPointerUp = (e: React.PointerEvent) => {
         setIsDragging(false);
+        (e.target as HTMLElement).releasePointerCapture(e.pointerId);
     };
-
-    // مستمعات الأحداث العالمية (Global Listeners) لضمان عدم فقدان السحب عند التحرك السريع
-    useEffect(() => {
-        if (isDragging) {
-            const onMouseMove = (e: MouseEvent) => handleDragMove(e.clientX, e.clientY);
-            const onMouseUp = () => handleDragEnd();
-            const onTouchMove = (e: TouchEvent) => {
-                e.preventDefault(); // منع تمرير الصفحة أثناء السحب
-                handleDragMove(e.touches[0].clientX, e.touches[0].clientY);
-            };
-            const onTouchEnd = () => handleDragEnd();
-
-            // إضافة المستمعات
-            document.addEventListener('mousemove', onMouseMove);
-            document.addEventListener('mouseup', onMouseUp);
-            document.addEventListener('touchmove', onTouchMove, { passive: false });
-            document.addEventListener('touchend', onTouchEnd);
-
-            return () => {
-                // تنظيف المستمعات
-                document.removeEventListener('mousemove', onMouseMove);
-                document.removeEventListener('mouseup', onMouseUp);
-                document.removeEventListener('touchmove', onTouchMove);
-                document.removeEventListener('touchend', onTouchEnd);
-            };
-        }
-    }, [isDragging, position]); // إعادة ربط المستمعات لتحديث الـ position
-    // ------------------------------------
 
     useEffect(() => {
         if (!book) {
-            setPosition({ x: 0, y: 0 }); // إعادة التمركز عند إغلاق النافذة
+            setOffset({ x: 0, y: 0 });
             return;
         }
         
@@ -148,90 +119,82 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
 
     if (!book) return null;
 
-    const modalContent = (
-        <div dir={dir} className="fixed inset-0 z-[999999] flex items-center justify-center p-4 sm:p-6 md:p-8" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
-            {/* طبقة الخلفية المعتمة */}
-            <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-md animate-fade-in" onClick={onClose} />
+    const modalPortal = (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center pointer-events-none">
+            {/* الخلفية المعتمة */}
+            <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-md pointer-events-auto animate-fade-in" onClick={onClose} />
             
-            {/* الحاوية القابلة للسحب */}
+            {/* النافذة المنبثقة */}
             <div 
-                className="relative z-10 w-full max-w-2xl animate-zoom-in"
+                ref={modalRef}
+                dir={dir}
+                className="relative w-[92%] max-w-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl border border-white/20 dark:border-white/5 overflow-hidden flex flex-col max-h-[85vh] pointer-events-auto animate-zoom-in"
                 style={{ 
-                    transform: `translate(${position.x}px, ${position.y}px)`,
-                    transition: isDragging ? 'none' : 'transform 0.1s ease-out', // إيقاف الانتقال السلس أثناء السحب الفعلي
-                    touchAction: 'none' // مهم جداً للموبايل
+                    transform: `translate(${offset.x}px, ${offset.y}px)`,
+                    touchAction: 'none' // تمنع تداخل سحب الصفحة مع سحب النافذة
                 }}
-                onClick={(e) => e.stopPropagation()}
             >
-                <div className="w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl border border-white/20 dark:border-white/5 overflow-hidden flex flex-col max-h-[85vh] md:max-h-[90vh]">
+                {/* شريط السحب العلوي (Drag Handle) */}
+                <div 
+                    className="w-full pt-6 pb-2 flex justify-center cursor-grab active:cursor-grabbing select-none"
+                    onPointerDown={onPointerDown}
+                    onPointerMove={onPointerMove}
+                    onPointerUp={onPointerUp}
+                    onPointerCancel={onPointerUp}
+                >
+                    <div className="w-16 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full" />
+                </div>
+
+                {/* زر الإغلاق */}
+                <button onClick={onClose} className={`absolute top-5 ${locale === 'ar' ? 'left-5' : 'right-5'} z-50 p-2 md:p-3 bg-slate-100/50 hover:bg-red-500 dark:bg-slate-800/50 dark:hover:bg-red-600 hover:text-white transition-all rounded-full shadow-lg backdrop-blur-md`}>
+                    <svg className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+
+                <div className="p-6 md:p-10 lg:p-12 overflow-y-auto no-scrollbar flex flex-col items-center text-center">
+                    <span className="inline-block px-4 py-1.5 rounded-full bg-red-600/10 text-red-600 text-[10px] font-black uppercase tracking-widest mb-6 border border-red-600/20 shadow-sm">Saqr AI Insight</span>
+                    <h2 className="text-2xl md:text-4xl text-slate-950 dark:text-white font-black leading-tight mb-2 tracking-tight">{book.title}</h2>
+                    <p className="text-base md:text-xl text-slate-500 dark:text-slate-400 font-bold mb-8 opacity-70">By {book.author}</p>
                     
-                    {/* منطقة السحب (Drag Handle) */}
-                    <div 
-                        className="w-full pt-5 pb-3 flex justify-center cursor-grab active:cursor-grabbing relative z-[100]"
-                        onMouseDown={(e) => handleDragStart(e.clientX, e.clientY)}
-                        onTouchStart={(e) => {
-                            e.preventDefault(); // منع الأحداث الافتراضية للمس هنا
-                            handleDragStart(e.touches[0].clientX, e.touches[0].clientY);
-                        }}
-                    >
-                        <div className="w-20 h-1.5 bg-slate-300/80 dark:bg-slate-600/80 rounded-full hover:bg-slate-400 dark:hover:bg-slate-500 transition-colors"></div>
-                    </div>
-
-                    {/* زر الإغلاق */}
-                    <button onClick={onClose} className={`absolute top-4 md:top-6 ${locale === 'ar' ? 'left-4 md:left-6' : 'right-4 md:right-6'} z-[110] p-2 md:p-3 bg-slate-100/50 hover:bg-red-500 dark:bg-slate-800/50 dark:hover:bg-red-600 hover:text-white transition-all rounded-full shadow-lg backdrop-blur-md`}>
-                        <svg className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
-
-                    <div className="p-6 pt-0 md:p-10 md:pt-2 lg:p-12 lg:pt-4 overflow-y-auto no-scrollbar flex flex-col items-center text-center relative z-50">
-                        <span className="inline-block px-4 py-1.5 rounded-full bg-red-600/10 text-red-600 text-[10px] font-black uppercase tracking-widest mb-6 border border-red-600/20 shadow-sm">Saqr AI Insight</span>
-                        <h2 className="text-2xl md:text-4xl text-slate-950 dark:text-white font-black leading-tight mb-2 tracking-tight">{book.title}</h2>
-                        <p className="text-base md:text-xl text-slate-500 dark:text-slate-400 font-bold mb-8 opacity-70">By {book.author}</p>
-                        
-                        {/* لوحة البيانات الزجاجية */}
-                        <div className="w-full max-w-lg bg-white/50 dark:bg-white/5 backdrop-blur-md p-6 md:p-8 rounded-[2rem] mb-8 border border-white/20 dark:border-white/5 shadow-inner">
-                            <div className="text-center mb-6">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{t('subjectLabel')}</p>
-                                <p className="text-xl md:text-2xl font-black text-slate-900 dark:text-white leading-tight">
-                                    {loading ? '...' : (aiContent.genre || book.subject)}
-                                </p>
-                            </div>
-                            
-                            <div className="w-full h-px bg-slate-200 dark:bg-white/10 mb-6"></div>
-                            
-                            <div className="flex justify-center gap-10 md:gap-20 w-full">
-                                <div className="text-center">
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{t('shelf')}</p>
-                                    <p className="text-4xl md:text-5xl font-black text-red-600">{book.shelf}</p>
-                                </div>
-                                <div className="w-px bg-slate-200 dark:bg-white/10"></div>
-                                <div className="text-center">
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{t('row')}</p>
-                                    <p className="text-4xl md:text-5xl font-black text-green-600">{book.row}</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* تحليل الذكاء الاصطناعي */}
-                        <div className="w-full bg-slate-50/80 dark:bg-slate-800/50 backdrop-blur-sm p-6 md:p-8 rounded-[2rem] border border-slate-100 dark:border-white/5 relative text-start mb-8 shadow-sm">
-                            <div className="flex items-center gap-3 mb-4">
-                               <span className={`w-2.5 h-2.5 rounded-full ${loading ? 'animate-ping bg-red-600' : 'bg-green-600'}`}></span>
-                               <p className="text-[10px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest">{t('officialAi')}</p>
-                            </div>
-                            <p className="text-slate-800 dark:text-slate-200 text-base md:text-xl font-bold leading-relaxed">
-                               {loading ? <span className="animate-pulse">...</span> : `"${aiContent.summary}"`}
+                    <div className="w-full max-w-lg bg-white/50 dark:bg-white/5 backdrop-blur-md p-6 md:p-8 rounded-[2rem] mb-8 border border-white/20 dark:border-white/5 shadow-inner">
+                        <div className="text-center mb-6">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{t('subjectLabel')}</p>
+                            <p className="text-xl md:text-2xl font-black text-slate-900 dark:text-white leading-tight">
+                                {loading ? '...' : (aiContent.genre || book.subject)}
                             </p>
                         </div>
-
-                        <button onClick={onClose} className="w-full max-w-xs mx-auto bg-slate-950 dark:bg-white text-white dark:text-slate-950 font-black py-4 md:py-5 rounded-full hover:bg-red-600 dark:hover:bg-red-600 hover:text-white transition-all uppercase tracking-widest text-xs shadow-xl active:scale-95">
-                            {t('close')}
-                        </button>
+                        <div className="w-full h-px bg-slate-200 dark:bg-white/10 mb-6"></div>
+                        <div className="flex justify-center gap-10 md:gap-20 w-full">
+                            <div className="text-center">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{t('shelf')}</p>
+                                <p className="text-4xl md:text-5xl font-black text-red-600">{book.shelf}</p>
+                            </div>
+                            <div className="w-px bg-slate-200 dark:bg-white/10"></div>
+                            <div className="text-center">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{t('row')}</p>
+                                <p className="text-4xl md:text-5xl font-black text-green-600">{book.row}</p>
+                            </div>
+                        </div>
                     </div>
+
+                    <div className="w-full bg-slate-50/80 dark:bg-slate-800/50 backdrop-blur-sm p-6 md:p-8 rounded-[2rem] border border-slate-100 dark:border-white/5 relative text-start mb-8 shadow-sm">
+                        <div className="flex items-center gap-3 mb-4">
+                           <span className={`w-2.5 h-2.5 rounded-full ${loading ? 'animate-ping bg-red-600' : 'bg-green-600'}`}></span>
+                           <p className="text-[10px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest">{t('officialAi')}</p>
+                        </div>
+                        <p className="text-slate-800 dark:text-slate-200 text-base md:text-xl font-bold leading-relaxed">
+                           {loading ? <span className="animate-pulse">...</span> : `"${aiContent.summary}"`}
+                        </p>
+                    </div>
+
+                    <button onClick={onClose} className="w-full max-w-xs mx-auto bg-slate-950 dark:bg-white text-white dark:text-slate-950 font-black py-4 md:py-5 rounded-full hover:bg-red-600 dark:hover:bg-red-600 hover:text-white transition-all uppercase tracking-widest text-xs shadow-xl active:scale-95">
+                        {t('close')}
+                    </button>
                 </div>
             </div>
         </div>
     );
 
-    return createPortal(modalContent, document.body);
+    return createPortal(modalPortal, document.body);
 };
 
 // --- 3. Component: BookCard (البطاقة الزجاجية) ---
@@ -289,6 +252,7 @@ const SearchPage: React.FC = () => {
     const [visibleCount, setVisibleCount] = useState(16);
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
+    // نظام إخفاء/إظهار شريط البحث بالتمرير
     const [isSearchVisible, setIsSearchVisible] = useState(true);
     const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -334,7 +298,7 @@ const SearchPage: React.FC = () => {
     return (
         <div dir={dir} className="w-full min-h-[100dvh] flex flex-col py-6 md:py-10 px-4 md:px-6 relative">
             
-            {/* الخلفية الديناميكية للهوية الوطنية */}
+            {/* الخلفية الديناميكية */}
             <div className="fixed inset-0 overflow-hidden -z-10 pointer-events-none opacity-50 dark:opacity-30">
                <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-red-600/10 dark:bg-red-500/20 blur-[150px] rounded-full animate-pulse"></div>
                <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] bg-green-600/10 dark:bg-green-500/20 blur-[150px] rounded-full animate-pulse [animation-delay:2s]"></div>
@@ -355,7 +319,7 @@ const SearchPage: React.FC = () => {
                                 <input 
                                   type="text" 
                                   placeholder={t('searchPlaceholder')} 
-                                  className="w-full py-5 px-8 ps-16 md:ps-20 bg-black/5 dark:bg-white/5 border border-transparent focus:border-red-600 focus:bg-white dark:focus:bg-slate-900 rounded-3xl outline-none transition-all text-slate-950 dark:text-white font-bold text-base md:text-xl placeholder-slate-400" 
+                                  className="w-full py-5 px-8 ps-16 md:ps-20 bg-black/5 dark:bg-white/5 border border-transparent focus:border-red-600 focus:bg-white dark:focus:bg-slate-900 rounded-3xl outline-none transition-all text-slate-950 dark:text-white font-bold text-base md:text-xl placeholder-slate-400 shadow-inner" 
                                   value={searchTerm}
                                   onChange={(e) => setSearchTerm(e.target.value)} 
                                 />
