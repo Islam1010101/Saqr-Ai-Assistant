@@ -53,7 +53,7 @@ const translations = {
   }
 };
 
-// --- 2. Component: BookModal (النافذة المنبثقة - تم التوسيط وتغيير الألوان) ---
+// --- 2. Component: BookModal (تم التعديل للتوسيط المطلق وتغيير الألوان) ---
 const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
     const { locale, dir } = useLanguage();
     const [aiContent, setAiContent] = useState({ summary: '', genre: '' });
@@ -92,62 +92,62 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
     if (!book) return null;
 
     return (
-        // تم تغيير grid إلى flex لضمان التوسيط المطلق في منتصف الشاشة
-        <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 backdrop-blur-sm bg-slate-900/40 dark:bg-black/60 animate-fade-in" onClick={onClose}>
+        // تم استخدام flex مع items-center و justify-center لضمان التوسيط في منتصف الشاشة تماماً
+        <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 md:p-8 backdrop-blur-md bg-slate-900/60 animate-fade-in" onClick={onClose}>
             <div 
                 dir={dir}
-                className="relative w-full max-w-3xl bg-white dark:bg-slate-800 rounded-[2rem] md:rounded-[3rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border border-slate-200 dark:border-slate-700 animate-zoom-in" 
+                className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border border-white/20 dark:border-white/5 animate-zoom-in" 
                 onClick={(e) => e.stopPropagation()}
             >
                 
                 {/* زر الإغلاق */}
-                <button onClick={onClose} className={`absolute top-4 ${locale === 'ar' ? 'left-4' : 'right-4'} z-50 p-2 md:p-3 bg-slate-100 hover:bg-red-100 dark:bg-slate-700 dark:hover:bg-red-900/30 text-slate-500 hover:text-red-600 transition-colors rounded-full`}>
-                    <svg className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                <button onClick={onClose} className={`absolute top-6 ${locale === 'ar' ? 'left-6' : 'right-6'} z-50 p-2 md:p-3 bg-slate-100 hover:bg-red-100 dark:bg-slate-800 dark:hover:bg-red-900/40 text-slate-500 hover:text-red-600 transition-all rounded-full shadow-md`}>
+                    <svg className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
 
                 {/* المحتوى النصي والملخص */}
-                <div className="p-6 md:p-10 lg:p-12 overflow-y-auto no-scrollbar flex flex-col items-center text-center">
-                    <span className="inline-block px-4 py-1.5 rounded-full bg-red-50 dark:bg-red-500/10 text-red-600 text-xs font-bold uppercase tracking-widest mb-4 border border-red-100 dark:border-red-500/20">Saqr AI</span>
-                    <h2 className="text-2xl md:text-4xl lg:text-5xl text-slate-900 dark:text-white font-black leading-tight mb-2">{book.title}</h2>
-                    <p className="text-lg md:text-xl text-slate-500 dark:text-slate-400 font-bold mb-8">By {book.author}</p>
+                <div className="p-8 md:p-12 overflow-y-auto no-scrollbar flex flex-col items-center text-center">
+                    <span className="inline-block px-4 py-1.5 rounded-full bg-red-50 dark:bg-red-500/10 text-red-600 text-[10px] font-black uppercase tracking-widest mb-6 border border-red-100 dark:border-red-500/20 shadow-sm">Saqr AI Insight</span>
+                    <h2 className="text-3xl md:text-5xl text-slate-900 dark:text-white font-black leading-tight mb-3 tracking-tighter">{book.title}</h2>
+                    <p className="text-lg md:text-xl text-slate-500 dark:text-slate-400 font-bold mb-10 opacity-70">By {book.author}</p>
                     
                     {/* بيانات الرف والصف (في الوسط) */}
-                    <div className="w-full max-w-xl bg-slate-50 dark:bg-slate-900 p-6 md:p-8 rounded-3xl mb-8 flex flex-col items-center border border-slate-200 dark:border-slate-700">
-                        <div className="text-center mb-6">
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">{t('subjectLabel')}</p>
-                            <p className="text-xl md:text-2xl font-black text-slate-800 dark:text-white leading-tight">
+                    <div className="w-full max-w-lg bg-slate-50/50 dark:bg-white/5 p-8 md:p-10 rounded-[2rem] md:rounded-[2.5rem] mb-10 flex flex-col items-center border border-slate-100 dark:border-white/5 shadow-inner">
+                        <div className="text-center mb-8">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 opacity-60">{t('subjectLabel')}</p>
+                            <p className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white leading-tight">
                                 {loading ? '...' : (aiContent.genre || book.subject)}
                             </p>
                         </div>
                         
-                        <div className="w-full h-px bg-slate-200 dark:bg-slate-700 mb-6"></div>
+                        <div className="w-full h-px bg-slate-200/50 dark:bg-white/10 mb-8"></div>
                         
-                        <div className="flex justify-center gap-12 md:gap-20 w-full">
+                        <div className="flex justify-center gap-12 md:gap-24 w-full">
                             <div className="text-center">
-                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">{t('shelf')}</p>
-                                <p className="text-4xl md:text-5xl font-black text-red-600 dark:text-red-500">{book.shelf}</p>
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 opacity-60">{t('shelf')}</p>
+                                <p className="text-5xl md:text-6xl font-black text-red-600 drop-shadow-sm">{book.shelf}</p>
                             </div>
-                            <div className="w-px bg-slate-200 dark:bg-slate-700"></div>
+                            <div className="w-px bg-slate-200/50 dark:bg-white/10"></div>
                             <div className="text-center">
-                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">{t('row')}</p>
-                                {/* تم تغيير اللون من أزرق إلى أخضر إماراتي */}
-                                <p className="text-4xl md:text-5xl font-black text-green-600 dark:text-green-500">{book.row}</p>
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 opacity-60">{t('row')}</p>
+                                {/* تم تغيير اللون إلى الأخضر الإماراتي */}
+                                <p className="text-5xl md:text-6xl font-black text-green-600 drop-shadow-sm">{book.row}</p>
                             </div>
                         </div>
                     </div>
 
                     {/* الملخص */}
-                    <div className="w-full bg-slate-50 dark:bg-slate-900/50 p-6 md:p-8 rounded-3xl border border-slate-100 dark:border-slate-700 relative text-start mb-8">
-                        <div className="flex items-center gap-3 mb-4">
-                           <span className={`w-2.5 h-2.5 rounded-full ${loading ? 'animate-ping bg-red-500' : 'bg-green-500'}`}></span>
-                           <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">{t('officialAi')}</p>
+                    <div className="w-full bg-slate-50 dark:bg-white/5 p-8 md:p-10 rounded-[2rem] border border-slate-100 dark:border-white/5 relative text-start mb-10 shadow-sm">
+                        <div className="flex items-center gap-3 mb-5">
+                           <span className={`w-2.5 h-2.5 rounded-full ${loading ? 'animate-ping bg-red-600' : 'bg-green-600 shadow-[0_0_8px_rgba(22,163,74,0.5)]'}`}></span>
+                           <p className="text-[10px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest">{t('officialAi')}</p>
                         </div>
-                        <p className="text-slate-800 dark:text-slate-200 text-base md:text-xl font-medium leading-[1.8]">
-                           {loading ? <span className="animate-pulse">...</span> : `"${aiContent.summary}"`}
+                        <p className="text-slate-800 dark:text-slate-200 text-lg md:text-2xl font-bold leading-relaxed">
+                           {loading ? <span className="animate-pulse opacity-50">...</span> : `"${aiContent.summary}"`}
                         </p>
                     </div>
 
-                    <button onClick={onClose} className="w-full max-w-xs mx-auto bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold py-4 rounded-full hover:bg-red-600 dark:hover:bg-red-600 hover:text-white transition-colors uppercase tracking-widest text-sm">
+                    <button onClick={onClose} className="w-full max-w-xs mx-auto bg-slate-950 dark:bg-white text-white dark:text-slate-950 font-black py-5 rounded-full hover:bg-red-600 dark:hover:bg-red-600 hover:text-white transition-all uppercase tracking-widest text-xs md:text-sm shadow-xl active:scale-95">
                         {t('close')}
                     </button>
                 </div>
@@ -156,48 +156,47 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
     );
 };
 
-// --- 3. Component: BookCard (البطاقات العصرية) ---
+// --- 3. Component: BookCard (تغيير الأزرق إلى أخضر) ---
 const BookCard = React.memo(({ book, onClick, t }: { book: Book; onClick: () => void; t: any }) => {
   const isAi = !book.subject || book.subject === "Unknown";
 
   return (
-    <div onClick={onClick} className="group bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-red-500/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden cursor-pointer h-full relative">
+    <div onClick={onClick} className="group bg-white/70 dark:bg-white/5 backdrop-blur-xl rounded-[2rem] border border-slate-200 dark:border-white/5 hover:border-red-600/50 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 flex flex-col overflow-hidden cursor-pointer h-full relative">
       
-      {/* الخط الجانبي - تم استبدال الأزرق بالأخضر */}
-      <div className={`absolute top-0 start-0 w-1.5 h-full transition-colors duration-300 ${isAi ? 'bg-red-500' : 'bg-green-500'}`}></div>
+      {/* الخط الجانبي - أخضر للهوية الوطنية */}
+      <div className={`absolute top-0 start-0 w-2 h-full transition-all duration-500 ${isAi ? 'bg-red-600 shadow-[2px_0_10px_rgba(220,38,38,0.2)]' : 'bg-green-600 shadow-[2px_0_10px_rgba(22,163,74,0.2)]'}`}></div>
 
-      <div className="p-6 md:p-8 flex-1 flex flex-col text-start">
-        {/* شارة التصنيف - تم استبدال الأزرق بالأخضر */}
-        <span className={`self-start px-3 py-1 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-wider mb-4 border
-            ${isAi ? 'bg-red-50 dark:bg-red-500/10 text-red-600 border-red-200 dark:border-red-500/20' : 'bg-green-50 dark:bg-green-500/10 text-green-600 border-green-200 dark:border-green-500/20'}`}>
+      <div className="p-8 flex-1 flex flex-col text-start">
+        {/* شارة التصنيف - أخضر */}
+        <span className={`self-start px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-wider mb-5 border
+            ${isAi ? 'bg-red-50 dark:bg-red-600/10 text-red-600 border-red-200 dark:border-red-600/20' : 'bg-green-50 dark:bg-green-600/10 text-green-600 border-green-200 dark:border-green-600/20'}`}>
             {isAi ? t('aiSubject') : book.subject}
         </span>
         
-        <h3 className="font-black text-lg md:text-xl text-slate-900 dark:text-white leading-snug mb-3 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors line-clamp-2">
+        <h3 className="font-black text-xl md:text-2xl text-slate-950 dark:text-white leading-tight mb-4 group-hover:text-red-600 transition-colors line-clamp-2">
             {book.title}
         </h3>
         
-        <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-auto truncate flex items-center gap-2">
-            <span className="text-lg">👤</span> {book.author}
+        <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-auto truncate flex items-center gap-2">
+            <span className="text-lg opacity-50">👤</span> {book.author}
         </p>
       </div>
 
-      {/* الفوتر الخاص بالرف والصف */}
-      <div className="bg-slate-50 dark:bg-slate-900/50 px-6 py-4 flex justify-between items-center border-t border-slate-100 dark:border-slate-700">
-        <div className="flex gap-6 items-center">
+      <div className="bg-slate-50/50 dark:bg-white/5 px-8 py-5 flex justify-between items-center border-t border-slate-100 dark:border-white/5">
+        <div className="flex gap-8 items-center">
             <div className="text-center">
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{t('shelf')}</p>
-                <p className="text-lg font-black text-slate-800 dark:text-white leading-none mt-1">{book.shelf}</p>
+                <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest opacity-60">{t('shelf')}</p>
+                <p className="text-xl font-black text-slate-900 dark:text-white mt-1">{book.shelf}</p>
             </div>
-            <div className="w-px h-8 bg-slate-200 dark:bg-slate-700"></div>
+            <div className="w-px h-8 bg-slate-200 dark:bg-white/10"></div>
             <div className="text-center">
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{t('row')}</p>
-                <p className="text-lg font-black text-slate-800 dark:text-white leading-none mt-1">{book.row}</p>
+                <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest opacity-60">{t('row')}</p>
+                <p className="text-xl font-black text-slate-900 dark:text-white mt-1">{book.row}</p>
             </div>
         </div>
         
-        <div className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-600 flex items-center justify-center text-slate-400 group-hover:bg-red-600 group-hover:border-red-600 group-hover:text-white transition-colors">
-            <svg className="w-4 h-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+        <div className="w-9 h-9 rounded-full border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-400 group-hover:bg-red-600 group-hover:border-red-600 group-hover:text-white transition-all shadow-sm">
+            <svg className="w-4 h-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
         </div>
       </div>
     </div>
@@ -243,40 +242,38 @@ const SearchPage: React.FC = () => {
     }, [debouncedSearchTerm, subjectFilter, authorFilter, shelfFilter, sortBy, locale]);
 
     return (
-        <div dir={dir} className="w-full min-h-[100dvh] flex flex-col bg-slate-50 dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300 py-6 md:py-10 px-4 md:px-6">
+        <div dir={dir} className="w-full min-h-[100dvh] flex flex-col transition-colors duration-700 py-6 md:py-10 px-4 md:px-6 relative">
             
-            {/* الخلفية الديناميكية الموحدة بألوان الهوية */}
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-40 dark:opacity-20">
-               <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-red-500/20 rounded-full blur-[120px]"></div>
-               <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-green-500/10 rounded-full blur-[100px]"></div>
+            {/* الخلفية الديناميكية الموحدة بألوان الهوية الوطنية */}
+            <div className="fixed inset-0 overflow-hidden -z-10 pointer-events-none opacity-40 dark:opacity-30">
+               <div className="absolute top-[-15%] left-[-10%] w-[50%] h-[50%] bg-red-600/10 rounded-full blur-[150px]"></div>
+               {/* تم تغيير اللون الأزرق في الخلفية إلى أخضر إماراتي */}
+               <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[60%] bg-green-600/15 rounded-full blur-[150px]"></div>
             </div>
 
             <div className="w-full max-w-[1400px] mx-auto flex flex-col animate-fade-in-up pb-20">
                 
-                {/* العنوان */}
-                <div className="text-center mb-8 md:mb-12">
-                    <h1 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight">{t('pageTitle')}</h1>
+                <div className="text-center mb-12 md:mb-16">
+                    <h1 className="text-4xl md:text-7xl font-black text-slate-950 dark:text-white tracking-tighter uppercase">{t('pageTitle')}</h1>
+                    <div className="h-1.5 w-24 bg-red-600 mx-auto mt-6 rounded-full shadow-lg"></div>
                 </div>
 
-                {/* بار البحث والفلاتر (Sticky) */}
-                <div className="sticky top-4 md:top-6 z-[100] mb-8 md:mb-12">
-                    <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200 dark:border-slate-700 shadow-sm rounded-3xl md:rounded-[2.5rem] p-4 md:p-6 transition-all">
-                        <div className="flex flex-col gap-4">
+                <div className="sticky top-4 md:top-8 z-[100] mb-12 md:mb-20">
+                    <div className="bg-white/80 dark:bg-slate-950/80 backdrop-blur-2xl border border-slate-200 dark:border-white/10 shadow-2xl rounded-[2.5rem] md:rounded-[4rem] p-5 md:p-8 transition-all">
+                        <div className="flex flex-col gap-5">
                             
-                            {/* حقل البحث */}
                             <div className="relative group">
                                 <input 
                                   type="text" 
                                   placeholder={t('searchPlaceholder')} 
-                                  className="w-full py-4 px-6 ps-14 md:ps-16 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:border-red-500 dark:focus:border-red-500 rounded-2xl outline-none transition-colors text-slate-900 dark:text-white font-medium text-sm md:text-base placeholder-slate-400" 
+                                  className="w-full py-5 px-8 ps-16 md:ps-20 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 focus:border-red-600 dark:focus:border-red-600 rounded-3xl outline-none transition-all text-slate-950 dark:text-white font-bold text-base md:text-xl placeholder-slate-400 shadow-inner" 
                                   value={searchTerm}
                                   onChange={(e) => setSearchTerm(e.target.value)} 
                                 />
-                                <svg className="absolute start-5 top-1/2 -translate-y-1/2 h-5 w-5 md:h-6 md:w-6 text-slate-400 group-focus-within:text-red-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                                <svg className="absolute start-6 top-1/2 -translate-y-1/2 h-6 w-6 md:h-8 md:w-8 text-slate-400 group-focus-within:text-red-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                             </div>
                             
-                            {/* شبكة الفلاتر */}
-                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                                 {[
                                     { id: 'sortBy', val: sortBy, set: setSortBy, opts: ['alphabetical', 'author'] },
                                     { id: 'allSubjects', val: subjectFilter, set: setSubjectFilter, opts: filters.subjects },
@@ -287,13 +284,13 @@ const SearchPage: React.FC = () => {
                                         <select 
                                             value={filter.val} 
                                             onChange={(e) => filter.set(e.target.value)} 
-                                            className="w-full py-3 px-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs md:text-sm cursor-pointer appearance-none outline-none focus:border-red-500 hover:border-slate-300 dark:hover:border-slate-600 transition-colors"
+                                            className="w-full py-4 px-6 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-950 dark:text-white font-black text-xs md:text-sm cursor-pointer appearance-none outline-none focus:border-red-600 hover:bg-white dark:hover:bg-white/10 transition-all shadow-sm"
                                         >
                                             <option value={filter.id === 'sortBy' ? 'alphabetical' : 'all'}>{t(filter.id)}</option>
                                             {filter.opts.map(o => <option key={o} value={o}>{filter.pre && locale === 'en' ? `${filter.pre}${o}` : o}</option>)}
                                         </select>
-                                        <div className="absolute end-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 transition-colors">
-                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                        <div className="absolute end-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-hover:text-red-600 transition-colors">
+                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
                                         </div>
                                     </div>
                                 ))}
@@ -302,25 +299,24 @@ const SearchPage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* شبكة الكتب */}
                 {filteredBooks.length === 0 ? (
-                    <div className="flex-1 flex items-center justify-center text-slate-500 dark:text-slate-400 font-medium text-lg">
-                        {t('noResults')}
+                    <div className="flex-1 flex flex-col items-center justify-center py-20 text-slate-400">
+                        <span className="text-8xl mb-6 opacity-20">🔍</span>
+                        <p className="font-black text-2xl uppercase tracking-widest">{t('noResults')}</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 md:gap-10">
                         {filteredBooks.slice(0, visibleCount).map((book) => (
                             <BookCard key={book.id} book={book} t={t} onClick={() => setSelectedBook(book)} />
                         ))}
                     </div>
                 )}
 
-                {/* زر استكشف المزيد */}
                 {filteredBooks.length > visibleCount && (
-                    <div className="mt-16 text-center">
+                    <div className="mt-20 text-center">
                         <button 
                             onClick={() => setVisibleCount(prev => prev + 16)} 
-                            className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-bold rounded-full px-10 py-4 hover:shadow-lg hover:-translate-y-1 transition-all text-sm md:text-base uppercase tracking-widest"
+                            className="bg-slate-950 dark:bg-white text-white dark:text-slate-950 font-black rounded-full px-12 py-5 hover:bg-red-600 dark:hover:bg-red-600 hover:text-white shadow-2xl hover:-translate-y-2 transition-all text-sm md:text-lg uppercase tracking-[0.3em] active:scale-95"
                         >
                             {t('exploreMore')}
                         </button>
@@ -334,12 +330,12 @@ const SearchPage: React.FC = () => {
                 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
                 * { font-family: 'Cairo', sans-serif !important; }
                 .no-scrollbar::-webkit-scrollbar { display: none; }
-                @keyframes fade-in-up { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
-                .animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; }
+                @keyframes fade-in-up { 0% { opacity: 0; transform: translateY(30px); } 100% { opacity: 1; transform: translateY(0); } }
+                .animate-fade-in-up { animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
                 @keyframes fade-in { 0% { opacity: 0; } 100% { opacity: 1; } }
-                .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
-                @keyframes zoom-in { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
-                .animate-zoom-in { animation: zoom-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+                .animate-fade-in { animation: fade-in 0.4s ease-out forwards; }
+                @keyframes zoom-in { 0% { opacity: 0; transform: scale(0.92); } 100% { opacity: 1; transform: scale(1); } }
+                .animate-zoom-in { animation: zoom-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
             `}</style>
         </div>
     );
