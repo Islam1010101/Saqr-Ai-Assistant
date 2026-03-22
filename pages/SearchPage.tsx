@@ -54,14 +54,49 @@ const translations = {
   }
 };
 
-// --- 2. Component: BookModal (التوسيط الإجباري المطلق باستخدام React Portal) ---
+// --- 2. Component: BookModal (قابلة للسحب - Draggable Modal) ---
 const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
     const { locale, dir } = useLanguage();
     const [aiContent, setAiContent] = useState({ summary: '', genre: '' });
     const [loading, setLoading] = useState(false);
 
+    // حالات السحب (Drag States)
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [isDragging, setIsDragging] = useState(false);
+    const dragStart = useRef({ x: 0, y: 0 });
+
+    // دوال التحكم بالسحب (تدعم الماوس واللمس معاً)
+    const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+        setIsDragging(true);
+        dragStart.current = {
+            x: e.clientX - position.x,
+            y: e.clientY - position.y
+        };
+        (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    };
+
+    const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+        if (!isDragging) return;
+        setPosition({
+            x: e.clientX - dragStart.current.x,
+            y: e.clientY - dragStart.current.y
+        });
+    };
+
+    const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+        setIsDragging(false);
+        const target = e.target as HTMLElement;
+        if (target.hasPointerCapture(e.pointerId)) {
+            target.releasePointerCapture(e.pointerId);
+        }
+    };
+
     useEffect(() => {
-        if (!book) return;
+        if (!book) {
+            // إعادة تعيين الموضع عند إغلاق النافذة
+            setPosition({ x: 0, y: 0 });
+            return;
+        }
         
         const fetchAiDeepDive = async () => {
             setLoading(true);
@@ -92,71 +127,87 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
 
     if (!book) return null;
 
-    // تجهيز محتوى النافذة المنبثقة لنقله خارج قيود الصفحة باستخدام Portal
     const modalContent = (
         <div dir={dir} className="fixed inset-0 z-[999999] flex items-center justify-center p-4 sm:p-6 md:p-8" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
             {/* طبقة الخلفية المعتمة */}
             <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-md animate-fade-in" onClick={onClose} />
             
-            {/* صندوق النافذة الفعلي */}
+            {/* الحاوية القابلة للسحب */}
             <div 
-                className="relative z-10 w-full max-w-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl border border-white/20 dark:border-white/5 overflow-hidden flex flex-col max-h-[85vh] md:max-h-[90vh] animate-zoom-in" 
+                className="relative z-10 w-full max-w-2xl animate-zoom-in"
+                style={{ 
+                    transform: `translate(${position.x}px, ${position.y}px)`,
+                    transition: isDragging ? 'none' : 'transform 0.1s ease-out'
+                }}
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* زر الإغلاق */}
-                <button onClick={onClose} className={`absolute top-4 md:top-6 ${locale === 'ar' ? 'left-4 md:left-6' : 'right-4 md:right-6'} z-50 p-2 md:p-3 bg-slate-100/50 hover:bg-red-500 dark:bg-slate-800/50 dark:hover:bg-red-600 hover:text-white transition-all rounded-full shadow-lg backdrop-blur-md`}>
-                    <svg className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-
-                <div className="p-6 md:p-10 lg:p-12 overflow-y-auto no-scrollbar flex flex-col items-center text-center">
-                    <span className="inline-block px-4 py-1.5 rounded-full bg-red-600/10 text-red-600 text-[10px] font-black uppercase tracking-widest mb-6 border border-red-600/20 shadow-sm">Saqr AI Insight</span>
-                    <h2 className="text-2xl md:text-4xl text-slate-950 dark:text-white font-black leading-tight mb-2 tracking-tight">{book.title}</h2>
-                    <p className="text-base md:text-xl text-slate-500 dark:text-slate-400 font-bold mb-8 opacity-70">By {book.author}</p>
+                <div className="w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl border border-white/20 dark:border-white/5 overflow-hidden flex flex-col max-h-[85vh] md:max-h-[90vh]">
                     
-                    {/* لوحة البيانات الزجاجية */}
-                    <div className="w-full max-w-lg bg-white/50 dark:bg-white/5 backdrop-blur-md p-6 md:p-8 rounded-[2rem] mb-8 border border-white/20 dark:border-white/5 shadow-inner">
-                        <div className="text-center mb-6">
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{t('subjectLabel')}</p>
-                            <p className="text-xl md:text-2xl font-black text-slate-900 dark:text-white leading-tight">
-                                {loading ? '...' : (aiContent.genre || book.subject)}
+                    {/* منطقة السحب (Drag Handle) - شريط علوي للتحريك */}
+                    <div 
+                        className="w-full pt-5 pb-3 flex justify-center cursor-grab active:cursor-grabbing touch-none select-none relative z-[100]"
+                        onPointerDown={handlePointerDown}
+                        onPointerMove={handlePointerMove}
+                        onPointerUp={handlePointerUp}
+                        onPointerCancel={handlePointerUp}
+                    >
+                        <div className="w-20 h-1.5 bg-slate-300/80 dark:bg-slate-600/80 rounded-full hover:bg-slate-400 dark:hover:bg-slate-500 transition-colors"></div>
+                    </div>
+
+                    {/* زر الإغلاق */}
+                    <button onClick={onClose} className={`absolute top-4 md:top-6 ${locale === 'ar' ? 'left-4 md:left-6' : 'right-4 md:right-6'} z-[110] p-2 md:p-3 bg-slate-100/50 hover:bg-red-500 dark:bg-slate-800/50 dark:hover:bg-red-600 hover:text-white transition-all rounded-full shadow-lg backdrop-blur-md`}>
+                        <svg className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+
+                    <div className="p-6 pt-0 md:p-10 md:pt-2 lg:p-12 lg:pt-4 overflow-y-auto no-scrollbar flex flex-col items-center text-center relative z-50">
+                        <span className="inline-block px-4 py-1.5 rounded-full bg-red-600/10 text-red-600 text-[10px] font-black uppercase tracking-widest mb-6 border border-red-600/20 shadow-sm">Saqr AI Insight</span>
+                        <h2 className="text-2xl md:text-4xl text-slate-950 dark:text-white font-black leading-tight mb-2 tracking-tight">{book.title}</h2>
+                        <p className="text-base md:text-xl text-slate-500 dark:text-slate-400 font-bold mb-8 opacity-70">By {book.author}</p>
+                        
+                        {/* لوحة البيانات الزجاجية */}
+                        <div className="w-full max-w-lg bg-white/50 dark:bg-white/5 backdrop-blur-md p-6 md:p-8 rounded-[2rem] mb-8 border border-white/20 dark:border-white/5 shadow-inner">
+                            <div className="text-center mb-6">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{t('subjectLabel')}</p>
+                                <p className="text-xl md:text-2xl font-black text-slate-900 dark:text-white leading-tight">
+                                    {loading ? '...' : (aiContent.genre || book.subject)}
+                                </p>
+                            </div>
+                            
+                            <div className="w-full h-px bg-slate-200 dark:bg-white/10 mb-6"></div>
+                            
+                            <div className="flex justify-center gap-10 md:gap-20 w-full">
+                                <div className="text-center">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{t('shelf')}</p>
+                                    <p className="text-4xl md:text-5xl font-black text-red-600">{book.shelf}</p>
+                                </div>
+                                <div className="w-px bg-slate-200 dark:bg-white/10"></div>
+                                <div className="text-center">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{t('row')}</p>
+                                    <p className="text-4xl md:text-5xl font-black text-green-600">{book.row}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* تحليل الذكاء الاصطناعي */}
+                        <div className="w-full bg-slate-50/80 dark:bg-slate-800/50 backdrop-blur-sm p-6 md:p-8 rounded-[2rem] border border-slate-100 dark:border-white/5 relative text-start mb-8 shadow-sm">
+                            <div className="flex items-center gap-3 mb-4">
+                               <span className={`w-2.5 h-2.5 rounded-full ${loading ? 'animate-ping bg-red-600' : 'bg-green-600'}`}></span>
+                               <p className="text-[10px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest">{t('officialAi')}</p>
+                            </div>
+                            <p className="text-slate-800 dark:text-slate-200 text-base md:text-xl font-bold leading-relaxed">
+                               {loading ? <span className="animate-pulse">...</span> : `"${aiContent.summary}"`}
                             </p>
                         </div>
-                        
-                        <div className="w-full h-px bg-slate-200 dark:bg-white/10 mb-6"></div>
-                        
-                        <div className="flex justify-center gap-10 md:gap-20 w-full">
-                            <div className="text-center">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{t('shelf')}</p>
-                                <p className="text-4xl md:text-5xl font-black text-red-600">{book.shelf}</p>
-                            </div>
-                            <div className="w-px bg-slate-200 dark:bg-white/10"></div>
-                            <div className="text-center">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{t('row')}</p>
-                                <p className="text-4xl md:text-5xl font-black text-green-600">{book.row}</p>
-                            </div>
-                        </div>
-                    </div>
 
-                    {/* تحليل الذكاء الاصطناعي */}
-                    <div className="w-full bg-slate-50/80 dark:bg-slate-800/50 backdrop-blur-sm p-6 md:p-8 rounded-[2rem] border border-slate-100 dark:border-white/5 relative text-start mb-8 shadow-sm">
-                        <div className="flex items-center gap-3 mb-4">
-                           <span className={`w-2.5 h-2.5 rounded-full ${loading ? 'animate-ping bg-red-600' : 'bg-green-600'}`}></span>
-                           <p className="text-[10px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest">{t('officialAi')}</p>
-                        </div>
-                        <p className="text-slate-800 dark:text-slate-200 text-base md:text-xl font-bold leading-relaxed">
-                           {loading ? <span className="animate-pulse">...</span> : `"${aiContent.summary}"`}
-                        </p>
+                        <button onClick={onClose} className="w-full max-w-xs mx-auto bg-slate-950 dark:bg-white text-white dark:text-slate-950 font-black py-4 md:py-5 rounded-full hover:bg-red-600 dark:hover:bg-red-600 hover:text-white transition-all uppercase tracking-widest text-xs shadow-xl active:scale-95">
+                            {t('close')}
+                        </button>
                     </div>
-
-                    <button onClick={onClose} className="w-full max-w-xs mx-auto bg-slate-950 dark:bg-white text-white dark:text-slate-950 font-black py-4 md:py-5 rounded-full hover:bg-red-600 dark:hover:bg-red-600 hover:text-white transition-all uppercase tracking-widest text-xs shadow-xl active:scale-95">
-                        {t('close')}
-                    </button>
                 </div>
             </div>
         </div>
     );
 
-    // استخدام createPortal لضمان ظهور النافذة فوق كل شيء وتوسيطها مركزياً بعيداً عن قيود الصفحة
     return createPortal(modalContent, document.body);
 };
 
@@ -215,7 +266,6 @@ const SearchPage: React.FC = () => {
     const [visibleCount, setVisibleCount] = useState(16);
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-    // حالة لتتبع ظهور شريط البحث بناءً على حركة التمرير
     const [isSearchVisible, setIsSearchVisible] = useState(true);
     const [lastScrollY, setLastScrollY] = useState(0);
 
