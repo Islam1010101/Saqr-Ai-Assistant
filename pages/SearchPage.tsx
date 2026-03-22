@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { createPortal } from 'react-dom'; // الحل السحري والتوسيط المطلق
+import { createPortal } from 'react-dom'; 
 import { bookData, type Book } from '../api/bookData'; 
 import { useLanguage } from '../App';
 
@@ -54,47 +54,68 @@ const translations = {
   }
 };
 
-// --- 2. Component: BookModal (قابلة للسحب - Draggable Modal) ---
+// --- 2. Component: BookModal (قابلة للسحب بدعم قوي للمس والماوس) ---
 const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
     const { locale, dir } = useLanguage();
     const [aiContent, setAiContent] = useState({ summary: '', genre: '' });
     const [loading, setLoading] = useState(false);
 
-    // حالات السحب (Drag States)
+    // --- منطق السحب المُحدّث (Drag Logic) ---
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [isDragging, setIsDragging] = useState(false);
     const dragStart = useRef({ x: 0, y: 0 });
 
-    // دوال التحكم بالسحب (تدعم الماوس واللمس معاً)
-    const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    const handleDragStart = (clientX: number, clientY: number) => {
         setIsDragging(true);
         dragStart.current = {
-            x: e.clientX - position.x,
-            y: e.clientY - position.y
+            x: clientX - position.x,
+            y: clientY - position.y
         };
-        (e.target as HTMLElement).setPointerCapture(e.pointerId);
     };
 
-    const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const handleDragMove = (clientX: number, clientY: number) => {
         if (!isDragging) return;
         setPosition({
-            x: e.clientX - dragStart.current.x,
-            y: e.clientY - dragStart.current.y
+            x: clientX - dragStart.current.x,
+            y: clientY - dragStart.current.y
         });
     };
 
-    const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    const handleDragEnd = () => {
         setIsDragging(false);
-        const target = e.target as HTMLElement;
-        if (target.hasPointerCapture(e.pointerId)) {
-            target.releasePointerCapture(e.pointerId);
-        }
     };
+
+    // مستمعات الأحداث العالمية (Global Listeners) لضمان عدم فقدان السحب عند التحرك السريع
+    useEffect(() => {
+        if (isDragging) {
+            const onMouseMove = (e: MouseEvent) => handleDragMove(e.clientX, e.clientY);
+            const onMouseUp = () => handleDragEnd();
+            const onTouchMove = (e: TouchEvent) => {
+                e.preventDefault(); // منع تمرير الصفحة أثناء السحب
+                handleDragMove(e.touches[0].clientX, e.touches[0].clientY);
+            };
+            const onTouchEnd = () => handleDragEnd();
+
+            // إضافة المستمعات
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+            document.addEventListener('touchmove', onTouchMove, { passive: false });
+            document.addEventListener('touchend', onTouchEnd);
+
+            return () => {
+                // تنظيف المستمعات
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+                document.removeEventListener('touchmove', onTouchMove);
+                document.removeEventListener('touchend', onTouchEnd);
+            };
+        }
+    }, [isDragging, position]); // إعادة ربط المستمعات لتحديث الـ position
+    // ------------------------------------
 
     useEffect(() => {
         if (!book) {
-            // إعادة تعيين الموضع عند إغلاق النافذة
-            setPosition({ x: 0, y: 0 });
+            setPosition({ x: 0, y: 0 }); // إعادة التمركز عند إغلاق النافذة
             return;
         }
         
@@ -137,19 +158,21 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                 className="relative z-10 w-full max-w-2xl animate-zoom-in"
                 style={{ 
                     transform: `translate(${position.x}px, ${position.y}px)`,
-                    transition: isDragging ? 'none' : 'transform 0.1s ease-out'
+                    transition: isDragging ? 'none' : 'transform 0.1s ease-out', // إيقاف الانتقال السلس أثناء السحب الفعلي
+                    touchAction: 'none' // مهم جداً للموبايل
                 }}
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl border border-white/20 dark:border-white/5 overflow-hidden flex flex-col max-h-[85vh] md:max-h-[90vh]">
                     
-                    {/* منطقة السحب (Drag Handle) - شريط علوي للتحريك */}
+                    {/* منطقة السحب (Drag Handle) */}
                     <div 
-                        className="w-full pt-5 pb-3 flex justify-center cursor-grab active:cursor-grabbing touch-none select-none relative z-[100]"
-                        onPointerDown={handlePointerDown}
-                        onPointerMove={handlePointerMove}
-                        onPointerUp={handlePointerUp}
-                        onPointerCancel={handlePointerUp}
+                        className="w-full pt-5 pb-3 flex justify-center cursor-grab active:cursor-grabbing relative z-[100]"
+                        onMouseDown={(e) => handleDragStart(e.clientX, e.clientY)}
+                        onTouchStart={(e) => {
+                            e.preventDefault(); // منع الأحداث الافتراضية للمس هنا
+                            handleDragStart(e.touches[0].clientX, e.touches[0].clientY);
+                        }}
                     >
                         <div className="w-20 h-1.5 bg-slate-300/80 dark:bg-slate-600/80 rounded-full hover:bg-slate-400 dark:hover:bg-slate-500 transition-colors"></div>
                     </div>
