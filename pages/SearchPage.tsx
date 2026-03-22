@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom'; // الحل السحري والتوسيط المطلق
 import { bookData, type Book } from '../api/bookData'; 
 import { useLanguage } from '../App';
 
@@ -53,7 +54,7 @@ const translations = {
   }
 };
 
-// --- 2. Component: BookModal (التوسيط الإجباري المطلق - The Nuclear Centering) ---
+// --- 2. Component: BookModal (التوسيط الإجباري المطلق باستخدام React Portal) ---
 const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
     const { locale, dir } = useLanguage();
     const [aiContent, setAiContent] = useState({ summary: '', genre: '' });
@@ -91,26 +92,22 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
 
     if (!book) return null;
 
-    return (
-        <>
-            {/* 1. طبقة الخلفية المعتمة (مفصلة لضمان التغطية الكاملة لكل الشاشة) */}
+    // تجهيز محتوى النافذة المنبثقة لنقله خارج قيود الصفحة باستخدام Portal
+    const modalContent = (
+        <div dir={dir} className="fixed inset-0 z-[999999] flex items-center justify-center p-4 sm:p-6 md:p-8" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
+            {/* طبقة الخلفية المعتمة */}
+            <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-md animate-fade-in" onClick={onClose} />
+            
+            {/* صندوق النافذة الفعلي */}
             <div 
-                className="fixed inset-0 z-[9998] backdrop-blur-md bg-slate-950/60 animate-fade-in" 
-                onClick={onClose} 
-            />
-
-            {/* 2. النافذة المنبثقة (توسيط جبري دقيق عبر inset-0 و m-auto و h-fit) */}
-            <div 
-                dir={dir}
-                className="fixed inset-0 m-auto h-fit z-[9999] w-[95%] max-w-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl border border-white/20 dark:border-white/5 overflow-hidden flex flex-col max-h-[85vh] animate-zoom-in" 
+                className="relative z-10 w-full max-w-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl border border-white/20 dark:border-white/5 overflow-hidden flex flex-col max-h-[85vh] md:max-h-[90vh] animate-zoom-in" 
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* زر الإغلاق */}
-                <button onClick={onClose} className={`absolute top-5 ${locale === 'ar' ? 'left-5' : 'right-5'} z-50 p-2 md:p-3 bg-slate-100/50 hover:bg-red-500 dark:bg-slate-800/50 dark:hover:bg-red-600 hover:text-white transition-all rounded-full shadow-lg backdrop-blur-md`}>
+                <button onClick={onClose} className={`absolute top-4 md:top-6 ${locale === 'ar' ? 'left-4 md:left-6' : 'right-4 md:right-6'} z-50 p-2 md:p-3 bg-slate-100/50 hover:bg-red-500 dark:bg-slate-800/50 dark:hover:bg-red-600 hover:text-white transition-all rounded-full shadow-lg backdrop-blur-md`}>
                     <svg className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
 
-                {/* المحتوى الداخلي */}
                 <div className="p-6 md:p-10 lg:p-12 overflow-y-auto no-scrollbar flex flex-col items-center text-center">
                     <span className="inline-block px-4 py-1.5 rounded-full bg-red-600/10 text-red-600 text-[10px] font-black uppercase tracking-widest mb-6 border border-red-600/20 shadow-sm">Saqr AI Insight</span>
                     <h2 className="text-2xl md:text-4xl text-slate-950 dark:text-white font-black leading-tight mb-2 tracking-tight">{book.title}</h2>
@@ -156,8 +153,11 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                     </button>
                 </div>
             </div>
-        </>
+        </div>
     );
+
+    // استخدام createPortal لضمان ظهور النافذة فوق كل شيء وتوسيطها مركزياً بعيداً عن قيود الصفحة
+    return createPortal(modalContent, document.body);
 };
 
 // --- 3. Component: BookCard (البطاقة الزجاجية) ---
