@@ -53,7 +53,7 @@ const translations = {
   }
 };
 
-// --- 2. Component: BookModal (توسيط مطلق على كافة الشاشات) ---
+// --- 2. Component: BookModal (توسيط مطلق ومتجاوب تماماً) ---
 const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
     const { locale, dir } = useLanguage();
     const [aiContent, setAiContent] = useState({ summary: '', genre: '' });
@@ -92,14 +92,14 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
     if (!book) return null;
 
     return (
-        // استخدام خصائص تموضع صارمة لضمان التوسيط التام في كافة الشاشات والظهور فوق الفوتر
+        // استخدام حاوية بخصائص صارمة لضمان التوسيط في منتصف الشاشة وتغطية الفوتر
         <div
-  dir={dir}
-  className="fixed inset-0 z-[9999] grid place-items-center p-4 md:p-8 backdrop-blur-md bg-slate-950/60 animate-fade-in"
-  onClick={onClose}
->
+            dir={dir}
+            className="fixed inset-0 z-[9999] flex items-center justify-center min-h-screen p-4 md:p-8 backdrop-blur-md bg-slate-950/60 animate-fade-in"
+            onClick={onClose}
+        >
             <div 
-                className="relative w-full max-w-2xl m-auto bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl border border-white/20 dark:border-white/5 overflow-hidden flex flex-col max-h-[90dvh] animate-zoom-in" 
+                className="relative w-[95%] md:w-full max-w-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl border border-white/20 dark:border-white/5 overflow-hidden flex flex-col max-h-[90vh] animate-zoom-in" 
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* زر الإغلاق المطور */}
@@ -219,7 +219,8 @@ const SearchPage: React.FC = () => {
         const handleScroll = () => {
             const currentScrollY = window.scrollY;
             // إخفاء الشريط عند النزول للأسفل، وإظهاره عند الصعود
-            if (currentScrollY > lastScrollY && currentScrollY > 50) {
+            // زيادة الـ offset قليلاً لتجنب الإخفاء غير المقصود
+            if (currentScrollY > lastScrollY && currentScrollY > 100) {
                 setIsSearchVisible(false);
             } else {
                 setIsSearchVisible(true);
@@ -272,7 +273,7 @@ const SearchPage: React.FC = () => {
                 </div>
 
                 {/* بار البحث الزجاجي المتجاوب مع التمرير */}
-                <div className={`sticky z-[100] mb-12 md:mb-20 transition-all duration-500 ease-in-out ${isSearchVisible ? 'top-4 md:top-8 translate-y-0 opacity-100' : 'top-0 -translate-y-[150%] opacity-0 pointer-events-none'}`}>
+                <div className={`sticky z-[100] transition-all duration-500 ease-in-out mb-12 md:mb-20 ${isSearchVisible ? 'top-4 md:top-8 translate-y-0 opacity-100' : 'top-0 -translate-y-[150%] opacity-0 pointer-events-none'}`}>
                     <div className="bg-white/70 dark:bg-slate-950/70 backdrop-blur-2xl border border-white/30 dark:border-white/10 shadow-2xl rounded-[2.5rem] md:rounded-[4rem] p-5 md:p-8 transition-all">
                         <div className="flex flex-col gap-5">
                             <div className="relative group">
