@@ -53,7 +53,7 @@ const translations = {
   }
 };
 
-// --- 2. Component: BookModal (النافذة المنبثقة المطورة زجاجياً ومركزياً) ---
+// --- 2. Component: BookModal (توسيط مطلق على كافة الشاشات) ---
 const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
     const { locale, dir } = useLanguage();
     const [aiContent, setAiContent] = useState({ summary: '', genre: '' });
@@ -92,15 +92,14 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
     if (!book) return null;
 
     return (
-        // تم استخدام z-[1000] ليكون فوق الفوتر و flex للتوسيط المطلق
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 backdrop-blur-md bg-slate-950/40 animate-fade-in" onClick={onClose}>
+        // استخدام خصائص تموضع صارمة لضمان التوسيط التام في كافة الشاشات والظهور فوق الفوتر
+        <div dir={dir} className="fixed top-0 left-0 w-screen h-screen z-[9999] flex items-center justify-center p-4 md:p-8 backdrop-blur-md bg-slate-950/60 animate-fade-in" onClick={onClose} style={{ position: 'fixed' }}>
             <div 
-                dir={dir}
-                className="relative w-[95%] md:w-full max-w-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl rounded-[2rem] md:rounded-[3rem] shadow-2xl border border-white/20 dark:border-white/5 overflow-hidden flex flex-col max-h-[85vh] animate-zoom-in" 
+                className="relative w-full max-w-2xl m-auto bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl border border-white/20 dark:border-white/5 overflow-hidden flex flex-col max-h-[85vh] animate-zoom-in" 
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* زر الإغلاق المطور */}
-                <button onClick={onClose} className={`absolute top-5 ${locale === 'ar' ? 'left-5' : 'right-5'} z-50 p-2 md:p-3 bg-white/50 dark:bg-slate-800/50 hover:bg-red-500 hover:text-white transition-all rounded-full shadow-lg backdrop-blur-md`}>
+                <button onClick={onClose} className={`absolute top-5 ${locale === 'ar' ? 'left-5' : 'right-5'} z-50 p-2 md:p-3 bg-slate-100/50 hover:bg-red-500 dark:bg-slate-800/50 dark:hover:bg-red-600 hover:text-white transition-all rounded-full shadow-lg backdrop-blur-md`}>
                     <svg className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
 
@@ -208,6 +207,26 @@ const SearchPage: React.FC = () => {
     const [visibleCount, setVisibleCount] = useState(16);
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
+    // إضافة حالة لتتبع ظهور شريط البحث بناءً على حركة التمرير
+    const [isSearchVisible, setIsSearchVisible] = useState(true);
+    const [lastScrollY, setLastScrollY] = useState(0);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const currentScrollY = window.scrollY;
+            // إخفاء الشريط عند النزول للأسفل، وإظهاره عند الصعود
+            if (currentScrollY > lastScrollY && currentScrollY > 50) {
+                setIsSearchVisible(false);
+            } else {
+                setIsSearchVisible(true);
+            }
+            setLastScrollY(currentScrollY);
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [lastScrollY]);
+
     const filters = useMemo(() => ({
         subjects: [...new Set(bookData.map(b => b.subject))].filter(s => s !== "Unknown").sort(),
         authors: [...new Set(bookData.map(b => b.author))].filter(a => a !== 'Unknown Author').sort(),
@@ -248,8 +267,8 @@ const SearchPage: React.FC = () => {
                     <div className="h-1.5 w-24 bg-red-600 mx-auto mt-6 rounded-full shadow-lg"></div>
                 </div>
 
-                {/* بار البحث الزجاجي */}
-                <div className="sticky top-4 md:top-8 z-[100] mb-12 md:mb-20">
+                {/* بار البحث الزجاجي المتجاوب مع التمرير */}
+                <div className={`sticky z-[100] mb-12 md:mb-20 transition-all duration-500 ease-in-out ${isSearchVisible ? 'top-4 md:top-8 translate-y-0 opacity-100' : 'top-0 -translate-y-[150%] opacity-0 pointer-events-none'}`}>
                     <div className="bg-white/70 dark:bg-slate-950/70 backdrop-blur-2xl border border-white/30 dark:border-white/10 shadow-2xl rounded-[2.5rem] md:rounded-[4rem] p-5 md:p-8 transition-all">
                         <div className="flex flex-col gap-5">
                             <div className="relative group">
