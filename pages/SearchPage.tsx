@@ -53,7 +53,7 @@ const translations = {
   }
 };
 
-// --- 2. Component: BookModal (النافذة المنبثقة للذكاء الاصطناعي) ---
+// --- 2. Component: BookModal (النافذة المنبثقة للذكاء الاصطناعي - مجمعة في الوسط) ---
 const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
     const { locale, dir } = useLanguage();
     const [aiContent, setAiContent] = useState({ summary: '', genre: '' });
@@ -93,20 +93,46 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
 
     return (
         <div dir={dir} className="fixed inset-0 z-[200] flex items-center justify-center p-4 backdrop-blur-sm bg-slate-900/40 dark:bg-black/60 animate-fade-in" onClick={onClose}>
-            <div className="relative w-full max-w-4xl bg-white dark:bg-slate-800 rounded-[2rem] md:rounded-[3rem] shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] border border-slate-200 dark:border-slate-700 animate-zoom-in" onClick={(e) => e.stopPropagation()}>
+            {/* تم تغيير max-w-4xl إلى max-w-3xl ليتناسب مع العرض المجمع في الوسط وإزالة تقسيم flex-row */}
+            <div className="relative w-full max-w-3xl bg-white dark:bg-slate-800 rounded-[2rem] md:rounded-[3rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border border-slate-200 dark:border-slate-700 animate-zoom-in" onClick={(e) => e.stopPropagation()}>
                 
                 {/* زر الإغلاق */}
                 <button onClick={onClose} className={`absolute top-4 ${locale === 'ar' ? 'left-4' : 'right-4'} z-50 p-2 md:p-3 bg-slate-100 hover:bg-red-100 dark:bg-slate-700 dark:hover:bg-red-900/30 text-slate-500 hover:text-red-600 transition-colors rounded-full`}>
                     <svg className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
 
-                {/* المحتوى النصي والملخص */}
-                <div className="flex-1 p-6 md:p-10 lg:p-12 overflow-y-auto no-scrollbar">
+                {/* المحتوى النصي والملخص (مجمع في المنتصف) */}
+                <div className="p-6 md:p-10 lg:p-12 overflow-y-auto no-scrollbar flex flex-col items-center text-center">
                     <span className="inline-block px-4 py-1.5 rounded-full bg-red-50 dark:bg-red-500/10 text-red-600 text-xs font-bold uppercase tracking-widest mb-4 border border-red-100 dark:border-red-500/20">Saqr AI Insight</span>
                     <h2 className="text-2xl md:text-4xl lg:text-5xl text-slate-900 dark:text-white font-black leading-tight mb-2">{book.title}</h2>
                     <p className="text-lg md:text-xl text-slate-500 dark:text-slate-400 font-bold mb-8">By {book.author}</p>
                     
-                    <div className="bg-slate-50 dark:bg-slate-900/50 p-6 md:p-8 rounded-3xl border border-slate-100 dark:border-slate-700 relative">
+                    {/* بيانات الرف والصف (في الوسط) */}
+                    <div className="w-full max-w-xl bg-slate-50 dark:bg-slate-900 p-6 md:p-8 rounded-3xl mb-8 flex flex-col items-center border border-slate-200 dark:border-slate-700">
+                        <div className="text-center mb-6">
+                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">{t('subjectLabel')}</p>
+                            <p className="text-xl md:text-2xl font-black text-slate-800 dark:text-white leading-tight">
+                                {loading ? '...' : (aiContent.genre || book.subject)}
+                            </p>
+                        </div>
+                        
+                        <div className="w-full h-px bg-slate-200 dark:bg-slate-700 mb-6"></div>
+                        
+                        <div className="flex justify-center gap-12 md:gap-20 w-full">
+                            <div className="text-center">
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">{t('shelf')}</p>
+                                <p className="text-4xl md:text-5xl font-black text-red-600 dark:text-red-500">{book.shelf}</p>
+                            </div>
+                            <div className="w-px bg-slate-200 dark:bg-slate-700"></div>
+                            <div className="text-center">
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">{t('row')}</p>
+                                <p className="text-4xl md:text-5xl font-black text-blue-600 dark:text-blue-500">{book.row}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* الملخص */}
+                    <div className="w-full bg-slate-50 dark:bg-slate-900/50 p-6 md:p-8 rounded-3xl border border-slate-100 dark:border-slate-700 relative text-start mb-8">
                         <div className="flex items-center gap-3 mb-4">
                            <span className={`w-2.5 h-2.5 rounded-full ${loading ? 'animate-ping bg-red-500' : 'bg-green-500'}`}></span>
                            <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">{t('officialAi')}</p>
@@ -115,36 +141,10 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                            {loading ? <span className="animate-pulse">...</span> : `"${aiContent.summary}"`}
                         </p>
                     </div>
-                </div>
 
-                {/* العمود الجانبي (بيانات الرف والصف) */}
-                <div className="w-full md:w-72 lg:w-80 bg-slate-50 dark:bg-slate-900 p-6 md:p-10 flex flex-col justify-center items-center border-t md:border-t-0 md:border-s border-slate-200 dark:border-slate-700 shrink-0">
-                    <div className="w-full space-y-6 md:space-y-8">
-                        <div className="text-center">
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">{t('subjectLabel')}</p>
-                            <p className="text-xl md:text-2xl font-black text-slate-800 dark:text-white leading-tight">
-                                {loading ? '...' : (aiContent.genre || book.subject)}
-                            </p>
-                        </div>
-                        
-                        <div className="h-px w-full bg-slate-200 dark:bg-slate-700"></div>
-                        
-                        <div className="flex justify-center gap-8 md:gap-12">
-                            <div className="text-center">
-                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">{t('shelf')}</p>
-                                <p className="text-4xl md:text-5xl font-black text-red-600 dark:text-red-500">{book.shelf}</p>
-                            </div>
-                            <div className="w-px h-16 bg-slate-200 dark:bg-slate-700"></div>
-                            <div className="text-center">
-                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">{t('row')}</p>
-                                <p className="text-4xl md:text-5xl font-black text-blue-600 dark:text-blue-500">{book.row}</p>
-                            </div>
-                        </div>
-
-                        <button onClick={onClose} className="w-full mt-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold py-4 rounded-full hover:bg-red-600 dark:hover:bg-red-600 hover:text-white transition-colors uppercase tracking-widest text-sm">
-                            {t('close')}
-                        </button>
-                    </div>
+                    <button onClick={onClose} className="w-full max-w-xs bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold py-4 rounded-full hover:bg-red-600 dark:hover:bg-red-600 hover:text-white transition-colors uppercase tracking-widest text-sm">
+                        {t('close')}
+                    </button>
                 </div>
             </div>
         </div>
