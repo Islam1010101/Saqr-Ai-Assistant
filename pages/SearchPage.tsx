@@ -93,9 +93,13 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
 
     return (
         // استخدام خصائص تموضع صارمة لضمان التوسيط التام في كافة الشاشات والظهور فوق الفوتر
-        <div dir={dir} className="fixed top-0 left-0 w-screen h-screen z-[9999] flex items-center justify-center p-4 md:p-8 backdrop-blur-md bg-slate-950/60 animate-fade-in" onClick={onClose} style={{ position: 'fixed' }}>
+        <div
+  dir={dir}
+  className="fixed inset-0 z-[9999] grid place-items-center p-4 md:p-8 backdrop-blur-md bg-slate-950/60 animate-fade-in"
+  onClick={onClose}
+>
             <div 
-                className="relative w-full max-w-2xl m-auto bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl border border-white/20 dark:border-white/5 overflow-hidden flex flex-col max-h-[85vh] animate-zoom-in" 
+                className="relative w-full max-w-2xl m-auto bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl border border-white/20 dark:border-white/5 overflow-hidden flex flex-col max-h-[90dvh] animate-zoom-in" 
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* زر الإغلاق المطور */}
