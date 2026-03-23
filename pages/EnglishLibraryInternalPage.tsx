@@ -1,10 +1,10 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useLanguage } from '../App';
 import { useNavigate } from 'react-router-dom';
 
 // --- 1. تعريف واجهة البيانات وقاعدة البيانات ---
 interface Book {
-    id: number;
+    id: number | string;
     title: string;
     author: string;
     subject: string;
@@ -12,7 +12,7 @@ interface Book {
     bio: string;
     summary: string;
     publisher?: string;
-    audioId?: string; // حقل لدعم التمييز الصوتي
+    audioId?: string;
 }
 
 export const ENGLISH_LIBRARY_DATABASE: Book[] = [
@@ -58,64 +58,64 @@ export const ENGLISH_LIBRARY_DATABASE: Book[] = [
 ];
 
 const translations = {
-    ar: {
-        pageTitle: "المكتبة الإنجليزية",
-        searchPlaceholder: "ابحث عن عنوان أو كاتب...",
-        sortBy: "فرز حسب",
-        alphabetical: "العنوان",
-        authorSort: "المؤلف",
-        subjectSort: "الموضوع",
-        audioSort: "الصوتيات أولاً",
-        allAuthors: "كل المؤلفين",
-        allSubjects: "كل الموضوعات",
-        audioOnly: "صوتيات فقط",
-        read: "قراءة الكتاب",
-        listen: "استمع للملخص",
-        summaryTitle: "ملخص الذكاء الاصطناعي",
-        back: "العودة",
-        close: "إغلاق",
-        bioTitle: "نبذة عن المؤلف",
-        exclusive: "رقمياً من",
-        speed: "السرعة"
-    },
-    en: {
-        pageTitle: "English Library",
-        searchPlaceholder: "Search title or author...",
-        sortBy: "Sort By",
-        alphabetical: "Title",
-        authorSort: "Author",
-        subjectSort: "Subject",
-        audioSort: "Audio First",
-        allAuthors: "All Authors",
-        allSubjects: "All Subjects",
-        audioOnly: "Audio Only",
-        read: "Read Book",
-        listen: "Play Summary",
-        summaryTitle: "AI Summary",
-        back: "Back",
-        close: "Close",
-        bioTitle: "About Author",
-        exclusive: "Digital by",
-        speed: "Speed"
-    }
+  ar: {
+    pageTitle: "المكتبة الإنجليزية",
+    searchPlaceholder: "ابحث عن عنوان أو مؤلف...",
+    allSubjects: "المواضيع",
+    allAuthors: "المؤلفين",
+    sortBy: "فرز حسب",
+    alphabetical: "أبجدياً",
+    authorName: "المؤلف",
+    none: "تلقائي",
+    noResults: "لا توجد نتائج.",
+    close: "إغلاق",
+    subjectLabel: "الموضوع",
+    audioOnly: "صوتيات فقط",
+    audioSort: "الصوتيات أولاً",
+    read: "قراءة المحتوى",
+    listen: "تلخيص صقر الصوتي",
+    back: "العودة",
+    ageClassification: "التصنيف العمري",
+    bioLabel: "نبذة عن المؤلف:",
+    summaryLabel: "نبذة عن الكتاب"
+  },
+  en: {
+    pageTitle: "English Library",
+    searchPlaceholder: "Search title or author...",
+    allSubjects: "Subjects",
+    allAuthors: "Authors",
+    sortBy: "Sort By",
+    alphabetical: "Alphabetical",
+    authorName: "Author",
+    none: "Default",
+    noResults: "No results found.",
+    close: "Close",
+    subjectLabel: "Topic",
+    audioOnly: "Audio Only",
+    audioSort: "Audio First",
+    read: "Read Content",
+    listen: "Saqr Audio Summary",
+    back: "Back",
+    ageClassification: "Age Group",
+    bioLabel: "Author Bio:",
+    summaryLabel: "Book Summary"
+  }
 };
 
-// --- 3. المكونات الفرعية (Sub-components) ---
-
-const SchoolLogo = ({ forceWhite = false, className = "" }: { forceWhite?: boolean, className?: string }) => (
-    <img 
-        src="/school-logo.png" 
-        alt="School Logo" 
-        className={`h-8 md:h-12 w-auto transition-all duration-500 ${forceWhite ? 'brightness-0 invert' : 'dark:brightness-0 dark:invert'} ${className}`}
-    />
+// --- 2. المكونات الرسومية ---
+const ReflectionLayer = () => (
+  <div className="absolute inset-0 pointer-events-none z-20 overflow-hidden rounded-[inherit]">
+    <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-white/5 to-transparent opacity-40" />
+    <div className="absolute -top-[100%] -left-[100%] w-[300%] h-[300%] bg-[linear-gradient(45deg,transparent_45%,rgba(255,255,255,0.15)_50%,transparent_55%)] animate-[shine_10s_infinite] opacity-30" />
+  </div>
 );
 
 const AudioWaveIcon = () => (
-    <div className="flex gap-[3px] items-end h-4">
-        <div className="w-1 bg-red-500 animate-audio-bar-1 rounded-t-sm"></div>
-        <div className="w-1 bg-red-500 animate-audio-bar-2 rounded-t-sm"></div>
-        <div className="w-1 bg-red-500 animate-audio-bar-3 rounded-t-sm"></div>
-        <div className="w-1 bg-red-500 animate-audio-bar-2 rounded-t-sm"></div>
+    <div className="flex gap-[2px] items-end h-3">
+        <div className="w-[2px] bg-white/80 animate-audio-bar-1"></div>
+        <div className="w-[2px] bg-white/80 animate-audio-bar-2"></div>
+        <div className="w-[2px] bg-white/80 animate-audio-bar-3"></div>
+        <div className="w-[2px] bg-white/80 animate-audio-bar-2"></div>
     </div>
 );
 
@@ -141,266 +141,349 @@ const SaqrAudioPlayer: React.FC<{ audioSrc: string; t: any }> = ({ audioSrc, t }
     };
 
     return (
-        <div className="mt-8 animate-fade-in-up">
-            <h4 className="text-xs font-bold text-red-600 dark:text-red-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                <span className="text-lg">🎧</span> {t('listen')}
-            </h4>
-            <div className="p-4 md:p-5 rounded-[1.5rem] bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 flex items-center gap-4 shadow-sm">
-                <audio 
-                    ref={audioRef} 
-                    src={audioSrc} 
-                    onTimeUpdate={() => setProgress((audioRef.current!.currentTime / audioRef.current!.duration) * 100)} 
-                    onEnded={() => setIsPlaying(false)} 
-                />
-                
-                <button onClick={togglePlay} className="w-12 h-12 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-md hover:shadow-lg transition-all shrink-0 active:scale-95">
-                    {isPlaying ? (
-                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
-                    ) : (
-                        <svg className="w-5 h-5 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" strokeWidth="2" strokeLinejoin="round"/></svg>
-                    )}
+        <div className="mt-6 animate-fade-up">
+            <h4 className="text-xs font-semibold text-[#00732f] uppercase tracking-widest mb-3 flex items-center gap-2">🎧 {t('listen')}</h4>
+            <div className="p-4 md:p-5 rounded-[2rem] bg-slate-50/50 dark:bg-white/5 backdrop-blur-xl border border-white/20 shadow-sm flex items-center gap-4">
+                <audio ref={audioRef} src={audioSrc} onTimeUpdate={() => setProgress((audioRef.current!.currentTime / audioRef.current!.duration) * 100)} onEnded={() => setIsPlaying(false)} />
+                <button onClick={togglePlay} className="w-12 h-12 shrink-0 rounded-full bg-[#00732f] text-white flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-all">
+                    {isPlaying ? <span className="text-xl">⏸</span> : <span className="text-xl ps-1">▶</span>}
                 </button>
-                
-                <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                    <div className="h-full bg-red-500 transition-all duration-100" style={{ width: `${progress}%` }} />
+                <div className="flex-1">
+                    <div className="h-1 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                        <div className="h-full bg-red-600 transition-all duration-300" style={{ width: `${progress}%` }} />
+                    </div>
                 </div>
-                
-                <button onClick={handleSpeed} className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-red-100 hover:text-red-600 dark:hover:bg-slate-700 transition-colors shrink-0">
-                    {speed}x
-                </button>
+                <button onClick={handleSpeed} className="px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-white text-[10px] font-semibold hover:bg-slate-300 transition-colors uppercase min-w-[45px]">{speed}x</button>
             </div>
         </div>
     );
 };
 
-// --- 4. الصفحة الرئيسية والمكونات الرئيسية ---
+// --- 3. Component: BookModal ---
+const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
+    const { locale } = useLanguage();
+    const [ageGroup, setAgeGroup] = useState('');
+    const [loading, setLoading] = useState(false);
 
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+    const dragging = useRef(false);
+    const offset = useRef({ x: 0, y: 0 });
+
+    const handleStart = (e: any) => {
+        dragging.current = true;
+        const clientX = e.clientX || e.touches[0].clientX;
+        const clientY = e.clientY || e.touches[0].clientY;
+        offset.current = { x: clientX - position.x, y: clientY - position.y };
+    };
+
+    const handleMove = (e: any) => {
+        if (!dragging.current) return;
+        const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+        const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+        setPosition({ x: clientX - offset.current.x, y: clientY - offset.current.y });
+    };
+
+    const handleEnd = () => dragging.current = false;
+
+    useEffect(() => {
+        if (book) {
+            window.addEventListener('mousemove', handleMove, { passive: false });
+            window.addEventListener('mouseup', handleEnd);
+            window.addEventListener('touchmove', handleMove, { passive: false });
+            window.addEventListener('touchend', handleEnd);
+        }
+        return () => {
+            window.removeEventListener('mousemove', handleMove);
+            window.removeEventListener('mouseup', handleEnd);
+            window.removeEventListener('touchmove', handleMove);
+            window.removeEventListener('touchend', handleEnd);
+        };
+    }, [book]);
+
+    useEffect(() => {
+        if (!book) { setPosition({ x: 0, y: 0 }); return; }
+        setLoading(true);
+        const fetchAgeGroup = async () => {
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        messages: [{
+                            role: 'system',
+                            content: `Analyze the book titled "${book.title}". Return JSON ONLY: {"ageGroup": "Children or Teens or Adults"}`
+                        }]
+                    })
+                });
+                const data = await response.json();
+                setAgeGroup(JSON.parse(data.reply.replace(/```json|```/g, '').trim()).ageGroup);
+            } catch (err) {
+                let fallbackAge = "Adults";
+                if (book.subject.toLowerCase().includes("children")) fallbackAge = "Children";
+                else if (book.subject.toLowerCase().includes("fantasy") || book.subject.toLowerCase().includes("adventure")) fallbackAge = "Teens & Adults";
+                setAgeGroup(fallbackAge);
+            } finally { setLoading(false); }
+        };
+        fetchAgeGroup();
+    }, [book]);
+
+    if (!book) return null;
+
+    return (
+        <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 backdrop-blur-md bg-slate-900/60 animate-fade-in" onClick={onClose}>
+            <div 
+                className="relative w-full max-w-3xl mx-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-[2.5rem] border border-white/20 shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] transition-transform duration-75 ease-out select-none"
+                style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div 
+                    onMouseDown={handleStart} 
+                    onTouchStart={handleStart}
+                    className="absolute top-0 left-0 right-0 h-16 cursor-grab active:cursor-grabbing z-40 bg-transparent"
+                    style={{ touchAction: 'none' }}
+                    title="Drag to move"
+                />
+
+                <button onClick={onClose} className="absolute top-4 end-4 z-50 p-2 bg-slate-100/80 dark:bg-slate-800/80 hover:bg-red-600 hover:text-white rounded-full transition-all shadow-sm">
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+
+                <div className="flex-1 p-8 overflow-y-auto no-scrollbar text-start flex flex-col mt-4 md:mt-0">
+                    <h2 className="text-2xl md:text-3xl text-slate-950 dark:text-white font-semibold leading-tight mb-2" dir="ltr">{book.title}</h2>
+                    
+                    <div className="relative group/author inline-block mb-6 w-fit z-50">
+                        <p className="text-base text-[#00732f] font-medium cursor-help border-b border-dashed border-[#00732f]/50 pb-0.5">By {book.author}</p>
+                        <div className="absolute top-full mt-2 start-0 w-64 p-3 bg-slate-900 text-white text-xs rounded-xl opacity-0 invisible group-hover/author:opacity-100 group-hover/author:visible transition-all shadow-xl pointer-events-none">
+                            <strong className="block mb-1 text-red-400 font-medium">{t('bioLabel')}</strong>
+                            <span className="font-normal">{book.bio}</span>
+                        </div>
+                    </div>
+                    
+                    <div className="bg-slate-50/50 dark:bg-white/5 p-6 rounded-[2rem] border border-white/20 shadow-inner text-start flex-grow">
+                        <div className="flex items-center gap-2 mb-3">
+                           <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-widest">{t('summaryLabel')}</p>
+                        </div>
+                        <p className="text-slate-700 dark:text-slate-200 text-sm md:text-base font-normal leading-relaxed">
+                           {book.summary}
+                        </p>
+                    </div>
+
+                    {book.audioId && <SaqrAudioPlayer audioSrc={book.audioId} t={t} />}
+                </div>
+
+                <div className="w-full md:w-[280px] bg-slate-100/50 dark:bg-black/20 p-8 flex flex-col justify-center items-center border-t md:border-t-0 md:border-s border-slate-200 dark:border-white/10 shrink-0 relative z-30">
+                    <div className="w-full text-center space-y-6">
+                        <div className="bg-white/60 dark:bg-slate-800/60 p-5 rounded-2xl border border-white/30 shadow-sm">
+                            <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest mb-1">{t('subjectLabel')}</p>
+                            <p className="text-lg font-medium text-slate-900 dark:text-white truncate">{book.subject}</p>
+                        </div>
+                        
+                        <div className="bg-red-50 dark:bg-red-900/20 p-5 rounded-2xl border border-red-100 dark:border-red-900/30 shadow-sm">
+                            <p className="text-[10px] font-medium text-red-400 uppercase tracking-widest mb-1">{t('ageClassification')}</p>
+                            <p className="text-xl font-semibold text-red-600 truncate">{loading ? '...' : (ageGroup || 'General')}</p>
+                        </div>
+
+                        <div className="space-y-3 pt-6">
+                            <a href={book.driveLink} target="_blank" rel="noreferrer" className="w-full block bg-[#00732f] text-white font-medium py-3.5 rounded-2xl hover:bg-green-700 transition-all text-center uppercase tracking-widest text-sm shadow-md shadow-green-900/20">{t('read')}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// --- 4. Component: BookCard ---
+const BookCard = React.memo(({ book, onClick, t }: { book: any; onClick: () => void; t: any }) => {
+  const isAi = !book.subject || book.subject === "Unknown";
+  const hasAudio = !!book.audioId;
+
+  const themeColor = (hasAudio || isAi) ? 'bg-red-600' : 'bg-[#00732f]';
+  const borderColor = hasAudio ? 'border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.1)]' : 'border-white/30 dark:border-white/10';
+
+  return (
+    <div onClick={onClick} className="group relative glass-panel rounded-[2rem] p-0.5 cursor-pointer transition-all duration-500 hover:-translate-y-2 h-full active:scale-[0.98] shadow-sm hover:shadow-xl">
+      <div className={`relative overflow-hidden rounded-[1.9rem] bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl h-full flex flex-col border transition-all duration-500 ${borderColor}`}>
+        
+        <ReflectionLayer />
+        
+        <div className={`absolute top-0 start-0 w-1.5 h-full z-30 transition-all duration-500 ${themeColor}`} />
+
+        <div className="p-6 relative z-10 flex-grow text-start flex flex-col">
+          <div className="flex justify-between items-start mb-4">
+              <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-medium uppercase tracking-wider border border-white/20 shadow-sm text-white ${themeColor}`}>
+                 {book.subject}
+              </span>
+              {hasAudio && (
+                <div className="bg-red-600 p-1.5 rounded-full shadow-md animate-pulse">
+                  <AudioWaveIcon />
+                </div>
+              )}
+          </div>
+          
+          <h3 className={`font-semibold text-lg text-slate-900 dark:text-white leading-tight mb-3 transition-colors line-clamp-3 ${hasAudio ? 'group-hover:text-red-600' : 'group-hover:text-[#00732f]'}`} dir="ltr">
+              {book.title}
+          </h3>
+          
+          <div className="mt-auto pt-2">
+              <div className="relative group/author inline-block" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex items-center gap-2 opacity-80 cursor-help border-b border-transparent hover:border-slate-400 pb-0.5 transition-all">
+                      <span className="text-sm">👤</span>
+                      <p className="text-[12px] font-medium truncate uppercase tracking-wide">{book.author}</p>
+                  </div>
+                  <div className="absolute bottom-full mb-2 start-0 w-48 p-3 bg-slate-900 text-white text-[11px] leading-relaxed rounded-xl opacity-0 invisible group-hover/author:opacity-100 group-hover/author:visible transition-all duration-300 shadow-xl z-50 pointer-events-none font-normal">
+                      <strong className="block text-red-400 mb-1 font-medium">{t('bioLabel')}</strong>
+                      {book.bio}
+                      <div className="absolute top-full start-4 border-4 border-transparent border-t-slate-900" />
+                  </div>
+              </div>
+          </div>
+        </div>
+
+        <div className="bg-slate-50/50 dark:bg-black/20 py-4 px-6 border-t border-slate-200/50 dark:border-white/10 flex items-center justify-end relative z-10 backdrop-blur-md">
+            <div className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all ${hasAudio ? 'group-hover:border-red-600 group-hover:bg-red-50 text-red-600' : 'group-hover:border-[#00732f] group-hover:bg-green-50 text-slate-400'}`}>
+              <span className="text-[10px]">➔</span>
+            </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+// --- 5. Main Component: EnglishLibraryInternalPage ---
 const EnglishLibraryInternalPage: React.FC = () => {
     const { locale, dir } = useLanguage();
     const navigate = useNavigate();
-    const isAr = locale === 'ar';
-    const t = (key: keyof typeof translations.ar) => translations[locale][key];
-
+    const t = (key: keyof typeof translations.en) => translations[locale][key] as string;
+    
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedBook, setSelectedBook] = useState<Book | null>(null);
-    const [authorFilter, setAuthorFilter] = useState('all');
     const [subjectFilter, setSubjectFilter] = useState('all');
+    const [authorFilter, setAuthorFilter] = useState('all');
+    const [sortBy, setSortBy] = useState('alphabetical'); 
     const [audioOnly, setAudioOnly] = useState(false);
-    const [sortBy, setSortBy] = useState('alphabetical');
-    const [tooltip, setTooltip] = useState<{ text: string, x: number, y: number } | null>(null);
+    const [selectedBook, setSelectedBook] = useState<any | null>(null);
+    const [visibleCount, setVisibleCount] = useState(16);
 
-    const authors = useMemo(() => ["all", ...new Set(ENGLISH_LIBRARY_DATABASE.map(b => b.author))].sort(), []);
-    const subjects = useMemo(() => ["all", ...new Set(ENGLISH_LIBRARY_DATABASE.map(b => b.subject))].sort(), []);
+    const [showSearch, setShowSearch] = useState(true);
+    const lastScrollY = useRef(0);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const currentScrollY = window.scrollY;
+            if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
+                setShowSearch(false);
+            } else {
+                setShowSearch(true);
+            }
+            lastScrollY.current = currentScrollY;
+        };
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    const filters = useMemo(() => ({
+        subjects: [...new Set(ENGLISH_LIBRARY_DATABASE.map(b => b.subject))].filter(s => s !== "Unknown").sort(),
+        authors: [...new Set(ENGLISH_LIBRARY_DATABASE.map(b => b.author))].filter(a => a !== 'Unknown Author').sort(),
+    }), []);
 
     const filteredBooks = useMemo(() => {
         const term = searchTerm.toLowerCase().trim();
         let result = ENGLISH_LIBRARY_DATABASE.filter(b => {
             const matchesSearch = b.title.toLowerCase().includes(term) || b.author.toLowerCase().includes(term);
-            const matchesAuthor = authorFilter === 'all' || b.author === authorFilter;
             const matchesSubject = subjectFilter === 'all' || b.subject === subjectFilter;
+            const matchesAuthor = authorFilter === 'all' || b.author === authorFilter;
             const matchesAudio = audioOnly ? !!b.audioId : true;
-            return matchesSearch && matchesAuthor && matchesSubject && matchesAudio;
+            return matchesSearch && matchesSubject && matchesAuthor && matchesAudio;
         });
 
-        if (sortBy === 'author') result = [...result].sort((a, b) => a.author.localeCompare(b.author));
-        else if (sortBy === 'subject') result = [...result].sort((a, b) => a.subject.localeCompare(b.subject));
+        if (sortBy === 'author') result = [...result].sort((a, b) => a.author.localeCompare(b.author, locale));
+        else if (sortBy === 'subject') result = [...result].sort((a, b) => a.subject.localeCompare(b.subject, locale));
         else if (sortBy === 'audio') result = [...result].sort((a, b) => (b.audioId ? 1 : 0) - (a.audioId ? 1 : 0));
-        else result = [...result].sort((a, b) => a.title.localeCompare(b.title));
-
+        else result = [...result].sort((a, b) => a.title.localeCompare(b.title, locale));
         return result;
-    }, [searchTerm, authorFilter, subjectFilter, audioOnly, sortBy]);
-
-    const handleAuthorHover = (e: React.MouseEvent, bio: string | null) => {
-        if (!bio || window.innerWidth < 768) { setTooltip(null); return; }
-        setTooltip({ text: bio, x: e.clientX, y: e.clientY });
-    };
+    }, [searchTerm, subjectFilter, authorFilter, audioOnly, sortBy, locale]);
 
     return (
-        <div dir={dir} className="w-full min-h-[100dvh] flex flex-col bg-slate-50 dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300 py-6 md:py-10 px-4 md:px-6">
+        <div dir={dir} className="max-w-7xl mx-auto px-4 md:px-6 pb-20 relative z-10 antialiased overflow-x-hidden">
             
-            {/* الخلفية الديناميكية الموحدة */}
-            <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-40 dark:opacity-20">
-               <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-red-600/30 rounded-full blur-[120px]"></div>
-               <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-green-600/30 rounded-full blur-[100px]"></div>
+            <div className="text-center mt-12 mb-16 animate-fade-up">
+                <button onClick={() => navigate(-1)} className="absolute start-0 top-1/2 -translate-y-1/2 text-slate-500 hover:text-red-600 font-medium flex items-center gap-2 transition-all"><span className="text-xl">←</span> {t('back')}</button>
+                <h1 className="text-3xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tight">{t('pageTitle')}</h1>
+                <div className="flex justify-center gap-2 mt-4"><div className="w-12 h-1 bg-red-600 rounded-full" /><div className="w-12 h-1 bg-[#00732f] rounded-full" /></div>
             </div>
 
-            <div className="w-full max-w-[1400px] mx-auto flex flex-col animate-fade-in-up pb-20 z-10">
-                
-                {/* Tooltip */}
-                {tooltip && (
-                    <div 
-                        className="fixed pointer-events-none z-[300] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 rounded-2xl shadow-xl animate-zoom-in max-w-xs"
-                        style={{ left: tooltip.x + 15, top: tooltip.y + 15, transform: isAr ? 'translateX(-100%)' : 'none' }}
-                    >
-                        <p className="text-[10px] font-bold text-red-500 uppercase mb-1 tracking-widest">{t('bioTitle')}</p>
-                        <p className="text-xs font-medium text-slate-800 dark:text-slate-200 leading-relaxed">{tooltip.text}</p>
-                    </div>
-                )}
-
-                {/* الهيدر */}
-                <div className="relative text-center mb-10 md:mb-16">
-                    <button onClick={() => navigate(-1)} className="absolute start-0 top-1/2 -translate-y-1/2 text-slate-500 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400 flex items-center gap-2 transition-colors font-bold text-sm md:text-base">
-                        <svg className="w-5 h-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
-                        {t('back')}
-                    </button>
-                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white tracking-tight inline-block relative">
-                        {t('pageTitle')}
-                        <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-16 h-1.5 bg-red-600 rounded-full shadow-[0_0_10px_rgba(220,38,38,0.5)]"></div>
-                    </h1>
-                </div>
-
-                {/* شريط البحث والفلاتر (Sticky) */}
-                <div className="sticky top-4 md:top-6 z-[100] mb-8 md:mb-12">
-                    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-800 shadow-sm rounded-3xl md:rounded-[2.5rem] p-4 md:p-6 transition-all">
-                        <div className="flex flex-col gap-4">
-                            
-                            <div className="relative group">
-                                <input 
-                                    type="text" 
-                                    placeholder={t('searchPlaceholder')} 
-                                    className="w-full py-4 px-6 ps-12 md:ps-14 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-red-500 dark:focus:border-red-500 rounded-2xl outline-none transition-colors text-slate-900 dark:text-white font-medium text-sm md:text-base placeholder-slate-400"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)} 
-                                />
-                                <svg className="absolute start-4 top-1/2 -translate-y-1/2 h-5 w-5 md:h-6 md:w-6 text-slate-400 group-focus-within:text-red-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                            </div>
-                            
-                            <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
-                                <select value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)} className="w-full py-3 px-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs cursor-pointer outline-none focus:border-red-500 transition-colors appearance-none text-center">
-                                    <option value="all">{t('allAuthors')}</option>
-                                    {authors.filter(a => a !== "all").map(a => <option key={a} value={a}>{a}</option>)}
-                                </select>
-                                <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="w-full py-3 px-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs cursor-pointer outline-none focus:border-red-500 transition-colors appearance-none text-center">
-                                    <option value="all">{t('allSubjects')}</option>
-                                    {subjects.filter(s => s !== "all").map(s => <option key={s} value={s}>{s}</option>)}
-                                </select>
-                                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="w-full py-3 px-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs cursor-pointer outline-none focus:border-red-500 transition-colors appearance-none text-center lg:col-span-2">
-                                    <option value="alphabetical">{t('alphabetical')}</option>
-                                    <option value="author">{t('authorSort')}</option>
-                                    <option value="subject">{t('subjectSort')}</option>
-                                    <option value="audio">{t('audioSort')}</option>
-                                </select>
-                                <button 
-                                    onClick={() => setAudioOnly(!audioOnly)} 
-                                    className={`w-full py-3 px-4 rounded-xl font-bold text-xs transition-colors border col-span-2 lg:col-span-1 flex justify-center items-center gap-2 ${audioOnly ? 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border-red-200 dark:border-red-500/30' : 'bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'}`}
-                                >
-                                    🎧 {t('audioOnly')}
-                                </button>
-                            </div>
+            <div className={`sticky z-[100] transition-all duration-500 ease-in-out ${showSearch ? 'top-6 opacity-100 translate-y-0' : '-top-40 opacity-0 -translate-y-full'} mb-12`}>
+                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-3xl border border-white/40 dark:border-white/10 shadow-lg rounded-[2rem] p-4 md:p-5">
+                    <div className="flex flex-col gap-4">
+                        <div className="relative">
+                            <input 
+                              type="text" 
+                              placeholder={t('searchPlaceholder')} 
+                              className="w-full p-4 ps-12 bg-white/60 dark:bg-black/40 text-slate-900 dark:text-white border-2 border-transparent focus:border-red-500 rounded-xl outline-none transition-all text-base font-medium shadow-inner" 
+                              value={searchTerm}
+                              onChange={(e) => setSearchTerm(e.target.value)} 
+                            />
+                            <svg className="absolute start-4 top-1/2 -translate-y-1/2 h-5 w-5 text-red-600 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                        </div>
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                            <select value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)} className="p-3 rounded-lg bg-slate-100 dark:bg-slate-800 font-medium text-sm outline-none cursor-pointer hover:bg-white transition-all text-slate-700 dark:text-slate-200">
+                                <option value="all">{t('allAuthors')}</option>
+                                {filters.authors.map(a => <option key={a} value={a}>{a}</option>)}
+                            </select>
+                            <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="p-3 rounded-lg bg-slate-100 dark:bg-slate-800 font-medium text-sm outline-none cursor-pointer hover:bg-white transition-all text-slate-700 dark:text-slate-200">
+                                <option value="all">{t('allSubjects')}</option>
+                                {filters.subjects.map(s => <option key={s} value={s}>{s}</option>)}
+                            </select>
+                            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="p-3 rounded-lg bg-slate-100 dark:bg-slate-800 font-medium text-sm outline-none cursor-pointer hover:bg-white transition-all text-slate-700 dark:text-slate-200">
+                                <option value="alphabetical">{t('alphabetical')}</option>
+                                <option value="audio">{t('audioSort')}</option>
+                            </select>
+                            <button onClick={() => setAudioOnly(!audioOnly)} className={`p-3 rounded-lg font-medium text-sm transition-all shadow-sm ${audioOnly ? 'bg-red-600 text-white animate-pulse' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700'}`}>
+                                🎧 {t('audioOnly')}
+                            </button>
                         </div>
                     </div>
                 </div>
-
-                {/* شبكة الكتب */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
-                    {filteredBooks.map((book) => (
-                        <div key={book.id} onClick={() => setSelectedBook(book)} className="group bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-red-500/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden cursor-pointer h-full relative">
-                            
-                            <div className={`absolute top-0 start-0 w-1.5 h-full transition-colors duration-300 ${book.audioId ? 'bg-red-500' : 'bg-blue-500'}`}></div>
-
-                            <div className="p-6 md:p-8 flex-1 flex flex-col text-start">
-                                <div className="flex justify-between items-center mb-4">
-                                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border
-                                        ${book.audioId ? 'bg-red-50 dark:bg-red-500/10 text-red-600 border-red-200 dark:border-red-500/20' : 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 border-blue-200 dark:border-blue-500/20'}`}>
-                                        {book.subject}
-                                    </span>
-                                    {book.audioId && <AudioWaveIcon />}
-                                </div>
-                                
-                                <h3 className="font-black text-lg md:text-xl text-slate-900 dark:text-white leading-snug mb-3 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors line-clamp-2" dir="ltr">
-                                    {book.title}
-                                </h3>
-                                
-                                <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-auto truncate flex items-center gap-2">
-                                    <span className="text-lg">👤</span> {book.author}
-                                </p>
-                            </div>
-
-                            <div className="bg-slate-50 dark:bg-slate-900/50 px-6 py-4 flex justify-between items-center border-t border-slate-100 dark:border-slate-700">
-                                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Digital Index</span>
-                                <div className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-600 flex items-center justify-center text-slate-400 group-hover:bg-red-600 group-hover:border-red-600 group-hover:text-white transition-colors">
-                                    <svg className="w-4 h-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-                {filteredBooks.length === 0 && (
-                    <div className="text-center py-20">
-                        <p className="text-xl font-bold text-slate-500 dark:text-slate-400">No books found matching your criteria.</p>
-                    </div>
-                )}
             </div>
 
-            {/* نافذة تفاصيل الكتاب (Modal) */}
-            {selectedBook && (
-                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 backdrop-blur-sm bg-slate-900/40 dark:bg-black/60 animate-fade-in" onClick={() => setSelectedBook(null)}>
-                    <div className="relative w-full max-w-4xl bg-white dark:bg-slate-800 rounded-[2rem] md:rounded-[3rem] shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] border border-slate-200 dark:border-slate-700 animate-zoom-in" onClick={(e) => e.stopPropagation()}>
-                        
-                        <button onClick={() => setSelectedBook(null)} className={`absolute top-4 ${isAr ? 'left-4' : 'right-4'} z-50 p-2 md:p-3 bg-slate-100 hover:bg-red-100 dark:bg-slate-700 dark:hover:bg-red-900/30 text-slate-500 hover:text-red-600 transition-colors rounded-full`}>
-                            <svg className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                        </button>
-                        
-                        <div className="flex-1 p-6 md:p-10 lg:p-12 overflow-y-auto no-scrollbar flex flex-col">
-                            <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight mb-2" dir="ltr">{selectedBook.title}</h2>
-                            <p 
-                                onMouseMove={(e) => handleAuthorHover(e, selectedBook.bio)} 
-                                onMouseLeave={(e) => handleAuthorHover(e, null)}
-                                className="text-lg md:text-xl text-slate-500 dark:text-slate-400 font-medium mb-8 cursor-help inline-block border-b border-dashed border-slate-300 dark:border-slate-600 w-max pb-1"
-                            >
-                                By {selectedBook.author}
-                            </p>
-                            
-                            <div className="bg-slate-50 dark:bg-slate-900/50 p-6 md:p-8 rounded-3xl border border-slate-100 dark:border-slate-700 flex-1">
-                                <p className="text-xs text-red-600 dark:text-red-500 font-bold uppercase tracking-widest mb-3 flex items-center gap-2">
-                                    <span className="text-base">✨</span> {t('summaryTitle')}
-                                </p>
-                                <p className="text-slate-800 dark:text-slate-200 text-base md:text-lg font-medium leading-relaxed">
-                                    {selectedBook.summary}
-                                </p>
-                            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
+                {filteredBooks.slice(0, visibleCount).map((book) => (
+                    <BookCard key={book.id} book={book} t={t} onClick={() => setSelectedBook(book)} />
+                ))}
+            </div>
 
-                            {selectedBook.audioId && <SaqrAudioPlayer audioSrc={selectedBook.audioId} t={t} />}
-                        </div>
-
-                        <div className="w-full md:w-72 lg:w-80 bg-slate-50 dark:bg-slate-900 p-6 md:p-10 flex flex-col justify-center items-center border-t md:border-t-0 md:border-s border-slate-200 dark:border-slate-700 shrink-0">
-                            <div className="w-full text-center flex flex-col items-center gap-2 mb-8">
-                                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('exclusive')}</span>
-                                <SchoolLogo className="h-12 w-auto mt-2" />
-                            </div>
-                            
-                            <div className="w-full flex flex-col gap-4">
-                                <a href={selectedBook.driveLink} target="_blank" rel="noreferrer" className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-full transition-colors text-center text-sm md:text-base uppercase tracking-widest shadow-md hover:shadow-lg flex justify-center items-center gap-2">
-                                    {t('read')}
-                                </a>
-                                <button onClick={() => setSelectedBook(null)} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-bold py-4 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-sm uppercase tracking-widest">
-                                    {t('close')}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+            {filteredBooks.length === 0 && (
+                <div className="py-20 text-center opacity-40">
+                    <span className="text-5xl mb-4 block">📚</span>
+                    <p className="text-xl font-medium text-slate-500">{t('noResults')}</p>
                 </div>
             )}
 
+            {filteredBooks.length > visibleCount && (
+                <div className="mt-16 text-center">
+                    <button onClick={() => setVisibleCount(v => v + 16)} className="bg-[#00732f] text-white px-10 py-3.5 rounded-full font-medium text-base hover:bg-red-600 hover:scale-105 transition-all shadow-lg active:scale-95">
+                        EXPLORE MORE BOOKS
+                    </button>
+                </div>
+            )}
+
+            <BookModal book={selectedBook} onClose={() => setSelectedBook(null)} t={t} />
+
             <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
-                * { font-family: 'Cairo', sans-serif !important; }
+                @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600&display=swap');
+                * { font-family: 'Cairo', sans-serif !important; font-style: normal !important; }
                 .no-scrollbar::-webkit-scrollbar { display: none; }
                 
-                @keyframes audio-bar { 0%, 100% { height: 4px; } 50% { height: 16px; } }
-                .animate-audio-bar-1 { animation: audio-bar 0.8s ease-in-out infinite; }
-                .animate-audio-bar-2 { animation: audio-bar 1s ease-in-out infinite 0.2s; }
-                .animate-audio-bar-3 { animation: audio-bar 0.9s ease-in-out infinite 0.4s; }
+                @keyframes zoom-in-custom {
+                  0% { opacity: 0; transform: scale(0.9) translateY(20px); }
+                  100% { opacity: 1; transform: scale(1) translateY(0); }
+                }
+                .animate-zoom-in { animation: zoom-in-custom 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
                 
-                @keyframes fade-in-up { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
-                .animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; }
-                
-                @keyframes zoom-in { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
-                .animate-zoom-in { animation: zoom-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-                
-                @keyframes fade-in { 0% { opacity: 0; } 100% { opacity: 1; } }
-                .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
+                @keyframes audio-bar { 0%, 100% { height: 4px; } 50% { height: 12px; } }
+                .animate-audio-bar-1 { animation: audio-bar 0.6s ease-in-out infinite; }
+                .animate-audio-bar-2 { animation: audio-bar 0.8s ease-in-out infinite 0.2s; }
+                .animate-audio-bar-3 { animation: audio-bar 0.7s ease-in-out infinite 0.4s; }
             `}</style>
         </div>
     );
