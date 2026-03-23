@@ -31,7 +31,7 @@ interface NavLink {
   color: string;
 }
 
-// -------- 1. مساعد صقر العائم (تم تعديله ليفتح النافذة) --------
+// -------- 1. مساعد صقر العائم --------
 const FloatingSaqr: React.FC<{ onOpenModal: () => void }> = ({ onOpenModal }) => {
   const location = useLocation();
   const { dir } = useLanguage();
@@ -48,7 +48,7 @@ const FloatingSaqr: React.FC<{ onOpenModal: () => void }> = ({ onOpenModal }) =>
     
     setTimeout(() => {
       setRipples(prev => prev.filter(r => r.id !== rippleId));
-      onOpenModal(); // يفتح النافذة المنبثقة بدلاً من التوجيه لصفحة جديدة
+      onOpenModal(); 
     }, 400);
   };
 
@@ -72,17 +72,22 @@ const FloatingSaqr: React.FC<{ onOpenModal: () => void }> = ({ onOpenModal }) =>
   );
 };
 
-// -------- 1.5. نافذة صقر المنبثقة القابلة للسحب (الجديدة) --------
+// -------- 1.5. نافذة صقر المنبثقة القابلة للسحب (المعدلة) --------
 const DraggableSaqrModal: React.FC<{ isOpen: boolean; onClose: () => void; children: ReactNode }> = ({ isOpen, onClose, children }) => {
     const { locale, dir } = useLanguage();
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [isDragging, setIsDragging] = useState(false);
     const dragStart = useRef({ x: 0, y: 0 });
 
+    // إعادة النقطة للصفر عند كل فتح حتى تتوسط الشاشة دائماً
+    useEffect(() => {
+        if (isOpen) setPosition({ x: 0, y: 0 });
+    }, [isOpen]);
+
     const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
         setIsDragging(true);
         dragStart.current = { x: e.clientX - position.x, y: e.clientY - position.y };
-        (e.target as HTMLElement).setPointerCapture(e.pointerId);
+        e.currentTarget.setPointerCapture(e.pointerId); // استخدام currentTarget بدلاً من target
     };
 
     const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -92,8 +97,9 @@ const DraggableSaqrModal: React.FC<{ isOpen: boolean; onClose: () => void; child
 
     const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
         setIsDragging(false);
-        const target = e.target as HTMLElement;
-        if (target.hasPointerCapture(e.pointerId)) target.releasePointerCapture(e.pointerId);
+        if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+            e.currentTarget.releasePointerCapture(e.pointerId);
+        }
     };
 
     if (!isOpen) return null;
@@ -102,39 +108,42 @@ const DraggableSaqrModal: React.FC<{ isOpen: boolean; onClose: () => void; child
         <div className="fixed inset-0 z-[999999] pointer-events-none flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm pointer-events-auto animate-fade-in" onClick={onClose}></div>
             
-            <div 
-                dir={dir}
-                className="relative w-full md:w-[450px] h-[85vh] md:h-[650px] bg-slate-50 dark:bg-slate-950 rounded-[2rem] shadow-2xl border border-white/40 dark:border-slate-700 flex flex-col pointer-events-auto overflow-hidden animate-zoom-in"
-                style={{ transform: `translate(${position.x}px, ${position.y}px)`, touchAction: 'none' }}
-            >
-                {/* Header / Drag Handle */}
+            {/* غلاف الأنيميشن لمنع التعارض مع حركة السحب */}
+            <div className="animate-zoom-in flex items-center justify-center pointer-events-none w-full h-full absolute inset-0 p-4">
                 <div 
-                    className="w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 p-4 flex items-center justify-between cursor-grab active:cursor-grabbing select-none touch-none z-50"
-                    onPointerDown={handlePointerDown}
-                    onPointerMove={handlePointerMove}
-                    onPointerUp={handlePointerUp}
-                    onPointerCancel={handlePointerUp}
+                    dir={dir}
+                    className="relative w-full md:w-[450px] h-[85vh] md:h-[650px] bg-slate-50 dark:bg-slate-950 rounded-[2rem] shadow-2xl border border-white/40 dark:border-slate-700 flex flex-col pointer-events-auto overflow-hidden"
+                    style={{ transform: `translate(${position.x}px, ${position.y}px)`, touchAction: 'none' }}
                 >
-                    <div className="flex items-center gap-3 pointer-events-none">
-                        <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-100 border border-slate-200 shadow-inner">
-                            <img src="/saqr-avatar.png" alt="Saqr" className="w-full h-full object-cover" onError={(e) => e.currentTarget.src="https://www.efipslibrary.online/school-logo.png"} />
+                    {/* Header / Drag Handle */}
+                    <div 
+                        className="w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 p-4 flex items-center justify-between cursor-grab active:cursor-grabbing select-none touch-none z-50"
+                        onPointerDown={handlePointerDown}
+                        onPointerMove={handlePointerMove}
+                        onPointerUp={handlePointerUp}
+                        onPointerCancel={handlePointerUp}
+                    >
+                        <div className="flex items-center gap-3 pointer-events-none">
+                            <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-100 border border-slate-200 shadow-inner">
+                                <img src="/saqr-avatar.png" alt="Saqr" className="w-full h-full object-cover" onError={(e) => e.currentTarget.src="https://www.efipslibrary.online/school-logo.png"} />
+                            </div>
+                            <div>
+                                <h3 className="font-black text-sm text-slate-900 dark:text-white uppercase tracking-widest">{locale === 'en' ? 'Saqr AI' : 'صقر الذكي'}</h3>
+                                <p className="text-[9px] text-green-600 font-bold flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> {locale === 'en' ? 'Online' : 'متصل'}
+                                </p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 className="font-black text-sm text-slate-900 dark:text-white uppercase tracking-widest">{locale === 'en' ? 'Saqr AI' : 'صقر الذكي'}</h3>
-                            <p className="text-[9px] text-green-600 font-bold flex items-center gap-1">
-                                <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> {locale === 'en' ? 'Online' : 'متصل'}
-                            </p>
-                        </div>
+                        <button onClick={(e) => { e.stopPropagation(); onClose(); }} className="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-red-500 hover:text-white dark:hover:bg-red-600 rounded-full transition-all pointer-events-auto shadow-sm">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
                     </div>
-                    <button onClick={(e) => { e.stopPropagation(); onClose(); }} className="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-red-500 hover:text-white dark:hover:bg-red-600 rounded-full transition-all pointer-events-auto shadow-sm">
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
-                </div>
-                
-                {/* محتوى البحث الذكي معزول عن باقي الصفحة */}
-                <div className="flex-1 overflow-y-auto no-scrollbar relative pointer-events-auto bg-slate-50 dark:bg-slate-950">
-                    <div className="w-full min-h-full">
-                        {children}
+                    
+                    {/* محتوى البحث الذكي معزول عن باقي الصفحة */}
+                    <div className="flex-1 overflow-y-auto no-scrollbar relative pointer-events-auto bg-slate-50 dark:bg-slate-950 cursor-auto">
+                        <div className="w-full min-h-full">
+                            {children}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -308,7 +317,7 @@ const MainLayout: React.FC = () => {
         <p className="mt-2 font-medium text-slate-400 dark:text-slate-500 text-[9px] md:text-[10px] uppercase">&copy; Emirates Falcon Int'l. Private School</p>
       </footer>
 
-      {/* 🚀 نافذة صقر المنبثقة الذكية هنا 🚀 */}
+      {/* 🚀 نافذة صقر المنبثقة الذكية 🚀 */}
       <DraggableSaqrModal isOpen={isSaqrModalOpen} onClose={() => setIsSaqrModalOpen(false)}>
          <SmartSearchPage />
       </DraggableSaqrModal>
@@ -332,7 +341,8 @@ const MainLayout: React.FC = () => {
         @keyframes fade-in-up { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
         .animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; }
         
-        @keyframes zoom-in { 0% { opacity: 0; transform: scale(0.9) translateX(-50%); } 100% { opacity: 1; transform: scale(1) translateX(-50%); } }
+        /* 🔧 تم إزالة translateX(-50%) من هنا لتجنب التعارض مع Flexbox */
+        @keyframes zoom-in { 0% { opacity: 0; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
         .animate-zoom-in { animation: zoom-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         
         .no-scrollbar::-webkit-scrollbar { display: none; }
