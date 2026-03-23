@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useLanguage } from '../App';
 import { useNavigate } from 'react-router-dom';
 
-// --- 1. قاعدة البيانات (Database) ---
+// --- 1. قاعدة البيانات (تم الإبقاء عليها كما هي) ---
 export const ARABIC_LIBRARY_DATABASE = [
     { id: "AR_1", title: "مجموعة روايات أجاثا كريستي", author: "أجاثا كريستي", subject: "قصص بوليسية", publisher: "ناشرون متعددون", driveLink: "https://drive.google.com/drive/folders/1PZk0vPQrKXIgE0WmUXlEMcSzt_d94Q6u", bio: "ملكة الجريمة عالمياً، صاحبة الشخصيات الخالدة مثل هيركيول بوارو.", summary: "أضخم مجموعة لروايات التحقيق والغموض التي تتميز بحبكة عبقرية ونهايات صادمة." },
     { id: "AR_2", title: "أرض الإله", author: "أحمد مراد", subject: "أدب تاريخي", publisher: "دار الشروق", driveLink: "https://drive.google.com/file/d/1Q-dT9-g292nqv1N_PvlB2TnZMBdQGpio/view", bio: "كاتب ومصور مصري معاصر، تميز برواياته التي تمزج بين التاريخ والغموض.", summary: "رحلة تاريخية مثيرة في زمن الفراعنة تكشف أسراراً مخفية حول خروج بني إسرائيل.", audioId: "/audio/أرض الإله.mp3" },
@@ -32,7 +32,7 @@ export const ARABIC_LIBRARY_DATABASE = [
     { id: "AR_27", title: "صحيح البخاري", author: "البخاري", subject: "كتب سنة", publisher: "دار ابن كثير", driveLink: "https://drive.google.com/file/d/1j7rtHR8fP3et3p1cQ8fB15Wb4Of8GBnG/view", bio: "الإمام محمد بن إسماعيل البخاري، صاحب أصح كتاب بعد القرآن.", summary: "الجامع المسند الصحيح لأقوال وأفعال وتقارير النبي صلى الله عليه وسلم." },
     { id: "AR_28", title: "صحيح مسلم", author: "مسلم", subject: "كتب سنة", publisher: "دار الحديث", driveLink: "https://drive.google.com/file/d/1k3nMYrD9V40GGP2BDJ18IinXBWXbL-04/view", bio: "الإمام مسلم بن الحجاج، أحد كبار علماء الحديث النبوي.", summary: "ثاني أصح الكتب في الحديث النبوي، مرتباً ترتيباً فقهياً دقيقاً وشاملاً." },
     { id: "AR_29", title: "الأب الغني والأب الفقير", author: "روبرت كيوساكي", subject: "تنمية بشرية", publisher: "مكتبة جرير", driveLink: "https://drive.google.com/file/d/17S2yXqeKbybMCdpuxV_vZU3McSarrp-1/view", bio: "رجل أعمال ومستثمر أمريكي، أحدث ثورة في الثقافة المالية.", summary: "كتاب يعلمك الفرق بين الأصول والالتزامات، وكيف تبدأ رحلتك نحو الاستقلال المالي." },
-    { id: "AR_30", title: "الرقص مع الحياة", author: "مهدي الموسوي", subject: "تنمية بشرية", publisher: "مدارك", driveLink: "https://drive.google.com/file/d/1GNcOcjbcGARMXTMh0A0wYnaOxDHQ2ivt/view", bio: "باحث وكاتب كويتي، يركز في كتاباته على السعادة الداخلية والسلام.", summary: "دعوة ملهمة لعيش الحياة ببهجة وسلام، متجاوزاً العقبات الروحية والنفسية." },
+    { id: "AR_30", title: "الرقص مع الحياة", author: "مهدي الموسوي", subject: "تنمية بشرية", publisher: "مدارك", driveLink: "https://drive.google.com/file/d/1GNcOcjbcGARMXTMh0A0wYnaOxDHQ2ivt/view", bio: "باحث وكاتب كويتي، يركز في كتاباته على السعادة الداخلية السلام.", summary: "دعوة ملهمة لعيش الحياة ببهجة وسلام، متجاوزاً العقبات الروحية والنفسية." },
     { id: "AR_31", title: "المفاتيح العشرة للنجاح", author: "إبراهيم الفقي", subject: "تنمية بشرية", publisher: "غير محدد", driveLink: "https://drive.google.com/file/d/1Oi25K6qOcePeORTEFaev4dFkWGFonwdf/view", bio: "خبير التنمية البشرية والبرمجة اللغوية العصبية، رائد هذا المجال عربياً.", summary: "دليل عملي يحتوي على أهم القواعد والخطوات لتحقيق النجاح في كافة مجالات الحياة." },
     { id: "AR_32", title: "خوارق اللاشعور", author: "علي الوردي", subject: "تنمية بشرية", publisher: "الوراق", driveLink: "https://drive.google.com/file/d/1_8qsQrkCoIDFJbFD1lB7be6JpOApErLR/view", bio: "عالم اجتماع عراقي شهير، عرف بتحليله النفسي والاجتماعي العميق.", summary: "دراسة في طبيعة النفس البشرية وتأثير اللاشعور على سلوك الفرد والمجتمع." },
     { id: "AR_33", title: "قوة الآن", author: "إيكهارت تول", subject: "تنمية بشرية", publisher: "دار علاء الدين", driveLink: "https://drive.google.com/file/d/1_jmXl_PDCqU1ElBcJZGYLoUIydM32mec/view", bio: "معلم روحي عالمي، يركز على العيش في اللحظة الحاضرة.", summary: "دليل للتنوير الروحي عبر التخلص من آلام الماضي وقلق المستقبل والعيش الآن." },
@@ -163,7 +163,7 @@ const SaqrAudioPlayer: React.FC<{ audioSrc: string; t: any }> = ({ audioSrc, t }
     );
 };
 
-// --- 3. Component: BookModal (النافذة المصغرة والمنظمة زجاجياً) ---
+// --- 3. Component: BookModal (تعديل: توسيط النافذة) ---
 const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
     const { locale } = useLanguage();
     const [aiContent, setAiContent] = useState({ summary: '', genre: '' });
@@ -200,9 +200,10 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
     if (!book) return null;
 
     return (
+        // التوسيط هنا باستخدام flex items-center justify-center
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 backdrop-blur-md bg-slate-900/40 animate-fade-in" onClick={onClose}>
-            {/* النافذة المنبثقة: حجم أصغر (max-w-3xl) ومنظمة بشكل أفضل */}
-            <div className="relative w-full max-w-3xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl rounded-[2rem] border border-white/20 shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[85vh] animate-zoom-in" onClick={(e) => e.stopPropagation()}>
+            {/* النافذة المنبثقة: تمت إضافة mx-auto لضمان التوسيط في جميع الشاشات */}
+            <div className="relative w-full max-w-3xl mx-auto bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl rounded-[2rem] border border-white/20 shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[85vh] animate-zoom-in" onClick={(e) => e.stopPropagation()}>
                 
                 <button onClick={onClose} className="absolute top-4 end-4 z-50 p-2 bg-slate-100/50 dark:bg-slate-800/50 hover:bg-red-600 hover:text-white rounded-full transition-all shadow-sm">
                     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path d="M6 18L18 6M6 6l12 12" /></svg>
@@ -258,13 +259,18 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
     );
 };
 
-// --- 4. Component: BookCard (الهوية الإماراتية، والزجاجية الخفيفة) ---
-const BookCard = React.memo(({ book, onClick, t }: { book: Book; onClick: () => void; t: any }) => {
+// --- 4. Component: BookCard (تعديل: تمييز إطار الصوتيات بالأحمر) ---
+const BookCard = React.memo(({ book, onClick, t }: { book: any; onClick: () => void; t: any }) => {
   const isAi = !book.subject || book.subject === "Unknown";
+  // شرط للتحقق مما إذا كان الكتاب يحتوي على ملف صوتي
+  const hasAudio = !!book.audioId;
 
   return (
     <div onClick={onClick} className="group relative glass-panel rounded-[2rem] p-0.5 cursor-pointer transition-all duration-500 hover:-translate-y-2 h-full active:scale-[0.98] shadow-sm hover:shadow-xl">
-      <div className="relative overflow-hidden rounded-[1.9rem] bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl h-full flex flex-col border border-white/30 dark:border-white/10">
+      {/* تم تغيير الحدود هنا لتصبح حمراء في حال وجود ملف صوتي مع إضافة تأثير توهج خفيف */}
+      <div className={`relative overflow-hidden rounded-[1.9rem] bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl h-full flex flex-col border transition-all duration-300 
+        ${hasAudio ? 'border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.1)]' : 'border-white/30 dark:border-white/10'}`}>
+        
         <ReflectionLayer />
         
         <div className={`absolute top-0 start-0 w-1.5 h-full z-30 transition-all duration-500 ${isAi ? 'bg-red-600' : 'bg-[#00732f]'}`} />
@@ -275,7 +281,7 @@ const BookCard = React.memo(({ book, onClick, t }: { book: Book; onClick: () => 
                              ${isAi ? 'bg-red-600 text-white' : 'bg-[#00732f] text-white'}`}>
                  {isAi ? t('aiSubject') : book.subject}
               </span>
-              {book.audioId && <div className="bg-red-600 px-2 py-1 rounded-full shadow-sm"><AudioWaveIcon /></div>}
+              {hasAudio && <div className="bg-red-600 px-2 py-1 rounded-full shadow-sm"><AudioWaveIcon /></div>}
           </div>
           
           <h3 className="font-semibold text-lg md:text-xl text-slate-900 dark:text-white leading-snug mb-3 group-hover:text-red-600 transition-colors line-clamp-2">
@@ -309,7 +315,7 @@ const BookCard = React.memo(({ book, onClick, t }: { book: Book; onClick: () => 
   );
 });
 
-// --- 5. Main Component: SearchPage (مع خاصية إخفاء شريط البحث) ---
+// --- 5. Main Component: ArabicLibraryInternalPage (بدون تغييرات جوهرية) ---
 const ArabicLibraryInternalPage: React.FC = () => {
     const { locale, dir } = useLanguage();
     const navigate = useNavigate();
@@ -320,10 +326,9 @@ const ArabicLibraryInternalPage: React.FC = () => {
     const [authorFilter, setAuthorFilter] = useState('all');
     const [sortBy, setSortBy] = useState('alphabetical'); 
     const [audioOnly, setAudioOnly] = useState(false);
-    const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+    const [selectedBook, setSelectedBook] = useState<any | null>(null);
     const [visibleCount, setVisibleCount] = useState(16);
 
-    // منطق إخفاء شريط البحث عند التمرير للأسفل
     const [showSearch, setShowSearch] = useState(true);
     const lastScrollY = useRef(0);
 
@@ -366,14 +371,12 @@ const ArabicLibraryInternalPage: React.FC = () => {
     return (
         <div dir={dir} className="max-w-7xl mx-auto px-4 md:px-6 pb-20 relative z-10 antialiased">
             
-            {/* زر العودة والهيدر */}
             <div className="text-center mt-12 mb-16 animate-fade-up relative">
                 <button onClick={() => navigate(-1)} className="absolute start-0 top-1/2 -translate-y-1/2 text-slate-500 hover:text-red-600 font-bold flex items-center gap-2 transition-all"><span className="text-xl">←</span> {t('back')}</button>
                 <h1 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight">{t('pageTitle')}</h1>
                 <div className="flex justify-center gap-1.5 mt-6"><div className="w-10 h-1 bg-red-600 rounded-full" /><div className="w-10 h-1 bg-[#00732f] rounded-full" /></div>
             </div>
 
-            {/* بار البحث الزجاجي - يختفي ويظهر بالتمرير */}
             <div className={`sticky z-[100] transition-all duration-500 ease-in-out ${showSearch ? 'top-4 md:top-6 opacity-100 translate-y-0' : '-top-40 opacity-0 -translate-y-full'} mb-12`}>
                 <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border border-white/40 dark:border-white/10 shadow-xl rounded-[2rem] p-4 md:p-5">
                     <div className="flex flex-col gap-4">
