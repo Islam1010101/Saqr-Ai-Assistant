@@ -1,4 +1,5 @@
-import React, { useState, useEffect, createContext, useContext, ReactNode } from 'react';
+import React, { useState, useEffect, createContext, useContext, ReactNode, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { HashRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 
 // 🚀 تشغيل محرك فايربيز أول ما الموقع يفتح
@@ -17,7 +18,7 @@ import FeedbackPage from './pages/FeedbackPage';
 import CreatorsPortalPage from './pages/CreatorsPortalPage';
 import LibraryMapPage from './pages/LibraryMapPage';
 import CreatorsStudioPage from './pages/CreatorsStudioPage';
-import SaqrStudioPage from './pages/SaqrStudioPage'; // 👈 تم إضافة صفحة استوديو صقر هنا
+import SaqrStudioPage from './pages/SaqrStudioPage';
 
 export type Locale = 'en' | 'ar';
 
@@ -30,10 +31,9 @@ interface NavLink {
   color: string;
 }
 
-// -------- 1. مساعد صقر العائم --------
-const FloatingSaqr: React.FC = () => {
+// -------- 1. مساعد صقر العائم (تم تعديله ليفتح النافذة) --------
+const FloatingSaqr: React.FC<{ onOpenModal: () => void }> = ({ onOpenModal }) => {
   const location = useLocation();
-  const navigate = useNavigate();
   const { dir } = useLanguage();
   const [ripples, setRipples] = useState<{ id: number, x: number, y: number }[]>([]);
 
@@ -48,7 +48,7 @@ const FloatingSaqr: React.FC = () => {
     
     setTimeout(() => {
       setRipples(prev => prev.filter(r => r.id !== rippleId));
-      navigate('/smart-search');
+      onOpenModal(); // يفتح النافذة المنبثقة بدلاً من التوجيه لصفحة جديدة
     }, 400);
   };
 
@@ -72,6 +72,77 @@ const FloatingSaqr: React.FC = () => {
   );
 };
 
+// -------- 1.5. نافذة صقر المنبثقة القابلة للسحب (الجديدة) --------
+const DraggableSaqrModal: React.FC<{ isOpen: boolean; onClose: () => void; children: ReactNode }> = ({ isOpen, onClose, children }) => {
+    const { locale, dir } = useLanguage();
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [isDragging, setIsDragging] = useState(false);
+    const dragStart = useRef({ x: 0, y: 0 });
+
+    const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+        setIsDragging(true);
+        dragStart.current = { x: e.clientX - position.x, y: e.clientY - position.y };
+        (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    };
+
+    const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+        if (!isDragging) return;
+        setPosition({ x: e.clientX - dragStart.current.x, y: e.clientY - dragStart.current.y });
+    };
+
+    const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+        setIsDragging(false);
+        const target = e.target as HTMLElement;
+        if (target.hasPointerCapture(e.pointerId)) target.releasePointerCapture(e.pointerId);
+    };
+
+    if (!isOpen) return null;
+
+    return createPortal(
+        <div className="fixed inset-0 z-[999999] pointer-events-none flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm pointer-events-auto animate-fade-in" onClick={onClose}></div>
+            
+            <div 
+                dir={dir}
+                className="relative w-full md:w-[450px] h-[85vh] md:h-[650px] bg-slate-50 dark:bg-slate-950 rounded-[2rem] shadow-2xl border border-white/40 dark:border-slate-700 flex flex-col pointer-events-auto overflow-hidden animate-zoom-in"
+                style={{ transform: `translate(${position.x}px, ${position.y}px)`, touchAction: 'none' }}
+            >
+                {/* Header / Drag Handle */}
+                <div 
+                    className="w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 p-4 flex items-center justify-between cursor-grab active:cursor-grabbing select-none touch-none z-50"
+                    onPointerDown={handlePointerDown}
+                    onPointerMove={handlePointerMove}
+                    onPointerUp={handlePointerUp}
+                    onPointerCancel={handlePointerUp}
+                >
+                    <div className="flex items-center gap-3 pointer-events-none">
+                        <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-100 border border-slate-200 shadow-inner">
+                            <img src="/saqr-avatar.png" alt="Saqr" className="w-full h-full object-cover" onError={(e) => e.currentTarget.src="https://www.efipslibrary.online/school-logo.png"} />
+                        </div>
+                        <div>
+                            <h3 className="font-black text-sm text-slate-900 dark:text-white uppercase tracking-widest">{locale === 'en' ? 'Saqr AI' : 'صقر الذكي'}</h3>
+                            <p className="text-[9px] text-green-600 font-bold flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> {locale === 'en' ? 'Online' : 'متصل'}
+                            </p>
+                        </div>
+                    </div>
+                    <button onClick={(e) => { e.stopPropagation(); onClose(); }} className="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-red-500 hover:text-white dark:hover:bg-red-600 rounded-full transition-all pointer-events-auto shadow-sm">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
+                
+                {/* محتوى البحث الذكي معزول عن باقي الصفحة */}
+                <div className="flex-1 overflow-y-auto no-scrollbar relative pointer-events-auto bg-slate-50 dark:bg-slate-950">
+                    <div className="w-full min-h-full">
+                        {children}
+                    </div>
+                </div>
+            </div>
+        </div>,
+        document.body
+    );
+};
+
 // -------- 2. هيدر EFIPS الزجاجي الذكي --------
 const Header: React.FC = () => {
   const { locale, setLocale, dir } = useLanguage();
@@ -80,7 +151,6 @@ const Header: React.FC = () => {
   const [activeHint, setActiveHint] = useState<string | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   
-  // States for Scroll Logic (يختفي عند النزول ويظهر عند الصعود)
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -95,7 +165,6 @@ const Header: React.FC = () => {
         setLastScrollY(window.scrollY);
       }
     };
-
     window.addEventListener('scroll', controlNavbar);
     return () => window.removeEventListener('scroll', controlNavbar);
   }, [lastScrollY]);
@@ -105,6 +174,7 @@ const Header: React.FC = () => {
     { path: '/smart-search', label: locale === 'en' ? 'Ask Saqr' : 'اسأل صقر', icon: '🤖', hint: locale === 'en' ? 'Ask SAQR' : 'اسأل صقر', color: 'bg-green-600' },
     { path: '/digital-library', label: locale === 'en' ? 'Digital' : 'المكتبة الرقمية', icon: '📚', hint: locale === 'en' ? 'E-Books' : 'المكتبة الرقمية', color: 'bg-slate-800' },
     { path: '/creators', label: locale === 'en' ? 'Creators' : 'بوابة المبدعين', icon: '🎨', hint: locale === 'en' ? 'Talents' : 'إبداعات طلابنا', color: 'bg-red-500' },
+    { path: '/saqr-studio', label: locale === 'en' ? 'Studio' : 'استديو صقر', icon: '🎧', hint: locale === 'en' ? 'Saqr Studio' : 'استديو صقر', color: 'bg-slate-900' }, 
     { path: '/feedback', label: locale === 'en' ? 'Ideas' : 'مقترحات', icon: '✍️', hint: locale === 'en' ? 'Contact' : 'رأيك يهمنا', color: 'bg-green-500' }, 
     { path: '/reports', label: locale === 'en' ? 'Reports' : 'تقارير', icon: '📊', hint: locale === 'en' ? 'Reports' : 'تقارير', color: 'bg-slate-700' },
     { path: '/map', label: locale === 'en' ? "Lib's Map" : 'خريطة المكتبة', icon: '🗺️', hint: locale === 'en' ? 'Shelf Cont' : 'محتويات الأرفف', color: 'bg-red-600' },
@@ -139,11 +209,7 @@ const Header: React.FC = () => {
                 
                 {activeHint === l.path && (
                   <div className={`fixed z-[999] px-4 py-2 ${l.color} text-white text-[10px] md:text-xs font-semibold rounded-xl shadow-lg pointer-events-none transition-opacity duration-200 whitespace-nowrap animate-zoom-in ${locale === 'en' ? 'tracking-wider uppercase' : ''}`}
-                       style={{ 
-                         left: `${mousePos.x}px`, 
-                         top: `${mousePos.y + 25}px`, 
-                         transform: 'translateX(-50%)' 
-                       }}>
+                       style={{ left: `${mousePos.x}px`, top: `${mousePos.y + 25}px`, transform: 'translateX(-50%)' }}>
                     <div className={`absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 ${l.color} rotate-45`}></div>
                     {l.hint}
                   </div>
@@ -201,74 +267,87 @@ const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   return <ThemeContext.Provider value={{ theme, toggleTheme: () => setTheme(prev => prev === 'light' ? 'dark' : 'light') }}>{children}</ThemeContext.Provider>;
 };
 
-// -------- 4. المكون الرئيسي --------
+// -------- 4. المكون الرئيسي والتوزيع الداخلي --------
+const MainLayout: React.FC = () => {
+  const [isSaqrModalOpen, setIsSaqrModalOpen] = useState(false);
+
+  return (
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans transition-colors duration-300 flex flex-col selection:bg-red-500/30 relative">
+      
+      {/* الخلفية الديناميكية الموحدة للهوية الوطنية (الأحمر والأخضر) */}
+      <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-40 dark:opacity-20">
+         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-red-600/30 rounded-full blur-[120px]"></div>
+         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-green-600/30 rounded-full blur-[100px]"></div>
+      </div>
+
+      <Header />
+      <FloatingSaqr onOpenModal={() => setIsSaqrModalOpen(true)} />
+      
+      <main className="flex-1 relative z-10 w-full">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/search" element={<SearchPage />} />
+          <Route path="/map" element={<LibraryMapPage />} />
+          <Route path="/smart-search" element={<SmartSearchPage />} />
+          <Route path="/digital-library" element={<DigitalLibraryPage />} />
+          <Route path="/digital-library/arabic" element={<ArabicLibraryInternalPage />} />
+          <Route path="/digital-library/english" element={<EnglishLibraryInternalPage />} />
+          <Route path="/creators" element={<CreatorsPortalPage />} />
+          <Route path="/creators-studio" element={<CreatorsStudioPage />} />
+          <Route path="/saqr-studio" element={<SaqrStudioPage />} />
+          
+          <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/feedback" element={<FeedbackPage />} /> 
+          <Route path="/about" element={<AboutPage />} />
+        </Routes>
+      </main>
+
+      <footer className="relative z-10 py-10 text-center border-t border-slate-200 dark:border-slate-800 mx-4 md:mx-20 mt-10">
+        <div className="h-1.5 w-16 bg-red-600 mx-auto mb-6 rounded-full shadow-[0_0_10px_rgba(220,38,38,0.5)]"></div>
+        <p className="font-semibold text-[10px] md:text-xs tracking-widest uppercase text-slate-500 dark:text-slate-400">EFIPS • Library • 2026</p>
+        <p className="mt-2 font-medium text-slate-400 dark:text-slate-500 text-[9px] md:text-[10px] uppercase">&copy; Emirates Falcon Int'l. Private School</p>
+      </footer>
+
+      {/* 🚀 نافذة صقر المنبثقة الذكية هنا 🚀 */}
+      <DraggableSaqrModal isOpen={isSaqrModalOpen} onClose={() => setIsSaqrModalOpen(false)}>
+         <SmartSearchPage />
+      </DraggableSaqrModal>
+
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap');
+        * { font-family: 'Cairo', sans-serif !important; }
+        
+        @keyframes float { 
+          0%, 100% { transform: translateY(0px) rotate(0deg); } 
+          50% { transform: translateY(-10px) rotate(3deg); } 
+        }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        
+        @keyframes ripple {
+          0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+          100% { transform: translate(-50%, -50%) scale(4); opacity: 0; }
+        }
+        .animate-ripple { animation: ripple 0.6s linear forwards; }
+        
+        @keyframes fade-in-up { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; }
+        
+        @keyframes zoom-in { 0% { opacity: 0; transform: scale(0.9) translateX(-50%); } 100% { opacity: 1; transform: scale(1) translateX(-50%); } }
+        .animate-zoom-in { animation: zoom-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
+    </div>
+  );
+};
+
 const App: React.FC = () => {
   return (
     <ThemeProvider>
       <LanguageProvider>
         <HashRouter>
-          <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans transition-colors duration-300 flex flex-col selection:bg-red-500/30 relative">
-            
-            {/* الخلفية الديناميكية الموحدة للهوية الوطنية (الأحمر والأخضر) */}
-            <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-40 dark:opacity-20">
-               <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-red-600/30 rounded-full blur-[120px]"></div>
-               <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-green-600/30 rounded-full blur-[100px]"></div>
-            </div>
-
-            <Header />
-            <FloatingSaqr />
-            
-            <main className="flex-1 relative z-10 w-full">
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/search" element={<SearchPage />} />
-                <Route path="/map" element={<LibraryMapPage />} />
-                <Route path="/smart-search" element={<SmartSearchPage />} />
-                <Route path="/digital-library" element={<DigitalLibraryPage />} />
-                <Route path="/digital-library/arabic" element={<ArabicLibraryInternalPage />} />
-                <Route path="/digital-library/english" element={<EnglishLibraryInternalPage />} />
-                <Route path="/creators" element={<CreatorsPortalPage />} />
-                <Route path="/creators-studio" element={<CreatorsStudioPage />} />
-                <Route path="/saqr-studio" element={<SaqrStudioPage />} /> {/* 👈 راوت استوديو صقر */}
-                
-                <Route path="/reports" element={<ReportsPage />} />
-                <Route path="/feedback" element={<FeedbackPage />} /> 
-                <Route path="/about" element={<AboutPage />} />
-              </Routes>
-            </main>
-
-            <footer className="relative z-10 py-10 text-center border-t border-slate-200 dark:border-slate-800 mx-4 md:mx-20 mt-10">
-              <div className="h-1.5 w-16 bg-red-600 mx-auto mb-6 rounded-full shadow-[0_0_10px_rgba(220,38,38,0.5)]"></div>
-              <p className="font-semibold text-[10px] md:text-xs tracking-widest uppercase text-slate-500 dark:text-slate-400">EFIPS • Library • 2026</p>
-              <p className="mt-2 font-medium text-slate-400 dark:text-slate-500 text-[9px] md:text-[10px] uppercase">&copy; Emirates Falcon Int'l. Private School</p>
-            </footer>
-
-            <style>{`
-              @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap');
-              * { font-family: 'Cairo', sans-serif !important; }
-              
-              @keyframes float { 
-                0%, 100% { transform: translateY(0px) rotate(0deg); } 
-                50% { transform: translateY(-10px) rotate(3deg); } 
-              }
-              .animate-float { animation: float 6s ease-in-out infinite; }
-              
-              @keyframes ripple {
-                0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
-                100% { transform: translate(-50%, -50%) scale(4); opacity: 0; }
-              }
-              .animate-ripple { animation: ripple 0.6s linear forwards; }
-              
-              @keyframes fade-in-up { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
-              .animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; }
-              
-              @keyframes zoom-in { 0% { opacity: 0; transform: scale(0.9) translateX(-50%); } 100% { opacity: 1; transform: scale(1) translateX(-50%); } }
-              .animate-zoom-in { animation: zoom-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-              
-              .no-scrollbar::-webkit-scrollbar { display: none; }
-              .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-            `}</style>
-          </div>
+          <MainLayout />
         </HashRouter>
       </LanguageProvider>
     </ThemeProvider>
