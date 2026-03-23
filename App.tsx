@@ -17,6 +17,7 @@ import FeedbackPage from './pages/FeedbackPage';
 import CreatorsPortalPage from './pages/CreatorsPortalPage';
 import LibraryMapPage from './pages/LibraryMapPage';
 import CreatorsStudioPage from './pages/CreatorsStudioPage';
+import SaqrStudioPage from './pages/SaqrStudioPage'; // 👈 تم إضافة صفحة استوديو صقر هنا
 
 export type Locale = 'en' | 'ar';
 
@@ -79,7 +80,7 @@ const Header: React.FC = () => {
   const [activeHint, setActiveHint] = useState<string | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   
-  // States for Scroll Logic (محافظة على نفس الأبعاد والحركة)
+  // States for Scroll Logic (يختفي عند النزول ويظهر عند الصعود)
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -121,7 +122,7 @@ const Header: React.FC = () => {
         <Link to="/" className="flex items-center gap-2 md:gap-3 ps-4 md:ps-6 group flex-shrink-0">
           <img src="https://www.efipslibrary.online/school-logo.png" alt="EFIPS" className="h-8 w-8 md:h-11 md:w-11 object-contain rotate-12 transition-transform duration-500 group-hover:scale-110 dark:invert" />
           <div className="hidden xl:block leading-none text-start">
-            <span className="font-bold text-slate-900 dark:text-white text-[7px] md:text-[10px] block uppercase opacity-80 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
+            <span className="font-semibold text-slate-900 dark:text-white text-[7px] md:text-[10px] block uppercase opacity-80 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
               {locale === 'en' ? "Emirates Falcon Int'l Private School" : "مدرسة صقر الإمارات الدولية الخاصة"}
             </span>
           </div>
@@ -136,9 +137,8 @@ const Header: React.FC = () => {
                    onMouseMove={handleMouseMove}
                    onTouchStart={(e) => { e.stopPropagation(); setActiveHint(activeHint === l.path ? null : l.path); }}>
                 
-                {/* التولتيب المحدث */}
                 {activeHint === l.path && (
-                  <div className={`fixed z-[999] px-4 py-2 ${l.color} text-white text-[10px] md:text-xs font-bold rounded-xl shadow-lg pointer-events-none transition-opacity duration-200 whitespace-nowrap animate-zoom-in ${locale === 'en' ? 'tracking-wider uppercase' : ''}`}
+                  <div className={`fixed z-[999] px-4 py-2 ${l.color} text-white text-[10px] md:text-xs font-semibold rounded-xl shadow-lg pointer-events-none transition-opacity duration-200 whitespace-nowrap animate-zoom-in ${locale === 'en' ? 'tracking-wider uppercase' : ''}`}
                        style={{ 
                          left: `${mousePos.x}px`, 
                          top: `${mousePos.y + 25}px`, 
@@ -151,7 +151,7 @@ const Header: React.FC = () => {
 
                 <Link 
                   to={l.path} 
-                  className={`px-4 lg:px-5 py-2 md:py-3 rounded-full text-[10px] md:text-xs font-bold transition-all flex items-center justify-center whitespace-nowrap ${
+                  className={`px-4 lg:px-5 py-2 md:py-3 rounded-full text-[10px] md:text-xs font-semibold transition-all flex items-center justify-center whitespace-nowrap ${
                     location.pathname === l.path 
                       ? 'bg-red-600 text-white shadow-md scale-105' 
                       : 'text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -166,7 +166,7 @@ const Header: React.FC = () => {
         </nav>
         
         <div className="flex items-center gap-2 pe-4 md:pe-6 flex-shrink-0">
-          <button onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')} className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-slate-700 dark:text-slate-200 font-bold text-[10px] md:text-xs border border-slate-300 dark:border-slate-600 rounded-full hover:border-red-600 hover:text-red-600 dark:hover:border-red-500 dark:hover:text-red-400 transition-all active:scale-90 shadow-sm bg-white dark:bg-slate-800">
+          <button onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')} className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-slate-700 dark:text-slate-200 font-semibold text-[10px] md:text-xs border border-slate-300 dark:border-slate-600 rounded-full hover:border-red-600 hover:text-red-600 dark:hover:border-red-500 dark:hover:text-red-400 transition-all active:scale-90 shadow-sm bg-white dark:bg-slate-800">
             {locale === 'en' ? 'AR' : 'EN'}
           </button>
           <button onClick={toggleTheme} className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-slate-100 dark:bg-slate-700 rounded-full text-[10px] md:text-sm shadow-inner transition-all hover:scale-110 border border-slate-200 dark:border-slate-600">
@@ -229,6 +229,7 @@ const App: React.FC = () => {
                 <Route path="/digital-library/english" element={<EnglishLibraryInternalPage />} />
                 <Route path="/creators" element={<CreatorsPortalPage />} />
                 <Route path="/creators-studio" element={<CreatorsStudioPage />} />
+                <Route path="/saqr-studio" element={<SaqrStudioPage />} /> {/* 👈 راوت استوديو صقر */}
                 
                 <Route path="/reports" element={<ReportsPage />} />
                 <Route path="/feedback" element={<FeedbackPage />} /> 
@@ -238,12 +239,12 @@ const App: React.FC = () => {
 
             <footer className="relative z-10 py-10 text-center border-t border-slate-200 dark:border-slate-800 mx-4 md:mx-20 mt-10">
               <div className="h-1.5 w-16 bg-red-600 mx-auto mb-6 rounded-full shadow-[0_0_10px_rgba(220,38,38,0.5)]"></div>
-              <p className="font-bold text-[10px] md:text-xs tracking-widest uppercase text-slate-500 dark:text-slate-400">EFIPS • Library • 2026</p>
+              <p className="font-semibold text-[10px] md:text-xs tracking-widest uppercase text-slate-500 dark:text-slate-400">EFIPS • Library • 2026</p>
               <p className="mt-2 font-medium text-slate-400 dark:text-slate-500 text-[9px] md:text-[10px] uppercase">&copy; Emirates Falcon Int'l. Private School</p>
             </footer>
 
             <style>{`
-              @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+              @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap');
               * { font-family: 'Cairo', sans-serif !important; }
               
               @keyframes float { 
