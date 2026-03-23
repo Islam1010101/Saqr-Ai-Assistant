@@ -64,27 +64,6 @@ export const ARABIC_LIBRARY_DATABASE = [
 ];
 
 const translations = {
-  ar: {
-    pageTitle: "المكتبة العربية",
-    searchPlaceholder: "ابحث عن عنوان أو مؤلف...",
-    allSubjects: "المواضيع",
-    allAuthors: "المؤلفين",
-    sortBy: "فرز حسب",
-    alphabetical: "أبجدياً",
-    authorName: "المؤلف",
-    none: "تلقائي",
-    noResults: "لا توجد نتائج.",
-    close: "إغلاق",
-    subjectLabel: "الموضوع",
-    audioOnly: "صوتيات فقط",
-    audioSort: "الصوتيات أولاً",
-    read: "قراءة المحتوى",
-    listen: "تلخيص صقر الصوتي",
-    back: "العودة",
-    ageClassification: "التصنيف العمري",
-    bioLabel: "نبذة عن المؤلف:",
-    summaryLabel: "نبذة عن الكتاب"
-  },
   en: {
     pageTitle: "Arabic Library",
     searchPlaceholder: "Search title or author...",
@@ -105,6 +84,27 @@ const translations = {
     ageClassification: "Age Group",
     bioLabel: "Author Bio:",
     summaryLabel: "Book Summary"
+  },
+  ar: {
+    pageTitle: "المكتبة العربية",
+    searchPlaceholder: "ابحث عن عنوان أو مؤلف...",
+    allSubjects: "المواضيع",
+    allAuthors: "المؤلفين",
+    sortBy: "فرز حسب",
+    alphabetical: "أبجدياً",
+    authorName: "المؤلف",
+    none: "تلقائي",
+    noResults: "لا توجد نتائج.",
+    close: "إغلاق",
+    subjectLabel: "الموضوع",
+    audioOnly: "صوتيات فقط",
+    audioSort: "الصوتيات أولاً",
+    read: "قراءة المحتوى",
+    listen: "تلخيص صقر الصوتي",
+    back: "العودة",
+    ageClassification: "التصنيف العمري",
+    bioLabel: "نبذة عن المؤلف:",
+    summaryLabel: "نبذة عن الكتاب"
   }
 };
 
@@ -125,7 +125,6 @@ const AudioWaveIcon = () => (
     </div>
 );
 
-// مشغل الصوت المتقدم (تم تضمينه مسبقاً وفيه أداة التسريع)
 const SaqrAudioPlayer: React.FC<{ audioSrc: string; t: any }> = ({ audioSrc, t }) => {
     const audioRef = useRef<HTMLAudioElement>(null);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -166,13 +165,11 @@ const SaqrAudioPlayer: React.FC<{ audioSrc: string; t: any }> = ({ audioSrc, t }
     );
 };
 
-// --- 3. Component: BookModal (النافذة المنبثقة: مركزية، قابلة للسحب، وتدعم التصنيف العمري، تعرض الملخص المباشر) ---
+// --- 3. Component: BookModal ---
 const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
-    const { locale } = useLanguage();
     const [ageGroup, setAgeGroup] = useState('');
     const [loading, setLoading] = useState(false);
 
-    // منطق السحب (Drag Logic) - مع خاصية touch-action لمنع تمرير الشاشة الخلفية
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const dragging = useRef(false);
     const offset = useRef({ x: 0, y: 0 });
@@ -208,7 +205,6 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
         };
     }, [book]);
 
-    // جلب التصنيف العمري من AI
     useEffect(() => {
         if (!book) { setPosition({ x: 0, y: 0 }); return; }
         setLoading(true);
@@ -227,7 +223,6 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
                 const data = await response.json();
                 setAgeGroup(JSON.parse(data.reply.replace(/```json|```/g, '').trim()).ageGroup);
             } catch (err) {
-                // محاكاة للذكاء الاصطناعي في حال عدم عمل الـ API الحقيقي
                 let fallbackAge = "كبار";
                 if (book.subject.includes("أطفال")) fallbackAge = "أطفال";
                 else if (book.subject.includes("خيالي") || book.subject.includes("بوليسية")) fallbackAge = "مراهقين وكبار";
@@ -240,14 +235,12 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
     if (!book) return null;
 
     return (
-        // flex items-center justify-center: تضمن توسيط النافذة على جميع الشاشات
         <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 backdrop-blur-md bg-slate-900/60 animate-fade-in" onClick={onClose}>
             <div 
                 className="relative w-full max-w-3xl mx-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-[2.5rem] border border-white/20 shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] transition-transform duration-75 ease-out select-none"
                 style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* مقبض السحب (Drag Handle) مع touch-action-none */}
                 <div 
                     onMouseDown={handleStart} 
                     onTouchStart={handleStart}
@@ -263,7 +256,6 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
                 <div className="flex-1 p-8 overflow-y-auto no-scrollbar text-start flex flex-col mt-4 md:mt-0">
                     <h2 className="text-2xl md:text-3xl text-slate-950 dark:text-white font-semibold leading-tight mb-2">{book.title}</h2>
                     
-                    {/* نبذة المؤلف العائمة في النافذة المنبثقة */}
                     <div className="relative group/author inline-block mb-6 w-fit z-50">
                         <p className="text-base text-[#00732f] font-medium cursor-help border-b border-dashed border-[#00732f]/50 pb-0.5">By {book.author}</p>
                         <div className="absolute top-full mt-2 start-0 w-64 p-3 bg-slate-900 text-white text-xs rounded-xl opacity-0 invisible group-hover/author:opacity-100 group-hover/author:visible transition-all shadow-xl pointer-events-none">
@@ -272,7 +264,6 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
                         </div>
                     </div>
                     
-                    {/* استبدال تحليل صقر الذكي بنبذة الكتاب الأساسية من قاعدة البيانات */}
                     <div className="bg-slate-50/50 dark:bg-white/5 p-6 rounded-[2rem] border border-white/20 shadow-inner text-start flex-grow">
                         <div className="flex items-center gap-2 mb-3">
                            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-widest">{t('summaryLabel')}</p>
@@ -282,7 +273,6 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
                         </p>
                     </div>
 
-                    {/* إظهار الشريط الصوتي إذا توفر */}
                     {book.audioId && <SaqrAudioPlayer audioSrc={book.audioId} t={t} />}
                 </div>
 
@@ -293,7 +283,6 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
                             <p className="text-lg font-medium text-slate-900 dark:text-white truncate">{book.subject}</p>
                         </div>
                         
-                        {/* التصنيف العمري */}
                         <div className="bg-red-50 dark:bg-red-900/20 p-5 rounded-2xl border border-red-100 dark:border-red-900/30 shadow-sm">
                             <p className="text-[10px] font-medium text-red-400 uppercase tracking-widest mb-1">{t('ageClassification')}</p>
                             <p className="text-xl font-semibold text-red-600 truncate">{loading ? '...' : (ageGroup || 'عام')}</p>
@@ -309,7 +298,7 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
     );
 };
 
-// --- 4. Component: BookCard (البطاقات، مع تخفيف الأوزان) ---
+// --- 4. Component: BookCard (مع إضافة الناشر) ---
 const BookCard = React.memo(({ book, onClick, t }: { book: any; onClick: () => void; t: any }) => {
   const isAi = !book.subject || book.subject === "Unknown";
   const hasAudio = !!book.audioId;
@@ -337,20 +326,16 @@ const BookCard = React.memo(({ book, onClick, t }: { book: any; onClick: () => v
               )}
           </div>
           
-          {/* تخفيف وزن الخط للعنوان */}
           <h3 className={`font-semibold text-lg text-slate-900 dark:text-white leading-tight mb-3 transition-colors line-clamp-3 ${hasAudio ? 'group-hover:text-red-600' : 'group-hover:text-[#00732f]'}`}>
               {book.title}
           </h3>
           
           <div className="mt-auto pt-2">
-              {/* النبذة العائمة للمؤلف عند التمرير/اللمس */}
               <div className="relative group/author inline-block" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center gap-2 opacity-80 cursor-help border-b border-transparent hover:border-slate-400 pb-0.5 transition-all">
                       <span className="text-sm">👤</span>
-                      {/* تخفيف وزن الخط للمؤلف */}
                       <p className="text-[12px] font-medium truncate uppercase tracking-wide">{book.author}</p>
                   </div>
-                  {/* نافذة (Tooltip) */}
                   <div className="absolute bottom-full mb-2 start-0 w-48 p-3 bg-slate-900 text-white text-[11px] leading-relaxed rounded-xl opacity-0 invisible group-hover/author:opacity-100 group-hover/author:visible transition-all duration-300 shadow-xl z-50 pointer-events-none font-normal">
                       <strong className="block text-red-400 mb-1 font-medium">{t('bioLabel')}</strong>
                       {book.bio}
@@ -360,8 +345,13 @@ const BookCard = React.memo(({ book, onClick, t }: { book: any; onClick: () => v
           </div>
         </div>
 
-        <div className="bg-slate-50/50 dark:bg-black/20 py-4 px-6 border-t border-slate-200/50 dark:border-white/10 flex items-center justify-end relative z-10 backdrop-blur-md">
-            <div className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all ${hasAudio ? 'group-hover:border-red-600 group-hover:bg-red-50 text-red-600' : 'group-hover:border-[#00732f] group-hover:bg-green-50 text-slate-400'}`}>
+        {/* إضافة قسم الناشر مع الاحتفاظ بالتصميم الأصلي */}
+        <div className="bg-slate-50/50 dark:bg-black/20 py-4 px-6 border-t border-slate-200/50 dark:border-white/10 flex items-center justify-between relative z-10 backdrop-blur-md">
+            <div className="flex flex-col">
+                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Publisher</span>
+                <span className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate max-w-[120px]">{book.publisher || "Unknown"}</span>
+            </div>
+            <div className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all shrink-0 ${hasAudio ? 'group-hover:border-red-600 group-hover:bg-red-50 text-red-600' : 'group-hover:border-[#00732f] group-hover:bg-green-50 text-slate-400'}`}>
               <span className="text-[10px]">➔</span>
             </div>
         </div>
@@ -374,7 +364,8 @@ const BookCard = React.memo(({ book, onClick, t }: { book: any; onClick: () => v
 const ArabicLibraryInternalPage: React.FC = () => {
     const { locale, dir } = useLanguage();
     const navigate = useNavigate();
-    const t = (key: keyof typeof translations.ar) => translations[locale][key] as string;
+    // تأكدنا من استخدام المفاتيح الصحيحة للترجمة بناءً على الـ locale الحالي
+    const t = (key: keyof typeof translations.ar) => translations[locale as keyof typeof translations]?.[key] as string;
     
     const [searchTerm, setSearchTerm] = useState('');
     const [subjectFilter, setSubjectFilter] = useState('all');
