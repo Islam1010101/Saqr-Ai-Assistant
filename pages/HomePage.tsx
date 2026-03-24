@@ -6,6 +6,8 @@ const translations = {
   ar: {
     welcome: "بوابة المعرفة مدرسة صقر الإمارات",
     subWelcome: "بوابتك الذكية للوصول إلى المعلومات.",
+    newsTitle: "جديدنا",
+    newsContent: "بإمكانك الآن الاطلاع على المكتبة الإلكترونية التي تم تحديثها لتضم عدداً أكبر وتنوعاً أوسع من الكتب والإصدارات باللغتين العربية والإنجليزية، مع إضافة تصنيف الفئة العمرية للكتب. كما يمكنك من خلال 'اسأل صقر' خوض تحدي التأليف؛ حيث تسأله التحدي ليظهر لك بداية القصة وتكملها أنت على هيئة جمل، وفي النهاية تُصدر لك شهادة باسمك تحتوي على القصة! وقريباً سيتم إضافة 'استديو صقر' حيث يمكنك تلخيص أو قراءة محتوى المكتبة بصوتك وربطه بالكتاب. وترقبوا أيضاً ميزة الدوبلاج، وتزامناً مع 'عام الأسرة'، ستتمكن الأسرة من المشاركة في عمل دوبلاج لمقطع قصير وإضافته على البوابة وفي مواقع تواصل المدرسة.",
     manualSearch: "البحث اليدوي",
     manualDesc: "البحث عن كتاب ما في مكتبة المدرسة والوصول إليه.",
     smartSearch: "اسأل صقر (AI)",
@@ -19,13 +21,15 @@ const translations = {
     challengeTitle: "تحدي المبدعين",
     challengeDesc: "ناقش، ابدأ قصتك الخاصة مع صقر، وأثبت موهبتك كل ماعليك فعله تحدى صقر. هل أنت مستعد ؟!",
     challengeCTA: "ابدأ رحلة الإبداع مع صقر الآن",
-    term3Banner: "مفاجآت قريبة في الفصل الدراسي الثالث 2026",
-    term3Tag: "ترقبوا 🚀",
+    saqrStudioBanner: "استديو صقر قريباً",
+    saqrStudioTag: "ترقبوا 🚀",
     visitorsLabel: "زوار البوابة:"
   },
   en: {
     welcome: "Knowledge Portal at Falcon Int'l School",
     subWelcome: "Your smart gateway to access knowledge.",
+    newsTitle: "What's New",
+    newsContent: "Explore the newly updated Digital Library, featuring a wider variety of Arabic and English books categorized by age group. Through 'Ask Saqr', take on the 'Author Challenge'—complete the story sentence by sentence and earn a personalized certificate! Coming soon: 'Saqr Studio', allowing you to record book summaries and narrations. Also, celebrate the 'Year of the Family' with our upcoming family dubbing feature to voice short clips and share them on the portal and school social media!",
     manualSearch: "Manual Search",
     manualDesc: "Find and access a specific book in the school library.",
     smartSearch: "Ask Saqr (AI)",
@@ -39,8 +43,8 @@ const translations = {
     challengeTitle: "Authors Challenge",
     challengeDesc: "Discuss, author your own tales with Saqr, All you have to do is challenge Saqr. Are You Ready?!",
     challengeCTA: "Start your creative journey now",
-    term3Banner: "Surprises coming soon in Term 3 2026",
-    term3Tag: "STAY TUNED 🚀",
+    saqrStudioBanner: "Saqr Studio Coming Soon",
+    saqrStudioTag: "STAY TUNED 🚀",
     visitorsLabel: "Portal Visitors:"
   }
 };
@@ -144,17 +148,29 @@ const HomePage: React.FC = () => {
           <div className="h-1.5 w-24 bg-red-600 mx-auto rounded-full"></div>
         </div>
 
-        {/* --- 🌟 لافتة مفاجآت الفصل الثالث --- */}
+        {/* --- شريط الأخبار المتحرك (جديدنا) --- */}
+        <div className="w-full max-w-6xl mx-auto relative z-30 flex items-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full shadow-sm overflow-hidden h-12 md:h-14">
+          <div className="bg-red-600 text-white font-bold px-4 md:px-8 h-full flex items-center justify-center relative z-10 shrink-0 uppercase tracking-wide">
+            {t('newsTitle')}
+          </div>
+          <div className="flex-1 overflow-hidden h-full flex items-center relative">
+            <div className={`whitespace-nowrap ${isAr ? 'animate-marquee-rtl' : 'animate-marquee-ltr'} text-slate-700 dark:text-slate-300 font-semibold text-sm md:text-base px-4`}>
+              {t('newsContent')}
+            </div>
+          </div>
+        </div>
+
+        {/* --- 🌟 لافتة استديو صقر --- */}
         <div className="w-full relative z-30 flex flex-col items-center justify-center">
-          <div className="group relative overflow-hidden px-8 py-5 md:px-12 md:py-6 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row items-center gap-4 hover:shadow-lg transition-all duration-300">
+          <Link to="/saqr-studio" className="group relative overflow-hidden px-8 py-5 md:px-12 md:py-6 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row items-center gap-4 hover:shadow-lg hover:border-blue-500/50 transition-all duration-300">
             <div className="absolute inset-0 bg-gradient-to-r from-red-600/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            <span className="bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20 text-xs md:text-sm font-bold px-5 py-1.5 rounded-full uppercase tracking-widest animate-pulse">
-              {t('term3Tag')}
+            <span className="bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 text-xs md:text-sm font-bold px-5 py-1.5 rounded-full uppercase tracking-widest animate-pulse">
+              {t('saqrStudioTag')}
             </span>
             <span className="relative z-10 text-sm md:text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-              {t('term3Banner')} ✨
+              {t('saqrStudioBanner')} ✨
             </span>
-          </div>
+          </Link>
         </div>
 
         {/* --- 2. مركز العمليات والكروت --- */}
@@ -296,6 +312,18 @@ const HomePage: React.FC = () => {
           100% { opacity: 1; transform: translateY(0); }
         }
         .animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; }
+        
+        /* تأثيرات حركة شريط الأخبار بناءً على اتجاه اللغة */
+        @keyframes marquee-ltr {
+          0% { transform: translateX(100vw); }
+          100% { transform: translateX(-100%); }
+        }
+        @keyframes marquee-rtl {
+          0% { transform: translateX(-100vw); }
+          100% { transform: translateX(100%); }
+        }
+        .animate-marquee-ltr { animation: marquee-ltr 30s linear infinite; }
+        .animate-marquee-rtl { animation: marquee-rtl 30s linear infinite; }
       `}</style>
     </div>
   );
