@@ -148,13 +148,15 @@ const HomePage: React.FC = () => {
           <div className="h-1.5 w-24 bg-red-600 mx-auto rounded-full"></div>
         </div>
 
-        {/* --- شريط الأخبار المتحرك (جديدنا) --- */}
-        <div className="w-full max-w-6xl mx-auto relative z-30 flex items-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full shadow-sm overflow-hidden h-12 md:h-14">
-          <div className="bg-red-600 text-white font-bold px-4 md:px-8 h-full flex items-center justify-center relative z-10 shrink-0 uppercase tracking-wide">
+        {/* --- شريط الأخبار المتحرك (جديدنا) - نسخة مميزة وبطيئة --- */}
+        <div className="w-full max-w-6xl mx-auto relative z-30 flex items-center bg-white dark:bg-slate-800 border-2 border-red-200 dark:border-red-900/50 rounded-full shadow-lg overflow-hidden h-12 md:h-14 hover:shadow-xl transition-shadow duration-300">
+          <div className="bg-gradient-to-r from-red-600 to-red-700 text-white font-bold px-5 md:px-8 h-full flex items-center justify-center gap-2 md:gap-3 relative z-20 shrink-0 uppercase tracking-wide shadow-[2px_0_10px_rgba(0,0,0,0.1)]">
+            <div className="w-2 h-2 md:w-2.5 md:h-2.5 bg-white rounded-full animate-pulse shadow-[0_0_8px_#ffffff]"></div>
             {t('newsTitle')}
           </div>
-          <div className="flex-1 overflow-hidden h-full flex items-center relative">
-            <div className={`whitespace-nowrap ${isAr ? 'animate-marquee-rtl' : 'animate-marquee-ltr'} text-slate-700 dark:text-slate-300 font-semibold text-sm md:text-base px-4`}>
+          <div className="flex-1 overflow-hidden h-full flex items-center relative group bg-red-50/50 dark:bg-red-900/10">
+            {/* أضفنا group-hover:[animation-play-state:paused] عشان يقف لما الماوس ييجي عليه */}
+            <div className={`whitespace-nowrap ${isAr ? 'animate-marquee-rtl' : 'animate-marquee-ltr'} text-slate-800 dark:text-slate-100 font-bold text-sm md:text-base px-4 group-hover:[animation-play-state:paused] cursor-pointer`}>
               {t('newsContent')}
             </div>
           </div>
@@ -313,7 +315,7 @@ const HomePage: React.FC = () => {
         }
         .animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; }
         
-        /* تأثيرات حركة شريط الأخبار بناءً على اتجاه اللغة */
+        /* قمنا بزيادة المدة لـ 70 ثانية عشان يكون بطيء ومريح للقراءة */
         @keyframes marquee-ltr {
           0% { transform: translateX(100vw); }
           100% { transform: translateX(-100%); }
@@ -322,8 +324,8 @@ const HomePage: React.FC = () => {
           0% { transform: translateX(-100vw); }
           100% { transform: translateX(100%); }
         }
-        .animate-marquee-ltr { animation: marquee-ltr 30s linear infinite; }
-        .animate-marquee-rtl { animation: marquee-rtl 30s linear infinite; }
+        .animate-marquee-ltr { animation: marquee-ltr 70s linear infinite; }
+        .animate-marquee-rtl { animation: marquee-rtl 70s linear infinite; }
       `}</style>
     </div>
   );
