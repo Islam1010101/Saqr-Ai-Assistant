@@ -36,13 +36,13 @@ Style: Professional, empathetic, uses flawless Fos'ha Arabic or English based on
 
 const localization: any = {
   ar: {
-    welcome: 'أهلاً بك! أنا "صقر"، المساعد الذكي لمكتبة المدرسة. 🦅\nهل نؤلف قصة معاً اليوم من وحي هويتنا الإماراتية، أم تبحث عن كتاب محدد؟',
+    welcome: 'أهلاً بك! أنا "صقر"، المساعد الذكي لمكتبة المدرسة. هل نؤلف قصة معاً اليوم ، أم تبحث عن كتاب محدد؟',
     input: 'اكتب رسالتك، قصتك، أو ابحث عن كتاب...',
     status: 'صقر الذكي (EFIPS)',
     online: 'متصل وجاهز',
     download: 'تحميل شهادة المؤلف الصغير',
     you: 'أنت',
-    certSchool: 'مدرسة الإمارات فالكون الدولية الخاصة',
+    certSchool: 'مدرسة صقر الإمارات الدولية الخاصة',
     certChallenge: 'تحدي المؤلف الصغير',
     certTitle: 'شهادة إبداع أدبي',
     certSubtitle: 'يفخر "صقر" المساعد الذكي بتوثيق الإنجاز الأدبي للمبدع(ة):',
@@ -54,7 +54,7 @@ const localization: any = {
     certSaqr: 'صقر - المساعد الذكي'
   },
   en: {
-    welcome: "Welcome! I'm 'Saqr', your AI Librarian. 🦅\nShall we co-author a UAE-inspired story today, or are you looking for a specific book?",
+    welcome: "Welcome! I'm 'Saqr', your AI Librarian. Shall we co-author story today, or are you looking for a specific book?",
     input: 'Start a story, discuss, or search...',
     status: 'Saqr AI Librarian',
     online: 'Online & Ready',
