@@ -3,7 +3,7 @@ import { useLanguage } from '../App';
 import { useNavigate } from 'react-router-dom';
 
 // 👇 1. استدعاء دالة التتبع
-import { trackActivity } from '../utils/tracker';
+import { trackActivity } from '../src/utils/tracker';
 
 // --- 1. تعريف واجهة البيانات وقاعدة البيانات ---
 interface Book {
