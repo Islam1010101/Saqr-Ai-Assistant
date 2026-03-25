@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../App';
 
-// --- مسار الصورة المباشر من مجلد public ---
 const podcastHeaderImg = '/Saqr Podcast.png'; 
 
 const translations = {
@@ -28,7 +27,6 @@ const translations = {
     effectsTitle: "مؤثرات الاستديو (للمعاينة)",
     effEcho: "إضافة صدى",
     effNoise: "عزل الضوضاء",
-    effEnhance: "تحسين الجودة",
     effPitch: "تغيير النبرة",
     speed: "السرعة:",
     studentName: "اسم الطالب الرباعي",
@@ -61,7 +59,6 @@ const translations = {
     effectsTitle: "Studio Effects (Preview)",
     effEcho: "Add Echo",
     effNoise: "Noise Reduction",
-    effEnhance: "Enhance Quality",
     effPitch: "Voice Changer",
     speed: "Speed:",
     studentName: "Full Student Name",
@@ -74,14 +71,13 @@ const translations = {
   }
 };
 
-// --- واجهة عنصر الانفجار الصوتي ---
 interface BurstParticle {
   id: number;
   icon: string;
-  tx: number; // مسار الحركة X
-  ty: number; // مسار الحركة Y
-  rot: number; // الدوران
-  scale: number; // الحجم
+  tx: number;
+  ty: number;
+  rot: number;
+  scale: number;
 }
 
 const AUDIO_ICONS = ["🎙️", "🎧", "🎵", "🎶", "📻", "🔊", "🎛️"];
@@ -91,14 +87,14 @@ const PodcastPage: React.FC = () => {
   const isAr = locale === 'ar';
   const t = (key: keyof typeof translations.ar) => translations[locale][key];
 
-  // Recording States
+  // Recording & Audio States
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   
   // Effects States
-  const [effects, setEffects] = useState({ echo: false, noise: false, enhance: false, pitch: false });
+  const [effects, setEffects] = useState({ echo: false, noise: false, pitch: false });
   const [playbackRate, setPlaybackRate] = useState(1);
 
   // Form States
@@ -107,7 +103,6 @@ const PodcastPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{type: 'success' | 'error' | '', text: string}>({type: '', text: ''});
 
-  // Explosion States
   const [particles, setParticles] = useState<BurstParticle[]>([]);
 
   // Refs
@@ -116,22 +111,23 @@ const PodcastPage: React.FC = () => {
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  // --- دالة تأثير الانفجار الصوتي عند الضغط على الشعار ---
+  // Web Audio API Refs for real-time effects
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
+  const echoNodeRef = useRef<{ delay: DelayNode, gain: GainNode } | null>(null);
+  const noiseFilterRef = useRef<BiquadFilterNode | null>(null);
+
   const triggerExplosion = useCallback(() => {
     const id = Date.now();
-    // إنشاء 10 أيقونات عشوائية
     const newParticles: BurstParticle[] = Array.from({ length: 12 }).map((_, i) => ({
       id: id + i,
       icon: AUDIO_ICONS[Math.floor(Math.random() * AUDIO_ICONS.length)],
-      tx: (Math.random() - 0.5) * 400, // انتشار أفقي واسع
-      ty: (Math.random() - 0.5) * 400, // انتشار رأسي واسع
+      tx: (Math.random() - 0.5) * 400, 
+      ty: (Math.random() - 0.5) * 400, 
       rot: Math.random() * 360,
-      scale: 0.8 + Math.random() * 1.5 // أحجام مختلفة
+      scale: 0.8 + Math.random() * 1.5 
     }));
-
     setParticles(prev => [...prev, ...newParticles]);
-
-    // إزالة العناصر بعد انتهاء الأنيميشن (2 ثانية)
     newParticles.forEach(p => {
       setTimeout(() => {
         setParticles(current => current.filter(item => item.id !== p.id));
@@ -139,7 +135,6 @@ const PodcastPage: React.FC = () => {
     });
   }, []);
 
-  // --- Recording Logic ---
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -163,6 +158,8 @@ const PodcastPage: React.FC = () => {
       setRecordingTime(0);
       setAudioBlob(null);
       setAudioUrl(null);
+      setEffects({ echo: false, noise: false, pitch: false });
+      setPlaybackRate(1);
       setStatusMessage({type: '', text: ''});
 
       timerIntervalRef.current = setInterval(() => {
@@ -188,18 +185,81 @@ const PodcastPage: React.FC = () => {
     return `${m}:${s}`;
   };
 
-  // --- Audio Playback Effects ---
+  // --- إعداد Web Audio API لتطبيق التأثيرات عند التشغيل ---
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.playbackRate = playbackRate;
+    if (audioUrl && audioRef.current) {
+      // تجنب إنشاء السياق أكثر من مرة لنفس عنصر الصوت
+      if (!audioCtxRef.current) {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        audioCtxRef.current = new AudioContextClass();
+        sourceNodeRef.current = audioCtxRef.current.createMediaElementSource(audioRef.current);
+      }
+
+      const ctx = audioCtxRef.current;
+      const source = sourceNodeRef.current;
+      
+      if (!ctx || !source) return;
+
+      // فصل أي مسارات قديمة
+      source.disconnect();
+
+      let lastNode: AudioNode = source;
+
+      // 1. فلتر إزالة الضوضاء (Noise Reduction - Bandpass)
+      if (effects.noise) {
+        if (!noiseFilterRef.current) {
+          noiseFilterRef.current = ctx.createBiquadFilter();
+          noiseFilterRef.current.type = 'bandpass';
+          // التركيز على ترددات الصوت البشري وتجاهل الباقي
+          noiseFilterRef.current.frequency.value = 1000; 
+          noiseFilterRef.current.Q.value = 0.5;
+        }
+        lastNode.connect(noiseFilterRef.current);
+        lastNode = noiseFilterRef.current;
+      } else if (noiseFilterRef.current) {
+         noiseFilterRef.current.disconnect();
+      }
+
+      // 2. فلتر الصدى (Echo)
+      if (effects.echo) {
+        if (!echoNodeRef.current) {
+          const delay = ctx.createDelay();
+          delay.delayTime.value = 0.3; // وقت التأخير بالثواني
+          const gain = ctx.createGain();
+          gain.gain.value = 0.4; // قوة الصدى
+          
+          delay.connect(gain);
+          // الصدى يعود ليتكرر
+          gain.connect(delay);
+          
+          echoNodeRef.current = { delay, gain };
+        }
+        
+        // مسار مزدوج: الصوت الأصلي + مسار الصدى
+        lastNode.connect(echoNodeRef.current.delay);
+        echoNodeRef.current.delay.connect(ctx.destination);
+      } else if (echoNodeRef.current) {
+         echoNodeRef.current.delay.disconnect();
+      }
+
+      // ربط العقدة الأخيرة بالمخرج النهائي
+      lastNode.connect(ctx.destination);
+
+      // 3. تأثير الـ Pitch (تغيير النبرة يتم عبر تغيير الـ playbackRate في متصفحات الويب بطريقة بسيطة)
+      // إذا كان Pitch مفعلاً، نزيد السرعة قليلاً ليصبح الصوت أرفع، مع الحفاظ على إمكانية تغيير السرعة يدوياً
+      if (audioRef.current) {
+          // preservePitch = false تجعل تغيير السرعة يغير النبرة (Pitch) كما في السناجب
+          audioRef.current.preservesPitch = !effects.pitch; 
+          audioRef.current.playbackRate = effects.pitch ? playbackRate * 1.3 : playbackRate;
+      }
+
     }
-  }, [playbackRate, audioUrl]);
+  }, [audioUrl, effects, playbackRate]);
 
   const toggleEffect = (effect: keyof typeof effects) => {
     setEffects(prev => ({ ...prev, [effect]: !prev[effect] }));
   };
 
-  // --- Submission Logic ---
   const handleSubmit = async () => {
     if (!audioBlob || !studentName.trim() || !studentGrade.trim()) {
       setStatusMessage({ type: 'error', text: t('fillRequired') });
@@ -220,6 +280,7 @@ const PodcastPage: React.FC = () => {
           grade: studentGrade,
           audioData: base64Audio,
           mimeType: audioBlob.type,
+          // إرسال الإعدادات للمحرر ليعرف ماذا اختار الطالب
           effectsApplied: JSON.stringify({ ...effects, playbackRate })
         };
 
@@ -235,7 +296,7 @@ const PodcastPage: React.FC = () => {
           setAudioBlob(null);
           setAudioUrl(null);
           setRecordingTime(0);
-          setEffects({ echo: false, noise: false, enhance: false, pitch: false });
+          setEffects({ echo: false, noise: false, pitch: false });
         } else {
           throw new Error('Network response was not ok.');
         }
@@ -251,7 +312,6 @@ const PodcastPage: React.FC = () => {
   return (
     <div dir={dir} className="min-h-screen bg-slate-50 dark:bg-slate-950 py-10 px-4 md:py-16 font-sans antialiased text-slate-800 dark:text-slate-200 relative overflow-x-hidden">
       
-      {/* 🌟 الخلفية الديناميكية لهوية الموقع */}
       <div className="fixed inset-0 overflow-hidden -z-10 pointer-events-none opacity-40 dark:opacity-20">
          <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-red-600/20 blur-[120px] rounded-full animate-pulse"></div>
          <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/20 blur-[120px] rounded-full animate-pulse [animation-delay:2s]"></div>
@@ -259,11 +319,8 @@ const PodcastPage: React.FC = () => {
 
       <div className="max-w-6xl mx-auto space-y-12 animate-fade-in-up relative z-10">
         
-        {/* --- تصميم الهيدر الجديد مع الصورة وانفجار الأيقونات --- */}
         <div className="text-center flex flex-col items-center">
           <div className="relative mb-8 flex justify-center items-center">
-            
-            {/* طباعة عناصر الانفجار المرجعية */}
             {particles.map((p) => (
               <div 
                 key={p.id}
@@ -291,7 +348,6 @@ const PodcastPage: React.FC = () => {
           <div className="h-1.5 w-24 bg-red-600 mt-6 rounded-full"></div>
         </div>
 
-        {/* --- روابط المكتبات (المسارات المحدثة) --- */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
           <Link to="/digital-library/arabic" className="group glass-panel p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-red-500/50 hover:-translate-y-1 transition-all flex items-center gap-6 shadow-sm hover:shadow-xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl">
             <div className="w-16 h-16 bg-red-50 dark:bg-red-500/10 rounded-2xl flex items-center justify-center text-4xl group-hover:scale-110 group-hover:rotate-6 transition-transform">🇦🇪</div>
@@ -309,7 +365,6 @@ const PodcastPage: React.FC = () => {
           </Link>
         </div>
 
-        {/* --- التعليمات بتصميم البطاقة الصفراء المميزة --- */}
         <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl p-8 md:p-10 rounded-[2.5rem] border-l-8 border-yellow-400 shadow-lg relative overflow-hidden">
           <div className="absolute -top-10 -right-10 text-9xl opacity-10">📋</div>
           <h2 className="text-3xl font-black mb-8 flex items-center gap-4 text-slate-950 dark:text-white relative z-10">
@@ -325,17 +380,14 @@ const PodcastPage: React.FC = () => {
           </ul>
         </div>
 
-        {/* --- منطقة الاستديو الاحترافية --- */}
         <div className="bg-slate-950 dark:bg-black p-8 md:p-12 rounded-[3rem] shadow-2xl border-2 border-slate-800 dark:border-slate-900 relative overflow-hidden text-white animate-fade-in">
           
-          {/* خلفية الاستديو */}
           <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTAgMGg0MHY0MEgwVjB6bTIwIDIwaDIwdjIwSDIwVjIwek0wIDIwaDIwdjIwSDBWMjB6bTIwIDBoMjB2MjBIMjBWMHoiIGZpbGw9IiM4ODgiIGZpbGwtb3BhY2l0eT0iMC4xIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiLz4PC9zdmc+')]"></div>
 
-          <h2 className="text-3xl font-black mb-12 text-center text-whitetracking-widest relative z-10 uppercase flex items-center justify-center gap-3">
+          <h2 className="text-3xl font-black mb-12 text-center text-white tracking-widest relative z-10 uppercase flex items-center justify-center gap-3">
              {t('studioTitle')}
           </h2>
 
-          {/*Recorder UI */}
           <div className="flex flex-col items-center justify-center mb-12 relative z-10">
             <div className="relative mb-6 group">
               {isRecording && (
@@ -361,20 +413,19 @@ const PodcastPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Audio Preview & Effects */}
           {audioUrl && (
             <div className="bg-slate-800/40 backdrop-blur-md p-8 rounded-3xl border border-slate-700 mb-12 animate-fade-in-up relative z-10">
               <h3 className="text-xl font-extrabold mb-6 flex items-center gap-3">🎧 {t('previewTitle')}</h3>
               
-              <audio ref={audioRef} src={audioUrl} controls className="w-full mb-8 outline-none dark:invert" />
+              {/* مشغل الصوت المدمج الذي يمر عبر Web Audio API */}
+              <audio ref={audioRef} src={audioUrl} controls className="w-full mb-8 outline-none dark:invert" crossOrigin="anonymous" />
 
               <h4 className="text-sm font-extrabold text-slate-400 mb-4 uppercase tracking-wider">{t('effectsTitle')}</h4>
               
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                 <button onClick={() => toggleEffect('echo')} className={`py-3 px-4 rounded-2xl text-base font-bold transition-all transform active:scale-95 flex items-center justify-center gap-2 ${effects.echo ? 'bg-blue-500 text-white shadow-md' : 'bg-slate-700 text-slate-200 hover:bg-slate-600'}`}>🌊 {t('effEcho')}</button>
                 <button onClick={() => toggleEffect('noise')} className={`py-3 px-4 rounded-2xl text-base font-bold transition-all transform active:scale-95 flex items-center justify-center gap-2 ${effects.noise ? 'bg-green-600 text-white shadow-md' : 'bg-slate-700 text-slate-200 hover:bg-slate-600'}`}>🔇 {t('effNoise')}</button>
-                <button onClick={() => toggleEffect('enhance')} className={`py-3 px-4 rounded-2xl text-base font-bold transition-all transform active:scale-95 flex items-center justify-center gap-2 ${effects.enhance ? 'bg-purple-600 text-white shadow-md' : 'bg-slate-700 text-slate-200 hover:bg-slate-600'}`}>✨ {t('effEnhance')}</button>
-                <button onClick={() => toggleEffect('pitch')} className={`py-2 px-4 rounded-2xl text-base font-bold transition-all transform active:scale-95 flex items-center justify-center gap-2 ${effects.pitch ? 'bg-yellow-500 text-slate-950 shadow-md' : 'bg-slate-700 text-slate-200 hover:bg-slate-600'}`}>👽 {t('effPitch')}</button>
+                <button onClick={() => toggleEffect('pitch')} className={`py-3 px-4 rounded-2xl text-base font-bold transition-all transform active:scale-95 flex items-center justify-center gap-2 ${effects.pitch ? 'bg-yellow-500 text-slate-950 shadow-md' : 'bg-slate-700 text-slate-200 hover:bg-slate-600'}`}>👽 {t('effPitch')}</button>
               </div>
 
               <div className="flex items-center gap-5 bg-slate-900/60 p-5 rounded-2xl border border-slate-700">
@@ -389,7 +440,6 @@ const PodcastPage: React.FC = () => {
             </div>
           )}
 
-          {/* Submission Form */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8 relative z-10">
             <input 
               type="text" 
@@ -446,7 +496,6 @@ const PodcastPage: React.FC = () => {
         }
         .animate-audio-burst { animation: audio-burst 2s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
 
-        /* استايل مخصص لمشغل الصوت ليتناسب مع الثيم الداكن */
         audio::-webkit-media-controls-panel { background-color: #1e293b; }
         audio::-webkit-media-controls-current-time-display,
         audio::-webkit-media-controls-time-remaining-display { color: #f1f5f9; }
