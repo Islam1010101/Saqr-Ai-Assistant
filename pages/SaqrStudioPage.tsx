@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '../App';
 
 // --- مسار الصورة المباشر من مجلد public ---
@@ -111,9 +112,6 @@ const SaqrStudioPage: React.FC = () => {
                     </div>
 
                     {/* النصوص */}
-                    <h2 className="text-4xl md:text-6xl font-black mb-4 tracking-tight z-30 uppercase bg-clip-text text-transparent bg-gradient-to-r from-red-600 via-slate-800 to-[#00732f] dark:from-red-400 dark:via-white dark:to-green-400 drop-shadow-sm">
-                        {t('comingSoon')}
-                    </h2>
                     <p className="text-lg md:text-2xl text-slate-600 dark:text-slate-300 font-bold mb-10 max-w-2xl z-30 leading-relaxed">
                         {t('studioDesc')}
                     </p>
@@ -126,8 +124,8 @@ const SaqrStudioPage: React.FC = () => {
                     {/* كروت البودكاست والدوبلاج (أزرار تحكم استديو) */}
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-6 md:gap-8 w-full max-w-3xl z-30">
                         
-                        {/* كارت البودكاست */}
-                        <div className="group relative w-full flex-1 px-6 py-8 rounded-3xl bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:border-red-500/50 dark:hover:border-red-500/50 hover:-translate-y-2 transition-all overflow-hidden cursor-default flex flex-col items-center justify-center">
+                        {/* كارت البودكاست (تم تحويله إلى رابط) */}
+                        <Link to="/podcast" className="group relative w-full flex-1 px-6 py-8 rounded-3xl bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:border-red-500/50 dark:hover:border-red-500/50 hover:-translate-y-2 transition-all overflow-hidden flex flex-col items-center justify-center">
                             <div className="absolute top-0 w-full h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                             <div className="absolute inset-0 bg-gradient-to-b from-red-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                             <div className="relative z-10 flex flex-col items-center">
@@ -136,10 +134,16 @@ const SaqrStudioPage: React.FC = () => {
                                 </div>
                                 <h3 className="text-xl md:text-2xl font-black text-slate-800 dark:text-white group-hover:text-red-600 dark:group-hover:text-red-400 uppercase tracking-widest transition-colors">{t('podcast')}</h3>
                             </div>
-                        </div>
+                        </Link>
 
-                        {/* كارت الدوبلاج */}
+                        {/* كارت الدوبلاج (مع علامة قريباً) */}
                         <div className="group relative w-full flex-1 px-6 py-8 rounded-3xl bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:border-[#00732f]/50 dark:hover:border-green-500/50 hover:-translate-y-2 transition-all overflow-hidden cursor-default flex flex-col items-center justify-center">
+                            
+                            {/* علامة قريباً */}
+                            <div className="absolute top-4 right-4 bg-gradient-to-r from-green-500 to-[#00732f] text-white text-[10px] md:text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest z-20 shadow-md animate-pulse">
+                                {t('comingSoon')}
+                            </div>
+
                             <div className="absolute top-0 w-full h-1 bg-gradient-to-r from-transparent via-[#00732f] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                             <div className="absolute inset-0 bg-gradient-to-b from-[#00732f]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                             <div className="relative z-10 flex flex-col items-center">
