@@ -7,7 +7,7 @@ const translations = {
     welcome: "بوابة المعرفة مدرسة صقر الإمارات",
     subWelcome: "بوابتك الذكية للوصول إلى المعلومات.",
     newsTitle: "جديدنا",
-    newsContent: "بإمكانك الآن الاطلاع على المكتبة الإلكترونية التي تم تحديثها لتضم عدداً أكبر وتنوعاً أوسع من الكتب والإصدارات باللغتين العربية والإنجليزية، مع إضافة تصنيف الفئة العمرية للكتب. كما يمكنك من خلال 'اسأل صقر' خوض تحدي التأليف؛ حيث تسأله التحدي ليظهر لك بداية القصة وتكملها أنت على هيئة جمل، وفي النهاية تُصدر لك شهادة باسمك تحتوي على القصة! وقريباً سيتم إضافة 'استديو صقر' حيث يمكنك تلخيص أو قراءة محتوى المكتبة بصوتك وربطه بالكتاب. وترقبوا أيضاً ميزة الدوبلاج، وتزامناً مع 'عام الأسرة'، ستتمكن الأسرة من المشاركة في عمل دوبلاج لمقطع قصير وإضافته على البوابة وفي مواقع تواصل المدرسة.",
+    newsContent: "بإمكانك الآن الاطلاع على المكتبة الإلكترونية التي تم تحديثها لتضم عدداً أكبر وتنوعاً أوسع من الكتب والإصدارات باللغتين العربية والإنجليزية، مع إضافة تصنيف الفئة العمرية للكتب. كما يمكنك من خلال 'اسأل صقر' خوض تحدي التأليف وإصدار شهادة باسمك! والآن، انطلق 'استديو صقر' للبودكاست حيث يمكنك تسجيل ملخصات الكتب بصوتك. وترقبوا قريباً انطلاق ميزة الدوبلاج العائلي.",
     manualSearch: "البحث اليدوي",
     manualDesc: "البحث عن كتاب ما في مكتبة المدرسة والوصول إليه.",
     smartSearch: "اسأل صقر (AI)",
@@ -21,15 +21,15 @@ const translations = {
     challengeTitle: "تحدي المبدعين",
     challengeDesc: "ناقش، ابدأ قصتك الخاصة مع صقر، وأثبت موهبتك كل ماعليك فعله تحدى صقر. هل أنت مستعد ؟!",
     challengeCTA: "ابدأ رحلة الإبداع مع صقر الآن",
-    saqrStudioBanner: "استديو صقر قريباً",
-    saqrStudioTag: "ترقبوا 🚀",
+    saqrStudioBanner: "وميض الدوبلاج قريباً",
+    saqrStudioTag: "قريباً 🚀",
     visitorsLabel: "زوار البوابة:"
   },
   en: {
     welcome: "Knowledge Portal at Falcon Int'l School",
     subWelcome: "Your smart gateway to access knowledge.",
     newsTitle: "What's New",
-    newsContent: "Explore the newly updated Digital Library, featuring a wider variety of Arabic and English books categorized by age group. Through 'Ask Saqr', take on the 'Author Challenge'—complete the story sentence by sentence and earn a personalized certificate! Coming soon: 'Saqr Studio', allowing you to record book summaries and narrations. Also, celebrate the 'Year of the Family' with our upcoming family dubbing feature to voice short clips and share them on the portal and school social media!",
+    newsContent: "Explore the newly updated Digital Library, featuring a wider variety of Arabic and English books categorized by age group. Through 'Ask Saqr', take on the 'Author Challenge' and earn a personalized certificate! 'Saqr Studio' Podcast is now live for you to record book summaries. Also, stay tuned for our upcoming family dubbing feature!",
     manualSearch: "Manual Search",
     manualDesc: "Find and access a specific book in the school library.",
     smartSearch: "Ask Saqr (AI)",
@@ -43,8 +43,8 @@ const translations = {
     challengeTitle: "Authors Challenge",
     challengeDesc: "Discuss, author your own tales with Saqr, All you have to do is challenge Saqr. Are You Ready?!",
     challengeCTA: "Start your creative journey now",
-    saqrStudioBanner: "Saqr Studio Coming Soon",
-    saqrStudioTag: "STAY TUNED 🚀",
+    saqrStudioBanner: "Dubbing Spark Coming Soon",
+    saqrStudioTag: "COMING SOON 🚀",
     visitorsLabel: "Portal Visitors:"
   }
 };
@@ -162,7 +162,7 @@ const HomePage: React.FC = () => {
           </div>
         </div>
 
-        {/* --- 🌟 لافتة استديو صقر --- */}
+        {/* --- 🌟 لافتة وميض الدوبلاج --- */}
         <div className="w-full relative z-30 flex flex-col items-center justify-center">
           <Link to="/saqr-studio" className="group relative overflow-hidden px-8 py-5 md:px-12 md:py-6 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row items-center gap-4 hover:shadow-lg hover:border-blue-500/50 transition-all duration-300">
             <div className="absolute inset-0 bg-gradient-to-r from-red-600/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
