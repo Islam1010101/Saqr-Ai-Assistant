@@ -2,70 +2,75 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../App';
 
+// --- مسار الصورة المباشر من مجلد public ---
+const podcastHeaderImg = '/Saqr Podcast.png'; 
+
 const translations = {
   ar: {
     pageTitle: "بودكاست صقر",
-    subTitle: "سجل ملخصاتك وشارك إبداعك الصوتي",
+    subTitle: "منبرك الصوتي لمشاركة المعرفة والإبداع",
     arabicLibrary: "المكتبة الرقمية العربية",
     englishLibrary: "المكتبة الرقمية الإنجليزية",
-    libraryDesc: "تصفح الكتب لاختيار كتابك قبل بدء التسجيل.",
-    instructionsTitle: "تعليمات التسجيل",
-    inst1: "يجب ذكر عنوان الكتاب واسم المؤلف في بداية التسجيل.",
-    inst2: "يمكنك تسجيل ملخص للكتاب أو ماذا تعلمت منه.",
-    inst3: "بإمكانك إجراء حوار بينك وبين أحد حول الكتاب.",
-    inst4: "يمكنك التعديل على الصوت باختيار المؤثرات الموجودة في الاستديو بعد التسجيل.",
-    inst5: "وبعد الانتهاء يرجى كتابة اسمك في خانة الاسم وصفك ثم إرسال.",
-    inst6: "سيتم إرسال التسجيل إلينا ومن ثم وضع التسجيل المناسب مع الكتاب.",
-    studioTitle: "استديو التسجيل",
+    libraryDesc: "اختر كتابك من هنا قبل البدء بالتسجيل.",
+    instructionsTitle: "دليل التسجيل والقبول",
+    inst1: "يجب الالتزام بالكتب الموجودة حصرياً داخل المكتبة الرقمية (العربية أو الإنجليزية) الخاصة بالمدرسة، وغير مسموح بأي كتب من خارجها.",
+    inst2: "ابدأ تسجيلك بذكر عنوان الكتاب واسم المؤلف بوضوح.",
+    inst3: "يمكنك تسجيل ملخص للكتاب، أو عرض لأهم ما تعلمته منه.",
+    inst4: "بإمكانك تسجيل الحوارات واللقاءات الثنائية حول الكتاب.",
+    inst5: "استخدم مؤثرات الاستديو بعد التسجيل لمعاينة الصوت وتحسينه.",
+    inst6: "تأكد من كتابة اسمك الرباعي وصفك الدراسي بشكل صحيح قبل الضغط على إرسال.",
+    inst7: "سيخضع التسجيل للمراجعة من قبلنا قبل اعتماده ووضعه مع الكتاب المناسب.",
+    studioTitle: "غرفة التسجيل الذكية",
     startRecord: "بدء التسجيل",
-    stopRecord: "إيقاف",
-    recording: "جاري التسجيل...",
-    previewTitle: "معاينة وتعديل الصوت",
-    effectsTitle: "مؤثرات الصوت (للمعاينة)",
+    stopRecord: "إنهاء وحفظ",
+    recording: "جاري التسجيل الآن...",
+    previewTitle: "معاينة هندسة الصوت",
+    effectsTitle: "مؤثرات الاستديو (للمعاينة)",
     effEcho: "إضافة صدى",
     effNoise: "عزل الضوضاء",
     effEnhance: "تحسين الجودة",
-    effPitch: "تغيير الصوت",
+    effPitch: "تغيير النبرة",
     speed: "السرعة:",
     studentName: "اسم الطالب الرباعي",
     studentGrade: "الصف الدراسي",
-    submit: "إرسال التسجيل",
-    submitting: "جاري الإرسال...",
-    success: "تم الإرسال بنجاح! شكراً لمشاركتك.",
-    error: "حدث خطأ أثناء الإرسال، يرجى المحاولة مرة أخرى.",
-    fillRequired: "يرجى تسجيل الصوت وكتابة الاسم والصف قبل الإرسال."
+    submit: "إرسال إلى الاستديو",
+    submitting: "جاري الرفع...",
+    success: "تم إرسال تسجيلك بنجاح! شكراً لمشاركتك المتميزة.",
+    error: "حدث خطأ غير متوقع، يرجى التحقق من الشبكة والمحاولة مرة أخرى.",
+    fillRequired: "يرجى تسجيل الصوت أولاً، وتعبئة حقول الاسم والصف بدقة."
   },
   en: {
     pageTitle: "Saqr Podcast",
-    subTitle: "Record your summaries and share your voice",
+    subTitle: "Your Vocal Platform to Share Knowledge & Creativity",
     arabicLibrary: "Arabic Digital Library",
     englishLibrary: "English Digital Library",
-    libraryDesc: "Browse and select a book before you start recording.",
-    instructionsTitle: "Recording Instructions",
-    inst1: "State the book title and author's name at the beginning.",
-    inst2: "You can record a summary or what you learned from the book.",
-    inst3: "You can conduct a dialogue or interview about the book.",
-    inst4: "You can edit the audio using the studio effects after recording.",
-    inst5: "When finished, enter your name and grade, then submit.",
-    inst6: "The recording will be reviewed and linked to the respective book.",
-    studioTitle: "Recording Studio",
+    libraryDesc: "Select your book from here before starting the recording.",
+    instructionsTitle: "Recording & Acceptance Guide",
+    inst1: "Strict adherence to books exclusively within the school's Digital Library (Arabic or English) is required; outside books are not permitted.",
+    inst2: "Start your recording by clearly stating the book title and author's name.",
+    inst3: "You can record a book summary or a presentation of your key learnings.",
+    inst4: "You can record dialogues and interviews about the book.",
+    inst5: "Use studio effects after recording to preview and enhance the audio.",
+    inst6: "Ensure you enter your full name and grade correctly before clicking submit.",
+    inst7: "The recording will undergo review before being approved and placed with the appropriate book.",
+    studioTitle: "Smart Recording Room",
     startRecord: "Start Recording",
-    stopRecord: "Stop",
+    stopRecord: "Stop & Save",
     recording: "Recording in progress...",
-    previewTitle: "Preview & Edit",
-    effectsTitle: "Audio Effects (Preview)",
+    previewTitle: "Audio Engineering Preview",
+    effectsTitle: "Studio Effects (Preview)",
     effEcho: "Add Echo",
     effNoise: "Noise Reduction",
     effEnhance: "Enhance Quality",
     effPitch: "Voice Changer",
     speed: "Speed:",
-    studentName: "Full Name",
+    studentName: "Full Student Name",
     studentGrade: "Grade",
-    submit: "Submit Recording",
-    submitting: "Submitting...",
-    success: "Submitted successfully! Thank you.",
-    error: "An error occurred during submission. Please try again.",
-    fillRequired: "Please record audio, enter your name and grade before submitting."
+    submit: "Submit to Studio",
+    submitting: "Uploading...",
+    success: "Your recording was submitted successfully! Thank you for your contribution.",
+    error: "An unexpected error occurred. Please check your network and try again.",
+    fillRequired: "Please record audio first, and accurately fill in the name and grade fields."
   }
 };
 
@@ -180,7 +185,6 @@ const PodcastPage: React.FC = () => {
           effectsApplied: JSON.stringify({ ...effects, playbackRate })
         };
 
-        // 🌟 الرابط الجديد الخاص بك تم وضعه هنا 🌟
         const response = await fetch('https://script.google.com/macros/s/AKfycbzA8P-nF32I4Ponw18GynsgFCuf5LYH6kf16f4k7UjjPgod4mVGxSk12monYmYcCmFW/exec', {
           method: 'POST',
           body: JSON.stringify(payload)
@@ -207,129 +211,150 @@ const PodcastPage: React.FC = () => {
   };
 
   return (
-    <div dir={dir} className="min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4 font-sans antialiased text-slate-800 dark:text-slate-200">
+    <div dir={dir} className="min-h-screen bg-slate-50 dark:bg-slate-950 py-10 px-4 md:py-16 font-sans antialiased text-slate-800 dark:text-slate-200 relative overflow-x-hidden">
       
+      {/* 🌟 الخلفية الديناميكية لهوية الموقع */}
       <div className="fixed inset-0 overflow-hidden -z-10 pointer-events-none opacity-40 dark:opacity-20">
-         <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-red-600/20 blur-[120px] rounded-full"></div>
-         <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/20 blur-[120px] rounded-full"></div>
+         <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-red-600/20 blur-[120px] rounded-full animate-pulse"></div>
+         <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/20 blur-[120px] rounded-full animate-pulse [animation-delay:2s]"></div>
       </div>
 
-      <div className="max-w-5xl mx-auto space-y-10 animate-fade-in-up">
+      <div className="max-w-6xl mx-auto space-y-12 animate-fade-in-up relative z-10">
         
-        <div className="text-center space-y-4">
-          <div className="inline-block bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 p-4 rounded-full mb-2">
-            <span className="text-4xl">🎙️</span>
+        {/* --- تصميم الهيدر الجديد مع الصورة --- */}
+        <div className="text-center flex flex-col items-center">
+          <div className="relative mb-8 group">
+            {/* توهج خلف الصورة */}
+            <div className="absolute -inset-6 rounded-full bg-gradient-to-r from-red-600/20 to-blue-600/20 blur-3xl opacity-70 group-hover:opacity-100 transition-opacity"></div>
+            <img 
+              src={podcastHeaderImg} 
+              alt="Saqr Podcast Logo" 
+              className="relative w-48 h-48 md:w-64 md:h-64 object-contain drop-shadow-2xl animate-float"
+            />
           </div>
-          <h1 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight">{t('pageTitle')}</h1>
-          <p className="text-lg text-slate-600 dark:text-slate-400 font-medium">{t('subTitle')}</p>
+          <h1 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter mb-4 drop-shadow-sm">{t('pageTitle')}</h1>
+          <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-400 font-bold leading-relaxed max-w-2xl mx-auto">{t('subTitle')}</p>
+          <div className="h-1.5 w-24 bg-red-600 mt-6 rounded-full"></div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Link to="/arabic-library" className="group bg-white dark:bg-slate-800 p-6 rounded-3xl border-2 border-slate-200 dark:border-slate-700 hover:border-red-500 dark:hover:border-red-500 transition-all flex items-center gap-5 shadow-sm hover:shadow-lg">
-            <div className="w-14 h-14 bg-red-50 dark:bg-red-500/10 rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">🇦🇪</div>
+        {/* --- روابط المكتبات بصياغة جديدة للهوية --- */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+          <Link to="/arabic-library" className="group glass-panel p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-red-500/50 hover:-translate-y-1 transition-all flex items-center gap-6 shadow-sm hover:shadow-xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl">
+            <div className="w-16 h-16 bg-red-50 dark:bg-red-500/10 rounded-2xl flex items-center justify-center text-4xl group-hover:scale-110 group-hover:rotate-6 transition-transform">🇦🇪</div>
             <div>
-              <h3 className="font-bold text-xl text-slate-900 dark:text-white mb-1">{t('arabicLibrary')}</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400">{t('libraryDesc')}</p>
+              <h3 className="font-extrabold text-2xl text-slate-900 dark:text-white mb-1.5">{t('arabicLibrary')}</h3>
+              <p className="text-base text-slate-600 dark:text-slate-400 font-medium">{t('libraryDesc')}</p>
             </div>
           </Link>
-          <Link to="/english-library" className="group bg-white dark:bg-slate-800 p-6 rounded-3xl border-2 border-slate-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-500 transition-all flex items-center gap-5 shadow-sm hover:shadow-lg">
-            <div className="w-14 h-14 bg-blue-50 dark:bg-blue-500/10 rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">🇬🇧</div>
+          <Link to="/english-library" className="group glass-panel p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-blue-500/50 hover:-translate-y-1 transition-all flex items-center gap-6 shadow-sm hover:shadow-xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl">
+            <div className="w-16 h-16 bg-blue-50 dark:bg-blue-500/10 rounded-2xl flex items-center justify-center text-4xl group-hover:scale-110 group-hover:-rotate-6 transition-transform">🇬🇧</div>
             <div>
-              <h3 className="font-bold text-xl text-slate-900 dark:text-white mb-1">{t('englishLibrary')}</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400">{t('libraryDesc')}</p>
+              <h3 className="font-extrabold text-2xl text-slate-900 dark:text-white mb-1.5">{t('englishLibrary')}</h3>
+              <p className="text-base text-slate-600 dark:text-slate-400 font-medium">{t('libraryDesc')}</p>
             </div>
           </Link>
         </div>
 
-        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-8 rounded-[2rem] border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-2 h-full bg-yellow-400"></div>
-          <h2 className="text-2xl font-black mb-6 flex items-center gap-3">
-            <span>📋</span> {t('instructionsTitle')}
+        {/* --- التعليمات بتصميم البطاقة الصفراء المميزة --- */}
+        <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl p-8 md:p-10 rounded-[2.5rem] border-l-8 border-yellow-400 shadow-lg relative overflow-hidden">
+          <div className="absolute -top-10 -right-10 text-9xl opacity-10">📋</div>
+          <h2 className="text-3xl font-black mb-8 flex items-center gap-4 text-slate-950 dark:text-white relative z-10">
+             {t('instructionsTitle')}
           </h2>
-          <ul className="space-y-4 font-semibold text-slate-700 dark:text-slate-300">
-            {[1, 2, 3, 4, 5, 6].map((num) => (
-              <li key={num} className="flex gap-4 items-start">
-                <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center font-bold text-sm border border-slate-200 dark:border-slate-700">{num}</span>
-                <span className="pt-1">{t(`inst${num}` as keyof typeof translations.ar)}</span>
+          <ul className="space-y-5 font-bold text-lg text-slate-700 dark:text-slate-300 relative z-10 leading-relaxed">
+            {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+              <li key={num} className="flex gap-4 items-start hover:translate-x-1 transition-transform">
+                <span className="flex-shrink-0 w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center font-black text-base border border-slate-200 dark:border-slate-700 shadow-inner">{num}</span>
+                <span className="pt-1.5 flex-1">{t(`inst${num}` as keyof typeof translations.ar)}</span>
               </li>
             ))}
           </ul>
         </div>
 
-        <div className="bg-slate-900 dark:bg-slate-950 p-6 md:p-10 rounded-[2.5rem] shadow-2xl border border-slate-800 relative overflow-hidden text-white">
-          <h2 className="text-2xl font-black mb-8 text-center text-white/90 uppercase tracking-widest">{t('studioTitle')}</h2>
+        {/* --- منطقة الاستديو الاحترافية --- */}
+        <div className="bg-slate-950 dark:bg-black p-8 md:p-12 rounded-[3rem] shadow-2xl border-2 border-slate-800 dark:border-slate-900 relative overflow-hidden text-white animate-fade-in">
+          
+          {/* خلفية الاستديو */}
+          <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTAgMGg0MHY0MEgwVjB6bTIwIDIwaDIwdjIwSDIwVjIwek0wIDIwaDIwdjIwSDBWMjB6bTIwIDBoMjB2MjBIMjBWMHoiIGZpbGw9IiM4ODgiIGZpbGwtb3BhY2l0eT0iMC4xIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiLz4PC9zdmc+')]"></div>
 
-          <div className="flex flex-col items-center justify-center mb-10">
-            <div className="relative mb-6">
+          <h2 className="text-3xl font-black mb-12 text-center text-whitetracking-widest relative z-10 uppercase flex items-center justify-center gap-3">
+             {t('studioTitle')}
+          </h2>
+
+          {/*Recorder UI */}
+          <div className="flex flex-col items-center justify-center mb-12 relative z-10">
+            <div className="relative mb-6 group">
               {isRecording && (
-                <div className="absolute -inset-4 bg-red-600/30 rounded-full animate-ping"></div>
+                <div className="absolute -inset-6 bg-red-600/30 rounded-full animate-ping opacity-70"></div>
               )}
               <button 
                 onClick={isRecording ? stopRecording : startRecording}
-                className={`relative z-10 w-24 h-24 rounded-full flex items-center justify-center text-3xl transition-all duration-300 ${isRecording ? 'bg-slate-800 border-4 border-red-500 text-red-500 shadow-[0_0_30px_#ef4444]' : 'bg-red-600 hover:bg-red-500 text-white shadow-lg hover:scale-105'}`}
+                className={`relative z-10 w-28 h-28 rounded-full flex items-center justify-center text-4xl transition-all duration-300 transform active:scale-95 ${isRecording ? 'bg-slate-800 border-8 border-red-500 text-red-500 shadow-[0_0_40px_#ef4444]' : 'bg-red-600 hover:bg-red-500 text-white shadow-lg hover:scale-105'}`}
               >
                 {isRecording ? '⏹' : '🎙️'}
               </button>
             </div>
             
-            <div className="text-center h-12">
+            <div className="text-center h-16 flex items-center justify-center">
               {isRecording ? (
-                <div className="flex flex-col items-center">
-                   <span className="text-red-400 font-bold animate-pulse">{t('recording')}</span>
-                   <span className="text-3xl font-mono mt-1 text-white">{formatTime(recordingTime)}</span>
+                <div className="flex flex-col items-center space-y-2">
+                   <span className="text-red-400 font-extrabold text-xl animate-pulse tracking-wide">{t('recording')}</span>
+                   <span className="text-4xl font-mono text-white bg-black/40 px-4 py-1 rounded-lg border border-slate-700">{formatTime(recordingTime)}</span>
                 </div>
               ) : (
-                <span className="text-slate-400 font-medium">{audioBlob ? formatTime(recordingTime) : t('startRecord')}</span>
+                <span className="text-slate-400 font-bold text-xl">{audioBlob ? `${t('previewTitle')} (${formatTime(recordingTime)})` : t('startRecord')}</span>
               )}
             </div>
           </div>
 
+          {/* Audio Preview & Effects */}
           {audioUrl && (
-            <div className="bg-slate-800/50 p-6 rounded-3xl border border-slate-700 mb-10 animate-fade-in-up">
-              <h3 className="text-lg font-bold mb-4 flex items-center gap-2">🎧 {t('previewTitle')}</h3>
+            <div className="bg-slate-800/40 backdrop-blur-md p-8 rounded-3xl border border-slate-700 mb-12 animate-fade-in-up relative z-10">
+              <h3 className="text-xl font-extrabold mb-6 flex items-center gap-3">🎧 {t('previewTitle')}</h3>
               
-              <audio ref={audioRef} src={audioUrl} controls className="w-full mb-6 outline-none" />
+              <audio ref={audioRef} src={audioUrl} controls className="w-full mb-8 outline-none dark:invert" />
 
-              <h4 className="text-sm font-semibold text-slate-400 mb-3 uppercase tracking-wider">{t('effectsTitle')}</h4>
+              <h4 className="text-sm font-extrabold text-slate-400 mb-4 uppercase tracking-wider">{t('effectsTitle')}</h4>
               
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                <button onClick={() => toggleEffect('echo')} className={`py-2 px-3 rounded-xl text-sm font-bold transition-colors ${effects.echo ? 'bg-blue-500 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>🌊 {t('effEcho')}</button>
-                <button onClick={() => toggleEffect('noise')} className={`py-2 px-3 rounded-xl text-sm font-bold transition-colors ${effects.noise ? 'bg-green-500 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>🔇 {t('effNoise')}</button>
-                <button onClick={() => toggleEffect('enhance')} className={`py-2 px-3 rounded-xl text-sm font-bold transition-colors ${effects.enhance ? 'bg-purple-500 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>✨ {t('effEnhance')}</button>
-                <button onClick={() => toggleEffect('pitch')} className={`py-2 px-3 rounded-xl text-sm font-bold transition-colors ${effects.pitch ? 'bg-yellow-500 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>👽 {t('effPitch')}</button>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <button onClick={() => toggleEffect('echo')} className={`py-3 px-4 rounded-2xl text-base font-bold transition-all transform active:scale-95 flex items-center justify-center gap-2 ${effects.echo ? 'bg-blue-500 text-white shadow-md' : 'bg-slate-700 text-slate-200 hover:bg-slate-600'}`}>🌊 {t('effEcho')}</button>
+                <button onClick={() => toggleEffect('noise')} className={`py-3 px-4 rounded-2xl text-base font-bold transition-all transform active:scale-95 flex items-center justify-center gap-2 ${effects.noise ? 'bg-green-600 text-white shadow-md' : 'bg-slate-700 text-slate-200 hover:bg-slate-600'}`}>🔇 {t('effNoise')}</button>
+                <button onClick={() => toggleEffect('enhance')} className={`py-3 px-4 rounded-2xl text-base font-bold transition-all transform active:scale-95 flex items-center justify-center gap-2 ${effects.enhance ? 'bg-purple-600 text-white shadow-md' : 'bg-slate-700 text-slate-200 hover:bg-slate-600'}`}>✨ {t('effEnhance')}</button>
+                <button onClick={() => toggleEffect('pitch')} className={`py-2 px-4 rounded-2xl text-base font-bold transition-all transform active:scale-95 flex items-center justify-center gap-2 ${effects.pitch ? 'bg-yellow-500 text-slate-950 shadow-md' : 'bg-slate-700 text-slate-200 hover:bg-slate-600'}`}>👽 {t('effPitch')}</button>
               </div>
 
-              <div className="flex items-center gap-4 bg-slate-900/50 p-4 rounded-2xl">
-                <span className="text-sm font-bold text-slate-400">{t('speed')}</span>
+              <div className="flex items-center gap-5 bg-slate-900/60 p-5 rounded-2xl border border-slate-700">
+                <span className="text-base font-bold text-slate-300">{t('speed')}</span>
                 <input 
                   type="range" min="0.5" max="2" step="0.1" value={playbackRate} 
                   onChange={(e) => setPlaybackRate(parseFloat(e.target.value))}
-                  className="flex-1 accent-red-500"
+                  className="flex-1 accent-red-500 h-2 cursor-pointer"
                 />
-                <span className="text-sm font-mono bg-slate-800 px-2 py-1 rounded-md">{playbackRate}x</span>
+                <span className="text-lg font-mono font-bold bg-slate-800 text-red-400 px-3 py-1 rounded-lg border border-slate-700">{playbackRate.toFixed(1)}x</span>
               </div>
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          {/* Submission Form */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8 relative z-10">
             <input 
               type="text" 
               placeholder={t('studentName')}
               value={studentName}
               onChange={(e) => setStudentName(e.target.value)}
-              className="bg-slate-800 border border-slate-700 text-white rounded-2xl px-5 py-4 focus:outline-none focus:border-red-500 transition-colors"
+              className="bg-slate-800/80 border-2 border-slate-700 text-white font-bold rounded-2xl px-6 py-4 text-lg focus:outline-none focus:border-red-500 focus:bg-slate-800 transition-all"
             />
             <input 
               type="text" 
               placeholder={t('studentGrade')}
               value={studentGrade}
               onChange={(e) => setStudentGrade(e.target.value)}
-              className="bg-slate-800 border border-slate-700 text-white rounded-2xl px-5 py-4 focus:outline-none focus:border-red-500 transition-colors"
+              className="bg-slate-800/80 border-2 border-slate-700 text-white font-bold rounded-2xl px-6 py-4 text-lg focus:outline-none focus:border-red-500 focus:bg-slate-800 transition-all"
             />
           </div>
 
           {statusMessage.text && (
-            <div className={`p-4 rounded-xl mb-6 text-center font-bold text-sm ${statusMessage.type === 'error' ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'}`}>
+            <div className={`p-5 rounded-2xl mb-8 text-center font-bold text-base relative z-10 ${statusMessage.type === 'error' ? 'bg-red-500/20 text-red-300 border border-red-500/50' : 'bg-green-500/20 text-green-300 border border-green-500/50'}`}>
               {statusMessage.text}
             </div>
           )}
@@ -337,9 +362,9 @@ const PodcastPage: React.FC = () => {
           <button 
             onClick={handleSubmit}
             disabled={isSubmitting || !audioBlob}
-            className={`w-full py-4 rounded-2xl font-black text-lg transition-all flex items-center justify-center gap-2 ${(!audioBlob || isSubmitting) ? 'bg-slate-800 text-slate-500 cursor-not-allowed' : 'bg-gradient-to-r from-red-600 to-red-500 text-white hover:shadow-[0_0_20px_rgba(239,68,68,0.4)] hover:-translate-y-1'}`}
+            className={`w-full py-5 rounded-2xl font-black text-xl transition-all flex items-center justify-center gap-3 relative z-10 transform active:scale-[0.98] ${(!audioBlob || isSubmitting) ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700' : 'bg-gradient-to-r from-red-600 to-red-500 text-white hover:shadow-[0_0_30px_rgba(239,68,68,0.5)] hover:-translate-y-1'}`}
           >
-            {isSubmitting ? <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin"></div> : '🚀'}
+            {isSubmitting ? <div className="w-7 h-7 border-4 border-white/30 border-t-white rounded-full animate-spin"></div> : '🚀'}
             {isSubmitting ? t('submitting') : t('submit')}
           </button>
 
@@ -347,10 +372,22 @@ const PodcastPage: React.FC = () => {
       </div>
 
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
         * { font-family: 'Cairo', sans-serif !important; }
-        @keyframes fade-in-up { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; }
+        
+        @keyframes fade-in-up { 0% { opacity: 0; transform: translateY(30px); } 100% { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in-up { animation: fade-in-up 0.8s ease-out forwards; }
+
+        @keyframes fade-in { 0% { opacity: 0; } 100% { opacity: 1; } }
+        .animate-fade-in { animation: fade-in 1s ease-out forwards; }
+
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-15px); } }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        
+        /* استايل مخصص لمشغل الصوت ليتناسب مع الثيم الداكن */
+        audio::-webkit-media-controls-panel { background-color: #1e293b; }
+        audio::-webkit-media-controls-current-time-display,
+        audio::-webkit-media-controls-time-remaining-display { color: #f1f5f9; }
       `}</style>
     </div>
   );
