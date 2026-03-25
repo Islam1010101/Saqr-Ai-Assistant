@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useLanguage } from '../App';
 import { useNavigate } from 'react-router-dom';
 // 👇 1. استدعاء دالة التتبع
-import { trackActivity } from '../utils/tracker'; 
+import { trackActivity } from '../src/utils/tracker';
 
 // --- 1. قاعدة البيانات (لم يتم تغييرها بناءً على طلبك) ---
 export const ARABIC_LIBRARY_DATABASE = [
