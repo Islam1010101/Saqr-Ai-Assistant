@@ -1,6 +1,8 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useLanguage } from '../App';
 import { useNavigate } from 'react-router-dom';
+// 👇 1. استدعاء دالة التتبع
+import { trackActivity } from '../utils/tracker'; 
 
 // --- 1. قاعدة البيانات (لم يتم تغييرها بناءً على طلبك) ---
 export const ARABIC_LIBRARY_DATABASE = [
@@ -55,7 +57,7 @@ export const ARABIC_LIBRARY_DATABASE = [
     { id: "AR_50", title: "كليلة ودمنة", author: "عبدالله بن المقفع", subject: "أدب خيالي", publisher: "هنداوي", driveLink: "https://drive.google.com/file/d/1manKVHamsvHDO-37IxmecGeKOtKxpJhB/view?usp=drive_link", bio: "أديب ومفكر عبقري من العصر العباسي، اشتهر ببلاغته الاستثنائية ودوره المحوري في نقل الحكمة الفارسية.", summary: "كتاب قصصي ذو أصول هندية تدور أحداثه على ألسنة الحيوانات والطيور لتقديم نصائح وحكم.", audioId: "/audio/كليلة.mp3" },
     { id: "AR_51", title: "مغامرات جحا", author: "مؤلفون", subject: "أدب عربي/تراث", publisher: "المؤسسة العربية الحديثة", driveLink: "https://drive.google.com/drive/folders/1WCsXruxkyuiG-QV6iXFGMemtwv6vvq3-?usp=drive_link", bio: "مجموعة من المؤلفين العرب", summary: "قصص فكاهية تعكس ذكاءً فطرياً وسخرية فلسفية من مواقف الحياة اليومية، حيث يتقمص جحا دور الأحمق ليعطي دروساً عميقة وحكماً بليغة." },
     { id: "AR_52", title: "أخلاقيات الذكاء الاصطناعي", author: "مارك كوكلبيرج", subject: "تكنولوجيا", publisher: "هنداوي", driveLink: "https://drive.google.com/file/d/1A98xA-eWvm8Z_Gktfg-XmSLmT0Xkz9wB/view?usp=drive_link", bio: "أستاذ فلسفة الإعلام والتكنولوجيا في جامعة فيينا بفرنسا، وعضو في مجموعات استشارية رفيعة المستوى حول الذكاء الاصطناعي لدى المفوضية الأوروبية. يُعرف بقدرته على ربط الأسئلة الفلسفية العميقة بالتحديات التقنية والسياسية الراهنة.", summary: "يُعد كتاب أخلاقيات الذكاء الاصطناعي (AI Ethics)، الصادر ضمن سلسلة MIT Press Essential Knowledge ، أحد أهم المراجع الحديثة التي تُفند المعضلات الأخلاقية الناتجة عن تطور التقنيات الذكية بأسلوب فلسفي وعملي في آن واحد." },
-    { id: "AR_53", title: "التفكير الحوسبي", author: "بيتر جيه دنينج ، ماتي تيدري", subject: "تكنولوجيا", publisher: "هنداوي", driveLink: "https://drive.google.com/file/d/1X0h06VJmX9BUWhZsDPx6TTGIDdV6YzsK/view?usp=drive_link", bio: "بيتر جيه دنينج (Peter J. Denning): أحد رواد علوم الحاسوب، ورئيس سابق لجمعية آلات الحوسبة (ACM)، وصاحب مساهمات تأسيسية في أنظمة التشغيل والشبكات", summary: "يُعد كتاب التفكير الحوسبي (Computational Thinking)، وهو أيضاً جزء من سلسلة MIT Press Essential Knowledge، مرجعاً أساسياً لفهم كيف غيرت علوم الحاسوب الطريقة التي نحل بها المشكلات، ليس فقط في البرمجة، بل في مختلف مجالات الحياة." },
+    { id: "AR_53", title: "التفكير الحوسبي", author: "بيتر جيه دنينج ، ماتي تيدري", subject: "تكنولوجيا", publisher: "هنداوي", driveLink: "https://drive.google.com/file/d/1X0h06VJmX9BUWhZsDPx6TTGIDdV6YzsK/view?usp=drive_link", bio: "بيتر جيه دنينج (Peter J. Denning): أحد رواد علوم الحاسوب، ورئيس سابق لجمعية آلات بمساهمات تأسيسية في أنظمة التشغيل والشبكات", summary: "يُعد كتاب التفكير الحوسبي (Computational Thinking)، وهو أيضاً جزء من سلسلة MIT Press Essential Knowledge، مرجعاً أساسياً لفهم كيف غيرت علوم الحاسوب الطريقة التي نحل بها المشكلات، ليس فقط في البرمجة، بل في مختلف مجالات الحياة." },
     { id: "AR_54", title: "الدماغ المبتكر", author: "مين جونج", subject: "تكنولوجيا", publisher: "هنداوي", driveLink: "https://drive.google.com/file/d/1GZpt4CrcZomX4WHyoh6E2HcOdjrDCsBE/view?usp=drive_link", bio: "هو باحث متخصص في علوم الدماغ والذكاء، يركز في دراساته على كيفية تحويل العمليات العصبية المعقدة إلى مهارات عملية يمكن للإنسان استخدامها لتطوير قدراته الإبداعية وتوليد أفكار غير تقليدية.", summary: "يدحض الكتاب فكرة أن الإبداع موهبة فطرية يولد بها البعض وينحرم منها الآخرون، بل يؤكد أنه عضلة يمكن تدريبها من خلال فهم كيفية عمل الدماغ." },
     { id: "AR_55", title: "الرياح في أشجار الصفصاف", author: "كينيث جرام", subject: "أدب أطفال", publisher: "هنداوي", driveLink: "https://drive.google.com/file/d/1CwrvdNwi5yPQFvkce_OV_nHy0ipcvi0V/view?usp=drive_link", bio: "كاتباً إسكتلندياً، كتب هذه الرواية في الأصل كمجموعة من القصص والرسائل لابنه الصغير أليستير. استلهم جرام أحداث الرواية من الطبيعة الإنجليزية الهادئة التي كان يحبها، هرباً من ضغوط عمله الرسمي في بنك إنجلترا.", summary: "تُعد رواية الرياح في أشجار الصفصاف (The Wind in the Willows)، الصادرة عام 1908، واحدة من أعظم كلاسيكيات أدب الأطفال العالمي، وهي عمل أدبي يتجاوز الصغار ليخاطب الكبار برمزياته العميقة وجمال وصفه للطبيعة." },
     { id: "AR_56", title: "ذكاء اصطناعي متوافق مع البشر: حتى لا تفرض الآلات سيطرتها على البشر", author: "ستيوارت راسل", subject: "تكنولوجيا", publisher: "هنداوي", driveLink: "https://drive.google.com/file/d/1ddbyuo2M2dfh-86lM3as1uoYDoB4fz1K/view?usp=drive_link", bio: "هو أحد أعمدة علم الذكاء الاصطناعي في العالم، وأستاذ علوم الحاسوب في جامعة كاليفورنيا ببرلين.", summary: "يُعتبر كتاب ذكاء اصطناعي متوافق مع البشر: مشكلة السيطرة (Human Compatible: Artificial Intelligence and the Problem of Control)، الصادر عام 2019، من أهم الكتب التي تتناول مستقبل البشرية في ظل وجود ذكاء اصطناعي فائق، ويُعد صرخة تحذير علمية رصينة من داخل المجتمع التقني نفسه." },
@@ -457,9 +459,18 @@ const ArabicLibraryInternalPage: React.FC = () => {
                 </div>
             </div>
 
+            {/* 👇 2. هنا تم إضافة التتبع عند الضغط على الكتاب */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
                 {filteredBooks.slice(0, visibleCount).map((book) => (
-                    <BookCard key={book.id} book={book} t={t} onClick={() => setSelectedBook(book)} />
+                    <BookCard 
+                        key={book.id} 
+                        book={book} 
+                        t={t} 
+                        onClick={() => {
+                            setSelectedBook(book);
+                            trackActivity('digital', book.title); // السطر المضاف لإرسال التفاعل
+                        }} 
+                    />
                 ))}
             </div>
 
