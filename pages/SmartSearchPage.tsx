@@ -7,6 +7,9 @@ import { bookData } from '../api/bookData';
 import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
 
+// 👇 1. استدعاء دالة التتبع (تأكد من تعديل المسار ليتطابق مع مشروعك)
+import { trackActivity } from '../utils/tracker'; 
+
 // --- 1. بروتوكول عقل صقر النهائي (تم تعديل التعليمات بصرامة) ---
 const SAQR_ELITE_PROMPT = `
 Identity: You are "Saqr" (صقر), the official Elite AI Librarian of Emirates Falcon International Private School (EFIPS).
@@ -118,6 +121,10 @@ const SmartSearchPage: React.FC = () => {
   const handleSendMessage = async () => {
     if (input.trim() === '' || isLoading) return;
     const userQuery = input.trim();
+
+    // 👇 2. هنا يتم إرسال سؤال الطالب إلى السحابة فور الضغط على إرسال
+    trackActivity('ai', userQuery);
+
     setMessages(prev => [...prev, { role: 'user', content: userQuery }]);
     setInput('');
     setIsLoading(true);
