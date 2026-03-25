@@ -8,7 +8,7 @@ import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
 
 // 👇 1. استدعاء دالة التتبع (تأكد من تعديل المسار ليتطابق مع مشروعك)
-import { trackActivity } from '../utils/tracker'; 
+import { trackActivity } from '../src/utils/tracker';
 
 // --- 1. بروتوكول عقل صقر النهائي (تم تعديل التعليمات بصرامة) ---
 const SAQR_ELITE_PROMPT = `
