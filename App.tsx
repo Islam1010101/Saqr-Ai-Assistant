@@ -19,6 +19,7 @@ import CreatorsPortalPage from './pages/CreatorsPortalPage';
 import LibraryMapPage from './pages/LibraryMapPage';
 import CreatorsStudioPage from './pages/CreatorsStudioPage';
 import SaqrStudioPage from './pages/SaqrStudioPage';
+import PodcastPage from './pages/PodcastPage';
 
 export type Locale = 'en' | 'ar';
 
@@ -199,7 +200,8 @@ const Header: React.FC = () => {
       <div className="mx-auto max-w-[98rem] p-1.5 md:p-2.5 rounded-full border border-slate-200 dark:border-slate-800 flex items-center justify-between shadow-lg backdrop-blur-xl bg-white/80 dark:bg-slate-900/80 transition-all relative overflow-visible">
         
         <Link to="/" className="flex items-center gap-2 md:gap-3 ps-4 md:ps-6 group flex-shrink-0">
-          <img src="https://www.efipslibrary.online/school-logo.png" alt="EFIPS" className="h-8 w-8 md:h-11 md:w-11 object-contain rotate-12 transition-transform duration-500 group-hover:scale-110 dark:invert" />
+          {/* تمت إضافة dark:brightness-0 هنا ليصبح الشعار أبيض تماماً في الوضع الداكن */}
+          <img src="https://www.efipslibrary.online/school-logo.png" alt="EFIPS" className="h-8 w-8 md:h-11 md:w-11 object-contain rotate-12 transition-transform duration-500 group-hover:scale-110 dark:brightness-0 dark:invert" />
           <div className="hidden xl:block leading-none text-start">
             <span className="font-semibold text-slate-900 dark:text-white text-[7px] md:text-[10px] block uppercase opacity-80 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
               {locale === 'en' ? "Emirates Falcon Int'l Private School" : "مدرسة صقر الإمارات الدولية الخاصة"}
@@ -304,6 +306,9 @@ const MainLayout: React.FC = () => {
           <Route path="/creators" element={<CreatorsPortalPage />} />
           <Route path="/creators-studio" element={<CreatorsStudioPage />} />
           <Route path="/saqr-studio" element={<SaqrStudioPage />} />
+          
+          {/* 🌟 مسار البودكاست تم إضافته هنا دون وضعه في الشريط العلوي 🌟 */}
+          <Route path="/podcast" element={<PodcastPage />} />
           
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/feedback" element={<FeedbackPage />} /> 
