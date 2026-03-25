@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../App';
 
@@ -74,6 +74,18 @@ const translations = {
   }
 };
 
+// --- واجهة عنصر الانفجار الصوتي ---
+interface BurstParticle {
+  id: number;
+  icon: string;
+  tx: number; // مسار الحركة X
+  ty: number; // مسار الحركة Y
+  rot: number; // الدوران
+  scale: number; // الحجم
+}
+
+const AUDIO_ICONS = ["🎙️", "🎧", "🎵", "🎶", "📻", "🔊", "🎛️"];
+
 const PodcastPage: React.FC = () => {
   const { locale, dir } = useLanguage();
   const isAr = locale === 'ar';
@@ -95,11 +107,37 @@ const PodcastPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{type: 'success' | 'error' | '', text: string}>({type: '', text: ''});
 
+  // Explosion States
+  const [particles, setParticles] = useState<BurstParticle[]>([]);
+
   // Refs
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+
+  // --- دالة تأثير الانفجار الصوتي عند الضغط على الشعار ---
+  const triggerExplosion = useCallback(() => {
+    const id = Date.now();
+    // إنشاء 10 أيقونات عشوائية
+    const newParticles: BurstParticle[] = Array.from({ length: 12 }).map((_, i) => ({
+      id: id + i,
+      icon: AUDIO_ICONS[Math.floor(Math.random() * AUDIO_ICONS.length)],
+      tx: (Math.random() - 0.5) * 400, // انتشار أفقي واسع
+      ty: (Math.random() - 0.5) * 400, // انتشار رأسي واسع
+      rot: Math.random() * 360,
+      scale: 0.8 + Math.random() * 1.5 // أحجام مختلفة
+    }));
+
+    setParticles(prev => [...prev, ...newParticles]);
+
+    // إزالة العناصر بعد انتهاء الأنيميشن (2 ثانية)
+    newParticles.forEach(p => {
+      setTimeout(() => {
+        setParticles(current => current.filter(item => item.id !== p.id));
+      }, 2000);
+    });
+  }, []);
 
   // --- Recording Logic ---
   const startRecording = async () => {
@@ -221,15 +259,31 @@ const PodcastPage: React.FC = () => {
 
       <div className="max-w-6xl mx-auto space-y-12 animate-fade-in-up relative z-10">
         
-        {/* --- تصميم الهيدر الجديد مع الصورة --- */}
+        {/* --- تصميم الهيدر الجديد مع الصورة وانفجار الأيقونات --- */}
         <div className="text-center flex flex-col items-center">
-          <div className="relative mb-8 group">
-            {/* توهج خلف الصورة */}
-            <div className="absolute -inset-6 rounded-full bg-gradient-to-r from-red-600/20 to-blue-600/20 blur-3xl opacity-70 group-hover:opacity-100 transition-opacity"></div>
+          <div className="relative mb-8 flex justify-center items-center">
+            
+            {/* طباعة عناصر الانفجار المرجعية */}
+            {particles.map((p) => (
+              <div 
+                key={p.id}
+                className="absolute z-50 pointer-events-none animate-audio-burst select-none"
+                style={{ 
+                  '--tx': `${p.tx}px`, 
+                  '--ty': `${p.ty}px`, 
+                  '--rot': `${p.rot}deg`,
+                  fontSize: `${p.scale * 2}rem`
+                } as any}
+              >
+                {p.icon}
+              </div>
+            ))}
+
             <img 
               src={podcastHeaderImg} 
               alt="Saqr Podcast Logo" 
-              className="relative w-48 h-48 md:w-64 md:h-64 object-contain drop-shadow-2xl animate-float"
+              onClick={triggerExplosion}
+              className="relative w-48 h-48 md:w-64 md:h-64 object-contain animate-float cursor-pointer z-40 active:scale-95 transition-transform"
             />
           </div>
           <h1 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter mb-4 drop-shadow-sm">{t('pageTitle')}</h1>
@@ -237,16 +291,16 @@ const PodcastPage: React.FC = () => {
           <div className="h-1.5 w-24 bg-red-600 mt-6 rounded-full"></div>
         </div>
 
-        {/* --- روابط المكتبات بصياغة جديدة للهوية --- */}
+        {/* --- روابط المكتبات (المسارات المحدثة) --- */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-          <Link to="/arabic-library" className="group glass-panel p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-red-500/50 hover:-translate-y-1 transition-all flex items-center gap-6 shadow-sm hover:shadow-xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl">
+          <Link to="/digital-library/arabic" className="group glass-panel p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-red-500/50 hover:-translate-y-1 transition-all flex items-center gap-6 shadow-sm hover:shadow-xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl">
             <div className="w-16 h-16 bg-red-50 dark:bg-red-500/10 rounded-2xl flex items-center justify-center text-4xl group-hover:scale-110 group-hover:rotate-6 transition-transform">🇦🇪</div>
             <div>
               <h3 className="font-extrabold text-2xl text-slate-900 dark:text-white mb-1.5">{t('arabicLibrary')}</h3>
               <p className="text-base text-slate-600 dark:text-slate-400 font-medium">{t('libraryDesc')}</p>
             </div>
           </Link>
-          <Link to="/english-library" className="group glass-panel p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-blue-500/50 hover:-translate-y-1 transition-all flex items-center gap-6 shadow-sm hover:shadow-xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl">
+          <Link to="/digital-library/english" className="group glass-panel p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-blue-500/50 hover:-translate-y-1 transition-all flex items-center gap-6 shadow-sm hover:shadow-xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl">
             <div className="w-16 h-16 bg-blue-50 dark:bg-blue-500/10 rounded-2xl flex items-center justify-center text-4xl group-hover:scale-110 group-hover:-rotate-6 transition-transform">🇬🇧</div>
             <div>
               <h3 className="font-extrabold text-2xl text-slate-900 dark:text-white mb-1.5">{t('englishLibrary')}</h3>
@@ -384,6 +438,14 @@ const PodcastPage: React.FC = () => {
         @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-15px); } }
         .animate-float { animation: float 6s ease-in-out infinite; }
         
+        /* 💥 أنيميشن الانفجار الصوتي 💥 */
+        @keyframes audio-burst {
+          0% { transform: translate(0, 0) scale(0) rotate(0deg); opacity: 1; filter: blur(0px); }
+          50% { opacity: 1; }
+          100% { transform: translate(var(--tx), var(--ty)) scale(1.5) rotate(var(--rot)); opacity: 0; filter: blur(4px); }
+        }
+        .animate-audio-burst { animation: audio-burst 2s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
+
         /* استايل مخصص لمشغل الصوت ليتناسب مع الثيم الداكن */
         audio::-webkit-media-controls-panel { background-color: #1e293b; }
         audio::-webkit-media-controls-current-time-display,
