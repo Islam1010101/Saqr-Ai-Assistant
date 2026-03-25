@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { bookData, type Book } from '../api/bookData'; 
 import { useLanguage } from '../App';
 // 👇 هنا تم استدعاء دالة التتبع - تأكد من تعديل المسار ليتطابق مع مجلد مشروعك
-import { trackActivity } from '../utils/tracker'; 
+import { trackActivity } from '../src/utils/tracker';
 
 // --- 1. الـ Hooks المساعدة ---
 const useDebounce = <T,>(value: T, delay: number): T => {
