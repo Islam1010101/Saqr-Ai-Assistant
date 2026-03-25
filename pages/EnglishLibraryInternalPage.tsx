@@ -2,6 +2,9 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useLanguage } from '../App';
 import { useNavigate } from 'react-router-dom';
 
+// 👇 1. استدعاء دالة التتبع
+import { trackActivity } from '../utils/tracker';
+
 // --- 1. تعريف واجهة البيانات وقاعدة البيانات ---
 interface Book {
     id: number | string;
