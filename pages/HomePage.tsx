@@ -7,7 +7,7 @@ const translations = {
     welcome: "بوابة المعرفة مدرسة صقر الإمارات",
     subWelcome: "بوابتك الذكية للوصول إلى المعلومات.",
     newsTitle: "جديدنا",
-    newsContent: "بإمكانك الآن الاطلاع على المكتبة الإلكترونية التي تم تحديثها لتضم عدداً أكبر وتنوعاً أوسع من الكتب والإصدارات باللغتين العربية والإنجليزية، مع إضافة تصنيف الفئة العمرية للكتب. كما يمكنك من خلال 'اسأل صقر' خوض تحدي التأليف وإصدار شهادة باسمك! والآن، انطلق 'استديو صقر' للبودكاست حيث يمكنك تسجيل ملخصات الكتب بصوتك. وترقبوا قريباً انطلاق ميزة الدوبلاج العائلي.",
+    newsContent: "بإمكانك الآن الاطلاع على المكتبة الإلكترونية التي تم تحديثها لتضم عدداً أكبر وتنوعاً أوسع من الكتب والإصدارات باللغتين العربية والإنجليزية، مع إضافة تصنيف الفئة العمرية للكتب. كما يمكنك من خلال 'اسأل صقر' خوض تحدي التأليف وإصدار شهادة باسمك! والآن، استديو البودكاست متاح للتسجيل ومشاركة إبداعاتكم الصوتية، وترقبوا انطلاق ميزة الدوبلاج قريباً.",
     manualSearch: "البحث اليدوي",
     manualDesc: "البحث عن كتاب ما في مكتبة المدرسة والوصول إليه.",
     smartSearch: "اسأل صقر (AI)",
@@ -21,15 +21,15 @@ const translations = {
     challengeTitle: "تحدي المبدعين",
     challengeDesc: "ناقش، ابدأ قصتك الخاصة مع صقر، وأثبت موهبتك كل ماعليك فعله تحدى صقر. هل أنت مستعد ؟!",
     challengeCTA: "ابدأ رحلة الإبداع مع صقر الآن",
-    saqrStudioBanner: "وميض الدوبلاج قريباً",
-    saqrStudioTag: "قريباً 🚀",
+    saqrStudioBanner: "استديو صقر",
+    saqrStudioTag: "الدوبلاج قريباً 🚀",
     visitorsLabel: "زوار البوابة:"
   },
   en: {
     welcome: "Knowledge Portal at Falcon Int'l School",
     subWelcome: "Your smart gateway to access knowledge.",
     newsTitle: "What's New",
-    newsContent: "Explore the newly updated Digital Library, featuring a wider variety of Arabic and English books categorized by age group. Through 'Ask Saqr', take on the 'Author Challenge' and earn a personalized certificate! 'Saqr Studio' Podcast is now live for you to record book summaries. Also, stay tuned for our upcoming family dubbing feature!",
+    newsContent: "Explore the newly updated Digital Library, featuring a wider variety of books categorized by age group. Through 'Ask Saqr', take on the 'Author Challenge' and earn your certificate! The Podcast Studio is now live for your recordings. Stay tuned for the upcoming Dubbing feature soon!",
     manualSearch: "Manual Search",
     manualDesc: "Find and access a specific book in the school library.",
     smartSearch: "Ask Saqr (AI)",
@@ -43,8 +43,8 @@ const translations = {
     challengeTitle: "Authors Challenge",
     challengeDesc: "Discuss, author your own tales with Saqr, All you have to do is challenge Saqr. Are You Ready?!",
     challengeCTA: "Start your creative journey now",
-    saqrStudioBanner: "Dubbing Spark Coming Soon",
-    saqrStudioTag: "COMING SOON 🚀",
+    saqrStudioBanner: "Saqr Studio",
+    saqrStudioTag: "Dubbing Coming Soon 🚀",
     visitorsLabel: "Portal Visitors:"
   }
 };
@@ -129,7 +129,7 @@ const HomePage: React.FC = () => {
   return (
     <div dir={dir} className="w-full min-h-[100dvh] flex flex-col items-center bg-slate-50 dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300 py-10 md:py-20 px-4">
       
-      {/* 🌟 الخلفية الديناميكية (مثل صفحة البحث الذكي) */}
+      {/* 🌟 الخلفية الديناميكية */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-40 dark:opacity-20">
          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-red-500/20 rounded-full blur-[120px]"></div>
          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-blue-500/10 rounded-full blur-[100px]"></div>
@@ -148,21 +148,20 @@ const HomePage: React.FC = () => {
           <div className="h-1.5 w-24 bg-red-600 mx-auto rounded-full"></div>
         </div>
 
-        {/* --- شريط الأخبار المتحرك (جديدنا) - نسخة مميزة وبطيئة --- */}
+        {/* --- شريط الأخبار المتحرك (جديدنا) --- */}
         <div className="w-full max-w-6xl mx-auto relative z-30 flex items-center bg-white dark:bg-slate-800 border-2 border-red-200 dark:border-red-900/50 rounded-full shadow-lg overflow-hidden h-12 md:h-14 hover:shadow-xl transition-shadow duration-300">
           <div className="bg-gradient-to-r from-red-600 to-red-700 text-white font-bold px-5 md:px-8 h-full flex items-center justify-center gap-2 md:gap-3 relative z-20 shrink-0 uppercase tracking-wide shadow-[2px_0_10px_rgba(0,0,0,0.1)]">
             <div className="w-2 h-2 md:w-2.5 md:h-2.5 bg-white rounded-full animate-pulse shadow-[0_0_8px_#ffffff]"></div>
             {t('newsTitle')}
           </div>
           <div className="flex-1 overflow-hidden h-full flex items-center relative group bg-red-50/50 dark:bg-red-900/10">
-            {/* أضفنا group-hover:[animation-play-state:paused] عشان يقف لما الماوس ييجي عليه */}
             <div className={`whitespace-nowrap ${isAr ? 'animate-marquee-rtl' : 'animate-marquee-ltr'} text-slate-800 dark:text-slate-100 font-bold text-sm md:text-base px-4 group-hover:[animation-play-state:paused] cursor-pointer`}>
               {t('newsContent')}
             </div>
           </div>
         </div>
 
-        {/* --- 🌟 لافتة وميض الدوبلاج --- */}
+        {/* --- 🌟 لافتة استديو صقر --- */}
         <div className="w-full relative z-30 flex flex-col items-center justify-center">
           <Link to="/saqr-studio" className="group relative overflow-hidden px-8 py-5 md:px-12 md:py-6 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row items-center gap-4 hover:shadow-lg hover:border-blue-500/50 transition-all duration-300">
             <div className="absolute inset-0 bg-gradient-to-r from-red-600/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -204,14 +203,12 @@ const HomePage: React.FC = () => {
             </Link>
           </div>
 
-          {/* التفاعل مع صقر وبطاقة المؤلف الصغير */}
+          {/* التفاعل مع صقر */}
           <div className="lg:col-span-5 flex flex-col items-center justify-center order-1 lg:order-2 relative gap-8">
             <div onClick={handleMascotInteraction} className={`relative cursor-pointer transition-transform duration-700 ${isMascotClicked ? 'scale-105' : 'hover:scale-105'}`}>
-              
               <div className="absolute inset-0 flex items-center justify-center -z-10 pointer-events-none opacity-5 dark:opacity-10 transition-all duration-1000">
                 <img src="/school-logo.png" alt="Seal" className="w-[120%] h-[120%] object-contain rotate-12 dark:invert" />
               </div>
-
               {bursts.map((burst) => (
                 <div key={burst.id} 
                   className={`absolute z-[100] bg-white dark:bg-slate-800 px-4 py-2 md:px-5 md:py-2.5 rounded-2xl border border-slate-200 dark:border-slate-600 shadow-lg animate-burst-steady pointer-events-none flex items-center gap-2`}
@@ -220,18 +217,13 @@ const HomePage: React.FC = () => {
                   <span className="text-[10px] md:text-sm font-bold text-slate-800 dark:text-slate-200 whitespace-nowrap">{isAr ? burst.item.textAr : burst.item.textEn}</span>
                 </div>
               ))}
-
               <img src="/saqr-full.png" alt="Saqr Mascot" className="h-64 md:h-[500px] object-contain relative z-10 animate-float drop-shadow-2xl" />
-              
               <div className="absolute -top-4 -right-2 md:-top-6 md:-right-6 bg-white dark:bg-slate-800 px-6 py-4 rounded-3xl rounded-br-none border border-slate-200 dark:border-slate-700 shadow-xl text-xs md:text-base font-bold text-red-600 dark:text-red-400 animate-bounce z-20">
                 {t('bubble')}
               </div>
             </div>
-
-            {/* بطاقة دعوة تحدي المبدعين الصغار */}
             <div className="w-full max-w-md bg-white/60 dark:bg-slate-800/60 backdrop-blur-md p-8 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm text-center relative z-30 group overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-red-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              
               <div className="relative z-10 space-y-4">
                 <span className="bg-red-50 dark:bg-red-500/10 text-red-600 font-bold px-3 py-1 rounded-full text-xs uppercase tracking-widest">
                   {isAr ? "أطلق العنان لموهبتك" : "Show Your Talent"}
@@ -254,11 +246,9 @@ const HomePage: React.FC = () => {
         <div className="w-full px-2">
           <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-8 md:p-16 rounded-[2.5rem] md:rounded-[4rem] border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden flex flex-col md:flex-row items-center gap-8 md:gap-12">
             <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-green-500 to-red-500"></div>
-            
             <div className="w-20 h-20 md:w-32 md:h-32 bg-slate-50 dark:bg-slate-700 rounded-[2rem] flex items-center justify-center text-4xl md:text-6xl shadow-inner border border-slate-100 dark:border-slate-600 shrink-0">
               🇦🇪
             </div>
-            
             <div className="text-center md:text-start flex-1 space-y-3 md:space-y-4">
               <h3 className="text-sm md:text-lg font-bold text-red-600 dark:text-red-400 uppercase tracking-widest">
                 {t('homelandTitle')}
@@ -273,7 +263,6 @@ const HomePage: React.FC = () => {
         {/* --- 4. عداد الزوار والتاريخ --- */}
         <div className="w-full flex justify-center pb-10">
           <div className="bg-white dark:bg-slate-800 px-8 py-5 rounded-full border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row items-center gap-6">
-            
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_#22c55e]"></div>
               <span className="text-slate-500 dark:text-slate-400 font-medium text-sm">
@@ -283,9 +272,7 @@ const HomePage: React.FC = () => {
                 {visitorCount.toLocaleString()}
               </span>
             </div>
-            
             <div className="hidden md:block h-6 w-px bg-slate-200 dark:bg-slate-700"></div>
-            
             <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400">
               <span className="text-lg">📅</span>
               <span className="font-bold text-sm tracking-wide">
@@ -314,16 +301,8 @@ const HomePage: React.FC = () => {
           100% { opacity: 1; transform: translateY(0); }
         }
         .animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; }
-        
-        /* قمنا بزيادة المدة لـ 70 ثانية عشان يكون بطيء ومريح للقراءة */
-        @keyframes marquee-ltr {
-          0% { transform: translateX(100vw); }
-          100% { transform: translateX(-100%); }
-        }
-        @keyframes marquee-rtl {
-          0% { transform: translateX(-100vw); }
-          100% { transform: translateX(100%); }
-        }
+        @keyframes marquee-ltr { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
+        @keyframes marquee-rtl { 0% { transform: translateX(-100vw); } 100% { transform: translateX(100%); } }
         .animate-marquee-ltr { animation: marquee-ltr 70s linear infinite; }
         .animate-marquee-rtl { animation: marquee-rtl 70s linear infinite; }
       `}</style>
