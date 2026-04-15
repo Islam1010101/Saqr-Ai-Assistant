@@ -16,7 +16,7 @@ const translations = {
     digitalDesc: "عالم من الكتب والروايات الرقمية.",
     creators: "ركن المبدعين",
     creatorsDesc: "استكشف قصص وابتكارات زملائك المبدعين في ركن المؤلف والمخترع الصغير.",
-    bubble: "أهلاً بك في صقر!",
+    bubble: "فخورون بالإمارات",
     homelandTitle: "لمحات من الموطن",
     challengeTitle: "تحدي المبدعين",
     challengeDesc: "ناقش، ابدأ قصتك الخاصة مع صقر، وأثبت موهبتك كل ماعليك فعله تحدى صقر. هل أنت مستعد ؟!",
@@ -38,7 +38,7 @@ const translations = {
     digitalDesc: "A world of digital books and novels.",
     creators: "Creators Corner",
     creatorsDesc: "Explore the stories and innovations of your creative peers.",
-    bubble: "Welcome to Saqr!",
+    bubble: "Proud of the UAE",
     homelandTitle: "Hints From Homeland",
     challengeTitle: "Authors Challenge",
     challengeDesc: "Discuss, author your own tales with Saqr, All you have to do is challenge Saqr. Are You Ready?!",
@@ -207,18 +207,17 @@ const HomePage: React.FC = () => {
           <div className="lg:col-span-5 flex flex-col items-center justify-center order-1 lg:order-2 relative gap-8">
             <div onClick={handleMascotInteraction} className={`relative cursor-pointer transition-transform duration-700 ${isMascotClicked ? 'scale-105' : 'hover:scale-105'}`}>
               <div className="absolute inset-0 flex items-center justify-center -z-10 pointer-events-none opacity-5 dark:opacity-10 transition-all duration-1000">
-                <img src="/school-logo.png" alt="Seal" className="w-[120%] h-[120%] object-contain rotate-12 dark:invert" />
+                <img src="/school-logo.png" alt="Seal" className="w-[120%] h-[120%] object-contain rotate-12 dark:brightness-0 dark:invert" />
               </div>
               {bursts.map((burst) => (
                 <div key={burst.id} 
-                  className={`absolute z-[100] bg-white dark:bg-slate-800 px-4 py-2 md:px-5 md:py-2.5 rounded-2xl border border-slate-200 dark:border-slate-600 shadow-lg animate-burst-steady pointer-events-none flex items-center gap-2`}
+                  className={`absolute z-[100] bg-white dark:bg-slate-800 px-4 py-2 md:px-5 md:py-2.5 rounded-2xl border border-slate-200 dark:border-slate-600 shadow-lg animate-burst-steady pointer-events-none flex items-center justify-center`}
                   style={{ '--tx': `${burst.tx}px`, '--ty': `${burst.ty}px`, '--rot': `${burst.rot}deg` } as any}>
-                  <span className="text-lg md:text-2xl">{burst.item.icon}</span>
-                  <span className="text-[10px] md:text-sm font-bold text-slate-800 dark:text-slate-200 whitespace-nowrap">{isAr ? burst.item.textAr : burst.item.textEn}</span>
+                  <span className="text-xl md:text-2xl">🇦🇪</span>
                 </div>
               ))}
               <img src="/saqr-full.png" alt="Saqr Mascot" className="h-64 md:h-[500px] object-contain relative z-10 animate-float drop-shadow-2xl" />
-              <div className="absolute -top-4 -right-2 md:-top-6 md:-right-6 bg-white dark:bg-slate-800 px-6 py-4 rounded-3xl rounded-br-none border border-slate-200 dark:border-slate-700 shadow-xl text-xs md:text-base font-bold text-red-600 dark:text-red-400 animate-bounce z-20">
+              <div className="absolute -top-4 -right-2 md:-top-6 md:-right-6 bg-white dark:bg-slate-800 px-6 py-4 rounded-3xl rounded-br-none border border-slate-200 dark:border-slate-700 shadow-xl text-sm md:text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-red-600 dark:from-green-400 dark:to-red-400 animate-bounce z-20">
                 {t('bubble')}
               </div>
             </div>
