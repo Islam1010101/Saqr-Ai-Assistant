@@ -3134,7 +3134,8 @@ const rawBookData = [
 { "title": "All Alone in the Universe", "author": "Lynne Rae Perkins", "shelf": 15, "row": 6 },
 { "title": "The Incredible Journey", "author": "Sheila Burnford", "shelf": 15, "row": 6 },
 { "title": "Stuart Little", "author": "E.B. White", "shelf": 15, "row": 6 },
-{ "title": "Danger in Dinosaur Valley", "author": "Roy MacGregor", "shelf": 15, "row": 6 }
+{ "title": "Danger in Dinosaur Valley", "author": "Roy MacGregor", "shelf": 15, "row": 6 },
+{ "title": "The Silva Mind Control Method", "author": "JOSE SELVA", "shelf": 3, "row": 1 }
 ];
 
 // 3. دالة معالجة البيانات
