@@ -1,6 +1,6 @@
 import React, { useState, useEffect, createContext, useContext, ReactNode, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { HashRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 
 // 🚀 تشغيل محرك فايربيز أول ما الموقع يفتح
 import './src/utils/firebase';
@@ -17,7 +17,6 @@ import EnglishLibraryInternalPage from './pages/EnglishLibraryInternalPage';
 import FeedbackPage from './pages/FeedbackPage';
 import CreatorsPortalPage from './pages/CreatorsPortalPage';
 import LibraryMapPage from './pages/LibraryMapPage';
-import CreatorsStudioPage from './pages/CreatorsStudioPage';
 import SaqrStudioPage from './pages/SaqrStudioPage';
 import PodcastPage from './pages/PodcastPage';
 
@@ -73,7 +72,7 @@ const FloatingSaqr: React.FC<{ onOpenModal: () => void }> = ({ onOpenModal }) =>
   );
 };
 
-// -------- 1.5. نافذة صقر المنبثقة القابلة للسحب (المعدلة) --------
+// -------- 1.5. نافذة صقر المنبثقة القابلة للسحب --------
 const DraggableSaqrModal: React.FC<{ isOpen: boolean; onClose: () => void; children: ReactNode }> = ({ isOpen, onClose, children }) => {
     const { locale, dir } = useLanguage();
     const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -337,7 +336,7 @@ const MainLayout: React.FC = () => {
           <Route path="/digital-library/arabic" element={<ArabicLibraryInternalPage />} />
           <Route path="/digital-library/english" element={<EnglishLibraryInternalPage />} />
           <Route path="/creators" element={<CreatorsPortalPage />} />
-          <Route path="/creators-studio" element={<CreatorsStudioPage />} />
+          {/* تم إزالة CreatorsStudioPage لأن الملف تم حذفه لتفادي أي Build Errors */}
           <Route path="/saqr-studio" element={<SaqrStudioPage />} />
           <Route path="/podcast" element={<PodcastPage />} />
           <Route path="/reports" element={<ReportsPage />} />
