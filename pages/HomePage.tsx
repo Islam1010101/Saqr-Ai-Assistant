@@ -130,26 +130,26 @@ const HomePage: React.FC = () => {
     <div dir={dir} className="w-full min-h-[100dvh] flex flex-col items-center bg-slate-50 dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300 py-10 md:py-20 px-4">
       
       {/* 🌟 الخلفية الديناميكية */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-40 dark:opacity-20">
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-40 dark:opacity-20 reveal-elem delay-100">
          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-red-500/20 rounded-full blur-[120px]"></div>
          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-blue-500/10 rounded-full blur-[100px]"></div>
       </div>
 
-      <div className="w-full max-w-[1400px] flex flex-col gap-12 md:gap-20 animate-fade-in-up">
+      <div className="w-full max-w-[1400px] flex flex-col gap-12 md:gap-20">
         
         {/* --- 1. قسم الترحيب --- */}
         <div className="text-center space-y-6 md:space-y-8 max-w-5xl mx-auto relative z-20">
-          <h1 className="text-4xl md:text-7xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+          <h1 className="text-4xl md:text-7xl font-black text-slate-900 dark:text-white tracking-tight leading-tight reveal-elem delay-100">
             {t('welcome')}
           </h1>
-          <p className="text-base md:text-2xl text-slate-600 dark:text-slate-400 font-medium leading-relaxed max-w-3xl mx-auto">
+          <p className="text-base md:text-2xl text-slate-600 dark:text-slate-400 font-medium leading-relaxed max-w-3xl mx-auto reveal-elem delay-200">
             {t('subWelcome')}
           </p>
-          <div className="h-1.5 w-24 bg-red-600 mx-auto rounded-full"></div>
+          <div className="h-1.5 w-24 bg-red-600 mx-auto rounded-full reveal-elem delay-300"></div>
         </div>
 
         {/* --- شريط الأخبار المتحرك (جديدنا) --- */}
-        <div className="w-full max-w-6xl mx-auto relative z-30 flex items-center bg-white dark:bg-slate-800 border-2 border-red-200 dark:border-red-900/50 rounded-full shadow-lg overflow-hidden h-12 md:h-14 hover:shadow-xl transition-shadow duration-300">
+        <div className="w-full max-w-6xl mx-auto relative z-30 flex items-center bg-white dark:bg-slate-800 border-2 border-red-200 dark:border-red-900/50 rounded-full shadow-lg overflow-hidden h-12 md:h-14 hover:shadow-xl transition-shadow duration-300 reveal-elem delay-300">
           <div className="bg-gradient-to-r from-red-600 to-red-700 text-white font-bold px-5 md:px-8 h-full flex items-center justify-center gap-2 md:gap-3 relative z-20 shrink-0 uppercase tracking-wide shadow-[2px_0_10px_rgba(0,0,0,0.1)]">
             <div className="w-2 h-2 md:w-2.5 md:h-2.5 bg-white rounded-full animate-pulse shadow-[0_0_8px_#ffffff]"></div>
             {t('newsTitle')}
@@ -162,7 +162,7 @@ const HomePage: React.FC = () => {
         </div>
 
         {/* --- 🌟 لافتة استديو صقر --- */}
-        <div className="w-full relative z-30 flex flex-col items-center justify-center">
+        <div className="w-full relative z-30 flex flex-col items-center justify-center reveal-elem delay-400">
           <Link to="/saqr-studio" className="group relative overflow-hidden px-8 py-5 md:px-12 md:py-6 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row items-center gap-4 hover:shadow-lg hover:border-blue-500/50 transition-all duration-300">
             <div className="absolute inset-0 bg-gradient-to-r from-red-600/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <span className="bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 text-xs md:text-sm font-bold px-5 py-1.5 rounded-full uppercase tracking-widest animate-pulse">
@@ -178,25 +178,25 @@ const HomePage: React.FC = () => {
         <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-center">
           
           <div className="lg:col-span-7 grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 order-2 lg:order-1">
-            <Link to="/search" className="group bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-red-500/50 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col items-start text-start">
+            <Link to="/search" className="group bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-red-500/50 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col items-start text-start reveal-elem delay-500">
               <div className="w-14 h-14 bg-red-50 dark:bg-red-500/10 rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-5 group-hover:scale-110 transition-transform">🔍</div>
               <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2">{t('manualSearch')}</h3>
               <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-medium leading-relaxed">{t('manualDesc')}</p>
             </Link>
 
-            <Link to="/smart-search" className="group bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-green-500/50 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col items-start text-start">
+            <Link to="/smart-search" className="group bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-green-500/50 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col items-start text-start reveal-elem delay-600">
               <div className="w-14 h-14 bg-green-50 dark:bg-green-500/10 rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-5 group-hover:scale-110 transition-transform">🤖</div>
               <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2">{t('smartSearch')}</h3>
               <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-medium leading-relaxed">{t('smartDesc')}</p>
             </Link>
 
-            <Link to="/digital-library" className="group bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-blue-500/50 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col items-start text-start">
+            <Link to="/digital-library" className="group bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-blue-500/50 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col items-start text-start reveal-elem delay-700">
               <div className="w-14 h-14 bg-blue-50 dark:bg-blue-500/10 rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-5 group-hover:rotate-12 transition-transform">📚</div>
               <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2">{t('digitalLibrary')}</h3>
               <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-medium leading-relaxed">{t('digitalDesc')}</p>
             </Link>
 
-            <Link to="/creators" className="group bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-purple-500/50 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col items-start text-start">
+            <Link to="/creators" className="group bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-purple-500/50 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col items-start text-start reveal-elem delay-800">
               <div className="w-14 h-14 bg-purple-50 dark:bg-purple-500/10 rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-5 group-hover:scale-110 transition-transform">🎨</div>
               <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2">{t('creators')}</h3>
               <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-medium leading-relaxed">{t('creatorsDesc')}</p>
@@ -205,7 +205,7 @@ const HomePage: React.FC = () => {
 
           {/* التفاعل مع صقر */}
           <div className="lg:col-span-5 flex flex-col items-center justify-center order-1 lg:order-2 relative gap-8">
-            <div onClick={handleMascotInteraction} className={`relative cursor-pointer transition-transform duration-700 ${isMascotClicked ? 'scale-105' : 'hover:scale-105'}`}>
+            <div onClick={handleMascotInteraction} className={`relative cursor-pointer transition-transform duration-700 reveal-elem delay-500 ${isMascotClicked ? 'scale-105' : 'hover:scale-105'}`}>
               <div className="absolute inset-0 flex items-center justify-center -z-10 pointer-events-none opacity-5 dark:opacity-10 transition-all duration-1000">
                 <img src="/school-logo.png" alt="Seal" className="w-[120%] h-[120%] object-contain rotate-12 dark:brightness-0 dark:invert" />
               </div>
@@ -221,7 +221,7 @@ const HomePage: React.FC = () => {
                 {t('bubble')}
               </div>
             </div>
-            <div className="w-full max-w-md bg-white/60 dark:bg-slate-800/60 backdrop-blur-md p-8 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm text-center relative z-30 group overflow-hidden">
+            <div className="w-full max-w-md bg-white/60 dark:bg-slate-800/60 backdrop-blur-md p-8 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm text-center relative z-30 group overflow-hidden reveal-elem delay-600">
               <div className="absolute inset-0 bg-gradient-to-br from-red-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <div className="relative z-10 space-y-4">
                 <span className="bg-red-50 dark:bg-red-500/10 text-red-600 font-bold px-3 py-1 rounded-full text-xs uppercase tracking-widest">
@@ -242,7 +242,7 @@ const HomePage: React.FC = () => {
         </div>
 
         {/* --- 3. قسم لمحات من الموطن --- */}
-        <div className="w-full px-2">
+        <div className="w-full px-2 reveal-elem delay-800">
           <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-8 md:p-16 rounded-[2.5rem] md:rounded-[4rem] border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden flex flex-col md:flex-row items-center gap-8 md:gap-12">
             <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-green-500 to-red-500"></div>
             <div className="w-20 h-20 md:w-32 md:h-32 bg-slate-50 dark:bg-slate-700 rounded-[2rem] flex items-center justify-center text-4xl md:text-6xl shadow-inner border border-slate-100 dark:border-slate-600 shrink-0">
@@ -260,7 +260,7 @@ const HomePage: React.FC = () => {
         </div>
 
         {/* --- 4. عداد الزوار والتاريخ --- */}
-        <div className="w-full flex justify-center pb-10">
+        <div className="w-full flex justify-center pb-10 reveal-elem delay-1000">
           <div className="bg-white dark:bg-slate-800 px-8 py-5 rounded-full border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row items-center gap-6">
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_#22c55e]"></div>
@@ -286,6 +286,35 @@ const HomePage: React.FC = () => {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
         * { font-family: 'Cairo', sans-serif !important; }
+        
+        /* تأثير Reveal آمن ومناسب للخط العربي */
+        @keyframes smooth-reveal {
+          0% {
+            opacity: 0;
+            transform: translateY(40px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .reveal-elem {
+          opacity: 0;
+          animation: smooth-reveal 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+
+        /* تأخيرات زمنية متدرجة لظهور العناصر تباعاً */
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        .delay-400 { animation-delay: 400ms; }
+        .delay-500 { animation-delay: 500ms; }
+        .delay-600 { animation-delay: 600ms; }
+        .delay-700 { animation-delay: 700ms; }
+        .delay-800 { animation-delay: 800ms; }
+        .delay-1000 { animation-delay: 1000ms; }
+
         @keyframes burst-steady {
           0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
           10% { transform: translate(var(--tx), var(--ty)) scale(1.1) rotate(var(--rot)); opacity: 1; }
@@ -293,13 +322,13 @@ const HomePage: React.FC = () => {
           100% { transform: translate(var(--tx), calc(var(--ty) - 30px)) scale(0.8) rotate(var(--rot)); opacity: 0; }
         }
         .animate-burst-steady { animation: burst-steady 2.2s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
+        
         .animate-float { animation: float 8s ease-in-out infinite; }
-        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-30px); } }
-        @keyframes fade-in-up {
-          0% { opacity: 0; transform: translateY(20px); }
-          100% { opacity: 1; transform: translateY(0); }
+        @keyframes float { 
+          0%, 100% { transform: translateY(0px); } 
+          50% { transform: translateY(-30px); } 
         }
-        .animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; }
+        
         @keyframes marquee-ltr { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
         @keyframes marquee-rtl { 0% { transform: translateX(-100vw); } 100% { transform: translateX(100%); } }
         .animate-marquee-ltr { animation: marquee-ltr 70s linear infinite; }
