@@ -199,7 +199,7 @@ const Header: React.FC = () => {
           <img src="https://www.efipslibrary.online/school-logo.png" alt="EFIPS" className="h-8 w-8 md:h-10 md:w-10 object-contain transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12 dark:brightness-0 dark:invert drop-shadow-md" />
           <div className="hidden lg:block leading-none text-start">
             <span className="font-bold text-slate-900 dark:text-white text-[9px] md:text-[10px] block uppercase opacity-90 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors tracking-wide">
-              {locale === 'en' ? "EFIPS Library" : "مكتبة صقر"}
+              {locale === 'en' ? "Emirates Falcon Int'l Private School" : "مدرسة صقر الإمارات الدولية الخاصة"}
             </span>
           </div>
         </Link>
