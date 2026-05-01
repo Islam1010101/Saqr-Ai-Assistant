@@ -163,11 +163,8 @@ const HomePage: React.FC = () => {
 
         {/* --- 🌟 لافتة استديو صقر --- */}
         <div className="w-full relative z-30 flex flex-col items-center justify-center">
-          <Link to="/saqr-studio" className="group relative overflow-hidden px-8 py-5 md:px-12 md:py-6 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row items-center gap-4 hover:shadow-lg hover:border-blue-500/50 transition-all duration-300">
+          <Link to="/saqr-studio" className="group relative overflow-hidden px-6 py-3 md:px-8 md:py-4 w-fit rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-center hover:shadow-lg hover:border-blue-500/50 transition-all duration-300">
             <div className="absolute inset-0 bg-gradient-to-r from-red-600/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            <span className="bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 text-xs md:text-sm font-bold px-5 py-1.5 rounded-full uppercase tracking-widest animate-pulse">
-              {t('saqrStudioTag')}
-            </span>
             <span className="relative z-10 text-sm md:text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
               {t('saqrStudioBanner')} ✨
             </span>
