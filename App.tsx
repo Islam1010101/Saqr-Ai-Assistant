@@ -1,6 +1,6 @@
 import React, { useState, useEffect, createContext, useContext, ReactNode, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { HashRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { HashRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 
 // 🚀 تشغيل محرك فايربيز أول ما الموقع يفتح
 import './src/utils/firebase';
@@ -17,6 +17,7 @@ import EnglishLibraryInternalPage from './pages/EnglishLibraryInternalPage';
 import FeedbackPage from './pages/FeedbackPage';
 import CreatorsPortalPage from './pages/CreatorsPortalPage';
 import LibraryMapPage from './pages/LibraryMapPage';
+import CreatorsStudioPage from './pages/CreatorsStudioPage';
 import SaqrStudioPage from './pages/SaqrStudioPage';
 import PodcastPage from './pages/PodcastPage';
 
@@ -148,18 +149,13 @@ const DraggableSaqrModal: React.FC<{ isOpen: boolean; onClose: () => void; child
     );
 };
 
-// -------- 2. هيدر EFIPS بتأثير Apple Dock السحري --------
+// -------- 2. هيدر EFIPS بتأثير Apple Dock السحري والأداء السلس --------
 const Header: React.FC = () => {
   const { locale, setLocale, dir } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const [activeHint, setActiveHint] = useState<string | null>(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  
-  // حالة الماوس لتأثير العدسة (Apple Dock Effect)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-
-  // حالة الاختفاء عند التمرير (Scroll Hide)
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -189,65 +185,65 @@ const Header: React.FC = () => {
     { path: '/about', label: locale === 'en' ? 'About' : 'عنا', icon: 'ℹ️', hint: locale === 'en' ? 'About us' : 'من نحن؟', color: 'bg-green-600' },
   ];
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    setMousePos({ x: e.clientX, y: e.clientY });
-  };
-
   return (
     <header className={`fixed top-4 left-0 right-0 z-[60] px-2 flex justify-center transition-all duration-500 ease-in-out ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-[150%] opacity-0 pointer-events-none'}`}>
       
       <div className="w-fit max-w-full px-3 py-2 md:px-5 md:py-3 rounded-full border border-white/40 dark:border-slate-700/50 flex items-center gap-3 md:gap-6 shadow-2xl backdrop-blur-2xl bg-white/75 dark:bg-slate-900/80 overflow-visible">
         
-        <Link to="/" className="flex items-center gap-2 group flex-shrink-0">
-          <img src="https://www.efipslibrary.online/school-logo.png" alt="EFIPS" className="h-8 w-8 md:h-10 md:w-10 object-contain transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12 dark:brightness-0 dark:invert drop-shadow-md" />
-          <div className="hidden lg:block leading-none text-start">
-            <span className="font-bold text-slate-900 dark:text-white text-[9px] md:text-[10px] block uppercase opacity-90 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors tracking-wide">
-              {locale === 'en' ? "EFIPS Library" : "مكتبة صقر"}
+        <Link to="/" className="flex items-center gap-2 md:gap-3 group flex-shrink-0">
+          <img src="https://www.efipslibrary.online/school-logo.png" alt="EFIPS" className="h-8 w-8 md:h-10 md:w-10 object-contain transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12 dark:brightness-0 dark:invert drop-shadow-md shrink-0" />
+          <div className="hidden lg:flex flex-col text-start justify-center">
+            <span className="font-bold text-slate-900 dark:text-white text-[10px] md:text-[11px] uppercase opacity-90 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors tracking-wide leading-tight line-clamp-2 max-w-[150px] xl:max-w-[190px]">
+              {locale === 'en' ? "Emirates Falcon Int'l. Private School" : "مدرسة صقر الإمارات الدولية الخاصة"}
             </span>
           </div>
         </Link>
         
         <nav className="flex items-end h-10 md:h-12 px-2 md:px-4 bg-slate-200/50 dark:bg-slate-800/50 rounded-full border border-white/60 dark:border-slate-600/50 shadow-inner">
-          <div className="flex items-end gap-1 md:gap-2 h-full pb-1">
+          <div className="flex items-end gap-1 md:gap-2 h-full pb-1 relative">
             {links.map((l, index) => {
               const isHovered = hoveredIndex === index;
               const isNeighbor = hoveredIndex === index - 1 || hoveredIndex === index + 1;
               const isActive = location.pathname === l.path;
 
-              let effectClasses = "scale-100 translate-y-0 z-10 mx-0";
+              // حساب حجم الحركة بنعومة (بناءً على تأثير Apple Dock)
+              let effectClasses = "scale-100 translate-y-0 z-10 mx-0 md:mx-0.5";
               if (isHovered) {
-                  effectClasses = "scale-[1.4] md:scale-[1.6] -translate-y-2 md:-translate-y-4 z-30 mx-2 md:mx-4 shadow-xl";
+                  effectClasses = "scale-[1.5] md:scale-[1.7] -translate-y-3 md:-translate-y-4 z-30 mx-3 md:mx-5 shadow-2xl";
               } else if (isNeighbor) {
-                  effectClasses = "scale-[1.15] md:scale-[1.25] -translate-y-1 md:-translate-y-2 z-20 mx-1 md:mx-2 shadow-md";
+                  effectClasses = "scale-[1.15] md:scale-[1.25] -translate-y-1.5 md:-translate-y-2 z-20 mx-1.5 md:mx-2 shadow-lg";
               }
 
               return (
                 <div 
                    key={l.path} 
-                   className={`relative group/nav transition-all duration-300 ease-out origin-bottom flex items-center justify-center ${effectClasses}`}
+                   className="relative flex flex-col items-center justify-end h-full group"
                    onMouseEnter={() => { setActiveHint(l.path); setHoveredIndex(index); }} 
                    onMouseLeave={() => { setActiveHint(null); setHoveredIndex(null); }}
-                   onMouseMove={handleMouseMove}
                    onTouchStart={(e) => { e.stopPropagation(); setActiveHint(activeHint === l.path ? null : l.path); setHoveredIndex(index); }}
                    onTouchEnd={() => { setHoveredIndex(null); }}
                 >
                   
-                  {activeHint === l.path && (
-                    <div className={`fixed z-[999] px-3 py-1.5 ${l.color} text-white text-[10px] md:text-xs font-bold rounded-lg shadow-xl pointer-events-none transition-opacity duration-200 whitespace-nowrap animate-zoom-in border border-white/20`}
-                         style={{ left: `${mousePos.x}px`, top: `${mousePos.y + 30}px`, transform: 'translateX(-50%)' }}>
-                      {l.hint}
-                    </div>
-                  )}
+                  {/* الفلوت الثابت بدقة (التلميح) */}
+                  <div 
+                    className={`absolute top-[120%] md:top-full mt-2 md:mt-3 left-1/2 -translate-x-1/2 z-[999] px-3 py-1.5 ${l.color} text-white text-[10px] md:text-xs font-bold rounded-lg shadow-xl pointer-events-none whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] ${activeHint === l.path ? 'opacity-100 translate-y-0 scale-100 visible' : 'opacity-0 -translate-y-2 scale-95 invisible'}`}
+                  >
+                    {/* المثلث الصغير أعلى الفلوت */}
+                    <div className={`absolute -top-1 left-1/2 -translate-x-1/2 w-2.5 h-2.5 ${l.color} rotate-45 rounded-sm`}></div>
+                    <span className="relative z-10">{l.hint}</span>
+                  </div>
 
+                  {/* الأيقونة التي تتمدد وتطفو */}
                   <Link 
                     to={l.path} 
-                    className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-colors duration-300 ${
+                    className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center origin-bottom will-change-transform ${effectClasses} ${
                       isActive 
-                        ? 'bg-red-600 text-white shadow-lg shadow-red-600/40' 
+                        ? 'bg-red-600 text-white shadow-red-600/40 border-transparent' 
                         : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600/50'
                     }`}
+                    style={{ transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
                   >
-                    <span className="text-sm md:text-lg drop-shadow-sm transition-transform duration-300">{l.icon}</span>
+                    <span className="text-sm md:text-lg drop-shadow-sm pointer-events-none">{l.icon}</span>
                   </Link>
                 </div>
               );
@@ -308,7 +304,7 @@ const MainLayout: React.FC = () => {
       <Header />
       <FloatingSaqr onOpenModal={() => setIsSaqrModalOpen(true)} />
       
-      <main className="flex-1 relative z-10 w-full pt-16 md:pt-20">
+      <main className="flex-1 relative z-10 w-full pt-20 md:pt-24">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/search" element={<SearchPage />} />
@@ -318,8 +314,11 @@ const MainLayout: React.FC = () => {
           <Route path="/digital-library/arabic" element={<ArabicLibraryInternalPage />} />
           <Route path="/digital-library/english" element={<EnglishLibraryInternalPage />} />
           <Route path="/creators" element={<CreatorsPortalPage />} />
+          <Route path="/creators-studio" element={<CreatorsStudioPage />} />
           <Route path="/saqr-studio" element={<SaqrStudioPage />} />
+          
           <Route path="/podcast" element={<PodcastPage />} />
+          
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/feedback" element={<FeedbackPage />} /> 
           <Route path="/about" element={<AboutPage />} />
@@ -338,7 +337,7 @@ const MainLayout: React.FC = () => {
       </DraggableSaqrModal>
 
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;900&display=swap');
         * { font-family: 'Cairo', sans-serif !important; }
         
         @keyframes float { 
