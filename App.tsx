@@ -1,5 +1,3 @@
-ظبطلي الشريط وخليه يختفي لما اعمل اسكرول داون في الصفحات وخالي حجمة مناسب للايقونات والمحتوى اللي هوا فيه وخاليه فيه الايفيكت بتاع ابل اللي هوا كان جبت عدسة مكبرة لما بختار اي ايقونه او اجي عليها بالماوس او المسها بالموبايل او التابلت وطبعا خلي الشريط مطابق لكل انواع واحجام الاجهزة 
-
 import React, { useState, useEffect, createContext, useContext, ReactNode, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { HashRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
@@ -19,7 +17,6 @@ import EnglishLibraryInternalPage from './pages/EnglishLibraryInternalPage';
 import FeedbackPage from './pages/FeedbackPage';
 import CreatorsPortalPage from './pages/CreatorsPortalPage';
 import LibraryMapPage from './pages/LibraryMapPage';
-import CreatorsStudioPage from './pages/CreatorsStudioPage';
 import SaqrStudioPage from './pages/SaqrStudioPage';
 import PodcastPage from './pages/PodcastPage';
 
@@ -75,14 +72,13 @@ const FloatingSaqr: React.FC<{ onOpenModal: () => void }> = ({ onOpenModal }) =>
   );
 };
 
-// -------- 1.5. نافذة صقر المنبثقة القابلة للسحب (المعدلة) --------
+// -------- 1.5. نافذة صقر المنبثقة القابلة للسحب --------
 const DraggableSaqrModal: React.FC<{ isOpen: boolean; onClose: () => void; children: ReactNode }> = ({ isOpen, onClose, children }) => {
     const { locale, dir } = useLanguage();
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [isDragging, setIsDragging] = useState(false);
     const dragStart = useRef({ x: 0, y: 0 });
 
-    // إعادة النقطة للصفر عند كل فتح حتى تتوسط الشاشة دائماً
     useEffect(() => {
         if (isOpen) setPosition({ x: 0, y: 0 });
     }, [isOpen]);
@@ -90,7 +86,7 @@ const DraggableSaqrModal: React.FC<{ isOpen: boolean; onClose: () => void; child
     const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
         setIsDragging(true);
         dragStart.current = { x: e.clientX - position.x, y: e.clientY - position.y };
-        e.currentTarget.setPointerCapture(e.pointerId); // استخدام currentTarget بدلاً من target
+        e.currentTarget.setPointerCapture(e.pointerId); 
     };
 
     const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -111,14 +107,12 @@ const DraggableSaqrModal: React.FC<{ isOpen: boolean; onClose: () => void; child
         <div className="fixed inset-0 z-[999999] pointer-events-none flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm pointer-events-auto animate-fade-in" onClick={onClose}></div>
             
-            {/* غلاف الأنيميشن لمنع التعارض مع حركة السحب */}
             <div className="animate-zoom-in flex items-center justify-center pointer-events-none w-full h-full absolute inset-0 p-4">
                 <div 
                     dir={dir}
                     className="relative w-full md:w-[450px] h-[85vh] md:h-[650px] bg-slate-50 dark:bg-slate-950 rounded-[2rem] shadow-2xl border border-white/40 dark:border-slate-700 flex flex-col pointer-events-auto overflow-hidden"
                     style={{ transform: `translate(${position.x}px, ${position.y}px)`, touchAction: 'none' }}
                 >
-                    {/* Header / Drag Handle */}
                     <div 
                         className="w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 p-4 flex items-center justify-between cursor-grab active:cursor-grabbing select-none touch-none z-50"
                         onPointerDown={handlePointerDown}
@@ -142,7 +136,6 @@ const DraggableSaqrModal: React.FC<{ isOpen: boolean; onClose: () => void; child
                         </button>
                     </div>
                     
-                    {/* محتوى البحث الذكي معزول عن باقي الصفحة */}
                     <div className="flex-1 overflow-y-auto no-scrollbar relative pointer-events-auto bg-slate-50 dark:bg-slate-950 cursor-auto">
                         <div className="w-full min-h-full">
                             {children}
@@ -155,7 +148,7 @@ const DraggableSaqrModal: React.FC<{ isOpen: boolean; onClose: () => void; child
     );
 };
 
-// -------- 2. هيدر EFIPS الزجاجي الذكي --------
+// -------- 2. هيدر EFIPS بتأثير Apple Dock السحري --------
 const Header: React.FC = () => {
   const { locale, setLocale, dir } = useLanguage();
   const { theme, toggleTheme } = useTheme();
@@ -163,18 +156,20 @@ const Header: React.FC = () => {
   const [activeHint, setActiveHint] = useState<string | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
   useEffect(() => {
     const controlNavbar = () => {
       if (typeof window !== 'undefined') {
-        if (window.scrollY > lastScrollY && window.scrollY > 50) {
+        const currentScrollY = window.scrollY;
+        if (currentScrollY > lastScrollY && currentScrollY > 60) {
           setIsVisible(false);
         } else {
           setIsVisible(true);
         }
-        setLastScrollY(window.scrollY);
+        setLastScrollY(currentScrollY);
       }
     };
     window.addEventListener('scroll', controlNavbar);
@@ -196,60 +191,76 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className={`sticky top-4 z-[60] px-4 md:px-10 transition-transform duration-500 ease-in-out ${isVisible ? 'translate-y-0' : '-translate-y-32'}`}>
-      <div className="mx-auto max-w-[98rem] p-1.5 md:p-2.5 rounded-full border border-slate-200 dark:border-slate-800 flex items-center justify-between shadow-lg backdrop-blur-xl bg-white/80 dark:bg-slate-900/80 transition-all relative overflow-visible">
+    <header className={`fixed top-4 left-0 right-0 z-[60] px-2 flex justify-center transition-all duration-500 ease-in-out ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-[150%] opacity-0 pointer-events-none'}`}>
+      
+      <div className="w-fit max-w-full px-3 py-2 md:px-5 md:py-3 rounded-full border border-white/40 dark:border-slate-700/50 flex items-center gap-3 md:gap-6 shadow-2xl backdrop-blur-2xl bg-white/75 dark:bg-slate-900/80 overflow-visible">
         
-        <Link to="/" className="flex items-center gap-2 md:gap-3 ps-4 md:ps-6 group flex-shrink-0">
-          {/* تمت إضافة dark:brightness-0 هنا ليصبح الشعار أبيض تماماً في الوضع الداكن */}
-          <img src="https://www.efipslibrary.online/school-logo.png" alt="EFIPS" className="h-8 w-8 md:h-11 md:w-11 object-contain rotate-12 transition-transform duration-500 group-hover:scale-110 dark:brightness-0 dark:invert" />
-          <div className="hidden xl:block leading-none text-start">
-            <span className="font-semibold text-slate-900 dark:text-white text-[7px] md:text-[10px] block uppercase opacity-80 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
-              {locale === 'en' ? "Emirates Falcon Int'l Private School" : "مدرسة صقر الإمارات الدولية الخاصة"}
+        <Link to="/" className="flex items-center gap-2 group flex-shrink-0">
+          <img src="https://www.efipslibrary.online/school-logo.png" alt="EFIPS" className="h-8 w-8 md:h-10 md:w-10 object-contain transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12 dark:brightness-0 dark:invert drop-shadow-md" />
+          <div className="hidden lg:block leading-none text-start">
+            <span className="font-bold text-slate-900 dark:text-white text-[9px] md:text-[10px] block uppercase opacity-90 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors tracking-wide">
+              {locale === 'en' ? "EFIPS Library" : "مكتبة صقر"}
             </span>
           </div>
         </Link>
         
-        <nav className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-full p-1 mx-2 overflow-x-auto no-scrollbar lg:overflow-visible overflow-y-visible">
-          <div className="flex items-center gap-1">
-            {links.map((l) => (
-              <div key={l.path} className="relative group/nav" 
-                   onMouseEnter={() => setActiveHint(l.path)} 
-                   onMouseLeave={() => setActiveHint(null)}
-                   onMouseMove={handleMouseMove}
-                   onTouchStart={(e) => { e.stopPropagation(); setActiveHint(activeHint === l.path ? null : l.path); }}>
-                
-                {activeHint === l.path && (
-                  <div className={`fixed z-[999] px-4 py-2 ${l.color} text-white text-[10px] md:text-xs font-semibold rounded-xl shadow-lg pointer-events-none transition-opacity duration-200 whitespace-nowrap animate-zoom-in ${locale === 'en' ? 'tracking-wider uppercase' : ''}`}
-                       style={{ left: `${mousePos.x}px`, top: `${mousePos.y + 25}px`, transform: 'translateX(-50%)' }}>
-                    <div className={`absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 ${l.color} rotate-45`}></div>
-                    {l.hint}
-                  </div>
-                )}
+        <nav className="flex items-end h-10 md:h-12 px-2 md:px-4 bg-slate-200/50 dark:bg-slate-800/50 rounded-full border border-white/60 dark:border-slate-600/50 shadow-inner">
+          <div className="flex items-end gap-1 md:gap-2 h-full pb-1">
+            {links.map((l, index) => {
+              const isHovered = hoveredIndex === index;
+              const isNeighbor = hoveredIndex === index - 1 || hoveredIndex === index + 1;
+              const isActive = location.pathname === l.path;
 
-                <Link 
-                  to={l.path} 
-                  className={`px-4 lg:px-5 py-2 md:py-3 rounded-full text-[10px] md:text-xs font-semibold transition-all flex items-center justify-center whitespace-nowrap ${
-                    location.pathname === l.path 
-                      ? 'bg-red-600 text-white shadow-md scale-105' 
-                      : 'text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-                  }`}
+              let effectClasses = "scale-100 translate-y-0 z-10 mx-0";
+              if (isHovered) {
+                  effectClasses = "scale-[1.4] md:scale-[1.6] -translate-y-2 md:-translate-y-4 z-30 mx-2 md:mx-4 shadow-xl";
+              } else if (isNeighbor) {
+                  effectClasses = "scale-[1.15] md:scale-[1.25] -translate-y-1 md:-translate-y-2 z-20 mx-1 md:mx-2 shadow-md";
+              }
+
+              return (
+                <div 
+                   key={l.path} 
+                   className={`relative group/nav transition-all duration-300 ease-out origin-bottom flex items-center justify-center ${effectClasses}`}
+                   onMouseEnter={() => { setActiveHint(l.path); setHoveredIndex(index); }} 
+                   onMouseLeave={() => { setActiveHint(null); setHoveredIndex(null); }}
+                   onMouseMove={handleMouseMove}
+                   onTouchStart={(e) => { e.stopPropagation(); setActiveHint(activeHint === l.path ? null : l.path); setHoveredIndex(index); }}
+                   onTouchEnd={() => { setHoveredIndex(null); }}
                 >
-                  <span className="text-sm md:text-lg">{l.icon}</span>
-                  <span className="md:hidden ms-1.5">{l.label}</span>
-                </Link>
-              </div>
-            ))}
+                  
+                  {activeHint === l.path && (
+                    <div className={`fixed z-[999] px-3 py-1.5 ${l.color} text-white text-[10px] md:text-xs font-bold rounded-lg shadow-xl pointer-events-none transition-opacity duration-200 whitespace-nowrap animate-zoom-in border border-white/20`}
+                         style={{ left: `${mousePos.x}px`, top: `${mousePos.y + 30}px`, transform: 'translateX(-50%)' }}>
+                      {l.hint}
+                    </div>
+                  )}
+
+                  <Link 
+                    to={l.path} 
+                    className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-colors duration-300 ${
+                      isActive 
+                        ? 'bg-red-600 text-white shadow-lg shadow-red-600/40' 
+                        : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600/50'
+                    }`}
+                  >
+                    <span className="text-sm md:text-lg drop-shadow-sm transition-transform duration-300">{l.icon}</span>
+                  </Link>
+                </div>
+              );
+            })}
           </div>
         </nav>
         
-        <div className="flex items-center gap-2 pe-4 md:pe-6 flex-shrink-0">
-          <button onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')} className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-slate-700 dark:text-slate-200 font-semibold text-[10px] md:text-xs border border-slate-300 dark:border-slate-600 rounded-full hover:border-red-600 hover:text-red-600 dark:hover:border-red-500 dark:hover:text-red-400 transition-all active:scale-90 shadow-sm bg-white dark:bg-slate-800">
+        <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
+          <button onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')} className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-slate-700 dark:text-slate-200 font-bold text-[10px] md:text-xs border border-slate-300 dark:border-slate-600 rounded-full hover:border-red-600 hover:text-red-600 dark:hover:border-red-500 dark:hover:text-red-400 transition-all active:scale-90 shadow-sm bg-white dark:bg-slate-800 hover:scale-105">
             {locale === 'en' ? 'AR' : 'EN'}
           </button>
-          <button onClick={toggleTheme} className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-slate-100 dark:bg-slate-700 rounded-full text-[10px] md:text-sm shadow-inner transition-all hover:scale-110 border border-slate-200 dark:border-slate-600">
+          <button onClick={toggleTheme} className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-full text-[10px] md:text-sm shadow-inner transition-all hover:scale-110 border border-slate-200 dark:border-slate-600 active:scale-90">
             {theme === 'light' ? '🌙' : '☀️'}
           </button>
         </div>
+
       </div>
     </header>
   );
@@ -294,7 +305,7 @@ const MainLayout: React.FC = () => {
       <Header />
       <FloatingSaqr onOpenModal={() => setIsSaqrModalOpen(true)} />
       
-      <main className="flex-1 relative z-10 w-full">
+      <main className="flex-1 relative z-10 w-full pt-16 md:pt-20">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/search" element={<SearchPage />} />
@@ -304,12 +315,8 @@ const MainLayout: React.FC = () => {
           <Route path="/digital-library/arabic" element={<ArabicLibraryInternalPage />} />
           <Route path="/digital-library/english" element={<EnglishLibraryInternalPage />} />
           <Route path="/creators" element={<CreatorsPortalPage />} />
-          <Route path="/creators-studio" element={<CreatorsStudioPage />} />
           <Route path="/saqr-studio" element={<SaqrStudioPage />} />
-          
-          {/* 🌟 مسار البودكاست تم إضافته هنا دون وضعه في الشريط العلوي 🌟 */}
           <Route path="/podcast" element={<PodcastPage />} />
-          
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/feedback" element={<FeedbackPage />} /> 
           <Route path="/about" element={<AboutPage />} />
@@ -346,7 +353,6 @@ const MainLayout: React.FC = () => {
         @keyframes fade-in-up { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
         .animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; }
         
-        /* 🔧 تم إزالة translateX(-50%) من هنا لتجنب التعارض مع Flexbox */
         @keyframes zoom-in { 0% { opacity: 0; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
         .animate-zoom-in { animation: zoom-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         
