@@ -154,7 +154,6 @@ const Header: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const [activeHint, setActiveHint] = useState<string | null>(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [isVisible, setIsVisible] = useState(true);
@@ -186,15 +185,13 @@ const Header: React.FC = () => {
     { path: '/about', label: locale === 'en' ? 'About' : 'عنا', icon: 'ℹ️', hint: locale === 'en' ? 'About us' : 'من نحن؟', color: 'bg-green-600' },
   ];
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    setMousePos({ x: e.clientX, y: e.clientY });
-  };
-
   return (
     <header className={`fixed top-4 left-0 right-0 z-[60] px-2 flex justify-center transition-all duration-500 ease-in-out ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-[150%] opacity-0 pointer-events-none'}`}>
       
-      <div className="w-fit max-w-full px-3 py-2 md:px-5 md:py-3 rounded-full border border-white/40 dark:border-slate-700/50 flex items-center gap-3 md:gap-6 shadow-2xl backdrop-blur-2xl bg-white/75 dark:bg-slate-900/80 overflow-visible">
+      {/* الحاوية الرئيسية للشريط */}
+      <div className="w-full max-w-[95%] md:w-fit md:max-w-full px-3 py-2 md:px-5 md:py-3 rounded-full border border-white/40 dark:border-slate-700/50 flex items-center gap-3 md:gap-6 shadow-2xl backdrop-blur-2xl bg-white/75 dark:bg-slate-900/80 overflow-visible">
         
+        {/* اللوجو */}
         <Link to="/" className="flex items-center gap-2 group flex-shrink-0">
           <img src="https://www.efipslibrary.online/school-logo.png" alt="EFIPS" className="h-8 w-8 md:h-10 md:w-10 object-contain transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12 dark:brightness-0 dark:invert drop-shadow-md" />
           <div className="hidden lg:block leading-none text-start">
@@ -204,8 +201,9 @@ const Header: React.FC = () => {
           </div>
         </Link>
         
-        <nav className="flex items-end h-10 md:h-12 px-2 md:px-4 bg-slate-200/50 dark:bg-slate-800/50 rounded-full border border-white/60 dark:border-slate-600/50 shadow-inner">
-          <div className="flex items-end gap-1 md:gap-2 h-full pb-1">
+        {/* حاوية الأيقونات القابلة للتمرير على الموبايل */}
+        <nav className="flex-1 md:flex-none overflow-x-auto no-scrollbar scroll-smooth flex items-end h-12 md:h-12 px-2 md:px-4 bg-slate-200/50 dark:bg-slate-800/50 rounded-full border border-white/60 dark:border-slate-600/50 shadow-inner">
+          <div className="flex items-end gap-1 md:gap-2 h-full pb-1 mx-auto min-w-max">
             {links.map((l, index) => {
               const isHovered = hoveredIndex === index;
               const isNeighbor = hoveredIndex === index - 1 || hoveredIndex === index + 1;
@@ -213,9 +211,9 @@ const Header: React.FC = () => {
 
               let effectClasses = "scale-100 translate-y-0 z-10 mx-0";
               if (isHovered) {
-                  effectClasses = "scale-[1.4] md:scale-[1.6] -translate-y-2 md:-translate-y-4 z-30 mx-2 md:mx-4 shadow-xl";
+                  effectClasses = "scale-[1.3] md:scale-[1.6] -translate-y-2 md:-translate-y-4 z-30 mx-1.5 md:mx-4 shadow-xl";
               } else if (isNeighbor) {
-                  effectClasses = "scale-[1.15] md:scale-[1.25] -translate-y-1 md:-translate-y-2 z-20 mx-1 md:mx-2 shadow-md";
+                  effectClasses = "scale-[1.1] md:scale-[1.25] -translate-y-1 md:-translate-y-2 z-20 mx-0.5 md:mx-2 shadow-md";
               }
 
               return (
@@ -224,14 +222,14 @@ const Header: React.FC = () => {
                    className={`relative group/nav transition-all duration-300 ease-out origin-bottom flex items-center justify-center ${effectClasses}`}
                    onMouseEnter={() => { setActiveHint(l.path); setHoveredIndex(index); }} 
                    onMouseLeave={() => { setActiveHint(null); setHoveredIndex(null); }}
-                   onMouseMove={handleMouseMove}
                    onTouchStart={(e) => { e.stopPropagation(); setActiveHint(activeHint === l.path ? null : l.path); setHoveredIndex(index); }}
-                   onTouchEnd={() => { setHoveredIndex(null); }}
+                   onTouchEnd={() => { setTimeout(() => { setHoveredIndex(null); setActiveHint(null); }, 1500); }} // إخفاء بعد ثانية ونصف للموبايل
                 >
                   
+                  {/* أداة التلميح (Tooltip) الصغيرة الملتصقة أسفل الأيقونة المحددة */}
                   {activeHint === l.path && (
-                    <div className={`fixed z-[999] px-3 py-1.5 ${l.color} text-white text-[10px] md:text-xs font-bold rounded-lg shadow-xl pointer-events-none transition-opacity duration-200 whitespace-nowrap animate-zoom-in border border-white/20`}
-                         style={{ left: `${mousePos.x}px`, top: `${mousePos.y + 30}px`, transform: 'translateX(-50%)' }}>
+                    <div className={`absolute top-full mt-2 md:mt-3 z-[999] px-2 py-1 ${l.color} text-white text-[9px] md:text-[10px] font-bold rounded-md shadow-lg pointer-events-none transition-opacity duration-200 whitespace-nowrap animate-zoom-in border border-white/20`}>
+                      <div className={`absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 ${l.color} rotate-45`}></div>
                       {l.hint}
                     </div>
                   )}
@@ -252,6 +250,7 @@ const Header: React.FC = () => {
           </div>
         </nav>
         
+        {/* أزرار اللغة والوضع الليلي */}
         <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
           <button onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')} className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-slate-700 dark:text-slate-200 font-bold text-[10px] md:text-xs border border-slate-300 dark:border-slate-600 rounded-full hover:border-red-600 hover:text-red-600 dark:hover:border-red-500 dark:hover:text-red-400 transition-all active:scale-90 shadow-sm bg-white dark:bg-slate-800 hover:scale-105">
             {locale === 'en' ? 'AR' : 'EN'}
@@ -305,7 +304,7 @@ const MainLayout: React.FC = () => {
       <Header />
       <FloatingSaqr onOpenModal={() => setIsSaqrModalOpen(true)} />
       
-      <main className="flex-1 relative z-10 w-full pt-16 md:pt-20">
+      <main className="flex-1 relative z-10 w-full pt-20 md:pt-24">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/search" element={<SearchPage />} />
@@ -356,6 +355,7 @@ const MainLayout: React.FC = () => {
         @keyframes zoom-in { 0% { opacity: 0; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
         .animate-zoom-in { animation: zoom-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         
+        /* إخفاء شريط التمرير مع الاحتفاظ بالقدرة على التمرير */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
