@@ -1,6 +1,6 @@
 import React, { useState, useEffect, createContext, useContext, ReactNode, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { HashRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 
 // 🚀 تشغيل محرك فايربيز أول ما الموقع يفتح
 import './src/utils/firebase';
@@ -17,7 +17,6 @@ import EnglishLibraryInternalPage from './pages/EnglishLibraryInternalPage';
 import FeedbackPage from './pages/FeedbackPage';
 import CreatorsPortalPage from './pages/CreatorsPortalPage';
 import LibraryMapPage from './pages/LibraryMapPage';
-import CreatorsStudioPage from './pages/CreatorsStudioPage';
 import SaqrStudioPage from './pages/SaqrStudioPage';
 import PodcastPage from './pages/PodcastPage';
 
@@ -168,7 +167,6 @@ const Header: React.FC = () => {
     const controlNavbar = () => {
       if (typeof window !== 'undefined') {
         const currentScrollY = window.scrollY;
-        // إخفاء الشريط عند النزول لأكثر من 60 بيكسل، وإظهاره فور الصعود
         if (currentScrollY > lastScrollY && currentScrollY > 60) {
           setIsVisible(false);
         } else {
@@ -196,12 +194,10 @@ const Header: React.FC = () => {
   };
 
   return (
-    // استخدام fixed وتوسيط الشريط ليكون مضغوطاً وعائماً بمنتصف الشاشة
     <header className={`fixed top-4 left-0 right-0 z-[60] px-2 flex justify-center transition-all duration-500 ease-in-out ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-[150%] opacity-0 pointer-events-none'}`}>
       
       <div className="w-fit max-w-full px-3 py-2 md:px-5 md:py-3 rounded-full border border-white/40 dark:border-slate-700/50 flex items-center gap-3 md:gap-6 shadow-2xl backdrop-blur-2xl bg-white/75 dark:bg-slate-900/80 overflow-visible">
         
-        {/* اللوجو */}
         <Link to="/" className="flex items-center gap-2 group flex-shrink-0">
           <img src="https://www.efipslibrary.online/school-logo.png" alt="EFIPS" className="h-8 w-8 md:h-10 md:w-10 object-contain transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12 dark:brightness-0 dark:invert drop-shadow-md" />
           <div className="hidden lg:block leading-none text-start">
@@ -211,16 +207,13 @@ const Header: React.FC = () => {
           </div>
         </Link>
         
-        {/* شريط الأيقونات بتأثير أبل (Apple Dock) */}
         <nav className="flex items-end h-10 md:h-12 px-2 md:px-4 bg-slate-200/50 dark:bg-slate-800/50 rounded-full border border-white/60 dark:border-slate-600/50 shadow-inner">
           <div className="flex items-end gap-1 md:gap-2 h-full pb-1">
             {links.map((l, index) => {
-              // حساب التأثير بناءً على مكان الماوس
               const isHovered = hoveredIndex === index;
               const isNeighbor = hoveredIndex === index - 1 || hoveredIndex === index + 1;
               const isActive = location.pathname === l.path;
 
-              // الفئات الديناميكية للحجم والارتفاع
               let effectClasses = "scale-100 translate-y-0 z-10 mx-0";
               if (isHovered) {
                   effectClasses = "scale-[1.4] md:scale-[1.6] -translate-y-2 md:-translate-y-4 z-30 mx-2 md:mx-4 shadow-xl";
@@ -262,7 +255,6 @@ const Header: React.FC = () => {
           </div>
         </nav>
         
-        {/* أزرار اللغة والوضع الليلي */}
         <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
           <button onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')} className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-slate-700 dark:text-slate-200 font-bold text-[10px] md:text-xs border border-slate-300 dark:border-slate-600 rounded-full hover:border-red-600 hover:text-red-600 dark:hover:border-red-500 dark:hover:text-red-400 transition-all active:scale-90 shadow-sm bg-white dark:bg-slate-800 hover:scale-105">
             {locale === 'en' ? 'AR' : 'EN'}
@@ -326,11 +318,8 @@ const MainLayout: React.FC = () => {
           <Route path="/digital-library/arabic" element={<ArabicLibraryInternalPage />} />
           <Route path="/digital-library/english" element={<EnglishLibraryInternalPage />} />
           <Route path="/creators" element={<CreatorsPortalPage />} />
-          <Route path="/creators-studio" element={<CreatorsStudioPage />} />
           <Route path="/saqr-studio" element={<SaqrStudioPage />} />
-          
           <Route path="/podcast" element={<PodcastPage />} />
-          
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/feedback" element={<FeedbackPage />} /> 
           <Route path="/about" element={<AboutPage />} />
