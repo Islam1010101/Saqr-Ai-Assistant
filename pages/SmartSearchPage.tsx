@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useLanguage } from '../App';
 import { ChatMessage } from '../types';
 import ReactMarkdown from 'react-markdown'; 
@@ -7,10 +7,10 @@ import { bookData } from '../api/bookData';
 import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
 
-// 👇 1. استدعاء دالة التتبع (تأكد من تعديل المسار ليتطابق مع مشروعك)
+// 👇 1. استدعاء دالة التتبع 
 import { trackActivity } from '../src/utils/tracker';
 
-// --- 1. بروتوكول عقل صقر النهائي (تم تعديل التعليمات بصرامة) ---
+// --- 1. بروتوكول عقل صقر النهائي (تم الحفاظ عليه تماماً) ---
 const SAQR_ELITE_PROMPT = `
 Identity: You are "Saqr" (صقر), the official Elite AI Librarian of Emirates Falcon International Private School (EFIPS).
 
@@ -89,6 +89,10 @@ const SmartSearchPage: React.FC = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [winnerData, setWinnerData] = useState<any>(null);
+  
+  // حالة تفاعل صقر الحركية
+  const [saqrState, setSaqrState] = useState<'idle' | 'thinking' | 'speaking' | 'victory'>('idle');
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const certificateRef = useRef<HTMLDivElement>(null);
 
@@ -99,13 +103,11 @@ const SmartSearchPage: React.FC = () => {
   const handleDownloadJPG = async () => {
     if (!certificateRef.current) return;
     
-    // إظهار الشهادة في الخلفية للالتقاط
     certificateRef.current.style.left = '0';
     certificateRef.current.style.top = '0';
     certificateRef.current.style.position = 'fixed';
     certificateRef.current.style.zIndex = '-9999';
 
-    // استخدام الارتفاع التلقائي للشهادة (scrollHeight) لضمان عدم قص القصة الطويلة
     const canvas = await html2canvas(certificateRef.current, { 
       scale: 3, 
       backgroundColor: '#ffffff',
@@ -127,12 +129,14 @@ const SmartSearchPage: React.FC = () => {
     if (input.trim() === '' || isLoading) return;
     const userQuery = input.trim();
 
-    // 👇 2. هنا يتم إرسال سؤال الطالب إلى السحابة فور الضغط على إرسال
     trackActivity('ai', userQuery);
 
     setMessages(prev => [...prev, { role: 'user', content: userQuery }]);
     setInput('');
     setIsLoading(true);
+    
+    // 1. تحويل صقر لحالة التفكير
+    setSaqrState('thinking');
 
     const normalize = (text: string) => 
       text?.toString()
@@ -146,13 +150,11 @@ const SmartSearchPage: React.FC = () => {
     const stopWords = ['the', 'book', 'about', 'summary', 'عن', 'كتاب', 'تلخيص', 'ملخص', 'اريد', 'ابحث'];
     const queryWords = qNormalized.split(/\s+/).filter(word => word.length > 2 && !stopWords.includes(word));
 
-    // بحث دقيق وشامل
     const searchIn = (db: any[], location: string) => {
       if (!db || !Array.isArray(db)) return [];
       return db.filter(b => {
         const title = normalize(b?.title || '');
         const author = normalize(b?.author || '');
-        
         if (title.includes(qNormalized) || author.includes(qNormalized)) return true;
         return queryWords.length > 0 && queryWords.some(word => title.includes(word) || author.includes(word));
       }).map(b => ({ ...b, pageLocation: location }));
@@ -185,7 +187,6 @@ const SmartSearchPage: React.FC = () => {
       const data = await response.json();
       let reply = data.reply || '';
 
-      // التقاط بيانات الشهادة
       if (reply.includes('[WINNER:')) {
         const match = reply.match(/\[WINNER:\s*(.*?)\s*\|\s*Grade:\s*(.*?)\s*\|\s*Content:\s*(.*?)\]/s);
         if (match) {
@@ -200,127 +201,154 @@ const SmartSearchPage: React.FC = () => {
           };
           setWinnerData(info);
           localStorage.setItem('efips_challenge_reports', JSON.stringify([info, ...JSON.parse(localStorage.getItem('efips_challenge_reports') || '[]')]));
+          
+          // تحويل صقر لحالة الفرحة بالشهادة
+          setSaqrState('victory');
         }
         reply = reply.replace(/\[WINNER:.*?\]/gs, '');
+      } else {
+        // 2. تحويل صقر لحالة التحدث عند استلام الرد
+        setSaqrState('speaking');
+        // إعادته للوضع الطبيعي بعد 2.5 ثانية من انتهاء الحركة
+        setTimeout(() => setSaqrState('idle'), 2500);
       }
+      
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
     } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: locale === 'ar' ? 'حدث خطأ في الاتصال، يرجى المحاولة مرة أخرى.' : 'Connection error, please try again.' }]);
+      setSaqrState('idle');
     } finally {
       setIsLoading(false);
     }
   };
 
+  // تحديد كلاس الحركة المناسب لصقر
+  const getSaqrAnimClass = () => {
+    switch (saqrState) {
+        case 'thinking': return 'animate-saqr-thinking';
+        case 'speaking': return 'animate-saqr-speaking';
+        case 'victory': return 'animate-saqr-victory';
+        default: return 'animate-saqr-idle';
+    }
+  };
+
   return (
-    <div dir={dir} className="w-full h-[100dvh] flex flex-col bg-slate-50 dark:bg-slate-900 font-sans relative overflow-hidden text-slate-900 dark:text-slate-100 transition-colors duration-300">
+    <div dir={dir} className="w-full h-[100dvh] flex flex-col bg-slate-50 dark:bg-slate-950 font-sans relative overflow-hidden text-slate-900 dark:text-slate-100 transition-colors duration-300">
       
       {/* خلفية ديناميكية */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-40 dark:opacity-20">
-         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-red-500/20 rounded-full blur-[120px]"></div>
-         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-blue-500/10 rounded-full blur-[100px]"></div>
+         <div className="absolute top-[10%] left-[-10%] w-[50%] h-[50%] bg-red-500/20 rounded-full blur-[120px]"></div>
+         <div className="absolute bottom-[10%] right-[-10%] w-[40%] h-[60%] bg-blue-500/10 rounded-full blur-[100px]"></div>
       </div>
 
-      {/* الهيدر */}
-      <div className="w-full max-w-5xl mx-auto px-4 py-4 md:py-6 z-10 shrink-0">
-        <div className="flex items-center justify-between px-6 py-4 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200 dark:border-slate-700 rounded-3xl shadow-sm">
-          <div className="flex items-center gap-4 text-start">
-            <div className="relative group">
-              <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full z-20"></span>
-              <img 
-                src="https://www.efipslibrary.online/school-logo.png" 
-                alt="EFIPS" 
-                className="w-12 h-12 md:w-14 md:h-14 object-contain bg-white rounded-full p-1 shadow-sm transition-transform duration-500 hover:rotate-12" 
-              />
-            </div>
-            <div className="leading-tight text-start">
-              <h2 className="text-base md:text-xl font-bold uppercase text-slate-800 dark:text-white leading-none mb-1">{t('status')}</h2>
-              <span className="text-[10px] md:text-xs text-green-600 dark:text-green-400 font-bold uppercase flex items-center gap-1">
-                <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> {t('online')}
-              </span>
-            </div>
+      {/* 🌟 القسم العلوي: بطل الشاشة (شخصية صقر) في المنتصف 🌟 */}
+      <div className="w-full h-[35vh] min-h-[250px] flex-shrink-0 flex flex-col items-center justify-center relative z-20 mt-4">
+        
+        {/* الحالة: متصل */}
+        <div className="absolute top-0 flex flex-col items-center gap-1 opacity-70">
+           <span className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">{t('status')}</span>
+           <span className="flex items-center gap-1.5 text-[10px] text-green-500 font-bold uppercase">
+             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> {t('online')}
+           </span>
+        </div>
+
+        {/* شخصية صقر التفاعلية */}
+        <div className={`relative flex items-center justify-center w-40 h-40 md:w-56 md:h-56 transition-all duration-300 ${getSaqrAnimClass()}`}>
+            
+            {/* هالة ضوئية تظهر فقط أثناء التفكير */}
+            <div className={`absolute inset-0 bg-red-500/30 rounded-full blur-3xl transition-opacity duration-500 ${saqrState === 'thinking' ? 'opacity-100 animate-pulse' : 'opacity-0'}`}></div>
+            
+            <img 
+              src="/saqr-full.png" 
+              alt="Saqr Mascot" 
+              className="w-full h-full object-contain relative z-10 drop-shadow-2xl" 
+            />
+        </div>
+
+        {/* زر تحميل الشهادة (يظهر تحت صقر مباشرة عند الفوز) */}
+        {winnerData && saqrState === 'victory' && (
+          <div className="absolute bottom-[-10px] z-30 animate-bounce">
+            <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-bold rounded-full shadow-xl border-2 border-white/20 transition-transform transform hover:scale-105 uppercase text-xs md:text-sm">
+              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+              <span>{t('download')}</span>
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* 🌟 القسم السفلي: المحادثة (Chat) والشريط 🌟 */}
+      <div className="flex-1 w-full max-w-4xl mx-auto flex flex-col bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border-t border-x border-slate-200 dark:border-slate-800 rounded-t-[3rem] shadow-[0_-10px_40px_rgba(0,0,0,0.05)] overflow-hidden z-10">
+        
+        {/* منطقة عرض الرسائل (Scrollable) */}
+        <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 no-scrollbar scroll-smooth">
+          <div className="flex flex-col justify-end min-h-full space-y-6">
+            {messages.map((msg, index) => (
+              <div key={index} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'} animate-fade-in-up`}>
+                
+                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 mb-1 px-2 uppercase">
+                  {msg.role === 'user' ? t('you') : 'صقر'}
+                </span>
+
+                <div className={`relative max-w-[85%] md:max-w-[75%] px-5 py-4 rounded-3xl text-sm md:text-base shadow-sm ${
+                    msg.role === 'user' 
+                    ? 'bg-red-600 text-white rounded-tr-none' 
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-tl-none border border-slate-200 dark:border-slate-700'
+                  }`}>
+                  <div className="prose prose-sm md:prose-base dark:prose-invert font-medium leading-relaxed max-w-none text-start">
+                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            {isLoading && (
+              <div className="flex flex-col items-start animate-fade-in-up">
+                 <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 mb-1 px-2 uppercase">صقر</span>
+                 <div className="bg-slate-100 dark:bg-slate-800 px-6 py-5 rounded-3xl rounded-tl-none shadow-sm flex gap-1.5 items-center border border-slate-200 dark:border-slate-700">
+                  <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-bounce"></span>
+                  <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></span>
+                  <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-bounce" style={{animationDelay: '0.4s'}}></span>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} className="h-2" />
           </div>
         </div>
-      </div>
 
-      {/* منطقة المحادثة */}
-      <div className="flex-1 w-full max-w-5xl mx-auto overflow-y-auto px-4 pb-32 no-scrollbar scroll-smooth z-10">
-        <div className="space-y-6 md:space-y-8 flex flex-col justify-end min-h-full">
-          {messages.map((msg, index) => (
-            <div key={index} className={`flex items-end gap-3 md:gap-4 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'} animate-fade-in-up`}>
-              
-              {msg.role === 'assistant' && (
-                <div className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full flex items-center justify-center shadow-sm overflow-hidden z-10">
-                   <img src="/saqr-avatar.png" alt="S" className="w-7 h-7 md:w-8 md:h-8 object-contain" onError={(e) => e.currentTarget.src="https://www.efipslibrary.online/school-logo.png"} />
-                </div>
-              )}
-
-              <div className={`relative max-w-[85%] md:max-w-[75%] px-5 py-4 rounded-3xl text-sm md:text-base shadow-sm ${
-                  msg.role === 'user' 
-                  ? 'bg-red-600 text-white rounded-br-none' 
-                  : 'bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-bl-none'
-                }`}>
-                <div className="prose prose-sm md:prose-base dark:prose-invert font-medium leading-relaxed max-w-none text-start">
-                  <ReactMarkdown>{msg.content}</ReactMarkdown>
-                </div>
-              </div>
-            </div>
-          ))}
-          
-          {/* زر تحميل الشهادة */}
-          {winnerData && (
-            <div className="mt-8 mb-4 flex justify-center w-full animate-bounce">
-              <button onClick={handleDownloadJPG} className="flex items-center gap-3 w-full md:w-auto px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-full shadow-xl transition-transform transform hover:scale-105 uppercase text-sm md:text-base">
-                <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                <span>{t('download')}</span>
-              </button>
-            </div>
-          )}
-
-          {isLoading && (
-            <div className="flex items-end gap-3">
-              <div className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full flex items-center justify-center shadow-sm">
-                  <img src="https://www.efipslibrary.online/school-logo.png" className="w-6 h-6 opacity-40 animate-pulse" alt="..." />
-              </div>
-              <div className="bg-white dark:bg-slate-800 px-5 py-4 rounded-3xl rounded-bl-none shadow-sm flex gap-1.5 items-center h-[52px]">
-                <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></span>
-                <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></span>
-                <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{animationDelay: '0.4s'}}></span>
-              </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} className="h-4" />
-        </div>
-      </div>
-
-      {/* منطقة الإدخال */}
-      <div className="absolute bottom-0 left-0 w-full p-4 md:p-6 bg-gradient-to-t from-slate-50 via-slate-50 to-transparent dark:from-slate-900 dark:via-slate-900 z-20">
-        <div className="max-w-4xl mx-auto relative flex items-center shadow-2xl rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 focus-within:border-red-500 dark:focus-within:border-red-500 transition-colors">
-          <input
-            type="text" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-            placeholder={t('input')}
-            className="flex-1 bg-transparent border-0 focus:ring-0 py-4 md:py-5 px-6 md:px-8 text-slate-900 dark:text-white font-medium text-sm md:text-lg outline-none w-full placeholder-slate-400"
-            disabled={isLoading}
-          />
-          <button onClick={handleSendMessage} disabled={isLoading || !input.trim()} className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-red-600 hover:bg-red-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white flex items-center justify-center shadow-md transition-all rtl:left-2 rtl:right-auto rtl:rotate-180">
-            <svg className="w-5 h-5 md:w-6 md:h-6 rotate-[-45deg] rtl:rotate-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
-          </button>
+        {/* منطقة الإدخال ثابتة بالأسفل */}
+        <div className="p-4 md:p-6 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
+          <div className="relative flex items-center bg-slate-50 dark:bg-slate-950 rounded-full border-2 border-slate-200 dark:border-slate-700 focus-within:border-red-500 dark:focus-within:border-red-500 transition-colors">
+            <input
+              type="text" 
+              value={input} 
+              onChange={(e) => setInput(e.target.value)} 
+              onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+              placeholder={t('input')}
+              className="flex-1 bg-transparent border-0 focus:ring-0 py-4 px-6 text-slate-900 dark:text-white font-medium outline-none w-full placeholder-slate-400"
+              disabled={isLoading}
+            />
+            <button 
+              onClick={handleSendMessage} 
+              disabled={isLoading || !input.trim()} 
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-red-600 hover:bg-red-700 disabled:bg-slate-300 dark:disabled:bg-slate-700 disabled:cursor-not-allowed text-white flex items-center justify-center shadow-md transition-all active:scale-95 rtl:left-2 rtl:right-auto rtl:rotate-180"
+            >
+              <svg className="w-5 h-5 md:w-6 md:h-6 rotate-[-45deg] rtl:rotate-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+            </button>
+          </div>
         </div>
       </div>
 
       {/* --- تصميم الشهادة العرضية للتصدير --- */}
       <div className="fixed left-[-9999px] top-0 pointer-events-none">
-          {/* إزالة الارتفاع الثابت وجعله min-h ليتمكن من التمدد إذا كانت القصة طويلة */}
           <div ref={certificateRef} dir={locale === 'ar' ? 'rtl' : 'ltr'} className="w-[1123px] min-h-[794px] h-fit bg-white text-slate-900 relative overflow-hidden flex flex-col font-sans border-[20px] border-double border-red-700 pb-12">
               
               <div className="absolute top-0 right-0 w-80 h-80 bg-red-50 rounded-bl-full -z-10"></div>
               <div className="absolute bottom-0 left-0 w-80 h-80 bg-red-50 rounded-tr-full -z-10"></div>
 
-              {/* رأس الشهادة */}
               <div className="flex justify-between items-center p-10 border-b-2 border-slate-100">
                  <div className="flex items-center gap-6">
                      <img src="https://www.efipslibrary.online/school-logo.png" className="w-24 object-contain" alt="EFIPS Logo" />
                      <div>
-                         {/* تم إزالة tracking-widest من العربي لمنع تقطع الحروف */}
                          <h3 className="text-2xl font-bold text-slate-800">{t('certSchool')}</h3>
                          <h4 className="text-base font-bold text-slate-400 uppercase mt-1" dir="ltr">EFIPS</h4>
                      </div>
@@ -330,9 +358,7 @@ const SmartSearchPage: React.FC = () => {
                  </div>
               </div>
 
-              {/* محتوى الشهادة */}
               <div className="flex-1 flex flex-col items-center justify-center text-center px-16 mt-8">
-                  {/* تصغير أحجام الخطوط لتكون أكثر تناسقاً */}
                   <h1 className="text-5xl font-black text-red-700 mb-6">{t('certTitle')}</h1>
                   <p className="text-2xl font-medium text-slate-600 mb-8">{t('certSubtitle')}</p>
                   
@@ -345,7 +371,6 @@ const SmartSearchPage: React.FC = () => {
                   </div>
               </div>
 
-              {/* تذييل الشهادة */}
               <div className="flex justify-between items-end px-16 pt-8 border-t-2 border-slate-100 mt-auto">
                   <div className="text-center w-64">
                      <p className="text-lg font-bold text-slate-500 mb-2">{t('certDate')}</p>
@@ -367,11 +392,41 @@ const SmartSearchPage: React.FC = () => {
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;700;900&display=swap');
         * { font-family: 'Cairo', sans-serif !important; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
+        
         @keyframes fade-in-up {
           0% { opacity: 0; transform: translateY(10px); }
           100% { opacity: 1; transform: translateY(0); }
         }
         .animate-fade-in-up { animation: fade-in-up 0.4s ease-out forwards; }
+
+        /* 1. حركة الطفو الطبيعية (Idle) */
+        @keyframes saqr-idle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        .animate-saqr-idle { animation: saqr-idle 4s ease-in-out infinite; }
+
+        /* 2. حركة التفكير (Thinking) */
+        @keyframes saqr-thinking {
+            0%, 100% { transform: scale(1) translateY(0); }
+            50% { transform: scale(1.05) translateY(-5px); }
+        }
+        .animate-saqr-thinking { animation: saqr-thinking 1.5s ease-in-out infinite; }
+
+        /* 3. حركة التحدث السريعة (Speaking) */
+        @keyframes saqr-speaking {
+            0%, 100% { transform: rotate(0deg) translateY(0); }
+            25% { transform: rotate(5deg) translateY(-5px); }
+            75% { transform: rotate(-5deg) translateY(-5px); }
+        }
+        .animate-saqr-speaking { animation: saqr-speaking 0.5s ease-in-out infinite; }
+
+        /* 4. حركة الفرحة / الشهادة (Victory) */
+        @keyframes saqr-victory {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-25px) scale(1.1); }
+        }
+        .animate-saqr-victory { animation: saqr-victory 1s ease-in-out infinite; }
       `}</style>
     </div>
   );
