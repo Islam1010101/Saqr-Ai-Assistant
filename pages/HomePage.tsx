@@ -253,16 +253,16 @@ const HomePage: React.FC = () => {
               className="group relative w-full overflow-hidden rounded-[2rem] bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 border-2 border-red-500/30 hover:border-red-500 p-6 md:p-8 flex flex-col md:flex-row items-center gap-6 transition-all duration-500 shadow-[0_10px_30px_-10px_rgba(220,38,38,0.2)] hover:shadow-[0_20px_50px_-10px_rgba(220,38,38,0.4)] hover:-translate-y-1"
             >
               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <img src="/alc-logo-header.png" alt="ALC Logo Decor" className="w-32 md:w-48 grayscale" />
+                <img src="https://alc.ae/media/htonj1al/alc-logo-header.png" alt="ALC Logo Decor" className="w-32 md:w-48 grayscale" />
               </div>
               
               <div className="relative z-10 w-24 md:w-32 h-24 md:h-32 bg-white dark:bg-slate-700 rounded-2xl p-2 shadow-inner flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-500">
-                <img src="/alc-logo-header.png" alt="Abu Dhabi Arabic Language Centre" className="w-full h-full object-contain" />
+                <img src="https://alc.ae/media/htonj1al/alc-logo-header.png" alt="Abu Dhabi Arabic Language Centre" className="w-full h-full object-contain" />
               </div>
 
               <div className="relative z-10 flex-1 text-center md:text-start space-y-2">
                 <div className="inline-block px-3 py-1 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-black uppercase tracking-widest mb-2 animate-pulse">
-                   Exclusive Initiative | مبادرة حصرية
+                    Exclusive Initiative | مبادرة حصرية
                 </div>
                 <h3 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white leading-tight">
                   {t('alcLibraryTitle')}
