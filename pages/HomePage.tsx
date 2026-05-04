@@ -26,7 +26,9 @@ const translations = {
     visitorsLabel: "زوار البوابة:",
     upcomingEvents: "أحداث قريبة",
     startsIn: "يبدأ خلال:",
-    endsIn: "ينتهي خلال:"
+    endsIn: "ينتهي خلال:",
+    dayUnit: "يوم",
+    daysUnit: "أيام"
   },
   en: {
     welcome: "Knowledge Portal at Falcon Int'l School",
@@ -51,7 +53,9 @@ const translations = {
     visitorsLabel: "Portal Visitors:",
     upcomingEvents: "Upcoming Events",
     startsIn: "Starts in:",
-    endsIn: "Ends in:"
+    endsIn: "Ends in:",
+    dayUnit: "Day",
+    daysUnit: "Days"
   }
 };
 
@@ -67,7 +71,6 @@ const HOMELAND_FACTS = [
   { ar: "جامع الشيخ زايد الكبير يضم واحدة من أكبر الثريات والسجادات في العالم.", en: "Sheikh Zayed Grand Mosque houses one of the world's largest chandeliers and carpets." },
 ];
 
-// تعديل البيانات لتشمل كائنات Date للحساب
 const ACADEMIC_EVENTS = [
   { 
     ar: "يوم عرفة وعيد الأضحى", 
@@ -109,16 +112,14 @@ const HomePage: React.FC = () => {
   
   const [bursts, setBursts] = useState<BurstItem[]>([]);
   const [isMascotClicked, setIsMascotClicked] = useState(false);
-  const [timeLeft, setTimeLeft] = useState<{days:number, hours:number, mins:number, secs:number} | null>(null);
+  const [daysLeft, setDaysLeft] = useState<number | null>(null);
   const [activeEvent, setActiveEvent] = useState<typeof ACADEMIC_EVENTS[0] | null>(null);
   const [countdownType, setCountdownType] = useState<'start' | 'end'>('start');
 
-  // منطق حساب العد التنازلي
+  // منطق حساب العد التنازلي بالأيام فقط
   useEffect(() => {
-    const timer = setInterval(() => {
+    const checkTime = () => {
       const now = new Date().getTime();
-      
-      // العثور على الحدث القادم أو الحالي
       const upcoming = ACADEMIC_EVENTS.find(event => event.endDate.getTime() > now);
       
       if (upcoming) {
@@ -133,15 +134,13 @@ const HomePage: React.FC = () => {
         }
 
         const distance = target - now;
-        setTimeLeft({
-          days: Math.floor(distance / (1000 * 60 * 60 * 24)),
-          hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-          mins: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
-          secs: Math.floor((distance % (1000 * 60)) / 1000)
-        });
+        // حساب عدد الأيام المتبقية (Math.ceil لضمان احتساب اليوم الحالي كـ 1 إذا كان هناك ساعات متبقية)
+        setDaysLeft(Math.ceil(distance / (1000 * 60 * 60 * 24)));
       }
-    }, 1000);
+    };
 
+    checkTime();
+    const timer = setInterval(checkTime, 60000); // تحديث كل دقيقة كافي للأيام
     return () => clearInterval(timer);
   }, []);
 
@@ -320,7 +319,7 @@ const HomePage: React.FC = () => {
           </div>
         </div>
 
-        {/* --- 4. عداد الزوار + الأحداث + العد التنازلي --- */}
+        {/* --- 4. عداد الزوار + الأحداث + العد التنازلي بالأيام --- */}
         <div className="w-full flex flex-col items-center gap-12 pb-10">
           <div className="bg-white dark:bg-slate-800 px-8 py-5 rounded-full border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row items-center gap-6">
             <div className="flex items-center gap-3">
@@ -335,31 +334,25 @@ const HomePage: React.FC = () => {
             </div>
           </div>
 
-          {/* 📅 قسم الأحداث والعد التنازلي الذكي */}
+          {/* 📅 قسم الأحداث والعد التنازلي الذكي (أيام فقط) */}
           <div className="w-full max-w-5xl flex flex-col gap-8">
-            {timeLeft && activeEvent && (
-              <div className="w-full flex flex-col items-center gap-4 animate-fade-in-up">
+            {daysLeft !== null && activeEvent && (
+              <div className="w-full flex flex-col items-center gap-6 animate-fade-in-up">
                 <div className="bg-red-600/10 dark:bg-red-400/10 border border-red-200 dark:border-red-900/50 px-6 py-2 rounded-full">
                   <span className="text-red-600 dark:text-red-400 font-bold text-sm md:text-lg">
                     {countdownType === 'start' ? t('startsIn') : t('endsIn')} {isAr ? activeEvent.ar : activeEvent.en}
                   </span>
                 </div>
-                <div className="flex gap-4 md:gap-8">
-                  {[
-                    { label: isAr ? 'يوم' : 'Days', value: timeLeft.days },
-                    { label: isAr ? 'ساعة' : 'Hrs', value: timeLeft.hours },
-                    { label: isAr ? 'دقيقة' : 'Mins', value: timeLeft.mins },
-                    { label: isAr ? 'ثانية' : 'Secs', value: timeLeft.secs }
-                  ].map((unit, i) => (
-                    <div key={i} className="flex flex-col items-center">
-                      <div className="bg-white dark:bg-slate-800 w-16 h-16 md:w-20 md:h-20 rounded-2xl border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center shadow-xl">
-                        <span className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white">
-                          {unit.value.toString().padStart(2, '0')}
-                        </span>
-                      </div>
-                      <span className="mt-2 text-xs md:text-sm font-bold text-slate-500 uppercase tracking-tighter">{unit.label}</span>
-                    </div>
-                  ))}
+                
+                <div className="flex flex-col items-center group">
+                  <div className="bg-white dark:bg-slate-800 min-w-[120px] md:min-w-[160px] h-20 md:h-28 px-8 rounded-[2rem] border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center shadow-xl group-hover:border-red-500 transition-colors duration-500">
+                    <span className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white">
+                      {daysLeft}
+                    </span>
+                  </div>
+                  <span className="mt-3 text-sm md:text-lg font-bold text-slate-500 uppercase tracking-widest">
+                    {daysLeft === 1 ? t('dayUnit') : t('daysUnit')}
+                  </span>
                 </div>
               </div>
             )}
