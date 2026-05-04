@@ -7,7 +7,7 @@ const translations = {
     welcome: "بوابة المعرفة مدرسة صقر الإمارات",
     subWelcome: "بوابتك الذكية للوصول إلى المعلومات.",
     newsTitle: "جديدنا",
-    newsContent: "بإمكانك الآن الاطلاع على المكتبة الإلكترونية التي تم تحديثها لتضم عدداً أكبر وتنوعاً أوسع من الكتب والإصدارات باللغتين العربية والإنجليزية، مع إضافة تصنيف الفئة العمرية للكتب. كما يمكنك من خلال 'اسأل صقر' خوض تحدي التأليف وإصدار شهادة باسمك! والآن، استديو البودكاست متاح للتسجيل ومشاركة إبداعاتكم الصوتية، وترقبوا انطلاق ميزة الدوبلاج قريباً.",
+    newsContent: "بإمكانك الآن الاطلاع على المكتبة الإلكترونية التي تم تحديثها لتضم عدداً أكبر وتنوعاً أوسع من الكتب والإصدارات باللغتين العربية والإنجليزية، مع إضافة تصنيف الفئة العمرية للكتب. كما يمكنك من خلال 'اسأل صقر' خوض تحدي التأليف وإصدار شهادة باسمك! والآن، استديو البودكاست متاح للتسجيل ومشاركة إبداعاتكم الصوتية، وترقبوا انطلاق ميزة الدوبلاج قريبا.",
     manualSearch: "البحث اليدوي",
     manualDesc: "البحث عن كتاب ما في مكتبة المدرسة والوصول إليه.",
     smartSearch: "اسأل صقر (AI)",
@@ -23,7 +23,8 @@ const translations = {
     challengeCTA: "ابدأ رحلة الإبداع مع صقر الآن",
     saqrStudioBanner: "استديو صقر",
     saqrStudioTag: "الدوبلاج قريباً 🚀",
-    visitorsLabel: "زوار البوابة:"
+    visitorsLabel: "زوار البوابة:",
+    upcomingEvents: "أحداث قريبة"
   },
   en: {
     welcome: "Knowledge Portal at Falcon Int'l School",
@@ -45,7 +46,8 @@ const translations = {
     challengeCTA: "Start your creative journey now",
     saqrStudioBanner: "Saqr Studio",
     saqrStudioTag: "Dubbing Coming Soon 🚀",
-    visitorsLabel: "Portal Visitors:"
+    visitorsLabel: "Portal Visitors:",
+    upcomingEvents: "Upcoming Events"
   }
 };
 
@@ -59,6 +61,13 @@ const HOMELAND_FACTS = [
   { ar: "شجرة الغاف هي الشجرة الوطنية ورمز للصمود في الصحراء.", en: "The Ghaf tree is the national tree and a symbol of resilience in the desert." },
   { ar: "تضم الدولة متحف المستقبل الذي يعد أيقونة معمارية فريدة.", en: "The country hosts the Museum of the Future, a unique architectural icon." },
   { ar: "جامع الشيخ زايد الكبير يضم واحدة من أكبر الثريات والسجادات في العالم.", en: "Sheikh Zayed Grand Mosque houses one of the world's largest chandeliers and carpets." },
+];
+
+// الأحداث المستخرجة من الصورة المرفقة
+const ACADEMIC_EVENTS = [
+  { ar: "يوم عرفة وعيد الأضحى", en: "Arafah Day & Eid Al Adha", date: "26 – 29 May 2026" },
+  { ar: "رأس السنة الهجرية", en: "Hijri New Year", date: "16 June 2026" },
+  { ar: "نهاية العام الدراسي", en: "End of Academic Year", date: "3 July 2026" }
 ];
 
 const KNOWLEDGE_CARDS = [
@@ -270,8 +279,9 @@ const HomePage: React.FC = () => {
           </div>
         </div>
 
-        {/* --- 4. عداد الزوار والتاريخ --- */}
-        <div className="w-full flex justify-center pb-10">
+        {/* --- 4. عداد الزوار والتاريخ + الأحداث القريبة --- */}
+        <div className="w-full flex flex-col items-center gap-8 pb-10">
+          {/* شريط الزوار والتاريخ الحالي */}
           <div className="bg-white dark:bg-slate-800 px-8 py-5 rounded-full border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-300 flex flex-col md:flex-row items-center gap-6 cursor-default">
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-ping shadow-[0_0_8px_#22c55e]"></div>
@@ -288,6 +298,25 @@ const HomePage: React.FC = () => {
               <span className="font-bold text-sm tracking-wide">
                 {todayDate}
               </span>
+            </div>
+          </div>
+
+          {/* 📅 قسم الأحداث القريبة (مستخرج من التقويم الدراسي) */}
+          <div className="w-full max-w-4xl flex flex-col gap-4">
+            <h4 className="text-center text-slate-400 dark:text-slate-500 text-xs uppercase tracking-[0.3em] font-bold">
+              {t('upcomingEvents')}
+            </h4>
+            <div className="flex flex-wrap justify-center gap-4">
+              {ACADEMIC_EVENTS.map((event, idx) => (
+                <div key={idx} className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border border-slate-200 dark:border-slate-800 px-6 py-3 rounded-2xl flex flex-col items-center gap-1 hover:border-red-500/50 transition-colors group">
+                  <span className="text-slate-900 dark:text-white font-bold text-sm group-hover:text-red-600 transition-colors">
+                    {isAr ? event.ar : event.en}
+                  </span>
+                  <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+                    {event.date}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
