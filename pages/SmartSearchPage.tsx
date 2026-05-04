@@ -7,7 +7,7 @@ import { bookData } from '../api/bookData';
 import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
 
-// 👇 1. استدعاء دالة التتبع 
+// 👇 1. استدعاء دالة التتبع (تم الحفاظ عليه تماماً)
 import { trackActivity } from '../src/utils/tracker';
 
 // --- 1. بروتوكول عقل صقر النهائي (تم الحفاظ عليه تماماً) ---
@@ -85,12 +85,13 @@ const SmartSearchPage: React.FC = () => {
   const { locale, dir } = useLanguage();
   const t = (key: string) => localization[locale][key];
 
+  // تم الحفاظ على كافة الـ States الأصلية
   const [messages, setMessages] = useState<ChatMessage[]>([{ role: 'assistant', content: localization[locale].welcome }]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [winnerData, setWinnerData] = useState<any>(null);
   
-  // حالة تفاعل صقر الحركية
+  // حالة تفاعل صقر الحركية (Idle هي الافتراضية)
   const [saqrState, setSaqrState] = useState<'idle' | 'thinking' | 'speaking' | 'victory'>('idle');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -103,11 +104,13 @@ const SmartSearchPage: React.FC = () => {
   const handleDownloadJPG = async () => {
     if (!certificateRef.current) return;
     
+    // إظهار الشهادة في الخلفية للالتقاط
     certificateRef.current.style.left = '0';
     certificateRef.current.style.top = '0';
     certificateRef.current.style.position = 'fixed';
     certificateRef.current.style.zIndex = '-9999';
 
+    // استخدام الارتفاع التلقائي للشهادة (scrollHeight) لضمان عدم قص القصة الطويلة
     const canvas = await html2canvas(certificateRef.current, { 
       scale: 3, 
       backgroundColor: '#ffffff',
@@ -129,13 +132,14 @@ const SmartSearchPage: React.FC = () => {
     if (input.trim() === '' || isLoading) return;
     const userQuery = input.trim();
 
+    // 👇 2. هنا يتم إرسال سؤال الطالب إلى السحابة فور الضغط على إرسال
     trackActivity('ai', userQuery);
 
     setMessages(prev => [...prev, { role: 'user', content: userQuery }]);
     setInput('');
     setIsLoading(true);
     
-    // 1. تحويل صقر لحالة التفكير
+    // 1. تحويل صقر لحالة التفكير (لتفعيل الـ GIF)
     setSaqrState('thinking');
 
     const normalize = (text: string) => 
@@ -150,11 +154,13 @@ const SmartSearchPage: React.FC = () => {
     const stopWords = ['the', 'book', 'about', 'summary', 'عن', 'كتاب', 'تلخيص', 'ملخص', 'اريد', 'ابحث'];
     const queryWords = qNormalized.split(/\s+/).filter(word => word.length > 2 && !stopWords.includes(word));
 
+    // بحث دقيق وشامل
     const searchIn = (db: any[], location: string) => {
       if (!db || !Array.isArray(db)) return [];
       return db.filter(b => {
         const title = normalize(b?.title || '');
         const author = normalize(b?.author || '');
+        
         if (title.includes(qNormalized) || author.includes(qNormalized)) return true;
         return queryWords.length > 0 && queryWords.some(word => title.includes(word) || author.includes(word));
       }).map(b => ({ ...b, pageLocation: location }));
@@ -187,6 +193,7 @@ const SmartSearchPage: React.FC = () => {
       const data = await response.json();
       let reply = data.reply || '';
 
+      // التقاط بيانات الشهادة
       if (reply.includes('[WINNER:')) {
         const match = reply.match(/\[WINNER:\s*(.*?)\s*\|\s*Grade:\s*(.*?)\s*\|\s*Content:\s*(.*?)\]/s);
         if (match) {
@@ -202,46 +209,45 @@ const SmartSearchPage: React.FC = () => {
           setWinnerData(info);
           localStorage.setItem('efips_challenge_reports', JSON.stringify([info, ...JSON.parse(localStorage.getItem('efips_challenge_reports') || '[]')]));
           
-          // تحويل صقر لحالة الفرحة بالشهادة
+          // تحويل صقر لحالة الفرحة بالشهادة (لتفعيل الـ GIF)
           setSaqrState('victory');
         }
         reply = reply.replace(/\[WINNER:.*?\]/gs, '');
       } else {
-        // 2. تحويل صقر لحالة التحدث عند استلام الرد
+        // 2. تحويل صقر لحالة التحدث عند استلام الرد (لتفعيل الـ GIF)
         setSaqrState('speaking');
-        // إعادته للوضع الطبيعي بعد 2.5 ثانية من انتهاء الحركة
+        // إعادته للوضع الطبيعي (الثابت) بعد 2.5 ثانية من انتهاء الحركة
         setTimeout(() => setSaqrState('idle'), 2500);
       }
       
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
     } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: locale === 'ar' ? 'حدث خطأ في الاتصال، يرجى المحاولة مرة أخرى.' : 'Connection error, please try again.' }]);
-      setSaqrState('idle');
+      setSaqrState('idle'); // العودة للوضع الثابت عند الخطأ
     } finally {
       setIsLoading(false);
     }
   };
 
-  // تحديد كلاس الحركة المناسب لصقر
-  const getSaqrAnimClass = () => {
-    switch (saqrState) {
-        case 'thinking': return 'animate-saqr-thinking';
-        case 'speaking': return 'animate-saqr-speaking';
-        case 'victory': return 'animate-saqr-victory';
-        default: return 'animate-saqr-idle';
+  // تحديد مسار الصورة المناسب بناءً على الحالة
+  // إذا كانت idle، اعرض الإطار الثابت، وإلا اعرض الـ GIF
+  const getSaqrImageSrc = () => {
+    if (saqrState === 'idle') {
+        return '/search_still_frame.png'; // إطار ثابت واحد من الـ GIF
     }
+    return '/search.gif'; // الملف المتحرك الكامل
   };
 
   return (
     <div dir={dir} className="w-full h-[100dvh] flex flex-col bg-slate-50 dark:bg-slate-950 font-sans relative overflow-hidden text-slate-900 dark:text-slate-100 transition-colors duration-300">
       
-      {/* خلفية ديناميكية */}
+      {/* خلفية ديناميكية (تم الحفاظ عليه تماماً) */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-40 dark:opacity-20">
          <div className="absolute top-[10%] left-[-10%] w-[50%] h-[50%] bg-red-500/20 rounded-full blur-[120px]"></div>
          <div className="absolute bottom-[10%] right-[-10%] w-[40%] h-[60%] bg-blue-500/10 rounded-full blur-[100px]"></div>
       </div>
 
-      {/* 🌟 القسم العلوي: بطل الشاشة (شخصية صقر) في المنتصف 🌟 */}
+      {/* القسم العلوي: بطل الشاشة (شخصية صقر) في المنتصف (تم الحفاظ على التخطيط) */}
       <div className="w-full h-[35vh] min-h-[250px] flex-shrink-0 flex flex-col items-center justify-center relative z-20 mt-4">
         
         {/* الحالة: متصل */}
@@ -253,13 +259,14 @@ const SmartSearchPage: React.FC = () => {
         </div>
 
         {/* شخصية صقر التفاعلية */}
-        <div className={`relative flex items-center justify-center w-40 h-40 md:w-56 md:h-56 transition-all duration-300 ${getSaqrAnimClass()}`}>
+        {/* تم تحديث دالة getSaqrImageSrc لتقوم بالتبديل بين الثابت والمتحرك */}
+        <div className="relative flex items-center justify-center w-40 h-40 md:w-56 md:h-56 transition-all duration-300">
             
             {/* هالة ضوئية تظهر فقط أثناء التفكير */}
             <div className={`absolute inset-0 bg-red-500/30 rounded-full blur-3xl transition-opacity duration-500 ${saqrState === 'thinking' ? 'opacity-100 animate-pulse' : 'opacity-0'}`}></div>
             
             <img 
-              src="/saqr-full.png" 
+              src={getSaqrImageSrc()} // 🌟 الدالة الجديدة للتبديل بين الثابت والمتحرك
               alt="Saqr Mascot" 
               className="w-full h-full object-contain relative z-10 drop-shadow-2xl" 
             />
@@ -276,7 +283,7 @@ const SmartSearchPage: React.FC = () => {
         )}
       </div>
 
-      {/* 🌟 القسم السفلي: المحادثة (Chat) والشريط 🌟 */}
+      {/* القسم السفلي: المحادثة (Chat) والشريط (تم الحفاظ عليه تماماً) */}
       <div className="flex-1 w-full max-w-4xl mx-auto flex flex-col bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border-t border-x border-slate-200 dark:border-slate-800 rounded-t-[3rem] shadow-[0_-10px_40px_rgba(0,0,0,0.05)] overflow-hidden z-10">
         
         {/* منطقة عرض الرسائل (Scrollable) */}
@@ -338,7 +345,7 @@ const SmartSearchPage: React.FC = () => {
         </div>
       </div>
 
-      {/* --- تصميم الشهادة العرضية للتصدير --- */}
+      {/* --- تصميم الشهادة العرضية للتصدير (تم الحفاظ عليه تماماً) --- */}
       <div className="fixed left-[-9999px] top-0 pointer-events-none">
           <div ref={certificateRef} dir={locale === 'ar' ? 'rtl' : 'ltr'} className="w-[1123px] min-h-[794px] h-fit bg-white text-slate-900 relative overflow-hidden flex flex-col font-sans border-[20px] border-double border-red-700 pb-12">
               
@@ -398,35 +405,6 @@ const SmartSearchPage: React.FC = () => {
           100% { opacity: 1; transform: translateY(0); }
         }
         .animate-fade-in-up { animation: fade-in-up 0.4s ease-out forwards; }
-
-        /* 1. حركة الطفو الطبيعية (Idle) */
-        @keyframes saqr-idle {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
-        }
-        .animate-saqr-idle { animation: saqr-idle 4s ease-in-out infinite; }
-
-        /* 2. حركة التفكير (Thinking) */
-        @keyframes saqr-thinking {
-            0%, 100% { transform: scale(1) translateY(0); }
-            50% { transform: scale(1.05) translateY(-5px); }
-        }
-        .animate-saqr-thinking { animation: saqr-thinking 1.5s ease-in-out infinite; }
-
-        /* 3. حركة التحدث السريعة (Speaking) */
-        @keyframes saqr-speaking {
-            0%, 100% { transform: rotate(0deg) translateY(0); }
-            25% { transform: rotate(5deg) translateY(-5px); }
-            75% { transform: rotate(-5deg) translateY(-5px); }
-        }
-        .animate-saqr-speaking { animation: saqr-speaking 0.5s ease-in-out infinite; }
-
-        /* 4. حركة الفرحة / الشهادة (Victory) */
-        @keyframes saqr-victory {
-            0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-25px) scale(1.1); }
-        }
-        .animate-saqr-victory { animation: saqr-victory 1s ease-in-out infinite; }
       `}</style>
     </div>
   );
