@@ -229,13 +229,12 @@ const SmartSearchPage: React.FC = () => {
     }
   };
 
-  // تحديد مسار الصورة المناسب بناءً على الحالة
-  // إذا كانت idle، اعرض الإطار الثابت، وإلا اعرض الـ GIF
+  // 🌟 التعديل المطلوب هنا: تحديد مسار الصورة المناسب بدقة
   const getSaqrImageSrc = () => {
     if (saqrState === 'idle') {
-        return '/search_still_frame.png'; // إطار ثابت واحد من الـ GIF
+        return '/search_still_frame.png'; // إطار ثابت واحد
     }
-    return '/search.gif'; // الملف المتحرك الكامل
+    return '/Search.gif'; // الملف المتحرك الكامل
   };
 
   return (
@@ -259,14 +258,13 @@ const SmartSearchPage: React.FC = () => {
         </div>
 
         {/* شخصية صقر التفاعلية */}
-        {/* تم تحديث دالة getSaqrImageSrc لتقوم بالتبديل بين الثابت والمتحرك */}
         <div className="relative flex items-center justify-center w-40 h-40 md:w-56 md:h-56 transition-all duration-300">
             
             {/* هالة ضوئية تظهر فقط أثناء التفكير */}
             <div className={`absolute inset-0 bg-red-500/30 rounded-full blur-3xl transition-opacity duration-500 ${saqrState === 'thinking' ? 'opacity-100 animate-pulse' : 'opacity-0'}`}></div>
             
             <img 
-              src={getSaqrImageSrc()} // 🌟 الدالة الجديدة للتبديل بين الثابت والمتحرك
+              src={getSaqrImageSrc()} // 🌟 استخدام الدالة لاستدعاء الصورة/الـ GIF بدقة
               alt="Saqr Mascot" 
               className="w-full h-full object-contain relative z-10 drop-shadow-2xl" 
             />
