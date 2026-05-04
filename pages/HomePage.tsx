@@ -28,7 +28,9 @@ const translations = {
     startsIn: "يبدأ خلال:",
     endsIn: "ينتهي خلال:",
     dayUnit: "يوم",
-    daysUnit: "أيام"
+    daysUnit: "أيام",
+    alcLibraryTitle: "المكتبة العربية الرقمية المجانية",
+    alcLibrarySub: "مبادرة رائدة يقدمها مركز أبو ظبي للغة العربية"
   },
   en: {
     welcome: "Knowledge Portal at Falcon Int'l School",
@@ -55,7 +57,9 @@ const translations = {
     startsIn: "Starts in:",
     endsIn: "Ends in:",
     dayUnit: "Day",
-    daysUnit: "Days"
+    daysUnit: "Days",
+    alcLibraryTitle: "Free Digital Arabic Library",
+    alcLibrarySub: "A leading initiative by Abu Dhabi Arabic Language Centre"
   }
 };
 
@@ -116,7 +120,6 @@ const HomePage: React.FC = () => {
   const [activeEvent, setActiveEvent] = useState<typeof ACADEMIC_EVENTS[0] | null>(null);
   const [countdownType, setCountdownType] = useState<'start' | 'end'>('start');
 
-  // منطق حساب العد التنازلي بالأيام فقط
   useEffect(() => {
     const checkTime = () => {
       const now = new Date().getTime();
@@ -134,13 +137,12 @@ const HomePage: React.FC = () => {
         }
 
         const distance = target - now;
-        // حساب عدد الأيام المتبقية (Math.ceil لضمان احتساب اليوم الحالي كـ 1 إذا كان هناك ساعات متبقية)
         setDaysLeft(Math.ceil(distance / (1000 * 60 * 60 * 24)));
       }
     };
 
     checkTime();
-    const timer = setInterval(checkTime, 60000); // تحديث كل دقيقة كافي للأيام
+    const timer = setInterval(checkTime, 60000);
     return () => clearInterval(timer);
   }, []);
 
@@ -217,7 +219,7 @@ const HomePage: React.FC = () => {
         {/* --- شريط الأخبار --- */}
         <div className="w-full max-w-6xl mx-auto relative z-30 flex items-center bg-white dark:bg-slate-800 border-2 border-red-200 dark:border-red-900/50 rounded-full shadow-lg overflow-hidden h-12 md:h-14 hover:shadow-2xl hover:scale-[1.01] transition-all duration-300">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 dark:via-white/5 to-transparent skew-x-[-20deg] animate-[shimmer_3s_infinite] pointer-events-none z-10"></div>
-          <div className="bg-gradient-to-r from-red-600 to-red-700 text-white font-bold px-5 md:px-8 h-full flex items-center justify-center gap-2 md:gap-3 relative z-20 shrink-0 uppercase tracking-wide shadow-[2px_0_10px_rgba(0,0,0,0.1)]">
+          <div className="bg-gradient-to-r from-red-600 to-red-700 text-white font-bold px-5 md:px-8 h-full flex items-center justify-center gap-2 md:gap-3 relative z-20 shrink-0 uppercase tracking-wide shadow-[2px_0_10px_rgba(0,0,0,0.15)]">
             <div className="w-2 h-2 md:w-2.5 md:h-2.5 bg-white rounded-full animate-ping shadow-[0_0_8px_#ffffff]"></div>
             {t('newsTitle')}
           </div>
@@ -240,35 +242,71 @@ const HomePage: React.FC = () => {
         </div>
 
         {/* --- 2. مركز العمليات والكروت --- */}
-        <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-center">
-          <div className="lg:col-span-7 grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 order-2 lg:order-1">
-            <Link to="/search" className="group bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-red-500 hover:-translate-y-2 hover:scale-[1.02] hover:shadow-[0_20px_40px_-15px_rgba(239,68,68,0.2)] transition-all duration-500 flex flex-col items-start text-start relative overflow-hidden">
-              <div className="w-14 h-14 bg-red-50 dark:bg-red-500/10 rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-5 relative z-10">🔍</div>
-              <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2 relative z-10">{t('manualSearch')}</h3>
-              <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-medium leading-relaxed relative z-10">{t('manualDesc')}</p>
-            </Link>
+        <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-start">
+          <div className="lg:col-span-7 flex flex-col gap-6 order-2 lg:order-1">
+            
+            {/* 📚 القسم الجديد: المكتبة الرقمية لمركز أبو ظبي */}
+            <a 
+              href="https://www.amazon.com/stores/page/64B19CDC-2694-46EA-8C7D-AA43238F9A37" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="group relative w-full overflow-hidden rounded-[2rem] bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 border-2 border-red-500/30 hover:border-red-500 p-6 md:p-8 flex flex-col md:flex-row items-center gap-6 transition-all duration-500 shadow-[0_10px_30px_-10px_rgba(220,38,38,0.2)] hover:shadow-[0_20px_50px_-10px_rgba(220,38,38,0.4)] hover:-translate-y-1"
+            >
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <img src="/alc-logo-header.png" alt="ALC Logo Decor" className="w-32 md:w-48 grayscale" />
+              </div>
+              
+              <div className="relative z-10 w-24 md:w-32 h-24 md:h-32 bg-white dark:bg-slate-700 rounded-2xl p-2 shadow-inner flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-500">
+                <img src="/alc-logo-header.png" alt="Abu Dhabi Arabic Language Centre" className="w-full h-full object-contain" />
+              </div>
 
-            <Link to="/smart-search" className="group bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-green-500 hover:-translate-y-2 hover:scale-[1.02] hover:shadow-[0_20px_40px_-15px_rgba(34,197,94,0.2)] transition-all duration-500 flex flex-col items-start text-start relative overflow-hidden">
-              <div className="w-14 h-14 bg-green-50 dark:bg-green-500/10 rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-5 relative z-10">🤖</div>
-              <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2 relative z-10">{t('smartSearch')}</h3>
-              <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-medium leading-relaxed relative z-10">{t('smartDesc')}</p>
-            </Link>
+              <div className="relative z-10 flex-1 text-center md:text-start space-y-2">
+                <div className="inline-block px-3 py-1 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-black uppercase tracking-widest mb-2 animate-pulse">
+                   Exclusive Initiative | مبادرة حصرية
+                </div>
+                <h3 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white leading-tight">
+                  {t('alcLibraryTitle')}
+                </h3>
+                <p className="text-sm md:text-lg text-slate-600 dark:text-slate-400 font-bold">
+                  {t('alcLibrarySub')}
+                </p>
+                <div className="pt-2 flex items-center justify-center md:justify-start gap-2 text-red-600 dark:text-red-400 font-black">
+                  <span>تصفح الآن</span>
+                  <span className="group-hover:translate-x-2 transition-transform duration-300">→</span>
+                </div>
+              </div>
+            </a>
 
-            <Link to="/digital-library" className="group bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-blue-500 hover:-translate-y-2 hover:scale-[1.02] hover:shadow-[0_20px_40px_-15px_rgba(59,130,246,0.2)] transition-all duration-500 flex flex-col items-start text-start relative overflow-hidden">
-              <div className="w-14 h-14 bg-blue-50 dark:bg-blue-500/10 rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-5 relative z-10">📚</div>
-              <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2 relative z-10">{t('digitalLibrary')}</h3>
-              <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-medium leading-relaxed relative z-10">{t('digitalDesc')}</p>
-            </Link>
+            {/* الأزرار الأربعة الأصلية */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
+              <Link to="/search" className="group bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-red-500 hover:-translate-y-2 hover:scale-[1.02] hover:shadow-[0_20px_40px_-15px_rgba(239,68,68,0.2)] transition-all duration-500 flex flex-col items-start text-start relative overflow-hidden">
+                <div className="w-14 h-14 bg-red-50 dark:bg-red-500/10 rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-5 relative z-10">🔍</div>
+                <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2 relative z-10">{t('manualSearch')}</h3>
+                <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-medium leading-relaxed relative z-10">{t('manualDesc')}</p>
+              </Link>
 
-            <Link to="/creators" className="group bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-purple-500 hover:-translate-y-2 hover:scale-[1.02] hover:shadow-[0_20px_40px_-15px_rgba(168,85,247,0.2)] transition-all duration-500 flex flex-col items-start text-start relative overflow-hidden">
-              <div className="w-14 h-14 bg-purple-50 dark:bg-purple-500/10 rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-5 relative z-10">🎨</div>
-              <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2 relative z-10">{t('creators')}</h3>
-              <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-medium leading-relaxed relative z-10">{t('creatorsDesc')}</p>
-            </Link>
+              <Link to="/smart-search" className="group bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-green-500 hover:-translate-y-2 hover:scale-[1.02] hover:shadow-[0_20px_40px_-15px_rgba(34,197,94,0.2)] transition-all duration-500 flex flex-col items-start text-start relative overflow-hidden">
+                <div className="w-14 h-14 bg-green-50 dark:bg-green-500/10 rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-5 relative z-10">🤖</div>
+                <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2 relative z-10">{t('smartSearch')}</h3>
+                <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-medium leading-relaxed relative z-10">{t('smartDesc')}</p>
+              </Link>
+
+              <Link to="/digital-library" className="group bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-blue-500 hover:-translate-y-2 hover:scale-[1.02] hover:shadow-[0_20px_40px_-15px_rgba(59,130,246,0.2)] transition-all duration-500 flex flex-col items-start text-start relative overflow-hidden">
+                <div className="w-14 h-14 bg-blue-50 dark:bg-blue-500/10 rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-5 relative z-10">📚</div>
+                <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2 relative z-10">{t('digitalLibrary')}</h3>
+                <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-medium leading-relaxed relative z-10">{t('digitalDesc')}</p>
+              </Link>
+
+              <Link to="/creators" className="group bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-purple-500 hover:-translate-y-2 hover:scale-[1.02] hover:shadow-[0_20px_40px_-15px_rgba(168,85,247,0.2)] transition-all duration-500 flex flex-col items-start text-start relative overflow-hidden">
+                <div className="w-14 h-14 bg-purple-50 dark:bg-purple-500/10 rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-5 relative z-10">🎨</div>
+                <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2 relative z-10">{t('creators')}</h3>
+                <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-medium leading-relaxed relative z-10">{t('creatorsDesc')}</p>
+              </Link>
+            </div>
           </div>
 
           {/* التفاعل مع صقر */}
-          <div className="lg:col-span-5 flex flex-col items-center justify-center order-1 lg:order-2 relative gap-8">
+          <div className="lg:col-span-5 flex flex-col items-center justify-center order-1 lg:order-2 relative gap-8 self-center">
             <div onClick={handleMascotInteraction} className={`relative cursor-pointer transition-transform duration-700 ${isMascotClicked ? 'scale-95' : 'hover:scale-105'}`}>
               <div className="absolute inset-0 bg-gradient-to-tr from-red-500/20 to-green-500/20 rounded-full blur-[80px] -z-20 animate-pulse"></div>
               {bursts.map((burst) => (
@@ -319,7 +357,7 @@ const HomePage: React.FC = () => {
           </div>
         </div>
 
-        {/* --- 4. عداد الزوار + الأحداث + العد التنازلي بالأيام --- */}
+        {/* --- 4. عداد الزوار + الأحداث --- */}
         <div className="w-full flex flex-col items-center gap-12 pb-10">
           <div className="bg-white dark:bg-slate-800 px-8 py-5 rounded-full border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row items-center gap-6">
             <div className="flex items-center gap-3">
@@ -334,7 +372,6 @@ const HomePage: React.FC = () => {
             </div>
           </div>
 
-          {/* 📅 قسم الأحداث والعد التنازلي الذكي (أيام فقط) */}
           <div className="w-full max-w-5xl flex flex-col gap-8">
             {daysLeft !== null && activeEvent && (
               <div className="w-full flex flex-col items-center gap-6 animate-fade-in-up">
