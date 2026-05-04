@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../App';
 
@@ -24,7 +24,9 @@ const translations = {
     saqrStudioBanner: "استديو صقر",
     saqrStudioTag: "الدوبلاج قريباً 🚀",
     visitorsLabel: "زوار البوابة:",
-    upcomingEvents: "أحداث قريبة"
+    upcomingEvents: "أحداث قريبة",
+    startsIn: "يبدأ خلال:",
+    endsIn: "ينتهي خلال:"
   },
   en: {
     welcome: "Knowledge Portal at Falcon Int'l School",
@@ -47,7 +49,9 @@ const translations = {
     saqrStudioBanner: "Saqr Studio",
     saqrStudioTag: "Dubbing Coming Soon 🚀",
     visitorsLabel: "Portal Visitors:",
-    upcomingEvents: "Upcoming Events"
+    upcomingEvents: "Upcoming Events",
+    startsIn: "Starts in:",
+    endsIn: "Ends in:"
   }
 };
 
@@ -63,11 +67,29 @@ const HOMELAND_FACTS = [
   { ar: "جامع الشيخ زايد الكبير يضم واحدة من أكبر الثريات والسجادات في العالم.", en: "Sheikh Zayed Grand Mosque houses one of the world's largest chandeliers and carpets." },
 ];
 
-// الأحداث المستخرجة من الصورة المرفقة
+// تعديل البيانات لتشمل كائنات Date للحساب
 const ACADEMIC_EVENTS = [
-  { ar: "يوم عرفة وعيد الأضحى", en: "Arafah Day & Eid Al Adha", date: "26 – 29 May 2026" },
-  { ar: "رأس السنة الهجرية", en: "Hijri New Year", date: "16 June 2026" },
-  { ar: "نهاية العام الدراسي", en: "End of Academic Year", date: "3 July 2026" }
+  { 
+    ar: "يوم عرفة وعيد الأضحى", 
+    en: "Arafah Day & Eid Al Adha", 
+    startDate: new Date('2026-05-26T00:00:00'), 
+    endDate: new Date('2026-05-29T23:59:59'),
+    displayDate: "26 – 29 May 2026" 
+  },
+  { 
+    ar: "رأس السنة الهجرية", 
+    en: "Hijri New Year", 
+    startDate: new Date('2026-06-16T00:00:00'), 
+    endDate: new Date('2026-06-16T23:59:59'),
+    displayDate: "16 June 2026" 
+  },
+  { 
+    ar: "نهاية العام الدراسي", 
+    en: "End of Academic Year", 
+    startDate: new Date('2026-07-03T00:00:00'), 
+    endDate: new Date('2026-07-03T23:59:59'),
+    displayDate: "3 July 2026" 
+  }
 ];
 
 const KNOWLEDGE_CARDS = [
@@ -87,6 +109,41 @@ const HomePage: React.FC = () => {
   
   const [bursts, setBursts] = useState<BurstItem[]>([]);
   const [isMascotClicked, setIsMascotClicked] = useState(false);
+  const [timeLeft, setTimeLeft] = useState<{days:number, hours:number, mins:number, secs:number} | null>(null);
+  const [activeEvent, setActiveEvent] = useState<typeof ACADEMIC_EVENTS[0] | null>(null);
+  const [countdownType, setCountdownType] = useState<'start' | 'end'>('start');
+
+  // منطق حساب العد التنازلي
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = new Date().getTime();
+      
+      // العثور على الحدث القادم أو الحالي
+      const upcoming = ACADEMIC_EVENTS.find(event => event.endDate.getTime() > now);
+      
+      if (upcoming) {
+        setActiveEvent(upcoming);
+        let target = upcoming.startDate.getTime();
+        
+        if (now > upcoming.startDate.getTime()) {
+          target = upcoming.endDate.getTime();
+          setCountdownType('end');
+        } else {
+          setCountdownType('start');
+        }
+
+        const distance = target - now;
+        setTimeLeft({
+          days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+          mins: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+          secs: Math.floor((distance % (1000 * 60)) / 1000)
+        });
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   const visitorCount = useMemo(() => {
     const baseCount = 1000;
@@ -138,7 +195,7 @@ const HomePage: React.FC = () => {
   return (
     <div dir={dir} className="w-full min-h-[100dvh] flex flex-col items-center bg-slate-50 dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300 py-10 md:py-20 px-4">
       
-      {/* 🌟 الخلفية الديناميكية النابضة */}
+      {/* 🌟 الخلفية الديناميكية */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-40 dark:opacity-20">
          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-red-500/20 rounded-full blur-[120px] animate-blob"></div>
          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-blue-500/10 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
@@ -158,7 +215,7 @@ const HomePage: React.FC = () => {
           <div className="h-1.5 w-24 bg-red-600 mx-auto rounded-full shadow-[0_0_15px_rgba(220,38,38,0.5)] animate-pulse"></div>
         </div>
 
-        {/* --- شريط الأخبار المتحرك (جديدنا) --- */}
+        {/* --- شريط الأخبار --- */}
         <div className="w-full max-w-6xl mx-auto relative z-30 flex items-center bg-white dark:bg-slate-800 border-2 border-red-200 dark:border-red-900/50 rounded-full shadow-lg overflow-hidden h-12 md:h-14 hover:shadow-2xl hover:scale-[1.01] transition-all duration-300">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 dark:via-white/5 to-transparent skew-x-[-20deg] animate-[shimmer_3s_infinite] pointer-events-none z-10"></div>
           <div className="bg-gradient-to-r from-red-600 to-red-700 text-white font-bold px-5 md:px-8 h-full flex items-center justify-center gap-2 md:gap-3 relative z-20 shrink-0 uppercase tracking-wide shadow-[2px_0_10px_rgba(0,0,0,0.1)]">
@@ -172,7 +229,7 @@ const HomePage: React.FC = () => {
           </div>
         </div>
 
-        {/* --- 🌟 لافتة استديو صقر --- */}
+        {/* --- لافتة استديو صقر --- */}
         <div className="w-full relative z-30 flex flex-col items-center justify-center">
           <Link to="/saqr-studio" className="group relative overflow-hidden px-6 py-3 md:px-8 md:py-4 w-fit rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-md flex items-center justify-center hover:shadow-[0_0_30px_rgba(59,130,246,0.3)] hover:border-blue-500 hover:scale-105 transition-all duration-300">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] skew-x-12"></div>
@@ -185,32 +242,27 @@ const HomePage: React.FC = () => {
 
         {/* --- 2. مركز العمليات والكروت --- */}
         <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-center">
-          
           <div className="lg:col-span-7 grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 order-2 lg:order-1">
             <Link to="/search" className="group bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-red-500 hover:-translate-y-2 hover:scale-[1.02] hover:shadow-[0_20px_40px_-15px_rgba(239,68,68,0.2)] transition-all duration-500 flex flex-col items-start text-start relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="w-14 h-14 bg-red-50 dark:bg-red-500/10 rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-5 group-hover:animate-bounce shadow-sm relative z-10">🔍</div>
+              <div className="w-14 h-14 bg-red-50 dark:bg-red-500/10 rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-5 relative z-10">🔍</div>
               <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2 relative z-10">{t('manualSearch')}</h3>
               <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-medium leading-relaxed relative z-10">{t('manualDesc')}</p>
             </Link>
 
             <Link to="/smart-search" className="group bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-green-500 hover:-translate-y-2 hover:scale-[1.02] hover:shadow-[0_20px_40px_-15px_rgba(34,197,94,0.2)] transition-all duration-500 flex flex-col items-start text-start relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="w-14 h-14 bg-green-50 dark:bg-green-500/10 rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-5 group-hover:rotate-12 group-hover:scale-125 transition-transform duration-300 shadow-sm relative z-10">🤖</div>
+              <div className="w-14 h-14 bg-green-50 dark:bg-green-500/10 rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-5 relative z-10">🤖</div>
               <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2 relative z-10">{t('smartSearch')}</h3>
               <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-medium leading-relaxed relative z-10">{t('smartDesc')}</p>
             </Link>
 
             <Link to="/digital-library" className="group bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-blue-500 hover:-translate-y-2 hover:scale-[1.02] hover:shadow-[0_20px_40px_-15px_rgba(59,130,246,0.2)] transition-all duration-500 flex flex-col items-start text-start relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="w-14 h-14 bg-blue-50 dark:bg-blue-500/10 rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-5 group-hover:-translate-y-2 group-hover:scale-110 transition-transform duration-300 shadow-sm relative z-10">📚</div>
+              <div className="w-14 h-14 bg-blue-50 dark:bg-blue-500/10 rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-5 relative z-10">📚</div>
               <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2 relative z-10">{t('digitalLibrary')}</h3>
               <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-medium leading-relaxed relative z-10">{t('digitalDesc')}</p>
             </Link>
 
             <Link to="/creators" className="group bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-purple-500 hover:-translate-y-2 hover:scale-[1.02] hover:shadow-[0_20px_40px_-15px_rgba(168,85,247,0.2)] transition-all duration-500 flex flex-col items-start text-start relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="w-14 h-14 bg-purple-50 dark:bg-purple-500/10 rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-5 group-hover:animate-spin-slow shadow-sm relative z-10">🎨</div>
+              <div className="w-14 h-14 bg-purple-50 dark:bg-purple-500/10 rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-5 relative z-10">🎨</div>
               <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2 relative z-10">{t('creators')}</h3>
               <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-medium leading-relaxed relative z-10">{t('creatorsDesc')}</p>
             </Link>
@@ -219,12 +271,7 @@ const HomePage: React.FC = () => {
           {/* التفاعل مع صقر */}
           <div className="lg:col-span-5 flex flex-col items-center justify-center order-1 lg:order-2 relative gap-8">
             <div onClick={handleMascotInteraction} className={`relative cursor-pointer transition-transform duration-700 ${isMascotClicked ? 'scale-95' : 'hover:scale-105'}`}>
-              <div className="absolute inset-0 flex items-center justify-center -z-10 pointer-events-none opacity-5 dark:opacity-10 transition-all duration-1000 group-hover:opacity-20 group-hover:rotate-[360deg]">
-                <img src="/school-logo.png" alt="Seal" className="w-[120%] h-[120%] object-contain rotate-12 dark:brightness-0 dark:invert" />
-              </div>
-              {/* التوهج الخلفي لصقر */}
               <div className="absolute inset-0 bg-gradient-to-tr from-red-500/20 to-green-500/20 rounded-full blur-[80px] -z-20 animate-pulse"></div>
-              
               {bursts.map((burst) => (
                 <div key={burst.id} 
                   className={`absolute z-[100] bg-white dark:bg-slate-800 px-4 py-2 md:px-5 md:py-2.5 rounded-2xl border border-slate-200 dark:border-slate-600 shadow-lg animate-burst-steady pointer-events-none flex items-center justify-center`}
@@ -233,14 +280,12 @@ const HomePage: React.FC = () => {
                 </div>
               ))}
               <img src="/saqr-full.png" alt="Saqr Mascot" className="h-64 md:h-[500px] object-contain relative z-10 animate-float drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)]" />
-              <div className="absolute -top-4 -right-2 md:-top-6 md:-right-6 bg-white dark:bg-slate-800 px-6 py-4 rounded-3xl rounded-br-none border border-slate-200 dark:border-slate-700 shadow-xl text-sm md:text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-red-600 dark:from-green-400 dark:to-red-400 animate-float-delayed z-20 hover:scale-110 transition-transform">
+              <div className="absolute -top-4 -right-2 md:-top-6 md:-right-6 bg-white dark:bg-slate-800 px-6 py-4 rounded-3xl rounded-br-none border border-slate-200 dark:border-slate-700 shadow-xl text-sm md:text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-red-600 dark:from-green-400 dark:to-red-400 animate-float-delayed z-20">
                 {t('bubble')}
               </div>
             </div>
             
-            <div className="w-full max-w-md bg-white/60 dark:bg-slate-800/60 backdrop-blur-md p-8 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-lg text-center relative z-30 group overflow-hidden hover:shadow-[0_20px_50px_-15px_rgba(220,38,38,0.2)] hover:-translate-y-2 transition-all duration-500">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500/10 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite] skew-x-12 z-0"></div>
-              <div className="absolute inset-0 bg-gradient-to-br from-red-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="w-full max-w-md bg-white/60 dark:bg-slate-800/60 backdrop-blur-md p-8 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-lg text-center relative z-30 group overflow-hidden">
               <div className="relative z-10 space-y-4">
                 <span className="bg-red-50 dark:bg-red-500/10 text-red-600 font-bold px-3 py-1 rounded-full text-xs uppercase tracking-widest animate-pulse">
                   {isAr ? "أطلق العنان لموهبتك" : "Show Your Talent"}
@@ -261,13 +306,9 @@ const HomePage: React.FC = () => {
 
         {/* --- 3. قسم لمحات من الموطن --- */}
         <div className="w-full px-2 group">
-          <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-8 md:p-16 rounded-[2.5rem] md:rounded-[4rem] border border-slate-200 dark:border-slate-700 shadow-md group-hover:shadow-2xl group-hover:-translate-y-2 transition-all duration-500 relative overflow-hidden flex flex-col md:flex-row items-center gap-8 md:gap-12">
-            <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-green-500 to-red-500 opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_2.5s_infinite] skew-x-12 z-0"></div>
-            <div className="w-20 h-20 md:w-32 md:h-32 bg-slate-50 dark:bg-slate-700 rounded-[2rem] flex items-center justify-center text-4xl md:text-6xl shadow-inner border border-slate-100 dark:border-slate-600 shrink-0 relative z-10 group-hover:rotate-[360deg] transition-transform duration-1000 ease-in-out">
-              🇦🇪
-            </div>
-            <div className="text-center md:text-start flex-1 space-y-3 md:space-y-4 relative z-10">
+          <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-8 md:p-16 rounded-[2.5rem] md:rounded-[4rem] border border-slate-200 dark:border-slate-700 shadow-md transition-all duration-500 relative overflow-hidden flex flex-col md:flex-row items-center gap-8 md:gap-12">
+            <div className="w-20 h-20 md:w-32 md:h-32 bg-slate-50 dark:bg-slate-700 rounded-[2rem] flex items-center justify-center text-4xl md:text-6xl shadow-inner relative z-10">🇦🇪</div>
+            <div className="text-center md:text-start flex-1 space-y-3 relative z-10">
               <h3 className="text-sm md:text-lg font-bold text-red-600 dark:text-red-400 uppercase tracking-widest flex items-center gap-2 justify-center md:justify-start">
                 <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
                 {t('homelandTitle')}
@@ -279,63 +320,78 @@ const HomePage: React.FC = () => {
           </div>
         </div>
 
-        {/* --- 4. عداد الزوار والتاريخ + الأحداث القريبة --- */}
-        <div className="w-full flex flex-col items-center gap-8 pb-10">
-          {/* شريط الزوار والتاريخ الحالي */}
-          <div className="bg-white dark:bg-slate-800 px-8 py-5 rounded-full border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-300 flex flex-col md:flex-row items-center gap-6 cursor-default">
+        {/* --- 4. عداد الزوار + الأحداث + العد التنازلي --- */}
+        <div className="w-full flex flex-col items-center gap-12 pb-10">
+          <div className="bg-white dark:bg-slate-800 px-8 py-5 rounded-full border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row items-center gap-6">
             <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-ping shadow-[0_0_8px_#22c55e]"></div>
-              <span className="text-slate-500 dark:text-slate-400 font-medium text-sm">
-                {t('visitorsLabel')}
-              </span>
-              <span className="text-slate-900 dark:text-white font-bold text-lg">
-                {visitorCount.toLocaleString()}
-              </span>
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-ping"></div>
+              <span className="text-slate-500 dark:text-slate-400 font-medium text-sm">{t('visitorsLabel')}</span>
+              <span className="text-slate-900 dark:text-white font-bold text-lg">{visitorCount.toLocaleString()}</span>
             </div>
             <div className="hidden md:block h-6 w-px bg-slate-200 dark:bg-slate-700"></div>
-            <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400 hover:text-blue-500 transition-colors">
-              <span className="text-lg animate-pulse">📅</span>
-              <span className="font-bold text-sm tracking-wide">
-                {todayDate}
-              </span>
+            <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400">
+              <span className="text-lg">📅</span>
+              <span className="font-bold text-sm">{todayDate}</span>
             </div>
           </div>
 
-          {/* 📅 قسم الأحداث القريبة (مستخرج من التقويم الدراسي) */}
-          <div className="w-full max-w-4xl flex flex-col gap-4">
+          {/* 📅 قسم الأحداث والعد التنازلي الذكي */}
+          <div className="w-full max-w-5xl flex flex-col gap-8">
+            {timeLeft && activeEvent && (
+              <div className="w-full flex flex-col items-center gap-4 animate-fade-in-up">
+                <div className="bg-red-600/10 dark:bg-red-400/10 border border-red-200 dark:border-red-900/50 px-6 py-2 rounded-full">
+                  <span className="text-red-600 dark:text-red-400 font-bold text-sm md:text-lg">
+                    {countdownType === 'start' ? t('startsIn') : t('endsIn')} {isAr ? activeEvent.ar : activeEvent.en}
+                  </span>
+                </div>
+                <div className="flex gap-4 md:gap-8">
+                  {[
+                    { label: isAr ? 'يوم' : 'Days', value: timeLeft.days },
+                    { label: isAr ? 'ساعة' : 'Hrs', value: timeLeft.hours },
+                    { label: isAr ? 'دقيقة' : 'Mins', value: timeLeft.mins },
+                    { label: isAr ? 'ثانية' : 'Secs', value: timeLeft.secs }
+                  ].map((unit, i) => (
+                    <div key={i} className="flex flex-col items-center">
+                      <div className="bg-white dark:bg-slate-800 w-16 h-16 md:w-20 md:h-20 rounded-2xl border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center shadow-xl">
+                        <span className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white">
+                          {unit.value.toString().padStart(2, '0')}
+                        </span>
+                      </div>
+                      <span className="mt-2 text-xs md:text-sm font-bold text-slate-500 uppercase tracking-tighter">{unit.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <h4 className="text-center text-slate-400 dark:text-slate-500 text-xs uppercase tracking-[0.3em] font-bold">
               {t('upcomingEvents')}
             </h4>
             <div className="flex flex-wrap justify-center gap-4">
               {ACADEMIC_EVENTS.map((event, idx) => (
-                <div key={idx} className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border border-slate-200 dark:border-slate-800 px-6 py-3 rounded-2xl flex flex-col items-center gap-1 hover:border-red-500/50 transition-colors group">
-                  <span className="text-slate-900 dark:text-white font-bold text-sm group-hover:text-red-600 transition-colors">
+                <div key={idx} className={`bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border ${activeEvent?.ar === event.ar ? 'border-red-500 scale-105 shadow-lg' : 'border-slate-200 dark:border-slate-800'} px-6 py-3 rounded-2xl flex flex-col items-center gap-1 transition-all`}>
+                  <span className="text-slate-900 dark:text-white font-bold text-sm">
                     {isAr ? event.ar : event.en}
                   </span>
                   <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
-                    {event.date}
+                    {event.displayDate}
                   </span>
                 </div>
               ))}
             </div>
           </div>
         </div>
-
       </div>
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
         * { font-family: 'Cairo', sans-serif !important; }
-        
-        /* تأثيرات كشف النص */
         @keyframes reveal-text {
           0% { clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%); transform: translateY(40px); opacity: 0; }
           100% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); transform: translateY(0); opacity: 1; }
         }
         .animate-text-reveal { animation: reveal-text 1.2s cubic-bezier(0.77, 0, 0.175, 1) forwards; }
         .animate-text-reveal-delayed { animation: reveal-text 1.2s cubic-bezier(0.77, 0, 0.175, 1) 0.3s forwards; clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%); }
-
-        /* الأشكال الخلفية العائمة والمتحركة */
         @keyframes blob {
           0% { transform: translate(0px, 0px) scale(1); }
           33% { transform: translate(30px, -50px) scale(1.1); }
@@ -343,15 +399,7 @@ const HomePage: React.FC = () => {
           100% { transform: translate(0px, 0px) scale(1); }
         }
         .animate-blob { animation: blob 7s infinite alternate ease-in-out; }
-        .animation-delay-2000 { animation-delay: 2s; }
-        .animation-delay-4000 { animation-delay: 4s; }
-
-        /* تأثير اللمعان (Shimmer) */
-        @keyframes shimmer {
-          100% { transform: translateX(200%); }
-        }
-
-        /* انيميشن العناصر المتطايرة */
+        @keyframes shimmer { 100% { transform: translateX(200%); } }
         @keyframes burst-steady {
           0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
           10% { transform: translate(var(--tx), var(--ty)) scale(1.1) rotate(var(--rot)); opacity: 1; }
@@ -359,18 +407,11 @@ const HomePage: React.FC = () => {
           100% { transform: translate(var(--tx), calc(var(--ty) - 30px)) scale(0.8) rotate(var(--rot)); opacity: 0; }
         }
         .animate-burst-steady { animation: burst-steady 2.2s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
-        
-        /* تأثير الطفو الخاص بصقر والبالون */
         @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
         .animate-float { animation: float 6s ease-in-out infinite; }
         .animate-float-delayed { animation: float 6s ease-in-out infinite; animation-delay: 1.5s; }
-        
         @keyframes fade-in-up { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
         .animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; }
-        
-        /* دوران الأيقونات */
-        .animate-spin-slow { animation: spin 4s linear infinite; }
-
         @keyframes marquee-ltr { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
         @keyframes marquee-rtl { 0% { transform: translateX(-100vw); } 100% { transform: translateX(100%); } }
         .animate-marquee-ltr { animation: marquee-ltr 70s linear infinite; }
