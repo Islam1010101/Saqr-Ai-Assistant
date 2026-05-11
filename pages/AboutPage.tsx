@@ -22,8 +22,8 @@ const translations = {
         servicesList: "جلسات قراءة • أوراق عمل • ورش عمل إبداعية • إعارة • مسابقات ثقافية • خدمات صقر الذكي AI",
         contactSection: "التواصل والعمل الرسمي",
         operatingHours: "مواعيد العمل",
-        monThu: "الاثنين - الخميس (07:30 ص - 03:00 م)",
-        fri: "الجمعة (07:30 ص - 11:30 ص)",
+        monThu: "الاثنين - الخميس (07:30 ص - 02:00 م)",
+        fri: "الجمعة (07:30 ص - 10:30 ص)",
         satSun: "السبت - الأحد (مغلق)",
         contactLink: "تواصل مع أمين المكتبة",
         motto: "العلم نور.. والقراءة هي المفتاح لفتح آفاق المستقبل"
@@ -48,8 +48,8 @@ const translations = {
         servicesList: "Reading Sessions • Worksheets • Creative Workshops • Lending • Competitions • Saqr AI Services",
         contactSection: "Contact & Working Hours",
         operatingHours: "Operating Hours",
-        monThu: "Mon - Thu (07:30 AM - 03:00 PM)",
-        fri: "Friday (07:30 AM - 11:30 AM)",
+        monThu: "Mon - Thu (07:30 AM - 02:00 PM)",
+        fri: "Friday (07:30 AM - 10:30 AM)",
         satSun: "Sat - Sun (Closed)",
         contactLink: "Contact the Librarian",
         motto: "Knowledge is Light.. and Reading is the Key to the Future"
