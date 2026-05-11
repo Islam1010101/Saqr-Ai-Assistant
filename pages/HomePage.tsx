@@ -262,7 +262,7 @@ const HomePage: React.FC = () => {
 
               <div className="relative z-10 flex-1 text-center md:text-start space-y-2">
                 <div className="inline-block px-3 py-1 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-black uppercase tracking-widest mb-2 animate-pulse">
-                    Exclusive Initiative | مبادرة حصرية
+                     Initiative | مبادرة
                 </div>
                 <h3 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white leading-tight">
                   {t('alcLibraryTitle')}
