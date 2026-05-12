@@ -3165,7 +3165,6 @@ const rawBookData = [
 { "title": "The Best of Dear Abby", "author": "Abigail Van Buren", "shelf": 17, "row": 2 },
 { "title": "A Place Called Canterbury", "author": "Dudley Clendinen", "shelf": 17, "row": 2 },
 { "title": "Tales of the New Old Age in America", "author": "Unknown", "shelf": 17, "row": 2 },
-{ "title": "Breaking Point", "author": "Suzanne Brockmann", "shelf": 17, "row": 2 },
 { "title": "Purgatory Road", "author": "Bob Rae", "shelf": 17, "row": 2 },
 { "title": "Surviving Columbine", "author": "Liz Carlston", "shelf": 17, "row": 2 },
 { "title": "The Silence of the Lambs", "author": "Thomas Harris", "shelf": 17, "row": 2 },
