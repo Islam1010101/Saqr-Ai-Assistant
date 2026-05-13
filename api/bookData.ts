@@ -3145,7 +3145,7 @@ const rawBookData = [
 { "title": "A Tale of Two Cities", "author": "Charles Dickens", "shelf": 17, "row": 1 },
 { "title": "Privileged Lives", "author": "Edward Stewart", "shelf": 17, "row": 1 },
 { "title": "Hannibal", "author": "Thomas Harris", "shelf": 17, "row": 1 },
-{ "title": "Black in the Saddle Again", "author": "Unknown", "shelf": 17, "row": 1 },
+{ "title": "Black in the Saddle Again", "author": "Arthur Black", "shelf": 17, "row": 1 },
 { "title": "Maggy's Child", "author": "Karen Robards", "shelf": 17, "row": 1 },
 { "title": "The Raj Quartet", "author": "Paul Scott", "shelf": 17, "row": 1 },
 { "title": "Morning, Noon, and Night", "author": "Sidney Sheldon", "shelf": 17, "row": 1 },
