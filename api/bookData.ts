@@ -3308,7 +3308,10 @@ const rawBookData = [
 { "title": "الجملة النحوية في ديوان الهذليين", "author": "حسين عثمان الحكمي", "shelf": 39, "row": 5 },
 { "title": "قاموس اللغة السومرية ، الأكدية ، العربية", "author": "علي ياسين الجبوري", "shelf": 39, "row": 5 },
 { "title": "جامع الشروح والحواشي", "author": "عبدالله محمد الحبشي", "shelf": 32, "row": 3 },
-{ "title": "The Broken Window", "author": "Jefffery Deaver", "shelf": 17, "row": 5 }
+{ "title": "The Broken Window", "author": "Jefffery Deaver", "shelf": 17, "row": 5 },
+{ "title": "Gross News: Gross (but Clean) Stories from Around the World", "author": "Andrews McMeel Publishing", "shelf": 14, "row": 4 },
+{ "title": "Two Years Before The Mast", "author": "R.H. Dana Jr", "shelf": 19, "row": 5 },
+{ "title": "Laurence Olivier: Confessions of an actor", "author": "Laurence Olivier", "shelf": 20, "row": 2 }
 ];
 
 // 3. دالة معالجة البيانات
