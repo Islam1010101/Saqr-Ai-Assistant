@@ -3304,7 +3304,25 @@ const localBookData = [
 { "title": "The Broken Window", "author": "Jefffery Deaver", "shelf": 17, "row": 5 },
 { "title": "Gross News: Gross (but Clean) Stories from Around the World", "author": "Andrews McMeel Publishing", "shelf": 14, "row": 4 },
 { "title": "Two Years Before The Mast", "author": "R.H. Dana Jr", "shelf": 19, "row": 5 },
-{ "title": "Laurence Olivier: Confessions of an actor", "author": "Laurence Olivier", "shelf": 20, "row": 2 }
+{ "title": "Laurence Olivier: Confessions of an actor", "author": "Laurence Olivier", "shelf": 20, "row": 2 },
+{ "title": "في الفضاء الفسيح: علماء الفلك", "author": "دويجو قيران", "shelf": 35, "row": 2 },
+{ "title": "لا مشكلة.. صحتك بخير: الأطباء", "author": "دويجو قيران", "shelf": 35, "row": 2 },
+{ "title": "ملوك الأرقام: علماء الرياضيات", "author": "دويجو قيران", "shelf": 35, "row": 2 },
+{ "title": "حياه عظيمة: مفكرون عظماء", "author": "دويجو قيران", "shelf": 35, "row": 2 },
+{ "title": "الخير الذي لا ينفذ: أسس العلوم", "author": "دويجو قيران", "shelf": 35, "row": 2 },
+{ "title": "سقوط التفاحة: علماء الفيزياء", "author": "دويجو قيران", "shelf": 35, "row": 2 },
+{ "title": "سليم: جولة في عجائب الدنيا", "author": "مصطفى أوراكتشي", "shelf": 35, "row": 2 },
+{ "title": "سليم: سرقة في قطار الشرق السريع", "author": "مصطفى أوراكتشي", "shelf": 35, "row": 2 },
+{ "title": "طوق المرجات", "author": "أمين تواتي", "shelf": 35, "row": 2 },
+{ "title": "خطة العميل أوناي 97", "author": "بدرية الشامسي", "shelf": 35, "row": 2 },
+{ "title": "قصة القوة الخفية في القرية", "author": "بيرسن أكيم أوزن", "shelf": 35, "row": 2 },
+{ "title": "قصة جوقة الأعضاء الغاضبة", "author": "بيرسن أكيم أوزن", "shelf": 35, "row": 2 },
+{ "title": "سارة: قصر غريب في ألمانيا", "author": "بيرسن أكيم أوزن", "shelf": 35, "row": 2 },
+{ "title": "سارة: اقتفاء أثر الكنز", "author": "بيرسن أكيم أوزن", "shelf": 35, "row": 2 },
+{ "title": "الفارس الحالم: كلب غير عادي", "author": "فاطمة عشق", "shelf": 35, "row": 2 },
+{ "title": "الفارس الحالم: مغامرة الجرو الأحمر", "author": "فاطمة عشق", "shelf": 35, "row": 2 },
+{ "title": "عشاق كرة القدم: لغز الأهداف السبعة في نفس المرمى", "author": "روبرتو سانتياجو", "shelf": 35, "row": 2 },
+{ "title": "أفضل صديقة: نسخة مطورة من الكاريكاتير", "author": "يانغ خونغ يينغ", "shelf": 35, "row": 2 }
 ];
 
 function findBooks(q: string) {
