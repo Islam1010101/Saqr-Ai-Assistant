@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useLanguage } from '../App';
 import { ChatMessage } from '../types';
 import ReactMarkdown from 'react-markdown'; 
@@ -6,41 +6,92 @@ import html2canvas from 'html2canvas';
 import { bookData } from '../api/bookData'; 
 import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
+
+// 👇 1. استدعاء دالة التتبع (تم الحفاظ عليه تماماً)
 import { trackActivity } from '../src/utils/tracker';
 
-const SAQR_ELITE_PROMPT = `Identity: You are "Saqr" (صقر), the official Elite AI Librarian of Emirates Falcon International Private School (EFIPS)...`; 
+// --- 1. بروتوكول عقل صقر النهائي (تم الحفاظ عليه تماماً) ---
+const SAQR_ELITE_PROMPT = `
+Identity: You are "Saqr" (صقر), the official Elite AI Librarian of Emirates Falcon International Private School (EFIPS).
+
+General Rules & Information:
+1. PRE-SEARCH REQUIREMENT: Before answering any book query, you MUST first search the Physical Library Index, the Arabic Digital Library, and the English Digital Library.
+2. SCHOOL INFO: If asked about the school (Emirates Falcon International Private School) or when it was established, provide the information and share the official website: www.flacon-school.com
+3. LIBRARIAN & CREATOR INFO: If asked about the current librarian or the creator of this system, clearly state that it is "Islam Soliman" (إسلام سليمان). For communication, provide his email: islam.ahmed@falcon-school.com
+
+Instructions for Books & Search:
+1. If the user asks about a book, ALWAYS check the "EFIPS LIBRARY RECORDS FOUND" context provided at the end of this prompt.
+2. If found, tell them EXACTLY where it is based on the data. For Physical Library (المكتبة العادية), mention the shelf or row number if available. For Digital Libraries, specify if it's the Arabic or English Digital Library.
+3. If the user searches in Arabic for an English book (e.g., "هاري بوتر"), use your AI knowledge to recognize they mean "Harry Potter", and answer accordingly.
+
+Instructions for "Little Author" Challenge (STRICT RULES):
+1. UAE THEMES: Start stories inspired by UAE identity (Space, Pearl Diving, Desert Heritage, Falcons, Zayed's legacy).
+2. INTERACTION: Write ONLY ONE short sentence to continue the plot naturally. 
+   - DO NOT give hints. DO NOT suggest what happens next.
+   - DO NOT ask "Are you finished?", "What happens next?", or ANY questions. Just write your sentence and wait.
+   - Use plain, clear text. DO NOT use weird symbols, markdown asterisks, or formatting in the story.
+3. SILENT CORRECTION: Check the student's text for spelling/grammar errors. ONLY IF there is an actual mistake, politely point it out and provide the correct word, then write your sentence to continue the story. If there are NO errors, JUST continue the story. NEVER ask if there are errors.
+4. ENDING THE STORY: 
+   - Wait patiently until the student explicitly types "انتهت" or "finished".
+   - DO NOT output the WINNER tag yet. 
+   - Praise their story, then EXPLICITLY ASK: "ما هو اسمك الكامل؟ وما هو مستواك الدراسي؟" (What is your full name and grade level?).
+5. ISSUING THE CERTIFICATE: 
+   - ONLY AFTER the student replies with their Name and Grade, output this EXACT format at the very end of your message:
+   [WINNER: {Student Name} | Grade: {Student Grade} | Content: {Write a beautifully summarized, grammatically flawless, plain-text summary of the full story they wrote. No weird symbols.}]
+
+Style: Professional, empathetic, uses flawless Fos'ha Arabic or English based on user input. NO emojis in the certificate content.
+`;
 
 const localization: any = {
   ar: {
-    heroTitle: 'هل لديك أفكار جديدة لاستكشافها؟',
-    welcome: 'أهلاً بك! أنا "صقر"، المساعد الذكي لمكتبة المدرسة. هل نؤلف قصة معاً اليوم، أم تبحث عن كتاب محدد؟',
-    input: 'اسأل صقر عن الكتب أو ابدأ قصة...',
+    welcome: 'أهلاً بك! أنا "صقر"، المساعد الذكي لمكتبة المدرسة. هل نؤلف قصة معاً اليوم ، أم تبحث عن كتاب محدد؟',
+    input: 'اكتب رسالتك، قصتك، أو ابحث عن كتاب...',
     status: 'صقر الذكي (EFIPS)',
     online: 'متصل',
     download: 'تحميل شهادة المؤلف الصغير',
     you: 'أنت',
-    thinking: 'جاري التفكير...',
+    certSchool: 'مدرسة صقر الإمارات الدولية الخاصة',
+    certChallenge: 'تحدي المؤلف الصغير',
+    certTitle: 'شهادة إبداع أدبي',
+    certSubtitle: 'يفخر "صقر" المساعد الذكي بتوثيق الإنجاز الأدبي للمبدع(ة):',
+    certGrade: 'المستوى الدراسي:',
+    certStory: 'القصة المبدعة',
+    certDate: 'تاريخ الإصدار',
+    certOfficial: 'وثيقة رسمية من المكتبة',
+    certAI: 'الموثق المعتمد',
+    certSaqr: 'صقر - المساعد الذكي'
   },
   en: {
-    heroTitle: 'Any new ideas to explore?',
-    welcome: "Welcome! I'm 'Saqr', your AI Librarian. Shall we co-author a story, or find a book?",
-    input: 'Ask Saqr about books or start a story...',
+    welcome: "Welcome! I'm 'Saqr', your AI Librarian. Shall we co-author story today, or are you looking for a specific book?",
+    input: 'Start a story, discuss, or search...',
     status: 'Saqr AI Librarian',
     online: 'Online',
     download: 'Download Certificate',
     you: 'YOU',
-    thinking: 'Thinking...',
+    certSchool: 'Emirates Falcon International Private School',
+    certChallenge: 'Little Author Challenge',
+    certTitle: 'CERTIFICATE OF LITERARY CREATIVITY',
+    certSubtitle: 'Saqr, the AI Librarian, proudly documents the achievement of:',
+    certGrade: 'Grade Level:',
+    certStory: 'The Creative Story',
+    certDate: 'Date of Issue',
+    certOfficial: 'Official Library Document',
+    certAI: 'Certified By',
+    certSaqr: 'Saqr - AI Librarian'
   }
 };
 
 const SmartSearchPage: React.FC = () => {
   const { locale, dir } = useLanguage();
-  const t = (key: string) => localization[locale][key] || key;
+  const t = (key: string) => localization[locale][key];
 
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  // تم الحفاظ على كافة الـ States الأصلية
+  const [messages, setMessages] = useState<ChatMessage[]>([{ role: 'assistant', content: localization[locale].welcome }]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [winnerData, setWinnerData] = useState<any>(null);
+  
+  // حالة تفاعل صقر الحركية (Idle هي الافتراضية)
   const [saqrState, setSaqrState] = useState<'idle' | 'thinking' | 'speaking' | 'victory'>('idle');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -50,147 +101,308 @@ const SmartSearchPage: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
+  const handleDownloadJPG = async () => {
+    if (!certificateRef.current) return;
+    
+    // إظهار الشهادة في الخلفية للالتقاط
+    certificateRef.current.style.left = '0';
+    certificateRef.current.style.top = '0';
+    certificateRef.current.style.position = 'fixed';
+    certificateRef.current.style.zIndex = '-9999';
+
+    // استخدام الارتفاع التلقائي للشهادة (scrollHeight) لضمان عدم قص القصة الطويلة
+    const canvas = await html2canvas(certificateRef.current, { 
+      scale: 3, 
+      backgroundColor: '#ffffff',
+      useCORS: true,
+      windowWidth: 1123, 
+      height: certificateRef.current.scrollHeight
+    });
+
+    certificateRef.current.style.left = '-9999px';
+
+    const imgData = canvas.toDataURL('image/jpeg', 1.0);
+    const link = document.createElement('a');
+    link.href = imgData;
+    link.download = `EFIPS_Author_${winnerData.name.replace(/\s+/g, '_')}.jpg`;
+    link.click();
+  };
+
   const handleSendMessage = async () => {
     if (input.trim() === '' || isLoading) return;
     const userQuery = input.trim();
+
+    // 👇 2. هنا يتم إرسال سؤال الطالب إلى السحابة فور الضغط على إرسال
     trackActivity('ai', userQuery);
-    
+
     setMessages(prev => [...prev, { role: 'user', content: userQuery }]);
     setInput('');
     setIsLoading(true);
+    
+    // 1. تحويل صقر لحالة التفكير (لتفعيل الـ GIF)
     setSaqrState('thinking');
 
+    const normalize = (text: string) => 
+      text?.toString()
+          .replace(/[أإآا]/g, 'ا')
+          .replace(/[ةه]/g, 'ه')
+          .replace(/[ىي]/g, 'ي')
+          .toLowerCase()
+          .trim() || '';
+
+    const qNormalized = normalize(userQuery);
+    const stopWords = ['the', 'book', 'about', 'summary', 'عن', 'كتاب', 'تلخيص', 'ملخص', 'اريد', 'ابحث'];
+    const queryWords = qNormalized.split(/\s+/).filter(word => word.length > 2 && !stopWords.includes(word));
+
+    // بحث دقيق وشامل
+    const searchIn = (db: any[], location: string) => {
+      if (!db || !Array.isArray(db)) return [];
+      return db.filter(b => {
+        const title = normalize(b?.title || '');
+        const author = normalize(b?.author || '');
+        
+        if (title.includes(qNormalized) || author.includes(qNormalized)) return true;
+        return queryWords.length > 0 && queryWords.some(word => title.includes(word) || author.includes(word));
+      }).map(b => ({ ...b, pageLocation: location }));
+    };
+
+    const foundBooks = [
+      ...searchIn(bookData, "المكتبة العادية (Physical Library)"),
+      ...searchIn(ARABIC_LIBRARY_DATABASE, "المكتبة الرقمية العربية (Arabic Digital Library)"),
+      ...searchIn(ENGLISH_LIBRARY_DATABASE, "المكتبة الرقمية الإنجليزية (English Digital Library)")
+    ];
+
+    let searchContext = "";
+    if (foundBooks.length > 0) {
+      searchContext = `EFIPS LIBRARY RECORDS FOUND: ${JSON.stringify(foundBooks.slice(0, 10))}.`;
+    }
+
     try {
-        // هنا يوضع منطق الـ Fetch الخاص بك كما هو في الكود الأصلي
-        // سأقوم بمحاكاة استجابة بسيطة للتجربة
-        setTimeout(() => {
-            setSaqrState('speaking');
-            setMessages(prev => [...prev, { role: 'assistant', content: "أنا جاهز لمساعدتك في مكتبة مدرسة صقر الإمارات!" }]);
-            setTimeout(() => setSaqrState('idle'), 2500);
-            setIsLoading(false);
-        }, 1500);
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [
+            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${searchContext}` }, 
+            ...messages, 
+            { role: 'user', content: userQuery }
+          ],
+          locale,
+        }),
+      });
+      const data = await response.json();
+      let reply = data.reply || '';
+
+      // التقاط بيانات الشهادة
+      if (reply.includes('[WINNER:')) {
+        const match = reply.match(/\[WINNER:\s*(.*?)\s*\|\s*Grade:\s*(.*?)\s*\|\s*Content:\s*(.*?)\]/s);
+        if (match) {
+          const dateOptions: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+          const formattedDate = new Date().toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', dateOptions);
+
+          const info = { 
+            name: match[1].trim(), 
+            grade: match[2].trim(), 
+            content: match[3].trim(), 
+            date: formattedDate 
+          };
+          setWinnerData(info);
+          localStorage.setItem('efips_challenge_reports', JSON.stringify([info, ...JSON.parse(localStorage.getItem('efips_challenge_reports') || '[]')]));
+          
+          // تحويل صقر لحالة الفرحة بالشهادة (لتفعيل الـ GIF)
+          setSaqrState('victory');
+        }
+        reply = reply.replace(/\[WINNER:.*?\]/gs, '');
+      } else {
+        // 2. تحويل صقر لحالة التحدث عند استلام الرد (لتفعيل الـ GIF)
+        setSaqrState('speaking');
+        // إعادته للوضع الطبيعي (الثابت) بعد 2.5 ثانية من انتهاء الحركة
+        setTimeout(() => setSaqrState('idle'), 2500);
+      }
+      
+      setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
     } catch {
-        setSaqrState('idle');
-        setIsLoading(false);
+      setMessages(prev => [...prev, { role: 'assistant', content: locale === 'ar' ? 'حدث خطأ في الاتصال، يرجى المحاولة مرة أخرى.' : 'Connection error, please try again.' }]);
+      setSaqrState('idle'); // العودة للوضع الثابت عند الخطأ
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  // 🌟 التعديل المطلوب هنا: تحديد مسار الصورة المناسب بدقة
   const getSaqrImageSrc = () => {
-    return saqrState === 'idle' ? '/search_still_frame.png' : '/Search.gif';
+    if (saqrState === 'idle') {
+        return '/search_still_frame.png'; // إطار ثابت واحد
+    }
+    return '/Search.gif'; // الملف المتحرك الكامل
   };
 
   return (
-    <div dir={dir} className="w-full h-screen flex flex-col bg-[#f8faff] dark:bg-[#0e1117] font-sans relative overflow-hidden transition-colors duration-500">
+    <div dir={dir} className="w-full h-[100dvh] flex flex-col bg-slate-50 dark:bg-slate-950 font-sans relative overflow-hidden text-slate-900 dark:text-slate-100 transition-colors duration-300">
       
-      {/* طبقة الخلفية - جعلناها خلف كل شيء لضمان عدم حجب المدخلات */}
-      <div className="absolute inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-100/40 dark:bg-blue-900/10 rounded-full blur-[120px]"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-red-100/20 dark:bg-red-900/10 rounded-full blur-[120px]"></div>
+      {/* خلفية ديناميكية (تم الحفاظ عليه تماماً) */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-40 dark:opacity-20">
+         <div className="absolute top-[10%] left-[-10%] w-[50%] h-[50%] bg-red-500/20 rounded-full blur-[120px]"></div>
+         <div className="absolute bottom-[10%] right-[-10%] w-[40%] h-[60%] bg-blue-500/10 rounded-full blur-[100px]"></div>
       </div>
 
-      {/* منطقة المحتوى الرئيسية - مع إضافة padding bottom كبير لمنع التداخل مع الشريط */}
-      <div className="flex-1 overflow-y-auto no-scrollbar relative z-10 pt-12 pb-44">
-        <div className="max-w-3xl mx-auto flex flex-col items-center">
-          
-          {messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center mt-20 animate-fade-in px-6">
-              <img 
-                src={getSaqrImageSrc()} 
-                className="w-32 h-32 md:w-44 md:h-44 object-contain mb-8 drop-shadow-xl" 
-                alt="Saqr" 
-              />
-              <h1 className="text-3xl md:text-5xl font-medium text-slate-700 dark:text-slate-200 tracking-tight text-center">
-                {t('heroTitle')}
-              </h1>
-            </div>
-          ) : (
-            <div className="w-full px-6 space-y-10">
-              {messages.map((msg, index) => (
-                <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in-up`}>
-                  <div className={`max-w-[90%] md:max-w-[80%] px-6 py-4 ${
-                    msg.role === 'user' 
-                    ? 'bg-slate-100 dark:bg-slate-800 rounded-[2rem]' 
-                    : 'bg-transparent'
-                  }`}>
-                    <div className="prose prose-slate dark:prose-invert max-w-none text-lg leading-relaxed text-start">
-                      <ReactMarkdown>{msg.content}</ReactMarkdown>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              <div ref={messagesEndRef} />
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* منطقة الإدخال - رفع الـ z-index وضمان أنها ثابتة فوق كل شيء */}
-      <div className="fixed bottom-0 left-0 w-full p-4 md:p-10 flex flex-col items-center z-50 bg-gradient-to-t from-[#f8faff] dark:from-[#0e1117] via-[#f8faff]/90 to-transparent">
+      {/* القسم العلوي: بطل الشاشة (شخصية صقر) في المنتصف (تم الحفاظ على التخطيط) */}
+      <div className="w-full h-[35vh] min-h-[250px] flex-shrink-0 flex flex-col items-center justify-center relative z-20 mt-4">
         
-        <div className="w-full max-w-3xl relative">
-          
-          {/* حاوية الإدخال (Pill) */}
-          <div className="relative flex items-center bg-white dark:bg-[#1e1f20] rounded-full shadow-[0_4px_30px_rgba(0,0,0,0.06)] border border-slate-200/50 dark:border-slate-700/50 px-6 py-2 min-h-[64px]">
+        {/* الحالة: متصل */}
+        <div className="absolute top-0 flex flex-col items-center gap-1 opacity-70">
+           <span className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">{t('status')}</span>
+           <span className="flex items-center gap-1.5 text-[10px] text-green-500 font-bold uppercase">
+             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> {t('online')}
+           </span>
+        </div>
+
+        {/* شخصية صقر التفاعلية */}
+        <div className="relative flex items-center justify-center w-40 h-40 md:w-56 md:h-56 transition-all duration-300">
             
-            <input
-              autoFocus
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-              placeholder={t('input')}
-              className="flex-1 bg-transparent border-none focus:ring-0 text-lg py-2 text-slate-800 dark:text-slate-100 placeholder-slate-400 outline-none"
+            {/* هالة ضوئية تظهر فقط أثناء التفكير */}
+            <div className={`absolute inset-0 bg-red-500/30 rounded-full blur-3xl transition-opacity duration-500 ${saqrState === 'thinking' ? 'opacity-100 animate-pulse' : 'opacity-0'}`}></div>
+            
+            <img 
+              src={getSaqrImageSrc()} // 🌟 استخدام الدالة لاستدعاء الصورة/الـ GIF بدقة
+              alt="Saqr Mascot" 
+              className="w-full h-full object-contain relative z-10 drop-shadow-2xl" 
             />
+        </div>
 
-            {/* حالة التفكير */}
-            {isLoading && (
-              <div className="flex items-center gap-2 px-3 text-blue-500 animate-pulse">
-                <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path d="M12 2v4m0 12v4M4.22 4.22l2.83 2.83m8.49 8.49l2.83 2.83M2 12h4m12 0h4M4.22 19.78l2.83-2.83m8.49-8.49l2.83-2.83" strokeWidth="2.5" strokeLinecap="round"/>
-                </svg>
-              </div>
-            )}
-
-            {/* زر الإرسال */}
-            <button 
-              disabled={!input.trim() || isLoading}
-              onClick={handleSendMessage}
-              className={`p-3 rounded-full transition-all ${
-                input.trim() ? 'text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20' : 'text-slate-300'
-              }`}
-            >
-              <svg className="w-7 h-7 rotate-90 rtl:-rotate-90" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-              </svg>
+        {/* زر تحميل الشهادة (يظهر تحت صقر مباشرة عند الفوز) */}
+        {winnerData && saqrState === 'victory' && (
+          <div className="absolute bottom-[-10px] z-30 animate-bounce">
+            <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-bold rounded-full shadow-xl border-2 border-white/20 transition-transform transform hover:scale-105 uppercase text-xs md:text-sm">
+              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+              <span>{t('download')}</span>
             </button>
           </div>
+        )}
+      </div>
 
-          {/* تنويه بسيط تحت الشريط (اختياري لزيادة الجمالية) */}
-          <p className="text-[10px] text-center mt-3 text-slate-400 font-medium uppercase tracking-wider">
-            Powered by Saqr Elite AI - EFIPS Library
-          </p>
+      {/* القسم السفلي: المحادثة (Chat) والشريط (تم الحفاظ عليه تماماً) */}
+      <div className="flex-1 w-full max-w-4xl mx-auto flex flex-col bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border-t border-x border-slate-200 dark:border-slate-800 rounded-t-[3rem] shadow-[0_-10px_40px_rgba(0,0,0,0.05)] overflow-hidden z-10">
+        
+        {/* منطقة عرض الرسائل (Scrollable) */}
+        <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 no-scrollbar scroll-smooth">
+          <div className="flex flex-col justify-end min-h-full space-y-6">
+            {messages.map((msg, index) => (
+              <div key={index} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'} animate-fade-in-up`}>
+                
+                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 mb-1 px-2 uppercase">
+                  {msg.role === 'user' ? t('you') : 'صقر'}
+                </span>
 
-          {/* زر تحميل الشهادة العائم */}
-          {winnerData && (
-             <button onClick={() => {/* دالة التحميل */}} className="absolute -top-16 left-1/2 -translate-x-1/2 bg-red-600 text-white px-8 py-3 rounded-full text-sm font-bold shadow-2xl hover:bg-red-700 transition-all flex items-center gap-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                {t('download')}
-             </button>
-          )}
+                <div className={`relative max-w-[85%] md:max-w-[75%] px-5 py-4 rounded-3xl text-sm md:text-base shadow-sm ${
+                    msg.role === 'user' 
+                    ? 'bg-red-600 text-white rounded-tr-none' 
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-tl-none border border-slate-200 dark:border-slate-700'
+                  }`}>
+                  <div className="prose prose-sm md:prose-base dark:prose-invert font-medium leading-relaxed max-w-none text-start">
+                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            {isLoading && (
+              <div className="flex flex-col items-start animate-fade-in-up">
+                 <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 mb-1 px-2 uppercase">صقر</span>
+                 <div className="bg-slate-100 dark:bg-slate-800 px-6 py-5 rounded-3xl rounded-tl-none shadow-sm flex gap-1.5 items-center border border-slate-200 dark:border-slate-700">
+                  <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-bounce"></span>
+                  <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></span>
+                  <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-bounce" style={{animationDelay: '0.4s'}}></span>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} className="h-2" />
+          </div>
         </div>
+
+        {/* منطقة الإدخال ثابتة بالأسفل */}
+        <div className="p-4 md:p-6 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
+          <div className="relative flex items-center bg-slate-50 dark:bg-slate-950 rounded-full border-2 border-slate-200 dark:border-slate-700 focus-within:border-red-500 dark:focus-within:border-red-500 transition-colors">
+            <input
+              type="text" 
+              value={input} 
+              onChange={(e) => setInput(e.target.value)} 
+              onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+              placeholder={t('input')}
+              className="flex-1 bg-transparent border-0 focus:ring-0 py-4 px-6 text-slate-900 dark:text-white font-medium outline-none w-full placeholder-slate-400"
+              disabled={isLoading}
+            />
+            <button 
+              onClick={handleSendMessage} 
+              disabled={isLoading || !input.trim()} 
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-red-600 hover:bg-red-700 disabled:bg-slate-300 dark:disabled:bg-slate-700 disabled:cursor-not-allowed text-white flex items-center justify-center shadow-md transition-all active:scale-95 rtl:left-2 rtl:right-auto rtl:rotate-180"
+            >
+              <svg className="w-5 h-5 md:w-6 md:h-6 rotate-[-45deg] rtl:rotate-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* --- تصميم الشهادة العرضية للتصدير (تم الحفاظ عليه تماماً) --- */}
+      <div className="fixed left-[-9999px] top-0 pointer-events-none">
+          <div ref={certificateRef} dir={locale === 'ar' ? 'rtl' : 'ltr'} className="w-[1123px] min-h-[794px] h-fit bg-white text-slate-900 relative overflow-hidden flex flex-col font-sans border-[20px] border-double border-red-700 pb-12">
+              
+              <div className="absolute top-0 right-0 w-80 h-80 bg-red-50 rounded-bl-full -z-10"></div>
+              <div className="absolute bottom-0 left-0 w-80 h-80 bg-red-50 rounded-tr-full -z-10"></div>
+
+              <div className="flex justify-between items-center p-10 border-b-2 border-slate-100">
+                 <div className="flex items-center gap-6">
+                     <img src="https://www.efipslibrary.online/school-logo.png" className="w-24 object-contain" alt="EFIPS Logo" />
+                     <div>
+                         <h3 className="text-2xl font-bold text-slate-800">{t('certSchool')}</h3>
+                         <h4 className="text-base font-bold text-slate-400 uppercase mt-1" dir="ltr">EFIPS</h4>
+                     </div>
+                 </div>
+                 <div className="text-left">
+                     <div className="px-8 py-3 bg-red-600 text-white font-bold rounded-full text-lg shadow-sm border-2 border-red-700">{t('certChallenge')}</div>
+                 </div>
+              </div>
+
+              <div className="flex-1 flex flex-col items-center justify-center text-center px-16 mt-8">
+                  <h1 className="text-5xl font-black text-red-700 mb-6">{t('certTitle')}</h1>
+                  <p className="text-2xl font-medium text-slate-600 mb-8">{t('certSubtitle')}</p>
+                  
+                  <h2 className="text-5xl font-black text-slate-900 mb-4 pb-2 border-b-4 border-red-600 px-12 inline-block leading-tight">{winnerData?.name}</h2>
+                  <p className="text-3xl font-bold text-slate-500 mb-10">{t('certGrade')} <span className="text-red-600">{winnerData?.grade}</span></p>
+                  
+                  <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200 w-full text-start relative shadow-inner mb-8">
+                      <span className={`absolute -top-4 ${locale === 'ar' ? 'right-10' : 'left-10'} bg-white px-6 py-1 text-red-700 font-bold text-lg border border-slate-200 rounded-full`}>{t('certStory')}</span>
+                      <p className={`text-2xl leading-[1.8] font-medium text-slate-800 mt-4 ${locale === 'ar' ? 'text-justify' : 'text-left'} whitespace-pre-wrap`}>{winnerData?.content}</p>
+                  </div>
+              </div>
+
+              <div className="flex justify-between items-end px-16 pt-8 border-t-2 border-slate-100 mt-auto">
+                  <div className="text-center w-64">
+                     <p className="text-lg font-bold text-slate-500 mb-2">{t('certDate')}</p>
+                     <p className="text-xl font-black text-slate-900">{winnerData?.date}</p>
+                  </div>
+                  <div className="text-center flex flex-col items-center flex-1">
+                     <img src="https://www.efipslibrary.online/school-logo.png" className="w-16 opacity-20 mb-2 grayscale" alt="Stamp" />
+                     <p className="text-xs font-bold text-slate-400 uppercase">{t('certOfficial')}</p>
+                  </div>
+                  <div className="text-center w-64">
+                     <p className="text-lg font-bold text-slate-500 mb-2">{t('certAI')}</p>
+                     <p className="text-2xl font-black text-red-700">{t('certSaqr')}</p>
+                  </div>
+              </div>
+          </div>
       </div>
 
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;700;900&display=swap');
         * { font-family: 'Cairo', sans-serif !important; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
+        
         @keyframes fade-in-up {
-          from { opacity: 0; transform: translateY(15px); }
-          to { opacity: 1; transform: translateY(0); }
+          0% { opacity: 0; transform: translateY(10px); }
+          100% { opacity: 1; transform: translateY(0); }
         }
         .animate-fade-in-up { animation: fade-in-up 0.4s ease-out forwards; }
-        .animate-fade-in { animation: fadeIn 0.8s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
       `}</style>
     </div>
   );
