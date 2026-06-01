@@ -229,7 +229,7 @@ const SmartSearchPage: React.FC = () => {
     }
   };
 
-  // 🌟 التعديل المطلوب هنا: تحديد مسار الصورة المناسب بدقة
+  // 🌟 مسار الصورة للحفاظ على حركة وتفاعلات صقر
   const getSaqrImageSrc = () => {
     if (saqrState === 'idle') {
         return '/search_still_frame.png'; // إطار ثابت واحد
@@ -238,112 +238,112 @@ const SmartSearchPage: React.FC = () => {
   };
 
   return (
-    <div dir={dir} className="w-full h-[100dvh] flex flex-col bg-slate-50 dark:bg-slate-950 font-sans relative overflow-hidden text-slate-900 dark:text-slate-100 transition-colors duration-300">
+    <div dir={dir} className="w-full h-[100dvh] flex flex-col bg-white dark:bg-[#131314] font-sans relative overflow-hidden text-slate-900 dark:text-slate-100 transition-colors duration-300">
       
-      {/* خلفية ديناميكية (تم الحفاظ عليه تماماً) */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-40 dark:opacity-20">
-         <div className="absolute top-[10%] left-[-10%] w-[50%] h-[50%] bg-red-500/20 rounded-full blur-[120px]"></div>
-         <div className="absolute bottom-[10%] right-[-10%] w-[40%] h-[60%] bg-blue-500/10 rounded-full blur-[100px]"></div>
-      </div>
-
-      {/* القسم العلوي: بطل الشاشة (شخصية صقر) في المنتصف (تم الحفاظ على التخطيط) */}
-      <div className="w-full h-[35vh] min-h-[250px] flex-shrink-0 flex flex-col items-center justify-center relative z-20 mt-4">
-        
-        {/* الحالة: متصل */}
-        <div className="absolute top-0 flex flex-col items-center gap-1 opacity-70">
-           <span className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">{t('status')}</span>
-           <span className="flex items-center gap-1.5 text-[10px] text-green-500 font-bold uppercase">
-             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> {t('online')}
+      {/* Header - واجهة جيميني النظيفة بالجهة العلوية */}
+      <header className="flex-shrink-0 px-4 py-4 md:px-8 w-full max-w-4xl mx-auto flex justify-between items-center z-20">
+         <div className="flex items-center gap-3">
+           <span className="font-bold text-lg md:text-xl text-slate-700 dark:text-slate-200 tracking-wide">{t('status')}</span>
+           <span className="flex items-center gap-1.5 text-[10px] text-green-600 dark:text-green-400 font-bold uppercase bg-green-50 dark:bg-green-900/30 px-2 py-0.5 rounded-full border border-green-100 dark:border-green-800">
+             <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> {t('online')}
            </span>
-        </div>
+         </div>
 
-        {/* شخصية صقر التفاعلية */}
-        <div className="relative flex items-center justify-center w-40 h-40 md:w-56 md:h-56 transition-all duration-300">
-            
-            {/* هالة ضوئية تظهر فقط أثناء التفكير */}
-            <div className={`absolute inset-0 bg-red-500/30 rounded-full blur-3xl transition-opacity duration-500 ${saqrState === 'thinking' ? 'opacity-100 animate-pulse' : 'opacity-0'}`}></div>
-            
-            <img 
-              src={getSaqrImageSrc()} // 🌟 استخدام الدالة لاستدعاء الصورة/الـ GIF بدقة
-              alt="Saqr Mascot" 
-              className="w-full h-full object-contain relative z-10 drop-shadow-2xl" 
-            />
-        </div>
+         {/* زر تحميل الشهادة يظهر عند الفوز بشكل أنيق في الـ Header */}
+         {winnerData && saqrState === 'victory' && (
+           <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white font-bold rounded-full shadow-md transition-transform transform hover:scale-105 uppercase text-[10px] md:text-xs">
+             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+             <span className="hidden md:inline">{t('download')}</span>
+             <span className="md:hidden">تحميل</span>
+           </button>
+         )}
+      </header>
 
-        {/* زر تحميل الشهادة (يظهر تحت صقر مباشرة عند الفوز) */}
-        {winnerData && saqrState === 'victory' && (
-          <div className="absolute bottom-[-10px] z-30 animate-bounce">
-            <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-bold rounded-full shadow-xl border-2 border-white/20 transition-transform transform hover:scale-105 uppercase text-xs md:text-sm">
-              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-              <span>{t('download')}</span>
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* القسم السفلي: المحادثة (Chat) والشريط (تم الحفاظ عليه تماماً) */}
-      <div className="flex-1 w-full max-w-4xl mx-auto flex flex-col bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border-t border-x border-slate-200 dark:border-slate-800 rounded-t-[3rem] shadow-[0_-10px_40px_rgba(0,0,0,0.05)] overflow-hidden z-10">
-        
-        {/* منطقة عرض الرسائل (Scrollable) */}
-        <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 no-scrollbar scroll-smooth">
-          <div className="flex flex-col justify-end min-h-full space-y-6">
-            {messages.map((msg, index) => (
-              <div key={index} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'} animate-fade-in-up`}>
-                
-                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 mb-1 px-2 uppercase">
-                  {msg.role === 'user' ? t('you') : 'صقر'}
-                </span>
-
-                <div className={`relative max-w-[85%] md:max-w-[75%] px-5 py-4 rounded-3xl text-sm md:text-base shadow-sm ${
-                    msg.role === 'user' 
-                    ? 'bg-red-600 text-white rounded-tr-none' 
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-tl-none border border-slate-200 dark:border-slate-700'
-                  }`}>
-                  <div className="prose prose-sm md:prose-base dark:prose-invert font-medium leading-relaxed max-w-none text-start">
+      {/* المحادثة (Chat Area) - تصميم المحادثة النظيف مثل جيميني */}
+      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 no-scrollbar scroll-smooth">
+        <div className="max-w-3xl mx-auto flex flex-col justify-start min-h-full space-y-8">
+          
+          {/* رسالة الترحيب الأولى تظهر دائماً */}
+          {messages.map((msg, index) => (
+            <div key={index} className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in-up`}>
+              
+              {/* رسائل صقر (AI) */}
+              {msg.role === 'assistant' && (
+                <div className="flex gap-4 max-w-[95%] md:max-w-[85%]">
+                  {/* الأيقونة الرمزية (Avatar) لصقر بنفس الصور/الـ GIF الأصلية */}
+                  <div className="w-8 h-8 md:w-10 md:h-10 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 mt-1 shadow-sm">
+                    <img 
+                      src={getSaqrImageSrc()} 
+                      alt="Saqr AI" 
+                      className={`w-full h-full object-cover transition-all ${saqrState === 'thinking' && index === messages.length - 1 ? 'scale-110 opacity-80' : ''}`}
+                    />
+                  </div>
+                  <div className="prose prose-sm md:prose-base dark:prose-invert font-medium leading-relaxed max-w-none text-start pt-1.5 md:pt-2">
                     <ReactMarkdown>{msg.content}</ReactMarkdown>
                   </div>
                 </div>
-              </div>
-            ))}
-            
-            {isLoading && (
-              <div className="flex flex-col items-start animate-fade-in-up">
-                 <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 mb-1 px-2 uppercase">صقر</span>
-                 <div className="bg-slate-100 dark:bg-slate-800 px-6 py-5 rounded-3xl rounded-tl-none shadow-sm flex gap-1.5 items-center border border-slate-200 dark:border-slate-700">
-                  <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-bounce"></span>
-                  <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></span>
-                  <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-bounce" style={{animationDelay: '0.4s'}}></span>
+              )}
+
+              {/* رسائل المستخدم (User) */}
+              {msg.role === 'user' && (
+                <div className="bg-[#f0f4f9] dark:bg-[#1e1f20] text-slate-900 dark:text-slate-100 px-5 py-3 md:px-6 md:py-4 rounded-3xl max-w-[85%] md:max-w-[75%] shadow-sm">
+                  <div className="font-medium leading-relaxed max-w-none text-start">
+                    {msg.content}
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+          
+          {/* تأثير التفكير (Loading) مع حركة صقر */}
+          {isLoading && (
+            <div className="flex w-full justify-start animate-fade-in-up">
+              <div className="flex gap-4 max-w-[95%] md:max-w-[85%]">
+                <div className="w-8 h-8 md:w-10 md:h-10 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 mt-1 shadow-sm">
+                  <img src={getSaqrImageSrc()} alt="Saqr AI Thinking" className="w-full h-full object-cover scale-110 opacity-80"/>
+                </div>
+                <div className="flex gap-1.5 items-center pt-4 md:pt-5">
+                  <span className="w-2 h-2 bg-red-400 rounded-full animate-bounce"></span>
+                  <span className="w-2 h-2 bg-red-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></span>
+                  <span className="w-2 h-2 bg-red-400 rounded-full animate-bounce" style={{animationDelay: '0.4s'}}></span>
                 </div>
               </div>
-            )}
-            <div ref={messagesEndRef} className="h-2" />
-          </div>
+            </div>
+          )}
+          
+          <div ref={messagesEndRef} className="h-4" />
         </div>
+      </div>
 
-        {/* منطقة الإدخال ثابتة بالأسفل */}
-        <div className="p-4 md:p-6 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
-          <div className="relative flex items-center bg-slate-50 dark:bg-slate-950 rounded-full border-2 border-slate-200 dark:border-slate-700 focus-within:border-red-500 dark:focus-within:border-red-500 transition-colors">
+      {/* منطقة الإدخال (Input Area) - شريط جيميني الدائري بالأسفل */}
+      <div className="px-4 py-4 md:px-8 pb-6 md:pb-8 w-full bg-white dark:bg-[#131314] z-20">
+        <div className="max-w-3xl mx-auto">
+          <div className="relative flex items-center bg-[#f0f4f9] dark:bg-[#1e1f20] rounded-full focus-within:ring-1 ring-slate-300 dark:ring-slate-700 transition-all shadow-sm">
             <input
               type="text" 
               value={input} 
               onChange={(e) => setInput(e.target.value)} 
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
               placeholder={t('input')}
-              className="flex-1 bg-transparent border-0 focus:ring-0 py-4 px-6 text-slate-900 dark:text-white font-medium outline-none w-full placeholder-slate-400"
+              className="flex-1 bg-transparent border-0 focus:ring-0 py-4 px-6 md:py-5 md:px-8 text-slate-900 dark:text-white font-medium outline-none w-full placeholder-slate-500"
               disabled={isLoading}
             />
             <button 
               onClick={handleSendMessage} 
               disabled={isLoading || !input.trim()} 
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-red-600 hover:bg-red-700 disabled:bg-slate-300 dark:disabled:bg-slate-700 disabled:cursor-not-allowed text-white flex items-center justify-center shadow-md transition-all active:scale-95 rtl:left-2 rtl:right-auto rtl:rotate-180"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 disabled:bg-transparent disabled:opacity-30 disabled:cursor-not-allowed text-slate-800 dark:text-slate-200 flex items-center justify-center transition-all active:scale-95 rtl:left-2 rtl:right-auto"
             >
-              <svg className="w-5 h-5 md:w-6 md:h-6 rotate-[-45deg] rtl:rotate-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+              {/* أيقونة الإرسال */}
+              <svg className="w-5 h-5 md:w-6 md:h-6 rtl:rotate-180" fill="currentColor" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" /></svg>
             </button>
           </div>
+          <p className="text-center text-[11px] md:text-xs text-slate-400 dark:text-slate-500 mt-3 font-medium">
+            Saqr AI Librarian can make mistakes. Please verify library information.
+          </p>
         </div>
       </div>
 
-      {/* --- تصميم الشهادة العرضية للتصدير (تم الحفاظ عليه تماماً) --- */}
+      {/* --- تصميم الشهادة العرضية للتصدير (تم الحفاظ عليه تماماً كما هو مخفي) --- */}
       <div className="fixed left-[-9999px] top-0 pointer-events-none">
           <div ref={certificateRef} dir={locale === 'ar' ? 'rtl' : 'ltr'} className="w-[1123px] min-h-[794px] h-fit bg-white text-slate-900 relative overflow-hidden flex flex-col font-sans border-[20px] border-double border-red-700 pb-12">
               
@@ -402,7 +402,7 @@ const SmartSearchPage: React.FC = () => {
           0% { opacity: 0; transform: translateY(10px); }
           100% { opacity: 1; transform: translateY(0); }
         }
-        .animate-fade-in-up { animation: fade-in-up 0.4s ease-out forwards; }
+        .animate-fade-in-up { animation: fade-in-up 0.3s ease-out forwards; }
       `}</style>
     </div>
   );
