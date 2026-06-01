@@ -3322,7 +3322,9 @@ const localBookData = [
 { "title": "الفارس الحالم: كلب غير عادي", "author": "فاطمة عشق", "shelf": 35, "row": 2 },
 { "title": "الفارس الحالم: مغامرة الجرو الأحمر", "author": "فاطمة عشق", "shelf": 35, "row": 2 },
 { "title": "عشاق كرة القدم: لغز الأهداف السبعة في نفس المرمى", "author": "روبرتو سانتياجو", "shelf": 35, "row": 2 },
-{ "title": "أفضل صديقة: نسخة مطورة من الكاريكاتير", "author": "يانغ خونغ يينغ", "shelf": 35, "row": 2 }
+{ "title": "أفضل صديقة: نسخة مطورة من الكاريكاتير", "author": "يانغ خونغ يينغ", "shelf": 35, "row": 2 },
+{ "title": "Soudium Counter", "author": "Louis Weber", "shelf": 10, "row": 1 },  
+{ "title": "Zoo Frankfurt", "author": "R. Faust", "shelf": 10, "row": 1 }
 ];
 
 function findBooks(q: string) {
