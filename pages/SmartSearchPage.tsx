@@ -45,7 +45,7 @@ Style: Professional, empathetic, uses flawless Fos'ha Arabic or English based on
 const localization: any = {
   ar: {
     welcome: 'أهلاً بك! أنا "صقر"، المساعد الذكي لمكتبة المدرسة. هل نؤلف قصة معاً اليوم ، أم تبحث عن كتاب محدد؟',
-    input: 'اكتب رسالتك، قصتك، أو ابحث عن كتاب...',
+    input: 'اسأل صقر أو ابحث عن كتاب أو ابدأ قصة مبدعة...',
     status: 'صقر الذكي (EFIPS)',
     online: 'متصل',
     download: 'تحميل شهادة المؤلف الصغير',
@@ -63,7 +63,7 @@ const localization: any = {
   },
   en: {
     welcome: "Welcome! I'm 'Saqr', your AI Librarian. Shall we co-author story today, or are you looking for a specific book?",
-    input: 'Start a story, discuss, or search...',
+    input: 'Ask Saqr, search for a book or start a story...',
     status: 'Saqr AI Librarian',
     online: 'Online',
     download: 'Download Certificate',
@@ -85,7 +85,7 @@ const SmartSearchPage: React.FC = () => {
   const { locale, dir } = useLanguage();
   const t = (key: string) => localization[locale][key];
 
-  // تم الحفاظ على كافة الـ States الأصلية
+  // تم الحفاظ على كافة الـ States الأصلية تماماً دون تغيير
   const [messages, setMessages] = useState<ChatMessage[]>([{ role: 'assistant', content: localization[locale].welcome }]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -104,13 +104,11 @@ const SmartSearchPage: React.FC = () => {
   const handleDownloadJPG = async () => {
     if (!certificateRef.current) return;
     
-    // إظهار الشهادة في الخلفية للالتقاط
     certificateRef.current.style.left = '0';
     certificateRef.current.style.top = '0';
     certificateRef.current.style.position = 'fixed';
     certificateRef.current.style.zIndex = '-9999';
 
-    // استخدام الارتفاع التلقائي للشهادة (scrollHeight) لضمان عدم قص القصة الطويلة
     const canvas = await html2canvas(certificateRef.current, { 
       scale: 3, 
       backgroundColor: '#ffffff',
@@ -132,14 +130,13 @@ const SmartSearchPage: React.FC = () => {
     if (input.trim() === '' || isLoading) return;
     const userQuery = input.trim();
 
-    // 👇 2. هنا يتم إرسال سؤال الطالب إلى السحابة فور الضغط على إرسال
+    // 👇 2. هنا يتم إرسال سؤال الطالب إلى السحابة فور الضغط على إرسال (تم الحفاظ عليه)
     trackActivity('ai', userQuery);
 
     setMessages(prev => [...prev, { role: 'user', content: userQuery }]);
     setInput('');
     setIsLoading(true);
     
-    // 1. تحويل صقر لحالة التفكير (لتفعيل الـ GIF)
     setSaqrState('thinking');
 
     const normalize = (text: string) => 
@@ -154,7 +151,6 @@ const SmartSearchPage: React.FC = () => {
     const stopWords = ['the', 'book', 'about', 'summary', 'عن', 'كتاب', 'تلخيص', 'ملخص', 'اريد', 'ابحث'];
     const queryWords = qNormalized.split(/\s+/).filter(word => word.length > 2 && !stopWords.includes(word));
 
-    // بحث دقيق وشامل
     const searchIn = (db: any[], location: string) => {
       if (!db || !Array.isArray(db)) return [];
       return db.filter(b => {
@@ -193,7 +189,6 @@ const SmartSearchPage: React.FC = () => {
       const data = await response.json();
       let reply = data.reply || '';
 
-      // التقاط بيانات الشهادة
       if (reply.includes('[WINNER:')) {
         const match = reply.match(/\[WINNER:\s*(.*?)\s*\|\s*Grade:\s*(.*?)\s*\|\s*Content:\s*(.*?)\]/s);
         if (match) {
@@ -209,49 +204,47 @@ const SmartSearchPage: React.FC = () => {
           setWinnerData(info);
           localStorage.setItem('efips_challenge_reports', JSON.stringify([info, ...JSON.parse(localStorage.getItem('efips_challenge_reports') || '[]')]));
           
-          // تحويل صقر لحالة الفرحة بالشهادة (لتفعيل الـ GIF)
           setSaqrState('victory');
         }
         reply = reply.replace(/\[WINNER:.*?\]/gs, '');
       } else {
-        // 2. تحويل صقر لحالة التحدث عند استلام الرد (لتفعيل الـ GIF)
         setSaqrState('speaking');
-        // إعادته للوضع الطبيعي (الثابت) بعد 2.5 ثانية من انتهاء الحركة
         setTimeout(() => setSaqrState('idle'), 2500);
       }
       
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
     } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: locale === 'ar' ? 'حدث خطأ في الاتصال، يرجى المحاولة مرة أخرى.' : 'Connection error, please try again.' }]);
-      setSaqrState('idle'); // العودة للوضع الثابت عند الخطأ
+      setSaqrState('idle');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 🌟 مسار الصورة للحفاظ على حركة وتفاعلات صقر
   const getSaqrImageSrc = () => {
     if (saqrState === 'idle') {
-        return '/search_still_frame.png'; // إطار ثابت واحد
+        return '/search_still_frame.png';
     }
-    return '/Search.gif'; // الملف المتحرك الكامل
+    return '/Search.gif';
   };
 
   return (
-    <div dir={dir} className="w-full h-[100dvh] flex flex-col bg-white dark:bg-[#131314] font-sans relative overflow-hidden text-slate-900 dark:text-slate-100 transition-colors duration-300">
+    <div dir={dir} className="w-full h-[100dvh] flex flex-col bg-[#f0f4f9] dark:bg-[#131314] font-sans relative overflow-hidden text-slate-900 dark:text-slate-100 transition-colors duration-300">
       
-      {/* Header - واجهة جيميني النظيفة بالجهة العلوية */}
-      <header className="flex-shrink-0 px-4 py-4 md:px-8 w-full max-w-4xl mx-auto flex justify-between items-center z-20">
+      {/* خلفية التوهج المحيطي بأسلوب جيميناي الفاخر */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-gradient-to-b from-blue-500/10 via-purple-500/5 to-transparent rounded-full blur-[120px] pointer-events-none z-0"></div>
+      
+      {/* Header - الهيدر العلوي النظيف */}
+      <header className="flex-shrink-0 px-4 py-3 md:px-8 w-full max-w-5xl mx-auto flex justify-between items-center z-20 relative">
          <div className="flex items-center gap-3">
-           <span className="font-bold text-lg md:text-xl text-slate-700 dark:text-slate-200 tracking-wide">{t('status')}</span>
-           <span className="flex items-center gap-1.5 text-[10px] text-green-600 dark:text-green-400 font-bold uppercase bg-green-50 dark:bg-green-900/30 px-2 py-0.5 rounded-full border border-green-100 dark:border-green-800">
+           <span className="font-bold text-lg md:text-xl text-slate-800 dark:text-[#e3e3e3] tracking-wide bg-clip-text bg-gradient-to-r dark:from-white dark:to-slate-400">{t('status')}</span>
+           <span className="flex items-center gap-1.5 text-[10px] text-green-600 dark:text-green-400 font-bold uppercase bg-green-50 dark:bg-green-900/20 px-2 py-0.5 rounded-full border border-green-100 dark:border-green-900/50">
              <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> {t('online')}
            </span>
          </div>
 
-         {/* زر تحميل الشهادة يظهر عند الفوز بشكل أنيق في الـ Header */}
          {winnerData && saqrState === 'victory' && (
-           <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white font-bold rounded-full shadow-md transition-transform transform hover:scale-105 uppercase text-[10px] md:text-xs">
+           <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white font-bold rounded-full shadow-lg hover:shadow-red-600/20 transition-all transform hover:scale-105 uppercase text-[10px] md:text-xs">
              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
              <span className="hidden md:inline">{t('download')}</span>
              <span className="md:hidden">تحميل</span>
@@ -259,35 +252,71 @@ const SmartSearchPage: React.FC = () => {
          )}
       </header>
 
-      {/* المحادثة (Chat Area) - تصميم المحادثة النظيف مثل جيميني */}
-      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 no-scrollbar scroll-smooth">
-        <div className="max-w-3xl mx-auto flex flex-col justify-start min-h-full space-y-8">
+      {/* 🌟 منطقة الإدخال والبحث - تم نقلها للأعلى بناءً على طلبك بأسلوب Gemini 🌟 */}
+      <div className="px-4 py-2 md:px-8 w-full z-20 relative flex-shrink-0">
+        <div className="max-w-4xl mx-auto">
+          <div className="relative flex items-center bg-white dark:bg-[#1e1f20] rounded-full ring-1 ring-slate-200 dark:ring-transparent focus-within:ring-2 focus-within:ring-blue-500/50 dark:focus-within:ring-slate-700 transition-all shadow-md hover:shadow-lg pl-2 pr-2">
+            
+            {/* مؤشر وامض ملون بداخل البار يحاكي كبسولة Gemini الفاخرة */}
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 opacity-0 focus-within:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+
+            <input
+              type="text" 
+              value={input} 
+              onChange={(e) => setInput(e.target.value)} 
+              onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+              placeholder={t('input')}
+              className="flex-1 bg-transparent border-0 focus:ring-0 py-4 px-5 md:py-4.5 md:px-7 text-slate-900 dark:text-[#e3e3e3] font-medium outline-none w-full placeholder-slate-400 dark:placeholder-slate-500 text-sm md:text-base relative z-10"
+              disabled={isLoading}
+            />
+            
+            <button 
+              onClick={handleSendMessage} 
+              disabled={isLoading || !input.trim()} 
+              className="relative z-10 w-10 h-10 md:w-11 md:h-11 rounded-full bg-slate-100 dark:bg-[#282a2c] hover:bg-slate-200 dark:hover:bg-[#333537] disabled:bg-transparent disabled:opacity-20 disabled:cursor-not-allowed text-blue-600 dark:text-blue-400 flex items-center justify-center transition-all active:scale-95 rtl:rotate-180"
+            >
+              <svg className="w-5 h-5 md:w-5.5 md:h-5.5" fill="currentColor" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" /></svg>
+            </button>
+          </div>
+
+          {/* تأثير التفكير الانسيابي اللامع المتعرج الممتد أسفل البار مباشرة (Gemini Wave) */}
+          {isLoading && (
+            <div className="w-[92%] mx-auto h-[4px] mt-2 rounded-full overflow-hidden relative bg-slate-200 dark:bg-slate-800">
+              <div className="gemini-shimmer-line absolute inset-0 w-full h-full rounded-full"></div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* منطقة المحادثات والرسائل تتدفق بالأسفل بسلاسة */}
+      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-4 no-scrollbar scroll-smooth relative z-10">
+        <div className="max-w-4xl mx-auto flex flex-col justify-start min-h-full space-y-6 pt-4">
           
-          {/* رسالة الترحيب الأولى تظهر دائماً */}
           {messages.map((msg, index) => (
             <div key={index} className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in-up`}>
               
-              {/* رسائل صقر (AI) */}
+              {/* رسائل صقر المساعد الذكي */}
               {msg.role === 'assistant' && (
-                <div className="flex gap-4 max-w-[95%] md:max-w-[85%]">
-                  {/* الأيقونة الرمزية (Avatar) لصقر بنفس الصور/الـ GIF الأصلية */}
-                  <div className="w-8 h-8 md:w-10 md:h-10 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 mt-1 shadow-sm">
+                <div className="flex gap-4 max-w-[95%] md:max-w-[85%] items-start">
+                  {/* الأيقونة الرمزية التفاعلية لصقر */}
+                  <div className="w-9 h-9 md:w-10 md:h-10 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden bg-white dark:bg-[#1e1f20] border border-slate-200 dark:border-slate-800 shadow-sm">
                     <img 
                       src={getSaqrImageSrc()} 
                       alt="Saqr AI" 
-                      className={`w-full h-full object-cover transition-all ${saqrState === 'thinking' && index === messages.length - 1 ? 'scale-110 opacity-80' : ''}`}
+                      className={`w-full h-full object-cover transition-all duration-300 ${saqrState === 'thinking' && index === messages.length - 1 ? 'scale-110 opacity-90 animate-pulse' : ''}`}
                     />
                   </div>
-                  <div className="prose prose-sm md:prose-base dark:prose-invert font-medium leading-relaxed max-w-none text-start pt-1.5 md:pt-2">
+                  {/* حاوية نص رد الذكاء الاصطناعي الأنيقة مثل Gemini بدون خلفية صارخة */}
+                  <div className="prose prose-sm md:prose-base dark:prose-invert font-medium leading-relaxed max-w-none text-start pt-1 text-slate-800 dark:text-[#e3e3e3]">
                     <ReactMarkdown>{msg.content}</ReactMarkdown>
                   </div>
                 </div>
               )}
 
-              {/* رسائل المستخدم (User) */}
+              {/* رسائل المستخدم الطالب */}
               {msg.role === 'user' && (
-                <div className="bg-[#f0f4f9] dark:bg-[#1e1f20] text-slate-900 dark:text-slate-100 px-5 py-3 md:px-6 md:py-4 rounded-3xl max-w-[85%] md:max-w-[75%] shadow-sm">
-                  <div className="font-medium leading-relaxed max-w-none text-start">
+                <div className="bg-white dark:bg-[#1e1f20] text-slate-900 dark:text-[#e3e3e3] px-5 py-3 md:px-6 md:py-3.5 rounded-2xl rounded-tr-none max-w-[85%] md:max-w-[75%] shadow-sm border border-slate-100 dark:border-transparent transition-all hover:shadow-md">
+                  <div className="font-medium leading-relaxed max-w-none text-start text-sm md:text-base">
                     {msg.content}
                   </div>
                 </div>
@@ -295,55 +324,16 @@ const SmartSearchPage: React.FC = () => {
             </div>
           ))}
           
-          {/* تأثير التفكير (Loading) مع حركة صقر */}
-          {isLoading && (
-            <div className="flex w-full justify-start animate-fade-in-up">
-              <div className="flex gap-4 max-w-[95%] md:max-w-[85%]">
-                <div className="w-8 h-8 md:w-10 md:h-10 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 mt-1 shadow-sm">
-                  <img src={getSaqrImageSrc()} alt="Saqr AI Thinking" className="w-full h-full object-cover scale-110 opacity-80"/>
-                </div>
-                <div className="flex gap-1.5 items-center pt-4 md:pt-5">
-                  <span className="w-2 h-2 bg-red-400 rounded-full animate-bounce"></span>
-                  <span className="w-2 h-2 bg-red-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></span>
-                  <span className="w-2 h-2 bg-red-400 rounded-full animate-bounce" style={{animationDelay: '0.4s'}}></span>
-                </div>
-              </div>
-            </div>
-          )}
-          
-          <div ref={messagesEndRef} className="h-4" />
+          <div ref={messagesEndRef} className="h-2" />
         </div>
       </div>
 
-      {/* منطقة الإدخال (Input Area) - شريط جيميني الدائري بالأسفل */}
-      <div className="px-4 py-4 md:px-8 pb-6 md:pb-8 w-full bg-white dark:bg-[#131314] z-20">
-        <div className="max-w-3xl mx-auto">
-          <div className="relative flex items-center bg-[#f0f4f9] dark:bg-[#1e1f20] rounded-full focus-within:ring-1 ring-slate-300 dark:ring-slate-700 transition-all shadow-sm">
-            <input
-              type="text" 
-              value={input} 
-              onChange={(e) => setInput(e.target.value)} 
-              onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-              placeholder={t('input')}
-              className="flex-1 bg-transparent border-0 focus:ring-0 py-4 px-6 md:py-5 md:px-8 text-slate-900 dark:text-white font-medium outline-none w-full placeholder-slate-500"
-              disabled={isLoading}
-            />
-            <button 
-              onClick={handleSendMessage} 
-              disabled={isLoading || !input.trim()} 
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 disabled:bg-transparent disabled:opacity-30 disabled:cursor-not-allowed text-slate-800 dark:text-slate-200 flex items-center justify-center transition-all active:scale-95 rtl:left-2 rtl:right-auto"
-            >
-              {/* أيقونة الإرسال */}
-              <svg className="w-5 h-5 md:w-6 md:h-6 rtl:rotate-180" fill="currentColor" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" /></svg>
-            </button>
-          </div>
-          <p className="text-center text-[11px] md:text-xs text-slate-400 dark:text-slate-500 mt-3 font-medium">
-            Saqr AI Librarian can make mistakes. Please verify library information.
-          </p>
-        </div>
-      </div>
+      {/* التذييل الصغير المتناسق سفلياً */}
+      <footer className="w-full py-2 bg-transparent text-center text-[10px] md:text-xs text-slate-400 dark:text-slate-500 font-medium z-10 relative">
+        Saqr AI Librarian can make mistakes. Please verify library information.
+      </footer>
 
-      {/* --- تصميم الشهادة العرضية للتصدير (تم الحفاظ عليه تماماً كما هو مخفي) --- */}
+      {/* --- تصميم الشهادة العرضية للتصدير (تم الحفاظ عليه تماماً دون تعديل) --- */}
       <div className="fixed left-[-9999px] top-0 pointer-events-none">
           <div ref={certificateRef} dir={locale === 'ar' ? 'rtl' : 'ltr'} className="w-[1123px] min-h-[794px] h-fit bg-white text-slate-900 relative overflow-hidden flex flex-col font-sans border-[20px] border-double border-red-700 pb-12">
               
@@ -393,16 +383,29 @@ const SmartSearchPage: React.FC = () => {
           </div>
       </div>
 
+      {/* الأنماط والـ Animations المتقدمة للتأثيرات البصرية */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;700;900&display=swap');
         * { font-family: 'Cairo', sans-serif !important; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         
         @keyframes fade-in-up {
-          0% { opacity: 0; transform: translateY(10px); }
+          0% { opacity: 0; transform: translateY(8px); }
           100% { opacity: 1; transform: translateY(0); }
         }
-        .animate-fade-in-up { animation: fade-in-up 0.3s ease-out forwards; }
+        .animate-fade-in-up { animation: fade-in-up 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+
+        /* تأثير الحركة للخط المتلألئ الجيميناي */
+        @keyframes gemini-shimmer {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        .gemini-shimmer-line {
+          background: linear-gradient(90deg, #1a73e8, #744af2, #d946ef, #1a73e8);
+          background-size: 300% 300%;
+          animation: gemini-shimmer 2s ease infinite;
+        }
       `}</style>
     </div>
   );
