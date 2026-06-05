@@ -3324,7 +3324,9 @@ const localBookData = [
 { "title": "عشاق كرة القدم: لغز الأهداف السبعة في نفس المرمى", "author": "روبرتو سانتياجو", "shelf": 35, "row": 2 },
 { "title": "أفضل صديقة: نسخة مطورة من الكاريكاتير", "author": "يانغ خونغ يينغ", "shelf": 35, "row": 2 },
 { "title": "Soudium Counter", "author": "Louis Weber", "shelf": 10, "row": 1 },  
-{ "title": "Zoo Frankfurt", "author": "R. Faust", "shelf": 10, "row": 1 }
+{ "title": "Zoo Frankfurt", "author": "R. Faust", "shelf": 10, "row": 1 },
+{ "title": "At The Love Corner Of Love And Heartache", "author": "Curtiss Ann Matlock", "shelf": 19, "row": 6 },
+{ "title": "New Webster's Dictionary And Roget's Thesaurus", "author": "Book Essentials Inc", "shelf": 5, "row": 5 }
 ];
 
 function findBooks(q: string) {
