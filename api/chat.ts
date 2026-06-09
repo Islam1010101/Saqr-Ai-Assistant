@@ -479,7 +479,7 @@ const localBookData = [
 { "title": "Essentials of Data Processing", "author": "(Topic: Computers)", "shelf": 1, "row": 1 },
 { "title": "COOL INTERNET", "author": "(Topic: Computers)", "shelf": 1, "row": 1 },
 { "title": "ART (of) SELF-PUBLISHING", "author": "(Topic: Writing)", "shelf": 1, "row": 1 },
-{ "title": "Psycho-Cybernetic Principles for Creative Living", "author": "Maxwell Maltz 2", "shelf": 1, "row": 1 },
+{ "title": "Psycho-Cybernetic Principles for Creative Living", "author": "Maxwell Maltz 2", "shelf": 3, "row": 1 },
 { "title": "PHOTOSHOP 3 FOR MACINTOSH", "author": "(Topic: Software)", "shelf": 1, "row": 1 },
 { "title": "The Internet", "author": "(Topic: Computers)", "shelf": 1, "row": 1 },
 { "title": "ASP.NET", "author": "(Topic: Programming)", "shelf": 1, "row": 1 },
