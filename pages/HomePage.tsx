@@ -77,13 +77,6 @@ const HOMELAND_FACTS = [
 
 const ACADEMIC_EVENTS = [
   { 
-    ar: "يوم عرفة وعيد الأضحى", 
-    en: "Arafah Day & Eid Al Adha", 
-    startDate: new Date('2026-05-26T00:00:00'), 
-    endDate: new Date('2026-05-29T23:59:59'),
-    displayDate: "26 – 29 May 2026" 
-  },
-  { 
     ar: "رأس السنة الهجرية", 
     en: "Hijri New Year", 
     startDate: new Date('2026-06-16T00:00:00'), 
