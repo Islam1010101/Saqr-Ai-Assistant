@@ -77,13 +77,6 @@ const HOMELAND_FACTS = [
 
 const ACADEMIC_EVENTS = [
   { 
-    ar: "رأس السنة الهجرية", 
-    en: "Hijri New Year", 
-    startDate: new Date('2026-06-16T00:00:00'), 
-    endDate: new Date('2026-06-16T23:59:59'),
-    displayDate: "16 June 2026" 
-  },
-  { 
     ar: "نهاية العام الدراسي", 
     en: "End of Academic Year", 
     startDate: new Date('2026-07-03T00:00:00'), 
