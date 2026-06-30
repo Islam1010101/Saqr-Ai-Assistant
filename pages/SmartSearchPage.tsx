@@ -269,9 +269,9 @@ const SmartSearchPage: React.FC = () => {
          )}
       </header>
 
-      {/* منطقة المحادثات والرسائل تتدفق بالوسط وتأخذ المساحة الكاملة المرنة */}
-      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-4 no-scrollbar scroll-smooth relative z-10 pb-32">
-        <div className="max-w-4xl mx-auto flex flex-col justify-start min-h-full space-y-6 pt-4">
+      {/* 🛠️ منطقة المحادثات والرسائل تتدفق بالوسط (تمت موازنة الارتفاع وتقليص الفراغ الأولي وتدعيم السكرول التلقائي) */}
+      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-2 no-scrollbar scroll-smooth relative z-10 pb-40">
+        <div className="max-w-4xl mx-auto flex flex-col justify-end min-h-fit space-y-6 pt-4">
           
           {messages.map((msg, index) => (
             <div key={index} className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in-up`}>
@@ -321,7 +321,7 @@ const SmartSearchPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 🌟 منطقة الإدخال والبحث - تم تثبيتها في الأسفل (Bottom Bar Style) 🌟 */}
+      {/* منطقة الإدخال والبحث - مثبتة في الأسفل (Bottom Bar Style) */}
       <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-[#f0f4f9] via-[#f0f4f9]/95 to-transparent dark:from-[#131314] dark:via-[#131314]/95 dark:to-transparent px-4 py-4 md:py-6 md:px-8 w-full z-20 flex-shrink-0">
         <div className="max-w-4xl mx-auto flex flex-col gap-2">
           <div className="relative flex items-center bg-white dark:bg-[#1e1f20] rounded-full ring-1 ring-slate-200 dark:ring-transparent focus-within:ring-2 focus-within:ring-blue-500/50 dark:focus-within:ring-slate-700 transition-all shadow-md hover:shadow-lg pl-2 pr-2">
