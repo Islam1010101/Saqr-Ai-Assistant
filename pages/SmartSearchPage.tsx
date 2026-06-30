@@ -269,44 +269,8 @@ const SmartSearchPage: React.FC = () => {
          )}
       </header>
 
-      {/* 🌟 منطقة الإدخال والبحث - بأسلوب Gemini 🌟 */}
-      <div className="px-4 py-2 md:px-8 w-full z-20 relative flex-shrink-0">
-        <div className="max-w-4xl mx-auto">
-          <div className="relative flex items-center bg-white dark:bg-[#1e1f20] rounded-full ring-1 ring-slate-200 dark:ring-transparent focus-within:ring-2 focus-within:ring-blue-500/50 dark:focus-within:ring-slate-700 transition-all shadow-md hover:shadow-lg pl-2 pr-2">
-            
-            {/* مؤشر وامض ملون بداخل البار يحاكي كبسولة Gemini الفاخرة */}
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 opacity-0 focus-within:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-
-            <input
-              type="text" 
-              value={input} 
-              onChange={(e) => setInput(e.target.value)} 
-              onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-              placeholder={t('input')}
-              className="flex-1 bg-transparent border-0 focus:ring-0 py-4 px-5 md:py-4.5 md:px-7 text-slate-900 dark:text-[#e3e3e3] font-medium outline-none w-full placeholder-slate-400 dark:placeholder-slate-500 text-sm md:text-base relative z-10"
-              disabled={isLoading}
-            />
-            
-            <button 
-              onClick={handleSendMessage} 
-              disabled={isLoading || !input.trim()} 
-              className="relative z-10 w-10 h-10 md:w-11 md:h-11 rounded-full bg-slate-100 dark:bg-[#282a2c] hover:bg-slate-200 dark:hover:bg-[#333537] disabled:bg-transparent disabled:opacity-20 disabled:cursor-not-allowed text-blue-600 dark:text-blue-400 flex items-center justify-center transition-all active:scale-95 rtl:rotate-180"
-            >
-              <svg className="w-5 h-5 md:w-5.5 md:h-5.5" fill="currentColor" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" /></svg>
-            </button>
-          </div>
-
-          {/* تأثير التفكير الانسيابي اللامع المتعرج الممتد أسفل البار مباشرة (Gemini Wave) */}
-          {isLoading && (
-            <div className="w-[92%] mx-auto h-[4px] mt-2 rounded-full overflow-hidden relative bg-slate-200 dark:bg-slate-800">
-              <div className="gemini-shimmer-line absolute inset-0 w-full h-full rounded-full"></div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* منطقة المحادثات والرسائل تتدفق بالأسفل بسلاسة */}
-      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-4 no-scrollbar scroll-smooth relative z-10">
+      {/* منطقة المحادثات والرسائل تتدفق بالوسط وتأخذ المساحة الكاملة المرنة */}
+      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-4 no-scrollbar scroll-smooth relative z-10 pb-32">
         <div className="max-w-4xl mx-auto flex flex-col justify-start min-h-full space-y-6 pt-4">
           
           {messages.map((msg, index) => (
@@ -315,7 +279,6 @@ const SmartSearchPage: React.FC = () => {
               {/* رسائل صقر المساعد الذكي */}
               {msg.role === 'assistant' && (
                 <div className="flex flex-col gap-2 max-w-[95%] md:max-w-[85%] items-start">
-                  {/* 🛠️ إضافة خاصية translate="no" و تفعيل lang إلى الحاوية الأساسية للنصوص لمنع إضافات المتصفح من العبث بها أو ترجمتها خاطئاً */}
                   <div className="flex gap-4 items-start" translate="no" lang={locale}>
                     {/* الأيقونة الرمزية التفاعلية لصقر */}
                     <div className="w-9 h-9 md:w-10 md:h-10 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden bg-white dark:bg-[#1e1f20] border border-slate-200 dark:border-slate-800 shadow-sm">
@@ -358,10 +321,46 @@ const SmartSearchPage: React.FC = () => {
         </div>
       </div>
 
-      {/* التذييل الصغير المتناسق سفلياً */}
-      <footer className="w-full py-2 bg-transparent text-center text-[10px] md:text-xs text-slate-400 dark:text-slate-500 font-medium z-10 relative">
-        Saqr AI Librarian can make mistakes. Please verify library information.
-      </footer>
+      {/* 🌟 منطقة الإدخال والبحث - تم تثبيتها في الأسفل (Bottom Bar Style) 🌟 */}
+      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-[#f0f4f9] via-[#f0f4f9]/95 to-transparent dark:from-[#131314] dark:via-[#131314]/95 dark:to-transparent px-4 py-4 md:py-6 md:px-8 w-full z-20 flex-shrink-0">
+        <div className="max-w-4xl mx-auto flex flex-col gap-2">
+          <div className="relative flex items-center bg-white dark:bg-[#1e1f20] rounded-full ring-1 ring-slate-200 dark:ring-transparent focus-within:ring-2 focus-within:ring-blue-500/50 dark:focus-within:ring-slate-700 transition-all shadow-md hover:shadow-lg pl-2 pr-2">
+            
+            {/* مؤشر وامض ملون بداخل البار يحاكي كبسولة Gemini الفاخرة */}
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 opacity-0 focus-within:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+
+            <input
+              type="text" 
+              value={input} 
+              onChange={(e) => setInput(e.target.value)} 
+              onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+              placeholder={t('input')}
+              className="flex-1 bg-transparent border-0 focus:ring-0 py-4 px-5 md:py-4.5 md:px-7 text-slate-900 dark:text-[#e3e3e3] font-medium outline-none w-full placeholder-slate-400 dark:placeholder-slate-500 text-sm md:text-base relative z-10"
+              disabled={isLoading}
+            />
+            
+            <button 
+              onClick={handleSendMessage} 
+              disabled={isLoading || !input.trim()} 
+              className="relative z-10 w-10 h-10 md:w-11 md:h-11 rounded-full bg-slate-100 dark:bg-[#282a2c] hover:bg-slate-200 dark:hover:bg-[#333537] disabled:bg-transparent disabled:opacity-20 disabled:cursor-not-allowed text-blue-600 dark:text-blue-400 flex items-center justify-center transition-all active:scale-95 rtl:rotate-180"
+            >
+              <svg className="w-5 h-5 md:w-5.5 md:h-5.5" fill="currentColor" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" /></svg>
+            </button>
+          </div>
+
+          {/* تأثير التفكير الانسيابي اللامع المتعرج الممتد أسفل البار مباشرة (Gemini Wave) */}
+          {isLoading && (
+            <div className="w-[92%] mx-auto h-[4px] rounded-full overflow-hidden relative bg-slate-200 dark:bg-slate-800">
+              <div className="gemini-shimmer-line absolute inset-0 w-full h-full rounded-full"></div>
+            </div>
+          )}
+
+          {/* التذييل الصغير المتناسق سفلياً تحت البار مباشرة */}
+          <footer className="w-full text-center text-[9px] md:text-[11px] text-slate-400 dark:text-slate-500 font-medium pt-1">
+            Saqr AI Librarian can make mistakes. Please verify library information.
+          </footer>
+        </div>
+      </div>
 
       {/* --- تصميم الشهادة العرضية للتصدير --- */}
       <div className="fixed left-[-9999px] top-0 pointer-events-none">
