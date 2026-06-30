@@ -269,7 +269,7 @@ const SmartSearchPage: React.FC = () => {
          )}
       </header>
 
-      {/* 🌟 منطقة الإدخال والبحث - تم نقلها للأعلى بناءً على طلبك بأسلوب Gemini 🌟 */}
+      {/* 🌟 منطقة الإدخال والبحث - بأسلوب Gemini 🌟 */}
       <div className="px-4 py-2 md:px-8 w-full z-20 relative flex-shrink-0">
         <div className="max-w-4xl mx-auto">
           <div className="relative flex items-center bg-white dark:bg-[#1e1f20] rounded-full ring-1 ring-slate-200 dark:ring-transparent focus-within:ring-2 focus-within:ring-blue-500/50 dark:focus-within:ring-slate-700 transition-all shadow-md hover:shadow-lg pl-2 pr-2">
@@ -315,7 +315,8 @@ const SmartSearchPage: React.FC = () => {
               {/* رسائل صقر المساعد الذكي */}
               {msg.role === 'assistant' && (
                 <div className="flex flex-col gap-2 max-w-[95%] md:max-w-[85%] items-start">
-                  <div className="flex gap-4 items-start">
+                  {/* 🛠️ إضافة خاصية translate="no" و تفعيل lang إلى الحاوية الأساسية للنصوص لمنع إضافات المتصفح من العبث بها أو ترجمتها خاطئاً */}
+                  <div className="flex gap-4 items-start" translate="no" lang={locale}>
                     {/* الأيقونة الرمزية التفاعلية لصقر */}
                     <div className="w-9 h-9 md:w-10 md:h-10 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden bg-white dark:bg-[#1e1f20] border border-slate-200 dark:border-slate-800 shadow-sm">
                       <img 
@@ -324,13 +325,13 @@ const SmartSearchPage: React.FC = () => {
                         className={`w-full h-full object-cover transition-all duration-300 ${saqrState === 'thinking' && index === messages.length - 1 ? 'scale-110 opacity-90 animate-pulse' : ''}`}
                       />
                     </div>
-                    {/* حاوية نص رد الذكاء الاصطناعي الأنيقة مثل Gemini بدون خلفية صارخة */}
+                    {/* حاوية نص رد الذكاء الاصطناعي الأنيقة */}
                     <div className="prose prose-sm md:prose-base dark:prose-invert font-medium leading-relaxed max-w-none text-start pt-1 text-slate-800 dark:text-[#e3e3e3]">
                       <ReactMarkdown>{msg.content}</ReactMarkdown>
                     </div>
                   </div>
 
-                  {/* 🛠️ إضافة زر التحميل المباشر أسفل رد الفوز الأخير مباشرة لسهولة الوصول */}
+                  {/* إضافة زر التحميل المباشر أسفل رد الفوز الأخير مباشرة لسهولة الوصول */}
                   {winnerData && saqrState === 'victory' && index === messages.length - 1 && (
                     <div className="mt-4 px-14 w-full text-start">
                       <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold rounded-xl shadow-md transition-all transform active:scale-95 text-sm">
@@ -362,7 +363,7 @@ const SmartSearchPage: React.FC = () => {
         Saqr AI Librarian can make mistakes. Please verify library information.
       </footer>
 
-      {/* --- تصميم الشهادة العرضية للتصدير (تم الحفاظ عليه تماماً دون تعديل) --- */}
+      {/* --- تصميم الشهادة العرضية للتصدير --- */}
       <div className="fixed left-[-9999px] top-0 pointer-events-none">
           <div ref={certificateRef} dir={locale === 'ar' ? 'rtl' : 'ltr'} className="w-[1123px] min-h-[794px] h-fit bg-white text-slate-900 relative overflow-hidden flex flex-col font-sans border-[20px] border-double border-red-700 pb-12">
               
