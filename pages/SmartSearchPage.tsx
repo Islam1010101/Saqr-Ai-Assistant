@@ -101,29 +101,47 @@ const SmartSearchPage: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
+  // 🛠️ تم تصحيح وظيفة التقاط وتصدير الصورة هنا فقط دون لمس بقية الملف
   const handleDownloadJPG = async () => {
     if (!certificateRef.current) return;
     
-    certificateRef.current.style.left = '0';
-    certificateRef.current.style.top = '0';
-    certificateRef.current.style.position = 'fixed';
+    // حفظ التنسيقات الأصلية مؤقتاً لحمايتها
+    const originalPosition = certificateRef.current.style.position;
+    const originalLeft = certificateRef.current.style.left;
+    const originalTop = certificateRef.current.style.top;
+    const originalZIndex = certificateRef.current.style.zIndex;
+
+    // تهيئة العنصر بشكل مستقر ليتمكن html2canvas من التقاطه بكامل أبعاده الواقعية
+    certificateRef.current.style.position = 'absolute';
+    certificateRef.current.style.left = '0px';
+    certificateRef.current.style.top = '0px';
     certificateRef.current.style.zIndex = '-9999';
 
-    const canvas = await html2canvas(certificateRef.current, { 
-      scale: 3, 
-      backgroundColor: '#ffffff',
-      useCORS: true,
-      windowWidth: 1123, 
-      height: certificateRef.current.scrollHeight
-    });
+    try {
+      const canvas = await html2canvas(certificateRef.current, { 
+        scale: 3, 
+        backgroundColor: '#ffffff',
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        width: 1123, 
+        height: certificateRef.current.offsetHeight || certificateRef.current.scrollHeight
+      });
 
-    certificateRef.current.style.left = '-9999px';
-
-    const imgData = canvas.toDataURL('image/jpeg', 1.0);
-    const link = document.createElement('a');
-    link.href = imgData;
-    link.download = `EFIPS_Author_${winnerData.name.replace(/\s+/g, '_')}.jpg`;
-    link.click();
+      const imgData = canvas.toDataURL('image/jpeg', 1.0);
+      const link = document.createElement('a');
+      link.href = imgData;
+      link.download = `EFIPS_Author_${winnerData?.name ? winnerData.name.replace(/\s+/g, '_') : 'Certificate'}.jpg`;
+      link.click();
+    } catch (error) {
+      console.error("Error generating certificate image:", error);
+    } finally {
+      // إعادة التنسيقات الأصلية للعنصر تماماً كما كانت لحفظ استقرار الصفحة التالية
+      certificateRef.current.style.position = originalPosition;
+      certificateRef.current.style.left = originalLeft;
+      certificateRef.current.style.top = originalTop;
+      certificateRef.current.style.zIndex = originalZIndex;
+    }
   };
 
   const handleSendMessage = async () => {
