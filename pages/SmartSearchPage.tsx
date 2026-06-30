@@ -101,7 +101,6 @@ const SmartSearchPage: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
-  // 🛠️ تم تصحيح وظيفة التقاط وتصدير الصورة هنا فقط دون لمس بقية الملف
   const handleDownloadJPG = async () => {
     if (!certificateRef.current) return;
     
@@ -315,19 +314,31 @@ const SmartSearchPage: React.FC = () => {
               
               {/* رسائل صقر المساعد الذكي */}
               {msg.role === 'assistant' && (
-                <div className="flex gap-4 max-w-[95%] md:max-w-[85%] items-start">
-                  {/* الأيقونة الرمزية التفاعلية لصقر */}
-                  <div className="w-9 h-9 md:w-10 md:h-10 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden bg-white dark:bg-[#1e1f20] border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <img 
-                      src={getSaqrImageSrc()} 
-                      alt="Saqr AI" 
-                      className={`w-full h-full object-cover transition-all duration-300 ${saqrState === 'thinking' && index === messages.length - 1 ? 'scale-110 opacity-90 animate-pulse' : ''}`}
-                    />
+                <div className="flex flex-col gap-2 max-w-[95%] md:max-w-[85%] items-start">
+                  <div className="flex gap-4 items-start">
+                    {/* الأيقونة الرمزية التفاعلية لصقر */}
+                    <div className="w-9 h-9 md:w-10 md:h-10 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden bg-white dark:bg-[#1e1f20] border border-slate-200 dark:border-slate-800 shadow-sm">
+                      <img 
+                        src={getSaqrImageSrc()} 
+                        alt="Saqr AI" 
+                        className={`w-full h-full object-cover transition-all duration-300 ${saqrState === 'thinking' && index === messages.length - 1 ? 'scale-110 opacity-90 animate-pulse' : ''}`}
+                      />
+                    </div>
+                    {/* حاوية نص رد الذكاء الاصطناعي الأنيقة مثل Gemini بدون خلفية صارخة */}
+                    <div className="prose prose-sm md:prose-base dark:prose-invert font-medium leading-relaxed max-w-none text-start pt-1 text-slate-800 dark:text-[#e3e3e3]">
+                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+                    </div>
                   </div>
-                  {/* حاوية نص رد الذكاء الاصطناعي الأنيقة مثل Gemini بدون خلفية صارخة */}
-                  <div className="prose prose-sm md:prose-base dark:prose-invert font-medium leading-relaxed max-w-none text-start pt-1 text-slate-800 dark:text-[#e3e3e3]">
-                    <ReactMarkdown>{msg.content}</ReactMarkdown>
-                  </div>
+
+                  {/* 🛠️ إضافة زر التحميل المباشر أسفل رد الفوز الأخير مباشرة لسهولة الوصول */}
+                  {winnerData && saqrState === 'victory' && index === messages.length - 1 && (
+                    <div className="mt-4 px-14 w-full text-start">
+                      <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold rounded-xl shadow-md transition-all transform active:scale-95 text-sm">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                        <span>{t('download')}</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
