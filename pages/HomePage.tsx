@@ -103,18 +103,18 @@ const KNOWLEDGE_CARDS = [
   { icon: "🇦🇪", textAr: "الهوية الوطنية", textEn: "N.Identity", color: "border-red-500" }
 ];
 
-// 10 كتب مميزة للعرض في الهوم مع روابط أغلفة افتراضية من الإنترنت قابلة للتخصيص
+// 10 كتب مميزة مع تحديث الروابط المباشرة للأغلفة وصور مصغرة ملائمة ومستقرة
 const FEATURED_BOOKS = [
   { id: 1, titleAr: "سلسلة عالمي الصغير", authorAr: "محمد بن راشد آل مكتوم", publisherAr: "دون ناشر", titleEn: "My Little World Series", authorEn: "Mohammed bin Rashid Al Maktoum", publisherEn: "No Publisher", cover: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400&auto=format&fit=crop&q=60" },
-  { id: 2, titleAr: "حكيم العرب", authorAr: "مريم صقر القاسمي", publisherAr: "الهدهد للنشر", titleEn: "Wise Man of the Arabs", authorEn: "Maryam Saqr Al Qasimi", publisherEn: "Al Hudhud Publishing", cover: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&auto=format&fit=crop&q=60" },
+  { id: 2, titleAr: "حكيم العرب", authorAr: "مريم صقر القاسمي", publisherAr: "الهدهد للنشر", titleEn: "Wise Man of the Arabs", authorEn: "Maryam Saqr Al Qasimi", publisherEn: "Al Hudhud Publishing", cover: "https://m.media-amazon.com/images/S/compressed.photo.goodreads.com/books/1614967678i/57318992.jpg" },
   { id: 3, titleAr: "أسرار الفضاء مع هزاع وأصدقائه", authorAr: "هدى المشالي", publisherAr: "نبض القلم للنشر والتوزيع", titleEn: "Space Secrets with Hazza & Friends", authorEn: "Huda Al Mashali", publisherEn: "Nabdh Al Qalam", cover: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&auto=format&fit=crop&q=60" },
-  { id: 4, titleAr: "يتامى في الغيب", authorAr: "سلامة بنت هزاع آل نهيان", publisherAr: "المؤلف", titleEn: "Orphans in the Unseen", authorEn: "Salama Bint Hazza Al Nahyan", publisherEn: "Author", cover: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&auto=format&fit=crop&q=60" },
-  { id: 5, titleAr: "التنمية المستدامة - رهان الحاضر", authorAr: "سيلفي برونيل", publisherAr: "كلمة", titleEn: "Sustainable Development", authorEn: "Sylvie Brunel", publisherEn: "Kalima", cover: "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=400&auto=format&fit=crop&q=60" },
-  { id: 6, titleAr: "أحمد بن ماجد: أسد البحار", authorAr: "عائشة الغيص", publisherAr: "الظبي للنشر", titleEn: "Ahmad bin Majid: Lion of the Seas", authorEn: "Aisha Al Ghais", publisherEn: "Al Dhabi Publishing", cover: "https://images.unsplash.com/photo-1532012197267-da84d127e765?w=400&auto=format&fit=crop&q=60" },
-  { id: 7, titleAr: "الشيخ نهيان بن مبارك رجل التسامح", authorAr: "صبحة الخييلي", publisherAr: "مداد للنشر والتوزيع", titleEn: "Sheikh Nahyan bin Mubarak", authorEn: "Sobha Al Khaili", publisherEn: "Medad Publishing", cover: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=400&auto=format&fit=crop&q=60" },
-  { id: 8, titleAr: "محمد بن زايد والتعليم", authorAr: "مركز الإمارات للدراسات والبحوث الاستراتيجية", publisherAr: "مركز الإمارات للدراسات والبحوث الاستراتيجية", titleEn: "Mohamed bin Zayed and Education", authorEn: "ECSSR", publisherEn: "ECSSR", cover: "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=400&auto=format&fit=crop&q=60" },
-  { id: 9, titleAr: "الصدام داخل الحضارات", authorAr: "دييتر سنغاس", publisherAr: "كلمة", titleEn: "The Clash Within Civilizations", authorEn: "Dieter Senghaas", publisherEn: "Kalima", cover: "https://images.unsplash.com/photo-1447069387593-a5de0862481e?w=400&auto=format&fit=crop&q=60" },
-  { id: 10, titleAr: "زن وفن صيانة الدراجة النارية", authorAr: "روبرت م بيرسيغ", publisherAr: "كلمة", titleEn: "Zen and the Art of Motorcycle Maintenance", authorEn: "Robert M. Pirsig", publisherEn: "Kalima", cover: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400&auto=format&fit=crop&q=60" },
+  { id: 4, titleAr: "يتامى في الغيب", authorAr: "سلامة بنت هزاع آل نهيان", publisherAr: "المؤلف", titleEn: "Orphans in the Unseen", authorEn: "Salama Bint Hazza Al Nahyan", publisherEn: "Author", cover: "https://cdn1-m.alittihad.ae/assets/images/Articles/750x425/2019/4/2019430232338983E2.jpg?v=7&format=jpg" },
+  { id: 5, titleAr: "التنمية المستدامة - رهان الحاضر", authorAr: "سيلفي برونيل", publisherAr: "كلمة", titleEn: "Sustainable Development", authorEn: "Sylvie Brunel", publisherEn: "Kalima", cover: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRKg00ZPa1fDxxggjnMxBjurgEERKSOCty0tKbFM_h1A&s=10" },
+  { id: 6, titleAr: "أحمد بن ماجد: أسد البحار", authorAr: "عائشة الغيص", publisherAr: "الظبي للنشر", titleEn: "Ahmad bin Majid: Lion of the Seas", authorEn: "Aisha Al Ghais", publisherEn: "Al Dhabi Publishing", cover: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbaDeTlyQX6f_qLje_EJ-AmXZghV-MTCaunCctD1hN0KTfze1Q9FK5Vnny&s=10" },
+  { id: 7, titleAr: "الشيخ نهيان بن مبارك رجل التسامح", authorAr: "صبحة الخييلي", publisherAr: "مداد للنشر والتوزيع", titleEn: "Sheikh Nahyan bin Mubarak", authorEn: "Sobha Al Khaili", publisherEn: "Medad Publishing", cover: "https://catalogue.mbrl.ae/BookCovers/Symphony/08082023/349321/mbc.jpg" },
+  { id: 8, titleAr: "محمد بن زايد والتعليم", authorAr: "مركز الإمارات للدراسات والبحوث الاستراتيجية", publisherAr: "مركز الإمارات للدراسات والبحوث الاستراتيجية", titleEn: "Mohamed bin Zayed and Education", authorEn: "ECSSR", publisherEn: "ECSSR", cover: "https://www.ecssr.ae/en/api/common/Thumbnail/eyJnbmFtZSI6IjRjMWZlMDdhLTVhY2EtNDI4ZS05Zjc5LTk0YjBlMTUwYTZjNS5qcGciLCJmb2xkZXJQYXRoIjoiSW1hZ2VzL1Byb2R1Y3RzIiwiYXNzZXRJZCI6bnVsbCwibGFuZ0lkIjpudWxsfQ%3D%3D" },
+  { id: 9, titleAr: "الصدام داخل الحضارات", authorAr: "دييتر سنغاس", publisherAr: "كلمة", titleEn: "The Clash Within Civilizations", authorEn: "Dieter Senghaas", publisherEn: "Kalima", cover: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTpORGHnf4xmE7teLTq1IRDORrLMFfDgbarV1Ni9HI-LA&s=10" },
+  { id: 10, titleAr: "زن وفن صيانة الدراجة النارية", authorAr: "روبرت م بيرسيغ", publisherAr: "كلمة", titleEn: "Zen and the Art of Motorcycle Maintenance", authorEn: "Robert M. Pirsig", publisherEn: "Kalima", cover: "https://pbs.twimg.com/media/DVnl6p-UQAAPzpf.jpg" },
 ];
 
 interface BurstItem { id: number; tx: number; ty: number; rot: number; item: typeof KNOWLEDGE_CARDS[0]; }
@@ -351,7 +351,7 @@ const HomePage: React.FC = () => {
           </div>
         </div>
 
-        {/* --- 🆕 القسم المضاف: شريط الكتب المضافة حديثاً بأغلفتها (عرض 10 كتب + زر عرض المزيد) --- */}
+        {/* --- 🆕 شريط الكتب المضافة حديثاً (تحديث الأغلفة والحجم ليناسب أبعاد الصور دون تعديل الكود) --- */}
         <div className="w-full px-2 space-y-6">
           <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
             <h3 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
@@ -366,26 +366,26 @@ const HomePage: React.FC = () => {
             {FEATURED_BOOKS.map((book) => (
               <div 
                 key={book.id} 
-                className="min-w-[260px] md:min-w-[300px] max-w-[300px] snap-start bg-white dark:bg-slate-800 rounded-[2rem] border border-slate-200 dark:border-slate-700/60 shadow-md hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col overflow-hidden"
+                className="min-w-[220px] md:min-w-[240px] max-w-[240px] snap-start bg-white dark:bg-slate-800 rounded-[2rem] border border-slate-200 dark:border-slate-700/60 shadow-md hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col overflow-hidden"
               >
-                {/* غلاف الكتاب */}
-                <div className="h-48 md:h-56 w-full relative overflow-hidden bg-slate-100 dark:bg-slate-900 flex items-center justify-center">
+                {/* الحجم مخصص ومحكوم ليناسب دقة الصورة بدون تشويه */}
+                <div className="h-44 md:h-48 w-full relative overflow-hidden bg-slate-100 dark:bg-slate-900 flex items-center justify-center">
                   <img 
                     src={book.cover} 
                     alt={isAr ? book.titleAr : book.titleEn} 
                     className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                     loading="lazy"
                   />
-                  <div className="absolute top-3 left-3 bg-red-600 text-white text-[10px] px-2 py-0.5 rounded-md font-bold uppercase shadow-sm">NEW</div>
+                  <div className="absolute top-3 left-3 bg-red-600 text-white text-[9px] px-2 py-0.5 rounded-md font-bold uppercase shadow-sm">NEW</div>
                 </div>
 
                 {/* تفاصيل الكتاب */}
-                <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                  <h4 className="text-base md:text-lg font-bold text-slate-900 dark:text-white line-clamp-2 leading-snug">
+                <div className="p-4 flex-1 flex flex-col justify-between gap-3">
+                  <h4 className="text-sm md:text-base font-bold text-slate-900 dark:text-white line-clamp-2 leading-snug min-h-[40px]">
                     {isAr ? book.titleAr : book.titleEn}
                   </h4>
                   
-                  <div className="pt-3 border-t border-slate-100 dark:border-slate-700/50 space-y-1 text-xs md:text-sm">
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-700/50 space-y-0.5 text-xs">
                     <p className="text-slate-600 dark:text-slate-400 font-medium truncate">
                       <span className="text-slate-400 dark:text-slate-500 ml-1">{t('by')}</span> {isAr ? book.authorAr : book.authorEn}
                     </p>
@@ -397,18 +397,18 @@ const HomePage: React.FC = () => {
               </div>
             ))}
 
-            {/* كارت عرض المزيد في نهاية شريط التمرير الأفقي */}
+            {/* كارت عرض المزيد المتناسق مع الحجم الجديد */}
             <Link 
               to="/new-arrivals"
-              className="min-w-[240px] md:min-w-[260px] snap-start bg-gradient-to-br from-red-600 to-red-700 text-white rounded-[2rem] p-6 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-center items-center text-center group gap-4 cursor-pointer relative overflow-hidden"
+              className="min-w-[200px] md:min-w-[220px] max-w-[220px] snap-start bg-gradient-to-br from-red-600 to-red-700 text-white rounded-[2rem] p-5 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-center items-center text-center group gap-3 cursor-pointer relative overflow-hidden"
             >
               <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center text-3xl shadow-inner group-hover:scale-110 transition-transform duration-300">📚</div>
-              <div className="space-y-2 relative z-10">
-                <h4 className="text-xl font-black">{t('seeMore')}</h4>
-                <p className="text-xs text-red-100/80 font-medium leading-relaxed px-2">{t('seeMoreDesc')}</p>
+              <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center text-2xl shadow-inner group-hover:scale-110 transition-transform duration-300">📚</div>
+              <div className="space-y-1 relative z-10">
+                <h4 className="text-lg font-black">{t('seeMore')}</h4>
+                <p className="text-[11px] text-red-100/80 font-medium leading-relaxed px-1">{t('seeMoreDesc')}</p>
               </div>
-              <span className="text-2xl group-hover:translate-x-2 transition-transform duration-300">&rarr;</span>
+              <span className="text-xl group-hover:translate-x-2 transition-transform duration-300">&rarr;</span>
             </Link>
           </div>
         </div>
@@ -519,7 +519,6 @@ const HomePage: React.FC = () => {
         .animate-marquee-ltr { animation: marquee-ltr 70s linear infinite; }
         .animate-marquee-rtl { animation: marquee-rtl 70s linear infinite; }
         
-        /* شريط التمرير الأفقي الأنيق للكتب */
         .scrollbar-thin::-webkit-scrollbar { height: 6px; }
         .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
         .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
