@@ -30,7 +30,10 @@ const translations = {
     dayUnit: "يوم",
     daysUnit: "أيام",
     alcLibraryTitle: "المكتبة العربية الرقمية المجانية",
-    alcLibrarySub: "مبادرة رائدة يقدمها مركز أبو ظبي للغة العربية"
+    alcLibrarySub: "مبادرة رائدة يقدمها مركز أبو ظبي للغة العربية",
+    recentBooksTitle: "الكتب وصلت حديثاً 📚",
+    by: "تأليف:",
+    publisher: "الناشر:"
   },
   en: {
     welcome: "Knowledge Portal at Falcon Int'l School",
@@ -59,7 +62,10 @@ const translations = {
     dayUnit: "Day",
     daysUnit: "Days",
     alcLibraryTitle: "Free Digital Arabic Library",
-    alcLibrarySub: "A leading initiative by Abu Dhabi Arabic Language Centre"
+    alcLibrarySub: "A leading initiative by Abu Dhabi Arabic Language Centre",
+    recentBooksTitle: "Newly Arrived Books 📚",
+    by: "By:",
+    publisher: "Publisher:"
   }
 };
 
@@ -91,6 +97,18 @@ const KNOWLEDGE_CARDS = [
   { icon: "🤖", textAr: "ذكاء صقر", textEn: "Saqr AI", color: "border-green-600" },
   { icon: "📚", textAr: "كتب الكترونية", textEn: "E-Books", color: "border-slate-800" },
   { icon: "🇦🇪", textAr: "الهوية الوطنية", textEn: "N.Identity", color: "border-red-500" }
+];
+
+// القائمة المستخرجة من البيانات الرسمية (بدون ذكر كلمة إهداء)
+const RECENT_BOOKS = [
+  { titleAr: "سلسلة عالمي الصغير", authorAr: "محمد بن راشد آل مكتوم", publisherAr: "دون ناشر", titleEn: "My Little World Series", authorEn: "Mohammed bin Rashid Al Maktoum", publisherEn: "No Publisher" },
+  { titleAr: "حكيم العرب", authorAr: "مريم صقر القاسمي", publisherAr: "الهدهد للنشر", titleEn: "Wise Man of the Arabs", authorEn: "Maryam Saqr Al Qasimi", publisherEn: "Al Hudhud Publishing" },
+  { titleAr: "أسرار الفضاء مع هزاع وأصدقائه", authorAr: "هدى المشالي", publisherAr: "نبض القلم للنشر والتوزيع", titleEn: "Space Secrets with Hazza & Friends", authorEn: "Huda Al Mashali", publisherEn: "Nabdh Al Qalam" },
+  { titleAr: "يتامى في الغيب", authorAr: "سلامة بنت هزاع آل نهيان", publisherAr: "المؤلف", titleEn: "Orphans in the Unseen", authorEn: "Salama Bint Hazza Al Nahyan", publisherEn: "Author" },
+  { titleAr: "التنمية المستدامة - رهان الحاضر", authorAr: "سيلفي برونيل", publisherAr: "كلمة", titleEn: "Sustainable Development", authorEn: "Sylvie Brunel", publisherEn: "Kalima" },
+  { titleAr: "أحمد بن ماجد: أسد البحار", authorAr: "عائشة الغيص", publisherAr: "الظبي للنشر", titleEn: "Ahmad bin Majid: Lion of the Seas", authorEn: "Aisha Al Ghais", publisherEn: "Al Dhabi Publishing" },
+  { titleAr: "الشيخ نهيان بن مبارك رجل التسامح", authorAr: "صبحة الخييلي", publisherAr: "مداد للنشر والتوزيع", titleEn: "Sheikh Nahyan bin Mubarak", authorEn: "Sobha Al Khaili", publisherEn: "Medad Publishing" },
+  { titleAr: "محمد بن زايد والتعليم", authorAr: "مركز الإمارات للدراسات والبحوث", publisherAr: "مركز الإمارات للدراسات والبحوث", titleEn: "Mohamed bin Zayed & Education", authorEn: "ECSSR", publisherEn: "ECSSR" }
 ];
 
 interface BurstItem { id: number; tx: number; ty: number; rot: number; item: typeof KNOWLEDGE_CARDS[0]; }
@@ -327,6 +345,36 @@ const HomePage: React.FC = () => {
           </div>
         </div>
 
+        {/* --- 🆕 القسم المضاف: شريط الكتب المضافة حديثاً (أفقي وسلس) --- */}
+        <div className="w-full px-2 space-y-4">
+          <h3 className="text-xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+            {t('recentBooksTitle')}
+          </h3>
+          <div className="w-full overflow-x-auto flex gap-6 pb-4 pt-2 scrollbar-thin scroll-smooth snap-x">
+            {RECENT_BOOKS.map((book, idx) => (
+              <div 
+                key={idx} 
+                className="min-w-[280px] md:min-w-[320px] snap-start bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-6 rounded-3xl border border-slate-200 dark:border-slate-700/60 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between"
+              >
+                <div className="space-y-3">
+                  <div className="w-12 h-12 bg-blue-50 dark:bg-blue-500/10 rounded-2xl flex items-center justify-center text-xl">📖</div>
+                  <h4 className="text-base md:text-lg font-bold text-slate-900 dark:text-white line-clamp-2 leading-snug">
+                    {isAr ? book.titleAr : book.titleEn}
+                  </h4>
+                </div>
+                <div className="pt-4 border-t border-slate-100 dark:border-slate-700/50 mt-4 space-y-1 text-xs md:text-sm">
+                  <p className="text-slate-600 dark:text-slate-400 font-medium">
+                    <span className="text-slate-400 dark:text-slate-500 ml-1">{t('by')}</span> {isAr ? book.authorAr : book.authorEn}
+                  </p>
+                  <p className="text-slate-500 dark:text-slate-400">
+                    <span className="text-slate-400 dark:text-slate-500 ml-1">{t('publisher')}</span> {isAr ? book.publisherAr : book.publisherEn}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* --- 3. قسم لمحات من الموطن --- */}
         <div className="w-full px-2 group">
           <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-8 md:p-16 rounded-[2.5rem] md:rounded-[4rem] border border-slate-200 dark:border-slate-700 shadow-md transition-all duration-500 relative overflow-hidden flex flex-col md:flex-row items-center gap-8 md:gap-12">
@@ -432,6 +480,12 @@ const HomePage: React.FC = () => {
         @keyframes marquee-rtl { 0% { transform: translateX(-100vw); } 100% { transform: translateX(100%); } }
         .animate-marquee-ltr { animation: marquee-ltr 70s linear infinite; }
         .animate-marquee-rtl { animation: marquee-rtl 70s linear infinite; }
+        
+        /* تحسين مظهر شريط التمرير الأفقي للكتب */
+        .scrollbar-thin::-webkit-scrollbar { height: 6px; }
+        .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .dark .scrollbar-thin::-webkit-scrollbar-thumb { background: #334155; }
       `}</style>
     </div>
   );
