@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { useLanguage } from '../App';
+import { useLanguage, useTheme } from '../App'; // 🚀 استدعاء السياق الموحد للغة والثيم من الـ App
 
 const pageTranslations = {
   ar: {
@@ -23,7 +23,7 @@ const pageTranslations = {
   }
 };
 
-// المصفوفة الكاملة لجميع الكتب (بدون ذكر كلمة إهداء)
+// القائمة الكاملة والشاملة لجميع الكتب مع ملخصاتها وتصنيفاتها
 const ALL_BOOKS_DATA = [
   // --- مستند 1: سلامة بنت هزاع آل نهيان ---
   { titleAr: "يتامى في الغيب", authorAr: "سلامة بنت هزاع آل نهيان", publisherAr: "المؤلف", titleEn: "Orphans in the Unseen", authorEn: "Salama Bint Hazza Al Nahyan", publisherEn: "Author", catAr: "رواية", catEn: "Novel", summaryAr: "رواية أدبية بلمسة خيالية ساحرة تأخذ القارئ في رحلة مشاعر إنسانية عميقة واستكشاف الذات.", summaryEn: "A captivating literary novel with a touch of fantasy exploring deep human emotions and self-discovery." },
@@ -82,18 +82,18 @@ const ALL_BOOKS_DATA = [
   { titleAr: "كسلان جداً...جداً جداً", authorAr: "فوزية الفهدية", publisherAr: "الظبي للنشر", titleEn: "Very... Very Lazy k visual", authorEn: "Fawzia Al Fahdi", publisherEn: "Al Dhabi Publishing", catAr: "تربوي وسلوكي", catEn: "Behavioral", summaryAr: "قصة فكاهية هادفة تعالج مشكلة الكسل وتوضح فوائد النشاط والعمل والإنجاز المثمر.", summaryEn: "A humorous targeted story addressing laziness while showcasing the benefits of being active." },
   { titleAr: "تسامح أميرة / وفاء أميرة", authorAr: "صفاء عزمي", publisherAr: "واحة الحكايات", titleEn: "Princess Tolerance & Loyalty", authorEn: "Safaa Azmy", publisherEn: "Oasis of Stories", catAr: "قصص أخلاقية", catEn: "Moral Stories", summaryAr: "مجموعة قصصية تغرس شيم التسامح العفو والوفاء بالعهود في نفوس الأميرات الصغيرات.", summaryEn: "A narrative structure deeply instilling values of forgiveness and loyalty in kids." },
   { titleAr: "لن أغضب", authorAr: "عائشة الغيص", publisherAr: "الظبي للنشر", titleEn: "I Will Not Get Angry", authorEn: "Aisha Al Ghais", publisherEn: "Al Dhabi Publishing", catAr: "تحكم بالمشاعر", catEn: "Emotional Control", summaryAr: "توجيهات تربوية ممتازة لم مساعدة الأطفال على ضبط الانفعالات والتعامل مع الغضب بهدوء.", summaryEn: "Excellent educational guide helping children manage anger and control daily emotions." },
-  { titleAr: "الفرسان الثلاثة / أليس في بلاد العجائب", authorAr: "ألكساندر دوما / لويس كارول", publisherAr: "مكتبة جرير", titleEn: "The Three Musketeers / Alice", authorEn: "Alexandre Dumas / Lewis Carroll", publisherEn: "Jarir Bookstore", catAr: "روايات عالمية مصورة", catEn: "Graphic Novels", summaryAr: "روائع الأدب العالمي الكلاسيكي المعاد صياغتها بالرسوم المشوقة لتسهيل تصفح الطلاب للقراءة.", summaryEn: "Re-imagined timeless masterpieces with rich graphics for dynamic reading experiences." },
+  { titleAr: "الفرسان الثلاثة / أليس في بلاد العجائب", authorAr: "ألكساندر دوما / لويس كارول", publisherAr: "مكتبة جرير", titleEn: "The Three Musketeers / Alice", authorEn: "Alexandre Dumas / Lewis Carroll", publisherEn: "Jarir Bookstore", catAr: "روايات عالمية مصورة", catEn: "Graphic Novels", summaryAr: "روائع الأدب العالمي الكلاسيكي المعاد صياغتها بالرسوم المشوقة لتسهيل تصفح الطلاب للقراءة.", summaryEn: "Re-imagine timeless masterpieces with rich graphics for dynamic reading experiences." },
   { titleAr: "كيف تصبح صقارا ؟", authorAr: "عائشة مطر المنصوري", publisherAr: "قنديل للنشر", titleEn: "How to Become a Falconer?", authorEn: "Aisha Al Mansoori", publisherEn: "Qandeel Printing", catAr: "هوية وطنية وتراث", catEn: "National Heritage", summaryAr: "دليل تراثي رائع يعلم اليافعين أصول الصقارة العربية التقليدية وكيفية رعاية الصقور.", summaryEn: "A comprehensive heritage guide teaching youth the traditional art of Arab falconry." },
   { titleAr: "رحلة رجل الثلج", authorAr: "عائشة الحارثي", publisherAr: "لؤلؤ للنشر والتوزيع", titleEn: "The Snowman's Journey", authorEn: "Aisha Al Harthi", publisherEn: "Lulu Publishing", catAr: "خيال - أطفال", catEn: "Fantasy - Kids", summaryAr: "قصة شائقة حول رجل ثلج يخوض مغامرة دافئة يبحث فيها عن سر الشتاء والصداقة.", summaryEn: "An imaginative tale about a snowman embarking on a warm path searching for winter secrets." },
   { titleAr: "غافتان", authorAr: "نادية النجار", publisherAr: "الهدهد للنشر", titleEn: "Two Ghaf Trees", authorEn: "Nadia Al Najjar", publisherEn: "Al Hudhud", catAr: "هوية وطنية وبيئة", catEn: "National Environment", summaryAr: "حوار بين شجرتي غاف يروي تاريخ الأرض والقدرة المذهلة على الصمود والتكيف البيئي.", summaryEn: "A dialogue between two Ghaf trees narrating local history and environmental resilience." },
-  { titleAr: "العاصمة العالمية للكتاب", authorAr: "بدور القاسمي", publisherAr: "كلمات", titleEn: "World Book Capital", authorEn: "Bodour Al Qasimi", publisherEn: "Kalimat", catAr: "قصص أطفال ثقافية", catEn: "Cultural Kids", summaryAr: "يحتفي بالشارقة كمنارة للثقافة والقراءة، مشجعاً الأطفال على حب الكتاب والمعرفة.", summaryEn: "Celebrating Sharjah as a beacon of culture, inspiring children to fall in love with reading." },
+  { titleAr: "العاصمة العالمية للكتاب", authorAr: "بدور القاسمي", publisherAr: "كلمات", titleEn: "World Book Capital", authorEn: "Bodour Al القاسمي", publisherEn: "Kalimat", catAr: "قصص أطفال ثقافية", catEn: "Cultural Kids", summaryAr: "يحتفي بالشارقة كمنارة للثقافة والقراءة، مشجعاً الأطفال على حب الكتاب والمعرفة.", summaryEn: "Celebrating Sharjah as a beacon of culture, inspiring children to fall in love with reading." },
   { titleAr: "رحلة الخمسين", authorAr: "جاسم عبيد", publisherAr: "جاسم عبيد", titleEn: "The Journey of the Fifty", authorEn: "Jassim Obeid", publisherEn: "Jassim Obeid", catAr: "هوية وطنية – بالغين", catEn: "National Identity", summaryAr: "كتاب توثيقي يستعرض الإنجازات التاريخية المذهلة لدولة الإمارات خلال خمسين عاماً.", summaryEn: "A documentary volume capturing the UAE's grand milestones over fifty historic years." },
   { titleAr: "يوميات آيباد", authorAr: "فاضل الكعبي", publisherAr: "نبض القلم للنشر", titleEn: "iPad Diaries", authorEn: "Fadel Al Kaabi", publisherEn: "Nabdh Al Qalam", catAr: "وعي رقمي", catEn: "Digital Awareness", summaryAr: "تناول نقدي هادف لعلاقة الجيل الجديد بالأجهزة الرقمية والموازنة بين التقنية والحياة الحقيقية.", summaryEn: "A thoughtful look at balancing technological tools with active daily school life." },
   { titleAr: "العادات ال7 للأطفال السعداء", authorAr: "شون كوفي", publisherAr: "مكتبة جرير", titleEn: "The 7 Habits of Happy Kids", authorEn: "Sean Covey", publisherEn: "Jarir Bookstore", catAr: "تطوير سلوكي", catEn: "Behavioral Development", summaryAr: "تطبيق عملي لأهم المبادئ والمهارات الحياتية التي تبني شخصيات الطلاب القيادية والناجحة.", summaryEn: "Practical adaptation of core life strategies for building successful youth leadership." },
   { titleAr: "شيرلوك سام وخدعة الكتب المصورة", authorAr: "إيه. جيه. لو", publisherAr: "مكتبة جرير", titleEn: "Sherlock Sam and the Comic Book Trick", authorEn: "A.J. Low", publisherEn: "Jarir Bookstore", catAr: "بوليسي وغموض", catEn: "Mystery", summaryAr: "مغامرة بوليسية شيقة للأطفال تحفز الذكاء وحل الألغاز والمشكلات بطرق منطقية إبداعية.", summaryEn: "A fun mystery engaging kids in logical problem solving and clever deduction." },
   { titleAr: "رواية الاعتراف", authorAr: "علي أبو الريش", publisherAr: "مداد للنشر والتوزيع", titleEn: "The Confession Novel", authorEn: "Ali Abu Al Reesh", publisherEn: "Medad Publishing", catAr: "أدب – بالغين", catEn: "Adult Literature", summaryAr: "عمل أدبي رفيع وعميق يغوص في النفس البشرية ويناقش قضايا مجتمعية وفلسفية معاصرة.", summaryEn: "A rich literary masterpiece exploring complex social values and human philosophies." },
 
-  // --- مستند 3: مكتبة زايد العامة (إصدارات مشروع كلمة وهيئة أبوظبي للثقافة) ---
+  // --- مستند 3: مكتبة زايد العامة ---
   { titleAr: "مقولات يوغا بتنجالي", authorAr: "سوامي برابهافانندا", publisherAr: "كلمة", titleEn: "Patanjali Yoga Aphorisms", authorEn: "Swami Prabhavananda", publisherEn: "Kalima", catAr: "فلسفة وتأمل", catEn: "Philosophy", summaryAr: "ترجمة ممتازة لنصوص اليوغا الفلسفية القديمة لاستكشاف فنون التأمل والسلام الداخلي.", summaryEn: "A translation of ancient texts exploring inner meditation methods and absolute mental peace." },
   { titleAr: "النظرية الثقافية والثقافة الشعبية", authorAr: "جون ستوريك", publisherAr: "كلمة", titleEn: "Cultural Theory and Popular Culture", authorEn: "John Storey", publisherEn: "Kalima", catAr: "دراسات ثقافية", catEn: "Cultural Studies", summaryAr: "كتاب أكاديمي يبحث في تطور الثقافات الجماهيرية وتأثيرها على المجتمعات الحديثة.", summaryEn: "An academic review looking at mass culture patterns and its societal impact." },
   { titleAr: "الأعمال المصرفية في العالم الروماني", authorAr: "جان أندرو", publisherAr: "كلمة", titleEn: "Banking in the Roman World", authorEn: "Jean Andreau", publisherEn: "Kalima", catAr: "تاريخ واقتصاد", catEn: "History & Economics", summaryAr: "دراسة تاريخية فريدة للنظم المالية والأنشطة الاقتصادية في العهد الروماني القديم.", summaryEn: "A fascinating study detailing financial strategies and trade in the ancient Roman era." },
@@ -102,7 +102,7 @@ const ALL_BOOKS_DATA = [
   { titleAr: "موسیقى الهند", authorAr: "ريجنالد ماسي، جميلة ماسي", publisherAr: "كلمة", titleEn: "The Music of India", authorEn: "Reginald & Jamila Massey", publisherEn: "Kalima", catAr: "فنون وموسيقى", catEn: "Arts & Music", summaryAr: "يتناول تاريخ المقامات والآلات الموسيقية الهندية العريقة وتطورها عبر العصور الثقافية المختلفة.", summaryEn: "Explores the deep histories and traditions of classical Indian musical patterns." },
   { titleAr: "قراءة في الإقتصاد الصيني", authorAr: "لين يي فو", publisherAr: "كلمة", titleEn: "Demystifying the Chinese Economy", authorEn: "Lin Yifu", publisherEn: "Kalima", catAr: "اقتصاد دولي", catEn: "Economics", summaryAr: "كشف أسرار وآليات الصعود الاقتصادي المذهل لجمهورية الصين لتصبح قوة اقتصادية عظمى.", summaryEn: "Unveiling the structural parameters that shaped the modern economic rise of China." },
   { titleAr: "البندقية بوابة الشرق", authorAr: "ماريا بيا بيداني", publisherAr: "كلمة", titleEn: "Venice and the Islamic World", authorEn: "Maria Pia Pedani", publisherEn: "Kalima", catAr: "تاريخ وعلاقات", catEn: "History", summaryAr: "يوثق الروابط التاريخية والتجارية العميقة والتبادل الثقافي بين مدينة البندقية والعالم الإسلامي.", summaryEn: "Documenting the historical and cross-cultural trade links between Venice and the Orient." },
-  { titleAr: "الفن الصخري : في إمارة أبو ظبي", authorAr: "وليد ياسين التكريتي", publisherAr: "هيئة أبوظبي للسياحة والثقافة", titleEn: "Rock Art in Abu Dhabi", authorEn: "Walid Yasin Al Tikriti", publisherEn: "TCA Abu Dhabi", catAr: "تاريخ وآثار الإمارات", catEn: "UAE Archeology", summaryAr: "كتاب أثري قيم يستعرض الرسوم والنقوش الصخرية التاريخية المكتشفة في أبوظبي.", summaryEn: "A valuable archaeological piece uncovering ancient rock carvings found in Abu Dhabi." },
+  { titleAr: "الفن الصخري : في إمارة أبو ظبي", authorAr: "وليد ياسين التكريتي", publisherAr: "هيئة أبوظبي للسياحة والثقافة", titleEn: "Rock Art in Abu Dhabi", authorAr: "Walid Yasin Al Tikriti", publisherEn: "TCA Abu Dhabi", catAr: "تاريخ وآثار الإمارات", catEn: "UAE Archeology", summaryAr: "كتاب أثري قيم يستعرض الرسوم والنقوش الصخرية التاريخية المكتشفة في أبوظبي.", summaryEn: "A valuable archaeological piece uncovering ancient rock carvings found in Abu Dhabi." },
   { titleAr: "الآلات الموسيقية في دولة الإمارات", authorAr: "عبدالجليل علي السعد", publisherAr: "هيئة أبوظبي للسياحة والثقافة", titleEn: "Musical Instruments in the UAE", authorEn: "Abduljaleel Al Saad", publisherEn: "TCA Abu Dhabi", catAr: "تراث وفنون", catEn: "UAE Arts", summaryAr: "توثيق شامل للآلات الإيقاعية والوترية التقليدية مثل العود والقانون والطبول التراثية بالدولة.", summaryEn: "A rich documentation of traditional UAE musical instruments like Oud, Qanun, and heritage drums." },
   { titleAr: "الموسيقا العربية في مئة عام", authorAr: "عادل الهاشمي", publisherAr: "هيئة أبوظبي للسياحة والثقافة", titleEn: "Arabic Music in a Century", authorEn: "Adel Al Hashemi", publisherEn: "TCA Abu Dhabi", catAr: "فنون وموسيقى", catEn: "Arabic Music History", summaryAr: "دراسة نقدية وتاريخية ترصد تطور الأنماط الغنائية والموسيقية العربية والأصوات الخالدة.", summaryEn: "A comprehensive critical history mapping modern Arab musical shifts and timeless voices." },
   { titleAr: "الأمير الصغير", authorAr: "سانت إكزوبري", publisherAr: "هيئة أبوظبي للسياحة والثقافة", titleEn: "The Little Prince", authorEn: "Antoine de Saint-Exupéry", publisherEn: "TCA Abu Dhabi", catAr: "أدب عالمي كلاسيكي", catEn: "Classic Literature", summaryAr: "الرواية الفلسفية الإنسانية الشهيرة المترجمة لتبحر بالطلاب في معاني الحياة والصداقة الحقيقية.", summaryEn: "The timeless masterpiece guiding readers through deep human philosophies and meaning of life." }
@@ -110,6 +110,7 @@ const ALL_BOOKS_DATA = [
 
 const NewArrivalsPage: React.FC = () => {
   const { locale, dir } = useLanguage();
+  const { theme } = useTheme(); // 🎨 جلب حالة الدارك مود ومفاتيح التحكم الاختيارية من الـ App
   const isAr = locale === 'ar';
   
   const [searchTerm, setSearchTerm] = useState('');
@@ -118,12 +119,12 @@ const NewArrivalsPage: React.FC = () => {
   const [hoveredBook, setHoveredBook] = useState<any | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   
-  // حالة لإدارة اللمس على الموبايل
+  // حالة لإدارة اللمس التفاعلي على التابلت والموبايل لعدم تداخل التلميحات
   const [activeTouchIdx, setActiveTouchId] = useState<number | null>(null);
 
   const pt = (key: keyof typeof pageTranslations.ar) => pageTranslations[locale][key];
 
-  // دالة تحديث مكان الماوس بسلاسة تامة لتتبع دقيق
+  // دالة تحديث مكان الماوس بسلاسة تامة لتتبع دقيق ومنع حجب نصوص الكارت العلوي
   const handleMouseMove = (e: React.MouseEvent) => {
     setMousePos({ x: e.clientX, y: e.clientY });
   };
@@ -142,54 +143,55 @@ const NewArrivalsPage: React.FC = () => {
   }, [searchTerm]);
 
   return (
-    <div dir={dir} className="w-full min-h-[100dvh] flex flex-col items-center bg-slate-900 font-sans relative overflow-x-hidden pb-16 md:pb-24 pt-24 md:pt-32 px-4 sm:px-6 md:px-8">
+    // 🎨 ستايل ديناميكي يتأثر اختيارياً بوضع الثيم العام للموقع (Light/Dark) المأخوذ من زر الموقع
+    <div dir={dir} className="w-full min-h-[100dvh] flex flex-col items-center bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-white font-sans relative overflow-x-hidden pb-20 md:pb-32 pt-24 md:pt-32 px-4 sm:px-6 md:px-8 transition-colors duration-500">
       
-      {/* 🌟 تأثيرات الخلفية العميقة المتطابقة الثابتة لتعميق الـ iOS Glassmorphism */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-40 dark:opacity-40">
-         <div className="absolute top-[-5%] left-[-5%] w-[60%] h-[50%] bg-emerald-600/25 rounded-full blur-[140px] animate-blob"></div>
-         <div className="absolute bottom-[-5%] right-[-5%] w-[50%] h-[60%] bg-red-600/20 rounded-full blur-[140px] animate-blob animation-delay-2000"></div>
-         <div className="absolute top-[35%] left-[15%] w-[40%] h-[40%] bg-amber-500/15 rounded-full blur-[120px] animate-blob animation-delay-4000"></div>
+      {/* 🌟 تأثيرات خلفية زجاجية متغيرة ومطابقة لنظام هوية الـ iOS التفاعلية */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-40 dark:opacity-30 transition-opacity duration-500">
+         <div className="absolute top-[-5%] left-[-5%] w-[60%] h-[50%] bg-emerald-500/20 dark:bg-emerald-600/25 rounded-full blur-[140px] animate-blob"></div>
+         <div className="absolute bottom-[-5%] right-[-5%] w-[50%] h-[60%] bg-red-500/15 dark:bg-red-600/20 rounded-full blur-[140px] animate-blob animation-delay-2000"></div>
+         <div className="absolute top-[35%] left-[15%] w-[40%] h-[40%] bg-amber-500/10 dark:bg-amber-500/15 rounded-full blur-[120px] animate-blob animation-delay-4000"></div>
       </div>
 
       <div className="w-full max-w-[1350px] flex flex-col gap-10 md:gap-14 animate-fade-in-up">
         
-        {/* زر العودة بتصميم زجاجي عائم مستوحى من نظام iOS */}
+        {/* زر العودة بتصميم بلوري شفاف iOS Glassmorphism مدمج متناسق للوضعين */}
         <div className="w-full flex justify-start relative z-30 px-1">
-          <Link to="/" className="group flex items-center gap-2.5 bg-white/5 border border-white/10 backdrop-blur-2xl font-bold px-5 py-2.5 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.2)] hover:border-red-500/50 hover:bg-white/10 transition-all duration-400 text-white text-xs md:text-sm active:scale-95 touch-manipulation">
+          <Link to="/" className="group flex items-center gap-2.5 bg-white/40 dark:bg-white/5 border border-white/60 dark:border-white/10 backdrop-blur-2xl font-bold px-5 py-2.5 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:border-red-500/50 hover:bg-white/60 dark:hover:bg-white/10 transition-all duration-400 text-slate-800 dark:text-white text-xs md:text-sm active:scale-95 touch-manipulation">
             <span className={`transform transition-transform duration-300 ${isAr ? 'group-hover:translate-x-1' : 'group-hover:-translate-x-1'}`}>&larr;</span>
             {pt('backBtn')}
           </Link>
         </div>
 
-        {/* 💎 الترويسة الأنيقة ذات العنوان الضخم اللامع */}
+        {/* 💎 الترويسة الأنيقة ذات العنوان الكبير "وصل حديثاً للمكتبة" مع تدرج نيون براق */}
         <div className="text-center space-y-4 max-w-4xl mx-auto relative z-20 px-2 select-none">
           <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-tight">
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-amber-300 to-red-400 drop-shadow-[0_4px_16px_rgba(0,0,0,0.3)]">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 via-amber-500 to-red-600 dark:from-emerald-400 dark:via-amber-300 dark:to-red-400 drop-shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:drop-shadow-[0_4px_16px_rgba(0,0,0,0.4)]">
               {pt('title')}
             </span>
           </h1>
-          <p className="text-xs sm:text-sm md:text-xl text-slate-300 font-medium leading-relaxed max-w-2xl mx-auto px-1 opacity-90">
+          <p className="text-xs sm:text-sm md:text-xl text-slate-600 dark:text-slate-300 font-medium leading-relaxed max-w-2xl mx-auto px-1">
             {pt('subtitle')}
           </p>
-          <div className="h-1 w-28 bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 mx-auto rounded-full shadow-[0_0_20px_rgba(239,68,68,0.5)] animate-pulse"></div>
+          <div className="h-1 w-28 bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 mx-auto rounded-full shadow-[0_0_20px_rgba(239,68,68,0.3)] dark:shadow-[0_0_20px_rgba(239,68,68,0.6)] animate-pulse"></div>
         </div>
 
-        {/* 🔍 شريط البحث الزجاجي الأنيق متوافق بالكامل مع جميع الأحجام */}
+        {/* 🔍 شريط البحث الزجاجي الأنيق المتجاوب بالكامل مع أجهزة الكمبيوتر والموبايل */}
         <div className="w-full max-w-xl mx-auto relative z-30 px-2 sm:px-4">
-          <div className="relative flex items-center bg-white/5 backdrop-blur-2xl border border-white/10 rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.25)] focus-within:border-emerald-500/50 focus-within:shadow-[0_0_35px_rgba(52,211,153,0.15)] transition-all duration-300">
-            <span className="absolute inset-y-0 right-5 flex items-center text-base md:text-lg pointer-events-none select-none">{isAr ? '🔍' : ''}</span>
+          <div className="relative flex items-center bg-white/30 dark:bg-white/5 backdrop-blur-2xl border border-white/50 dark:border-white/10 rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.05)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.3)] focus-within:border-emerald-500/50 focus-within:shadow-[0_0_35px_rgba(52,211,153,0.15)] transition-all duration-300">
+            <span className="absolute inset-y-0 right-5 flex items-center text-base md:text-lg pointer-events-none select-none text-slate-400 dark:text-slate-300">{isAr ? '🔍' : ''}</span>
             <input 
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder={pt('searchPlaceholder')}
-              className={`w-full bg-transparent rounded-full py-3.5 md:py-4.5 text-sm md:text-base text-white font-bold placeholder-slate-400 focus:outline-none touch-manipulation ${isAr ? 'pr-12 pl-6 text-right' : 'pl-12 pr-6 text-left'}`}
+              className={`w-full bg-transparent rounded-full py-3.5 md:py-4.5 text-sm md:text-base font-bold focus:outline-none touch-manipulation text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-400 ${isAr ? 'pr-12 pl-6 text-right' : 'pl-12 pr-6 text-left'}`}
             />
-            <span className="absolute inset-y-0 left-5 flex items-center text-base md:text-lg pointer-events-none select-none">{!isAr ? '🔍' : ''}</span>
+            <span className="absolute inset-y-0 left-5 flex items-center text-base md:text-lg pointer-events-none select-none text-slate-400 dark:text-slate-300">{!isAr ? '🔍' : ''}</span>
           </div>
         </div>
 
-        {/* 📱 شبكة كروت الكتب المتجاوبة والمطابقة لأبعاد شاشات اللابتوب، التابلت، والهواتف */}
+        {/* 📱 شبكة كروت الكتب فائقة التجاوب المتوافقة بالكامل مع الكمبيوتر واللابتوب والتابلت والموبايل */}
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8 relative z-30 px-1 sm:px-0">
           {filteredBooks.map((book, idx) => {
             const isTouchActive = activeTouchIdx === idx;
@@ -200,39 +202,39 @@ const NewArrivalsPage: React.FC = () => {
                 onMouseLeave={() => setHoveredBook(null)}
                 onMouseMove={handleMouseMove}
                 onClick={() => setActiveTouchId(isTouchActive ? null : idx)}
-                className={`group relative bg-white/[0.03] dark:bg-black/[0.2] border border-white/[0.08] backdrop-blur-xl p-5 md:p-6 rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.15)] hover:bg-white/[0.06] hover:border-emerald-500/40 hover:-translate-y-1.5 transition-all duration-400 flex flex-col justify-between h-[160px] sm:h-[170px] cursor-pointer select-none active:scale-[0.99] touch-manipulation ${isTouchActive ? 'border-emerald-500/60 bg-white/[0.07]' : ''}`}
+                className={`group relative bg-white/40 dark:bg-black/20 border border-white/60 dark:border-white/[0.08] backdrop-blur-xl p-5 md:p-6 rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.2)] hover:bg-white/60 dark:hover:bg-white/[0.06] hover:border-emerald-500/40 dark:hover:border-emerald-500/40 hover:-translate-y-1.5 transition-all duration-400 flex flex-col justify-between h-[160px] sm:h-[170px] cursor-pointer select-none active:scale-[0.99] touch-manipulation ${isTouchActive ? 'border-emerald-500/60 bg-white/70 dark:bg-white/[0.07]' : ''}`}
               >
                 <div className="space-y-3 flex-1 flex flex-col justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center text-lg shadow-md shrink-0 group-hover:scale-105 transition-transform">📚</div>
-                    <h4 className="text-sm sm:text-base md:text-lg font-bold text-white line-clamp-1 leading-snug flex-1">
+                    <div className="w-9 h-9 bg-white/60 dark:bg-white/5 border border-white/80 dark:border-white/10 rounded-xl flex items-center justify-center text-lg shadow-sm shrink-0 group-hover:scale-105 transition-transform text-slate-800 dark:text-white">📚</div>
+                    <h4 className="text-sm sm:text-base md:text-lg font-bold line-clamp-1 leading-snug flex-1 text-slate-900 dark:text-white">
                       {isAr ? book.titleAr : book.titleEn}
                     </h4>
                   </div>
                   
-                  <div className="space-y-0.5 text-xs md:text-sm pt-2 border-t border-white/[0.06]">
-                    <p className="text-slate-300 font-medium truncate">
-                      <span className="text-slate-500 ml-1">{pt('by')}</span> {isAr ? book.authorAr : book.authorEn}
+                  <div className="space-y-0.5 text-xs md:text-sm pt-2 border-t border-slate-200/50 dark:border-white/[0.06]">
+                    <p className="text-slate-700 dark:text-slate-300 font-bold truncate">
+                      <span className="text-slate-400 dark:text-slate-500 ml-1">{pt('by')}</span> {isAr ? book.authorAr : book.authorEn}
                     </p>
-                    <p className="text-slate-400 truncate">
-                      <span className="text-slate-500 ml-1">{pt('publisher')}</span> {isAr ? book.publisherAr : book.publisherEn}
+                    <p className="text-slate-600 dark:text-slate-400 font-medium truncate">
+                      <span className="text-slate-400 dark:text-slate-500 ml-1">{pt('publisher')}</span> {isAr ? book.publisherAr : book.publisherEn}
                     </p>
                     <div className="pt-2 flex items-center justify-between">
-                      <span className="inline-block bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-lg font-semibold text-[10px] md:text-xs text-slate-400 shadow-inner">
+                      <span className="inline-block bg-white/60 dark:bg-white/5 border border-white/80 dark:border-white/10 px-2.5 py-0.5 rounded-lg font-semibold text-[10px] md:text-xs text-slate-500 dark:text-slate-400 shadow-sm">
                         {isAr ? book.catAr : book.catEn}
                       </span>
-                      {/* تلميح صغير للموبايل فقط */}
-                      <span className="block sm:hidden text-[9px] text-emerald-400 animate-pulse font-medium">
+                      {/* تلميح صغير تفاعلي لشاشات الهواتف الجوالة فقط عند اللمس */}
+                      <span className="block sm:hidden text-[9px] text-emerald-600 dark:text-emerald-400 animate-pulse font-medium">
                         {isTouchActive ? (isAr ? 'إغلاق ✕' : 'Close ✕') : (isAr ? 'ملخص ✨' : 'Summary ✨')}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {/* 📱 العرض المخصص للموبايل والتابلت عند اللمس (يظهر بالأسفل بدلاً من الطفو المزعج) */}
+                {/* 📱 العرض المخصص للموبايل والآيباد عند اللمس (يظهر منسدلاً أسفل الكارت بلون داكن زجاجي iOS واضح جداً ومقروء) */}
                 {isTouchActive && (
-                  <div className="block sm:hidden absolute top-[102%] left-0 right-0 bg-slate-950/95 backdrop-blur-2xl border border-white/10 p-4 rounded-2xl text-white shadow-2xl z-50 animate-zoom-in text-xs leading-relaxed font-medium">
-                    <div className="text-[10px] text-emerald-400 font-bold mb-1">✨ {pt('aiBadge')}</div>
+                  <div className="block sm:hidden absolute top-[102%] left-0 right-0 bg-slate-950/95 border border-white/10 p-4 rounded-2xl text-white shadow-2xl z-50 animate-zoom-in text-xs leading-relaxed font-medium">
+                    <div className="text-[10px] text-emerald-400 font-bold mb-1">✨ {isAr ? 'ملخص صقر الذكي' : 'Saqr AI Summary'}</div>
                     {isAr ? book.summaryAr : book.summaryEn}
                   </div>
                 )}
@@ -243,21 +245,21 @@ const NewArrivalsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 🔮 السامري العائم الحقيقي (Floating Tooltip) المخصص لبيئات اللابتوب والكمبيوتر فقط لراحة بصرية فائقة */}
+      {/* 🔮 السامري العائم ذو الخلفية الداكنة الواضحة والثابتة للابتوب والحاسوب الشخصي (يتحرك بطلاقة مع الماوس دون حجب النصوص) */}
       {hoveredBook && (
         <div 
-          className="hidden sm:block fixed z-[99999] pointer-events-none max-w-xs md:max-w-sm transition-transform duration-100 ease-out"
+          className="hidden sm:block fixed z-[99999] pointer-events-none max-w-xs md:max-w-sm transition-transform duration-700 ease-out"
           style={{ 
-            left: mousePos.x + 20, 
-            top: mousePos.y + 20,
-            transform: isAr ? 'translate(-100%, -100%)' : 'none' // ضبط اتجاه الانبثاق حسب لغة الواجهة
+            left: mousePos.x + 22, 
+            top: mousePos.y + 15,
+            transform: isAr ? 'translate(-100%, -100%)' : 'none' // حركية ذكية للانبثاق الجانبي المريح حسب لغة الواجهة
           }}
         >
-          <div className="bg-slate-950/90 backdrop-blur-xl border border-white/15 p-4 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.5)] space-y-2 animate-zoom-in text-white text-xs md:text-sm">
-            <div className="inline-block px-2.5 py-0.5 rounded-md bg-emerald-600/80 text-[10px] md:text-xs font-black tracking-wide uppercase shadow-sm">
-              {pt('aiBadge')}
+          <div className="bg-slate-950/95 border border-white/15 p-4 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.4)] space-y-2 animate-zoom-in text-white text-xs md:text-sm backdrop-blur-xl">
+            <div className="inline-block px-2.5 py-0.5 rounded-md bg-emerald-600/95 text-[10px] md:text-xs font-black tracking-wide uppercase shadow-sm">
+              ✨ {isAr ? 'ملخص صقر الذكي' : 'Saqr AI Summary'}
             </div>
-            <p className="text-slate-200 font-medium leading-relaxed">
+            <p className="text-slate-100 font-bold leading-relaxed">
               {isAr ? hoveredBook.summaryAr : hoveredBook.summaryEn}
             </p>
             <div className="text-[9px] text-slate-500 font-bold pt-1 border-t border-white/5 flex justify-between items-center">
