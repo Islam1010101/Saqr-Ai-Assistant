@@ -4,7 +4,7 @@ import { useLanguage, useTheme } from '../App'; // 🚀 استدعاء السي�
 
 const pageTranslations = {
   ar: {
-    title: "وصل حديثاً للمكتبة 📚",
+    title: "وصل حديثاً للمكتبة",
     subtitle: "رصد ذكي يستعرض أحدث المؤلفات والدراسات التي انضمت إلى رفوفنا مؤخراً.",
     backBtn: "العودة للرئيسية",
     by: "تأليف:",
@@ -13,7 +13,7 @@ const pageTranslations = {
     searchPlaceholder: "ابحث عن كتاب، مؤلف، أو دار نشر..."
   },
   en: {
-    title: "New Arrivals to the Library 📚",
+    title: "New Arrivals to the Library",
     subtitle: "A smart showcase reviewing the latest books and studies added to our shelves.",
     backBtn: "Back to Home",
     by: "By:",
