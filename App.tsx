@@ -19,6 +19,7 @@ import CreatorsPortalPage from './pages/CreatorsPortalPage';
 import LibraryMapPage from './pages/LibraryMapPage';
 import SaqrStudioPage from './pages/SaqrStudioPage';
 import PodcastPage from './pages/PodcastPage';
+import NewArrivalsPage from './pages/NewArrivalsPage'; // 🆕 استيراد صفحة القائمة الكاملة الجديدة
 
 export type Locale = 'en' | 'ar';
 
@@ -342,6 +343,7 @@ const MainLayout: React.FC = () => {
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/feedback" element={<FeedbackPage />} /> 
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/new-arrivals" element={<NewArrivalsPage />} /> {/* 🆕 مسار الصفحة الجديدة المضاف بدقة */}
         </Routes>
       </main>
 
