@@ -4,28 +4,30 @@ import { useLanguage } from '../App';
 
 const pageTranslations = {
   ar: {
-    title: "القائمة الكاملة للإصدارات الحديثة 📚",
-    subtitle: "استكشف قائمة الكتب والاصدارات الشاملة التي انضمت إلى مكتبتنا مع الملخص الذكي لكل كتاب.",
+    title: "بوابة صقر للإصدارات الحديثة",
+    subtitle: "كنز معرفي متجدد يضم أحدث الكتب والدراسات التي انضمت إلى مكتبتنا مع رصد شامل وموجز ذكي لكل مصنف.",
     backBtn: "العودة للرئيسية",
     by: "تأليف:",
     publisher: "الناشر:",
     category: "التصنيف:",
-    searchPlaceholder: "ابحث عن كتاب، مؤلف، أو ناشر...",
-    aiBadge: "ملخص صقر الذكي ✨"
+    searchPlaceholder: "ابحث عن جوهرة معرفية، مؤلف، أو دار نشر...",
+    aiBadge: "ملخص صقر الذكي ✨",
+    closeHint: "اضغط لإغلاق الملخص"
   },
   en: {
-    title: "Full New Arrivals List 📚",
-    subtitle: "Explore the comprehensive list of newly arrived books with smart AI summaries for each.",
+    title: "Saqr Portal For New Arrivals",
+    subtitle: "A renewed knowledge treasure featuring the latest books and studies added to our library with smart AI summaries.",
     backBtn: "Back to Home",
     by: "By:",
     publisher: "Publisher:",
     category: "Category:",
-    searchPlaceholder: "Search by title, author, or publisher...",
-    aiBadge: "Saqr AI Summary ✨"
+    searchPlaceholder: "Search for a title, author, or publisher...",
+    aiBadge: "Saqr AI Summary ✨",
+    closeHint: "Tap to close summary"
   }
 };
 
-// المصفوفة الكاملة والشاملة لجميع الكتب من كافة المستندات مع الملخصات الذكية
+// المصفوفة الكاملة والشاملة لجميع الكتب من كافة المستندات مع الملخصات الذكية والتصنيفات
 const ALL_BOOKS_DATA = [
   // --- مستند 1: سلامة بنت هزاع آل نهيان ---
   { titleAr: "يتامى في الغيب", authorAr: "سلامة بنت هزاع آل نهيان", publisherAr: "المؤلف", titleEn: "Orphans in the Unseen", authorEn: "Salama Bint Hazza Al Nahyan", publisherEn: "Author", catAr: "رواية", catEn: "Novel", summaryAr: "رواية أدبية بلمسة خيالية ساحرة تأخذ القارئ في رحلة مشاعر إنسانية عميقة واستكشاف الذات.", summaryEn: "A captivating literary novel with a touch of fantasy exploring deep human emotions and self-discovery." },
@@ -101,7 +103,7 @@ const ALL_BOOKS_DATA = [
   { titleAr: "الأعمال المصرفية في العالم الروماني", authorAr: "جان أندرو", publisherAr: "كلمة", titleEn: "Banking in the Roman World", authorEn: "Jean Andreau", publisherEn: "Kalima", catAr: "تاريخ واقتصاد", catEn: "History & Economics", summaryAr: "دراسة تاريخية فريدة للنظم المالية والأنشطة الاقتصادية في العهد الروماني القديم.", summaryEn: "A fascinating study detailing financial strategies and trade in the ancient Roman era." },
   { titleAr: "ظلال الاستهلاك : عواقب البيئة العالمية", authorAr: "بيتر دوفيرن", publisherAr: "كلمة", titleEn: "Shadows of Consumption", authorEn: "Peter Dauvergne", publisherEn: "Kalima", catAr: "بيئة واقتصاد", catEn: "Environment", summaryAr: "يحلل الآثار السلبية للاستهلاك البشري المفرط على الأنظمة البيئية والمناخ العالمي لجغرافيي الغد.", summaryEn: "Analyses the negative footprints of consumption patterns on global ecosystems." },
   { titleAr: "حرب الجينوم: شفرة الحياة", authorAr: "جيمس شريف", publisherAr: "كلمة", titleEn: "The Genome War", authorEn: "James Shreeve", publisherEn: "Kalima", catAr: "علوم وحياة", catEn: "Science", summaryAr: "السباق العلمي المثير لفك شفرة الجينوم البشري وثورته الطبية المعاصرة.", summaryEn: "The dramatic scientific journey of decoding the human DNA and biological revolutions." },
-  { titleAr: "موسيقى الهند", authorAr: "ريجنالد ماسي، جميلة ماسي", publisherAr: "كلمة", titleEn: "The Music of India", authorEn: "Reginald & Jamila Massey", publisherEn: "Kalima", catAr: "فنون وموسيقى", catEn: "Arts & Music", summaryAr: "يتناول تاريخ المقامات والآلات الموسيقية الهندية العريقة وتطورها عبر العصور الثقافية المختلفة.", summaryEn: "Explores the deep histories and traditions of classical Indian musical patterns." },
+  { titleAr: "موسیقى الهند", authorAr: "ريجنالد ماسي، جميلة ماسي", publisherAr: "كلمة", titleEn: "The Music of India", authorEn: "Reginald & Jamila Massey", publisherEn: "Kalima", catAr: "فنون وموسيقى", catEn: "Arts & Music", summaryAr: "يتناول تاريخ المقامات والآلات الموسيقية الهندية العريقة وتطورها عبر العصور الثقافية المختلفة.", summaryEn: "Explores the deep histories and traditions of classical Indian musical patterns." },
   { titleAr: "قراءة في الإقتصاد الصيني", authorAr: "لين يي فو", publisherAr: "كلمة", titleEn: "Demystifying the Chinese Economy", authorEn: "Lin Yifu", publisherEn: "Kalima", catAr: "اقتصاد دولي", catEn: "Economics", summaryAr: "كشف أسرار وآليات الصعود الاقتصادي المذهل لجمهورية الصين لتصبح قوة اقتصادية عظمى.", summaryEn: "Unveiling the structural parameters that shaped the modern economic rise of China." },
   { titleAr: "البندقية بوابة الشرق", authorAr: "ماريا بيا بيداني", publisherAr: "كلمة", titleEn: "Venice and the Islamic World", authorEn: "Maria Pia Pedani", publisherEn: "Kalima", catAr: "تاريخ وعلاقات", catEn: "History", summaryAr: "يوثق الروابط التاريخية والتجارية العميقة والتبادل الثقافي بين مدينة البندقية والعالم الإسلامي.", summaryEn: "Documenting the historical and cross-cultural trade links between Venice and the Orient." },
   { titleAr: "الفن الصخري : في إمارة أبو ظبي", authorAr: "وليد ياسين التكريتي", publisherAr: "هيئة أبوظبي للسياحة والثقافة", titleEn: "Rock Art in Abu Dhabi", authorEn: "Walid Yasin Al Tikriti", publisherEn: "TCA Abu Dhabi", catAr: "تاريخ وآثار الإمارات", catEn: "UAE Archeology", summaryAr: "كتاب أثري قيم يستعرض الرسوم والنقوش الصخرية التاريخية المكتشفة في أبوظبي.", summaryEn: "A valuable archaeological piece uncovering ancient rock carvings found in Abu Dhabi." },
@@ -115,108 +117,130 @@ const NewArrivalsPage: React.FC = () => {
   const isAr = locale === 'ar';
   
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeTouchId, setActiveTouchId] = useState<number | null>(null); // لإدارة ظهور الهنت باللمس
+  
   const pt = (key: keyof typeof pageTranslations.ar) => pageTranslations[locale][key];
 
-  // تصفية ذكية للبحث لمنع بطء الواجهة والتأكد من الفلترة الدقيقة
   const filteredBooks = useMemo(() => {
     return ALL_BOOKS_DATA.filter(book => {
-      const matchAr = book.titleAr.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                      book.authorAr.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                      book.publisherAr.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchEn = book.titleEn.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                      book.authorEn.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                      book.publisherEn.toLowerCase().includes(searchTerm.toLowerCase());
+      const targetStr = searchTerm.toLowerCase();
+      const matchAr = book.titleAr.toLowerCase().includes(targetStr) || 
+                      book.authorAr.toLowerCase().includes(targetStr) ||
+                      book.publisherAr.toLowerCase().includes(targetStr);
+      const matchEn = book.titleEn.toLowerCase().includes(targetStr) || 
+                      book.authorEn.toLowerCase().includes(targetStr) ||
+                      book.publisherEn.toLowerCase().includes(targetStr);
       return matchAr || matchEn;
     });
   }, [searchTerm]);
 
   return (
-    <div dir={dir} className="w-full min-h-[100dvh] flex flex-col items-center bg-slate-50 dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300 py-10 md:py-20 px-4">
+    <div dir={dir} className="w-full min-h-[100dvh] flex flex-col items-center bg-slate-50 dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300 py-12 md:py-24 px-4 sm:px-6 md:px-8">
       
-      {/* 🌟 الخلفية الديناميكية الثابتة والموحدة مع الهوم */}
+      {/* 🌟 الخلفية الديناميكية الموحدة الثابتة لضمان استقرار الهوية البصرية */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-40 dark:opacity-20">
          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-red-500/20 rounded-full blur-[120px] animate-blob"></div>
          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-blue-500/10 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
          <div className="absolute top-[40%] left-[20%] w-[30%] h-[30%] bg-green-500/10 rounded-full blur-[100px] animate-blob animation-delay-4000"></div>
       </div>
 
-      <div className="w-full max-w-[1400px] flex flex-col gap-8 md:gap-12 animate-fade-in-up">
+      <div className="w-full max-w-[1400px] flex flex-col gap-10 md:gap-16 animate-fade-in-up">
         
-        {/* زر العودة المتناسق */}
+        {/* زر العودة بتصميم زجاجي عائم ومقاوم للمس العشوائي */}
         <div className="w-full flex justify-start relative z-30">
-          <Link to="/" className="group flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold px-5 py-2.5 rounded-full shadow-sm hover:border-red-500 transition-all duration-300 text-slate-800 dark:text-white text-sm">
-            <span className="group-hover:-translate-x-1 transition-transform">←</span>
+          <Link to="/" className="group flex items-center gap-2 bg-white/40 dark:bg-slate-900/40 border border-white/50 dark:border-slate-800/60 backdrop-blur-xl font-bold px-6 py-3 rounded-full shadow-lg hover:border-red-500 hover:bg-white/60 dark:hover:bg-slate-900/60 transition-all duration-300 text-slate-800 dark:text-white text-xs md:text-sm active:scale-95 touch-manipulation">
+            <span className={`transform transition-transform duration-300 ${isAr ? 'group-hover:translate-x-1' : 'group-hover:-translate-x-1'}`}>&larr;</span>
             {pt('backBtn')}
           </Link>
         </div>
 
-        {/* ترويسة وعنوان الصفحة العريض مع ثبات التنسيق والأبعاد */}
-        <div className="text-center space-y-4 max-w-4xl mx-auto relative z-20 hover:scale-[1.01] transition-transform duration-700">
-          <h1 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
-            {pt('title')}
+        {/* 💎 الترويسة والعنوان الضخم ثلاثي التدرج مع حركات الظل اللامع */}
+        <div className="text-center space-y-6 max-w-5xl mx-auto relative z-20 hover:scale-[1.01] transition-transform duration-700">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-black tracking-tight leading-tight select-none">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 via-amber-500 to-red-600 dark:from-emerald-400 dark:via-amber-400 dark:to-red-400 drop-shadow-[0_4px_12px_rgba(0,0,0,0.08)] animate-text-reveal">
+              {pt('title')}
+            </span>
           </h1>
-          <p className="text-sm md:text-lg text-slate-600 dark:text-slate-400 font-medium leading-relaxed max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base md:text-2xl text-slate-600 dark:text-slate-400 font-medium leading-relaxed max-w-3xl mx-auto px-2 animate-text-reveal-delayed">
             {pt('subtitle')}
           </p>
-          <div className="h-1.5 w-24 bg-red-600 mx-auto rounded-full shadow-[0_0_15px_rgba(220,38,38,0.5)] animate-pulse"></div>
+          <div className="h-1.5 w-32 bg-gradient-to-r from-emerald-500 via-amber-500 to-red-600 mx-auto rounded-full shadow-[0_0_20px_rgba(220,38,38,0.4)] animate-pulse"></div>
         </div>
 
-        {/* 🔍 شريط البحث الذكي السلس للوصول الفوري لكافة كتب القائمة */}
-        <div className="w-full max-w-xl mx-auto relative z-30 px-2">
-          <input 
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder={pt('searchPlaceholder')}
-            className="w-full bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-full px-6 py-3 text-sm md:text-base text-slate-900 dark:text-white font-bold placeholder-slate-400 focus:outline-none focus:border-red-500 shadow-md hover:shadow-lg transition-all"
-          />
+        {/* 🔍 شريط البحث الزجاجي المتجاوب كلياً مع اللمس وأجهزة التابلت واللابتوب */}
+        <div className="w-full max-w-2xl mx-auto relative z-30 px-2 sm:px-4">
+          <div className="relative flex items-center bg-white/30 dark:bg-slate-900/30 backdrop-blur-xl border border-white/40 dark:border-slate-800/50 rounded-full shadow-xl focus-within:border-emerald-500 focus-within:shadow-[0_0_30px_rgba(16,185,129,0.2)] transition-all duration-300">
+            <span className="absolute inset-y-0 right-5 md:right-6 flex items-center text-lg md:text-xl pointer-events-none select-none">{isAr ? '🔍' : ''}</span>
+            <input 
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder={pt('searchPlaceholder')}
+              className={`w-full bg-transparent rounded-full py-4 md:py-5 text-sm md:text-base text-slate-900 dark:text-white font-bold placeholder-slate-400/80 focus:outline-none touch-manipulation ${isAr ? 'pr-12 pl-6 text-right' : 'pl-12 pr-6 text-left'}`}
+            />
+            <span className="absolute inset-y-0 left-5 md:left-6 flex items-center text-lg md:text-xl pointer-events-none select-none">{!isAr ? '🔍' : ''}</span>
+          </div>
         </div>
 
-        {/* شبكة عرض كروت الكتب الذكية بدون صور وتظهر السامري بسلاسة عند حوم الماوس (Hover) */}
-        <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-30">
-          {filteredBooks.map((book, idx) => (
-            <div 
-              key={idx} 
-              className="group relative bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-5 rounded-[2rem] border border-slate-200 dark:border-slate-700/60 shadow-md hover:border-blue-500 transition-all duration-300 flex flex-col justify-between h-[190px] overflow-visible cursor-pointer animate-fade-in-up"
-            >
-              {/* بيانات الكتاب الظاهرية */}
-              <div className="space-y-2 flex-1">
-                <div className="flex items-center gap-2">
-                  <div className="w-9 h-9 bg-blue-50 dark:bg-blue-500/10 rounded-xl flex items-center justify-center text-lg shrink-0">📖</div>
-                  <h4 className="text-sm md:text-base font-bold text-slate-900 dark:text-white line-clamp-1 leading-snug flex-1">
-                    {isAr ? book.titleAr : book.titleEn}
-                  </h4>
-                </div>
-                
-                <div className="space-y-0.5 text-xs pt-2 border-t border-slate-100 dark:border-slate-700/40 mt-2">
-                  <p className="text-slate-600 dark:text-slate-400 font-medium truncate">
-                    <span className="text-slate-400 dark:text-slate-500 ml-1">{pt('by')}</span> {isAr ? book.authorAr : book.authorEn}
-                  </p>
-                  <p className="text-slate-500 dark:text-slate-400 truncate">
-                    <span className="text-slate-400 dark:text-slate-500 ml-1">{pt('publisher')}</span> {isAr ? book.publisherAr : book.publisherEn}
-                  </p>
-                  <p className="text-slate-400 dark:text-slate-500 truncate text-[11px] pt-1">
-                    <span className="bg-slate-100 dark:bg-slate-700/60 px-2 py-0.5 rounded-md font-bold">{pt('category')} {isAr ? book.catAr : book.catEn}</span>
-                  </p>
-                </div>
-              </div>
-
-              {/* ✨ طبقة الملخص الذكي (AI Summary) تظهر بانسيابية فائقة بمجرد وقوف الماوس */}
-              <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 to-slate-950/98 rounded-[2rem] p-5 text-white opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-300 flex flex-col justify-between transform scale-95 group-hover:scale-100 shadow-2xl z-40">
-                <div className="space-y-2">
-                  <div className="inline-block px-2.5 py-0.5 rounded-full bg-red-600 text-[10px] font-bold tracking-wide uppercase shadow-sm">
-                    {pt('aiBadge')}
+        {/* 📱 شبكة كروت الكتب فائقة التجاوب Glassmorphism Grid تلائم الشاشات واللمس واللابتوبس */}
+        <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 sm:gap-8 relative z-30 px-2 sm:px-0">
+          {filteredBooks.map((book, idx) => {
+            const isCurrentActive = activeTouchId === idx;
+            return (
+              <div 
+                key={idx}
+                onClick={() => setActiveTouchId(isCurrentActive ? null : idx)}
+                className="group relative bg-white/40 dark:bg-slate-900/40 backdrop-blur-md p-6 rounded-[2.5rem] border border-white/50 dark:border-slate-800/40 shadow-lg hover:shadow-2xl hover:border-emerald-500/80 hover:-translate-y-2 transition-all duration-500 flex flex-col justify-between h-[200px] sm:h-[210px] overflow-visible cursor-pointer select-none active:scale-[0.99] touch-manipulation"
+              >
+                {/* المحتوى النصي الافتراضي للكارت */}
+                <div className="space-y-3 flex-1">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-emerald-500/10 dark:bg-emerald-400/10 rounded-2xl flex items-center justify-center text-xl shadow-inner shrink-0 group-hover:scale-110 transition-transform duration-300">📚</div>
+                    <h4 className="text-base md:text-lg font-black text-slate-900 dark:text-white line-clamp-1 leading-snug flex-1">
+                      {isAr ? book.titleAr : book.titleEn}
+                    </h4>
                   </div>
-                  <p className="text-xs text-slate-200 font-medium leading-relaxed pt-1 line-clamp-4">
-                    {isAr ? book.summaryAr : book.summaryEn}
-                  </p>
+                  
+                  <div className="space-y-1 text-xs md:text-sm pt-3 border-t border-slate-200/40 dark:border-slate-700/30 mt-3">
+                    <p className="text-slate-700 dark:text-slate-300 font-bold truncate">
+                      <span className="text-slate-400 dark:text-slate-500 ml-1">{pt('by')}</span> {isAr ? book.authorAr : book.authorEn}
+                    </p>
+                    <p className="text-slate-600 dark:text-slate-400 font-medium truncate">
+                      <span className="text-slate-400 dark:text-slate-500 ml-1">{pt('publisher')}</span> {isAr ? book.publisherAr : book.publisherEn}
+                    </p>
+                    <div className="pt-2">
+                      <span className="inline-block bg-gradient-to-r from-slate-100 to-slate-200/80 dark:from-slate-800 dark:to-slate-800/50 px-3 py-1 rounded-xl font-bold text-[10px] md:text-xs text-slate-500 dark:text-slate-400 shadow-sm border border-white/20">
+                        {pt('category')} {isAr ? book.catAr : book.catEn}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div className="text-[10px] text-slate-400 font-bold border-t border-slate-800 pt-1">
-                  <span>✨ بوابة معرفة صقر الإمارات</span>
+
+                {/* 🔮 طبقة الهنت والملخص الزجاجي المطور - متجاوب مع حوم الحاسوب واللمس الفوري للتابلت والهواتف */}
+                <div className={`absolute inset-0 bg-gradient-to-br from-slate-900/98 via-slate-950/98 to-slate-900/95 rounded-[2.5rem] p-6 text-white flex flex-col justify-between transition-all duration-500 shadow-2xl z-40 ${isCurrentActive ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none lg:group-hover:opacity-100 lg:group-hover:scale-100 lg:group-hover:pointer-events-auto'}`}>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="inline-block px-3 py-1 rounded-full bg-emerald-600 text-[10px] md:text-xs font-black tracking-wide uppercase shadow-md animate-pulse">
+                        {pt('aiBadge')}
+                      </div>
+                      {/* تلميح غلق مخصص لبيئات اللمس (مخفي اختيارياً على الشاشات الكبيرة) */}
+                      <span className="block lg:hidden text-[9px] bg-white/10 px-2 py-0.5 rounded-full font-bold text-slate-400">
+                        {pt('closeHint')}
+                      </span>
+                    </div>
+                    <p className="text-xs md:text-sm text-slate-200 font-bold leading-relaxed pt-1 overflow-y-auto no-scrollbar max-h-[90px] sm:max-h-[100px]">
+                      {isAr ? book.summaryAr : book.summaryEn}
+                    </p>
+                  </div>
+                  <div className="text-[10px] text-slate-400 font-black border-t border-slate-800/80 pt-2 flex items-center justify-between">
+                    <span>✨ مدرسة صقر الإمارات الدولية</span>
+                    <span className="text-emerald-400 font-bold">SAQR AI</span>
+                  </div>
                 </div>
+
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -224,19 +248,29 @@ const NewArrivalsPage: React.FC = () => {
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
         * { font-family: 'Cairo', sans-serif !important; }
         
+        @keyframes reveal-text {
+          0% { clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%); transform: translateY(30px); opacity: 0; }
+          100% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); transform: translateY(0); opacity: 1; }
+        }
+        .animate-text-reveal { animation: reveal-text 1.2s cubic-bezier(0.77, 0, 0.175, 1) forwards; }
+        .animate-text-reveal-delayed { animation: reveal-text 1.2s cubic-bezier(0.77, 0, 0.175, 1) 0.3s forwards; clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%); }
+
         @keyframes blob {
           0% { transform: translate(0px, 0px) scale(1); }
-          33% { transform: translate(30px, -50px) scale(1.1); }
-          66% { transform: translate(-20px, 20px) scale(0.9); }
+          33% { transform: translate(25px, -40px) scale(1.08); }
+          66% { transform: translate(-15px, 15px) scale(0.95); }
           100% { transform: translate(0px, 0px) scale(1); }
         }
-        .animate-blob { animation: blob 7s infinite alternate ease-in-out; }
+        .animate-blob { animation: blob 8s infinite alternate ease-in-out; }
         
         @keyframes fade-in-up { 
-          0% { opacity: 0; transform: translateY(15px); } 
+          0% { opacity: 0; transform: translateY(20px); } 
           100% { opacity: 1; transform: translateY(0); } 
         }
-        .animate-fade-in-up { animation: fade-in-up 0.5s ease-out forwards; }
+        .animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
     </div>
   );
