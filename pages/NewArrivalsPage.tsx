@@ -1,33 +1,29 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../App';
 
 const pageTranslations = {
   ar: {
-    title: "بوابة صقر للإصدارات الحديثة",
-    subtitle: "كنز معرفي متجدد يضم أحدث الكتب والدراسات التي انضمت إلى مكتبتنا مع رصد شامل وموجز ذكي لكل مصنف.",
+    title: "وصل حديثاً للمكتبة 📚",
+    subtitle: "رصد ذكي يستعرض أحدث المؤلفات والدراسات التي انضمت إلى رفوفنا مؤخراً.",
     backBtn: "العودة للرئيسية",
     by: "تأليف:",
     publisher: "الناشر:",
     category: "التصنيف:",
-    searchPlaceholder: "ابحث عن جوهرة معرفية، مؤلف، أو دار نشر...",
-    aiBadge: "ملخص صقر الذكي ✨",
-    closeHint: "اضغط لإغلاق الملخص"
+    searchPlaceholder: "ابحث عن كتاب، مؤلف، أو دار نشر..."
   },
   en: {
-    title: "Saqr Portal For New Arrivals",
-    subtitle: "A renewed knowledge treasure featuring the latest books and studies added to our library with smart AI summaries.",
+    title: "New Arrivals to the Library 📚",
+    subtitle: "A smart showcase reviewing the latest books and studies added to our shelves.",
     backBtn: "Back to Home",
     by: "By:",
     publisher: "Publisher:",
     category: "Category:",
-    searchPlaceholder: "Search for a title, author, or publisher...",
-    aiBadge: "Saqr AI Summary ✨",
-    closeHint: "Tap to close summary"
+    searchPlaceholder: "Search for a book, author, or publisher..."
   }
 };
 
-// المصفوفة الكاملة والشاملة لجميع الكتب من كافة المستندات مع الملخصات الذكية والتصنيفات
+// المصفوفة الكاملة لجميع الكتب (بدون ذكر كلمة إهداء)
 const ALL_BOOKS_DATA = [
   // --- مستند 1: سلامة بنت هزاع آل نهيان ---
   { titleAr: "يتامى في الغيب", authorAr: "سلامة بنت هزاع آل نهيان", publisherAr: "المؤلف", titleEn: "Orphans in the Unseen", authorEn: "Salama Bint Hazza Al Nahyan", publisherEn: "Author", catAr: "رواية", catEn: "Novel", summaryAr: "رواية أدبية بلمسة خيالية ساحرة تأخذ القارئ في رحلة مشاعر إنسانية عميقة واستكشاف الذات.", summaryEn: "A captivating literary novel with a touch of fantasy exploring deep human emotions and self-discovery." },
@@ -117,9 +113,20 @@ const NewArrivalsPage: React.FC = () => {
   const isAr = locale === 'ar';
   
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTouchId, setActiveTouchId] = useState<number | null>(null); // لإدارة ظهور الهنت باللمس
   
+  // حالات تتبع الماوس ومحتوى السامري العائم
+  const [hoveredBook, setHoveredBook] = useState<any | null>(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  
+  // حالة لإدارة اللمس على الموبايل
+  const [activeTouchIdx, setActiveTouchId] = useState<number | null>(null);
+
   const pt = (key: keyof typeof pageTranslations.ar) => pageTranslations[locale][key];
+
+  // دالة تحديث مكان الماوس بسلاسة تامة لتتبع دقيق
+  const handleMouseMove = (e: React.MouseEvent) => {
+    setMousePos({ x: e.clientX, y: e.clientY });
+  };
 
   const filteredBooks = useMemo(() => {
     return ALL_BOOKS_DATA.filter(book => {
@@ -135,108 +142,100 @@ const NewArrivalsPage: React.FC = () => {
   }, [searchTerm]);
 
   return (
-    <div dir={dir} className="w-full min-h-[100dvh] flex flex-col items-center bg-slate-50 dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300 py-12 md:py-24 px-4 sm:px-6 md:px-8">
+    <div dir={dir} className="w-full min-h-[100dvh] flex flex-col items-center bg-slate-900 font-sans relative overflow-x-hidden pb-16 md:pb-24 pt-24 md:pt-32 px-4 sm:px-6 md:px-8">
       
-      {/* 🌟 الخلفية الديناميكية الموحدة الثابتة لضمان استقرار الهوية البصرية */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-40 dark:opacity-20">
-         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-red-500/20 rounded-full blur-[120px] animate-blob"></div>
-         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-blue-500/10 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
-         <div className="absolute top-[40%] left-[20%] w-[30%] h-[30%] bg-green-500/10 rounded-full blur-[100px] animate-blob animation-delay-4000"></div>
+      {/* 🌟 تأثيرات الخلفية العميقة المتطابقة الثابتة لتعميق الـ iOS Glassmorphism */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-40 dark:opacity-40">
+         <div className="absolute top-[-5%] left-[-5%] w-[60%] h-[50%] bg-emerald-600/25 rounded-full blur-[140px] animate-blob"></div>
+         <div className="absolute bottom-[-5%] right-[-5%] w-[50%] h-[60%] bg-red-600/20 rounded-full blur-[140px] animate-blob animation-delay-2000"></div>
+         <div className="absolute top-[35%] left-[15%] w-[40%] h-[40%] bg-amber-500/15 rounded-full blur-[120px] animate-blob animation-delay-4000"></div>
       </div>
 
-      <div className="w-full max-w-[1400px] flex flex-col gap-10 md:gap-16 animate-fade-in-up">
+      <div className="w-full max-w-[1350px] flex flex-col gap-10 md:gap-14 animate-fade-in-up">
         
-        {/* زر العودة بتصميم زجاجي عائم ومقاوم للمس العشوائي */}
-        <div className="w-full flex justify-start relative z-30">
-          <Link to="/" className="group flex items-center gap-2 bg-white/40 dark:bg-slate-900/40 border border-white/50 dark:border-slate-800/60 backdrop-blur-xl font-bold px-6 py-3 rounded-full shadow-lg hover:border-red-500 hover:bg-white/60 dark:hover:bg-slate-900/60 transition-all duration-300 text-slate-800 dark:text-white text-xs md:text-sm active:scale-95 touch-manipulation">
+        {/* زر العودة بتصميم زجاجي عائم مستوحى من نظام iOS */}
+        <div className="w-full flex justify-start relative z-30 px-1">
+          <Link to="/" className="group flex items-center gap-2.5 bg-white/5 border border-white/10 backdrop-blur-2xl font-bold px-5 py-2.5 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.2)] hover:border-red-500/50 hover:bg-white/10 transition-all duration-400 text-white text-xs md:text-sm active:scale-95 touch-manipulation">
             <span className={`transform transition-transform duration-300 ${isAr ? 'group-hover:translate-x-1' : 'group-hover:-translate-x-1'}`}>&larr;</span>
             {pt('backBtn')}
           </Link>
         </div>
 
-        {/* 💎 الترويسة والعنوان الضخم ثلاثي التدرج مع حركات الظل اللامع */}
-        <div className="text-center space-y-6 max-w-5xl mx-auto relative z-20 hover:scale-[1.01] transition-transform duration-700">
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-black tracking-tight leading-tight select-none">
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 via-amber-500 to-red-600 dark:from-emerald-400 dark:via-amber-400 dark:to-red-400 drop-shadow-[0_4px_12px_rgba(0,0,0,0.08)] animate-text-reveal">
+        {/* 💎 الترويسة الأنيقة ذات العنوان الضخم اللامع */}
+        <div className="text-center space-y-4 max-w-4xl mx-auto relative z-20 px-2 select-none">
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-tight">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-amber-300 to-red-400 drop-shadow-[0_4px_16px_rgba(0,0,0,0.3)]">
               {pt('title')}
             </span>
           </h1>
-          <p className="text-sm sm:text-base md:text-2xl text-slate-600 dark:text-slate-400 font-medium leading-relaxed max-w-3xl mx-auto px-2 animate-text-reveal-delayed">
+          <p className="text-xs sm:text-sm md:text-xl text-slate-300 font-medium leading-relaxed max-w-2xl mx-auto px-1 opacity-90">
             {pt('subtitle')}
           </p>
-          <div className="h-1.5 w-32 bg-gradient-to-r from-emerald-500 via-amber-500 to-red-600 mx-auto rounded-full shadow-[0_0_20px_rgba(220,38,38,0.4)] animate-pulse"></div>
+          <div className="h-1 w-28 bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 mx-auto rounded-full shadow-[0_0_20px_rgba(239,68,68,0.5)] animate-pulse"></div>
         </div>
 
-        {/* 🔍 شريط البحث الزجاجي المتجاوب كلياً مع اللمس وأجهزة التابلت واللابتوب */}
-        <div className="w-full max-w-2xl mx-auto relative z-30 px-2 sm:px-4">
-          <div className="relative flex items-center bg-white/30 dark:bg-slate-900/30 backdrop-blur-xl border border-white/40 dark:border-slate-800/50 rounded-full shadow-xl focus-within:border-emerald-500 focus-within:shadow-[0_0_30px_rgba(16,185,129,0.2)] transition-all duration-300">
-            <span className="absolute inset-y-0 right-5 md:right-6 flex items-center text-lg md:text-xl pointer-events-none select-none">{isAr ? '🔍' : ''}</span>
+        {/* 🔍 شريط البحث الزجاجي الأنيق متوافق بالكامل مع جميع الأحجام */}
+        <div className="w-full max-w-xl mx-auto relative z-30 px-2 sm:px-4">
+          <div className="relative flex items-center bg-white/5 backdrop-blur-2xl border border-white/10 rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.25)] focus-within:border-emerald-500/50 focus-within:shadow-[0_0_35px_rgba(52,211,153,0.15)] transition-all duration-300">
+            <span className="absolute inset-y-0 right-5 flex items-center text-base md:text-lg pointer-events-none select-none">{isAr ? '🔍' : ''}</span>
             <input 
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder={pt('searchPlaceholder')}
-              className={`w-full bg-transparent rounded-full py-4 md:py-5 text-sm md:text-base text-slate-900 dark:text-white font-bold placeholder-slate-400/80 focus:outline-none touch-manipulation ${isAr ? 'pr-12 pl-6 text-right' : 'pl-12 pr-6 text-left'}`}
+              className={`w-full bg-transparent rounded-full py-3.5 md:py-4.5 text-sm md:text-base text-white font-bold placeholder-slate-400 focus:outline-none touch-manipulation ${isAr ? 'pr-12 pl-6 text-right' : 'pl-12 pr-6 text-left'}`}
             />
-            <span className="absolute inset-y-0 left-5 md:left-6 flex items-center text-lg md:text-xl pointer-events-none select-none">{!isAr ? '🔍' : ''}</span>
+            <span className="absolute inset-y-0 left-5 flex items-center text-base md:text-lg pointer-events-none select-none">{!isAr ? '🔍' : ''}</span>
           </div>
         </div>
 
-        {/* 📱 شبكة كروت الكتب فائقة التجاوب Glassmorphism Grid تلائم الشاشات واللمس واللابتوبس */}
-        <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 sm:gap-8 relative z-30 px-2 sm:px-0">
+        {/* 📱 شبكة كروت الكتب المتجاوبة والمطابقة لأبعاد شاشات اللابتوب، التابلت، والهواتف */}
+        <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8 relative z-30 px-1 sm:px-0">
           {filteredBooks.map((book, idx) => {
-            const isCurrentActive = activeTouchId === idx;
+            const isTouchActive = activeTouchIdx === idx;
             return (
               <div 
                 key={idx}
-                onClick={() => setActiveTouchId(isCurrentActive ? null : idx)}
-                className="group relative bg-white/40 dark:bg-slate-900/40 backdrop-blur-md p-6 rounded-[2.5rem] border border-white/50 dark:border-slate-800/40 shadow-lg hover:shadow-2xl hover:border-emerald-500/80 hover:-translate-y-2 transition-all duration-500 flex flex-col justify-between h-[200px] sm:h-[210px] overflow-visible cursor-pointer select-none active:scale-[0.99] touch-manipulation"
+                onMouseEnter={() => setHoveredBook(book)}
+                onMouseLeave={() => setHoveredBook(null)}
+                onMouseMove={handleMouseMove}
+                onClick={() => setActiveTouchId(isTouchActive ? null : idx)}
+                className={`group relative bg-white/[0.03] dark:bg-black/[0.2] border border-white/[0.08] backdrop-blur-xl p-5 md:p-6 rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.15)] hover:bg-white/[0.06] hover:border-emerald-500/40 hover:-translate-y-1.5 transition-all duration-400 flex flex-col justify-between h-[160px] sm:h-[170px] cursor-pointer select-none active:scale-[0.99] touch-manipulation ${isTouchActive ? 'border-emerald-500/60 bg-white/[0.07]' : ''}`}
               >
-                {/* المحتوى النصي الافتراضي للكارت */}
-                <div className="space-y-3 flex-1">
+                <div className="space-y-3 flex-1 flex flex-col justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-emerald-500/10 dark:bg-emerald-400/10 rounded-2xl flex items-center justify-center text-xl shadow-inner shrink-0 group-hover:scale-110 transition-transform duration-300">📚</div>
-                    <h4 className="text-base md:text-lg font-black text-slate-900 dark:text-white line-clamp-1 leading-snug flex-1">
+                    <div className="w-9 h-9 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center text-lg shadow-md shrink-0 group-hover:scale-105 transition-transform">📚</div>
+                    <h4 className="text-sm sm:text-base md:text-lg font-bold text-white line-clamp-1 leading-snug flex-1">
                       {isAr ? book.titleAr : book.titleEn}
                     </h4>
                   </div>
                   
-                  <div className="space-y-1 text-xs md:text-sm pt-3 border-t border-slate-200/40 dark:border-slate-700/30 mt-3">
-                    <p className="text-slate-700 dark:text-slate-300 font-bold truncate">
-                      <span className="text-slate-400 dark:text-slate-500 ml-1">{pt('by')}</span> {isAr ? book.authorAr : book.authorEn}
+                  <div className="space-y-0.5 text-xs md:text-sm pt-2 border-t border-white/[0.06]">
+                    <p className="text-slate-300 font-medium truncate">
+                      <span className="text-slate-500 ml-1">{pt('by')}</span> {isAr ? book.authorAr : book.authorEn}
                     </p>
-                    <p className="text-slate-600 dark:text-slate-400 font-medium truncate">
-                      <span className="text-slate-400 dark:text-slate-500 ml-1">{pt('publisher')}</span> {isAr ? book.publisherAr : book.publisherEn}
+                    <p className="text-slate-400 truncate">
+                      <span className="text-slate-500 ml-1">{pt('publisher')}</span> {isAr ? book.publisherAr : book.publisherEn}
                     </p>
-                    <div className="pt-2">
-                      <span className="inline-block bg-gradient-to-r from-slate-100 to-slate-200/80 dark:from-slate-800 dark:to-slate-800/50 px-3 py-1 rounded-xl font-bold text-[10px] md:text-xs text-slate-500 dark:text-slate-400 shadow-sm border border-white/20">
-                        {pt('category')} {isAr ? book.catAr : book.catEn}
+                    <div className="pt-2 flex items-center justify-between">
+                      <span className="inline-block bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-lg font-semibold text-[10px] md:text-xs text-slate-400 shadow-inner">
+                        {isAr ? book.catAr : book.catEn}
+                      </span>
+                      {/* تلميح صغير للموبايل فقط */}
+                      <span className="block sm:hidden text-[9px] text-emerald-400 animate-pulse font-medium">
+                        {isTouchActive ? (isAr ? 'إغلاق ✕' : 'Close ✕') : (isAr ? 'ملخص ✨' : 'Summary ✨')}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {/* 🔮 طبقة الهنت والملخص الزجاجي المطور - متجاوب مع حوم الحاسوب واللمس الفوري للتابلت والهواتف */}
-                <div className={`absolute inset-0 bg-gradient-to-br from-slate-900/98 via-slate-950/98 to-slate-900/95 rounded-[2.5rem] p-6 text-white flex flex-col justify-between transition-all duration-500 shadow-2xl z-40 ${isCurrentActive ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none lg:group-hover:opacity-100 lg:group-hover:scale-100 lg:group-hover:pointer-events-auto'}`}>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="inline-block px-3 py-1 rounded-full bg-emerald-600 text-[10px] md:text-xs font-black tracking-wide uppercase shadow-md animate-pulse">
-                        {pt('aiBadge')}
-                      </div>
-                      {/* تلميح غلق مخصص لبيئات اللمس (مخفي اختيارياً على الشاشات الكبيرة) */}
-                      <span className="block lg:hidden text-[9px] bg-white/10 px-2 py-0.5 rounded-full font-bold text-slate-400">
-                        {pt('closeHint')}
-                      </span>
-                    </div>
-                    <p className="text-xs md:text-sm text-slate-200 font-bold leading-relaxed pt-1 overflow-y-auto no-scrollbar max-h-[90px] sm:max-h-[100px]">
-                      {isAr ? book.summaryAr : book.summaryEn}
-                    </p>
+                {/* 📱 العرض المخصص للموبايل والتابلت عند اللمس (يظهر بالأسفل بدلاً من الطفو المزعج) */}
+                {isTouchActive && (
+                  <div className="block sm:hidden absolute top-[102%] left-0 right-0 bg-slate-950/95 backdrop-blur-2xl border border-white/10 p-4 rounded-2xl text-white shadow-2xl z-50 animate-zoom-in text-xs leading-relaxed font-medium">
+                    <div className="text-[10px] text-emerald-400 font-bold mb-1">✨ {pt('aiBadge')}</div>
+                    {isAr ? book.summaryAr : book.summaryEn}
                   </div>
-                  <div className="text-[10px] text-slate-400 font-black border-t border-slate-800/80 pt-2 flex items-center justify-between">
-                    <span>✨ مدرسة صقر الإمارات الدولية</span>
-                    <span className="text-emerald-400 font-bold">SAQR AI</span>
-                  </div>
-                </div>
+                )}
 
               </div>
             );
@@ -244,30 +243,54 @@ const NewArrivalsPage: React.FC = () => {
         </div>
       </div>
 
+      {/* 🔮 السامري العائم الحقيقي (Floating Tooltip) المخصص لبيئات اللابتوب والكمبيوتر فقط لراحة بصرية فائقة */}
+      {hoveredBook && (
+        <div 
+          className="hidden sm:block fixed z-[99999] pointer-events-none max-w-xs md:max-w-sm transition-transform duration-100 ease-out"
+          style={{ 
+            left: mousePos.x + 20, 
+            top: mousePos.y + 20,
+            transform: isAr ? 'translate(-100%, -100%)' : 'none' // ضبط اتجاه الانبثاق حسب لغة الواجهة
+          }}
+        >
+          <div className="bg-slate-950/90 backdrop-blur-xl border border-white/15 p-4 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.5)] space-y-2 animate-zoom-in text-white text-xs md:text-sm">
+            <div className="inline-block px-2.5 py-0.5 rounded-md bg-emerald-600/80 text-[10px] md:text-xs font-black tracking-wide uppercase shadow-sm">
+              {pt('aiBadge')}
+            </div>
+            <p className="text-slate-200 font-medium leading-relaxed">
+              {isAr ? hoveredBook.summaryAr : hoveredBook.summaryEn}
+            </p>
+            <div className="text-[9px] text-slate-500 font-bold pt-1 border-t border-white/5 flex justify-between items-center">
+              <span>SAQR AI</span>
+              <span>{isAr ? "مكتبة صقر الإمارات" : "EFIPS Library"}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
         * { font-family: 'Cairo', sans-serif !important; }
         
-        @keyframes reveal-text {
-          0% { clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%); transform: translateY(30px); opacity: 0; }
-          100% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); transform: translateY(0); opacity: 1; }
-        }
-        .animate-text-reveal { animation: reveal-text 1.2s cubic-bezier(0.77, 0, 0.175, 1) forwards; }
-        .animate-text-reveal-delayed { animation: reveal-text 1.2s cubic-bezier(0.77, 0, 0.175, 1) 0.3s forwards; clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%); }
-
         @keyframes blob {
           0% { transform: translate(0px, 0px) scale(1); }
-          33% { transform: translate(25px, -40px) scale(1.08); }
-          66% { transform: translate(-15px, 15px) scale(0.95); }
+          33% { transform: translate(25px, -35px) scale(1.06); }
+          66% { transform: translate(-15px, 15px) scale(0.97); }
           100% { transform: translate(0px, 0px) scale(1); }
         }
         .animate-blob { animation: blob 8s infinite alternate ease-in-out; }
         
         @keyframes fade-in-up { 
-          0% { opacity: 0; transform: translateY(20px); } 
+          0% { opacity: 0; transform: translateY(15px); } 
           100% { opacity: 1; transform: translateY(0); } 
         }
-        .animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; }
+        .animate-fade-in-up { animation: fade-in-up 0.5s ease-out forwards; }
+
+        @keyframes zoom-in {
+          0% { opacity: 0; transform: scale(0.95); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        .animate-zoom-in { animation: zoom-in 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
