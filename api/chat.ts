@@ -3367,7 +3367,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const groq = new Groq({ apiKey });
     
     const completion = await groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+      model: 'llama-3.1-8b-instant',
       messages: [
         {
           role: 'system',
