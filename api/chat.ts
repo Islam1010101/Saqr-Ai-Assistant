@@ -3366,7 +3366,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const groq = new Groq({ apiKey: apiKey.trim() });
     
     const completion = await groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile', // استخدام نموذج مجاني سريع ومستقر بشكل دائم
+      model: 'openai/gpt-oss-120b', // استخدام نموذج مجاني سريع ومستقر بشكل دائم
       messages: [
         {
           role: 'system',
