@@ -2,9 +2,8 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Groq from 'groq-sdk';
 
 // ==========================================
-// 1. البيانات المحلية (تأكد أن تنسخ كل كتبك هنا أيضاً لضمان دقة البحث)
+// 1. البيانات المحلية
 // ==========================================
-// ملاحظة: لكي يعمل البحث عن المكان بدقة، يفضل أن تكون قائمة الكتب هنا كاملة كما في الملف الآخر
 const localBookData = [
 { "title": "CREATING EXCELLENCE", "author": "Craig R. Hickman", "shelf": 4, "row": 1 },
 { "title": "The Canadian SMALL BUSINESS Handbook", "author": "Susan Kennedy", "shelf": 4, "row": 1 },
@@ -3338,7 +3337,7 @@ function findBooks(q: string) {
 }
 
 // ==========================================
-// 2. كود الشات المحدث (الذكاء)
+// 2. كود المعالجة والذكاء الاصطناعي
 // ==========================================
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // إعدادات السماح (CORS)
@@ -3359,15 +3358,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // البحث عن الكتاب وموقعه
     const found = findBooks(userMsg);
     
-    // تجهيز السياق: نعطي الذكاء الاصطناعي الأماكن فقط
+    // تجهيز السياق
     const context = found.length 
       ? found.map(b => `- "${b.title}" by ${b.author} is located at (Shelf ${b.shelf}, Row ${b.row})`).join('\n') 
       : 'No specific location found in the local database.';
 
-    const groq = new Groq({ apiKey });
+    const groq = new Groq({ apiKey: apiKey.trim() });
     
     const completion = await groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+      model: 'llama-3.1-8b-instant', // استخدام نموذج مجاني سريع ومستقر بشكل دائم
       messages: [
         {
           role: 'system',
@@ -3386,7 +3385,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         },
         ...messages
       ],
-      temperature: 0.7, // رفعنا الحرارة قليلاً للإبداع في التلخيص
+      temperature: 0.7,
       max_tokens: 500
     });
 
@@ -3394,7 +3393,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).json({ reply });
 
   } catch (error: any) {
-    console.error(error);
-    return res.status(500).json({ error: error.message });
+    console.error('Groq Error:', error);
+    return res.status(500).json({ error: error.message || 'Error executing request' });
   }
 }
