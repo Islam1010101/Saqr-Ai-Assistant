@@ -12,7 +12,7 @@
     "react-pageflip": "latest",
     "pdfjs-dist": "latest",
     "@vercel/node": "^3.0.0",
-    "groq-sdk": "^0.3.3",
+    "groq-sdk": "^0.7.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.1",
     "react": "^18.3.1",
