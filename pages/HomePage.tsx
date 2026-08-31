@@ -87,7 +87,7 @@ const HOMELAND_FACTS = [
 
 const ACADEMIC_EVENTS = [
   { 
-    ar: "أجازة منتصف الفصل الدراسي الأول", 
+    ar: "إجازة منتصف الفصل الدراسي الأول", 
     en: "Mid-term break", 
     startDate: new Date('2026-10-12T00:00:00'), 
     endDate: new Date('2026-10-16T23:59:59'),
