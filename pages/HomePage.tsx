@@ -87,11 +87,11 @@ const HOMELAND_FACTS = [
 
 const ACADEMIC_EVENTS = [
   { 
-    ar: "بداية العام الدراسي 2027", 
-    en: "Start of 2027 Academic Year", 
-    startDate: new Date('2026-08-31T00:00:00'), 
-    endDate: new Date('2026-08-31T23:59:59'),
-    displayDate: "31  August 2026" 
+    ar: "أجازة منتصف الفصل الدراسي الأول", 
+    en: "Mid-term break", 
+    startDate: new Date('2026-10-12T00:00:00'), 
+    endDate: new Date('2026-10-16T23:59:59'),
+    displayDate: "12  October 2026" 
   }
 ];
 
