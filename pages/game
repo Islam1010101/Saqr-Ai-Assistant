@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مغامرات صقر: نظام ديوي العشري (Inside Out Glass Edition)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      /* خلفية ناعمة متعددة الألوان لتعزيز الانعكاس الزجاجي */
+      --bg-gradient: radial-gradient(at 10% 20%, rgba(99, 102, 241, 0.45) 0px, transparent 50%),
+                     radial-gradient(at 90% 10%, rgba(236, 72, 153, 0.4) 0px, transparent 50%),
+                     radial-gradient(at 50% 90%, rgba(16, 185, 129, 0.35) 0px, transparent 55%),
+                     radial-gradient(at 20% 80%, rgba(245, 158, 11, 0.3) 0px, transparent 50%),
+                     #090d16;
+      --glass-bg: rgba(255, 255, 255, 0.07);
+      --glass-border: rgba(255, 255, 255, 0.18);
+      --glass-shadow: 0 16px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      --text-main: #ffffff;
+      --text-muted: rgba(255, 255, 255, 0.7);
+      --accent: #ffd166;
+    }
+
+    [data-theme="light"] {
+      --bg-gradient: radial-gradient(at 15% 15%, rgba(147, 197, 253, 0.7) 0px, transparent 55%),
+                     radial-gradient(at 85% 20%, rgba(249, 168, 212, 0.65) 0px, transparent 50%),
+                     radial-gradient(at 50% 85%, rgba(167, 243, 208, 0.6) 0px, transparent 50%),
+                     #e2e8f0;
+      --glass-bg: rgba(255, 255, 255, 0.45);
+      --glass-border: rgba(255, 255, 255, 0.65);
+      --glass-shadow: 0 16px 36px rgba(100, 116, 139, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      --text-main: #0f172a;
+      --text-muted: rgba(15, 23, 42, 0.7);
+      --accent: #d97706;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Tajawal', sans-serif;
+      user-select: none;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg-gradient);
+      background-attachment: fixed;
+      color: var(--text-main);
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: background 0.5s ease;
+    }
+
+    /* الشريط العلوي الزجاجي */
+    .top-bar {
+      width: calc(100% - 40px);
+      max-width: 1100px;
+      margin-top: 15px;
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: var(--glass-shadow);
+      z-index: 10;
+    }
+
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      letter-spacing: -0.3px;
+    }
+
+    .btn-glass {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--glass-border);
+      color: var(--text-main);
+      padding: 8px 18px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-glass:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.22);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* مسرح اللعبة */
+    .game-container {
+      width: 100%;
+      max-width: 1100px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 30px 20px 100px;
+    }
+
+    /* البطاقة الزجاجية الرئيسية */
+    .glass-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 32px;
+      padding: 45px 35px;
+      text-align: center;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      max-width: 580px;
+      width: 100%;
+      box-shadow: var(--glass-shadow);
+      animation: cardAppear 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .glass-card h1 {
+      font-size: 2.1rem;
+      font-weight: 900;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, var(--text-main) 60%, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .glass-card p {
+      font-size: 1.05rem;
+      line-height: 1.65;
+      margin-bottom: 28px;
+      color: var(--text-muted);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      text-align: right;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .glass-input {
+      width: 100%;
+      padding: 14px 18px;
+      border-radius: 16px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      font-size: 1rem;
+      outline: none;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .glass-input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
+
+    .glass-input:focus {
+      border-color: var(--accent);
+      background: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 0 16px rgba(255, 209, 102, 0.25);
+    }
+
+    /* زر التشغيل الزجاجي المتوهج */
+    .btn-action {
+      width: 100%;
+      padding: 16px;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #0b071e;
+      background: linear-gradient(135deg, #ffd166 0%, #f59e0b 100%);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 18px;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(245, 158, 11, 0.35);
+      transition: all 0.25s ease;
+    }
+
+    .btn-action:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 35px rgba(245, 158, 11, 0.5);
+    }
+
+    /* كرات الذاكرة الزجاجية (Inside Out Memory Orbs) */
+    .orbs-rack {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin: 30px 0;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 50px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .glass-orb {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      position: relative;
+      cursor: pointer;
+      box-shadow: inset -6px -6px 14px rgba(0, 0, 0, 0.4),
+                  inset 4px 4px 10px rgba(255, 255, 255, 0.5),
+                  0 0 20px var(--orb-glow);
+      animation: orbFloat 3s ease-in-out infinite alternate;
+      transition: transform 0.3s ease;
+    }
+
+    .glass-orb:hover {
+      transform: scale(1.15) !important;
+    }
+
+    .glass-orb::after {
+      content: '';
+      position: absolute;
+      top: 8px;
+      left: 10px;
+      width: 14px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.85);
+      transform: rotate(-40deg);
+      filter: blur(0.5px);
+    }
+
+    /* رفيق ديوي: صقر (زجاجي أنيق وبصري تماماً دون صوت) */
+    .falcon-companion {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      display: flex;
+      align-items: flex-end;
+      gap: 14px;
+      z-index: 30;
+      pointer-events: none;
+    }
+
+    .falcon-dialogue {
+      pointer-events: auto;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 12px 18px;
+      border-radius: 20px 20px 4px 20px;
+      max-width: 240px;
+      font-size: 0.9rem;
+      line-height: 1.45;
+      box-shadow: var(--glass-shadow);
+      animation: dialogPop 0.4s ease;
+    }
+
+    .falcon-avatar {
+      pointer-events: auto;
+      width: 64px;
+      height: 64px;
+      background: var(--glass-bg);
+      border: 1.5px solid var(--glass-border);
+      border-radius: 50%;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 15px rgba(255, 209, 102, 0.25);
+      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .falcon-avatar:hover {
+      transform: scale(1.1) rotate(-6deg);
+    }
+
+    /* حركات الأنيميشن */
+    @keyframes orbFloat {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-10px); }
+    }
+
+    @keyframes cardAppear {
+      from { opacity: 0; transform: translateY(25px) scale(0.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes dialogPop {
+      from { opacity: 0; transform: scale(0.85); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- شريط التحكم الزجاجي العلوي -->
+  <header class="top-bar">
+    <div class="brand-title">
+      <span>🦅</span>
+      <span>مغامرات ديوي: طبعة المشاعر</span>
+    </div>
+    <div>
+      <button class="btn-glass" onclick="toggleTheme()">☀️ / 🌙 مظهر الواجهة</button>
+    </div>
+  </header>
+
+  <!-- مسرح اللعبة الزجاجي -->
+  <main class="game-container" id="gameStage">
+    
+    <!-- بطاقة البداية الزجاجية -->
+    <section class="glass-card" id="startScreen">
+      <h1>مرحباً بك في عالم المعرفة 🪐</h1>
+      <p>ساعد الأستاذ صقر في تصنيف كرات الذاكرة واستعادة ترتيب رفوف المكتبة الذكية وفق نظام ديوي العشري!</p>
+
+      <!-- كرات الذاكرة الزجاجية المتوهجة -->
+      <div class="orbs-rack">
+        <!-- 000 الحاسب والمعارف -->
+        <div class="glass-orb" title="000 المعارف العامة" style="--orb-glow: #38bdf8; background: radial-gradient(circle at 35% 35%, #7dd3fc, #0284c7); animation-delay: 0s;"></div>
+        <!-- 100 الفلسفة والنفس -->
+        <div class="glass-orb" title="100 الفلسفة وعلم النفس" style="--orb-glow: #a855f7; background: radial-gradient(circle at 35% 35%, #c084fc, #7e22ce); animation-delay: 0.25s;"></div>
+        <!-- 200 الديانات -->
+        <div class="glass-orb" title="200 الديانات" style="--orb-glow: #34d399; background: radial-gradient(circle at 35% 35%, #6ee7b7, #059669); animation-delay: 0.5s;"></div>
+        <!-- 500 العلوم البحتة -->
+        <div class="glass-orb" title="500 العلوم الطبيعية" style="--orb-glow: #facc15; background: radial-gradient(circle at 35% 35%, #fde047, #ca8a04); animation-delay: 0.75s;"></div>
+        <!-- 900 التاريخ والجغرافيا -->
+        <div class="glass-orb" title="900 التاريخ والجغرافيا" style="--orb-glow: #f87171; background: radial-gradient(circle at 35% 35%, #fca5a5, #dc2626); animation-delay: 1s;"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="studentName">اسم البطل / البطلة:</label>
+        <input type="text" id="studentName" class="glass-input" placeholder="اكتب اسمك الثلاثي..." required>
+      </div>
+
+      <div class="form-group">
+        <label for="studentGrade">الصف الدراسي:</label>
+        <input type="text" id="studentGrade" class="glass-input" placeholder="مثال: الصف الخامس (A)..." required>
+      </div>
+
+      <button class="btn-action" onclick="startGame()">انطلاق الرحلة المعرفية 🚀</button>
+    </section>
+
+  </main>
+
+  <!-- شخصية الأستاذ صقر التوجيهية (بصرية وتفاعلية) -->
+  <aside class="falcon-companion">
+    <div class="falcon-dialogue" id="falconText">
+      أهلاً بك يا بطل! أنا رفيقك صقر، هل أنت مستعد لخوض تحدي كرات الذاكرة المعرفية؟
+    </div>
+    <div class="falcon-avatar" onclick="showRandomTip()">
+      🦅
+    </div>
+  </aside>
+
+  <script>
+    // بيانات الطالب
+    let player = {
+      name: '',
+      grade: '',
+      score: 0
+    };
+
+    // نصائح وإرشادات صقر البصرية
+    const tips = [
+      "نظام ديوي العشري يقسم المعرفة البشرية إلى 10 أصول رئيسية من 000 إلى 900!",
+      "فئة 500 مخصصة للعلوم الطبيعية كالرياضيات والفلك والحيوانات.",
+      "فئة 900 تضم التاريخ والجغرافيا والرحلات وتاريخ الدول!",
+      "فئة 600 تحتوي على التكنولوجيا والطب والهندسة والاختراعات."
+    ];
+
+    function showRandomTip() {
+      const tip = tips[Math.floor(Math.random() * tips.length)];
+      setFalconMessage(tip);
+    }
+
+    function setFalconMessage(msg) {
+      const el = document.getElementById('falconText');
+      el.style.animation = 'none';
+      el.offsetHeight; /* إعادة ضبط الأنيميشن */
+      el.innerText = msg;
+      el.style.animation = 'dialogPop 0.35s ease';
+    }
+
+    // تبديل المظهر
+    function toggleTheme() {
+      const isLight = document.body.getAttribute('data-theme') === 'light';
+      if (isLight) {
+        document.body.removeAttribute('data-theme');
+      } else {
+        document.body.setAttribute('data-theme', 'light');
+      }
+    }
+
+    // بدء اللعبة
+    function startGame() {
+      const name = document.getElementById('studentName').value.trim();
+      const grade = document.getElementById('studentGrade').value.trim();
+
+      if (!name) {
+        alert("يرجى كتابة اسمك لتسجيل نتيجتك في الشهادة الرقمية!");
+        return;
+      }
+
+      player.name = name;
+      player.grade = grade || 'مشارك متميز';
+
+      setFalconMessage(`رائع يا ${player.name}! الآن لنبدأ المرحلة الأولى: تصنيف كرات الذاكرة.`);
+      document.getElementById('startScreen').style.display = 'none';
+      
+      // الانتقال لتشغيل شاشة المرحلة الأولى
+      startStageOne();
+    }
+
+    // تجهيز المرحلة الأولى الزجاجية (Memory Orbs Challenge)
+    function startStageOne() {
+      const stage = document.getElementById('gameStage');
+      stage.innerHTML = `
+        <div class="glass-card" style="max-width: 800px; animation: cardAppear 0.5s ease;">
+          <h2 style="font-size: 1.6rem; color: var(--accent); margin-bottom: 8px;">المرحلة 1: كرات الذاكرة المعرفية 🔮</h2>
+          <p>اسحب كرة الكتاب أو اضغط عليها ثم وجّهها نحو الرف الصحيح وفق تصنيف ديوي!</p>
+          <div id="gamePlayArea" style="min-height: 250px; display: flex; align-items: center; justify-content: center; border: 1.5px dashed var(--glass-border); border-radius: 20px; margin: 15px 0;">
+            <span style="color: var(--text-muted);">جاري تجهيز الأرفف والكتب المعرفية...</span>
+          </div>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
