@@ -20,6 +20,7 @@ import LibraryMapPage from './pages/LibraryMapPage';
 import SaqrStudioPage from './pages/SaqrStudioPage';
 import PodcastPage from './pages/PodcastPage';
 import NewArrivalsPage from './pages/NewArrivalsPage'; // 🆕 استيراد صفحة القائمة الكاملة الجديدة
+import DeweyGame from './pages/game'; // 🎮 استيراد صفحة لعبة ديوي
 
 export type Locale = 'en' | 'ar';
 
@@ -192,6 +193,7 @@ const Header: React.FC = () => {
     { path: '/search', label: locale === 'en' ? 'Search' : 'البحث بالمكتبة', icon: '🔍', hint: locale === 'en' ? 'Library Index' : 'فهرس الكتب', color: 'bg-red-600' },
     { path: '/digital-library', label: locale === 'en' ? 'Digital' : 'المكتبة الرقمية', icon: '📚', hint: locale === 'en' ? 'E-Books' : 'المكتبة الرقمية', color: 'bg-slate-800' },
     { path: '/creators', label: locale === 'en' ? 'Creators' : 'بوابة المبدعين', icon: '🎨', hint: locale === 'en' ? 'Talents' : 'إبداعات طلابنا', color: 'bg-red-500' },
+    { path: '/game', label: locale === 'en' ? 'Game' : 'تحدي ديوي', icon: '🪐', hint: locale === 'en' ? 'Dewey Game' : 'لعبة تصنيف ديوي', color: 'bg-amber-500' },
     { path: '/feedback', label: locale === 'en' ? 'Ideas' : 'مقترحات', icon: '✍️', hint: locale === 'en' ? 'Contact' : 'رأيك يهمنا', color: 'bg-green-500' }, 
     { path: '/reports', label: locale === 'en' ? 'Reports' : 'تقارير', icon: '📊', hint: locale === 'en' ? 'Reports' : 'تقارير', color: 'bg-slate-700' },
     { path: '/map', label: locale === 'en' ? "Lib's Map" : 'خريطة المكتبة', icon: '🗺️', hint: locale === 'en' ? 'Shelf Cont' : 'محتويات الأرفف', color: 'bg-red-600' },
@@ -344,6 +346,7 @@ const MainLayout: React.FC = () => {
           <Route path="/feedback" element={<FeedbackPage />} /> 
           <Route path="/about" element={<AboutPage />} />
           <Route path="/new-arrivals" element={<NewArrivalsPage />} /> {/* 🆕 مسار الصفحة الجديدة المضاف بدقة */}
+          <Route path="/game" element={<DeweyGame />} /> {/* 🎮 مسار لعبة ديوي */}
         </Routes>
       </main>
 
