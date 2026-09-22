@@ -2,68 +2,48 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 // ==========================================
-// 1. البيانات وبنوك الأسئلة (تم التوسيع الشامل)
+// 1. البيانات وبنوك الأسئلة
 // ==========================================
 
 const DEWEY_CATEGORIES = [
-  { code: "000", label: "000 حاسب ومعارف عامة", color: "bg-cyan-500" },
-  { code: "100", label: "100 تفكير وتطوير الذات", color: "bg-purple-500" },
-  { code: "200", label: "200 ديانات وأخلاق", color: "bg-emerald-500" },
-  { code: "300", label: "300 مجتمع وقوانين", color: "bg-orange-500" },
-  { code: "400", label: "400 لغات ومعاجم", color: "bg-pink-500" },
-  { code: "500", label: "500 علوم طبيعية وفضاء", color: "bg-yellow-500" },
-  { code: "600", label: "600 طب وتكنولوجيا", color: "bg-teal-500" },
-  { code: "700", label: "700 فنون ورياضة", color: "bg-indigo-500" },
-  { code: "800", label: "800 قصص وروايات", color: "bg-rose-500" },
-  { code: "900", label: "900 تاريخ وجغرافيا", color: "bg-red-500" }
+  { code: "000", label: "000 معارف وحاسب", color: "border-cyan-500 text-cyan-700 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-900/20" },
+  { code: "100", label: "100 تطوير الذات", color: "border-purple-500 text-purple-700 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20" },
+  { code: "200", label: "200 ديانات وأخلاق", color: "border-emerald-500 text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20" },
+  { code: "300", label: "300 مجتمع وقانون", color: "border-orange-500 text-orange-700 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20" },
+  { code: "400", label: "400 لغات ومعاجم", color: "border-pink-500 text-pink-700 dark:text-pink-400 bg-pink-50 dark:bg-pink-900/20" },
+  { code: "500", label: "500 علوم طبيعية", color: "border-yellow-500 text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20" },
+  { code: "600", label: "600 طب وتكنولوجيا", color: "border-teal-500 text-teal-700 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/20" },
+  { code: "700", label: "700 فنون ورياضة", color: "border-indigo-500 text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20" },
+  { code: "800", label: "800 قصص وروايات", color: "border-rose-500 text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20" },
+  { code: "900", label: "900 تاريخ وجغرافيا", color: "border-red-500 text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/20" }
 ];
 
 // تحدي 1: مساعد المكتبة (سيناريوهات موسعة)
 const BANK_ASSISTANT = [
-  { text: "دخل أحمد يبحث عن معلومات حول الكواكب والمجموعة الشمسية، لأي قسم نوجهه؟", answer: "500" },
-  { text: "مريم تبحث عن قاموس لتعلم كلمات اللغة الإنجليزية الجديدة.", answer: "400" },
-  { text: "عمر يطلب كتاباً يحكي قصص الأنبياء وسيرة الرسول.", answer: "200" },
-  { text: "سارة تريد كتاباً يعلمها كيفية رسم شخصيات الأنمي وتلوينها.", answer: "700" },
-  { text: "خالد يبحث عن كتاب يشرح تاريخ دولة الإمارات قديماً.", answer: "900" },
-  { text: "فاطمة تريد تعلم البرمجة وصناعة المواقع الإلكترونية.", answer: "000" },
-  { text: "يوسف مريض ويبحث عن كتاب حول الفيتامينات وكيف يعمل جسم الإنسان.", answer: "600" },
-  { text: "علي يبحث عن ديوان شعر ليقرأه في الإذاعة المدرسية.", answer: "800" },
-  { text: "هدى تريد معرفة القوانين وحقوق الطفل في المجتمع.", answer: "300" },
-  { text: "ماجد يبحث عن كتاب يقرأه لتطوير تفكيره ومهاراته الشخصية وتقوية ثقته بنفسه.", answer: "100" },
-  { text: "لجين تريد قراءة حكايات شعبية من التراث الإماراتي القديم.", answer: "300" },
-  { text: "ياسين يحتاج لكتاب يشرح له كيفية أداء الصلاة وأحكام التجويد.", answer: "200" },
-  { text: "سلمى تحب الديناصورات وتبحث عن كتاب يضم صوراً ومعلومات عنها.", answer: "500" },
-  { text: "طارق يريد تعلم كيفية طهي البيتزا وإعداد الحلويات.", answer: "600" },
-  { text: "مروان يبحث عن كتاب يضم موسوعة غينيس للأرقام القياسية.", answer: "000" },
-  { text: "نورة تريد قراءة قصة خيالية عن أميرة تعيش في قلعة مسحورة.", answer: "800" },
-  { text: "سيف يهتم بكرة القدم ويريد كتاباً يشرح قوانين كأس العالم.", answer: "700" },
-  { text: "ريم تبحث عن خريطة لقارة آسيا ومعلومات عن عواصم العالم.", answer: "900" },
-  { text: "راشد يواجه صعوبة في النحو ويريد كتاباً يشرح قواعد اللغة العربية.", answer: "400" },
-  { text: "ليلى تبحث عن كتاب يشرح كيف يعمل العقل البشري ولماذا نحلم.", answer: "100" }
+  { text: "أحمد يبحث عن معلومات حول الكواكب والمجموعة الشمسية", answer: "500" },
+  { text: "مريم تبحث عن قاموس لتعلم كلمات الإنجليزية", answer: "400" },
+  { text: "عمر يطلب كتاباً يحكي سيرة الرسول", answer: "200" },
+  { text: "سارة تريد تعلم كيفية رسم شخصيات الأنمي", answer: "700" },
+  { text: "خالد يبحث عن تاريخ دولة الإمارات قديماً", answer: "900" },
+  { text: "فاطمة تريد تعلم صناعة المواقع الإلكترونية", answer: "000" },
+  { text: "يوسف يبحث عن كتاب حول الفيتامينات وجسم الإنسان", answer: "600" },
+  { text: "علي يبحث عن ديوان شعر للإذاعة المدرسية", answer: "800" },
+  { text: "هدى تريد معرفة القوانين وحقوق الطفل", answer: "300" },
+  { text: "ماجد يبحث عن كتاب لتطوير تفكيره وثقته بنفسه", answer: "100" }
 ];
 
 // تحدي 2: كرات المكتبة (عناوين كتب موسعة)
 const BANK_ORBS = [
-  { text: "كتاب 'أسرار البرمجة بلغة بايثون'", answer: "000" },
-  { text: "كتاب 'كيف تتحكم في غضبك وتصبح إيجابياً'", answer: "100" },
-  { text: "كتاب 'أركان الإسلام والإيمان'", answer: "200" },
-  { text: "كتاب 'وظائف الشرطة ودورها في المجتمع'", answer: "300" },
-  { text: "كتاب 'القواعد الذهبية في النحو العربي'", answer: "400" },
-  { text: "كتاب 'موسوعة الحيوانات المفترسة'", answer: "500" },
-  { text: "كتاب 'كيف تصنع روبوتاً في المنزل'", answer: "600" },
-  { text: "كتاب 'قوانين كرة القدم وتاريخ كأس العالم'", answer: "700" },
-  { text: "كتاب 'رواية البؤساء'", answer: "800" },
-  { text: "كتاب 'أطلس العالم وخريطة قارة أوروبا'", answer: "900" },
-  { text: "كتاب 'موسوعة المعارف للناشئين'", answer: "000" },
-  { text: "كتاب 'الخداع البصري وأسرار التركيز'", answer: "100" },
-  { text: "كتاب 'تفسير جزء عم للأطفال'", answer: "200" },
-  { text: "كتاب 'الاقتصاد والتجارة ببساطة'", answer: "300" },
-  { text: "كتاب 'كيف تتحدث اليابانية في 10 أيام'", answer: "400" },
-  { text: "كتاب 'الطقس والمناخ ولماذا تمطر؟'", answer: "500" },
-  { text: "كتاب 'عالم السيارات والطائرات'", answer: "600" },
-  { text: "كتاب 'تعلم العزف على البيانو'", answer: "700" },
-  { text: "كتاب 'حكايات كليلة ودمنة'", answer: "800" },
-  { text: "كتاب 'سيرة الشيخ زايد رحمه الله'", answer: "900" }
+  { text: "كتاب: أسرار البرمجة بلغة بايثون", answer: "000" },
+  { text: "كتاب: كيف تتحكم في غضبك", answer: "100" },
+  { text: "كتاب: أركان الإسلام والإيمان", answer: "200" },
+  { text: "كتاب: وظائف الشرطة ودورها", answer: "300" },
+  { text: "كتاب: القواعد الذهبية في النحو", answer: "400" },
+  { text: "كتاب: موسوعة الحيوانات المفترسة", answer: "500" },
+  { text: "كتاب: كيف تصنع روبوتاً في المنزل", answer: "600" },
+  { text: "كتاب: قوانين وتاريخ كأس العالم", answer: "700" },
+  { text: "رواية: البؤساء", answer: "800" },
+  { text: "أطلس: خريطة قارة أوروبا", answer: "900" }
 ];
 
 // تحدي 3: رفوف ديوي (موسعة: اختيار الكتاب المناسب للرف)
@@ -71,24 +51,16 @@ const BANK_SHELVES = [
   { shelf: "500 علوم طبيعية", correct: "عالم البحار والمحيطات", wrongs: ["تاريخ الأندلس", "كيف ترسم شجرة", "قواعد الإملاء"] },
   { shelf: "700 فنون ورياضة", correct: "أبطال السباحة الأولمبية", wrongs: ["جسم الإنسان والأمراض", "الذكاء الاصطناعي", "قصة سندريلا"] },
   { shelf: "900 تاريخ وجغرافيا", correct: "حضارة الفراعنة", wrongs: ["تعلم الإسبانية", "أخلاق المسلم", "موسوعة الطيور"] },
-  { shelf: "600 طب وتكنولوجيا", correct: "كيف تعمل السيارات الذكية", wrongs: ["ديوان المتنبي", "خريطة أوروبا", "حقوق الإنسان"] },
+  { shelf: "600 طب وتكنولوجيا", correct: "السيارات الذكية", wrongs: ["ديوان المتنبي", "خريطة أوروبا", "حقوق الإنسان"] },
   { shelf: "800 قصص وروايات", correct: "مغامرات أليس في بلاد العجائب", wrongs: ["لغات البرمجة", "تفسير القرآن", "الجاذبية الأرضية"] },
   { shelf: "200 ديانات", correct: "أخلاق المصطفى", wrongs: ["عواصم العالم", "صناعة الأدوية", "كيف تلعب الشطرنج"] },
-  { shelf: "000 حاسب ومعارف", correct: "موسوعة الإنترنت الآمن", wrongs: ["تاريخ الدولة الأموية", "تعلم السباحة", "قصص جحا"] },
-  { shelf: "100 تفكير وتطوير الذات", correct: "قوة التركيز والذاكرة", wrongs: ["مباريات كأس آسيا", "أشعار عنترة بن شداد", "كيف تعمل الثلاجة"] },
-  { shelf: "300 مجتمع وقوانين", correct: "حكايات شعبية من التراث", wrongs: ["الفضاء السحيق", "أحكام التجويد", "الطباعة ثلاثية الأبعاد"] },
-  { shelf: "400 لغات ومعاجم", correct: "قاموس أكسفورد المصور", wrongs: ["حرب أكتوبر", "كيف تصنع كيكة", "فن النحت بالصلصال"] },
-  { shelf: "900 تاريخ وجغرافيا", correct: "أطلس خرائط العالم", wrongs: ["علم النفس التربوي", "قاموس عربي-إنجليزي", "شخصيات خيالية"] },
-  { shelf: "600 طب وتكنولوجيا", correct: "دليل الإسعافات الأولية", wrongs: ["ألعاب الخفة", "قواعد اللغة الفرنسية", "تاريخ الإسلام في الهند"] },
-  { shelf: "500 علوم طبيعية", correct: "الجدول الدوري وعلم الكيمياء", wrongs: ["فن الخط العربي", "قصة بيتر بان", "العملات الرقمية"] },
-  { shelf: "200 ديانات", correct: "قصص القرآن الكريم", wrongs: ["كيف تبني روبوتا", "الفن الإسلامي (رسم)", "موسوعة الزواحف"] }
+  { shelf: "000 حاسب ومعارف", correct: "الإنترنت الآمن", wrongs: ["تاريخ الدولة الأموية", "تعلم السباحة", "قصص جحا"] }
 ];
 
-// دالة خلط المصفوفات العشوائية
 const shuffleArray = (array: any[]) => [...array].sort(() => 0.5 - Math.random());
 
 // ==========================================
-// 2. المكون الرئيسي للعبة
+// 2. مكون اللعبة الرئيسي
 // ==========================================
 
 const DeweyGame: React.FC = () => {
@@ -104,6 +76,9 @@ const DeweyGame: React.FC = () => {
   const [qIndex, setQIndex] = useState(0);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
 
+  // حالة لتتبع العنصر المسحوب (للسحب والإفلات أو النقر)
+  const [activeDragItem, setActiveDragItem] = useState<string | null>(null);
+
   // حساب الوقت الإجمالي
   useEffect(() => {
     let interval: any;
@@ -113,7 +88,7 @@ const DeweyGame: React.FC = () => {
     return () => clearInterval(interval);
   }, [stage]);
 
-  // مؤقت السؤال الفردي
+  // مؤقت السؤال
   useEffect(() => {
     let interval: any;
     if (stage.startsWith('challenge') && questionTimer > 0 && !feedback) {
@@ -126,7 +101,7 @@ const DeweyGame: React.FC = () => {
 
   const handleStart = () => {
     if (!studentName.trim() || !studentGrade.trim()) {
-      alert("الرجاء إدخال اسمك وصفك الدراسي لنتمكن من إصدار الشهادة المعتمدة!");
+      alert("الرجاء إدخال اسمك وصفك الدراسي لنتمكن من إصدار الشهادة!");
       return;
     }
     setStage('learn');
@@ -134,16 +109,12 @@ const DeweyGame: React.FC = () => {
 
   const startChallenge1 = () => {
     setCurrentQuestions(shuffleArray(BANK_ASSISTANT).slice(0, 5));
-    setQIndex(0);
-    setQuestionTimer(20);
-    setStage('challenge1');
+    setQIndex(0); setQuestionTimer(20); setStage('challenge1'); setActiveDragItem(null);
   };
 
   const startChallenge2 = () => {
     setCurrentQuestions(shuffleArray(BANK_ORBS).slice(0, 5));
-    setQIndex(0);
-    setQuestionTimer(20);
-    setStage('challenge2');
+    setQIndex(0); setQuestionTimer(20); setStage('challenge2'); setActiveDragItem(null);
   };
 
   const startChallenge3 = () => {
@@ -152,24 +123,33 @@ const DeweyGame: React.FC = () => {
       options: shuffleArray([q.correct, ...q.wrongs])
     }));
     setCurrentQuestions(mixed);
-    setQIndex(0);
-    setQuestionTimer(20);
-    setStage('challenge3');
+    setQIndex(0); setQuestionTimer(20); setStage('challenge3'); setActiveDragItem(null);
   };
 
   const handleTimeout = () => {
     setFeedback('wrong');
+    setActiveDragItem(null);
     setTimeout(() => nextQuestion(), 1500);
   };
 
-  const handleAnswer = (isCorrect: boolean) => {
+  const handleAnswer = (droppedAnswer: string) => {
     if (feedback) return; 
+    
+    let isCorrect = false;
+    if (stage === 'challenge3') {
+      isCorrect = droppedAnswer === currentQuestions[qIndex].correct;
+    } else {
+      isCorrect = droppedAnswer === currentQuestions[qIndex].answer;
+    }
+
     if (isCorrect) {
       setScore(s => s + 20); 
       setFeedback('correct');
     } else {
       setFeedback('wrong');
     }
+    
+    setActiveDragItem(null);
     setTimeout(() => nextQuestion(), 1500);
   };
 
@@ -191,16 +171,52 @@ const DeweyGame: React.FC = () => {
     return `${m > 0 ? m + ' دقيقة و ' : ''}${s} ثانية`;
   };
 
+  // ==============================================
+  // دوال السحب والإفلات (Drag & Drop)
+  // ==============================================
+  const onDragStart = (e: React.DragEvent, item: string) => {
+    e.dataTransfer.setData('text/plain', item);
+    setActiveDragItem(item);
+  };
+
+  const onDragOver = (e: React.DragEvent) => {
+    e.preventDefault(); // ضروري للسماح بالإفلات
+  };
+
+  const onDrop = (e: React.DragEvent, targetValue: string) => {
+    e.preventDefault();
+    const item = e.dataTransfer.getData('text/plain');
+    if (item) {
+      if (stage === 'challenge3') handleAnswer(item);
+      else handleAnswer(targetValue);
+    }
+  };
+
+  // بديل للموبايل: تحديد ثم إفلات بالنقر
+  const onTouchSelect = (item: string) => setActiveDragItem(item);
+  const onTouchDrop = (targetValue: string) => {
+    if (activeDragItem) {
+      if (stage === 'challenge3') handleAnswer(activeDragItem);
+      else handleAnswer(targetValue);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 flex flex-col items-center justify-center p-2 md:p-4 relative overflow-hidden select-none">
       
-      {/* ستايل الطباعة للشهادة فقط */}
       <style>{`
         @media print {
           body * { visibility: hidden; }
           #certificate-area, #certificate-area * { visibility: visible; }
           #certificate-area { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; background: #fff !important; }
           .no-print { display: none !important; }
+        }
+        /* تأثير الدولاب الفارغ */
+        .shelf-slot {
+          box-shadow: inset 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .dark .shelf-slot {
+          box-shadow: inset 0 10px 20px rgba(0,0,0,0.4);
         }
       `}</style>
 
@@ -209,126 +225,160 @@ const DeweyGame: React.FC = () => {
         <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-2xl text-center animate-fade-in-up relative z-10">
           <div className="text-6xl mb-4 animate-bounce">🪐</div>
           <h1 className="text-3xl font-black text-amber-500 mb-2">تحدي تصنيف ديوي</h1>
-          <p className="text-sm opacity-80 mb-6 font-bold">ساعدنا في ترتيب مكتبة المدرسة واختبر ذكاءك!</p>
+          <p className="text-sm opacity-80 mb-6 font-bold">رتب أرفف المكتبة عبر السحب والإفلات!</p>
           
           <div className="space-y-4 mb-6 text-right">
             <div>
               <label className="text-xs font-bold text-slate-500 mb-1 block px-2">اسم البطل / البطلة:</label>
-              <input 
-                type="text" placeholder="اكتب اسمك الثلاثي..." 
-                className="w-full p-4 rounded-xl bg-slate-100 dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-amber-500 font-bold"
-                value={studentName} onChange={(e) => setStudentName(e.target.value)}
-              />
+              <input type="text" placeholder="اكتب اسمك الثلاثي..." className="w-full p-4 rounded-xl bg-slate-100 dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-amber-500 font-bold" value={studentName} onChange={(e) => setStudentName(e.target.value)} />
             </div>
             <div>
               <label className="text-xs font-bold text-slate-500 mb-1 block px-2">الصف الدراسي:</label>
-              <input 
-                type="text" placeholder="مثال: الخامس أ" 
-                className="w-full p-4 rounded-xl bg-slate-100 dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-amber-500 font-bold"
-                value={studentGrade} onChange={(e) => setStudentGrade(e.target.value)}
-              />
+              <input type="text" placeholder="مثال: الخامس أ" className="w-full p-4 rounded-xl bg-slate-100 dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-amber-500 font-bold" value={studentGrade} onChange={(e) => setStudentGrade(e.target.value)} />
             </div>
           </div>
-          <button onClick={handleStart} className="w-full py-4 bg-amber-500 hover:bg-amber-600 text-white font-black text-lg rounded-xl shadow-[0_10px_20px_rgba(245,158,11,0.3)] transition-transform active:scale-95 hover:-translate-y-1">
+          <button onClick={handleStart} className="w-full py-4 bg-amber-500 hover:bg-amber-600 text-white font-black text-lg rounded-xl shadow-[0_10px_20px_rgba(245,158,11,0.3)] transition-transform active:scale-95">
             بدء المغامرة 🚀
           </button>
         </div>
       )}
 
-      {/* 2. شاشة التعلم والتوجيه */}
+      {/* 2. شاشة التعلم */}
       {stage === 'learn' && (
-        <div className="max-w-2xl w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-2xl animate-zoom-in relative z-10">
-          <h2 className="text-2xl md:text-3xl font-black text-amber-500 mb-4 text-center">ما هو نظام ديوي العشري؟ 🤔</h2>
-          <p className="text-sm md:text-base leading-relaxed mb-6 text-center opacity-90 font-medium">
-            تخيل أن المكتبة مدينة ضخمة! لتسهيل العثور على الكتب، قام عالم اسمه <strong className="text-red-500">"ملفيل ديوي"</strong> بتقسيم كل المعرفة البشرية إلى 10 شوارع رئيسية (أقسام)، كل شارع له رقم من 000 إلى 900 ولون مميز يسهل حفظه!
+        <div className="max-w-2xl w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-2xl animate-zoom-in relative z-10 text-center">
+          <h2 className="text-2xl md:text-3xl font-black text-amber-500 mb-4">قواعد اللعبة 💡</h2>
+          <p className="text-sm md:text-base leading-relaxed mb-6 opacity-90 font-medium">
+            في التحديات القادمة، ستجد <strong className="text-red-500">دواليب مكتبة فارغة</strong> في الأسفل. 
+            كل ما عليك فعله هو قراءة البطاقة أو الكتاب في الأعلى، ثم <strong>سحبه وإفلاته</strong> داخل الرف الصحيح!
+            <br/><br/>
+            <span className="text-xs opacity-70">(ملاحظة: إذا كنت تستخدم الموبايل، يمكنك النقر على البطاقة ثم النقر على الرف لتوصيلها).</span>
           </p>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
             {DEWEY_CATEGORIES.map(cat => (
-              <div key={cat.code} className={`p-3 rounded-xl text-[10px] md:text-xs font-bold text-white text-center shadow-lg transform transition-transform hover:scale-105 ${cat.color}`}>
+              <div key={cat.code} className={`p-3 rounded-xl border-b-4 text-[10px] md:text-xs font-bold shadow-sm ${cat.color}`}>
                 {cat.label}
               </div>
             ))}
           </div>
           <button onClick={startChallenge1} className="w-full py-4 bg-green-500 hover:bg-green-600 text-white font-black rounded-xl shadow-lg transition-transform active:scale-95 text-lg">
-            أنا مستعد للتحدي الأول! 💪
+            أنا مستعد للسحب والإفلات! 💪
           </button>
         </div>
       )}
 
-      {/* 3. شاشات التحديات الثلاثة */}
+      {/* 3. شاشات التحديات (السحب والإفلات) */}
       {stage.startsWith('challenge') && currentQuestions.length > 0 && (
-        <div className="max-w-4xl w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl animate-fade-in-up relative z-10">
+        <div className="max-w-4xl w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 md:p-8 shadow-2xl animate-fade-in-up relative z-10 flex flex-col h-full min-h-[85vh] md:min-h-0">
           
-          <div className="flex justify-between items-center mb-8 bg-slate-100 dark:bg-slate-800 p-4 rounded-2xl shadow-inner">
+          {/* شريط الإحصائيات */}
+          <div className="flex justify-between items-center mb-6 bg-slate-100 dark:bg-slate-800 p-4 rounded-2xl shadow-inner shrink-0">
             <div>
-              <span className="text-amber-500 font-black text-lg">
-                {stage === 'challenge1' ? 'التحدي 1: مساعد المكتبة 👨‍💻' : stage === 'challenge2' ? 'التحدي 2: كرات المكتبة 🔮' : 'التحدي 3: رفوف ديوي 📚'}
+              <span className="text-amber-500 font-black text-sm md:text-lg">
+                {stage === 'challenge1' ? 'التحدي 1: ساعد المستفيد 👨‍💻' : stage === 'challenge2' ? 'التحدي 2: صنف الكرة 🔮' : 'التحدي 3: املأ الرف 📚'}
               </span>
-              <div className="text-sm opacity-70 mt-1 font-bold">السؤال {qIndex + 1} من 5</div>
+              <div className="text-xs opacity-70 mt-1 font-bold">السؤال {qIndex + 1} من 5</div>
             </div>
-            <div className="flex gap-6 text-center">
-              <div className="bg-white dark:bg-slate-700 px-4 py-2 rounded-xl shadow">
-                <div className="text-[10px] opacity-70 font-bold">الوقت المتبقي</div>
-                <div className={`font-black text-xl ${questionTimer <= 5 ? 'text-red-500 animate-pulse' : 'text-slate-800 dark:text-white'}`}>{questionTimer} ث</div>
+            <div className="flex gap-4 text-center">
+              <div className="bg-white dark:bg-slate-700 px-3 py-1.5 md:px-4 md:py-2 rounded-xl shadow">
+                <div className="text-[9px] md:text-[10px] opacity-70 font-bold">الوقت</div>
+                <div className={`font-black text-lg md:text-xl ${questionTimer <= 5 ? 'text-red-500 animate-pulse' : ''}`}>{questionTimer} ث</div>
               </div>
-              <div className="bg-white dark:bg-slate-700 px-4 py-2 rounded-xl shadow">
-                <div className="text-[10px] opacity-70 font-bold">النقاط</div>
-                <div className="font-black text-xl text-green-500">{score}</div>
+              <div className="bg-white dark:bg-slate-700 px-3 py-1.5 md:px-4 md:py-2 rounded-xl shadow">
+                <div className="text-[9px] md:text-[10px] opacity-70 font-bold">النقاط</div>
+                <div className="font-black text-lg md:text-xl text-green-500">{score}</div>
               </div>
             </div>
           </div>
 
-          <div className="min-h-[280px] flex flex-col justify-center">
+          <div className="flex-1 flex flex-col justify-between relative">
             {feedback ? (
-              <div className="text-center animate-zoom-in">
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/90 dark:bg-slate-900/90 z-20 backdrop-blur-sm rounded-xl animate-zoom-in">
                 <div className="text-7xl mb-6">{feedback === 'correct' ? '✅' : '❌'}</div>
                 <h3 className={`text-3xl font-black ${feedback === 'correct' ? 'text-green-500' : 'text-red-500'}`}>
-                  {feedback === 'correct' ? 'إجابة صحيحة! بطل!' : 'للأسف إجابة خاطئة!'}
+                  {feedback === 'correct' ? 'إفلات مثالي! بطل!' : 'للأسف، الرف خاطئ!'}
                 </h3>
               </div>
-            ) : (
-              <>
-                <h3 className="text-xl md:text-2xl font-black mb-10 text-center leading-relaxed text-slate-800 dark:text-white">
-                  {stage === 'challenge3' ? (
-                    <span>أي كتاب يجب أن نضعه في الرف: <span className="text-amber-500 bg-amber-100 dark:bg-amber-900/30 px-3 py-1 rounded-lg">[{currentQuestions[qIndex].shelf}]</span> ؟</span>
-                  ) : currentQuestions[qIndex].text}
-                </h3>
+            ) : null}
 
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                  {stage === 'challenge3' ? (
-                    // خيارات التحدي الثالث
-                    currentQuestions[qIndex].options.map((opt: string, idx: number) => (
-                      <button 
-                        key={idx} onClick={() => handleAnswer(opt === currentQuestions[qIndex].correct)}
-                        className="col-span-1 md:col-span-2 lg:col-span-1 p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 font-bold text-sm md:text-base transition-all active:scale-95 shadow-sm"
-                      >
-                        {opt}
-                      </button>
-                    ))
-                  ) : (
-                    // خيارات التحديات 1 و 2
-                    DEWEY_CATEGORIES.map(cat => (
-                      <button 
-                        key={cat.code} onClick={() => handleAnswer(cat.code === currentQuestions[qIndex].answer)}
-                        className={`p-4 rounded-xl border-2 border-transparent text-white font-black text-xs md:text-sm transition-transform hover:-translate-y-1 active:scale-95 shadow-md ${cat.color}`}
-                      >
-                        {cat.label}
-                      </button>
-                    ))
-                  )}
+            {/* الجزء العلوي: العنصر القابل للسحب أو الرف الهدف */}
+            <div className="flex flex-col items-center justify-center mb-8 shrink-0 min-h-[160px]">
+              {stage === 'challenge3' ? (
+                // في التحدي 3، الأعلى هو الرف الهدف، والأسفل هي الكتب
+                <div 
+                  className={`w-full md:w-2/3 p-6 rounded-2xl border-4 border-dashed transition-all shelf-slot bg-slate-100 dark:bg-slate-800 ${activeDragItem ? 'border-amber-500 scale-105 bg-amber-50 dark:bg-amber-900/20' : 'border-slate-300 dark:border-slate-600'}`}
+                  onDragOver={onDragOver}
+                  onDrop={(e) => onDrop(e, currentQuestions[qIndex].shelf)}
+                  onClick={() => onTouchDrop(currentQuestions[qIndex].shelf)}
+                >
+                  <div className="text-center">
+                    <p className="text-sm font-bold opacity-70 mb-2 text-slate-500">أفلت الكتاب المناسب هنا 👇</p>
+                    <h3 className="text-2xl font-black text-amber-500">رف: {currentQuestions[qIndex].shelf}</h3>
+                  </div>
                 </div>
-              </>
-            )}
+              ) : (
+                // في التحدي 1 و 2، الأعلى هو العنصر القابل للسحب
+                <div className="text-center">
+                  <p className="text-sm font-bold opacity-70 mb-4 text-slate-500">اسحب هذه البطاقة إلى الرف الصحيح 👇</p>
+                  <div 
+                    draggable
+                    onDragStart={(e) => onDragStart(e, 'item')}
+                    onClick={() => onTouchSelect('item')}
+                    className={`cursor-grab active:cursor-grabbing p-6 md:p-8 rounded-2xl border-2 shadow-xl transition-all duration-300 max-w-lg mx-auto ${stage === 'challenge2' ? 'rounded-full aspect-square flex items-center justify-center text-center bg-gradient-to-br from-amber-200 to-amber-500 text-slate-900 w-48 h-48 border-amber-300' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'} ${activeDragItem ? 'ring-4 ring-amber-500 scale-105' : 'hover:scale-105'}`}
+                  >
+                    <h3 className={`font-black leading-relaxed ${stage === 'challenge2' ? 'text-lg' : 'text-xl md:text-2xl'}`}>
+                      {currentQuestions[qIndex].text}
+                    </h3>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* الجزء السفلي: الأرفف الفارغة أو الكتب المتوفرة */}
+            <div className="flex-1 mt-auto shrink-0">
+              {stage === 'challenge3' ? (
+                // التحدي 3: الكتب القابلة للسحب بالأسفل
+                <div className="grid grid-cols-2 gap-3">
+                  {currentQuestions[qIndex].options.map((opt: string, idx: number) => (
+                    <div 
+                      key={idx}
+                      draggable
+                      onDragStart={(e) => onDragStart(e, opt)}
+                      onClick={() => onTouchSelect(opt)}
+                      className={`cursor-grab active:cursor-grabbing p-4 rounded-xl border-l-4 border-b-2 bg-white dark:bg-slate-800 shadow-md font-bold text-sm text-center flex items-center justify-center min-h-[80px] transition-all ${activeDragItem === opt ? 'ring-4 ring-amber-500 border-amber-500 scale-105' : 'border-slate-300 hover:border-amber-400'}`}
+                    >
+                      📖 {opt}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                // التحديات 1 و 2: الأرفف الفارغة بالأسفل
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                  {DEWEY_CATEGORIES.map(cat => (
+                    <div 
+                      key={cat.code} 
+                      onDragOver={onDragOver}
+                      onDrop={(e) => onDrop(e, cat.code)}
+                      onClick={() => onTouchDrop(cat.code)}
+                      className={`shelf-slot cursor-pointer flex flex-col items-center justify-center text-center p-3 rounded-xl border-2 border-dashed transition-all min-h-[90px] ${activeDragItem ? 'border-amber-500 animate-pulse bg-amber-50 dark:bg-amber-900/10' : 'border-slate-300 dark:border-slate-600 hover:border-slate-400 bg-slate-100/50 dark:bg-slate-800/50'}`}
+                    >
+                      <div className={`text-[10px] md:text-xs font-black px-2 py-1 rounded mb-1 bg-white dark:bg-slate-900 shadow-sm border-b-2 ${cat.color.split(' ')[0]}`}>
+                        {cat.label}
+                      </div>
+                      <div className="text-xl opacity-30">📥</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
           </div>
         </div>
       )}
 
       {/* 4. شاشة الشهادة الاحترافية */}
       {stage === 'certificate' && (
-        <div className="w-full flex flex-col items-center animate-fade-in-up">
-          
+        <div className="w-full flex flex-col items-center animate-fade-in-up relative z-10">
           <div id="certificate-area" className="w-[850px] max-w-full bg-white text-slate-900 border-[16px] border-amber-500 p-12 rounded-2xl shadow-2xl relative overflow-hidden">
-            {/* خلفية جمالية مائية للشهادة */}
             <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/arabesque.png")' }}></div>
             
             <div className="flex justify-between items-center border-b-[3px] border-amber-500/30 pb-6 mb-8 relative z-10">
@@ -355,8 +405,8 @@ const DeweyGame: React.FC = () => {
               </p>
               
               <p className="text-xl leading-relaxed mt-8 opacity-90 max-w-3xl mx-auto font-medium text-slate-600">
-                قد اجتاز <strong className="text-slate-900">لعبة تحدي صقر لتصنيف ديوي العشري</strong> بنجاح وتفوق، 
-                وأثبت مهارة عالية واستثنائية في تنظيم مصادر المعرفة وترتيب الأرفف المكتبية بذكاء.
+                قد اجتاز <strong className="text-slate-900">لعبة تحدي صقر لتصنيف ديوي العشري (الإصدار التفاعلي)</strong> بنجاح وتفوق، 
+                وأثبت مهارة عالية في ترتيب الأرفف المكتبية وتصنيف المعرفة بذكاء.
               </p>
             </div>
 
@@ -377,8 +427,6 @@ const DeweyGame: React.FC = () => {
                 <p className="text-lg font-black text-slate-800 mb-4">توقيع أمين المكتبة</p>
                 <div className="w-48 h-[2px] bg-slate-800"></div>
               </div>
-              
-              {/* ختم صقر الذهبي */}
               <div className="w-28 h-28 bg-gradient-to-br from-amber-400 to-amber-600 text-white flex items-center justify-center rounded-full font-black text-5xl shadow-2xl transform -rotate-12 border-4 border-dashed border-white">
                 🦅
               </div>
@@ -393,7 +441,6 @@ const DeweyGame: React.FC = () => {
               العودة للمكتبة
             </Link>
           </div>
-
         </div>
       )}
 
