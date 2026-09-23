@@ -35,6 +35,7 @@ const T = {
     certBody: "قد اجتاز تحدي ترتيب المكتبة بنجاح وتفوق، وأثبت مهارة استثنائية وذكاءً كبيراً في تصنيف المعرفة وتنظيم الأرفف.",
     certPoints: "مجموع النقاط",
     certTime: "وقت الإنجاز",
+    certDate: "تاريخ الإصدار:",
     certSign: "توقيع أمين المكتبة",
     print: "طباعة وحفظ الشهادة",
     back: "العودة للمكتبة",
@@ -73,6 +74,7 @@ const T = {
     certBody: "has successfully passed the library organization challenge, showing exceptional skill and high intelligence in classifying knowledge.",
     certPoints: "Total Points",
     certTime: "Time Taken",
+    certDate: "Issue Date:",
     certSign: "Librarian Signature",
     print: "Print & Save Certificate",
     back: "Back to Library",
@@ -85,7 +87,7 @@ const T = {
 };
 
 // ==========================================
-// 2. البيانات المبسطة (للأطفال) بدون أرقام
+// 2. بنوك الأسئلة الموسعة والمتنوعة
 // ==========================================
 
 const DEWEY_CATEGORIES = [
@@ -111,7 +113,11 @@ const BANK_ASSISTANT = [
   { ar: "يوسف مريض ويريد أن يقرأ عن الفيتامينات", en: "Yousef wants to read about vitamins", answer: "600" },
   { ar: "علي يبحث عن شعر للإذاعة المدرسية", en: "Ali needs a poem for the school radio", answer: "800" },
   { ar: "هدى تريد أن تقرأ عن حقوق الطفل", en: "Huda wants to read about children's rights", answer: "300" },
-  { ar: "ماجد يبحث عن كتاب لزيادة ثقته بنفسه", en: "Majid wants a book to build self-confidence", answer: "100" }
+  { ar: "ماجد يبحث عن كتاب لزيادة ثقته بنفسه", en: "Majid wants a book to build self-confidence", answer: "100" },
+  { ar: "ليلى تبحث عن خريطة قارات العالم", en: "Laila is searching for a world map", answer: "900" },
+  { ar: "سعيد يريد قراءة قصة مغامرات شيقة", en: "Saeed wants an exciting adventure story", answer: "800" },
+  { ar: "راشد يسأل عن معلومات تخص عالم النباتات", en: "Rashed asks about plant biology", answer: "500" },
+  { ar: "منى تريد تعلم كيفية الإسعافات الأولية", en: "Mona wants to learn first aid basics", answer: "600" }
 ];
 
 const BANK_ORBS = [
@@ -124,7 +130,11 @@ const BANK_ORBS = [
   { ar: "كتاب: كيف تصنع سيارة ذكية", en: "Book: How to build a smart car", answer: "600" },
   { ar: "كتاب: قوانين كرة القدم", en: "Book: Football Rules", answer: "700" },
   { ar: "رواية: مغامرات أليس", en: "Novel: Alice's Adventures", answer: "800" },
-  { ar: "أطلس: خرائط دول العالم", en: "Atlas: World Maps", answer: "900" }
+  { ar: "أطلس: خرائط دول العالم", en: "Atlas: World Maps", answer: "900" },
+  { ar: "كتاب: التفكير الإيجابي", en: "Book: Positive Thinking", answer: "100" },
+  { ar: "كتاب: الفضاء الخارجي والمجرات", en: "Book: Outer Space & Galaxies", answer: "500" },
+  { ar: "كتاب: تاريخ الصحراء العربية", en: "Book: Arabian Desert History", answer: "900" },
+  { ar: "كتاب: فن الخط العربي", en: "Book: Arabic Calligraphy Art", answer: "700" }
 ];
 
 const BANK_SHELVES = [
@@ -134,7 +144,10 @@ const BANK_SHELVES = [
   { shelfCode: "600", arShelf: "تكنولوجيا وطب", enShelf: "Tech & Med", arCorrect: "السيارات الذكية", enCorrect: "Smart Cars", arWrongs: ["شعر المتنبي", "خريطة أوروبا", "حقوق الإنسان"], enWrongs: ["Poetry", "Europe Map", "Human Rights"] },
   { shelfCode: "800", arShelf: "قصص وحكايات", enShelf: "Stories", arCorrect: "قصة سندريلا", enCorrect: "Cinderella Story", arWrongs: ["لغات البرمجة", "تفسير القرآن", "الجاذبية"], enWrongs: ["Programming", "Quran", "Gravity"] },
   { shelfCode: "200", arShelf: "دين وأخلاق", enShelf: "Religion", arCorrect: "أخلاق المسلم", enCorrect: "Muslim Morals", arWrongs: ["عواصم العالم", "صناعة الأدوية", "الشطرنج"], enWrongs: ["World Capitals", "Medicine", "Chess"] },
-  { shelfCode: "000", arShelf: "حاسب ومعارف", enShelf: "Computers", arCorrect: "الإنترنت الآمن", enCorrect: "Safe Internet", arWrongs: ["تاريخ الأندلس", "تعلم السباحة", "قصص جحا"], enWrongs: ["History", "Learn Swimming", "Juha Stories"] }
+  { shelfCode: "000", arShelf: "حاسب ومعارف", enShelf: "Computers", arCorrect: "الإنترنت الآمن", enCorrect: "Safe Internet", arWrongs: ["تاريخ الأندلس", "تعلم السباحة", "قصص جحا"], enWrongs: ["History", "Learn Swimming", "Juha Stories"] },
+  { shelfCode: "100", arShelf: "تطوير الذات", enShelf: "Self Growth", arCorrect: "قوة الثقة بالنفس", enCorrect: "Self Confidence", arWrongs: ["أحكام الصيام", "البرمجة بلغة بايثون", "تاريخ القارات"], enWrongs: ["Fasting", "Python", "Continents"] },
+  { shelfCode: "300", arShelf: "مجتمع وقانون", enShelf: "Society", arCorrect: "حقوق الطفل والدستور", enCorrect: "Children's Rights", arWrongs: ["علم الفلك", "الرسم بالزيت", "قواميس اللغات"], enWrongs: ["Astronomy", "Oil Painting", "Dictionaries"] },
+  { shelfCode: "400", arShelf: "لغات وقواميس", enShelf: "Languages", arCorrect: "المعجم الوسيط للغة", enCorrect: "Language Lexicon", arWrongs: ["رياضة القفز", "أسرار البحار", "الذكاء الاصطناعي"], enWrongs: ["Jumping", "Deep Sea", "AI"] }
 ];
 
 const shuffleArray = (array: any[]) => [...array].sort(() => 0.5 - Math.random());
@@ -171,6 +184,17 @@ const DeweyGame: React.FC = () => {
   const [qIndex, setQIndex] = useState(0);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
   const [activeDragItem, setActiveDragItem] = useState<string | null>(null);
+  const [issueDate, setIssueDate] = useState('');
+
+  useEffect(() => {
+    // تعيين تاريخ الإصدار بالعربية أو الإنجليزية تلقائياً مع مراعاة التاريخ والزمان الجغرافي
+    const dateStr = new Date().toLocaleDateString(lang === 'ar' ? 'ar-AE' : 'en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+    setIssueDate(dateStr);
+  }, [lang, stage]);
 
   useEffect(() => {
     let interval: any;
@@ -297,14 +321,35 @@ const DeweyGame: React.FC = () => {
         .dir-rtl { direction: rtl; }
         .dir-ltr { direction: ltr; }
         
+        /* إعدادات الطباعة الدقيقة على ورق A4 */
         @media print {
           body * { visibility: hidden; }
           #certificate-area, #certificate-area * { visibility: visible !important; }
-          #certificate-area { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; background: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          #certificate-area {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 210mm !important;
+            height: 297mm !important;
+            max-height: 297mm !important;
+            margin: 0 !important;
+            padding: 15mm !important;
+            box-sizing: border-box !important;
+            background: #ffffff !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
           .no-print { display: none !important; }
         }
 
-        /* مؤثرات حركية طفولية */
+        @page {
+          size: A4 portrait;
+          margin: 0;
+        }
+
         .magic-glow {
           animation: pulse-glow 2s infinite alternate ease-in-out;
         }
@@ -322,7 +367,6 @@ const DeweyGame: React.FC = () => {
           100% { transform: translateY(0px); }
         }
 
-        /* شكل الرف الواقعي الخشبي */
         .wood-shelf {
           position: relative;
           background: linear-gradient(to bottom, #d97706 0%, #b45309 100%);
@@ -341,7 +385,6 @@ const DeweyGame: React.FC = () => {
           border-bottom-color: #f59e0b;
         }
         
-        /* شكل الكتاب الواقعي */
         .realistic-book {
           position: relative;
           background: linear-gradient(135deg, #ffffff, #f1f5f9);
@@ -360,7 +403,6 @@ const DeweyGame: React.FC = () => {
           border-left-color: #f59e0b;
         }
 
-        /* خطوط الشهادة */
         .cert-font {
           font-family: 'Cairo', sans-serif !important;
         }
@@ -523,62 +565,71 @@ const DeweyGame: React.FC = () => {
         </div>
       )}
 
-      {/* 4. شاشة الشهادة الاحترافية (مجهزة للطباعة) */}
+      {/* 4. شاشة الشهادة الاحترافية المتوافقة تماماً مع طباعة A4 */}
       {stage === 'certificate' && (
         <div className="w-full flex flex-col items-center animate-fade-in-up relative z-10">
-          <div id="certificate-area" className="cert-font w-[900px] max-w-full bg-white text-slate-900 border-[16px] border-amber-500 p-12 md:p-16 rounded-3xl shadow-2xl relative overflow-hidden">
+          <div 
+            id="certificate-area" 
+            className="cert-font bg-white text-slate-900 border-[14px] border-amber-500 p-8 md:p-12 rounded-3xl shadow-2xl relative overflow-hidden flex flex-col justify-between"
+            style={{ width: '210mm', minHeight: '297mm', boxSizing: 'border-box' }}
+          >
             {/* خلفية جمالية مائية للشهادة */}
             <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/arabesque.png")' }}></div>
             
-            <div className="flex justify-between items-center border-b-[4px] border-amber-500/30 pb-8 mb-10 relative z-10">
-              <img src="/school-logo.png" alt="School Logo" className="w-28 h-28 object-contain drop-shadow-xl" onError={(e) => e.currentTarget.style.display = 'none'} />
+            {/* رأس الشهادة */}
+            <div className="flex justify-between items-center border-b-[4px] border-amber-500/30 pb-6 mb-6 relative z-10">
+              <img src="/school-logo.png" alt="School Logo" className="w-24 h-24 object-contain drop-shadow-xl" onError={(e) => e.currentTarget.style.display = 'none'} />
               <div className={`text-left ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
-                <h2 className="text-2xl md:text-3xl font-black text-red-700 uppercase tracking-widest">{dict.schoolName}</h2>
-                <p className="text-base text-amber-600 font-black mt-3 bg-amber-50 inline-block px-4 py-2 rounded-xl border border-amber-200">{dict.dept}</p>
+                <h2 className="text-xl md:text-2xl font-black text-red-700 uppercase tracking-widest">{dict.schoolName}</h2>
+                <p className="text-xs md:text-sm text-amber-600 font-black mt-2 bg-amber-50 inline-block px-3 py-1.5 rounded-xl border border-amber-200">{dict.dept}</p>
+                <p className="text-xs text-slate-500 font-bold mt-1">{dict.certDate} {issueDate}</p>
               </div>
             </div>
 
-            <div className="text-center relative z-10 mb-12">
-              <h1 className="text-4xl md:text-6xl font-black text-amber-600 mb-8 drop-shadow-sm">{dict.certTitle}</h1>
-              <div className="w-48 h-2 bg-red-600 mx-auto rounded-full mb-10"></div>
+            {/* محتوى الشهادة */}
+            <div className="text-center relative z-10 my-auto">
+              <h1 className="text-3xl md:text-5xl font-black text-amber-600 mb-6 drop-shadow-sm">{dict.certTitle}</h1>
+              <div className="w-36 h-1.5 bg-red-600 mx-auto rounded-full mb-6"></div>
               
-              <p className="text-xl md:text-3xl leading-loose font-bold mb-6 text-slate-700">
+              <p className="text-lg md:text-2xl leading-relaxed font-bold mb-4 text-slate-700">
                 {dict.certAwardedTo}
               </p>
-              <h2 className="text-4xl md:text-5xl font-black text-slate-900 my-8 bg-slate-50 inline-block px-16 py-6 rounded-3xl border-2 border-slate-200 shadow-md">
+              <h2 className="text-3xl md:text-4xl font-black text-slate-900 my-4 bg-slate-50 inline-block px-12 py-4 rounded-2xl border-2 border-slate-200 shadow-md">
                 {studentName}
               </h2>
-              <p className="text-xl md:text-3xl leading-loose font-bold text-slate-700">
-                {dict.certGrade} <strong className="text-red-700 text-4xl mx-3">{studentGrade}</strong>
+              <p className="text-base md:text-2xl leading-relaxed font-bold text-slate-700 mt-2">
+                {dict.certGrade} <strong className="text-red-700 text-2xl md:text-3xl mx-2">{studentGrade}</strong>
               </p>
               
-              <p className="text-lg md:text-2xl leading-relaxed mt-10 opacity-90 max-w-4xl mx-auto font-bold text-slate-600">
+              <p className="text-sm md:text-lg leading-relaxed mt-6 opacity-90 max-w-3xl mx-auto font-bold text-slate-600">
                 {dict.certBody}
               </p>
             </div>
 
-            <div className="flex justify-center gap-12 md:gap-20 text-center relative z-10 bg-slate-50 p-8 rounded-[2rem] border-2 border-slate-200 shadow-inner">
+            {/* إحصائيات الشهادة */}
+            <div className="flex justify-center gap-8 md:gap-16 text-center relative z-10 bg-slate-50 p-6 rounded-2xl border-2 border-slate-200 shadow-inner my-6">
               <div>
-                <div className="text-sm md:text-base text-slate-500 font-black uppercase mb-3 tracking-wider">{dict.certPoints}</div>
-                <div className="text-4xl md:text-5xl font-black text-green-600">{score} <span className="text-2xl text-slate-400">/ 300</span></div>
+                <div className="text-xs md:text-sm text-slate-500 font-black uppercase mb-1 tracking-wider">{dict.certPoints}</div>
+                <div className="text-2xl md:text-4xl font-black text-green-600">{score} <span className="text-lg text-slate-400">/ 300</span></div>
               </div>
-              <div className="w-1.5 bg-slate-200 rounded-full"></div>
+              <div className="w-1 bg-slate-200 rounded-full"></div>
               <div>
-                <div className="text-sm md:text-base text-slate-500 font-black uppercase mb-3 tracking-wider">{dict.certTime}</div>
-                <div className="text-4xl md:text-5xl font-black text-amber-600">{formatTime(totalTime)}</div>
+                <div className="text-xs md:text-sm text-slate-500 font-black uppercase mb-1 tracking-wider">{dict.certTime}</div>
+                <div className="text-2xl md:text-4xl font-black text-amber-600">{formatTime(totalTime)}</div>
               </div>
             </div>
 
-            <div className="mt-16 flex justify-between items-end relative z-10 px-4 md:px-12">
+            {/* توقيع الشهادة */}
+            <div className="flex justify-between items-end relative z-10 px-4 md:px-8 mt-4">
               <div className="text-center">
-                <p className="text-lg md:text-xl font-black text-slate-800 mb-6">{dict.certSign}</p>
-                <div className="w-48 md:w-64 h-[3px] bg-slate-800"></div>
+                <p className="text-base md:text-lg font-black text-slate-800 mb-4">{dict.certSign}</p>
+                <div className="w-40 md:w-56 h-[2px] bg-slate-800"></div>
               </div>
-              <img src="/saqr-avatar.png" alt="Saqr Avatar" className="w-32 h-32 md:w-40 md:h-40 object-contain drop-shadow-2xl float-anim" onError={(e) => e.currentTarget.style.display = 'none'} />
+              <img src="/saqr-avatar.png" alt="Saqr Avatar" className="w-24 h-24 md:w-32 md:h-32 object-contain drop-shadow-xl" onError={(e) => e.currentTarget.style.display = 'none'} />
             </div>
           </div>
 
-          <div className="mt-10 flex gap-6 no-print relative z-10">
+          <div className="mt-10 flex gap-6 no-print relative z-10 pb-10">
             <button onClick={() => window.print()} className="px-8 py-4 md:px-10 md:py-5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-black text-lg md:text-xl rounded-2xl shadow-[0_10px_20px_rgba(220,38,38,0.3)] transition-transform active:scale-95">
               {dict.print}
             </button>
