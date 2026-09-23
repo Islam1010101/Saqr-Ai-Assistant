@@ -80,8 +80,17 @@ const translations = {
     }
 };
 
+// ==========================================
+// أيقونات SVG جذابة (بديلة للإيموجيز)
+// ==========================================
+const SearchSvg = ({ className = "w-6 h-6" }) => (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+    </svg>
+);
+
 const LibraryMapPage: React.FC = () => {
-    // جلب اللغة بشكل آمن
     const languageContext = useLanguage();
     const locale = languageContext?.locale === 'en' ? 'en' : 'ar';
     const dir = languageContext?.dir || 'rtl';
@@ -93,17 +102,15 @@ const LibraryMapPage: React.FC = () => {
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
     const [currentWingTheme, setCurrentWingTheme] = useState(1);
     
-    // حالة لاكتشاف الشاشات الصغيرة وتطبيق العرض الآمن للـ HUD
     const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
-        checkMobile(); // الفحص عند التحميل
+        checkMobile(); 
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
-    // تتبع تفاعل الماوس واللمس بأمان
     const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
         if ('touches' in e) {
             if (e.touches && e.touches.length > 0) {
@@ -116,11 +123,11 @@ const LibraryMapPage: React.FC = () => {
 
     const getWingTheme = (wing: number) => {
         const themes = [
-            { color: "#ef4444", glow: "rgba(239, 68, 68, 0.4)", nameAr: "جناح الباحثين", nameEn: "Researchers Wing" },
-            { color: "#3b82f6", glow: "rgba(59, 130, 246, 0.4)", nameAr: "جناح الشباب", nameEn: "Youth Wing" },
-            { color: "#10b981", glow: "rgba(16, 185, 129, 0.4)", nameAr: "جناح العربية", nameEn: "Arabic Wing" },
-            { color: "#f59e0b", glow: "rgba(245, 158, 11, 0.4)", nameAr: "الجناح الخاص", nameEn: "Special Wing" },
-            { color: "#8b5cf6", glow: "rgba(139, 92, 246, 0.4)", nameAr: "جناح الصغار", nameEn: "Kids Wing" }
+            { color: "#ef4444", glow: "rgba(239, 68, 68, 0.5)", nameAr: "جناح الباحثين", nameEn: "Researchers Wing" },
+            { color: "#3b82f6", glow: "rgba(59, 130, 246, 0.5)", nameAr: "جناح الشباب", nameEn: "Youth Wing" },
+            { color: "#10b981", glow: "rgba(16, 185, 129, 0.5)", nameAr: "جناح العربية", nameEn: "Arabic Wing" },
+            { color: "#f59e0b", glow: "rgba(245, 158, 11, 0.5)", nameAr: "الجناح الخاص", nameEn: "Special Wing" },
+            { color: "#8b5cf6", glow: "rgba(139, 92, 246, 0.5)", nameAr: "جناح الصغار", nameEn: "Kids Wing" }
         ];
         return themes[wing - 1] || themes[0];
     };
@@ -137,18 +144,19 @@ const LibraryMapPage: React.FC = () => {
                 className="mb-16 md:mb-24 relative group px-2"
             >
                 {/* عنوان الجناح التفاعلي */}
-                <div className="flex items-center gap-4 mb-8 md:mb-10">
-                    <div className="h-2 w-12 md:w-16 rounded-full transition-all duration-700 group-hover:w-32 shadow-lg" style={{ background: theme.color, boxShadow: `0 0 20px ${theme.glow}` }}></div>
+                <div className="flex items-center gap-4 mb-8 md:mb-12">
+                    <div className="h-2 w-12 md:w-16 rounded-full transition-all duration-700 group-hover:w-24 shadow-lg" style={{ background: theme.color, boxShadow: `0 0 20px ${theme.glow}` }}></div>
                     <h2 className={`text-3xl md:text-5xl font-black text-slate-900 dark:text-white opacity-80 group-hover:opacity-100 transition-all duration-500 ${!isAr ? 'uppercase tracking-tight' : ''}`}>
                         {wingTitle}
                     </h2>
                 </div>
 
-                {/* شبكة الأرفف مع تأثير أبل السحري */}
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-4 md:gap-5 p-6 md:p-10 bg-white/60 dark:bg-slate-800/60 rounded-[2.5rem] md:rounded-[3rem] border border-white/60 dark:border-slate-700/50 shadow-xl backdrop-blur-2xl transition-all duration-500 hover:shadow-2xl">
+                {/* شبكة الأرفف الواقعية (Realistic Cubbies) */}
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-x-4 gap-y-10 md:gap-x-5 md:gap-y-12 p-6 md:p-10 bg-white/40 dark:bg-slate-800/40 rounded-[3rem] border-4 border-white dark:border-slate-700 shadow-sm backdrop-blur-md">
                     {shelves.map(s => {
                         const isMatch = searchQuery && (s.ar.includes(searchQuery) || s.en.toLowerCase().includes(searchQuery.toLowerCase()));
                         const isActive = activeShelfId === s.id;
+                        const cubbyActive = isActive || isMatch;
 
                         return (
                             <button
@@ -160,18 +168,46 @@ const LibraryMapPage: React.FC = () => {
                                     handleInteraction(e); 
                                 }}
                                 className={`
-                                    relative aspect-square rounded-2xl md:rounded-3xl text-lg md:text-2xl font-black transition-all duration-300 ease-out
-                                    flex items-center justify-center border-2
-                                    /* تأثير أبل العظيم (Apple Pop-out Effect) */
-                                    ${isActive || isMatch 
-                                        ? 'scale-125 z-40 text-white shadow-2xl -translate-y-2' 
-                                        : 'bg-white dark:bg-slate-700 border-transparent text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-500 hover:scale-110 hover:shadow-lg hover:z-20'}
+                                    relative aspect-[4/5] w-full flex flex-col justify-end items-center pb-2 md:pb-3
+                                    bg-slate-100 dark:bg-slate-800
+                                    border-x-[6px] border-t-[6px] border-b-[16px]
+                                    border-slate-200 dark:border-slate-700
+                                    border-b-slate-300 dark:border-b-slate-900
+                                    rounded-2xl transition-all duration-300 ease-out cursor-pointer
+                                    shadow-inner outline-none
+                                    ${cubbyActive ? 'z-40' : 'hover:-translate-y-2 hover:shadow-xl hover:z-20'}
                                 `}
-                                style={isActive || isMatch ? { background: theme.color, borderColor: 'rgba(255,255,255,0.6)', boxShadow: `0 15px 35px ${theme.glow}` } : {}}
+                                style={cubbyActive ? { 
+                                    borderColor: theme.color, 
+                                    borderBottomColor: theme.color, 
+                                    boxShadow: `0 20px 40px ${theme.glow}, inset 0 -10px 20px rgba(0,0,0,0.3)`,
+                                    transform: 'scale(1.15) translateY(-10px)'
+                                } : {}}
                             >
-                                <span className="relative z-10 drop-shadow-md">{s.id}</span>
-                                {(isActive || isMatch) && (
-                                    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/30 to-white/0 animate-[shimmer_2s_infinite]"></div>
+                                {/* الظل الداخلي للعمق (Depth Shadow) */}
+                                <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20 pointer-events-none rounded-t-lg"></div>
+
+                                {/* الكتب المصغرة داخل الرف */}
+                                <div className="w-[70%] h-[55%] flex items-end justify-center gap-[2px] opacity-90 relative z-10">
+                                    <div className="w-[25%] h-[90%] rounded-t-sm border border-black/10 shadow-sm transition-colors" style={{ backgroundColor: cubbyActive ? theme.color : '#94a3b8', filter: 'brightness(0.85)' }}></div>
+                                    <div className="w-[25%] h-[100%] rounded-t-sm border border-black/10 shadow-sm transition-colors" style={{ backgroundColor: cubbyActive ? theme.color : '#94a3b8' }}></div>
+                                    <div className="w-[25%] h-[75%] rounded-t-sm border border-black/10 shadow-sm origin-bottom-left -rotate-12 translate-x-1 transition-colors" style={{ backgroundColor: cubbyActive ? theme.color : '#94a3b8', filter: 'brightness(1.15)' }}></div>
+                                </div>
+
+                                {/* رقم الرف البارز (Label) */}
+                                <div 
+                                    className={`absolute -bottom-4 md:-bottom-5 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-900 px-3 md:px-4 py-0.5 md:py-1 rounded-full text-sm md:text-xl font-black shadow-md border-2 transition-colors z-20`}
+                                    style={{ 
+                                        borderColor: cubbyActive ? theme.color : 'transparent',
+                                        color: cubbyActive ? theme.color : 'inherit'
+                                    }}
+                                >
+                                    {s.id}
+                                </div>
+                                
+                                {/* إضاءة تفاعلية عند التحديد */}
+                                {cubbyActive && (
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/30 to-white/0 animate-[shimmer_2s_infinite] rounded-t-lg pointer-events-none z-30"></div>
                                 )}
                             </button>
                         );
@@ -187,19 +223,19 @@ const LibraryMapPage: React.FC = () => {
         <div 
             dir={dir} 
             onMouseMove={handleInteraction}
-            className="w-full min-h-[100dvh] flex flex-col bg-slate-50 dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300 pb-32 md:pb-40"
+            className="w-full min-h-[100dvh] flex flex-col bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300 pb-32 md:pb-40"
         >
-            {/* 1. الخلفية الديناميكية (النبض السحري) */}
-            <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-50 dark:opacity-30">
-               <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-red-600/30 rounded-full blur-[120px] animate-blob"></div>
-               <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-blue-600/20 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
-               <div className="absolute top-[40%] left-[30%] w-[30%] h-[30%] bg-green-500/20 rounded-full blur-[100px] animate-blob animation-delay-4000"></div>
+            {/* 1. الخلفية الديناميكية (طفولية) */}
+            <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-50 dark:opacity-20">
+               <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-400/20 rounded-full blur-[100px] animate-blob"></div>
+               <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-amber-400/20 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
+               <div className="absolute top-[40%] left-[30%] w-[30%] h-[30%] bg-sky-400/20 rounded-full blur-[100px] animate-blob animation-delay-4000"></div>
             </div>
 
             {/* 2. إضاءة محيطية تتبع الماوس (للكمبيوتر فقط) */}
             {!isMobile && (
                 <div 
-                    className="fixed inset-0 pointer-events-none transition-all duration-300 z-0 opacity-60 mix-blend-screen dark:mix-blend-lighten"
+                    className="fixed inset-0 pointer-events-none transition-all duration-300 z-0 opacity-40 mix-blend-screen dark:mix-blend-lighten"
                     style={{ background: `radial-gradient(circle 600px at ${mousePos.x}px ${mousePos.y}px, ${getWingTheme(currentWingTheme).glow}, transparent 80%)` }}
                 ></div>
             )}
@@ -210,31 +246,41 @@ const LibraryMapPage: React.FC = () => {
                 <header className="mb-16 md:mb-24 flex flex-col lg:flex-row items-center justify-between gap-10 animate-fade-in-up">
                     <div className="space-y-4 md:space-y-6 text-center lg:text-start flex-1 hover:scale-[1.02] transition-transform duration-700">
                         <h1 className={`text-5xl md:text-7xl lg:text-[8rem] font-black leading-[1.1] text-slate-900 dark:text-white drop-shadow-sm ${!isAr ? 'tracking-tight uppercase' : ''}`}>
-                            {isAr ? 'خريطة ' : 'Library'}<br className="hidden md:block" />
+                            {isAr ? 'خريطة ' : 'Library '}<br className="hidden md:block" />
                             <span style={{ color: getWingTheme(currentWingTheme).color }} className="transition-colors duration-700 drop-shadow-md">{isAr ? 'المكتبة' : 'Map'}</span>
                         </h1>
                         <p className="text-base md:text-2xl text-slate-600 dark:text-slate-400 font-bold max-w-2xl leading-relaxed mx-auto lg:mx-0">
                             {t('subTitle')}
                         </p>
+                        <div className="flex justify-center lg:justify-start gap-3 mt-6">
+                            <div className="w-16 h-2 rounded-full transition-colors duration-500" style={{ background: getWingTheme(currentWingTheme).color }}></div>
+                            <div className="w-8 h-2 rounded-full transition-colors duration-500 opacity-60" style={{ background: getWingTheme(currentWingTheme).color }}></div>
+                        </div>
                     </div>
                     
                     <div className="flex-1 w-full max-w-sm lg:max-w-xl group">
-                         <img src="/library-hero.png" alt="Library Map Illustration" className="w-full h-auto object-contain animate-float drop-shadow-2xl group-hover:scale-105 transition-transform duration-700" />
+                         <img src="/library-hero.png" alt="Library Map Illustration" className="w-full h-auto object-contain animate-float drop-shadow-2xl group-hover:scale-105 transition-transform duration-700" onError={(e) => e.currentTarget.style.display = 'none'} />
                     </div>
                 </header>
 
-                {/* 🌟 شريط البحث المضيء الذكي 🌟 */}
+                {/* 🌟 شريط البحث المضيء الممتع 🌟 */}
                 <div className="sticky top-6 z-[80] mb-12 md:mb-20 px-2 animate-fade-in-up transition-all duration-500">
-                    <div className="max-w-3xl mx-auto bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl p-3 md:p-4 rounded-full border-2 border-white dark:border-slate-700 shadow-xl flex items-center gap-4 transition-all duration-500 hover:shadow-2xl hover:scale-[1.02]" style={{ borderColor: searchQuery ? getWingTheme(currentWingTheme).color : '' }}>
-                        <div className="w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center text-xl md:text-2xl shadow-inner text-white shrink-0 transition-all duration-500 animate-pulse-slow" style={{ background: getWingTheme(currentWingTheme).color, boxShadow: `0 0 20px ${getWingTheme(currentWingTheme).glow}` }}>
-                            🔍
+                    <div 
+                        className={`max-w-4xl mx-auto bg-white dark:bg-slate-800 p-3 md:p-4 rounded-[3rem] border-4 ${searchQuery ? '' : 'border-slate-200 dark:border-slate-700'} shadow-xl flex items-center gap-4 transition-all duration-500 hover:shadow-2xl hover:scale-[1.02]`}
+                        style={searchQuery ? { borderColor: getWingTheme(currentWingTheme).color } : {}}
+                    >
+                        <div 
+                            className="w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center shadow-inner shrink-0 transition-all duration-500 animate-pulse-slow" 
+                            style={{ background: getWingTheme(currentWingTheme).color, boxShadow: `0 0 20px ${getWingTheme(currentWingTheme).glow}` }}
+                        >
+                            <SearchSvg className="w-6 h-6 md:w-8 md:h-8 text-white" />
                         </div>
                         <input 
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder={t('searchPlaceholder')}
-                            className="bg-transparent border-none outline-none flex-1 text-base md:text-2xl font-bold placeholder-slate-400 dark:placeholder-slate-500 text-slate-900 dark:text-white pe-4"
+                            className="bg-transparent border-none outline-none flex-1 text-lg md:text-2xl font-black placeholder-slate-400 dark:placeholder-slate-500 text-slate-900 dark:text-white pe-4"
                         />
                     </div>
                 </div>
@@ -254,21 +300,28 @@ const LibraryMapPage: React.FC = () => {
                         className={`fixed z-[1000] pointer-events-none transition-all duration-200 ease-out animate-zoom-in ${
                             isMobile 
                                 ? 'bottom-6 left-4 right-4' // للموبايل: تظهر كبطاقة أسفل الشاشة
-                                : 'w-max -translate-x-1/2 -translate-y-[130%]' // للكمبيوتر: تتبع الماوس كعدسة مكبرة
+                                : 'w-max -translate-x-1/2 -translate-y-[130%]' // للكمبيوتر: تتبع الماوس
                         }`}
                         style={!isMobile ? { left: mousePos.x, top: mousePos.y } : {}}
                     >
-                        <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl px-6 py-5 md:px-10 md:py-8 rounded-[2rem] border border-white/50 dark:border-slate-700 shadow-2xl text-center flex flex-col items-center justify-center relative overflow-hidden">
-                            <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none"></div>
+                        <div 
+                            className="bg-white dark:bg-slate-800 px-6 py-6 md:px-10 md:py-8 rounded-[3rem] border-4 shadow-2xl text-center flex flex-col items-center justify-center relative overflow-hidden"
+                            style={{ borderColor: getWingTheme(activeData.wing).color }}
+                        >
+                            {/* زخرفة خلفية البطاقة */}
+                            <div className="absolute top-0 right-0 w-32 h-32 blur-[50px] opacity-30 pointer-events-none" style={{ background: getWingTheme(activeData.wing).color }}></div>
                             
-                            <div className="relative w-12 h-12 md:w-16 md:h-16 rounded-full border-4 border-white dark:border-slate-800 flex items-center justify-center text-white shadow-lg font-black text-lg md:text-2xl transition-colors duration-300 z-10" style={{ background: getWingTheme(activeData.wing).color }}>
+                            <div 
+                                className="relative w-16 h-16 md:w-20 md:h-20 rounded-full border-4 border-white dark:border-slate-800 flex items-center justify-center text-white shadow-lg font-black text-2xl md:text-3xl transition-colors duration-300 z-10 mb-4" 
+                                style={{ background: getWingTheme(activeData.wing).color }}
+                            >
                                 {activeData.id}
                             </div>
                             
-                            <p className={`text-xs md:text-sm font-bold mb-2 mt-4 z-10 ${!isAr ? 'uppercase tracking-widest' : ''}`} style={{ color: getWingTheme(activeData.wing).color }}>
+                            <span className="inline-block px-4 py-1 rounded-full bg-slate-100 dark:bg-slate-900 text-xs md:text-sm font-black uppercase tracking-widest mb-3 z-10 shadow-sm" style={{ color: getWingTheme(activeData.wing).color }}>
                                 {isAr ? getWingTheme(activeData.wing).nameAr : getWingTheme(activeData.wing).nameEn}
-                            </p>
-                            <h3 className="text-xl md:text-3xl font-black text-slate-900 dark:text-white leading-tight z-10 drop-shadow-sm">
+                            </span>
+                            <h3 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white leading-tight z-10 drop-shadow-sm max-w-[300px] md:max-w-md">
                                 {isAr ? activeData.ar : activeData.en}
                             </h3>
                         </div>
@@ -318,11 +371,6 @@ const LibraryMapPage: React.FC = () => {
                     }
                 }
                 .animate-zoom-in { animation: zoom-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-
-                ::-webkit-scrollbar { width: 8px; }
-                ::-webkit-scrollbar-track { background: transparent; }
-                ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-                .dark ::-webkit-scrollbar-thumb { background: #334155; }
             `}</style>
         </div>
     );
