@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useLanguage } from '../App';
 import { ChatMessage } from '../types';
 import ReactMarkdown from 'react-markdown'; 
@@ -81,6 +81,21 @@ const localization: any = {
   }
 };
 
+// ==========================================
+// أيقونات SVG جذابة (بديلة للإيموجيز)
+// ==========================================
+const SendIcon = () => (
+    <svg className="w-5 h-5 md:w-6 md:h-6" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+    </svg>
+);
+
+const DownloadIcon = () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+    </svg>
+);
+
 const SmartSearchPage: React.FC = () => {
   const { locale, dir } = useLanguage();
   const t = (key: string) => localization[locale][key];
@@ -147,7 +162,7 @@ const SmartSearchPage: React.FC = () => {
     if (input.trim() === '' || isLoading) return;
     const userQuery = input.trim();
 
-    // 👇 2. هنا يتم إرسال سؤال الطالب إلى السحابة فور الضغط على إرسال (تم الحفاظ عليه)
+    // 👇 2. إرسال سؤال الطالب إلى السحابة للتعقب
     trackActivity('ai', userQuery);
 
     setMessages(prev => [...prev, { role: 'user', content: userQuery }]);
@@ -207,7 +222,7 @@ const SmartSearchPage: React.FC = () => {
       let reply = data.reply || '';
 
       if (reply.includes('[WINNER:')) {
-        const match = reply.match(/\[WINNER:\s*(.*?)\s*\|\s*Grade:\s*(.*?)\s*\|\s*Content:\s*(.*?)\]/s);
+        const match = reply.match(/\[WINNER:\s*(.*?)\s*\Vert{}\s*Grade:\s*(.*?)\s*\Vert{}\s*Content:\s*(.*?)\]/s);
         if (match) {
           const dateOptions: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
           const formattedDate = new Date().toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', dateOptions);
@@ -246,31 +261,34 @@ const SmartSearchPage: React.FC = () => {
   };
 
   return (
-    <div dir={dir} className="w-full h-[100dvh] flex flex-col bg-[#f0f4f9] dark:bg-[#131314] font-sans relative overflow-hidden text-slate-900 dark:text-slate-100 transition-colors duration-300">
+    <div dir={dir} className="w-full h-[100dvh] flex flex-col bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-hidden text-slate-900 dark:text-slate-100 transition-colors duration-300">
       
-      {/* خلفية التوهج المحيطي بأسلوب جيميناي الفاخر */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-gradient-to-b from-blue-500/10 via-purple-500/5 to-transparent rounded-full blur-[120px] pointer-events-none z-0"></div>
+      {/* 🌟 الخلفية الديناميكية المبهجة 🌟 */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-50 dark:opacity-20">
+         <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-sky-400/30 blur-[120px] rounded-full animate-blob"></div>
+         <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-amber-400/30 blur-[120px] rounded-full animate-blob animation-delay-2000"></div>
+      </div>
       
-      {/* Header - الهيدر العلوي النظيف */}
-      <header className="flex-shrink-0 px-4 py-3 md:px-8 w-full max-w-5xl mx-auto flex justify-between items-center z-20 relative">
+      {/* Header - الهيدر العلوي بستايل ألعاب */}
+      <header className="flex-shrink-0 px-4 py-4 md:px-8 w-full max-w-5xl mx-auto flex justify-between items-center z-20 relative">
          <div className="flex items-center gap-3">
-           <span className="font-bold text-lg md:text-xl text-slate-800 dark:text-[#e3e3e3] tracking-wide bg-clip-text bg-gradient-to-r dark:from-white dark:to-slate-400">{t('status')}</span>
-           <span className="flex items-center gap-1.5 text-[10px] text-green-600 dark:text-green-400 font-bold uppercase bg-green-50 dark:bg-green-900/20 px-2 py-0.5 rounded-full border border-green-100 dark:border-green-900/50">
-             <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> {t('online')}
+           <span className="font-black text-xl md:text-2xl text-slate-800 dark:text-white tracking-tight uppercase">{t('status')}</span>
+           <span className="flex items-center gap-1.5 text-[10px] md:text-xs text-emerald-600 dark:text-emerald-400 font-black uppercase bg-emerald-100 dark:bg-emerald-900/30 px-3 py-1 rounded-full border-2 border-emerald-200 dark:border-emerald-800 shadow-sm">
+             <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> {t('online')}
            </span>
          </div>
 
          {winnerData && saqrState === 'victory' && (
-           <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white font-bold rounded-full shadow-lg hover:shadow-red-600/20 transition-all transform hover:scale-105 uppercase text-[10px] md:text-xs">
-             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+           <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-5 py-2.5 bg-rose-500 text-white font-black rounded-full border-b-4 border-rose-700 hover:-translate-y-1 active:border-b-0 active:translate-y-1 transition-all shadow-md uppercase text-xs md:text-sm">
+             <DownloadIcon />
              <span className="hidden md:inline">{t('download')}</span>
              <span className="md:hidden">تحميل</span>
            </button>
          )}
       </header>
 
-      {/* 🛠️ منطقة المحادثات والرسائل تتدفق بالوسط (تمت موازنة الارتفاع وتقليص الفراغ الأولي وتدعيم السكرول التلقائي) */}
-      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-2 no-scrollbar scroll-smooth relative z-10 pb-40">
+      {/* 🛠️ منطقة المحادثات */}
+      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-4 no-scrollbar scroll-smooth relative z-10 pb-40">
         <div className="max-w-4xl mx-auto flex flex-col justify-end min-h-fit space-y-6 pt-4">
           
           {messages.map((msg, index) => (
@@ -279,26 +297,29 @@ const SmartSearchPage: React.FC = () => {
               {/* رسائل صقر المساعد الذكي */}
               {msg.role === 'assistant' && (
                 <div className="flex flex-col gap-2 max-w-[95%] md:max-w-[85%] items-start">
-                  <div className="flex gap-4 items-start" translate="no" lang={locale}>
+                  <div className="flex gap-3 md:gap-4 items-end" translate="no" lang={locale}>
                     {/* الأيقونة الرمزية التفاعلية لصقر */}
-                    <div className="w-9 h-9 md:w-10 md:h-10 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden bg-white dark:bg-[#1e1f20] border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <div className={`w-12 h-12 md:w-14 md:h-14 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden bg-white dark:bg-slate-800 border-4 border-sky-300 dark:border-sky-600 shadow-md ${saqrState === 'thinking' && index === messages.length - 1 ? 'ring-4 ring-amber-400 animate-pulse' : ''}`}>
                       <img 
                         src={getSaqrImageSrc()} 
                         alt="Saqr AI" 
-                        className={`w-full h-full object-cover transition-all duration-300 ${saqrState === 'thinking' && index === messages.length - 1 ? 'scale-110 opacity-90 animate-pulse' : ''}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => e.currentTarget.style.display = 'none'}
                       />
                     </div>
-                    {/* حاوية نص رد الذكاء الاصطناعي الأنيقة */}
-                    <div className="prose prose-sm md:prose-base dark:prose-invert font-medium leading-relaxed max-w-none text-start pt-1 text-slate-800 dark:text-[#e3e3e3]">
-                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+                    {/* حاوية نص رد الذكاء الاصطناعي الأنيقة (شكل بالون ألعاب) */}
+                    <div className="bg-white dark:bg-slate-800 border-4 border-slate-200 dark:border-slate-700 rounded-[2rem] rounded-bl-none px-6 py-4 shadow-sm text-slate-800 dark:text-slate-100 font-bold leading-relaxed">
+                      <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none text-start">
+                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                      </div>
                     </div>
                   </div>
 
-                  {/* إضافة زر التحميل المباشر أسفل رد الفوز الأخير مباشرة لسهولة الوصول */}
+                  {/* إضافة زر التحميل المباشر أسفل رد الفوز الأخير مباشرة */}
                   {winnerData && saqrState === 'victory' && index === messages.length - 1 && (
-                    <div className="mt-4 px-14 w-full text-start">
-                      <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold rounded-xl shadow-md transition-all transform active:scale-95 text-sm">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                    <div className="mt-2 px-16 w-full text-start animate-zoom-in">
+                      <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-6 py-3 bg-emerald-500 text-white font-black rounded-full border-b-4 border-emerald-700 shadow-sm hover:-translate-y-1 active:border-b-0 active:translate-y-1 transition-all text-sm uppercase">
+                        <DownloadIcon />
                         <span>{t('download')}</span>
                       </button>
                     </div>
@@ -308,8 +329,8 @@ const SmartSearchPage: React.FC = () => {
 
               {/* رسائل المستخدم الطالب */}
               {msg.role === 'user' && (
-                <div className="bg-white dark:bg-[#1e1f20] text-slate-900 dark:text-[#e3e3e3] px-5 py-3 md:px-6 md:py-3.5 rounded-2xl rounded-tr-none max-w-[85%] md:max-w-[75%] shadow-sm border border-slate-100 dark:border-transparent transition-all hover:shadow-md">
-                  <div className="font-medium leading-relaxed max-w-none text-start text-sm md:text-base">
+                <div className="bg-amber-400 dark:bg-amber-500 text-slate-900 px-6 py-4 rounded-[2rem] rounded-br-none max-w-[85%] md:max-w-[75%] shadow-sm border-b-4 border-amber-600 transition-all hover:-translate-y-1">
+                  <div className="font-black leading-relaxed max-w-none text-start text-base md:text-lg">
                     {msg.content}
                   </div>
                 </div>
@@ -317,124 +338,127 @@ const SmartSearchPage: React.FC = () => {
             </div>
           ))}
           
-          <div ref={messagesEndRef} className="h-2" />
+          <div ref={messagesEndRef} className="h-4" />
         </div>
       </div>
 
-      {/* منطقة الإدخال والبحث - مثبتة في الأسفل (Bottom Bar Style) */}
-      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-[#f0f4f9] via-[#f0f4f9]/95 to-transparent dark:from-[#131314] dark:via-[#131314]/95 dark:to-transparent px-4 py-4 md:py-6 md:px-8 w-full z-20 flex-shrink-0">
-        <div className="max-w-4xl mx-auto flex flex-col gap-2">
-          <div className="relative flex items-center bg-white dark:bg-[#1e1f20] rounded-full ring-1 ring-slate-200 dark:ring-transparent focus-within:ring-2 focus-within:ring-blue-500/50 dark:focus-within:ring-slate-700 transition-all shadow-md hover:shadow-lg pl-2 pr-2">
+      {/* منطقة الإدخال والبحث - مثبتة في الأسفل */}
+      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-[#f8fafc] via-[#f8fafc] to-transparent dark:from-slate-950 dark:via-slate-950 dark:to-transparent px-4 py-6 md:py-8 w-full z-20 flex-shrink-0">
+        <div className="max-w-4xl mx-auto flex flex-col gap-3">
+          <div className="relative flex items-center bg-white dark:bg-slate-800 rounded-[2.5rem] border-4 border-slate-200 dark:border-slate-700 shadow-lg focus-within:border-sky-400 dark:focus-within:border-sky-500 focus-within:-translate-y-1 transition-all pl-2 pr-2">
             
-            {/* مؤشر وامض ملون بداخل البار يحاكي كبسولة Gemini الفاخرة */}
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 opacity-0 focus-within:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-
             <input
               type="text" 
               value={input} 
               onChange={(e) => setInput(e.target.value)} 
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
               placeholder={t('input')}
-              className="flex-1 bg-transparent border-0 focus:ring-0 py-4 px-5 md:py-4.5 md:px-7 text-slate-900 dark:text-[#e3e3e3] font-medium outline-none w-full placeholder-slate-400 dark:placeholder-slate-500 text-sm md:text-base relative z-10"
+              className="flex-1 bg-transparent border-0 focus:ring-0 py-4 px-5 md:py-5 md:px-6 text-slate-900 dark:text-white font-black outline-none w-full placeholder-slate-400 dark:placeholder-slate-500 text-base md:text-lg relative z-10"
               disabled={isLoading}
             />
             
             <button 
               onClick={handleSendMessage} 
               disabled={isLoading || !input.trim()} 
-              className="relative z-10 w-10 h-10 md:w-11 md:h-11 rounded-full bg-slate-100 dark:bg-[#282a2c] hover:bg-slate-200 dark:hover:bg-[#333537] disabled:bg-transparent disabled:opacity-20 disabled:cursor-not-allowed text-blue-600 dark:text-blue-400 flex items-center justify-center transition-all active:scale-95 rtl:rotate-180"
+              className="relative z-10 w-12 h-12 md:w-14 md:h-14 rounded-full bg-sky-500 hover:bg-sky-400 disabled:bg-slate-300 disabled:dark:bg-slate-700 disabled:border-b-0 border-b-4 border-sky-700 text-white flex items-center justify-center transition-all active:border-b-0 active:translate-y-1 rtl:rotate-180 m-2 shrink-0"
             >
-              <svg className="w-5 h-5 md:w-5.5 md:h-5.5" fill="currentColor" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" /></svg>
+              <SendIcon />
             </button>
           </div>
 
-          {/* تأثير التفكير الانسيابي اللامع المتعرج الممتد أسفل البار مباشرة (Gemini Wave) */}
+          {/* تأثير التحميل (Loader) المبهج */}
           {isLoading && (
-            <div className="w-[92%] mx-auto h-[4px] rounded-full overflow-hidden relative bg-slate-200 dark:bg-slate-800">
-              <div className="gemini-shimmer-line absolute inset-0 w-full h-full rounded-full"></div>
+            <div className="w-[90%] mx-auto h-2 rounded-full overflow-hidden relative bg-slate-200 dark:bg-slate-800">
+              <div className="absolute inset-0 bg-gradient-to-r from-sky-400 via-amber-400 to-rose-400 animate-[shimmer_1.5s_infinite] w-[200%]"></div>
             </div>
           )}
 
-          {/* التذييل الصغير المتناسق سفلياً تحت البار مباشرة */}
-          <footer className="w-full text-center text-[9px] md:text-[11px] text-slate-400 dark:text-slate-500 font-medium pt-1">
-            Saqr AI Librarian can make mistakes. Please verify library information.
+          {/* التذييل الصغير */}
+          <footer className="w-full text-center text-[10px] md:text-xs text-slate-400 dark:text-slate-500 font-bold pt-2 uppercase tracking-widest">
+            Saqr AI Librarian can make mistakes. Please verify library info.
           </footer>
         </div>
       </div>
 
-      {/* --- تصميم الشهادة العرضية للتصدير --- */}
+      {/* --- تصميم الشهادة العرضية للتصدير (مخفية ومحمية تماماً) --- */}
       <div className="fixed left-[-9999px] top-0 pointer-events-none">
           <div ref={certificateRef} dir={locale === 'ar' ? 'rtl' : 'ltr'} className="w-[1123px] min-h-[794px] h-fit bg-white text-slate-900 relative overflow-hidden flex flex-col font-sans border-[20px] border-double border-red-700 pb-12">
-              
               <div className="absolute top-0 right-0 w-80 h-80 bg-red-50 rounded-bl-full -z-10"></div>
               <div className="absolute bottom-0 left-0 w-80 h-80 bg-red-50 rounded-tr-full -z-10"></div>
 
-              <div className="flex justify-between items-center p-10 border-b-2 border-slate-100">
+              <div className="flex justify-between items-center p-10 border-b-4 border-slate-100">
                  <div className="flex items-center gap-6">
-                     <img src="https://www.efipslibrary.online/school-logo.png" className="w-24 object-contain" alt="EFIPS Logo" />
+                     <img src="https://www.efipslibrary.online/school-logo.png" className="w-24 object-contain" alt="EFIPS Logo" crossOrigin="anonymous" />
                      <div>
-                         <h3 className="text-2xl font-bold text-slate-800">{t('certSchool')}</h3>
-                         <h4 className="text-base font-bold text-slate-400 uppercase mt-1" dir="ltr">EFIPS</h4>
+                         <h3 className="text-2xl font-black text-slate-800">{t('certSchool')}</h3>
+                         <h4 className="text-base font-black text-slate-400 uppercase mt-1" dir="ltr">EFIPS</h4>
                      </div>
                  </div>
                  <div className="text-left">
-                     <div className="px-8 py-3 bg-red-600 text-white font-bold rounded-full text-lg shadow-sm border-2 border-red-700">{t('certChallenge')}</div>
+                     <div className="px-8 py-3 bg-red-600 text-white font-black rounded-full text-lg shadow-sm border-b-4 border-red-800">{t('certChallenge')}</div>
                  </div>
               </div>
 
               <div className="flex-1 flex flex-col items-center justify-center text-center px-16 mt-8">
                   <h1 className="text-5xl font-black text-red-700 mb-6">{t('certTitle')}</h1>
-                  <p className="text-2xl font-medium text-slate-600 mb-8">{t('certSubtitle')}</p>
+                  <p className="text-2xl font-bold text-slate-600 mb-8">{t('certSubtitle')}</p>
                   
-                  <h2 className="text-5xl font-black text-slate-900 mb-4 pb-2 border-b-4 border-red-600 px-12 inline-block leading-tight">{winnerData?.name}</h2>
-                  <p className="text-3xl font-bold text-slate-500 mb-10">{t('certGrade')} <span className="text-red-600">{winnerData?.grade}</span></p>
+                  <h2 className="text-5xl font-black text-slate-900 mb-4 pb-2 border-b-8 border-red-600 px-12 inline-block leading-tight">{winnerData?.name}</h2>
+                  <p className="text-3xl font-black text-slate-500 mb-10">{t('certGrade')} <span className="text-red-600">{winnerData?.grade}</span></p>
                   
-                  <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200 w-full text-start relative shadow-inner mb-8">
-                      <span className={`absolute -top-4 ${locale === 'ar' ? 'right-10' : 'left-10'} bg-white px-6 py-1 text-red-700 font-bold text-lg border border-slate-200 rounded-full`}>{t('certStory')}</span>
-                      <p className={`text-2xl leading-[1.8] font-medium text-slate-800 mt-4 ${locale === 'ar' ? 'text-justify' : 'text-left'} whitespace-pre-wrap`}>{winnerData?.content}</p>
+                  <div className="bg-slate-50 p-8 rounded-[2rem] border-4 border-slate-200 w-full text-start relative shadow-inner mb-8">
+                      <span className={`absolute -top-5 ${locale === 'ar' ? 'right-10' : 'left-10'} bg-white px-6 py-2 text-red-700 font-black text-xl border-4 border-slate-200 rounded-full`}>{t('certStory')}</span>
+                      <p className={`text-2xl leading-[1.8] font-bold text-slate-800 mt-6 ${locale === 'ar' ? 'text-justify' : 'text-left'} whitespace-pre-wrap`}>{winnerData?.content}</p>
                   </div>
               </div>
 
-              <div className="flex justify-between items-end px-16 pt-8 border-t-2 border-slate-100 mt-auto">
+              <div className="flex justify-between items-end px-16 pt-8 border-t-4 border-slate-100 mt-auto">
                   <div className="text-center w-64">
-                     <p className="text-lg font-bold text-slate-500 mb-2">{t('certDate')}</p>
-                     <p className="text-xl font-black text-slate-900">{winnerData?.date}</p>
+                     <p className="text-lg font-black text-slate-500 mb-2">{t('certDate')}</p>
+                     <p className="text-2xl font-black text-slate-900">{winnerData?.date}</p>
                   </div>
                   <div className="text-center flex flex-col items-center flex-1">
-                     <img src="https://www.efipslibrary.online/school-logo.png" className="w-16 opacity-20 mb-2 grayscale" alt="Stamp" />
-                     <p className="text-xs font-bold text-slate-400 uppercase">{t('certOfficial')}</p>
+                     <img src="https://www.efipslibrary.online/school-logo.png" className="w-16 opacity-20 mb-2 grayscale" alt="Stamp" crossOrigin="anonymous" />
+                     <p className="text-xs font-black text-slate-400 uppercase">{t('certOfficial')}</p>
                   </div>
                   <div className="text-center w-64">
-                     <p className="text-lg font-bold text-slate-500 mb-2">{t('certAI')}</p>
+                     <p className="text-lg font-black text-slate-500 mb-2">{t('certAI')}</p>
                      <p className="text-2xl font-black text-red-700">{t('certSaqr')}</p>
                   </div>
               </div>
           </div>
       </div>
 
-      {/* الأنماط والـ Animations المتقدمة للتأثيرات البصرية */}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
         * { font-family: 'Cairo', sans-serif !important; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         
-        @keyframes fade-in-up {
-          0% { opacity: 0; transform: translateY(8px); }
-          100% { opacity: 1; transform: translateY(0); }
+        @keyframes blob {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
         }
-        .animate-fade-in-up { animation: fade-in-up 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        .animate-blob { animation: blob 7s infinite alternate ease-in-out; }
+        .animation-delay-2000 { animation-delay: 2s; }
 
-        /* تأثير الحركة للخط المتلألئ الجيميناي */
-        @keyframes gemini-shimmer {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
+        @keyframes shimmer { 
+          0% { transform: translateX(-50%); }
+          100% { transform: translateX(0%); } 
         }
-        .gemini-shimmer-line {
-          background: linear-gradient(90deg, #1a73e8, #744af2, #d946ef, #1a73e8);
-          background-size: 300% 300%;
-          animation: gemini-shimmer 2s ease infinite;
+
+        @keyframes fade-in-up { 
+          0% { opacity: 0; transform: translateY(20px); } 
+          100% { opacity: 1; transform: translateY(0); } 
         }
+        .animate-fade-in-up { animation: fade-in-up 0.5s ease-out forwards; }
+        
+        @keyframes zoom-in { 
+          0% { opacity: 0; transform: scale(0.9); } 
+          100% { opacity: 1; transform: scale(1); } 
+        }
+        .animate-zoom-in { animation: zoom-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
       `}</style>
     </div>
   );
