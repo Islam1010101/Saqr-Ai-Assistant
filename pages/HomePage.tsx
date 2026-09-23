@@ -7,7 +7,7 @@ const translations = {
     welcome: "بوابة المعرفة مدرسة صقر الإمارات",
     subWelcome: "بوابتك الذكية للوصول إلى المعلومات.",
     newsTitle: "جديدنا",
-    newsContent: "بإمكانك الآن الاطلاع على المكتبة الإلكترونية التي تم تحديثها لتضم عدداً أكبر وتنوعاً أوسع من الكتب والإصدارات باللغتين العربية والإنجليزية، مع إضافة تصنيف الفئة العمرية للكتب. كما يمكنك من خلال 'اسأل صقر' خوض تحدي التأليف وإصدار شهادة باسمك! والآن، استديو البودكاست متاح للتسجيل ومشاركة إبداعاتكم الصوتية.",
+    newsContent: "بإمكانك الآن الاطلاع على المكتبة الإلكترونية المحدثة، وتم إضافة جدول استخدام المكتبة للمعلمين، كما تم إضافة لعبة وتحدي 'رتب المكتبة' الجديد لتصنيف الكتب، بالإضافة إلى استديو البودكاست المتاح للتسجيل ومشاركة إبداعاتكم الصوتية.",
     manualSearch: "البحث اليدوي",
     manualDesc: "البحث عن كتاب ما في مكتبة المدرسة والوصول إليه.",
     smartSearch: "اسأل صقر الذكي",
@@ -46,7 +46,7 @@ const translations = {
     welcome: "Knowledge Portal at Falcon Int'l School",
     subWelcome: "Your smart gateway to access knowledge.",
     newsTitle: "What's New",
-    newsContent: "Explore the newly updated Digital Library, featuring a wider variety of books categorized by age group. Through 'Ask Saqr', take on the 'Author Challenge' and earn your certificate! The Podcast Studio is now live for your recordings.",
+    newsContent: "Explore the updated Digital Library. The Library Schedule for teachers has been added, along with the new 'Library Game' challenge for book classification, plus our Podcast Studio is now live!",
     manualSearch: "Manual Search",
     manualDesc: "Find and access a specific book in the school library.",
     smartSearch: "Ask Saqr (AI)",
@@ -292,13 +292,14 @@ const HomePage: React.FC = () => {
           <div className="h-2 w-20 bg-amber-400 mx-auto rounded-full mt-4 animate-pulse"></div>
         </div>
 
+        {/* شريط جديدنا المتحرك (تم إصلاحه ليعمل بشكل سليم وتمرير مستمر) */}
         <div className="w-full max-w-5xl mx-auto relative z-30 flex items-center bg-white dark:bg-slate-800 border-4 border-amber-300 dark:border-amber-700 rounded-full shadow-lg overflow-hidden h-14 md:h-16 hover:scale-[1.01] transition-all duration-300">
           <div className="bg-amber-400 text-slate-900 font-black px-6 md:px-8 h-full flex items-center justify-center gap-2 relative z-20 shrink-0 uppercase tracking-widest">
             <div className="w-3 h-3 bg-white rounded-full animate-ping"></div>
             {t('newsTitle')}
           </div>
           <div className="flex-1 overflow-hidden h-full flex items-center relative group bg-amber-50 dark:bg-slate-800 z-20">
-            <div className={`whitespace-nowrap ${isAr ? 'animate-marquee-rtl' : 'animate-marquee-ltr'} text-slate-800 dark:text-slate-100 font-bold text-sm md:text-lg px-4 group-hover:[animation-play-state:paused] cursor-pointer`}>
+            <div className={`whitespace-nowrap inline-block ${isAr ? 'animate-marquee-rtl' : 'animate-marquee-ltr'} text-slate-800 dark:text-slate-100 font-bold text-sm md:text-lg px-4 group-hover:[animation-play-state:paused] cursor-pointer`}>
               {t('newsContent')}
             </div>
           </div>
@@ -371,7 +372,7 @@ const HomePage: React.FC = () => {
               <p className="text-sm font-bold opacity-90">{t('scheduleDesc')}</p>
             </Link>
 
-            {/* رتب المكتبة مع شارة جديد */}
+            {/* رتب المكتبة مع شارة جديد + حوار رتب المكتبة */}
             <Link to="/game" className="relative bg-amber-400 text-slate-900 p-6 rounded-[2rem] border-b-8 border-amber-600 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all flex flex-col items-center text-center shadow-md sm:col-span-2 lg:col-span-2 xl:col-span-1">
               <div className="absolute top-4 start-4 bg-rose-500 text-white text-[10px] md:text-xs px-3 py-0.5 rounded-full font-black uppercase tracking-wider shadow-md animate-pulse">
                 {t('newBadge')}
@@ -577,8 +578,8 @@ const HomePage: React.FC = () => {
         
         @keyframes marquee-ltr { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
         @keyframes marquee-rtl { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-        .animate-marquee-ltr { animation: marquee-ltr 50s linear infinite; }
-        .animate-marquee-rtl { animation: marquee-marquee-rtl 50s linear infinite; }
+        .animate-marquee-ltr { animation: marquee-ltr 25s linear infinite; }
+        .animate-marquee-rtl { animation: marquee-rtl 25s linear infinite; }
         
         .scrollbar-thin::-webkit-scrollbar { height: 8px; }
         .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
