@@ -7,7 +7,7 @@ const translations = {
     welcome: "بوابة المعرفة مدرسة صقر الإمارات",
     subWelcome: "بوابتك الذكية للوصول إلى المعلومات.",
     newsTitle: "جديدنا",
-    newsContent: "بإمكانك الآن الاطلاع على المكتبة الإلكترونية التي تم تحديثها لتضم عدداً أكبر وتنوعاً أوسع من الكتب والإصدارات باللغتين العربية والإنجليزية، مع إضافة تصنيف الفئة العمرية للكتب. كما يمكنك من خلال 'اسأل صقر' خوض تحدي التأليف وإصدار شهادة باسمك! والآن، استديو البودكاست متاح للتسجيل ومشاركة إبداعاتكم الصوتية، وترقبوا انطلاق ميزة الدوبلاج قريبا.",
+    newsContent: "بإمكانك الآن الاطلاع على المكتبة الإلكترونية التي تم تحديثها لتضم عدداً أكبر وتنوعاً أوسع من الكتب والإصدارات باللغتين العربية والإنجليزية، مع إضافة تصنيف الفئة العمرية للكتب. كما يمكنك من خلال 'اسأل صقر' خوض تحدي التأليف وإصدار شهادة باسمك! والآن، استديو البودكاست متاح للتسجيل ومشاركة إبداعاتكم الصوتية.",
     manualSearch: "البحث اليدوي",
     manualDesc: "البحث عن كتاب ما في مكتبة المدرسة والوصول إليه.",
     smartSearch: "اسأل صقر الذكي",
@@ -24,7 +24,7 @@ const translations = {
     challengeDesc: "ناقش، ابدأ قصتك الخاصة مع صقر، وأثبت موهبتك. هل أنت مستعد للتحدي؟",
     challengeCTA: "ابدأ رحلة الإبداع الآن",
     saqrStudioBanner: "استديو صقر",
-    saqrStudioTag: "الدوبلاج قريباً",
+    saqrStudioTag: "",
     visitorsLabel: "زوار البوابة:",
     upcomingEvents: "أحداث قريبة",
     startsIn: "يبدأ خلال:",
@@ -43,7 +43,7 @@ const translations = {
     welcome: "Knowledge Portal at Falcon Int'l School",
     subWelcome: "Your smart gateway to access knowledge.",
     newsTitle: "What's New",
-    newsContent: "Explore the newly updated Digital Library, featuring a wider variety of books categorized by age group. Through 'Ask Saqr', take on the 'Author Challenge' and earn your certificate! The Podcast Studio is now live for your recordings. Stay tuned for the upcoming Dubbing feature soon!",
+    newsContent: "Explore the newly updated Digital Library, featuring a wider variety of books categorized by age group. Through 'Ask Saqr', take on the 'Author Challenge' and earn your certificate! The Podcast Studio is now live for your recordings.",
     manualSearch: "Manual Search",
     manualDesc: "Find and access a specific book in the school library.",
     smartSearch: "Ask Saqr (AI)",
@@ -60,7 +60,7 @@ const translations = {
     challengeDesc: "Discuss, author your own tales with Saqr, and prove your talent. Are you ready?",
     challengeCTA: "Start your creative journey",
     saqrStudioBanner: "Saqr Studio",
-    saqrStudioTag: "Dubbing Coming Soon",
+    saqrStudioTag: "",
     visitorsLabel: "Portal Visitors:",
     upcomingEvents: "Upcoming Events",
     startsIn: "Starts in:",
@@ -156,6 +156,14 @@ const GameIcon = () => (
 const StarIcon = ({ className }: { className: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor">
     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+  </svg>
+);
+const UaeFlagIcon = () => (
+  <svg viewBox="0 0 640 480" className="w-10 h-10 rounded shadow-sm overflow-hidden" preserveAspectRatio="none">
+    <path fill="#00732f" d="M0 0h640v160H0z"/>
+    <path fill="#fff" d="M0 160h640v160H0z"/>
+    <path fill="#000" d="M0 320h640v160H0z"/>
+    <path fill="#ff0000" d="M0 0h220v480H0z"/>
   </svg>
 );
 
@@ -282,22 +290,24 @@ const HomePage: React.FC = () => {
 
         {/* --- لافتة استديو صقر --- */}
         <div className="w-full relative z-30 flex flex-col items-center justify-center">
-          <Link to="/saqr-studio" className="group relative px-8 py-3 md:px-10 md:py-4 w-fit rounded-full bg-blue-500 text-white border-b-4 border-blue-700 shadow-md flex items-center justify-center hover:-translate-y-1 hover:border-b-6 active:border-b-0 active:translate-y-2 transition-all duration-200">
-            <span className="relative z-10 text-base md:text-xl font-black flex items-center gap-3">
+          <Link to="/saqr-studio" className="group relative px-10 py-4 md:px-16 md:py-5 w-fit rounded-full bg-blue-500 text-white border-b-8 border-blue-700 shadow-lg flex items-center justify-center hover:-translate-y-1 hover:border-b-8 active:border-b-0 active:translate-y-2 transition-all duration-200">
+            <span className="relative z-10 text-lg md:text-2xl font-black uppercase tracking-wide">
               {t('saqrStudioBanner')}
-              <span className="bg-white text-blue-600 px-3 py-1 rounded-full text-xs font-black uppercase shadow-sm">
-                {t('saqrStudioTag')}
-              </span>
             </span>
           </Link>
         </div>
 
-        {/* --- 2. الأزرار الرئيسية وشخصية صقر (التخطيط الممتع) --- */}
+        {/* --- 2. الأزرار الرئيسية وشخصية صقر --- */}
         <div className="w-full flex flex-col lg:flex-row gap-10 items-center justify-center">
           
-          {/* شخصية صقر المركزية */}
+          {/* شخصية صقر المركزية مع خلفية الشعار */}
           <div className="lg:order-2 flex flex-col items-center justify-center relative z-20 max-w-sm w-full">
-            <div onClick={handleMascotInteraction} className={`relative cursor-pointer transition-transform duration-300 ${isMascotClicked ? 'scale-95' : 'hover:scale-105'}`}>
+            <div onClick={handleMascotInteraction} className={`relative cursor-pointer transition-transform duration-300 w-full flex justify-center items-center ${isMascotClicked ? 'scale-95' : 'hover:scale-105'}`}>
+              
+              {/* الشعار الخلفي للمدرسة بهيئة باهتة (يتحول للأبيض في الدارك مود) */}
+              <img src="/school-logo.png" alt="" className="absolute inset-0 m-auto w-[80%] h-[80%] object-contain opacity-10 dark:opacity-20 dark:invert z-0 pointer-events-none" />
+
+              {/* تأثيرات النجوم المتناثرة */}
               {bursts.map((burst) => (
                 <div key={burst.id} 
                   className={`absolute z-[100] animate-burst-steady pointer-events-none ${burst.color}`}
@@ -305,6 +315,7 @@ const HomePage: React.FC = () => {
                   <StarIcon className="w-10 h-10 drop-shadow-md" />
                 </div>
               ))}
+              
               <img src="/saqr-full.png" alt="Saqr Mascot" className="h-64 md:h-[400px] object-contain relative z-10 animate-float drop-shadow-2xl" />
               
               <div className="absolute -top-4 -right-4 bg-white dark:bg-slate-800 px-6 py-4 rounded-[2rem] rounded-br-none border-4 border-rose-400 shadow-xl text-sm md:text-lg font-black text-rose-500 animate-float-delayed z-20">
@@ -313,7 +324,7 @@ const HomePage: React.FC = () => {
             </div>
           </div>
 
-          {/* أزرار العمليات (تصميم ألعاب طفولي) */}
+          {/* أزرار العمليات والتنقل */}
           <div className="lg:order-1 lg:order-3 flex-1 w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
             
             <Link to="/search" className="bg-sky-400 text-white p-6 rounded-[2rem] border-b-8 border-sky-600 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all flex flex-col items-center text-center shadow-md">
@@ -349,30 +360,30 @@ const HomePage: React.FC = () => {
           </div>
         </div>
 
-        {/* --- 📚 المكتبة الرقمية لمركز أبو ظبي --- */}
+        {/* --- 📚 المكتبة الرقمية لمركز أبو ظبي (حجم مصغر) --- */}
         <div className="w-full mt-6">
           <a 
             href="https://www.amazon.com/stores/page/64B19CDC-2694-46EA-8C7D-AA43238F9A37" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="group w-full bg-rose-500 border-b-8 border-rose-700 hover:-translate-y-1 active:border-b-0 active:translate-y-2 rounded-[2rem] p-6 md:p-8 flex flex-col md:flex-row items-center gap-6 transition-all shadow-md block text-white"
+            className="group w-full max-w-4xl mx-auto bg-rose-500 border-b-6 border-rose-700 hover:-translate-y-1 active:border-b-0 active:translate-y-2 rounded-3xl p-4 md:p-5 flex flex-col md:flex-row items-center gap-5 transition-all shadow-sm block text-white"
           >
-            <div className="bg-white rounded-2xl p-3 shrink-0 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-300">
-              <img src="https://alc.ae/media/htonj1al/alc-logo-header.png" alt="ALC Logo" className="w-24 md:w-32 h-24 md:h-32 object-contain" />
+            <div className="bg-white rounded-xl p-2 shrink-0 flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform duration-300">
+              <img src="https://alc.ae/media/htonj1al/alc-logo-header.png" alt="ALC Logo" className="w-16 md:w-20 h-16 md:h-20 object-contain" />
             </div>
-            <div className="flex-1 text-center md:text-start space-y-2">
-              <div className="inline-block px-4 py-1 rounded-full bg-rose-700/50 text-white text-xs font-black uppercase tracking-widest mb-1">
+            <div className="flex-1 text-center md:text-start space-y-1">
+              <div className="inline-block px-3 py-0.5 rounded-full bg-rose-700/50 text-white text-[10px] font-black uppercase tracking-widest mb-1">
                  Initiative | مبادرة
               </div>
-              <h3 className="text-2xl md:text-4xl font-black leading-tight">
+              <h3 className="text-lg md:text-2xl font-black leading-tight">
                 {t('alcLibraryTitle')}
               </h3>
-              <p className="text-base md:text-xl font-bold opacity-90">
+              <p className="text-sm md:text-lg font-bold opacity-90">
                 {t('alcLibrarySub')}
               </p>
             </div>
-            <div className="shrink-0 bg-white text-rose-600 w-14 h-14 rounded-full flex items-center justify-center text-2xl font-black shadow-md group-hover:translate-x-2 transition-transform">
-              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+            <div className="shrink-0 bg-white text-rose-600 w-10 h-10 rounded-full flex items-center justify-center text-xl font-black shadow-md group-hover:translate-x-2 transition-transform">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
             </div>
@@ -380,7 +391,7 @@ const HomePage: React.FC = () => {
         </div>
 
         {/* --- 🆕 شريط الكتب المضافة حديثاً --- */}
-        <div className="w-full px-2 mt-4 space-y-6">
+        <div className="w-full px-2 mt-2 space-y-6">
           <div className="flex items-center justify-between border-b-4 border-slate-200 dark:border-slate-800 pb-3">
             <h3 className="text-2xl md:text-4xl font-black text-slate-800 dark:text-white tracking-tight">
               {t('recentBooksTitle')}
@@ -435,85 +446,90 @@ const HomePage: React.FC = () => {
           </div>
         </div>
 
-        {/* --- 3. قسم لمحات من الموطن --- */}
-        <div className="w-full px-2 mt-4">
-          <div className="bg-sky-100 dark:bg-slate-800 p-8 md:p-12 rounded-[2.5rem] border-4 border-sky-300 dark:border-slate-700 shadow-sm flex flex-col md:flex-row items-center gap-8 md:gap-12">
-            <div className="w-24 h-24 bg-white dark:bg-slate-700 rounded-full flex items-center justify-center shadow-sm shrink-0">
-              <svg className="w-12 h-12 text-sky-500" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-              </svg>
+        {/* --- 3 & 4. قسم لمحات من الموطن + العدادات والأحداث (تخطيط مدمج) --- */}
+        <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4 pb-10 px-2">
+          
+          {/* لمحات من الموطن (ثيم أصفر/ذهبي مع علم الإمارات) */}
+          <div className="bg-amber-100 dark:bg-slate-800 p-8 md:p-10 rounded-[2.5rem] border-4 border-amber-300 dark:border-amber-700 shadow-sm flex flex-col items-center md:items-start text-center md:text-start h-full relative overflow-hidden">
+            <div className="w-20 h-20 bg-white dark:bg-slate-700 rounded-full flex items-center justify-center shadow-sm mb-6 shrink-0 z-10 border-2 border-amber-200 dark:border-amber-600">
+              <UaeFlagIcon />
             </div>
-            <div className="text-center md:text-start flex-1 space-y-4">
-              <h3 className="text-lg md:text-xl font-black text-sky-600 dark:text-sky-400 uppercase tracking-widest">
+            <div className="space-y-4 z-10 flex-1">
+              <h3 className="text-lg md:text-xl font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">
                 {t('homelandTitle')}
               </h3>
               <p className="text-xl md:text-3xl text-slate-800 dark:text-white leading-relaxed font-black">
                 {isAr ? dailyFact.ar : dailyFact.en}
               </p>
             </div>
-          </div>
-        </div>
-
-        {/* --- 4. عداد الزوار + الأحداث --- */}
-        <div className="w-full flex flex-col items-center gap-10 pb-10 mt-6">
-          
-          <div className="bg-white dark:bg-slate-800 px-8 py-4 rounded-full border-4 border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row items-center gap-6">
-            <div className="flex items-center gap-3">
-              <div className="w-3 h-3 bg-green-500 rounded-full animate-ping"></div>
-              <span className="text-slate-600 dark:text-slate-300 font-bold text-base">{t('visitorsLabel')}</span>
-              <span className="text-slate-900 dark:text-white font-black text-xl">{visitorCount.toLocaleString()}</span>
-            </div>
-            <div className="hidden md:block h-6 w-1 bg-slate-200 dark:bg-slate-700 rounded-full"></div>
-            <div className="flex items-center gap-3 text-slate-600 dark:text-slate-300">
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
-              <span className="font-black text-base">{todayDate}</span>
-            </div>
+            {/* إضاءة زخرفية في الخلفية */}
+            <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-amber-200/50 dark:bg-amber-900/20 rounded-full blur-3xl pointer-events-none"></div>
           </div>
 
-          <div className="w-full max-w-4xl flex flex-col gap-8">
-            {daysLeft !== null && activeEvent && (
-              <div className="w-full flex flex-col items-center gap-6 animate-fade-in-up">
-                <div className="bg-rose-100 dark:bg-rose-900/30 px-6 py-2 rounded-full border-2 border-rose-300 dark:border-rose-700 text-rose-600 dark:text-rose-400 font-black text-sm md:text-lg">
-                  {countdownType === 'start' ? t('startsIn') : t('endsIn')} {isAr ? activeEvent.ar : activeEvent.en}
-                </div>
-                
-                <div className="flex flex-col items-center">
-                  <div className="bg-white dark:bg-slate-800 w-32 h-32 md:w-40 md:h-40 rounded-full border-8 border-rose-400 flex items-center justify-center shadow-lg">
-                    <span className="text-5xl md:text-7xl font-black text-slate-800 dark:text-white">
-                      {daysLeft}
+          {/* عداد الزوار والأحداث القريبة */}
+          <div className="flex flex-col gap-6 h-full">
+            
+            {/* شريط عداد الزوار والتاريخ */}
+            <div className="bg-white dark:bg-slate-800 px-6 py-5 rounded-[2rem] border-4 border-slate-200 dark:border-slate-700 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 bg-green-500 rounded-full animate-ping"></div>
+                <span className="text-slate-600 dark:text-slate-300 font-bold text-sm md:text-base">{t('visitorsLabel')}</span>
+                <span className="text-slate-900 dark:text-white font-black text-xl">{visitorCount.toLocaleString()}</span>
+              </div>
+              <div className="hidden sm:block h-8 w-1 bg-slate-200 dark:bg-slate-700 rounded-full"></div>
+              <div className="flex items-center gap-3 text-slate-600 dark:text-slate-300">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+                <span className="font-black text-sm md:text-base">{todayDate}</span>
+              </div>
+            </div>
+
+            {/* بطاقة الأحداث */}
+            <div className="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-[2.5rem] border-4 border-slate-200 dark:border-slate-700 shadow-sm flex-1 flex flex-col items-center justify-center">
+              {daysLeft !== null && activeEvent ? (
+                <div className="w-full flex flex-col items-center gap-4 animate-fade-in-up">
+                  <div className="bg-rose-100 dark:bg-rose-900/30 px-6 py-2 rounded-full border-2 border-rose-300 dark:border-rose-700 text-rose-600 dark:text-rose-400 font-black text-sm md:text-base text-center">
+                    {countdownType === 'start' ? t('startsIn') : t('endsIn')} {isAr ? activeEvent.ar : activeEvent.en}
+                  </div>
+                  
+                  <div className="flex flex-col items-center">
+                    <div className="bg-white dark:bg-slate-800 w-24 h-24 md:w-32 md:h-32 rounded-full border-8 border-rose-400 flex items-center justify-center shadow-lg">
+                      <span className="text-4xl md:text-6xl font-black text-slate-800 dark:text-white">
+                        {daysLeft}
+                      </span>
+                    </div>
+                    <span className="mt-3 text-sm md:text-base font-black text-slate-500 uppercase tracking-widest">
+                      {daysLeft === 1 ? t('dayUnit') : t('daysUnit')}
                     </span>
                   </div>
-                  <span className="mt-4 text-base md:text-xl font-black text-slate-500 uppercase tracking-widest">
-                    {daysLeft === 1 ? t('dayUnit') : t('daysUnit')}
-                  </span>
                 </div>
-              </div>
-            )}
+              ) : (
+                <h4 className="text-slate-400 dark:text-slate-500 text-sm uppercase tracking-[0.2em] font-black mb-4">
+                  {t('upcomingEvents')}
+                </h4>
+              )}
 
-            <div className="flex flex-col items-center mt-6">
-              <h4 className="text-slate-400 dark:text-slate-500 text-sm uppercase tracking-[0.2em] font-black mb-4">
-                {t('upcomingEvents')}
-              </h4>
-              <div className="flex flex-wrap justify-center gap-4">
+              <div className="flex flex-wrap justify-center gap-3 mt-6">
                 {ACADEMIC_EVENTS.map((event, idx) => (
-                  <div key={idx} className={`bg-white dark:bg-slate-800 border-4 ${activeEvent?.ar === event.ar ? 'border-rose-400 scale-105' : 'border-slate-200 dark:border-slate-700'} px-6 py-4 rounded-[2rem] flex flex-col items-center gap-2 text-center`}>
-                    <span className="text-slate-800 dark:text-white font-black text-sm md:text-base">
+                  <div key={idx} className={`bg-slate-50 dark:bg-slate-900/50 border-2 ${activeEvent?.ar === event.ar ? 'border-rose-400 scale-105' : 'border-slate-200 dark:border-slate-700'} px-4 py-2 rounded-xl flex flex-col items-center gap-1 text-center`}>
+                    <span className="text-slate-800 dark:text-white font-black text-xs md:text-sm">
                       {isAr ? event.ar : event.en}
                     </span>
-                    <span className="text-slate-500 font-bold text-xs md:text-sm bg-slate-100 dark:bg-slate-700 px-3 py-1 rounded-full">
+                    <span className="text-slate-500 font-bold text-[10px] md:text-xs">
                       {event.displayDate}
                     </span>
                   </div>
                 ))}
               </div>
             </div>
+
           </div>
         </div>
+
       </div>
 
       <style>{`
