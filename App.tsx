@@ -21,6 +21,7 @@ import SaqrStudioPage from './pages/SaqrStudioPage';
 import PodcastPage from './pages/PodcastPage';
 import NewArrivalsPage from './pages/NewArrivalsPage'; 
 import DeweyGame from './pages/game'; 
+import SchedulePage from './pages/SchedulePage'; // صفحة جدول المكتبة الخاصة بالمعلمين
 
 export type Locale = 'en' | 'ar';
 
@@ -353,6 +354,7 @@ const MainLayout: React.FC = () => {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/new-arrivals" element={<NewArrivalsPage />} /> 
           <Route path="/game" element={<DeweyGame />} /> 
+          <Route path="/schedule" element={<SchedulePage />} /> {/* إضافة مسار جدول المكتبة هنا دون ظهوره في الشريط العلوي */}
         </Routes>
       </main>
 
