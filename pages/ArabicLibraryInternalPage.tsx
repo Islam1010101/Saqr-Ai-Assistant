@@ -1,10 +1,10 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useLanguage } from '../App';
 import { useNavigate } from 'react-router-dom';
-
-// 👇 1. استدعاء دالة التتبع
 import { trackActivity } from '../src/utils/tracker';
 
+// --- 1. قاعدة البيانات ---
+export const ARABIC_LIBRARY_DATABASE = [
 // --- 1. قاعدة البيانات (لم يتم تغييرها بناءً على طلبك) ---
 export const ARABIC_LIBRARY_DATABASE = [
     { id: "AR_1", title: "مجموعة روايات أجاثا كريستي", author: "أجاثا كريستي", subject: "قصص بوليسية", publisher: "ناشرون متعددون", driveLink: "https://drive.google.com/drive/folders/1PZk0vPQrKXIgE0WmUXlEMcSzt_d94Q6u", bio: "ملكة الجريمة عالمياً، صاحبة الشخصيات الخالدة مثل هيركيول بوارو.", summary: "أضخم مجموعة لروايات التحقيق والغموض التي تتميز بحبكة عبقرية ونهايات صادمة." },
@@ -64,7 +64,7 @@ export const ARABIC_LIBRARY_DATABASE = [
     { id: "AR_56", title: "ذكاء اصطناعي متوافق مع البشر: حتى لا تفرض الآلات سيطرتها على البشر", author: "ستيوارت راسل", subject: "تكنولوجيا", publisher: "هنداوي", driveLink: "https://drive.google.com/file/d/1ddbyuo2M2dfh-86lM3as1uoYDoB4fz1K/view?usp=drive_link", bio: "هو أحد أعمدة علم الذكاء الاصطناعي في العالم، وأستاذ علوم الحاسوب في جامعة كاليفورنيا ببرلين.", summary: "يُعتبر كتاب ذكاء اصطناعي متوافق مع البشر: مشكلة السيطرة (Human Compatible: Artificial Intelligence and the Problem of Control)، الصادر عام 2019، من أهم الكتب التي تتناول مستقبل البشرية في ظل وجود ذكاء اصطناعي فائق، ويُعد صرخة تحذير علمية رصينة من داخل المجتمع التقني نفسه." },
     { id: "AR_57", title: "عشرون قصة من روائع شكسبير", author: "إديث نسبيت", subject: "أدب عالمي", publisher: "هنداوي", driveLink: "https://drive.google.com/file/d/1ocR16ZTGPIioAOMEMr1BY189jHFP3MJ_/view?usp=drive_link", bio: "هي رائدة أدب الأطفال الحديث، وصاحبة الرواية الشهيرة أطفال السكك الحديدية. تميزت بقدرتها الفائقة على تبسيط الأفكار العميقة وتقديمها بأسلوب قصصي جذاب يجمع بين المتعة والدرس الأخلاقي.", summary: "مسرحيات شكسبير الأصلية مكتوبة بلغة إنجليزية قديمة وشاعرية صعبة حتى على الكبار أحياناً. ما فعلته نسبيت هنا هو إعادة صياغة لأشهر المسرحيات بأسلوب نثري قصصي مشوق." },
     { id: "AR_58", title: "يوميات فوكس ميكي", author: "ساشا تشيورني", subject: "أدب عالمي", publisher: "هنداوي", driveLink: "https://drive.google.com/file/d/1m_d_qCj9CIEeAI7d8CDdJ02Yv30odXkE/view?usp=drive_link", bio: "هو شاعر وكاتب ساخر روسي شهير (1880-1932). عُرف بأسلوبه النقدي الساخر في شعره للكبار، لكنه عندما كتب للأطفال، قدم أعمالاً خالدة تميزت بقدرته المذهلة على التقمص النفسي، وأشهرها هذه اليوميات التي كتبها عام 1927.", summary: "الكتاب مكتوب بالكامل على لسان الكلب ميكي ، وهو من فصيلة فوكس تيرير (Fox Terrier). ميكي ليس مجرد كلب عادي، بل هو كلب مثقف يستطيع القراءة والكتابة (في خياله على الأقل)، ويقرر تدوين يومياته ليعبر عن وجهة نظره في عالم البشر الغريب." },
-    { id: "AR_59", title: "همس الجنون", author: "نجيب محفوظ", subject: "أدب عالمي", publisher: "هنداوي", driveLink: "https://drive.google.com/file/d/1RQYTtBhOwni78bg5IwqW0UVQfp4546hD/view?usp=drive_link", bio: "رائدُ الرواية العربية، والحائزُ على أعلى جائزةٍ أدبية في العالَم ، وُلِد في ١١ ديسمبر ١٩١١م في حي الجمالية بالقاهرة، لعائلةٍ من الطبقة المتوسطة، وكان والده موظفًا حكوميًّا، وقد اختار له اسمَ الطبيب الذي أشرَف على وِلادته، وهو الدكتور نجيب محفوظ باشا، ليصبح اسمُه مُركَّبًا نجيب محفوظ.", summary: "يُبدِع «نجيب محفوظ»، عميد الرواية العربية وفارس القصة القصيرة، في هذه المجموعة القصصية التي كانت أُولى تَجارِبه القصصية والتي ضمَّت ثمانيًا وعشرين قصة، في السرد عن الجنون بلغةٍ سلسة مُحكَمة وحكمةٍ مُتوارية في همساته؛ جنون الحب، جنون العظمة، جنون الجوع، جنون المال، الجنون المحض" }
+    { id: "AR_59", title: "همس الجنون", author: "نجيب محفوظ", subject: "أدب عالمي", publisher: "هنداوي", driveLink: "https://drive.google.com/file/d/1RQYTtBhOwni78bg5IwqW0UVQfp4546hD/view?usp=drive_link", bio: "رائدُ الرواية العربية، والحائزُ على أعلى جائزةٍ أدبية في العالَم ، وُلِد في ١١ ديسمبر ١٩١١م في حي الجمالية بالقاهرة، لعائلةٍ من الطبقة المتوسطة، وكان والده موظفًا حكوميًّا، وقد اختار له اسمَ الطبيب الذي أشرَف على وِلادته، وهو الدكتور نجيب محفوظ باشا، ليصبح اسمُه مُركَّبًا نجيب محفوظ.", summary: "يُبدِع «نجيب محفوظ»، عميد الرواية العربية وفارس القصة القصيرة، في هذه المجموعة القصصية التي كانت أُولى تَجارِبه القصصية والتي ضمَّت ثمانيًا وعشرين قصة، في السرد عن الجنون بلغةٍ سلسة مُحكَمة وحكمةٍ مُتوارية في همساته؛ جنون الحب، جنون العظمة، جنون الجوع، جنون المال، الجنون المحض" }
 ];
 
 const translations = {
@@ -112,23 +112,55 @@ const translations = {
   }
 };
 
-// --- 2. المكونات الرسومية ---
-const ReflectionLayer = () => (
-  <div className="absolute inset-0 pointer-events-none z-20 overflow-hidden rounded-[inherit]">
-    <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-white/5 to-transparent opacity-40" />
-    <div className="absolute -top-[100%] -left-[100%] w-[300%] h-[300%] bg-[linear-gradient(45deg,transparent_45%,rgba(255,255,255,0.15)_50%,transparent_55%)] animate-[shine_10s_infinite] opacity-30" />
-  </div>
+// ==========================================
+// أيقونات SVG جذابة (بديلة للإيموجيز)
+// ==========================================
+const UserIcon = () => (
+  <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </svg>
 );
 
-const AudioWaveIcon = () => (
-    <div className="flex gap-[2px] items-end h-3">
-        <div className="w-[2px] bg-white/80 animate-audio-bar-1"></div>
-        <div className="w-[2px] bg-white/80 animate-audio-bar-2"></div>
-        <div className="w-[2px] bg-white/80 animate-audio-bar-3"></div>
-        <div className="w-[2px] bg-white/80 animate-audio-bar-2"></div>
-    </div>
+const SearchSvg = () => (
+  <svg className="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="8" />
+    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+  </svg>
 );
 
+const CloseSvg = () => (
+  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+);
+
+const RobotSvg = () => (
+  <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="11" width="18" height="10" rx="2" />
+    <circle cx="12" cy="5" r="2" />
+    <path d="M12 7v4" />
+    <line x1="8" y1="16" x2="8" y2="16" strokeWidth={4} />
+    <line x1="16" y1="16" x2="16" y2="16" strokeWidth={4} />
+  </svg>
+);
+
+const HeadphonesIcon = () => (
+  <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+    <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+  </svg>
+);
+
+const PlayIcon = () => (
+  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+);
+const PauseIcon = () => (
+  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" /></svg>
+);
+
+// --- مشغل الصوت ---
 const SaqrAudioPlayer: React.FC<{ audioSrc: string; t: any }> = ({ audioSrc, t }) => {
     const audioRef = useRef<HTMLAudioElement>(null);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -151,19 +183,21 @@ const SaqrAudioPlayer: React.FC<{ audioSrc: string; t: any }> = ({ audioSrc, t }
     };
 
     return (
-        <div className="mt-6 animate-fade-up">
-            <h4 className="text-xs font-semibold text-[#00732f] uppercase tracking-widest mb-3 flex items-center gap-2">🎧 {t('listen')}</h4>
-            <div className="p-4 md:p-5 rounded-[2rem] bg-slate-50/50 dark:bg-white/5 backdrop-blur-xl border border-white/20 shadow-sm flex items-center gap-4">
+        <div className="mt-8 animate-fade-in-up w-full max-w-lg mx-auto">
+            <h4 className="text-xs font-black text-rose-500 uppercase tracking-widest mb-3 flex items-center justify-center gap-2">
+                <HeadphonesIcon /> {t('listen')}
+            </h4>
+            <div className="p-4 md:p-5 rounded-[2rem] bg-rose-50 dark:bg-slate-800 border-4 border-rose-200 dark:border-rose-900/50 shadow-sm flex items-center gap-4">
                 <audio ref={audioRef} src={audioSrc} onTimeUpdate={() => setProgress((audioRef.current!.currentTime / audioRef.current!.duration) * 100)} onEnded={() => setIsPlaying(false)} />
-                <button onClick={togglePlay} className="w-12 h-12 shrink-0 rounded-full bg-[#00732f] text-white flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-all">
-                    {isPlaying ? <span className="text-xl">⏸</span> : <span className="text-xl ps-1">▶</span>}
+                <button onClick={togglePlay} className="w-12 h-12 shrink-0 rounded-full bg-rose-500 text-white flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-transform">
+                    {isPlaying ? <PauseIcon /> : <PlayIcon />}
                 </button>
                 <div className="flex-1">
-                    <div className="h-1 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                        <div className="h-full bg-red-600 transition-all duration-300" style={{ width: `${progress}%` }} />
+                    <div className="h-3 w-full bg-rose-200 dark:bg-slate-700 rounded-full overflow-hidden shadow-inner">
+                        <div className="h-full bg-rose-500 transition-all duration-300 rounded-full" style={{ width: `${progress}%` }} />
                     </div>
                 </div>
-                <button onClick={handleSpeed} className="px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-white text-[10px] font-semibold hover:bg-slate-300 transition-colors uppercase min-w-[45px]">{speed}x</button>
+                <button onClick={handleSpeed} className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 text-rose-600 dark:text-rose-400 text-[10px] font-black hover:bg-rose-100 transition-colors uppercase min-w-[45px] shadow-sm border-2 border-rose-200 dark:border-rose-900">{speed}x</button>
             </div>
         </div>
     );
@@ -174,43 +208,8 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
     const [ageGroup, setAgeGroup] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const [position, setPosition] = useState({ x: 0, y: 0 });
-    const dragging = useRef(false);
-    const offset = useRef({ x: 0, y: 0 });
-
-    const handleStart = (e: any) => {
-        dragging.current = true;
-        const clientX = e.clientX || e.touches[0].clientX;
-        const clientY = e.clientY || e.touches[0].clientY;
-        offset.current = { x: clientX - position.x, y: clientY - position.y };
-    };
-
-    const handleMove = (e: any) => {
-        if (!dragging.current) return;
-        const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-        const clientY = e.clientY || (e.touches && e.touches[0].clientY);
-        setPosition({ x: clientX - offset.current.x, y: clientY - offset.current.y });
-    };
-
-    const handleEnd = () => dragging.current = false;
-
     useEffect(() => {
-        if (book) {
-            window.addEventListener('mousemove', handleMove, { passive: false });
-            window.addEventListener('mouseup', handleEnd);
-            window.addEventListener('touchmove', handleMove, { passive: false });
-            window.addEventListener('touchend', handleEnd);
-        }
-        return () => {
-            window.removeEventListener('mousemove', handleMove);
-            window.removeEventListener('mouseup', handleEnd);
-            window.removeEventListener('touchmove', handleMove);
-            window.removeEventListener('touchend', handleEnd);
-        };
-    }, [book]);
-
-    useEffect(() => {
-        if (!book) { setPosition({ x: 0, y: 0 }); return; }
+        if (!book) return;
         setLoading(true);
         const fetchAgeGroup = async () => {
             try {
@@ -239,40 +238,33 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
     if (!book) return null;
 
     return (
-        <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 backdrop-blur-md bg-slate-900/60 animate-fade-in" onClick={onClose}>
+        <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300" onClick={onClose}>
             <div 
-                className="relative w-full max-w-3xl mx-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-[2.5rem] border border-white/20 shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] transition-transform duration-75 ease-out select-none"
-                style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
+                className="relative w-full max-w-3xl mx-auto bg-white dark:bg-slate-800 rounded-[3rem] border-8 border-amber-400 dark:border-slate-700 shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] animate-in zoom-in-95 duration-300 cursor-default"
                 onClick={(e) => e.stopPropagation()}
             >
-                <div 
-                    onMouseDown={handleStart} 
-                    onTouchStart={handleStart}
-                    className="absolute top-0 left-0 right-0 h-16 cursor-grab active:cursor-grabbing z-40 bg-transparent"
-                    style={{ touchAction: 'none' }}
-                    title="اسحب للتحريك"
-                />
-
-                <button onClick={onClose} className="absolute top-4 end-4 z-50 p-2 bg-slate-100/80 dark:bg-slate-800/80 hover:bg-red-600 hover:text-white rounded-full transition-all shadow-sm">
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path d="M6 18L18 6M6 6l12 12" /></svg>
+                <button onClick={onClose} className="absolute top-4 end-4 z-50 p-2 bg-rose-500 text-white rounded-full hover:bg-rose-600 transition-transform shadow-lg active:scale-90 active:translate-y-1">
+                    <CloseSvg />
                 </button>
 
-                <div className="flex-1 p-8 overflow-y-auto no-scrollbar text-start flex flex-col mt-4 md:mt-0">
-                    <h2 className="text-2xl md:text-3xl text-slate-950 dark:text-white font-semibold leading-tight mb-2">{book.title}</h2>
+                <div className="flex-1 p-8 overflow-y-auto scrollbar-thin text-start flex flex-col mt-4 md:mt-0">
+                    <h2 className="text-3xl md:text-4xl text-slate-900 dark:text-white font-black leading-tight mb-4">{book.title}</h2>
                     
-                    <div className="relative group/author inline-block mb-6 w-fit z-50">
-                        <p className="text-base text-[#00732f] font-medium cursor-help border-b border-dashed border-[#00732f]/50 pb-0.5">By {book.author}</p>
-                        <div className="absolute top-full mt-2 start-0 w-64 p-3 bg-slate-900 text-white text-xs rounded-xl opacity-0 invisible group-hover/author:opacity-100 group-hover/author:visible transition-all shadow-xl pointer-events-none">
-                            <strong className="block mb-1 text-red-400 font-medium">{t('bioLabel')}</strong>
-                            <span className="font-normal">{book.bio}</span>
+                    <div className="relative group/author inline-flex items-center gap-2 mb-8 bg-sky-50 dark:bg-slate-700 w-fit px-4 py-2 rounded-full border-2 border-sky-200 dark:border-slate-600 cursor-help">
+                        <UserIcon />
+                        <p className="text-base text-sky-600 dark:text-sky-400 font-bold">{book.author}</p>
+                        <div className="absolute top-full mt-2 start-0 w-64 p-4 bg-slate-900 text-white text-xs rounded-2xl opacity-0 invisible group-hover/author:opacity-100 group-hover/author:visible transition-all shadow-xl z-50 font-medium leading-relaxed">
+                            <strong className="block mb-2 text-sky-400 font-black uppercase">{t('bioLabel')}</strong>
+                            {book.bio}
                         </div>
                     </div>
                     
-                    <div className="bg-slate-50/50 dark:bg-white/5 p-6 rounded-[2rem] border border-white/20 shadow-inner text-start flex-grow">
-                        <div className="flex items-center gap-2 mb-3">
-                           <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-widest">{t('summaryLabel')}</p>
+                    <div className="bg-slate-50 dark:bg-slate-900 p-6 md:p-8 rounded-[2rem] border-4 border-slate-200 dark:border-slate-700 shadow-inner text-start flex-grow">
+                        <div className="flex items-center gap-2 mb-4">
+                           <span className="w-3 h-3 rounded-full bg-amber-500"></span>
+                           <p className="text-xs text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest">{t('summaryLabel')}</p>
                         </div>
-                        <p className="text-slate-700 dark:text-slate-200 text-sm md:text-base font-normal leading-relaxed">
+                        <p className="text-slate-700 dark:text-slate-200 text-base md:text-lg font-bold leading-relaxed">
                            {book.summary}
                         </p>
                     </div>
@@ -280,20 +272,22 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
                     {book.audioId && <SaqrAudioPlayer audioSrc={book.audioId} t={t} />}
                 </div>
 
-                <div className="w-full md:w-[280px] bg-slate-100/50 dark:bg-black/20 p-8 flex flex-col justify-center items-center border-t md:border-t-0 md:border-s border-slate-200 dark:border-white/10 shrink-0 relative z-30">
+                <div className="w-full md:w-[280px] bg-slate-100 dark:bg-slate-900/50 p-8 flex flex-col justify-center items-center border-t-4 md:border-t-0 md:border-s-4 border-slate-200 dark:border-slate-700 shrink-0">
                     <div className="w-full text-center space-y-6">
-                        <div className="bg-white/60 dark:bg-slate-800/60 p-5 rounded-2xl border border-white/30 shadow-sm">
-                            <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest mb-1">{t('subjectLabel')}</p>
-                            <p className="text-lg font-medium text-slate-900 dark:text-white truncate">{book.subject}</p>
+                        <div className="bg-white dark:bg-slate-800 p-5 rounded-[2rem] border-4 border-slate-200 dark:border-slate-600 shadow-sm">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{t('subjectLabel')}</p>
+                            <p className="text-xl font-black text-slate-900 dark:text-white truncate">{book.subject}</p>
                         </div>
                         
-                        <div className="bg-red-50 dark:bg-red-900/20 p-5 rounded-2xl border border-red-100 dark:border-red-900/30 shadow-sm">
-                            <p className="text-[10px] font-medium text-red-400 uppercase tracking-widest mb-1">{t('ageClassification')}</p>
-                            <p className="text-xl font-semibold text-red-600 truncate">{loading ? '...' : (ageGroup || 'عام')}</p>
+                        <div className="bg-rose-50 dark:bg-slate-800 p-5 rounded-[2rem] border-4 border-rose-200 dark:border-slate-600 shadow-sm">
+                            <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest mb-2">{t('ageClassification')}</p>
+                            <p className="text-2xl font-black text-rose-600 truncate">{loading ? '...' : (ageGroup || 'عام')}</p>
                         </div>
 
-                        <div className="space-y-3 pt-6">
-                            <a href={book.driveLink} target="_blank" rel="noreferrer" className="w-full block bg-[#00732f] text-white font-medium py-3.5 rounded-2xl hover:bg-green-700 transition-all text-center uppercase tracking-widest text-sm shadow-md shadow-green-900/20">{t('read')}</a>
+                        <div className="pt-6">
+                            <a href={book.driveLink} target="_blank" rel="noreferrer" className="w-full block bg-emerald-500 text-white font-black py-4 rounded-[2rem] hover:-translate-y-1 active:translate-y-2 border-b-8 border-emerald-700 active:border-b-0 transition-all text-center uppercase tracking-widest text-base shadow-md">
+                                {t('read')}
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -302,62 +296,63 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
     );
 };
 
-// --- 4. Component: BookCard (مع إضافة الناشر) ---
+// --- 4. Component: BookCard (Realistic Book Design) ---
 const BookCard = React.memo(({ book, onClick, t }: { book: any; onClick: () => void; t: any }) => {
   const isAi = !book.subject || book.subject === "Unknown";
   const hasAudio = !!book.audioId;
 
-  const themeColor = (hasAudio || isAi) ? 'bg-red-600' : 'bg-[#00732f]';
-  const borderColor = hasAudio ? 'border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.1)]' : 'border-white/30 dark:border-white/10';
+  // توليد لون عشوائي للغلاف بناءً على الحرف الأول
+  const colors = [
+    'from-blue-500 to-blue-700 border-blue-800',
+    'from-emerald-500 to-emerald-700 border-emerald-800',
+    'from-rose-500 to-rose-700 border-rose-800',
+    'from-amber-500 to-amber-600 border-amber-700',
+    'from-purple-500 to-purple-700 border-purple-800'
+  ];
+  const colorClass = colors[book.title.length % colors.length];
 
   return (
-    <div onClick={onClick} className="group relative glass-panel rounded-[2rem] p-0.5 cursor-pointer transition-all duration-500 hover:-translate-y-2 h-full active:scale-[0.98] shadow-sm hover:shadow-xl">
-      <div className={`relative overflow-hidden rounded-[1.9rem] bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl h-full flex flex-col border transition-all duration-500 ${borderColor}`}>
+    <div onClick={onClick} className="relative group cursor-pointer w-full h-[320px] perspective-1000 flex items-end justify-center pb-2">
+      {/* تصميم الكتاب الواقعي */}
+      <div className={`book-volume w-[90%] h-full relative transform-style-3d transition-transform duration-500 group-hover:rotate-y-[-15deg] group-hover:-translate-y-4 group-hover:scale-105 rounded-r-2xl border-l-[16px] shadow-[-10px_10px_20px_rgba(0,0,0,0.15)] bg-gradient-to-br ${colorClass}`}>
         
-        <ReflectionLayer />
-        
-        <div className={`absolute top-0 start-0 w-1.5 h-full z-30 transition-all duration-500 ${themeColor}`} />
+        {/* الغلاف الأمامي */}
+        <div className="absolute inset-0 flex flex-col p-5 overflow-hidden rounded-r-2xl">
+          <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-black/20 pointer-events-none"></div>
 
-        <div className="p-6 relative z-10 flex-grow text-start flex flex-col">
-          <div className="flex justify-between items-start mb-4">
-              <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-medium uppercase tracking-wider border border-white/20 shadow-sm text-white ${themeColor}`}>
-                 {book.subject}
-              </span>
-              {hasAudio && (
-                <div className="bg-red-600 p-1.5 rounded-full shadow-md animate-pulse">
-                  <AudioWaveIcon />
-                </div>
-              )}
+          <div className="mb-auto mt-2 flex justify-between items-start">
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-white/20 text-white backdrop-blur-sm border border-white/30 shadow-sm max-w-[70%]`}>
+               {isAi && <RobotSvg />}
+               <span className="truncate">{isAi ? t('aiSubject') : book.subject}</span>
+            </span>
+            {hasAudio && (
+              <div className="bg-white/20 backdrop-blur-sm p-1.5 rounded-full border border-white/30 text-white animate-pulse">
+                <HeadphonesIcon />
+              </div>
+            )}
           </div>
           
-          <h3 className={`font-semibold text-lg text-slate-900 dark:text-white leading-tight mb-3 transition-colors line-clamp-3 ${hasAudio ? 'group-hover:text-red-600' : 'group-hover:text-[#00732f]'}`}>
-              {book.title}
-          </h3>
-          
-          <div className="mt-auto pt-2">
-              <div className="relative group/author inline-block" onClick={(e) => e.stopPropagation()}>
-                  <div className="flex items-center gap-2 opacity-80 cursor-help border-b border-transparent hover:border-slate-400 pb-0.5 transition-all">
-                      <span className="text-sm">👤</span>
-                      <p className="text-[12px] font-medium truncate uppercase tracking-wide">{book.author}</p>
-                  </div>
-                  <div className="absolute bottom-full mb-2 start-0 w-48 p-3 bg-slate-900 text-white text-[11px] leading-relaxed rounded-xl opacity-0 invisible group-hover/author:opacity-100 group-hover/author:visible transition-all duration-300 shadow-xl z-50 pointer-events-none font-normal">
-                      <strong className="block text-red-400 mb-1 font-medium">{t('bioLabel')}</strong>
-                      {book.bio}
-                      <div className="absolute top-full start-4 border-4 border-transparent border-t-slate-900" />
-                  </div>
-              </div>
+          <div className="relative z-10 flex-1 flex flex-col justify-center">
+            <h3 className="font-black text-lg md:text-xl text-white leading-snug drop-shadow-md line-clamp-3 mb-3">
+                {book.title}
+            </h3>
+            <div className="flex items-center gap-2 text-white/80 mt-auto mb-2">
+                <UserIcon />
+                <p className="text-xs font-bold truncate uppercase">{book.author}</p>
+            </div>
           </div>
         </div>
 
-        {/* إضافة قسم الناشر مع الاحتفاظ بالتصميم الأصلي */}
-        <div className="bg-slate-50/50 dark:bg-black/20 py-4 px-6 border-t border-slate-200/50 dark:border-white/10 flex items-center justify-between relative z-10 backdrop-blur-md">
-            <div className="flex flex-col">
-                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Publisher</span>
-                <span className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate max-w-[120px]">{book.publisher || "Unknown"}</span>
-            </div>
-            <div className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all shrink-0 ${hasAudio ? 'group-hover:border-red-600 group-hover:bg-red-50 text-red-600' : 'group-hover:border-[#00732f] group-hover:bg-green-50 text-slate-400'}`}>
-              <span className="text-[10px]">➔</span>
-            </div>
+        {/* كعب الكتاب */}
+        <div className="absolute top-0 left-[-16px] w-[16px] h-full bg-black/30 origin-right transform rotate-y-90 flex flex-col items-center justify-between py-6">
+           <div className="w-full h-1 bg-white/30"></div>
+           <div className="text-[10px] text-white/50 font-black -rotate-90 tracking-widest">{book.publisher?.substring(0, 10)}</div>
+           <div className="w-full h-1 bg-white/30"></div>
+        </div>
+
+        {/* صفحات الكتاب */}
+        <div className="absolute top-2 right-[-6px] w-[6px] h-[calc(100%-4px)] bg-[#fdfbf7] origin-left transform rotate-y-[-90deg] rounded-r-sm shadow-inner border-y border-r border-[#e2e8f0]">
+           <div className="w-full h-full bg-[repeating-linear-gradient(transparent,transparent_2px,#e2e8f0_2px,#e2e8f0_3px)] opacity-50"></div>
         </div>
       </div>
     </div>
@@ -368,7 +363,6 @@ const BookCard = React.memo(({ book, onClick, t }: { book: any; onClick: () => v
 const ArabicLibraryInternalPage: React.FC = () => {
     const { locale, dir } = useLanguage();
     const navigate = useNavigate();
-    // تأكدنا من استخدام المفاتيح الصحيحة للترجمة بناءً على الـ locale الحالي
     const t = (key: keyof typeof translations.ar) => translations[locale as keyof typeof translations]?.[key] as string;
     
     const [searchTerm, setSearchTerm] = useState('');
@@ -419,95 +413,132 @@ const ArabicLibraryInternalPage: React.FC = () => {
     }, [searchTerm, subjectFilter, authorFilter, audioOnly, sortBy, locale]);
 
     return (
-        <div dir={dir} className="max-w-7xl mx-auto px-4 md:px-6 pb-20 relative z-10 antialiased overflow-x-hidden">
+        <div dir={dir} className="w-full min-h-screen bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300">
             
-            <div className="text-center mt-12 mb-16 animate-fade-up">
-                <button onClick={() => navigate(-1)} className="absolute start-0 top-1/2 -translate-y-1/2 text-slate-500 hover:text-red-600 font-medium flex items-center gap-2 transition-all"><span className="text-xl">←</span> {t('back')}</button>
-                <h1 className="text-3xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tight">{t('pageTitle')}</h1>
-                <div className="flex justify-center gap-2 mt-4"><div className="w-12 h-1 bg-red-600 rounded-full" /><div className="w-12 h-1 bg-[#00732f] rounded-full" /></div>
+            {/* 🌟 تصميم طفولي للخلفية */}
+            <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-50 dark:opacity-20">
+               <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-400/20 rounded-full blur-[100px] animate-blob"></div>
+               <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-amber-400/20 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
             </div>
 
-            <div className={`sticky z-[100] transition-all duration-500 ease-in-out ${showSearch ? 'top-6 opacity-100 translate-y-0' : '-top-40 opacity-0 -translate-y-full'} mb-12`}>
-                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-3xl border border-white/40 dark:border-white/10 shadow-lg rounded-[2rem] p-4 md:p-5">
-                    <div className="flex flex-col gap-4">
-                        <div className="relative">
-                            <input 
-                              type="text" 
-                              placeholder={t('searchPlaceholder')} 
-                              className="w-full p-4 ps-12 bg-white/60 dark:bg-black/40 text-slate-900 dark:text-white border-2 border-transparent focus:border-red-500 rounded-xl outline-none transition-all text-base font-medium shadow-inner" 
-                              value={searchTerm}
-                              onChange={(e) => setSearchTerm(e.target.value)} 
-                            />
-                            <svg className="absolute start-4 top-1/2 -translate-y-1/2 h-5 w-5 text-red-600 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                        </div>
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                            <select value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)} className="p-3 rounded-lg bg-slate-100 dark:bg-slate-800 font-medium text-sm outline-none cursor-pointer hover:bg-white transition-all text-slate-700 dark:text-slate-200">
-                                <option value="all">{t('allAuthors')}</option>
-                                {filters.authors.map(a => <option key={a} value={a}>{a}</option>)}
-                            </select>
-                            <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="p-3 rounded-lg bg-slate-100 dark:bg-slate-800 font-medium text-sm outline-none cursor-pointer hover:bg-white transition-all text-slate-700 dark:text-slate-200">
-                                <option value="all">{t('allSubjects')}</option>
-                                {filters.subjects.map(s => <option key={s} value={s}>{s}</option>)}
-                            </select>
-                            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="p-3 rounded-lg bg-slate-100 dark:bg-slate-800 font-medium text-sm outline-none cursor-pointer hover:bg-white transition-all text-slate-700 dark:text-slate-200">
-                                <option value="alphabetical">{t('alphabetical')}</option>
-                                <option value="audio">{t('audioSort')}</option>
-                            </select>
-                            <button onClick={() => setAudioOnly(!audioOnly)} className={`p-3 rounded-lg font-medium text-sm transition-all shadow-sm ${audioOnly ? 'bg-red-600 text-white animate-pulse' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700'}`}>
-                                🎧 {t('audioOnly')}
-                            </button>
+            <div className="max-w-[1400px] mx-auto px-4 md:px-6 pb-20 relative z-10 antialiased overflow-x-hidden">
+                
+                {/* العنوان والزر */}
+                <div className="text-center mt-12 mb-16 relative">
+                    <button onClick={() => navigate(-1)} className="absolute start-0 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-800 text-slate-800 dark:text-white px-5 py-2.5 rounded-full font-black text-sm hover:bg-slate-200 hover:-translate-x-1 active:translate-y-1 border-b-4 border-slate-300 dark:border-slate-700 active:border-b-0 transition-all flex items-center gap-2 shadow-sm">
+                        <span className="text-xl leading-none rtl:rotate-180">←</span> {t('back')}
+                    </button>
+                    <h1 className="text-4xl md:text-6xl font-black text-slate-800 dark:text-white tracking-tight uppercase">{t('pageTitle')}</h1>
+                    <div className="flex justify-center gap-3 mt-6">
+                        <div className="w-16 h-2 bg-emerald-500 rounded-full" />
+                        <div className="w-8 h-2 bg-amber-400 rounded-full" />
+                    </div>
+                </div>
+
+                {/* شريط البحث المبهج */}
+                <div className={`sticky z-[100] transition-all duration-500 ease-in-out ${showSearch ? 'top-4 md:top-6 opacity-100 translate-y-0' : '-top-40 opacity-0 -translate-y-full'} mb-16`}>
+                    <div className="bg-white dark:bg-slate-800 p-5 md:p-8 rounded-[3rem] border-4 border-emerald-300 dark:border-emerald-600 shadow-xl max-w-5xl mx-auto">
+                        <div className="flex flex-col gap-5">
+                            <div className="relative group">
+                                <input 
+                                  type="text" 
+                                  placeholder={t('searchPlaceholder')} 
+                                  className="w-full p-4 md:p-5 ps-14 md:ps-16 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white border-4 border-slate-200 dark:border-slate-700 focus:border-emerald-400 rounded-[2rem] outline-none transition-colors text-base md:text-lg font-black shadow-inner" 
+                                  value={searchTerm}
+                                  onChange={(e) => setSearchTerm(e.target.value)} 
+                                />
+                                <div className="absolute start-5 md:start-6 top-1/2 -translate-y-1/2 text-emerald-500">
+                                    <SearchSvg />
+                                </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                                <select value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)} className="w-full p-3 md:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 font-black text-xs md:text-sm cursor-pointer appearance-none text-center hover:border-emerald-400 transition-colors outline-none focus:border-emerald-500 text-slate-700 dark:text-slate-200">
+                                    <option value="all">{t('allAuthors')}</option>
+                                    {filters.authors.map(a => <option key={a} value={a}>{a}</option>)}
+                                </select>
+                                <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="w-full p-3 md:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 font-black text-xs md:text-sm cursor-pointer appearance-none text-center hover:border-emerald-400 transition-colors outline-none focus:border-emerald-500 text-slate-700 dark:text-slate-200">
+                                    <option value="all">{t('allSubjects')}</option>
+                                    {filters.subjects.map(s => <option key={s} value={s}>{s}</option>)}
+                                </select>
+                                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="w-full p-3 md:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 font-black text-xs md:text-sm cursor-pointer appearance-none text-center hover:border-emerald-400 transition-colors outline-none focus:border-emerald-500 text-slate-700 dark:text-slate-200">
+                                    <option value="alphabetical">{t('alphabetical')}</option>
+                                    <option value="audio">{t('audioSort')}</option>
+                                </select>
+                                <button onClick={() => setAudioOnly(!audioOnly)} className={`w-full p-3 md:p-4 rounded-2xl font-black text-xs md:text-sm transition-all border-b-4 active:border-b-0 active:translate-y-1 flex items-center justify-center gap-2 ${audioOnly ? 'bg-rose-500 text-white border-rose-700 animate-pulse' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 border-2'}`}>
+                                    <HeadphonesIcon /> {t('audioOnly')}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            {/* 👇 2. هنا تم إضافة التتبع عند الضغط على الكتاب */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
-                {filteredBooks.slice(0, visibleCount).map((book) => (
-                    <BookCard 
-                        key={book.id} 
-                        book={book} 
-                        t={t} 
-                        onClick={() => {
-                            setSelectedBook(book);
-                            trackActivity('digital', book.title); // السطر المضاف لإرسال التفاعل
-                        }} 
-                    />
-                ))}
-            </div>
-
-            {filteredBooks.length === 0 && (
-                <div className="py-20 text-center opacity-40">
-                    <span className="text-5xl mb-4 block">📚</span>
-                    <p className="text-xl font-medium text-slate-500">{t('noResults')}</p>
+                {/* عرض الكتب كأرفف مكتبة حقيقية */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-y-12 gap-x-4 md:gap-x-8 px-2 md:px-8">
+                    {filteredBooks.slice(0, visibleCount).map((book) => (
+                        <div key={book.id} className="relative">
+                           <BookCard 
+                               book={book} 
+                               t={t} 
+                               onClick={() => {
+                                   setSelectedBook(book); 
+                                   trackActivity('digital', book.title); 
+                               }} 
+                           />
+                           {/* خط الرف الخشبي أسفل الكتاب */}
+                           <div className="absolute -bottom-2 w-[110%] -left-[5%] h-4 bg-[#8B4513] rounded-sm shadow-md border-b-4 border-[#5C2E0B] -z-10"></div>
+                        </div>
+                    ))}
                 </div>
-            )}
 
-            {filteredBooks.length > visibleCount && (
-                <div className="mt-16 text-center">
-                    <button onClick={() => setVisibleCount(v => v + 16)} className="bg-[#00732f] text-white px-10 py-3.5 rounded-full font-medium text-base hover:bg-red-600 hover:scale-105 transition-all shadow-lg active:scale-95">
-                        EXPLORE MORE BOOKS
-                    </button>
-                </div>
-            )}
+                {filteredBooks.length === 0 && (
+                    <div className="py-20 text-center text-slate-400 dark:text-slate-600 flex flex-col items-center">
+                        <svg className="w-24 h-24 mb-6 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p className="text-3xl font-black">{t('noResults')}</p>
+                    </div>
+                )}
 
-            <BookModal book={selectedBook} onClose={() => setSelectedBook(null)} t={t} />
+                {filteredBooks.length > visibleCount && (
+                    <div className="mt-20 text-center">
+                        <button 
+                            onClick={() => setVisibleCount(prev => prev + 16)} 
+                            className="bg-emerald-500 text-white px-10 py-4 rounded-full font-black text-lg md:text-xl border-b-8 border-emerald-700 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all shadow-md uppercase tracking-widest"
+                        >
+                            EXPLORE MORE
+                        </button>
+                    </div>
+                )}
+
+                <BookModal book={selectedBook} onClose={() => setSelectedBook(null)} t={t} />
+
+            </div>
 
             <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600&display=swap');
-                * { font-family: 'Cairo', sans-serif !important; font-style: normal !important; }
-                .no-scrollbar::-webkit-scrollbar { display: none; }
+                @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
+                * { font-family: 'Cairo', sans-serif !important; }
+                .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+                .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+                .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+                .dark .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; }
                 
-                @keyframes zoom-in-custom {
-                  0% { opacity: 0; transform: scale(0.9) translateY(20px); }
-                  100% { opacity: 1; transform: scale(1) translateY(0); }
+                /* إعدادات الشكل ثلاثي الأبعاد للكتاب */
+                .perspective-1000 { perspective: 1000px; }
+                .transform-style-3d { transform-style: preserve-3d; }
+                .rotate-y-90 { transform: rotateY(90deg); }
+                .-rotate-y-15 { transform: rotateY(-15deg); }
+                
+                @keyframes blob {
+                  0% { transform: translate(0px, 0px) scale(1); }
+                  33% { transform: translate(30px, -50px) scale(1.1); }
+                  66% { transform: translate(-20px, 20px) scale(0.9); }
+                  100% { transform: translate(0px, 0px) scale(1); }
                 }
-                .animate-zoom-in { animation: zoom-in-custom 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+                .animate-blob { animation: blob 7s infinite alternate ease-in-out; }
                 
-                @keyframes audio-bar { 0%, 100% { height: 4px; } 50% { height: 12px; } }
-                .animate-audio-bar-1 { animation: audio-bar 0.6s ease-in-out infinite; }
-                .animate-audio-bar-2 { animation: audio-bar 0.8s ease-in-out infinite 0.2s; }
-                .animate-audio-bar-3 { animation: audio-bar 0.7s ease-in-out infinite 0.4s; }
+                @keyframes fade-in-up { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+                .animate-fade-in-up { animation: fade-in-up 0.5s ease-out forwards; }
             `}</style>
         </div>
     );
