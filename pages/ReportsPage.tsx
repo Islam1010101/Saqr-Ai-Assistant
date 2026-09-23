@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../App';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../src/utils/firebase'; 
 
 const translations = {
@@ -10,21 +10,17 @@ const translations = {
         passPlaceholder: "الرمز السري",
         authBtn: "دخول النظام",
         printReport: "طباعة التقرير المعتمد",
-        searchedBooks: "أكثر الكتب بحثاً",
+        searchedBooks: "أكثر الكتب بحثاً في الفهرس",
         digitalReads: "تفاعل المكتبة الرقمية",
-        aiQuestions: "تحليل ذكاء صقر",
-        challengeResults: "سجل أبطال التحدي",
-        studentName: "اسم الطالب",
-        activityLabel: "النشاط",
-        contentLabel: "المحتوى الإبداعي",
-        dateLabel: "التاريخ",
-        viewBtn: "استعراض الإبداع",
-        librarian: "أمين المكتبة المعتمد",
-        signature: "توقيع الإدارة المدرسية",
+        aiQuestions: "تحليل ذكاء صقر AI",
         errorPass: "الرمز السري غير صحيح!",
-        gradeLabel: "الصف",
-        emailLabel: "البريد الإلكتروني",
-        loading: "جاري تحميل البيانات..."
+        loading: "جاري تحميل البيانات السحابية...",
+        schoolNameAr: "مدرسة صقر الإمارات الدولية الخاصة",
+        schoolNameEn: "Emirates Falcon International Private School",
+        reportHeader: "التقرير الإحصائي المعتمد لأنظمة المكتبة الذكية",
+        librarian: "أمين المكتبة: إسلام سليمان",
+        signature: "اعتماد الإدارة المدرسية",
+        datePrint: "تاريخ الإصدار:"
     },
     en: {
         pageTitle: "EFIPS Smart Intelligence Reports",
@@ -35,23 +31,19 @@ const translations = {
         searchedBooks: "Most Searched Titles",
         digitalReads: "Digital Engagement",
         aiQuestions: "Saqr AI Intel",
-        challengeResults: "Challenge Champions",
-        studentName: "Student Name",
-        activityLabel: "Activity",
-        contentLabel: "Creative Content",
-        dateLabel: "Date",
-        viewBtn: "View Creation",
-        librarian: "Certified Librarian",
-        signature: "Management Signature",
         errorPass: "Invalid Pin Code!",
-        gradeLabel: "Grade",
-        emailLabel: "Email",
-        loading: "Loading Data..."
+        loading: "Loading Cloud Data...",
+        schoolNameAr: "مدرسة صقر الإمارات الدولية الخاصة",
+        schoolNameEn: "Emirates Falcon International Private School",
+        reportHeader: "Certified Statistical Report for Smart Library Systems",
+        librarian: "Librarian: Islam Soliman",
+        signature: "Management Signature",
+        datePrint: "Issue Date:"
     }
 };
 
 // ==========================================
-// أيقونات SVG جذابة للمرح واللعب
+// أيقونات SVG جذابة
 // ==========================================
 const LockIcon = () => (
   <svg className="w-16 h-16 md:w-20 md:h-20 text-rose-500 mb-6 drop-shadow-md" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
@@ -89,73 +81,69 @@ const ReportsPage: React.FC = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isLoadingData, setIsLoadingData] = useState(false);
     
-    const [stats, setStats] = useState({ searched: [] as any[], digital: [] as any[], ai: [] as any[] });
-
-    // --- بيانات افتراضية مبهجة في حال لم يكن هناك بيانات من قاعدة البيانات ---
-    const defaultStats = {
+    const [stats, setStats] = useState({ 
         searched: [
             { label: isAr ? 'أرض زيكولا' : 'Zikola Land', value: 85, color: 'bg-rose-500' },
             { label: isAr ? 'هاري بوتر' : 'Harry Potter', value: 75, color: 'bg-rose-500' },
             { label: isAr ? 'كليلة ودمنة' : 'Kalila & Dimna', value: 60, color: 'bg-rose-500' },
             { label: isAr ? 'أماريتا' : 'Amarita', value: 40, color: 'bg-rose-500' },
             { label: isAr ? 'عالمي الصغير' : 'My Little World', value: 30, color: 'bg-rose-500' }
-        ],
+        ], 
         digital: [
             { label: isAr ? 'المكتبة العربية' : 'Arabic Library', value: 90, color: 'bg-emerald-500' },
             { label: isAr ? 'المكتبة الإنجليزية' : 'English Library', value: 65, color: 'bg-emerald-500' },
             { label: isAr ? 'قصص الأنبياء' : 'Prophets Stories', value: 50, color: 'bg-emerald-500' },
             { label: isAr ? 'موسوعة العلوم' : 'Science Encyclopedia', value: 35, color: 'bg-emerald-500' }
-        ],
+        ], 
         ai: [
             { label: isAr ? 'تأليف قصة خيالية' : 'Writing a Fantasy Story', value: 80, color: 'bg-sky-500' },
             { label: isAr ? 'تلخيص كتاب' : 'Book Summary', value: 70, color: 'bg-sky-500' },
             { label: isAr ? 'أسئلة علمية' : 'Scientific Questions', value: 55, color: 'bg-sky-500' },
             { label: isAr ? 'شرح قاعدة لغوية' : 'Grammar Explanation', value: 45, color: 'bg-sky-500' }
-        ]
-    };
+        ] 
+    });
 
     const fetchCloudData = async () => {
         setIsLoadingData(true);
         try {
-            // محاولة جلب السجلات الحقيقية
             const logsSnapshot = await getDocs(collection(db, 'activity_logs'));
-            const logs = logsSnapshot.docs.map(doc => doc.data());
-            
-            const counts: any = { searched: {}, digital: {}, ai: {} };
-            logs.forEach((log: any) => {
-                if (log.type && counts[log.type]) {
-                    counts[log.type][log.label] = (counts[log.type][log.label] || 0) + 1;
+            if (!logsSnapshot.empty) {
+                const logs = logsSnapshot.docs.map(doc => doc.data());
+                
+                const counts: any = { searched: {}, digital: {}, ai: {} };
+                logs.forEach((log: any) => {
+                    if (log.type && counts[log.type]) {
+                        counts[log.type][log.label] = (counts[log.type][log.label] || 0) + 1;
+                    }
+                });
+
+                const formatToStats = (data: any, defaultColor: string) => {
+                    const total = Object.values(data).reduce((a: any, b: any) => a + b, 0) as number;
+                    return Object.entries(data)
+                        .map(([label, val]: any) => ({
+                            label,
+                            value: total > 0 ? Math.round((val / total) * 100) : 0,
+                            color: defaultColor,
+                            count: val
+                        }))
+                        .sort((a, b) => b.count - a.count)
+                        .slice(0, 5); 
+                };
+
+                const realSearched = formatToStats(counts.searched, "bg-rose-500");
+                const realDigital = formatToStats(counts.digital, "bg-emerald-500");
+                const realAi = formatToStats(counts.ai, "bg-sky-500");
+
+                if (realSearched.length > 0 || realDigital.length > 0 || realAi.length > 0) {
+                    setStats({
+                        searched: realSearched.length > 0 ? realSearched : stats.searched,
+                        digital: realDigital.length > 0 ? realDigital : stats.digital,
+                        ai: realAi.length > 0 ? realAi : stats.ai
+                    });
                 }
-            });
-
-            const formatToStats = (data: any, defaultColor: string) => {
-                const total = Object.values(data).reduce((a: any, b: any) => a + b, 0) as number;
-                return Object.entries(data)
-                    .map(([label, val]: any) => ({
-                        label,
-                        value: total > 0 ? Math.round((val / total) * 100) : 0,
-                        color: defaultColor,
-                        count: val
-                    }))
-                    .sort((a, b) => b.count - a.count)
-                    .slice(0, 5); 
-            };
-
-            const realSearched = formatToStats(counts.searched, "bg-rose-500");
-            const realDigital = formatToStats(counts.digital, "bg-emerald-500");
-            const realAi = formatToStats(counts.ai, "bg-sky-500");
-
-            // في حال عدم توفر بيانات كافية نستخدم البيانات الافتراضية لعرض التصميم الجميل
-            setStats({
-                searched: realSearched.length > 0 ? realSearched : defaultStats.searched,
-                digital: realDigital.length > 0 ? realDigital : defaultStats.digital,
-                ai: realAi.length > 0 ? realAi : defaultStats.ai
-            });
-
+            }
         } catch (error) { 
-            console.log(error); 
-            // في حال وجود خطأ بالاتصال، تظهر البيانات الافتراضية الجمالية
-            setStats(defaultStats);
+            console.log("Using cached stats:", error); 
         } finally { 
             setIsLoadingData(false); 
         }
@@ -170,7 +158,11 @@ const ReportsPage: React.FC = () => {
         else { setPassword(''); alert(t('errorPass')); }
     };
 
-    // --- شاشة تسجيل الدخول السري (بأسلوب الألعاب) ---
+    const handlePrint = () => {
+        window.print();
+    };
+
+    // --- شاشة تسجيل الدخول السري ---
     if (!isAuthenticated) {
         return (
             <div dir={dir} className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 flex flex-col items-center justify-center p-4 relative overflow-hidden transition-colors duration-300">
@@ -196,7 +188,7 @@ const ReportsPage: React.FC = () => {
         );
     }
 
-    // --- شاشة التحميل المبهجة ---
+    // --- شاشة التحميل ---
     if (isLoadingData) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center bg-[#f8fafc] dark:bg-slate-950 relative overflow-hidden">
@@ -206,17 +198,89 @@ const ReportsPage: React.FC = () => {
         );
     }
 
-    // --- واجهة لوحة التحكم الرئيسية ---
+    // --- واجهة لوحة التحكم والتقارير (مع قالب الطباعة A4 المخصص) ---
     return (
         <div dir={dir} className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 pt-24 pb-20 px-4 md:px-8 font-sans relative overflow-x-hidden transition-colors duration-300">
             
-            {/* خلفية ديناميكية */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-50 dark:opacity-20">
                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-400/20 rounded-full blur-[100px] animate-blob"></div>
                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-sky-400/20 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
             </div>
 
-            <div className="max-w-[1400px] mx-auto animate-fade-in-up">
+            {/* قالب الطباعة الخاص بحجم A4 (يظهر فقط عند الطباعة) */}
+            <div id="printable-report" className="hidden print:flex flex-col bg-white text-slate-900 p-8 w-[210mm] min-h-[297mm] mx-auto box-border">
+                {/* رأس الصفحة الرسمية للطباعة */}
+                <div className="flex justify-between items-center border-b-4 border-slate-900 pb-6 mb-8">
+                    <div className="flex items-center gap-4">
+                        <img src="https://www.efipslibrary.online/school-logo.png" alt="EFIPS Logo" className="w-20 h-20 object-contain" crossOrigin="anonymous" />
+                        <div>
+                            <h2 className="text-xl font-black text-slate-900">{t('schoolNameAr')}</h2>
+                            <p className="text-xs font-bold text-slate-600 uppercase tracking-wide">{t('schoolNameEn')}</p>
+                        </div>
+                    </div>
+                    <div className="text-left">
+                        <p className="text-xs font-bold text-slate-500">{t('datePrint')} {new Date().toLocaleDateString()}</p>
+                    </div>
+                </div>
+
+                <div className="text-center mb-10">
+                    <h1 className="text-2xl font-black uppercase text-slate-900 border-2 border-slate-900 py-3 px-6 inline-block rounded-xl">{t('reportHeader')}</h1>
+                </div>
+
+                {/* محتوى التقارير للطباعة */}
+                <div className="grid grid-cols-1 gap-6 flex-1">
+                    <div className="border-2 border-slate-300 p-6 rounded-2xl">
+                        <h3 className="text-lg font-black mb-4 border-b pb-2">{t('searchedBooks')}</h3>
+                        <ul className="space-y-3">
+                            {stats.searched.map((s: any, i: number) => (
+                                <li key={i} className="flex justify-between font-bold text-sm">
+                                    <span>{i + 1}. {s.label}</span>
+                                    <span>{s.value}%</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    <div className="border-2 border-slate-300 p-6 rounded-2xl">
+                        <h3 className="text-lg font-black mb-4 border-b pb-2">{t('digitalReads')}</h3>
+                        <ul className="space-y-3">
+                            {stats.digital.map((s: any, i: number) => (
+                                <li key={i} className="flex justify-between font-bold text-sm">
+                                    <span>{i + 1}. {s.label}</span>
+                                    <span>{s.value}%</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    <div className="border-2 border-slate-300 p-6 rounded-2xl">
+                        <h3 className="text-lg font-black mb-4 border-b pb-2">{t('aiQuestions')}</h3>
+                        <ul className="space-y-3">
+                            {stats.ai.map((s: any, i: number) => (
+                                <li key={i} className="flex justify-between font-bold text-sm">
+                                    <span>{i + 1}. {s.label}</span>
+                                    <span>{s.value}%</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+
+                {/* التوقيعات الرسمية أسفل التقرير المطبوع */}
+                <div className="flex justify-between items-end mt-16 pt-8 border-t-2 border-slate-300">
+                    <div className="text-center">
+                        <p className="font-black text-sm mb-8">{t('librarian')}</p>
+                        <div className="w-48 border-b border-slate-400"></div>
+                    </div>
+                    <div className="text-center">
+                        <p className="font-black text-sm mb-8">{t('signature')}</p>
+                        <div className="w-48 border-b border-slate-400"></div>
+                    </div>
+                </div>
+            </div>
+
+            {/* الواجهة المعروضة على الموقع */}
+            <div className="max-w-[1400px] mx-auto animate-fade-in-up print:hidden">
                 
                 <div className="text-center mb-16 relative">
                     <h1 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tight uppercase">{t('pageTitle')}</h1>
@@ -227,7 +291,6 @@ const ReportsPage: React.FC = () => {
                     </div>
                 </div>
                 
-                {/* شبكة الإحصائيات المبهجة بأسلوب الكروت الصلبة */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     
                     {/* 1. أكثر الكتب بحثاً */}
@@ -296,7 +359,7 @@ const ReportsPage: React.FC = () => {
                 </div>
 
                 <div className="mt-16 text-center">
-                    <button className="bg-slate-800 dark:bg-white text-white dark:text-slate-900 px-10 py-5 rounded-[2rem] font-black text-lg md:text-xl border-b-8 border-slate-950 dark:border-slate-300 active:border-b-0 active:translate-y-2 transition-all shadow-md uppercase tracking-widest hover:-translate-y-1">
+                    <button onClick={handlePrint} className="bg-slate-800 dark:bg-white text-white dark:text-slate-900 px-10 py-5 rounded-[2rem] font-black text-lg md:text-xl border-b-8 border-slate-950 dark:border-slate-300 active:border-b-0 active:translate-y-2 transition-all shadow-md uppercase tracking-widest hover:-translate-y-1">
                         {t('printReport')}
                     </button>
                 </div>
@@ -306,6 +369,23 @@ const ReportsPage: React.FC = () => {
                 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
                 * { font-family: 'Cairo', sans-serif !important; }
                 
+                @media print {
+                    body {
+                        background: white !important;
+                        color: black !important;
+                    }
+                    .print\\:hidden {
+                        display: none !important;
+                    }
+                    .print\\:flex {
+                        display: flex !important;
+                    }
+                    @page {
+                        size: A4;
+                        margin: 10mm;
+                    }
+                }
+
                 @keyframes blob {
                   0% { transform: translate(0px, 0px) scale(1); }
                   33% { transform: translate(30px, -50px) scale(1.1); }
