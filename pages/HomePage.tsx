@@ -10,32 +10,34 @@ const translations = {
     newsContent: "بإمكانك الآن الاطلاع على المكتبة الإلكترونية التي تم تحديثها لتضم عدداً أكبر وتنوعاً أوسع من الكتب والإصدارات باللغتين العربية والإنجليزية، مع إضافة تصنيف الفئة العمرية للكتب. كما يمكنك من خلال 'اسأل صقر' خوض تحدي التأليف وإصدار شهادة باسمك! والآن، استديو البودكاست متاح للتسجيل ومشاركة إبداعاتكم الصوتية، وترقبوا انطلاق ميزة الدوبلاج قريبا.",
     manualSearch: "البحث اليدوي",
     manualDesc: "البحث عن كتاب ما في مكتبة المدرسة والوصول إليه.",
-    smartSearch: "اسأل صقر (AI)",
+    smartSearch: "اسأل صقر الذكي",
     smartDesc: "مساعدك الذكي للبحث والاستفسار.",
     digitalLibrary: "المكتبة الإلكترونية",
     digitalDesc: "عالم من الكتب والروايات الرقمية.",
     creators: "ركن المبدعين",
-    creatorsDesc: "استكشف قصص وابتكارات زملائك المبدعين في ركن المؤلف والمخترع الصغير.",
+    creatorsDesc: "استكشف قصص وابتكارات زملائك المبدعين.",
+    gameTitle: "رتب المكتبة",
+    gameDesc: "العب، استمتع، وتعلم كيفية تصنيف الكتب.",
     bubble: "فخورين بالإمارات",
     homelandTitle: "لمحات من الموطن",
     challengeTitle: "تحدي المبدعين",
-    challengeDesc: "ناقش، ابدأ قصتك الخاصة مع صقر، وأثبت موهبتك كل ماعليك فعله تحدى صقر. هل أنت مستعد ؟!",
-    challengeCTA: "ابدأ رحلة الإبداع مع صقر الآن",
+    challengeDesc: "ناقش، ابدأ قصتك الخاصة مع صقر، وأثبت موهبتك. هل أنت مستعد للتحدي؟",
+    challengeCTA: "ابدأ رحلة الإبداع الآن",
     saqrStudioBanner: "استديو صقر",
-    saqrStudioTag: "الدوبلاج قريباً 🚀",
+    saqrStudioTag: "الدوبلاج قريباً",
     visitorsLabel: "زوار البوابة:",
     upcomingEvents: "أحداث قريبة",
     startsIn: "يبدأ خلال:",
     endsIn: "ينتهي خلال:",
     dayUnit: "يوم",
     daysUnit: "أيام",
-    alcLibraryTitle: "المكتبة العربية الرقمية المجانية",
+    alcLibraryTitle: "المكتبة العربية الرقمية",
     alcLibrarySub: "مبادرة رائدة يقدمها مركز أبو ظبي للغة العربية",
-    recentBooksTitle: "وصل حديثاً في المكتبة 📚",
+    recentBooksTitle: "وصل حديثاً في المكتبة",
     by: "تأليف:",
     publisher: "الناشر:",
     seeMore: "عرض المزيد",
-    seeMoreDesc: "اكتشف القائمة الكاملة والملخصات الذكية لجميع الكتب الجديدة"
+    seeMoreDesc: "اكتشف القائمة الكاملة والملخصات الذكية للكتب الجديدة"
   },
   en: {
     welcome: "Knowledge Portal at Falcon Int'l School",
@@ -49,23 +51,25 @@ const translations = {
     digitalLibrary: "Digital Library",
     digitalDesc: "A world of digital books and novels.",
     creators: "Creators Corner",
-    creatorsDesc: "Explore the stories and innovations of your creative peers.",
+    creatorsDesc: "Explore the stories and innovations of your peers.",
+    gameTitle: "Library Game",
+    gameDesc: "Play, enjoy, and learn book classification.",
     bubble: "Proud of the UAE",
     homelandTitle: "Hints From Homeland",
     challengeTitle: "Authors Challenge",
-    challengeDesc: "Discuss, author your own tales with Saqr, All you have to do is challenge Saqr. Are You Ready?!",
-    challengeCTA: "Start your creative journey now",
+    challengeDesc: "Discuss, author your own tales with Saqr, and prove your talent. Are you ready?",
+    challengeCTA: "Start your creative journey",
     saqrStudioBanner: "Saqr Studio",
-    saqrStudioTag: "Dubbing Coming Soon 🚀",
+    saqrStudioTag: "Dubbing Coming Soon",
     visitorsLabel: "Portal Visitors:",
     upcomingEvents: "Upcoming Events",
     startsIn: "Starts in:",
     endsIn: "Ends in:",
     dayUnit: "Day",
     daysUnit: "Days",
-    alcLibraryTitle: "Free Digital Arabic Library",
+    alcLibraryTitle: "Digital Arabic Library",
     alcLibrarySub: "A leading initiative by Abu Dhabi Arabic Language Centre",
-    recentBooksTitle: "Newly Arrived Books 📚",
+    recentBooksTitle: "Newly Arrived Books",
     by: "By:",
     publisher: "Publisher:",
     seeMore: "See More",
@@ -91,19 +95,10 @@ const ACADEMIC_EVENTS = [
     en: "Mid-term break", 
     startDate: new Date('2026-10-12T00:00:00'), 
     endDate: new Date('2026-10-16T23:59:59'),
-    displayDate: "12  October 2026" 
+    displayDate: "12 October 2026" 
   }
 ];
 
-const KNOWLEDGE_CARDS = [
-  { icon: "📜", textAr: "بحث رقمي", textEn: "Research", color: "border-red-600" },
-  { icon: "💡", textAr: "بحث في مكتبة المدرسة", textEn: "Search In Library", color: "border-yellow-500" },
-  { icon: "🤖", textAr: "ذكاء صقر", textEn: "Saqr AI", color: "border-green-600" },
-  { icon: "📚", textAr: "كتب الكترونية", textEn: "E-Books", color: "border-slate-800" },
-  { icon: "🇦🇪", textAr: "الهوية الوطنية", textEn: "N.Identity", color: "border-red-500" }
-];
-
-// 10 كتب مميزة مع تحديث الروابط المباشرة للأغلفة وصور مصغرة ملائمة ومستقرة
 const FEATURED_BOOKS = [
   { id: 1, titleAr: "سلسلة عالمي الصغير", authorAr: "محمد بن راشد آل مكتوم", publisherAr: "دون ناشر", titleEn: "My Little World Series", authorEn: "Mohammed bin Rashid Al Maktoum", publisherEn: "No Publisher", cover: "https://mediaoffice.ae/-/media/2021/jan/09-01/05/my-little-world-cover-02.png?sc_lang=ar&hash=AC07100E6A716B1F6AA95942629C21CD" },
   { id: 2, titleAr: "حكيم العرب", authorAr: "مريم صقر القاسمي", publisherAr: "الهدهد للنشر", titleEn: "Wise Man of the Arabs", authorEn: "Maryam Saqr Al Qasimi", publisherEn: "Al Hudhud Publishing", cover: "https://m.media-amazon.com/images/S/compressed.photo.goodreads.com/books/1614967678i/57318992.jpg" },
@@ -117,7 +112,52 @@ const FEATURED_BOOKS = [
   { id: 10, titleAr: "زن وفن صيانة الدراجة النارية", authorAr: "روبرت م بيرسيغ", publisherAr: "كلمة", titleEn: "Zen and the Art of Motorcycle Maintenance", authorEn: "Robert M. Pirsig", publisherEn: "Kalima", cover: "https://pbs.twimg.com/media/DVnl6p-UQAAPzpf.jpg" },
 ];
 
-interface BurstItem { id: number; tx: number; ty: number; rot: number; item: typeof KNOWLEDGE_CARDS[0]; }
+interface BurstItem { id: number; tx: number; ty: number; rot: number; color: string; }
+
+// ==========================================
+// مكونات الأيقونات (SVG) للابتعاد عن الإيموجيز
+// ==========================================
+const SearchIcon = () => (
+  <svg className="w-10 h-10 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="8" />
+    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+  </svg>
+);
+const RobotIcon = () => (
+  <svg className="w-10 h-10 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="11" width="18" height="10" rx="2" />
+    <circle cx="12" cy="5" r="2" />
+    <path d="M12 7v4" />
+    <line x1="8" y1="16" x2="8" y2="16" strokeWidth={4} />
+    <line x1="16" y1="16" x2="16" y2="16" strokeWidth={4} />
+  </svg>
+);
+const BookIcon = () => (
+  <svg className="w-10 h-10 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+  </svg>
+);
+const PaletteIcon = () => (
+  <svg className="w-10 h-10 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/>
+    <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/>
+    <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/>
+    <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/>
+    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c1.66 0 3-1.34 3-3 0-.35-.07-.69-.21-1-.28-.62-1.07-1.46-1.57-2.09-.34-.43-.72-1.09-.72-1.91 0-1.66 1.34-3 3-3h.64c2.81 0 5.1-2.07 5.73-4.83A9.98 9.98 0 0 0 22 12c0-5.52-4.48-10-10-10z" />
+  </svg>
+);
+const GameIcon = () => (
+  <svg className="w-10 h-10 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="6" width="20" height="12" rx="4" />
+    <path d="M6 12h4m-2-2v4M15 11h.01M18 13h.01" />
+  </svg>
+);
+const StarIcon = ({ className }: { className: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+  </svg>
+);
 
 const HomePage: React.FC = () => {
   const { locale, dir } = useLanguage();
@@ -183,12 +223,13 @@ const HomePage: React.FC = () => {
     setTimeout(() => setIsMascotClicked(false), 300);
     
     const id = Date.now();
-    const newBursts: BurstItem[] = Array.from({ length: 3 }).map((_, i) => ({
+    const colors = ['text-red-500', 'text-blue-500', 'text-yellow-400', 'text-green-500', 'text-purple-500'];
+    const newBursts: BurstItem[] = Array.from({ length: 5 }).map((_, i) => ({
       id: id + i,
-      item: KNOWLEDGE_CARDS[Math.floor(Math.random() * KNOWLEDGE_CARDS.length)],
-      tx: (Math.random() - 0.5) * (window.innerWidth < 768 ? 120 : 280), 
-      ty: -100 - Math.random() * 120,
-      rot: (Math.random() - 0.5) * 30
+      color: colors[Math.floor(Math.random() * colors.length)],
+      tx: (Math.random() - 0.5) * (window.innerWidth < 768 ? 150 : 300), 
+      ty: -100 - Math.random() * 150,
+      rot: (Math.random() - 0.5) * 180
     }));
 
     setBursts(prev => [...prev, ...newBursts]);
@@ -204,37 +245,36 @@ const HomePage: React.FC = () => {
   }, []);
 
   return (
-    <div dir={dir} className="w-full min-h-[100dvh] flex flex-col items-center bg-slate-50 dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300 py-10 md:py-20 px-4">
+    <div dir={dir} className="w-full min-h-[100dvh] flex flex-col items-center bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300 py-10 md:py-16 px-4">
       
-      {/* 🌟 الخلفية الديناميكية */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-40 dark:opacity-20">
-         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-red-500/20 rounded-full blur-[120px] animate-blob"></div>
-         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-blue-500/10 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
-         <div className="absolute top-[40%] left-[20%] w-[30%] h-[30%] bg-green-500/10 rounded-full blur-[100px] animate-blob animation-delay-4000"></div>
+      {/* 🌟 تصميم طفولي للخلفية */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-50 dark:opacity-20">
+         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-rose-400/20 rounded-full blur-[100px] animate-blob"></div>
+         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-sky-400/20 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
+         <div className="absolute top-[30%] left-[20%] w-[30%] h-[30%] bg-amber-400/20 rounded-full blur-[100px] animate-blob animation-delay-4000"></div>
       </div>
 
-      <div className="w-full max-w-[1400px] flex flex-col gap-12 md:gap-20 animate-fade-in-up">
+      <div className="w-full max-w-[1300px] flex flex-col gap-10 md:gap-16 animate-fade-in-up">
         
         {/* --- 1. قسم الترحيب --- */}
-        <div className="text-center space-y-6 md:space-y-8 max-w-5xl mx-auto relative z-20 hover:scale-[1.01] transition-transform duration-700">
-          <h1 className="text-4xl md:text-7xl font-black text-slate-900 dark:text-white tracking-tight leading-tight animate-text-reveal">
+        <div className="text-center space-y-4 max-w-4xl mx-auto relative z-20 transition-transform duration-700">
+          <h1 className="text-4xl md:text-6xl font-black text-slate-800 dark:text-white tracking-tight leading-tight">
             {t('welcome')}
           </h1>
-          <p className="text-base md:text-2xl text-slate-600 dark:text-slate-400 font-medium leading-relaxed max-w-3xl mx-auto animate-text-reveal-delayed">
+          <p className="text-lg md:text-2xl text-slate-600 dark:text-slate-400 font-bold leading-relaxed max-w-2xl mx-auto">
             {t('subWelcome')}
           </p>
-          <div className="h-1.5 w-24 bg-red-600 mx-auto rounded-full shadow-[0_0_15px_rgba(220,38,38,0.5)] animate-pulse"></div>
+          <div className="h-2 w-20 bg-amber-400 mx-auto rounded-full mt-4 animate-pulse"></div>
         </div>
 
-        {/* --- شريط الأخبار --- */}
-        <div className="w-full max-w-6xl mx-auto relative z-30 flex items-center bg-white dark:bg-slate-800 border-2 border-red-200 dark:border-red-900/50 rounded-full shadow-lg overflow-hidden h-12 md:h-14 hover:shadow-2xl hover:scale-[1.01] transition-all duration-300">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 dark:via-white/5 to-transparent skew-x-[-20deg] animate-[shimmer_3s_infinite] pointer-events-none z-10"></div>
-          <div className="bg-gradient-to-r from-red-600 to-red-700 text-white font-bold px-5 md:px-8 h-full flex items-center justify-center gap-2 md:gap-3 relative z-20 shrink-0 uppercase tracking-wide shadow-[2px_0_10px_rgba(0,0,0,0.15)]">
-            <div className="w-2 h-2 md:w-2.5 md:h-2.5 bg-white rounded-full animate-ping shadow-[0_0_8px_#ffffff]"></div>
+        {/* --- شريط الأخبار التفاعلي --- */}
+        <div className="w-full max-w-5xl mx-auto relative z-30 flex items-center bg-white dark:bg-slate-800 border-4 border-amber-300 dark:border-amber-700 rounded-full shadow-lg overflow-hidden h-14 md:h-16 hover:scale-[1.01] transition-all duration-300">
+          <div className="bg-amber-400 text-slate-900 font-black px-6 md:px-8 h-full flex items-center justify-center gap-2 relative z-20 shrink-0 uppercase tracking-widest">
+            <div className="w-3 h-3 bg-white rounded-full animate-ping"></div>
             {t('newsTitle')}
           </div>
-          <div className="flex-1 overflow-hidden h-full flex items-center relative group bg-red-50/50 dark:bg-red-900/10 z-20">
-            <div className={`whitespace-nowrap ${isAr ? 'animate-marquee-rtl' : 'animate-marquee-ltr'} text-slate-800 dark:text-slate-100 font-bold text-sm md:text-base px-4 group-hover:[animation-play-state:paused] cursor-pointer`}>
+          <div className="flex-1 overflow-hidden h-full flex items-center relative group bg-amber-50 dark:bg-slate-800 z-20">
+            <div className={`whitespace-nowrap ${isAr ? 'animate-marquee-rtl' : 'animate-marquee-ltr'} text-slate-800 dark:text-slate-100 font-bold text-sm md:text-lg px-4 group-hover:[animation-play-state:paused] cursor-pointer`}>
               {t('newsContent')}
             </div>
           </div>
@@ -242,123 +282,111 @@ const HomePage: React.FC = () => {
 
         {/* --- لافتة استديو صقر --- */}
         <div className="w-full relative z-30 flex flex-col items-center justify-center">
-          <Link to="/saqr-studio" className="group relative overflow-hidden px-6 py-3 md:px-8 md:py-4 w-fit rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-md flex items-center justify-center hover:shadow-[0_0_30px_rgba(59,130,246,0.3)] hover:border-blue-500 hover:scale-105 transition-all duration-300">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] skew-x-12"></div>
-            <div className="absolute inset-0 bg-gradient-to-r from-red-600/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            <span className="relative z-10 text-sm md:text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-              {t('saqrStudioBanner')} <span className="group-hover:animate-bounce">✨</span>
+          <Link to="/saqr-studio" className="group relative px-8 py-3 md:px-10 md:py-4 w-fit rounded-full bg-blue-500 text-white border-b-4 border-blue-700 shadow-md flex items-center justify-center hover:-translate-y-1 hover:border-b-6 active:border-b-0 active:translate-y-2 transition-all duration-200">
+            <span className="relative z-10 text-base md:text-xl font-black flex items-center gap-3">
+              {t('saqrStudioBanner')}
+              <span className="bg-white text-blue-600 px-3 py-1 rounded-full text-xs font-black uppercase shadow-sm">
+                {t('saqrStudioTag')}
+              </span>
             </span>
           </Link>
         </div>
 
-        {/* --- 2. مركز العمليات والكروت --- */}
-        <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-start">
-          <div className="lg:col-span-7 flex flex-col gap-6 order-2 lg:order-1">
-            
-            {/* 📚 القسم الجديد: المكتبة الرقمية لمركز أبو ظبي */}
-            <a 
-              href="https://www.amazon.com/stores/page/64B19CDC-2694-46EA-8C7D-AA43238F9A37" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="group relative w-full overflow-hidden rounded-[2rem] bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 border-2 border-red-500/30 hover:border-red-500 p-6 md:p-8 flex flex-col md:flex-row items-center gap-6 transition-all duration-500 shadow-[0_10px_30px_-10px_rgba(220,38,38,0.2)] hover:shadow-[0_20px_50px_-10px_rgba(220,38,38,0.4)] hover:-translate-y-1"
-            >
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <img src="https://alc.ae/media/htonj1al/alc-logo-header.png" alt="ALC Logo Decor" className="w-32 md:w-48 grayscale" />
-              </div>
-              
-              <div className="relative z-10 w-24 md:w-32 h-24 md:h-32 bg-white dark:bg-slate-700 rounded-2xl p-2 shadow-inner flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-500">
-                <img src="https://alc.ae/media/htonj1al/alc-logo-header.png" alt="Abu Dhabi Arabic Language Centre" className="w-full h-full object-contain" />
-              </div>
-
-              <div className="relative z-10 flex-1 text-center md:text-start space-y-2">
-                <div className="inline-block px-3 py-1 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-black uppercase tracking-widest mb-2 animate-pulse">
-                     Initiative | مبادرة
-                </div>
-                <h3 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white leading-tight">
-                  {t('alcLibraryTitle')}
-                </h3>
-                <p className="text-sm md:text-lg text-slate-600 dark:text-slate-400 font-bold">
-                  {t('alcLibrarySub')}
-                </p>
-                <div className="pt-2 flex items-center justify-center md:justify-start gap-2 text-red-600 dark:text-red-400 font-black">
-                  <span>تصفح الآن</span>
-                  <span className="group-hover:translate-x-2 transition-transform duration-300">→</span>
-                </div>
-              </div>
-            </a>
-
-            {/* الأزرار الأربعة الأصلية */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
-              <Link to="/search" className="group bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-red-500 hover:-translate-y-2 hover:scale-[1.02] hover:shadow-[0_20px_40px_-15px_rgba(239,68,68,0.2)] transition-all duration-500 flex flex-col items-start text-start relative overflow-hidden">
-                <div className="w-14 h-14 bg-red-50 dark:bg-red-500/10 rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-5 relative z-10">🔍</div>
-                <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2 relative z-10">{t('manualSearch')}</h3>
-                <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-medium leading-relaxed relative z-10">{t('manualDesc')}</p>
-              </Link>
-
-              <Link to="/smart-search" className="group bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-green-500 hover:-translate-y-2 hover:scale-[1.02] hover:shadow-[0_20px_40px_-15px_rgba(34,197,94,0.2)] transition-all duration-500 flex flex-col items-start text-start relative overflow-hidden">
-                <div className="w-14 h-14 bg-green-50 dark:bg-green-500/10 rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-5 relative z-10">🤖</div>
-                <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2 relative z-10">{t('smartSearch')}</h3>
-                <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-medium leading-relaxed relative z-10">{t('smartDesc')}</p>
-              </Link>
-
-              <Link to="/digital-library" className="group bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-blue-500 hover:-translate-y-2 hover:scale-[1.02] hover:shadow-[0_20px_40px_-15px_rgba(59,130,246,0.2)] transition-all duration-500 flex flex-col items-start text-start relative overflow-hidden">
-                <div className="w-14 h-14 bg-blue-50 dark:bg-blue-500/10 rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-5 relative z-10">📚</div>
-                <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2 relative z-10">{t('digitalLibrary')}</h3>
-                <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-medium leading-relaxed relative z-10">{t('digitalDesc')}</p>
-              </Link>
-
-              <Link to="/creators" className="group bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-purple-500 hover:-translate-y-2 hover:scale-[1.02] hover:shadow-[0_20px_40px_-15px_rgba(168,85,247,0.2)] transition-all duration-500 flex flex-col items-start text-start relative overflow-hidden">
-                <div className="w-14 h-14 bg-purple-50 dark:bg-purple-500/10 rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-5 relative z-10">🎨</div>
-                <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2 relative z-10">{t('creators')}</h3>
-                <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-medium leading-relaxed relative z-10">{t('creatorsDesc')}</p>
-              </Link>
-            </div>
-          </div>
-
-          {/* التفاعل مع صقر */}
-          <div className="lg:col-span-5 flex flex-col items-center justify-center order-1 lg:order-2 relative gap-8 self-center">
-            <div onClick={handleMascotInteraction} className={`relative cursor-pointer transition-transform duration-700 ${isMascotClicked ? 'scale-95' : 'hover:scale-105'}`}>
-              <div className="absolute inset-0 bg-gradient-to-tr from-red-500/20 to-green-500/20 rounded-full blur-[80px] -z-20 animate-pulse"></div>
+        {/* --- 2. الأزرار الرئيسية وشخصية صقر (التخطيط الممتع) --- */}
+        <div className="w-full flex flex-col lg:flex-row gap-10 items-center justify-center">
+          
+          {/* شخصية صقر المركزية */}
+          <div className="lg:order-2 flex flex-col items-center justify-center relative z-20 max-w-sm w-full">
+            <div onClick={handleMascotInteraction} className={`relative cursor-pointer transition-transform duration-300 ${isMascotClicked ? 'scale-95' : 'hover:scale-105'}`}>
               {bursts.map((burst) => (
                 <div key={burst.id} 
-                  className={`absolute z-[100] bg-white dark:bg-slate-800 px-4 py-2 md:px-5 md:py-2.5 rounded-2xl border border-slate-200 dark:border-slate-600 shadow-lg animate-burst-steady pointer-events-none flex items-center justify-center`}
+                  className={`absolute z-[100] animate-burst-steady pointer-events-none ${burst.color}`}
                   style={{ '--tx': `${burst.tx}px`, '--ty': `${burst.ty}px`, '--rot': `${burst.rot}deg` } as any}>
-                  <span className="text-xl md:text-2xl">🇦🇪</span>
+                  <StarIcon className="w-10 h-10 drop-shadow-md" />
                 </div>
               ))}
-              <img src="/saqr-full.png" alt="Saqr Mascot" className="h-64 md:h-[500px] object-contain relative z-10 animate-float drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)]" />
-              <div className="absolute -top-4 -right-2 md:-top-6 md:-right-6 bg-white dark:bg-slate-800 px-6 py-4 rounded-3xl rounded-br-none border border-slate-200 dark:border-slate-700 shadow-xl text-sm md:text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-red-600 dark:from-green-400 dark:to-red-400 animate-float-delayed z-20">
+              <img src="/saqr-full.png" alt="Saqr Mascot" className="h-64 md:h-[400px] object-contain relative z-10 animate-float drop-shadow-2xl" />
+              
+              <div className="absolute -top-4 -right-4 bg-white dark:bg-slate-800 px-6 py-4 rounded-[2rem] rounded-br-none border-4 border-rose-400 shadow-xl text-sm md:text-lg font-black text-rose-500 animate-float-delayed z-20">
                 {t('bubble')}
               </div>
             </div>
+          </div>
+
+          {/* أزرار العمليات (تصميم ألعاب طفولي) */}
+          <div className="lg:order-1 lg:order-3 flex-1 w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
             
-            <div className="w-full max-w-md bg-white/60 dark:bg-slate-800/60 backdrop-blur-md p-8 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-lg text-center relative z-30 group overflow-hidden">
-              <div className="relative z-10 space-y-4">
-                <span className="bg-red-50 dark:bg-red-500/10 text-red-600 font-bold px-3 py-1 rounded-full text-xs uppercase tracking-widest animate-pulse">
-                  {isAr ? "أطلق العنان لموهبتك" : "Show Your Talent"}
-                </span>
-                <h3 className="text-xl md:text-3xl font-black text-slate-900 dark:text-white leading-tight">
-                  {t('challengeTitle')}
-                </h3>
-                <p className="text-sm md:text-base text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
-                  {t('challengeDesc')}
-                </p>
-                <Link to="/smart-search" className="inline-flex items-center gap-2 mt-2 text-sm md:text-base text-red-600 dark:text-red-400 font-bold uppercase tracking-wide group-hover:translate-x-2 transition-transform">
-                  {t('challengeCTA')} <span className="text-xl group-hover:animate-bounce">&rarr;</span>
-                </Link>
-              </div>
-            </div>
+            <Link to="/search" className="bg-sky-400 text-white p-6 rounded-[2rem] border-b-8 border-sky-600 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all flex flex-col items-center text-center shadow-md">
+              <SearchIcon />
+              <h3 className="text-xl md:text-2xl font-black mb-2">{t('manualSearch')}</h3>
+              <p className="text-sm font-bold opacity-90">{t('manualDesc')}</p>
+            </Link>
+
+            <Link to="/smart-search" className="bg-emerald-400 text-white p-6 rounded-[2rem] border-b-8 border-emerald-600 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all flex flex-col items-center text-center shadow-md">
+              <RobotIcon />
+              <h3 className="text-xl md:text-2xl font-black mb-2">{t('smartSearch')}</h3>
+              <p className="text-sm font-bold opacity-90">{t('smartDesc')}</p>
+            </Link>
+
+            <Link to="/digital-library" className="bg-indigo-400 text-white p-6 rounded-[2rem] border-b-8 border-indigo-600 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all flex flex-col items-center text-center shadow-md">
+              <BookIcon />
+              <h3 className="text-xl md:text-2xl font-black mb-2">{t('digitalLibrary')}</h3>
+              <p className="text-sm font-bold opacity-90">{t('digitalDesc')}</p>
+            </Link>
+
+            <Link to="/creators" className="bg-purple-400 text-white p-6 rounded-[2rem] border-b-8 border-purple-600 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all flex flex-col items-center text-center shadow-md">
+              <PaletteIcon />
+              <h3 className="text-xl md:text-2xl font-black mb-2">{t('creators')}</h3>
+              <p className="text-sm font-bold opacity-90">{t('creatorsDesc')}</p>
+            </Link>
+
+            <Link to="/game" className="bg-amber-400 text-slate-900 p-6 rounded-[2rem] border-b-8 border-amber-600 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all flex flex-col items-center text-center shadow-md sm:col-span-2 lg:col-span-2 xl:col-span-1">
+              <GameIcon />
+              <h3 className="text-xl md:text-2xl font-black mb-2">{t('gameTitle')}</h3>
+              <p className="text-sm font-bold opacity-90">{t('gameDesc')}</p>
+            </Link>
+
           </div>
         </div>
 
-        {/* --- 🆕 شريط الكتب المضافة حديثاً (تحديث الأغلفة والحجم ليناسب أبعاد الصور دون تعديل الكود) --- */}
-        <div className="w-full px-2 space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-            <h3 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+        {/* --- 📚 المكتبة الرقمية لمركز أبو ظبي --- */}
+        <div className="w-full mt-6">
+          <a 
+            href="https://www.amazon.com/stores/page/64B19CDC-2694-46EA-8C7D-AA43238F9A37" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="group w-full bg-rose-500 border-b-8 border-rose-700 hover:-translate-y-1 active:border-b-0 active:translate-y-2 rounded-[2rem] p-6 md:p-8 flex flex-col md:flex-row items-center gap-6 transition-all shadow-md block text-white"
+          >
+            <div className="bg-white rounded-2xl p-3 shrink-0 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-300">
+              <img src="https://alc.ae/media/htonj1al/alc-logo-header.png" alt="ALC Logo" className="w-24 md:w-32 h-24 md:h-32 object-contain" />
+            </div>
+            <div className="flex-1 text-center md:text-start space-y-2">
+              <div className="inline-block px-4 py-1 rounded-full bg-rose-700/50 text-white text-xs font-black uppercase tracking-widest mb-1">
+                 Initiative | مبادرة
+              </div>
+              <h3 className="text-2xl md:text-4xl font-black leading-tight">
+                {t('alcLibraryTitle')}
+              </h3>
+              <p className="text-base md:text-xl font-bold opacity-90">
+                {t('alcLibrarySub')}
+              </p>
+            </div>
+            <div className="shrink-0 bg-white text-rose-600 w-14 h-14 rounded-full flex items-center justify-center text-2xl font-black shadow-md group-hover:translate-x-2 transition-transform">
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </div>
+          </a>
+        </div>
+
+        {/* --- 🆕 شريط الكتب المضافة حديثاً --- */}
+        <div className="w-full px-2 mt-4 space-y-6">
+          <div className="flex items-center justify-between border-b-4 border-slate-200 dark:border-slate-800 pb-3">
+            <h3 className="text-2xl md:text-4xl font-black text-slate-800 dark:text-white tracking-tight">
               {t('recentBooksTitle')}
             </h3>
-            <Link to="/new-arrivals" className="text-sm md:text-base bg-red-600 hover:bg-red-700 text-white font-bold px-5 py-2.5 rounded-full shadow-md transition-all duration-300 hover:scale-105">
-              {t('seeMore')} &rarr;
+            <Link to="/new-arrivals" className="text-sm md:text-base bg-blue-500 text-white font-black px-6 py-2 rounded-full border-b-4 border-blue-700 active:border-b-0 active:translate-y-1 transition-all">
+              {t('seeMore')}
             </Link>
           </div>
           
@@ -366,63 +394,60 @@ const HomePage: React.FC = () => {
             {FEATURED_BOOKS.map((book) => (
               <div 
                 key={book.id} 
-                className="min-w-[220px] md:min-w-[240px] max-w-[240px] snap-start bg-white dark:bg-slate-800 rounded-[2rem] border border-slate-200 dark:border-slate-700/60 shadow-md hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col overflow-hidden"
+                className="min-w-[200px] md:min-w-[240px] max-w-[240px] snap-start bg-white dark:bg-slate-800 rounded-[2rem] border-4 border-slate-200 dark:border-slate-700 shadow-sm hover:-translate-y-2 hover:shadow-lg transition-all duration-300 flex flex-col overflow-hidden"
               >
-                {/* الحجم مخصص ومحكوم ليناسب دقة الصورة بدون تشويه */}
-                <div className="h-44 md:h-48 w-full relative overflow-hidden bg-slate-100 dark:bg-slate-900 flex items-center justify-center">
+                <div className="h-44 md:h-52 w-full relative overflow-hidden bg-slate-100 dark:bg-slate-900 flex items-center justify-center border-b-4 border-slate-200 dark:border-slate-700">
                   <img 
                     src={book.cover} 
                     alt={isAr ? book.titleAr : book.titleEn} 
-                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                    className="w-full h-full object-cover"
                     loading="lazy"
                   />
-                  <div className="absolute top-3 left-3 bg-red-600 text-white text-[9px] px-2 py-0.5 rounded-md font-bold uppercase shadow-sm">NEW</div>
+                  <div className="absolute top-3 left-3 bg-red-500 text-white text-[10px] px-3 py-1 rounded-full font-black uppercase shadow-sm">NEW</div>
                 </div>
-
-                {/* تفاصيل الكتاب */}
-                <div className="p-4 flex-1 flex flex-col justify-between gap-3">
-                  <h4 className="text-sm md:text-base font-bold text-slate-900 dark:text-white line-clamp-2 leading-snug min-h-[40px]">
+                <div className="p-4 flex-1 flex flex-col justify-between gap-3 text-center">
+                  <h4 className="text-sm md:text-base font-black text-slate-800 dark:text-white line-clamp-2 leading-snug">
                     {isAr ? book.titleAr : book.titleEn}
                   </h4>
-                  
-                  <div className="pt-2 border-t border-slate-100 dark:border-slate-700/50 space-y-0.5 text-xs">
-                    <p className="text-slate-600 dark:text-slate-400 font-medium truncate">
-                      <span className="text-slate-400 dark:text-slate-500 ml-1">{t('by')}</span> {isAr ? book.authorAr : book.authorEn}
-                    </p>
-                    <p className="text-slate-500 dark:text-slate-400 truncate">
-                      <span className="text-slate-400 dark:text-slate-500 ml-1">{t('publisher')}</span> {isAr ? book.publisherAr : book.publisherEn}
+                  <div className="space-y-1 text-xs">
+                    <p className="text-slate-600 dark:text-slate-400 font-bold truncate">
+                      {isAr ? book.authorAr : book.authorEn}
                     </p>
                   </div>
                 </div>
               </div>
             ))}
 
-            {/* كارت عرض المزيد المتناسق مع الحجم الجديد */}
             <Link 
               to="/new-arrivals"
-              className="min-w-[200px] md:min-w-[220px] max-w-[220px] snap-start bg-gradient-to-br from-red-600 to-red-700 text-white rounded-[2rem] p-5 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-center items-center text-center group gap-3 cursor-pointer relative overflow-hidden"
+              className="min-w-[200px] md:min-w-[220px] max-w-[220px] snap-start bg-amber-400 text-slate-900 rounded-[2rem] border-b-8 border-amber-600 p-5 shadow-sm hover:-translate-y-2 hover:shadow-lg transition-all duration-300 flex flex-col justify-center items-center text-center gap-3 cursor-pointer"
             >
-              <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center text-2xl shadow-inner group-hover:scale-110 transition-transform duration-300">📚</div>
-              <div className="space-y-1 relative z-10">
-                <h4 className="text-lg font-black">{t('seeMore')}</h4>
-                <p className="text-[11px] text-red-100/80 font-medium leading-relaxed px-1">{t('seeMoreDesc')}</p>
+              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-amber-500 shadow-sm">
+                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
               </div>
-              <span className="text-xl group-hover:translate-x-2 transition-transform duration-300">&rarr;</span>
+              <div className="space-y-1">
+                <h4 className="text-xl font-black">{t('seeMore')}</h4>
+                <p className="text-xs font-bold opacity-80">{t('seeMoreDesc')}</p>
+              </div>
             </Link>
           </div>
         </div>
 
         {/* --- 3. قسم لمحات من الموطن --- */}
-        <div className="w-full px-2 group">
-          <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-8 md:p-16 rounded-[2.5rem] md:rounded-[4rem] border border-slate-200 dark:border-slate-700 shadow-md transition-all duration-500 relative overflow-hidden flex flex-col md:flex-row items-center gap-8 md:gap-12">
-            <div className="w-20 h-20 md:w-32 md:h-32 bg-slate-50 dark:bg-slate-700 rounded-[2rem] flex items-center justify-center text-4xl md:text-6xl shadow-inner relative z-10">🇦🇪</div>
-            <div className="text-center md:text-start flex-1 space-y-3 relative z-10">
-              <h3 className="text-sm md:text-lg font-bold text-red-600 dark:text-red-400 uppercase tracking-widest flex items-center gap-2 justify-center md:justify-start">
-                <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+        <div className="w-full px-2 mt-4">
+          <div className="bg-sky-100 dark:bg-slate-800 p-8 md:p-12 rounded-[2.5rem] border-4 border-sky-300 dark:border-slate-700 shadow-sm flex flex-col md:flex-row items-center gap-8 md:gap-12">
+            <div className="w-24 h-24 bg-white dark:bg-slate-700 rounded-full flex items-center justify-center shadow-sm shrink-0">
+              <svg className="w-12 h-12 text-sky-500" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+              </svg>
+            </div>
+            <div className="text-center md:text-start flex-1 space-y-4">
+              <h3 className="text-lg md:text-xl font-black text-sky-600 dark:text-sky-400 uppercase tracking-widest">
                 {t('homelandTitle')}
               </h3>
-              <p className="text-lg md:text-3xl text-slate-900 dark:text-white leading-[1.6] font-bold">
+              <p className="text-xl md:text-3xl text-slate-800 dark:text-white leading-relaxed font-black">
                 {isAr ? dailyFact.ar : dailyFact.en}
               </p>
             </div>
@@ -430,70 +455,71 @@ const HomePage: React.FC = () => {
         </div>
 
         {/* --- 4. عداد الزوار + الأحداث --- */}
-        <div className="w-full flex flex-col items-center gap-12 pb-10">
-          <div className="bg-white dark:bg-slate-800 px-8 py-5 rounded-full border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row items-center gap-6">
+        <div className="w-full flex flex-col items-center gap-10 pb-10 mt-6">
+          
+          <div className="bg-white dark:bg-slate-800 px-8 py-4 rounded-full border-4 border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row items-center gap-6">
             <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-ping"></div>
-              <span className="text-slate-500 dark:text-slate-400 font-medium text-sm">{t('visitorsLabel')}</span>
-              <span className="text-slate-900 dark:text-white font-bold text-lg">{visitorCount.toLocaleString()}</span>
+              <div className="w-3 h-3 bg-green-500 rounded-full animate-ping"></div>
+              <span className="text-slate-600 dark:text-slate-300 font-bold text-base">{t('visitorsLabel')}</span>
+              <span className="text-slate-900 dark:text-white font-black text-xl">{visitorCount.toLocaleString()}</span>
             </div>
-            <div className="hidden md:block h-6 w-px bg-slate-200 dark:bg-slate-700"></div>
-            <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400">
-              <span className="text-lg">📅</span>
-              <span className="font-bold text-sm">{todayDate}</span>
+            <div className="hidden md:block h-6 w-1 bg-slate-200 dark:bg-slate-700 rounded-full"></div>
+            <div className="flex items-center gap-3 text-slate-600 dark:text-slate-300">
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+              <span className="font-black text-base">{todayDate}</span>
             </div>
           </div>
 
-          <div className="w-full max-w-5xl flex flex-col gap-8">
+          <div className="w-full max-w-4xl flex flex-col gap-8">
             {daysLeft !== null && activeEvent && (
               <div className="w-full flex flex-col items-center gap-6 animate-fade-in-up">
-                <div className="bg-red-600/10 dark:bg-red-400/10 border border-red-200 dark:border-red-900/50 px-6 py-2 rounded-full">
-                  <span className="text-red-600 dark:text-red-400 font-bold text-sm md:text-lg">
-                    {countdownType === 'start' ? t('startsIn') : t('endsIn')} {isAr ? activeEvent.ar : activeEvent.en}
-                  </span>
+                <div className="bg-rose-100 dark:bg-rose-900/30 px-6 py-2 rounded-full border-2 border-rose-300 dark:border-rose-700 text-rose-600 dark:text-rose-400 font-black text-sm md:text-lg">
+                  {countdownType === 'start' ? t('startsIn') : t('endsIn')} {isAr ? activeEvent.ar : activeEvent.en}
                 </div>
                 
-                <div className="flex flex-col items-center group">
-                  <div className="bg-white dark:bg-slate-800 min-w-[120px] md:min-w-[160px] h-20 md:h-28 px-8 rounded-[2rem] border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center shadow-xl group-hover:border-red-500 transition-colors duration-500">
-                    <span className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white">
+                <div className="flex flex-col items-center">
+                  <div className="bg-white dark:bg-slate-800 w-32 h-32 md:w-40 md:h-40 rounded-full border-8 border-rose-400 flex items-center justify-center shadow-lg">
+                    <span className="text-5xl md:text-7xl font-black text-slate-800 dark:text-white">
                       {daysLeft}
                     </span>
                   </div>
-                  <span className="mt-3 text-sm md:text-lg font-bold text-slate-500 uppercase tracking-widest">
+                  <span className="mt-4 text-base md:text-xl font-black text-slate-500 uppercase tracking-widest">
                     {daysLeft === 1 ? t('dayUnit') : t('daysUnit')}
                   </span>
                 </div>
               </div>
             )}
 
-            <h4 className="text-center text-slate-400 dark:text-slate-500 text-xs uppercase tracking-[0.3em] font-bold">
-              {t('upcomingEvents')}
-            </h4>
-            <div className="flex flex-wrap justify-center gap-4">
-              {ACADEMIC_EVENTS.map((event, idx) => (
-                <div key={idx} className={`bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border ${activeEvent?.ar === event.ar ? 'border-red-500 scale-105 shadow-lg' : 'border-slate-200 dark:border-slate-800'} px-6 py-3 rounded-2xl flex flex-col items-center gap-1 transition-all`}>
-                  <span className="text-slate-900 dark:text-white font-bold text-sm">
-                    {isAr ? event.ar : event.en}
-                  </span>
-                  <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
-                    {event.displayDate}
-                  </span>
-                </div>
-              ))}
+            <div className="flex flex-col items-center mt-6">
+              <h4 className="text-slate-400 dark:text-slate-500 text-sm uppercase tracking-[0.2em] font-black mb-4">
+                {t('upcomingEvents')}
+              </h4>
+              <div className="flex flex-wrap justify-center gap-4">
+                {ACADEMIC_EVENTS.map((event, idx) => (
+                  <div key={idx} className={`bg-white dark:bg-slate-800 border-4 ${activeEvent?.ar === event.ar ? 'border-rose-400 scale-105' : 'border-slate-200 dark:border-slate-700'} px-6 py-4 rounded-[2rem] flex flex-col items-center gap-2 text-center`}>
+                    <span className="text-slate-800 dark:text-white font-black text-sm md:text-base">
+                      {isAr ? event.ar : event.en}
+                    </span>
+                    <span className="text-slate-500 font-bold text-xs md:text-sm bg-slate-100 dark:bg-slate-700 px-3 py-1 rounded-full">
+                      {event.displayDate}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
         * { font-family: 'Cairo', sans-serif !important; }
-        @keyframes reveal-text {
-          0% { clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%); transform: translateY(40px); opacity: 0; }
-          100% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); transform: translateY(0); opacity: 1; }
-        }
-        .animate-text-reveal { animation: reveal-text 1.2s cubic-bezier(0.77, 0, 0.175, 1) forwards; }
-        .animate-text-reveal-delayed { animation: reveal-text 1.2s cubic-bezier(0.77, 0, 0.175, 1) 0.3s forwards; clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%); }
+        
         @keyframes blob {
           0% { transform: translate(0px, 0px) scale(1); }
           33% { transform: translate(30px, -50px) scale(1.1); }
@@ -501,28 +527,31 @@ const HomePage: React.FC = () => {
           100% { transform: translate(0px, 0px) scale(1); }
         }
         .animate-blob { animation: blob 7s infinite alternate ease-in-out; }
-        @keyframes shimmer { 100% { transform: translateX(200%); } }
-        @keyframes burst-steady {
-          0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
-          10% { transform: translate(var(--tx), var(--ty)) scale(1.1) rotate(var(--rot)); opacity: 1; }
-          85% { transform: translate(var(--tx), var(--ty)) scale(1) rotate(var(--rot)); opacity: 1; }
-          100% { transform: translate(var(--tx), calc(var(--ty) - 30px)) scale(0.8) rotate(var(--rot)); opacity: 0; }
-        }
-        .animate-burst-steady { animation: burst-steady 2.2s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
-        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
-        .animate-float { animation: float 6s ease-in-out infinite; }
-        .animate-float-delayed { animation: float 6s ease-in-out infinite; animation-delay: 1.5s; }
-        @keyframes fade-in-up { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; }
-        @keyframes marquee-ltr { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
-        @keyframes marquee-rtl { 0% { transform: translateX(-100vw); } 100% { transform: translateX(100%); } }
-        .animate-marquee-ltr { animation: marquee-ltr 70s linear infinite; }
-        .animate-marquee-rtl { animation: marquee-rtl 70s linear infinite; }
         
-        .scrollbar-thin::-webkit-scrollbar { height: 6px; }
+        @keyframes burst-steady {
+          0% { transform: translate(0, 0) scale(0.5); opacity: 0; }
+          20% { transform: translate(var(--tx), var(--ty)) scale(1.2) rotate(var(--rot)); opacity: 1; }
+          80% { transform: translate(var(--tx), var(--ty)) scale(1) rotate(var(--rot)); opacity: 1; }
+          100% { transform: translate(var(--tx), calc(var(--ty) - 20px)) scale(0.8) rotate(var(--rot)); opacity: 0; }
+        }
+        .animate-burst-steady { animation: burst-steady 2s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
+        
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-15px); } }
+        .animate-float { animation: float 5s ease-in-out infinite; }
+        .animate-float-delayed { animation: float 5s ease-in-out infinite; animation-delay: 1.5s; }
+        
+        @keyframes fade-in-up { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in-up { animation: fade-in-up 0.5s ease-out forwards; }
+        
+        @keyframes marquee-ltr { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+        @keyframes marquee-rtl { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+        .animate-marquee-ltr { animation: marquee-ltr 50s linear infinite; }
+        .animate-marquee-rtl { animation: marquee-rtl 50s linear infinite; }
+        
+        .scrollbar-thin::-webkit-scrollbar { height: 8px; }
         .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
-        .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .dark .scrollbar-thin::-webkit-scrollbar-thumb { background: #334155; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; border: 2px solid transparent; background-clip: content-box; }
+        .dark .scrollbar-thin::-webkit-scrollbar-thumb { background-color: #475569; }
       `}</style>
     </div>
   );
