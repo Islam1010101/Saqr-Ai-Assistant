@@ -25,6 +25,7 @@ const translations = {
         success: "تم حفظ الحصة بنجاح!",
         deleteSuccess: "تم حذف الحصة بنجاح!",
         unauthorizedDelete: "عذراً، لا تملك صلاحية حذف الحصص. مخصصة للمسؤول (hr785) فقط.",
+        alreadyBooked: "عذراً، هذه الحصة محجوزة مسبقاً من قبل معلم آخر، ولا يمكن تعديلها إلا من قبل المسؤول (hr785).",
         loading: "جاري تحميل جدول الحصص...",
         schoolNameAr: "مدرسة صقر الإمارات الدولية الخاصة",
         schoolNameEn: "Emirates Falcon International Private School",
@@ -53,6 +54,7 @@ const translations = {
         success: "Schedule updated successfully!",
         deleteSuccess: "Period deleted successfully!",
         unauthorizedDelete: "Sorry, you do not have permission to delete. Only hr785 can delete.",
+        alreadyBooked: "Sorry, this period is already booked by another teacher and can only be modified by the admin (hr785).",
         loading: "Loading schedule...",
         schoolNameAr: "مدرسة صقر الإمارات الدولية الخاصة",
         schoolNameEn: "Emirates Falcon International Private School",
@@ -125,10 +127,17 @@ const SchedulePage: React.FC = () => {
 
     const handleOpenModal = (day: string, period: number) => {
         const key = `${day}_${period}`;
-        const current = scheduleData[key] || { teacher: '', subject: '', grade: '' };
-        setFormTeacher(current.teacher);
-        setFormSubject(current.subject);
-        setFormGrade(current.grade);
+        const current = scheduleData[key];
+
+        // منع المعلم العادي من تعديل حصة محجوزة مسبقاً (فقط hr785 يمكنه ذلك)
+        if (current?.teacher && currentEmployeeId !== 'hr785') {
+            alert(t('alreadyBooked'));
+            return;
+        }
+
+        setFormTeacher(current?.teacher || '');
+        setFormSubject(current?.subject || '');
+        setFormGrade(current?.grade || '');
         setSelectedSlot({ day, period });
     };
 
@@ -137,6 +146,15 @@ const SchedulePage: React.FC = () => {
         if (!selectedSlot) return;
 
         const key = `${selectedSlot.day}_${selectedSlot.period}`;
+        const current = scheduleData[key];
+
+        // التأكد مرة أخرى أماناً عند الحفظ
+        if (current?.teacher && currentEmployeeId !== 'hr785') {
+            alert(t('alreadyBooked'));
+            setSelectedSlot(null);
+            return;
+        }
+
         const slotData = { teacher: formTeacher, subject: formSubject, grade: formGrade };
 
         try {
