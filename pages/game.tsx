@@ -7,33 +7,33 @@ import { Link } from 'react-router-dom';
 
 const T = {
   ar: {
-    title: "تحدي أبطال ديوي",
-    subtitle: "ساعد صقر في ترتيب مكتبة المدرسة واختبر ذكاءك!",
+    title: "تحدي أبطال المعرفة",
+    subtitle: "مرحباً بك! ساعدنا في ترتيب مكتبة المدرسة لتصبح بطلاً.",
     studentName: "اسم البطل / البطلة:",
-    namePlaceholder: "اكتب اسمك الثلاثي...",
+    namePlaceholder: "اكتب اسمك الثلاثي هنا...",
     grade: "الصف الدراسي:",
     gradePlaceholder: "مثال: الخامس أ",
     start: "الدخول للتحدي",
-    rulesTitle: "قواعد التحدي",
-    rulesText: "المكتبة مدينة ضخمة! لتسهيل العثور على الكتب، تم تقسيم المعرفة إلى شوارع رئيسية من 000 إلى 900. ضع كل كتاب في الشارع الصحيح!",
-    readyBtn: "أنا مستعد!",
-    ch1: "التحدي 1: ساعد القارئ",
-    ch2: "التحدي 2: صنف الكتاب",
-    ch3: "التحدي 3: املأ الرف",
-    question: "السؤال",
-    time: "الوقت المتبقي",
+    rulesTitle: "كيف نلعب؟",
+    rulesText: "المكتبة مثل مدينة كبيرة! لكي لا تضيع الكتب، قمنا بتقسيمها إلى شوارع ملونة. في التحديات القادمة، رتب الكتب بوضع كل كتاب في الشارع المناسب له!",
+    readyBtn: "أنا مستعد للانطلاق!",
+    ch1: "التحدي الأول: مساعدة القراء",
+    ch2: "التحدي الثاني: تصنيف الكتب",
+    ch3: "التحدي الثالث: ترتيب الأرفف",
+    question: "المهمة",
+    time: "الوقت",
     points: "النقاط",
     sec: "ث",
-    correct: "إجابة صحيحة! أنت بطل!",
-    wrong: "للأسف، الرف خاطئ!",
-    dragInstruction: "ضع هذه البطاقة في الرف الصحيح",
-    dropInstruction: "ضع الكتاب المناسب هنا",
+    correct: "عمل رائع! أنت بطل حقيقي!",
+    wrong: "حاول مرة أخرى يا بطل!",
+    dragInstruction: "أين نضع هذا الكتاب؟",
+    dropInstruction: "أي كتاب ينتمي لهذا الرف؟",
     shelfText: "رف",
-    certTitle: "شهادة أخصائي مكتبة",
-    certAwardedTo: "تشهد إدارة المكتبة بأن الطالب / الطالبة:",
+    certTitle: "شهادة أمين المكتبة المتميز",
+    certAwardedTo: "تشهد إدارة المكتبة بأن البطل / البطلة:",
     certGrade: "بالصف",
-    certBody: "قد اجتاز تحدي تصنيف ديوي العشري بنجاح، وأثبت مهارة استثنائية في ترتيب الأرفف وتصنيف مصادر المعرفة بذكاء.",
-    certPoints: "النقاط المكتسبة",
+    certBody: "قد اجتاز تحدي ترتيب المكتبة بنجاح وتفوق، وأثبت مهارة استثنائية وذكاءً كبيراً في تصنيف المعرفة وتنظيم الأرفف.",
+    certPoints: "مجموع النقاط",
     certTime: "وقت الإنجاز",
     certSign: "توقيع أمين المكتبة",
     print: "طباعة وحفظ الشهادة",
@@ -42,36 +42,36 @@ const T = {
     dept: "قسم المكتبة الرقمية والتفاعلية",
     minutes: "دقيقة و",
     seconds: "ثانية",
-    enterDetails: "الرجاء إدخال اسمك وصفك الدراسي لنتمكن من إصدار الشهادة!"
+    enterDetails: "الرجاء إدخال اسمك وصفك لنتمكن من تجهيز شهادتك!"
   },
   en: {
-    title: "Dewey Heroes Challenge",
-    subtitle: "Help Saqr organize the library and test your skills!",
+    title: "Knowledge Heroes Challenge",
+    subtitle: "Welcome! Help us organize the school library to become a hero.",
     studentName: "Hero's Name:",
     namePlaceholder: "Enter your full name...",
     grade: "Grade:",
     gradePlaceholder: "e.g., Grade 5A",
     start: "Enter Challenge",
-    rulesTitle: "Challenge Rules",
-    rulesText: "The library is a huge city! To find books easily, knowledge is divided into main streets from 000 to 900. Place each book in its correct street!",
-    readyBtn: "I am ready!",
-    ch1: "Challenge 1: Help the Reader",
-    ch2: "Challenge 2: Sort the Book",
-    ch3: "Challenge 3: Fill the Shelf",
-    question: "Question",
+    rulesTitle: "How to Play?",
+    rulesText: "The library is like a big city! To keep books from getting lost, we divided them into colorful streets. Put each book in its correct street!",
+    readyBtn: "I am ready to go!",
+    ch1: "Challenge 1: Help the Readers",
+    ch2: "Challenge 2: Sort the Books",
+    ch3: "Challenge 3: Fill the Shelves",
+    question: "Task",
     time: "Time Left",
     points: "Points",
     sec: "s",
-    correct: "Correct! You are a hero!",
-    wrong: "Sorry, wrong shelf!",
-    dragInstruction: "Place this card in the correct shelf",
-    dropInstruction: "Place the correct book here",
+    correct: "Great job! You are a hero!",
+    wrong: "Try again, hero!",
+    dragInstruction: "Where does this book go?",
+    dropInstruction: "Which book belongs to this shelf?",
     shelfText: "Shelf",
-    certTitle: "Library Specialist Certificate",
-    certAwardedTo: "The Library Administration certifies that:",
+    certTitle: "Outstanding Librarian Certificate",
+    certAwardedTo: "The Library Administration certifies that the hero:",
     certGrade: "Grade",
-    certBody: "has successfully completed the Dewey Decimal Classification challenge, showing exceptional skills in organizing library shelves intelligently.",
-    certPoints: "Points Earned",
+    certBody: "has successfully passed the library organization challenge, showing exceptional skill and high intelligence in classifying knowledge.",
+    certPoints: "Total Points",
     certTime: "Time Taken",
     certSign: "Librarian Signature",
     print: "Print & Save Certificate",
@@ -80,25 +80,25 @@ const T = {
     dept: "Digital & Interactive Library Dept.",
     minutes: "min and",
     seconds: "sec",
-    enterDetails: "Please enter your name and grade so we can issue your certificate!"
+    enterDetails: "Please enter your name and grade so we can prepare your certificate!"
   }
 };
 
 // ==========================================
-// 2. البيانات المبسطة (للأطفال) وبنوك الأسئلة
+// 2. البيانات المبسطة (للأطفال) بدون أرقام
 // ==========================================
 
 const DEWEY_CATEGORIES = [
-  { code: "000", ar: "000 حاسب ومعارف", en: "000 Computers", color: "#0ea5e9" },
-  { code: "100", ar: "100 تطوير الذات", en: "100 Self Growth", color: "#a855f7" },
-  { code: "200", ar: "200 دين وأخلاق", en: "200 Religion", color: "#10b981" },
-  { code: "300", ar: "300 مجتمع وقانون", en: "300 Society", color: "#f97316" },
-  { code: "400", ar: "400 لغات وقواميس", en: "400 Languages", color: "#ec4899" },
-  { code: "500", ar: "500 علوم وفضاء", en: "500 Science", color: "#eab308" },
-  { code: "600", ar: "600 تكنولوجيا وطب", en: "600 Tech & Med", color: "#14b8a6" },
-  { code: "700", ar: "700 فنون ورياضة", en: "700 Arts & Sports", color: "#6366f1" },
-  { code: "800", ar: "800 قصص وحكايات", en: "800 Stories", color: "#f43f5e" },
-  { code: "900", ar: "900 تاريخ وجغرافيا", en: "900 History", color: "#ef4444" }
+  { code: "000", ar: "حاسب ومعارف", en: "Computers", color: "#0ea5e9" },
+  { code: "100", ar: "تطوير الذات", en: "Self Growth", color: "#a855f7" },
+  { code: "200", ar: "دين وأخلاق", en: "Religion", color: "#10b981" },
+  { code: "300", ar: "مجتمع وقانون", en: "Society", color: "#f97316" },
+  { code: "400", ar: "لغات وقواميس", en: "Languages", color: "#ec4899" },
+  { code: "500", ar: "علوم وفضاء", en: "Science", color: "#eab308" },
+  { code: "600", ar: "تكنولوجيا وطب", en: "Tech & Med", color: "#14b8a6" },
+  { code: "700", ar: "فنون ورياضة", en: "Arts & Sports", color: "#6366f1" },
+  { code: "800", ar: "قصص وحكايات", en: "Stories", color: "#f43f5e" },
+  { code: "900", ar: "تاريخ وجغرافيا", en: "History", color: "#ef4444" }
 ];
 
 const BANK_ASSISTANT = [
@@ -118,7 +118,7 @@ const BANK_ORBS = [
   { ar: "كتاب: عالم الكمبيوتر والإنترنت", en: "Book: Computers and Internet", answer: "000" },
   { ar: "كتاب: كيف تتحكم في غضبك", en: "Book: How to Control Anger", answer: "100" },
   { ar: "كتاب: أركان الإسلام", en: "Book: Pillars of Islam", answer: "200" },
-  { ar: "كتاب: قوانين المرور والشرطة", en: "Book: Traffic Laws & Police", answer: "300" },
+  { ar: "كتاب: قوانين المرور", en: "Book: Traffic Laws", answer: "300" },
   { ar: "كتاب: قواعد اللغة العربية", en: "Book: Arabic Grammar", answer: "400" },
   { ar: "كتاب: الديناصورات والحيوانات", en: "Book: Dinosaurs and Animals", answer: "500" },
   { ar: "كتاب: كيف تصنع سيارة ذكية", en: "Book: How to build a smart car", answer: "600" },
@@ -128,13 +128,13 @@ const BANK_ORBS = [
 ];
 
 const BANK_SHELVES = [
-  { shelf: "500", arCorrect: "أسرار الفضاء", enCorrect: "Space Secrets", arWrongs: ["تاريخ العرب", "كيف ترسم", "قواعد الإملاء"], enWrongs: ["Arab History", "How to Draw", "Spelling Rules"] },
-  { shelf: "700", arCorrect: "أبطال السباحة", enCorrect: "Swimming Heroes", arWrongs: ["جسم الإنسان", "الكمبيوتر", "القصة القصيرة"], enWrongs: ["Human Body", "Computers", "Short Stories"] },
-  { shelf: "900", arCorrect: "حضارة الفراعنة", enCorrect: "Pharaohs History", arWrongs: ["تعلم الإسبانية", "أخلاق المسلم", "عالم الطيور"], enWrongs: ["Learn Spanish", "Muslim Morals", "Bird World"] },
-  { shelf: "600", arCorrect: "السيارات الذكية", enCorrect: "Smart Cars", arWrongs: ["شعر المتنبي", "خريطة أوروبا", "حقوق الإنسان"], enWrongs: ["Poetry", "Europe Map", "Human Rights"] },
-  { shelf: "800", arCorrect: "قصة سندريلا", enCorrect: "Cinderella Story", arWrongs: ["لغات البرمجة", "تفسير القرآن", "الجاذبية"], enWrongs: ["Programming", "Quran", "Gravity"] },
-  { shelf: "200", arCorrect: "أخلاق المسلم", enCorrect: "Muslim Morals", arWrongs: ["عواصم العالم", "صناعة الأدوية", "كيف تلعب الشطرنج"], enWrongs: ["World Capitals", "Medicine", "Play Chess"] },
-  { shelf: "000", arCorrect: "الإنترنت الآمن", enCorrect: "Safe Internet", arWrongs: ["تاريخ الأندلس", "تعلم السباحة", "قصص جحا"], enWrongs: ["History", "Learn Swimming", "Juha Stories"] }
+  { shelfCode: "500", arShelf: "علوم وفضاء", enShelf: "Science", arCorrect: "أسرار الفضاء", enCorrect: "Space Secrets", arWrongs: ["تاريخ العرب", "كيف ترسم", "قواعد الإملاء"], enWrongs: ["Arab History", "How to Draw", "Spelling Rules"] },
+  { shelfCode: "700", arShelf: "فنون ورياضة", enShelf: "Arts & Sports", arCorrect: "أبطال السباحة", enCorrect: "Swimming Heroes", arWrongs: ["جسم الإنسان", "الكمبيوتر", "القصة القصيرة"], enWrongs: ["Human Body", "Computers", "Short Stories"] },
+  { shelfCode: "900", arShelf: "تاريخ وجغرافيا", enShelf: "History", arCorrect: "حضارة الفراعنة", enCorrect: "Pharaohs History", arWrongs: ["تعلم الإسبانية", "أخلاق المسلم", "عالم الطيور"], enWrongs: ["Learn Spanish", "Muslim Morals", "Bird World"] },
+  { shelfCode: "600", arShelf: "تكنولوجيا وطب", enShelf: "Tech & Med", arCorrect: "السيارات الذكية", enCorrect: "Smart Cars", arWrongs: ["شعر المتنبي", "خريطة أوروبا", "حقوق الإنسان"], enWrongs: ["Poetry", "Europe Map", "Human Rights"] },
+  { shelfCode: "800", arShelf: "قصص وحكايات", enShelf: "Stories", arCorrect: "قصة سندريلا", enCorrect: "Cinderella Story", arWrongs: ["لغات البرمجة", "تفسير القرآن", "الجاذبية"], enWrongs: ["Programming", "Quran", "Gravity"] },
+  { shelfCode: "200", arShelf: "دين وأخلاق", enShelf: "Religion", arCorrect: "أخلاق المسلم", enCorrect: "Muslim Morals", arWrongs: ["عواصم العالم", "صناعة الأدوية", "الشطرنج"], enWrongs: ["World Capitals", "Medicine", "Chess"] },
+  { shelfCode: "000", arShelf: "حاسب ومعارف", enShelf: "Computers", arCorrect: "الإنترنت الآمن", enCorrect: "Safe Internet", arWrongs: ["تاريخ الأندلس", "تعلم السباحة", "قصص جحا"], enWrongs: ["History", "Learn Swimming", "Juha Stories"] }
 ];
 
 const shuffleArray = (array: any[]) => [...array].sort(() => 0.5 - Math.random());
@@ -144,7 +144,6 @@ const shuffleArray = (array: any[]) => [...array].sort(() => 0.5 - Math.random()
 // ==========================================
 
 const DeweyGame: React.FC = () => {
-  // تحديد اللغة بناءً على إعدادات الصفحة
   const [lang, setLang] = useState<'ar' | 'en'>('ar');
   
   useEffect(() => {
@@ -213,8 +212,10 @@ const DeweyGame: React.FC = () => {
     const mixed = shuffleArray(BANK_SHELVES).slice(0, 5).map(q => {
       const correct = lang === 'ar' ? q.arCorrect : q.enCorrect;
       const wrongs = lang === 'ar' ? q.arWrongs : q.enWrongs;
+      const displayShelf = lang === 'ar' ? q.arShelf : q.enShelf;
       return {
-        shelf: q.shelf,
+        shelfCode: q.shelfCode,
+        displayShelf: displayShelf,
         correct: correct,
         options: shuffleArray([correct, ...wrongs])
       };
@@ -298,73 +299,81 @@ const DeweyGame: React.FC = () => {
         
         @media print {
           body * { visibility: hidden; }
-          #certificate-area, #certificate-area * { visibility: visible; }
-          #certificate-area { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; background: #fff !important; }
+          #certificate-area, #certificate-area * { visibility: visible !important; }
+          #certificate-area { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; background: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           .no-print { display: none !important; }
         }
 
-        /* مؤثرات صورة البداية */
+        /* مؤثرات حركية طفولية */
         .magic-glow {
-          animation: pulse-glow 2.5s infinite alternate ease-in-out;
+          animation: pulse-glow 2s infinite alternate ease-in-out;
         }
         @keyframes pulse-glow {
           0% { filter: drop-shadow(0 0 15px rgba(245, 158, 11, 0.4)); transform: scale(1) translateY(0px); }
-          100% { filter: drop-shadow(0 0 35px rgba(245, 158, 11, 0.8)); transform: scale(1.05) translateY(-10px); }
+          100% { filter: drop-shadow(0 0 35px rgba(245, 158, 11, 0.9)); transform: scale(1.03) translateY(-8px); }
+        }
+        
+        .float-anim {
+          animation: floating 3s ease-in-out infinite;
+        }
+        @keyframes floating {
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+          100% { transform: translateY(0px); }
         }
 
-        /* شكل الرف الواقعي (خشبي) */
+        /* شكل الرف الواقعي الخشبي */
         .wood-shelf {
           position: relative;
           background: linear-gradient(to bottom, #d97706 0%, #b45309 100%);
-          border-bottom: 8px solid #78350f;
+          border-bottom: 10px solid #78350f;
           border-radius: 6px;
           box-shadow: inset 0 -4px 10px rgba(0,0,0,0.3), 0 10px 15px rgba(0,0,0,0.4);
           transition: all 0.3s ease;
         }
         .wood-shelf:hover {
-          filter: brightness(1.1);
+          filter: brightness(1.15);
+          transform: translateY(-2px);
         }
         .wood-shelf-active {
-          box-shadow: 0 0 20px rgba(245, 158, 11, 0.8), inset 0 -4px 10px rgba(0,0,0,0.3);
-          transform: scale(1.02);
+          box-shadow: 0 0 25px rgba(245, 158, 11, 0.9), inset 0 -4px 10px rgba(0,0,0,0.3);
+          transform: scale(1.03);
+          border-bottom-color: #f59e0b;
         }
         
         /* شكل الكتاب الواقعي */
         .realistic-book {
           position: relative;
-          background: linear-gradient(135deg, #f8fafc, #e2e8f0);
-          border-left: 12px solid #cbd5e1;
-          border-radius: 4px 12px 12px 4px;
-          box-shadow: -3px 4px 10px rgba(0,0,0,0.2);
-          transition: all 0.3s ease;
-        }
-        .realistic-book.colored {
-          border-left-width: 14px;
+          background: linear-gradient(135deg, #ffffff, #f1f5f9);
+          border-left: 14px solid #cbd5e1;
+          border-radius: 4px 16px 16px 4px;
+          box-shadow: -4px 6px 12px rgba(0,0,0,0.15);
+          transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         .realistic-book:hover {
-          transform: translateY(-5px) rotate(-2deg);
-          box-shadow: -5px 10px 15px rgba(0,0,0,0.3);
+          transform: translateY(-5px) rotate(-1deg);
+          box-shadow: -6px 12px 20px rgba(0,0,0,0.2);
         }
         .realistic-book-active {
-          transform: scale(1.05) translateY(-10px);
-          box-shadow: 0 15px 25px rgba(245, 158, 11, 0.5);
-          border-color: #f59e0b;
+          transform: scale(1.08) translateY(-10px);
+          box-shadow: 0 15px 30px rgba(245, 158, 11, 0.5);
+          border-left-color: #f59e0b;
         }
 
         /* خطوط الشهادة */
         .cert-font {
-          font-family: 'Cairo', sans-serif;
+          font-family: 'Cairo', sans-serif !important;
         }
       `}</style>
 
       {/* 1. شاشة البداية */}
       {stage === 'intro' && (
         <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-2xl text-center animate-fade-in-up relative z-10">
-          <img src="/Game.png" alt="Game Logo" className="w-48 h-48 mx-auto mb-6 object-contain magic-glow" onError={(e) => e.currentTarget.style.display = 'none'} />
+          <img src="/Game.png" alt="Game Logo" className="w-48 h-48 mx-auto mb-4 object-contain magic-glow" onError={(e) => e.currentTarget.style.display = 'none'} />
           <h1 className="text-3xl font-black text-amber-500 mb-2">{dict.title}</h1>
-          <p className="text-sm opacity-80 mb-6 font-bold text-slate-600 dark:text-slate-400">{dict.subtitle}</p>
+          <p className="text-sm opacity-90 mb-8 font-bold text-slate-600 dark:text-slate-400">{dict.subtitle}</p>
           
-          <div className={`space-y-4 mb-6 ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
+          <div className={`space-y-4 mb-8 ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
             <div>
               <label className="text-xs font-bold text-slate-500 mb-1 block px-2">{dict.studentName}</label>
               <input type="text" placeholder={dict.namePlaceholder} className="w-full p-4 rounded-xl bg-slate-100 dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-amber-500 font-bold" value={studentName} onChange={(e) => setStudentName(e.target.value)} />
@@ -374,7 +383,7 @@ const DeweyGame: React.FC = () => {
               <input type="text" placeholder={dict.gradePlaceholder} className="w-full p-4 rounded-xl bg-slate-100 dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-amber-500 font-bold" value={studentGrade} onChange={(e) => setStudentGrade(e.target.value)} />
             </div>
           </div>
-          <button onClick={handleStart} className="w-full py-4 bg-amber-500 hover:bg-amber-600 text-white font-black text-lg rounded-xl shadow-[0_10px_20px_rgba(245,158,11,0.3)] transition-transform active:scale-95">
+          <button onClick={handleStart} className="w-full py-4 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-white font-black text-xl rounded-2xl shadow-[0_10px_20px_rgba(245,158,11,0.4)] transition-all active:scale-95 float-anim">
             {dict.start}
           </button>
         </div>
@@ -382,19 +391,22 @@ const DeweyGame: React.FC = () => {
 
       {/* 2. شاشة التعلم */}
       {stage === 'learn' && (
-        <div className="max-w-2xl w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-2xl animate-zoom-in relative z-10 text-center">
-          <h2 className="text-2xl md:text-3xl font-black text-amber-500 mb-4">{dict.rulesTitle}</h2>
-          <p className="text-sm md:text-base leading-relaxed mb-8 opacity-90 font-medium text-slate-700 dark:text-slate-300">
+        <div className="max-w-3xl w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-2xl animate-zoom-in relative z-10 text-center">
+          <div className="w-24 h-24 bg-amber-100 dark:bg-amber-900/30 rounded-full mx-auto flex items-center justify-center mb-4">
+            <svg className="w-12 h-12 text-amber-500 magic-glow" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+          </div>
+          <h2 className="text-3xl font-black text-amber-500 mb-4">{dict.rulesTitle}</h2>
+          <p className="text-base md:text-lg leading-relaxed mb-10 opacity-90 font-bold text-slate-700 dark:text-slate-300">
             {dict.rulesText}
           </p>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-10">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-10">
             {DEWEY_CATEGORIES.map(cat => (
-              <div key={cat.code} className="p-3 rounded-lg text-[10px] md:text-xs font-bold shadow-md text-white transition-transform hover:scale-105" style={{ backgroundColor: cat.color }}>
+              <div key={cat.code} className="p-4 rounded-2xl text-[11px] md:text-sm font-black shadow-lg text-white float-anim" style={{ backgroundColor: cat.color, animationDelay: `${Math.random()}s` }}>
                 {lang === 'ar' ? cat.ar : cat.en}
               </div>
             ))}
           </div>
-          <button onClick={startChallenge1} className="w-full py-4 bg-green-500 hover:bg-green-600 text-white font-black rounded-xl shadow-lg transition-transform active:scale-95 text-lg">
+          <button onClick={startChallenge1} className="w-full py-4 bg-gradient-to-r from-green-400 to-green-500 hover:from-green-500 hover:to-green-600 text-white font-black rounded-2xl shadow-lg transition-transform active:scale-95 text-xl">
             {dict.readyBtn}
           </button>
         </div>
@@ -404,59 +416,67 @@ const DeweyGame: React.FC = () => {
       {stage.startsWith('challenge') && currentQuestions.length > 0 && (
         <div className="max-w-5xl w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 md:p-8 shadow-2xl animate-fade-in-up relative z-10 flex flex-col h-full min-h-[85vh] md:min-h-0">
           
-          <div className="flex justify-between items-center mb-6 bg-slate-100 dark:bg-slate-800 p-4 rounded-2xl shadow-inner shrink-0">
+          {/* شريط الإحصائيات العلوية */}
+          <div className="flex justify-between items-center mb-8 bg-slate-100 dark:bg-slate-800 p-4 rounded-2xl shadow-inner shrink-0">
             <div>
-              <span className="text-amber-500 font-black text-sm md:text-lg">
+              <span className="text-amber-500 font-black text-base md:text-xl">
                 {stage === 'challenge1' ? dict.ch1 : stage === 'challenge2' ? dict.ch2 : dict.ch3}
               </span>
-              <div className="text-xs opacity-70 mt-1 font-bold">{dict.question} {qIndex + 1} / 5</div>
+              <div className="text-xs md:text-sm opacity-70 mt-1 font-bold">{dict.question} {qIndex + 1} / 5</div>
             </div>
-            <div className="flex gap-3 md:gap-4 text-center">
-              <div className="bg-white dark:bg-slate-700 px-3 py-1.5 md:px-4 md:py-2 rounded-xl shadow">
-                <div className="text-[9px] md:text-[10px] opacity-70 font-bold">{dict.time}</div>
-                <div className={`font-black text-lg md:text-xl ${questionTimer <= 5 ? 'text-red-500 animate-pulse' : 'text-slate-800 dark:text-white'}`}>{questionTimer} {dict.sec}</div>
+            <div className="flex gap-3 md:gap-6 text-center">
+              <div className="bg-white dark:bg-slate-700 px-4 py-2 md:px-5 md:py-3 rounded-2xl shadow-md border border-slate-200 dark:border-slate-600">
+                <div className="text-[10px] md:text-xs opacity-70 font-black uppercase">{dict.time}</div>
+                <div className={`font-black text-xl md:text-2xl ${questionTimer <= 5 ? 'text-red-500 magic-glow' : 'text-slate-800 dark:text-white'}`}>{questionTimer} <span className="text-sm">{dict.sec}</span></div>
               </div>
-              <div className="bg-white dark:bg-slate-700 px-3 py-1.5 md:px-4 md:py-2 rounded-xl shadow">
-                <div className="text-[9px] md:text-[10px] opacity-70 font-bold">{dict.points}</div>
-                <div className="font-black text-lg md:text-xl text-green-500">{score}</div>
+              <div className="bg-white dark:bg-slate-700 px-4 py-2 md:px-5 md:py-3 rounded-2xl shadow-md border border-slate-200 dark:border-slate-600">
+                <div className="text-[10px] md:text-xs opacity-70 font-black uppercase">{dict.points}</div>
+                <div className="font-black text-xl md:text-2xl text-green-500">{score}</div>
               </div>
             </div>
           </div>
 
           <div className="flex-1 flex flex-col justify-between relative">
+            
+            {/* التغذية الراجعة (رائع / خطأ) */}
             {feedback ? (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/90 dark:bg-slate-900/90 z-20 backdrop-blur-sm rounded-2xl animate-zoom-in">
-                <h3 className={`text-3xl md:text-5xl font-black ${feedback === 'correct' ? 'text-green-500' : 'text-red-500'} animate-bounce`}>
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/95 dark:bg-slate-900/95 z-30 backdrop-blur-md rounded-2xl animate-zoom-in">
+                {feedback === 'correct' ? (
+                  <svg className="w-32 h-32 text-green-500 mb-6 drop-shadow-lg" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                ) : (
+                  <svg className="w-32 h-32 text-red-500 mb-6 drop-shadow-lg" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" /></svg>
+                )}
+                <h3 className={`text-3xl md:text-5xl font-black ${feedback === 'correct' ? 'text-green-500' : 'text-red-500'}`}>
                   {feedback === 'correct' ? dict.correct : dict.wrong}
                 </h3>
               </div>
             ) : null}
 
             {/* الجزء العلوي */}
-            <div className="flex flex-col items-center justify-center mb-10 shrink-0 min-h-[160px]">
+            <div className="flex flex-col items-center justify-center mb-10 shrink-0 min-h-[160px] relative z-20">
               {stage === 'challenge3' ? (
                 <div 
-                  className={`w-full md:w-2/3 h-32 relative wood-shelf flex items-end justify-center pb-4 cursor-pointer ${activeDragItem ? 'wood-shelf-active' : ''}`}
+                  className={`w-full md:w-2/3 h-36 relative wood-shelf flex items-end justify-center pb-5 cursor-pointer ${activeDragItem ? 'wood-shelf-active' : ''}`}
                   onDragOver={onDragOver}
-                  onDrop={(e) => onDrop(e, currentQuestions[qIndex].shelf)}
-                  onClick={() => onTouchDrop(currentQuestions[qIndex].shelf)}
+                  onDrop={(e) => onDrop(e, currentQuestions[qIndex].shelfCode)}
+                  onClick={() => onTouchDrop(currentQuestions[qIndex].shelfCode)}
                 >
-                  <div className="absolute -top-6 bg-white dark:bg-slate-800 px-6 py-2 rounded-full font-black text-amber-600 shadow-md border border-amber-200">
-                    {dict.shelfText}: {currentQuestions[qIndex].shelf}
+                  <div className="absolute -top-8 bg-amber-50 dark:bg-slate-800 px-8 py-3 rounded-full font-black text-amber-600 shadow-lg border-2 border-amber-200 dark:border-amber-700 text-lg md:text-xl">
+                    {dict.shelfText}: {currentQuestions[qIndex].displayShelf}
                   </div>
-                  <p className="text-white/80 font-bold text-sm tracking-widest">{dict.dropInstruction}</p>
+                  <p className="text-amber-100 font-bold text-sm md:text-base tracking-widest">{dict.dropInstruction}</p>
                 </div>
               ) : (
-                <div className="text-center">
-                  <p className="text-sm font-bold opacity-70 mb-4 text-slate-500">{dict.dragInstruction}</p>
+                <div className="text-center w-full">
+                  <p className="text-sm md:text-base font-black opacity-70 mb-6 text-slate-500 bg-slate-100 dark:bg-slate-800 inline-block px-4 py-2 rounded-full">{dict.dragInstruction}</p>
                   <div 
                     draggable
                     onDragStart={(e) => onDragStart(e, 'item')}
                     onClick={() => onTouchSelect('item')}
-                    className={`realistic-book p-6 md:p-10 max-w-lg mx-auto cursor-grab active:cursor-grabbing flex items-center justify-center text-center ${activeDragItem ? 'realistic-book-active' : ''}`}
-                    style={{ borderColor: '#f59e0b', backgroundColor: '#fff', color: '#0f172a' }}
+                    className={`realistic-book p-6 md:p-10 max-w-xl mx-auto cursor-grab active:cursor-grabbing flex items-center justify-center text-center ${activeDragItem ? 'realistic-book-active' : 'float-anim'}`}
+                    style={{ borderLeftColor: '#f59e0b', color: '#0f172a' }}
                   >
-                    <h3 className="font-black text-lg md:text-2xl leading-relaxed">
+                    <h3 className="font-black text-xl md:text-3xl leading-relaxed drop-shadow-sm">
                       {lang === 'ar' ? currentQuestions[qIndex].ar : currentQuestions[qIndex].en}
                     </h3>
                   </div>
@@ -465,33 +485,33 @@ const DeweyGame: React.FC = () => {
             </div>
 
             {/* الجزء السفلي */}
-            <div className="flex-1 mt-auto shrink-0 pb-4">
+            <div className="flex-1 mt-auto shrink-0 pb-6 relative z-10">
               {stage === 'challenge3' ? (
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-4 md:gap-6">
                   {currentQuestions[qIndex].options.map((opt: string, idx: number) => (
                     <div 
                       key={idx}
                       draggable
                       onDragStart={(e) => onDragStart(e, opt)}
                       onClick={() => onTouchSelect(opt)}
-                      className={`realistic-book p-4 font-bold text-sm text-center flex items-center justify-center min-h-[90px] cursor-grab active:cursor-grabbing text-slate-800 ${activeDragItem === opt ? 'realistic-book-active' : ''}`}
-                      style={{ borderColor: '#64748b' }}
+                      className={`realistic-book p-5 md:p-6 font-black text-sm md:text-lg text-center flex items-center justify-center min-h-[100px] cursor-grab active:cursor-grabbing text-slate-800 ${activeDragItem === opt ? 'realistic-book-active' : ''}`}
+                      style={{ borderLeftColor: '#cbd5e1' }}
                     >
                       {opt}
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-5">
                   {DEWEY_CATEGORIES.map(cat => (
                     <div 
                       key={cat.code} 
                       onDragOver={onDragOver}
                       onDrop={(e) => onDrop(e, cat.code)}
                       onClick={() => onTouchDrop(cat.code)}
-                      className={`wood-shelf h-28 flex flex-col justify-end items-center pb-2 cursor-pointer ${activeDragItem ? 'wood-shelf-active' : ''}`}
+                      className={`wood-shelf h-32 md:h-36 flex flex-col justify-end items-center pb-3 cursor-pointer ${activeDragItem ? 'wood-shelf-active' : ''}`}
                     >
-                      <div className="bg-white/90 text-slate-900 text-[10px] md:text-xs font-black px-2 py-1 rounded shadow-sm mb-2 text-center w-11/12 truncate" style={{ borderBottom: `4px solid ${cat.color}` }}>
+                      <div className="bg-white/95 text-slate-900 text-xs md:text-sm font-black px-3 py-2 rounded-lg shadow-md mb-2 text-center w-11/12 truncate" style={{ borderBottom: `4px solid ${cat.color}` }}>
                         {lang === 'ar' ? cat.ar : cat.en}
                       </div>
                     </div>
@@ -503,65 +523,66 @@ const DeweyGame: React.FC = () => {
         </div>
       )}
 
-      {/* 4. شاشة الشهادة الاحترافية */}
+      {/* 4. شاشة الشهادة الاحترافية (مجهزة للطباعة) */}
       {stage === 'certificate' && (
         <div className="w-full flex flex-col items-center animate-fade-in-up relative z-10">
-          <div id="certificate-area" className="cert-font w-[850px] max-w-full bg-white text-slate-900 border-[16px] border-amber-500 p-12 rounded-2xl shadow-2xl relative overflow-hidden">
+          <div id="certificate-area" className="cert-font w-[900px] max-w-full bg-white text-slate-900 border-[16px] border-amber-500 p-12 md:p-16 rounded-3xl shadow-2xl relative overflow-hidden">
+            {/* خلفية جمالية مائية للشهادة */}
             <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/arabesque.png")' }}></div>
             
-            <div className="flex justify-between items-center border-b-[3px] border-amber-500/30 pb-6 mb-8 relative z-10">
-              <img src="/school-logo.png" alt="School Logo" className="w-24 h-24 object-contain drop-shadow-md" onError={(e) => e.currentTarget.style.display = 'none'} />
+            <div className="flex justify-between items-center border-b-[4px] border-amber-500/30 pb-8 mb-10 relative z-10">
+              <img src="/school-logo.png" alt="School Logo" className="w-28 h-28 object-contain drop-shadow-xl" onError={(e) => e.currentTarget.style.display = 'none'} />
               <div className={`text-left ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
-                <h2 className="text-xl md:text-2xl font-black text-red-700 uppercase tracking-widest">{dict.schoolName}</h2>
-                <p className="text-sm text-amber-600 font-black mt-2 bg-amber-50 inline-block px-3 py-1 rounded-lg border border-amber-200">{dict.dept}</p>
+                <h2 className="text-2xl md:text-3xl font-black text-red-700 uppercase tracking-widest">{dict.schoolName}</h2>
+                <p className="text-base text-amber-600 font-black mt-3 bg-amber-50 inline-block px-4 py-2 rounded-xl border border-amber-200">{dict.dept}</p>
               </div>
             </div>
 
-            <div className="text-center relative z-10 mb-10">
-              <h1 className="text-4xl md:text-5xl font-black text-amber-600 mb-6 drop-shadow-sm">{dict.certTitle}</h1>
-              <div className="w-40 h-1.5 bg-red-600 mx-auto rounded-full mb-8"></div>
+            <div className="text-center relative z-10 mb-12">
+              <h1 className="text-4xl md:text-6xl font-black text-amber-600 mb-8 drop-shadow-sm">{dict.certTitle}</h1>
+              <div className="w-48 h-2 bg-red-600 mx-auto rounded-full mb-10"></div>
               
-              <p className="text-xl md:text-2xl leading-loose font-bold mb-4 text-slate-700">
+              <p className="text-xl md:text-3xl leading-loose font-bold mb-6 text-slate-700">
                 {dict.certAwardedTo}
               </p>
-              <h2 className="text-3xl md:text-4xl font-black text-slate-900 my-6 bg-slate-50 inline-block px-12 py-4 rounded-2xl border-2 border-slate-200 shadow-sm">
+              <h2 className="text-4xl md:text-5xl font-black text-slate-900 my-8 bg-slate-50 inline-block px-16 py-6 rounded-3xl border-2 border-slate-200 shadow-md">
                 {studentName}
               </h2>
-              <p className="text-xl md:text-2xl leading-loose font-bold text-slate-700">
-                {dict.certGrade} <strong className="text-red-700 text-3xl mx-2">{studentGrade}</strong>
+              <p className="text-xl md:text-3xl leading-loose font-bold text-slate-700">
+                {dict.certGrade} <strong className="text-red-700 text-4xl mx-3">{studentGrade}</strong>
               </p>
               
-              <p className="text-lg md:text-xl leading-relaxed mt-8 opacity-90 max-w-3xl mx-auto font-medium text-slate-600">
+              <p className="text-lg md:text-2xl leading-relaxed mt-10 opacity-90 max-w-4xl mx-auto font-bold text-slate-600">
                 {dict.certBody}
               </p>
             </div>
 
-            <div className="flex justify-center gap-10 md:gap-16 text-center relative z-10 bg-slate-50 p-6 rounded-3xl border border-slate-200 shadow-inner">
+            <div className="flex justify-center gap-12 md:gap-20 text-center relative z-10 bg-slate-50 p-8 rounded-[2rem] border-2 border-slate-200 shadow-inner">
               <div>
-                <div className="text-sm text-slate-500 font-black uppercase mb-2 tracking-wider">{dict.certPoints}</div>
-                <div className="text-3xl md:text-4xl font-black text-green-600">{score} <span className="text-xl text-slate-400">/ 300</span></div>
+                <div className="text-sm md:text-base text-slate-500 font-black uppercase mb-3 tracking-wider">{dict.certPoints}</div>
+                <div className="text-4xl md:text-5xl font-black text-green-600">{score} <span className="text-2xl text-slate-400">/ 300</span></div>
               </div>
-              <div className="w-1 bg-slate-200 rounded-full"></div>
+              <div className="w-1.5 bg-slate-200 rounded-full"></div>
               <div>
-                <div className="text-sm text-slate-500 font-black uppercase mb-2 tracking-wider">{dict.certTime}</div>
-                <div className="text-3xl md:text-4xl font-black text-amber-600">{formatTime(totalTime)}</div>
+                <div className="text-sm md:text-base text-slate-500 font-black uppercase mb-3 tracking-wider">{dict.certTime}</div>
+                <div className="text-4xl md:text-5xl font-black text-amber-600">{formatTime(totalTime)}</div>
               </div>
             </div>
 
-            <div className="mt-12 flex justify-between items-end relative z-10 px-4 md:px-10">
+            <div className="mt-16 flex justify-between items-end relative z-10 px-4 md:px-12">
               <div className="text-center">
-                <p className="text-base md:text-lg font-black text-slate-800 mb-4">{dict.certSign}</p>
-                <div className="w-40 md:w-48 h-[2px] bg-slate-800"></div>
+                <p className="text-lg md:text-xl font-black text-slate-800 mb-6">{dict.certSign}</p>
+                <div className="w-48 md:w-64 h-[3px] bg-slate-800"></div>
               </div>
-              <img src="/saqr-avatar.png" alt="Saqr Avatar" className="w-24 h-24 md:w-32 md:h-32 object-contain drop-shadow-2xl" onError={(e) => e.currentTarget.style.display = 'none'} />
+              <img src="/saqr-avatar.png" alt="Saqr Avatar" className="w-32 h-32 md:w-40 md:h-40 object-contain drop-shadow-2xl float-anim" onError={(e) => e.currentTarget.style.display = 'none'} />
             </div>
           </div>
 
-          <div className="mt-8 flex gap-4 no-print relative z-10">
-            <button onClick={() => window.print()} className="px-6 py-3 md:px-8 md:py-4 bg-red-600 hover:bg-red-700 text-white font-black text-base md:text-lg rounded-xl shadow-lg transition-transform active:scale-95">
+          <div className="mt-10 flex gap-6 no-print relative z-10">
+            <button onClick={() => window.print()} className="px-8 py-4 md:px-10 md:py-5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-black text-lg md:text-xl rounded-2xl shadow-[0_10px_20px_rgba(220,38,38,0.3)] transition-transform active:scale-95">
               {dict.print}
             </button>
-            <Link to="/" className="px-6 py-3 md:px-8 md:py-4 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-black text-base md:text-lg rounded-xl shadow-lg transition-transform active:scale-95">
+            <Link to="/" className="px-8 py-4 md:px-10 md:py-5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-black text-lg md:text-xl rounded-2xl shadow-lg transition-transform active:scale-95">
               {dict.back}
             </Link>
           </div>
