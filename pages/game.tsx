@@ -1,8 +1,3 @@
-عذراً، الخطأ حدث لأن النص التوضيحي تداخل في أول السطر داخل الملف.
-
-إليك الكود النظيف والجاهز تماماً لملف `pages/game.tsx` بدون أي نصوص زائدة، مع تحديث قسم التاريخ والخرائط ليكون **"تاريخ وجغرافيا"** (History & Geography) وتنسيق طباعة A4 سليم:
-
-```tsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -647,5 +642,3 @@ const DeweyGame: React.FC = () => {
 };
 
 export default DeweyGame;
-
-```
