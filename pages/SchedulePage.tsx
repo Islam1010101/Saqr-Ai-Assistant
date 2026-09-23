@@ -7,7 +7,7 @@ const translations = {
         pageTitle: "جدول المكتبة",
         subtitle: "نظام حجز وتنسيق حصص زيارة المكتبة المدرسية",
         secureTitle: "بوابة دخول المعلمين",
-        passPlaceholder: "رقم الموظف (مثال: hr123)",
+        passPlaceholder: "رقم الموظف (مثال: HR123)",
         authBtn: "دخول بوابة المعلمين",
         errorPass: "رقم الموظف غير صحيح! يجب أن يبدأ بـ hr ويتبعه 3 أو 4 أرقام.",
         days: ["الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"],
@@ -25,6 +25,7 @@ const translations = {
         deleteSuccess: "تم حذف الحصة بنجاح!",
         unauthorizedDelete: "عذراً، لا تملك صلاحية حذف الحصص. مخصصة للمسؤول (hr785) فقط.",
         alreadyBooked: "عذراً، هذه الحصة محجوزة مسبقاً من قبل معلم آخر، ولا يمكن تعديلها إلا من قبل المسؤول (hr785).",
+        bookSlotText: "+ حجز الحصة",
         loading: "جاري تحميل جدول الحصص...",
         schoolNameAr: "مدرسة صقر الإمارات الدولية الخاصة",
         schoolNameEn: "Emirates Falcon International Private School",
@@ -54,6 +55,7 @@ const translations = {
         deleteSuccess: "Period deleted successfully!",
         unauthorizedDelete: "Sorry, you do not have permission to delete. Only hr785 can delete.",
         alreadyBooked: "Sorry, this period is already booked by another teacher and can only be modified by the admin (hr785).",
+        bookSlotText: "+ Book Period",
         loading: "Loading schedule...",
         schoolNameAr: "مدرسة صقر الإمارات الدولية الخاصة",
         schoolNameEn: "Emirates Falcon International Private School",
@@ -93,7 +95,7 @@ const SchedulePage: React.FC = () => {
                 map[item.id] = { teacher: item.teacher, subject: item.subject, grade: item.grade };
             });
             setScheduleData(map);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error fetching schedule:", error);
         } finally {
             setIsLoading(false);
@@ -156,8 +158,9 @@ const SchedulePage: React.FC = () => {
             setScheduleData(prev => ({ ...prev, [key]: { teacher: formTeacher, subject: formSubject, grade: formGrade } }));
             setSelectedSlot(null);
             alert(t('success'));
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error saving slot:", error);
+            alert("خطأ أثناء الحفظ: " + (error.message || error));
         }
     };
 
@@ -181,8 +184,9 @@ const SchedulePage: React.FC = () => {
             });
             setSelectedSlot(null);
             alert(t('deleteSuccess'));
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error deleting slot:", error);
+            alert("خطأ أثناء الحذف: " + (error.message || error));
         }
     };
 
@@ -337,7 +341,7 @@ const SchedulePage: React.FC = () => {
                                                                 <span className="text-[10px] font-bold bg-emerald-200/50 dark:bg-emerald-900/50 px-2 py-0.5 rounded-full mt-1 text-slate-700 dark:text-slate-300">{slot.grade}</span>
                                                             </>
                                                         ) : (
-                                                            <span className="text-xs font-bold text-slate-400">+ حجز الحصة</span>
+                                                            <span className="text-xs font-bold text-slate-400">{t('bookSlotText')}</span>
                                                         )}
                                                     </div>
                                                 </td>
@@ -414,4 +418,4 @@ const SchedulePage: React.FC = () => {
     );
 };
 
-export default SchedulePage;
+exportTest: default SchedulePage;
