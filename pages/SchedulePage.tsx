@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../App';
-import { db } from '../src/utils/firebase';
-import { collection, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { supabase } from '../src/utils/supabase';
 
 const translations = {
     ar: {
@@ -64,13 +63,6 @@ const translations = {
     }
 };
 
-const LockIcon = () => (
-  <svg className="w-16 h-16 text-emerald-500 mb-6 drop-shadow-md" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-  </svg>
-);
-
 const SchedulePage: React.FC = () => {
     const { locale, dir } = useLanguage();
     const isAr = locale === 'ar';
@@ -93,12 +85,14 @@ const SchedulePage: React.FC = () => {
     const fetchSchedule = async () => {
         setIsLoading(true);
         try {
-            const querySnapshot = await getDocs(collection(db, 'library_schedule'));
-            const data: any = {};
-            querySnapshot.forEach((docSnap) => {
-                data[docSnap.id] = docSnap.data();
+            const { data, error } = await supabase.from('library_schedule').select('*');
+            if (error) throw error;
+
+            const map: any = {};
+            data?.forEach((item: any) => {
+                map[item.id] = { teacher: item.teacher, subject: item.subject, grade: item.grade };
             });
-            setScheduleData(data);
+            setScheduleData(map);
         } catch (error) {
             console.error("Error fetching schedule:", error);
         } finally {
@@ -129,7 +123,6 @@ const SchedulePage: React.FC = () => {
         const key = `${day}_${period}`;
         const current = scheduleData[key];
 
-        // منع المعلم العادي من تعديل حصة محجوزة مسبقاً (فقط hr785 يمكنه ذلك)
         if (current?.teacher && currentEmployeeId !== 'hr785') {
             alert(t('alreadyBooked'));
             return;
@@ -148,18 +141,19 @@ const SchedulePage: React.FC = () => {
         const key = `${selectedSlot.day}_${selectedSlot.period}`;
         const current = scheduleData[key];
 
-        // التأكد مرة أخرى أماناً عند الحفظ
         if (current?.teacher && currentEmployeeId !== 'hr785') {
             alert(t('alreadyBooked'));
             setSelectedSlot(null);
             return;
         }
 
-        const slotData = { teacher: formTeacher, subject: formSubject, grade: formGrade };
+        const slotData = { id: key, teacher: formTeacher, subject: formSubject, grade: formGrade };
 
         try {
-            await setDoc(doc(db, 'library_schedule', key), slotData);
-            setScheduleData(prev => ({ ...prev, [key]: slotData }));
+            const { error } = await supabase.from('library_schedule').upsert(slotData);
+            if (error) throw error;
+
+            setScheduleData(prev => ({ ...prev, [key]: { teacher: formTeacher, subject: formSubject, grade: formGrade } }));
             setSelectedSlot(null);
             alert(t('success'));
         } catch (error) {
@@ -177,7 +171,9 @@ const SchedulePage: React.FC = () => {
 
         const key = `${selectedSlot.day}_${selectedSlot.period}`;
         try {
-            await deleteDoc(doc(db, 'library_schedule', key));
+            const { error } = await supabase.from('library_schedule').delete().eq('id', key);
+            if (error) throw error;
+
             setScheduleData(prev => {
                 const updated = { ...prev };
                 delete updated[key];
@@ -216,7 +212,6 @@ const SchedulePage: React.FC = () => {
     return (
         <div dir={dir} className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 pt-24 pb-20 px-4 md:px-8 font-sans relative">
             
-            {/* قالب الطباعة الخاص بحجم A4 بالوضع العرضي (Landscape) */}
             <div id="printable-schedule" className="hidden print:flex flex-col bg-white text-slate-900 p-8 w-[297mm] min-h-[210mm] mx-auto box-border">
                 <div className="flex justify-between items-center border-b-4 border-slate-900 pb-4 mb-6">
                     <div className="flex items-center gap-4">
@@ -285,7 +280,6 @@ const SchedulePage: React.FC = () => {
                 </div>
             </div>
 
-            {/* الواجهة الظاهرة للمستخدم على الموقع */}
             <div className="max-w-[1400px] mx-auto print:hidden">
                 
                 <div className="text-center mb-10 flex flex-col items-center">
@@ -298,7 +292,6 @@ const SchedulePage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* زر الطباعة العلوي */}
                 <div className="flex justify-end mb-6">
                     <button onClick={() => window.print()} className="bg-slate-800 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-2xl font-black text-sm border-b-4 border-slate-950 dark:border-slate-300 active:border-b-0 active:translate-y-1 transition-all shadow-md uppercase tracking-wider">
                         {t('printBtn')}
