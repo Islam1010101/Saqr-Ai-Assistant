@@ -124,37 +124,34 @@ const DraggableSaqrModal: React.FC<{ isOpen: boolean; onClose: () => void; child
             <div className="animate-zoom-in flex items-center justify-center pointer-events-none w-full h-full absolute inset-0 p-4">
                 <div 
                     dir={dir}
-                    // تم تصغير النافذة وعمل تصميم متناسق ومبهج
-                    className="relative w-full max-w-[400px] max-h-[80vh] bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border-4 border-slate-200 dark:border-slate-700 flex flex-col pointer-events-auto overflow-hidden transition-all duration-300"
+                    className="relative w-[95%] max-w-[420px] max-h-[85vh] bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border-4 border-slate-200 dark:border-slate-700 flex flex-col pointer-events-auto transition-all duration-300 m-0 p-0"
                     style={{ transform: `translate(${position.x}px, ${position.y}px)`, touchAction: 'none' }}
                 >
-                    {/* هيدر مصغر لصقر */}
+                    {/* هيدر مصغر لصقر (مركز السحب) */}
                     <div 
-                        className="w-full bg-slate-50 dark:bg-slate-800 border-b-4 border-slate-200 dark:border-slate-700 p-3 flex items-center justify-between cursor-grab active:cursor-grabbing select-none touch-none z-50 shrink-0"
+                        className="w-full flex flex-col items-center justify-center cursor-grab active:cursor-grabbing select-none touch-none z-50 shrink-0 relative pt-6 pb-4 m-0 bg-slate-50 dark:bg-slate-800 rounded-t-[2.2rem] border-b-2 border-slate-200 dark:border-slate-700"
                         onPointerDown={handlePointerDown}
                         onPointerMove={handlePointerMove}
                         onPointerUp={handlePointerUp}
                         onPointerCancel={handlePointerUp}
                     >
-                        <div className="flex items-center gap-3 pointer-events-none">
-                            <div className="w-10 h-10 rounded-full overflow-hidden bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 shadow-inner flex items-center justify-center">
-                                <img src="/saqr-avatar.png" alt="Saqr" className="w-[80%] h-[80%] object-contain" onError={(e) => e.currentTarget.style.display='none'} />
-                            </div>
-                            <div>
-                                <h3 className="font-black text-sm text-slate-900 dark:text-white uppercase tracking-widest leading-none mb-1">{locale === 'en' ? 'Saqr AI' : 'صقر الذكي'}</h3>
-                                <div className="flex items-center gap-1">
-                                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase">{locale === 'en' ? 'Online' : 'متصل'}</span>
-                                </div>
-                            </div>
-                        </div>
-                        <button onClick={(e) => { e.stopPropagation(); onClose(); }} className="p-2 bg-slate-200 dark:bg-slate-700 hover:bg-rose-500 hover:text-white dark:hover:bg-rose-600 rounded-full transition-all pointer-events-auto shadow-sm active:scale-95">
+                        {/* زر الإغلاق في الزاوية */}
+                        <button onClick={(e) => { e.stopPropagation(); onClose(); }} className="absolute top-4 right-4 rtl:left-4 rtl:right-auto p-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-rose-500 hover:text-white dark:hover:bg-rose-600 rounded-full transition-all pointer-events-auto shadow-sm active:scale-95 z-50">
                             <CloseIcon />
                         </button>
+
+                        <div className="w-16 h-16 rounded-full overflow-hidden bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 shadow-inner flex items-center justify-center mb-2">
+                            <img src="/saqr-avatar.png" alt="Saqr" className="w-[85%] h-[85%] object-contain pointer-events-none" onError={(e) => e.currentTarget.style.display='none'} />
+                        </div>
+                        <h3 className="font-black text-lg text-slate-900 dark:text-white uppercase tracking-widest leading-none mb-1 pointer-events-none">{locale === 'en' ? 'Saqr AI' : 'صقر الذكي'}</h3>
+                        <div className="flex items-center gap-1.5 pointer-events-none">
+                            <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                            <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-black uppercase">{locale === 'en' ? 'Online' : 'متصل'}</span>
+                        </div>
                     </div>
                     
-                    {/* منطقة المحتوى الذكية تتوسع تلقائياً مع المحتوى */}
-                    <div className="flex-1 overflow-y-auto no-scrollbar relative pointer-events-auto bg-white dark:bg-slate-900 cursor-auto flex flex-col p-4">
+                    {/* منطقة المحتوى الذكية مع تطبيق الـ Overrides */}
+                    <div className="w-full overflow-y-auto no-scrollbar relative pointer-events-auto cursor-auto flex flex-col p-4 m-0 saqr-modal-override bg-white dark:bg-slate-900 rounded-b-[2.5rem]">
                         {children}
                     </div>
                 </div>
@@ -206,7 +203,8 @@ const Header: React.FC = () => {
     { path: '/search', label: locale === 'en' ? 'Search' : 'البحث بالمكتبة', icon: <SearchIcon />, hint: locale === 'en' ? 'Library Index' : 'فهرس الكتب', color: 'bg-rose-500' },
     { path: '/digital-library', label: locale === 'en' ? 'Digital' : 'المكتبة الرقمية', icon: <BookIcon />, hint: locale === 'en' ? 'E-Books' : 'المكتبة الرقمية', color: 'bg-blue-500' },
     { path: '/creators', label: locale === 'en' ? 'Creators' : 'بوابة المبدعين', icon: <PaletteIcon />, hint: locale === 'en' ? 'Talents' : 'إبداعات طلابنا', color: 'bg-purple-500' },
-    { path: '/game', label: locale === 'en' ? 'Game' : 'تحدي ديوي', icon: <GameIcon />, hint: locale === 'en' ? 'Dewey Game' : 'لعبة تصنيف ديوي', color: 'bg-amber-500' },
+    // تم تعديل التسمية إلى "ألعاب"
+    { path: '/game', label: locale === 'en' ? 'Games' : 'ألعاب', icon: <GameIcon />, hint: locale === 'en' ? 'Games' : 'ألعاب', color: 'bg-amber-500' },
     { path: '/feedback', label: locale === 'en' ? 'Ideas' : 'مقترحات', icon: <FeedbackIcon />, hint: locale === 'en' ? 'Contact' : 'رأيك يهمنا', color: 'bg-emerald-500' }, 
     { path: '/reports', label: locale === 'en' ? 'Reports' : 'تقارير', icon: <ReportsIcon />, hint: locale === 'en' ? 'Reports' : 'تقارير', color: 'bg-slate-700' },
     { path: '/map', label: locale === 'en' ? "Lib's Map" : 'خريطة المكتبة', icon: <MapIcon />, hint: locale === 'en' ? 'Shelf Cont' : 'محتويات الأرفف', color: 'bg-sky-500' },
@@ -234,11 +232,12 @@ const Header: React.FC = () => {
               const isNeighbor = hoveredIndex === index - 1 || hoveredIndex === index + 1;
               const isActive = location.pathname === l.path;
 
+              // تحديث حركة الأيقونات لتقفز للأمام خارج الشريط
               let effectClasses = "scale-100 translate-y-0 z-10 mx-0 md:mx-0.5";
               if (isHovered) {
-                  effectClasses = "scale-[1.5] md:scale-[1.7] -translate-y-3 md:-translate-y-4 z-30 mx-3 md:mx-5 shadow-2xl border-b-2 border-white/50";
+                  effectClasses = "scale-[1.8] md:scale-[2] -translate-y-8 md:-translate-y-10 z-[100] mx-4 md:mx-6 shadow-2xl border-2 border-white/50";
               } else if (isNeighbor) {
-                  effectClasses = "scale-[1.15] md:scale-[1.25] -translate-y-1.5 md:-translate-y-2 z-20 mx-1.5 md:mx-2 shadow-lg";
+                  effectClasses = "scale-[1.3] md:scale-[1.4] -translate-y-3 md:-translate-y-4 z-50 mx-2 shadow-lg";
               }
 
               return (
@@ -251,17 +250,19 @@ const Header: React.FC = () => {
                    onTouchStart={(e) => { e.stopPropagation(); setActiveHint(activeHint === l.path ? null : l.path); setHoveredIndex(index); updateMousePos(e); }}
                    onTouchEnd={() => { setTimeout(() => { setHoveredIndex(null); setActiveHint(null); }, 1500); }}
                 >
+                  {/* صندوق التعريف أسفل المؤشر مباشرة */}
                   {activeHint === l.path && (
                     <div 
                       className="fixed z-[99999] pointer-events-none"
                       style={{ 
                         left: mousePos.x, 
-                        top: mousePos.y - 25,
-                        transform: 'translate(-50%, -100%)' 
+                        top: mousePos.y + 20, // أسفل المؤشر
+                        transform: 'translate(-50%, 0)' 
                       }}
                     >
-                      <div className={`px-3 py-1 ${l.color} text-white text-[10px] md:text-[11px] font-black rounded-lg shadow-xl whitespace-nowrap animate-zoom-in border-2 border-white/20 relative uppercase tracking-wider`}>
-                        <div className={`absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 ${l.color} rotate-45 rounded-sm`}></div>
+                      <div className={`px-3 py-1.5 ${l.color} text-white text-[10px] md:text-[11px] font-black rounded-lg shadow-xl whitespace-nowrap animate-zoom-in border-2 border-white/20 relative uppercase tracking-wider`}>
+                        {/* المؤشر يشير للأعلى */}
+                        <div className={`absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 ${l.color} rotate-45 rounded-sm`}></div>
                         <span className="relative z-10">{l.hint}</span>
                       </div>
                     </div>
@@ -328,7 +329,6 @@ const MainLayout: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 font-sans transition-colors duration-300 flex flex-col selection:bg-rose-500/30 relative">
       
-      {/* الخلفية الديناميكية المبهجة (أحمر وأخضر باهت) */}
       <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-50 dark:opacity-20">
          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-rose-400/20 rounded-full blur-[100px] animate-blob"></div>
          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-emerald-400/20 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
@@ -363,18 +363,87 @@ const MainLayout: React.FC = () => {
         <p className="mt-2 font-bold text-slate-400 dark:text-slate-500 text-[9px] md:text-[10px] uppercase">&copy; Emirates Falcon Int'l. Private School</p>
       </footer>
 
-      {/* 🚀 نافذة صقر المنبثقة الذكية (المصغرة) 🚀 */}
+      {/* 🚀 نافذة صقر المنبثقة الذكية 🚀 */}
       <DraggableSaqrModal isOpen={isSaqrModalOpen} onClose={() => setIsSaqrModalOpen(false)}>
-         {/* تعديل ستايل مكون SmartSearchPage ليناسب النافذة المصغرة */}
-         <div className="w-full h-full flex flex-col pt-10">
-             <SmartSearchPage />
-         </div>
+         <SmartSearchPage />
       </DraggableSaqrModal>
 
+      {/* تنسيقات عامة و Overrides للنافذة العائمة */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
         * { font-family: 'Cairo', sans-serif !important; }
         
+        /* --------------------------------------------------------------------------
+           تعديلات الـ CSS لصفحة صقر بداخل النافذة العائمة لتوسيط البحث وتصفير الهوامش
+           -------------------------------------------------------------------------- */
+        .saqr-modal-override > div {
+            min-height: 0 !important;
+            height: auto !important;
+            background: transparent !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* إخفاء الهيدر الداخلي لصفحة المحادثة لأننا وضعناه في النافذة نفسها */
+        .saqr-modal-override header {
+            display: none !important;
+        }
+        
+        /* جعل المحادثات تظهر تحت شريط البحث */
+        .saqr-modal-override .flex-1.overflow-y-auto {
+            order: 2 !important; 
+            height: auto !important;
+            max-height: 50vh !important; 
+            padding: 10px 0 !important;
+            margin: 0 !important;
+            overflow-y: auto !important;
+        }
+        
+        /* جعل شريط البحث يظهر في المنتصف أعلى المحادثات */
+        .saqr-modal-override .absolute.bottom-0 {
+            position: relative !important;
+            order: 1 !important; 
+            background: transparent !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        /* تصغير الأحجام وتصفير الهوامش ليتناسب مع النافذة */
+        .saqr-modal-override input {
+            font-size: 0.9rem !important;
+            padding: 12px 18px !important;
+            border-radius: 2rem !important;
+            border-width: 2px !important;
+        }
+        .saqr-modal-override button {
+            width: 38px !important;
+            height: 38px !important;
+        }
+        .saqr-modal-override .prose {
+            font-size: 0.85rem !important;
+            line-height: 1.6 !important;
+        }
+        .saqr-modal-override .bg-white.dark\\:bg-slate-800 {
+            padding: 12px 16px !important;
+            border-radius: 1.5rem !important;
+        }
+        /* إخفاء صورة صقر المكررة داخل المحادثة لأنها موجودة في رأس النافذة */
+        .saqr-modal-override .w-12.h-12 {
+            display: none !important;
+        }
+        .saqr-modal-override footer {
+            display: none !important; 
+        }
+        .saqr-modal-override .max-w-4xl {
+             width: 100% !important;
+             max-width: 100% !important;
+             margin: 0 !important;
+             padding: 0 !important;
+        }
+        
+        /* الحركات والإضاءات العامة */
         @keyframes blob {
           0% { transform: translate(0px, 0px) scale(1); }
           33% { transform: translate(30px, -50px) scale(1.1); }
@@ -405,7 +474,6 @@ const MainLayout: React.FC = () => {
         @keyframes zoom-in { 0% { opacity: 0; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
         .animate-zoom-in { animation: zoom-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         
-        /* إخفاء شريط التمرير مع الاحتفاظ بالقدرة على التمرير */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
