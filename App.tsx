@@ -234,7 +234,6 @@ const Header: React.FC = () => {
               const isNeighbor = hoveredIndex === index - 1 || hoveredIndex === index + 1;
               const isActive = location.pathname === l.path;
 
-              // تعديل تأثير الطفو ليصبح خفيفاً وأنيقاً ولا يرتفع كثيراً للخارج
               let effectClasses = "scale-100 translate-y-0 z-10 mx-0.5 md:mx-1";
               if (isHovered) {
                   effectClasses = "scale-[1.4] md:scale-[1.55] -translate-y-4 md:-translate-y-5 z-[100] mx-2.5 md:mx-4 shadow-xl border-2 border-white/50";
@@ -299,11 +298,11 @@ const Header: React.FC = () => {
   );
 };
 
-// -------- 3. سياق اللغة والثيم --------
+// -------- 3. سياق اللغة والثيم (الافتراضي: الإنجليزية والوضع الفاتح) --------
 const LanguageContext = createContext<any>(null);
 export const useLanguage = () => useContext(LanguageContext);
 const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [locale, setLocale] = useState<Locale>('en'); 
+  const [locale, setLocale] = useState<Locale>('en'); // الافتراضي الإنجليزية
   useEffect(() => {
     document.documentElement.lang = locale;
     document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr';
@@ -314,7 +313,7 @@ const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 const ThemeContext = createContext<any>(null);
 export const useTheme = () => useContext(ThemeContext);
 const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem('saqr_theme') as any) || 'light');
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem('saqr_theme') as any) || 'light'); // الافتراضي اللايت مود
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
     localStorage.setItem('saqr_theme', theme);
@@ -354,7 +353,7 @@ const MainLayout: React.FC = () => {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/new-arrivals" element={<NewArrivalsPage />} /> 
           <Route path="/game" element={<DeweyGame />} /> 
-          <Route path="/schedule" element={<SchedulePage />} /> {/* إضافة مسار جدول المكتبة هنا دون ظهوره في الشريط العلوي */}
+          <Route path="/schedule" element={<SchedulePage />} />
         </Routes>
       </main>
 
