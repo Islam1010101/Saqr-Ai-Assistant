@@ -16,6 +16,8 @@ const translations = {
     digitalDesc: "عالم من الكتب والروايات الرقمية.",
     creators: "ركن المبدعين",
     creatorsDesc: "استكشف قصص وابتكارات زملائك المبدعين.",
+    scheduleTitle: "جدول المكتبة",
+    scheduleDesc: "حجز وتنسيق حصص زيارة المكتبة للمعلمين.",
     gameTitle: "رتب المكتبة",
     gameDesc: "العب، استمتع، وتعلم كيفية تصنيف الكتب.",
     bubble: "فخورين بالإمارات",
@@ -52,6 +54,8 @@ const translations = {
     digitalDesc: "A world of digital books and novels.",
     creators: "Creators Corner",
     creatorsDesc: "Explore the stories and innovations of your peers.",
+    scheduleTitle: "Library Schedule",
+    scheduleDesc: "Book and coordinate library visits for teachers.",
     gameTitle: "Library Game",
     gameDesc: "Play, enjoy, and learn book classification.",
     bubble: "Proud of the UAE",
@@ -107,7 +111,7 @@ const FEATURED_BOOKS = [
   { id: 5, titleAr: "التنمية المستدامة - رهان الحاضر", authorAr: "سيلفي برونيل", publisherAr: "كلمة", titleEn: "Sustainable Development", authorEn: "Sylvie Brunel", publisherEn: "Kalima", cover: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRKg00ZPa1fDxxggjnMxBjurgEERKSOCty0tKbFM_h1A&s=10" },
   { id: 6, titleAr: "أحمد بن ماجد: أسد البحار", authorAr: "عائشة الغيص", publisherAr: "الظبي للنشر", titleEn: "Ahmad bin Majid: Lion of the Seas", authorEn: "Aisha Al Ghais", publisherEn: "Al Dhabi Publishing", cover: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbaDeTlyQX6f_qLje_EJ-AmXZghV-MTCaunCctD1hN0KTfze1Q9FK5Vnny&s=10" },
   { id: 7, titleAr: "الشيخ نهيان بن مبارك رجل التسامح", authorAr: "صبحة الخييلي", publisherAr: "مداد للنشر والتوزيع", titleEn: "Sheikh Nahyan bin Mubarak", authorEn: "Sobha Al Khaili", publisherEn: "Medad Publishing", cover: "https://catalogue.mbrl.ae/BookCovers/Symphony/08082023/349321/mbc.jpg" },
-  { id: 8, titleAr: "محمد بن زايد والتعليم", authorAr: "مركز الإمارات للدراسات والبحوث الاستراتيجية", publisherAr: "مركز الإمارات للدراسات والبحوث الاستراتيجية", titleEn: "Mohamed bin Zayed and Education", authorEn: "ECSSR", publisherEn: "ECSSR", cover: "https://www.ecssr.ae/en/api/common/Thumbnail/eyJnbmFtZSI6IjRjMWZlMDdhLTVhY2EtNDI4ZS05Zjc5LTk0YjBlMTUwYTZjNS5qcGciLCJmb2xkZXJQYXRoIjoiSW1hZ2VzL1Byb2R1Y3RzIiwiYXNzZXRJZCI6bnVsbCwibGFuZ0lkIjpudWxsfQ%3D%3D" },
+  { id: 8, titleAr: "محمد بن زايد والتعليم", authorAr: "مركز الإمارات للدراسات والبحوث الاستراتيجية", publisherAr: "مركز الإمارات للدراسات والبحوث الاستراتيجية", titleEn: "Mohamed bin Zayed and Education", authorEn: "ECSSR", publisherEn: "ECSSR", cover: "https://www.ecssr.ae/en/api/common/Thumbnail/eyJgmnameSI6IjRjMWZlMDdhLTVhY2EtNDI4ZS05Zjc5LTk0YjBlMTUwYTZjNS5qcGciLCJmb2xkZXJQYXRoIjoiSW1hZ2VzL1Byb2R1Y3RzIiwiYXNzZXRJZCI6bnVsbCwibGFuZ0lkIjpudWxsfQ%3D%3D" },
   { id: 9, titleAr: "الصدام داخل الحضارات", authorAr: "دييتر سنغاس", publisherAr: "كلمة", titleEn: "The Clash Within Civilizations", authorEn: "Dieter Senghaas", publisherEn: "Kalima", cover: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTpORGHnf4xmE7teLTq1IRDORrLMFfDgbarV1Ni9HI-LA&s=10" },
   { id: 10, titleAr: "زن وفن صيانة الدراجة النارية", authorAr: "روبرت م بيرسيغ", publisherAr: "كلمة", titleEn: "Zen and the Art of Motorcycle Maintenance", authorEn: "Robert M. Pirsig", publisherEn: "Kalima", cover: "https://pbs.twimg.com/media/DVnl6p-UQAAPzpf.jpg" },
 ];
@@ -115,7 +119,7 @@ const FEATURED_BOOKS = [
 interface BurstItem { id: number; tx: number; ty: number; rot: number; color: string; }
 
 // ==========================================
-// مكونات الأيقونات (SVG) للابتعاد عن الإيموجيز
+// مكونات الأيقونات (SVG)
 // ==========================================
 const SearchIcon = () => (
   <svg className="w-10 h-10 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
@@ -153,6 +157,20 @@ const GameIcon = () => (
     <path d="M6 12h4m-2-2v4M15 11h.01M18 13h.01" />
   </svg>
 );
+// شعار جديد لجدول المكتبة (أيقونة الجدول/التقويم)
+const ScheduleIcon = () => (
+  <svg className="w-10 h-10 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+    <line x1="16" y1="2" x2="16" y2="6" />
+    <line x1="8" y1="2" x2="8" y2="6" />
+    <line x1="3" y1="10" x2="21" y2="10" />
+    <line x1="8" y1="14" x2="10" y2="14" />
+    <line x1="14" y1="14" x2="16" y2="14" />
+    <line x1="8" y1="18" x2="10" y2="18" />
+    <line x1="14" y1="18" x2="16" y2="18" />
+  </svg>
+);
+
 const StarIcon = ({ className }: { className: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor">
     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
@@ -255,7 +273,6 @@ const HomePage: React.FC = () => {
   return (
     <div dir={dir} className="w-full min-h-[100dvh] flex flex-col items-center bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300 py-10 md:py-16 px-4">
       
-      {/* 🌟 تصميم طفولي للخلفية */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-50 dark:opacity-20">
          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-rose-400/20 rounded-full blur-[100px] animate-blob"></div>
          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-sky-400/20 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
@@ -264,7 +281,6 @@ const HomePage: React.FC = () => {
 
       <div className="w-full max-w-[1300px] flex flex-col gap-10 md:gap-16 animate-fade-in-up">
         
-        {/* --- 1. قسم الترحيب --- */}
         <div className="text-center space-y-4 max-w-4xl mx-auto relative z-20 transition-transform duration-700">
           <h1 className="text-4xl md:text-6xl font-black text-slate-800 dark:text-white tracking-tight leading-tight">
             {t('welcome')}
@@ -275,7 +291,6 @@ const HomePage: React.FC = () => {
           <div className="h-2 w-20 bg-amber-400 mx-auto rounded-full mt-4 animate-pulse"></div>
         </div>
 
-        {/* --- شريط الأخبار التفاعلي --- */}
         <div className="w-full max-w-5xl mx-auto relative z-30 flex items-center bg-white dark:bg-slate-800 border-4 border-amber-300 dark:border-amber-700 rounded-full shadow-lg overflow-hidden h-14 md:h-16 hover:scale-[1.01] transition-all duration-300">
           <div className="bg-amber-400 text-slate-900 font-black px-6 md:px-8 h-full flex items-center justify-center gap-2 relative z-20 shrink-0 uppercase tracking-widest">
             <div className="w-3 h-3 bg-white rounded-full animate-ping"></div>
@@ -288,7 +303,6 @@ const HomePage: React.FC = () => {
           </div>
         </div>
 
-        {/* --- لافتة استديو صقر --- */}
         <div className="w-full relative z-30 flex flex-col items-center justify-center">
           <Link to="/saqr-studio" className="group relative px-10 py-4 md:px-16 md:py-5 w-fit rounded-full bg-blue-500 text-white border-b-8 border-blue-700 shadow-lg flex items-center justify-center hover:-translate-y-1 hover:border-b-8 active:border-b-0 active:translate-y-2 transition-all duration-200">
             <span className="relative z-10 text-lg md:text-2xl font-black uppercase tracking-wide">
@@ -297,17 +311,13 @@ const HomePage: React.FC = () => {
           </Link>
         </div>
 
-        {/* --- 2. الأزرار الرئيسية وشخصية صقر --- */}
         <div className="w-full flex flex-col lg:flex-row gap-10 items-center justify-center">
           
-          {/* شخصية صقر المركزية مع خلفية الشعار */}
           <div className="lg:order-2 flex flex-col items-center justify-center relative z-20 max-w-sm w-full">
             <div onClick={handleMascotInteraction} className={`relative cursor-pointer transition-transform duration-300 w-full flex justify-center items-center ${isMascotClicked ? 'scale-95' : 'hover:scale-105'}`}>
               
-              {/* الشعار الخلفي للمدرسة بهيئة باهتة (يتحول للأبيض في الدارك مود) */}
               <img src="/school-logo.png" alt="" className="absolute inset-0 m-auto w-[80%] h-[80%] object-contain opacity-10 dark:opacity-20 dark:invert z-0 pointer-events-none" />
 
-              {/* تأثيرات النجوم المتناثرة */}
               {bursts.map((burst) => (
                 <div key={burst.id} 
                   className={`absolute z-[100] animate-burst-steady pointer-events-none ${burst.color}`}
@@ -324,7 +334,6 @@ const HomePage: React.FC = () => {
             </div>
           </div>
 
-          {/* أزرار العمليات والتنقل */}
           <div className="lg:order-1 lg:order-3 flex-1 w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
             
             <Link to="/search" className="bg-sky-400 text-white p-6 rounded-[2rem] border-b-8 border-sky-600 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all flex flex-col items-center text-center shadow-md">
@@ -351,6 +360,13 @@ const HomePage: React.FC = () => {
               <p className="text-sm font-bold opacity-90">{t('creatorsDesc')}</p>
             </Link>
 
+            {/* جدول المكتبة الجديد فوق لعبة التصنيف */}
+            <Link to="/schedule" className="bg-teal-500 text-white p-6 rounded-[2rem] border-b-8 border-teal-700 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all flex flex-col items-center text-center shadow-md">
+              <ScheduleIcon />
+              <h3 className="text-xl md:text-2xl font-black mb-2">{t('scheduleTitle')}</h3>
+              <p className="text-sm font-bold opacity-90">{t('scheduleDesc')}</p>
+            </Link>
+
             <Link to="/game" className="bg-amber-400 text-slate-900 p-6 rounded-[2rem] border-b-8 border-amber-600 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all flex flex-col items-center text-center shadow-md sm:col-span-2 lg:col-span-2 xl:col-span-1">
               <GameIcon />
               <h3 className="text-xl md:text-2xl font-black mb-2">{t('gameTitle')}</h3>
@@ -360,7 +376,6 @@ const HomePage: React.FC = () => {
           </div>
         </div>
 
-        {/* --- 📚 المكتبة الرقمية لمركز أبو ظبي (حجم مصغر) --- */}
         <div className="w-full mt-6">
           <a 
             href="https://www.amazon.com/stores/page/64B19CDC-2694-46EA-8C7D-AA43238F9A37" 
@@ -373,7 +388,7 @@ const HomePage: React.FC = () => {
             </div>
             <div className="flex-1 text-center md:text-start space-y-1">
               <div className="inline-block px-3 py-0.5 rounded-full bg-rose-700/50 text-white text-[10px] font-black uppercase tracking-widest mb-1">
-                 Initiative | مبادرة
+                  Initiative | مبادرة
               </div>
               <h3 className="text-lg md:text-2xl font-black leading-tight">
                 {t('alcLibraryTitle')}
@@ -390,7 +405,6 @@ const HomePage: React.FC = () => {
           </a>
         </div>
 
-        {/* --- 🆕 شريط الكتب المضافة حديثاً --- */}
         <div className="w-full px-2 mt-2 space-y-6">
           <div className="flex items-center justify-between border-b-4 border-slate-200 dark:border-slate-800 pb-3">
             <h3 className="text-2xl md:text-4xl font-black text-slate-800 dark:text-white tracking-tight">
@@ -446,10 +460,8 @@ const HomePage: React.FC = () => {
           </div>
         </div>
 
-        {/* --- 3 & 4. قسم لمحات من الموطن + العدادات والأحداث (تخطيط مدمج) --- */}
         <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4 pb-10 px-2">
           
-          {/* لمحات من الموطن (ثيم أصفر/ذهبي مع علم الإمارات) */}
           <div className="bg-amber-100 dark:bg-slate-800 p-8 md:p-10 rounded-[2.5rem] border-4 border-amber-300 dark:border-amber-700 shadow-sm flex flex-col items-center md:items-start text-center md:text-start h-full relative overflow-hidden">
             <div className="w-20 h-20 bg-white dark:bg-slate-700 rounded-full flex items-center justify-center shadow-sm mb-6 shrink-0 z-10 border-2 border-amber-200 dark:border-amber-600">
               <UaeFlagIcon />
@@ -462,14 +474,11 @@ const HomePage: React.FC = () => {
                 {isAr ? dailyFact.ar : dailyFact.en}
               </p>
             </div>
-            {/* إضاءة زخرفية في الخلفية */}
             <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-amber-200/50 dark:bg-amber-900/20 rounded-full blur-3xl pointer-events-none"></div>
           </div>
 
-          {/* عداد الزوار والأحداث القريبة */}
           <div className="flex flex-col gap-6 h-full">
             
-            {/* شريط عداد الزوار والتاريخ */}
             <div className="bg-white dark:bg-slate-800 px-6 py-5 rounded-[2rem] border-4 border-slate-200 dark:border-slate-700 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-3 h-3 bg-green-500 rounded-full animate-ping"></div>
@@ -488,7 +497,6 @@ const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* بطاقة الأحداث */}
             <div className="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-[2.5rem] border-4 border-slate-200 dark:border-slate-700 shadow-sm flex-1 flex flex-col items-center justify-center">
               {daysLeft !== null && activeEvent ? (
                 <div className="w-full flex flex-col items-center gap-4 animate-fade-in-up">
