@@ -39,7 +39,8 @@ const translations = {
     by: "تأليف:",
     publisher: "الناشر:",
     seeMore: "عرض المزيد",
-    seeMoreDesc: "اكتشف القائمة الكاملة والملخصات الذكية للكتب الجديدة"
+    seeMoreDesc: "اكتشف القائمة الكاملة والملخصات الذكية للكتب الجديدة",
+    newBadge: "جديد"
   },
   en: {
     welcome: "Knowledge Portal at Falcon Int'l School",
@@ -77,7 +78,8 @@ const translations = {
     by: "By:",
     publisher: "Publisher:",
     seeMore: "See More",
-    seeMoreDesc: "Discover the full list and AI summaries for all new arrivals"
+    seeMoreDesc: "Discover the full list and AI summaries for all new arrivals",
+    newBadge: "NEW"
   }
 };
 
@@ -157,7 +159,6 @@ const GameIcon = () => (
     <path d="M6 12h4m-2-2v4M15 11h.01M18 13h.01" />
   </svg>
 );
-// شعار جديد لجدول المكتبة (أيقونة الجدول/التقويم)
 const ScheduleIcon = () => (
   <svg className="w-10 h-10 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
     <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
@@ -360,14 +361,21 @@ const HomePage: React.FC = () => {
               <p className="text-sm font-bold opacity-90">{t('creatorsDesc')}</p>
             </Link>
 
-            {/* جدول المكتبة الجديد فوق لعبة التصنيف */}
-            <Link to="/schedule" className="bg-teal-500 text-white p-6 rounded-[2rem] border-b-8 border-teal-700 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all flex flex-col items-center text-center shadow-md">
+            {/* جدول المكتبة مع شارة جديد */}
+            <Link to="/schedule" className="relative bg-teal-500 text-white p-6 rounded-[2rem] border-b-8 border-teal-700 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all flex flex-col items-center text-center shadow-md">
+              <div className="absolute top-4 start-4 bg-rose-500 text-white text-[10px] md:text-xs px-3 py-0.5 rounded-full font-black uppercase tracking-wider shadow-md animate-pulse">
+                {t('newBadge')}
+              </div>
               <ScheduleIcon />
               <h3 className="text-xl md:text-2xl font-black mb-2">{t('scheduleTitle')}</h3>
               <p className="text-sm font-bold opacity-90">{t('scheduleDesc')}</p>
             </Link>
 
-            <Link to="/game" className="bg-amber-400 text-slate-900 p-6 rounded-[2rem] border-b-8 border-amber-600 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all flex flex-col items-center text-center shadow-md sm:col-span-2 lg:col-span-2 xl:col-span-1">
+            {/* رتب المكتبة مع شارة جديد */}
+            <Link to="/game" className="relative bg-amber-400 text-slate-900 p-6 rounded-[2rem] border-b-8 border-amber-600 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all flex flex-col items-center text-center shadow-md sm:col-span-2 lg:col-span-2 xl:col-span-1">
+              <div className="absolute top-4 start-4 bg-rose-500 text-white text-[10px] md:text-xs px-3 py-0.5 rounded-full font-black uppercase tracking-wider shadow-md animate-pulse">
+                {t('newBadge')}
+              </div>
               <GameIcon />
               <h3 className="text-xl md:text-2xl font-black mb-2">{t('gameTitle')}</h3>
               <p className="text-sm font-bold opacity-90">{t('gameDesc')}</p>
@@ -570,7 +578,7 @@ const HomePage: React.FC = () => {
         @keyframes marquee-ltr { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
         @keyframes marquee-rtl { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
         .animate-marquee-ltr { animation: marquee-ltr 50s linear infinite; }
-        .animate-marquee-rtl { animation: marquee-rtl 50s linear infinite; }
+        .animate-marquee-rtl { animation: marquee-marquee-rtl 50s linear infinite; }
         
         .scrollbar-thin::-webkit-scrollbar { height: 8px; }
         .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
