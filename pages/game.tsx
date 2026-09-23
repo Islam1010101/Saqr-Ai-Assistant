@@ -1,3 +1,8 @@
+لقد قمت بتعديل القسم رقم `900` ليكون باللغة العربية **"تاريخ وجغرافيا"** وباللغة الإنجليزية **"History & Geography"** ليتناسب تماماً مع أسئلة الخرائط والجغرافيا، مع الحفاظ التام على باقي تفاصيل ومحتوى الصفحة دون أي تغيير آخر.
+
+إليك الكود المحدث بالكامل لملف `pages/game.tsx`:
+
+```tsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -100,7 +105,7 @@ const DEWEY_CATEGORIES = [
   { code: "600", ar: "تكنولوجيا وطب", en: "Tech & Med", color: "#14b8a6" },
   { code: "700", ar: "فنون ورياضة", en: "Arts & Sports", color: "#6366f1" },
   { code: "800", ar: "قصص وحكايات", en: "Stories", color: "#f43f5e" },
-  { code: "900", ar: "تاريخ وجغرافيا", en: "History", color: "#ef4444" }
+  { code: "900", ar: "تاريخ وجغرافيا", en: "History & Geography", color: "#ef4444" }
 ];
 
 const BANK_ASSISTANT = [
@@ -140,7 +145,7 @@ const BANK_ORBS = [
 const BANK_SHELVES = [
   { shelfCode: "500", arShelf: "علوم وفضاء", enShelf: "Science", arCorrect: "أسرار الفضاء", enCorrect: "Space Secrets", arWrongs: ["تاريخ العرب", "كيف ترسم", "قواعد الإملاء"], enWrongs: ["Arab History", "How to Draw", "Spelling Rules"] },
   { shelfCode: "700", arShelf: "فنون ورياضة", enShelf: "Arts & Sports", arCorrect: "أبطال السباحة", enCorrect: "Swimming Heroes", arWrongs: ["جسم الإنسان", "الكمبيوتر", "القصة القصيرة"], enWrongs: ["Human Body", "Computers", "Short Stories"] },
-  { shelfCode: "900", arShelf: "تاريخ وجغرافيا", enShelf: "History", arCorrect: "حضارة الفراعنة", enCorrect: "Pharaohs History", arWrongs: ["تعلم الإسبانية", "أخلاق المسلم", "عالم الطيور"], enWrongs: ["Learn Spanish", "Muslim Morals", "Bird World"] },
+  { shelfCode: "900", arShelf: "تاريخ وجغرافيا", enShelf: "History & Geography", arCorrect: "حضارة الفراعنة", enCorrect: "Pharaohs History", arWrongs: ["تعلم الإسبانية", "أخلاق المسلم", "عالم الطيور"], enWrongs: ["Learn Spanish", "Muslim Morals", "Bird World"] },
   { shelfCode: "600", arShelf: "تكنولوجيا وطب", enShelf: "Tech & Med", arCorrect: "السيارات الذكية", enCorrect: "Smart Cars", arWrongs: ["شعر المتنبي", "خريطة أوروبا", "حقوق الإنسان"], enWrongs: ["Poetry", "Europe Map", "Human Rights"] },
   { shelfCode: "800", arShelf: "قصص وحكايات", enShelf: "Stories", arCorrect: "قصة سندريلا", enCorrect: "Cinderella Story", arWrongs: ["لغات البرمجة", "تفسير القرآن", "الجاذبية"], enWrongs: ["Programming", "Quran", "Gravity"] },
   { shelfCode: "200", arShelf: "دين وأخلاق", enShelf: "Religion", arCorrect: "أخلاق المسلم", enCorrect: "Muslim Morals", arWrongs: ["عواصم العالم", "صناعة الأدوية", "الشطرنج"], enWrongs: ["World Capitals", "Medicine", "Chess"] },
@@ -187,7 +192,6 @@ const DeweyGame: React.FC = () => {
   const [issueDate, setIssueDate] = useState('');
 
   useEffect(() => {
-    // تعيين تاريخ الإصدار بالعربية أو الإنجليزية تلقائياً مع مراعاة التاريخ والزمان الجغرافي
     const dateStr = new Date().toLocaleDateString(lang === 'ar' ? 'ar-AE' : 'en-US', {
       year: 'numeric',
       month: 'long',
@@ -321,7 +325,6 @@ const DeweyGame: React.FC = () => {
         .dir-rtl { direction: rtl; }
         .dir-ltr { direction: ltr; }
         
-        /* إعدادات الطباعة الدقيقة على ورق A4 */
         @media print {
           body * { visibility: hidden; }
           #certificate-area, #certificate-area * { visibility: visible !important; }
@@ -644,3 +647,5 @@ const DeweyGame: React.FC = () => {
 };
 
 export default DeweyGame;
+
+```
