@@ -418,4 +418,4 @@ const SchedulePage: React.FC = () => {
     );
 };
 
-exportTest: default SchedulePage;
+export default SchedulePage;
