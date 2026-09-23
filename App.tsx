@@ -225,7 +225,7 @@ const Header: React.FC = () => {
           </div>
         </Link>
         
-        {/* استخدام التمرير الأفقي للأجهزة الصغيرة مع السماح بظهور الأيقونات رأسياً */}
+        {/* شريط تنقل متجاوب وخفيف الأبعاد للكمبيوتر والجوال */}
         <nav className="flex-1 md:flex-none overflow-x-auto overflow-y-visible no-scrollbar scroll-smooth flex items-end h-12 md:h-12 px-2 md:px-4 bg-slate-100 dark:bg-slate-800 rounded-full shadow-inner border-2 border-slate-200 dark:border-slate-700">
           <div className="flex items-end gap-1.5 md:gap-2 h-full pb-1 mx-auto min-w-max px-2">
             {links.map((l, index) => {
@@ -233,11 +233,12 @@ const Header: React.FC = () => {
               const isNeighbor = hoveredIndex === index - 1 || hoveredIndex === index + 1;
               const isActive = location.pathname === l.path;
 
-              let effectClasses = "scale-100 translate-y-0 z-10 mx-0 md:mx-0.5";
+              // تعديل تأثير الطفو ليصبح خفيفاً وأنيقاً ولا يرتفع كثيراً للخارج
+              let effectClasses = "scale-100 translate-y-0 z-10 mx-0.5 md:mx-1";
               if (isHovered) {
-                  effectClasses = "scale-[1.8] md:scale-[2] -translate-y-8 md:-translate-y-10 z-[100] mx-4 md:mx-6 shadow-2xl border-2 border-white/50";
+                  effectClasses = "scale-[1.4] md:scale-[1.55] -translate-y-4 md:-translate-y-5 z-[100] mx-2.5 md:mx-4 shadow-xl border-2 border-white/50";
               } else if (isNeighbor) {
-                  effectClasses = "scale-[1.3] md:scale-[1.4] -translate-y-3 md:-translate-y-4 z-50 mx-2 shadow-lg";
+                  effectClasses = "scale-[1.15] md:scale-[1.25] -translate-y-1.5 md:-translate-y-2 z-50 mx-1 md:mx-1.5 shadow-md";
               }
 
               return (
