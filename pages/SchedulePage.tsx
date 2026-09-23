@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../App';
-import { supabase } from '../utils/supabase';
+import { supabase } from '../src/utils/supabase';
 
 const translations = {
     ar: {
