@@ -23,7 +23,7 @@ const pageTranslations = {
   }
 };
 
-// הקائمة الكاملة والشاملة لجميع الكتب مع ملخصاتها وتصنيفاتها (كما هي)
+// القائمة الكاملة والشاملة لجميع الكتب مع ملخصاتها وتصنيفاتها (كما هي تماماً)
 const ALL_BOOKS_DATA = [
   // --- مستند 1: سلامة بنت هزاع آل نهيان ---
   { titleAr: "يتامى في الغيب", authorAr: "سلامة بنت هزاع آل نهيان", publisherAr: "المؤلف", titleEn: "Orphans in the Unseen", authorEn: "Salama Bint Hazza Al Nahyan", publisherEn: "Author", catAr: "رواية", catEn: "Novel", summaryAr: "رواية أدبية بلمسة خيالية ساحرة تأخذ القارئ في رحلة مشاعر إنسانية عميقة واستكشاف الذات.", summaryEn: "A captivating literary novel with a touch of fantasy exploring deep human emotions and self-discovery." },
@@ -108,7 +108,7 @@ const ALL_BOOKS_DATA = [
 ];
 
 // ==========================================
-// أيقونات SVG جذابة (بديلة للإيموجيز)
+// أيقونات SVG جذابة
 // ==========================================
 const SearchSvg = () => (
   <svg className="w-5 h-5 md:w-6 md:h-6 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
@@ -130,24 +130,15 @@ const SparkleSvg = () => (
   </svg>
 );
 
-const BookSvg = () => (
-  <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-  </svg>
-);
-
 const NewArrivalsPage: React.FC = () => {
   const { locale, dir } = useLanguage();
   const isAr = locale === 'ar';
   
   const [searchTerm, setSearchTerm] = useState('');
   
-  // حالات تتبع الماوس ومحتوى السامري العائم
   const [hoveredBook, setHoveredBook] = useState<any | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   
-  // حالة لإدارة اللمس التفاعلي
   const [activeTouchIdx, setActiveTouchId] = useState<number | null>(null);
 
   const pt = (key: keyof typeof pageTranslations.ar) => pageTranslations[locale][key];
@@ -172,7 +163,6 @@ const NewArrivalsPage: React.FC = () => {
   return (
     <div dir={dir} className="w-full min-h-[100dvh] flex flex-col items-center bg-[#f8fafc] text-slate-900 dark:bg-slate-950 dark:text-white font-sans relative overflow-x-hidden pb-20 md:pb-32 pt-24 md:pt-32 px-4 sm:px-6 md:px-8 transition-colors duration-500">
       
-      {/* 🌟 تصميم طفولي للخلفية 🌟 */}
       <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-50 dark:opacity-20">
          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-400/20 rounded-full blur-[100px] animate-blob"></div>
          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-amber-400/20 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
@@ -180,7 +170,6 @@ const NewArrivalsPage: React.FC = () => {
 
       <div className="w-full max-w-[1350px] flex flex-col gap-10 md:gap-14 animate-fade-in-up relative z-10">
         
-        {/* زر العودة بتصميم طفولي صلب */}
         <div className="w-full flex justify-start px-2">
           <Link to="/" className="group flex items-center gap-3 bg-white dark:bg-slate-800 border-b-4 border-slate-300 dark:border-slate-700 font-black px-6 py-3 rounded-[1.5rem] shadow-sm hover:-translate-y-1 active:border-b-0 active:translate-y-1 transition-all duration-300 text-slate-800 dark:text-white text-xs md:text-sm uppercase tracking-widest">
             <span className={`transform transition-transform duration-300 ${isAr ? 'group-hover:translate-x-1' : 'group-hover:-translate-x-1'}`}>&larr;</span>
@@ -188,7 +177,6 @@ const NewArrivalsPage: React.FC = () => {
           </Link>
         </div>
 
-        {/* 💎 الترويسة الأنيقة */}
         <div className="text-center space-y-4 max-w-4xl mx-auto px-2 select-none">
           <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-tight uppercase">
             {pt('title')}
@@ -202,7 +190,6 @@ const NewArrivalsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* 🔍 شريط البحث بتصميم صلب وألعاب */}
         <div className="w-full max-w-2xl mx-auto px-2">
           <div className="relative flex items-center bg-white dark:bg-slate-800 border-4 border-slate-200 dark:border-slate-700 rounded-[2.5rem] shadow-lg focus-within:border-emerald-400 dark:focus-within:border-emerald-500 transition-all duration-300 pl-2 pr-2">
             <input 
@@ -218,12 +205,11 @@ const NewArrivalsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* 📱 شبكة الكتب (Realistic Books on Shelves) */}
+        {/* شبكة الكتب الواقعية المعدلة لضمان ظهور كامل البيانات وعدم وجود فراغات */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-12 md:gap-x-8 px-2 md:px-8">
           {filteredBooks.map((book, idx) => {
             const isTouchActive = activeTouchIdx === idx;
             
-            // توليد ألوان الكتب
             const colors = [
               'from-sky-400 to-sky-600 border-sky-700',
               'from-emerald-400 to-emerald-600 border-emerald-700',
@@ -231,7 +217,7 @@ const NewArrivalsPage: React.FC = () => {
               'from-amber-400 to-amber-500 border-amber-600',
               'from-purple-400 to-purple-600 border-purple-700'
             ];
-            const colorClass = colors[book.titleEn.length % colors.length];
+            const colorClass = colors[idx % colors.length];
 
             return (
               <div 
@@ -240,43 +226,48 @@ const NewArrivalsPage: React.FC = () => {
                 onMouseLeave={() => setHoveredBook(null)}
                 onMouseMove={handleMouseMove}
                 onClick={() => setActiveTouchId(isTouchActive ? null : idx)}
-                className="relative group cursor-pointer w-full h-[280px] md:h-[320px] perspective-1000 flex items-end justify-center pb-2"
+                className="relative group cursor-pointer w-full h-[290px] md:h-[330px] perspective-1000 flex items-end justify-center pb-2"
               >
-                {/* الكتاب الواقعي */}
-                <div className={`book-volume w-[90%] h-full relative transform-style-3d transition-transform duration-500 group-hover:rotate-y-[-15deg] group-hover:-translate-y-4 group-hover:scale-105 rounded-r-2xl border-l-[12px] md:border-l-[16px] shadow-[-8px_8px_15px_rgba(0,0,0,0.15)] bg-gradient-to-br ${colorClass}`}>
+                {/* غلاف الكتاب المحسن بضمان ظهور النصوص بوضوح */}
+                <div className={`book-volume w-[92%] h-full relative transform-style-3d transition-transform duration-500 group-hover:rotate-y-[-15deg] group-hover:-translate-y-4 group-hover:scale-105 rounded-r-2xl border-l-[14px] md:border-l-[18px] shadow-[-8px_8px_15px_rgba(0,0,0,0.2)] bg-gradient-to-br ${colorClass} flex flex-col justify-between overflow-hidden`}>
                   
-                  <div className="absolute inset-0 flex flex-col p-4 md:p-5 overflow-hidden rounded-r-2xl">
-                    <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-black/20 pointer-events-none"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/25 via-transparent to-black/30 pointer-events-none"></div>
 
-                    <div className="mb-auto mt-1 flex justify-between items-start">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-md text-[8px] md:text-[9px] font-black uppercase tracking-wider bg-white/20 text-white backdrop-blur-sm border border-white/30 shadow-sm max-w-[80%]`}>
-                         <span className="truncate">{isAr ? book.catAr : book.catEn}</span>
-                      </span>
-                      {/* لمبة تلميح للموبايل تظهر ملخص عند اللمس */}
-                      <span className="block sm:hidden text-white animate-pulse">
-                         <SparkleSvg />
-                      </span>
-                    </div>
-                    
-                    <div className="relative z-10 flex-1 flex flex-col justify-center">
-                      <h3 className="font-black text-base md:text-lg text-white leading-snug drop-shadow-md line-clamp-3 mb-2" dir={isAr ? "rtl" : "ltr"}>
-                          {isAr ? book.titleAr : book.titleEn}
-                      </h3>
-                      <div className="flex items-center gap-1.5 text-white/80 mt-auto mb-1">
-                          <UserSvg />
-                          <p className="text-[10px] md:text-xs font-bold truncate uppercase">{isAr ? book.authorAr : book.authorEn}</p>
-                      </div>
+                  {/* القسم العلوي: التصنيف */}
+                  <div className="p-3 md:p-4 pb-1 relative z-10 flex justify-between items-start">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[8px] md:text-[10px] font-black uppercase tracking-wider bg-black/25 text-white backdrop-blur-sm border border-white/30 shadow-sm max-w-[85%] truncate">
+                       <span>{isAr ? book.catAr : book.catEn}</span>
+                    </span>
+                    <span className="block sm:hidden text-white animate-pulse">
+                       <SparkleSvg />
+                    </span>
+                  </div>
+                  
+                  {/* القسم الوسطي: عنوان الكتاب بوضوح */}
+                  <div className="relative z-10 px-3 md:px-4 flex-1 flex flex-col justify-center text-center">
+                    <h3 className="font-black text-sm sm:text-base md:text-lg text-white leading-snug drop-shadow-md line-clamp-4" dir={isAr ? "rtl" : "ltr"}>
+                        {isAr ? book.titleAr : book.titleEn}
+                    </h3>
+                  </div>
+
+                  {/* القسم السفلي: اسم المؤلف بوضوح تام */}
+                  <div className="relative z-10 p-3 md:p-4 pt-1 bg-black/20 backdrop-blur-[2px] mt-auto">
+                    <div className="flex items-center justify-center gap-1.5 text-white/90">
+                        <UserSvg />
+                        <p className="text-[10px] md:text-xs font-black truncate uppercase" dir={isAr ? "rtl" : "ltr"}>
+                          {isAr ? book.authorAr : book.authorEn}
+                        </p>
                     </div>
                   </div>
 
-                  {/* كعب الكتاب */}
-                  <div className="absolute top-0 left-[-12px] md:left-[-16px] w-[12px] md:w-[16px] h-full bg-black/30 origin-right transform rotate-y-90 flex flex-col items-center justify-between py-6">
+                  {/* كعب الكتاب الجانبي */}
+                  <div className="absolute top-0 left-[-14px] md:left-[-18px] w-[14px] md:w-[18px] h-full bg-black/40 origin-right transform rotate-y-90 flex flex-col items-center justify-between py-6">
                      <div className="w-full h-1 bg-white/30"></div>
-                     <div className="text-[8px] md:text-[10px] text-white/50 font-black -rotate-90 tracking-widest truncate max-w-[200px] px-2">{isAr ? book.publisherAr : book.publisherEn}</div>
+                     <div className="text-[7px] md:text-[9px] text-white/70 font-black -rotate-90 tracking-widest truncate max-w-[200px] px-2">{isAr ? book.publisherAr : book.publisherEn}</div>
                      <div className="w-full h-1 bg-white/30"></div>
                   </div>
 
-                  {/* صفحات الكتاب */}
+                  {/* صفحات الكتاب الجانبية */}
                   <div className="absolute top-2 right-[-4px] md:right-[-6px] w-[4px] md:w-[6px] h-[calc(100%-4px)] bg-[#fdfbf7] origin-left transform rotate-y-[-90deg] rounded-r-sm shadow-inner border-y border-r border-[#e2e8f0]">
                      <div className="w-full h-full bg-[repeating-linear-gradient(transparent,transparent_2px,#e2e8f0_2px,#e2e8f0_3px)] opacity-50"></div>
                   </div>
@@ -285,7 +276,7 @@ const NewArrivalsPage: React.FC = () => {
                 {/* خط الرف الخشبي أسفل الكتاب */}
                 <div className="absolute -bottom-2 w-[110%] -left-[5%] h-3 md:h-4 bg-[#8B4513] rounded-sm shadow-md border-b-4 border-[#5C2E0B] -z-10"></div>
 
-                {/* 📱 العرض المخصص للموبايل والآيباد عند اللمس (يظهر منسدلاً أسفل الكارت) */}
+                {/* 📱 عرض الملخص عند اللمس للموبايل */}
                 {isTouchActive && (
                   <div className="block sm:hidden absolute top-[105%] left-1/2 -translate-x-1/2 w-[120%] bg-slate-900 border-4 border-slate-700 p-4 rounded-[2rem] text-white shadow-2xl z-50 animate-zoom-in text-xs leading-relaxed font-bold">
                     <div className="text-[10px] text-emerald-400 font-black mb-2 uppercase tracking-widest flex items-center gap-1">
@@ -300,7 +291,7 @@ const NewArrivalsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 🔮 السامري العائم ذو الخلفية الداكنة الواضحة والثابتة للابتوب والحاسوب الشخصي (يتحرك بطلاقة مع الماوس) */}
+      {/* 🔮 السامري العائم للكمبيوتر */}
       {hoveredBook && (
         <div 
           className="hidden sm:block fixed z-[99999] pointer-events-none max-w-xs md:max-w-sm transition-transform duration-75 ease-out"
@@ -333,7 +324,6 @@ const NewArrivalsPage: React.FC = () => {
         }
         .animate-blob { animation: blob 8s infinite alternate ease-in-out; }
         .animation-delay-2000 { animation-delay: 2s; }
-        .animation-delay-4000 { animation-delay: 4s; }
         
         @keyframes fade-in-up { 
           0% { opacity: 0; transform: translateY(15px); } 
@@ -350,7 +340,6 @@ const NewArrivalsPage: React.FC = () => {
         .perspective-1000 { perspective: 1000px; }
         .transform-style-3d { transform-style: preserve-3d; }
         .rotate-y-90 { transform: rotateY(90deg); }
-        .-rotate-y-15 { transform: rotateY(-15deg); }
       `}</style>
     </div>
   );
