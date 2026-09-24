@@ -160,7 +160,7 @@ const AboutPage: React.FC = () => {
                         <img 
                             src="/school-logo.png" 
                             alt="EFIPS Logo" 
-                            className="w-full h-full object-contain relative z-10 animate-float drop-shadow-xl dark:invert group-hover:scale-105 transition-transform duration-500" 
+                            className="w-full h-full object-contain relative z-10 animate-float drop-shadow-xl dark:brightness-0 dark:invert rotate-6 group-hover:scale-105 transition-transform duration-500" 
                         />
                     </div>
                 </section>
