@@ -3,7 +3,7 @@ import { useLanguage } from '../App';
 
 const translations = {
     ar: {
-        pageTitle: "بوابة الابتكار والتميز",
+        pageTitle: "تقييم الخدمات",
         subTitle: "القراءة ذكاء، والتطوير شراكة.. بصمتك اليوم ترسم مستقبل خدماتنا",
         nameLabel: "الاسم الكامل",
         affiliationLabel: "الصفة المدرسية",
@@ -37,7 +37,7 @@ const translations = {
         optUseful: "مفيد"
     },
     en: {
-        pageTitle: "Innovation & Excellence",
+        pageTitle: "Library Perfomance",
         subTitle: "Reading is Intelligence, Development is Partnership.. Your footprint today shapes the future of our Library.",
         nameLabel: "Full Name",
         affiliationLabel: "School Affiliation",
