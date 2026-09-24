@@ -7,7 +7,7 @@ const translations = {
         pageTitle: "جدول المكتبة المرح",
         subtitle: "نظام حجز وتنسيق حصص زيارة المكتبة المدرسية بطريقة ذكية ومبتكرة",
         secureTitle: "بوابة دخول المعلمين",
-        passPlaceholder: "رقم الموظف (مثال: hr123)",
+        passPlaceholder: "رقم الموظف في المدرسة",
         authBtn: "دخول بوابة المعلمين",
         errorPass: "رقم الموظف غير صحيح! يجب أن يبدأ بـ hr ويتبعه 3 أو 4 أرقام.",
         days: ["الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"],
@@ -42,7 +42,7 @@ const translations = {
         pageTitle: "Magical Library Schedule",
         subtitle: "Smart and vibrant library visit booking and coordination system",
         secureTitle: "Teachers Portal Login",
-        passPlaceholder: "Employee ID (e.g., hr123)",
+        passPlaceholder: "Employee ID",
         authBtn: "Enter Portal",
         errorPass: "Invalid Employee ID! Must start with 'hr' followed by 3 or 4 digits.",
         days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
@@ -301,21 +301,21 @@ const SchedulePage: React.FC = () => {
 
     if (!isAuthenticated) {
         return (
-            <div dir={dir} className="min-h-screen bg-gradient-to-br from-indigo-900 via-slate-900 to-emerald-950 flex flex-col items-center justify-center p-4 relative overflow-hidden">
-                <div className="absolute -top-32 -left-32 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl animate-pulse" />
-                <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
+            <div dir={dir} className="min-h-screen bg-white dark:bg-slate-950 flex flex-col items-center justify-center p-4 relative overflow-hidden">
+                <div className="absolute -top-32 -left-32 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
+                <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" />
                 
-                <div className="w-full max-w-lg bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl p-10 md:p-14 rounded-[3rem] border-4 border-emerald-400/40 shadow-[0_0_50px_rgba(16,185,129,0.2)] text-center relative z-10 flex flex-col items-center animate-zoom-in">
-                    <img src="/saqr-sch.png" alt="Saqr Schedule" className="w-24 h-24 object-contain mb-4 animate-bounce" onError={(e)=>e.currentTarget.style.display='none'} />
+                <div className="w-full max-w-lg bg-white dark:bg-slate-900 backdrop-blur-xl p-10 md:p-14 rounded-[3rem] border-4 border-emerald-400/40 shadow-2xl text-center relative z-10 flex flex-col items-center animate-zoom-in">
+                    <img src="/saqr-sch.png" alt="Saqr Schedule" className="w-32 h-32 md:w-40 md:h-40 object-contain mb-5 animate-bounce drop-shadow-[0_15px_25px_rgba(16,185,129,0.3)] filter hover:scale-110 transition-transform duration-300" onError={(e)=>e.currentTarget.style.display='none'} />
                     <h2 className="text-3xl font-black mb-2 bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent uppercase">{t('secureTitle')}</h2>
-                    <p className="text-xs text-slate-500 font-bold mb-8">أدخل رقم الموظف الخاص بك (مثال: hr123)</p>
+                    <p className="text-xs text-slate-500 font-bold mb-8">أدخل رقم الموظف الخاص بك (مثال: hr000)</p>
                     <input 
                         type="text" 
                         value={password} 
                         onChange={(e)=>setPassword(e.target.value)} 
                         onKeyDown={(e)=>e.key==='Enter'&&handleAuth()} 
                         className="w-full p-5 rounded-3xl bg-slate-100 dark:bg-slate-800 border-4 border-slate-200 dark:border-slate-700 text-center text-2xl mb-8 outline-none focus:border-emerald-500 font-black text-slate-900 dark:text-white shadow-inner uppercase transition-all" 
-                        placeholder="hr123" 
+                        placeholder="hr000" 
                     />
                     <button onClick={handleAuth} className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-5 rounded-[2rem] font-black text-xl uppercase tracking-widest border-b-8 border-emerald-700 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all shadow-xl hover:shadow-emerald-500/30">
                         {t('authBtn')}
@@ -326,10 +326,10 @@ const SchedulePage: React.FC = () => {
     }
 
     return (
-        <div dir={dir} className="min-h-screen bg-gradient-to-br from-slate-50 via-teal-50/20 to-indigo-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 pt-24 pb-20 px-4 md:px-8 font-sans relative overflow-hidden">
+        <div dir={dir} className="min-h-screen bg-white dark:bg-slate-950 pt-24 pb-20 px-4 md:px-8 font-sans relative overflow-hidden">
             
-            <div className="absolute top-10 left-10 w-72 h-72 bg-teal-400/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute bottom-10 right-10 w-96 h-96 bg-purple-400/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute top-10 left-10 w-72 h-72 bg-teal-400/5 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-10 right-10 w-96 h-96 bg-purple-400/5 rounded-full blur-3xl pointer-events-none" />
 
             <div id="printable-schedule" className="hidden print:flex flex-col bg-white text-slate-900 p-8 w-[297mm] min-h-[210mm] mx-auto box-border">
                 <div className="flex justify-between items-center border-b-4 border-slate-900 pb-4 mb-6">
@@ -402,7 +402,16 @@ const SchedulePage: React.FC = () => {
             <div className="max-w-[1400px] mx-auto print:hidden relative z-10">
                 
                 <div className="text-center mb-10 flex flex-col items-center">
-                    <img src="/saqr-sch.png" alt="Saqr Schedule" className="w-20 h-20 object-contain mb-3 animate-bounce" onError={(e)=>e.currentTarget.style.display='none'} />
+                    {/* تكبير الشخصية وإبرازها بشكل واضح وجذاب مع تأثيرات واضحة */}
+                    <div className="relative group mb-4">
+                        <div className="absolute inset-0 bg-emerald-400/30 rounded-full blur-2xl group-hover:bg-emerald-400/50 transition-all duration-500 animate-pulse" />
+                        <img 
+                            src="/saqr-sch.png" 
+                            alt="Saqr Schedule" 
+                            className="w-32 h-32 md:w-44 md:h-44 object-contain relative z-10 animate-bounce drop-shadow-[0_20px_30px_rgba(16,185,129,0.35)] filter hover:scale-110 hover:rotate-3 transition-transform duration-300" 
+                            onError={(e)=>e.currentTarget.style.display='none'} 
+                        />
+                    </div>
                     <h1 className="text-3xl md:text-5xl font-black bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-600 bg-clip-text text-transparent tracking-tight uppercase drop-shadow-sm">
                         {t('pageTitle')}
                     </h1>
@@ -432,7 +441,7 @@ const SchedulePage: React.FC = () => {
                 {isLoading ? (
                     <div className="text-center py-20 text-xl font-black animate-pulse text-emerald-600">{t('loading')}</div>
                 ) : (
-                    <div className="overflow-x-auto bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] border-4 border-emerald-200/50 dark:border-slate-800 shadow-[0_20px_50px_rgba(0,0,0,0.07)] p-4 md:p-6 transition-all">
+                    <div className="overflow-x-auto bg-white dark:bg-slate-900 backdrop-blur-xl rounded-[2.5rem] border-4 border-emerald-200/60 dark:border-slate-800 shadow-[0_20px_50px_rgba(0,0,0,0.06)] p-4 md:p-6 transition-all">
                         <table className="w-full border-collapse min-w-[900px]">
                             <thead>
                                 <tr className="border-b-4 border-slate-100 dark:border-slate-800">
@@ -458,7 +467,7 @@ const SchedulePage: React.FC = () => {
                             <tbody>
                                 {periods.map((period) => (
                                     <tr key={period} className="border-b border-slate-100 dark:border-slate-800/60 hover:bg-teal-50/20 transition-colors">
-                                        <td className="p-4 text-center font-black bg-slate-100/80 dark:bg-slate-800/80 rounded-2xl m-2 text-slate-700 dark:text-slate-300 shadow-inner">
+                                        <td className="p-4 text-center font-black bg-slate-100 dark:bg-slate-800/80 rounded-2xl m-2 text-slate-700 dark:text-slate-300 shadow-inner">
                                             {t('periodLabel')} {period}
                                         </td>
                                         {days.map((day, dIdx) => {
@@ -471,7 +480,7 @@ const SchedulePage: React.FC = () => {
                                                         className={`p-3 rounded-2xl border-2 cursor-pointer transition-all duration-300 min-h-[105px] flex flex-col justify-center items-center shadow-md relative group overflow-hidden ${
                                                             slot?.teacher 
                                                                 ? 'bg-gradient-to-br from-emerald-50 via-teal-50/50 to-cyan-50 dark:from-emerald-950/40 dark:via-slate-900 dark:to-teal-950/40 border-emerald-400 hover:border-emerald-500 hover:scale-105 shadow-emerald-500/10' 
-                                                                : 'bg-white/60 dark:bg-slate-800/40 border-dashed border-slate-300 dark:border-slate-700 hover:border-emerald-400 hover:bg-emerald-50/30'
+                                                                : 'bg-white dark:bg-slate-800/40 border-dashed border-slate-300 dark:border-slate-700 hover:border-emerald-400 hover:bg-emerald-50/30'
                                                         }`}
                                                     >
                                                         {slot?.teacher ? (
