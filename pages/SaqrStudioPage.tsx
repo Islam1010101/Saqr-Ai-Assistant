@@ -11,7 +11,7 @@ const translations = {
     comingSoon: "قريباً",
     podcast: "بودكاست",
     dubbing: "أفلامك AI",
-    studioDesc: "مساحتك الإبداعية للتعبير، الإلقاء، والتمثيل الصوتي.",
+    studioDesc: "مساحتك الإبداعية للتعبير، الإلقاء، صناعة أفكارك.",
     onAir: "على الهواء"
   },
   en: {
@@ -19,7 +19,7 @@ const translations = {
     comingSoon: "COMING SOON",
     podcast: "Podcast",
     dubbing: "AI Filming",
-    studioDesc: "Your creative space to express, narrate, and voice act.",
+    studioDesc: "Your creative space to express, narrate, Create Your Ideias.",
     onAir: "ON AIR"
   }
 };
