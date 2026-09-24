@@ -4,7 +4,7 @@ import { supabase } from '../src/utils/supabase';
 
 const translations = {
     ar: {
-        pageTitle: "جدول المكتبة المرح",
+        pageTitle: "جدول حجز حصص بالمكتبة",
         subtitle: "نظام حجز وتنسيق حصص زيارة المكتبة المدرسية بطريقة ذكية ومبتكرة",
         secureTitle: "بوابة دخول المعلمين",
         passPlaceholder: "رقم الموظف في المدرسة",
@@ -39,7 +39,7 @@ const translations = {
         managementSign: "توقيع الإدارة المدرسية"
     },
     en: {
-        pageTitle: "Magical Library Schedule",
+        pageTitle: "Library Schedule",
         subtitle: "Smart and vibrant library visit booking and coordination system",
         secureTitle: "Teachers Portal Login",
         passPlaceholder: "Employee ID",
