@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../App';
-import { supabase } from '../utils/supabase';
+import { supabase } from '../src/utils/supabase';
 
 const translations = {
     ar: {
@@ -25,7 +25,7 @@ const translations = {
         success: "تم حفظ الحصة بنجاح!",
         deleteSuccess: "تم حذف الحصة بنجاح!",
         unauthorizedDelete: "عذراً، لا تملك صلاحية حذف الحصص. مخصصة للمسؤول فقط.",
-        alreadyBooked: "عذراً، هذه الحصة محجوزة مسبقاً من قبل معلم آخر، ولا يمكن تعديلها إلا من قبل المسؤول.",
+        alreadyBooked: "عذراً، هذه الحصة محجوزة مسبقاً من قبل معلم آخر، ولا يمكن تعديلها إلا من قبل المسؤول .",
         bookSlotText: "✨ اضغط لحجز الحصة",
         addToGoogleCal: "إضافة إلى Google Calendar",
         downloadIcs: "تحميل الحصة (.ics)",
@@ -302,7 +302,6 @@ const SchedulePage: React.FC = () => {
     if (!isAuthenticated) {
         return (
             <div dir={dir} className="min-h-screen bg-gradient-to-br from-indigo-900 via-slate-900 to-emerald-950 flex flex-col items-center justify-center p-4 relative overflow-hidden">
-                {/* خلفية ضوئية متحركة */}
                 <div className="absolute -top-32 -left-32 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl animate-pulse" />
                 <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
                 
@@ -329,11 +328,9 @@ const SchedulePage: React.FC = () => {
     return (
         <div dir={dir} className="min-h-screen bg-gradient-to-br from-slate-50 via-teal-50/20 to-indigo-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 pt-24 pb-20 px-4 md:px-8 font-sans relative overflow-hidden">
             
-            {/* تأثيرات خلفية مرحة ومضيئة */}
             <div className="absolute top-10 left-10 w-72 h-72 bg-teal-400/10 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute bottom-10 right-10 w-96 h-96 bg-purple-400/10 rounded-full blur-3xl pointer-events-none" />
 
-            {/* نسخة الطباعة */}
             <div id="printable-schedule" className="hidden print:flex flex-col bg-white text-slate-900 p-8 w-[297mm] min-h-[210mm] mx-auto box-border">
                 <div className="flex justify-between items-center border-b-4 border-slate-900 pb-4 mb-6">
                     <div className="flex items-center gap-4">
@@ -404,7 +401,6 @@ const SchedulePage: React.FC = () => {
 
             <div className="max-w-[1400px] mx-auto print:hidden relative z-10">
                 
-                {/* العنوان بتصميم جذاب ومرح */}
                 <div className="text-center mb-10 flex flex-col items-center">
                     <img src="/saqr-sch.png" alt="Saqr Schedule" className="w-20 h-20 object-contain mb-3 animate-bounce" onError={(e)=>e.currentTarget.style.display='none'} />
                     <h1 className="text-3xl md:text-5xl font-black bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-600 bg-clip-text text-transparent tracking-tight uppercase drop-shadow-sm">
@@ -418,7 +414,6 @@ const SchedulePage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* أزرار التحكم العلوية */}
                 <div className="flex flex-wrap justify-end gap-4 mb-6">
                     <button 
                         onClick={handleDownloadMySchedule} 
@@ -443,7 +438,6 @@ const SchedulePage: React.FC = () => {
                                 <tr className="border-b-4 border-slate-100 dark:border-slate-800">
                                     <th className="p-4 text-center font-black text-slate-400 uppercase text-sm">الحصة / اليوم</th>
                                     {days.map((day, idx) => {
-                                        // ألوان مختلفة لكل يوم لزيادة البهجة والحيوية
                                         const dayColors = [
                                             "from-emerald-500 to-teal-600 text-white shadow-emerald-500/20",
                                             "from-indigo-500 to-blue-600 text-white shadow-indigo-500/20",
@@ -482,7 +476,6 @@ const SchedulePage: React.FC = () => {
                                                     >
                                                         {slot?.teacher ? (
                                                             <>
-                                                                {/* شارة أو تأثير نبض خفيف للحصة المحجوزة */}
                                                                 <div className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
                                                                 <span className="font-black text-slate-900 dark:text-white text-sm truncate max-w-[150px] drop-shadow-sm">{slot.teacher}</span>
                                                                 <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-1">{slot.subject}</span>
@@ -490,7 +483,6 @@ const SchedulePage: React.FC = () => {
                                                                     {slot.grade}
                                                                 </span>
                                                                 
-                                                                {/* زر جوجل كالندر السريع يظهر عند التمرير */}
                                                                 <div className="flex gap-1 mt-2 opacity-90 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
                                                                     <button 
                                                                         title={t('addToGoogleCal')}
@@ -517,7 +509,6 @@ const SchedulePage: React.FC = () => {
                     </div>
                 )}
 
-                {/* نافذة الحجز والتعديل المنبثقة */}
                 {selectedSlot && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fade-in">
                         <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border-4 border-emerald-400/50 w-full max-w-md shadow-[0_0_60px_rgba(16,185,129,0.3)] animate-zoom-in relative">
