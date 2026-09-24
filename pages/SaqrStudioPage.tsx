@@ -10,7 +10,7 @@ const translations = {
     pageTitle: "استديو صقر",
     comingSoon: "قريباً",
     podcast: "بودكاست",
-    dubbing: "دوبلاج",
+    dubbing: "أفلامك AI",
     studioDesc: "مساحتك الإبداعية للتعبير، الإلقاء، والتمثيل الصوتي.",
     onAir: "على الهواء"
   },
@@ -18,7 +18,7 @@ const translations = {
     pageTitle: "Saqr Studio",
     comingSoon: "COMING SOON",
     podcast: "Podcast",
-    dubbing: "Dubbing",
+    dubbing: "AI Filming",
     studioDesc: "Your creative space to express, narrate, and voice act.",
     onAir: "ON AIR"
   }
