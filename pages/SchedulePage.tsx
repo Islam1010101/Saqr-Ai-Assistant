@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../App';
-import { supabase } from '../src/utils/supabase';
+import { supabase } from '../utils/supabase';
 
 const translations = {
     ar: {
-        pageTitle: "جدول المكتبة",
-        subtitle: "نظام حجز وتنسيق حصص زيارة المكتبة المدرسية",
+        pageTitle: "جدول المكتبة المرح",
+        subtitle: "نظام حجز وتنسيق حصص زيارة المكتبة المدرسية بطريقة ذكية ومبتكرة",
         secureTitle: "بوابة دخول المعلمين",
-        passPlaceholder: "رقم الموظف (مثال: HR123)",
+        passPlaceholder: "رقم الموظف (مثال: hr123)",
         authBtn: "دخول بوابة المعلمين",
         errorPass: "رقم الموظف غير صحيح! يجب أن يبدأ بـ hr ويتبعه 3 أو 4 أرقام.",
         days: ["الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"],
@@ -19,14 +19,19 @@ const translations = {
         saveBtn: "حجز / تعديل الحصة",
         deleteBtn: "حذف الحصة",
         printBtn: "طباعة الجدول المعتمد (A4 عرضي)",
+        myScheduleBtn: "📥 تحميل جدولي الشخصي (.ics)",
         modalTitle: "تحديث جدول الحصة",
         close: "إلغاء",
         success: "تم حفظ الحصة بنجاح!",
         deleteSuccess: "تم حذف الحصة بنجاح!",
-        unauthorizedDelete: "عذراً، لا تملك صلاحية حذف الحصص. مخصصة للمسؤول فقط.",
-        alreadyBooked: "عذراً، هذه الحصة محجوزة مسبقاً من قبل معلم آخر، ولا يمكن تعديلها إلا من قبل المسؤول.",
-        bookSlotText: "+ حجز الحصة",
-        loading: "جاري تحميل جدول الحصص...",
+        unauthorizedDelete: "عذراً، لا تملك صلاحية حذف الحصص. مخصصة للمسؤول (hr785) فقط.",
+        alreadyBooked: "عذراً، هذه الحصة محجوزة مسبقاً من قبل معلم آخر، ولا يمكن تعديلها إلا من قبل المسؤول (hr785).",
+        bookSlotText: "✨ اضغط لحجز الحصة",
+        addToGoogleCal: "إضافة إلى Google Calendar",
+        downloadIcs: "تحميل الحصة (.ics)",
+        enterTeacherName: "أدخل اسمك تماماً كما تم تسجيله في الجدول:",
+        noClassesFound: "لم يتم العثور على حصص مسجلة بهذا الاسم.",
+        loading: "جاري تحميل جدول الحصص السحري...",
         schoolNameAr: "مدرسة صقر الإمارات الدولية الخاصة",
         schoolNameEn: "Emirates Falcon International Private School",
         printHeader: "الجدول الزمني المعتمد لزيارات المكتبة المدرسية",
@@ -34,8 +39,8 @@ const translations = {
         managementSign: "توقيع الإدارة المدرسية"
     },
     en: {
-        pageTitle: "Library Schedule",
-        subtitle: "Library visit booking and coordination system for teachers",
+        pageTitle: "Magical Library Schedule",
+        subtitle: "Smart and vibrant library visit booking and coordination system",
         secureTitle: "Teachers Portal Login",
         passPlaceholder: "Employee ID (e.g., hr123)",
         authBtn: "Enter Portal",
@@ -49,14 +54,19 @@ const translations = {
         saveBtn: "Save / Update Period",
         deleteBtn: "Delete Period",
         printBtn: "Print Schedule (A4 Landscape)",
+        myScheduleBtn: "📥 Download My Schedule (.ics)",
         modalTitle: "Update Schedule Slot",
         close: "Cancel",
         success: "Schedule updated successfully!",
         deleteSuccess: "Period deleted successfully!",
-        unauthorizedDelete: "Sorry, you do not have permission to delete. Only Librarian can delete.",
-        alreadyBooked: "Sorry, this period is already booked by another teacher and can only be modified by the admin .",
-        bookSlotText: "+ Book Period",
-        loading: "Loading schedule...",
+        unauthorizedDelete: "Sorry, you do not have permission to delete. Only hr785 can delete.",
+        alreadyBooked: "Sorry, this period is already booked by another teacher and can only be modified by the admin (hr785).",
+        bookSlotText: "✨ Click to Book",
+        addToGoogleCal: "Add to Google Calendar",
+        downloadIcs: "Download Period (.ics)",
+        enterTeacherName: "Enter your name exactly as registered in the schedule:",
+        noClassesFound: "No classes found registered under this name.",
+        loading: "Loading magical schedule...",
         schoolNameAr: "مدرسة صقر الإمارات الدولية الخاصة",
         schoolNameEn: "Emirates Falcon International Private School",
         printHeader: "Certified Library Visit Timetable",
@@ -190,22 +200,125 @@ const SchedulePage: React.FC = () => {
         }
     };
 
+    const getNextDayOfWeek = (dayName: string) => {
+        const dayMapAr: { [key: string]: number } = { "الإثنين": 1, "الثلاثاء": 2, "الأربعاء": 3, "الخميس": 4, "الجمعة": 5 };
+        const dayMapEn: { [key: string]: number } = { "Monday": 1, "Tuesday": 2, "Wednesday": 3, "Thursday": 4, "Friday": 5 };
+        const targetDay = dayMapAr[dayName] || dayMapEn[dayName] || 1;
+
+        const now = new Date();
+        const currentDay = now.getDay();
+        let distance = targetDay - currentDay;
+        if (distance <= 0) distance += 7;
+
+        const resultDate = new Date(now);
+        resultDate.setDate(now.getDate() + distance);
+        return resultDate;
+    };
+
+    const getPeriodTimes = (periodNumber: number) => {
+        const baseHour = 7 + periodNumber;
+        const startHour = baseHour < 10 ? `0${baseHour}` : `${baseHour}`;
+        const endHour = (baseHour + 1) < 10 ? `0${baseHour + 1}` : `${baseHour + 1}`;
+        return { start: `${startHour}0000`, end: `${endHour}0000` };
+    };
+
+    const handleDownloadMySchedule = () => {
+        const teacherNameInput = prompt(t('enterTeacherName'));
+        if (!teacherNameInput || !teacherNameInput.trim()) return;
+
+        const searchName = teacherNameInput.trim().toLowerCase();
+        let icsEvents = [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'PRODID:-//Saqr Smart Library//Teacher Schedule//AR'
+        ];
+
+        let foundCount = 0;
+        Object.entries(scheduleData).forEach(([key, slot]) => {
+            if (slot.teacher && slot.teacher.trim().toLowerCase() === searchName) {
+                const [day, periodStr] = key.split('_');
+                const period = parseInt(periodStr);
+                
+                const date = getNextDayOfWeek(day);
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const dayStr = String(date.getDate()).padStart(2, '0');
+                const dateFormatted = `${year}${month}${dayStr}`;
+
+                const times = getPeriodTimes(period);
+                const startTime = `${dateFormatted}T${times.start}Z`;
+                const endTime = `${dateFormatted}T${times.end}Z`;
+
+                icsEvents.push(
+                    'BEGIN:VEVENT',
+                    `SUMMARY:حصة مكتبة: ${slot.subject} (${slot.grade})`,
+                    `DESCRIPTION:المعلم: ${slot.teacher} - المادة: ${slot.subject} - الصف: ${slot.grade}`,
+                    `LOCATION:مكتبة مدرسة صقر الإمارات الدولية الخاصة`,
+                    `DTSTART:${startTime}`,
+                    `DTEND:${endTime}`,
+                    'END:VEVENT'
+                );
+                foundCount++;
+            }
+        });
+
+        if (foundCount === 0) {
+            alert(t('noClassesFound'));
+            return;
+        }
+
+        icsEvents.push('END:VCALENDAR');
+        const icsContent = icsEvents.join('\r\n');
+
+        const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `my_library_schedule_${teacherNameInput}.ics`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const handleAddToGoogleCalendar = (day: string, period: number, slot: { teacher: string; subject: string; grade: string }) => {
+        const date = getNextDayOfWeek(day);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const dayStr = String(date.getDate()).padStart(2, '0');
+        const dateFormatted = `${year}${month}${dayStr}`;
+
+        const times = getPeriodTimes(period);
+        const startTime = `${dateFormatted}T${times.start}Z`;
+        const endTime = `${dateFormatted}T${times.end}Z`;
+
+        const title = encodeURIComponent(`حصة مكتبة: ${slot.subject} (${slot.grade})`);
+        const details = encodeURIComponent(`المعلم: ${slot.teacher}\nالصف: ${slot.grade}\nالمادة: ${slot.subject}\nزيارة مكتبة مدرسة صقر الإمارات الدولية الخاصة`);
+        const location = encodeURIComponent('مكتبة المدرسة - مدرسة صقر الإمارات الدولية الخاصة');
+
+        const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startTime}/${endTime}&details=${details}&location=${location}`;
+        window.open(url, '_blank');
+    };
+
     if (!isAuthenticated) {
         return (
-            <div dir={dir} className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 flex flex-col items-center justify-center p-4 relative overflow-hidden">
-                <div className="w-full max-w-lg bg-white dark:bg-slate-800 p-10 md:p-14 rounded-[3rem] border-4 border-slate-200 dark:border-slate-700 shadow-2xl text-center relative z-10 flex flex-col items-center animate-zoom-in">
-                    <img src="/saqr-sch.png" alt="Saqr Schedule" className="w-24 h-24 object-contain mb-4 animate-float" onError={(e)=>e.currentTarget.style.display='none'} />
-                    <h2 className="text-3xl font-black mb-2 text-slate-900 dark:text-white uppercase">{t('secureTitle')}</h2>
+            <div dir={dir} className="min-h-screen bg-gradient-to-br from-indigo-900 via-slate-900 to-emerald-950 flex flex-col items-center justify-center p-4 relative overflow-hidden">
+                {/* خلفية ضوئية متحركة */}
+                <div className="absolute -top-32 -left-32 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl animate-pulse" />
+                <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
+                
+                <div className="w-full max-w-lg bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl p-10 md:p-14 rounded-[3rem] border-4 border-emerald-400/40 shadow-[0_0_50px_rgba(16,185,129,0.2)] text-center relative z-10 flex flex-col items-center animate-zoom-in">
+                    <img src="/saqr-sch.png" alt="Saqr Schedule" className="w-24 h-24 object-contain mb-4 animate-bounce" onError={(e)=>e.currentTarget.style.display='none'} />
+                    <h2 className="text-3xl font-black mb-2 bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent uppercase">{t('secureTitle')}</h2>
                     <p className="text-xs text-slate-500 font-bold mb-8">أدخل رقم الموظف الخاص بك (مثال: hr123)</p>
                     <input 
                         type="text" 
                         value={password} 
                         onChange={(e)=>setPassword(e.target.value)} 
                         onKeyDown={(e)=>e.key==='Enter'&&handleAuth()} 
-                        className="w-full p-5 rounded-3xl bg-slate-50 dark:bg-slate-900 border-4 border-slate-200 dark:border-slate-700 text-center text-2xl mb-8 outline-none focus:border-emerald-500 font-black text-slate-900 dark:text-white shadow-inner uppercase" 
+                        className="w-full p-5 rounded-3xl bg-slate-100 dark:bg-slate-800 border-4 border-slate-200 dark:border-slate-700 text-center text-2xl mb-8 outline-none focus:border-emerald-500 font-black text-slate-900 dark:text-white shadow-inner uppercase transition-all" 
                         placeholder="hr123" 
                     />
-                    <button onClick={handleAuth} className="w-full bg-emerald-500 text-white py-5 rounded-[2rem] font-black text-xl uppercase tracking-widest border-b-8 border-emerald-700 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all shadow-md">
+                    <button onClick={handleAuth} className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-5 rounded-[2rem] font-black text-xl uppercase tracking-widest border-b-8 border-emerald-700 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all shadow-xl hover:shadow-emerald-500/30">
                         {t('authBtn')}
                     </button>
                 </div>
@@ -214,8 +327,13 @@ const SchedulePage: React.FC = () => {
     }
 
     return (
-        <div dir={dir} className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 pt-24 pb-20 px-4 md:px-8 font-sans relative">
+        <div dir={dir} className="min-h-screen bg-gradient-to-br from-slate-50 via-teal-50/20 to-indigo-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 pt-24 pb-20 px-4 md:px-8 font-sans relative overflow-hidden">
             
+            {/* تأثيرات خلفية مرحة ومضيئة */}
+            <div className="absolute top-10 left-10 w-72 h-72 bg-teal-400/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-10 right-10 w-96 h-96 bg-purple-400/10 rounded-full blur-3xl pointer-events-none" />
+
+            {/* نسخة الطباعة */}
             <div id="printable-schedule" className="hidden print:flex flex-col bg-white text-slate-900 p-8 w-[297mm] min-h-[210mm] mx-auto box-border">
                 <div className="flex justify-between items-center border-b-4 border-slate-900 pb-4 mb-6">
                     <div className="flex items-center gap-4">
@@ -284,41 +402,69 @@ const SchedulePage: React.FC = () => {
                 </div>
             </div>
 
-            <div className="max-w-[1400px] mx-auto print:hidden">
+            <div className="max-w-[1400px] mx-auto print:hidden relative z-10">
                 
+                {/* العنوان بتصميم جذاب ومرح */}
                 <div className="text-center mb-10 flex flex-col items-center">
-                    <img src="/saqr-sch.png" alt="Saqr Schedule" className="w-20 h-20 object-contain mb-3 animate-float" onError={(e)=>e.currentTarget.style.display='none'} />
-                    <h1 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight uppercase">{t('pageTitle')}</h1>
-                    <p className="text-sm font-bold text-slate-500 mt-2">{t('subtitle')}</p>
+                    <img src="/saqr-sch.png" alt="Saqr Schedule" className="w-20 h-20 object-contain mb-3 animate-bounce" onError={(e)=>e.currentTarget.style.display='none'} />
+                    <h1 className="text-3xl md:text-5xl font-black bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-600 bg-clip-text text-transparent tracking-tight uppercase drop-shadow-sm">
+                        {t('pageTitle')}
+                    </h1>
+                    <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-2">{t('subtitle')}</p>
                     <div className="flex justify-center gap-3 mt-4">
-                        <div className="w-16 h-2 bg-emerald-500 rounded-full" />
-                        <div className="w-8 h-2 bg-amber-400 rounded-full" />
+                        <div className="w-16 h-2 bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full animate-pulse" />
+                        <div className="w-8 h-2 bg-gradient-to-r from-amber-400 to-orange-400 rounded-full animate-pulse" />
+                        <div className="w-4 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse" />
                     </div>
                 </div>
 
-                <div className="flex justify-end mb-6">
-                    <button onClick={() => window.print()} className="bg-slate-800 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-2xl font-black text-sm border-b-4 border-slate-950 dark:border-slate-300 active:border-b-0 active:translate-y-1 transition-all shadow-md uppercase tracking-wider">
+                {/* أزرار التحكم العلوية */}
+                <div className="flex flex-wrap justify-end gap-4 mb-6">
+                    <button 
+                        onClick={handleDownloadMySchedule} 
+                        className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-6 py-3 rounded-2xl font-black text-sm border-b-4 border-emerald-800 active:border-b-0 active:translate-y-1 transition-all shadow-lg hover:shadow-emerald-500/25 uppercase tracking-wider flex items-center gap-2"
+                    >
+                        {t('myScheduleBtn')}
+                    </button>
+                    <button 
+                        onClick={() => window.print()} 
+                        className="bg-gradient-to-r from-slate-800 to-slate-900 dark:from-white dark:to-slate-200 text-white dark:text-slate-900 px-6 py-3 rounded-2xl font-black text-sm border-b-4 border-slate-950 dark:border-slate-300 active:border-b-0 active:translate-y-1 transition-all shadow-lg uppercase tracking-wider"
+                    >
                         {t('printBtn')}
                     </button>
                 </div>
 
                 {isLoading ? (
-                    <div className="text-center py-20 text-xl font-black">{t('loading')}</div>
+                    <div className="text-center py-20 text-xl font-black animate-pulse text-emerald-600">{t('loading')}</div>
                 ) : (
-                    <div className="overflow-x-auto bg-white dark:bg-slate-900 rounded-[2.5rem] border-4 border-slate-200 dark:border-slate-800 shadow-xl p-4 md:p-6">
+                    <div className="overflow-x-auto bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] border-4 border-emerald-200/50 dark:border-slate-800 shadow-[0_20px_50px_rgba(0,0,0,0.07)] p-4 md:p-6 transition-all">
                         <table className="w-full border-collapse min-w-[900px]">
                             <thead>
-                                <tr className="border-b-4 border-slate-200 dark:border-slate-800">
+                                <tr className="border-b-4 border-slate-100 dark:border-slate-800">
                                     <th className="p-4 text-center font-black text-slate-400 uppercase text-sm">الحصة / اليوم</th>
-                                    {days.map((day, idx) => (
-                                        <th key={idx} className="p-4 text-center font-black text-lg md:text-xl text-emerald-600 dark:text-emerald-400">{day}</th>
-                                    ))}
+                                    {days.map((day, idx) => {
+                                        // ألوان مختلفة لكل يوم لزيادة البهجة والحيوية
+                                        const dayColors = [
+                                            "from-emerald-500 to-teal-600 text-white shadow-emerald-500/20",
+                                            "from-indigo-500 to-blue-600 text-white shadow-indigo-500/20",
+                                            "from-purple-500 to-pink-600 text-white shadow-purple-500/20",
+                                            "from-amber-500 to-orange-600 text-white shadow-amber-500/20",
+                                            "from-cyan-500 to-blue-500 text-white shadow-cyan-500/20"
+                                        ];
+                                        return (
+                                            <th key={idx} className="p-3 text-center font-black text-base md:text-lg">
+                                                <div className={`py-3 px-4 rounded-2xl bg-gradient-to-r ${dayColors[idx % dayColors.length]} shadow-md transform hover:scale-105 transition-transform duration-300`}>
+                                                    {day}
+                                                </div>
+                                            </th>
+                                        );
+                                    })}
                                 </tr>
                             </thead>
                             <tbody>
                                 {periods.map((period) => (
-                                    <tr key={period} className="border-b border-slate-100 dark:border-slate-800/60 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
-                                        <td className="p-4 text-center font-black bg-slate-100 dark:bg-slate-800/80 rounded-2xl m-2 text-slate-700 dark:text-slate-300">
+                                    <tr key={period} className="border-b border-slate-100 dark:border-slate-800/60 hover:bg-teal-50/20 transition-colors">
+                                        <td className="p-4 text-center font-black bg-slate-100/80 dark:bg-slate-800/80 rounded-2xl m-2 text-slate-700 dark:text-slate-300 shadow-inner">
                                             {t('periodLabel')} {period}
                                         </td>
                                         {days.map((day, dIdx) => {
@@ -328,20 +474,37 @@ const SchedulePage: React.FC = () => {
                                                 <td key={dIdx} className="p-3 text-center">
                                                     <div 
                                                         onClick={() => handleOpenModal(day, period)}
-                                                        className={`p-3 rounded-2xl border-2 cursor-pointer transition-all duration-300 min-h-[90px] flex flex-col justify-center items-center shadow-sm ${
+                                                        className={`p-3 rounded-2xl border-2 cursor-pointer transition-all duration-300 min-h-[105px] flex flex-col justify-center items-center shadow-md relative group overflow-hidden ${
                                                             slot?.teacher 
-                                                                ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800 hover:scale-[1.02]' 
-                                                                : 'bg-slate-50 dark:bg-slate-800/40 border-dashed border-slate-300 dark:border-slate-700 hover:border-emerald-400'
+                                                                ? 'bg-gradient-to-br from-emerald-50 via-teal-50/50 to-cyan-50 dark:from-emerald-950/40 dark:via-slate-900 dark:to-teal-950/40 border-emerald-400 hover:border-emerald-500 hover:scale-105 shadow-emerald-500/10' 
+                                                                : 'bg-white/60 dark:bg-slate-800/40 border-dashed border-slate-300 dark:border-slate-700 hover:border-emerald-400 hover:bg-emerald-50/30'
                                                         }`}
                                                     >
                                                         {slot?.teacher ? (
                                                             <>
-                                                                <span className="font-black text-slate-900 dark:text-white text-sm truncate max-w-[150px]">{slot.teacher}</span>
+                                                                {/* شارة أو تأثير نبض خفيف للحصة المحجوزة */}
+                                                                <div className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                                                                <span className="font-black text-slate-900 dark:text-white text-sm truncate max-w-[150px] drop-shadow-sm">{slot.teacher}</span>
                                                                 <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-1">{slot.subject}</span>
-                                                                <span className="text-[10px] font-bold bg-emerald-200/50 dark:bg-emerald-900/50 px-2 py-0.5 rounded-full mt-1 text-slate-700 dark:text-slate-300">{slot.grade}</span>
+                                                                <span className="text-[10px] font-extrabold bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-2.5 py-0.5 rounded-full mt-1.5 shadow-sm">
+                                                                    {slot.grade}
+                                                                </span>
+                                                                
+                                                                {/* زر جوجل كالندر السريع يظهر عند التمرير */}
+                                                                <div className="flex gap-1 mt-2 opacity-90 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                                                                    <button 
+                                                                        title={t('addToGoogleCal')}
+                                                                        onClick={() => handleAddToGoogleCalendar(day, period, slot)}
+                                                                        className="px-2 py-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg text-[9px] hover:shadow-lg font-bold flex items-center gap-1 transform hover:scale-110 transition-transform"
+                                                                    >
+                                                                        📅 Google
+                                                                    </button>
+                                                                </div>
                                                             </>
                                                         ) : (
-                                                            <span className="text-xs font-bold text-slate-400">{t('bookSlotText')}</span>
+                                                            <span className="text-xs font-extrabold text-slate-400 group-hover:text-emerald-600 transition-colors flex items-center gap-1">
+                                                                {t('bookSlotText')}
+                                                            </span>
                                                         )}
                                                     </div>
                                                 </td>
@@ -354,36 +517,37 @@ const SchedulePage: React.FC = () => {
                     </div>
                 )}
 
+                {/* نافذة الحجز والتعديل المنبثقة */}
                 {selectedSlot && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-                        <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border-4 border-slate-200 dark:border-slate-800 w-full max-w-md shadow-2xl animate-zoom-in">
-                            <h3 className="text-2xl font-black mb-6 text-slate-900 dark:text-white text-center">
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fade-in">
+                        <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border-4 border-emerald-400/50 w-full max-w-md shadow-[0_0_60px_rgba(16,185,129,0.3)] animate-zoom-in relative">
+                            <h3 className="text-2xl font-black mb-6 bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent text-center">
                                 {selectedSlot.day} - {t('periodLabel')} {selectedSlot.period}
                             </h3>
                             <form onSubmit={handleSaveSlot} className="space-y-4">
                                 <div>
                                     <label className="text-xs font-bold text-slate-500 mb-1 block px-2">{t('teacherName')}</label>
-                                    <input type="text" required value={formTeacher} onChange={(e)=>setFormTeacher(e.target.value)} className="w-full p-4 rounded-xl bg-slate-100 dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-emerald-500 font-bold" />
+                                    <input type="text" required value={formTeacher} onChange={(e)=>setFormTeacher(e.target.value)} className="w-full p-4 rounded-2xl bg-slate-100 dark:bg-slate-800 border-2 border-transparent focus:border-emerald-500 outline-none font-bold shadow-inner transition-all" />
                                 </div>
                                 <div>
                                     <label className="text-xs font-bold text-slate-500 mb-1 block px-2">{t('subject')}</label>
-                                    <input type="text" required value={formSubject} onChange={(e)=>setFormSubject(e.target.value)} className="w-full p-4 rounded-xl bg-slate-100 dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-emerald-500 font-bold" />
+                                    <input type="text" required value={formSubject} onChange={(e)=>setFormSubject(e.target.value)} className="w-full p-4 rounded-2xl bg-slate-100 dark:bg-slate-800 border-2 border-transparent focus:border-emerald-500 outline-none font-bold shadow-inner transition-all" />
                                 </div>
                                 <div>
                                     <label className="text-xs font-bold text-slate-500 mb-1 block px-2">{t('grade')}</label>
-                                    <input type="text" required value={formGrade} onChange={(e)=>setFormGrade(e.target.value)} className="w-full p-4 rounded-xl bg-slate-100 dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-emerald-500 font-bold" />
+                                    <input type="text" required value={formGrade} onChange={(e)=>setFormGrade(e.target.value)} className="w-full p-4 rounded-2xl bg-slate-100 dark:bg-slate-800 border-2 border-transparent focus:border-emerald-500 outline-none font-bold shadow-inner transition-all" />
                                 </div>
                                 <div className="flex flex-col gap-3 pt-4">
                                     <div className="flex gap-4">
-                                        <button type="submit" className="flex-1 py-4 bg-emerald-500 text-white font-black rounded-2xl shadow-lg hover:bg-emerald-600 transition-transform active:scale-95">{t('saveBtn')}</button>
-                                        <button type="button" onClick={()=>setSelectedSlot(null)} className="px-6 py-4 bg-slate-200 dark:bg-slate-800 font-black rounded-2xl hover:bg-slate-300 transition-transform active:scale-95">{t('close')}</button>
+                                        <button type="submit" className="flex-1 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-black rounded-2xl shadow-lg hover:shadow-emerald-500/30 transition-all transform active:scale-95">{t('saveBtn')}</button>
+                                        <button type="button" onClick={()=>setSelectedSlot(null)} className="px-6 py-4 bg-slate-200 dark:bg-slate-800 font-black rounded-2xl hover:bg-slate-300 transition-all transform active:scale-95">{t('close')}</button>
                                     </div>
                                     
                                     {currentEmployeeId === 'hr785' && (
                                         <button 
                                             type="button" 
                                             onClick={handleDeleteSlot} 
-                                            className="w-full py-3 bg-rose-500 text-white font-black rounded-2xl shadow-md hover:bg-rose-600 transition-transform active:scale-95"
+                                            className="w-full py-3 bg-gradient-to-r from-rose-500 to-red-600 text-white font-black rounded-2xl shadow-md hover:shadow-rose-500/30 transition-all transform active:scale-95"
                                         >
                                             {t('deleteBtn')}
                                         </button>
