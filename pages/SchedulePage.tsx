@@ -4,7 +4,7 @@ import { supabase } from '../src/utils/supabase';
 
 const translations = {
     ar: {
-        pageTitle: "جدول حجز حصص بالمكتبة",
+        pageTitle: "جدول حجز حصص المكتبة",
         subtitle: "نظام حجز وتنسيق حصص زيارة المكتبة المدرسية بطريقة ذكية ومبتكرة",
         secureTitle: "بوابة دخول المعلمين",
         passPlaceholder: "رقم الموظف في المدرسة",
@@ -340,55 +340,55 @@ const SchedulePage: React.FC = () => {
     return (
         <div dir={dir} className="min-h-screen bg-white dark:bg-slate-950 pt-24 pb-20 px-4 md:px-8 font-sans relative overflow-hidden">
             
-            <div className="absolute top-10 left-10 w-72 h-72 bg-teal-400/5 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute bottom-10 right-10 w-96 h-96 bg-purple-400/5 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute top-10 left-10 w-72 h-72 bg-teal-400/5 rounded-full blur-3xl pointer-events-none print:hidden" />
+            <div className="absolute bottom-10 right-10 w-96 h-96 bg-purple-400/5 rounded-full blur-3xl pointer-events-none print:hidden" />
 
-            <div id="printable-schedule" className="hidden print:flex flex-col bg-white text-slate-900 p-8 w-[297mm] min-h-[210mm] mx-auto box-border">
-                <div className="flex justify-between items-center border-b-4 border-slate-900 pb-4 mb-6">
-                    <div className="flex items-center gap-4">
-                        <img src="https://www.efipslibrary.online/school-logo.png" alt="EFIPS Logo" className="w-16 h-16 object-contain" crossOrigin="anonymous" />
+            {/* --- بداية قسم الطباعة المخصص --- */}
+            <div id="printable-schedule" className="hidden print:flex flex-col bg-white text-black w-full h-[210mm] max-h-[210mm] mx-auto box-border overflow-hidden">
+                <div className="flex justify-between items-center border-b-2 border-black pb-2 mb-2">
+                    <div className="flex items-center gap-2">
+                        <img src="https://www.efipslibrary.online/school-logo.png" alt="EFIPS Logo" className="w-12 h-12 object-contain" crossOrigin="anonymous" />
                         <div>
-                            <h2 className="text-lg font-black text-slate-900">{t('schoolNameAr')}</h2>
-                            <p className="text-[10px] font-bold text-slate-600 uppercase tracking-wide">{t('schoolNameEn')}</p>
+                            <h2 className="text-sm font-black text-black m-0 p-0 leading-tight">{isAr ? t('schoolNameAr') : t('schoolNameEn')}</h2>
                         </div>
                     </div>
                     <div className="text-center">
-                        <h1 className="text-xl font-black uppercase text-slate-900 border-2 border-slate-900 py-2 px-6 rounded-xl">{t('printHeader')}</h1>
+                        <h1 className="text-base font-black uppercase text-black border-2 border-black py-1 px-4 rounded-lg m-0">{t('printHeader')}</h1>
                     </div>
                     <div className="text-left">
-                        <p className="text-xs font-bold text-slate-500">{new Date().toLocaleDateString()}</p>
+                        <p className="text-[10px] font-bold text-black m-0">{new Date().toLocaleDateString()}</p>
                     </div>
                 </div>
 
-                <div className="flex-1">
-                    <table className="w-full border-collapse border-2 border-slate-800 text-xs">
+                <div className="flex-1 overflow-hidden">
+                    <table className="w-full border-collapse border-2 border-black text-[10px] table-fixed h-full">
                         <thead>
-                            <tr className="bg-slate-200 border-b-2 border-slate-800">
-                                <th className="p-2 border-r border-slate-800 text-center font-black">الحصة / اليوم</th>
+                            <tr className="bg-gray-200 border-b-2 border-black">
+                                <th className="p-1 border-r border-black text-center font-black w-16">الحصة</th>
                                 {days.map((day, idx) => (
-                                    <th key={idx} className="p-2 border-r border-slate-800 text-center font-black text-sm">{day}</th>
+                                    <th key={idx} className="p-1 border-r border-black text-center font-black">{day}</th>
                                 ))}
                             </tr>
                         </thead>
                         <tbody>
                             {periods.map((period) => (
-                                <tr key={period} className="border-b border-slate-800">
-                                    <td className="p-2 border-r border-slate-800 text-center font-black bg-slate-100">
+                                <tr key={period} className="border-b border-black h-[11%]">
+                                    <td className="p-1 border-r border-black text-center font-black bg-gray-100 whitespace-nowrap">
                                         {t('periodLabel')} {period}
                                     </td>
                                     {days.map((day, dIdx) => {
                                         const key = `${day}_${period}`;
                                         const slot = scheduleData[key];
                                         return (
-                                            <td key={dIdx} className="p-2 border-r border-slate-800 text-center align-middle h-12">
+                                            <td key={dIdx} className="p-1 border-r border-black text-center align-middle overflow-hidden">
                                                 {slot?.teacher ? (
-                                                    <div>
-                                                        <div className="font-black text-slate-900">{slot.teacher}</div>
-                                                        <div className="text-emerald-700 font-bold">{slot.subject}</div>
-                                                        <div className="text-slate-600 font-bold">{slot.grade}</div>
+                                                    <div className="flex flex-col items-center justify-center leading-tight">
+                                                        <div className="font-black text-black truncate max-w-full">{slot.teacher}</div>
+                                                        <div className="font-bold text-gray-800 truncate max-w-full">{slot.subject}</div>
+                                                        <div className="font-bold text-gray-600 truncate max-w-full">{slot.grade}</div>
                                                     </div>
                                                 ) : (
-                                                    <span className="text-slate-300">-</span>
+                                                    <span className="text-gray-300">-</span>
                                                 )}
                                             </td>
                                         );
@@ -399,22 +399,22 @@ const SchedulePage: React.FC = () => {
                     </table>
                 </div>
 
-                <div className="flex justify-between items-end mt-8 pt-4 border-t-2 border-slate-400">
-                    <div className="text-center">
-                        <p className="font-black text-xs mb-6">{t('librarianSign')}</p>
-                        <div className="w-40 border-b border-slate-600"></div>
+                <div className="flex justify-between items-end mt-2 pt-2 border-t-2 border-gray-400 shrink-0">
+                    <div className="text-center w-1/3">
+                        <p className="font-black text-[10px] mb-4 m-0">{t('librarianSign')}</p>
+                        <div className="w-3/4 mx-auto border-b border-black"></div>
                     </div>
-                    <div className="text-center">
-                        <p className="font-black text-xs mb-6">{t('managementSign')}</p>
-                        <div className="w-40 border-b border-slate-600"></div>
+                    <div className="text-center w-1/3">
+                        <p className="font-black text-[10px] mb-4 m-0">{t('managementSign')}</p>
+                        <div className="w-3/4 mx-auto border-b border-black"></div>
                     </div>
                 </div>
             </div>
+            {/* --- نهاية قسم الطباعة المخصص --- */}
 
             <div className="max-w-[1400px] mx-auto print:hidden relative z-10">
                 
                 <div className="text-center mb-10 flex flex-col items-center">
-                    {/* تكبير الشخصية وإبرازها بشكل واضح وجذاب مع تأثيرات واضحة */}
                     <div className="relative group mb-4">
                         <div className="absolute inset-0 bg-emerald-400/30 rounded-full blur-2xl group-hover:bg-emerald-400/50 transition-all duration-500 animate-pulse" />
                         <img 
@@ -576,15 +576,20 @@ const SchedulePage: React.FC = () => {
                 @media print {
                     @page {
                         size: A4 landscape;
-                        margin: 10mm;
+                        margin: 5mm; /* حواف صغيرة لضمان احتواء الجدول */
                     }
                     body {
                         background: white !important;
                         color: black !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        height: 100vh !important;
                     }
+                    /* إخفاء واجهة الموقع الأصلية أثناء الطباعة */
                     .print\\:hidden {
                         display: none !important;
                     }
+                    /* إظهار قسم الطباعة المخصص فقط */
                     .print\\:flex {
                         display: flex !important;
                     }
