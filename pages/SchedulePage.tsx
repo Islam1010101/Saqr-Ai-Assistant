@@ -201,15 +201,27 @@ const SchedulePage: React.FC = () => {
     };
 
     const getNextDayOfWeek = (dayName: string) => {
-        const dayMapAr: { [key: string]: number } = { "الإثنين": 1, "الثلاثاء": 2, "الأربعاء": 3, "الخميس": 4, "الجمعة": 5 };
-        const dayMapEn: { [key: string]: number } = { "Monday": 1, "Tuesday": 2, "Wednesday": 3, "Thursday": 4, "Friday": 5 };
-        const targetDay = dayMapAr[dayName] || dayMapEn[dayName] || 1;
+        // خريطة أيام الأسبوع للغتين مع تعيين قيم عددية تطابق كائن Date في جافاسكريبت
+        const dayMap: Record<string, number> = { 
+            "الأحد": 0, "الإثنين": 1, "الثلاثاء": 2, "الأربعاء": 3, "الخميس": 4, "الجمعة": 5, "السبت": 6,
+            "Sunday": 0, "Monday": 1, "Tuesday": 2, "Wednesday": 3, "Thursday": 4, "Friday": 5, "Saturday": 6 
+        };
+        
+        // جلب الرقم الخاص باليوم المختار من الجدول
+        const targetDay = dayMap[dayName] ?? 1; // الافتراضي هو الإثنين إذا لم يتم التعرف على اليوم
 
         const now = new Date();
         const currentDay = now.getDay();
+        
+        // حساب الفارق بين اليوم الحالي واليوم المختار
         let distance = targetDay - currentDay;
-        if (distance <= 0) distance += 7;
+        
+        // إذا كان اليوم المختار قد مرّ في هذا الأسبوع، ننتقل للأسبوع القادم
+        if (distance < 0) {
+            distance += 7;
+        }
 
+        // إنشاء تاريخ جديد بناءً على الفارق
         const resultDate = new Date(now);
         resultDate.setDate(now.getDate() + distance);
         return resultDate;
