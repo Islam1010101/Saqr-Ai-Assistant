@@ -213,7 +213,7 @@ const DeweyGame: React.FC = () => {
     const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
     const [issueDate, setIssueDate] = useState('');
 
-    // === متغيرات السحب والإفلات المخصصة للهواتف (بدون Scroll ومزامنة مؤشر دقيقة) ===
+    // === متغيرات السحب والإفلات المخصصة للهواتف ===
     const [dragItem, setDragItem] = useState<{ id: string, type: 'q' | 'opt', content?: string } | null>(null);
     const [dragPos, setDragPos] = useState({ x: 0, y: 0 });
     const dropZonesRef = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -248,6 +248,15 @@ const DeweyGame: React.FC = () => {
         }
         return () => clearInterval(interval);
     }, [stage, questionTimer, feedback]);
+
+    // إيقاف تمرير الشاشة (Scroll) أثناء السحب فقط
+    useEffect(() => {
+        const preventDefault = (e: TouchEvent) => {
+            if (isDragging.current) e.preventDefault();
+        };
+        document.addEventListener('touchmove', preventDefault, { passive: false });
+        return () => document.removeEventListener('touchmove', preventDefault);
+    }, []);
 
     const handleStart = () => {
         if (!studentName.trim() || !studentGrade.trim()) {
@@ -284,7 +293,8 @@ const DeweyGame: React.FC = () => {
                 shelfCode: q.shelfCode,
                 displayShelf: lang === 'ar' ? q.arShelf : q.enShelf,
                 correct: correct,
-                options: shuffleArray([correct, ...wrongs.slice(0, 3)]) // 4 خيارات فقط لتناسب الشاشة
+                // تقليل الخيارات في الموبايل لتوضيح الرؤية (3 خيارات فقط كحد أقصى)
+                options: shuffleArray([correct, ...wrongs.slice(0, 2)]) 
             };
         });
         setCurrentQuestions(mixed);
@@ -343,7 +353,7 @@ const DeweyGame: React.FC = () => {
     };
 
     // =========================================================================
-    // نظام السحب والإفلات المخصص لدعم الهواتف بدقة مع إيقاف التمرير الافتراضي
+    // نظام السحب والإفلات المطور (استجابة فورية)
     // =========================================================================
     
     const handleDragStart = (e: React.TouchEvent | React.MouseEvent, id: string, type: 'q' | 'opt', content?: string) => {
@@ -452,30 +462,50 @@ const DeweyGame: React.FC = () => {
                 .dir-ltr { direction: ltr; }
                 
                 @media print {
+                    /* إعدادات طباعة الشهادة بشكل مثالي لملء صفحة A4 بدون قطع */
                     html, body {
-                        width: 210mm !important;
-                        height: 297mm !important;
+                        width: 100% !important;
+                        height: 100% !important;
                         margin: 0 !important;
                         padding: 0 !important;
-                        overflow: hidden !important;
+                        background: #fff !important;
                     }
-                    body * { visibility: hidden; }
-                    #certificate-area, #certificate-area * { visibility: visible !important; }
+                    body * { display: none !important; }
+                    
+                    #certificate-print-container, 
+                    #certificate-print-container * {
+                        display: block !important;
+                        visibility: visible !important;
+                    }
+                    
+                    #certificate-print-container {
+                        position: absolute;
+                        left: 0;
+                        top: 0;
+                        width: 100vw !important;
+                        height: 100vh !important;
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                    }
+
                     #certificate-area {
-                        position: fixed !important;
-                        left: 0 !important;
-                        top: 0 !important;
                         width: 210mm !important;
-                        height: 297mm !important;
-                        margin: 0 !important;
-                        padding: 15mm !important;
+                        height: 290mm !important; /* تقليل طفيف لتجنب صفحة إضافية */
+                        margin: auto !important;
+                        padding: 10mm !important;
                         box-sizing: border-box !important;
-                        transform: none !important;
+                        border: 10px solid #f59e0b !important;
+                        background: #ffffff !important;
+                        display: flex !important;
+                        flex-direction: column !important;
+                        justify-content: space-between !important;
+                        -webkit-print-color-adjust: exact;
+                        print-color-adjust: exact;
                         page-break-after: avoid !important;
                         page-break-before: avoid !important;
                         break-inside: avoid !important;
                     }
-                    .no-print { display: none !important; }
                 }
 
                 @page { size: A4 portrait; margin: 0; }
@@ -491,46 +521,46 @@ const DeweyGame: React.FC = () => {
                 .float-anim { animation: floating 3s ease-in-out infinite; }
                 @keyframes floating {
                     0% { transform: translateY(0px); }
-                    50% { transform: translateY(-8px); }
+                    50% { transform: translateY(-6px); }
                     100% { transform: translateY(0px); }
                 }
 
                 .wood-shelf {
                     position: relative;
                     background: linear-gradient(to bottom, #d97706 0%, #b45309 100%);
-                    border-bottom: 8px solid #78350f;
+                    border-bottom: 6px solid #78350f;
                     border-radius: 6px;
-                    box-shadow: inset 0 -4px 10px rgba(0,0,0,0.4), 0 8px 15px rgba(0,0,0,0.3);
+                    box-shadow: inset 0 -2px 5px rgba(0,0,0,0.4), 0 5px 10px rgba(0,0,0,0.3);
                     transition: all 0.2s;
                 }
                 .wood-shelf-active {
                     filter: brightness(1.2);
-                    box-shadow: 0 0 20px rgba(245, 158, 11, 0.9), inset 0 -4px 10px rgba(0,0,0,0.4);
+                    box-shadow: 0 0 15px rgba(245, 158, 11, 0.9), inset 0 -2px 5px rgba(0,0,0,0.4);
                     border-bottom-color: #f59e0b;
                 }
                 
                 .realistic-book {
                     position: relative;
                     background: linear-gradient(135deg, #ffffff, #f1f5f9);
-                    border-left: 12px solid #cbd5e1;
-                    border-radius: 4px 12px 12px 4px;
-                    box-shadow: -2px 4px 8px rgba(0,0,0,0.2);
-                    transition: transform 0.1s;
+                    border-left: 8px solid #cbd5e1;
+                    border-radius: 4px 10px 10px 4px;
+                    box-shadow: -2px 4px 6px rgba(0,0,0,0.15);
+                    /* إزالة الـ transition لمنع تأخر الحركة أثناء السحب */
                 }
 
                 .laser-beam {
                     position: absolute;
-                    bottom: 50px;
+                    bottom: 40px;
                     width: 4px;
-                    height: 30px;
+                    height: 25px;
                     background: #ef4444;
-                    box-shadow: 0 0 10px #ef4444, 0 0 20px #ef4444;
+                    box-shadow: 0 0 8px #ef4444, 0 0 15px #ef4444;
                     border-radius: 10px;
                     animation: shoot-up 0.3s linear forwards;
                     z-index: 20;
                 }
                 @keyframes shoot-up {
-                    0% { bottom: 50px; opacity: 1; }
+                    0% { bottom: 40px; opacity: 1; }
                     100% { bottom: 100%; opacity: 0; }
                 }
 
@@ -541,7 +571,7 @@ const DeweyGame: React.FC = () => {
                     display: flex;
                     flex-direction: column;
                     height: 100%;
-                    max-height: 90vh;
+                    max-height: 95vh;
                     justify-content: space-between;
                 }
                 
@@ -555,18 +585,18 @@ const DeweyGame: React.FC = () => {
                 }
             `}</style>
 
-            {/* --- العنصر المتحرك أثناء السحب (متمركز تماماً تحت الماوس/الإصبع) --- */}
+            {/* --- العنصر المتحرك أثناء السحب (متمركز تماماً ومستجيب فوراً) --- */}
             {dragItem && (
                 <div 
                     className="fixed pointer-events-none z-[9999] realistic-book p-2 md:p-4 font-black text-center flex items-center justify-center bg-white shadow-2xl text-slate-900"
                     style={{
                         left: dragPos.x,
                         top: dragPos.y,
-                        transform: 'translate(-50%, -50%)', // المركز بدقة بدون دوران لتجنب الانحراف
+                        transform: 'translate(-50%, -50%) scale(1.05)',
                         borderLeftColor: '#f59e0b',
-                        width: dragItem.type === 'q' ? '200px' : '130px',
+                        width: dragItem.type === 'q' ? '180px' : '110px',
                         minHeight: '50px',
-                        fontSize: dragItem.type === 'q' ? '0.9rem' : '0.8rem'
+                        fontSize: dragItem.type === 'q' ? '0.85rem' : '0.75rem'
                     }}
                 >
                     {dragItem.content || (lang === 'ar' ? currentQuestions[qIndex].ar : currentQuestions[qIndex].en)}
@@ -575,22 +605,22 @@ const DeweyGame: React.FC = () => {
 
             {/* 1. شاشة البداية */}
             {stage === 'intro' && (
-                <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl text-center animate-fade-in-up relative z-10">
-                    <img src="/Game.png" alt="Game Logo" className="w-32 h-32 md:w-48 md:h-48 mx-auto mb-4 object-contain magic-glow" onError={(e) => e.currentTarget.style.display = 'none'} />
-                    <h1 className="text-2xl md:text-3xl font-black text-amber-500 mb-2">{dict.title}</h1>
-                    <p className="text-xs md:text-sm opacity-90 mb-6 font-bold text-slate-600 dark:text-slate-400">{dict.subtitle}</p>
+                <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl text-center animate-fade-in-up relative z-10">
+                    <img src="/Game.png" alt="Game Logo" className="w-28 h-28 md:w-40 md:h-40 mx-auto mb-4 object-contain magic-glow" onError={(e) => e.currentTarget.style.display = 'none'} />
+                    <h1 className="text-xl md:text-3xl font-black text-amber-500 mb-2">{dict.title}</h1>
+                    <p className="text-[11px] md:text-sm opacity-90 mb-5 font-bold text-slate-600 dark:text-slate-400">{dict.subtitle}</p>
                     
-                    <div className={`space-y-3 mb-6 ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
+                    <div className={`space-y-3 mb-5 ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
                         <div>
                             <label className="text-[10px] md:text-xs font-bold text-slate-500 mb-1 block px-2">{dict.studentName}</label>
-                            <input type="text" placeholder={dict.namePlaceholder} className="w-full p-3 md:p-4 rounded-xl bg-slate-100 dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-amber-500 font-bold text-sm" value={studentName} onChange={(e) => setStudentName(e.target.value)} />
+                            <input type="text" placeholder={dict.namePlaceholder} className="w-full p-3 rounded-xl bg-slate-100 dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-amber-500 font-bold text-sm" value={studentName} onChange={(e) => setStudentName(e.target.value)} />
                         </div>
                         <div>
                             <label className="text-[10px] md:text-xs font-bold text-slate-500 mb-1 block px-2">{dict.grade}</label>
-                            <input type="text" placeholder={dict.gradePlaceholder} className="w-full p-3 md:p-4 rounded-xl bg-slate-100 dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-amber-500 font-bold text-sm" value={studentGrade} onChange={(e) => setStudentGrade(e.target.value)} />
+                            <input type="text" placeholder={dict.gradePlaceholder} className="w-full p-3 rounded-xl bg-slate-100 dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-amber-500 font-bold text-sm" value={studentGrade} onChange={(e) => setStudentGrade(e.target.value)} />
                         </div>
                     </div>
-                    <button onClick={handleStart} className="w-full py-3 md:py-4 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-white font-black text-lg md:text-xl rounded-2xl shadow-[0_10px_20px_rgba(245,158,11,0.4)] transition-all active:scale-95 float-anim">
+                    <button onClick={handleStart} className="w-full py-3 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-white font-black text-base md:text-xl rounded-xl shadow-[0_5px_15px_rgba(245,158,11,0.4)] transition-all active:scale-95 float-anim">
                         {dict.start}
                     </button>
                 </div>
@@ -598,24 +628,24 @@ const DeweyGame: React.FC = () => {
 
             {/* 2. شاشة التعلم */}
             {stage === 'learn' && (
-                <div className="max-w-3xl w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl animate-zoom-in relative z-10 text-center flex flex-col h-[90vh] md:h-auto justify-between md:justify-start">
-                    <div className="w-20 h-20 md:w-24 md:h-24 bg-amber-100 dark:bg-amber-900/30 rounded-full mx-auto flex items-center justify-center mb-4 shrink-0">
-                        <svg className="w-10 h-10 md:w-12 md:h-12 text-amber-500 magic-glow" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                <div className="max-w-3xl w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 md:p-8 shadow-2xl animate-zoom-in relative z-10 text-center flex flex-col h-[85vh] md:h-auto justify-between md:justify-start">
+                    <div className="w-16 h-16 md:w-24 md:h-24 bg-amber-100 dark:bg-amber-900/30 rounded-full mx-auto flex items-center justify-center mb-3 shrink-0">
+                        <svg className="w-8 h-8 md:w-12 md:h-12 text-amber-500 magic-glow" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                     </div>
                     <div>
-                        <h2 className="text-2xl md:text-3xl font-black text-amber-500 mb-2">{dict.rulesTitle}</h2>
-                        <p className="text-sm md:text-lg leading-relaxed mb-6 opacity-90 font-bold text-slate-700 dark:text-slate-300">
+                        <h2 className="text-xl md:text-3xl font-black text-amber-500 mb-2">{dict.rulesTitle}</h2>
+                        <p className="text-[11px] md:text-lg leading-relaxed mb-4 opacity-90 font-bold text-slate-700 dark:text-slate-300">
                             {dict.rulesText}
                         </p>
                     </div>
-                    <div className="compact-grid mb-6 flex-1 md:flex-none overflow-y-auto content-start px-1">
+                    <div className="compact-grid mb-4 flex-1 md:flex-none content-start px-1">
                         {DEWEY_CATEGORIES.map(cat => (
-                            <div key={cat.code} className="p-2 md:p-4 rounded-xl text-[10px] md:text-sm font-black shadow-md text-white flex items-center justify-center text-center" style={{ backgroundColor: cat.color }}>
+                            <div key={cat.code} className="p-2 rounded-lg text-[9px] md:text-sm font-black shadow-sm text-white flex items-center justify-center text-center" style={{ backgroundColor: cat.color }}>
                                 {lang === 'ar' ? cat.ar : cat.en}
                             </div>
                         ))}
                     </div>
-                    <button onClick={() => setStage('tut1')} className="w-full py-4 bg-gradient-to-r from-green-400 to-green-500 hover:from-green-500 hover:to-green-600 text-white font-black rounded-2xl shadow-lg transition-transform active:scale-95 text-lg md:text-xl mt-auto shrink-0">
+                    <button onClick={() => setStage('tut1')} className="w-full py-3 bg-gradient-to-r from-green-400 to-green-500 hover:from-green-500 hover:to-green-600 text-white font-black rounded-xl shadow-md transition-transform active:scale-95 text-base md:text-xl mt-auto shrink-0">
                         {dict.readyBtn}
                     </button>
                 </div>
@@ -624,45 +654,45 @@ const DeweyGame: React.FC = () => {
             {/* شاشات التعليمات قبل التحديات */}
             {stage === 'tut1' && (
                 <div className="max-w-md w-full bg-blue-50 dark:bg-slate-900 border border-blue-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl text-center animate-zoom-in relative z-10">
-                    <h2 className="text-2xl md:text-3xl font-black text-blue-500 mb-4">{dict.tutCh1Title}</h2>
-                    <p className="text-base md:text-lg leading-relaxed font-bold text-slate-700 dark:text-slate-300 mb-8">{dict.tutCh1Desc}</p>
-                    <button onClick={startChallenge1} className="w-full py-4 bg-blue-500 text-white font-black text-lg md:text-xl rounded-2xl shadow-lg active:scale-95">{dict.tutorialBtn}</button>
+                    <h2 className="text-xl md:text-3xl font-black text-blue-500 mb-3">{dict.tutCh1Title}</h2>
+                    <p className="text-sm md:text-lg leading-relaxed font-bold text-slate-700 dark:text-slate-300 mb-6">{dict.tutCh1Desc}</p>
+                    <button onClick={startChallenge1} className="w-full py-3 bg-blue-500 text-white font-black text-base md:text-xl rounded-xl shadow-md active:scale-95">{dict.tutorialBtn}</button>
                 </div>
             )}
             {stage === 'tut2' && (
                 <div className="max-w-md w-full bg-red-50 dark:bg-slate-900 border border-red-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl text-center animate-zoom-in relative z-10">
-                    <h2 className="text-2xl md:text-3xl font-black text-red-500 mb-4">{dict.tutCh2Title}</h2>
-                    <p className="text-base md:text-lg leading-relaxed font-bold text-slate-700 dark:text-slate-300 mb-8">{dict.tutCh2Desc}</p>
-                    <button onClick={startChallenge2} className="w-full py-4 bg-red-500 text-white font-black text-lg md:text-xl rounded-2xl shadow-lg active:scale-95">{dict.tutorialBtn}</button>
+                    <h2 className="text-xl md:text-3xl font-black text-red-500 mb-3">{dict.tutCh2Title}</h2>
+                    <p className="text-sm md:text-lg leading-relaxed font-bold text-slate-700 dark:text-slate-300 mb-6">{dict.tutCh2Desc}</p>
+                    <button onClick={startChallenge2} className="w-full py-3 bg-red-500 text-white font-black text-base md:text-xl rounded-xl shadow-md active:scale-95">{dict.tutorialBtn}</button>
                 </div>
             )}
             {stage === 'tut3' && (
                 <div className="max-w-md w-full bg-amber-50 dark:bg-slate-900 border border-amber-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl text-center animate-zoom-in relative z-10">
-                    <h2 className="text-2xl md:text-3xl font-black text-amber-500 mb-4">{dict.tutCh3Title}</h2>
-                    <p className="text-base md:text-lg leading-relaxed font-bold text-slate-700 dark:text-slate-300 mb-8">{dict.tutCh3Desc}</p>
-                    <button onClick={startChallenge3} className="w-full py-4 bg-amber-500 text-white font-black text-lg md:text-xl rounded-2xl shadow-lg active:scale-95">{dict.tutorialBtn}</button>
+                    <h2 className="text-xl md:text-3xl font-black text-amber-500 mb-3">{dict.tutCh3Title}</h2>
+                    <p className="text-sm md:text-lg leading-relaxed font-bold text-slate-700 dark:text-slate-300 mb-6">{dict.tutCh3Desc}</p>
+                    <button onClick={startChallenge3} className="w-full py-3 bg-amber-500 text-white font-black text-base md:text-xl rounded-xl shadow-md active:scale-95">{dict.tutorialBtn}</button>
                 </div>
             )}
 
             {/* 3. شاشات التحديات المدمجة للموبايل (Compact View) */}
             {stage.startsWith('challenge') && currentQuestions.length > 0 && (
-                <div className="max-w-5xl w-full h-[95vh] md:h-auto md:min-h-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-3 md:p-8 shadow-2xl animate-fade-in-up relative z-10 compact-layout">
+                <div className="max-w-5xl w-full h-[90vh] md:h-auto md:min-h-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-3 md:p-8 shadow-xl animate-fade-in-up relative z-10 compact-layout">
                     
                     {/* شريط الإحصائيات العلوية المدمج */}
-                    <div className="flex justify-between items-center mb-2 bg-slate-100 dark:bg-slate-800 p-2 rounded-xl shadow-inner shrink-0">
+                    <div className="flex justify-between items-center mb-2 bg-slate-100 dark:bg-slate-800 p-2 md:p-4 rounded-xl shadow-inner shrink-0">
                         <div>
                             <span className="text-amber-500 font-black text-xs md:text-xl block">
                                 {stage === 'challenge1' ? dict.ch1 : stage === 'challenge2' ? dict.ch2 : dict.ch3}
                             </span>
-                            <span className="text-[10px] md:text-sm opacity-70 font-bold">{dict.question} {qIndex + 1}/5</span>
+                            <span className="text-[9px] md:text-sm opacity-70 font-bold">{dict.question} {qIndex + 1}/5</span>
                         </div>
                         <div className="flex gap-2 text-center">
-                            <div className="bg-white dark:bg-slate-700 px-2 py-1 md:px-5 md:py-3 rounded-lg md:rounded-2xl shadow-sm border border-slate-200 dark:border-slate-600 min-w-[50px]">
-                                <div className="text-[9px] md:text-xs opacity-70 font-black">{dict.time}</div>
+                            <div className="bg-white dark:bg-slate-700 px-2 py-1 md:px-5 md:py-3 rounded-lg md:rounded-2xl shadow-sm border border-slate-200 dark:border-slate-600 min-w-[45px]">
+                                <div className="text-[8px] md:text-xs opacity-70 font-black">{dict.time}</div>
                                 <div className={`font-black text-sm md:text-2xl ${questionTimer <= 5 ? 'text-red-500 magic-glow' : 'text-slate-800 dark:text-white'}`}>{questionTimer}</div>
                             </div>
-                            <div className="bg-white dark:bg-slate-700 px-2 py-1 md:px-5 md:py-3 rounded-lg md:rounded-2xl shadow-sm border border-slate-200 dark:border-slate-600 min-w-[50px]">
-                                <div className="text-[9px] md:text-xs opacity-70 font-black">{dict.points}</div>
+                            <div className="bg-white dark:bg-slate-700 px-2 py-1 md:px-5 md:py-3 rounded-lg md:rounded-2xl shadow-sm border border-slate-200 dark:border-slate-600 min-w-[45px]">
+                                <div className="text-[8px] md:text-xs opacity-70 font-black">{dict.points}</div>
                                 <div className="font-black text-sm md:text-2xl text-green-500">{score}</div>
                             </div>
                         </div>
@@ -674,11 +704,11 @@ const DeweyGame: React.FC = () => {
                         {feedback ? (
                             <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/95 dark:bg-slate-900/95 z-40 backdrop-blur-sm rounded-2xl animate-zoom-in">
                                 {feedback === 'correct' ? (
-                                    <svg className="w-24 h-24 text-green-500 mb-4 drop-shadow-lg" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                                    <svg className="w-20 h-20 text-green-500 mb-3 drop-shadow-md" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
                                 ) : (
-                                    <svg className="w-24 h-24 text-red-500 mb-4 drop-shadow-lg" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" /></svg>
+                                    <svg className="w-20 h-20 text-red-500 mb-3 drop-shadow-md" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" /></svg>
                                 )}
-                                <h3 className={`text-2xl md:text-5xl font-black ${feedback === 'correct' ? 'text-green-500' : 'text-red-500'}`}>
+                                <h3 className={`text-xl md:text-5xl font-black ${feedback === 'correct' ? 'text-green-500' : 'text-red-500'}`}>
                                     {feedback === 'correct' ? dict.correct : dict.wrong}
                                 </h3>
                             </div>
@@ -689,28 +719,28 @@ const DeweyGame: React.FC = () => {
                         {/* ================================================= */}
                         {stage !== 'challenge2' && (
                             <>
-                                <div className="flex flex-col items-center justify-center shrink-0 min-h-[100px] md:min-h-[160px] relative z-20 mb-2 md:mb-8">
+                                <div className="flex flex-col items-center justify-center shrink-0 min-h-[90px] md:min-h-[160px] relative z-20 mb-2 md:mb-8">
                                     {stage === 'challenge3' ? (
                                         <div 
                                             ref={(el) => { if(el) dropZonesRef.current.set(currentQuestions[qIndex].shelfCode, el); }}
-                                            className="w-full h-24 md:h-36 relative wood-shelf flex items-end justify-center pb-2 md:pb-5 mt-6"
+                                            className="w-full md:w-2/3 h-20 md:h-36 relative wood-shelf flex items-end justify-center pb-1 md:pb-5 mt-4"
                                         >
                                             {/* إبراز سؤال التحدي 3 بوضوح شديد */}
-                                            <div className="absolute -top-8 md:-top-10 bg-amber-100 dark:bg-slate-800 px-4 py-2 rounded-xl font-black text-amber-700 shadow-md border-2 border-amber-300 dark:border-amber-700 text-sm md:text-xl w-11/12 text-center truncate">
+                                            <div className="absolute -top-6 md:-top-10 bg-amber-500 dark:bg-amber-600 px-3 py-1.5 md:py-2 rounded-lg font-black text-white shadow-md border-2 border-amber-300 dark:border-amber-400 text-xs md:text-xl w-[95%] text-center truncate">
                                                 {dict.shelfText}: {currentQuestions[qIndex].displayShelf}
                                             </div>
-                                            <p className="text-amber-100 font-bold text-[10px] md:text-base tracking-widest opacity-80">{dict.dropInstruction}</p>
+                                            <p className="text-amber-100 font-bold text-[9px] md:text-base tracking-widest opacity-80">{dict.dropInstruction}</p>
                                         </div>
                                     ) : (
                                         <div className="text-center w-full">
+                                            <p className="text-[10px] md:text-base font-black opacity-70 mb-2 md:mb-6 text-slate-500 bg-slate-100 dark:bg-slate-800 inline-block px-3 py-1 rounded-full">{dict.dragInstruction}</p>
                                             <div 
-                                                style={{ touchAction: 'none' }}
                                                 onMouseDown={(e) => handleDragStart(e, 'q', 'q')}
                                                 onTouchStart={(e) => handleDragStart(e, 'q', 'q')}
-                                                className={`realistic-book p-4 md:p-10 max-w-[280px] md:max-w-xl mx-auto cursor-grab active:cursor-grabbing flex items-center justify-center text-center float-anim`}
+                                                className={`realistic-book p-3 md:p-10 max-w-[260px] md:max-w-xl mx-auto cursor-grab active:cursor-grabbing flex items-center justify-center text-center float-anim`}
                                                 style={{ borderLeftColor: '#f59e0b', color: '#0f172a', opacity: dragItem?.type === 'q' ? 0.2 : 1 }}
                                             >
-                                                <h3 className="font-black text-sm md:text-3xl leading-snug drop-shadow-sm pointer-events-none">
+                                                <h3 className="font-black text-xs md:text-3xl leading-snug drop-shadow-sm pointer-events-none">
                                                     {lang === 'ar' ? currentQuestions[qIndex].ar : currentQuestions[qIndex].en}
                                                 </h3>
                                             </div>
@@ -724,10 +754,9 @@ const DeweyGame: React.FC = () => {
                                             {currentQuestions[qIndex].options.map((opt: string, idx: number) => (
                                                 <div 
                                                     key={idx}
-                                                    style={{ touchAction: 'none' }}
                                                     onMouseDown={(e) => handleDragStart(e, opt, 'opt', opt)}
                                                     onTouchStart={(e) => handleDragStart(e, opt, 'opt', opt)}
-                                                    className={`realistic-book p-2 md:p-6 font-black text-[10px] md:text-lg text-center flex items-center justify-center min-h-[50px] md:min-h-[100px] cursor-grab active:cursor-grabbing text-slate-800`}
+                                                    className={`realistic-book p-2 md:p-6 font-black text-[9px] md:text-lg text-center flex items-center justify-center min-h-[45px] md:min-h-[100px] cursor-grab active:cursor-grabbing text-slate-800`}
                                                     style={{ borderLeftColor: '#cbd5e1', opacity: dragItem?.id === opt ? 0.2 : 1 }}
                                                 >
                                                     <span className="pointer-events-none leading-tight px-1">{opt}</span>
@@ -740,9 +769,9 @@ const DeweyGame: React.FC = () => {
                                                 <div 
                                                     key={cat.code} 
                                                     ref={(el) => { if(el) dropZonesRef.current.set(cat.code, el); }}
-                                                    className={`wood-shelf h-16 md:h-36 flex flex-col justify-end items-center pb-1 md:pb-3`}
+                                                    className={`wood-shelf h-12 md:h-36 flex flex-col justify-end items-center pb-1 md:pb-3`}
                                                 >
-                                                    <div className="bg-white/95 text-slate-900 text-[9px] md:text-sm font-black px-1 py-0.5 md:px-3 md:py-2 rounded shadow-sm mb-0.5 md:mb-1 text-center w-[95%] truncate pointer-events-none" style={{ borderBottom: `2px solid ${cat.color}` }}>
+                                                    <div className="bg-white/95 text-slate-900 text-[8px] md:text-sm font-black px-1 py-0.5 md:px-3 md:py-2 rounded shadow-sm mb-0.5 md:mb-1 text-center w-[95%] truncate pointer-events-none" style={{ borderBottom: `2px solid ${cat.color}` }}>
                                                         {lang === 'ar' ? cat.ar : cat.en}
                                                     </div>
                                                 </div>
@@ -758,17 +787,17 @@ const DeweyGame: React.FC = () => {
                         {/* ================================================= */}
                         {stage === 'challenge2' && (
                             <div className="flex-1 flex flex-col bg-slate-900 rounded-2xl overflow-hidden relative border-4 border-slate-700 shadow-inner p-2 md:p-4">
-                                <div className="text-center mb-2 md:mb-6 z-20 shrink-0">
-                                    <p className="text-[9px] md:text-sm font-black text-sky-300 mb-1">{dict.shootInstruction}</p>
-                                    <div className="bg-white/10 backdrop-blur-md border border-white/20 text-white p-2 md:p-4 rounded-xl inline-block max-w-[280px] md:max-w-xl text-xs md:text-2xl font-black shadow-lg leading-tight">
+                                <div className="text-center mb-1 md:mb-6 z-20 shrink-0">
+                                    <p className="text-[8px] md:text-sm font-black text-sky-300 mb-0.5">{dict.shootInstruction}</p>
+                                    <div className="bg-white/10 backdrop-blur-md border border-white/20 text-white p-2 md:p-4 rounded-xl inline-block max-w-[260px] md:max-w-xl text-[10px] md:text-2xl font-black shadow-md leading-tight">
                                         {lang === 'ar' ? currentQuestions[qIndex].ar : currentQuestions[qIndex].en}
                                     </div>
                                 </div>
 
-                                <div className="flex justify-between w-full px-2 md:px-12 relative z-20 shrink-0">
+                                <div className="flex justify-between w-full px-1 md:px-12 relative z-20 shrink-0 mt-2">
                                     {ch2Options.map((opt, idx) => (
                                         <div key={idx} className="flex flex-col items-center w-1/4 px-0.5">
-                                            <div className="w-12 h-12 md:w-20 md:h-20 rounded-full flex items-center justify-center font-black text-[8px] md:text-base text-white shadow-[0_0_15px_rgba(255,255,255,0.3)] float-anim text-center leading-tight p-0.5" style={{ backgroundColor: opt.color, animationDelay: `${idx * 0.2}s` }}>
+                                            <div className="w-10 h-10 md:w-20 md:h-20 rounded-full flex items-center justify-center font-black text-[7px] md:text-base text-white shadow-[0_0_10px_rgba(255,255,255,0.3)] float-anim text-center leading-tight p-0.5" style={{ backgroundColor: opt.color, animationDelay: `${idx * 0.2}s` }}>
                                                 {lang === 'ar' ? opt.ar : opt.en}
                                             </div>
                                         </div>
@@ -776,16 +805,16 @@ const DeweyGame: React.FC = () => {
                                 </div>
 
                                 <div className="flex-1 relative mt-2 md:mt-10">
-                                    <div className="absolute inset-0 flex justify-between px-2 md:px-12 pointer-events-none opacity-10">
+                                    <div className="absolute inset-0 flex justify-between px-1 md:px-12 pointer-events-none opacity-10">
                                         {[0, 1, 2, 3].map(i => <div key={i} className="w-1/4 flex justify-center"><div className="w-px h-full bg-white border-dashed border-l"></div></div>)}
                                     </div>
 
-                                    <div className="absolute bottom-0 w-full flex justify-between px-2 md:px-12 pb-2 md:pb-4 transition-all duration-300 z-30">
+                                    <div className="absolute bottom-0 w-full flex justify-between px-1 md:px-12 pb-1 md:pb-4 transition-all duration-200 z-30">
                                         {[0, 1, 2, 3].map(pos => (
                                             <div key={pos} className="w-1/4 flex justify-center relative">
                                                 {rocketPos === pos && (
                                                     <>
-                                                        <svg className="w-8 h-8 md:w-16 md:h-16 text-sky-400 drop-shadow-[0_0_10px_#38bdf8]" fill="currentColor" viewBox="0 0 24 24">
+                                                        <svg className="w-8 h-8 md:w-16 md:h-16 text-sky-400 drop-shadow-[0_0_8px_#38bdf8]" fill="currentColor" viewBox="0 0 24 24">
                                                             <path d="M12 2.5l-4.5 9h9zM7.5 13L5 21l7-3 7 3-2.5-8H7.5z" />
                                                         </svg>
                                                         {isShooting && <div className="laser-beam left-1/2 -translate-x-1/2"></div>}
@@ -797,14 +826,14 @@ const DeweyGame: React.FC = () => {
                                 </div>
 
                                 {/* أزرار التحكم للشاشات اللمسية */}
-                                <div className="md:hidden flex justify-between items-center mt-2 gap-1.5 z-30 shrink-0">
-                                    <button onTouchStart={(e) => {e.preventDefault(); setRocketPos(p => (lang === 'ar' ? Math.min(3, p + 1) : Math.max(0, p - 1)))}} className="flex-1 bg-slate-800 text-white p-2 rounded-xl active:bg-slate-700 text-lg font-black shadow-sm">
+                                <div className="md:hidden flex justify-between items-center mt-1 gap-1 z-30 shrink-0">
+                                    <button onTouchStart={(e) => {e.preventDefault(); setRocketPos(p => (lang === 'ar' ? Math.min(3, p + 1) : Math.max(0, p - 1)))}} className="flex-1 bg-slate-800 text-white p-2 rounded-lg active:bg-slate-700 text-base font-black shadow-sm">
                                         {lang === 'ar' ? '►' : '◄'}
                                     </button>
-                                    <button onTouchStart={(e) => {e.preventDefault(); handleShoot();}} className="flex-[2] bg-red-600 text-white p-2 rounded-xl active:bg-red-700 font-black text-xs uppercase tracking-widest shadow-[0_0_10px_rgba(220,38,38,0.5)]">
+                                    <button onTouchStart={(e) => {e.preventDefault(); handleShoot();}} className="flex-[2] bg-red-600 text-white p-2 rounded-lg active:bg-red-700 font-black text-[10px] uppercase tracking-widest shadow-[0_0_10px_rgba(220,38,38,0.5)]">
                                         {dict.fireBtn}
                                     </button>
-                                    <button onTouchStart={(e) => {e.preventDefault(); setRocketPos(p => (lang === 'ar' ? Math.max(0, p - 1) : Math.min(3, p + 1)))}} className="flex-1 bg-slate-800 text-white p-2 rounded-xl active:bg-slate-700 text-lg font-black shadow-sm">
+                                    <button onTouchStart={(e) => {e.preventDefault(); setRocketPos(p => (lang === 'ar' ? Math.max(0, p - 1) : Math.min(3, p + 1)))}} className="flex-1 bg-slate-800 text-white p-2 rounded-lg active:bg-slate-700 text-base font-black shadow-sm">
                                         {lang === 'ar' ? '◄' : '►'}
                                     </button>
                                 </div>
@@ -814,70 +843,126 @@ const DeweyGame: React.FC = () => {
                 </div>
             )}
 
-            {/* 4. شاشة الشهادة الاحترافية المتوافقة تماماً مع طباعة A4 الطولية (Fix 1 Page Print) */}
+            {/* 4. شاشة الشهادة الاحترافية (مضبوطة لطباعة A4 طولي دون قطع) */}
             {stage === 'certificate' && (
                 <div className="w-full flex flex-col items-center animate-fade-in-up relative z-10 pt-4 pb-10 print:pt-0 print:pb-0">
-                    <div 
-                        id="certificate-area" 
-                        className="cert-font bg-white text-slate-900 border-[14px] border-amber-500 p-8 md:p-12 rounded-3xl shadow-2xl relative overflow-hidden flex flex-col justify-between"
-                        style={{ width: '210mm', minHeight: '297mm', boxSizing: 'border-box' }}
-                    >
+                    
+                    {/* حاوية وهمية مخصصة للطباعة فقط لضمان التموضع الصحيح */}
+                    <div id="certificate-print-container" className="hidden print:flex">
+                        <div 
+                            id="certificate-area" 
+                            className="cert-font bg-white text-slate-900 border-[14px] border-amber-500 p-8 md:p-12 rounded-3xl shadow-2xl relative overflow-hidden flex flex-col justify-between"
+                        >
+                            <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/arabesque.png")' }}></div>
+                            
+                            <div className="flex justify-between items-center border-b-[4px] border-amber-500/30 pb-6 mb-6 relative z-10">
+                                <img src="/school-logo.png" alt="School Logo" className="w-24 h-24 object-contain drop-shadow-xl" onError={(e) => e.currentTarget.style.display = 'none'} />
+                                <div className={`text-left ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
+                                    <h2 className="text-xl md:text-2xl font-black text-red-700 uppercase tracking-widest">{dict.schoolName}</h2>
+                                    <p className="text-xs md:text-sm text-amber-600 font-black mt-2 bg-amber-50 inline-block px-3 py-1.5 rounded-xl border border-amber-200">{dict.dept}</p>
+                                    <p className="text-xs text-slate-500 font-bold mt-1">{dict.certDate} {issueDate}</p>
+                                </div>
+                            </div>
+
+                            <div className="text-center relative z-10 my-auto">
+                                <h1 className="text-3xl md:text-5xl font-black text-amber-600 mb-6 drop-shadow-sm">{dict.certTitle}</h1>
+                                <div className="w-36 h-1.5 bg-red-600 mx-auto rounded-full mb-6"></div>
+                                
+                                <p className="text-lg md:text-2xl leading-relaxed font-bold mb-4 text-slate-700">
+                                    {dict.certAwardedTo}
+                                </p>
+                                <h2 className="text-3xl md:text-4xl font-black text-slate-900 my-4 bg-slate-50 inline-block px-12 py-4 rounded-2xl border-2 border-slate-200 shadow-md">
+                                    {studentName}
+                                </h2>
+                                <p className="text-base md:text-2xl leading-relaxed font-bold text-slate-700 mt-2">
+                                    {dict.certGrade} <strong className="text-red-700 text-2xl md:text-3xl mx-2">{studentGrade}</strong>
+                                </p>
+                                
+                                <p className="text-sm md:text-lg leading-relaxed mt-6 opacity-90 max-w-3xl mx-auto font-bold text-slate-600">
+                                    {dict.certBody}
+                                </p>
+                            </div>
+
+                            <div className="flex justify-center gap-8 md:gap-16 text-center relative z-10 bg-slate-50 p-6 rounded-2xl border-2 border-slate-200 shadow-inner my-6">
+                                <div>
+                                    <div className="text-xs md:text-sm text-slate-500 font-black uppercase mb-1 tracking-wider">{dict.certPoints}</div>
+                                    <div className="text-2xl md:text-4xl font-black text-green-600">{score} <span className="text-lg text-slate-400">/ 300</span></div>
+                                </div>
+                                <div className="w-1 bg-slate-200 rounded-full"></div>
+                                <div>
+                                    <div className="text-xs md:text-sm text-slate-500 font-black uppercase mb-1 tracking-wider">{dict.certTime}</div>
+                                    <div className="text-2xl md:text-4xl font-black text-amber-600">{formatTime(totalTime)}</div>
+                                </div>
+                            </div>
+
+                            <div className="flex justify-between items-end relative z-10 px-4 md:px-8 mt-4">
+                                <div className="text-center">
+                                    <p className="text-base md:text-lg font-black text-slate-800 mb-4">{dict.certSign}</p>
+                                    <div className="w-40 md:w-56 h-[2px] bg-slate-800"></div>
+                                </div>
+                                <img src="/saqr-avatar.png" alt="Saqr Avatar" className="w-24 h-24 md:w-32 md:h-32 object-contain drop-shadow-xl" onError={(e) => e.currentTarget.style.display = 'none'} />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* عرض الشهادة على الشاشة (للمشاهدة فقط) */}
+                    <div className="cert-font bg-white text-slate-900 border-[14px] border-amber-500 p-8 md:p-12 rounded-3xl shadow-2xl relative overflow-hidden flex flex-col justify-between print:hidden" style={{ width: '100%', maxWidth: '210mm', minHeight: '80vh', boxSizing: 'border-box' }}>
                         <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/arabesque.png")' }}></div>
                         
                         <div className="flex justify-between items-center border-b-[4px] border-amber-500/30 pb-6 mb-6 relative z-10">
-                            <img src="/school-logo.png" alt="School Logo" className="w-24 h-24 object-contain drop-shadow-xl" onError={(e) => e.currentTarget.style.display = 'none'} />
+                            <img src="/school-logo.png" alt="School Logo" className="w-16 h-16 md:w-24 md:h-24 object-contain drop-shadow-xl" onError={(e) => e.currentTarget.style.display = 'none'} />
                             <div className={`text-left ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
-                                <h2 className="text-xl md:text-2xl font-black text-red-700 uppercase tracking-widest">{dict.schoolName}</h2>
-                                <p className="text-xs md:text-sm text-amber-600 font-black mt-2 bg-amber-50 inline-block px-3 py-1.5 rounded-xl border border-amber-200">{dict.dept}</p>
-                                <p className="text-xs text-slate-500 font-bold mt-1">{dict.certDate} {issueDate}</p>
+                                <h2 className="text-sm md:text-2xl font-black text-red-700 uppercase tracking-widest">{dict.schoolName}</h2>
+                                <p className="text-[10px] md:text-sm text-amber-600 font-black mt-2 bg-amber-50 inline-block px-3 py-1.5 rounded-xl border border-amber-200">{dict.dept}</p>
+                                <p className="text-[10px] md:text-xs text-slate-500 font-bold mt-1">{dict.certDate} {issueDate}</p>
                             </div>
                         </div>
 
                         <div className="text-center relative z-10 my-auto">
-                            <h1 className="text-3xl md:text-5xl font-black text-amber-600 mb-6 drop-shadow-sm">{dict.certTitle}</h1>
-                            <div className="w-36 h-1.5 bg-red-600 mx-auto rounded-full mb-6"></div>
+                            <h1 className="text-xl md:text-5xl font-black text-amber-600 mb-6 drop-shadow-sm">{dict.certTitle}</h1>
+                            <div className="w-24 md:w-36 h-1.5 bg-red-600 mx-auto rounded-full mb-6"></div>
                             
-                            <p className="text-lg md:text-2xl leading-relaxed font-bold mb-4 text-slate-700">
+                            <p className="text-sm md:text-2xl leading-relaxed font-bold mb-4 text-slate-700">
                                 {dict.certAwardedTo}
                             </p>
-                            <h2 className="text-3xl md:text-4xl font-black text-slate-900 my-4 bg-slate-50 inline-block px-12 py-4 rounded-2xl border-2 border-slate-200 shadow-md">
+                            <h2 className="text-xl md:text-4xl font-black text-slate-900 my-4 bg-slate-50 inline-block px-8 py-3 md:px-12 md:py-4 rounded-2xl border-2 border-slate-200 shadow-md">
                                 {studentName}
                             </h2>
-                            <p className="text-base md:text-2xl leading-relaxed font-bold text-slate-700 mt-2">
-                                {dict.certGrade} <strong className="text-red-700 text-2xl md:text-3xl mx-2">{studentGrade}</strong>
+                            <p className="text-sm md:text-2xl leading-relaxed font-bold text-slate-700 mt-2">
+                                {dict.certGrade} <strong className="text-red-700 text-lg md:text-3xl mx-2">{studentGrade}</strong>
                             </p>
                             
-                            <p className="text-sm md:text-lg leading-relaxed mt-6 opacity-90 max-w-3xl mx-auto font-bold text-slate-600">
+                            <p className="text-[11px] md:text-lg leading-relaxed mt-6 opacity-90 max-w-3xl mx-auto font-bold text-slate-600">
                                 {dict.certBody}
                             </p>
                         </div>
 
-                        <div className="flex justify-center gap-8 md:gap-16 text-center relative z-10 bg-slate-50 p-6 rounded-2xl border-2 border-slate-200 shadow-inner my-6">
+                        <div className="flex justify-center gap-4 md:gap-16 text-center relative z-10 bg-slate-50 p-4 md:p-6 rounded-2xl border-2 border-slate-200 shadow-inner my-6">
                             <div>
-                                <div className="text-xs md:text-sm text-slate-500 font-black uppercase mb-1 tracking-wider">{dict.certPoints}</div>
-                                <div className="text-2xl md:text-4xl font-black text-green-600">{score} <span className="text-lg text-slate-400">/ 300</span></div>
+                                <div className="text-[10px] md:text-sm text-slate-500 font-black uppercase mb-1 tracking-wider">{dict.certPoints}</div>
+                                <div className="text-xl md:text-4xl font-black text-green-600">{score} <span className="text-sm md:text-lg text-slate-400">/ 300</span></div>
                             </div>
                             <div className="w-1 bg-slate-200 rounded-full"></div>
                             <div>
-                                <div className="text-xs md:text-sm text-slate-500 font-black uppercase mb-1 tracking-wider">{dict.certTime}</div>
-                                <div className="text-2xl md:text-4xl font-black text-amber-600">{formatTime(totalTime)}</div>
+                                <div className="text-[10px] md:text-sm text-slate-500 font-black uppercase mb-1 tracking-wider">{dict.certTime}</div>
+                                <div className="text-xl md:text-4xl font-black text-amber-600">{formatTime(totalTime)}</div>
                             </div>
                         </div>
 
-                        <div className="flex justify-between items-end relative z-10 px-4 md:px-8 mt-4">
+                        <div className="flex justify-between items-end relative z-10 px-2 md:px-8 mt-4">
                             <div className="text-center">
-                                <p className="text-base md:text-lg font-black text-slate-800 mb-4">{dict.certSign}</p>
-                                <div className="w-40 md:w-56 h-[2px] bg-slate-800"></div>
+                                <p className="text-sm md:text-lg font-black text-slate-800 mb-2 md:mb-4">{dict.certSign}</p>
+                                <div className="w-24 md:w-56 h-[2px] bg-slate-800"></div>
                             </div>
-                            <img src="/saqr-avatar.png" alt="Saqr Avatar" className="w-24 h-24 md:w-32 md:h-32 object-contain drop-shadow-xl" onError={(e) => e.currentTarget.style.display = 'none'} />
+                            <img src="/saqr-avatar.png" alt="Saqr Avatar" className="w-16 h-16 md:w-32 md:h-32 object-contain drop-shadow-xl" onError={(e) => e.currentTarget.style.display = 'none'} />
                         </div>
                     </div>
 
-                    <div className="mt-10 flex gap-4 md:gap-6 no-print relative z-10">
-                        <button onClick={() => window.print()} className="px-6 py-3 md:px-10 md:py-5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-black text-sm md:text-xl rounded-2xl shadow-[0_10px_20px_rgba(220,38,38,0.3)] transition-transform active:scale-95">
+                    <div className="mt-8 flex gap-3 md:gap-6 no-print relative z-10 w-full max-w-md md:max-w-none px-4">
+                        <button onClick={() => window.print()} className="flex-[2] py-3 md:px-10 md:py-5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-black text-xs md:text-xl rounded-xl shadow-[0_5px_15px_rgba(220,38,38,0.3)] transition-transform active:scale-95 text-center">
                             {dict.print}
                         </button>
-                        <Link to="/" className="px-6 py-3 md:px-10 md:py-5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-black text-sm md:text-xl rounded-2xl shadow-lg transition-transform active:scale-95">
+                        <Link to="/" className="flex-1 py-3 md:px-10 md:py-5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-black text-xs md:text-xl rounded-xl shadow-lg transition-transform active:scale-95 text-center flex items-center justify-center">
                             {dict.back}
                         </Link>
                     </div>
