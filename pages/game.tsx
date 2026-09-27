@@ -321,7 +321,6 @@ const DeweyGame: React.FC = () => {
                 shelfCode: q.shelfCode,
                 displayShelf: lang === 'ar' ? q.arShelf : q.enShelf,
                 correct: correct,
-                // إرجاع 4 خيارات للتحدي الثالث
                 options: shuffleArray([correct, ...wrongs.slice(0, 3)]) 
             };
         });
@@ -488,7 +487,7 @@ const DeweyGame: React.FC = () => {
     }, [stage, lang, handleShoot, feedback]);
 
     return (
-        <div className={`min-h-[100dvh] bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 flex flex-col items-center justify-center p-2 md:p-4 relative select-none ${lang === 'ar' ? 'dir-rtl' : 'dir-ltr'} ${stage === 'certificate' ? 'overflow-y-auto' : 'overflow-hidden touch-none'}`}>
+        <div className={`min-h-[100dvh] bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 flex flex-col items-center justify-center p-2 md:p-4 relative select-none ${lang === 'ar' ? 'dir-rtl' : 'dir-ltr'} ${stage.startsWith('challenge') ? 'overflow-hidden touch-none' : 'overflow-y-auto'}`}>
             
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
@@ -506,6 +505,7 @@ const DeweyGame: React.FC = () => {
                 }
 
                 @media print {
+                    /* إعدادات طباعة الشهادة بشكل مثالي لملء صفحة A4 بدون قطع */
                     html, body {
                         width: 100% !important;
                         height: 100% !important;
@@ -651,26 +651,26 @@ const DeweyGame: React.FC = () => {
                 </div>
             )}
 
-            {/* 2. شاشة التعلم */}
+            {/* 2. شاشة التعلم (تم معالجة التمرير وتثبيت الزر ليكون واضحاً تماماً) */}
             {stage === 'learn' && (
-                <div className="max-w-3xl w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 md:p-8 shadow-2xl animate-zoom-in relative z-10 text-center flex flex-col h-[85vh] md:h-auto justify-between md:justify-start">
-                    <div className="w-16 h-16 md:w-24 md:h-24 bg-amber-100 dark:bg-amber-900/30 rounded-full mx-auto flex items-center justify-center mb-3 shrink-0">
-                        <svg className="w-8 h-8 md:w-12 md:h-12 text-amber-500 magic-glow" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                <div className="max-w-3xl w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 md:p-8 shadow-2xl animate-zoom-in relative z-10 text-center flex flex-col max-h-[90dvh] overflow-y-auto justify-between my-auto">
+                    <div className="w-14 h-14 md:w-20 md:h-20 bg-amber-100 dark:bg-amber-900/30 rounded-full mx-auto flex items-center justify-center mb-2 shrink-0">
+                        <svg className="w-8 h-8 md:w-10 md:h-10 text-amber-500 magic-glow" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                     </div>
                     <div>
-                        <h2 className="text-xl md:text-3xl font-black text-amber-500 mb-2">{dict.rulesTitle}</h2>
-                        <p className="text-[11px] md:text-lg leading-relaxed mb-4 opacity-90 font-bold text-slate-700 dark:text-slate-300">
+                        <h2 className="text-xl md:text-3xl font-black text-amber-500 mb-1.5">{dict.rulesTitle}</h2>
+                        <p className="text-xs md:text-base leading-relaxed mb-3 opacity-90 font-bold text-slate-700 dark:text-slate-300">
                             {dict.rulesText}
                         </p>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-4 mb-4 flex-1 md:flex-none content-start px-1">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 md:gap-3 mb-3 content-start px-1">
                         {DEWEY_CATEGORIES.map(cat => (
-                            <div key={cat.code} className="p-2 rounded-lg text-[9px] md:text-sm font-black shadow-sm text-white flex items-center justify-center text-center" style={{ backgroundColor: cat.color }}>
+                            <div key={cat.code} className="p-2 rounded-lg text-[10px] md:text-sm font-black shadow-sm text-white flex items-center justify-center text-center" style={{ backgroundColor: cat.color }}>
                                 {lang === 'ar' ? cat.ar : cat.en}
                             </div>
                         ))}
                     </div>
-                    <button onClick={() => setStage('tut1')} className="w-full py-3 bg-gradient-to-r from-green-400 to-green-500 hover:from-green-500 hover:to-green-600 text-white font-black rounded-xl shadow-md transition-transform active:scale-95 text-base md:text-xl mt-auto shrink-0">
+                    <button onClick={() => setStage('tut1')} className="w-full py-3.5 md:py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-black rounded-2xl shadow-xl transition-transform active:scale-95 text-base md:text-xl mt-3 shrink-0 sticky bottom-0 z-20 border-2 border-green-400/50">
                         {dict.readyBtn}
                     </button>
                 </div>
