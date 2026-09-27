@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
 // ==========================================
@@ -45,7 +45,14 @@ const T = {
         seconds: "ثانية",
         enterDetails: "الرجاء إدخال اسمك وصفك لنتمكن من تجهيز شهادتك!",
         fireBtn: "إطلاق",
-        shootInstruction: "استخدم الأسهم (أو الأزرار) للحركة و Space لإطلاق النار على التصنيف الصحيح!"
+        shootInstruction: "استخدم الأسهم (أو الأزرار) للحركة و Space لإطلاق النار على التصنيف الصحيح!",
+        tutorialBtn: "فهمت، ابدأ التحدي",
+        tutCh1Title: "مساعدة القراء",
+        tutCh1Desc: "اقرأ ماذا يريد الطالب، ثم اسحب السؤال وأفلته على الرف الصحيح الذي يحتوي على هذا الموضوع. الإجابة الصحيحة تمنحك 20 نقطة!",
+        tutCh2Title: "تصويب الفضاء",
+        tutCh2Desc: "اقرأ عنوان الكتاب، ثم حرك الصاروخ يميناً ويساراً وأطلق النار على الكوكب الذي يحمل التصنيف الصحيح. الإجابة الصحيحة = 20 نقطة!",
+        tutCh3Title: "ترتيب الأرفف",
+        tutCh3Desc: "انظر إلى تصنيف الرف، ثم اسحب الكتاب المناسب من الخيارات بالأسفل وضعه على الرف. التركيز مهم! 20 نقطة لكل إجابة صحيحة."
     },
     en: {
         title: "Knowledge Heroes Challenge",
@@ -86,7 +93,14 @@ const T = {
         seconds: "sec",
         enterDetails: "Please enter your name and grade so we can prepare your certificate!",
         fireBtn: "FIRE",
-        shootInstruction: "Use arrows to move and Spacebar to shoot the correct category!"
+        shootInstruction: "Use arrows to move and Spacebar to shoot the correct category!",
+        tutorialBtn: "Got it, Start Challenge",
+        tutCh1Title: "Help the Readers",
+        tutCh1Desc: "Read what the student wants, then drag and drop the question onto the correct shelf. Correct answers give 20 points!",
+        tutCh2Title: "Space Shooter",
+        tutCh2Desc: "Read the book title, move the rocket, and shoot the planet with the correct category. Correct answer = 20 points!",
+        tutCh3Title: "Fill the Shelves",
+        tutCh3Desc: "Look at the shelf category, then drag the correct book from the options below onto the shelf. Focus! 20 points per correct answer."
     }
 };
 
@@ -127,7 +141,12 @@ const BANK_ASSISTANT = [
     { ar: "طارق يريد قراءة كتاب عن غزوات الرسول", en: "Tariq wants to read about the Prophet's battles", answer: "200" },
     { ar: "عبير تبحث عن كيفية حل المشكلات النفسية", en: "Abeer is searching for psychological problem-solving", answer: "100" },
     { ar: "جمال يحتاج كتاب لتعلم قوانين الشطرنج", en: "Jamal needs a book to learn chess rules", answer: "700" },
-    { ar: "سالم يريد كتاب يشرح كيفية عمل الروبوتات", en: "Salem wants a book explaining how robots work", answer: "000" }
+    { ar: "سالم يريد كتاب يشرح كيفية عمل الروبوتات", en: "Salem wants a book explaining how robots work", answer: "000" },
+    { ar: "وليد يبحث عن معلومات عن الثورة الصناعية", en: "Waleed seeks info about the Industrial Revolution", answer: "900" },
+    { ar: "أمل تريد كتاباً لتعلم الطبخ", en: "Amal wants a book to learn cooking", answer: "600" },
+    { ar: "زياد يطلب قصة خيالية عن التنانين", en: "Ziad asks for a fantasy story about dragons", answer: "800" },
+    { ar: "نور تبحث عن كتاب لشرح قواعد الرياضيات", en: "Noor is looking for a math rules book", answer: "500" },
+    { ar: "كريم يود قراءة كتاب عن العادات والتقاليد", en: "Karim wants to read about customs and traditions", answer: "300" }
 ];
 
 const BANK_ORBS = [
@@ -150,7 +169,12 @@ const BANK_ORBS = [
     { ar: "كتاب: السيرة النبوية", en: "Book: The Prophet's Biography", answer: "200" },
     { ar: "كتاب: تعلم اللغة الصينية", en: "Book: Learn Chinese Language", answer: "400" },
     { ar: "كتاب: حقوق الإنسان", en: "Book: Human Rights", answer: "300" },
-    { ar: "رواية: جزيرة الكنز", en: "Novel: Treasure Island", answer: "800" }
+    { ar: "رواية: جزيرة الكنز", en: "Novel: Treasure Island", answer: "800" },
+    { ar: "كتاب: التصوير الفوتوغرافي", en: "Book: Photography", answer: "700" },
+    { ar: "كتاب: أسرار البحار والمحيطات", en: "Book: Secrets of Seas and Oceans", answer: "500" },
+    { ar: "كتاب: سيرة عمر بن الخطاب", en: "Book: Biography of Omar bin Al-Khattab", answer: "200" },
+    { ar: "كتاب: تعلم البرمجة للأطفال", en: "Book: Learn Coding for Kids", answer: "000" },
+    { ar: "كتاب: جغرافية الوطن العربي", en: "Book: Geography of the Arab World", answer: "900" }
 ];
 
 const BANK_SHELVES = [
@@ -163,7 +187,9 @@ const BANK_SHELVES = [
     { shelfCode: "000", arShelf: "حاسب ومعارف", enShelf: "Computers", arCorrect: "الإنترنت الآمن", enCorrect: "Safe Internet", arWrongs: ["تاريخ الأندلس", "تعلم السباحة", "قصص جحا"], enWrongs: ["History", "Learn Swimming", "Juha Stories"] },
     { shelfCode: "100", arShelf: "تطوير الذات", enShelf: "Self Growth", arCorrect: "قوة الثقة بالنفس", enCorrect: "Self Confidence", arWrongs: ["أحكام الصيام", "البرمجة بلغة بايثون", "تاريخ القارات"], enWrongs: ["Fasting", "Python", "Continents"] },
     { shelfCode: "300", arShelf: "مجتمع وقانون", enShelf: "Society", arCorrect: "حقوق الطفل والدستور", enCorrect: "Children's Rights", arWrongs: ["علم الفلك", "الرسم بالزيت", "قواميس اللغات"], enWrongs: ["Astronomy", "Oil Painting", "Dictionaries"] },
-    { shelfCode: "400", arShelf: "لغات وقواميس", enShelf: "Languages", arCorrect: "المعجم الوسيط للغة", enCorrect: "Language Lexicon", arWrongs: ["رياضة القفز", "أسرار البحار", "الذكاء الاصطناعي"], enWrongs: ["Jumping", "Deep Sea", "AI"] }
+    { shelfCode: "400", arShelf: "لغات وقواميس", enShelf: "Languages", arCorrect: "المعجم الوسيط للغة", enCorrect: "Language Lexicon", arWrongs: ["رياضة القفز", "أسرار البحار", "الذكاء الاصطناعي"], enWrongs: ["Jumping", "Deep Sea", "AI"] },
+    { shelfCode: "500", arShelf: "علوم وفضاء", enShelf: "Science", arCorrect: "عالم الديناصورات", enCorrect: "Dinosaur World", arWrongs: ["مبادئ الاقتصاد", "تعلم الإيطالية", "رواية البؤساء"], enWrongs: ["Economics", "Learn Italian", "Les Misérables"] },
+    { shelfCode: "800", arShelf: "قصص وحكايات", enShelf: "Stories", arCorrect: "رواية البؤساء", enCorrect: "Les Misérables", arWrongs: ["برمجة الجافاسكريبت", "قوانين الفيزياء", "تاريخ الرومان"], enWrongs: ["JavaScript", "Physics Laws", "Roman History"] }
 ];
 
 const shuffleArray = (array: any[]) => [...array].sort(() => 0.5 - Math.random());
@@ -188,7 +214,7 @@ const DeweyGame: React.FC = () => {
 
     const dict = T[lang];
 
-    const [stage, setStage] = useState<'intro' | 'learn' | 'challenge1' | 'challenge2' | 'challenge3' | 'certificate'>('intro');
+    const [stage, setStage] = useState<'intro' | 'learn' | 'tut1' | 'challenge1' | 'tut2' | 'challenge2' | 'tut3' | 'challenge3' | 'certificate'>('intro');
     const [studentName, setStudentName] = useState('');
     const [studentGrade, setStudentGrade] = useState('');
     
@@ -199,8 +225,13 @@ const DeweyGame: React.FC = () => {
     const [currentQuestions, setCurrentQuestions] = useState<any[]>([]);
     const [qIndex, setQIndex] = useState(0);
     const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
-    const [activeDragItem, setActiveDragItem] = useState<string | null>(null);
     const [issueDate, setIssueDate] = useState('');
+
+    // === متغيرات السحب والإفلات المخصصة للهواتف ===
+    const [dragItem, setDragItem] = useState<{ id: string, type: 'q' | 'opt', content?: string } | null>(null);
+    const [dragPos, setDragPos] = useState({ x: 0, y: 0 });
+    const dragRef = useRef<HTMLDivElement>(null);
+    const dropZonesRef = useRef<Map<string, HTMLDivElement>>(new Map());
 
     // === متغيرات لعبة الصاروخ (التحدي 2) ===
     const [rocketPos, setRocketPos] = useState(1); // من 0 إلى 3 (4 خيارات)
@@ -244,7 +275,7 @@ const DeweyGame: React.FC = () => {
 
     const startChallenge1 = () => {
         setCurrentQuestions(shuffleArray(BANK_ASSISTANT).slice(0, 5));
-        setQIndex(0); setQuestionTimer(20); setStage('challenge1'); setActiveDragItem(null);
+        setQIndex(0); setQuestionTimer(20); setStage('challenge1');
     };
 
     const startChallenge2 = () => {
@@ -274,12 +305,12 @@ const DeweyGame: React.FC = () => {
             };
         });
         setCurrentQuestions(mixed);
-        setQIndex(0); setQuestionTimer(20); setStage('challenge3'); setActiveDragItem(null);
+        setQIndex(0); setQuestionTimer(20); setStage('challenge3');
     };
 
     const handleTimeout = () => {
         setFeedback('wrong');
-        setActiveDragItem(null);
+        setDragItem(null);
         setTimeout(() => nextQuestion(), 1500);
     };
 
@@ -298,7 +329,7 @@ const DeweyGame: React.FC = () => {
         } else {
             setFeedback('wrong');
         }
-        setActiveDragItem(null);
+        setDragItem(null);
         setTimeout(() => nextQuestion(), 1500);
     };
 
@@ -314,8 +345,8 @@ const DeweyGame: React.FC = () => {
                 setRocketPos(1);
             }
         } else {
-            if (stage === 'challenge1') startChallenge2();
-            else if (stage === 'challenge2') startChallenge3();
+            if (stage === 'challenge1') setStage('tut2');
+            else if (stage === 'challenge2') setStage('tut3');
             else setStage('certificate');
         }
     };
@@ -326,48 +357,77 @@ const DeweyGame: React.FC = () => {
         return `${m > 0 ? m + ' ' + dict.minutes + ' ' : ''}${s} ${dict.seconds}`;
     };
 
-    // --- تحسينات السحب والإفلات لتكون أكثر واقعية ---
-    const onDragStart = (e: React.DragEvent, item: string) => {
-        e.dataTransfer.setData('text/plain', item);
-        setActiveDragItem(item);
-        // جعل العنصر شفافاً قليلاً أثناء السحب لإعطاء إحساس بالحركة
-        setTimeout(() => {
-            (e.target as HTMLElement).style.opacity = '0.4';
-            (e.target as HTMLElement).style.transform = 'scale(0.95)';
-        }, 0);
-    };
-    const onDragEnd = (e: React.DragEvent) => {
-        setActiveDragItem(null);
-        (e.target as HTMLElement).style.opacity = '1';
-        (e.target as HTMLElement).style.transform = 'scale(1)';
-    };
-    const onDragOver = (e: React.DragEvent) => {
+    // =========================================================================
+    // نظام السحب والإفلات المخصص لدعم الهواتف والأجهزة اللوحية
+    // =========================================================================
+    
+    const handleDragStart = (e: any, id: string, type: 'q' | 'opt', content?: string) => {
         e.preventDefault();
-        e.dataTransfer.dropEffect = "move";
-    };
-    const onDrop = (e: React.DragEvent, targetValue: string) => {
-        e.preventDefault();
-        const item = e.dataTransfer.getData('text/plain');
-        if (item) {
-            if (stage === 'challenge3') handleAnswer(item);
-            else handleAnswer(targetValue);
-        }
+        const touch = e.touches ? e.touches[0] : e;
+        setDragItem({ id, type, content });
+        setDragPos({ x: touch.clientX, y: touch.clientY });
     };
 
-    // --- منطق لعبة الصاروخ (التحدي 2) ---
+    const handleDragMove = useCallback((e: any) => {
+        if (!dragItem) return;
+        e.preventDefault(); // منع التمرير في الموبايل أثناء السحب
+        const touch = e.touches ? e.touches[0] : e;
+        setDragPos({ x: touch.clientX, y: touch.clientY });
+    }, [dragItem]);
+
+    const handleDragEnd = useCallback((e: any) => {
+        if (!dragItem) return;
+        const touch = e.changedTouches ? e.changedTouches[0] : e;
+        
+        let droppedOn = null;
+        dropZonesRef.current.forEach((el, key) => {
+            if (!el) return;
+            const rect = el.getBoundingClientRect();
+            if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
+                touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+                droppedOn = key;
+            }
+        });
+
+        if (droppedOn) {
+            if (stage === 'challenge3') {
+                handleAnswer(dragItem.content || dragItem.id);
+            } else {
+                handleAnswer(droppedOn);
+            }
+        }
+        setDragItem(null);
+    }, [dragItem, stage, handleAnswer]);
+
+    useEffect(() => {
+        if (dragItem) {
+            window.addEventListener('mousemove', handleDragMove, { passive: false });
+            window.addEventListener('mouseup', handleDragEnd);
+            window.addEventListener('touchmove', handleDragMove, { passive: false });
+            window.addEventListener('touchend', handleDragEnd);
+        }
+        return () => {
+            window.removeEventListener('mousemove', handleDragMove);
+            window.removeEventListener('mouseup', handleDragEnd);
+            window.removeEventListener('touchmove', handleDragMove);
+            window.removeEventListener('touchend', handleDragEnd);
+        };
+    }, [dragItem, handleDragMove, handleDragEnd]);
+
+    // =========================================================================
+    // منطق لعبة الصاروخ (التحدي 2)
+    // =========================================================================
     const handleShoot = useCallback(() => {
         if (feedback || isShooting) return;
         setIsShooting(true);
         const shotCategory = ch2Options[rocketPos].code;
         
-        // تشغيل صوت ليزر بسيط
         const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/1666/1666-preview.mp3');
         audio.volume = 0.1; audio.play().catch(()=>{});
 
-        // انتظار حركة الليزر ثم فحص الإجابة
         setTimeout(() => {
             handleAnswer(shotCategory);
-        }, 300); // 300ms يطابق مدة حركة الليزر في CSS
+        }, 300);
     }, [rocketPos, ch2Options, feedback, isShooting]);
 
     useEffect(() => {
@@ -404,11 +464,11 @@ const DeweyGame: React.FC = () => {
                     #certificate-area, #certificate-area * { visibility: visible !important; }
                     #certificate-area {
                         position: absolute !important;
-                        left: 0 !important;
+                        left: 50% !important;
                         top: 0 !important;
+                        transform: translateX(-50%) !important;
                         width: 210mm !important;
                         height: 297mm !important;
-                        max-height: 297mm !important;
                         margin: 0 !important;
                         padding: 15mm !important;
                         box-sizing: border-box !important;
@@ -428,14 +488,14 @@ const DeweyGame: React.FC = () => {
                     animation: pulse-glow 2s infinite alternate ease-in-out;
                 }
                 @keyframes pulse-glow {
-                    0% { filter: drop-shadow(0 0 15px rgba(245, 158, 11, 0.5)); transform: scale(1) translateY(0px); }
-                    100% { filter: drop-shadow(0 0 40px rgba(245, 158, 11, 1)); transform: scale(1.05) translateY(-5px); }
+                    0% { filter: drop-shadow(0 0 15px rgba(245, 158, 11, 0.6)); transform: scale(1) translateY(0px); }
+                    100% { filter: drop-shadow(0 0 45px rgba(245, 158, 11, 1)); transform: scale(1.05) translateY(-5px); }
                 }
                 
                 .float-anim { animation: floating 3s ease-in-out infinite; }
                 @keyframes floating {
                     0% { transform: translateY(0px); }
-                    50% { transform: translateY(-10px); }
+                    50% { transform: translateY(-12px); }
                     100% { transform: translateY(0px); }
                 }
 
@@ -491,6 +551,23 @@ const DeweyGame: React.FC = () => {
                 .cert-font { font-family: 'Cairo', sans-serif !important; }
             `}</style>
 
+            {/* --- العنصر المتحرك أثناء السحب (المخصص) --- */}
+            {dragItem && (
+                <div 
+                    className="fixed pointer-events-none z-[9999] realistic-book p-4 font-black text-center flex items-center justify-center bg-white shadow-2xl opacity-90"
+                    style={{
+                        left: dragPos.x,
+                        top: dragPos.y,
+                        transform: 'translate(-50%, -50%) scale(1.1) rotate(-3deg)',
+                        borderLeftColor: '#f59e0b',
+                        width: dragItem.type === 'q' ? '250px' : '150px',
+                        minHeight: '80px'
+                    }}
+                >
+                    {dragItem.content || (lang === 'ar' ? currentQuestions[qIndex].ar : currentQuestions[qIndex].en)}
+                </div>
+            )}
+
             {/* 1. شاشة البداية */}
             {stage === 'intro' && (
                 <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-2xl text-center animate-fade-in-up relative z-10">
@@ -531,9 +608,32 @@ const DeweyGame: React.FC = () => {
                             </div>
                         ))}
                     </div>
-                    <button onClick={startChallenge1} className="w-full py-4 bg-gradient-to-r from-green-400 to-green-500 hover:from-green-500 hover:to-green-600 text-white font-black rounded-2xl shadow-lg transition-transform active:scale-95 text-xl">
+                    <button onClick={() => setStage('tut1')} className="w-full py-4 bg-gradient-to-r from-green-400 to-green-500 hover:from-green-500 hover:to-green-600 text-white font-black rounded-2xl shadow-lg transition-transform active:scale-95 text-xl">
                         {dict.readyBtn}
                     </button>
+                </div>
+            )}
+
+            {/* شاشات التعليمات قبل التحديات */}
+            {stage === 'tut1' && (
+                <div className="max-w-md w-full bg-blue-50 dark:bg-slate-900 border border-blue-200 dark:border-slate-800 rounded-3xl p-8 shadow-2xl text-center animate-zoom-in relative z-10">
+                    <h2 className="text-3xl font-black text-blue-500 mb-4">{dict.tutCh1Title}</h2>
+                    <p className="text-lg leading-relaxed font-bold text-slate-700 dark:text-slate-300 mb-8">{dict.tutCh1Desc}</p>
+                    <button onClick={startChallenge1} className="w-full py-4 bg-blue-500 text-white font-black text-xl rounded-2xl shadow-lg active:scale-95">{dict.tutorialBtn}</button>
+                </div>
+            )}
+            {stage === 'tut2' && (
+                <div className="max-w-md w-full bg-red-50 dark:bg-slate-900 border border-red-200 dark:border-slate-800 rounded-3xl p-8 shadow-2xl text-center animate-zoom-in relative z-10">
+                    <h2 className="text-3xl font-black text-red-500 mb-4">{dict.tutCh2Title}</h2>
+                    <p className="text-lg leading-relaxed font-bold text-slate-700 dark:text-slate-300 mb-8">{dict.tutCh2Desc}</p>
+                    <button onClick={startChallenge2} className="w-full py-4 bg-red-500 text-white font-black text-xl rounded-2xl shadow-lg active:scale-95">{dict.tutorialBtn}</button>
+                </div>
+            )}
+            {stage === 'tut3' && (
+                <div className="max-w-md w-full bg-amber-50 dark:bg-slate-900 border border-amber-200 dark:border-slate-800 rounded-3xl p-8 shadow-2xl text-center animate-zoom-in relative z-10">
+                    <h2 className="text-3xl font-black text-amber-500 mb-4">{dict.tutCh3Title}</h2>
+                    <p className="text-lg leading-relaxed font-bold text-slate-700 dark:text-slate-300 mb-8">{dict.tutCh3Desc}</p>
+                    <button onClick={startChallenge3} className="w-full py-4 bg-amber-500 text-white font-black text-xl rounded-2xl shadow-lg active:scale-95">{dict.tutorialBtn}</button>
                 </div>
             )}
 
@@ -578,17 +678,15 @@ const DeweyGame: React.FC = () => {
                         ) : null}
 
                         {/* ================================================= */}
-                        {/* تصميم التحدي الأول والثالث (السحب والإفلات) */}
+                        {/* تصميم التحدي الأول والثالث (السحب والإفلات المخصص) */}
                         {/* ================================================= */}
                         {stage !== 'challenge2' && (
                             <>
                                 <div className="flex flex-col items-center justify-center mb-10 shrink-0 min-h-[160px] relative z-20">
                                     {stage === 'challenge3' ? (
                                         <div 
-                                            className={`w-full md:w-2/3 h-36 relative wood-shelf flex items-end justify-center pb-5 cursor-pointer ${activeDragItem ? 'wood-shelf-active' : ''}`}
-                                            onDragOver={onDragOver}
-                                            onDrop={(e) => onDrop(e, currentQuestions[qIndex].shelfCode)}
-                                            onClick={() => { if(activeDragItem) handleAnswer(activeDragItem); }}
+                                            ref={(el) => { if(el) dropZonesRef.current.set(currentQuestions[qIndex].shelfCode, el); }}
+                                            className={`w-full md:w-2/3 h-36 relative wood-shelf flex items-end justify-center pb-5 ${dragItem ? 'wood-shelf-active' : ''}`}
                                         >
                                             <div className="absolute -top-8 bg-amber-50 dark:bg-slate-800 px-8 py-3 rounded-full font-black text-amber-600 shadow-lg border-2 border-amber-200 dark:border-amber-700 text-lg md:text-xl">
                                                 {dict.shelfText}: {currentQuestions[qIndex].displayShelf}
@@ -599,13 +697,12 @@ const DeweyGame: React.FC = () => {
                                         <div className="text-center w-full">
                                             <p className="text-sm md:text-base font-black opacity-70 mb-6 text-slate-500 bg-slate-100 dark:bg-slate-800 inline-block px-4 py-2 rounded-full">{dict.dragInstruction}</p>
                                             <div 
-                                                draggable
-                                                onDragStart={(e) => onDragStart(e, 'item')}
-                                                onDragEnd={onDragEnd}
-                                                className={`realistic-book p-6 md:p-10 max-w-xl mx-auto cursor-grab active:cursor-grabbing flex items-center justify-center text-center ${activeDragItem ? 'realistic-book-active opacity-50' : 'float-anim'}`}
-                                                style={{ borderLeftColor: '#f59e0b', color: '#0f172a' }}
+                                                onMouseDown={(e) => handleDragStart(e, 'q', 'q')}
+                                                onTouchStart={(e) => handleDragStart(e, 'q', 'q')}
+                                                className={`realistic-book p-6 md:p-10 max-w-xl mx-auto cursor-grab active:cursor-grabbing flex items-center justify-center text-center float-anim`}
+                                                style={{ borderLeftColor: '#f59e0b', color: '#0f172a', opacity: dragItem?.type === 'q' ? 0.3 : 1 }}
                                             >
-                                                <h3 className="font-black text-xl md:text-3xl leading-relaxed drop-shadow-sm">
+                                                <h3 className="font-black text-xl md:text-3xl leading-relaxed drop-shadow-sm pointer-events-none">
                                                     {lang === 'ar' ? currentQuestions[qIndex].ar : currentQuestions[qIndex].en}
                                                 </h3>
                                             </div>
@@ -619,14 +716,12 @@ const DeweyGame: React.FC = () => {
                                             {currentQuestions[qIndex].options.map((opt: string, idx: number) => (
                                                 <div 
                                                     key={idx}
-                                                    draggable
-                                                    onDragStart={(e) => onDragStart(e, opt)}
-                                                    onDragEnd={onDragEnd}
-                                                    onClick={() => setActiveDragItem(opt)}
-                                                    className={`realistic-book p-5 md:p-6 font-black text-sm md:text-lg text-center flex items-center justify-center min-h-[100px] cursor-grab active:cursor-grabbing text-slate-800 ${activeDragItem === opt ? 'realistic-book-active ring-4 ring-amber-400' : ''}`}
-                                                    style={{ borderLeftColor: '#cbd5e1' }}
+                                                    onMouseDown={(e) => handleDragStart(e, opt, 'opt', opt)}
+                                                    onTouchStart={(e) => handleDragStart(e, opt, 'opt', opt)}
+                                                    className={`realistic-book p-5 md:p-6 font-black text-sm md:text-lg text-center flex items-center justify-center min-h-[100px] cursor-grab active:cursor-grabbing text-slate-800`}
+                                                    style={{ borderLeftColor: '#cbd5e1', opacity: dragItem?.id === opt ? 0.3 : 1 }}
                                                 >
-                                                    {opt}
+                                                    <span className="pointer-events-none">{opt}</span>
                                                 </div>
                                             ))}
                                         </div>
@@ -635,12 +730,10 @@ const DeweyGame: React.FC = () => {
                                             {DEWEY_CATEGORIES.map(cat => (
                                                 <div 
                                                     key={cat.code} 
-                                                    onDragOver={onDragOver}
-                                                    onDrop={(e) => onDrop(e, cat.code)}
-                                                    onClick={() => { if(activeDragItem) handleAnswer(cat.code); }}
-                                                    className={`wood-shelf h-32 md:h-36 flex flex-col justify-end items-center pb-3 cursor-pointer ${activeDragItem ? 'wood-shelf-active' : ''}`}
+                                                    ref={(el) => { if(el) dropZonesRef.current.set(cat.code, el); }}
+                                                    className={`wood-shelf h-32 md:h-36 flex flex-col justify-end items-center pb-3 ${dragItem ? 'wood-shelf-active' : ''}`}
                                                 >
-                                                    <div className="bg-white/95 text-slate-900 text-xs md:text-sm font-black px-3 py-2 rounded-lg shadow-md mb-2 text-center w-11/12 truncate" style={{ borderBottom: `4px solid ${cat.color}` }}>
+                                                    <div className="bg-white/95 text-slate-900 text-xs md:text-sm font-black px-3 py-2 rounded-lg shadow-md mb-2 text-center w-11/12 truncate pointer-events-none" style={{ borderBottom: `4px solid ${cat.color}` }}>
                                                         {lang === 'ar' ? cat.ar : cat.en}
                                                     </div>
                                                 </div>
@@ -668,7 +761,7 @@ const DeweyGame: React.FC = () => {
                                 <div className="flex justify-between w-full px-4 md:px-12 relative z-20">
                                     {ch2Options.map((opt, idx) => (
                                         <div key={idx} className="flex flex-col items-center w-1/4">
-                                            <div className="w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center font-black text-sm md:text-base text-white shadow-[0_0_15px_rgba(255,255,255,0.3)] float-anim" style={{ backgroundColor: opt.color, animationDelay: `${idx * 0.2}s` }}>
+                                            <div className="w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center font-black text-sm md:text-base text-white shadow-[0_0_15px_rgba(255,255,255,0.3)] float-anim text-center px-1 leading-tight" style={{ backgroundColor: opt.color, animationDelay: `${idx * 0.2}s` }}>
                                                 {lang === 'ar' ? opt.ar : opt.en}
                                             </div>
                                         </div>
@@ -719,7 +812,7 @@ const DeweyGame: React.FC = () => {
                 </div>
             )}
 
-            {/* 4. شاشة الشهادة الاحترافية المتوافقة تماماً مع طباعة A4 */}
+            {/* 4. شاشة الشهادة الاحترافية المتوافقة تماماً مع طباعة A4 الطولية */}
             {stage === 'certificate' && (
                 <div className="w-full flex flex-col items-center animate-fade-in-up relative z-10">
                     <div 
