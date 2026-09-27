@@ -45,29 +45,29 @@ const T = {
         seconds: "ثانية",
         enterDetails: "الرجاء إدخال اسمك وصفك لنتمكن من تجهيز شهادتك!",
         fireBtn: "إطلاق",
-        shootInstruction: "استخدم الأسهم (أو الأزرار) للحركة و Space لإطلاق النار على التصنيف الصحيح!",
+        shootInstruction: "استخدم الأسهم للحركة و Space للرماية!",
         tutorialBtn: "فهمت، ابدأ التحدي",
         tutCh1Title: "مساعدة القراء",
-        tutCh1Desc: "اقرأ ماذا يريد الطالب، ثم اسحب السؤال وأفلته على الرف الصحيح الذي يحتوي على هذا الموضوع. الإجابة الصحيحة تمنحك 20 نقطة!",
+        tutCh1Desc: "اسحب طلب الطالب وأفلته على الرف الصحيح. 20 نقطة لكل إجابة!",
         tutCh2Title: "تصويب الفضاء",
-        tutCh2Desc: "اقرأ عنوان الكتاب، ثم حرك الصاروخ يميناً ويساراً وأطلق النار على الكوكب الذي يحمل التصنيف الصحيح. الإجابة الصحيحة = 20 نقطة!",
+        tutCh2Desc: "حرك الصاروخ وأطلق النار على كوكب التصنيف الصحيح. 20 نقطة لكل إجابة!",
         tutCh3Title: "ترتيب الأرفف",
-        tutCh3Desc: "انظر إلى تصنيف الرف، ثم اسحب الكتاب المناسب من الخيارات بالأسفل وضعه على الرف. التركيز مهم! 20 نقطة لكل إجابة صحيحة."
+        tutCh3Desc: "اسحب الكتاب المناسب وضعه على الرف المطلوب. 20 نقطة لكل إجابة!"
     },
     en: {
-        title: "Knowledge Heroes Challenge",
-        subtitle: "Welcome! Help us organize the school library to become a hero.",
+        title: "Knowledge Heroes",
+        subtitle: "Welcome! Help us organize the library to become a hero.",
         studentName: "Hero's Name:",
         namePlaceholder: "Enter your full name...",
         grade: "Grade:",
         gradePlaceholder: "e.g., Grade 5A",
         start: "Enter Challenge",
         rulesTitle: "How to Play?",
-        rulesText: "The library is a big city! We divided books into colorful streets. Drag books to their shelves, and use your rocket in the Space Challenge to shoot the correct category!",
+        rulesText: "The library is a big city! Drag books to their shelves, and use your rocket in the Space Challenge to shoot the correct category!",
         readyBtn: "I am ready to go!",
-        ch1: "Challenge 1: Help the Readers",
+        ch1: "Challenge 1: Help Readers",
         ch2: "Challenge 2: Space Shooter",
-        ch3: "Challenge 3: Fill the Shelves",
+        ch3: "Challenge 3: Fill Shelves",
         question: "Task",
         time: "Time Left",
         points: "Points",
@@ -78,29 +78,29 @@ const T = {
         dropInstruction: "Drop book here",
         shelfText: "Shelf",
         certTitle: "Outstanding Librarian Certificate",
-        certAwardedTo: "The Library Administration certifies that the hero:",
+        certAwardedTo: "The Administration certifies that the hero:",
         certGrade: "Grade",
-        certBody: "has successfully passed the library organization challenge, showing exceptional skill and high intelligence in classifying knowledge.",
+        certBody: "has passed the challenge, showing exceptional skill and high intelligence in classifying knowledge.",
         certPoints: "Total Points",
         certTime: "Time Taken",
         certDate: "Issue Date:",
         certSign: "Librarian Signature",
-        print: "Print & Save Certificate",
+        print: "Print Certificate",
         back: "Back to Library",
         schoolName: "Emirates Falcon Int'l. Private School",
-        dept: "Digital & Interactive Library Dept.",
+        dept: "Digital Library Dept.",
         minutes: "min and",
         seconds: "sec",
-        enterDetails: "Please enter your name and grade so we can prepare your certificate!",
+        enterDetails: "Please enter your name and grade to prepare your certificate!",
         fireBtn: "FIRE",
-        shootInstruction: "Use arrows to move and Spacebar to shoot the correct category!",
+        shootInstruction: "Use arrows to move and Spacebar to shoot!",
         tutorialBtn: "Got it, Start Challenge",
         tutCh1Title: "Help the Readers",
-        tutCh1Desc: "Read what the student wants, then drag and drop the question onto the correct shelf. Correct answers give 20 points!",
+        tutCh1Desc: "Drag the student's request to the correct shelf. 20 points per answer!",
         tutCh2Title: "Space Shooter",
-        tutCh2Desc: "Read the book title, move the rocket, and shoot the planet with the correct category. Correct answer = 20 points!",
+        tutCh2Desc: "Move the rocket and shoot the planet with the correct category. 20 points!",
         tutCh3Title: "Fill the Shelves",
-        tutCh3Desc: "Look at the shelf category, then drag the correct book from the options below onto the shelf. Focus! 20 points per correct answer."
+        tutCh3Desc: "Drag the correct book onto the required shelf. 20 points per answer!"
     }
 };
 
@@ -122,74 +122,60 @@ const DEWEY_CATEGORIES = [
 ];
 
 const BANK_ASSISTANT = [
-    { ar: "أحمد يبحث عن كتاب عن الكواكب والنجوم", en: "Ahmed wants a book about planets and stars", answer: "500" },
-    { ar: "مريم تريد قاموساً لتعلم الإنجليزية", en: "Maryam wants a dictionary to learn English", answer: "400" },
-    { ar: "عمر يطلب كتاباً عن قصص الأنبياء", en: "Omar asks for a book about Prophets", answer: "200" },
-    { ar: "سارة تريد تعلم رسم الشخصيات الكرتونية", en: "Sara wants to learn how to draw cartoons", answer: "700" },
-    { ar: "خالد يبحث عن كتاب عن تاريخ الإمارات", en: "Khalid is looking for UAE history", answer: "900" },
-    { ar: "فاطمة تحب أجهزة الكمبيوتر والبرمجة", en: "Fatima loves computers and coding", answer: "000" },
-    { ar: "يوسف مريض ويريد أن يقرأ عن الفيتامينات", en: "Yousef wants to read about vitamins", answer: "600" },
-    { ar: "علي يبحث عن شعر للإذاعة المدرسية", en: "Ali needs a poem for the school radio", answer: "800" },
-    { ar: "هدى تريد أن تقرأ عن حقوق الطفل", en: "Huda wants to read about children's rights", answer: "300" },
-    { ar: "ماجد يبحث عن كتاب لزيادة ثقته بنفسه", en: "Majid wants a book to build self-confidence", answer: "100" },
-    { ar: "ليلى تبحث عن خريطة قارات العالم", en: "Laila is searching for a world map", answer: "900" },
-    { ar: "سعيد يريد قراءة قصة مغامرات شيقة", en: "Saeed wants an exciting adventure story", answer: "800" },
-    { ar: "راشد يسأل عن معلومات تخص عالم النباتات", en: "Rashed asks about plant biology", answer: "500" },
-    { ar: "منى تريد تعلم كيفية الإسعافات الأولية", en: "Mona wants to learn first aid basics", answer: "600" },
-    { ar: "حسن يسأل عن كتاب لتعلم اللغة الفرنسية", en: "Hassan wants a book to learn French", answer: "400" },
-    { ar: "نورة تبحث عن موسوعة الاختراعات الحديثة", en: "Noura is looking for a modern inventions encyclopedia", answer: "600" },
-    { ar: "طارق يريد قراءة كتاب عن غزوات الرسول", en: "Tariq wants to read about the Prophet's battles", answer: "200" },
-    { ar: "عبير تبحث عن كيفية حل المشكلات النفسية", en: "Abeer is searching for psychological problem-solving", answer: "100" },
-    { ar: "جمال يحتاج كتاب لتعلم قوانين الشطرنج", en: "Jamal needs a book to learn chess rules", answer: "700" },
-    { ar: "سالم يريد كتاب يشرح كيفية عمل الروبوتات", en: "Salem wants a book explaining how robots work", answer: "000" },
-    { ar: "وليد يبحث عن معلومات عن الثورة الصناعية", en: "Waleed seeks info about the Industrial Revolution", answer: "900" },
-    { ar: "أمل تريد كتاباً لتعلم الطبخ", en: "Amal wants a book to learn cooking", answer: "600" },
-    { ar: "زياد يطلب قصة خيالية عن التنانين", en: "Ziad asks for a fantasy story about dragons", answer: "800" },
-    { ar: "نور تبحث عن كتاب لشرح قواعد الرياضيات", en: "Noor is looking for a math rules book", answer: "500" },
-    { ar: "كريم يود قراءة كتاب عن العادات والتقاليد", en: "Karim wants to read about customs and traditions", answer: "300" }
+    { ar: "أحمد يبحث عن كواكب ونجوم", en: "Ahmed wants planets and stars", answer: "500" },
+    { ar: "مريم تريد قاموس إنجليزي", en: "Maryam wants an English dictionary", answer: "400" },
+    { ar: "عمر يطلب قصص الأنبياء", en: "Omar asks for Prophets' stories", answer: "200" },
+    { ar: "سارة تتعلم رسم الكرتون", en: "Sara wants to draw cartoons", answer: "700" },
+    { ar: "خالد يبحث عن تاريخ الإمارات", en: "Khalid is looking for UAE history", answer: "900" },
+    { ar: "فاطمة تحب أجهزة الكمبيوتر", en: "Fatima loves computers", answer: "000" },
+    { ar: "يوسف يريد أن يقرأ عن الفيتامينات", en: "Yousef wants to read about vitamins", answer: "600" },
+    { ar: "علي يبحث عن شعر للإذاعة", en: "Ali needs a radio poem", answer: "800" },
+    { ar: "هدى تقرأ عن حقوق الطفل", en: "Huda reads about children's rights", answer: "300" },
+    { ar: "ماجد يبحث ليزيد ثقته بنفسه", en: "Majid builds self-confidence", answer: "100" },
+    { ar: "ليلى تبحث عن خريطة قارات العالم", en: "Laila searches for a world map", answer: "900" },
+    { ar: "سعيد يريد قصة مغامرات شيقة", en: "Saeed wants an adventure story", answer: "800" },
+    { ar: "راشد يسأل عن عالم النباتات", en: "Rashed asks about plants", answer: "500" },
+    { ar: "منى تتعلم الإسعافات الأولية", en: "Mona learns first aid", answer: "600" },
+    { ar: "حسن يسأل لتعلم الفرنسية", en: "Hassan wants to learn French", answer: "400" },
+    { ar: "نورة تبحث موسوعة الاختراعات", en: "Noura looks for inventions", answer: "600" },
+    { ar: "طارق يقرأ عن غزوات الرسول", en: "Tariq reads about Prophet's battles", answer: "200" },
+    { ar: "عبير تحل المشكلات النفسية", en: "Abeer solves psychological problems", answer: "100" },
+    { ar: "جمال يحتاج قوانين الشطرنج", en: "Jamal needs chess rules", answer: "700" },
+    { ar: "سالم يشرح كيفية عمل الروبوتات", en: "Salem explains how robots work", answer: "000" }
 ];
 
 const BANK_ORBS = [
-    { ar: "كتاب: عالم الكمبيوتر والإنترنت", en: "Book: Computers and Internet", answer: "000" },
-    { ar: "كتاب: كيف تتحكم في غضبك", en: "Book: How to Control Anger", answer: "100" },
+    { ar: "كتاب: الكمبيوتر والإنترنت", en: "Book: Computers & Internet", answer: "000" },
+    { ar: "كتاب: كيف تتحكم في غضبك", en: "Book: Control Anger", answer: "100" },
     { ar: "كتاب: أركان الإسلام", en: "Book: Pillars of Islam", answer: "200" },
     { ar: "كتاب: قوانين المرور", en: "Book: Traffic Laws", answer: "300" },
     { ar: "كتاب: قواعد اللغة العربية", en: "Book: Arabic Grammar", answer: "400" },
-    { ar: "كتاب: الديناصورات والحيوانات", en: "Book: Dinosaurs and Animals", answer: "500" },
-    { ar: "كتاب: كيف تصنع سيارة ذكية", en: "Book: How to build a smart car", answer: "600" },
+    { ar: "كتاب: الديناصورات والحيوانات", en: "Book: Dinosaurs & Animals", answer: "500" },
+    { ar: "كتاب: سيارة ذكية", en: "Book: Smart Car", answer: "600" },
     { ar: "كتاب: قوانين كرة القدم", en: "Book: Football Rules", answer: "700" },
     { ar: "رواية: مغامرات أليس", en: "Novel: Alice's Adventures", answer: "800" },
-    { ar: "أطلس: خرائط دول العالم", en: "Atlas: World Maps", answer: "900" },
+    { ar: "أطلس: خرائط العالم", en: "Atlas: World Maps", answer: "900" },
     { ar: "كتاب: التفكير الإيجابي", en: "Book: Positive Thinking", answer: "100" },
-    { ar: "كتاب: الفضاء الخارجي والمجرات", en: "Book: Outer Space & Galaxies", answer: "500" },
-    { ar: "كتاب: تاريخ الصحراء العربية", en: "Book: Arabian Desert History", answer: "900" },
-    { ar: "كتاب: فن الخط العربي", en: "Book: Arabic Calligraphy Art", answer: "700" },
+    { ar: "كتاب: الفضاء والمجرات", en: "Book: Space & Galaxies", answer: "500" },
+    { ar: "كتاب: تاريخ الصحراء", en: "Book: Desert History", answer: "900" },
+    { ar: "كتاب: فن الخط العربي", en: "Book: Arabic Calligraphy", answer: "700" },
     { ar: "كتاب: أساسيات الذكاء الاصطناعي", en: "Book: AI Basics", answer: "000" },
     { ar: "كتاب: الإسعافات الأولية", en: "Book: First Aid", answer: "600" },
-    { ar: "كتاب: السيرة النبوية", en: "Book: The Prophet's Biography", answer: "200" },
-    { ar: "كتاب: تعلم اللغة الصينية", en: "Book: Learn Chinese Language", answer: "400" },
+    { ar: "كتاب: السيرة النبوية", en: "Book: Prophet's Bio", answer: "200" },
+    { ar: "كتاب: تعلم اللغة الصينية", en: "Book: Learn Chinese", answer: "400" },
     { ar: "كتاب: حقوق الإنسان", en: "Book: Human Rights", answer: "300" },
-    { ar: "رواية: جزيرة الكنز", en: "Novel: Treasure Island", answer: "800" },
-    { ar: "كتاب: التصوير الفوتوغرافي", en: "Book: Photography", answer: "700" },
-    { ar: "كتاب: أسرار البحار والمحيطات", en: "Book: Secrets of Seas and Oceans", answer: "500" },
-    { ar: "كتاب: سيرة عمر بن الخطاب", en: "Book: Biography of Omar bin Al-Khattab", answer: "200" },
-    { ar: "كتاب: تعلم البرمجة للأطفال", en: "Book: Learn Coding for Kids", answer: "000" },
-    { ar: "كتاب: جغرافية الوطن العربي", en: "Book: Geography of the Arab World", answer: "900" }
+    { ar: "رواية: جزيرة الكنز", en: "Novel: Treasure Island", answer: "800" }
 ];
 
 const BANK_SHELVES = [
-    { shelfCode: "500", arShelf: "علوم وفضاء", enShelf: "Science", arCorrect: "أسرار الفضاء", enCorrect: "Space Secrets", arWrongs: ["تاريخ العرب", "كيف ترسم", "قواعد الإملاء"], enWrongs: ["Arab History", "How to Draw", "Spelling Rules"] },
+    { shelfCode: "500", arShelf: "علوم وفضاء", enShelf: "Science", arCorrect: "أسرار الفضاء", enCorrect: "Space Secrets", arWrongs: ["تاريخ العرب", "تعلم الرسم", "قواعد الإملاء"], enWrongs: ["Arab History", "How to Draw", "Spelling"] },
     { shelfCode: "700", arShelf: "فنون ورياضة", enShelf: "Arts & Sports", arCorrect: "أبطال السباحة", enCorrect: "Swimming Heroes", arWrongs: ["جسم الإنسان", "الكمبيوتر", "القصة القصيرة"], enWrongs: ["Human Body", "Computers", "Short Stories"] },
-    { shelfCode: "900", arShelf: "تاريخ وجغرافيا", enShelf: "History & Geography", arCorrect: "حضارة الفراعنة", enCorrect: "Pharaohs History", arWrongs: ["تعلم الإسبانية", "أخلاق المسلم", "عالم الطيور"], enWrongs: ["Learn Spanish", "Muslim Morals", "Bird World"] },
-    { shelfCode: "600", arShelf: "تكنولوجيا وطب", enShelf: "Tech & Med", arCorrect: "السيارات الذكية", enCorrect: "Smart Cars", arWrongs: ["شعر المتنبي", "خريطة أوروبا", "حقوق الإنسان"], enWrongs: ["Poetry", "Europe Map", "Human Rights"] },
-    { shelfCode: "800", arShelf: "قصص وحكايات", enShelf: "Stories", arCorrect: "قصة سندريلا", enCorrect: "Cinderella Story", arWrongs: ["لغات البرمجة", "تفسير القرآن", "الجاذبية"], enWrongs: ["Programming", "Quran", "Gravity"] },
-    { shelfCode: "200", arShelf: "دين وأخلاق", enShelf: "Religion", arCorrect: "أخلاق المسلم", enCorrect: "Muslim Morals", arWrongs: ["عواصم العالم", "صناعة الأدوية", "الشطرنج"], enWrongs: ["World Capitals", "Medicine", "Chess"] },
-    { shelfCode: "000", arShelf: "حاسب ومعارف", enShelf: "Computers", arCorrect: "الإنترنت الآمن", enCorrect: "Safe Internet", arWrongs: ["تاريخ الأندلس", "تعلم السباحة", "قصص جحا"], enWrongs: ["History", "Learn Swimming", "Juha Stories"] },
-    { shelfCode: "100", arShelf: "تطوير الذات", enShelf: "Self Growth", arCorrect: "قوة الثقة بالنفس", enCorrect: "Self Confidence", arWrongs: ["أحكام الصيام", "البرمجة بلغة بايثون", "تاريخ القارات"], enWrongs: ["Fasting", "Python", "Continents"] },
-    { shelfCode: "300", arShelf: "مجتمع وقانون", enShelf: "Society", arCorrect: "حقوق الطفل والدستور", enCorrect: "Children's Rights", arWrongs: ["علم الفلك", "الرسم بالزيت", "قواميس اللغات"], enWrongs: ["Astronomy", "Oil Painting", "Dictionaries"] },
-    { shelfCode: "400", arShelf: "لغات وقواميس", enShelf: "Languages", arCorrect: "المعجم الوسيط للغة", enCorrect: "Language Lexicon", arWrongs: ["رياضة القفز", "أسرار البحار", "الذكاء الاصطناعي"], enWrongs: ["Jumping", "Deep Sea", "AI"] },
-    { shelfCode: "500", arShelf: "علوم وفضاء", enShelf: "Science", arCorrect: "عالم الديناصورات", enCorrect: "Dinosaur World", arWrongs: ["مبادئ الاقتصاد", "تعلم الإيطالية", "رواية البؤساء"], enWrongs: ["Economics", "Learn Italian", "Les Misérables"] },
-    { shelfCode: "800", arShelf: "قصص وحكايات", enShelf: "Stories", arCorrect: "رواية البؤساء", enCorrect: "Les Misérables", arWrongs: ["برمجة الجافاسكريبت", "قوانين الفيزياء", "تاريخ الرومان"], enWrongs: ["JavaScript", "Physics Laws", "Roman History"] }
+    { shelfCode: "900", arShelf: "تاريخ وجغرافيا", enShelf: "History", arCorrect: "حضارة الفراعنة", enCorrect: "Pharaohs History", arWrongs: ["الإسبانية", "أخلاق المسلم", "عالم الطيور"], enWrongs: ["Spanish", "Muslim Morals", "Bird World"] },
+    { shelfCode: "600", arShelf: "تكنولوجيا وطب", enShelf: "Tech & Med", arCorrect: "السيارات الذكية", enCorrect: "Smart Cars", arWrongs: ["الشعر", "خريطة أوروبا", "حقوق الإنسان"], enWrongs: ["Poetry", "Europe Map", "Human Rights"] },
+    { shelfCode: "800", arShelf: "قصص وحكايات", enShelf: "Stories", arCorrect: "سندريلا", enCorrect: "Cinderella", arWrongs: ["البرمجة", "القرآن", "الجاذبية"], enWrongs: ["Coding", "Quran", "Gravity"] },
+    { shelfCode: "200", arShelf: "دين وأخلاق", enShelf: "Religion", arCorrect: "أخلاق المسلم", enCorrect: "Muslim Morals", arWrongs: ["العواصم", "الأدوية", "الشطرنج"], enWrongs: ["Capitals", "Medicine", "Chess"] },
+    { shelfCode: "000", arShelf: "حاسب ومعارف", enShelf: "Computers", arCorrect: "الإنترنت الآمن", enCorrect: "Safe Internet", arWrongs: ["تاريخ الأندلس", "السباحة", "قصص جحا"], enWrongs: ["History", "Swimming", "Juha Stories"] },
+    { shelfCode: "100", arShelf: "تطوير الذات", enShelf: "Self Growth", arCorrect: "الثقة بالنفس", enCorrect: "Confidence", arWrongs: ["الصيام", "بايثون", "تاريخ القارات"], enWrongs: ["Fasting", "Python", "Continents"] }
 ];
 
 const shuffleArray = (array: any[]) => [...array].sort(() => 0.5 - Math.random());
@@ -227,22 +213,20 @@ const DeweyGame: React.FC = () => {
     const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
     const [issueDate, setIssueDate] = useState('');
 
-    // === متغيرات السحب والإفلات المخصصة للهواتف ===
+    // === متغيرات السحب والإفلات المخصصة للهواتف (بدون Scroll) ===
     const [dragItem, setDragItem] = useState<{ id: string, type: 'q' | 'opt', content?: string } | null>(null);
     const [dragPos, setDragPos] = useState({ x: 0, y: 0 });
-    const dragRef = useRef<HTMLDivElement>(null);
     const dropZonesRef = useRef<Map<string, HTMLDivElement>>(new Map());
+    const isDragging = useRef(false);
 
     // === متغيرات لعبة الصاروخ (التحدي 2) ===
-    const [rocketPos, setRocketPos] = useState(1); // من 0 إلى 3 (4 خيارات)
+    const [rocketPos, setRocketPos] = useState(1); // من 0 إلى 3
     const [ch2Options, setCh2Options] = useState<any[]>([]);
     const [isShooting, setIsShooting] = useState(false);
 
     useEffect(() => {
         const dateStr = new Date().toLocaleDateString(lang === 'ar' ? 'ar-AE' : 'en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
+            year: 'numeric', month: 'long', day: 'numeric'
         });
         setIssueDate(dateStr);
     }, [lang, stage]);
@@ -264,6 +248,15 @@ const DeweyGame: React.FC = () => {
         }
         return () => clearInterval(interval);
     }, [stage, questionTimer, feedback]);
+
+    // إيقاف تمرير الشاشة (Scroll) أثناء السحب
+    useEffect(() => {
+        const preventDefault = (e: TouchEvent) => {
+            if (isDragging.current) e.preventDefault();
+        };
+        document.addEventListener('touchmove', preventDefault, { passive: false });
+        return () => document.removeEventListener('touchmove', preventDefault);
+    }, []);
 
     const handleStart = () => {
         if (!studentName.trim() || !studentGrade.trim()) {
@@ -296,12 +289,11 @@ const DeweyGame: React.FC = () => {
         const mixed = shuffleArray(BANK_SHELVES).slice(0, 5).map(q => {
             const correct = lang === 'ar' ? q.arCorrect : q.enCorrect;
             const wrongs = lang === 'ar' ? q.arWrongs : q.enWrongs;
-            const displayShelf = lang === 'ar' ? q.arShelf : q.enShelf;
             return {
                 shelfCode: q.shelfCode,
-                displayShelf: displayShelf,
+                displayShelf: lang === 'ar' ? q.arShelf : q.enShelf,
                 correct: correct,
-                options: shuffleArray([correct, ...wrongs])
+                options: shuffleArray([correct, ...wrongs.slice(0, 3)]) // 4 خيارات فقط لتناسب الشاشة
             };
         });
         setCurrentQuestions(mixed);
@@ -311,6 +303,7 @@ const DeweyGame: React.FC = () => {
     const handleTimeout = () => {
         setFeedback('wrong');
         setDragItem(null);
+        isDragging.current = false;
         setTimeout(() => nextQuestion(), 1500);
     };
 
@@ -330,6 +323,7 @@ const DeweyGame: React.FC = () => {
             setFeedback('wrong');
         }
         setDragItem(null);
+        isDragging.current = false;
         setTimeout(() => nextQuestion(), 1500);
     };
 
@@ -358,33 +352,38 @@ const DeweyGame: React.FC = () => {
     };
 
     // =========================================================================
-    // نظام السحب والإفلات المخصص لدعم الهواتف والأجهزة اللوحية
+    // نظام السحب والإفلات المخصص لدعم الهواتف (Touch/Mouse)
     // =========================================================================
     
-    const handleDragStart = (e: any, id: string, type: 'q' | 'opt', content?: string) => {
-        e.preventDefault();
-        const touch = e.touches ? e.touches[0] : e;
+    const handleDragStart = (e: React.TouchEvent | React.MouseEvent, id: string, type: 'q' | 'opt', content?: string) => {
+        if (feedback) return;
+        const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+        const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
+        
+        isDragging.current = true;
         setDragItem({ id, type, content });
-        setDragPos({ x: touch.clientX, y: touch.clientY });
+        setDragPos({ x: clientX, y: clientY });
     };
 
-    const handleDragMove = useCallback((e: any) => {
-        if (!dragItem) return;
-        e.preventDefault(); // منع التمرير في الموبايل أثناء السحب
-        const touch = e.touches ? e.touches[0] : e;
-        setDragPos({ x: touch.clientX, y: touch.clientY });
+    const handleDragMove = useCallback((e: TouchEvent | MouseEvent) => {
+        if (!isDragging.current || !dragItem) return;
+        const clientX = 'touches' in e ? (e as TouchEvent).touches[0].clientX : (e as MouseEvent).clientX;
+        const clientY = 'touches' in e ? (e as TouchEvent).touches[0].clientY : (e as MouseEvent).clientY;
+        setDragPos({ x: clientX, y: clientY });
     }, [dragItem]);
 
-    const handleDragEnd = useCallback((e: any) => {
-        if (!dragItem) return;
-        const touch = e.changedTouches ? e.changedTouches[0] : e;
+    const handleDragEnd = useCallback((e: TouchEvent | MouseEvent) => {
+        if (!isDragging.current || !dragItem) return;
+        
+        const clientX = 'changedTouches' in e ? (e as TouchEvent).changedTouches[0].clientX : (e as MouseEvent).clientX;
+        const clientY = 'changedTouches' in e ? (e as TouchEvent).changedTouches[0].clientY : (e as MouseEvent).clientY;
         
         let droppedOn = null;
         dropZonesRef.current.forEach((el, key) => {
             if (!el) return;
             const rect = el.getBoundingClientRect();
-            if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
-                touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+            if (clientX >= rect.left && clientX <= rect.right &&
+                clientY >= rect.top && clientY <= rect.bottom) {
                 droppedOn = key;
             }
         });
@@ -396,12 +395,14 @@ const DeweyGame: React.FC = () => {
                 handleAnswer(droppedOn);
             }
         }
+        
         setDragItem(null);
+        isDragging.current = false;
     }, [dragItem, stage, handleAnswer]);
 
     useEffect(() => {
         if (dragItem) {
-            window.addEventListener('mousemove', handleDragMove, { passive: false });
+            window.addEventListener('mousemove', handleDragMove);
             window.addEventListener('mouseup', handleDragEnd);
             window.addEventListener('touchmove', handleDragMove, { passive: false });
             window.addEventListener('touchend', handleDragEnd);
@@ -451,7 +452,7 @@ const DeweyGame: React.FC = () => {
     }, [stage, lang, handleShoot, feedback]);
 
     return (
-        <div className={`min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 flex flex-col items-center justify-center p-2 md:p-4 relative overflow-hidden select-none ${lang === 'ar' ? 'dir-rtl' : 'dir-ltr'}`}>
+        <div className={`min-h-[100dvh] bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 flex flex-col items-center justify-center p-2 md:p-4 relative overflow-hidden select-none touch-none ${lang === 'ar' ? 'dir-rtl' : 'dir-ltr'}`}>
             
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
@@ -488,80 +489,89 @@ const DeweyGame: React.FC = () => {
                     animation: pulse-glow 2s infinite alternate ease-in-out;
                 }
                 @keyframes pulse-glow {
-                    0% { filter: drop-shadow(0 0 15px rgba(245, 158, 11, 0.6)); transform: scale(1) translateY(0px); }
-                    100% { filter: drop-shadow(0 0 45px rgba(245, 158, 11, 1)); transform: scale(1.05) translateY(-5px); }
+                    0% { filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.4)); transform: scale(1) translateY(0px); }
+                    100% { filter: drop-shadow(0 0 25px rgba(245, 158, 11, 0.8)); transform: scale(1.02) translateY(-3px); }
                 }
                 
                 .float-anim { animation: floating 3s ease-in-out infinite; }
                 @keyframes floating {
                     0% { transform: translateY(0px); }
-                    50% { transform: translateY(-12px); }
+                    50% { transform: translateY(-8px); }
                     100% { transform: translateY(0px); }
                 }
 
-                /* تحسينات الرفوف */
                 .wood-shelf {
                     position: relative;
                     background: linear-gradient(to bottom, #d97706 0%, #b45309 100%);
-                    border-bottom: 12px solid #78350f;
-                    border-radius: 8px;
-                    box-shadow: inset 0 -4px 10px rgba(0,0,0,0.4), 0 12px 20px rgba(0,0,0,0.5);
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    border-bottom: 8px solid #78350f;
+                    border-radius: 6px;
+                    box-shadow: inset 0 -4px 10px rgba(0,0,0,0.4), 0 8px 15px rgba(0,0,0,0.3);
+                    transition: all 0.2s;
                 }
-                .wood-shelf:hover, .wood-shelf-active {
+                .wood-shelf-active {
                     filter: brightness(1.2);
-                    transform: translateY(-4px);
-                    box-shadow: 0 0 30px rgba(245, 158, 11, 0.8), inset 0 -4px 10px rgba(0,0,0,0.4);
+                    box-shadow: 0 0 20px rgba(245, 158, 11, 0.9), inset 0 -4px 10px rgba(0,0,0,0.4);
                     border-bottom-color: #f59e0b;
                 }
                 
-                /* تحسينات الكتب */
                 .realistic-book {
                     position: relative;
                     background: linear-gradient(135deg, #ffffff, #f1f5f9);
-                    border-left: 16px solid #cbd5e1;
-                    border-radius: 4px 16px 16px 4px;
-                    box-shadow: -4px 8px 15px rgba(0,0,0,0.2);
-                    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-                }
-                .realistic-book:hover, .realistic-book-active {
-                    transform: translateY(-8px) rotate(-2deg);
-                    box-shadow: -8px 15px 25px rgba(245, 158, 11, 0.4);
-                    border-left-color: #f59e0b !important;
-                    z-index: 10;
+                    border-left: 12px solid #cbd5e1;
+                    border-radius: 4px 12px 12px 4px;
+                    box-shadow: -2px 4px 8px rgba(0,0,0,0.2);
+                    transition: transform 0.1s;
                 }
 
-                /* أنيميشن الليزر للعبة الصاروخ */
                 .laser-beam {
                     position: absolute;
-                    bottom: 60px;
-                    width: 6px;
-                    height: 40px;
+                    bottom: 50px;
+                    width: 4px;
+                    height: 30px;
                     background: #ef4444;
-                    box-shadow: 0 0 15px #ef4444, 0 0 30px #ef4444;
+                    box-shadow: 0 0 10px #ef4444, 0 0 20px #ef4444;
                     border-radius: 10px;
                     animation: shoot-up 0.3s linear forwards;
                     z-index: 20;
                 }
                 @keyframes shoot-up {
-                    0% { bottom: 60px; opacity: 1; }
+                    0% { bottom: 50px; opacity: 1; }
                     100% { bottom: 100%; opacity: 0; }
                 }
 
                 .cert-font { font-family: 'Cairo', sans-serif !important; }
+                
+                /* Layout Helpers for Compact Mobile View */
+                .compact-layout {
+                    display: flex;
+                    flex-direction: column;
+                    height: 100%;
+                    max-height: 85vh;
+                    justify-content: space-between;
+                }
+                
+                .compact-grid {
+                    display: grid;
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                    gap: 0.5rem;
+                }
+                @media (min-width: 768px) {
+                    .compact-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1rem; }
+                }
             `}</style>
 
             {/* --- العنصر المتحرك أثناء السحب (المخصص) --- */}
             {dragItem && (
                 <div 
-                    className="fixed pointer-events-none z-[9999] realistic-book p-4 font-black text-center flex items-center justify-center bg-white shadow-2xl opacity-90"
+                    className="fixed pointer-events-none z-[9999] realistic-book p-3 md:p-4 font-black text-center flex items-center justify-center bg-white shadow-2xl opacity-90 text-slate-900"
                     style={{
                         left: dragPos.x,
                         top: dragPos.y,
-                        transform: 'translate(-50%, -50%) scale(1.1) rotate(-3deg)',
+                        transform: 'translate(-50%, -50%) scale(1.05) rotate(-3deg)',
                         borderLeftColor: '#f59e0b',
-                        width: dragItem.type === 'q' ? '250px' : '150px',
-                        minHeight: '80px'
+                        width: dragItem.type === 'q' ? '200px' : '120px',
+                        minHeight: '60px',
+                        fontSize: dragItem.type === 'q' ? '1rem' : '0.875rem'
                     }}
                 >
                     {dragItem.content || (lang === 'ar' ? currentQuestions[qIndex].ar : currentQuestions[qIndex].en)}
@@ -570,22 +580,22 @@ const DeweyGame: React.FC = () => {
 
             {/* 1. شاشة البداية */}
             {stage === 'intro' && (
-                <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-2xl text-center animate-fade-in-up relative z-10">
-                    <img src="/Game.png" alt="Game Logo" className="w-48 h-48 mx-auto mb-4 object-contain magic-glow" onError={(e) => e.currentTarget.style.display = 'none'} />
-                    <h1 className="text-3xl font-black text-amber-500 mb-2">{dict.title}</h1>
-                    <p className="text-sm opacity-90 mb-8 font-bold text-slate-600 dark:text-slate-400">{dict.subtitle}</p>
+                <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl text-center animate-fade-in-up relative z-10">
+                    <img src="/Game.png" alt="Game Logo" className="w-32 h-32 md:w-48 md:h-48 mx-auto mb-4 object-contain magic-glow" onError={(e) => e.currentTarget.style.display = 'none'} />
+                    <h1 className="text-2xl md:text-3xl font-black text-amber-500 mb-2">{dict.title}</h1>
+                    <p className="text-xs md:text-sm opacity-90 mb-6 font-bold text-slate-600 dark:text-slate-400">{dict.subtitle}</p>
                     
-                    <div className={`space-y-4 mb-8 ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
+                    <div className={`space-y-3 mb-6 ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
                         <div>
-                            <label className="text-xs font-bold text-slate-500 mb-1 block px-2">{dict.studentName}</label>
-                            <input type="text" placeholder={dict.namePlaceholder} className="w-full p-4 rounded-xl bg-slate-100 dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-amber-500 font-bold" value={studentName} onChange={(e) => setStudentName(e.target.value)} />
+                            <label className="text-[10px] md:text-xs font-bold text-slate-500 mb-1 block px-2">{dict.studentName}</label>
+                            <input type="text" placeholder={dict.namePlaceholder} className="w-full p-3 md:p-4 rounded-xl bg-slate-100 dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-amber-500 font-bold text-sm" value={studentName} onChange={(e) => setStudentName(e.target.value)} />
                         </div>
                         <div>
-                            <label className="text-xs font-bold text-slate-500 mb-1 block px-2">{dict.grade}</label>
-                            <input type="text" placeholder={dict.gradePlaceholder} className="w-full p-4 rounded-xl bg-slate-100 dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-amber-500 font-bold" value={studentGrade} onChange={(e) => setStudentGrade(e.target.value)} />
+                            <label className="text-[10px] md:text-xs font-bold text-slate-500 mb-1 block px-2">{dict.grade}</label>
+                            <input type="text" placeholder={dict.gradePlaceholder} className="w-full p-3 md:p-4 rounded-xl bg-slate-100 dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-amber-500 font-bold text-sm" value={studentGrade} onChange={(e) => setStudentGrade(e.target.value)} />
                         </div>
                     </div>
-                    <button onClick={handleStart} className="w-full py-4 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-white font-black text-xl rounded-2xl shadow-[0_10px_20px_rgba(245,158,11,0.4)] transition-all active:scale-95 float-anim">
+                    <button onClick={handleStart} className="w-full py-3 md:py-4 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-white font-black text-lg md:text-xl rounded-2xl shadow-[0_10px_20px_rgba(245,158,11,0.4)] transition-all active:scale-95 float-anim">
                         {dict.start}
                     </button>
                 </div>
@@ -593,22 +603,24 @@ const DeweyGame: React.FC = () => {
 
             {/* 2. شاشة التعلم */}
             {stage === 'learn' && (
-                <div className="max-w-3xl w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-2xl animate-zoom-in relative z-10 text-center">
-                    <div className="w-24 h-24 bg-amber-100 dark:bg-amber-900/30 rounded-full mx-auto flex items-center justify-center mb-4">
-                        <svg className="w-12 h-12 text-amber-500 magic-glow" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                <div className="max-w-3xl w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl animate-zoom-in relative z-10 text-center flex flex-col h-[90vh] md:h-auto justify-between md:justify-start">
+                    <div className="w-20 h-20 md:w-24 md:h-24 bg-amber-100 dark:bg-amber-900/30 rounded-full mx-auto flex items-center justify-center mb-4 shrink-0">
+                        <svg className="w-10 h-10 md:w-12 md:h-12 text-amber-500 magic-glow" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                     </div>
-                    <h2 className="text-3xl font-black text-amber-500 mb-4">{dict.rulesTitle}</h2>
-                    <p className="text-base md:text-lg leading-relaxed mb-10 opacity-90 font-bold text-slate-700 dark:text-slate-300">
-                        {dict.rulesText}
-                    </p>
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-10">
+                    <div>
+                        <h2 className="text-2xl md:text-3xl font-black text-amber-500 mb-2">{dict.rulesTitle}</h2>
+                        <p className="text-sm md:text-lg leading-relaxed mb-6 opacity-90 font-bold text-slate-700 dark:text-slate-300">
+                            {dict.rulesText}
+                        </p>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-4 mb-6 flex-1 md:flex-none overflow-y-auto content-start px-1">
                         {DEWEY_CATEGORIES.map(cat => (
-                            <div key={cat.code} className="p-4 rounded-2xl text-[11px] md:text-sm font-black shadow-lg text-white float-anim" style={{ backgroundColor: cat.color, animationDelay: `${Math.random()}s` }}>
+                            <div key={cat.code} className="p-3 md:p-4 rounded-xl text-[10px] md:text-sm font-black shadow-md text-white flex items-center justify-center text-center" style={{ backgroundColor: cat.color }}>
                                 {lang === 'ar' ? cat.ar : cat.en}
                             </div>
                         ))}
                     </div>
-                    <button onClick={() => setStage('tut1')} className="w-full py-4 bg-gradient-to-r from-green-400 to-green-500 hover:from-green-500 hover:to-green-600 text-white font-black rounded-2xl shadow-lg transition-transform active:scale-95 text-xl">
+                    <button onClick={() => setStage('tut1')} className="w-full py-4 bg-gradient-to-r from-green-400 to-green-500 hover:from-green-500 hover:to-green-600 text-white font-black rounded-2xl shadow-lg transition-transform active:scale-95 text-lg md:text-xl mt-auto shrink-0">
                         {dict.readyBtn}
                     </button>
                 </div>
@@ -616,93 +628,93 @@ const DeweyGame: React.FC = () => {
 
             {/* شاشات التعليمات قبل التحديات */}
             {stage === 'tut1' && (
-                <div className="max-w-md w-full bg-blue-50 dark:bg-slate-900 border border-blue-200 dark:border-slate-800 rounded-3xl p-8 shadow-2xl text-center animate-zoom-in relative z-10">
-                    <h2 className="text-3xl font-black text-blue-500 mb-4">{dict.tutCh1Title}</h2>
-                    <p className="text-lg leading-relaxed font-bold text-slate-700 dark:text-slate-300 mb-8">{dict.tutCh1Desc}</p>
-                    <button onClick={startChallenge1} className="w-full py-4 bg-blue-500 text-white font-black text-xl rounded-2xl shadow-lg active:scale-95">{dict.tutorialBtn}</button>
+                <div className="max-w-md w-full bg-blue-50 dark:bg-slate-900 border border-blue-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl text-center animate-zoom-in relative z-10">
+                    <h2 className="text-2xl md:text-3xl font-black text-blue-500 mb-4">{dict.tutCh1Title}</h2>
+                    <p className="text-base md:text-lg leading-relaxed font-bold text-slate-700 dark:text-slate-300 mb-8">{dict.tutCh1Desc}</p>
+                    <button onClick={startChallenge1} className="w-full py-4 bg-blue-500 text-white font-black text-lg md:text-xl rounded-2xl shadow-lg active:scale-95">{dict.tutorialBtn}</button>
                 </div>
             )}
             {stage === 'tut2' && (
-                <div className="max-w-md w-full bg-red-50 dark:bg-slate-900 border border-red-200 dark:border-slate-800 rounded-3xl p-8 shadow-2xl text-center animate-zoom-in relative z-10">
-                    <h2 className="text-3xl font-black text-red-500 mb-4">{dict.tutCh2Title}</h2>
-                    <p className="text-lg leading-relaxed font-bold text-slate-700 dark:text-slate-300 mb-8">{dict.tutCh2Desc}</p>
-                    <button onClick={startChallenge2} className="w-full py-4 bg-red-500 text-white font-black text-xl rounded-2xl shadow-lg active:scale-95">{dict.tutorialBtn}</button>
+                <div className="max-w-md w-full bg-red-50 dark:bg-slate-900 border border-red-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl text-center animate-zoom-in relative z-10">
+                    <h2 className="text-2xl md:text-3xl font-black text-red-500 mb-4">{dict.tutCh2Title}</h2>
+                    <p className="text-base md:text-lg leading-relaxed font-bold text-slate-700 dark:text-slate-300 mb-8">{dict.tutCh2Desc}</p>
+                    <button onClick={startChallenge2} className="w-full py-4 bg-red-500 text-white font-black text-lg md:text-xl rounded-2xl shadow-lg active:scale-95">{dict.tutorialBtn}</button>
                 </div>
             )}
             {stage === 'tut3' && (
-                <div className="max-w-md w-full bg-amber-50 dark:bg-slate-900 border border-amber-200 dark:border-slate-800 rounded-3xl p-8 shadow-2xl text-center animate-zoom-in relative z-10">
-                    <h2 className="text-3xl font-black text-amber-500 mb-4">{dict.tutCh3Title}</h2>
-                    <p className="text-lg leading-relaxed font-bold text-slate-700 dark:text-slate-300 mb-8">{dict.tutCh3Desc}</p>
-                    <button onClick={startChallenge3} className="w-full py-4 bg-amber-500 text-white font-black text-xl rounded-2xl shadow-lg active:scale-95">{dict.tutorialBtn}</button>
+                <div className="max-w-md w-full bg-amber-50 dark:bg-slate-900 border border-amber-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl text-center animate-zoom-in relative z-10">
+                    <h2 className="text-2xl md:text-3xl font-black text-amber-500 mb-4">{dict.tutCh3Title}</h2>
+                    <p className="text-base md:text-lg leading-relaxed font-bold text-slate-700 dark:text-slate-300 mb-8">{dict.tutCh3Desc}</p>
+                    <button onClick={startChallenge3} className="w-full py-4 bg-amber-500 text-white font-black text-lg md:text-xl rounded-2xl shadow-lg active:scale-95">{dict.tutorialBtn}</button>
                 </div>
             )}
 
-            {/* 3. شاشات التحديات */}
+            {/* 3. شاشات التحديات المدمجة للموبايل (Compact View) */}
             {stage.startsWith('challenge') && currentQuestions.length > 0 && (
-                <div className="max-w-5xl w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 md:p-8 shadow-2xl animate-fade-in-up relative z-10 flex flex-col h-full min-h-[85vh] md:min-h-0">
+                <div className="max-w-5xl w-full h-[95vh] md:h-auto md:min-h-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-3 md:p-8 shadow-2xl animate-fade-in-up relative z-10 compact-layout">
                     
                     {/* شريط الإحصائيات العلوية */}
-                    <div className="flex justify-between items-center mb-6 bg-slate-100 dark:bg-slate-800 p-4 rounded-2xl shadow-inner shrink-0">
+                    <div className="flex justify-between items-center mb-4 bg-slate-100 dark:bg-slate-800 p-3 md:p-4 rounded-2xl shadow-inner shrink-0">
                         <div>
-                            <span className="text-amber-500 font-black text-base md:text-xl">
+                            <span className="text-amber-500 font-black text-sm md:text-xl">
                                 {stage === 'challenge1' ? dict.ch1 : stage === 'challenge2' ? dict.ch2 : dict.ch3}
                             </span>
-                            <div className="text-xs md:text-sm opacity-70 mt-1 font-bold">{dict.question} {qIndex + 1} / 5</div>
+                            <div className="text-[10px] md:text-sm opacity-70 mt-1 font-bold">{dict.question} {qIndex + 1} / 5</div>
                         </div>
-                        <div className="flex gap-3 md:gap-6 text-center">
-                            <div className="bg-white dark:bg-slate-700 px-4 py-2 md:px-5 md:py-3 rounded-2xl shadow-md border border-slate-200 dark:border-slate-600">
-                                <div className="text-[10px] md:text-xs opacity-70 font-black uppercase">{dict.time}</div>
-                                <div className={`font-black text-xl md:text-2xl ${questionTimer <= 5 ? 'text-red-500 magic-glow' : 'text-slate-800 dark:text-white'}`}>{questionTimer} <span className="text-sm">{dict.sec}</span></div>
+                        <div className="flex gap-2 md:gap-6 text-center">
+                            <div className="bg-white dark:bg-slate-700 px-3 py-1.5 md:px-5 md:py-3 rounded-xl md:rounded-2xl shadow-md border border-slate-200 dark:border-slate-600">
+                                <div className="text-[9px] md:text-xs opacity-70 font-black uppercase">{dict.time}</div>
+                                <div className={`font-black text-lg md:text-2xl ${questionTimer <= 5 ? 'text-red-500 magic-glow' : 'text-slate-800 dark:text-white'}`}>{questionTimer} <span className="text-[10px] md:text-sm">{dict.sec}</span></div>
                             </div>
-                            <div className="bg-white dark:bg-slate-700 px-4 py-2 md:px-5 md:py-3 rounded-2xl shadow-md border border-slate-200 dark:border-slate-600">
-                                <div className="text-[10px] md:text-xs opacity-70 font-black uppercase">{dict.points}</div>
-                                <div className="font-black text-xl md:text-2xl text-green-500">{score}</div>
+                            <div className="bg-white dark:bg-slate-700 px-3 py-1.5 md:px-5 md:py-3 rounded-xl md:rounded-2xl shadow-md border border-slate-200 dark:border-slate-600">
+                                <div className="text-[9px] md:text-xs opacity-70 font-black uppercase">{dict.points}</div>
+                                <div className="font-black text-lg md:text-2xl text-green-500">{score}</div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex-1 flex flex-col justify-between relative">
+                    <div className="flex-1 flex flex-col justify-between relative overflow-hidden">
                         
-                        {/* التغذية الراجعة (رائع / خطأ) */}
+                        {/* التغذية الراجعة */}
                         {feedback ? (
-                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/95 dark:bg-slate-900/95 z-40 backdrop-blur-md rounded-2xl animate-zoom-in">
+                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/95 dark:bg-slate-900/95 z-40 backdrop-blur-sm rounded-2xl animate-zoom-in">
                                 {feedback === 'correct' ? (
-                                    <svg className="w-32 h-32 text-green-500 mb-6 drop-shadow-lg" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                                    <svg className="w-24 h-24 text-green-500 mb-4 drop-shadow-lg" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
                                 ) : (
-                                    <svg className="w-32 h-32 text-red-500 mb-6 drop-shadow-lg" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" /></svg>
+                                    <svg className="w-24 h-24 text-red-500 mb-4 drop-shadow-lg" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" /></svg>
                                 )}
-                                <h3 className={`text-3xl md:text-5xl font-black ${feedback === 'correct' ? 'text-green-500' : 'text-red-500'}`}>
+                                <h3 className={`text-2xl md:text-5xl font-black ${feedback === 'correct' ? 'text-green-500' : 'text-red-500'}`}>
                                     {feedback === 'correct' ? dict.correct : dict.wrong}
                                 </h3>
                             </div>
                         ) : null}
 
                         {/* ================================================= */}
-                        {/* تصميم التحدي الأول والثالث (السحب والإفلات المخصص) */}
+                        {/* تصميم التحدي الأول والثالث (السحب والإفلات المدمج) */}
                         {/* ================================================= */}
                         {stage !== 'challenge2' && (
                             <>
-                                <div className="flex flex-col items-center justify-center mb-10 shrink-0 min-h-[160px] relative z-20">
+                                <div className="flex flex-col items-center justify-center shrink-0 min-h-[120px] md:min-h-[160px] relative z-20 mb-4 md:mb-8">
                                     {stage === 'challenge3' ? (
                                         <div 
                                             ref={(el) => { if(el) dropZonesRef.current.set(currentQuestions[qIndex].shelfCode, el); }}
-                                            className={`w-full md:w-2/3 h-36 relative wood-shelf flex items-end justify-center pb-5 ${dragItem ? 'wood-shelf-active' : ''}`}
+                                            className="w-full md:w-2/3 h-24 md:h-36 relative wood-shelf flex items-end justify-center pb-2 md:pb-5"
                                         >
-                                            <div className="absolute -top-8 bg-amber-50 dark:bg-slate-800 px-8 py-3 rounded-full font-black text-amber-600 shadow-lg border-2 border-amber-200 dark:border-amber-700 text-lg md:text-xl">
+                                            <div className="absolute -top-4 md:-top-8 bg-amber-50 dark:bg-slate-800 px-6 py-2 rounded-full font-black text-amber-600 shadow-md border-2 border-amber-200 dark:border-amber-700 text-sm md:text-xl">
                                                 {dict.shelfText}: {currentQuestions[qIndex].displayShelf}
                                             </div>
-                                            <p className="text-amber-100 font-bold text-sm md:text-base tracking-widest">{dict.dropInstruction}</p>
+                                            <p className="text-amber-100 font-bold text-[10px] md:text-base tracking-widest">{dict.dropInstruction}</p>
                                         </div>
                                     ) : (
                                         <div className="text-center w-full">
-                                            <p className="text-sm md:text-base font-black opacity-70 mb-6 text-slate-500 bg-slate-100 dark:bg-slate-800 inline-block px-4 py-2 rounded-full">{dict.dragInstruction}</p>
+                                            <p className="text-xs md:text-base font-black opacity-70 mb-3 md:mb-6 text-slate-500 bg-slate-100 dark:bg-slate-800 inline-block px-3 py-1.5 rounded-full">{dict.dragInstruction}</p>
                                             <div 
                                                 onMouseDown={(e) => handleDragStart(e, 'q', 'q')}
                                                 onTouchStart={(e) => handleDragStart(e, 'q', 'q')}
-                                                className={`realistic-book p-6 md:p-10 max-w-xl mx-auto cursor-grab active:cursor-grabbing flex items-center justify-center text-center float-anim`}
-                                                style={{ borderLeftColor: '#f59e0b', color: '#0f172a', opacity: dragItem?.type === 'q' ? 0.3 : 1 }}
+                                                className={`realistic-book p-4 md:p-10 max-w-sm md:max-w-xl mx-auto cursor-grab active:cursor-grabbing flex items-center justify-center text-center float-anim`}
+                                                style={{ borderLeftColor: '#f59e0b', color: '#0f172a', opacity: dragItem?.type === 'q' ? 0.2 : 1 }}
                                             >
-                                                <h3 className="font-black text-xl md:text-3xl leading-relaxed drop-shadow-sm pointer-events-none">
+                                                <h3 className="font-black text-base md:text-3xl leading-snug drop-shadow-sm pointer-events-none">
                                                     {lang === 'ar' ? currentQuestions[qIndex].ar : currentQuestions[qIndex].en}
                                                 </h3>
                                             </div>
@@ -710,30 +722,30 @@ const DeweyGame: React.FC = () => {
                                     )}
                                 </div>
 
-                                <div className="flex-1 mt-auto shrink-0 pb-6 relative z-10">
+                                <div className="flex-1 shrink-0 relative z-10 w-full overflow-hidden flex flex-col justify-end pb-2">
                                     {stage === 'challenge3' ? (
-                                        <div className="grid grid-cols-2 gap-4 md:gap-6">
+                                        <div className="grid grid-cols-2 gap-2 md:gap-6 w-full">
                                             {currentQuestions[qIndex].options.map((opt: string, idx: number) => (
                                                 <div 
                                                     key={idx}
                                                     onMouseDown={(e) => handleDragStart(e, opt, 'opt', opt)}
                                                     onTouchStart={(e) => handleDragStart(e, opt, 'opt', opt)}
-                                                    className={`realistic-book p-5 md:p-6 font-black text-sm md:text-lg text-center flex items-center justify-center min-h-[100px] cursor-grab active:cursor-grabbing text-slate-800`}
-                                                    style={{ borderLeftColor: '#cbd5e1', opacity: dragItem?.id === opt ? 0.3 : 1 }}
+                                                    className={`realistic-book p-3 md:p-6 font-black text-[11px] md:text-lg text-center flex items-center justify-center min-h-[60px] md:min-h-[100px] cursor-grab active:cursor-grabbing text-slate-800`}
+                                                    style={{ borderLeftColor: '#cbd5e1', opacity: dragItem?.id === opt ? 0.2 : 1 }}
                                                 >
-                                                    <span className="pointer-events-none">{opt}</span>
+                                                    <span className="pointer-events-none leading-tight">{opt}</span>
                                                 </div>
                                             ))}
                                         </div>
                                     ) : (
-                                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-5">
+                                        <div className="compact-grid w-full">
                                             {DEWEY_CATEGORIES.map(cat => (
                                                 <div 
                                                     key={cat.code} 
                                                     ref={(el) => { if(el) dropZonesRef.current.set(cat.code, el); }}
-                                                    className={`wood-shelf h-32 md:h-36 flex flex-col justify-end items-center pb-3 ${dragItem ? 'wood-shelf-active' : ''}`}
+                                                    className={`wood-shelf h-20 md:h-36 flex flex-col justify-end items-center pb-2 md:pb-3`}
                                                 >
-                                                    <div className="bg-white/95 text-slate-900 text-xs md:text-sm font-black px-3 py-2 rounded-lg shadow-md mb-2 text-center w-11/12 truncate pointer-events-none" style={{ borderBottom: `4px solid ${cat.color}` }}>
+                                                    <div className="bg-white/95 text-slate-900 text-[9px] md:text-sm font-black px-1.5 py-1 md:px-3 md:py-2 rounded shadow-md mb-1 text-center w-[95%] truncate pointer-events-none" style={{ borderBottom: `3px solid ${cat.color}` }}>
                                                         {lang === 'ar' ? cat.ar : cat.en}
                                                     </div>
                                                 </div>
@@ -745,43 +757,38 @@ const DeweyGame: React.FC = () => {
                         )}
 
                         {/* ================================================= */}
-                        {/* تصميم التحدي الثاني (لعبة الصاروخ الفضائي) */}
+                        {/* تصميم التحدي الثاني (لعبة الصاروخ المدمجة) */}
                         {/* ================================================= */}
                         {stage === 'challenge2' && (
-                            <div className="flex-1 flex flex-col bg-slate-900 rounded-3xl overflow-hidden relative border-4 border-slate-700 shadow-inner p-4">
-                                {/* السؤال بالأعلى */}
-                                <div className="text-center mb-6 z-20">
-                                    <p className="text-sm font-black text-sky-300 mb-2">{dict.shootInstruction}</p>
-                                    <div className="bg-white/10 backdrop-blur-md border-2 border-white/20 text-white p-4 rounded-2xl inline-block max-w-xl text-xl md:text-2xl font-black shadow-lg">
+                            <div className="flex-1 flex flex-col bg-slate-900 rounded-2xl overflow-hidden relative border-4 border-slate-700 shadow-inner p-2 md:p-4">
+                                <div className="text-center mb-4 md:mb-6 z-20 shrink-0">
+                                    <p className="text-[10px] md:text-sm font-black text-sky-300 mb-1">{dict.shootInstruction}</p>
+                                    <div className="bg-white/10 backdrop-blur-md border-2 border-white/20 text-white p-3 md:p-4 rounded-xl inline-block max-w-sm md:max-w-xl text-base md:text-2xl font-black shadow-lg leading-tight">
                                         {lang === 'ar' ? currentQuestions[qIndex].ar : currentQuestions[qIndex].en}
                                     </div>
                                 </div>
 
-                                {/* الأهداف (الكائنات/الخيارات) */}
-                                <div className="flex justify-between w-full px-4 md:px-12 relative z-20">
+                                <div className="flex justify-between w-full px-2 md:px-12 relative z-20 shrink-0">
                                     {ch2Options.map((opt, idx) => (
-                                        <div key={idx} className="flex flex-col items-center w-1/4">
-                                            <div className="w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center font-black text-sm md:text-base text-white shadow-[0_0_15px_rgba(255,255,255,0.3)] float-anim text-center px-1 leading-tight" style={{ backgroundColor: opt.color, animationDelay: `${idx * 0.2}s` }}>
+                                        <div key={idx} className="flex flex-col items-center w-1/4 px-0.5">
+                                            <div className="w-14 h-14 md:w-20 md:h-20 rounded-full flex items-center justify-center font-black text-[9px] md:text-base text-white shadow-[0_0_15px_rgba(255,255,255,0.3)] float-anim text-center leading-tight" style={{ backgroundColor: opt.color, animationDelay: `${idx * 0.2}s` }}>
                                                 {lang === 'ar' ? opt.ar : opt.en}
                                             </div>
                                         </div>
                                     ))}
                                 </div>
 
-                                {/* منطقة لعب الصاروخ */}
-                                <div className="flex-1 relative mt-10">
-                                    {/* مسارات الحركة الوهمية */}
-                                    <div className="absolute inset-0 flex justify-between px-4 md:px-12 pointer-events-none opacity-10">
-                                        {[0, 1, 2, 3].map(i => <div key={i} className="w-1/4 flex justify-center"><div className="w-1 h-full bg-white border-dashed border-l-2"></div></div>)}
+                                <div className="flex-1 relative mt-4 md:mt-10">
+                                    <div className="absolute inset-0 flex justify-between px-2 md:px-12 pointer-events-none opacity-10">
+                                        {[0, 1, 2, 3].map(i => <div key={i} className="w-1/4 flex justify-center"><div className="w-0.5 h-full bg-white border-dashed border-l"></div></div>)}
                                     </div>
 
-                                    {/* الصاروخ */}
-                                    <div className="absolute bottom-0 w-full flex justify-between px-4 md:px-12 pb-4 transition-all duration-300 z-30">
+                                    <div className="absolute bottom-0 w-full flex justify-between px-2 md:px-12 pb-2 md:pb-4 transition-all duration-300 z-30">
                                         {[0, 1, 2, 3].map(pos => (
                                             <div key={pos} className="w-1/4 flex justify-center relative">
                                                 {rocketPos === pos && (
                                                     <>
-                                                        <svg className="w-12 h-12 md:w-16 md:h-16 text-sky-400 drop-shadow-[0_0_10px_#38bdf8]" fill="currentColor" viewBox="0 0 24 24">
+                                                        <svg className="w-10 h-10 md:w-16 md:h-16 text-sky-400 drop-shadow-[0_0_10px_#38bdf8]" fill="currentColor" viewBox="0 0 24 24">
                                                             <path d="M12 2.5l-4.5 9h9zM7.5 13L5 21l7-3 7 3-2.5-8H7.5z" />
                                                         </svg>
                                                         {isShooting && <div className="laser-beam left-1/2 -translate-x-1/2"></div>}
@@ -792,15 +799,15 @@ const DeweyGame: React.FC = () => {
                                     </div>
                                 </div>
 
-                                {/* أزرار التحكم للشاشات اللمسية */}
-                                <div className="md:hidden flex justify-between items-center mt-4 gap-2 z-30">
-                                    <button onClick={() => setRocketPos(p => (lang === 'ar' ? Math.min(3, p + 1) : Math.max(0, p - 1)))} className="flex-1 bg-slate-800 text-white p-4 rounded-2xl active:bg-slate-700 text-2xl font-black">
+                                {/* أزرار التحكم للشاشات اللمسية - مدمجة أكثر */}
+                                <div className="md:hidden flex justify-between items-center mt-2 gap-1.5 z-30 shrink-0">
+                                    <button onTouchStart={(e) => {e.preventDefault(); setRocketPos(p => (lang === 'ar' ? Math.min(3, p + 1) : Math.max(0, p - 1)))}} className="flex-1 bg-slate-800 text-white p-3 rounded-xl active:bg-slate-700 text-xl font-black shadow-sm">
                                         {lang === 'ar' ? '►' : '◄'}
                                     </button>
-                                    <button onClick={handleShoot} className="flex-[2] bg-red-600 text-white p-4 rounded-2xl active:bg-red-700 font-black text-xl uppercase tracking-widest shadow-[0_0_15px_rgba(220,38,38,0.5)]">
+                                    <button onTouchStart={(e) => {e.preventDefault(); handleShoot();}} className="flex-[2] bg-red-600 text-white p-3 rounded-xl active:bg-red-700 font-black text-sm uppercase tracking-widest shadow-[0_0_15px_rgba(220,38,38,0.5)]">
                                         {dict.fireBtn}
                                     </button>
-                                    <button onClick={() => setRocketPos(p => (lang === 'ar' ? Math.max(0, p - 1) : Math.min(3, p + 1)))} className="flex-1 bg-slate-800 text-white p-4 rounded-2xl active:bg-slate-700 text-2xl font-black">
+                                    <button onTouchStart={(e) => {e.preventDefault(); setRocketPos(p => (lang === 'ar' ? Math.max(0, p - 1) : Math.min(3, p + 1)))}} className="flex-1 bg-slate-800 text-white p-3 rounded-xl active:bg-slate-700 text-xl font-black shadow-sm">
                                         {lang === 'ar' ? '◄' : '►'}
                                     </button>
                                 </div>
@@ -814,16 +821,14 @@ const DeweyGame: React.FC = () => {
 
             {/* 4. شاشة الشهادة الاحترافية المتوافقة تماماً مع طباعة A4 الطولية */}
             {stage === 'certificate' && (
-                <div className="w-full flex flex-col items-center animate-fade-in-up relative z-10">
+                <div className="w-full flex flex-col items-center animate-fade-in-up relative z-10 pt-4 pb-10">
                     <div 
                         id="certificate-area" 
                         className="cert-font bg-white text-slate-900 border-[14px] border-amber-500 p-8 md:p-12 rounded-3xl shadow-2xl relative overflow-hidden flex flex-col justify-between"
                         style={{ width: '210mm', minHeight: '297mm', boxSizing: 'border-box' }}
                     >
-                        {/* خلفية جمالية مائية للشهادة */}
                         <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/arabesque.png")' }}></div>
                         
-                        {/* رأس الشهادة */}
                         <div className="flex justify-between items-center border-b-[4px] border-amber-500/30 pb-6 mb-6 relative z-10">
                             <img src="/school-logo.png" alt="School Logo" className="w-24 h-24 object-contain drop-shadow-xl" onError={(e) => e.currentTarget.style.display = 'none'} />
                             <div className={`text-left ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
@@ -833,7 +838,6 @@ const DeweyGame: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* محتوى الشهادة */}
                         <div className="text-center relative z-10 my-auto">
                             <h1 className="text-3xl md:text-5xl font-black text-amber-600 mb-6 drop-shadow-sm">{dict.certTitle}</h1>
                             <div className="w-36 h-1.5 bg-red-600 mx-auto rounded-full mb-6"></div>
@@ -853,7 +857,6 @@ const DeweyGame: React.FC = () => {
                             </p>
                         </div>
 
-                        {/* إحصائيات الشهادة */}
                         <div className="flex justify-center gap-8 md:gap-16 text-center relative z-10 bg-slate-50 p-6 rounded-2xl border-2 border-slate-200 shadow-inner my-6">
                             <div>
                                 <div className="text-xs md:text-sm text-slate-500 font-black uppercase mb-1 tracking-wider">{dict.certPoints}</div>
@@ -866,7 +869,6 @@ const DeweyGame: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* توقيع الشهادة */}
                         <div className="flex justify-between items-end relative z-10 px-4 md:px-8 mt-4">
                             <div className="text-center">
                                 <p className="text-base md:text-lg font-black text-slate-800 mb-4">{dict.certSign}</p>
@@ -876,11 +878,11 @@ const DeweyGame: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="mt-10 flex gap-6 no-print relative z-10 pb-10">
-                        <button onClick={() => window.print()} className="px-8 py-4 md:px-10 md:py-5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-black text-lg md:text-xl rounded-2xl shadow-[0_10px_20px_rgba(220,38,38,0.3)] transition-transform active:scale-95">
+                    <div className="mt-10 flex gap-4 md:gap-6 no-print relative z-10">
+                        <button onClick={() => window.print()} className="px-6 py-3 md:px-10 md:py-5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-black text-sm md:text-xl rounded-2xl shadow-[0_10px_20px_rgba(220,38,38,0.3)] transition-transform active:scale-95">
                             {dict.print}
                         </button>
-                        <Link to="/" className="px-8 py-4 md:px-10 md:py-5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-black text-lg md:text-xl rounded-2xl shadow-lg transition-transform active:scale-95">
+                        <Link to="/" className="px-6 py-3 md:px-10 md:py-5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-black text-sm md:text-xl rounded-2xl shadow-lg transition-transform active:scale-95">
                             {dict.back}
                         </Link>
                     </div>
