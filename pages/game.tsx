@@ -28,7 +28,7 @@ const T = {
         wrong: "حاول مرة أخرى يا بطل!",
         dragInstruction: "اسحب هذا الكتاب إلى الرف المناسب",
         dropInstruction: "أفلت الكتاب هنا",
-        shelfText: "رف",
+        shelfText: "المطلوب رف",
         certTitle: "شهادة أمين المكتبة المتميز",
         certAwardedTo: "تشهد إدارة المكتبة بأن البطل / البطلة:",
         certGrade: "بالصف",
@@ -76,7 +76,7 @@ const T = {
         wrong: "Try again, hero!",
         dragInstruction: "Drag this book to the correct shelf",
         dropInstruction: "Drop book here",
-        shelfText: "Shelf",
+        shelfText: "Target Shelf",
         certTitle: "Outstanding Librarian Certificate",
         certAwardedTo: "The Administration certifies that the hero:",
         certGrade: "Grade",
@@ -213,7 +213,7 @@ const DeweyGame: React.FC = () => {
     const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
     const [issueDate, setIssueDate] = useState('');
 
-    // === متغيرات السحب والإفلات المخصصة للهواتف (بدون Scroll) ===
+    // === متغيرات السحب والإفلات المخصصة للهواتف (بدون Scroll ومزامنة مؤشر دقيقة) ===
     const [dragItem, setDragItem] = useState<{ id: string, type: 'q' | 'opt', content?: string } | null>(null);
     const [dragPos, setDragPos] = useState({ x: 0, y: 0 });
     const dropZonesRef = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -248,15 +248,6 @@ const DeweyGame: React.FC = () => {
         }
         return () => clearInterval(interval);
     }, [stage, questionTimer, feedback]);
-
-    // إيقاف تمرير الشاشة (Scroll) أثناء السحب
-    useEffect(() => {
-        const preventDefault = (e: TouchEvent) => {
-            if (isDragging.current) e.preventDefault();
-        };
-        document.addEventListener('touchmove', preventDefault, { passive: false });
-        return () => document.removeEventListener('touchmove', preventDefault);
-    }, []);
 
     const handleStart = () => {
         if (!studentName.trim() || !studentGrade.trim()) {
@@ -352,7 +343,7 @@ const DeweyGame: React.FC = () => {
     };
 
     // =========================================================================
-    // نظام السحب والإفلات المخصص لدعم الهواتف (Touch/Mouse)
+    // نظام السحب والإفلات المخصص لدعم الهواتف بدقة مع إيقاف التمرير الافتراضي
     // =========================================================================
     
     const handleDragStart = (e: React.TouchEvent | React.MouseEvent, id: string, type: 'q' | 'opt', content?: string) => {
@@ -402,7 +393,7 @@ const DeweyGame: React.FC = () => {
 
     useEffect(() => {
         if (dragItem) {
-            window.addEventListener('mousemove', handleDragMove);
+            window.addEventListener('mousemove', handleDragMove, { passive: false });
             window.addEventListener('mouseup', handleDragEnd);
             window.addEventListener('touchmove', handleDragMove, { passive: false });
             window.addEventListener('touchend', handleDragEnd);
@@ -461,24 +452,28 @@ const DeweyGame: React.FC = () => {
                 .dir-ltr { direction: ltr; }
                 
                 @media print {
+                    html, body {
+                        width: 210mm !important;
+                        height: 297mm !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        overflow: hidden !important;
+                    }
                     body * { visibility: hidden; }
                     #certificate-area, #certificate-area * { visibility: visible !important; }
                     #certificate-area {
-                        position: absolute !important;
-                        left: 50% !important;
+                        position: fixed !important;
+                        left: 0 !important;
                         top: 0 !important;
-                        transform: translateX(-50%) !important;
                         width: 210mm !important;
                         height: 297mm !important;
                         margin: 0 !important;
                         padding: 15mm !important;
                         box-sizing: border-box !important;
-                        background: #ffffff !important;
-                        display: flex !important;
-                        flex-direction: column !important;
-                        justify-content: space-between !important;
-                        -webkit-print-color-adjust: exact;
-                        print-color-adjust: exact;
+                        transform: none !important;
+                        page-break-after: avoid !important;
+                        page-break-before: avoid !important;
+                        break-inside: avoid !important;
                     }
                     .no-print { display: none !important; }
                 }
@@ -546,32 +541,32 @@ const DeweyGame: React.FC = () => {
                     display: flex;
                     flex-direction: column;
                     height: 100%;
-                    max-height: 85vh;
+                    max-height: 90vh;
                     justify-content: space-between;
                 }
                 
                 .compact-grid {
                     display: grid;
-                    grid-template-columns: repeat(2, minmax(0, 1fr));
-                    gap: 0.5rem;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    gap: 0.25rem;
                 }
                 @media (min-width: 768px) {
                     .compact-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1rem; }
                 }
             `}</style>
 
-            {/* --- العنصر المتحرك أثناء السحب (المخصص) --- */}
+            {/* --- العنصر المتحرك أثناء السحب (متمركز تماماً تحت الماوس/الإصبع) --- */}
             {dragItem && (
                 <div 
-                    className="fixed pointer-events-none z-[9999] realistic-book p-3 md:p-4 font-black text-center flex items-center justify-center bg-white shadow-2xl opacity-90 text-slate-900"
+                    className="fixed pointer-events-none z-[9999] realistic-book p-2 md:p-4 font-black text-center flex items-center justify-center bg-white shadow-2xl text-slate-900"
                     style={{
                         left: dragPos.x,
                         top: dragPos.y,
-                        transform: 'translate(-50%, -50%) scale(1.05) rotate(-3deg)',
+                        transform: 'translate(-50%, -50%)', // المركز بدقة بدون دوران لتجنب الانحراف
                         borderLeftColor: '#f59e0b',
-                        width: dragItem.type === 'q' ? '200px' : '120px',
-                        minHeight: '60px',
-                        fontSize: dragItem.type === 'q' ? '1rem' : '0.875rem'
+                        width: dragItem.type === 'q' ? '200px' : '130px',
+                        minHeight: '50px',
+                        fontSize: dragItem.type === 'q' ? '0.9rem' : '0.8rem'
                     }}
                 >
                     {dragItem.content || (lang === 'ar' ? currentQuestions[qIndex].ar : currentQuestions[qIndex].en)}
@@ -613,9 +608,9 @@ const DeweyGame: React.FC = () => {
                             {dict.rulesText}
                         </p>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-4 mb-6 flex-1 md:flex-none overflow-y-auto content-start px-1">
+                    <div className="compact-grid mb-6 flex-1 md:flex-none overflow-y-auto content-start px-1">
                         {DEWEY_CATEGORIES.map(cat => (
-                            <div key={cat.code} className="p-3 md:p-4 rounded-xl text-[10px] md:text-sm font-black shadow-md text-white flex items-center justify-center text-center" style={{ backgroundColor: cat.color }}>
+                            <div key={cat.code} className="p-2 md:p-4 rounded-xl text-[10px] md:text-sm font-black shadow-md text-white flex items-center justify-center text-center" style={{ backgroundColor: cat.color }}>
                                 {lang === 'ar' ? cat.ar : cat.en}
                             </div>
                         ))}
@@ -653,22 +648,22 @@ const DeweyGame: React.FC = () => {
             {stage.startsWith('challenge') && currentQuestions.length > 0 && (
                 <div className="max-w-5xl w-full h-[95vh] md:h-auto md:min-h-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-3 md:p-8 shadow-2xl animate-fade-in-up relative z-10 compact-layout">
                     
-                    {/* شريط الإحصائيات العلوية */}
-                    <div className="flex justify-between items-center mb-4 bg-slate-100 dark:bg-slate-800 p-3 md:p-4 rounded-2xl shadow-inner shrink-0">
+                    {/* شريط الإحصائيات العلوية المدمج */}
+                    <div className="flex justify-between items-center mb-2 bg-slate-100 dark:bg-slate-800 p-2 rounded-xl shadow-inner shrink-0">
                         <div>
-                            <span className="text-amber-500 font-black text-sm md:text-xl">
+                            <span className="text-amber-500 font-black text-xs md:text-xl block">
                                 {stage === 'challenge1' ? dict.ch1 : stage === 'challenge2' ? dict.ch2 : dict.ch3}
                             </span>
-                            <div className="text-[10px] md:text-sm opacity-70 mt-1 font-bold">{dict.question} {qIndex + 1} / 5</div>
+                            <span className="text-[10px] md:text-sm opacity-70 font-bold">{dict.question} {qIndex + 1}/5</span>
                         </div>
-                        <div className="flex gap-2 md:gap-6 text-center">
-                            <div className="bg-white dark:bg-slate-700 px-3 py-1.5 md:px-5 md:py-3 rounded-xl md:rounded-2xl shadow-md border border-slate-200 dark:border-slate-600">
-                                <div className="text-[9px] md:text-xs opacity-70 font-black uppercase">{dict.time}</div>
-                                <div className={`font-black text-lg md:text-2xl ${questionTimer <= 5 ? 'text-red-500 magic-glow' : 'text-slate-800 dark:text-white'}`}>{questionTimer} <span className="text-[10px] md:text-sm">{dict.sec}</span></div>
+                        <div className="flex gap-2 text-center">
+                            <div className="bg-white dark:bg-slate-700 px-2 py-1 md:px-5 md:py-3 rounded-lg md:rounded-2xl shadow-sm border border-slate-200 dark:border-slate-600 min-w-[50px]">
+                                <div className="text-[9px] md:text-xs opacity-70 font-black">{dict.time}</div>
+                                <div className={`font-black text-sm md:text-2xl ${questionTimer <= 5 ? 'text-red-500 magic-glow' : 'text-slate-800 dark:text-white'}`}>{questionTimer}</div>
                             </div>
-                            <div className="bg-white dark:bg-slate-700 px-3 py-1.5 md:px-5 md:py-3 rounded-xl md:rounded-2xl shadow-md border border-slate-200 dark:border-slate-600">
-                                <div className="text-[9px] md:text-xs opacity-70 font-black uppercase">{dict.points}</div>
-                                <div className="font-black text-lg md:text-2xl text-green-500">{score}</div>
+                            <div className="bg-white dark:bg-slate-700 px-2 py-1 md:px-5 md:py-3 rounded-lg md:rounded-2xl shadow-sm border border-slate-200 dark:border-slate-600 min-w-[50px]">
+                                <div className="text-[9px] md:text-xs opacity-70 font-black">{dict.points}</div>
+                                <div className="font-black text-sm md:text-2xl text-green-500">{score}</div>
                             </div>
                         </div>
                     </div>
@@ -694,27 +689,28 @@ const DeweyGame: React.FC = () => {
                         {/* ================================================= */}
                         {stage !== 'challenge2' && (
                             <>
-                                <div className="flex flex-col items-center justify-center shrink-0 min-h-[120px] md:min-h-[160px] relative z-20 mb-4 md:mb-8">
+                                <div className="flex flex-col items-center justify-center shrink-0 min-h-[100px] md:min-h-[160px] relative z-20 mb-2 md:mb-8">
                                     {stage === 'challenge3' ? (
                                         <div 
                                             ref={(el) => { if(el) dropZonesRef.current.set(currentQuestions[qIndex].shelfCode, el); }}
-                                            className="w-full md:w-2/3 h-24 md:h-36 relative wood-shelf flex items-end justify-center pb-2 md:pb-5"
+                                            className="w-full h-24 md:h-36 relative wood-shelf flex items-end justify-center pb-2 md:pb-5 mt-6"
                                         >
-                                            <div className="absolute -top-4 md:-top-8 bg-amber-50 dark:bg-slate-800 px-6 py-2 rounded-full font-black text-amber-600 shadow-md border-2 border-amber-200 dark:border-amber-700 text-sm md:text-xl">
+                                            {/* إبراز سؤال التحدي 3 بوضوح شديد */}
+                                            <div className="absolute -top-8 md:-top-10 bg-amber-100 dark:bg-slate-800 px-4 py-2 rounded-xl font-black text-amber-700 shadow-md border-2 border-amber-300 dark:border-amber-700 text-sm md:text-xl w-11/12 text-center truncate">
                                                 {dict.shelfText}: {currentQuestions[qIndex].displayShelf}
                                             </div>
-                                            <p className="text-amber-100 font-bold text-[10px] md:text-base tracking-widest">{dict.dropInstruction}</p>
+                                            <p className="text-amber-100 font-bold text-[10px] md:text-base tracking-widest opacity-80">{dict.dropInstruction}</p>
                                         </div>
                                     ) : (
                                         <div className="text-center w-full">
-                                            <p className="text-xs md:text-base font-black opacity-70 mb-3 md:mb-6 text-slate-500 bg-slate-100 dark:bg-slate-800 inline-block px-3 py-1.5 rounded-full">{dict.dragInstruction}</p>
                                             <div 
+                                                style={{ touchAction: 'none' }}
                                                 onMouseDown={(e) => handleDragStart(e, 'q', 'q')}
                                                 onTouchStart={(e) => handleDragStart(e, 'q', 'q')}
-                                                className={`realistic-book p-4 md:p-10 max-w-sm md:max-w-xl mx-auto cursor-grab active:cursor-grabbing flex items-center justify-center text-center float-anim`}
+                                                className={`realistic-book p-4 md:p-10 max-w-[280px] md:max-w-xl mx-auto cursor-grab active:cursor-grabbing flex items-center justify-center text-center float-anim`}
                                                 style={{ borderLeftColor: '#f59e0b', color: '#0f172a', opacity: dragItem?.type === 'q' ? 0.2 : 1 }}
                                             >
-                                                <h3 className="font-black text-base md:text-3xl leading-snug drop-shadow-sm pointer-events-none">
+                                                <h3 className="font-black text-sm md:text-3xl leading-snug drop-shadow-sm pointer-events-none">
                                                     {lang === 'ar' ? currentQuestions[qIndex].ar : currentQuestions[qIndex].en}
                                                 </h3>
                                             </div>
@@ -722,18 +718,19 @@ const DeweyGame: React.FC = () => {
                                     )}
                                 </div>
 
-                                <div className="flex-1 shrink-0 relative z-10 w-full overflow-hidden flex flex-col justify-end pb-2">
+                                <div className="flex-1 shrink-0 relative z-10 w-full overflow-hidden flex flex-col justify-end pb-1 md:pb-2">
                                     {stage === 'challenge3' ? (
                                         <div className="grid grid-cols-2 gap-2 md:gap-6 w-full">
                                             {currentQuestions[qIndex].options.map((opt: string, idx: number) => (
                                                 <div 
                                                     key={idx}
+                                                    style={{ touchAction: 'none' }}
                                                     onMouseDown={(e) => handleDragStart(e, opt, 'opt', opt)}
                                                     onTouchStart={(e) => handleDragStart(e, opt, 'opt', opt)}
-                                                    className={`realistic-book p-3 md:p-6 font-black text-[11px] md:text-lg text-center flex items-center justify-center min-h-[60px] md:min-h-[100px] cursor-grab active:cursor-grabbing text-slate-800`}
+                                                    className={`realistic-book p-2 md:p-6 font-black text-[10px] md:text-lg text-center flex items-center justify-center min-h-[50px] md:min-h-[100px] cursor-grab active:cursor-grabbing text-slate-800`}
                                                     style={{ borderLeftColor: '#cbd5e1', opacity: dragItem?.id === opt ? 0.2 : 1 }}
                                                 >
-                                                    <span className="pointer-events-none leading-tight">{opt}</span>
+                                                    <span className="pointer-events-none leading-tight px-1">{opt}</span>
                                                 </div>
                                             ))}
                                         </div>
@@ -743,9 +740,9 @@ const DeweyGame: React.FC = () => {
                                                 <div 
                                                     key={cat.code} 
                                                     ref={(el) => { if(el) dropZonesRef.current.set(cat.code, el); }}
-                                                    className={`wood-shelf h-20 md:h-36 flex flex-col justify-end items-center pb-2 md:pb-3`}
+                                                    className={`wood-shelf h-16 md:h-36 flex flex-col justify-end items-center pb-1 md:pb-3`}
                                                 >
-                                                    <div className="bg-white/95 text-slate-900 text-[9px] md:text-sm font-black px-1.5 py-1 md:px-3 md:py-2 rounded shadow-md mb-1 text-center w-[95%] truncate pointer-events-none" style={{ borderBottom: `3px solid ${cat.color}` }}>
+                                                    <div className="bg-white/95 text-slate-900 text-[9px] md:text-sm font-black px-1 py-0.5 md:px-3 md:py-2 rounded shadow-sm mb-0.5 md:mb-1 text-center w-[95%] truncate pointer-events-none" style={{ borderBottom: `2px solid ${cat.color}` }}>
                                                         {lang === 'ar' ? cat.ar : cat.en}
                                                     </div>
                                                 </div>
@@ -761,9 +758,9 @@ const DeweyGame: React.FC = () => {
                         {/* ================================================= */}
                         {stage === 'challenge2' && (
                             <div className="flex-1 flex flex-col bg-slate-900 rounded-2xl overflow-hidden relative border-4 border-slate-700 shadow-inner p-2 md:p-4">
-                                <div className="text-center mb-4 md:mb-6 z-20 shrink-0">
-                                    <p className="text-[10px] md:text-sm font-black text-sky-300 mb-1">{dict.shootInstruction}</p>
-                                    <div className="bg-white/10 backdrop-blur-md border-2 border-white/20 text-white p-3 md:p-4 rounded-xl inline-block max-w-sm md:max-w-xl text-base md:text-2xl font-black shadow-lg leading-tight">
+                                <div className="text-center mb-2 md:mb-6 z-20 shrink-0">
+                                    <p className="text-[9px] md:text-sm font-black text-sky-300 mb-1">{dict.shootInstruction}</p>
+                                    <div className="bg-white/10 backdrop-blur-md border border-white/20 text-white p-2 md:p-4 rounded-xl inline-block max-w-[280px] md:max-w-xl text-xs md:text-2xl font-black shadow-lg leading-tight">
                                         {lang === 'ar' ? currentQuestions[qIndex].ar : currentQuestions[qIndex].en}
                                     </div>
                                 </div>
@@ -771,16 +768,16 @@ const DeweyGame: React.FC = () => {
                                 <div className="flex justify-between w-full px-2 md:px-12 relative z-20 shrink-0">
                                     {ch2Options.map((opt, idx) => (
                                         <div key={idx} className="flex flex-col items-center w-1/4 px-0.5">
-                                            <div className="w-14 h-14 md:w-20 md:h-20 rounded-full flex items-center justify-center font-black text-[9px] md:text-base text-white shadow-[0_0_15px_rgba(255,255,255,0.3)] float-anim text-center leading-tight" style={{ backgroundColor: opt.color, animationDelay: `${idx * 0.2}s` }}>
+                                            <div className="w-12 h-12 md:w-20 md:h-20 rounded-full flex items-center justify-center font-black text-[8px] md:text-base text-white shadow-[0_0_15px_rgba(255,255,255,0.3)] float-anim text-center leading-tight p-0.5" style={{ backgroundColor: opt.color, animationDelay: `${idx * 0.2}s` }}>
                                                 {lang === 'ar' ? opt.ar : opt.en}
                                             </div>
                                         </div>
                                     ))}
                                 </div>
 
-                                <div className="flex-1 relative mt-4 md:mt-10">
+                                <div className="flex-1 relative mt-2 md:mt-10">
                                     <div className="absolute inset-0 flex justify-between px-2 md:px-12 pointer-events-none opacity-10">
-                                        {[0, 1, 2, 3].map(i => <div key={i} className="w-1/4 flex justify-center"><div className="w-0.5 h-full bg-white border-dashed border-l"></div></div>)}
+                                        {[0, 1, 2, 3].map(i => <div key={i} className="w-1/4 flex justify-center"><div className="w-px h-full bg-white border-dashed border-l"></div></div>)}
                                     </div>
 
                                     <div className="absolute bottom-0 w-full flex justify-between px-2 md:px-12 pb-2 md:pb-4 transition-all duration-300 z-30">
@@ -788,7 +785,7 @@ const DeweyGame: React.FC = () => {
                                             <div key={pos} className="w-1/4 flex justify-center relative">
                                                 {rocketPos === pos && (
                                                     <>
-                                                        <svg className="w-10 h-10 md:w-16 md:h-16 text-sky-400 drop-shadow-[0_0_10px_#38bdf8]" fill="currentColor" viewBox="0 0 24 24">
+                                                        <svg className="w-8 h-8 md:w-16 md:h-16 text-sky-400 drop-shadow-[0_0_10px_#38bdf8]" fill="currentColor" viewBox="0 0 24 24">
                                                             <path d="M12 2.5l-4.5 9h9zM7.5 13L5 21l7-3 7 3-2.5-8H7.5z" />
                                                         </svg>
                                                         {isShooting && <div className="laser-beam left-1/2 -translate-x-1/2"></div>}
@@ -799,29 +796,27 @@ const DeweyGame: React.FC = () => {
                                     </div>
                                 </div>
 
-                                {/* أزرار التحكم للشاشات اللمسية - مدمجة أكثر */}
+                                {/* أزرار التحكم للشاشات اللمسية */}
                                 <div className="md:hidden flex justify-between items-center mt-2 gap-1.5 z-30 shrink-0">
-                                    <button onTouchStart={(e) => {e.preventDefault(); setRocketPos(p => (lang === 'ar' ? Math.min(3, p + 1) : Math.max(0, p - 1)))}} className="flex-1 bg-slate-800 text-white p-3 rounded-xl active:bg-slate-700 text-xl font-black shadow-sm">
+                                    <button onTouchStart={(e) => {e.preventDefault(); setRocketPos(p => (lang === 'ar' ? Math.min(3, p + 1) : Math.max(0, p - 1)))}} className="flex-1 bg-slate-800 text-white p-2 rounded-xl active:bg-slate-700 text-lg font-black shadow-sm">
                                         {lang === 'ar' ? '►' : '◄'}
                                     </button>
-                                    <button onTouchStart={(e) => {e.preventDefault(); handleShoot();}} className="flex-[2] bg-red-600 text-white p-3 rounded-xl active:bg-red-700 font-black text-sm uppercase tracking-widest shadow-[0_0_15px_rgba(220,38,38,0.5)]">
+                                    <button onTouchStart={(e) => {e.preventDefault(); handleShoot();}} className="flex-[2] bg-red-600 text-white p-2 rounded-xl active:bg-red-700 font-black text-xs uppercase tracking-widest shadow-[0_0_10px_rgba(220,38,38,0.5)]">
                                         {dict.fireBtn}
                                     </button>
-                                    <button onTouchStart={(e) => {e.preventDefault(); setRocketPos(p => (lang === 'ar' ? Math.max(0, p - 1) : Math.min(3, p + 1)))}} className="flex-1 bg-slate-800 text-white p-3 rounded-xl active:bg-slate-700 text-xl font-black shadow-sm">
+                                    <button onTouchStart={(e) => {e.preventDefault(); setRocketPos(p => (lang === 'ar' ? Math.max(0, p - 1) : Math.min(3, p + 1)))}} className="flex-1 bg-slate-800 text-white p-2 rounded-xl active:bg-slate-700 text-lg font-black shadow-sm">
                                         {lang === 'ar' ? '◄' : '►'}
                                     </button>
                                 </div>
                             </div>
                         )}
-                        {/* ================================================= */}
-
                     </div>
                 </div>
             )}
 
-            {/* 4. شاشة الشهادة الاحترافية المتوافقة تماماً مع طباعة A4 الطولية */}
+            {/* 4. شاشة الشهادة الاحترافية المتوافقة تماماً مع طباعة A4 الطولية (Fix 1 Page Print) */}
             {stage === 'certificate' && (
-                <div className="w-full flex flex-col items-center animate-fade-in-up relative z-10 pt-4 pb-10">
+                <div className="w-full flex flex-col items-center animate-fade-in-up relative z-10 pt-4 pb-10 print:pt-0 print:pb-0">
                     <div 
                         id="certificate-area" 
                         className="cert-font bg-white text-slate-900 border-[14px] border-amber-500 p-8 md:p-12 rounded-3xl shadow-2xl relative overflow-hidden flex flex-col justify-between"
