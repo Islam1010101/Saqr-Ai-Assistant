@@ -7,8 +7,8 @@ import { Link } from 'react-router-dom';
 
 const T = {
     ar: {
-        title: "تحدي أبطال المعرفة",
-        subtitle: "مرحباً بك! ساعدنا في ترتيب مكتبة المدرسة لتصبح بطلاً خارقاً.",
+        title: "تحدي أبطال المكتبة",
+        subtitle: "مرحباً بك! ساعدنا في ترتيب مكتبة المدرسة لتصبح أمين مكتبة.",
         studentName: "اسم البطل / البطلة:",
         namePlaceholder: "اكتب اسمك الثلاثي هنا...",
         grade: "الصف الدراسي:",
@@ -55,8 +55,8 @@ const T = {
         tutCh3Desc: "انظر للرف المطلوب في الأعلى، ثم اسحب الكتاب الصحيح من الخيارات بالأسفل وضعه عليه. الإجابة الصحيحة = 20 نقطة!"
     },
     en: {
-        title: "Knowledge Heroes",
-        subtitle: "Welcome! Help us organize the library to become a certified hero.",
+        title: "Library's Heroes",
+        subtitle: "Welcome! Help us organize the library to become a Librarian.",
         studentName: "Hero's Name:",
         namePlaceholder: "Enter your full name...",
         grade: "Grade / Section:",
