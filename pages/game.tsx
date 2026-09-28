@@ -30,13 +30,13 @@ const T = {
         dropInstruction: "أفلت الكتاب هنا",
         shelfText: "المطلوب رف",
         certTitle: "شهادة أمين المكتبة المتميز",
-        certAwardedTo: "تشهد إدارة المكتبة بأن البطل / البطلة:",
-        certGrade: "بالصف",
-        certBody: "قد اجتاز تحدي ترتيب المكتبة بنجاح وتفوق، وأثبت مهارة استثنائية وذكاءً كبيراً في تصنيف المعرفة وتنظيم الأرفف.",
+        certAwardedTo: "تشهد إدارة المكتبة المدرسية بأن البطل / البطلة:",
+        certGrade: "بالصف الدراسي:",
+        certBody: "قد اجتاز تحدي تصنيف وترتيب المكتبة بنجاح باهر وتفوق مستحق، وأظهر مهارة استثنائية وذكاءً كبيراً في تنظيم أوعية المعرفة حسب تصنيف ديوي العشري.",
         certPoints: "مجموع النقاط",
         certTime: "وقت الإنجاز",
         certDate: "تاريخ الإصدار:",
-        certSign: "توقيع أمين المكتبة",
+        certSign: "اعتماد أمين المكتبة",
         print: "طباعة وحفظ الشهادة",
         back: "العودة للمكتبة",
         schoolName: "مدرسة صقر الإمارات الدولية الخاصة",
@@ -52,7 +52,7 @@ const T = {
         tutCh2Title: "تصويب الفضاء",
         tutCh2Desc: "حرك الصاروخ وأطلق النار على كوكب التصنيف الصحيح. 20 نقطة لكل إجابة!",
         tutCh3Title: "ترتيب الأرفف",
-        tutCh3Desc: "اسحب الكتاب المناسب وضعه على الرف المطلوب. 20 نقطة لكل إجابة!"
+        tutCh3Desc: "انظر إلى الرف المطلوب بالأعلى، ثم اسحب الكتاب المناسب له من الأسفل وضعه عليه. 20 نقطة لكل إجابة!"
     },
     en: {
         title: "Knowledge Heroes",
@@ -78,9 +78,9 @@ const T = {
         dropInstruction: "Drop book here",
         shelfText: "Target Shelf",
         certTitle: "Outstanding Librarian Certificate",
-        certAwardedTo: "The Administration certifies that the hero:",
-        certGrade: "Grade",
-        certBody: "has passed the challenge, showing exceptional skill and high intelligence in classifying knowledge.",
+        certAwardedTo: "The Library Administration certifies that the hero:",
+        certGrade: "Grade:",
+        certBody: "has successfully passed the library classification challenge, showing exceptional skill and high intelligence in organizing knowledge according to Dewey Decimal Classification.",
         certPoints: "Total Points",
         certTime: "Time Taken",
         certDate: "Issue Date:",
@@ -88,7 +88,7 @@ const T = {
         print: "Print Certificate",
         back: "Back to Library",
         schoolName: "Emirates Falcon Int'l. Private School",
-        dept: "Digital Library Dept.",
+        dept: "Digital & Interactive Library Dept.",
         minutes: "min and",
         seconds: "sec",
         enterDetails: "Please enter your name and grade to prepare your certificate!",
@@ -100,7 +100,7 @@ const T = {
         tutCh2Title: "Space Shooter",
         tutCh2Desc: "Move the rocket and shoot the planet with the correct category. 20 points!",
         tutCh3Title: "Fill the Shelves",
-        tutCh3Desc: "Drag the correct book onto the required shelf. 20 points per answer!"
+        tutCh3Desc: "Look at the target shelf above, then drag the matching book from below onto it. 20 points per answer!"
     }
 };
 
@@ -167,15 +167,28 @@ const BANK_ORBS = [
     { ar: "رواية: جزيرة الكنز", en: "Novel: Treasure Island", answer: "800" }
 ];
 
+// بنك موسع ومتنوع للتحدي الثالث (20 سيناريو فريد)
 const BANK_SHELVES = [
-    { shelfCode: "500", arShelf: "علوم وفضاء", enShelf: "Science", arCorrect: "أسرار الفضاء", enCorrect: "Space Secrets", arWrongs: ["تاريخ العرب", "تعلم الرسم", "قواعد الإملاء"], enWrongs: ["Arab History", "How to Draw", "Spelling"] },
-    { shelfCode: "700", arShelf: "فنون ورياضة", enShelf: "Arts & Sports", arCorrect: "أبطال السباحة", enCorrect: "Swimming Heroes", arWrongs: ["جسم الإنسان", "الكمبيوتر", "القصة القصيرة"], enWrongs: ["Human Body", "Computers", "Short Stories"] },
-    { shelfCode: "900", arShelf: "تاريخ وجغرافيا", enShelf: "History", arCorrect: "حضارة الفراعنة", enCorrect: "Pharaohs History", arWrongs: ["الإسبانية", "أخلاق المسلم", "عالم الطيور"], enWrongs: ["Spanish", "Muslim Morals", "Bird World"] },
-    { shelfCode: "600", arShelf: "تكنولوجيا وطب", enShelf: "Tech & Med", arCorrect: "السيارات الذكية", enCorrect: "Smart Cars", arWrongs: ["الشعر", "خريطة أوروبا", "حقوق الإنسان"], enWrongs: ["Poetry", "Europe Map", "Human Rights"] },
-    { shelfCode: "800", arShelf: "قصص وحكايات", enShelf: "Stories", arCorrect: "سندريلا", enCorrect: "Cinderella", arWrongs: ["البرمجة", "القرآن", "الجاذبية"], enWrongs: ["Coding", "Quran", "Gravity"] },
-    { shelfCode: "200", arShelf: "دين وأخلاق", enShelf: "Religion", arCorrect: "أخلاق المسلم", enCorrect: "Muslim Morals", arWrongs: ["العواصم", "الأدوية", "الشطرنج"], enWrongs: ["Capitals", "Medicine", "Chess"] },
-    { shelfCode: "000", arShelf: "حاسب ومعارف", enShelf: "Computers", arCorrect: "الإنترنت الآمن", enCorrect: "Safe Internet", arWrongs: ["تاريخ الأندلس", "السباحة", "قصص جحا"], enWrongs: ["History", "Swimming", "Juha Stories"] },
-    { shelfCode: "100", arShelf: "تطوير الذات", enShelf: "Self Growth", arCorrect: "الثقة بالنفس", enCorrect: "Confidence", arWrongs: ["الصيام", "بايثون", "تاريخ القارات"], enWrongs: ["Fasting", "Python", "Continents"] }
+    { shelfCode: "500", arShelf: "500: علوم وفضاء", enShelf: "500: Science & Space", arCorrect: "أسرار الفضاء والجاذبية", enCorrect: "Space & Gravity Secrets", arWrongs: ["تاريخ العرب والمسلمين", "تعلم الرسم الزيتي", "قواعد الإملاء والنحو"], enWrongs: ["Arab History", "Oil Painting", "Grammar Rules"] },
+    { shelfCode: "700", arShelf: "700: فنون ورياضة", enShelf: "700: Arts & Sports", arCorrect: "قوانين بطولات السباحة", enCorrect: "Swimming Rules", arWrongs: ["تشريح جسم الإنسان", "برمجة الكمبيوتر", "أصول القصة القصيرة"], enWrongs: ["Human Anatomy", "Computer Coding", "Short Stories"] },
+    { shelfCode: "900", arShelf: "900: تاريخ وجغرافيا", enShelf: "900: History & Geography", arCorrect: "تاريخ قلاع وحصون الإمارات", enCorrect: "UAE Forts History", arWrongs: ["تعلم الإسبانية للمبتدئين", "أخلاق المؤمن", "عالم الطيور المهاجرة"], enWrongs: ["Learn Spanish", "Believer Morals", "Migratory Birds"] },
+    { shelfCode: "600", arShelf: "600: تكنولوجيا وطب", enShelf: "600: Tech & Medicine", arCorrect: "صناعة الروبوت والسيارات الذكية", enCorrect: "Robots & Smart Cars", arWrongs: ["ديوان المتنبي", "خريطة قارة أوروبا", "حقوق الإنسان والدستور"], enWrongs: ["Mutanabbi Poetry", "Europe Map", "Human Rights"] },
+    { shelfCode: "800", arShelf: "800: قصص وحكايات", enShelf: "800: Literature & Stories", arCorrect: "حكايات ألف ليلة وليلة", enCorrect: "Arabian Nights Tales", arWrongs: ["لغات البرمجة الحديثة", "تفسير القرآن الكريم", "قوانين الفيزياء"], enWrongs: ["Programming", "Quran Exegesis", "Physics Laws"] },
+    { shelfCode: "200", arShelf: "200: دين وأخلاق", enShelf: "200: Religion & Ethics", arCorrect: "قصص الأنبياء والصحابة", enCorrect: "Prophets & Companions", arWrongs: ["عواصم وبلدان العالم", "صناعة الأدوية واللقاحات", "أسرار لعبة الشطرنج"], enWrongs: ["World Capitals", "Medicine Making", "Chess Secrets"] },
+    { shelfCode: "000", arShelf: "000: حاسب ومعارف عامة", enShelf: "000: Computers & General", arCorrect: "موسوعة الإنترنت والذكاء الاصطناعي", enCorrect: "Internet & AI Encyclopedia", arWrongs: ["تاريخ بلاد الأندلس", "تمارين اللياقة البدنية", "نوادر جحا والبهلول"], enWrongs: ["Andalusia History", "Fitness Workouts", "Juha Tales"] },
+    { shelfCode: "100", arShelf: "100: تطوير الذات وفلسفة", enShelf: "100: Self Growth & Philosophy", arCorrect: "قوة العزيمة وبناء الثقة بالنفس", enCorrect: "Willpower & Confidence", arWrongs: ["أحكام الزكاة والصيام", "البرمجة بلغة بايثون", "تضاريس قارة آسيا"], enWrongs: ["Zakat Rules", "Python Coding", "Asia Geography"] },
+    { shelfCode: "300", arShelf: "300: مجتمع وقانون", enShelf: "300: Society & Law", arCorrect: "حقوق الطفل والمواطنة الصالحة", enCorrect: "Child Rights & Citizenship", arWrongs: ["حركة النجوم والمجرات", "فن النحت والتشكيل", "معجم مصطلحات اللغة"], enWrongs: ["Galaxies Motion", "Sculpture Art", "Language Glossary"] },
+    { shelfCode: "400", arShelf: "400: لغات وقواميس", enShelf: "400: Languages & Dictionaries", arCorrect: "معجم لسان العرب في المعاني", enCorrect: "Arabic Lexicon Dictionary", arWrongs: ["رياضة التايكوندو", "أعماق البحار والمحيطات", "تاريخ الثورة الصناعية"], enWrongs: ["Taekwondo", "Deep Oceans", "Industrial Revolution"] },
+    { shelfCode: "500", arShelf: "500: علوم وفضاء", enShelf: "500: Science & Space", arCorrect: "دليل الحيوانات وعالم الديناصورات", enCorrect: "Animals & Dinosaurs Guide", arWrongs: ["علم الاقتصاد والبورصة", "محادثات باللغة الإيطالية", "رواية البؤساء"], enWrongs: ["Economics", "Italian Conversations", "Les Misérables"] },
+    { shelfCode: "800", arShelf: "800: قصص وحكايات", enShelf: "800: Literature & Stories", arCorrect: "رواية جزيرة الكنز والمغامرة", enCorrect: "Treasure Island Novel", arWrongs: ["أكواد جافاسكريبت المتقدمة", "الجدول الدوري للعناصر", "تاريخ الإمبراطورية الرومانية"], enWrongs: ["JavaScript Codes", "Periodic Table", "Roman Empire"] },
+    { shelfCode: "600", arShelf: "600: تكنولوجيا وطب", enShelf: "600: Tech & Medicine", arCorrect: "دليل الإسعافات الأولية والتغذية", enCorrect: "First Aid & Nutrition Guide", arWrongs: ["أشعار شوقي وحافظ", "أطلس المحيطات", "قوانين الانتخابات"], enWrongs: ["Poetry Collection", "Oceans Atlas", "Election Laws"] },
+    { shelfCode: "900", arShelf: "900: تاريخ وجغرافيا", enShelf: "900: History & Geography", arCorrect: "أطلس خرائط العالم وتضاريسه", enCorrect: "World Atlas & Maps", arWrongs: ["تطوير برامج الهواتف", "ألعاب القوى والجمباز", "رواية تاجر البندقية"], enWrongs: ["Mobile App Dev", "Gymnastics", "Merchant of Venice"] },
+    { shelfCode: "700", arShelf: "700: فنون ورياضة", enShelf: "700: Arts & Sports", arCorrect: "أسرار احتراف كرة القدم والتكتيك", enCorrect: "Football Tactics & Skills", arWrongs: ["وظائف الكبد والقلب", "علم الفلك والمذنبات", "السيرة النبوية العطرة"], enWrongs: ["Liver Functions", "Astronomy & Comets", "Prophet Biography"] },
+    { shelfCode: "200", arShelf: "200: دين وأخلاق", enShelf: "200: Religion & Ethics", arCorrect: "تفسير آيات القرآن الكريم للأشبال", enCorrect: "Quran Commentary for Youth", arWrongs: ["قواعد قيادة السيارات", "تاريخ الحرب العالمية", "صيانة الأجهزة الإلكترونية"], enWrongs: ["Driving Rules", "World War History", "Electronics Repair"] },
+    { shelfCode: "100", arShelf: "100: تطوير الذات وفلسفة", enShelf: "100: Self Growth & Philosophy", arCorrect: "كيف تتغلب على القلق وتفكر بإيجابية", enCorrect: "Overcoming Anxiety & Positivity", arWrongs: ["تضاريس جبال الألب", "رياضة الكاراتيه", "شرح المعلقات السبع"], enWrongs: ["Alps Mountains", "Karate Sports", "Ancient Poems"] },
+    { shelfCode: "400", arShelf: "400: لغات وقواميس", enShelf: "400: Languages & Dictionaries", arCorrect: "القاموس الشامل لترجمة الكلمات", enCorrect: "Comprehensive Translation Dictionary", arWrongs: ["تاريخ الحضارة الفرعونية", "أمراض العيون وعلاجها", "قصة سندباد البحري"], enWrongs: ["Pharaohs History", "Eye Diseases", "Sinbad Stories"] },
+    { shelfCode: "300", arShelf: "300: مجتمع وقانون", enShelf: "300: Society & Law", arCorrect: "مفاهيم التجارة وإدارة الأموال للأجيال", enCorrect: "Money Management & Trade for Kids", arWrongs: ["حركة الرياح والأمطار", "تعلم العزف على البيانو", "قواعد الصرف في اللغة"], enWrongs: ["Winds & Rain", "Piano Playing", "Morphology Rules"] },
+    { shelfCode: "000", arShelf: "000: حاسب ومعارف عامة", enShelf: "000: Computers & General", arCorrect: "مبادئ الأمن السيبراني وحماية الحسابات", enCorrect: "Cybersecurity & Account Safety", arWrongs: ["تاريخ دولة المماليك", "أسرار رياضة اليوجا", "حكايات جحا والنوادر"], enWrongs: ["Mamluk History", "Yoga Secrets", "Juha Anecdotes"] }
 ];
 
 const shuffleArray = (array: any[]) => [...array].sort(() => 0.5 - Math.random());
@@ -321,6 +334,7 @@ const DeweyGame: React.FC = () => {
                 shelfCode: q.shelfCode,
                 displayShelf: lang === 'ar' ? q.arShelf : q.enShelf,
                 correct: correct,
+                // 4 خيارات للتحدي الثالث
                 options: shuffleArray([correct, ...wrongs.slice(0, 3)]) 
             };
         });
@@ -505,53 +519,59 @@ const DeweyGame: React.FC = () => {
                 }
 
                 @media print {
-                    /* إعدادات طباعة الشهادة بشكل مثالي لملء صفحة A4 بدون قطع */
+                    /* إعدادات طباعة الشهادة بشكل مثالي لملء صفحة A4 واحدة بدون قطع نهائياً */
+                    @page { 
+                        size: A4 portrait; 
+                        margin: 0; 
+                    }
                     html, body {
-                        width: 100% !important;
-                        height: 100% !important;
+                        width: 210mm !important;
+                        height: 297mm !important;
                         margin: 0 !important;
                         padding: 0 !important;
-                        background: #fff !important;
+                        background: #ffffff !important;
+                        overflow: hidden !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
                     }
-                    body * { display: none !important; }
-                    
+                    body * { 
+                        visibility: hidden !important; 
+                    }
                     #certificate-print-container, 
                     #certificate-print-container * {
-                        display: block !important;
                         visibility: visible !important;
                     }
-                    
                     #certificate-print-container {
-                        position: absolute;
-                        left: 0;
-                        top: 0;
-                        width: 100% !important;
-                        height: 100% !important;
-                        display: flex !important;
-                        align-items: center !important;
-                        justify-content: center !important;
-                    }
-
-                    #certificate-area {
+                        position: fixed !important;
+                        left: 0 !important;
+                        top: 0 !important;
                         width: 210mm !important;
-                        height: 290mm !important;
-                        margin: auto !important;
-                        padding: 12mm !important;
+                        height: 297mm !important;
+                        margin: 0 !important;
+                        padding: 10mm !important;
                         box-sizing: border-box !important;
-                        border: 12px solid #f59e0b !important;
+                        display: flex !important;
+                        flex-direction: column !important;
+                        justify-content: center !important;
+                        align-items: center !important;
+                        background: #ffffff !important;
+                    }
+                    #certificate-area-print {
+                        width: 190mm !important;
+                        height: 275mm !important; /* ارتفاع مضبوط لا يتجاوز الصفحة الأولى أبداً */
+                        box-sizing: border-box !important;
+                        border: 10px solid #d97706 !important;
+                        border-radius: 20px !important;
+                        padding: 12mm !important;
                         background: #ffffff !important;
                         display: flex !important;
                         flex-direction: column !important;
                         justify-content: space-between !important;
-                        -webkit-print-color-adjust: exact;
-                        print-color-adjust: exact;
-                        page-break-after: avoid !important;
-                        page-break-before: avoid !important;
+                        page-break-inside: avoid !important;
                         break-inside: avoid !important;
+                        page-break-after: avoid !important;
                     }
                 }
-
-                @page { size: A4 portrait; margin: 0; }
 
                 .magic-glow {
                     animation: pulse-glow 2s infinite alternate ease-in-out;
@@ -651,28 +671,32 @@ const DeweyGame: React.FC = () => {
                 </div>
             )}
 
-            {/* 2. شاشة التعلم (تم معالجة التمرير وتثبيت الزر ليكون واضحاً تماماً) */}
+            {/* 2. شاشة التعلم */}
             {stage === 'learn' && (
-                <div className="max-w-3xl w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 md:p-8 shadow-2xl animate-zoom-in relative z-10 text-center flex flex-col max-h-[90dvh] overflow-y-auto justify-between my-auto">
-                    <div className="w-14 h-14 md:w-20 md:h-20 bg-amber-100 dark:bg-amber-900/30 rounded-full mx-auto flex items-center justify-center mb-2 shrink-0">
-                        <svg className="w-8 h-8 md:w-10 md:h-10 text-amber-500 magic-glow" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                <div className="max-w-3xl w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 md:p-8 shadow-2xl animate-zoom-in relative z-10 text-center flex flex-col max-h-[90dvh] my-auto">
+                    <div className="overflow-y-auto flex-1 px-1 pb-2">
+                        <div className="w-14 h-14 md:w-20 md:h-20 bg-amber-100 dark:bg-amber-900/30 rounded-full mx-auto flex items-center justify-center mb-2 shrink-0">
+                            <svg className="w-8 h-8 md:w-10 md:h-10 text-amber-500 magic-glow" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                        </div>
+                        <div>
+                            <h2 className="text-xl md:text-3xl font-black text-amber-500 mb-1.5">{dict.rulesTitle}</h2>
+                            <p className="text-xs md:text-base leading-relaxed mb-3 opacity-90 font-bold text-slate-700 dark:text-slate-300">
+                                {dict.rulesText}
+                            </p>
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 md:gap-3 mb-2 content-start px-1">
+                            {DEWEY_CATEGORIES.map(cat => (
+                                <div key={cat.code} className="p-2 rounded-lg text-[10px] md:text-sm font-black shadow-sm text-white flex items-center justify-center text-center" style={{ backgroundColor: cat.color }}>
+                                    {lang === 'ar' ? cat.ar : cat.en}
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                    <div>
-                        <h2 className="text-xl md:text-3xl font-black text-amber-500 mb-1.5">{dict.rulesTitle}</h2>
-                        <p className="text-xs md:text-base leading-relaxed mb-3 opacity-90 font-bold text-slate-700 dark:text-slate-300">
-                            {dict.rulesText}
-                        </p>
+                    <div className="pt-2 pb-1 shrink-0 w-full bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800/80">
+                        <button onClick={() => setStage('tut1')} className="w-full py-3.5 md:py-4 bg-gradient-to-r from-emerald-500 via-green-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black rounded-2xl shadow-xl transition-transform active:scale-95 text-base md:text-xl border-b-4 border-emerald-700 active:border-b-0 active:translate-y-1">
+                            {dict.readyBtn}
+                        </button>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 md:gap-3 mb-3 content-start px-1">
-                        {DEWEY_CATEGORIES.map(cat => (
-                            <div key={cat.code} className="p-2 rounded-lg text-[10px] md:text-sm font-black shadow-sm text-white flex items-center justify-center text-center" style={{ backgroundColor: cat.color }}>
-                                {lang === 'ar' ? cat.ar : cat.en}
-                            </div>
-                        ))}
-                    </div>
-                    <button onClick={() => setStage('tut1')} className="w-full py-3.5 md:py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-black rounded-2xl shadow-xl transition-transform active:scale-95 text-base md:text-xl mt-3 shrink-0 sticky bottom-0 z-20 border-2 border-green-400/50">
-                        {dict.readyBtn}
-                    </button>
                 </div>
             )}
 
@@ -744,17 +768,19 @@ const DeweyGame: React.FC = () => {
                         {/* ================================================= */}
                         {stage !== 'challenge2' && (
                             <>
-                                <div className="flex flex-col items-center justify-center shrink-0 min-h-[90px] md:min-h-[160px] relative z-20 mb-2 md:mb-6">
+                                <div className="flex flex-col items-center justify-center shrink-0 min-h-[75px] md:min-h-[140px] relative z-20 mb-1 md:mb-4">
                                     {stage === 'challenge3' ? (
                                         <div 
                                             ref={(el) => { if(el) dropZonesRef.current.set(currentQuestions[qIndex].shelfCode, el); }}
-                                            className="w-full md:w-2/3 h-20 md:h-36 relative wood-shelf flex items-end justify-center pb-2 md:pb-5 mt-5"
+                                            className="w-full md:w-2/3 h-14 md:h-20 relative wood-shelf flex items-center justify-center shadow-lg my-2 cursor-pointer"
                                         >
-                                            {/* إبراز سؤال التحدي 3 بوضوح شديد */}
-                                            <div className="absolute -top-7 md:-top-10 bg-amber-500 dark:bg-amber-600 px-4 py-2 rounded-xl font-black text-white shadow-lg border-2 border-amber-300 dark:border-amber-400 text-sm md:text-xl w-[92%] text-center truncate">
+                                            {/* إبراز مسمى الرف المطلوب بوضوح كامل وتصغير الرف */}
+                                            <div className="absolute -top-3.5 md:-top-4 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 px-4 py-1 rounded-full font-black text-white shadow-lg border-2 border-amber-300 text-xs md:text-base w-fit max-w-[90%] text-center truncate tracking-wide">
                                                 {dict.shelfText}: {currentQuestions[qIndex].displayShelf}
                                             </div>
-                                            <p className="text-amber-100 font-bold text-[10px] md:text-base tracking-widest opacity-80">{dict.dropInstruction}</p>
+                                            <p className="text-amber-100 font-bold text-[10px] md:text-xs tracking-wider mt-3 opacity-95">
+                                                {dict.dropInstruction}
+                                            </p>
                                         </div>
                                     ) : (
                                         <div className="text-center w-full">
@@ -784,7 +810,7 @@ const DeweyGame: React.FC = () => {
                                                     style={{ touchAction: 'none' }}
                                                     onMouseDown={(e) => handleDragStart(e, opt, 'opt', opt)}
                                                     onTouchStart={(e) => handleDragStart(e, opt, 'opt', opt)}
-                                                    className={`realistic-book p-2 md:p-5 font-black text-[10px] md:text-base text-center flex items-center justify-center min-h-[50px] md:min-h-[80px] cursor-grab active:cursor-grabbing text-slate-800`}
+                                                    className={`realistic-book p-2 md:p-4 font-black text-[10px] md:text-base text-center flex items-center justify-center min-h-[48px] md:min-h-[75px] cursor-grab active:cursor-grabbing text-slate-800`}
                                                     style={{ borderLeftColor: '#cbd5e1', opacity: dragItem?.id === opt ? 0.2 : 1 }}
                                                 >
                                                     <span className="pointer-events-none leading-tight px-1">{opt}</span>
@@ -871,127 +897,120 @@ const DeweyGame: React.FC = () => {
                 </div>
             )}
 
-            {/* 4. شاشة الشهادة (تفعيل التمرير الكامل على الهواتف مع طباعة A4 دقيقة) */}
+            {/* 4. شاشة الشهادة (واضحة تماماً على الشاشات الكبيرة والموبايلات والطباعة في صفحة A4 واحدة) */}
             {stage === 'certificate' && (
-                <div className="w-full flex flex-col items-center animate-fade-in-up relative z-10 pt-4 pb-16 print:pt-0 print:pb-0 overflow-y-auto max-h-[100dvh]">
+                <div className="w-full flex flex-col items-center animate-fade-in-up relative z-10 pt-2 pb-16 print:pt-0 print:pb-0 overflow-y-auto max-h-[100dvh]">
                     
-                    {/* حاوية مخصصة للطباعة A4 فقط */}
+                    {/* حاوية مخصصة للطباعة A4 فقط (صفحة واحدة 100%) */}
                     <div id="certificate-print-container" className="hidden print:flex">
-                        <div 
-                            id="certificate-area" 
-                            className="cert-font bg-white text-slate-900 rounded-3xl shadow-2xl relative overflow-hidden flex flex-col justify-between"
-                        >
-                            <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/arabesque.png")' }}></div>
-                            
-                            <div className="flex justify-between items-center border-b-[4px] border-amber-500/30 pb-6 mb-6 relative z-10">
-                                <img src="/school-logo.png" alt="School Logo" className="w-24 h-24 object-contain drop-shadow-xl" onError={(e) => e.currentTarget.style.display = 'none'} />
+                        <div id="certificate-area-print" className="cert-font text-slate-900">
+                            <div className="flex justify-between items-center border-b-2 border-amber-600 pb-4 mb-2">
+                                <img src="/school-logo.png" alt="School Logo" className="w-20 h-20 object-contain" onError={(e) => e.currentTarget.style.display = 'none'} />
                                 <div className={`text-left ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
-                                    <h2 className="text-xl md:text-2xl font-black text-red-700 uppercase tracking-widest">{dict.schoolName}</h2>
-                                    <p className="text-xs md:text-sm text-amber-600 font-black mt-2 bg-amber-50 inline-block px-3 py-1.5 rounded-xl border border-amber-200">{dict.dept}</p>
-                                    <p className="text-xs text-slate-500 font-bold mt-1">{dict.certDate} {issueDate}</p>
+                                    <h2 className="text-xl font-black text-slate-900 leading-tight">{dict.schoolName}</h2>
+                                    <p className="text-xs text-amber-700 font-bold mt-1">{dict.dept}</p>
+                                    <p className="text-[10px] text-slate-500 font-bold mt-0.5">{dict.certDate} {issueDate}</p>
                                 </div>
                             </div>
 
-                            <div className="text-center relative z-10 my-auto">
-                                <h1 className="text-3xl md:text-5xl font-black text-amber-600 mb-6 drop-shadow-sm">{dict.certTitle}</h1>
-                                <div className="w-36 h-1.5 bg-red-600 mx-auto rounded-full mb-6"></div>
+                            <div className="text-center my-auto py-2">
+                                <h1 className="text-3xl font-black text-amber-700 mb-2">{dict.certTitle}</h1>
+                                <div className="w-32 h-1 bg-amber-500 mx-auto rounded-full mb-4"></div>
                                 
-                                <p className="text-lg md:text-2xl leading-relaxed font-bold mb-4 text-slate-700">
+                                <p className="text-base font-bold text-slate-700 mb-2">
                                     {dict.certAwardedTo}
                                 </p>
-                                <h2 className="text-3xl md:text-4xl font-black text-slate-900 my-4 bg-slate-50 inline-block px-12 py-4 rounded-2xl border-2 border-slate-200 shadow-md">
+                                <h2 className="text-2xl font-black text-slate-900 my-2 bg-slate-50 inline-block px-8 py-2 rounded-xl border border-slate-300">
                                     {studentName}
                                 </h2>
-                                <p className="text-base md:text-2xl leading-relaxed font-bold text-slate-700 mt-2">
-                                    {dict.certGrade} <strong className="text-red-700 text-2xl md:text-3xl mx-2">{studentGrade}</strong>
+                                <p className="text-base font-bold text-slate-700 mt-1">
+                                    {dict.certGrade} <strong className="text-amber-800 text-xl mx-1">{studentGrade}</strong>
                                 </p>
                                 
-                                <p className="text-sm md:text-lg leading-relaxed mt-6 opacity-90 max-w-3xl mx-auto font-bold text-slate-600">
+                                <p className="text-xs leading-relaxed mt-4 max-w-lg mx-auto font-bold text-slate-600">
                                     {dict.certBody}
                                 </p>
                             </div>
 
-                            <div className="flex justify-center gap-8 md:gap-16 text-center relative z-10 bg-slate-50 p-6 rounded-2xl border-2 border-slate-200 shadow-inner my-6">
+                            <div className="flex justify-center gap-12 text-center bg-amber-50/60 p-4 rounded-xl border border-amber-200 my-2">
                                 <div>
-                                    <div className="text-xs md:text-sm text-slate-500 font-black uppercase mb-1 tracking-wider">{dict.certPoints}</div>
-                                    <div className="text-2xl md:text-4xl font-black text-green-600">{score} <span className="text-lg text-slate-400">/ 300</span></div>
+                                    <div className="text-[10px] text-slate-600 font-black uppercase mb-0.5">{dict.certPoints}</div>
+                                    <div className="text-2xl font-black text-green-700">{score} <span className="text-xs text-slate-400">/ 300</span></div>
                                 </div>
-                                <div className="w-1 bg-slate-200 rounded-full"></div>
+                                <div className="w-0.5 bg-amber-200"></div>
                                 <div>
-                                    <div className="text-xs md:text-sm text-slate-500 font-black uppercase mb-1 tracking-wider">{dict.certTime}</div>
-                                    <div className="text-2xl md:text-4xl font-black text-amber-600">{formatTime(totalTime)}</div>
+                                    <div className="text-[10px] text-slate-600 font-black uppercase mb-0.5">{dict.certTime}</div>
+                                    <div className="text-2xl font-black text-amber-800">{formatTime(totalTime)}</div>
                                 </div>
                             </div>
 
-                            <div className="flex justify-between items-end relative z-10 px-4 md:px-8 mt-4">
+                            <div className="flex justify-between items-end px-6 mt-2">
                                 <div className="text-center">
-                                    <p className="text-base md:text-lg font-black text-slate-800 mb-4">{dict.certSign}</p>
-                                    <div className="w-40 md:w-56 h-[2px] bg-slate-800"></div>
+                                    <p className="text-sm font-black text-slate-800 mb-3">{dict.certSign}</p>
+                                    <div className="w-36 h-0.5 bg-slate-800"></div>
                                 </div>
-                                <img src="/saqr-avatar.png" alt="Saqr Avatar" className="w-24 h-24 md:w-32 md:h-32 object-contain drop-shadow-xl" onError={(e) => e.currentTarget.style.display = 'none'} />
+                                <img src="/saqr-avatar.png" alt="Saqr Avatar" className="w-20 h-20 object-contain" onError={(e) => e.currentTarget.style.display = 'none'} />
                             </div>
                         </div>
                     </div>
 
-                    {/* عرض الشهادة على شاشة الجهاز (قابلة للتمرير بسهولة) */}
-                    <div className="cert-font bg-white text-slate-900 border-[8px] md:border-[14px] border-amber-500 p-5 md:p-12 rounded-3xl shadow-2xl relative overflow-hidden flex flex-col justify-between print:hidden w-[95%] max-w-2xl my-4">
-                        <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/arabesque.png")' }}></div>
-                        
-                        <div className="flex justify-between items-center border-b-[2px] md:border-b-[4px] border-amber-500/30 pb-4 mb-4 relative z-10">
-                            <img src="/school-logo.png" alt="School Logo" className="w-16 h-16 md:w-24 md:h-24 object-contain drop-shadow-xl" onError={(e) => e.currentTarget.style.display = 'none'} />
+                    {/* عرض الشهادة على الشاشة (واضح، أنيق، وعالي الدقة على الموبايل والكمبيوتر) */}
+                    <div className="cert-font bg-white text-slate-900 border-4 md:border-8 border-amber-500 rounded-3xl shadow-2xl p-5 md:p-8 w-[95%] max-w-xl my-2 print:hidden flex flex-col justify-between">
+                        <div className="flex justify-between items-center border-b-2 border-amber-400 pb-3 mb-3">
+                            <img src="/school-logo.png" alt="School Logo" className="w-14 h-14 md:w-20 md:h-20 object-contain drop-shadow" onError={(e) => e.currentTarget.style.display = 'none'} />
                             <div className={`text-left ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
-                                <h2 className="text-xs md:text-2xl font-black text-red-700 uppercase tracking-widest">{dict.schoolName}</h2>
-                                <p className="text-[9px] md:text-sm text-amber-600 font-black mt-1 bg-amber-50 inline-block px-2 py-1 rounded-lg border border-amber-200">{dict.dept}</p>
-                                <p className="text-[9px] md:text-xs text-slate-500 font-bold mt-1">{dict.certDate} {issueDate}</p>
+                                <h2 className="text-xs md:text-lg font-black text-slate-900 leading-tight">{dict.schoolName}</h2>
+                                <p className="text-[10px] md:text-xs text-amber-700 font-bold mt-1 bg-amber-50 inline-block px-2 py-0.5 rounded border border-amber-200">{dict.dept}</p>
+                                <p className="text-[9px] md:text-[11px] text-slate-500 font-bold mt-0.5">{dict.certDate} {issueDate}</p>
                             </div>
                         </div>
 
-                        <div className="text-center relative z-10 my-auto py-2">
-                            <h1 className="text-xl md:text-4xl font-black text-amber-600 mb-2 drop-shadow-sm">{dict.certTitle}</h1>
-                            <div className="w-20 md:w-36 h-1 bg-red-600 mx-auto rounded-full mb-3"></div>
+                        <div className="text-center my-auto py-2">
+                            <h1 className="text-lg md:text-3xl font-black text-amber-600 mb-1">{dict.certTitle}</h1>
+                            <div className="w-24 md:w-32 h-1 bg-amber-500 mx-auto rounded-full mb-3"></div>
                             
-                            <p className="text-xs md:text-xl leading-relaxed font-bold mb-2 text-slate-700">
+                            <p className="text-xs md:text-sm font-bold text-slate-700 mb-1">
                                 {dict.certAwardedTo}
                             </p>
-                            <h2 className="text-base md:text-3xl font-black text-slate-900 my-2 bg-slate-50 inline-block px-6 py-2 rounded-xl border border-slate-200 shadow-sm">
+                            <h2 className="text-base md:text-2xl font-black text-slate-900 my-1 bg-slate-50 inline-block px-6 py-1.5 rounded-xl border border-slate-300 shadow-sm">
                                 {studentName}
                             </h2>
-                            <p className="text-xs md:text-xl leading-relaxed font-bold text-slate-700 mt-1">
-                                {dict.certGrade} <strong className="text-red-700 text-sm md:text-2xl mx-1">{studentGrade}</strong>
+                            <p className="text-xs md:text-sm font-bold text-slate-700 mt-1">
+                                {dict.certGrade} <strong className="text-amber-800 text-sm md:text-lg mx-1">{studentGrade}</strong>
                             </p>
                             
-                            <p className="text-[10px] md:text-base leading-relaxed mt-3 opacity-90 max-w-xl mx-auto font-bold text-slate-600">
+                            <p className="text-[11px] md:text-xs leading-relaxed mt-2 max-w-md mx-auto font-bold text-slate-600">
                                 {dict.certBody}
                             </p>
                         </div>
 
-                        <div className="flex justify-center gap-4 md:gap-12 text-center relative z-10 bg-slate-50 p-3 md:p-5 rounded-xl border border-slate-200 shadow-inner my-4">
+                        <div className="flex justify-center gap-6 md:gap-12 text-center bg-amber-50/70 p-2.5 md:p-4 rounded-xl border border-amber-200 my-3">
                             <div>
-                                <div className="text-[9px] md:text-xs text-slate-500 font-black uppercase mb-0.5">{dict.certPoints}</div>
-                                <div className="text-base md:text-3xl font-black text-green-600">{score} <span className="text-xs text-slate-400">/ 300</span></div>
+                                <div className="text-[9px] md:text-xs text-slate-600 font-black uppercase mb-0.5">{dict.certPoints}</div>
+                                <div className="text-lg md:text-3xl font-black text-green-700">{score} <span className="text-[10px] text-slate-400">/ 300</span></div>
                             </div>
-                            <div className="w-0.5 bg-slate-200 rounded-full"></div>
+                            <div className="w-0.5 bg-amber-200"></div>
                             <div>
-                                <div className="text-[9px] md:text-xs text-slate-500 font-black uppercase mb-0.5">{dict.certTime}</div>
-                                <div className="text-base md:text-3xl font-black text-amber-600">{formatTime(totalTime)}</div>
+                                <div className="text-[9px] md:text-xs text-slate-600 font-black uppercase mb-0.5">{dict.certTime}</div>
+                                <div className="text-lg md:text-3xl font-black text-amber-700">{formatTime(totalTime)}</div>
                             </div>
                         </div>
 
-                        <div className="flex justify-between items-end relative z-10 px-2 md:px-6 mt-2">
+                        <div className="flex justify-between items-end px-2 md:px-4 mt-1">
                             <div className="text-center">
-                                <p className="text-xs md:text-base font-black text-slate-800 mb-2">{dict.certSign}</p>
-                                <div className="w-24 md:w-48 h-0.5 bg-slate-800"></div>
+                                <p className="text-xs md:text-sm font-black text-slate-800 mb-2">{dict.certSign}</p>
+                                <div className="w-24 md:w-36 h-0.5 bg-slate-800"></div>
                             </div>
-                            <img src="/saqr-avatar.png" alt="Saqr Avatar" className="w-14 h-14 md:w-28 md:h-28 object-contain drop-shadow-xl" onError={(e) => e.currentTarget.style.display = 'none'} />
+                            <img src="/saqr-avatar.png" alt="Saqr Avatar" className="w-12 h-12 md:w-20 md:h-20 object-contain drop-shadow" onError={(e) => e.currentTarget.style.display = 'none'} />
                         </div>
                     </div>
 
                     {/* الأزرار تحت الشهادة */}
-                    <div className="mt-4 flex gap-3 no-print relative z-10 w-[95%] max-w-md pb-6">
-                        <button onClick={() => window.print()} className="flex-[2] py-3.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-black text-sm md:text-lg rounded-xl shadow-lg active:scale-95 text-center">
+                    <div className="mt-3 flex gap-3 no-print relative z-10 w-[95%] max-w-xl pb-6">
+                        <button onClick={() => window.print()} className="flex-[2] py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-black text-sm md:text-base rounded-xl shadow-lg active:scale-95 text-center">
                             {dict.print}
                         </button>
-                        <Link to="/" className="flex-1 py-3.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-black text-sm md:text-lg rounded-xl shadow-md active:scale-95 text-center flex items-center justify-center">
+                        <Link to="/" className="flex-1 py-3 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-black text-sm md:text-base rounded-xl shadow-md active:scale-95 text-center flex items-center justify-center">
                             {dict.back}
                         </Link>
                     </div>
