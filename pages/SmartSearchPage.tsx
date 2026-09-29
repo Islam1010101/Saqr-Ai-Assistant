@@ -44,7 +44,6 @@ Style: Professional, empathetic, uses flawless Fos'ha Arabic or English based on
 
 const localization: any = {
   ar: {
-    welcome: 'أهلاً بك! أنا "صقر"، المساعد الذكي لمكتبة المدرسة. هل نؤلف قصة معاً اليوم ، أم تبحث عن كتاب محدد؟',
     input: 'اسأل صقر أو ابحث عن كتاب أو ابدأ قصة مبدعة...',
     status: 'صقر الذكي (EFIPS)',
     online: 'متصل',
@@ -62,7 +61,6 @@ const localization: any = {
     certSaqr: 'صقر - المساعد الذكي'
   },
   en: {
-    welcome: "Welcome! I'm 'Saqr', your AI Librarian. Shall we co-author story today, or are you looking for a specific book?",
     input: 'Ask Saqr, search for a book or start a story...',
     status: 'Saqr AI Librarian',
     online: 'Online',
@@ -100,8 +98,8 @@ const SmartSearchPage: React.FC = () => {
   const { locale, dir } = useLanguage();
   const t = (key: string) => localization[locale][key];
 
-  // تم الحفاظ على كافة الـ States الأصلية تماماً دون تغيير
-  const [messages, setMessages] = useState<ChatMessage[]>([{ role: 'assistant', content: localization[locale].welcome }]);
+  // 🚀 إنشاء رسالة الترحيب الديناميكية حسب نوع المستخدم
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [winnerData, setWinnerData] = useState<any>(null);
@@ -111,6 +109,37 @@ const SmartSearchPage: React.FC = () => {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const certificateRef = useRef<HTMLDivElement>(null);
+
+  // 🚀 قراءة بيانات المستخدم وصياغة رسالة الترحيب
+  useEffect(() => {
+    const storedUser = localStorage.getItem('current_user');
+    const storedType = localStorage.getItem('user_type');
+    
+    let welcomeMessage = '';
+
+    if (storedUser && storedType) {
+      const user = JSON.parse(storedUser);
+      const name = locale === 'ar' ? (user.name_ar || user.name_en) : (user.name_en || user.name_ar);
+      const firstName = name.split(' ')[0]; // أخذ الاسم الأول للودية
+      
+      if (storedType === 'student') {
+        welcomeMessage = locale === 'ar' 
+          ? `أهلاً بك يا صديقي المبدع **${firstName}**! 🎓\nأنا "صقر"، المساعد الذكي لمكتبتك. هل نؤلف قصة ممتعة معاً اليوم، أم تبحث عن كتاب محدد لتقرأه؟`
+          : `Welcome my creative friend **${firstName}**! 🎓\nI'm 'Saqr', your AI Librarian. Shall we co-author a story today, or are you looking for a specific book?`;
+      } else if (storedType === 'teacher' || storedType === 'admin') {
+        welcomeMessage = locale === 'ar'
+          ? `أهلاً بك أستاذي الفاضل **${firstName}**! 👨‍🏫\nأنا "صقر" في خدمتك. كيف يمكنني مساعدتك اليوم في البحث عن مصادر أو معلومات لمادتك؟`
+          : `Welcome esteemed teacher **${firstName}**! 👨‍🏫\nI am 'Saqr', at your service. How can I assist you today with resources or information?`;
+      }
+    } else {
+      // رسالة الترحيب الافتراضية إذا لم يكن مسجلاً
+      welcomeMessage = locale === 'ar'
+        ? 'أهلاً بك! أنا "صقر"، المساعد الذكي لمكتبة المدرسة. هل نؤلف قصة معاً اليوم، أم تبحث عن كتاب محدد؟'
+        : "Welcome! I'm 'Saqr', your AI Librarian. Shall we co-author a story today, or are you looking for a specific book?";
+    }
+
+    setMessages([{ role: 'assistant', content: welcomeMessage }]);
+  }, [locale]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -205,13 +234,23 @@ const SmartSearchPage: React.FC = () => {
       searchContext = `EFIPS LIBRARY RECORDS FOUND: ${JSON.stringify(foundBooks.slice(0, 10))}.`;
     }
 
+    // إرسال البيانات السياقية لـ Saqr (إذا كان المستخدم مسجلاً، أخبر Saqr باسمه ليسهل التفاعل)
+    const storedUser = localStorage.getItem('current_user');
+    let userContextInfo = "";
+    if (storedUser) {
+        const user = JSON.parse(storedUser);
+        const name = locale === 'ar' ? (user.name_ar || user.name_en) : (user.name_en || user.name_ar);
+        const type = localStorage.getItem('user_type') === 'student' ? 'Student' : 'Teacher';
+        userContextInfo = `\nCurrent User Context: The person talking to you is a ${type} named "${name}". Use their name occasionally to be friendly.`;
+    }
+
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [
-            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${searchContext}` }, 
+            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}` }, 
             ...messages, 
             { role: 'user', content: userQuery }
           ],
@@ -307,7 +346,7 @@ const SmartSearchPage: React.FC = () => {
                         onError={(e) => e.currentTarget.style.display = 'none'}
                       />
                     </div>
-                    {/* حاوية نص رد الذكاء الاصطناعي الأنيقة (شكل بالون ألعاب) */}
+                    {/* حاوية نص رد الذكاء الاصطناعي الأنيقة */}
                     <div className="bg-white dark:bg-slate-800 border-4 border-slate-200 dark:border-slate-700 rounded-[2rem] rounded-bl-none px-6 py-4 shadow-sm text-slate-800 dark:text-slate-100 font-bold leading-relaxed">
                       <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none text-start">
                         <ReactMarkdown>{msg.content}</ReactMarkdown>
@@ -315,7 +354,7 @@ const SmartSearchPage: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* إضافة زر التحميل المباشر أسفل رد الفوز الأخير مباشرة */}
+                  {/* زر التحميل المباشر أسفل رد الفوز */}
                   {winnerData && saqrState === 'victory' && index === messages.length - 1 && (
                     <div className="mt-2 px-16 w-full text-start animate-zoom-in">
                       <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-6 py-3 bg-emerald-500 text-white font-black rounded-full border-b-4 border-emerald-700 shadow-sm hover:-translate-y-1 active:border-b-0 active:translate-y-1 transition-all text-sm uppercase">
