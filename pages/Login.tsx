@@ -6,12 +6,14 @@ const StudentIcon = () => <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" vie
 const TeacherIcon = () => <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>;
 
 export default function Login() {
-  const [lang, setLang] = useState<'ar' | 'en'>('ar');
+  // اللغة الافتراضية أصبحت الإنجليزية ('en')
+  const [lang, setLang] = useState<'ar' | 'en'>('en');
   const [loginType, setLoginType] = useState<'student' | 'teacher'>('student');
   const [studentId, setStudentId] = useState('');
   const [teacherId, setTeacherId] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showFlag, setShowFlag] = useState(false); // حالة إظهار علم الإمارات عند الضغط على صقر
 
   // دالة تسجيل دخول الطلاب
   const handleStudentLogin = async (e: React.FormEvent) => {
@@ -42,7 +44,7 @@ export default function Login() {
     }
   };
 
-  // دالة تسجيل دخول المعلمين والأدمن (بدون كلمة مرور)
+  // دالة تسجيل دخول المعلمين والأدمن
   const handleTeacherLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!teacherId.trim()) return;
@@ -65,7 +67,6 @@ export default function Login() {
         return;
       }
 
-      // إذا كان الرقم هو الخاص بك كمدير النظام
       const isAdmin = data.teacher_id === 'PASS254177';
 
       localStorage.setItem('user_type', isAdmin ? 'admin' : 'teacher'); 
@@ -79,12 +80,19 @@ export default function Login() {
     }
   };
 
+  const handleSaqrClick = () => {
+    setShowFlag(true);
+    setTimeout(() => setShowFlag(false), 3000);
+    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
+    audio.volume = 0.05; audio.play().catch(() => {});
+  };
+
   return (
     <div 
       className="min-h-[100dvh] bg-[#f0f4f8] bg-[url('/bg-pattern-light.svg')] flex items-center justify-center p-4 sm:p-8 font-sans selection:bg-blue-500 selection:text-white transition-colors duration-500 relative" 
       dir={lang === 'ar' ? 'rtl' : 'ltr'}
     >
-      {/* 🌐 أزرار تغيير اللغة في أعلى يمين/يسار الشاشة */}
+      {/* 🌐 أزرار تغيير اللغة في أعلى الشاشة */}
       <div className={`absolute top-6 ${lang === 'ar' ? 'left-6' : 'right-6'} flex items-center gap-2 z-50`}>
           <button onClick={() => setLang('ar')} className={`px-4 py-1.5 rounded-full font-bold text-xs md:text-sm border-2 transition-all ${lang === 'ar' ? 'bg-blue-600 border-blue-600 text-white shadow-md' : 'bg-white border-slate-300 text-slate-600 hover:border-blue-400'}`}>العربية</button>
           <button onClick={() => setLang('en')} className={`px-4 py-1.5 rounded-full font-bold text-xs md:text-sm border-2 transition-all ${lang === 'en' ? 'bg-indigo-600 border-indigo-600 text-white shadow-md' : 'bg-white border-slate-300 text-slate-600 hover:border-indigo-400'}`}>English</button>
@@ -92,7 +100,7 @@ export default function Login() {
 
       <div className="max-w-5xl w-full bg-white/90 backdrop-blur-xl border border-slate-200 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col lg:flex-row z-10">
         
-        {/* ================= القسم الأول: الهوية البصرية وصقر (Light Mode) ================= */}
+        {/* ================= القسم الأول: الهوية البصرية وصقر ================= */}
         <div className="lg:w-1/2 p-8 lg:p-12 flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br from-blue-50/50 to-slate-100/50 border-b lg:border-b-0 lg:border-l border-slate-200">
           
           <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
@@ -107,12 +115,13 @@ export default function Login() {
               </h2>
             </div>
             
+            {/* تم إمالة شعار المدرسة بحدود 30 درجة لليمين */}
             <div className="relative group shrink-0">
               <div className="absolute inset-0 bg-blue-100 rounded-full blur-xl group-hover:bg-blue-200 transition-all duration-500 -z-10"></div>
               <img 
                 src="/school-logo.png" 
                 alt="School Logo" 
-                className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain relative z-10"
+                className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain relative z-10 rotate-[30deg] transition-transform duration-500 group-hover:rotate-[38deg]"
               />
             </div>
 
@@ -124,7 +133,8 @@ export default function Login() {
           </div>
 
           <div className="text-center z-10 mb-6">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 mb-3 drop-shadow-sm">
+            {/* تم تكبير عنوان المكتبة الذكية بشكل أكبر وأكثر بروزاً */}
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 mb-3 drop-shadow-sm tracking-tight">
               {lang === 'ar' ? 'المكتبة الذكية' : 'Smart Library'}
             </h1>
             <p className="text-slate-500 text-xs sm:text-sm max-w-sm mx-auto font-bold leading-relaxed">
@@ -134,12 +144,21 @@ export default function Login() {
             </p>
           </div>
 
-          <div className="relative mt-2 mb-2 lg:mb-0 w-40 h-40 sm:w-56 sm:h-56 md:w-64 md:h-64 flex items-center justify-center">
+          {/* شخصية صقر التفاعلية مع ظهور علم الإمارات عند الضغط */}
+          <div onClick={handleSaqrClick} className="relative mt-2 mb-2 lg:mb-0 w-40 h-40 sm:w-56 sm:h-56 md:w-64 md:h-64 flex items-center justify-center cursor-pointer group">
             <div className="absolute bottom-0 w-3/4 h-6 bg-slate-300/40 rounded-[100%] blur-md"></div>
+            
+            {showFlag && (
+              <div className="absolute -top-10 z-30 animate-bounce bg-white/90 backdrop-blur-md px-4 py-2 rounded-2xl shadow-xl border-2 border-emerald-500 flex items-center gap-2">
+                <span className="text-2xl">🇦🇪</span>
+                <span className="font-black text-xs text-slate-800">{lang === 'ar' ? 'الإمارات العظمى' : 'Proud UAE'}</span>
+              </div>
+            )}
+
             <img 
               src="/saqr-full.png" 
               alt="صقر المساعد الذكي" 
-              className="w-full h-full object-contain relative z-10 animate-float drop-shadow-lg"
+              className="w-full h-full object-contain relative z-10 animate-float drop-shadow-lg group-hover:scale-105 transition-transform"
             />
           </div>
         </div>
@@ -211,14 +230,13 @@ export default function Login() {
               </button>
             </form>
           ) : (
-            /* فورم المعلمين (بدون كلمة مرور - بالرقم الوظيفي فقط) */
+            /* فورم المعلمين */
             <form onSubmit={handleTeacherLogin} className="space-y-5 animate-fade-in">
               <div className="space-y-2 text-start">
                 <label className="block text-xs md:text-sm font-black text-slate-600 px-1">
                   {lang === 'ar' ? 'الرقم الوظيفي للمعلم (ADEK ID)' : 'Teacher ADEK ID'}
                 </label>
                 
-                {/* 💡 التلميح الخاص برقم المعلم */}
                 <div className={`text-[10px] md:text-xs font-bold text-indigo-600 mb-2 px-1 flex items-start gap-1`}>
                     <svg className="w-3.5 h-3.5 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     <span>{lang === 'ar' ? 'تلميح: الرقم الوظيفي الخاص بك يبدأ دائماً بكلمة PASS متبوعاً بالأرقام.' : 'Hint: Your official ID always starts with PASS followed by numbers.'}</span>
