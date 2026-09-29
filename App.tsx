@@ -33,22 +33,14 @@ export type Locale = 'en' | 'ar';
 interface NavLink {
   path: string;
   label: string;
-  icon: React.ReactNode;
   hint: string;
   color: string;
+  roles: ('student' | 'teacher' | 'admin')[]; // تحديد الصلاحيات لكل رابط
 }
 
 // ==========================================
-// أيقونات SVG جذابة (بديلة للإيموجيز)
+// أيقونة إغلاق النافذة المنبثقة
 // ==========================================
-const SearchIcon = () => <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>;
-const BookIcon = () => <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg>;
-const PaletteIcon = () => <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c1.66 0 3-1.34 3-3 0-.35-.07-.69-.21-1-.28-.62-1.07-1.46-1.57-2.09-.34-.43-.72-1.09-.72-1.91 0-1.66 1.34-3 3-3h.64c2.81 0 5.1-2.07 5.73-4.83A9.98 9.98 0 0 0 22 12c0-5.52-4.48-10-10-10z" /></svg>;
-const GameIcon = () => <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><rect x="2" y="6" width="20" height="12" rx="4" /><path d="M6 12h4m-2-2v4M15 11h.01M18 13h.01" /></svg>;
-const MapIcon = () => <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21 3 6" /><line x1="9" y1="3" x2="9" y2="18" /><line x1="15" y1="6" x2="15" y2="21" /></svg>;
-const FeedbackIcon = () => <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" /></svg>;
-const ReportsIcon = () => <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg>;
-const AboutIcon = () => <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>;
 const CloseIcon = () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>;
 
 // -------- 1. مساعد صقر العائم --------
@@ -169,7 +161,7 @@ const DraggableSaqrModal: React.FC<{ isOpen: boolean; onClose: () => void; child
     );
 };
 
-// -------- 2. هيدر EFIPS --------
+// -------- 2. هيدر EFIPS المتكيف حسب الصلاحيات --------
 const Header: React.FC = () => {
   const { locale, setLocale, dir } = useLanguage();
   const { theme, toggleTheme } = useTheme();
@@ -178,10 +170,15 @@ const Header: React.FC = () => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
-
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [userRole, setUserRole] = useState<'student' | 'teacher' | 'admin' | null>(null);
 
-  // إخفاء الـ Header في صفحة تسجيل الدخول ولوحة الإدارة
+  // جلب صلاحية المستخدم لمعرفة الأزرار التي ستظهر له
+  useEffect(() => {
+    const role = localStorage.getItem('user_type') as 'student' | 'teacher' | 'admin' | null;
+    setUserRole(role);
+  }, [location.pathname]);
+
   if (location.pathname === '/' || location.pathname === '/admin-dashboard') return null;
 
   const updateMousePos = (e: React.MouseEvent | React.TouchEvent) => {
@@ -210,90 +207,52 @@ const Header: React.FC = () => {
     return () => window.removeEventListener('scroll', controlNavbar);
   }, [lastScrollY]);
 
-  const links: NavLink[] = [
-    { path: '/home', label: locale === 'en' ? 'Home' : 'الرئيسية', icon: <img src="/saqr-avatar.png" className="w-6 h-6 object-contain" alt="Home"/>, hint: locale === 'en' ? 'Home' : 'الرئيسية', color: 'bg-emerald-500' },
-    { path: '/search', label: locale === 'en' ? 'Search' : 'البحث بالمكتبة', icon: <SearchIcon />, hint: locale === 'en' ? 'Library Index' : 'فهرس الكتب', color: 'bg-rose-500' },
-    { path: '/digital-library', label: locale === 'en' ? 'Digital' : 'المكتبة الرقمية', icon: <BookIcon />, hint: locale === 'en' ? 'E-Books' : 'المكتبة الرقمية', color: 'bg-blue-500' },
-    { path: '/creators', label: locale === 'en' ? 'Creators' : 'بوابة المبدعين', icon: <PaletteIcon />, hint: locale === 'en' ? 'Talents' : 'إبداعات طلابنا', color: 'bg-purple-500' },
-    { path: '/game', label: locale === 'en' ? 'Games' : 'ألعاب', icon: <GameIcon />, hint: locale === 'en' ? 'Games' : 'ألعاب', color: 'bg-amber-500' },
-    { path: '/feedback', label: locale === 'en' ? 'Ideas' : 'مقترحات', icon: <FeedbackIcon />, hint: locale === 'en' ? 'Contact' : 'رأيك يهمنا', color: 'bg-teal-500' }, 
-    { path: '/reports', label: locale === 'en' ? 'Reports' : 'تقارير', icon: <ReportsIcon />, hint: locale === 'en' ? 'Reports' : 'تقارير', color: 'bg-slate-700' },
-    { path: '/map', label: locale === 'en' ? "Lib's Map" : 'خريطة المكتبة', icon: <MapIcon />, hint: locale === 'en' ? 'Shelf Cont' : 'محتويات الأرفف', color: 'bg-sky-500' },
-    { path: '/about', label: locale === 'en' ? 'About' : 'عنا', icon: <AboutIcon />, hint: locale === 'en' ? 'About us' : 'من نحن؟', color: 'bg-indigo-500' },
+  // تعريف الروابط مع صلاحياتها بالنصوص فقط
+  const allLinks: NavLink[] = [
+    { path: '/home', label: locale === 'en' ? 'Home' : 'الرئيسية', hint: locale === 'en' ? 'Home' : 'الرئيسية', color: 'bg-emerald-500', roles: ['student', 'teacher', 'admin'] },
+    { path: '/search', label: locale === 'en' ? 'Search' : 'البحث بالمكتبة', hint: locale === 'en' ? 'Library Index' : 'فهرس الكتب', color: 'bg-rose-500', roles: ['student', 'teacher', 'admin'] },
+    { path: '/digital-library', label: locale === 'en' ? 'Digital' : 'المكتبة الرقمية', hint: locale === 'en' ? 'E-Books' : 'المكتبة الرقمية', color: 'bg-blue-500', roles: ['student', 'teacher', 'admin'] },
+    { path: '/creators', label: locale === 'en' ? 'Creators' : 'بوابة المبدعين', hint: locale === 'en' ? 'Talents' : 'إبداعات طلابنا', color: 'bg-purple-500', roles: ['student', 'admin'] },
+    { path: '/game', label: locale === 'en' ? 'Games' : 'ألعاب', hint: locale === 'en' ? 'Games' : 'ألعاب', color: 'bg-amber-500', roles: ['student', 'admin'] },
+    { path: '/schedule', label: locale === 'en' ? 'Schedule' : 'جدول المكتبة', hint: locale === 'en' ? 'Bookings' : 'حجز المكتبة', color: 'bg-teal-500', roles: ['teacher', 'admin'] },
+    { path: '/feedback', label: locale === 'en' ? 'Ideas' : 'مقترحات', hint: locale === 'en' ? 'Contact' : 'رأيك يهمنا', color: 'bg-emerald-500', roles: ['student', 'teacher', 'admin'] }, 
+    { path: '/admin-dashboard', label: locale === 'en' ? 'Admin' : 'الإدارة', hint: locale === 'en' ? 'Dashboard' : 'لوحة التحكم', color: 'bg-rose-600', roles: ['admin'] }, 
   ];
+
+  const allowedLinks = allLinks.filter(link => !userRole || link.roles.includes(userRole));
 
   return (
     <header className={`fixed top-4 left-0 right-0 z-[60] px-2 flex justify-center transition-all duration-500 ease-in-out ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-[150%] opacity-0 pointer-events-none'}`}>
       
-      <div className="w-full max-w-[95%] md:w-fit md:max-w-full px-3 py-2 md:px-5 md:py-3 rounded-[2rem] border-4 border-white dark:border-slate-700/50 flex items-center gap-3 md:gap-6 shadow-xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md overflow-visible transition-colors duration-300">
+      <div className="w-full max-w-[98%] md:w-fit md:max-w-full px-2 py-2 md:px-4 md:py-3 rounded-[2rem] border-4 border-white dark:border-slate-700/50 flex items-center justify-between md:justify-center gap-2 md:gap-6 shadow-xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md overflow-visible transition-colors duration-300">
         
-        <Link to="/home" className="flex items-center gap-2 md:gap-3 group flex-shrink-0">
+        <Link to="/home" className="flex items-center gap-2 group flex-shrink-0">
           <img src="/school-logo.png" alt="EFIPS" className="h-8 w-8 md:h-10 md:w-10 object-contain transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12 dark:brightness-0 dark:invert drop-shadow-md shrink-0" onError={(e) => e.currentTarget.style.display='none'} />
-          <div className="hidden lg:flex flex-col text-start justify-center">
-            <span className="font-black text-slate-900 dark:text-white text-[10px] md:text-[11px] uppercase opacity-90 group-hover:text-rose-500 transition-colors tracking-wide leading-tight line-clamp-2 max-w-[150px] xl:max-w-[190px]">
-              {locale === 'en' ? "Emirates Falcon Int'l. Private School" : "مدرسة صقر الإمارات الدولية الخاصة"}
-            </span>
-          </div>
         </Link>
         
-        <nav className="flex-1 md:flex-none overflow-x-auto overflow-y-visible no-scrollbar scroll-smooth flex items-end h-12 md:h-12 px-2 md:px-4 bg-slate-100 dark:bg-slate-800 rounded-full shadow-inner border-2 border-slate-200 dark:border-slate-700">
-          <div className="flex items-end gap-1.5 md:gap-2 h-full pb-1 mx-auto min-w-max px-2">
-            {links.map((l, index) => {
-              const isHovered = hoveredIndex === index;
-              const isNeighbor = hoveredIndex === index - 1 || hoveredIndex === index + 1;
+        <nav className="flex-1 overflow-x-auto overflow-y-hidden no-scrollbar scroll-smooth flex items-center h-10 md:h-12 px-1 md:px-2 rounded-full">
+          <div className="flex items-center gap-1.5 md:gap-2 h-full mx-auto min-w-max px-1">
+            {allowedLinks.map((l, index) => {
               const isActive = location.pathname === l.path;
 
-              let effectClasses = "scale-100 translate-y-0 z-10 mx-0.5 md:mx-1";
-              if (isHovered) {
-                  effectClasses = "scale-[1.4] md:scale-[1.55] -translate-y-4 md:-translate-y-5 z-[100] mx-2.5 md:mx-4 shadow-xl border-2 border-white/50";
-              } else if (isNeighbor) {
-                  effectClasses = "scale-[1.15] md:scale-[1.25] -translate-y-1.5 md:-translate-y-2 z-50 mx-1 md:mx-1.5 shadow-md";
-              }
-
               return (
-                <div 
-                   key={l.path} 
-                   className="relative flex flex-col items-center justify-end h-full group"
-                   onMouseEnter={(e) => { setActiveHint(l.path); setHoveredIndex(index); updateMousePos(e); }} 
-                   onMouseLeave={() => { setActiveHint(null); setHoveredIndex(null); }}
-                   onMouseMove={updateMousePos}
-                   onTouchStart={(e) => { e.stopPropagation(); setActiveHint(activeHint === l.path ? null : l.path); setHoveredIndex(index); updateMousePos(e); }}
-                   onTouchEnd={() => { setTimeout(() => { setHoveredIndex(null); setActiveHint(null); }, 1500); }}
+                <Link 
+                  key={l.path}
+                  to={l.path}
+                  className={`px-3 py-1.5 md:px-5 md:py-2 text-[10px] md:text-sm font-black rounded-full transition-all duration-300 shrink-0 select-none ${
+                    isActive 
+                      ? `${l.color} text-white shadow-md` 
+                      : 'text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  }`}
                 >
-                  {activeHint === l.path && (
-                    <div 
-                      className="fixed z-[99999] pointer-events-none"
-                      style={{ 
-                        left: mousePos.x, 
-                        top: mousePos.y + 20,
-                        transform: 'translate(-50%, 0)' 
-                      }}
-                    >
-                      <div className={`px-3 py-1.5 ${l.color} text-white text-[10px] md:text-[11px] font-black rounded-lg shadow-xl whitespace-nowrap animate-zoom-in border-2 border-white/20 relative uppercase tracking-wider`}>
-                        <div className={`absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 ${l.color} rotate-45 rounded-sm`}></div>
-                        <span className="relative z-10">{l.hint}</span>
-                      </div>
-                    </div>
-                  )}
-
-                  <Link 
-                    to={l.path} 
-                    className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center origin-bottom will-change-transform ${effectClasses} ${
-                      isActive 
-                        ? `${l.color} text-white shadow-md border-transparent` 
-                        : 'bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600 border-2 border-slate-200 dark:border-slate-600'
-                    }`}
-                    style={{ transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
-                  >
-                    <span className="drop-shadow-sm pointer-events-none">{l.icon}</span>
-                  </Link>
-                </div>
+                  {l.label}
+                </Link>
               );
             })}
           </div>
         </nav>
         
-        <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
+        <div className="flex items-center gap-1 flex-shrink-0">
           <button onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')} className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-slate-700 dark:text-slate-200 font-black text-[10px] md:text-xs border-2 border-slate-300 dark:border-slate-600 rounded-full hover:border-amber-400 dark:hover:border-amber-500 transition-all active:scale-90 shadow-sm bg-slate-50 dark:bg-slate-800">
             {locale === 'en' ? 'AR' : 'EN'}
           </button>
@@ -351,9 +310,9 @@ const MainLayout: React.FC = () => {
       
       <main className={`flex-1 relative z-10 w-full ${location.pathname === '/' || location.pathname === '/admin-dashboard' ? 'pt-0' : 'pt-20 md:pt-24'}`}>
         <Routes>
-          <Route path="/" element={<Login />} /> {/* 🔑 صفحة تسجيل الدخول هي الواجهة الرئيسية الآن */}
+          <Route path="/" element={<Login />} /> 
           <Route path="/home" element={<HomePage />} />
-          <Route path="/admin-dashboard" element={<AdminDashboard />} /> {/* 👑 لوحة تحكم الإدارة */}
+          <Route path="/admin-dashboard" element={<AdminDashboard />} />
           
           <Route path="/search" element={<SearchPage />} />
           <Route path="/map" element={<LibraryMapPage />} />
