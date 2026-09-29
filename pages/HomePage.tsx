@@ -101,15 +101,24 @@ const ACADEMIC_EVENTS = [
 ];
 
 const HomePage: React.FC = () => {
-    // -----------------------------------------------------------------
-    // استدعاء جميع الـ Hooks في أعلى الدالة تماماً وبشكل ثابت وثابت الترتيب
-    // -----------------------------------------------------------------
     const { locale, dir } = useLanguage();
     const isAr = locale === 'ar';
     const t = (key: keyof typeof translations.ar) => translations[locale as 'ar' | 'en'][key];
     
-    const [userData, setUserData] = useState<any>(null);
-    const [userType, setUserType] = useState<'student' | 'teacher' | 'admin' | null>(null);
+    // قراءة البيانات مباشرة وثابته من الـ localStorage لمنع أخطاء الـ hooks وشاشة التحميل
+    const [userData, setUserData] = useState(() => {
+        try {
+            const stored = localStorage.getItem('current_user');
+            return stored ? JSON.parse(stored) : null;
+        } catch {
+            return null;
+        }
+    });
+
+    const [userType, setUserType] = useState(() => {
+        return localStorage.getItem('user_type') || null;
+    });
+
     const [bursts, setBursts] = useState<any[]>([]);
     const [isMascotClicked, setIsMascotClicked] = useState(false);
     const [daysLeft, setDaysLeft] = useState<number | null>(null);
@@ -117,22 +126,10 @@ const HomePage: React.FC = () => {
     const [countdownType, setCountdownType] = useState<'start' | 'end'>('start');
 
     useEffect(() => {
-        try {
-            const storedUser = localStorage.getItem('current_user');
-            const storedType = localStorage.getItem('user_type');
-
-            if (storedUser && storedType) {
-                setUserData(JSON.parse(storedUser));
-                setUserType(storedType as 'student' | 'teacher' | 'admin');
-            } else {
-                window.location.href = '#/login';
-            }
-        } catch (err) {
-            console.error("Session error:", err);
-            localStorage.clear();
-            window.location.href = '#/login';
+        if (!userData || !userType) {
+            window.location.href = '#/';
         }
-    }, []);
+    }, [userData, userType]);
 
     useEffect(() => {
         const now = new Date().getTime();
@@ -149,31 +146,15 @@ const HomePage: React.FC = () => {
     const todayDate = useMemo(() => new Date().toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US'), [locale]);
     const dailyFact = useMemo(() => HOMELAND_FACTS[0], []);
 
-    const handleMascotInteraction = useCallback(() => {
-        setIsMascotClicked(true);
-        setTimeout(() => setIsMascotClicked(false), 300);
-    }, []);
-
     const handleLogout = () => {
         localStorage.clear();
-        window.location.href = '#/login';
+        window.location.href = '#/';
     };
 
     const getDisplayName = () => {
         if (!userData) return isAr ? 'زائر' : 'Guest';
         return isAr ? (userData.name_ar || userData.name_en || 'زائر') : (userData.name_en || userData.name_ar || 'Guest');
     };
-
-    // حماية ضد التحميل بدون بيانات بدون الإضرار بالـ Hooks
-    if (!userData) {
-        return (
-            <div className="min-h-[100dvh] flex items-center justify-center bg-[#f8fafc] dark:bg-slate-950">
-                <div className="animate-pulse text-xl font-bold text-slate-500 text-center">
-                    جاري تحميل بوابة المعرفة...
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div dir={dir} className="w-full min-h-[100dvh] flex flex-col items-center bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden p-4 md:p-8">
@@ -201,7 +182,7 @@ const HomePage: React.FC = () => {
                     </p>
                 </div>
 
-                {/* استديو صقر (يظهر للطلاب والأدمن فقط) */}
+                {/* استديو صقر (يظهر للطلاب والأدمن فقط بناءً على طلبك) */}
                 {(userType === 'student' || userType === 'admin') && (
                     <div className="flex justify-center">
                         <Link to="/saqr-studio" className="px-10 py-4 rounded-full bg-blue-500 text-white font-black text-lg shadow-lg hover:bg-blue-600 transition-all">
