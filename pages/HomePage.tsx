@@ -100,40 +100,20 @@ const ACADEMIC_EVENTS = [
     }
 ];
 
-const FEATURED_BOOKS = [
-    { id: 1, titleAr: "سلسلة عالمي الصغير", authorAr: "محمد بن راشد آل مكتوم", titleEn: "My Little World Series", authorEn: "Mohammed bin Rashid Al Maktoum", cover: "https://mediaoffice.ae/-/media/2021/jan/09-01/05/my-little-world-cover-02.png?sc_lang=ar&hash=AC07100E6A716B1F6AA95942629C21CD" },
-    { id: 2, titleAr: "حكيم العرب", authorAr: "مريم صقر القاسمي", titleEn: "Wise Man of the Arabs", authorEn: "Maryam Saqr Al Qasimi", cover: "https://m.media-amazon.com/images/S/compressed.photo.goodreads.com/books/1614967678i/57318992.jpg" },
-];
-
-interface BurstItem { id: number; tx: number; ty: number; rot: number; color: string; }
-
-const StarIcon = ({ className }: { className: string }) => (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-    </svg>
-);
-
-const UaeFlagIcon = () => (
-    <svg viewBox="0 0 640 480" className="w-10 h-10 rounded shadow-sm overflow-hidden" preserveAspectRatio="none">
-        <path fill="#00732f" d="M0 0h640v160H0z"/>
-        <path fill="#fff" d="M0 160h640v160H0z"/>
-        <path fill="#000" d="M0 320h640v160H0z"/>
-        <path fill="#ff0000" d="M0 0h220v480H0z"/>
-    </svg>
-);
-
 const HomePage: React.FC = () => {
-    // 1. استدعاء جميع الـ Hooks في البداية تماماً وبدون أي شروط تسبقها
+    // -----------------------------------------------------------------
+    // استدعاء جميع الـ Hooks في أعلى الدالة تماماً وبشكل ثابت وثابت الترتيب
+    // -----------------------------------------------------------------
     const { locale, dir } = useLanguage();
     const isAr = locale === 'ar';
     const t = (key: keyof typeof translations.ar) => translations[locale as 'ar' | 'en'][key];
     
     const [userData, setUserData] = useState<any>(null);
     const [userType, setUserType] = useState<'student' | 'teacher' | 'admin' | null>(null);
-    const [bursts, setBursts] = useState<BurstItem[]>([]);
+    const [bursts, setBursts] = useState<any[]>([]);
     const [isMascotClicked, setIsMascotClicked] = useState(false);
     const [daysLeft, setDaysLeft] = useState<number | null>(null);
-    const [activeEvent, setActiveEvent] = useState<typeof ACADEMIC_EVENTS[0] | null>(null);
+    const [activeEvent, setActiveEvent] = useState<any>(null);
     const [countdownType, setCountdownType] = useState<'start' | 'end'>('start');
 
     useEffect(() => {
@@ -165,6 +145,15 @@ const HomePage: React.FC = () => {
         }
     }, []);
 
+    const visitorCount = useMemo(() => 1250, []);
+    const todayDate = useMemo(() => new Date().toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US'), [locale]);
+    const dailyFact = useMemo(() => HOMELAND_FACTS[0], []);
+
+    const handleMascotInteraction = useCallback(() => {
+        setIsMascotClicked(true);
+        setTimeout(() => setIsMascotClicked(false), 300);
+    }, []);
+
     const handleLogout = () => {
         localStorage.clear();
         window.location.href = '#/login';
@@ -175,29 +164,7 @@ const HomePage: React.FC = () => {
         return isAr ? (userData.name_ar || userData.name_en || 'زائر') : (userData.name_en || userData.name_ar || 'Guest');
     };
 
-    const visitorCount = useMemo(() => 1250, []);
-    const todayDate = useMemo(() => new Date().toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US'), [locale]);
-    const dailyFact = useMemo(() => HOMELAND_FACTS[0], []);
-
-    const handleMascotInteraction = useCallback(() => {
-        setIsMascotClicked(true);
-        setTimeout(() => setIsMascotClicked(false), 300);
-        
-        const id = Date.now();
-        const colors = ['text-red-500', 'text-blue-500', 'text-yellow-400', 'text-green-500', 'text-purple-500'];
-        const newBursts: BurstItem[] = Array.from({ length: 5 }).map((_, i) => ({
-            id: id + i,
-            color: colors[Math.floor(Math.random() * colors.length)],
-            tx: (Math.random() - 0.5) * 200, 
-            ty: -80 - Math.random() * 100,
-            rot: (Math.random() - 0.5) * 180
-        }));
-
-        setBursts(prev => [...prev, ...newBursts]);
-        setTimeout(() => setBursts([]), 2000);
-    }, []);
-
-    // 2. إذا لم يتم تحميل البيانات بعد، نعرض شاشة تحميل خفيفة بدلاً من عمل return مبكر يكسر الـ Hooks
+    // حماية ضد التحميل بدون بيانات بدون الإضرار بالـ Hooks
     if (!userData) {
         return (
             <div className="min-h-[100dvh] flex items-center justify-center bg-[#f8fafc] dark:bg-slate-950">
@@ -234,7 +201,7 @@ const HomePage: React.FC = () => {
                     </p>
                 </div>
 
-                {/* استديو صقر (يظهر للطلاب والأدمن فقط بناءً على طلبك) */}
+                {/* استديو صقر (يظهر للطلاب والأدمن فقط) */}
                 {(userType === 'student' || userType === 'admin') && (
                     <div className="flex justify-center">
                         <Link to="/saqr-studio" className="px-10 py-4 rounded-full bg-blue-500 text-white font-black text-lg shadow-lg hover:bg-blue-600 transition-all">
