@@ -198,7 +198,6 @@ const Header: React.FC = () => {
     setUserRole(role);
   }, [location.pathname]);
 
-  // استدعاء جميع Hooks قبل أي return مشروط لمنع اختلاف ترتيبها
   useEffect(() => {
     if (location.pathname === '/' || location.pathname === '/admin-dashboard') {
       return;
@@ -222,8 +221,8 @@ const Header: React.FC = () => {
 
   if (location.pathname === '/' || location.pathname === '/admin-dashboard') return null;
 
+  // تم إلغاء زر الرئيسية من الروابط
   const allLinks: NavLink[] = [
-    { path: '/home', label: locale === 'en' ? 'Home' : 'الرئيسية', hint: 'Home', color: 'bg-emerald-500', roles: ['student', 'teacher', 'admin'] },
     { path: '/search', label: locale === 'en' ? 'Search' : 'البحث بالمكتبة', hint: 'Search', color: 'bg-rose-500', roles: ['student', 'teacher', 'admin'] },
     { path: '/digital-library', label: locale === 'en' ? 'Digital' : 'المكتبة الرقمية', hint: 'Digital', color: 'bg-blue-500', roles: ['student', 'teacher', 'admin'] },
     { path: '/creators', label: locale === 'en' ? 'Creators' : 'بوابة المبدعين', hint: 'Creators', color: 'bg-purple-500', roles: ['student', 'admin'] },
@@ -241,12 +240,15 @@ const Header: React.FC = () => {
         isVisible ? 'translate-y-0 opacity-100' : '-translate-y-[150%] opacity-0 pointer-events-none'
       }`}
     >
-      <div className="w-full max-w-[98%] md:w-fit px-3 py-2 rounded-[2rem] border-4 border-white dark:border-slate-700/50 flex items-center justify-between md:justify-center gap-4 shadow-xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md">
-        <Link to="/home" className="flex items-center gap-2 group flex-shrink-0">
+      {/* تم زيادة الشفافية والبلور (backdrop-blur-2xl with /50 opacity) */}
+      <div className="w-full max-w-[98%] md:w-fit px-4 py-2.5 rounded-[2rem] border-4 border-white/70 dark:border-slate-700/40 flex items-center justify-between md:justify-center gap-4 shadow-2xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-2xl">
+        
+        {/* الشعار يميل أكثر لليمين عبر هامش me-3 */}
+        <Link to="/home" className="flex items-center gap-2 group flex-shrink-0 me-3">
           <img
             src="/school-logo.png"
             alt="EFIPS"
-            className="h-8 w-8 md:h-10 md:w-10 object-contain dark:brightness-0 dark:invert shrink-0"
+            className="h-8 w-8 md:h-10 md:w-10 object-contain dark:brightness-0 dark:invert shrink-0 transition-transform group-hover:scale-110"
             onError={(e) => { e.currentTarget.style.display = 'none'; }}
           />
         </Link>
@@ -263,7 +265,7 @@ const Header: React.FC = () => {
                   className={`px-3 py-1.5 md:px-5 md:py-2 text-[10px] md:text-sm font-black rounded-full transition-all duration-300 shrink-0 ${
                     isActive
                       ? `${l.color} text-white shadow-md`
-                      : 'text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800'
+                      : 'text-slate-600 dark:text-slate-300 bg-slate-100/80 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700'
                   }`}
                 >
                   {l.label}
@@ -276,13 +278,13 @@ const Header: React.FC = () => {
         <div className="flex items-center gap-1 flex-shrink-0">
           <button
             onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')}
-            className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-slate-700 dark:text-slate-200 font-black text-[10px] border-2 border-slate-300 dark:border-slate-600 rounded-full bg-slate-50 dark:bg-slate-800"
+            className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-slate-700 dark:text-slate-200 font-black text-[10px] border-2 border-slate-300/80 dark:border-slate-600 rounded-full bg-slate-50/80 dark:bg-slate-800/80"
           >
             {locale === 'en' ? 'AR' : 'EN'}
           </button>
           <button
             onClick={toggleTheme}
-            className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-full text-sm border-2 border-slate-200 dark:border-slate-600"
+            className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-slate-100/80 dark:bg-slate-800/80 rounded-full text-sm border-2 border-slate-200/80 dark:border-slate-600"
           >
             {theme === 'light' ? '🌙' : '☀️'}
           </button>
