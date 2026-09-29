@@ -236,11 +236,12 @@ const PodcastPage: React.FC = () => {
         if (e.data.size > 0) audioChunksRef.current.push(e.data);
       };
 
+      // الحل: تحديد مسار إنشاء الرابط عند الإيقاف فوراً وبشكل صريح.
       mediaRecorder.onstop = () => {
         const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        setAudioBlob(blob);
         const url = URL.createObjectURL(blob);
-        setAudioUrl(url);
+        setAudioBlob(blob);
+        setAudioUrl(url); // تعيين الرابط ليظهر قسم المعاينة
       };
 
       mediaRecorder.start();
@@ -262,7 +263,7 @@ const PodcastPage: React.FC = () => {
 
   const stopRecording = () => {
     if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current.stop(); // سيؤدي هذا لتشغيل الحدث onstop لإنشاء المقطع الصوتي
       setIsRecording(false);
       mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
@@ -281,14 +282,15 @@ const PodcastPage: React.FC = () => {
       if (!audioCtxRef.current) {
         const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
         audioCtxRef.current = new AudioContextClass();
-        sourceNodeRef.current = audioCtxRef.current.createMediaElementSource(audioRef.current);
+      }
+      
+      const ctx = audioCtxRef.current;
+      
+      if (!sourceNodeRef.current) {
+         sourceNodeRef.current = ctx.createMediaElementSource(audioRef.current);
       }
 
-      const ctx = audioCtxRef.current;
       const source = sourceNodeRef.current;
-      
-      if (!ctx || !source) return;
-
       source.disconnect();
       let lastNode: AudioNode = source;
 
@@ -356,7 +358,7 @@ const PodcastPage: React.FC = () => {
       reader.onloadend = async () => {
         const base64Audio = (reader.result as string).split(',')[1]; 
 
-        // تم تعيين studentGrade ليكون هو اسم الملف الصوتي
+        // تم تعيين studentGrade ليكون هو اسم الملف الصوتي المرفوع لجوجل درايف
         const payload = {
           name: studentName,
           grade: studentGrade,
@@ -389,7 +391,7 @@ const PodcastPage: React.FC = () => {
   };
 
   // ستايل الحقول (Read-only format)
-  const inputClass = "w-full p-4 md:p-5 rounded-2xl bg-slate-100 dark:bg-slate-800 border-4 border-slate-200 dark:border-slate-700 outline-none font-black text-slate-500 dark:text-slate-400 text-sm md:text-lg cursor-not-allowed shadow-inner";
+  const inputClass = "w-full p-4 md:p-5 rounded-2xl bg-slate-100 dark:bg-slate-800 border-4 border-slate-200 dark:border-slate-700 outline-none font-black text-slate-500 dark:text-slate-400 text-sm md:text-lg cursor-not-allowed shadow-inner text-center";
 
   return (
     <div dir={dir} className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 py-10 px-4 md:py-16 font-sans antialiased text-slate-800 dark:text-slate-200 relative overflow-x-hidden">
@@ -509,13 +511,14 @@ const PodcastPage: React.FC = () => {
             </div>
           </div>
 
-          {/* منطقة المعاينة والمؤثرات */}
+          {/* منطقة المعاينة والمؤثرات تظهر فور إيقاف التسجيل */}
           {audioUrl && (
             <div className="bg-slate-50 dark:bg-slate-800 p-8 md:p-10 rounded-[3rem] border-4 border-slate-200 dark:border-slate-700 mb-12 animate-fade-in-up relative z-10 shadow-inner">
               <h3 className="text-xl md:text-2xl font-black mb-8 flex items-center gap-3 text-slate-800 dark:text-white uppercase tracking-tight">
                 <HeadphonesIcon /> {t('previewTitle')}
               </h3>
               
+              {/* مشغل الصوت */}
               <audio ref={audioRef} src={audioUrl} controls className="w-full mb-10 outline-none dark:invert" crossOrigin="anonymous" />
 
               <h4 className="text-sm font-black text-slate-400 mb-6 uppercase tracking-widest">{t('effectsTitle')}</h4>
@@ -544,7 +547,7 @@ const PodcastPage: React.FC = () => {
             </div>
           )}
 
-          {/* بيانات الطالب - يتم جلبها تلقائياً ولا يمكن للمستخدم تعديلها */}
+          {/* بيانات الطالب - يتم جلبها تلقائياً ولا يمكن للمستخدم تعديلها (تُعرض في المنتصف) */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 relative z-10">
             <input 
               type="text" 
