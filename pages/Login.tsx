@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
-
-// إعداد اتصال Supabase
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mgbzzgnprbddajyfieop.supabase.co/rest/v1/';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1nYnp6Z25wcmJkZGFqeWZpZW9wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxNDgzMzgsImV4cCI6MjEwNTcyNDMzOH0.vA0UDiXOltingkfNZMDRHGBKgZ5cW-lrvS1YYar-nTI';
-const supabase = createClient(supabaseUrl, supabaseKey);
+// 🚀 استيراد الاتصال من الملف المركزي بدلاً من كتابته هنا
+import { supabase } from '../src/utils/supabase';
 
 export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
   const [loginType, setLoginType] = useState<'student' | 'teacher'>('student');
@@ -52,9 +48,8 @@ export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
     setError('');
 
     try {
-      const tId = teacherId.trim().toUpperCase(); // تحويل الحروف لكبيرة لضمان التطابق مع قاعدة البيانات
+      const tId = teacherId.trim().toUpperCase();
 
-      // البحث عن المعلم في قاعدة البيانات
       const { data, error } = await supabase
         .from('teachers')
         .select('*')
@@ -67,7 +62,6 @@ export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
         return;
       }
 
-      // 🔐 نظام التحقق من كلمة المرور (مدرس عادي = pass | أدمن = PASS254177)
       const isAdmin = data.teacher_id === 'PASS254177';
       const correctPassword = isAdmin ? 'PASS254177' : 'pass';
 
@@ -77,8 +71,7 @@ export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
         return;
       }
 
-      // تم الدخول بنجاح!
-      localStorage.setItem('user_type', isAdmin ? 'admin' : 'teacher'); // حفظ صلاحية الأدمن
+      localStorage.setItem('user_type', isAdmin ? 'admin' : 'teacher'); 
       localStorage.setItem('current_user', JSON.stringify(data));
       window.location.href = '/home';
       
@@ -160,7 +153,7 @@ export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
             </p>
           </div>
 
-          {/* أزرار التبديل */}
+          {/* أزرار التبديل - بدون إيموجيز لتكون رسمية واحترافية */}
           <div className="flex bg-slate-900/50 p-1.5 rounded-2xl mb-8 border border-slate-700/50">
             <button
               onClick={() => { setLoginType('student'); setError(''); setPassword(''); }}
@@ -170,7 +163,7 @@ export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
               }`}
             >
-              🎓 {lang === 'ar' ? 'دخول الطلاب' : 'Students'}
+              {lang === 'ar' ? 'دخول الطلاب' : 'Students'}
             </button>
             <button
               onClick={() => { setLoginType('teacher'); setError(''); setStudentId(''); }}
@@ -180,7 +173,7 @@ export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
               }`}
             >
-              👨‍🏫 {lang === 'ar' ? 'دخول المعلمين' : 'Teachers'}
+              {lang === 'ar' ? 'دخول المعلمين' : 'Teachers'}
             </button>
           </div>
 
@@ -191,19 +184,14 @@ export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                 <label className="block text-sm font-semibold text-slate-300">
                   {lang === 'ar' ? 'رقم الطالب (Student ID)' : 'Student ID'}
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <span className="text-slate-500 text-xl">🆔</span>
-                  </div>
-                  <input
-                    type="text"
-                    value={studentId}
-                    onChange={(e) => setStudentId(e.target.value)}
-                    placeholder={lang === 'ar' ? 'أدخل رقمك المكون من 6 أو 7 أرقام' : 'Enter your 6-7 digit ID'}
-                    className="w-full pl-12 pr-4 py-4 bg-slate-900/50 border border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-white placeholder-slate-500 font-mono text-lg tracking-widest text-center"
-                    required
-                  />
-                </div>
+                <input
+                  type="text"
+                  value={studentId}
+                  onChange={(e) => setStudentId(e.target.value)}
+                  placeholder={lang === 'ar' ? 'أدخل رقمك المكون من 6 أو 7 أرقام' : 'Enter your 6-7 digit ID'}
+                  className="w-full px-5 py-4 bg-slate-900/50 border border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-white placeholder-slate-500 font-mono text-lg tracking-widest text-center"
+                  required
+                />
               </div>
 
               {error && (
@@ -215,55 +203,40 @@ export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl transition-all duration-300 shadow-lg shadow-blue-900/50 active:scale-[0.98] disabled:opacity-70 flex justify-center items-center gap-2 text-lg"
+                className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl transition-all duration-300 shadow-lg shadow-blue-900/50 active:scale-[0.98] disabled:opacity-70 flex justify-center items-center text-lg"
               >
-                {loading ? (
-                  <span className="animate-pulse">{lang === 'ar' ? 'جاري التحقق من الهوية...' : 'Verifying...'}</span>
-                ) : (
-                  <><span>{lang === 'ar' ? 'دخول للمكتبة' : 'Enter Library'}</span> 🚀</>
-                )}
+                {loading ? (lang === 'ar' ? 'جاري التحقق...' : 'Verifying...') : (lang === 'ar' ? 'دخول للمكتبة' : 'Enter Library')}
               </button>
             </form>
           ) : (
-            /* فورم المعلمين (يحتوي على ID وباسورد) */
+            /* فورم المعلمين */
             <form onSubmit={handleTeacherLogin} className="space-y-6">
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-slate-300">
                   {lang === 'ar' ? 'الرقم الوظيفي للمعلم (Teacher ID)' : 'Teacher ID'}
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <span className="text-slate-500 text-xl">👨‍🏫</span>
-                  </div>
-                  <input
-                    type="text"
-                    value={teacherId}
-                    onChange={(e) => setTeacherId(e.target.value)}
-                    placeholder="PASSXXXXX"
-                    className="w-full pl-12 pr-4 py-4 bg-slate-900/50 border border-slate-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-white placeholder-slate-500 font-mono text-lg tracking-widest text-center uppercase"
-                    required
-                  />
-                </div>
+                <input
+                  type="text"
+                  value={teacherId}
+                  onChange={(e) => setTeacherId(e.target.value)}
+                  placeholder="PASSXXXXX"
+                  className="w-full px-5 py-4 bg-slate-900/50 border border-slate-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-white placeholder-slate-500 font-mono text-lg tracking-widest text-center uppercase"
+                  required
+                />
               </div>
 
-              {/* حقل كلمة المرور الجديد */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-slate-300">
                   {lang === 'ar' ? 'كلمة المرور (Password)' : 'Password'}
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <span className="text-slate-500 text-xl">🔒</span>
-                  </div>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder={lang === 'ar' ? 'أدخل كلمة المرور' : 'Enter password'}
-                    className="w-full pl-12 pr-4 py-4 bg-slate-900/50 border border-slate-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-white placeholder-slate-500 text-center text-lg tracking-widest"
-                    required
-                  />
-                </div>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder={lang === 'ar' ? 'أدخل كلمة المرور' : 'Enter password'}
+                  className="w-full px-5 py-4 bg-slate-900/50 border border-slate-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-white placeholder-slate-500 text-center text-lg tracking-widest"
+                  required
+                />
               </div>
 
               {error && (
@@ -275,13 +248,9 @@ export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold rounded-xl transition-all duration-300 shadow-lg shadow-indigo-900/50 active:scale-[0.98] disabled:opacity-70 flex justify-center items-center gap-2 text-lg"
+                className="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold rounded-xl transition-all duration-300 shadow-lg shadow-indigo-900/50 active:scale-[0.98] disabled:opacity-70 flex justify-center items-center text-lg"
               >
-                {loading ? (
-                  <span className="animate-pulse">{lang === 'ar' ? 'جاري التحقق من الهوية...' : 'Verifying...'}</span>
-                ) : (
-                  <><span>{lang === 'ar' ? 'دخول المعلم' : 'Teacher Login'}</span> ✨</>
-                )}
+                {loading ? (lang === 'ar' ? 'جاري التحقق...' : 'Verifying...') : (lang === 'ar' ? 'دخول المعلم' : 'Teacher Login')}
               </button>
             </form>
           )}
