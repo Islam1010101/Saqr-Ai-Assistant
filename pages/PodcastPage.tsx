@@ -227,24 +227,21 @@ const PodcastPage: React.FC = () => {
 
   const startRecording = async () => {
     try {
+      // تعديل خاص لدعم سفاري (Safari Compatibility)
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
+      const options = MediaRecorder.isTypeSupported('audio/webm') ? { mimeType: 'audio/webm' } : { mimeType: 'audio/mp4' };
+      const mediaRecorder = new MediaRecorder(stream, options);
+      
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
 
       mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+        if (e.data && e.data.size > 0) {
+            audioChunksRef.current.push(e.data);
+        }
       };
 
-      // الحل: تحديد مسار إنشاء الرابط عند الإيقاف فوراً وبشكل صريح.
-      mediaRecorder.onstop = () => {
-        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        const url = URL.createObjectURL(blob);
-        setAudioBlob(blob);
-        setAudioUrl(url); // تعيين الرابط ليظهر قسم المعاينة
-      };
-
-      mediaRecorder.start();
+      mediaRecorder.start(200); // تقسيم البيانات لضمان عدم ضياعها في سفاري
       setIsRecording(true);
       setRecordingTime(0);
       setAudioBlob(null);
@@ -263,9 +260,21 @@ const PodcastPage: React.FC = () => {
 
   const stopRecording = () => {
     if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop(); // سيؤدي هذا لتشغيل الحدث onstop لإنشاء المقطع الصوتي
+      mediaRecorderRef.current.onstop = () => {
+        const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+        const blob = new Blob(audioChunksRef.current, { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        setAudioBlob(blob);
+        setAudioUrl(url); // تعيين الرابط ليظهر قسم المعاينة
+        
+        // إغلاق المايكروفون تماماً
+        if (mediaRecorderRef.current && mediaRecorderRef.current.stream) {
+            mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+        }
+      };
+      
+      mediaRecorderRef.current.stop();
       setIsRecording(false);
-      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     }
   };
@@ -279,62 +288,66 @@ const PodcastPage: React.FC = () => {
   // --- إعداد Web Audio API لتطبيق التأثيرات عند التشغيل ---
   useEffect(() => {
     if (audioUrl && audioRef.current) {
-      if (!audioCtxRef.current) {
-        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-        audioCtxRef.current = new AudioContextClass();
-      }
-      
-      const ctx = audioCtxRef.current;
-      
-      if (!sourceNodeRef.current) {
-         sourceNodeRef.current = ctx.createMediaElementSource(audioRef.current);
-      }
-
-      const source = sourceNodeRef.current;
-      source.disconnect();
-      let lastNode: AudioNode = source;
-
-      // 1. فلتر إزالة الضوضاء (Noise Reduction - Bandpass)
-      if (effects.noise) {
-        if (!noiseFilterRef.current) {
-          noiseFilterRef.current = ctx.createBiquadFilter();
-          noiseFilterRef.current.type = 'bandpass';
-          noiseFilterRef.current.frequency.value = 1000; 
-          noiseFilterRef.current.Q.value = 0.5;
-        }
-        lastNode.connect(noiseFilterRef.current);
-        lastNode = noiseFilterRef.current;
-      } else if (noiseFilterRef.current) {
-         noiseFilterRef.current.disconnect();
-      }
-
-      // 2. فلتر الصدى (Echo)
-      if (effects.echo) {
-        if (!echoNodeRef.current) {
-          const delay = ctx.createDelay();
-          delay.delayTime.value = 0.3; 
-          const gain = ctx.createGain();
-          gain.gain.value = 0.4; 
+      try {
+          if (!audioCtxRef.current) {
+            const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+            audioCtxRef.current = new AudioContextClass();
+          }
           
-          delay.connect(gain);
-          gain.connect(delay);
+          const ctx = audioCtxRef.current;
           
-          echoNodeRef.current = { delay, gain };
-        }
-        
-        lastNode.connect(echoNodeRef.current.delay);
-        echoNodeRef.current.delay.connect(ctx.destination);
-      } else if (echoNodeRef.current) {
-         echoNodeRef.current.delay.disconnect();
-      }
+          if (!sourceNodeRef.current) {
+             sourceNodeRef.current = ctx.createMediaElementSource(audioRef.current);
+          }
 
-      // ربط العقدة الأخيرة بالمخرج النهائي
-      lastNode.connect(ctx.destination);
+          const source = sourceNodeRef.current;
+          source.disconnect();
+          let lastNode: AudioNode = source;
 
-      // 3. تأثير الـ Pitch 
-      if (audioRef.current) {
-          audioRef.current.preservesPitch = !effects.pitch; 
-          audioRef.current.playbackRate = effects.pitch ? playbackRate * 1.3 : playbackRate;
+          // 1. فلتر إزالة الضوضاء
+          if (effects.noise) {
+            if (!noiseFilterRef.current) {
+              noiseFilterRef.current = ctx.createBiquadFilter();
+              noiseFilterRef.current.type = 'bandpass';
+              noiseFilterRef.current.frequency.value = 1000; 
+              noiseFilterRef.current.Q.value = 0.5;
+            }
+            lastNode.connect(noiseFilterRef.current);
+            lastNode = noiseFilterRef.current;
+          } else if (noiseFilterRef.current) {
+             noiseFilterRef.current.disconnect();
+          }
+
+          // 2. فلتر الصدى
+          if (effects.echo) {
+            if (!echoNodeRef.current) {
+              const delay = ctx.createDelay();
+              delay.delayTime.value = 0.3; 
+              const gain = ctx.createGain();
+              gain.gain.value = 0.4; 
+              
+              delay.connect(gain);
+              gain.connect(delay);
+              
+              echoNodeRef.current = { delay, gain };
+            }
+            
+            lastNode.connect(echoNodeRef.current.delay);
+            echoNodeRef.current.delay.connect(ctx.destination);
+          } else if (echoNodeRef.current) {
+             echoNodeRef.current.delay.disconnect();
+          }
+
+          // ربط العقدة الأخيرة بالمخرج النهائي
+          lastNode.connect(ctx.destination);
+
+          // 3. تأثير الـ Pitch 
+          if (audioRef.current) {
+              audioRef.current.preservesPitch = !effects.pitch; 
+              audioRef.current.playbackRate = effects.pitch ? playbackRate * 1.3 : playbackRate;
+          }
+      } catch (error) {
+          console.error("Audio Routing Error (Safari):", error);
       }
     }
   }, [audioUrl, effects, playbackRate]);
@@ -344,7 +357,7 @@ const PodcastPage: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (!audioBlob || !studentName.trim() || !studentGrade.trim()) {
+    if (!audioBlob || !studentName.trim() || !studentGrade.trim() || isSubmitting) {
       setStatusMessage({ type: 'error', text: t('fillRequired') });
       return;
     }
@@ -358,7 +371,6 @@ const PodcastPage: React.FC = () => {
       reader.onloadend = async () => {
         const base64Audio = (reader.result as string).split(',')[1]; 
 
-        // تم تعيين studentGrade ليكون هو اسم الملف الصوتي المرفوع لجوجل درايف
         const payload = {
           name: studentName,
           grade: studentGrade,
@@ -374,7 +386,7 @@ const PodcastPage: React.FC = () => {
 
         if (response.ok) {
           setStatusMessage({ type: 'success', text: t('success') });
-          setAudioBlob(null);
+          setAudioBlob(null); // لمنع الإرسال المزدوج
           setAudioUrl(null);
           setRecordingTime(0);
           setEffects({ echo: false, noise: false, pitch: false });
