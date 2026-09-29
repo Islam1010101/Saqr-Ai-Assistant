@@ -9,12 +9,12 @@ const translations = {
         subtitle: "نظام إدارة المكتبة الذكية (EFIPS)",
         welcome: "مرحباً بك أستاذ",
         backToHome: "العودة للرئيسية",
-        statsTitle: "إحصائيات النظام الحية",
+        statsTitle: "إحصائيات النظام الحية (حقيقية)",
         totalStudents: "إجمالي الطلاب",
         totalTeachers: "إجمالي المعلمين",
-        studentLogins: "طالب مسجل / نشط",
-        teacherLogins: "معلم مسجل / نشط",
-        topBooksTitle: "أكثر الكتب طلباً وقراءة",
+        studentLogins: "طلاب قاموا بالدخول",
+        teacherLogins: "معلمون قاموا بالدخول",
+        topBooksTitle: "أكثر الكتب طلباً وقراءة (حقيقي)",
         arabicBooks: "المكتبة العربية",
         englishBooks: "المكتبة الإنجليزية",
         studentManagement: "إدارة الطلاب",
@@ -34,19 +34,19 @@ const translations = {
         modalEditStudent: "تعديل بيانات الطالب",
         modalEditTeacher: "تعديل بيانات المعلم",
         accessDenied: "عذراً، هذه الصفحة مخصصة لمدير النظام فقط.",
-        loading: "جاري تحميل لوحة التحكم..."
+        loading: "جاري تحليل البيانات الحية..."
     },
     en: {
         title: "Command Center",
         subtitle: "Smart Library Management System",
         welcome: "Welcome Mr.",
         backToHome: "Back to Home",
-        statsTitle: "Live System Statistics",
+        statsTitle: "Live Real-Time Statistics",
         totalStudents: "Total Students",
         totalTeachers: "Total Teachers",
-        studentLogins: "Active Students",
-        teacherLogins: "Active Teachers",
-        topBooksTitle: "Most Popular Digital Books",
+        studentLogins: "Students Logged In",
+        teacherLogins: "Teachers Logged In",
+        topBooksTitle: "Most Popular Digital Books (Real)",
         arabicBooks: "Arabic Library",
         englishBooks: "English Library",
         studentManagement: "Student Management",
@@ -66,7 +66,7 @@ const translations = {
         modalEditStudent: "Edit Student Info",
         modalEditTeacher: "Edit Teacher Info",
         accessDenied: "Access Denied. Admin privileges required.",
-        loading: "Loading dashboard..."
+        loading: "Loading live dashboard data..."
     }
 };
 
@@ -87,11 +87,12 @@ const AdminDashboard: React.FC = () => {
         teacherLogins: 0
     });
 
+    const [topArabicBooks, setTopArabicBooks] = useState<any[]>([]);
+    const [topEnglishBooks, setTopEnglishBooks] = useState<any[]>([]);
     const [studentsList, setStudentsList] = useState<any[]>([]);
     const [teachersList, setTeachersList] = useState<any[]>([]);
-    const [activeTab, setActiveTab] = useState<'students' | 'teachers' | 'books'>('students');
+    const [activeTab, setActiveTab] = useState<'students' | 'teachers'>('students');
 
-    // مودال الإضافة والتعديل
     const [modalMode, setModalMode] = useState<'addStudent' | 'addTeacher' | 'editStudent' | 'editTeacher' | null>(null);
     const [selectedItem, setSelectedItem] = useState<any>(null);
     const [formData, setFormData] = useState({ student_id: '', teacher_id: '', name_ar: '', name_en: '', grade: 'الصف الخامس', points: 0 });
@@ -105,75 +106,100 @@ const AdminDashboard: React.FC = () => {
             const user = JSON.parse(storedUser);
             const name = isAr ? (user.name_ar || user.name_en) : (user.name_en || user.name_ar);
             setAdminName(name.split(' ').slice(0, 2).join(' '));
-            fetchAllData();
+            fetchRealDashboardData();
         } else {
             setIsAdmin(false);
             setIsLoading(false);
         }
     }, [isAr]);
 
-    const fetchAllData = async () => {
+    const fetchRealDashboardData = async () => {
         setIsLoading(true);
         try {
-            const { data: students, count: sCount } = await supabase.from('students').select('*').order('points', { ascending: false });
-            const { data: teachers, count: tCount } = await supabase.from('teachers').select('*');
+            // 1. إجمالي الطلاب والمعلمين الحقيقي
+            const { count: sCount } = await supabase.from('students').select('*', { count: 'exact', head: true });
+            const { count: tCount } = await supabase.from('teachers').select('*', { count: 'exact', head: true });
+
+            // 2. عدد الطلاب والمعلمين الفريدين الذين قاموا بالدخول (من جدول login_logs)
+            const { data: loginLogs } = await supabase.from('login_logs').select('user_id, user_type');
+            const uniqueStudentLogins = new Set(loginLogs?.filter(l => l.user_type === 'student').map(l => l.user_id)).size;
+            const uniqueTeacherLogins = new Set(loginLogs?.filter(l => l.user_type === 'teacher' || l.user_type === 'admin').map(l => l.user_id)).size;
+
+            // 3. جلب القوائم الكاملة للطلاب والمعلمين
+            const { data: students } = await supabase.from('students').select('*').order('points', { ascending: false });
+            const { data: teachers } = await supabase.from('teachers').select('*');
 
             if (students) setStudentsList(students);
             if (teachers) setTeachersList(teachers);
 
+            // 4. جلب الكتب الأكثر فتحاً من جدول book_views الحقيقي
+            const { data: bookViews } = await supabase.from('book_views').select('book_title, language');
+            
+            const arBooksCount: Record<string, number> = {};
+            const enBooksCount: Record<string, number> = {};
+
+            bookViews?.forEach(bv => {
+                if (bv.language === 'ar') {
+                    arBooksCount[bv.book_title] = (arBooksCount[bv.book_title] || 0) + 1;
+                } else {
+                    enBooksCount[bv.book_title] = (enBooksCount[bv.book_title] || 0) + 1;
+                }
+            });
+
+            const sortedAr = Object.entries(arBooksCount).map(([title, count]) => ({ title, count })).sort((a, b) => b.count - a.count).slice(0, 3);
+            const sortedEn = Object.entries(enBooksCount).map(([title, count]) => ({ title, count })).sort((a, b) => b.count - a.count).slice(0, 3);
+
+            setTopArabicBooks(sortedAr);
+            setTopEnglishBooks(sortedEn);
+
             setStats({
                 students: sCount || students?.length || 0,
                 teachers: tCount || teachers?.length || 0,
-                studentLogins: students?.length || 0,
-                teacherLogins: teachers?.length || 0
+                studentLogins: uniqueStudentLogins,
+                teacherLogins: uniqueTeacherLogins
             });
         } catch (err) {
-            console.error('Error fetching admin data:', err);
+            console.error('Error fetching real admin stats:', err);
         } finally {
             setIsLoading(false);
         }
     };
 
-    // حفظ أو إضافة طالب/معلم
     const handleSubmitForm = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
             if (modalMode === 'addStudent') {
-                const { error } = await supabase.from('students').insert([{
+                await supabase.from('students').insert([{
                     student_id: formData.student_id.trim(),
                     name_ar: formData.name_ar,
                     name_en: formData.name_en || formData.name_ar,
                     grade: formData.grade,
                     points: Number(formData.points) || 0
                 }]);
-                if (error) alert(error.message);
             } else if (modalMode === 'addTeacher') {
-                const { error } = await supabase.from('teachers').insert([{
+                await supabase.from('teachers').insert([{
                     teacher_id: formData.teacher_id.trim().toUpperCase(),
                     name_ar: formData.name_ar,
                     name_en: formData.name_en || formData.name_ar
                 }]);
-                if (error) alert(error.message);
             } else if (modalMode === 'editStudent') {
-                const { error } = await supabase.from('students').update({
+                await supabase.from('students').update({
                     student_id: formData.student_id.trim(),
                     name_ar: formData.name_ar,
                     name_en: formData.name_en,
                     grade: formData.grade
                 }).eq('id', selectedItem.id);
-                if (error) alert(error.message);
             } else if (modalMode === 'editTeacher') {
-                const { error } = await supabase.from('teachers').update({
+                await supabase.from('teachers').update({
                     teacher_id: formData.teacher_id.trim().toUpperCase(),
                     name_ar: formData.name_ar,
                     name_en: formData.name_en
                 }).eq('id', selectedItem.id);
-                if (error) alert(error.message);
             }
 
             setModalMode(null);
             setSelectedItem(null);
-            fetchAllData();
+            fetchRealDashboardData();
         } catch (err) {
             console.error('Operation error:', err);
         }
@@ -209,7 +235,7 @@ const AdminDashboard: React.FC = () => {
             `}</style>
 
             {/* الهيدر العلوي */}
-            <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 mb-8 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-700/50 p-6 rounded-[2.5rem] shadow-xl mt-4 md:mt-6">
+            <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 mb-8 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200 dark:border-slate-700/50 p-6 rounded-[2.5rem] shadow-xl mt-4 md:mt-6">
                 <div>
                     <h1 className="text-2xl md:text-4xl font-black bg-gradient-to-r from-rose-500 to-amber-500 bg-clip-text text-transparent">
                         {t('title')}
@@ -220,7 +246,6 @@ const AdminDashboard: React.FC = () => {
                 </div>
                 
                 <div className="flex items-center gap-3 w-full md:w-auto justify-end">
-                    {/* زر تبديل الثيم */}
                     <button onClick={toggleTheme} className="px-4 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm shadow-inner transition-all">
                         {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
                     </button>
@@ -232,8 +257,8 @@ const AdminDashboard: React.FC = () => {
 
             <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6">
                 
-                {/* لوحة الإحصائيات الحية */}
-                <div className="lg:col-span-4 bg-white dark:bg-slate-900/80 backdrop-blur-md border border-slate-200 dark:border-slate-700/50 p-6 rounded-[2.5rem] shadow-xl">
+                {/* إحصائيات الدخول الحقيقية */}
+                <div className="lg:col-span-4 bg-white dark:bg-slate-900/90 backdrop-blur-md border border-slate-200 dark:border-slate-700/50 p-6 rounded-[2.5rem] shadow-xl">
                     <h2 className="text-lg md:text-xl font-black mb-6 text-rose-500 flex items-center gap-2">
                         <span className="w-3 h-3 bg-rose-500 rounded-full animate-ping"></span>
                         {t('statsTitle')}
@@ -262,51 +287,43 @@ const AdminDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                {/* لوحة الكتب الأكثر طلباً في المكتبة العربية والإنجليزية */}
+                {/* الكتب الأكثر طلباً (حقيقي من جدول book_views) */}
                 <div className="lg:col-span-4 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-white dark:bg-slate-900/80 backdrop-blur-md border border-slate-200 dark:border-slate-700/50 p-6 rounded-[2.5rem] shadow-xl">
+                    <div className="bg-white dark:bg-slate-900/90 backdrop-blur-md border border-slate-200 dark:border-slate-700/50 p-6 rounded-[2.5rem] shadow-xl">
                         <h3 className="text-base md:text-lg font-black mb-4 text-blue-500 flex items-center gap-2">
                             📖 {t('topBooksTitle')} ({t('arabicBooks')})
                         </h3>
                         <ul className="space-y-3">
-                            <li className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl text-xs md:text-sm font-bold">
-                                <span>1. سلسلة عالمي الصغير (محمد بن راشد)</span>
-                                <span className="bg-blue-500 text-white px-2.5 py-1 rounded-full text-xs">142 فتح</span>
-                            </li>
-                            <li className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl text-xs md:text-sm font-bold">
-                                <span>2. حكيم العرب (مريم القاسمي)</span>
-                                <span className="bg-blue-500 text-white px-2.5 py-1 rounded-full text-xs">98 فتح</span>
-                            </li>
-                            <li className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl text-xs md:text-sm font-bold">
-                                <span>3. أسرار الفضاء مع هزاع</span>
-                                <span className="bg-blue-500 text-white px-2.5 py-1 rounded-full text-xs">85 فتح</span>
-                            </li>
+                            {topArabicBooks.length > 0 ? topArabicBooks.map((b, idx) => (
+                                <li key={idx} className="flex justify-between items-center p-3.5 bg-slate-50 dark:bg-slate-800 rounded-2xl text-xs md:text-sm font-bold">
+                                    <span>{idx + 1}. {b.title}</span>
+                                    <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs">{b.count} فتح</span>
+                                </li>
+                            )) : (
+                                <li className="p-4 text-center text-slate-400 text-xs">لا توجد بيانات تفاعل مسجلة بعد</li>
+                            )}
                         </ul>
                     </div>
 
-                    <div className="bg-white dark:bg-slate-900/80 backdrop-blur-md border border-slate-200 dark:border-slate-700/50 p-6 rounded-[2.5rem] shadow-xl">
+                    <div className="bg-white dark:bg-slate-900/90 backdrop-blur-md border border-slate-200 dark:border-slate-700/50 p-6 rounded-[2.5rem] shadow-xl">
                         <h3 className="text-base md:text-lg font-black mb-4 text-emerald-500 flex items-center gap-2">
                             📚 {t('topBooksTitle')} ({t('englishBooks')})
                         </h3>
                         <ul className="space-y-3">
-                            <li className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl text-xs md:text-sm font-bold">
-                                <span>1. My Little World Series</span>
-                                <span className="bg-emerald-500 text-white px-2.5 py-1 rounded-full text-xs">120 opens</span>
-                            </li>
-                            <li className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl text-xs md:text-sm font-bold">
-                                <span>2. Wise Man of the Arabs</span>
-                                <span className="bg-emerald-500 text-white px-2.5 py-1 rounded-full text-xs">112 opens</span>
-                            </li>
-                            <li className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl text-xs md:text-sm font-bold">
-                                <span>3. Space Secrets with Hazza</span>
-                                <span className="bg-emerald-500 text-white px-2.5 py-1 rounded-full text-xs">76 opens</span>
-                            </li>
+                            {topEnglishBooks.length > 0 ? topEnglishBooks.map((b, idx) => (
+                                <li key={idx} className="flex justify-between items-center p-3.5 bg-slate-50 dark:bg-slate-800 rounded-2xl text-xs md:text-sm font-bold">
+                                    <span>{idx + 1}. {b.title}</span>
+                                    <span className="bg-emerald-500 text-white px-3 py-1 rounded-full text-xs">{b.count} opens</span>
+                                </li>
+                            )) : (
+                                <li className="p-4 text-center text-slate-400 text-xs">No analytics recorded yet</li>
+                            )}
                         </ul>
                     </div>
                 </div>
 
-                {/* أزرار التبديل بين جدول الطلاب والمعلمين */}
-                <div className="lg:col-span-4 flex items-center justify-between bg-white dark:bg-slate-900/80 p-4 rounded-[2rem] border border-slate-200 dark:border-slate-700">
+                {/* أزرار التبديل وإضافة الطلاب/المعلمين */}
+                <div className="lg:col-span-4 flex items-center justify-between bg-white dark:bg-slate-900/90 p-4 rounded-[2rem] border border-slate-200 dark:border-slate-700">
                     <div className="flex gap-2">
                         <button
                             onClick={() => setActiveTab('students')}
@@ -335,8 +352,8 @@ const AdminDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                {/* جداول الإدارة (الطلاب أو المعلمين) */}
-                <div className="lg:col-span-4 bg-white dark:bg-slate-900/80 backdrop-blur-md border border-slate-200 dark:border-slate-700/50 p-6 rounded-[2.5rem] shadow-xl overflow-hidden">
+                {/* جداول إدارة الطلاب والمعلمين */}
+                <div className="lg:col-span-4 bg-white dark:bg-slate-900/90 backdrop-blur-md border border-slate-200 dark:border-slate-700/50 p-6 rounded-[2.5rem] shadow-xl overflow-hidden">
                     <div className="overflow-x-auto">
                         {activeTab === 'students' ? (
                             <table className="w-full text-left rtl:text-right border-collapse min-w-[600px]">
@@ -394,7 +411,7 @@ const AdminDashboard: React.FC = () => {
 
             </div>
 
-            {/* نافذة المودال للإضافة والتعديل */}
+            {/* مودال الإضافة والتعديل */}
             {modalMode && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
                     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-8 rounded-[2.5rem] shadow-2xl max-w-md w-full">
