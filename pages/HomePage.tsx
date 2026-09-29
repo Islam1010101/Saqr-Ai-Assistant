@@ -29,9 +29,6 @@ const translations = {
         gameDesc: "العب، استمتع، وتعلم كيفية تصنيف الكتب.",
         bubble: "فخورين بالإمارات",
         homelandTitle: "لمحات من الموطن",
-        challengeTitle: "تحدي المبدعين",
-        challengeDesc: "ناقش، ابدأ قصتك الخاصة مع صقر، وأثبت موهبتك. هل أنت مستعد للتحدي؟",
-        challengeCTA: "ابدأ رحلة الإبداع الآن",
         saqrStudioBanner: "استديو صقر",
         visitorsLabel: "زوار البوابة:",
         upcomingEvents: "أحداث قريبة",
@@ -72,9 +69,6 @@ const translations = {
         gameDesc: "Play, enjoy, and learn book classification.",
         bubble: "Proud of the UAE",
         homelandTitle: "Hints From Homeland",
-        challengeTitle: "Authors Challenge",
-        challengeDesc: "Discuss, author your own tales with Saqr, and prove your talent. Are you ready?",
-        challengeCTA: "Start your creative journey",
         saqrStudioBanner: "Saqr Studio",
         visitorsLabel: "Portal Visitors:",
         upcomingEvents: "Upcoming Events",
@@ -94,7 +88,6 @@ const translations = {
 const HOMELAND_FACTS = [
     { ar: "تأسست دولة الإمارات العربية المتحدة في الثاني من ديسمبر عام 1971م على يد الشيخ زايد بن سلطان آل نهيان، طيب الله ثراه.", en: "The UAE was founded on Dec 2, 1971, by Sheikh Zayed bin Sultan Al Nahyan." },
     { ar: "هل تعلم أن برج خليفة في دبي هو أطول بناء شيده الإنسان في العالم بارتفاع 828 متراً؟", en: "Did you know Burj Khalifa is the tallest man-made structure in the world at 828m?" },
-    { ar: "مسبار الأمل الإماراتي هو أول مهمة عربية تصل إلى مدار كوكب المريخ لاستكشاف غلافه الجوي.", en: "The Hope Probe is the first Arab mission to reach Mars to explore its atmosphere." },
 ];
 
 const ACADEMIC_EVENTS = [
@@ -130,14 +123,19 @@ const UaeFlagIcon = () => (
 );
 
 const HomePage: React.FC = () => {
+    // 1. استدعاء جميع الـ Hooks في البداية تماماً وبدون أي شروط تسبقها
     const { locale, dir } = useLanguage();
     const isAr = locale === 'ar';
     const t = (key: keyof typeof translations.ar) => translations[locale as 'ar' | 'en'][key];
     
     const [userData, setUserData] = useState<any>(null);
     const [userType, setUserType] = useState<'student' | 'teacher' | 'admin' | null>(null);
+    const [bursts, setBursts] = useState<BurstItem[]>([]);
+    const [isMascotClicked, setIsMascotClicked] = useState(false);
+    const [daysLeft, setDaysLeft] = useState<number | null>(null);
+    const [activeEvent, setActiveEvent] = useState<typeof ACADEMIC_EVENTS[0] | null>(null);
+    const [countdownType, setCountdownType] = useState<'start' | 'end'>('start');
 
-    // استخدام try/catch لمنع الانهيار تماماً إذا كان الـ localStorage تالفاً
     useEffect(() => {
         try {
             const storedUser = localStorage.getItem('current_user');
@@ -147,54 +145,35 @@ const HomePage: React.FC = () => {
                 setUserData(JSON.parse(storedUser));
                 setUserType(storedType as 'student' | 'teacher' | 'admin');
             } else {
-                window.location.href = '#/';
+                window.location.href = '#/login';
             }
         } catch (err) {
-            console.error("Session parse error:", err);
+            console.error("Session error:", err);
             localStorage.clear();
-            window.location.href = '#/';
+            window.location.href = '#/login';
+        }
+    }, []);
+
+    useEffect(() => {
+        const now = new Date().getTime();
+        const upcoming = ACADEMIC_EVENTS[0];
+        if (upcoming) {
+            setActiveEvent(upcoming);
+            const target = now > upcoming.startDate.getTime() ? upcoming.endDate.getTime() : upcoming.startDate.getTime();
+            setCountdownType(now > upcoming.startDate.getTime() ? 'end' : 'start');
+            setDaysLeft(Math.ceil((target - now) / (1000 * 60 * 60 * 24)));
         }
     }, []);
 
     const handleLogout = () => {
         localStorage.clear();
-        window.location.href = '#/';
+        window.location.href = '#/login';
     };
 
     const getDisplayName = () => {
-        if (!userData) return '';
+        if (!userData) return isAr ? 'زائر' : 'Guest';
         return isAr ? (userData.name_ar || userData.name_en || 'زائر') : (userData.name_en || userData.name_ar || 'Guest');
     };
-
-    const [bursts, setBursts] = useState<BurstItem[]>([]);
-    const [isMascotClicked, setIsMascotClicked] = useState(false);
-    const [daysLeft, setDaysLeft] = useState<number | null>(null);
-    const [activeEvent, setActiveEvent] = useState<typeof ACADEMIC_EVENTS[0] | null>(null);
-    const [countdownType, setCountdownType] = useState<'start' | 'end'>('start');
-
-    useEffect(() => {
-        const checkTime = () => {
-            const now = new Date().getTime();
-            const upcoming = ACADEMIC_EVENTS.find(event => event.endDate.getTime() > now);
-            
-            if (upcoming) {
-                setActiveEvent(upcoming);
-                let target = upcoming.startDate.getTime();
-                
-                if (now > upcoming.startDate.getTime()) {
-                    target = upcoming.endDate.getTime();
-                    setCountdownType('end');
-                } else {
-                    setCountdownType('start');
-                }
-
-                const distance = target - now;
-                setDaysLeft(Math.ceil(distance / (1000 * 60 * 60 * 24)));
-            }
-        };
-
-        checkTime();
-    }, []);
 
     const visitorCount = useMemo(() => 1250, []);
     const todayDate = useMemo(() => new Date().toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US'), [locale]);
@@ -218,6 +197,7 @@ const HomePage: React.FC = () => {
         setTimeout(() => setBursts([]), 2000);
     }, []);
 
+    // 2. إذا لم يتم تحميل البيانات بعد، نعرض شاشة تحميل خفيفة بدلاً من عمل return مبكر يكسر الـ Hooks
     if (!userData) {
         return (
             <div className="min-h-[100dvh] flex items-center justify-center bg-[#f8fafc] dark:bg-slate-950">
@@ -254,7 +234,7 @@ const HomePage: React.FC = () => {
                     </p>
                 </div>
 
-                {/* استديو صقر (للطلاب والأدمن فقط) */}
+                {/* استديو صقر (يظهر للطلاب والأدمن فقط بناءً على طلبك) */}
                 {(userType === 'student' || userType === 'admin') && (
                     <div className="flex justify-center">
                         <Link to="/saqr-studio" className="px-10 py-4 rounded-full bg-blue-500 text-white font-black text-lg shadow-lg hover:bg-blue-600 transition-all">
