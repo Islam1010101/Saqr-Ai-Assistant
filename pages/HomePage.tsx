@@ -6,6 +6,13 @@ const translations = {
     ar: {
         welcome: "بوابة المعرفة في مدرسة صقر الإمارات",
         subWelcome: "بوابتك الذكية للوصول إلى المعلومات.",
+        welcomeUser: "أهلاً بك يا",
+        logout: "تسجيل الخروج",
+        adminBadge: "👑 مدير النظام",
+        teacherBadge: "👨‍🏫 حساب معلم",
+        studentBadge: "🎓 حساب طالب",
+        adminSettings: "إدارة النظام",
+        adminSettingsDesc: "التحكم الشامل في المنصة والبيانات",
         newsTitle: "جديدنا",
         newsContent: "بإمكانك الآن الاطلاع على المكتبة الإلكترونية المحدثة، وتم إضافة جدول استخدام المكتبة للمعلمين، كما تم إضافة لعبة وتحدي 'رتب المكتبة' الجديد لتصنيف الكتب، بالإضافة إلى استديو البودكاست المتاح للتسجيل ومشاركة إبداعاتكم الصوتية.",
         manualSearch: "البحث اليدوي",
@@ -45,6 +52,13 @@ const translations = {
     en: {
         welcome: "Knowledge Portal at Falcon Int'l School",
         subWelcome: "Your smart gateway to access knowledge.",
+        welcomeUser: "Welcome,",
+        logout: "Logout",
+        adminBadge: "👑 Admin",
+        teacherBadge: "👨‍🏫 Teacher",
+        studentBadge: "🎓 Student",
+        adminSettings: "System Admin",
+        adminSettingsDesc: "Full platform and data control",
         newsTitle: "What's New",
         newsContent: "Explore the updated Digital Library. The Library Schedule for teachers has been added, along with the new 'Library Game' challenge for book classification, plus our Podcast Studio is now live!",
         manualSearch: "Manual Search",
@@ -120,58 +134,6 @@ const FEATURED_BOOKS = [
 
 interface BurstItem { id: number; tx: number; ty: number; rot: number; color: string; }
 
-// ==========================================
-// مكونات الأيقونات (SVG)
-// ==========================================
-const SearchIcon = () => (
-    <svg className="w-10 h-10 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="11" cy="11" r="8" />
-        <line x1="21" y1="21" x2="16.65" y2="16.65" />
-    </svg>
-);
-const RobotIcon = () => (
-    <svg className="w-10 h-10 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="11" width="18" height="10" rx="2" />
-        <circle cx="12" cy="5" r="2" />
-        <path d="M12 7v4" />
-        <line x1="8" y1="16" x2="8" y2="16" strokeWidth={4} />
-        <line x1="16" y1="16" x2="16" y2="16" strokeWidth={4} />
-    </svg>
-);
-const BookIcon = () => (
-    <svg className="w-10 h-10 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-    </svg>
-);
-const PaletteIcon = () => (
-    <svg className="w-10 h-10 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/>
-        <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/>
-        <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/>
-        <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/>
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c1.66 0 3-1.34 3-3 0-.35-.07-.69-.21-1-.28-.62-1.07-1.46-1.57-2.09-.34-.43-.72-1.09-.72-1.91 0-1.66 1.34-3 3-3h.64c2.81 0 5.1-2.07 5.73-4.83A9.98 9.98 0 0 0 22 12c0-5.52-4.48-10-10-10z" />
-    </svg>
-);
-const GameIcon = () => (
-    <svg className="w-10 h-10 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="6" width="20" height="12" rx="4" />
-        <path d="M6 12h4m-2-2v4M15 11h.01M18 13h.01" />
-    </svg>
-);
-const ScheduleIcon = () => (
-    <svg className="w-10 h-10 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-        <line x1="16" y1="2" x2="16" y2="6" />
-        <line x1="8" y1="2" x2="8" y2="6" />
-        <line x1="3" y1="10" x2="21" y2="10" />
-        <line x1="8" y1="14" x2="10" y2="14" />
-        <line x1="14" y1="14" x2="16" y2="14" />
-        <line x1="8" y1="18" x2="10" y2="18" />
-        <line x1="14" y1="18" x2="16" y2="18" />
-    </svg>
-);
-
 const StarIcon = ({ className }: { className: string }) => (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor">
         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
@@ -189,8 +151,40 @@ const UaeFlagIcon = () => (
 const HomePage: React.FC = () => {
     const { locale, dir } = useLanguage();
     const isAr = locale === 'ar';
-    const t = (key: keyof typeof translations.ar) => translations[locale][key];
+    const t = (key: keyof typeof translations.ar) => translations[locale as 'ar' | 'en'][key];
     
+    // ==========================================
+    // نظام الجلسات والمصادقة
+    // ==========================================
+    const [userData, setUserData] = useState<any>(null);
+    const [userType, setUserType] = useState<'student' | 'teacher' | 'admin' | null>(null);
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem('current_user');
+        const storedType = localStorage.getItem('user_type');
+
+        if (storedUser && storedType) {
+            setUserData(JSON.parse(storedUser));
+            setUserType(storedType as 'student' | 'teacher' | 'admin');
+        } else {
+            // توجيه لصفحة تسجيل الدخول إذا لم يكن مسجلاً
+            window.location.href = '/login';
+        }
+    }, []);
+
+    const handleLogout = () => {
+        localStorage.clear();
+        window.location.href = '/login';
+    };
+
+    const getDisplayName = () => {
+        if (!userData) return '';
+        return isAr ? (userData.name_ar || userData.name_en) : (userData.name_en || userData.name_ar);
+    };
+
+    // ==========================================
+    // الحالات التفاعلية الأخرى
+    // ==========================================
     const [bursts, setBursts] = useState<BurstItem[]>([]);
     const [isMascotClicked, setIsMascotClicked] = useState(false);
     const [daysLeft, setDaysLeft] = useState<number | null>(null);
@@ -271,20 +265,46 @@ const HomePage: React.FC = () => {
         audio.volume = 0.03; audio.play().catch(() => {});
     }, []);
 
+    if (!userData) {
+        return (
+            <div className="min-h-[100dvh] flex items-center justify-center bg-[#f8fafc] dark:bg-slate-950">
+                <div className="animate-pulse text-2xl font-bold text-slate-500 text-center">
+                    جاري تحميل بوابة المعرفة...
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div dir={dir} className="w-full min-h-[100dvh] flex flex-col items-center bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300 py-10 md:py-16 px-4">
             
+            {/* زر تسجيل الخروج العائم */}
+            <div className="absolute top-4 end-4 md:top-8 md:end-8 z-50">
+                <button 
+                    onClick={handleLogout} 
+                    className="flex items-center gap-2 bg-white/50 dark:bg-slate-800/50 backdrop-blur-md border border-slate-200 dark:border-slate-700 hover:bg-rose-50 hover:border-rose-200 dark:hover:bg-rose-900/30 text-slate-600 dark:text-slate-300 hover:text-rose-600 font-bold px-4 py-2 rounded-full shadow-sm transition-all text-sm md:text-base"
+                >
+                    <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    {t('logout')}
+                </button>
+            </div>
+
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-50 dark:opacity-20">
                  <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-rose-400/20 rounded-full blur-[100px] animate-blob"></div>
                  <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-sky-400/20 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
                  <div className="absolute top-[30%] left-[20%] w-[30%] h-[30%] bg-amber-400/20 rounded-full blur-[100px] animate-blob animation-delay-4000"></div>
             </div>
 
-            <div className="w-full max-w-[1300px] flex flex-col gap-10 md:gap-16 animate-fade-in-up">
+            <div className="w-full max-w-[1300px] flex flex-col gap-10 md:gap-16 animate-fade-in-up mt-4 md:mt-0">
                 
                 <div className="text-center space-y-4 max-w-4xl mx-auto relative z-20 transition-transform duration-700">
-                    <h1 className="text-4xl md:text-6xl font-black text-slate-800 dark:text-white tracking-tight leading-tight">
-                        {t('welcome')}
+                    <div className="mb-2 inline-block px-4 py-1.5 rounded-full bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-black text-xs md:text-sm shadow-sm border border-slate-200 dark:border-slate-700">
+                        {userType === 'admin' ? t('adminBadge') : userType === 'teacher' ? t('teacherBadge') : t('studentBadge')}
+                    </div>
+                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-slate-800 dark:text-white tracking-tight leading-tight">
+                        {t('welcomeUser')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-500">{getDisplayName()}</span>
                     </h1>
                     <p className="text-lg md:text-2xl text-slate-600 dark:text-slate-400 font-bold leading-relaxed max-w-2xl mx-auto">
                         {t('subWelcome')}
@@ -292,7 +312,7 @@ const HomePage: React.FC = () => {
                     <div className="h-2 w-20 bg-amber-400 mx-auto rounded-full mt-4 animate-pulse"></div>
                 </div>
 
-                {/* شريط جديدنا المتحرك (تم إصلاحه ليعمل بشكل سليم وتمرير مستمر) */}
+                {/* شريط جديدنا المتحرك */}
                 <div className="w-full max-w-5xl mx-auto relative z-30 flex items-center bg-white dark:bg-slate-800 border-4 border-amber-300 dark:border-amber-700 rounded-full shadow-lg overflow-hidden h-14 md:h-16 hover:scale-[1.01] transition-all duration-300">
                     <div className="bg-amber-400 text-slate-900 font-black px-6 md:px-8 h-full flex items-center justify-center gap-2 relative z-20 shrink-0 uppercase tracking-widest">
                         <div className="w-3 h-3 bg-white rounded-full animate-ping"></div>
@@ -338,49 +358,56 @@ const HomePage: React.FC = () => {
 
                     <div className="lg:order-1 lg:order-3 flex-1 w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
                         
-                        <Link to="/search" className="bg-sky-400 text-white p-6 rounded-[2rem] border-b-8 border-sky-600 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all flex flex-col items-center text-center shadow-md">
-                            <SearchIcon />
-                            <h3 className="text-xl md:text-2xl font-black mb-2">{t('manualSearch')}</h3>
+                        {/* روابط مرئية للجميع */}
+                        <Link to="/search" className="bg-sky-400 text-white p-6 rounded-[2rem] border-b-8 border-sky-600 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all flex flex-col justify-center text-center shadow-md min-h-[120px]">
+                            <h3 className="text-xl md:text-2xl font-black mb-1">{t('manualSearch')}</h3>
                             <p className="text-sm font-bold opacity-90">{t('manualDesc')}</p>
                         </Link>
 
-                        <Link to="/smart-search" className="bg-emerald-400 text-white p-6 rounded-[2rem] border-b-8 border-emerald-600 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all flex flex-col items-center text-center shadow-md">
-                            <RobotIcon />
-                            <h3 className="text-xl md:text-2xl font-black mb-2">{t('smartSearch')}</h3>
+                        <Link to="/smart-search" className="bg-emerald-400 text-white p-6 rounded-[2rem] border-b-8 border-emerald-600 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all flex flex-col justify-center text-center shadow-md min-h-[120px]">
+                            <h3 className="text-xl md:text-2xl font-black mb-1">{t('smartSearch')}</h3>
                             <p className="text-sm font-bold opacity-90">{t('smartDesc')}</p>
                         </Link>
 
-                        <Link to="/digital-library" className="bg-indigo-400 text-white p-6 rounded-[2rem] border-b-8 border-indigo-600 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all flex flex-col items-center text-center shadow-md">
-                            <BookIcon />
-                            <h3 className="text-xl md:text-2xl font-black mb-2">{t('digitalLibrary')}</h3>
+                        <Link to="/digital-library" className="bg-indigo-400 text-white p-6 rounded-[2rem] border-b-8 border-indigo-600 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all flex flex-col justify-center text-center shadow-md min-h-[120px]">
+                            <h3 className="text-xl md:text-2xl font-black mb-1">{t('digitalLibrary')}</h3>
                             <p className="text-sm font-bold opacity-90">{t('digitalDesc')}</p>
                         </Link>
 
-                        <Link to="/creators" className="bg-purple-400 text-white p-6 rounded-[2rem] border-b-8 border-purple-600 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all flex flex-col items-center text-center shadow-md">
-                            <PaletteIcon />
-                            <h3 className="text-xl md:text-2xl font-black mb-2">{t('creators')}</h3>
+                        <Link to="/creators" className="bg-purple-400 text-white p-6 rounded-[2rem] border-b-8 border-purple-600 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all flex flex-col justify-center text-center shadow-md min-h-[120px]">
+                            <h3 className="text-xl md:text-2xl font-black mb-1">{t('creators')}</h3>
                             <p className="text-sm font-bold opacity-90">{t('creatorsDesc')}</p>
                         </Link>
 
-                        {/* جدول المكتبة مع شارة جديد */}
-                        <Link to="/schedule" className="relative bg-teal-500 text-white p-6 rounded-[2rem] border-b-8 border-teal-700 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all flex flex-col items-center text-center shadow-md">
-                            <div className="absolute top-4 start-4 bg-rose-500 text-white text-[10px] md:text-xs px-3 py-0.5 rounded-full font-black uppercase tracking-wider shadow-md animate-pulse">
-                                {t('newBadge')}
-                            </div>
-                            <ScheduleIcon />
-                            <h3 className="text-xl md:text-2xl font-black mb-2">{t('scheduleTitle')}</h3>
-                            <p className="text-sm font-bold opacity-90">{t('scheduleDesc')}</p>
-                        </Link>
+                        {/* جدول المكتبة (يظهر للمعلم والأدمن فقط) */}
+                        {(userType === 'teacher' || userType === 'admin') && (
+                            <Link to="/schedule" className="relative bg-teal-500 text-white p-6 rounded-[2rem] border-b-8 border-teal-700 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all flex flex-col justify-center text-center shadow-md min-h-[120px]">
+                                <div className="absolute top-4 start-4 bg-rose-500 text-white text-[10px] md:text-xs px-3 py-0.5 rounded-full font-black uppercase tracking-wider shadow-md animate-pulse">
+                                    {t('newBadge')}
+                                </div>
+                                <h3 className="text-xl md:text-2xl font-black mb-1">{t('scheduleTitle')}</h3>
+                                <p className="text-sm font-bold opacity-90">{t('scheduleDesc')}</p>
+                            </Link>
+                        )}
 
-                        {/* رتب المكتبة مع شارة جديد + حوار رتب المكتبة */}
-                        <Link to="/game" className="relative bg-amber-400 text-slate-900 p-6 rounded-[2rem] border-b-8 border-amber-600 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all flex flex-col items-center text-center shadow-md sm:col-span-2 lg:col-span-2 xl:col-span-1">
-                            <div className="absolute top-4 start-4 bg-rose-500 text-white text-[10px] md:text-xs px-3 py-0.5 rounded-full font-black uppercase tracking-wider shadow-md animate-pulse">
-                                {t('newBadge')}
-                            </div>
-                            <GameIcon />
-                            <h3 className="text-xl md:text-2xl font-black mb-2">{t('gameTitle')}</h3>
-                            <p className="text-sm font-bold opacity-90">{t('gameDesc')}</p>
-                        </Link>
+                        {/* رتب المكتبة (تظهر للطالب والأدمن فقط) */}
+                        {(userType === 'student' || userType === 'admin') && (
+                            <Link to="/game" className="relative bg-amber-400 text-slate-900 p-6 rounded-[2rem] border-b-8 border-amber-600 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all flex flex-col justify-center text-center shadow-md min-h-[120px]">
+                                <div className="absolute top-4 start-4 bg-rose-500 text-white text-[10px] md:text-xs px-3 py-0.5 rounded-full font-black uppercase tracking-wider shadow-md animate-pulse">
+                                    {t('newBadge')}
+                                </div>
+                                <h3 className="text-xl md:text-2xl font-black mb-1">{t('gameTitle')}</h3>
+                                <p className="text-sm font-bold opacity-90">{t('gameDesc')}</p>
+                            </Link>
+                        )}
+
+                        {/* لوحة تحكم الإدارة (للأدمن إسلام فقط) */}
+                        {userType === 'admin' && (
+                            <Link to="/admin-dashboard" className="bg-rose-500 text-white p-6 rounded-[2rem] border-b-8 border-rose-700 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all flex flex-col justify-center text-center shadow-md min-h-[120px]">
+                                <h3 className="text-xl md:text-2xl font-black mb-1">{t('adminSettings')}</h3>
+                                <p className="text-sm font-bold opacity-90">{t('adminSettingsDesc')}</p>
+                            </Link>
+                        )}
 
                     </div>
                 </div>
