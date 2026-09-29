@@ -1,14 +1,9 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../App';
-import { createClient } from '@supabase/supabase-js';
 
-// ==========================================
-// إعداد اتصال Supabase لحفظ النقاط تلقائياً
-// ==========================================
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'YOUR_SUPABASE_URL';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
-const supabase = createClient(supabaseUrl, supabaseKey);
+// 🚀 استيراد الاتصال من الملف المركزي بدلاً من كتابته هنا
+import { supabase } from '../src/utils/supabase';
 
 // ==========================================
 // 1. القاموس والترجمة (عربي / إنجليزي)
@@ -192,7 +187,7 @@ const DeweyGame: React.FC = () => {
         const storedType = localStorage.getItem('user_type');
 
         if (storedUser && storedType) {
-            // منع دخول المعلمين
+            // منع دخول المعلمين للعبة
             if (storedType === 'teacher') {
                 window.location.href = '/home';
                 return;
