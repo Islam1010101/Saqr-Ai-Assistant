@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../App';
 // 🚀 استيراد الاتصال من الملف المركزي بدلاً من كتابته هنا
-import { supabase } from '../src/utils/supabase';
+import { supabase } from '../utils/supabase';
 
 // ==========================================
 // القاموس والترجمات
