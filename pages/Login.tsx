@@ -9,8 +9,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
   const [loginType, setLoginType] = useState<'student' | 'teacher'>('student');
   const [studentId, setStudentId] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [teacherId, setTeacherId] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -33,11 +32,11 @@ export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
         setError(lang === 'ar' ? 'رقم الطالب غير صحيح، يرجى المحاولة مرة أخرى.' : 'Invalid Student ID.');
       } else {
         localStorage.setItem('user_type', 'student');
-        localStorage.setItem('current_student', JSON.stringify(data));
+        localStorage.setItem('current_user', JSON.stringify(data));
         window.location.href = '/home'; 
       }
     } catch (err) {
-      setError(lang === 'ar' ? 'حدث خطأ في الاتصال.' : 'Connection error.');
+      setError(lang === 'ar' ? 'حدث خطأ في الاتصال بقاعدة البيانات.' : 'Database connection error.');
     } finally {
       setLoading(false);
     }
@@ -46,26 +45,28 @@ export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
   // دالة تسجيل دخول المعلمين
   const handleTeacherLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim() || !password.trim()) return;
+    if (!teacherId.trim()) return;
 
     setLoading(true);
     setError('');
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password: password.trim(),
-      });
+      // البحث عن المعلم في جدول teachers
+      const { data, error } = await supabase
+        .from('teachers')
+        .select('*')
+        .eq('teacher_id', teacherId.trim())
+        .single();
 
-      if (error || !data.user) {
-        setError(lang === 'ar' ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة.' : 'Invalid email or password.');
+      if (error || !data) {
+        setError(lang === 'ar' ? 'رقم المعلم غير صحيح، يرجى المحاولة مرة أخرى.' : 'Invalid Teacher ID.');
       } else {
         localStorage.setItem('user_type', 'teacher');
-        localStorage.setItem('user_data', JSON.stringify(data.user));
+        localStorage.setItem('current_user', JSON.stringify(data));
         window.location.href = '/home';
       }
     } catch (err) {
-      setError(lang === 'ar' ? 'حدث خطأ في الاتصال.' : 'Connection error.');
+      setError(lang === 'ar' ? 'حدث خطأ في الاتصال بقاعدة البيانات.' : 'Database connection error.');
     } finally {
       setLoading(false);
     }
@@ -78,7 +79,7 @@ export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
     >
       <div className="max-w-6xl w-full bg-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col lg:flex-row">
         
-        {/* ================= القسم الأول: الهوية البصرية وصقر (يعرض في الأعلى على الجوال وفي اليمين على الكمبيوتر) ================= */}
+        {/* ================= القسم الأول: الهوية البصرية وصقر ================= */}
         <div className="lg:w-1/2 p-8 lg:p-12 flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br from-blue-900/40 to-indigo-900/20 border-b lg:border-b-0 lg:border-l border-slate-700/50">
           
           {/* تأثيرات الإضاءة في الخلفية */}
@@ -87,16 +88,14 @@ export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
             <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-indigo-500/20 rounded-full blur-[80px]"></div>
           </div>
 
-          {/* ترويسة المدرسة (الشعار يتوسط اللغتين) */}
+          {/* ترويسة المدرسة */}
           <div className="flex items-center justify-center w-full gap-3 md:gap-6 mb-10">
-            {/* الاسم بالعربية (يمين الشعار في وضع RTL) */}
             <div className="flex-1 text-left">
               <h2 className="text-white font-bold text-xs sm:text-sm md:text-base leading-snug drop-shadow-md">
                 مدرسة صقر الإمارات<br className="hidden sm:block"/> الدولية الخاصة
               </h2>
             </div>
             
-            {/* شعار المدرسة في المنتصف */}
             <div className="relative group shrink-0">
               <div className="absolute inset-0 bg-white/20 rounded-full blur-xl group-hover:bg-white/30 transition-all duration-500"></div>
               <img 
@@ -106,7 +105,6 @@ export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
               />
             </div>
 
-            {/* الاسم بالإنجليزية (يسار الشعار في وضع RTL) */}
             <div className="flex-1 text-right" dir="ltr">
               <h2 className="text-white font-bold text-xs sm:text-sm md:text-base leading-snug drop-shadow-md">
                 Emirates Falcon Int'l<br className="hidden sm:block"/> Private School
@@ -126,13 +124,10 @@ export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
             </p>
           </div>
 
-          {/* شخصية صقر مع التأثيرات البصرية المتقدمة */}
+          {/* شخصية صقر */}
           <div className="relative mt-4 mb-4 lg:mb-0 w-48 h-48 sm:w-64 sm:h-64 flex items-center justify-center">
-            {/* هالة التوهج النبضية خلف صقر */}
             <div className="absolute w-3/4 h-3/4 bg-blue-500/40 rounded-full blur-3xl animate-pulse-slow"></div>
-            {/* حلقة سحرية أو قاعدة */}
             <div className="absolute bottom-0 w-4/5 h-8 bg-blue-400/20 rounded-[100%] blur-md"></div>
-            {/* صورة صقر نفسها مع تأثير الطفو والتوهج الخارجي */}
             <img 
               src="/saqr-full.png" 
               alt="صقر المساعد الذكي" 
@@ -141,7 +136,7 @@ export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
           </div>
         </div>
 
-        {/* ================= القسم الثاني: نموذج تسجيل الدخول ================= */}
+        {/* ================= القسم الثاني: نموذج تسجيل الدخول (بدون كلمة مرور) ================= */}
         <div className="lg:w-1/2 p-6 sm:p-10 lg:p-16 flex flex-col justify-center bg-slate-800/80">
           <div className="mb-8 text-center lg:text-start">
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
@@ -217,35 +212,25 @@ export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
               </button>
             </form>
           ) : (
-            /* فورم المعلمين */
-            <form onSubmit={handleTeacherLogin} className="space-y-5">
+            /* فورم المعلمين (استخدام ID فقط بدون باسورد) */
+            <form onSubmit={handleTeacherLogin} className="space-y-6">
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-slate-300">
-                  {lang === 'ar' ? 'البريد الإلكتروني' : 'Email Address'}
+                  {lang === 'ar' ? 'الرقم الوظيفي للمعلم (Teacher ID)' : 'Teacher ID'}
                 </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="teacher@efips.com"
-                  className="w-full px-5 py-4 bg-slate-900/50 border border-slate-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-white placeholder-slate-500"
-                  dir="ltr"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-slate-300">
-                  {lang === 'ar' ? 'كلمة المرور' : 'Password'}
-                </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full px-5 py-4 bg-slate-900/50 border border-slate-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-white placeholder-slate-500"
-                  dir="ltr"
-                  required
-                />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <span className="text-slate-500 text-xl">👨‍🏫</span>
+                  </div>
+                  <input
+                    type="text"
+                    value={teacherId}
+                    onChange={(e) => setTeacherId(e.target.value)}
+                    placeholder={lang === 'ar' ? 'أدخل رقمك الوظيفي' : 'Enter your Teacher ID'}
+                    className="w-full pl-12 pr-4 py-4 bg-slate-900/50 border border-slate-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-white placeholder-slate-500 font-mono text-lg tracking-widest text-center"
+                    required
+                  />
+                </div>
               </div>
 
               {error && (
@@ -257,16 +242,19 @@ export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-4 bg-slate-700 hover:bg-slate-600 border border-slate-500 text-white font-bold rounded-xl transition-all duration-300 shadow-lg active:scale-[0.98] disabled:opacity-70 text-lg"
+                className="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold rounded-xl transition-all duration-300 shadow-lg shadow-indigo-900/50 active:scale-[0.98] disabled:opacity-70 flex justify-center items-center gap-2 text-lg"
               >
-                {loading ? (lang === 'ar' ? 'جاري الدخول...' : 'Logging in...') : (lang === 'ar' ? 'تسجيل الدخول' : 'Sign In')}
+                {loading ? (
+                  <span className="animate-pulse">{lang === 'ar' ? 'جاري التحقق من الهوية...' : 'Verifying...'}</span>
+                ) : (
+                  <><span>{lang === 'ar' ? 'دخول المعلم' : 'Teacher Login'}</span> ✨</>
+                )}
               </button>
             </form>
           )}
         </div>
       </div>
 
-      {/* ================= أكواد الحركة والتأثيرات (CSS Animations) ================= */}
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes float {
           0%, 100% { transform: translateY(0px); }
