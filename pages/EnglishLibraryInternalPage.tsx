@@ -477,10 +477,16 @@ const EnglishLibraryInternalPage: React.FC = () => {
                            <BookCard 
                                book={book} 
                                t={t} 
-                               onClick={() => {
-                                   setSelectedBook(book); 
-                                   trackActivity('digital', book.title); 
-                               }} 
+                               onClick={async () => {
+    setSelectedBook(book); 
+    trackActivity('digital', book.title); 
+    // 📊 تسجيل المشاهدة في قاعدة البيانات للإحصائيات الحقيقية
+    try {
+        await supabase.from('book_views').insert([{ book_title: book.title, language: 'en' }]);
+    } catch (e) {
+        console.error("Error logging book view:", e);
+    }
+}}
                            />
                            {/* خط الرف الخشبي أسفل الكتاب */}
                            <div className="absolute -bottom-2 w-[110%] -left-[5%] h-4 bg-[#8B4513] rounded-sm shadow-md border-b-4 border-[#5C2E0B] -z-10"></div>
