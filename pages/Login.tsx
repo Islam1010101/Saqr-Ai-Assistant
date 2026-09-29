@@ -73,6 +73,7 @@ export default function Login() {
       localStorage.setItem('user_type', isAdmin ? 'admin' : 'teacher'); 
       localStorage.setItem('current_user', JSON.stringify(data));
       window.location.href = '#/home';
+      await supabase.from('login_logs').insert([{ user_id: tId, user_type: isAdmin ? 'admin' : 'teacher' }]);
       
     } catch (err) {
       setError(lang === 'ar' ? 'حدث خطأ في الاتصال بقاعدة البيانات.' : 'Database connection error.');
