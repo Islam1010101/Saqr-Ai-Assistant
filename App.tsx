@@ -2,11 +2,8 @@ import React, { useState, useEffect, createContext, useContext, ReactNode, useRe
 import { createPortal } from 'react-dom';
 import { HashRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 
-// 🚀 تشغيل محرك فايربيز أول ما الموقع يفتح
-import './src/utils/firebase';
-
 // ==========================================
-// استيراد جميع صفحات المنظومة الجديدة
+// استيراد جميع صفحات المنظومة
 // ==========================================
 import Login from './pages/Login'; 
 import HomePage from './pages/HomePage';
@@ -35,12 +32,9 @@ interface NavLink {
   label: string;
   hint: string;
   color: string;
-  roles: ('student' | 'teacher' | 'admin')[]; // تحديد الصلاحيات لكل رابط
+  roles: ('student' | 'teacher' | 'admin')[];
 }
 
-// ==========================================
-// أيقونة إغلاق النافذة المنبثقة
-// ==========================================
 const CloseIcon = () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>;
 
 // -------- 1. مساعد صقر العائم --------
@@ -49,7 +43,6 @@ const FloatingSaqr: React.FC<{ onOpenModal: () => void }> = ({ onOpenModal }) =>
   const { dir } = useLanguage();
   const [ripples, setRipples] = useState<{ id: number, x: number, y: number }[]>([]);
 
-  // إخفاء المساعد في صفحة الدخول ولوحة الإدارة لتجنب التداخل
   if (location.pathname === '/' || location.pathname === '/admin-dashboard') return null;
 
   const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
@@ -85,9 +78,9 @@ const FloatingSaqr: React.FC<{ onOpenModal: () => void }> = ({ onOpenModal }) =>
   );
 };
 
-// -------- 1.5. نافذة صقر المنبثقة القابلة للسحب --------
+// -------- 1.5. نافذة صقر المنبثقة --------
 const DraggableSaqrModal: React.FC<{ isOpen: boolean; onClose: () => void; children: ReactNode }> = ({ isOpen, onClose, children }) => {
-    const { locale, dir } = useLanguage();
+    const { dir } = useLanguage();
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [isDragging, setIsDragging] = useState(false);
     const dragStart = useRef({ x: 0, y: 0 });
@@ -144,11 +137,7 @@ const DraggableSaqrModal: React.FC<{ isOpen: boolean; onClose: () => void; child
                         <div className="w-16 h-16 rounded-full overflow-hidden bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 shadow-inner flex items-center justify-center mb-2 pointer-events-none">
                             <img src="/saqr-avatar.png" alt="Saqr" className="w-[85%] h-[85%] object-contain" onError={(e) => e.currentTarget.style.display='none'} />
                         </div>
-                        <h3 className="font-black text-lg text-slate-900 dark:text-white uppercase tracking-widest leading-none mb-1 pointer-events-none">{locale === 'en' ? 'Saqr AI' : 'صقر الذكي'}</h3>
-                        <div className="flex items-center gap-1.5 pointer-events-none">
-                            <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                            <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-black uppercase">{locale === 'en' ? 'Online' : 'متصل'}</span>
-                        </div>
+                        <h3 className="font-black text-lg text-slate-900 dark:text-white uppercase tracking-widest leading-none mb-1 pointer-events-none">صقر الذكي</h3>
                     </div>
                     
                     <div className="w-full overflow-hidden relative pointer-events-auto cursor-auto flex flex-col m-0 saqr-modal-override bg-white dark:bg-slate-900 rounded-b-[2.5rem]">
@@ -161,35 +150,21 @@ const DraggableSaqrModal: React.FC<{ isOpen: boolean; onClose: () => void; child
     );
 };
 
-// -------- 2. هيدر EFIPS المتكيف حسب الصلاحيات --------
+// -------- 2. هيدر EFIPS --------
 const Header: React.FC = () => {
-  const { locale, setLocale, dir } = useLanguage();
+  const { locale, setLocale } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
-  const [activeHint, setActiveHint] = useState<string | null>(null);
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [userRole, setUserRole] = useState<'student' | 'teacher' | 'admin' | null>(null);
 
-  // جلب صلاحية المستخدم لمعرفة الأزرار التي ستظهر له
   useEffect(() => {
     const role = localStorage.getItem('user_type') as 'student' | 'teacher' | 'admin' | null;
     setUserRole(role);
   }, [location.pathname]);
 
   if (location.pathname === '/' || location.pathname === '/admin-dashboard') return null;
-
-  const updateMousePos = (e: React.MouseEvent | React.TouchEvent) => {
-    if ('touches' in e) {
-      if (e.touches.length > 0) {
-        setMousePos({ x: e.touches[0].clientX, y: e.touches[0].clientY });
-      }
-    } else {
-      setMousePos({ x: (e as React.MouseEvent).clientX, y: (e as React.MouseEvent).clientY });
-    }
-  };
 
   useEffect(() => {
     const controlNavbar = () => {
@@ -207,42 +182,37 @@ const Header: React.FC = () => {
     return () => window.removeEventListener('scroll', controlNavbar);
   }, [lastScrollY]);
 
-  // تعريف الروابط مع صلاحياتها بالنصوص فقط
   const allLinks: NavLink[] = [
-    { path: '/home', label: locale === 'en' ? 'Home' : 'الرئيسية', hint: locale === 'en' ? 'Home' : 'الرئيسية', color: 'bg-emerald-500', roles: ['student', 'teacher', 'admin'] },
-    { path: '/search', label: locale === 'en' ? 'Search' : 'البحث بالمكتبة', hint: locale === 'en' ? 'Library Index' : 'فهرس الكتب', color: 'bg-rose-500', roles: ['student', 'teacher', 'admin'] },
-    { path: '/digital-library', label: locale === 'en' ? 'Digital' : 'المكتبة الرقمية', hint: locale === 'en' ? 'E-Books' : 'المكتبة الرقمية', color: 'bg-blue-500', roles: ['student', 'teacher', 'admin'] },
-    { path: '/creators', label: locale === 'en' ? 'Creators' : 'بوابة المبدعين', hint: locale === 'en' ? 'Talents' : 'إبداعات طلابنا', color: 'bg-purple-500', roles: ['student', 'admin'] },
-    { path: '/game', label: locale === 'en' ? 'Games' : 'ألعاب', hint: locale === 'en' ? 'Games' : 'ألعاب', color: 'bg-amber-500', roles: ['student', 'admin'] },
-    { path: '/schedule', label: locale === 'en' ? 'Schedule' : 'جدول المكتبة', hint: locale === 'en' ? 'Bookings' : 'حجز المكتبة', color: 'bg-teal-500', roles: ['teacher', 'admin'] },
-    { path: '/feedback', label: locale === 'en' ? 'Ideas' : 'مقترحات', hint: locale === 'en' ? 'Contact' : 'رأيك يهمنا', color: 'bg-emerald-500', roles: ['student', 'teacher', 'admin'] }, 
-    { path: '/admin-dashboard', label: locale === 'en' ? 'Admin' : 'الإدارة', hint: locale === 'en' ? 'Dashboard' : 'لوحة التحكم', color: 'bg-rose-600', roles: ['admin'] }, 
+    { path: '/home', label: locale === 'en' ? 'Home' : 'الرئيسية', hint: 'Home', color: 'bg-emerald-500', roles: ['student', 'teacher', 'admin'] },
+    { path: '/search', label: locale === 'en' ? 'Search' : 'البحث بالمكتبة', hint: 'Search', color: 'bg-rose-500', roles: ['student', 'teacher', 'admin'] },
+    { path: '/digital-library', label: locale === 'en' ? 'Digital' : 'المكتبة الرقمية', hint: 'Digital', color: 'bg-blue-500', roles: ['student', 'teacher', 'admin'] },
+    { path: '/creators', label: locale === 'en' ? 'Creators' : 'بوابة المبدعين', hint: 'Creators', color: 'bg-purple-500', roles: ['student', 'admin'] },
+    { path: '/game', label: locale === 'en' ? 'Games' : 'ألعاب', hint: 'Games', color: 'bg-amber-500', roles: ['student', 'admin'] },
+    { path: '/schedule', label: locale === 'en' ? 'Schedule' : 'جدول المكتبة', hint: 'Schedule', color: 'bg-teal-500', roles: ['teacher', 'admin'] },
+    { path: '/feedback', label: locale === 'en' ? 'Ideas' : 'مقترحات', hint: 'Feedback', color: 'bg-emerald-500', roles: ['student', 'teacher', 'admin'] }, 
+    { path: '/admin-dashboard', label: locale === 'en' ? 'Admin' : 'الإدارة', hint: 'Admin', color: 'bg-rose-600', roles: ['admin'] }, 
   ];
 
   const allowedLinks = allLinks.filter(link => !userRole || link.roles.includes(userRole));
 
   return (
     <header className={`fixed top-4 left-0 right-0 z-[60] px-2 flex justify-center transition-all duration-500 ease-in-out ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-[150%] opacity-0 pointer-events-none'}`}>
-      
-      <div className="w-full max-w-[98%] md:w-fit md:max-w-full px-2 py-2 md:px-4 md:py-3 rounded-[2rem] border-4 border-white dark:border-slate-700/50 flex items-center justify-between md:justify-center gap-2 md:gap-6 shadow-xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md overflow-visible transition-colors duration-300">
+      <div className="w-full max-w-[98%] md:w-fit px-3 py-2 rounded-[2rem] border-4 border-white dark:border-slate-700/50 flex items-center justify-between md:justify-center gap-4 shadow-xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md">
         
         <Link to="/home" className="flex items-center gap-2 group flex-shrink-0">
-          <img src="/school-logo.png" alt="EFIPS" className="h-8 w-8 md:h-10 md:w-10 object-contain transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12 dark:brightness-0 dark:invert drop-shadow-md shrink-0" onError={(e) => e.currentTarget.style.display='none'} />
+          <img src="/school-logo.png" alt="EFIPS" className="h-8 w-8 md:h-10 md:w-10 object-contain dark:brightness-0 dark:invert shrink-0" onError={(e) => e.currentTarget.style.display='none'} />
         </Link>
         
-        <nav className="flex-1 overflow-x-auto overflow-y-hidden no-scrollbar scroll-smooth flex items-center h-10 md:h-12 px-1 md:px-2 rounded-full">
-          <div className="flex items-center gap-1.5 md:gap-2 h-full mx-auto min-w-max px-1">
-            {allowedLinks.map((l, index) => {
+        <nav className="flex-1 overflow-x-auto no-scrollbar flex items-center h-10 md:h-12 px-1">
+          <div className="flex items-center gap-1.5 h-full mx-auto min-w-max">
+            {allowedLinks.map((l) => {
               const isActive = location.pathname === l.path;
-
               return (
                 <Link 
                   key={l.path}
                   to={l.path}
-                  className={`px-3 py-1.5 md:px-5 md:py-2 text-[10px] md:text-sm font-black rounded-full transition-all duration-300 shrink-0 select-none ${
-                    isActive 
-                      ? `${l.color} text-white shadow-md` 
-                      : 'text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  className={`px-3 py-1.5 md:px-5 md:py-2 text-[10px] md:text-sm font-black rounded-full transition-all duration-300 shrink-0 ${
+                    isActive ? `${l.color} text-white shadow-md` : 'text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800'
                   }`}
                 >
                   {l.label}
@@ -253,10 +223,10 @@ const Header: React.FC = () => {
         </nav>
         
         <div className="flex items-center gap-1 flex-shrink-0">
-          <button onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')} className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-slate-700 dark:text-slate-200 font-black text-[10px] md:text-xs border-2 border-slate-300 dark:border-slate-600 rounded-full hover:border-amber-400 dark:hover:border-amber-500 transition-all active:scale-90 shadow-sm bg-slate-50 dark:bg-slate-800">
+          <button onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')} className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-slate-700 dark:text-slate-200 font-black text-[10px] border-2 border-slate-300 dark:border-slate-600 rounded-full bg-slate-50 dark:bg-slate-800">
             {locale === 'en' ? 'AR' : 'EN'}
           </button>
-          <button onClick={toggleTheme} className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-full text-[10px] md:text-sm shadow-inner transition-all border-2 border-slate-200 dark:border-slate-600 active:scale-90 hover:border-sky-400 dark:hover:border-sky-500">
+          <button onClick={toggleTheme} className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-full text-sm border-2 border-slate-200 dark:border-slate-600">
             {theme === 'light' ? '🌙' : '☀️'}
           </button>
         </div>
@@ -270,7 +240,7 @@ const Header: React.FC = () => {
 const LanguageContext = createContext<any>(null);
 export const useLanguage = () => useContext(LanguageContext);
 const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [locale, setLocale] = useState<Locale>('en'); 
+  const [locale, setLocale] = useState<Locale>('ar'); 
   useEffect(() => {
     document.documentElement.lang = locale;
     document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr';
@@ -289,22 +259,14 @@ const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   return <ThemeContext.Provider value={{ theme, toggleTheme: () => setTheme(prev => prev === 'light' ? 'dark' : 'light') }}>{children}</ThemeContext.Provider>;
 };
 
-// -------- 4. المكون الرئيسي والتوزيع الداخلي --------
+// -------- 4. المكون الرئيسي --------
 const MainLayout: React.FC = () => {
   const [isSaqrModalOpen, setIsSaqrModalOpen] = useState(false);
   const location = useLocation();
-
-  // إخفاء الـ Footer فقط في صفحة الدخول ولوحة الإدارة واللعبة
   const hideFooter = location.pathname === '/' || location.pathname === '/admin-dashboard' || location.pathname === '/game';
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 font-sans transition-colors duration-300 flex flex-col selection:bg-rose-500/30 relative">
-      
-      <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-50 dark:opacity-20">
-         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-rose-400/20 rounded-full blur-[100px] animate-blob"></div>
-         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-emerald-400/20 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
-      </div>
-
+    <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 font-sans transition-colors duration-300 flex flex-col relative">
       <Header />
       <FloatingSaqr onOpenModal={() => setIsSaqrModalOpen(true)} />
       
@@ -313,7 +275,6 @@ const MainLayout: React.FC = () => {
           <Route path="/" element={<Login />} /> 
           <Route path="/home" element={<HomePage />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
-          
           <Route path="/search" element={<SearchPage />} />
           <Route path="/map" element={<LibraryMapPage />} />
           <Route path="/smart-search" element={<SmartSearchPage />} />
@@ -333,10 +294,8 @@ const MainLayout: React.FC = () => {
       </main>
 
       {!hideFooter && (
-        <footer className="relative z-10 py-10 text-center border-t-4 border-slate-200 dark:border-slate-800 mx-4 md:mx-20 mt-10">
-          <div className="h-2 w-16 bg-rose-500 mx-auto mb-6 rounded-full"></div>
-          <p className="font-black text-[10px] md:text-xs tracking-widest uppercase text-slate-500 dark:text-slate-400">EFIPS • Library • 2026</p>
-          <p className="mt-2 font-bold text-slate-400 dark:text-slate-500 text-[9px] md:text-[10px] uppercase">&copy; Emirates Falcon Int'l. Private School</p>
+        <footer className="relative z-10 py-8 text-center border-t-4 border-slate-200 dark:border-slate-800 mx-4 md:mx-20 mt-10">
+          <p className="font-black text-xs text-slate-500">EFIPS • Library • 2026</p>
         </footer>
       )}
 
@@ -345,108 +304,6 @@ const MainLayout: React.FC = () => {
              <SmartSearchPage />
          </div>
       </DraggableSaqrModal>
-
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
-        * { font-family: 'Cairo', sans-serif !important; }
-        
-        .saqr-modal-override > div {
-            min-height: 0 !important;
-            height: auto !important;
-            background: transparent !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .saqr-modal-override header {
-            display: none !important;
-        }
-        
-        .saqr-modal-override .absolute.bottom-0 {
-            position: relative !important;
-            order: 1 !important; 
-            background: transparent !important;
-            padding: 10px 0 !important;
-            margin: 0 !important;
-            width: 100% !important;
-        }
-
-        .saqr-modal-override .flex-1.overflow-y-auto {
-            order: 2 !important; 
-            height: auto !important;
-            max-height: 50vh !important; 
-            padding: 0 !important;
-            margin: 0 !important;
-            overflow-y: auto !important;
-        }
-        
-        .saqr-modal-override input {
-            font-size: 0.9rem !important;
-            padding: 12px 18px !important;
-            border-radius: 2rem !important;
-            border-width: 2px !important;
-        }
-        .saqr-modal-override button {
-            width: 40px !important;
-            height: 40px !important;
-            margin: 4px !important;
-        }
-        .saqr-modal-override .prose {
-            font-size: 0.85rem !important;
-            line-height: 1.6 !important;
-        }
-        .saqr-modal-override .bg-white.dark\\:bg-slate-800 {
-            padding: 12px 16px !important;
-            border-radius: 1.5rem !important;
-        }
-        .saqr-modal-override .w-12.h-12 {
-            display: none !important;
-        }
-        .saqr-modal-override footer {
-            display: none !important; 
-        }
-        .saqr-modal-override .max-w-4xl {
-             width: 100% !important;
-             max-width: 100% !important;
-             margin: 0 !important;
-             padding: 0 !important;
-        }
-        
-        @keyframes blob {
-          0% { transform: translate(0px, 0px) scale(1); }
-          33% { transform: translate(30px, -50px) scale(1.1); }
-          66% { transform: translate(-20px, 20px) scale(0.9); }
-          100% { transform: translate(0px, 0px) scale(1); }
-        }
-        .animate-blob { animation: blob 8s infinite alternate ease-in-out; }
-        .animation-delay-2000 { animation-delay: 2s; }
-
-        @keyframes float { 
-          0%, 100% { transform: translateY(0px); } 
-          50% { transform: translateY(-10px); } 
-        }
-        .animate-float { animation: float 5s ease-in-out infinite; }
-        
-        @keyframes ripple {
-          0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
-          100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
-        }
-        .animate-ripple { animation: ripple 0.6s linear forwards; }
-        
-        @keyframes fade-in-up { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in-up { animation: fade-in-up 0.5s ease-out forwards; }
-        
-        @keyframes fade-in { 0% { opacity: 0; } 100% { opacity: 1; } }
-        .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
-
-        @keyframes zoom-in { 0% { opacity: 0; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
-        .animate-zoom-in { animation: zoom-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      `}</style>
     </div>
   );
 };
