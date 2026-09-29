@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '../App';
 
 // 🚀 استيراد الاتصال من الملف المركزي بدلاً من كتابته هنا
-import { supabase } from '../utils/supabase';
+import { supabase } from '../src/utils/supabase';
 
 // ==========================================
 // 1. القاموس والترجمة (عربي / إنجليزي)
