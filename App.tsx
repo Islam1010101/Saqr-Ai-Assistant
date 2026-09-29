@@ -5,8 +5,13 @@ import { HashRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 // 🚀 تشغيل محرك فايربيز أول ما الموقع يفتح
 import './src/utils/firebase';
 
-// استيراد الصفحات
+// ==========================================
+// استيراد جميع صفحات المنظومة الجديدة
+// ==========================================
+import Login from './pages/Login'; 
 import HomePage from './pages/HomePage';
+import AdminDashboard from './pages/AdminDashboard'; 
+
 import SearchPage from './pages/SearchPage';
 import SmartSearchPage from './pages/SmartSearchPage';
 import ReportsPage from './pages/ReportsPage';
@@ -21,7 +26,7 @@ import SaqrStudioPage from './pages/SaqrStudioPage';
 import PodcastPage from './pages/PodcastPage';
 import NewArrivalsPage from './pages/NewArrivalsPage'; 
 import DeweyGame from './pages/game'; 
-import SchedulePage from './pages/SchedulePage'; // صفحة جدول المكتبة الخاصة بالمعلمين
+import SchedulePage from './pages/SchedulePage'; 
 
 export type Locale = 'en' | 'ar';
 
@@ -52,7 +57,8 @@ const FloatingSaqr: React.FC<{ onOpenModal: () => void }> = ({ onOpenModal }) =>
   const { dir } = useLanguage();
   const [ripples, setRipples] = useState<{ id: number, x: number, y: number }[]>([]);
 
-  if (location.pathname === '/') return null;
+  // إخفاء المساعد في صفحة الدخول ولوحة الإدارة لتجنب التداخل
+  if (location.pathname === '/' || location.pathname === '/admin-dashboard') return null;
 
   const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
     const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
@@ -87,7 +93,7 @@ const FloatingSaqr: React.FC<{ onOpenModal: () => void }> = ({ onOpenModal }) =>
   );
 };
 
-// -------- 1.5. نافذة صقر المنبثقة القابلة للسحب (مصغرة ومركزة) --------
+// -------- 1.5. نافذة صقر المنبثقة القابلة للسحب --------
 const DraggableSaqrModal: React.FC<{ isOpen: boolean; onClose: () => void; children: ReactNode }> = ({ isOpen, onClose, children }) => {
     const { locale, dir } = useLanguage();
     const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -175,6 +181,9 @@ const Header: React.FC = () => {
 
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
+  // إخفاء الـ Header في صفحة تسجيل الدخول ولوحة الإدارة
+  if (location.pathname === '/' || location.pathname === '/admin-dashboard') return null;
+
   const updateMousePos = (e: React.MouseEvent | React.TouchEvent) => {
     if ('touches' in e) {
       if (e.touches.length > 0) {
@@ -202,14 +211,15 @@ const Header: React.FC = () => {
   }, [lastScrollY]);
 
   const links: NavLink[] = [
+    { path: '/home', label: locale === 'en' ? 'Home' : 'الرئيسية', icon: <img src="/saqr-avatar.png" className="w-6 h-6 object-contain" alt="Home"/>, hint: locale === 'en' ? 'Home' : 'الرئيسية', color: 'bg-emerald-500' },
     { path: '/search', label: locale === 'en' ? 'Search' : 'البحث بالمكتبة', icon: <SearchIcon />, hint: locale === 'en' ? 'Library Index' : 'فهرس الكتب', color: 'bg-rose-500' },
     { path: '/digital-library', label: locale === 'en' ? 'Digital' : 'المكتبة الرقمية', icon: <BookIcon />, hint: locale === 'en' ? 'E-Books' : 'المكتبة الرقمية', color: 'bg-blue-500' },
     { path: '/creators', label: locale === 'en' ? 'Creators' : 'بوابة المبدعين', icon: <PaletteIcon />, hint: locale === 'en' ? 'Talents' : 'إبداعات طلابنا', color: 'bg-purple-500' },
     { path: '/game', label: locale === 'en' ? 'Games' : 'ألعاب', icon: <GameIcon />, hint: locale === 'en' ? 'Games' : 'ألعاب', color: 'bg-amber-500' },
-    { path: '/feedback', label: locale === 'en' ? 'Ideas' : 'مقترحات', icon: <FeedbackIcon />, hint: locale === 'en' ? 'Contact' : 'رأيك يهمنا', color: 'bg-emerald-500' }, 
+    { path: '/feedback', label: locale === 'en' ? 'Ideas' : 'مقترحات', icon: <FeedbackIcon />, hint: locale === 'en' ? 'Contact' : 'رأيك يهمنا', color: 'bg-teal-500' }, 
     { path: '/reports', label: locale === 'en' ? 'Reports' : 'تقارير', icon: <ReportsIcon />, hint: locale === 'en' ? 'Reports' : 'تقارير', color: 'bg-slate-700' },
     { path: '/map', label: locale === 'en' ? "Lib's Map" : 'خريطة المكتبة', icon: <MapIcon />, hint: locale === 'en' ? 'Shelf Cont' : 'محتويات الأرفف', color: 'bg-sky-500' },
-    { path: '/about', label: locale === 'en' ? 'About' : 'عنا', icon: <AboutIcon />, hint: locale === 'en' ? 'About us' : 'من نحن؟', color: 'bg-teal-500' },
+    { path: '/about', label: locale === 'en' ? 'About' : 'عنا', icon: <AboutIcon />, hint: locale === 'en' ? 'About us' : 'من نحن؟', color: 'bg-indigo-500' },
   ];
 
   return (
@@ -217,8 +227,8 @@ const Header: React.FC = () => {
       
       <div className="w-full max-w-[95%] md:w-fit md:max-w-full px-3 py-2 md:px-5 md:py-3 rounded-[2rem] border-4 border-white dark:border-slate-700/50 flex items-center gap-3 md:gap-6 shadow-xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md overflow-visible transition-colors duration-300">
         
-        <Link to="/" className="flex items-center gap-2 md:gap-3 group flex-shrink-0">
-          <img src="https://www.efipslibrary.online/school-logo.png" alt="EFIPS" className="h-8 w-8 md:h-10 md:w-10 object-contain transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12 dark:brightness-0 dark:invert drop-shadow-md shrink-0" onError={(e) => e.currentTarget.style.display='none'} />
+        <Link to="/home" className="flex items-center gap-2 md:gap-3 group flex-shrink-0">
+          <img src="/school-logo.png" alt="EFIPS" className="h-8 w-8 md:h-10 md:w-10 object-contain transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12 dark:brightness-0 dark:invert drop-shadow-md shrink-0" onError={(e) => e.currentTarget.style.display='none'} />
           <div className="hidden lg:flex flex-col text-start justify-center">
             <span className="font-black text-slate-900 dark:text-white text-[10px] md:text-[11px] uppercase opacity-90 group-hover:text-rose-500 transition-colors tracking-wide leading-tight line-clamp-2 max-w-[150px] xl:max-w-[190px]">
               {locale === 'en' ? "Emirates Falcon Int'l. Private School" : "مدرسة صقر الإمارات الدولية الخاصة"}
@@ -226,7 +236,6 @@ const Header: React.FC = () => {
           </div>
         </Link>
         
-        {/* شريط تنقل متجاوب وخفيف الأبعاد للكمبيوتر والجوال */}
         <nav className="flex-1 md:flex-none overflow-x-auto overflow-y-visible no-scrollbar scroll-smooth flex items-end h-12 md:h-12 px-2 md:px-4 bg-slate-100 dark:bg-slate-800 rounded-full shadow-inner border-2 border-slate-200 dark:border-slate-700">
           <div className="flex items-end gap-1.5 md:gap-2 h-full pb-1 mx-auto min-w-max px-2">
             {links.map((l, index) => {
@@ -298,11 +307,11 @@ const Header: React.FC = () => {
   );
 };
 
-// -------- 3. سياق اللغة والثيم (الافتراضي: الإنجليزية والوضع الفاتح) --------
+// -------- 3. سياق اللغة والثيم --------
 const LanguageContext = createContext<any>(null);
 export const useLanguage = () => useContext(LanguageContext);
 const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [locale, setLocale] = useState<Locale>('en'); // الافتراضي الإنجليزية
+  const [locale, setLocale] = useState<Locale>('en'); 
   useEffect(() => {
     document.documentElement.lang = locale;
     document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr';
@@ -313,7 +322,7 @@ const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 const ThemeContext = createContext<any>(null);
 export const useTheme = () => useContext(ThemeContext);
 const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem('saqr_theme') as any) || 'light'); // الافتراضي اللايت مود
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem('saqr_theme') as any) || 'light');
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
     localStorage.setItem('saqr_theme', theme);
@@ -324,6 +333,10 @@ const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 // -------- 4. المكون الرئيسي والتوزيع الداخلي --------
 const MainLayout: React.FC = () => {
   const [isSaqrModalOpen, setIsSaqrModalOpen] = useState(false);
+  const location = useLocation();
+
+  // إخفاء الـ Footer فقط في صفحة الدخول ولوحة الإدارة واللعبة
+  const hideFooter = location.pathname === '/' || location.pathname === '/admin-dashboard' || location.pathname === '/game';
 
   return (
     <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 font-sans transition-colors duration-300 flex flex-col selection:bg-rose-500/30 relative">
@@ -336,9 +349,12 @@ const MainLayout: React.FC = () => {
       <Header />
       <FloatingSaqr onOpenModal={() => setIsSaqrModalOpen(true)} />
       
-      <main className="flex-1 relative z-10 w-full pt-20 md:pt-24">
+      <main className={`flex-1 relative z-10 w-full ${location.pathname === '/' || location.pathname === '/admin-dashboard' ? 'pt-0' : 'pt-20 md:pt-24'}`}>
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<Login />} /> {/* 🔑 صفحة تسجيل الدخول هي الواجهة الرئيسية الآن */}
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/admin-dashboard" element={<AdminDashboard />} /> {/* 👑 لوحة تحكم الإدارة */}
+          
           <Route path="/search" element={<SearchPage />} />
           <Route path="/map" element={<LibraryMapPage />} />
           <Route path="/smart-search" element={<SmartSearchPage />} />
@@ -357,11 +373,13 @@ const MainLayout: React.FC = () => {
         </Routes>
       </main>
 
-      <footer className="relative z-10 py-10 text-center border-t-4 border-slate-200 dark:border-slate-800 mx-4 md:mx-20 mt-10">
-        <div className="h-2 w-16 bg-rose-500 mx-auto mb-6 rounded-full"></div>
-        <p className="font-black text-[10px] md:text-xs tracking-widest uppercase text-slate-500 dark:text-slate-400">EFIPS • Library • 2026</p>
-        <p className="mt-2 font-bold text-slate-400 dark:text-slate-500 text-[9px] md:text-[10px] uppercase">&copy; Emirates Falcon Int'l. Private School</p>
-      </footer>
+      {!hideFooter && (
+        <footer className="relative z-10 py-10 text-center border-t-4 border-slate-200 dark:border-slate-800 mx-4 md:mx-20 mt-10">
+          <div className="h-2 w-16 bg-rose-500 mx-auto mb-6 rounded-full"></div>
+          <p className="font-black text-[10px] md:text-xs tracking-widest uppercase text-slate-500 dark:text-slate-400">EFIPS • Library • 2026</p>
+          <p className="mt-2 font-bold text-slate-400 dark:text-slate-500 text-[9px] md:text-[10px] uppercase">&copy; Emirates Falcon Int'l. Private School</p>
+        </footer>
+      )}
 
       <DraggableSaqrModal isOpen={isSaqrModalOpen} onClose={() => setIsSaqrModalOpen(false)}>
          <div className="w-full flex flex-col h-auto max-h-full">
