@@ -167,14 +167,13 @@ const HomePage: React.FC = () => {
             setUserData(JSON.parse(storedUser));
             setUserType(storedType as 'student' | 'teacher' | 'admin');
         } else {
-            // توجيه لصفحة تسجيل الدخول إذا لم يكن مسجلاً
-            window.location.href = '/login';
+            window.location.href = '#/login';
         }
     }, []);
 
     const handleLogout = () => {
         localStorage.clear();
-        window.location.href = '/login';
+        window.location.href = '#/login';
     };
 
     const getDisplayName = () => {
@@ -325,13 +324,16 @@ const HomePage: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="w-full relative z-30 flex flex-col items-center justify-center">
-                    <Link to="/saqr-studio" className="group relative px-10 py-4 md:px-16 md:py-5 w-fit rounded-full bg-blue-500 text-white border-b-8 border-blue-700 shadow-lg flex items-center justify-center hover:-translate-y-1 hover:border-b-8 active:border-b-0 active:translate-y-2 transition-all duration-200">
-                        <span className="relative z-10 text-lg md:text-2xl font-black uppercase tracking-wide">
-                            {t('saqrStudioBanner')}
-                        </span>
-                    </Link>
-                </div>
+                {/* استديو صقر (يظهر للطلاب والأدمن فقط) */}
+                {(userType === 'student' || userType === 'admin') && (
+                    <div className="w-full relative z-30 flex flex-col items-center justify-center">
+                        <Link to="/saqr-studio" className="group relative px-10 py-4 md:px-16 md:py-5 w-fit rounded-full bg-blue-500 text-white border-b-8 border-blue-700 shadow-lg flex items-center justify-center hover:-translate-y-1 hover:border-b-8 active:border-b-0 active:translate-y-2 transition-all duration-200">
+                            <span className="relative z-10 text-lg md:text-2xl font-black uppercase tracking-wide">
+                                {t('saqrStudioBanner')}
+                            </span>
+                        </Link>
+                    </div>
+                )}
 
                 <div className="w-full flex flex-col lg:flex-row gap-10 items-center justify-center">
                     
@@ -358,7 +360,6 @@ const HomePage: React.FC = () => {
 
                     <div className="lg:order-1 lg:order-3 flex-1 w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
                         
-                        {/* روابط مرئية للجميع */}
                         <Link to="/search" className="bg-sky-400 text-white p-6 rounded-[2rem] border-b-8 border-sky-600 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all flex flex-col justify-center text-center shadow-md min-h-[120px]">
                             <h3 className="text-xl md:text-2xl font-black mb-1">{t('manualSearch')}</h3>
                             <p className="text-sm font-bold opacity-90">{t('manualDesc')}</p>
@@ -401,7 +402,7 @@ const HomePage: React.FC = () => {
                             </Link>
                         )}
 
-                        {/* لوحة تحكم الإدارة (للأدمن إسلام فقط) */}
+                        {/* لوحة تحكم الإدارة (للأدمن فقط) */}
                         {userType === 'admin' && (
                             <Link to="/admin-dashboard" className="bg-rose-500 text-white p-6 rounded-[2rem] border-b-8 border-rose-700 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all flex flex-col justify-center text-center shadow-md min-h-[120px]">
                                 <h3 className="text-xl md:text-2xl font-black mb-1">{t('adminSettings')}</h3>
@@ -424,7 +425,7 @@ const HomePage: React.FC = () => {
                         </div>
                         <div className="flex-1 text-center md:text-start space-y-1">
                             <div className="inline-block px-3 py-0.5 rounded-full bg-rose-700/50 text-white text-[10px] font-black uppercase tracking-widest mb-1">
-                                 Initiative | مبادرة
+                                    Initiative | مبادرة
                             </div>
                             <h3 className="text-lg md:text-2xl font-black leading-tight">
                                 {t('alcLibraryTitle')}
