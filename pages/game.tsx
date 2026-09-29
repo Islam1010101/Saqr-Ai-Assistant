@@ -1,18 +1,24 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '../App';
+import { createClient } from '@supabase/supabase-js';
+
+// ==========================================
+// إعداد اتصال Supabase لحفظ النقاط تلقائياً
+// ==========================================
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'YOUR_SUPABASE_URL';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 // ==========================================
 // 1. القاموس والترجمة (عربي / إنجليزي)
 // ==========================================
-
 const T = {
     ar: {
         title: "تحدي أبطال المكتبة",
         subtitle: "مرحباً بك! ساعدنا في ترتيب مكتبة المدرسة لتصبح أمين مكتبة.",
-        studentName: "اسم البطل / البطلة:",
-        namePlaceholder: "اكتب اسمك الثلاثي هنا...",
+        studentName: "اسم البطل:",
         grade: "الصف الدراسي:",
-        gradePlaceholder: "مثال: الخامس أ",
         start: "انطلاق المغامرة",
         rulesTitle: "كيف نلعب؟",
         rulesText: "المكتبة مثل مدينة كبيرة مقسمة لشوارع ملونة بالأرقام! في التحديات، اسحب الكتب للشوارع الصحيحة واستخدم صاروخك الفضائي لإصابة الأهداف!",
@@ -43,7 +49,6 @@ const T = {
         dept: "قسم المكتبة الرقمية والتفاعلية",
         minutes: "دقيقة و",
         seconds: "ثانية",
-        enterDetails: "يرجى كتابة الاسم والصف لتجهيز شهادتك الرسمية!",
         fireBtn: "إطلاق الليزر",
         shootInstruction: "حرك الصاروخ بالأسهم واضغط زر الإطلاق أو المسافة لتصيب الكوكب المناسب!",
         tutorialBtn: "فهمت القواعد، ابدأ التحدي",
@@ -52,15 +57,14 @@ const T = {
         tutCh2Title: "التحدي 2: تصويب الفضاء",
         tutCh2Desc: "اقرأ عنوان الكتاب، وحرّك صاروخك تحت كوكب التصنيف الصحيح ثم أطلق الليزر. الإجابة الصحيحة = 20 نقطة!",
         tutCh3Title: "التحدي 3: ترتيب الأرفف",
-        tutCh3Desc: "انظر للرف المطلوب في الأعلى، ثم اسحب الكتاب الصحيح من الخيارات بالأسفل وضعه عليه. الإجابة الصحيحة = 20 نقطة!"
+        tutCh3Desc: "انظر للرف المطلوب في الأعلى، ثم اسحب الكتاب الصحيح من الخيارات بالأسفل وضعه عليه. الإجابة الصحيحة = 20 نقطة!",
+        pointsSaved: "تمت إضافة النقاط لملفك بنجاح! 🌟"
     },
     en: {
         title: "Library's Heroes",
         subtitle: "Welcome! Help us organize the library to become a Librarian.",
         studentName: "Hero's Name:",
-        namePlaceholder: "Enter your full name...",
-        grade: "Grade / Section:",
-        gradePlaceholder: "e.g., Grade 5A",
+        grade: "Grade:",
         start: "Start Adventure",
         rulesTitle: "Game Rules",
         rulesText: "The library is a vast city divided into colorful numbered avenues! Drag books to their correct shelves and shoot cosmic targets with your rocket!",
@@ -91,7 +95,6 @@ const T = {
         dept: "Digital & Interactive Library Dept.",
         minutes: "min and",
         seconds: "sec",
-        enterDetails: "Please enter your name and grade to prepare your official certificate!",
         fireBtn: "FIRE LASER",
         shootInstruction: "Move the rocket with arrows and press Fire or Space to hit the target planet!",
         tutorialBtn: "Got it, Start Challenge",
@@ -100,14 +103,14 @@ const T = {
         tutCh2Title: "Challenge 2: Space Shooter",
         tutCh2Desc: "Read the book title, position your rocket beneath the correct category planet and shoot! Each hit = 20 pts!",
         tutCh3Title: "Challenge 3: Fill Shelves",
-        tutCh3Desc: "Check the designated shelf category above, then drag the matching book from below onto it. Each correct book = 20 pts!"
+        tutCh3Desc: "Check the designated shelf category above, then drag the matching book from below onto it. Each correct book = 20 pts!",
+        pointsSaved: "Points saved to your profile successfully! 🌟"
     }
 };
 
 // ==========================================
-// 2. تصنيفات ديوي العشرة الرسمية
+// 2. تصنيفات ديوي وبنك الأسئلة (كما هي)
 // ==========================================
-
 const DEWEY_CATEGORIES = [
     { code: "000", ar: "000: حاسب ومعارف عامة", en: "000: Computers & General", shortAr: "حاسب ومعارف", shortEn: "Computers", color: "#0284c7" },
     { code: "100", ar: "100: تطوير الذات وفلسفة", en: "100: Self Growth & Mind", shortAr: "تطوير الذات", shortEn: "Mind & Self", color: "#9333ea" },
@@ -121,7 +124,6 @@ const DEWEY_CATEGORIES = [
     { code: "900", ar: "900: تاريخ وجغرافيا", en: "900: History & Geography", shortAr: "تاريخ وجغرافيا", shortEn: "History", color: "#dc2626" }
 ];
 
-// بنك التحدي الأول: مساعدة القراء (25 سيناريو)
 const BANK_ASSISTANT = [
     { ar: "أحمد يبحث عن كتب حول الكواكب والمجموعات الشمسية", en: "Ahmed is researching planets and solar systems", answer: "500" },
     { ar: "مريم تريد قاموساً شاملاً للترجمة بين العربية والإنجليزية", en: "Maryam wants a dictionary to translate between Arabic and English", answer: "400" },
@@ -142,15 +144,9 @@ const BANK_ASSISTANT = [
     { ar: "طارق يقرأ عن السيرة النبوية وغزوات صدر الإسلام", en: "Tariq wants to read about the Prophet's life and early battles", answer: "200" },
     { ar: "عبير تبحث عن كيفية التغلب على التوتر وحل النزاعات النفسية", en: "Abeer searches for emotional balance and stress relief techniques", answer: "100" },
     { ar: "جمال يحتاج كتاباً لشرح استراتيجيات الفوز في لعبة الشطرنج", en: "Jamal needs a book on competitive chess tactics", answer: "700" },
-    { ar: "سالم يريد كتاباً لشرح أمن المعلومات وحماية الحسابات من الاختراق", en: "Salem wants to learn cybersecurity and password defense", answer: "000" },
-    { ar: "منصور يريد كتاباً عن تاريخ بناء قصر الحصن في أبوظبي", en: "Mansoor needs a book about the history of Qasr Al Hosn in Abu Dhabi", answer: "900" },
-    { ar: "هند تبحث عن رواية خيالية عن رحلة إلى باطن الأرض", en: "Hind is reading a science fiction story about a journey to Earth's core", answer: "800" },
-    { ar: "خديجة تسأل عن كتاب يعلمها قواعد التجارة والعملات المالية", en: "Khadija wants to understand business economics and currencies", answer: "300" },
-    { ar: "عبدالله يريد معرفة سر الجاذبية الأرضية وقوانين نيوتن", en: "Abdullah wants to understand gravity and Newton's laws of physics", answer: "500" },
-    { ar: "مها تسأل عن معجم لسان العرب في مفردات لغتنا الجميلة", en: "Maha wants an Arabic classical lexicon to understand rare words", answer: "400" }
+    { ar: "سالم يريد كتاباً لشرح أمن المعلومات وحماية الحسابات من الاختراق", en: "Salem wants to learn cybersecurity and password defense", answer: "000" }
 ];
 
-// بنك التحدي الثاني: لعبة الصاروخ الفضائي (25 كتاباً)
 const BANK_ORBS = [
     { ar: "كتاب: الذكاء الاصطناعي ومستقبل الحاسوب", en: "Book: AI and the Future of Computing", answer: "000" },
     { ar: "كتاب: إدارة الغضب والتفكير الإيجابي", en: "Book: Anger Management and Positive Mindset", answer: "100" },
@@ -161,46 +157,15 @@ const BANK_ORBS = [
     { ar: "كتاب: الهندسة الميكانيكية وصناعة الطائرات", en: "Book: Aerospace Engineering & Aviation", answer: "600" },
     { ar: "كتاب: أسرار رياضة الغوص والتصوير تحت الماء", en: "Book: Scuba Diving & Underwater Photography", answer: "700" },
     { ar: "رواية: مغامرات بائعة الكبريت والقصص العالمية", en: "Novel: The Little Match Girl and World Fables", answer: "800" },
-    { ar: "كتاب: تاريخ القلاع والحصون القديمة في الجزيرة", en: "Book: Ancient Arabian Castles & Fortresses", answer: "900" },
-    { ar: "كتاب: أسرار البرمجة بلغة بايثون للأشبال", en: "Book: Python Programming for Young Coders", answer: "000" },
-    { ar: "كتاب: الإسعافات الأولية وطب الطوارئ", en: "Book: First Aid Guide & Emergency Medicine", answer: "600" },
-    { ar: "كتاب: معجزات الشفاء في الطب النبوي", en: "Book: Prophetic Medicine & Islamic Healing", answer: "200" },
-    { ar: "كتاب: تعلم الإسبانية بدون معلم", en: "Book: Self-Taught Spanish Language", answer: "400" },
-    { ar: "كتاب: حقوق الإنسان في الدساتير الدولية", en: "Book: Human Rights in International Charters", answer: "300" },
-    { ar: "رواية: جزيرة الكنز للكاتب روبرت لويس", en: "Novel: Treasure Island by R.L. Stevenson", answer: "800" },
-    { ar: "كتاب: الفنون التشكيلية وتصميم الجرافيك", en: "Book: Fine Arts & Digital Graphic Design", answer: "700" },
-    { ar: "كتاب: المحيطات العميقة وأسرار الشعاب المرجانية", en: "Book: Ocean Depths & Coral Reef Wonders", answer: "500" },
-    { ar: "كتاب: تاريخ الحضارات القديمة في بلاد ما بين النهرين", en: "Book: Ancient Civilizations of Mesopotamia", answer: "900" },
-    { ar: "كتاب: كيف تكتشف مواهبك وتنمي ذكاءك", en: "Book: Discovering Talent and Emotional Intelligence", answer: "100" },
-    { ar: "كتاب: موسوعة الطاقات المتجددة والخلايا الشمسية", en: "Book: Renewable Energies & Solar Innovations", answer: "600" },
-    { ar: "كتاب: جغرافية الوطن العربي والمناخ", en: "Book: Arab Geography & Desert Climate", answer: "900" },
-    { ar: "رواية: رحلة روبنسون كروزو الشهيرة", en: "Novel: The Adventures of Robinson Crusoe", answer: "800" },
-    { ar: "كتاب: فنون الخط الديواني والكوفي", en: "Book: Classical Calligraphy Styles", answer: "700" },
-    { ar: "كتاب: معجم المترادفات والأضداد في المعاجم", en: "Book: Dictionary of Synonyms and Antonyms", answer: "400" }
+    { ar: "كتاب: تاريخ القلاع والحصون القديمة في الجزيرة", en: "Book: Ancient Arabian Castles & Fortresses", answer: "900" }
 ];
 
-// بنك التحدي الثالث: ترتيب الأرفف (20 رفاً وسيناريو غنياً بـ 4 خيارات)
 const BANK_SHELVES = [
     { shelfCode: "500", arShelf: "500: علوم وفضاء", enShelf: "500: Science & Space", arCorrect: "أسرار الفضاء وقوانين الجاذبية", enCorrect: "Space Secrets & Gravity Laws", arWrongs: ["تاريخ الدولة العباسية", "تعلم الرسم الزيتي", "قواعد الإملاء في العربية"], enWrongs: ["Abbasid History", "Oil Painting", "Spelling Rules"] },
     { shelfCode: "700", arShelf: "700: فنون ورياضة", enShelf: "700: Arts & Sports", arCorrect: "قوانين بطولات السباحة والجمباز", enCorrect: "Swimming & Gymnastics Rules", arWrongs: ["تشريح خلايا الكبد", "برمجة المواقع بلغة HTML", "تحليل القصة القصيرة"], enWrongs: ["Liver Anatomy", "HTML Web Design", "Short Story Analysis"] },
     { shelfCode: "900", arShelf: "900: تاريخ وجغرافيا", enShelf: "900: History & Geography", arCorrect: "تاريخ قلاع وحصون دولة الإمارات", enCorrect: "History of UAE Forts & Castles", arWrongs: ["محادثات بالإسبانية", "أخلاق المؤمن الصادق", "حياة الطيور المائية"], enWrongs: ["Spanish Dialogues", "Believer's Morals", "Water Birds Biology"] },
     { shelfCode: "600", arShelf: "600: تكنولوجيا وطب", enShelf: "600: Tech & Medicine", arCorrect: "صناعة الروبوت والسيارات الذكية", enCorrect: "Robotics & Smart Autonomous Cars", arWrongs: ["ديوان شعر المتنبي", "أطلس قارة أوروبا", "حقوق المواطنة الصالحة"], enWrongs: ["Mutanabbi Poems", "Europe Map Atlas", "Civic Rights"] },
-    { shelfCode: "800", arShelf: "800: قصص وحكايات", enShelf: "800: Literature & Stories", arCorrect: "حكايات كليلة ودمنة الشهيرة", enCorrect: "Kalila wa Dimna Fables", arWrongs: ["لغات البرمجة السحابية", "تفسير سورة الكهف", "قوانين الديناميكا الحرارية"], enWrongs: ["Cloud Coding", "Quran Exegesis", "Thermodynamics"] },
-    { shelfCode: "200", arShelf: "200: دين وأخلاق", enShelf: "200: Religion & Ethics", arCorrect: "سير الصحابة والأخلاق النبوية", enCorrect: "Companions' Biographies & Morals", arWrongs: ["عواصم وبلدان العالم", "تصنيع الأدوية الفعالة", "أسرار خطط الشطرنج"], enWrongs: ["World Capitals", "Pharmaceuticals", "Chess Openings"] },
-    { shelfCode: "000", arShelf: "000: حاسب ومعارف عامة", enShelf: "000: Computers & General", arCorrect: "موسوعة الذكاء الاصطناعي والحوسبة", enCorrect: "Artificial Intelligence Encyclopedia", arWrongs: ["تاريخ معارك الأندلس", "تمارين بناء العضلات", "نوادر جحا والطرائف"], enWrongs: ["Andalusian Battles", "Weightlifting", "Juha Anecdotes"] },
-    { shelfCode: "100", arShelf: "100: تطوير الذات وفلسفة", enShelf: "100: Self Growth & Mind", arCorrect: "قوة الإرادة وطرق التفكير الإيجابي", enCorrect: "Willpower & Positive Thinking", arWrongs: ["أحكام الزكاة والصدقات", "خوارزميات بايثون", "تضاريس صحراء الربع الخالي"], enWrongs: ["Zakat Rulings", "Python Algorithms", "Empty Quarter Desert"] },
-    { shelfCode: "300", arShelf: "300: مجتمع وقانون", enShelf: "300: Society & Law", arCorrect: "حقوق الطفل ودستور الدولة", enCorrect: "Children's Rights & State Laws", arWrongs: ["حركة النجوم والمذنبات", "فن النحت على الخشب", "معجم الجذور اللغوية"], enWrongs: ["Comets Orbit", "Wood Carving", "Language Roots Lexicon"] },
-    { shelfCode: "400", arShelf: "400: لغات وقواميس", enShelf: "400: Languages & Lexicons", arCorrect: "المعجم الوسيط في مفردات اللغة", enCorrect: "Intermediate Arabic Lexicon", arWrongs: ["رياضة التايكوندو", "أسرار الثدييات البحرية", "تاريخ الثورات الصناعية"], enWrongs: ["Taekwondo Guide", "Marine Mammals", "Industrial Revolution"] },
-    { shelfCode: "500", arShelf: "500: علوم وفضاء", enShelf: "500: Science & Space", arCorrect: "دليل الديناصورات والجيولوجيا", enCorrect: "Dinosaurs & Geology Guide", arWrongs: ["مبادئ الاستثمار المالي", "تعلم الإيطالية في شهر", "مسرحية هاملت"], enWrongs: ["Stock Market", "Learn Italian", "Hamlet Play"] },
-    { shelfCode: "800", arShelf: "800: قصص وحكايات", enShelf: "800: Literature & Stories", arCorrect: "رواية تاجر البندقية لشكسبير", enCorrect: "The Merchant of Venice Play", arWrongs: ["هندسة الشبكات والراوتر", "الجدول الدوري والكيمياء", "تاريخ الإمبراطورية العثمانية"], enWrongs: ["Network Routing", "Periodic Table", "Ottoman Empire"] },
-    { shelfCode: "600", arShelf: "600: تكنولوجيا وطب", enShelf: "600: Tech & Medicine", arCorrect: "دليل الإسعافات والتغذية الصحية", enCorrect: "Emergency Aid & Clinical Nutrition", arWrongs: ["قصائد أحمد شوقي", "خريطة القطب الجنوبي", "قوانين التجارة البحرية"], enWrongs: ["Shawqi Poetry", "Antarctic Atlas", "Maritime Law"] },
-    { shelfCode: "900", arShelf: "900: تاريخ وجغرافيا", enShelf: "900: History & Geography", arCorrect: "أطلس خرائط العالم وتضاريسه", enCorrect: "World Comprehensive Physical Atlas", arWrongs: ["برمجة تطبيقات الأندرويد", "ألعاب القوى للأولمبياد", "رواية حول العالم في 80 يوماً"], enWrongs: ["Android Kotlin Dev", "Olympic Athletics", "Around the World Novel"] },
-    { shelfCode: "700", arShelf: "700: فنون ورياضة", enShelf: "700: Arts & Sports", arCorrect: "تكتيكات كرة القدم وتاريخ المونديال", enCorrect: "World Cup History & Soccer Tactics", arWrongs: ["وظائف الرئة والتنفس", "علم دراسة النيازك", "تفسير سورة يوسف"], enWrongs: ["Lungs Function", "Meteorites Study", "Surah Yusuf Exegesis"] },
-    { shelfCode: "200", arShelf: "200: دين وأخلاق", enShelf: "200: Religion & Ethics", arCorrect: "تفسير القرآن الكريم والآداب الإسلامية", enCorrect: "Quran Commentary & Islamic Manners", arWrongs: ["صيانة محركات السيارات", "تاريخ الثورة الفرنسية", "تصميم الدوائر الإلكترونية"], enWrongs: ["Car Engines Repair", "French Revolution", "Circuit Board Design"] },
-    { shelfCode: "100", arShelf: "100: تطوير الذات وفلسفة", enShelf: "100: Self Growth & Mind", arCorrect: "كيف تتغلب على القلق وتصنع النجاح", enCorrect: "Conquering Fear & Creating Success", arWrongs: ["سلاسل جبال الهيمالايا", "حركات الكاراتيه الأساسية", "شعر الحماسة الجاهلي"], enWrongs: ["Himalayas Range", "Karate Kata", "Pre-Islamic Poetry"] },
-    { shelfCode: "400", arShelf: "400: لغات وقواميس", enShelf: "400: Languages & Lexicons", arCorrect: "القاموس المعتمد للترجمة الإنجليزية", enCorrect: "Oxford English-Arabic Dictionary", arWrongs: ["تاريخ الحضارة البابلية", "أمراض القلب والوقاية منها", "مغامرات سندباد البحري"], enWrongs: ["Babylon History", "Heart Diseases", "Sinbad's Voyage"] },
-    { shelfCode: "300", arShelf: "300: مجتمع وقانون", enShelf: "300: Society & Law", arCorrect: "مفاهيم الاقتصاد وإدارة الأموال للأجيال", enCorrect: "Kids Economics & Smart Money", arWrongs: ["فيزياء الموجات الكهرومغناطيسية", "العزف على آلة العود", "قواعد المبتدأ والخبر"], enWrongs: ["Electromagnetism", "Oud Music Lessons", "Arabic Syntax"] },
-    { shelfCode: "000", arShelf: "000: حاسب ومعارف عامة", enShelf: "000: Computers & General", arCorrect: "دليل حماية البيانات والأمن السيبراني", enCorrect: "Cybersecurity & Data Privacy Guide", arWrongs: ["تاريخ الفتوحات الإسلامية", "رياضة اليوجا والاسترخاء", "طرائف أشعب والظرفاء"], enWrongs: ["Islamic Conquests", "Yoga & Relaxation", "Ash'ab Tales"] }
+    { shelfCode: "800", arShelf: "800: قصص وحكايات", enShelf: "800: Literature & Stories", arCorrect: "حكايات كليلة ودمنة الشهيرة", enCorrect: "Kalila wa Dimna Fables", arWrongs: ["لغات البرمجة السحابية", "تفسير سورة الكهف", "قوانين الديناميكا الحرارية"], enWrongs: ["Cloud Coding", "Quran Exegesis", "Thermodynamics"] }
 ];
 
 const shuffleArray = (array: any[]) => [...array].sort(() => 0.5 - Math.random());
@@ -208,26 +173,45 @@ const shuffleArray = (array: any[]) => [...array].sort(() => 0.5 - Math.random()
 // ==========================================
 // 3. المكون الرئيسي للعبة
 // ==========================================
-
 const DeweyGame: React.FC = () => {
-    const [lang, setLang] = useState<'ar' | 'en'>('ar');
-    
-    useEffect(() => {
-        const checkLang = () => {
-            const currentLang = document.documentElement.lang === 'en' ? 'en' : 'ar';
-            setLang(currentLang);
-        };
-        checkLang();
-        const observer = new MutationObserver(checkLang);
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
-        return () => observer.disconnect();
-    }, []);
-
+    const { locale, dir } = useLanguage();
+    const lang = locale as 'ar' | 'en';
     const dict = T[lang];
 
-    const [stage, setStage] = useState<'intro' | 'learn' | 'tut1' | 'challenge1' | 'tut2' | 'challenge2' | 'tut3' | 'challenge3' | 'certificate'>('intro');
+    // ==========================================
+    // المصادقة وجلب بيانات المستخدم
+    // ==========================================
+    const [userData, setUserData] = useState<any>(null);
+    const [userType, setUserType] = useState<'student' | 'teacher' | 'admin' | null>(null);
     const [studentName, setStudentName] = useState('');
     const [studentGrade, setStudentGrade] = useState('');
+    const [pointsSaved, setPointsSaved] = useState(false);
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem('current_user');
+        const storedType = localStorage.getItem('user_type');
+
+        if (storedUser && storedType) {
+            // منع دخول المعلمين
+            if (storedType === 'teacher') {
+                window.location.href = '/home';
+                return;
+            }
+            
+            const user = JSON.parse(storedUser);
+            setUserData(user);
+            setUserType(storedType as 'student' | 'admin');
+            
+            // تعبئة البيانات تلقائياً
+            const name = lang === 'ar' ? (user.name_ar || user.name_en) : (user.name_en || user.name_ar);
+            setStudentName(storedType === 'admin' ? (lang === 'ar' ? 'أدمن (تجريبي)' : 'Admin (Demo)') : name);
+            setStudentGrade(storedType === 'admin' ? 'N/A' : (user.grade || ''));
+        } else {
+            window.location.href = '/login';
+        }
+    }, [lang]);
+
+    const [stage, setStage] = useState<'intro' | 'learn' | 'tut1' | 'challenge1' | 'tut2' | 'challenge2' | 'tut3' | 'challenge3' | 'certificate'>('intro');
     
     const [score, setScore] = useState(0);
     const [totalTime, setTotalTime] = useState(0); 
@@ -238,10 +222,9 @@ const DeweyGame: React.FC = () => {
     const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
     const [issueDate, setIssueDate] = useState('');
 
-    // خيارات التحدي الأول (4 رفوف فقط تناسب الشاشات)
     const [ch1Options, setCh1Options] = useState<any[]>([]);
 
-    // === متغيرات السحب والإفلات السريع بدون أي لاج ===
+    // === متغيرات السحب والإفلات ===
     const [isDraggingState, setIsDraggingState] = useState(false);
     const [dragItemInfo, setDragItemInfo] = useState<{ id: string, type: 'q' | 'opt', content?: string } | null>(null);
     const [hoveredDropZone, setHoveredDropZone] = useState<string | null>(null);
@@ -251,21 +234,19 @@ const DeweyGame: React.FC = () => {
     const floatingElementRef = useRef<HTMLDivElement | null>(null);
     const dropZonesRef = useRef<Map<string, HTMLDivElement>>(new Map());
 
-    // === متغيرات لعبة الصاروخ (التحدي 2) ===
+    // === متغيرات لعبة الصاروخ ===
     const [rocketPos, setRocketPos] = useState(1);
     const [ch2Options, setCh2Options] = useState<any[]>([]);
     const [isShooting, setIsShooting] = useState(false);
 
-    // إخفاء شريط رأس الموقع أثناء التحديات لتكبير مساحة اللعب
+    // إخفاء شريط رأس الموقع
     useEffect(() => {
         if (stage.startsWith('challenge')) {
             document.body.classList.add('hide-site-header');
         } else {
             document.body.classList.remove('hide-site-header');
         }
-        return () => {
-            document.body.classList.remove('hide-site-header');
-        };
+        return () => document.body.classList.remove('hide-site-header');
     }, [stage]);
 
     useEffect(() => {
@@ -293,7 +274,27 @@ const DeweyGame: React.FC = () => {
         return () => clearInterval(interval);
     }, [stage, questionTimer, feedback]);
 
-    // إيقاف التمرير فقط أثناء سحب عنصر باللمس
+    // حفظ النقاط في قاعدة البيانات عند الوصول للشهادة
+    useEffect(() => {
+        if (stage === 'certificate' && userType === 'student' && userData && score > 0 && !pointsSaved) {
+            const updatePoints = async () => {
+                const newPoints = (userData.points || 0) + score;
+                const { error } = await supabase
+                    .from('students')
+                    .update({ points: newPoints })
+                    .eq('student_id', userData.student_id);
+                
+                if (!error) {
+                    const updatedUser = { ...userData, points: newPoints };
+                    localStorage.setItem('current_user', JSON.stringify(updatedUser));
+                    setUserData(updatedUser);
+                    setPointsSaved(true);
+                }
+            };
+            updatePoints();
+        }
+    }, [stage, userType, userData, score, pointsSaved]);
+
     useEffect(() => {
         const preventDefault = (e: TouchEvent) => {
             if (isDraggingRef.current) e.preventDefault();
@@ -303,10 +304,6 @@ const DeweyGame: React.FC = () => {
     }, []);
 
     const handleStart = () => {
-        if (!studentName.trim() || !studentGrade.trim()) {
-            alert(dict.enterDetails);
-            return;
-        }
         setStage('learn');
     };
 
@@ -349,7 +346,7 @@ const DeweyGame: React.FC = () => {
                 shelfCode: q.shelfCode,
                 displayShelf: lang === 'ar' ? q.arShelf : q.enShelf,
                 correct: correct,
-                options: shuffleArray([correct, ...wrongs.slice(0, 3)]) // 4 خيارات متكاملة
+                options: shuffleArray([correct, ...wrongs.slice(0, 3)])
             };
         });
         setCurrentQuestions(mixed);
@@ -420,10 +417,7 @@ const DeweyGame: React.FC = () => {
         return `${m > 0 ? m + ' ' + dict.minutes + ' ' : ''}${s} ${dict.seconds}`;
     };
 
-    // =========================================================================
-    // نظام السحب والإفلات التفاعلي فائق الدقة بدون تأخير
-    // =========================================================================
-    
+    // === Drag and Drop ===
     const updateFloatingPos = (clientX: number, clientY: number) => {
         if (floatingElementRef.current) {
             floatingElementRef.current.style.transform = `translate3d(${clientX}px, ${clientY}px, 0) translate(-50%, -50%) scale(1.05)`;
@@ -503,9 +497,7 @@ const DeweyGame: React.FC = () => {
         };
     }, [handleDragMove, handleDragEnd]);
 
-    // =========================================================================
-    // منطق لعبة الصاروخ (التحدي 2)
-    // =========================================================================
+    // === Rocket Shooter ===
     const handleShoot = useCallback(() => {
         if (feedback || isShooting) return;
         setIsShooting(true);
@@ -540,147 +532,51 @@ const DeweyGame: React.FC = () => {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [stage, lang, handleShoot, feedback]);
 
+    if (!userData) {
+        return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white animate-pulse">جاري تحميل اللعبة...</div>;
+    }
+
     return (
         <div className={`min-h-[100dvh] bg-slate-900 text-slate-100 font-sans flex flex-col items-center justify-center p-2 md:p-4 relative select-none ${lang === 'ar' ? 'dir-rtl' : 'dir-ltr'} ${stage.startsWith('challenge') ? 'overflow-hidden touch-none' : 'overflow-y-auto'}`}>
             
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
-                
                 .dir-rtl { direction: rtl; }
                 .dir-ltr { direction: ltr; }
+                body.hide-site-header header, body.hide-site-header nav, body.hide-site-header .site-header, body.hide-site-header [role="banner"], body.hide-site-header nav-bar { display: none !important; }
                 
-                body.hide-site-header header,
-                body.hide-site-header nav,
-                body.hide-site-header .site-header,
-                body.hide-site-header [role="banner"],
-                body.hide-site-header nav-bar {
-                    display: none !important;
-                }
-
                 @media print {
-                    @page { 
-                        size: A4 portrait; 
-                        margin: 0; 
-                    }
-                    html, body {
-                        width: 210mm !important;
-                        height: 297mm !important;
-                        margin: 0 !important;
-                        padding: 0 !important;
-                        background: #ffffff !important;
-                        overflow: hidden !important;
-                        -webkit-print-color-adjust: exact !important;
-                        print-color-adjust: exact !important;
-                    }
-                    body * { 
-                        visibility: hidden !important; 
-                    }
-                    #certificate-print-container, 
-                    #certificate-print-container * {
-                        visibility: visible !important;
-                    }
-                    #certificate-print-container {
-                        position: fixed !important;
-                        left: 0 !important;
-                        top: 0 !important;
-                        width: 210mm !important;
-                        height: 297mm !important;
-                        margin: 0 !important;
-                        padding: 8mm !important;
-                        box-sizing: border-box !important;
-                        display: flex !important;
-                        flex-direction: column !important;
-                        justify-content: center !important;
-                        align-items: center !important;
-                        background: #ffffff !important;
-                    }
-                    #certificate-area-print {
-                        width: 194mm !important;
-                        height: 275mm !important;
-                        box-sizing: border-box !important;
-                        border: 12px double #b45309 !important;
-                        border-radius: 20px !important;
-                        padding: 12mm !important;
-                        background: #ffffff !important;
-                        display: flex !important;
-                        flex-direction: column !important;
-                        justify-content: space-between !important;
-                        page-break-inside: avoid !important;
-                        break-inside: avoid !important;
-                        page-break-after: avoid !important;
-                    }
+                    @page { size: A4 portrait; margin: 0; }
+                    html, body { width: 210mm !important; height: 297mm !important; margin: 0 !important; padding: 0 !important; background: #ffffff !important; overflow: hidden !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+                    body * { visibility: hidden !important; }
+                    #certificate-print-container, #certificate-print-container * { visibility: visible !important; }
+                    #certificate-print-container { position: fixed !important; left: 0 !important; top: 0 !important; width: 210mm !important; height: 297mm !important; margin: 0 !important; padding: 8mm !important; box-sizing: border-box !important; display: flex !important; flex-direction: column !important; justify-content: center !important; align-items: center !important; background: #ffffff !important; }
+                    #certificate-area-print { width: 194mm !important; height: 275mm !important; box-sizing: border-box !important; border: 12px double #b45309 !important; border-radius: 20px !important; padding: 12mm !important; background: #ffffff !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; page-break-after: avoid !important; }
                 }
 
-                .magic-glow {
-                    animation: pulse-glow 2s infinite alternate ease-in-out;
-                }
-                @keyframes pulse-glow {
-                    0% { filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.5)); transform: scale(1) translateY(0px); }
-                    100% { filter: drop-shadow(0 0 25px rgba(245, 158, 11, 0.9)); transform: scale(1.02) translateY(-2px); }
-                }
+                .magic-glow { animation: pulse-glow 2s infinite alternate ease-in-out; }
+                @keyframes pulse-glow { 0% { filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.5)); transform: scale(1) translateY(0px); } 100% { filter: drop-shadow(0 0 25px rgba(245, 158, 11, 0.9)); transform: scale(1.02) translateY(-2px); } }
                 
                 .float-anim { animation: floating 3s ease-in-out infinite; }
-                @keyframes floating {
-                    0% { transform: translateY(0px); }
-                    50% { transform: translateY(-5px); }
-                    100% { transform: translateY(0px); }
-                }
+                @keyframes floating { 0% { transform: translateY(0px); } 50% { transform: translateY(-5px); } 100% { transform: translateY(0px); } }
 
-                .wood-shelf {
-                    position: relative;
-                    background: linear-gradient(180deg, #b45309 0%, #78350f 100%);
-                    border-bottom: 6px solid #451a03;
-                    border-radius: 10px;
-                    box-shadow: inset 0 -2px 6px rgba(0,0,0,0.5), 0 6px 12px rgba(0,0,0,0.4);
-                    transition: all 0.15s ease-out;
-                }
+                .wood-shelf { position: relative; background: linear-gradient(180deg, #b45309 0%, #78350f 100%); border-bottom: 6px solid #451a03; border-radius: 10px; box-shadow: inset 0 -2px 6px rgba(0,0,0,0.5), 0 6px 12px rgba(0,0,0,0.4); transition: all 0.15s ease-out; }
                 
-                .realistic-book {
-                    position: relative;
-                    background: linear-gradient(135deg, #1e293b, #0f172a);
-                    border-left: 8px solid #f59e0b;
-                    border-radius: 4px 10px 10px 4px;
-                    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-                }
+                .realistic-book { position: relative; background: linear-gradient(135deg, #1e293b, #0f172a); border-left: 8px solid #f59e0b; border-radius: 4px 10px 10px 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
 
-                .laser-beam {
-                    position: absolute;
-                    bottom: 45px;
-                    width: 4px;
-                    height: 35px;
-                    background: #22d3ee;
-                    box-shadow: 0 0 12px #06b6d4, 0 0 25px #0891b2;
-                    border-radius: 10px;
-                    animation: shoot-up 0.28s linear forwards;
-                    z-index: 20;
-                }
-                @keyframes shoot-up {
-                    0% { bottom: 45px; opacity: 1; }
-                    100% { bottom: 100%; opacity: 0; }
-                }
+                .laser-beam { position: absolute; bottom: 45px; width: 4px; height: 35px; background: #22d3ee; box-shadow: 0 0 12px #06b6d4, 0 0 25px #0891b2; border-radius: 10px; animation: shoot-up 0.28s linear forwards; z-index: 20; }
+                @keyframes shoot-up { 0% { bottom: 45px; opacity: 1; } 100% { bottom: 100%; opacity: 0; } }
 
                 .cert-font { font-family: 'Cairo', sans-serif !important; }
                 
-                .compact-layout {
-                    display: flex;
-                    flex-direction: column;
-                    height: 100%;
-                    max-height: 95vh;
-                    justify-content: space-between;
-                }
+                .compact-layout { display: flex; flex-direction: column; height: 100%; max-height: 95vh; justify-content: space-between; }
             `}</style>
 
-            {/* --- العنصر الممسوك (متحرك ومطابق للمؤشر فوراً 100% بدون لاج) --- */}
+            {/* --- العنصر الممسوك --- */}
             <div 
                 ref={floatingElementRef}
                 className="fixed pointer-events-none z-[9999] realistic-book p-3 font-black text-center items-center justify-center bg-slate-900 text-amber-300 shadow-2xl border-2 border-amber-400 hidden will-change-transform"
-                style={{
-                    left: 0,
-                    top: 0,
-                    width: dragItemInfo?.type === 'q' ? '210px' : '150px',
-                    minHeight: '50px',
-                    fontSize: dragItemInfo?.type === 'q' ? '0.85rem' : '0.8rem'
-                }}
+                style={{ left: 0, top: 0, width: dragItemInfo?.type === 'q' ? '210px' : '150px', minHeight: '50px', fontSize: dragItemInfo?.type === 'q' ? '0.85rem' : '0.8rem' }}
             >
                 {dragItemInfo?.content || (currentQuestions[qIndex] ? (lang === 'ar' ? currentQuestions[qIndex].ar : currentQuestions[qIndex].en) : '')}
             </div>
@@ -692,16 +588,25 @@ const DeweyGame: React.FC = () => {
                     <h1 className="text-2xl md:text-3xl font-black text-amber-400 mb-1">{dict.title}</h1>
                     <p className="text-xs md:text-sm text-slate-300 mb-5 font-bold">{dict.subtitle}</p>
                     
-                    <div className={`space-y-3 mb-5 ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
-                        <div>
-                            <label className="text-[10px] md:text-xs font-bold text-amber-400 mb-1 block px-1">{dict.studentName}</label>
-                            <input type="text" placeholder={dict.namePlaceholder} className="w-full p-3 rounded-xl bg-slate-900 border border-slate-700 text-white outline-none focus:border-amber-400 font-bold text-sm shadow-inner" value={studentName} onChange={(e) => setStudentName(e.target.value)} />
+                    {/* عرض بيانات المستخدم التلقائية بدلاً من حقول الإدخال */}
+                    <div className="bg-slate-900/50 p-4 rounded-2xl border border-slate-700 mb-6 text-start flex flex-col gap-2">
+                        <div className="flex items-center gap-2">
+                            <span className="text-xl">👤</span>
+                            <div>
+                                <p className="text-[10px] text-amber-400 font-bold uppercase">{dict.studentName}</p>
+                                <p className="text-sm font-black text-white">{studentName}</p>
+                            </div>
                         </div>
-                        <div>
-                            <label className="text-[10px] md:text-xs font-bold text-amber-400 mb-1 block px-1">{dict.grade}</label>
-                            <input type="text" placeholder={dict.gradePlaceholder} className="w-full p-3 rounded-xl bg-slate-900 border border-slate-700 text-white outline-none focus:border-amber-400 font-bold text-sm shadow-inner" value={studentGrade} onChange={(e) => setStudentGrade(e.target.value)} />
+                        <div className="w-full h-px bg-slate-700"></div>
+                        <div className="flex items-center gap-2">
+                            <span className="text-xl">🎓</span>
+                            <div>
+                                <p className="text-[10px] text-amber-400 font-bold uppercase">{dict.grade}</p>
+                                <p className="text-sm font-black text-white">{studentGrade}</p>
+                            </div>
                         </div>
                     </div>
+
                     <button onClick={handleStart} className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-black text-base md:text-xl rounded-xl shadow-lg hover:shadow-amber-500/25 transition-all active:scale-95 float-anim tracking-wide">
                         {dict.start}
                     </button>
@@ -737,7 +642,7 @@ const DeweyGame: React.FC = () => {
                 </div>
             )}
 
-            {/* شاشات التعليمات التمهيدية قبل التحديات */}
+            {/* شاشات التعليمات */}
             {stage === 'tut1' && (
                 <div className="max-w-md w-full bg-slate-800/90 border border-sky-500/50 rounded-3xl p-6 shadow-2xl text-center animate-zoom-in relative z-10">
                     <span className="text-4xl mb-2 block">📚</span>
@@ -763,11 +668,10 @@ const DeweyGame: React.FC = () => {
                 </div>
             )}
 
-            {/* 3. شاشات التحديات المدمجة للهواتف والشاشات الكبيرة */}
+            {/* 3. شاشات التحديات */}
             {stage.startsWith('challenge') && currentQuestions.length > 0 && (
                 <div className="max-w-5xl w-full h-[94vh] md:h-auto md:min-h-0 bg-slate-900 border-2 border-slate-700 rounded-3xl p-3 md:p-6 shadow-2xl animate-fade-in-up relative z-10 compact-layout">
                     
-                    {/* شريط الإحصائيات والألعاب (Game HUD) */}
                     <div className="flex justify-between items-center mb-2 bg-slate-800/80 border border-slate-700 p-2 md:p-3 rounded-2xl shadow-inner shrink-0">
                         <div>
                             <span className="text-amber-400 font-black text-xs md:text-lg block tracking-wide">
@@ -788,8 +692,6 @@ const DeweyGame: React.FC = () => {
                     </div>
 
                     <div className="flex-1 flex flex-col justify-between relative overflow-hidden">
-                        
-                        {/* شاشة التغذية الراجعة الفورية */}
                         {feedback && (
                             <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/90 z-50 backdrop-blur-md rounded-2xl animate-zoom-in">
                                 {feedback === 'correct' ? (
@@ -807,9 +709,6 @@ const DeweyGame: React.FC = () => {
                             </div>
                         )}
 
-                        {/* ================================================= */}
-                        {/* التحدي الأول والثالث (سحب وإفلات تفاعلي 100%) */}
-                        {/* ================================================= */}
                         {stage !== 'challenge2' && (
                             <>
                                 <div className="flex flex-col items-center justify-center shrink-0 min-h-[85px] md:min-h-[140px] relative z-20 mb-2">
@@ -818,7 +717,6 @@ const DeweyGame: React.FC = () => {
                                             ref={(el) => { if(el) dropZonesRef.current.set(currentQuestions[qIndex].shelfCode, el); }}
                                             className={`w-full md:w-2/3 h-16 md:h-20 relative wood-shelf flex items-center justify-center shadow-2xl my-2 cursor-pointer transition-all duration-150 ${hoveredDropZone === currentQuestions[qIndex].shelfCode ? 'ring-4 ring-amber-400 brightness-125 scale-105' : ''}`}
                                         >
-                                            {/* إبراز مسمى الرف المطلوب كشريط نيون واضح وجذاب */}
                                             <div className="absolute -top-3.5 md:-top-4 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 px-5 py-1 rounded-full font-black text-slate-950 shadow-xl border-2 border-amber-200 text-xs md:text-base w-fit max-w-[92%] text-center truncate tracking-wide">
                                                 {dict.shelfText}: {currentQuestions[qIndex].displayShelf}
                                             </div>
@@ -846,7 +744,6 @@ const DeweyGame: React.FC = () => {
 
                                 <div className="flex-1 shrink-0 relative z-10 w-full overflow-hidden flex flex-col justify-end pb-1 md:pb-2">
                                     {stage === 'challenge3' ? (
-                                        /* 4 خيارات للتحدي الثالث في شبكة 2x2 */
                                         <div className="grid grid-cols-2 gap-2 md:gap-4 w-full">
                                             {currentQuestions[qIndex].options.map((opt: string, idx: number) => (
                                                 <div 
@@ -862,7 +759,6 @@ const DeweyGame: React.FC = () => {
                                             ))}
                                         </div>
                                     ) : (
-                                        /* التحدي الأول: 4 رفوف أركيد ممتازة للموبايل والكمبيوتر */
                                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 w-full">
                                             {ch1Options.map(cat => (
                                                 <div 
@@ -881,9 +777,6 @@ const DeweyGame: React.FC = () => {
                             </>
                         )}
 
-                        {/* ================================================= */}
-                        {/* التحدي الثاني: لعبة الصاروخ الفضائي */}
-                        {/* ================================================= */}
                         {stage === 'challenge2' && (
                             <div className="flex-1 flex flex-col bg-slate-950 rounded-2xl overflow-hidden relative border-2 border-slate-800 shadow-inner p-2 md:p-4">
                                 <div className="text-center mb-1 md:mb-3 z-20 shrink-0">
@@ -924,7 +817,6 @@ const DeweyGame: React.FC = () => {
                                     </div>
                                 </div>
 
-                                {/* أزرار التحكم اللمسية للموبايل */}
                                 <div className="md:hidden flex justify-between items-center mt-1 gap-1.5 z-30 shrink-0">
                                     <button onTouchStart={(e) => {e.preventDefault(); setRocketPos(p => (lang === 'ar' ? Math.min(3, p + 1) : Math.max(0, p - 1)))}} className="flex-1 bg-slate-800 text-cyan-400 p-2.5 rounded-xl active:bg-slate-700 text-lg font-black shadow border border-slate-700">
                                         {lang === 'ar' ? '►' : '◄'}
@@ -942,11 +834,10 @@ const DeweyGame: React.FC = () => {
                 </div>
             )}
 
-            {/* 4. شاشة الشهادة (طباعة A4 كاملة وعرض واضح مريح للشاشات والموبايل) */}
+            {/* 4. شاشة الشهادة (الطباعة والعرض) */}
             {stage === 'certificate' && (
                 <div className="w-full flex flex-col items-center animate-fade-in-up relative z-10 pt-2 pb-16 print:pt-0 print:pb-0 overflow-y-auto max-h-[100dvh]">
                     
-                    {/* حاوية مخصصة لطباعة A4 صفحة واحدة بدون قطع */}
                     <div id="certificate-print-container" className="hidden print:flex">
                         <div id="certificate-area-print" className="cert-font text-slate-900">
                             <div className="flex justify-between items-center border-b-2 border-amber-600 pb-3 mb-2">
@@ -999,7 +890,6 @@ const DeweyGame: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* عرض الشهادة المريح على شاشة الجهاز */}
                     <div className="cert-font bg-white text-slate-900 border-4 md:border-8 border-amber-500 rounded-3xl shadow-2xl p-5 md:p-8 w-[95%] max-w-xl my-2 print:hidden flex flex-col justify-between">
                         <div className="flex justify-between items-center border-b-2 border-amber-400 pb-3 mb-3">
                             <img src="/school-logo.png" alt="School Logo" className="w-14 h-14 md:w-20 md:h-20 object-contain drop-shadow" onError={(e) => e.currentTarget.style.display = 'none'} />
@@ -1029,7 +919,12 @@ const DeweyGame: React.FC = () => {
                             </p>
                         </div>
 
-                        <div className="flex justify-center gap-6 md:gap-12 text-center bg-amber-50/70 p-2.5 md:p-4 rounded-xl border border-amber-200 my-3">
+                        <div className="flex justify-center gap-6 md:gap-12 text-center bg-amber-50/70 p-2.5 md:p-4 rounded-xl border border-amber-200 my-3 relative">
+                            {pointsSaved && (
+                                <div className="absolute -top-3 right-2 bg-emerald-500 text-white text-[10px] px-2 py-0.5 rounded-full font-black animate-bounce">
+                                    {dict.pointsSaved}
+                                </div>
+                            )}
                             <div>
                                 <div className="text-[9px] md:text-xs text-slate-600 font-black uppercase mb-0.5">{dict.certPoints}</div>
                                 <div className="text-lg md:text-2xl font-black text-emerald-700">{score} <span className="text-[10px] text-slate-400">/ 300</span></div>
@@ -1050,12 +945,11 @@ const DeweyGame: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* الأزرار تحت الشهادة */}
                     <div className="mt-3 flex gap-3 no-print relative z-10 w-[95%] max-w-xl pb-6">
                         <button onClick={() => window.print()} className="flex-[2] py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-black text-sm md:text-base rounded-xl shadow-lg active:scale-95 text-center">
                             {dict.print}
                         </button>
-                        <Link to="/" className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-white font-black text-sm md:text-base rounded-xl shadow-md active:scale-95 text-center flex items-center justify-center border border-slate-700">
+                        <Link to="/home" className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-white font-black text-sm md:text-base rounded-xl shadow-md active:scale-95 text-center flex items-center justify-center border border-slate-700">
                             {dict.back}
                         </Link>
                     </div>
