@@ -723,11 +723,10 @@ const DeweyGame: React.FC = () => {
                                         <div className="text-center w-full">
                                             <p className="text-[10px] md:text-sm font-black text-amber-400 mb-1.5 bg-slate-800/60 inline-block px-3 py-1 rounded-full border border-slate-700">{dict.dragInstruction}</p>
                                             <div 
-                                                style={{ touchAction: 'none' }}
                                                 onMouseDown={(e) => handleDragStart(e, 'q', 'q')}
                                                 onTouchStart={(e) => handleDragStart(e, 'q', 'q')}
                                                 className={`realistic-book p-3.5 md:p-6 max-w-[280px] md:max-w-xl mx-auto cursor-grab active:cursor-grabbing flex items-center justify-center text-center float-anim border border-slate-700`}
-                                                style={{ opacity: isDraggingState && dragDataRef.current?.type === 'q' ? 0.25 : 1 }}
+                                                style={{ touchAction: 'none', opacity: isDraggingState && dragDataRef.current?.type === 'q' ? 0.25 : 1 }}
                                             >
                                                 <h3 className="font-black text-xs md:text-xl text-white leading-relaxed pointer-events-none">
                                                     {lang === 'ar' ? currentQuestions[qIndex].ar : currentQuestions[qIndex].en}
@@ -743,11 +742,10 @@ const DeweyGame: React.FC = () => {
                                             {currentQuestions[qIndex].options.map((opt: string, idx: number) => (
                                                 <div 
                                                     key={idx}
-                                                    style={{ touchAction: 'none' }}
                                                     onMouseDown={(e) => handleDragStart(e, opt, 'opt', opt)}
                                                     onTouchStart={(e) => handleDragStart(e, opt, 'opt', opt)}
                                                     className={`realistic-book p-2.5 md:p-4 font-black text-[10px] md:text-sm text-center flex items-center justify-center min-h-[50px] md:min-h-[75px] cursor-grab active:cursor-grabbing text-slate-200 border border-slate-700/80 hover:border-amber-400/80`}
-                                                    style={{ opacity: isDraggingState && dragDataRef.current?.id === opt ? 0.25 : 1 }}
+                                                    style={{ touchAction: 'none', opacity: isDraggingState && dragDataRef.current?.id === opt ? 0.25 : 1 }}
                                                 >
                                                     <span className="pointer-events-none leading-snug px-1">{opt}</span>
                                                 </div>
