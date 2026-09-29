@@ -14,7 +14,7 @@ const translations = {
         adminSettings: "إدارة النظام",
         adminSettingsDesc: "التحكم الشامل في المنصة والبيانات",
         newsTitle: "جديدنا",
-        newsContent: "قريباً مسابقة بودكاست للطلاب! | تم إضافة كتب جديدة في القسم العربي، الرجاء زيارة المكتبة للاطلاع عليها | استديو البودكاست متاح الآن للتسجيل ومشاركة إبداعاتكم الصوتية.",
+        newsContent: "قريباً مسابقة بودكاست للطلاب! |  تم إضافة كتب جديدة في القسم العربي، الرجاء زيارة المكتبة للاطلاع عليها | 🎙️ استديو البودكاست متاح الآن للتسجيل ومشاركة إبداعاتكم الصوتية.",
         manualSearch: "البحث اليدوي",
         manualDesc: "البحث عن كتاب ما في مكتبة المدرسة والوصول إليه.",
         smartSearch: "اسأل صقر الذكي",
@@ -30,7 +30,7 @@ const translations = {
         saqrStudioBanner: "استديو صقر",
         saqrStudioDesc: "سجل إبداعاتك الصوتية وشارك في البودكاست.",
         bubble: "فخورين بالإمارات",
-        homelandTitle: "لمحات من الموطن",
+        homelandTitle: "معلومات عن وطني",
         visitorsLabel: "زوار البوابة:",
         upcomingEvents: "إجازة منتصف الفصل الأول",
         startsIn: "تبدأ إجازة منتصف الفصل خلال:",
@@ -50,7 +50,7 @@ const translations = {
         adminSettings: "System Admin",
         adminSettingsDesc: "Full platform and data control",
         newsTitle: "What's New",
-        newsContent: "Coming soon: Student podcast competition! |  New books have been added to the Arabic section, please visit the library |  Podcast Studio is now live!",
+        newsContent: "Coming soon: Student podcast competition! |  New books have been added to the Arabic section, please visit the library | Podcast Studio is now live!",
         manualSearch: "Manual Search",
         manualDesc: "Find and access a specific book in the school library.",
         smartSearch: "Ask Saqr (AI)",
@@ -66,7 +66,7 @@ const translations = {
         saqrStudioBanner: "Saqr Studio",
         saqrStudioDesc: "Record your voice and share in the podcast.",
         bubble: "Proud of the UAE",
-        homelandTitle: "Hints From Homeland",
+        homelandTitle: "Information About My Country",
         visitorsLabel: "Portal Visitors:",
         upcomingEvents: "Mid-term Break",
         startsIn: "Mid-term break starts in:",
@@ -263,7 +263,6 @@ const HomePage: React.FC = () => {
                             onClick={handleNameClick}
                             className="group relative px-8 py-3.5 rounded-[2.5rem] bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border-2 border-white/90 dark:border-slate-800 shadow-2xl transition-all active:scale-95 cursor-pointer hover:scale-[1.02] duration-300 overflow-hidden"
                         >
-                            {/* تأثير اللمعة (Shimmer) على الماوس */}
                             <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full duration-1000 bg-gradient-to-r from-transparent via-white/40 dark:via-white/10 to-transparent transition-transform pointer-events-none"></div>
 
                             <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-slate-800 dark:text-white tracking-tight">
@@ -333,7 +332,7 @@ const HomePage: React.FC = () => {
                         </div>
                     </Link>
 
-                    {/* استديو صقر (للطلاب والأدمن فقط) مع علامة جديد في الجهة المقابلة */}
+                    {/* استديو صقر (للطلاب والأدمن فقط) مع علامة جديد */}
                     {(userType === 'student' || userType === 'admin') && (
                         <Link to="/saqr-studio" className="group relative bg-blue-500 text-white p-6 rounded-[2.5rem] border-b-8 border-blue-700 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
                             <div className="absolute top-4 end-4 bg-rose-500 text-white text-[10px] md:text-xs px-3 py-0.5 rounded-full font-black uppercase tracking-wider shadow-md animate-pulse">
@@ -362,7 +361,7 @@ const HomePage: React.FC = () => {
                         </Link>
                     )}
 
-                    {/* رتب المكتبة (للطلاب والأدمن فقط) مع علامة جديد في الجهة المقابلة */}
+                    {/* رتب المكتبة (للطلاب والأدمن فقط) مع علامة جديد */}
                     {(userType === 'student' || userType === 'admin') && (
                         <Link to="/game" className="group relative bg-amber-400 text-slate-900 p-6 rounded-[2.5rem] border-b-8 border-amber-600 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
                             <div className="absolute top-4 end-4 bg-rose-500 text-white text-[10px] md:text-xs px-3 py-0.5 rounded-full font-black uppercase tracking-wider shadow-md animate-pulse">
@@ -392,13 +391,12 @@ const HomePage: React.FC = () => {
                     )}
                 </div>
 
-                {/* ثانياً: قسم شخصية صقر التفاعلية ومعلومات الموطن (في الأسفل) */}
+                {/* ثانياً: قسم شخصية صقر التفاعلية ومعلومات الموطن (بتصميم تراثي إماراتي أصيل) */}
                 <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center mt-6">
                     
                     {/* شخصية صقر والتاثيرات */}
                     <div className="lg:col-span-5 flex flex-col items-center justify-center relative">
                         <div onClick={handleMascotInteraction} className="relative cursor-pointer group flex flex-col items-center">
-                            {/* شعار المدرسة في الخلفية (يتغير للأبيض في الدارك مود) */}
                             <img src="/school-logo.png" alt="" className="absolute inset-0 m-auto w-72 h-72 object-contain opacity-10 dark:opacity-25 dark:brightness-0 dark:invert z-0 pointer-events-none transition-all duration-300" />
 
                             {bursts.map((burst) => (
@@ -409,7 +407,6 @@ const HomePage: React.FC = () => {
                                 </div>
                             ))}
 
-                            {/* فقاعة الترحيب عند الضغط */}
                             {showBubble && (
                                 <div className="absolute -top-14 bg-white dark:bg-slate-800 px-6 py-2.5 rounded-2xl border-4 border-rose-500 shadow-2xl text-rose-600 dark:text-rose-400 font-black text-sm md:text-base animate-bounce z-30">
                                     {isAr ? 'فخورين بالإمارات 🇦🇪' : 'Proud of the UAE 🇦🇪'}
@@ -423,19 +420,32 @@ const HomePage: React.FC = () => {
                     {/* معلومات الموطن والعد التنازلي والزوار */}
                     <div className="lg:col-span-7 grid grid-cols-1 gap-6">
                         
-                        {/* بلوك معلومات عن الإمارات (يتغير يومياً) */}
-                        <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:bg-slate-900 p-6 md:p-8 rounded-[2.5rem] border-4 border-amber-300 dark:border-amber-700 shadow-lg relative overflow-hidden flex flex-col justify-between">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="p-2 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-amber-200 dark:border-amber-600">
+                        {/* بلوك معلومات عن وطني (تصميم تراثي إماراتي أصيل) */}
+                        <div className="bg-gradient-to-br from-amber-100 via-amber-50 to-emerald-50 dark:from-slate-900 dark:to-slate-950 p-8 md:p-10 rounded-[3rem] border-4 border-amber-400 dark:border-amber-600 shadow-2xl relative overflow-hidden flex flex-col items-center text-center">
+                            
+                            {/* شريط ألوان الهوية الوطنية في الأعلى */}
+                            <div className="absolute top-0 left-0 right-0 h-2.5 flex">
+                                <div className="bg-red-600 w-1/4"></div>
+                                <div className="bg-emerald-600 w-1/4"></div>
+                                <div className="bg-white w-1/4"></div>
+                                <div className="bg-black w-1/4"></div>
+                            </div>
+
+                            <div className="flex flex-col items-center gap-3 mb-6 mt-3">
+                                <div className="p-3 bg-white dark:bg-slate-800 rounded-3xl shadow-md border-2 border-amber-300 dark:border-amber-600">
                                     <UaeFlagIcon />
                                 </div>
-                                <h3 className="text-base md:text-lg font-black text-amber-700 dark:text-amber-400 uppercase tracking-widest">
+                                {/* العنوان مُعَدل، مُكبر، ومُوسّط */}
+                                <h3 className="text-xl md:text-3xl font-black text-amber-800 dark:text-amber-400 tracking-wider">
                                     {t('homelandTitle')}
                                 </h3>
                             </div>
-                            <p className="text-lg md:text-2xl text-slate-800 dark:text-white font-black leading-relaxed">
+
+                            <p className="text-lg md:text-2xl text-slate-900 dark:text-white font-black leading-relaxed max-w-2xl">
                                 {isAr ? dailyFact.ar : dailyFact.en}
                             </p>
+
+                            <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-amber-400/20 rounded-full blur-3xl pointer-events-none"></div>
                         </div>
 
                         {/* قسم التاريخ، الزوار، والعد التنازلي للإجازة */}
