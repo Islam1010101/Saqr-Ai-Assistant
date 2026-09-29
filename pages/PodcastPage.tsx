@@ -173,7 +173,7 @@ const PodcastPage: React.FC = () => {
   const [effects, setEffects] = useState({ echo: false, noise: false, pitch: false });
   const [playbackRate, setPlaybackRate] = useState(1);
 
-  // Form States
+  // Form States - جلب البيانات تلقائياً من localStorage
   const [studentName, setStudentName] = useState('');
   const [studentGrade, setStudentGrade] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -192,6 +192,20 @@ const PodcastPage: React.FC = () => {
   const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
   const echoNodeRef = useRef<{ delay: DelayNode, gain: GainNode } | null>(null);
   const noiseFilterRef = useRef<BiquadFilterNode | null>(null);
+
+  // جلب اسم وصف الطالب تلقائياً عند التحميل
+  useEffect(() => {
+    try {
+      const storedUser = localStorage.getItem('current_user');
+      if (storedUser) {
+        const user = JSON.parse(storedUser);
+        setStudentName(user.name_en || user.name_ar || '');
+        setStudentGrade(user.grade || 'Unknown Grade');
+      }
+    } catch (error) {
+      console.error('Failed to parse user data from localStorage', error);
+    }
+  }, []);
 
   const triggerExplosion = useCallback(() => {
     const id = Date.now();
@@ -342,6 +356,7 @@ const PodcastPage: React.FC = () => {
       reader.onloadend = async () => {
         const base64Audio = (reader.result as string).split(',')[1]; 
 
+        // تم تعيين studentGrade ليكون هو اسم الملف الصوتي
         const payload = {
           name: studentName,
           grade: studentGrade,
@@ -357,8 +372,6 @@ const PodcastPage: React.FC = () => {
 
         if (response.ok) {
           setStatusMessage({ type: 'success', text: t('success') });
-          setStudentName('');
-          setStudentGrade('');
           setAudioBlob(null);
           setAudioUrl(null);
           setRecordingTime(0);
@@ -375,8 +388,8 @@ const PodcastPage: React.FC = () => {
     }
   };
 
-  // ستايل الحقول
-  const inputClass = "w-full p-4 md:p-5 rounded-2xl bg-slate-50 dark:bg-slate-900 border-4 border-slate-200 dark:border-slate-700 outline-none font-black text-slate-900 dark:text-white text-sm md:text-lg focus:border-rose-400 dark:focus:border-rose-500 transition-colors shadow-inner";
+  // ستايل الحقول (Read-only format)
+  const inputClass = "w-full p-4 md:p-5 rounded-2xl bg-slate-100 dark:bg-slate-800 border-4 border-slate-200 dark:border-slate-700 outline-none font-black text-slate-500 dark:text-slate-400 text-sm md:text-lg cursor-not-allowed shadow-inner";
 
   return (
     <div dir={dir} className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 py-10 px-4 md:py-16 font-sans antialiased text-slate-800 dark:text-slate-200 relative overflow-x-hidden">
@@ -531,20 +544,20 @@ const PodcastPage: React.FC = () => {
             </div>
           )}
 
-          {/* بيانات الطالب */}
+          {/* بيانات الطالب - يتم جلبها تلقائياً ولا يمكن للمستخدم تعديلها */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 relative z-10">
             <input 
               type="text" 
               placeholder={t('studentName')}
               value={studentName}
-              onChange={(e) => setStudentName(e.target.value)}
+              readOnly
               className={inputClass}
             />
             <input 
               type="text" 
               placeholder={t('studentGrade')}
               value={studentGrade}
-              onChange={(e) => setStudentGrade(e.target.value)}
+              readOnly
               className={inputClass}
             />
           </div>
