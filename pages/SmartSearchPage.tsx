@@ -10,6 +10,9 @@ import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
 // 👇 1. استدعاء دالة التتبع (تم الحفاظ عليه تماماً)
 import { trackActivity } from '../src/utils/tracker';
 
+// 🚀 استيراد الاتصال من الملف المركزي بدلاً من كتابته هنا
+import { supabase } from '../src/utils/supabase';
+
 // --- 1. بروتوكول عقل صقر النهائي (تم الحفاظ عليه تماماً) ---
 const SAQR_ELITE_PROMPT = `
 Identity: You are "Saqr" (صقر), the official Elite AI Librarian of Emirates Falcon International Private School (EFIPS).
