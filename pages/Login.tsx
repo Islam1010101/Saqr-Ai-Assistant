@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
-// إعداد اتصال Supabase (تأكد من وضع الروابط الخاصة بك هنا)
+// إعداد اتصال Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'YOUR_SUPABASE_URL';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
 const supabase = createClient(supabaseUrl, supabaseKey);
@@ -10,6 +10,7 @@ export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
   const [loginType, setLoginType] = useState<'student' | 'teacher'>('student');
   const [studentId, setStudentId] = useState('');
   const [teacherId, setTeacherId] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -42,29 +43,45 @@ export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
     }
   };
 
-  // دالة تسجيل دخول المعلمين
+  // دالة تسجيل دخول المعلمين والأدمن
   const handleTeacherLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!teacherId.trim()) return;
+    if (!teacherId.trim() || !password.trim()) return;
 
     setLoading(true);
     setError('');
 
     try {
-      // البحث عن المعلم في جدول teachers
+      const tId = teacherId.trim().toUpperCase(); // تحويل الحروف لكبيرة لضمان التطابق مع قاعدة البيانات
+
+      // البحث عن المعلم في قاعدة البيانات
       const { data, error } = await supabase
         .from('teachers')
         .select('*')
-        .eq('teacher_id', teacherId.trim())
+        .eq('teacher_id', tId)
         .single();
 
       if (error || !data) {
-        setError(lang === 'ar' ? 'رقم المعلم غير صحيح، يرجى المحاولة مرة أخرى.' : 'Invalid Teacher ID.');
-      } else {
-        localStorage.setItem('user_type', 'teacher');
-        localStorage.setItem('current_user', JSON.stringify(data));
-        window.location.href = '/home';
+        setError(lang === 'ar' ? 'الرقم الوظيفي غير صحيح.' : 'Invalid Teacher ID.');
+        setLoading(false);
+        return;
       }
+
+      // 🔐 نظام التحقق من كلمة المرور (مدرس عادي = pass | أدمن = PASS254177)
+      const isAdmin = data.teacher_id === 'PASS254177';
+      const correctPassword = isAdmin ? 'PASS254177' : 'pass';
+
+      if (password !== correctPassword) {
+        setError(lang === 'ar' ? 'كلمة المرور غير صحيحة.' : 'Incorrect password.');
+        setLoading(false);
+        return;
+      }
+
+      // تم الدخول بنجاح!
+      localStorage.setItem('user_type', isAdmin ? 'admin' : 'teacher'); // حفظ صلاحية الأدمن
+      localStorage.setItem('current_user', JSON.stringify(data));
+      window.location.href = '/home';
+      
     } catch (err) {
       setError(lang === 'ar' ? 'حدث خطأ في الاتصال بقاعدة البيانات.' : 'Database connection error.');
     } finally {
@@ -82,13 +99,11 @@ export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
         {/* ================= القسم الأول: الهوية البصرية وصقر ================= */}
         <div className="lg:w-1/2 p-8 lg:p-12 flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br from-blue-900/40 to-indigo-900/20 border-b lg:border-b-0 lg:border-l border-slate-700/50">
           
-          {/* تأثيرات الإضاءة في الخلفية */}
           <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
             <div className="absolute -top-20 -right-20 w-72 h-72 bg-blue-500/20 rounded-full blur-[80px]"></div>
             <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-indigo-500/20 rounded-full blur-[80px]"></div>
           </div>
 
-          {/* ترويسة المدرسة */}
           <div className="flex items-center justify-center w-full gap-3 md:gap-6 mb-10">
             <div className="flex-1 text-left">
               <h2 className="text-white font-bold text-xs sm:text-sm md:text-base leading-snug drop-shadow-md">
@@ -112,7 +127,6 @@ export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
             </div>
           </div>
 
-          {/* نصوص الترحيب */}
           <div className="text-center z-10 mb-8">
             <h1 className="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300 mb-4 drop-shadow-sm">
               {lang === 'ar' ? 'المكتبة الذكية' : 'Smart Library'}
@@ -124,7 +138,6 @@ export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
             </p>
           </div>
 
-          {/* شخصية صقر */}
           <div className="relative mt-4 mb-4 lg:mb-0 w-48 h-48 sm:w-64 sm:h-64 flex items-center justify-center">
             <div className="absolute w-3/4 h-3/4 bg-blue-500/40 rounded-full blur-3xl animate-pulse-slow"></div>
             <div className="absolute bottom-0 w-4/5 h-8 bg-blue-400/20 rounded-[100%] blur-md"></div>
@@ -136,7 +149,7 @@ export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
           </div>
         </div>
 
-        {/* ================= القسم الثاني: نموذج تسجيل الدخول (بدون كلمة مرور) ================= */}
+        {/* ================= القسم الثاني: نموذج تسجيل الدخول ================= */}
         <div className="lg:w-1/2 p-6 sm:p-10 lg:p-16 flex flex-col justify-center bg-slate-800/80">
           <div className="mb-8 text-center lg:text-start">
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
@@ -147,10 +160,10 @@ export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
             </p>
           </div>
 
-          {/* أزرار التبديل (طالب / معلم) */}
+          {/* أزرار التبديل */}
           <div className="flex bg-slate-900/50 p-1.5 rounded-2xl mb-8 border border-slate-700/50">
             <button
-              onClick={() => { setLoginType('student'); setError(''); }}
+              onClick={() => { setLoginType('student'); setError(''); setPassword(''); }}
               className={`flex-1 py-3.5 px-2 text-sm sm:text-base font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 ${
                 loginType === 'student' 
                 ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.4)]' 
@@ -160,7 +173,7 @@ export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
               🎓 {lang === 'ar' ? 'دخول الطلاب' : 'Students'}
             </button>
             <button
-              onClick={() => { setLoginType('teacher'); setError(''); }}
+              onClick={() => { setLoginType('teacher'); setError(''); setStudentId(''); }}
               className={`flex-1 py-3.5 px-2 text-sm sm:text-base font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 ${
                 loginType === 'teacher' 
                 ? 'bg-indigo-600 text-white shadow-[0_0_15px_rgba(79,70,229,0.4)]' 
@@ -212,7 +225,7 @@ export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
               </button>
             </form>
           ) : (
-            /* فورم المعلمين (استخدام ID فقط بدون باسورد) */
+            /* فورم المعلمين (يحتوي على ID وباسورد) */
             <form onSubmit={handleTeacherLogin} className="space-y-6">
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-slate-300">
@@ -226,8 +239,28 @@ export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                     type="text"
                     value={teacherId}
                     onChange={(e) => setTeacherId(e.target.value)}
-                    placeholder={lang === 'ar' ? 'أدخل رقمك الوظيفي' : 'Enter your Teacher ID'}
-                    className="w-full pl-12 pr-4 py-4 bg-slate-900/50 border border-slate-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-white placeholder-slate-500 font-mono text-lg tracking-widest text-center"
+                    placeholder="PASSXXXXX"
+                    className="w-full pl-12 pr-4 py-4 bg-slate-900/50 border border-slate-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-white placeholder-slate-500 font-mono text-lg tracking-widest text-center uppercase"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* حقل كلمة المرور الجديد */}
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-slate-300">
+                  {lang === 'ar' ? 'كلمة المرور (Password)' : 'Password'}
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <span className="text-slate-500 text-xl">🔒</span>
+                  </div>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder={lang === 'ar' ? 'أدخل كلمة المرور' : 'Enter password'}
+                    className="w-full pl-12 pr-4 py-4 bg-slate-900/50 border border-slate-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-white placeholder-slate-500 text-center text-lg tracking-widest"
                     required
                   />
                 </div>
