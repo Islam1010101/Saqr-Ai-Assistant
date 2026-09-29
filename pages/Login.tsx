@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 // 🚀 استيراد الاتصال من الملف المركزي بدلاً من كتابته هنا
-import { supabase } from '../utils/supabase';
+import { supabase } from 'src/utils/supabase.ts';
 
 export default function Login({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
   const [loginType, setLoginType] = useState<'student' | 'teacher'>('student');
