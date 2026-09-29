@@ -12,7 +12,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // دالة تسجيل دخول الطلاب مع التتبع
+  // دالة تسجيل دخول الطلاب (بحث ذكي ومرن)
   const handleStudentLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     const cleanId = studentId.trim();
@@ -23,19 +23,47 @@ export default function Login() {
 
     try {
       console.log("جاري البحث عن رقم الطالب:", cleanId);
-      const { data, error } = await supabase
+
+      // محاولة البحث بالعامود student_id (كـ نص)
+      let { data, error } = await supabase
         .from('students')
         .select('*')
         .eq('student_id', cleanId)
-        .maybeSingle(); // استخدام maybeSingle لمنع ظهور خطأ إذا لم يوجد السجل
+        .limit(1);
 
-      console.log("نتيجة بحث الطالب:", { data, error });
+      // إذا لم يتم العثور عليه، نجرب البحث كـ رقم (integer) أو بعامود id
+      if (!data || data.length === 0) {
+        const numId = Number(cleanId);
+        if (!isNaN(numId)) {
+          const res = await supabase
+            .from('students')
+            .select('*')
+            .eq('student_id', numId)
+            .limit(1);
+          data = res.data;
+          error = res.error;
+        }
+      }
 
-      if (error || !data) {
+      // محاولة أخيرة بالعامود البديل id إذا وجد
+      if (!data || data.length === 0) {
+        const res = await supabase
+          .from('students')
+          .select('*')
+          .eq('id', cleanId)
+          .limit(1);
+        data = res.data;
+        error = res.error;
+      }
+
+      console.log("نتيجة بحث الطالب النهائية:", { data, error });
+
+      if (error || !data || data.length === 0) {
         setError(lang === 'ar' ? 'رقم الطالب غير موجود في قاعدة البيانات.' : 'Student ID not found.');
       } else {
+        const studentRecord = data[0];
         localStorage.setItem('user_type', 'student');
-        localStorage.setItem('current_user', JSON.stringify(data));
+        localStorage.setItem('current_user', JSON.stringify(studentRecord));
         window.location.href = '#/home'; 
       }
     } catch (err) {
@@ -46,7 +74,7 @@ export default function Login() {
     }
   };
 
-  // دالة تسجيل دخول المعلمين مع التتبع
+  // دالة تسجيل دخول المعلمين
   const handleTeacherLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     const cleanId = teacherId.trim().toUpperCase();
@@ -144,11 +172,11 @@ export default function Login() {
                 value={studentId}
                 onChange={(e) => setStudentId(e.target.value)}
                 placeholder={lang === 'ar' ? 'أدخل رقم الطالب' : 'Enter Student ID'}
-                className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-200 rounded-[1.5rem] text-slate-800 font-mono text-center shadow-inner"
+                className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-200 rounded-[1.5rem] text-slate-800 font-mono text-center shadow-inner text-lg font-bold"
                 required
               />
               {error && <div className="bg-rose-50 text-rose-600 p-3 rounded-2xl text-xs font-bold text-center">{error}</div>}
-              <button type="submit" disabled={loading} className="w-full py-4 bg-blue-500 text-white font-black rounded-[1.5rem] shadow-md">
+              <button type="submit" disabled={loading} className="w-full py-4 bg-blue-500 hover:bg-blue-600 text-white font-black rounded-[1.5rem] shadow-md transition-all">
                 {loading ? '...' : (lang === 'ar' ? 'دخول' : 'Login')}
               </button>
             </form>
@@ -159,11 +187,11 @@ export default function Login() {
                 value={teacherId}
                 onChange={(e) => setTeacherId(e.target.value)}
                 placeholder="PASSXXXXX"
-                className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-200 rounded-[1.5rem] text-slate-800 font-mono text-center uppercase shadow-inner"
+                className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-200 rounded-[1.5rem] text-slate-800 font-mono text-center uppercase shadow-inner text-lg font-bold"
                 required
               />
               {error && <div className="bg-rose-50 text-rose-600 p-3 rounded-2xl text-xs font-bold text-center">{error}</div>}
-              <button type="submit" disabled={loading} className="w-full py-4 bg-indigo-500 text-white font-black rounded-[1.5rem] shadow-md">
+              <button type="submit" disabled={loading} className="w-full py-4 bg-indigo-500 hover:bg-indigo-600 text-white font-black rounded-[1.5rem] shadow-md transition-all">
                 {loading ? '...' : (lang === 'ar' ? 'دخول المعلم' : 'Teacher Login')}
               </button>
             </form>
