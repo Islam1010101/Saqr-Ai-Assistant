@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../App';
-import { supabase } from '../src/utils/supabase';
+import { createClient } from '@supabase/supabase-js';
+
+// إعداد اتصال Supabase
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'YOUR_SUPABASE_URL';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const translations = {
     ar: {
         pageTitle: "جدول حجز حصص المكتبة",
         subtitle: "نظام حجز وتنسيق حصص زيارة المكتبة المدرسية بطريقة ذكية ومبتكرة",
-        secureTitle: "بوابة دخول المعلمين",
-        passPlaceholder: "رقم الموظف في المدرسة",
-        authBtn: "دخول بوابة المعلمين",
-        errorPass: "رقم الموظف غير صحيح! يجب أن يبدأ بـ hr ويتبعه 3 أو 4 أرقام.",
         days: ["الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"],
         periods: [1, 2, 3, 4, 5, 6, 7, 8],
         periodLabel: "الحصة",
@@ -24,27 +25,23 @@ const translations = {
         close: "إلغاء",
         success: "تم حفظ الحصة بنجاح!",
         deleteSuccess: "تم حذف الحصة بنجاح!",
-        unauthorizedDelete: "عذراً، لا تملك صلاحية حذف الحصص. مخصصة للمسؤول فقط.",
-        alreadyBooked: "عذراً، هذه الحصة محجوزة مسبقاً من قبل معلم آخر، ولا يمكن تعديلها إلا من قبل المسؤول .",
+        unauthorizedDelete: "عذراً، لا تملك صلاحية حذف حصص المعلمين الآخرين. مخصصة للمسؤول فقط.",
+        alreadyBooked: "عذراً، هذه الحصة محجوزة مسبقاً من قبل معلم آخر، ولا يمكن تعديلها إلا من قبل المسؤول.",
         bookSlotText: "+ اضغط لحجز الحصة",
         addToGoogleCal: "إضافة إلى Google Calendar",
         downloadIcs: "تحميل الحصة (.ics)",
-        enterTeacherName: "أدخل اسمك تماماً كما تم تسجيله في الجدول:",
-        noClassesFound: "لم يتم العثور على حصص مسجلة بهذا الاسم.",
+        noClassesFound: "لم يتم العثور على حصص مسجلة باسمك.",
         loading: "جاري تحميل جدول الحصص السحري...",
         schoolNameAr: "مدرسة صقر الإمارات الدولية الخاصة",
         schoolNameEn: "Emirates Falcon International Private School",
         printHeader: "الجدول الزمني المعتمد لزيارات المكتبة المدرسية",
         librarianSign: "اعتماد أمين المكتبة",
-        managementSign: "توقيع الإدارة المدرسية"
+        managementSign: "توقيع الإدارة المدرسية",
+        accessDenied: "عذراً، هذه الصفحة مخصصة للمعلمين وإدارة المدرسة فقط."
     },
     en: {
         pageTitle: "Library Schedule",
         subtitle: "Smart and vibrant library visit booking and coordination system",
-        secureTitle: "Teachers Portal Login",
-        passPlaceholder: "Employee ID",
-        authBtn: "Enter Portal",
-        errorPass: "Invalid Employee ID! Must start with 'hr' followed by 3 or 4 digits.",
         days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
         periods: [1, 2, 3, 4, 5, 6, 7, 8],
         periodLabel: "Period",
@@ -59,40 +56,68 @@ const translations = {
         close: "Cancel",
         success: "Schedule updated successfully!",
         deleteSuccess: "Period deleted successfully!",
-        unauthorizedDelete: "Sorry, you do not have permission to delete. Only Admin can delete.",
-        alreadyBooked: "Sorry, this period is already booked by another teacher and can only be modified by the admin.",
+        unauthorizedDelete: "Sorry, you cannot delete other teachers' periods. Admin only.",
+        alreadyBooked: "Sorry, this period is already booked by another teacher.",
         bookSlotText: "+ Click to Book",
         addToGoogleCal: "Add to Google Calendar",
         downloadIcs: "Download Period (.ics)",
-        enterTeacherName: "Enter your name exactly as registered in the schedule:",
-        noClassesFound: "No classes found registered under this name.",
+        noClassesFound: "No classes found registered under your name.",
         loading: "Loading magical schedule...",
         schoolNameAr: "مدرسة صقر الإمارات الدولية الخاصة",
         schoolNameEn: "Emirates Falcon International Private School",
         printHeader: "Certified Library Visit Timetable",
         librarianSign: "Librarian Approval",
-        managementSign: "Management Signature"
+        managementSign: "Management Signature",
+        accessDenied: "Sorry, this page is for teachers and school administration only."
     }
 };
 
 const SchedulePage: React.FC = () => {
     const { locale, dir } = useLanguage();
     const isAr = locale === 'ar';
-    const t = (key: keyof typeof translations.ar) => translations[locale][key];
+    const t = (key: keyof typeof translations.ar) => translations[locale as 'ar' | 'en'][key];
 
-    const [password, setPassword] = useState('');
-    const [currentEmployeeId, setCurrentEmployeeId] = useState('');
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    // ==========================================
+    // نظام الجلسات والمصادقة (التحديث الجديد)
+    // ==========================================
+    const [userData, setUserData] = useState<any>(null);
+    const [userType, setUserType] = useState<'student' | 'teacher' | 'admin' | null>(null);
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem('current_user');
+        const storedType = localStorage.getItem('user_type');
+
+        if (storedUser && storedType) {
+            // منع الطلاب من الدخول لصفحة الجدول
+            if (storedType === 'student') {
+                window.location.href = '/home';
+            } else {
+                setUserData(JSON.parse(storedUser));
+                setUserType(storedType as 'teacher' | 'admin');
+            }
+        } else {
+            window.location.href = '/login';
+        }
+    }, []);
+
+    const getDisplayName = () => {
+        if (!userData) return '';
+        return isAr ? (userData.name_ar || userData.name_en) : (userData.name_en || userData.name_ar);
+    };
+
+    // ==========================================
+    // إدارة بيانات الجدول
+    // ==========================================
     const [isLoading, setIsLoading] = useState(false);
-    const [scheduleData, setScheduleData] = useState<{ [key: string]: { teacher: string; subject: string; grade: string } }>({});
+    const [scheduleData, setScheduleData] = useState<{ [key: string]: { teacher: string; subject: string; grade: string; user_id: string } }>({});
     
     const [selectedSlot, setSelectedSlot] = useState<{ day: string; period: number } | null>(null);
     const [formTeacher, setFormTeacher] = useState('');
     const [formSubject, setFormSubject] = useState('');
     const [formGrade, setFormGrade] = useState('');
 
-    const days = translations[locale].days;
-    const periods = translations[locale].periods;
+    const days = translations[locale as 'ar' | 'en'].days;
+    const periods = translations[locale as 'ar' | 'en'].periods;
 
     const fetchSchedule = async () => {
         setIsLoading(true);
@@ -102,7 +127,7 @@ const SchedulePage: React.FC = () => {
 
             const map: any = {};
             data?.forEach((item: any) => {
-                map[item.id] = { teacher: item.teacher, subject: item.subject, grade: item.grade };
+                map[item.id] = { teacher: item.teacher, subject: item.subject, grade: item.grade, user_id: item.user_id };
             });
             setScheduleData(map);
         } catch (error: any) {
@@ -113,34 +138,23 @@ const SchedulePage: React.FC = () => {
     };
 
     useEffect(() => {
-        if (isAuthenticated) {
+        if (userType === 'teacher' || userType === 'admin') {
             fetchSchedule();
         }
-    }, [isAuthenticated]);
-
-    const handleAuth = () => {
-        const cleanId = password.trim().toLowerCase();
-        const hrEmployeeRegex = /^hr\d{3,4}$/i;
-        
-        if (hrEmployeeRegex.test(cleanId)) {
-            setCurrentEmployeeId(cleanId);
-            setIsAuthenticated(true);
-        } else {
-            setPassword('');
-            alert(t('errorPass'));
-        }
-    };
+    }, [userType]);
 
     const handleOpenModal = (day: string, period: number) => {
         const key = `${day}_${period}`;
         const current = scheduleData[key];
 
-        if (current?.teacher && currentEmployeeId !== 'hr785') {
+        // حماية: إذا كانت الحصة محجوزة لمعلم آخر وأنت لست الأدمن
+        if (current?.user_id && current.user_id !== userData.teacher_id && userType !== 'admin') {
             alert(t('alreadyBooked'));
             return;
         }
 
-        setFormTeacher(current?.teacher || '');
+        // ملء اسم المعلم تلقائياً إذا كان يحجز حصة جديدة
+        setFormTeacher(current?.teacher || getDisplayName());
         setFormSubject(current?.subject || '');
         setFormGrade(current?.grade || '');
         setSelectedSlot({ day, period });
@@ -151,21 +165,19 @@ const SchedulePage: React.FC = () => {
         if (!selectedSlot) return;
 
         const key = `${selectedSlot.day}_${selectedSlot.period}`;
-        const current = scheduleData[key];
-
-        if (current?.teacher && currentEmployeeId !== 'hr785') {
-            alert(t('alreadyBooked'));
-            setSelectedSlot(null);
-            return;
-        }
-
-        const slotData = { id: key, teacher: formTeacher, subject: formSubject, grade: formGrade };
+        const slotData = { 
+            id: key, 
+            teacher: formTeacher, 
+            subject: formSubject, 
+            grade: formGrade,
+            user_id: userData.teacher_id // حفظ الـ ID لمعرفة من حجز الحصة
+        };
 
         try {
             const { error } = await supabase.from('library_schedule').upsert(slotData);
             if (error) throw error;
 
-            setScheduleData(prev => ({ ...prev, [key]: { teacher: formTeacher, subject: formSubject, grade: formGrade } }));
+            setScheduleData(prev => ({ ...prev, [key]: slotData }));
             setSelectedSlot(null);
             alert(t('success'));
         } catch (error: any) {
@@ -177,12 +189,15 @@ const SchedulePage: React.FC = () => {
     const handleDeleteSlot = async () => {
         if (!selectedSlot) return;
 
-        if (currentEmployeeId !== 'hr785') {
+        const key = `${selectedSlot.day}_${selectedSlot.period}`;
+        const current = scheduleData[key];
+
+        // حماية الحذف: الأدمن يمكنه حذف أي شيء، المعلم يحذف حصصه فقط
+        if (userType !== 'admin' && current?.user_id !== userData.teacher_id) {
             alert(t('unauthorizedDelete'));
             return;
         }
 
-        const key = `${selectedSlot.day}_${selectedSlot.period}`;
         try {
             const { error } = await supabase.from('library_schedule').delete().eq('id', key);
             if (error) throw error;
@@ -200,28 +215,19 @@ const SchedulePage: React.FC = () => {
         }
     };
 
+    // ==========================================
+    // دوال التقويم والوقت (كما هي من الكود الأصلي)
+    // ==========================================
     const getNextDayOfWeek = (dayName: string) => {
-        // خريطة أيام الأسبوع للغتين مع تعيين قيم عددية تطابق كائن Date في جافاسكريبت
         const dayMap: Record<string, number> = { 
             "الأحد": 0, "الإثنين": 1, "الثلاثاء": 2, "الأربعاء": 3, "الخميس": 4, "الجمعة": 5, "السبت": 6,
             "Sunday": 0, "Monday": 1, "Tuesday": 2, "Wednesday": 3, "Thursday": 4, "Friday": 5, "Saturday": 6 
         };
-        
-        // جلب الرقم الخاص باليوم المختار من الجدول
-        const targetDay = dayMap[dayName] ?? 1; // الافتراضي هو الإثنين إذا لم يتم التعرف على اليوم
-
+        const targetDay = dayMap[dayName] ?? 1; 
         const now = new Date();
         const currentDay = now.getDay();
-        
-        // حساب الفارق بين اليوم الحالي واليوم المختار
         let distance = targetDay - currentDay;
-        
-        // إذا كان اليوم المختار قد مرّ في هذا الأسبوع، ننتقل للأسبوع القادم
-        if (distance < 0) {
-            distance += 7;
-        }
-
-        // إنشاء تاريخ جديد بناءً على الفارق
+        if (distance < 0) distance += 7;
         const resultDate = new Date(now);
         resultDate.setDate(now.getDate() + distance);
         return resultDate;
@@ -235,10 +241,7 @@ const SchedulePage: React.FC = () => {
     };
 
     const handleDownloadMySchedule = () => {
-        const teacherNameInput = prompt(t('enterTeacherName'));
-        if (!teacherNameInput || !teacherNameInput.trim()) return;
-
-        const searchName = teacherNameInput.trim().toLowerCase();
+        const searchId = userData.teacher_id; // البحث أصبح تلقائي برقم المعلم بدلاً من كتابة الاسم
         let icsEvents = [
             'BEGIN:VCALENDAR',
             'VERSION:2.0',
@@ -247,7 +250,7 @@ const SchedulePage: React.FC = () => {
 
         let foundCount = 0;
         Object.entries(scheduleData).forEach(([key, slot]) => {
-            if (slot.teacher && slot.teacher.trim().toLowerCase() === searchName) {
+            if (slot.user_id === searchId || (slot.teacher && slot.teacher === getDisplayName())) {
                 const [day, periodStr] = key.split('_');
                 const period = parseInt(periodStr);
                 
@@ -286,7 +289,7 @@ const SchedulePage: React.FC = () => {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download', `my_library_schedule_${teacherNameInput}.ics`);
+        link.setAttribute('download', `my_library_schedule.ics`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -311,26 +314,14 @@ const SchedulePage: React.FC = () => {
         window.open(url, '_blank');
     };
 
-    if (!isAuthenticated) {
+    if (!userData || (userType !== 'teacher' && userType !== 'admin')) {
         return (
-            <div dir={dir} className="min-h-screen bg-white dark:bg-slate-950 flex flex-col items-center justify-center p-4 relative overflow-hidden">
-                <div className="absolute -top-32 -left-32 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
-                <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" />
-                
-                <div className="w-full max-w-lg bg-white dark:bg-slate-900 backdrop-blur-xl p-10 md:p-14 rounded-[3rem] border-4 border-emerald-400/40 shadow-2xl text-center relative z-10 flex flex-col items-center animate-zoom-in">
-                    <img src="/saqr-sch.png" alt="Saqr Schedule" className="w-32 h-32 md:w-40 md:h-40 object-contain mb-5 animate-bounce drop-shadow-[0_15px_25px_rgba(16,185,129,0.3)] filter hover:scale-110 transition-transform duration-300" onError={(e)=>e.currentTarget.style.display='none'} />
-                    <h2 className="text-3xl font-black mb-2 bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent uppercase">{t('secureTitle')}</h2>
-                    <p className="text-xs text-slate-500 font-bold mb-8">أدخل رقم الموظف الخاص بك (مثال: hr000)</p>
-                    <input 
-                        type="text" 
-                        value={password} 
-                        onChange={(e)=>setPassword(e.target.value)} 
-                        onKeyDown={(e)=>e.key==='Enter'&&handleAuth()} 
-                        className="w-full p-5 rounded-3xl bg-slate-100 dark:bg-slate-800 border-4 border-slate-200 dark:border-slate-700 text-center text-2xl mb-8 outline-none focus:border-emerald-500 font-black text-slate-900 dark:text-white shadow-inner uppercase transition-all" 
-                        placeholder="hr000" 
-                    />
-                    <button onClick={handleAuth} className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-5 rounded-[2rem] font-black text-xl uppercase tracking-widest border-b-8 border-emerald-700 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all shadow-xl hover:shadow-emerald-500/30">
-                        {t('authBtn')}
+            <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+                <div className="text-center text-white p-10 bg-slate-800 rounded-3xl border border-slate-700 shadow-2xl">
+                    <div className="text-4xl mb-4">🔒</div>
+                    <h2 className="text-2xl font-bold mb-2">{t('accessDenied')}</h2>
+                    <button onClick={() => window.location.href = '/login'} className="mt-6 px-6 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
+                        العودة لتسجيل الدخول
                     </button>
                 </div>
             </div>
@@ -338,7 +329,7 @@ const SchedulePage: React.FC = () => {
     }
 
     return (
-        <div dir={dir} className="min-h-screen bg-white dark:bg-slate-950 pt-24 pb-20 px-4 md:px-8 font-sans relative overflow-hidden">
+        <div dir={dir} className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-10 pb-20 px-4 md:px-8 font-sans relative overflow-hidden">
             
             <div className="absolute top-10 left-10 w-72 h-72 bg-teal-400/5 rounded-full blur-3xl pointer-events-none print:hidden" />
             <div className="absolute bottom-10 right-10 w-96 h-96 bg-purple-400/5 rounded-full blur-3xl pointer-events-none print:hidden" />
@@ -347,7 +338,7 @@ const SchedulePage: React.FC = () => {
             <div id="printable-schedule" className="hidden print:flex flex-col bg-white text-black w-full h-[210mm] max-h-[210mm] mx-auto box-border overflow-hidden">
                 <div className="flex justify-between items-center border-b-2 border-black pb-2 mb-2">
                     <div className="flex items-center gap-2">
-                        <img src="https://www.efipslibrary.online/school-logo.png" alt="EFIPS Logo" className="w-12 h-12 object-contain" crossOrigin="anonymous" />
+                        <img src="/school-logo.png" alt="EFIPS Logo" className="w-12 h-12 object-contain" crossOrigin="anonymous" />
                         <div>
                             <h2 className="text-sm font-black text-black m-0 p-0 leading-tight">{isAr ? t('schoolNameAr') : t('schoolNameEn')}</h2>
                         </div>
@@ -415,24 +406,13 @@ const SchedulePage: React.FC = () => {
             <div className="max-w-[1400px] mx-auto print:hidden relative z-10">
                 
                 <div className="text-center mb-10 flex flex-col items-center">
-                    <div className="relative group mb-4">
-                        <div className="absolute inset-0 bg-emerald-400/30 rounded-full blur-2xl group-hover:bg-emerald-400/50 transition-all duration-500 animate-pulse" />
-                        <img 
-                            src="/saqr-sch.png" 
-                            alt="Saqr Schedule" 
-                            className="w-32 h-32 md:w-44 md:h-44 object-contain relative z-10 animate-bounce drop-shadow-[0_20px_30px_rgba(16,185,129,0.35)] filter hover:scale-110 hover:rotate-3 transition-transform duration-300" 
-                            onError={(e)=>e.currentTarget.style.display='none'} 
-                        />
+                    <div className="mb-2 inline-block px-4 py-1.5 rounded-full bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-black text-xs shadow-sm border border-slate-200 dark:border-slate-700">
+                        {userType === 'admin' ? "👑 نمط المسؤول النشط" : `👨‍🏫 مرحباً ${getDisplayName()}`}
                     </div>
                     <h1 className="text-3xl md:text-5xl font-black bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-600 bg-clip-text text-transparent tracking-tight uppercase drop-shadow-sm">
                         {t('pageTitle')}
                     </h1>
                     <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-2">{t('subtitle')}</p>
-                    <div className="flex justify-center gap-3 mt-4">
-                        <div className="w-16 h-2 bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full animate-pulse" />
-                        <div className="w-8 h-2 bg-gradient-to-r from-amber-400 to-orange-400 rounded-full animate-pulse" />
-                        <div className="w-4 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse" />
-                    </div>
                 </div>
 
                 <div className="flex flex-wrap justify-end gap-4 mb-6">
@@ -497,7 +477,7 @@ const SchedulePage: React.FC = () => {
                                                     >
                                                         {slot?.teacher ? (
                                                             <>
-                                                                <div className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                                                                <div className={`absolute top-1.5 right-1.5 w-2 h-2 rounded-full ${slot.user_id === userData.teacher_id ? 'bg-emerald-500 animate-ping' : 'bg-slate-400'}`} />
                                                                 <span className="font-black text-slate-900 dark:text-white text-sm truncate max-w-[150px] drop-shadow-sm">{slot.teacher}</span>
                                                                 <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-1">{slot.subject}</span>
                                                                 <span className="text-[10px] font-extrabold bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-2.5 py-0.5 rounded-full mt-1.5 shadow-sm">
@@ -532,14 +512,15 @@ const SchedulePage: React.FC = () => {
 
                 {selectedSlot && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fade-in">
-                        <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border-4 border-emerald-400/50 w-full max-w-md shadow-[0_0_60px_rgba(16,185,129,0.3)] animate-zoom-in relative">
+                        <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border-4 border-emerald-400/50 w-full max-w-md shadow-[0_0_60px_rgba(16,185,129,0.3)] relative">
                             <h3 className="text-2xl font-black mb-6 bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent text-center">
                                 {selectedSlot.day} - {t('periodLabel')} {selectedSlot.period}
                             </h3>
                             <form onSubmit={handleSaveSlot} className="space-y-4">
                                 <div>
                                     <label className="text-xs font-bold text-slate-500 mb-1 block px-2">{t('teacherName')}</label>
-                                    <input type="text" required value={formTeacher} onChange={(e)=>setFormTeacher(e.target.value)} className="w-full p-4 rounded-2xl bg-slate-100 dark:bg-slate-800 border-2 border-transparent focus:border-emerald-500 outline-none font-bold shadow-inner transition-all" />
+                                    <input type="text" required value={formTeacher} onChange={(e)=>setFormTeacher(e.target.value)} className="w-full p-4 rounded-2xl bg-slate-100 dark:bg-slate-800 border-2 border-transparent focus:border-emerald-500 outline-none font-bold shadow-inner transition-all" disabled={userType !== 'admin'} />
+                                    {userType !== 'admin' && <p className="text-[10px] text-slate-400 mt-1 px-2">الاسم مسجل تلقائياً ولا يمكن تغييره</p>}
                                 </div>
                                 <div>
                                     <label className="text-xs font-bold text-slate-500 mb-1 block px-2">{t('subject')}</label>
@@ -555,7 +536,7 @@ const SchedulePage: React.FC = () => {
                                         <button type="button" onClick={()=>setSelectedSlot(null)} className="px-6 py-4 bg-slate-200 dark:bg-slate-800 font-black rounded-2xl hover:bg-slate-300 transition-all transform active:scale-95">{t('close')}</button>
                                     </div>
                                     
-                                    {currentEmployeeId === 'hr785' && (
+                                    {(userType === 'admin' || scheduleData[`${selectedSlot.day}_${selectedSlot.period}`]?.user_id === userData.teacher_id) && scheduleData[`${selectedSlot.day}_${selectedSlot.period}`]?.teacher && (
                                         <button 
                                             type="button" 
                                             onClick={handleDeleteSlot} 
@@ -576,7 +557,7 @@ const SchedulePage: React.FC = () => {
                 @media print {
                     @page {
                         size: A4 landscape;
-                        margin: 5mm; /* حواف صغيرة لضمان احتواء الجدول */
+                        margin: 5mm;
                     }
                     body {
                         background: white !important;
@@ -585,15 +566,15 @@ const SchedulePage: React.FC = () => {
                         padding: 0 !important;
                         height: 100vh !important;
                     }
-                    /* إخفاء واجهة الموقع الأصلية أثناء الطباعة */
-                    .print\\:hidden {
-                        display: none !important;
-                    }
-                    /* إظهار قسم الطباعة المخصص فقط */
-                    .print\\:flex {
-                        display: flex !important;
-                    }
+                    .print\\:hidden { display: none !important; }
+                    .print\\:flex { display: flex !important; }
                 }
+                
+                @keyframes fade-in {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                .animate-fade-in { animation: fade-in 0.2s ease-out; }
             `}</style>
         </div>
     );
