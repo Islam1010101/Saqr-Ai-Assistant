@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../App';
 import { createClient } from '@supabase/supabase-js';
-
-// إعداد اتصال Supabase
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'YOUR_SUPABASE_URL';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
-const supabase = createClient(supabaseUrl, supabaseKey);
+// 🚀 استيراد الاتصال من الملف المركزي بدلاً من كتابته هنا
+import { supabase } from '../src/utils/supabase';
 
 const translations = {
     ar: {
