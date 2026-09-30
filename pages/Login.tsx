@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../src/utils/supabase';
 
 // أيقونات مبسطة وخفيفة للـ Light Mode
@@ -230,6 +231,13 @@ export default function Login() {
               >
                 {loading ? (lang === 'ar' ? 'جاري التحقق...' : 'Verifying...') : (lang === 'ar' ? 'دخول للمكتبة' : 'Enter Library')}
               </button>
+
+              {/* الرابط المطلوب إضافته تحت زر الدخول للمكتبة */}
+              <div className="text-center pt-2">
+                <Link to="/about" className="text-xs md:text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline transition-all">
+                  {lang === 'ar' ? 'عن مدرسة صقر الإمارات الدولية الخاصة' : 'More About EFIPS'}
+                </Link>
+              </div>
             </form>
           ) : (
             /* فورم المعلمين */
@@ -267,6 +275,13 @@ export default function Login() {
               >
                 {loading ? (lang === 'ar' ? 'جاري التحقق...' : 'Verifying...') : (lang === 'ar' ? 'دخول المعلم' : 'Teacher Login')}
               </button>
+
+              {/* الرابط المطلوب إضافته تحت زر الدخول للمكتبة */}
+              <div className="text-center pt-2">
+                <Link to="/about" className="text-xs md:text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:underline transition-all">
+                  {lang === 'ar' ? 'عن مدرسة صقر الإمارات الدولية الخاصة' : 'More About EFIPS'}
+                </Link>
+              </div>
             </form>
           )}
         </div>
