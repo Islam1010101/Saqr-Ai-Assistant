@@ -1,22 +1,168 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useLanguage } from '../App';
+import { useNavigate } from 'react-router-dom';
 
 // --- الأيقونات البرمجية SVG ---
-const IconPlay = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>;
-const IconStop = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="3"/></svg>;
+const IconPlay = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>;
+const IconStop = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="3"/></svg>;
 const IconRead = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a4 4 0 0 0-4-4H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a4 4 0 0 1 4-4h6z"/></svg>;
-const IconArrowLeft = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>;
-const IconArrowRight = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>;
+const UserIcon = () => (
+    <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+        <circle cx="12" cy="7" r="4" />
+    </svg>
+);
+const HeadphonesIcon = () => (
+    <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+        <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+    </svg>
+);
+
+// --- مكون التلاشي المخصص (Reveal Component) ---
+const RevealOnScroll = ({ children, delay = 0 }: { children: React.ReactNode, delay?: number }) => {
+    const [isVisible, setIsVisible] = useState(true);
+    const elementRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setIsVisible(true);
+                } else {
+                    setIsVisible(false);
+                }
+            },
+            {
+                threshold: 0.15,
+                rootMargin: "-20px 0px -20px 0px"
+            }
+        );
+
+        if (elementRef.current) {
+            observer.observe(elementRef.current);
+        }
+
+        return () => {
+            if (elementRef.current) {
+                observer.unobserve(elementRef.current);
+            }
+        };
+    }, []);
+
+    return (
+        <div
+            ref={elementRef}
+            className={`transition-all duration-700 ease-out transform w-full ${
+                isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-12 scale-95 pointer-events-none'
+            }`}
+            style={{ transitionDelay: `${delay}ms` }}
+        >
+            {children}
+        </div>
+    );
+};
+
+// --- بطاقة الكتاب بالتصميم الثنائي الأبعاد (2D Flat Design) المتطابق مع الموقع ---
+const CreatorCard = React.memo(({ work, isPlaying, onPlayToggle, isAr }: { work: any, isPlaying: boolean, onPlayToggle: (id: string) => void, isAr: boolean }) => {
+    const colors = [
+        'from-blue-500 to-sky-500 border-blue-200',
+        'from-emerald-500 to-teal-400 border-emerald-200',
+        'from-rose-500 to-pink-500 border-rose-200',
+        'from-amber-500 to-orange-400 border-amber-200',
+        'from-purple-500 to-indigo-500 border-purple-200'
+    ];
+    // تحديد لون عشوائي بناء على الحرف الأول للثبات
+    const colorClass = colors[work.title.length % colors.length];
+
+    return (
+        <div className="relative group w-full h-[320px] md:h-[350px] flex items-stretch justify-center p-2">
+            
+            {/* هالة مضيئة خلف الكتاب في حالة التشغيل */}
+            {isPlaying && (
+                <div className="absolute inset-0 bg-white/30 blur-3xl rounded-[2rem] scale-105 opacity-80 animate-pulse transition-all duration-500 pointer-events-none -z-10"></div>
+            )}
+
+            <div className={`w-full h-full relative rounded-[2rem] border-4 shadow-lg bg-gradient-to-br ${colorClass} transition-all duration-500 transform group-hover:-translate-y-3 group-hover:shadow-2xl overflow-hidden flex flex-col`}>
+                
+                {/* تأثير انعكاس الزجاج الخفيف */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-black/10 pointer-events-none z-10"></div>
+                
+                {/* صورة غلاف القصة العلوية مع زر قراءة الكتاب */}
+                <div className="relative h-1/2 w-full overflow-hidden rounded-t-[1.5rem] z-20">
+                    <img src={work.cover} alt={work.title} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
+                    <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                        <a href={work.pdfUrl} target="_blank" rel="noopener noreferrer" className="bg-white/90 text-slate-900 font-black px-6 py-2.5 rounded-full flex items-center gap-2 hover:scale-105 hover:bg-white transition-all shadow-xl text-xs uppercase translate-y-4 group-hover:translate-y-0 duration-300">
+                            {isAr ? 'قراءة الكتاب' : 'Read Book'} <IconRead />
+                        </a>
+                    </div>
+                </div>
+
+                <div className="p-4 md:p-5 flex flex-col flex-1 relative z-20 bg-black/20 backdrop-blur-md">
+                    
+                    <div className="flex-1 flex flex-col text-center mt-1">
+                        <h3 className="font-black text-lg md:text-xl text-white leading-tight drop-shadow-md line-clamp-2 mb-2">
+                            {work.title}
+                        </h3>
+                        <div className="flex items-center gap-2 text-white/90 justify-center bg-black/20 p-2 rounded-xl w-fit mx-auto backdrop-blur-sm mb-4">
+                            <UserIcon />
+                            <p className="text-xs md:text-sm font-bold truncate uppercase tracking-wide">{work.author}</p>
+                        </div>
+                    </div>
+
+                    {/* زر الاستماع */}
+                    <button 
+                        onClick={() => onPlayToggle(work.id)} 
+                        className={`w-full py-2.5 rounded-xl font-black text-xs md:text-sm flex items-center justify-center gap-2 transition-all duration-300 relative overflow-hidden ${isPlaying ? 'bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.6)] border border-rose-300' : 'bg-white/20 text-white hover:bg-white hover:text-slate-900 border border-white/40'}`}
+                    >
+                        {isPlaying && <div className="absolute inset-0 bg-white/20 animate-pulse pointer-events-none"></div>}
+                        <span className="relative z-10 flex items-center gap-2 uppercase tracking-widest">
+                            {isPlaying ? <><IconStop /> {isAr ? 'إيقاف' : 'Stop'}</> : <><HeadphonesIcon /> {isAr ? 'استمع للملخص' : 'Play Summary'}</>}
+                        </span>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    );
+});
+
 
 const CreatorsPortalPage: React.FC = () => {
+    // تعيين الإنجليزية كلغة افتراضية عند فتح الصفحة مباشرة
     const { locale, dir } = useLanguage();
-    const isAr = locale === 'ar';
+    const [currentLocale, setCurrentLocale] = useState(locale || 'en');
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        setCurrentLocale(locale);
+    }, [locale]);
+
+    const isAr = currentLocale === 'ar';
     const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
-    const scrollRef = useRef<HTMLDivElement>(null);
     const audioRefs = useRef<Map<string, HTMLAudioElement>>(new Map());
 
+    // حالة للتحكم في ظهور وتلاشي الحاوية الرئيسية
+    const [isVisible, setIsVisible] = useState(true);
+    const lastScrollY = useRef(0);
+
+    // متابعة التمرير لتلاشي الصفحة الرئيسية
+    useEffect(() => {
+        const handleScroll = () => {
+            const currentScrollY = window.scrollY;
+            if (currentScrollY > lastScrollY.current && currentScrollY > 150) {
+                setIsVisible(false);
+            } else {
+                setIsVisible(true);
+            }
+            lastScrollY.current = currentScrollY;
+        };
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
     // البيانات الأساسية
-    const baseWorks = [
+   const baseWorks = [
         { id: "1", title: isAr ? "أبي نبع العطاء" : "Father: Fountain of Giving", author: isAr ? "ياسين محمد مسعود" : "Yassin Mohamed", cover: "/cover/12.jpg", pdfUrl: "https://drive.google.com/file/d/1EcOPekgKRMhnq-HTiqU5hLrVxMIl2MEV/view?usp=drive_link", audioUrl: "/audio/أبي نبع العطاء.mp3" },
         { id: "2", title: isAr ? "الصدق منجاة" : "Honesty is Salvation", author: isAr ? "الصالح إسماعيل المصري" : "Al-Saleh Ismail", cover: "/cover/17.jpg", pdfUrl: "https://drive.google.com/file/d/1WbIIcUpBd2s4on8aMSiw20KCG5fpK-IA/view?usp=drive_link", audioUrl: "/audio/الصدق منجاة.mp3" },
         { id: "3", title: isAr ? "مسرحية اللغة العربية" : "Arabic Language Play", author: isAr ? "فاطمة فلاح الأحبابي" : "Fatima Al-Ahbabi", cover: "/cover/18.jpg", pdfUrl: "https://drive.google.com/file/d/1DZk9Moh7CceSN5fpekCtxfRzNSzQiYMY/view?usp=drive_link", audioUrl: "/audio/اللغة العربية.mp3" },
@@ -32,7 +178,7 @@ const CreatorsPortalPage: React.FC = () => {
     // ترتيب عشوائي عند التحميل
     const studentWorks = useMemo(() => {
         return [...baseWorks].sort(() => Math.random() - 0.5);
-    }, [locale]);
+    }, [baseWorks]);
 
     const handleAudioPlay = (id: string) => {
         const targetAudio = audioRefs.current.get(id);
@@ -46,151 +192,97 @@ const CreatorsPortalPage: React.FC = () => {
         }
     };
 
-    const scroll = (direction: 'left' | 'right') => {
-        if (scrollRef.current) {
-            const { scrollLeft, clientWidth } = scrollRef.current;
-            const scrollAmount = clientWidth * 0.8;
-            scrollRef.current.scrollTo({ left: direction === 'left' ? scrollLeft - scrollAmount : scrollLeft + scrollAmount, behavior: 'smooth' });
-        }
-    };
-
-    // التمرير التلقائي
-    useEffect(() => {
-        const interval = setInterval(() => {
-            if (scrollRef.current) {
-                const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-                const isEnd = dir === 'rtl' ? Math.abs(scrollLeft) + clientWidth >= scrollWidth - 100 : scrollLeft + clientWidth >= scrollWidth - 100;
-                if (isEnd) scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
-                else scrollRef.current.scrollBy({ left: dir === 'rtl' ? -clientWidth * 0.8 : clientWidth * 0.8, behavior: 'smooth' });
-            }
-        }, 6000);
-        return () => clearInterval(interval);
-    }, [dir]);
-
     return (
-        <div dir={dir} className="w-full min-h-[100dvh] flex flex-col bg-slate-50 dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300 py-10 md:py-20 px-4 md:px-6">
+        <div dir={dir} className="w-full min-h-[100dvh] flex flex-col items-center bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-500 pb-20">
             
             {/* 🌟 الخلفية الديناميكية النابضة 🌟 */}
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-50 dark:opacity-30">
-               <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-red-500/20 rounded-full blur-[120px] animate-blob"></div>
-               <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-blue-500/10 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
-               <div className="absolute top-[40%] left-[20%] w-[30%] h-[30%] bg-purple-500/10 rounded-full blur-[100px] animate-blob animation-delay-4000"></div>
+            <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-50 dark:opacity-20">
+               <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-500/20 rounded-full blur-[100px] animate-blob"></div>
+               <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-pink-500/20 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
             </div>
 
-            <div className="w-full max-w-[1400px] mx-auto flex flex-col gap-12 md:gap-16 animate-fade-in-up pb-20">
+            {/* الحاوية الرئيسية التي تتلاشى عند التمرير لأسفل */}
+            <div className={`w-full max-w-[1400px] mx-auto px-4 md:px-6 relative z-10 antialiased overflow-x-hidden transition-all duration-700 ease-in-out transform origin-top ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-8 scale-95 pointer-events-none'}`}>
                 
-                {/* --- 1. قسم الترحيب العلوي المُحسن --- */}
-                <div className="text-center space-y-6 md:space-y-8 max-w-5xl mx-auto relative z-20 hover:scale-[1.01] transition-transform duration-700">
-                    <h1 className={`text-5xl md:text-7xl lg:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-blue-600 dark:from-red-400 dark:to-blue-400 leading-tight animate-text-reveal pb-2 drop-shadow-sm ${locale === 'en' ? 'tracking-tight' : ''}`}>
+                {/* --- 1. قسم الترحيب العلوي --- */}
+                <div className="text-center mt-12 mb-16 relative">
+                    <button onClick={() => navigate(-1)} className="absolute start-0 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-800 text-slate-800 dark:text-white px-5 py-2.5 rounded-full font-black text-sm hover:bg-slate-200 hover:-translate-x-1 active:translate-y-1 border-b-4 border-slate-300 dark:border-slate-700 active:border-b-0 transition-all flex items-center gap-2 shadow-sm">
+                        <span className="text-xl leading-none rtl:rotate-180">←</span> {isAr ? 'العودة' : 'Back'}
+                    </button>
+                    
+                    <h1 className={`text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-500 uppercase tracking-tight`}>
                         {isAr ? 'ركن المبدعين' : 'CREATORS CORNER'}
                     </h1>
-                    <p className="text-lg md:text-2xl text-slate-600 dark:text-slate-400 font-medium leading-relaxed max-w-3xl mx-auto animate-text-reveal-delayed">
+                    <p className="text-sm md:text-lg text-slate-600 dark:text-slate-400 font-bold max-w-2xl mx-auto pt-4">
                         {isAr ? 'مساحة حيث تلتقي الأفكار المبتكرة لتشكل المستقبل. استكشف إبداعات زملائك في عالم التأليف.' : 'A space where innovative ideas meet to shape the future. Explore your peers\' authoring creations.'}
                     </p>
-                    <div className="h-1.5 w-24 bg-gradient-to-r from-red-600 to-blue-600 mx-auto rounded-full shadow-[0_0_15px_rgba(220,38,38,0.5)] animate-pulse"></div>
+                    <div className="flex justify-center gap-3 mt-6">
+                        <div className="w-16 h-2 bg-purple-500 rounded-full" />
+                        <div className="w-8 h-2 bg-pink-400 rounded-full" />
+                    </div>
                 </div>
 
-                {/* --- 2. قسم المؤلف الصغير (المعرض الزجاجي التفاعلي) --- */}
-                <div className="w-full relative z-10 bg-white/60 dark:bg-slate-800/60 backdrop-blur-2xl rounded-[2.5rem] md:rounded-[4rem] border border-white/50 dark:border-slate-700/50 shadow-2xl shadow-slate-200/50 dark:shadow-slate-900/50 py-10 md:py-16 overflow-hidden">
-                    
-                    {/* لمعان زجاجي متحرك فوق الحاوية */}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-white/40 to-transparent dark:from-white/0 dark:via-white/5 opacity-50 pointer-events-none"></div>
+                {/* --- 2. عرض البطاقات (Grid متوافق مع الموبايل وعمود واحد على الشاشات الصغيرة) --- */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-10 gap-x-4 md:gap-x-6 px-2 md:px-4">
+                    {studentWorks.map((work, index) => (
+                        <RevealOnScroll key={work.id} delay={(index % 4) * 100}>
+                            <div className="w-full max-w-sm mx-auto">
+                                <CreatorCard 
+                                    work={work} 
+                                    isAr={isAr}
+                                    isPlaying={playingAudioId === work.id} 
+                                    onPlayToggle={handleAudioPlay} 
+                                />
+                            </div>
+                            
+                            {/* إخفاء المشغل الحقيقي في الخلفية واستدعائه برمجياً */}
+                            <audio 
+                                ref={el => { if(el) audioRefs.current.set(work.id, el); }} 
+                                onEnded={() => setPlayingAudioId(null)} 
+                                src={work.audioUrl} 
+                                hidden 
+                            />
+                        </RevealOnScroll>
+                    ))}
+                </div>
 
-                    <div className="text-center mb-12 px-4 relative z-20 animate-fade-in-up" style={{animationDelay: '0.4s'}}>
-                        <span className="inline-flex items-center gap-3 px-8 py-3 bg-white/90 dark:bg-slate-800/90 text-slate-800 dark:text-white border border-slate-200 dark:border-slate-600 rounded-full text-sm md:text-lg font-bold uppercase tracking-widest shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-default">
-                            <span className="animate-bounce">📚</span> {isAr ? 'مكتبة المؤلف الصغير' : 'The Little Author Library'}
-                        </span>
-                    </div>
-
-                    <div className="relative px-2 md:px-16 group/container z-20">
-                        {/* أزرار التمرير الجانبية (تظهر عند المرور) */}
-                        <button onClick={() => scroll('left')} className="hidden md:flex absolute left-4 top-[45%] -translate-y-1/2 z-40 bg-white/90 dark:bg-slate-800/90 p-4 rounded-full shadow-xl hover:bg-red-600 hover:text-white dark:hover:bg-red-600 transition-all border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 opacity-0 group-hover/container:opacity-100 group-hover/container:-translate-x-2 hover:scale-110">
-                            <IconArrowLeft />
-                        </button>
-                        <button onClick={() => scroll('right')} className="hidden md:flex absolute right-4 top-[45%] -translate-y-1/2 z-40 bg-white/90 dark:bg-slate-800/90 p-4 rounded-full shadow-xl hover:bg-red-600 hover:text-white dark:hover:bg-red-600 transition-all border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 opacity-0 group-hover/container:opacity-100 group-hover/container:translate-x-2 hover:scale-110">
-                            <IconArrowRight />
-                        </button>
-
-                        {/* شريط التمرير للكروت */}
-                        <div ref={scrollRef} className="flex overflow-x-auto gap-6 md:gap-8 pb-10 snap-x snap-mandatory no-scrollbar pt-4 px-6 md:px-4 scroll-smooth items-stretch">
-                            {studentWorks.map((work) => (
-                                <div key={work.id} className="w-[85vw] sm:w-[350px] md:w-[380px] flex-shrink-0 snap-center">
-                                    
-                                    {/* كارت الكتاب مع تأثيرات Hover */}
-                                    <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md rounded-[2rem] p-6 border border-slate-200 dark:border-slate-700 shadow-md hover:shadow-[0_20px_40px_-15px_rgba(220,38,38,0.25)] dark:hover:shadow-[0_20px_40px_-15px_rgba(220,38,38,0.15)] transition-all duration-500 hover:-translate-y-4 hover:scale-[1.02] h-full flex flex-col relative overflow-hidden group/card">
-                                        
-                                        {/* وهج خلفي خفيف داخل الكارت عند التمرير */}
-                                        <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-blue-500/5 opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-
-                                        <div className="relative aspect-[3/4.2] rounded-[1.5rem] overflow-hidden mb-6 block shadow-sm group-hover/card:shadow-xl transition-shadow duration-500">
-                                            <img src={work.cover} className="w-full h-full object-cover transform group-hover/card:scale-110 transition-transform duration-700" alt={work.title} />
-                                            
-                                            {/* تأثير الغطاء عند المرور مع زر قراءة الـ PDF */}
-                                            <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px] opacity-0 group-hover/card:opacity-100 transition-all duration-300 flex items-center justify-center">
-                                                <a href={work.pdfUrl} target="_blank" rel="noopener noreferrer" className="bg-white/90 text-slate-900 font-bold px-6 py-3 rounded-full flex items-center gap-2 hover:scale-105 hover:bg-white transition-all shadow-xl text-sm uppercase translate-y-4 group-hover/card:translate-y-0 duration-300">
-                                                    {isAr ? 'قراءة الكتاب' : 'Read PDF'} <IconRead />
-                                                </a>
-                                            </div>
-                                        </div>
-                                        
-                                        <div className="text-start flex-1 flex flex-col relative z-10">
-                                            <h3 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white line-clamp-2 mb-1 group-hover/card:text-red-600 dark:group-hover/card:text-red-400 transition-colors">{work.title}</h3>
-                                            <p className="text-slate-500 dark:text-slate-400 font-medium text-sm md:text-base mb-6">{work.author}</p>
-                                            
-                                            {/* زر تشغيل الصوت */}
-                                            <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-700/50">
-                                                <audio ref={el => { if(el) audioRefs.current.set(work.id, el); }} onEnded={() => setPlayingAudioId(null)} src={work.audioUrl} hidden />
-                                                <button onClick={() => handleAudioPlay(work.id)} className={`w-full py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-300 overflow-hidden relative ${playingAudioId === work.id ? 'bg-red-600 text-white shadow-lg shadow-red-600/30 scale-[1.02]' : 'bg-slate-100 dark:bg-slate-700/50 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
-                                                    {playingAudioId === work.id && (
-                                                        <div className="absolute inset-0 bg-white/20 animate-pulse pointer-events-none"></div>
-                                                    )}
-                                                    <span className="relative z-10 flex items-center gap-2">
-                                                        {playingAudioId === work.id 
-                                                            ? <><IconStop /> <span>{isAr ? 'إيقاف الاستماع' : 'Stop Audio'}</span></> 
-                                                            : <><IconPlay /> <span>{isAr ? 'استمع للملخص' : 'Play Summary'}</span></>
-                                                        }
-                                                    </span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
+                {/* --- 3. لافتة "قريباً ستكون أنت أحد المبدعين" (في الأسفل مع تأثير تلاشي) --- */}
+                <RevealOnScroll delay={300}>
+                    <div className="mt-20 w-full text-center flex justify-center px-4">
+                        <div className="bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-200 dark:from-amber-600 dark:via-yellow-500 dark:to-amber-600 p-[4px] rounded-[3rem] shadow-2xl hover:scale-105 transition-transform duration-500 max-w-3xl w-full">
+                            <div className="bg-white dark:bg-slate-900 rounded-[2.8rem] py-8 px-6 md:py-10 md:px-12 flex flex-col items-center justify-center relative overflow-hidden">
+                                <div className="absolute inset-0 bg-yellow-400/10 dark:bg-yellow-400/5 animate-pulse pointer-events-none"></div>
+                                <span className="text-4xl md:text-5xl mb-4 animate-bounce">🌟</span>
+                                <h2 className="text-2xl md:text-4xl font-black text-slate-800 dark:text-white text-center leading-tight tracking-wide">
+                                    {isAr ? 'قريباً.. ستكون أنت أحد هؤلاء المبدعين!' : 'Soon.. You will be one of these creators!'}
+                                </h2>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </RevealOnScroll>
 
             </div>
 
             <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+                @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
                 * { font-family: 'Cairo', sans-serif !important; }
-                .no-scrollbar::-webkit-scrollbar { display: none; }
+                .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+                .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+                .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+                .dark .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; }
                 
-                /* تأثيرات كشف النص */
-                @keyframes reveal-text {
-                  0% { clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%); transform: translateY(40px); opacity: 0; }
-                  100% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); transform: translateY(0); opacity: 1; }
-                }
-                .animate-text-reveal { animation: reveal-text 1.2s cubic-bezier(0.77, 0, 0.175, 1) forwards; }
-                .animate-text-reveal-delayed { animation: reveal-text 1.2s cubic-bezier(0.77, 0, 0.175, 1) 0.3s forwards; clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%); }
-
-                /* الأشكال الخلفية العائمة والمتحركة (لتنبض بالحياة) */
                 @keyframes blob {
                   0% { transform: translate(0px, 0px) scale(1); }
                   33% { transform: translate(30px, -50px) scale(1.1); }
                   66% { transform: translate(-20px, 20px) scale(0.9); }
                   100% { transform: translate(0px, 0px) scale(1); }
                 }
-                .animate-blob { animation: blob 8s infinite alternate ease-in-out; }
+                .animate-blob { animation: blob 7s infinite alternate ease-in-out; }
                 .animation-delay-2000 { animation-delay: 2s; }
                 .animation-delay-4000 { animation-delay: 4s; }
                 
-                @keyframes fade-in-up {
-                  0% { opacity: 0; transform: translateY(30px); }
-                  100% { opacity: 1; transform: translateY(0); }
-                }
-                .animate-fade-in-up { animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+                @keyframes fade-in-up { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+                .animate-fade-in-up { animation: fade-in-up 0.5s ease-out forwards; }
             `}</style>
         </div>
     );
