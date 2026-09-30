@@ -6,11 +6,7 @@ import html2canvas from 'html2canvas';
 import { bookData } from '../api/bookData'; 
 import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
-
-// 👇 1. استدعاء دالة التتبع (تم الحفاظ عليه تماماً)
 import { trackActivity } from '../src/utils/tracker';
-
-// 🚀 استيراد الاتصال من الملف المركزي بدلاً من كتابته هنا
 import { supabase } from '../src/utils/supabase';
 
 // --- 1. بروتوكول عقل صقر النهائي (تم الحفاظ عليه تماماً) ---
@@ -83,7 +79,7 @@ const localization: any = {
 };
 
 // ==========================================
-// أيقونات SVG جذابة (بديلة للإيموجيز)
+// أيقونات SVG جذابة
 // ==========================================
 const SendIcon = () => (
     <svg className="w-6 h-6 md:w-8 md:h-8" fill="currentColor" viewBox="0 0 24 24">
@@ -99,12 +95,13 @@ const DownloadIcon = () => (
 
 // --- مكون التلاشي المخصص للرسائل (Message Reveal Component) ---
 const RevealMessage = ({ children, delay = 0 }: { children: React.ReactNode, delay?: number }) => {
-    const [isVisible, setIsVisible] = useState(true);
+    const [isVisible, setIsVisible] = useState(false);
     const elementRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const observer = new IntersectionObserver(
             ([entry]) => {
+                // يعطي تأثير الظهور عندما تكون الرسالة في منتصف الشاشة، ويتلاشى عندما تبتعد
                 if (entry.isIntersecting) {
                     setIsVisible(true);
                 } else {
@@ -112,8 +109,8 @@ const RevealMessage = ({ children, delay = 0 }: { children: React.ReactNode, del
                 }
             },
             {
-                threshold: 0.1,
-                rootMargin: "0px 0px -50px 0px"
+                threshold: 0.2, // يتفعل عند ظهور 20% من العنصر
+                rootMargin: "-10% 0px -10% 0px" // حواف مخفية من الأعلى والأسفل للتلاشي السلس
             }
         );
 
@@ -132,7 +129,7 @@ const RevealMessage = ({ children, delay = 0 }: { children: React.ReactNode, del
         <div
             ref={elementRef}
             className={`transition-all duration-700 ease-out transform w-full ${
-                isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-8 scale-95'
+                isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'
             }`}
             style={{ transitionDelay: `${delay}ms` }}
         >
@@ -145,19 +142,16 @@ const SmartSearchPage: React.FC = () => {
   const { locale, dir } = useLanguage();
   const t = (key: string) => localization[locale][key];
 
-  // 🚀 إنشاء رسالة الترحيب الديناميكية حسب نوع المستخدم
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [winnerData, setWinnerData] = useState<any>(null);
   
-  // حالة تفاعل صقر الحركية (Idle هي الافتراضية)
   const [saqrState, setSaqrState] = useState<'idle' | 'thinking' | 'speaking' | 'victory'>('idle');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const certificateRef = useRef<HTMLDivElement>(null);
 
-  // 🚀 قراءة بيانات المستخدم وصياغة رسالة الترحيب
   useEffect(() => {
     const storedUser = localStorage.getItem('current_user');
     const storedType = localStorage.getItem('user_type');
@@ -167,7 +161,7 @@ const SmartSearchPage: React.FC = () => {
     if (storedUser && storedType) {
       const user = JSON.parse(storedUser);
       const name = locale === 'ar' ? (user.name_ar || user.name_en) : (user.name_en || user.name_ar);
-      const firstName = name.split(' ')[0]; // أخذ الاسم الأول للودية
+      const firstName = name.split(' ')[0];
       
       if (storedType === 'student') {
         welcomeMessage = locale === 'ar' 
@@ -179,7 +173,6 @@ const SmartSearchPage: React.FC = () => {
           : `Welcome esteemed teacher **${firstName}**! 👨‍🏫\nI am 'Saqr', at your service. How can I assist you today with resources or information?`;
       }
     } else {
-      // رسالة الترحيب الافتراضية إذا لم يكن مسجلاً
       welcomeMessage = locale === 'ar'
         ? 'أهلاً بك! أنا "صقر"، المساعد الذكي لمكتبة المدرسة. هل نؤلف قصة معاً اليوم، أم تبحث عن كتاب محدد؟'
         : "Welcome! I'm 'Saqr', your AI Librarian. Shall we co-author a story today, or are you looking for a specific book?";
@@ -195,13 +188,11 @@ const SmartSearchPage: React.FC = () => {
   const handleDownloadJPG = async () => {
     if (!certificateRef.current) return;
     
-    // حفظ التنسيقات الأصلية مؤقتاً لحمايتها
     const originalPosition = certificateRef.current.style.position;
     const originalLeft = certificateRef.current.style.left;
     const originalTop = certificateRef.current.style.top;
     const originalZIndex = certificateRef.current.style.zIndex;
 
-    // تهيئة العنصر بشكل مستقر ليتمكن html2canvas من التقاطه بكامل أبعاده الواقعية
     certificateRef.current.style.position = 'absolute';
     certificateRef.current.style.left = '0px';
     certificateRef.current.style.top = '0px';
@@ -226,7 +217,6 @@ const SmartSearchPage: React.FC = () => {
     } catch (error) {
       console.error("Error generating certificate image:", error);
     } finally {
-      // إعادة التنسيقات الأصلية للعنصر تماماً كما كانت لحفظ استقرار الصفحة التالية
       certificateRef.current.style.position = originalPosition;
       certificateRef.current.style.left = originalLeft;
       certificateRef.current.style.top = originalTop;
@@ -238,7 +228,6 @@ const SmartSearchPage: React.FC = () => {
     if (input.trim() === '' || isLoading) return;
     const userQuery = input.trim();
 
-    // 👇 2. إرسال سؤال الطالب إلى السحابة للتعقب
     trackActivity('ai', userQuery);
 
     setMessages(prev => [...prev, { role: 'user', content: userQuery }]);
@@ -281,7 +270,6 @@ const SmartSearchPage: React.FC = () => {
       searchContext = `EFIPS LIBRARY RECORDS FOUND: ${JSON.stringify(foundBooks.slice(0, 10))}.`;
     }
 
-    // إرسال البيانات السياقية لـ Saqr
     const storedUser = localStorage.getItem('current_user');
     let userContextInfo = "";
     if (storedUser) {
@@ -349,34 +337,34 @@ const SmartSearchPage: React.FC = () => {
   return (
     <div dir={dir} className="w-full h-[100dvh] flex flex-col bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-hidden text-slate-900 dark:text-slate-100 transition-colors duration-300">
       
-      {/* 🌟 الخلفية الديناميكية المبهجة 🌟 */}
+      {/* 🌟 الخلفية الديناميكية المبهجة */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-50 dark:opacity-20">
          <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-sky-400/30 blur-[120px] rounded-full animate-blob"></div>
          <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-amber-400/30 blur-[120px] rounded-full animate-blob animation-delay-2000"></div>
       </div>
       
-      {/* Header - الهيدر العلوي بستايل بارز ومكبر */}
-      <header className="flex-shrink-0 px-4 py-6 md:px-8 w-full max-w-5xl mx-auto flex justify-between items-center z-20 relative">
+      {/* Header - الهيدر العلوي مكبر وبارز */}
+      <header className="flex-shrink-0 px-4 py-6 md:px-8 w-full max-w-5xl mx-auto flex justify-between items-center z-20 relative bg-white/40 dark:bg-slate-900/40 backdrop-blur-md rounded-b-[3rem] shadow-sm mb-4">
          <div className="flex items-center gap-4">
-           {/* تكبير صورة صقر في الهيدر ليكون أكثر وضوحاً */}
-           <div className={`w-16 h-16 md:w-20 md:h-20 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden bg-white dark:bg-slate-800 border-4 border-sky-400 dark:border-sky-600 shadow-lg ${saqrState === 'thinking' ? 'ring-4 ring-amber-400 animate-pulse' : ''}`}>
+           {/* تكبير صورة صقر */}
+           <div className={`w-16 h-16 md:w-20 md:h-20 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden bg-white dark:bg-slate-800 border-4 border-sky-400 dark:border-sky-600 shadow-xl ${saqrState === 'thinking' ? 'ring-4 ring-amber-400 animate-pulse' : ''}`}>
              <img 
                src={getSaqrImageSrc()} 
                alt="Saqr AI" 
-               className="w-full h-full object-cover"
+               className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-300"
                onError={(e) => e.currentTarget.style.display = 'none'}
              />
            </div>
            <div>
-             <h1 className="font-black text-2xl md:text-4xl text-slate-900 dark:text-white tracking-tight uppercase">{t('status')}</h1>
-             <span className="inline-flex items-center gap-1.5 text-xs md:text-sm text-emerald-600 dark:text-emerald-400 font-black uppercase mt-1">
-               <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span> {t('online')}
+             <h1 className="font-black text-3xl md:text-5xl text-slate-900 dark:text-white tracking-tight uppercase drop-shadow-sm">{t('status')}</h1>
+             <span className="inline-flex items-center gap-1.5 text-sm md:text-base text-emerald-600 dark:text-emerald-400 font-black uppercase mt-1">
+               <span className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]"></span> {t('online')}
              </span>
            </div>
          </div>
 
          {winnerData && saqrState === 'victory' && (
-           <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-6 py-3 bg-rose-500 text-white font-black rounded-full border-b-4 border-rose-700 hover:-translate-y-1 active:border-b-0 active:translate-y-1 transition-all shadow-md uppercase text-sm">
+           <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-6 py-3 bg-rose-500 text-white font-black rounded-full border-b-4 border-rose-700 hover:-translate-y-1 active:border-b-0 active:translate-y-1 transition-all shadow-md uppercase text-sm md:text-base">
              <DownloadIcon />
              <span className="hidden md:inline">{t('download')}</span>
              <span className="md:hidden">تحميل</span>
@@ -384,21 +372,21 @@ const SmartSearchPage: React.FC = () => {
          )}
       </header>
 
-      {/* 🛠️ منطقة المحادثات والتلاشي */}
-      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-2 no-scrollbar scroll-smooth relative z-10 pb-32">
-        <div className="max-w-4xl mx-auto flex flex-col justify-end min-h-fit space-y-4 pt-2">
+      {/* 🛠️ منطقة المحادثات والتلاشي التفاعلي للرسائل (تختفي من الأعلى والأسفل إذا بعدت عن المركز) */}
+      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-2 no-scrollbar scroll-smooth relative z-10 pb-40">
+        <div className="max-w-5xl mx-auto flex flex-col justify-end min-h-fit space-y-6 pt-2">
           
           {messages.map((msg, index) => (
             <RevealMessage key={index}>
                 <div className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   
-                  {/* رسائل صقر المساعد الذكي */}
+                  {/* رسائل صقر */}
                   {msg.role === 'assistant' && (
                     <div className="flex flex-col gap-2 max-w-[95%] md:max-w-[85%] items-start">
                       <div className="flex gap-3 md:gap-4 items-end" translate="no" lang={locale}>
                         {/* حاوية نص رد الذكاء الاصطناعي الأنيقة بدون مسافات إضافية */}
-                        <div className="bg-white dark:bg-slate-800 border-4 border-slate-200 dark:border-slate-700 rounded-[2rem] rounded-bl-none px-6 py-4 shadow-md text-slate-800 dark:text-slate-100 font-bold leading-relaxed text-base md:text-xl">
-                          <div className="prose prose-base md:prose-lg dark:prose-invert max-w-none text-start font-cairo font-bold">
+                        <div className="bg-white dark:bg-slate-800 border-4 border-slate-200 dark:border-slate-700 rounded-[2rem] rounded-bl-none px-6 py-5 shadow-lg text-slate-800 dark:text-slate-100 font-bold leading-relaxed text-lg md:text-2xl">
+                          <div className="prose prose-lg md:prose-xl dark:prose-invert max-w-none text-start font-cairo font-bold">
                             <ReactMarkdown>{msg.content}</ReactMarkdown>
                           </div>
                         </div>
@@ -418,8 +406,8 @@ const SmartSearchPage: React.FC = () => {
 
                   {/* رسائل المستخدم الطالب */}
                   {msg.role === 'user' && (
-                    <div className="bg-amber-400 dark:bg-amber-500 text-slate-900 px-6 py-4 rounded-[2rem] rounded-br-none max-w-[85%] md:max-w-[75%] shadow-md border-b-4 border-amber-600 transition-all hover:-translate-y-1">
-                      <div className="font-black leading-relaxed max-w-none text-start text-lg md:text-xl">
+                    <div className="bg-amber-400 dark:bg-amber-500 text-slate-900 px-6 py-5 rounded-[2rem] rounded-br-none max-w-[85%] md:max-w-[75%] shadow-lg border-b-4 border-amber-600 transition-all hover:-translate-y-1">
+                      <div className="font-black leading-relaxed max-w-none text-start text-xl md:text-2xl">
                         {msg.content}
                       </div>
                     </div>
@@ -428,14 +416,14 @@ const SmartSearchPage: React.FC = () => {
             </RevealMessage>
           ))}
           
-          <div ref={messagesEndRef} className="h-2" />
+          <div ref={messagesEndRef} className="h-4" />
         </div>
       </div>
 
-      {/* منطقة الإدخال والبحث - مثبتة في الأسفل وتقليل الفراغات */}
-      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-[#f8fafc] via-[#f8fafc] to-transparent dark:from-slate-950 dark:via-slate-950 dark:to-transparent px-4 py-4 md:py-6 w-full z-20 flex-shrink-0">
+      {/* منطقة الإدخال والبحث - مثبتة ومدمجة بالأسفل بتقليل الفراغات */}
+      <div className="absolute bottom-0 inset-x-0 bg-white dark:bg-slate-900 px-4 py-4 md:py-5 w-full z-20 flex-shrink-0 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.2)] rounded-t-[3rem] border-t-4 border-slate-100 dark:border-slate-800">
         <div className="max-w-4xl mx-auto flex flex-col gap-2">
-          <div className="relative flex items-center bg-white dark:bg-slate-800 rounded-[3rem] border-4 border-slate-200 dark:border-slate-700 shadow-xl focus-within:border-sky-400 dark:focus-within:border-sky-500 focus-within:-translate-y-1 transition-all pl-2 pr-2">
+          <div className="relative flex items-center bg-slate-50 dark:bg-slate-800 rounded-[3rem] border-4 border-slate-200 dark:border-slate-700 shadow-inner focus-within:border-sky-400 dark:focus-within:border-sky-500 transition-all pl-2 pr-2">
             
             <input
               type="text" 
@@ -443,22 +431,22 @@ const SmartSearchPage: React.FC = () => {
               onChange={(e) => setInput(e.target.value)} 
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
               placeholder={t('input')}
-              className="flex-1 bg-transparent border-0 focus:ring-0 py-4 px-5 md:py-5 md:px-6 text-slate-900 dark:text-white font-black outline-none w-full placeholder-slate-400 dark:placeholder-slate-500 text-lg md:text-xl relative z-10"
+              className="flex-1 bg-transparent border-0 focus:ring-0 py-4 px-5 md:py-5 md:px-6 text-slate-900 dark:text-white font-black outline-none w-full placeholder-slate-400 dark:placeholder-slate-500 text-xl md:text-2xl relative z-10"
               disabled={isLoading}
             />
             
             <button 
               onClick={handleSendMessage} 
               disabled={isLoading || !input.trim()} 
-              className="relative z-10 w-14 h-14 md:w-16 md:h-16 rounded-full bg-sky-500 hover:bg-sky-400 disabled:bg-slate-300 disabled:dark:bg-slate-700 disabled:border-b-0 border-b-4 border-sky-700 text-white flex items-center justify-center transition-all active:border-b-0 active:translate-y-1 rtl:rotate-180 m-2 shrink-0"
+              className="relative z-10 w-16 h-16 md:w-20 md:h-20 rounded-full bg-sky-500 hover:bg-sky-400 disabled:bg-slate-300 disabled:dark:bg-slate-700 disabled:border-b-0 border-b-4 border-sky-700 text-white flex items-center justify-center transition-all active:border-b-0 active:translate-y-1 rtl:rotate-180 m-2 shrink-0 shadow-lg"
             >
               <SendIcon />
             </button>
           </div>
 
-          {/* تأثير التحميل (Loader) المبهج */}
+          {/* تأثير التحميل (Loader) المبهج والمدمج */}
           {isLoading && (
-            <div className="w-[90%] mx-auto h-2 rounded-full overflow-hidden relative bg-slate-200 dark:bg-slate-800">
+            <div className="w-[95%] mx-auto h-2.5 rounded-full overflow-hidden relative bg-slate-200 dark:bg-slate-800 mt-2">
               <div className="absolute inset-0 bg-gradient-to-r from-sky-400 via-amber-400 to-rose-400 animate-[shimmer_1.5s_infinite] w-[200%]"></div>
             </div>
           )}
