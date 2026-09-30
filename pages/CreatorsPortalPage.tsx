@@ -72,23 +72,19 @@ const CreatorCard = React.memo(({ work, isPlaying, onPlayToggle, isAr }: { work:
         'from-amber-500 to-orange-400 border-amber-200',
         'from-purple-500 to-indigo-500 border-purple-200'
     ];
-    // تحديد لون عشوائي بناء على الحرف الأول للثبات
     const colorClass = colors[work.title.length % colors.length];
 
     return (
         <div className="relative group w-full h-[320px] md:h-[350px] flex items-stretch justify-center p-2">
             
-            {/* هالة مضيئة خلف الكتاب في حالة التشغيل */}
             {isPlaying && (
                 <div className="absolute inset-0 bg-white/30 blur-3xl rounded-[2rem] scale-105 opacity-80 animate-pulse transition-all duration-500 pointer-events-none -z-10"></div>
             )}
 
             <div className={`w-full h-full relative rounded-[2rem] border-4 shadow-lg bg-gradient-to-br ${colorClass} transition-all duration-500 transform group-hover:-translate-y-3 group-hover:shadow-2xl overflow-hidden flex flex-col`}>
                 
-                {/* تأثير انعكاس الزجاج الخفيف */}
                 <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-black/10 pointer-events-none z-10"></div>
                 
-                {/* صورة غلاف القصة العلوية مع زر قراءة الكتاب */}
                 <div className="relative h-1/2 w-full overflow-hidden rounded-t-[1.5rem] z-20">
                     <img src={work.cover} alt={work.title} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
                     <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
@@ -110,7 +106,6 @@ const CreatorCard = React.memo(({ work, isPlaying, onPlayToggle, isAr }: { work:
                         </div>
                     </div>
 
-                    {/* زر الاستماع */}
                     <button 
                         onClick={() => onPlayToggle(work.id)} 
                         className={`w-full py-2.5 rounded-xl font-black text-xs md:text-sm flex items-center justify-center gap-2 transition-all duration-300 relative overflow-hidden mt-auto ${isPlaying ? 'bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.6)] border border-rose-300' : 'bg-white/20 text-white hover:bg-white hover:text-slate-900 border border-white/40'}`}
@@ -127,9 +122,7 @@ const CreatorCard = React.memo(({ work, isPlaying, onPlayToggle, isAr }: { work:
     );
 });
 
-
 const CreatorsPortalPage: React.FC = () => {
-    // تعيين الإنجليزية كلغة افتراضية عند فتح الصفحة مباشرة
     const { locale, dir } = useLanguage();
     const [currentLocale, setCurrentLocale] = useState(locale || 'en');
     const navigate = useNavigate();
@@ -142,11 +135,9 @@ const CreatorsPortalPage: React.FC = () => {
     const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
     const audioRefs = useRef<Map<string, HTMLAudioElement>>(new Map());
 
-    // حالة للتحكم في ظهور وتلاشي الحاوية الرئيسية للهيدر
     const [isVisible, setIsVisible] = useState(true);
     const lastScrollY = useRef(0);
 
-    // متابعة التمرير لتلاشي الصفحة الرئيسية
     useEffect(() => {
         const handleScroll = () => {
             const currentScrollY = window.scrollY;
@@ -161,7 +152,6 @@ const CreatorsPortalPage: React.FC = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // البيانات الأساسية (مرتبة وثابتة في مكانها دون تقليب عشوائي)
     const baseWorks = [
         { id: "1", title: isAr ? "أبي نبع العطاء" : "Father: Fountain of Giving", author: isAr ? "ياسين محمد مسعود" : "Yassin Mohamed", cover: "/cover/12.jpg", pdfUrl: "https://drive.google.com/file/d/1EcOPekgKRMhnq-HTiqU5hLrVxMIl2MEV/view?usp=drive_link", audioUrl: "/audio/أبي نبع العطاء.mp3" },
         { id: "2", title: isAr ? "الصدق منجاة" : "Honesty is Salvation", author: isAr ? "الصالح إسماعيل المصري" : "Al-Saleh Ismail", cover: "/cover/17.jpg", pdfUrl: "https://drive.google.com/file/d/1WbIIcUpBd2s4on8aMSiw20KCG5fpK-IA/view?usp=drive_link", audioUrl: "/audio/الصدق منجاة.mp3" },
@@ -190,7 +180,6 @@ const CreatorsPortalPage: React.FC = () => {
     return (
         <div dir={dir} className="w-full min-h-[100dvh] flex flex-col items-center bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-500 pb-20">
             
-            {/* 🌟 الخلفية الديناميكية النابضة 🌟 */}
             <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-50 dark:opacity-20">
                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-500/20 rounded-full blur-[100px] animate-blob"></div>
                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-pink-500/20 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
@@ -198,7 +187,6 @@ const CreatorsPortalPage: React.FC = () => {
 
             <div className={`w-full max-w-[1400px] mx-auto px-4 md:px-6 relative z-10 antialiased overflow-x-hidden transition-all duration-700 ease-in-out transform origin-top`}>
                 
-                {/* --- 1. قسم الترحيب العلوي --- */}
                 <div className={`text-center mt-12 mb-16 relative transition-all duration-700 ease-in-out transform origin-top ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-8 scale-95 pointer-events-none'}`}>
                     <button onClick={() => navigate(-1)} className="absolute start-0 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-800 text-slate-800 dark:text-white px-5 py-2.5 rounded-full font-black text-sm hover:bg-slate-200 hover:-translate-x-1 active:translate-y-1 border-b-4 border-slate-300 dark:border-slate-700 active:border-b-0 transition-all flex items-center gap-2 shadow-sm">
                         <span className="text-xl leading-none rtl:rotate-180">←</span> {isAr ? 'العودة' : 'Back'}
@@ -216,7 +204,6 @@ const CreatorsPortalPage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* --- 2. عرض البطاقات (Grid متوافق مع الموبايل وعمود واحد على الشاشات الصغيرة) --- */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-10 gap-x-4 md:gap-x-6 px-2 md:px-4">
                     {studentWorks.map((work, index) => (
                         <RevealOnScroll key={work.id} delay={(index % 4) * 100}>
@@ -229,7 +216,6 @@ const CreatorsPortalPage: React.FC = () => {
                                 />
                             </div>
                             
-                            {/* إخفاء المشغل الحقيقي في الخلفية واستدعائه برمجياً */}
                             <audio 
                                 ref={el => { if(el) audioRefs.current.set(work.id, el); }} 
                                 onEnded={() => setPlayingAudioId(null)} 
@@ -240,7 +226,6 @@ const CreatorsPortalPage: React.FC = () => {
                     ))}
                 </div>
 
-                {/* --- 3. لافتة "قريباً ستكون أنت أحد المبدعين" (في الأسفل مع تأثير تلاشي) --- */}
                 <RevealOnScroll delay={300}>
                     <div className="mt-20 w-full text-center flex justify-center px-4">
                         <div className="bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-200 dark:from-amber-600 dark:via-yellow-500 dark:to-amber-600 p-[4px] rounded-[3rem] shadow-2xl hover:scale-105 transition-transform duration-500 max-w-3xl w-full">
