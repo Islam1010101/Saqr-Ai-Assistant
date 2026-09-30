@@ -100,7 +100,7 @@ const CreatorCard = React.memo(({ work, isPlaying, onPlayToggle, isAr }: { work:
 
                 <div className="p-4 md:p-5 flex flex-col flex-1 relative z-20 bg-black/20 backdrop-blur-md">
                     
-                    <div className="flex-1 flex flex-col text-center mt-1">
+                    <div className="flex-1 flex flex-col justify-center text-center mt-1">
                         <h3 className="font-black text-lg md:text-xl text-white leading-tight drop-shadow-md line-clamp-2 mb-2">
                             {work.title}
                         </h3>
@@ -113,7 +113,7 @@ const CreatorCard = React.memo(({ work, isPlaying, onPlayToggle, isAr }: { work:
                     {/* زر الاستماع */}
                     <button 
                         onClick={() => onPlayToggle(work.id)} 
-                        className={`w-full py-2.5 rounded-xl font-black text-xs md:text-sm flex items-center justify-center gap-2 transition-all duration-300 relative overflow-hidden ${isPlaying ? 'bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.6)] border border-rose-300' : 'bg-white/20 text-white hover:bg-white hover:text-slate-900 border border-white/40'}`}
+                        className={`w-full py-2.5 rounded-xl font-black text-xs md:text-sm flex items-center justify-center gap-2 transition-all duration-300 relative overflow-hidden mt-auto ${isPlaying ? 'bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.6)] border border-rose-300' : 'bg-white/20 text-white hover:bg-white hover:text-slate-900 border border-white/40'}`}
                     >
                         {isPlaying && <div className="absolute inset-0 bg-white/20 animate-pulse pointer-events-none"></div>}
                         <span className="relative z-10 flex items-center gap-2 uppercase tracking-widest">
@@ -142,7 +142,7 @@ const CreatorsPortalPage: React.FC = () => {
     const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
     const audioRefs = useRef<Map<string, HTMLAudioElement>>(new Map());
 
-    // حالة للتحكم في ظهور وتلاشي الحاوية الرئيسية
+    // حالة للتحكم في ظهور وتلاشي الحاوية الرئيسية للهيدر
     const [isVisible, setIsVisible] = useState(true);
     const lastScrollY = useRef(0);
 
@@ -162,7 +162,7 @@ const CreatorsPortalPage: React.FC = () => {
     }, []);
 
     // البيانات الأساسية
-   const baseWorks = [
+const baseWorks = [
         { id: "1", title: isAr ? "أبي نبع العطاء" : "Father: Fountain of Giving", author: isAr ? "ياسين محمد مسعود" : "Yassin Mohamed", cover: "/cover/12.jpg", pdfUrl: "https://drive.google.com/file/d/1EcOPekgKRMhnq-HTiqU5hLrVxMIl2MEV/view?usp=drive_link", audioUrl: "/audio/أبي نبع العطاء.mp3" },
         { id: "2", title: isAr ? "الصدق منجاة" : "Honesty is Salvation", author: isAr ? "الصالح إسماعيل المصري" : "Al-Saleh Ismail", cover: "/cover/17.jpg", pdfUrl: "https://drive.google.com/file/d/1WbIIcUpBd2s4on8aMSiw20KCG5fpK-IA/view?usp=drive_link", audioUrl: "/audio/الصدق منجاة.mp3" },
         { id: "3", title: isAr ? "مسرحية اللغة العربية" : "Arabic Language Play", author: isAr ? "فاطمة فلاح الأحبابي" : "Fatima Al-Ahbabi", cover: "/cover/18.jpg", pdfUrl: "https://drive.google.com/file/d/1DZk9Moh7CceSN5fpekCtxfRzNSzQiYMY/view?usp=drive_link", audioUrl: "/audio/اللغة العربية.mp3" },
@@ -174,7 +174,7 @@ const CreatorsPortalPage: React.FC = () => {
         { id: "9", title: isAr ? "عندما يعود الخير" : "When Goodness Returns", author: isAr ? "سهيلة البلوشي" : "Suhaila Al-Balooshi", cover: "/cover/15.jpg", pdfUrl: "https://drive.google.com/file/d/1mxaLmat3IEg2SItPiLjLa7U-hqrACw2e/view?usp=drive_link", audioUrl: "/audio/عندما يعود الخير.mp3" },
         { id: "10", title: isAr ? "لمار تهمس" : "Lamar Whispers", author: isAr ? "ألين رافع فريحات" : "Aleen Rafe", cover: "/cover/11.jpg", pdfUrl: "https://drive.google.com/file/d/1C0S0PA-yg2RDmXCB6-MlMoRLp2mp-Utw/view?usp=drive_link", audioUrl: "/audio/لمار.mp3" }
     ];
-
+    
     // ترتيب عشوائي عند التحميل
     const studentWorks = useMemo(() => {
         return [...baseWorks].sort(() => Math.random() - 0.5);
@@ -201,11 +201,10 @@ const CreatorsPortalPage: React.FC = () => {
                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-pink-500/20 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
             </div>
 
-            {/* الحاوية الرئيسية التي تتلاشى عند التمرير لأسفل */}
-            <div className={`w-full max-w-[1400px] mx-auto px-4 md:px-6 relative z-10 antialiased overflow-x-hidden transition-all duration-700 ease-in-out transform origin-top ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-8 scale-95 pointer-events-none'}`}>
+            <div className={`w-full max-w-[1400px] mx-auto px-4 md:px-6 relative z-10 antialiased overflow-x-hidden transition-all duration-700 ease-in-out transform origin-top`}>
                 
                 {/* --- 1. قسم الترحيب العلوي --- */}
-                <div className="text-center mt-12 mb-16 relative">
+                <div className={`text-center mt-12 mb-16 relative transition-all duration-700 ease-in-out transform origin-top ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-8 scale-95 pointer-events-none'}`}>
                     <button onClick={() => navigate(-1)} className="absolute start-0 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-800 text-slate-800 dark:text-white px-5 py-2.5 rounded-full font-black text-sm hover:bg-slate-200 hover:-translate-x-1 active:translate-y-1 border-b-4 border-slate-300 dark:border-slate-700 active:border-b-0 transition-all flex items-center gap-2 shadow-sm">
                         <span className="text-xl leading-none rtl:rotate-180">←</span> {isAr ? 'العودة' : 'Back'}
                     </button>
