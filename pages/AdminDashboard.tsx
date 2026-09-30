@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage, useTheme } from '../App';
 import { supabase } from '../src/utils/supabase';
@@ -34,7 +34,10 @@ const translations = {
         modalEditStudent: "تعديل بيانات الطالب",
         modalEditTeacher: "تعديل بيانات المعلم",
         accessDenied: "عذراً، هذه الصفحة مخصصة لمدير النظام فقط.",
-        loading: "جاري تحليل البيانات الحية..."
+        loading: "جاري تحليل البيانات الحية...",
+        searchStudentPlaceholder: "ابحث عن طالب بالاسم أو الرقم...",
+        searchTeacherPlaceholder: "ابحث عن معلم بالاسم أو الرقم...",
+        noResults: "لا توجد نتائج مطابقة للبحث."
     },
     en: {
         title: "Command Center",
@@ -66,9 +69,20 @@ const translations = {
         modalEditStudent: "Edit Student Info",
         modalEditTeacher: "Edit Teacher Info",
         accessDenied: "Access Denied. Admin privileges required.",
-        loading: "Loading live dashboard data..."
+        loading: "Loading live dashboard data...",
+        searchStudentPlaceholder: "Search student by name or ID...",
+        searchTeacherPlaceholder: "Search teacher by name or ID...",
+        noResults: "No matching results found."
     }
 };
+
+// أيقونة البحث المتوافقة مع هوية الموقع
+const SearchSvg = () => (
+    <svg className="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+    </svg>
+);
 
 const AdminDashboard: React.FC = () => {
     const { locale, dir } = useLanguage();
@@ -93,6 +107,10 @@ const AdminDashboard: React.FC = () => {
     const [teachersList, setTeachersList] = useState<any[]>([]);
     const [activeTab, setActiveTab] = useState<'students' | 'teachers'>('students');
 
+    // حالات البحث الجديدة لإدارة الطلاب والمعلمين
+    const [studentSearch, setStudentSearch] = useState('');
+    const [teacherSearch, setTeacherSearch] = useState('');
+
     const [modalMode, setModalMode] = useState<'addStudent' | 'addTeacher' | 'editStudent' | 'editTeacher' | null>(null);
     const [selectedItem, setSelectedItem] = useState<any>(null);
     const [formData, setFormData] = useState({ student_id: '', teacher_id: '', name_ar: '', name_en: '', grade: 'الصف الخامس', points: 0 });
@@ -116,23 +134,19 @@ const AdminDashboard: React.FC = () => {
     const fetchRealDashboardData = async () => {
         setIsLoading(true);
         try {
-            // 1. إجمالي الطلاب والمعلمين الحقيقي
             const { count: sCount } = await supabase.from('students').select('*', { count: 'exact', head: true });
             const { count: tCount } = await supabase.from('teachers').select('*', { count: 'exact', head: true });
 
-            // 2. عدد الطلاب والمعلمين الفريدين الذين قاموا بالدخول (من جدول login_logs)
             const { data: loginLogs } = await supabase.from('login_logs').select('user_id, user_type');
             const uniqueStudentLogins = new Set(loginLogs?.filter(l => l.user_type === 'student').map(l => l.user_id)).size;
             const uniqueTeacherLogins = new Set(loginLogs?.filter(l => l.user_type === 'teacher' || l.user_type === 'admin').map(l => l.user_id)).size;
 
-            // 3. جلب القوائم الكاملة للطلاب والمعلمين
             const { data: students } = await supabase.from('students').select('*').order('points', { ascending: false });
             const { data: teachers } = await supabase.from('teachers').select('*');
 
             if (students) setStudentsList(students);
             if (teachers) setTeachersList(teachers);
 
-            // 4. جلب الكتب الأكثر فتحاً من جدول book_views الحقيقي
             const { data: bookViews } = await supabase.from('book_views').select('book_title, language');
             
             const arBooksCount: Record<string, number> = {};
@@ -164,6 +178,29 @@ const AdminDashboard: React.FC = () => {
             setIsLoading(false);
         }
     };
+
+    // فلترة الطلاب بناءً على البحث
+    const filteredStudents = useMemo(() => {
+        if (!studentSearch.trim()) return studentsList;
+        const term = studentSearch.toLowerCase().trim();
+        return studentsList.filter(st => 
+            (st.name_ar && st.name_ar.toLowerCase().includes(term)) ||
+            (st.name_en && st.name_en.toLowerCase().includes(term)) ||
+            (st.student_id && st.student_id.toLowerCase().includes(term)) ||
+            (st.grade && st.grade.toLowerCase().includes(term))
+        );
+    }, [studentsList, studentSearch]);
+
+    // فلترة المعلمين بناءً على البحث
+    const filteredTeachers = useMemo(() => {
+        if (!teacherSearch.trim()) return teachersList;
+        const term = teacherSearch.toLowerCase().trim();
+        return teachersList.filter(tch => 
+            (tch.name_ar && tch.name_ar.toLowerCase().includes(term)) ||
+            (tch.name_en && tch.name_en.toLowerCase().includes(term)) ||
+            (tch.teacher_id && tch.teacher_id.toLowerCase().includes(term))
+        );
+    }, [teachersList, teacherSearch]);
 
     const handleSubmitForm = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -323,32 +360,48 @@ const AdminDashboard: React.FC = () => {
                 </div>
 
                 {/* أزرار التبديل وإضافة الطلاب/المعلمين */}
-                <div className="lg:col-span-4 flex items-center justify-between bg-white dark:bg-slate-900/90 p-4 rounded-[2rem] border border-slate-200 dark:border-slate-700">
-                    <div className="flex gap-2">
+                <div className="lg:col-span-4 flex flex-col md:flex-row items-center justify-between gap-4 bg-white dark:bg-slate-900/90 p-5 rounded-[2rem] border border-slate-200 dark:border-slate-700 shadow-sm">
+                    <div className="flex gap-2 w-full md:w-auto">
                         <button
                             onClick={() => setActiveTab('students')}
-                            className={`px-6 py-2.5 rounded-2xl font-black text-xs md:text-sm transition-all ${activeTab === 'students' ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}
+                            className={`flex-1 md:flex-initial px-6 py-3 rounded-2xl font-black text-xs md:text-sm transition-all ${activeTab === 'students' ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}
                         >
                             {t('studentManagement')} ({studentsList.length})
                         </button>
                         <button
                             onClick={() => setActiveTab('teachers')}
-                            className={`px-6 py-2.5 rounded-2xl font-black text-xs md:text-sm transition-all ${activeTab === 'teachers' ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}
+                            className={`flex-1 md:flex-initial px-6 py-3 rounded-2xl font-black text-xs md:text-sm transition-all ${activeTab === 'teachers' ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}
                         >
                             {t('teacherManagement')} ({teachersList.length})
                         </button>
                     </div>
 
-                    <div>
+                    <div className="w-full md:w-auto flex justify-end">
                         {activeTab === 'students' ? (
-                            <button onClick={() => { setFormData({ student_id: '', teacher_id: '', name_ar: '', name_en: '', grade: 'الصف الخامس', points: 0 }); setModalMode('addStudent'); }} className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all">
+                            <button onClick={() => { setFormData({ student_id: '', teacher_id: '', name_ar: '', name_en: '', grade: 'الصف الخامس', points: 0 }); setModalMode('addStudent'); }} className="w-full md:w-auto px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all text-center">
                                 {t('addStudentBtn')}
                             </button>
                         ) : (
-                            <button onClick={() => { setFormData({ student_id: '', teacher_id: '', name_ar: '', name_en: '', grade: '', points: 0 }); setModalMode('addTeacher'); }} className="px-5 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all">
+                            <button onClick={() => { setFormData({ student_id: '', teacher_id: '', name_ar: '', name_en: '', grade: '', points: 0 }); setModalMode('addTeacher'); }} className="w-full md:w-auto px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all text-center">
                                 {t('addTeacherBtn')}
                             </button>
                         )}
+                    </div>
+                </div>
+
+                {/* 🔍 شريط البحث المخصص لإدارة الطلاب والمعلمين (متوافق مع روح وهية الموقع) */}
+                <div className="lg:col-span-4 bg-white dark:bg-slate-900/90 backdrop-blur-md p-4 md:p-5 rounded-[2rem] border border-slate-200 dark:border-slate-700/50 shadow-md">
+                    <div className="relative group">
+                        <input 
+                            type="text" 
+                            placeholder={activeTab === 'students' ? t('searchStudentPlaceholder') : t('searchTeacherPlaceholder')}
+                            value={activeTab === 'students' ? studentSearch : teacherSearch}
+                            onChange={(e) => activeTab === 'students' ? setStudentSearch(e.target.value) : setTeacherSearch(e.target.value)}
+                            className="w-full p-4 ps-14 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white border-2 border-slate-200 dark:border-slate-700 focus:border-amber-400 rounded-2xl outline-none font-bold text-sm md:text-base shadow-inner transition-colors"
+                        />
+                        <div className="absolute start-4 top-1/2 -translate-y-1/2">
+                            <SearchSvg />
+                        </div>
                     </div>
                 </div>
 
@@ -367,19 +420,27 @@ const AdminDashboard: React.FC = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {studentsList.map((st) => (
-                                        <tr key={st.id} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                                            <td className="p-3.5 font-mono font-bold text-xs md:text-sm text-blue-600 dark:text-blue-400">{st.student_id}</td>
-                                            <td className="p-3.5 font-bold text-xs md:text-sm">{st.name_ar} / {st.name_en}</td>
-                                            <td className="p-3.5 text-xs md:text-sm text-slate-500 dark:text-slate-400">{st.grade}</td>
-                                            <td className="p-3.5 text-center font-black text-emerald-600 dark:text-emerald-400">{st.points || 0}</td>
-                                            <td className="p-3.5 text-center">
-                                                <button onClick={() => { setSelectedItem(st); setFormData({ student_id: st.student_id, teacher_id: '', name_ar: st.name_ar, name_en: st.name_en, grade: st.grade, points: st.points }); setModalMode('editStudent'); }} className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs shadow-sm transition-all">
-                                                    {t('editIdBtn')}
-                                                </button>
+                                    {filteredStudents.length > 0 ? (
+                                        filteredStudents.map((st) => (
+                                            <tr key={st.id} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                                <td className="p-3.5 font-mono font-bold text-xs md:text-sm text-blue-600 dark:text-blue-400">{st.student_id}</td>
+                                                <td className="p-3.5 font-bold text-xs md:text-sm">{st.name_ar} / {st.name_en}</td>
+                                                <td className="p-3.5 text-xs md:text-sm text-slate-500 dark:text-slate-400">{st.grade}</td>
+                                                <td className="p-3.5 text-center font-black text-emerald-600 dark:text-emerald-400">{st.points || 0}</td>
+                                                <td className="p-3.5 text-center">
+                                                    <button onClick={() => { setSelectedItem(st); setFormData({ student_id: st.student_id, teacher_id: '', name_ar: st.name_ar, name_en: st.name_en, grade: st.grade, points: st.points }); setModalMode('editStudent'); }} className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs shadow-sm transition-all">
+                                                        {t('editIdBtn')}
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan={5} className="p-8 text-center text-slate-400 font-bold text-sm">
+                                                {t('noResults')}
                                             </td>
                                         </tr>
-                                    ))}
+                                    )}
                                 </tbody>
                             </table>
                         ) : (
@@ -392,17 +453,25 @@ const AdminDashboard: React.FC = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {teachersList.map((tch) => (
-                                        <tr key={tch.id} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                                            <td className="p-3.5 font-mono font-bold text-xs md:text-sm text-indigo-600 dark:text-indigo-400">{tch.teacher_id}</td>
-                                            <td className="p-3.5 font-bold text-xs md:text-sm">{tch.name_ar} / {tch.name_en}</td>
-                                            <td className="p-3.5 text-center">
-                                                <button onClick={() => { setSelectedItem(tch); setFormData({ student_id: '', teacher_id: tch.teacher_id, name_ar: tch.name_ar, name_en: tch.name_en, grade: '', points: 0 }); setModalMode('editTeacher'); }} className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs shadow-sm transition-all">
-                                                    {t('editIdBtn')}
-                                                </button>
+                                    {filteredTeachers.length > 0 ? (
+                                        filteredTeachers.map((tch) => (
+                                            <tr key={tch.id} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                                <td className="p-3.5 font-mono font-bold text-xs md:text-sm text-indigo-600 dark:text-indigo-400">{tch.teacher_id}</td>
+                                                <td className="p-3.5 font-bold text-xs md:text-sm">{tch.name_ar} / {tch.name_en}</td>
+                                                <td className="p-3.5 text-center">
+                                                    <button onClick={() => { setSelectedItem(tch); setFormData({ student_id: '', teacher_id: tch.teacher_id, name_ar: tch.name_ar, name_en: tch.name_en, grade: '', points: 0 }); setModalMode('editTeacher'); }} className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs shadow-sm transition-all">
+                                                        {t('editIdBtn')}
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan={3} className="p-8 text-center text-slate-400 font-bold text-sm">
+                                                {t('noResults')}
                                             </td>
                                         </tr>
-                                    ))}
+                                    )}
                                 </tbody>
                             </table>
                         )}
