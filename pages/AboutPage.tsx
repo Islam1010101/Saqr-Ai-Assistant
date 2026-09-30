@@ -173,7 +173,7 @@ const AboutPage: React.FC = () => {
 
             <div className="w-full max-w-[1400px] mx-auto flex flex-col gap-10 md:gap-14 relative z-10">
                 
-                {/* زر العودة لصفحة التسجيل (بدون شريط علوي تماماً) */}
+                {/* زر العودة لصفحة التسجيل (بدون أي شريط علوي تماماً) */}
                 <div className="relative">
                     <button onClick={() => navigate('/')} className="bg-white dark:bg-slate-800 text-slate-800 dark:text-white px-5 py-2.5 rounded-full font-black text-sm hover:bg-slate-200 hover:-translate-x-1 active:translate-y-1 border-b-4 border-slate-300 dark:border-slate-700 active:border-b-0 transition-all flex items-center gap-2 shadow-sm w-fit">
                         <span className="text-xl leading-none rtl:rotate-180">←</span> {isAr ? 'العودة لصفحة التسجيل' : 'Back to Login'}
@@ -361,8 +361,8 @@ const AboutPage: React.FC = () => {
                         </p>
                         <div className="flex justify-center gap-3 mt-8">
                             <div className="h-2 w-12 bg-amber-400 rounded-full"></div>
-                            <div className="h-2 w-3 bg-sky-400 rounded-full"></div>
-                            <div className="h-2 w-3 bg-rose-400 rounded-full"></div>
+                            <div className="h-2 w-3 bg-sky-400/20 dark:bg-sky-400/40 rounded-full"></div>
+                            <div className="h-2 w-3 bg-rose-400/20 dark:bg-rose-400/40 rounded-full"></div>
                         </div>
                     </div>
                 </RevealOnScroll>
@@ -384,7 +384,7 @@ const AboutPage: React.FC = () => {
                 .animate-float { animation: float 6s ease-in-out infinite; }
                 @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-15px); } }
                 
-                @keyframes fade-in-up { 0% { opacity: 0; transform: translateY(30px); } 100% { opacity: 1; transform: translateY(0); } }
+                @keyframes fade-in-up { 0% { opacity: 0; transform: translateY(30px); } 100% { opacity: 1; transform: translateY(0); } z-index: 10; }
                 .animate-fade-in-up { animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
             `}</style>
         </div>
