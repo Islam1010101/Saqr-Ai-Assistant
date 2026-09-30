@@ -141,11 +141,53 @@ const AdminDashboard: React.FC = () => {
             const uniqueStudentLogins = new Set(loginLogs?.filter(l => l.user_type === 'student').map(l => l.user_id)).size;
             const uniqueTeacherLogins = new Set(loginLogs?.filter(l => l.user_type === 'teacher' || l.user_type === 'admin').map(l => l.user_id)).size;
 
-            const { data: students } = await supabase.from('students').select('*').order('points', { ascending: false });
-            const { data: teachers } = await supabase.from('teachers').select('*');
+            // جلب كامل عدد الطلاب (تخطيط حد الـ 1000 سجل في Supabase عبر التجميع التلقائي)
+            let allStudents: any[] = [];
+            let step = 1000;
+            let start = 0;
+            let fetchMoreStudents = true;
+            while (fetchMoreStudents) {
+                const { data, error } = await supabase
+                    .from('students')
+                    .select('*')
+                    .order('points', { ascending: false })
+                    .range(start, start + step - 1);
+                if (error || !data || data.length === 0) {
+                    fetchMoreStudents = false;
+                } else {
+                    allStudents = [...allStudents, ...data];
+                    if (data.length < step) {
+                        fetchMoreStudents = false;
+                    } else {
+                        start += step;
+                    }
+                }
+            }
 
-            if (students) setStudentsList(students);
-            if (teachers) setTeachersList(teachers);
+            // جلب كامل عدد المعلمين
+            let allTeachers: any[] = [];
+            let tStep = 1000;
+            let tStart = 0;
+            let fetchMoreTeachers = true;
+            while (fetchMoreTeachers) {
+                const { data, error } = await supabase
+                    .from('teachers')
+                    .select('*')
+                    .range(tStart, tStart + tStep - 1);
+                if (error || !data || data.length === 0) {
+                    fetchMoreTeachers = false;
+                } else {
+                    allTeachers = [...allTeachers, ...data];
+                    if (data.length < tStep) {
+                        fetchMoreTeachers = false;
+                    } else {
+                        tStart += tStep;
+                    }
+                }
+            }
+
+            setStudentsList(allStudents);
+            setTeachersList(allTeachers);
 
             const { data: bookViews } = await supabase.from('book_views').select('book_title, language');
             
@@ -167,8 +209,8 @@ const AdminDashboard: React.FC = () => {
             setTopEnglishBooks(sortedEn);
 
             setStats({
-                students: sCount || students?.length || 0,
-                teachers: tCount || teachers?.length || 0,
+                students: sCount || allStudents.length || 0,
+                teachers: tCount || allTeachers.length || 0,
                 studentLogins: uniqueStudentLogins,
                 teacherLogins: uniqueTeacherLogins
             });
@@ -407,11 +449,11 @@ const AdminDashboard: React.FC = () => {
 
                 {/* جداول إدارة الطلاب والمعلمين */}
                 <div className="lg:col-span-4 bg-white dark:bg-slate-900/90 backdrop-blur-md border border-slate-200 dark:border-slate-700/50 p-6 rounded-[2.5rem] shadow-xl overflow-hidden">
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto max-h-[600px] scrollbar-thin">
                         {activeTab === 'students' ? (
                             <table className="w-full text-left rtl:text-right border-collapse min-w-[600px]">
-                                <thead>
-                                    <tr className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs md:text-sm border-b border-slate-200 dark:border-slate-700">
+                                <thead className="sticky top-0 bg-slate-100 dark:bg-slate-800 z-10">
+                                    <tr className="text-slate-600 dark:text-slate-300 text-xs md:text-sm border-b border-slate-200 dark:border-slate-700">
                                         <th className="p-3.5 font-black">{t('colId')}</th>
                                         <th className="p-3.5 font-black">{t('colName')}</th>
                                         <th className="p-3.5 font-black">{t('colGrade')}</th>
@@ -445,8 +487,8 @@ const AdminDashboard: React.FC = () => {
                             </table>
                         ) : (
                             <table className="w-full text-left rtl:text-right border-collapse min-w-[600px]">
-                                <thead>
-                                    <tr className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs md:text-sm border-b border-slate-200 dark:border-slate-700">
+                                <thead className="sticky top-0 bg-slate-100 dark:bg-slate-800 z-10">
+                                    <tr className="text-slate-600 dark:text-slate-300 text-xs md:text-sm border-b border-slate-200 dark:border-slate-700">
                                         <th className="p-3.5 font-black">{t('colId')}</th>
                                         <th className="p-3.5 font-black">{t('colName')}</th>
                                         <th className="p-3.5 font-black text-center">{t('colActions')}</th>
@@ -527,7 +569,7 @@ const AdminDashboard: React.FC = () => {
                                     </div>
                                     <div>
                                         <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">الاسم بالعربي</label>
-                                        <input type="text" value={formData.name_ar} onChange={(e) => setFormData({ ...formData, name_ar: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm" required />
+                                        <input type="text" value={formData.name_ar} onChange={(e) => setFormData({ name_ar: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm" required />
                                     </div>
                                     <div>
                                         <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">الاسم بالإنجليزي</label>
