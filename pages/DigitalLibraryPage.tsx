@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../App';
 
@@ -6,14 +6,14 @@ import { useLanguage } from '../App';
 // أيقونات SVG جذابة (بديلة للإيموجيز)
 // ==========================================
 const BookIcon = () => (
-    <svg className="w-10 h-10 md:w-14 md:h-14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+    <svg className="w-8 h-8 md:w-12 md:h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
       <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
       <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
     </svg>
 );
 
 const GlobeIcon = () => (
-    <svg className="w-10 h-10 md:w-14 md:h-14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+    <svg className="w-8 h-8 md:w-12 md:h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="10" />
       <line x1="2" y1="12" x2="22" y2="12" />
       <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
@@ -52,11 +52,11 @@ const HeartIcon = ({ className }: { className?: string }) => (
 
 const READING_INSPIRATIONS = [
     { icon: <BookIcon />, textAr: "اقرأ لترتقي", textEn: "Read to Rise", color: "text-blue-500" },
-    { icon: <StarIcon className="w-8 h-8 md:w-10 md:h-10" />, textAr: "مغامرة في كل صفحة", textEn: "Adventure in every page", color: "text-amber-500" },
-    { icon: <BrainIcon className="w-8 h-8 md:w-10 md:h-10" />, textAr: "المعرفة قوة", textEn: "Knowledge is Power", color: "text-purple-500" },
-    { icon: <RocketIcon className="w-8 h-8 md:w-10 md:h-10" />, textAr: "سافر عبر الكلمات", textEn: "Travel through Words", color: "text-rose-500" },
-    { icon: <LightBulbIcon className="w-8 h-8 md:w-10 md:h-10" />, textAr: "نور العقل", textEn: "Light of the Mind", color: "text-emerald-500" },
-    { icon: <HeartIcon className="w-8 h-8 md:w-10 md:h-10" />, textAr: "أحب القراءة", textEn: "I Love Reading", color: "text-red-500" }
+    { icon: <StarIcon className="w-6 h-6 md:w-8 md:h-8" />, textAr: "مغامرة في كل صفحة", textEn: "Adventure in every page", color: "text-amber-500" },
+    { icon: <BrainIcon className="w-6 h-6 md:w-8 md:h-8" />, textAr: "المعرفة قوة", textEn: "Knowledge is Power", color: "text-purple-500" },
+    { icon: <RocketIcon className="w-6 h-6 md:w-8 md:h-8" />, textAr: "سافر عبر الكلمات", textEn: "Travel through Words", color: "text-rose-500" },
+    { icon: <LightBulbIcon className="w-6 h-6 md:w-8 md:h-8" />, textAr: "نور العقل", textEn: "Light of the Mind", color: "text-emerald-500" },
+    { icon: <HeartIcon className="w-6 h-6 md:w-8 md:h-8" />, textAr: "أحب القراءة", textEn: "I Love Reading", color: "text-red-500" }
 ];
 
 const translations = {
@@ -88,6 +88,50 @@ interface BurstItem {
     item: typeof READING_INSPIRATIONS[0];
 }
 
+// --- مكون التلاشي المخصص (Reveal Component) المطابق لباقي الصفحات ---
+const RevealOnScroll = ({ children, delay = 0 }: { children: React.ReactNode, delay?: number }) => {
+    const [isVisible, setIsVisible] = useState(true);
+    const elementRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setIsVisible(true);
+                } else {
+                    setIsVisible(false);
+                }
+            },
+            {
+                threshold: 0.15,
+                rootMargin: "-30px 0px -30px 0px"
+            }
+        );
+
+        if (elementRef.current) {
+            observer.observe(elementRef.current);
+        }
+
+        return () => {
+            if (elementRef.current) {
+                observer.unobserve(elementRef.current);
+            }
+        };
+    }, []);
+
+    return (
+        <div
+            ref={elementRef}
+            className={`transition-all duration-700 ease-out transform w-full ${
+                isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95 pointer-events-none'
+            }`}
+            style={{ transitionDelay: `${delay}ms` }}
+        >
+            {children}
+        </div>
+    );
+};
+
 const DigitalLibraryPage: React.FC = () => {
     const { locale, dir } = useLanguage();
     const isAr = locale === 'ar';
@@ -106,9 +150,9 @@ const DigitalLibraryPage: React.FC = () => {
         const newBurst: BurstItem = {
             id,
             item: randomItem,
-            tx: (Math.random() - 0.5) * (window.innerWidth < 768 ? 150 : 350),
-            ty: -100 - Math.random() * 150,
-            rot: (Math.random() - 0.5) * 40
+            tx: (Math.random() - 0.5) * (window.innerWidth < 768 ? 120 : 300),
+            ty: -80 - Math.random() * 120,
+            rot: (Math.random() - 0.5) * 30
         };
 
         setBursts(prev => [...prev, newBurst]);
@@ -121,92 +165,100 @@ const DigitalLibraryPage: React.FC = () => {
     }, []);
 
     return (
-        <div dir={dir} className="w-full min-h-[100dvh] flex flex-col bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300 py-10 md:py-20 px-4 md:px-6">
+        <div dir={dir} className="w-full min-h-[100dvh] flex flex-col bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300 py-6 md:py-12 px-4 md:px-6">
             
-            {/* الخلفية الديناميكية الموحدة (تصميم طفولي) */}
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-50 dark:opacity-20">
+            {/* الخلفية الديناميكية الموحدة */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-50 dark:opacity-20">
                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-400/20 rounded-full blur-[100px] animate-blob"></div>
                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-sky-400/20 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
             </div>
 
-            <div className="w-full max-w-[1400px] mx-auto flex flex-col gap-16 md:gap-24 animate-fade-in-up pb-20">
+            <div className="w-full max-w-[1300px] mx-auto flex flex-col gap-10 md:gap-16 relative z-10">
                 
                 {/* 1. قسم الترحيب العلوي */}
-                <div className="text-center space-y-4 md:space-y-6 max-w-5xl mx-auto relative z-20">
-                    <h1 className="text-5xl md:text-[6rem] lg:text-[8rem] font-black text-slate-800 dark:text-white tracking-tight leading-none uppercase">
-                        {t('title')}
-                    </h1>
-                    <p className="text-lg md:text-3xl text-slate-500 dark:text-slate-400 font-bold leading-relaxed max-w-3xl mx-auto px-4">
-                        {t('desc')}
-                    </p>
-                    <div className="flex justify-center gap-3 pt-4">
-                        <div className="h-2 w-16 bg-emerald-400 rounded-full"></div>
-                        <div className="h-2 w-24 bg-sky-400 rounded-full"></div>
+                <RevealOnScroll>
+                    <div className="text-center space-y-3 md:space-y-4 max-w-4xl mx-auto relative z-20">
+                        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-slate-800 dark:text-white tracking-tight leading-tight uppercase">
+                            {t('title')}
+                        </h1>
+                        <p className="text-sm sm:text-base md:text-xl text-slate-500 dark:text-slate-400 font-bold leading-relaxed max-w-2xl mx-auto px-4">
+                            {t('desc')}
+                        </p>
+                        <div className="flex justify-center gap-2 pt-2">
+                            <div className="h-2 w-12 bg-emerald-400 rounded-full"></div>
+                            <div className="h-2 w-20 bg-sky-400 rounded-full"></div>
+                        </div>
                     </div>
-                </div>
+                </RevealOnScroll>
 
-                {/* 2. مركز العمليات الرقمي */}
-                <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-12 md:gap-20 items-center">
+                {/* 2. مركز العمليات الرقمي (متوافق مع الشاشات الصغيرة) */}
+                <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-center">
                     
                     {/* الكروت الصلبة المبهجة */}
-                    <div className="lg:col-span-7 flex flex-col gap-6 md:gap-8 order-2 lg:order-1 px-2 md:px-0">
+                    <div className="lg:col-span-7 flex flex-col gap-5 md:gap-6 order-2 lg:order-1 px-1 md:px-0">
                         
-                        <Link 
-                            to="/digital-library/arabic" 
-                            className="group bg-white dark:bg-slate-800 p-6 md:p-10 lg:p-12 rounded-[3rem] border-4 border-slate-200 dark:border-slate-700 border-b-8 hover:border-emerald-400 dark:hover:border-emerald-500 hover:-translate-y-2 active:border-b-4 active:translate-y-2 transition-all duration-300 flex flex-col md:flex-row items-center gap-6 md:gap-8 text-center md:text-start shadow-sm"
-                        >
-                            <div className="w-24 h-24 md:w-28 md:h-28 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shrink-0 border-4 border-emerald-200 dark:border-emerald-800">
-                                <BookIcon />
-                            </div>
-                            <div className="flex-1 space-y-2">
-                                <h3 className="text-3xl md:text-4xl lg:text-5xl font-black text-slate-800 dark:text-white tracking-tight">{t('arabicLib')}</h3>
-                                <p className="text-base md:text-xl text-slate-500 dark:text-slate-400 font-bold leading-relaxed">{t('arabicDesc')}</p>
-                            </div>
-                        </Link>
+                        <RevealOnScroll delay={50}>
+                            <Link 
+                                to="/digital-library/arabic" 
+                                className="group bg-white dark:bg-slate-800 p-6 md:p-8 rounded-[2.5rem] border-4 border-slate-200 dark:border-slate-700 border-b-6 hover:border-emerald-400 dark:hover:border-emerald-500 hover:-translate-y-1.5 active:border-b-2 active:translate-y-1 transition-all duration-300 flex flex-col md:flex-row items-center gap-5 text-center md:text-start shadow-sm"
+                            >
+                                <div className="w-20 h-20 md:w-24 md:h-24 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shrink-0 border-4 border-emerald-200 dark:border-emerald-800">
+                                    <BookIcon />
+                                </div>
+                                <div className="flex-1 space-y-1.5">
+                                    <h3 className="text-2xl md:text-3xl lg:text-4xl font-black text-slate-800 dark:text-white tracking-tight">{t('arabicLib')}</h3>
+                                    <p className="text-xs sm:text-sm md:text-base text-slate-500 dark:text-slate-400 font-bold leading-relaxed">{t('arabicDesc')}</p>
+                                </div>
+                            </Link>
+                        </RevealOnScroll>
 
-                        <Link 
-                            to="/digital-library/english" 
-                            className="group bg-white dark:bg-slate-800 p-6 md:p-10 lg:p-12 rounded-[3rem] border-4 border-slate-200 dark:border-slate-700 border-b-8 hover:border-sky-400 dark:hover:border-sky-500 hover:-translate-y-2 active:border-b-4 active:translate-y-2 transition-all duration-300 flex flex-col md:flex-row items-center gap-6 md:gap-8 text-center md:text-start shadow-sm"
-                        >
-                            <div className="w-24 h-24 md:w-28 md:h-28 bg-sky-100 dark:bg-sky-900/30 text-sky-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shrink-0 border-4 border-sky-200 dark:border-sky-800">
-                                <GlobeIcon />
-                            </div>
-                            <div className="flex-1 space-y-2">
-                                <h3 className="text-3xl md:text-4xl lg:text-5xl font-black text-slate-800 dark:text-white tracking-tight">{t('englishLib')}</h3>
-                                <p className="text-base md:text-xl text-slate-500 dark:text-slate-400 font-bold leading-relaxed">{t('englishDesc')}</p>
-                            </div>
-                        </Link>
+                        <RevealOnScroll delay={100}>
+                            <Link 
+                                to="/digital-library/english" 
+                                className="group bg-white dark:bg-slate-800 p-6 md:p-8 rounded-[2.5rem] border-4 border-slate-200 dark:border-slate-700 border-b-6 hover:border-sky-400 dark:hover:border-sky-500 hover:-translate-y-1.5 active:border-b-2 active:translate-y-1 transition-all duration-300 flex flex-col md:flex-row items-center gap-5 text-center md:text-start shadow-sm"
+                            >
+                                <div className="w-20 h-20 md:w-24 md:h-24 bg-sky-100 dark:bg-sky-900/30 text-sky-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shrink-0 border-4 border-sky-200 dark:border-sky-800">
+                                    <GlobeIcon />
+                                </div>
+                                <div className="flex-1 space-y-1.5">
+                                    <h3 className="text-2xl md:text-3xl lg:text-4xl font-black text-slate-800 dark:text-white tracking-tight">{t('englishLib')}</h3>
+                                    <p className="text-xs sm:text-sm md:text-base text-slate-500 dark:text-slate-400 font-bold leading-relaxed">{t('englishDesc')}</p>
+                                </div>
+                            </Link>
+                        </RevealOnScroll>
 
                     </div>
 
                     {/* صقر مع الشعار الذكي خلفه */}
                     <div className="lg:col-span-5 flex justify-center order-1 lg:order-2 relative z-[30]">
-                        <div onClick={handleMascotInteraction} className={`relative cursor-pointer transition-transform duration-300 w-full flex justify-center items-center ${isMascotClicked ? 'scale-95' : 'hover:scale-105'}`}>
-                            
-                            {/* شعار المدرسة الباهت (يتحول للأبيض في الدارك مود) */}
-                            <img 
-                                src="/school-logo.png" 
-                                alt="EFIPS Seal" 
-                                className="absolute inset-0 m-auto w-[110%] h-[110%] object-contain rotate-6 opacity-10 dark:opacity-20 dark:brightness-0 dark:invert -z-10 pointer-events-none transition-all duration-1000" 
-                            />
+                        <RevealOnScroll delay={150}>
+                            <div onClick={handleMascotInteraction} className={`relative cursor-pointer transition-transform duration-300 w-full flex justify-center items-center ${isMascotClicked ? 'scale-95' : 'hover:scale-105'}`}>
+                                
+                                {/* شعار المدرسة الباهت */}
+                                <img 
+                                    src="/school-logo.png" 
+                                    alt="EFIPS Seal" 
+                                    className="absolute inset-0 m-auto w-[100%] h-[100%] object-contain rotate-6 opacity-10 dark:opacity-20 dark:brightness-0 dark:invert -z-10 pointer-events-none transition-all duration-1000" 
+                                />
 
-                            {/* كروت الإلهام الطائرة */}
-                            {bursts.map((burst) => (
-                                <div key={burst.id} 
-                                    className="absolute z-[100] bg-white dark:bg-slate-800 px-6 py-3 md:px-8 md:py-4 rounded-[2rem] border-4 border-slate-200 dark:border-slate-700 shadow-md animate-burst-steady pointer-events-none flex items-center gap-3 md:gap-4"
-                                    style={{ '--tx': `${burst.tx}px`, '--ty': `${burst.ty}px`, '--rot': `${burst.rot}deg` } as any}>
-                                    <span className={`${burst.item.color}`}>{burst.item.icon}</span>
-                                    <span className="text-sm md:text-xl font-black text-slate-800 dark:text-slate-200 whitespace-nowrap">{isAr ? burst.item.textAr : burst.item.textEn}</span>
+                                {/* كروت الإلهام الطائرة */}
+                                {bursts.map((burst) => (
+                                    <div key={burst.id} 
+                                        className="absolute z-[100] bg-white dark:bg-slate-800 px-4 py-2.5 md:px-6 md:py-3 rounded-[1.5rem] border-2 border-slate-200 dark:border-slate-700 shadow-md animate-burst-steady pointer-events-none flex items-center gap-2.5 md:gap-3"
+                                        style={{ '--tx': `${burst.tx}px`, '--ty': `${burst.ty}px`, '--rot': `${burst.rot}deg` } as any}>
+                                        <span className={`${burst.item.color}`}>{burst.item.icon}</span>
+                                        <span className="text-xs md:text-sm font-black text-slate-800 dark:text-slate-200 whitespace-nowrap">{isAr ? burst.item.textAr : burst.item.textEn}</span>
+                                    </div>
+                                ))}
+
+                                <img src="/saqr-digital.png" alt="Saqr Mascot" className="h-52 sm:h-64 md:h-[350px] lg:h-[420px] object-contain drop-shadow-xl relative z-10 animate-float" />
+                                
+                                {/* فقاعة المحادثة */}
+                                <div className="absolute -top-3 -right-2 md:-top-4 md:-right-4 bg-white dark:bg-slate-800 px-3.5 py-2.5 md:px-5 md:py-3.5 rounded-[1.5rem] rounded-br-none border-3 border-rose-400 shadow-md text-xs sm:text-sm md:text-lg font-black text-rose-500 animate-bounce z-25">
+                                    {t('bubble')}
                                 </div>
-                            ))}
-
-                            <img src="/saqr-digital.png" alt="Saqr Mascot" className="h-64 md:h-[450px] lg:h-[550px] object-contain drop-shadow-2xl relative z-10 animate-float" />
-                            
-                            {/* فقاعة المحادثة */}
-                            <div className="absolute -top-4 -right-4 md:-top-6 md:-right-6 bg-white dark:bg-slate-800 p-4 md:p-6 lg:p-8 rounded-[2rem] md:rounded-[3rem] rounded-br-none border-4 border-rose-400 shadow-lg text-sm md:text-2xl font-black text-rose-500 animate-bounce z-20">
-                                {t('bubble')}
                             </div>
-                        </div>
+                        </RevealOnScroll>
                     </div>
 
                 </div>
@@ -226,20 +278,14 @@ const DigitalLibraryPage: React.FC = () => {
                 
                 @keyframes burst-steady {
                   0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
-                  20% { transform: translate(var(--tx), var(--ty)) scale(1.1) rotate(var(--rot)); opacity: 1; }
+                  20% { transform: translate(var(--tx), var(--ty)) scale(1.05) rotate(var(--rot)); opacity: 1; }
                   80% { transform: translate(var(--tx), var(--ty)) scale(1) rotate(var(--rot)); opacity: 1; }
-                  100% { transform: translate(var(--tx), calc(var(--ty) - 30px)) scale(0.8) rotate(var(--rot)); opacity: 0; }
+                  100% { transform: translate(var(--tx), calc(var(--ty) - 20px)) scale(0.8) rotate(var(--rot)); opacity: 0; }
                 }
                 .animate-burst-steady { animation: burst-steady 2.5s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
                 
                 .animate-float { animation: float 6s ease-in-out infinite; }
-                @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
-                
-                @keyframes fade-in-up {
-                  0% { opacity: 0; transform: translateY(20px); }
-                  100% { opacity: 1; transform: translateY(0); }
-                }
-                .animate-fade-in-up { animation: fade-in-up 0.5s ease-out forwards; }
+                @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-12px); } }
             `}</style>
         </div>
     );
