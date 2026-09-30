@@ -112,7 +112,7 @@ const MailIcon = () => (
   </svg>
 );
 
-// --- مكون التلاشي المخصص (Reveal Component) ---
+// --- مكون التلاشي المخصص (Reveal Component) لتوزيع الظهور والتلاشي بذكاء ---
 const RevealOnScroll = ({ children, delay = 0 }: { children: React.ReactNode, delay?: number }) => {
     const [isVisible, setIsVisible] = useState(true);
     const elementRef = useRef<HTMLDivElement>(null);
@@ -128,7 +128,7 @@ const RevealOnScroll = ({ children, delay = 0 }: { children: React.ReactNode, de
             },
             {
                 threshold: 0.15,
-                rootMargin: "-20px 0px -20px 0px"
+                rootMargin: "-40px 0px -40px 0px"
             }
         );
 
@@ -147,7 +147,7 @@ const RevealOnScroll = ({ children, delay = 0 }: { children: React.ReactNode, de
         <div
             ref={elementRef}
             className={`transition-all duration-700 ease-out transform w-full ${
-                isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-12 scale-95 pointer-events-none'
+                isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95 pointer-events-none'
             }`}
             style={{ transitionDelay: `${delay}ms` }}
         >
@@ -163,7 +163,7 @@ const AboutPage: React.FC = () => {
     const navigate = useNavigate();
 
     return (
-        <div dir={dir} className="w-full min-h-[100dvh] flex flex-col bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300 py-10 md:py-16 px-4">
+        <div dir={dir} className="w-full min-h-[100dvh] flex flex-col bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300 py-6 md:py-12 px-4">
             
             {/* 🌟 خلفية بصرية نابضة مطابقة للموقع */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-50 dark:opacity-20">
@@ -171,9 +171,9 @@ const AboutPage: React.FC = () => {
                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-sky-400/20 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
             </div>
 
-            <div className="w-full max-w-[1400px] mx-auto flex flex-col gap-16 md:gap-24 animate-fade-in-up pb-20 relative z-10">
+            <div className="w-full max-w-[1400px] mx-auto flex flex-col gap-10 md:gap-14 relative z-10">
                 
-                {/* زر العودة لصفحة التسجيل بدون أي شريط علوي */}
+                {/* زر العودة لصفحة التسجيل (بدون شريط علوي تماماً) */}
                 <div className="relative">
                     <button onClick={() => navigate('/')} className="bg-white dark:bg-slate-800 text-slate-800 dark:text-white px-5 py-2.5 rounded-full font-black text-sm hover:bg-slate-200 hover:-translate-x-1 active:translate-y-1 border-b-4 border-slate-300 dark:border-slate-700 active:border-b-0 transition-all flex items-center gap-2 shadow-sm w-fit">
                         <span className="text-xl leading-none rtl:rotate-180">←</span> {isAr ? 'العودة لصفحة التسجيل' : 'Back to Login'}
@@ -182,22 +182,22 @@ const AboutPage: React.FC = () => {
 
                 {/* --- 1. قسم عن المدرسة --- */}
                 <RevealOnScroll>
-                    <section className="bg-white dark:bg-slate-800 p-8 md:p-16 lg:p-20 rounded-[3rem] border-4 border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row items-center gap-10 md:gap-20 relative overflow-hidden group hover:border-amber-300 dark:hover:border-amber-700 transition-colors duration-500">
+                    <section className="bg-white dark:bg-slate-800 p-8 md:p-14 lg:p-16 rounded-[3rem] border-4 border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row items-center gap-8 md:gap-16 relative overflow-hidden group hover:border-amber-300 dark:hover:border-amber-700 transition-colors duration-500">
                         
                         <div className="absolute top-0 start-0 w-4 h-full bg-amber-400 rounded-s-[2.5rem]"></div>
                         
-                        <div className="flex-1 space-y-6 md:space-y-8 relative z-10 text-center md:text-start ps-4">
+                        <div className="flex-1 space-y-6 relative z-10 text-center md:text-start ps-4">
                             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 font-black text-xs md:text-sm uppercase tracking-widest border-2 border-amber-200 dark:border-amber-800">
                                 <BuildingIcon />
                                 EFIPS
                             </div>
-                            <h2 className={`text-4xl md:text-5xl lg:text-7xl font-black text-slate-900 dark:text-white leading-tight ${!isAr && 'tracking-tight'}`}>
+                            <h2 className={`text-3xl md:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white leading-tight ${!isAr && 'tracking-tight'}`}>
                                 {t('schoolHistory')}
                             </h2>
-                            <p className="text-lg md:text-2xl text-slate-600 dark:text-slate-400 leading-relaxed font-bold">
+                            <p className="text-base md:text-xl text-slate-600 dark:text-slate-400 leading-relaxed font-bold">
                                 {t('historyText')}
                             </p>
-                            <div className="pt-6 flex justify-center md:justify-start">
+                            <div className="pt-4 flex justify-center md:justify-start">
                                 <a 
                                     href="https://www.falcon-school.com" 
                                     target="_blank" 
@@ -210,7 +210,7 @@ const AboutPage: React.FC = () => {
                             </div>
                         </div>
                         
-                        <div className="w-56 h-56 md:w-80 md:h-80 shrink-0 relative flex justify-center items-center">
+                        <div className="w-48 h-48 md:w-72 md:h-72 shrink-0 relative flex justify-center items-center">
                             <img 
                                 src="/school-logo.png" 
                                 alt="EFIPS Logo" 
@@ -223,14 +223,14 @@ const AboutPage: React.FC = () => {
                 {/* --- 2. قسم عن المكتبة والأجنحة --- */}
                 <RevealOnScroll delay={100}>
                     <section className="relative z-10">
-                        <div className="text-center mb-12 md:mb-16">
-                            <span className="inline-block px-4 py-2 rounded-full bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400 font-black text-xs uppercase tracking-widest mb-6 border-2 border-sky-200 dark:border-sky-800">
+                        <div className="text-center mb-10 md:mb-12">
+                            <span className="inline-block px-4 py-2 rounded-full bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400 font-black text-xs uppercase tracking-widest mb-4 border-2 border-sky-200 dark:border-sky-800">
                                 Library Overview
                             </span>
-                            <h3 className={`text-4xl md:text-6xl font-black text-slate-900 dark:text-white mb-6 ${!isAr && 'tracking-tight'}`}>
+                            <h3 className={`text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-4 ${!isAr && 'tracking-tight'}`}>
                                 {t('librarySection')}
                             </h3>
-                            <p className="text-lg md:text-2xl text-slate-600 dark:text-slate-400 font-bold max-w-4xl mx-auto leading-relaxed px-4">
+                            <p className="text-base md:text-xl text-slate-600 dark:text-slate-400 font-bold max-w-4xl mx-auto leading-relaxed px-4">
                                 {t('libraryIntro')}
                             </p>
                         </div>
@@ -243,23 +243,23 @@ const AboutPage: React.FC = () => {
                                 { title: t('wing4'), desc: t('wing4Desc'), color: "bg-blue-500", border: "border-blue-700", icon: <Wing4Icon /> }
                             ].map((w, i) => (
                                 <RevealOnScroll key={i} delay={i * 50}>
-                                    <div className={`${w.color} ${w.border} text-white p-8 md:p-12 rounded-[3rem] border-b-8 hover:-translate-y-2 transition-all duration-300 flex flex-col items-center md:items-start text-center md:text-start shadow-md h-full`}>
+                                    <div className={`${w.color} ${w.border} text-white p-8 md:p-10 rounded-[3rem] border-b-8 hover:-translate-y-2 transition-all duration-300 flex flex-col items-center md:items-start text-center md:text-start shadow-md h-full`}>
                                         <div className="text-white/90 drop-shadow-sm">{w.icon}</div>
-                                        <h4 className="text-2xl md:text-3xl font-black mb-4">{w.title}</h4>
+                                        <h4 className="text-2xl md:text-3xl font-black mb-3">{w.title}</h4>
                                         <p className="text-base md:text-lg font-bold opacity-90 leading-relaxed">{w.desc}</p>
                                     </div>
                                 </RevealOnScroll>
                             ))}
 
                             {/* الجناح الخامس - تصميم خاص للهوية الوطنية */}
-                            <div className="md:col-span-2 relative mt-2">
+                            <div className="md:col-span-2 relative mt-1">
                                 <RevealOnScroll delay={250}>
-                                    <div className="p-10 md:p-16 rounded-[3rem] bg-slate-900 text-white border-b-8 border-slate-950 flex flex-col md:flex-row items-center gap-10 shadow-md hover:-translate-y-2 transition-transform overflow-hidden relative">
+                                    <div className="p-8 md:p-14 rounded-[3rem] bg-slate-900 text-white border-b-8 border-slate-950 flex flex-col md:flex-row items-center gap-8 shadow-md hover:-translate-y-2 transition-transform overflow-hidden relative">
                                         <div className="absolute top-[-20%] right-[-10%] w-64 h-64 bg-red-600/40 rounded-full blur-[80px]"></div>
                                         <div className="absolute bottom-[-20%] left-[-10%] w-64 h-64 bg-green-600/40 rounded-full blur-[80px]"></div>
                                         
-                                        <div className="relative z-10 w-24 h-24 md:w-32 md:h-32 bg-white rounded-full flex items-center justify-center shrink-0 border-4 border-slate-700">
-                                           <svg viewBox="0 0 640 480" className="w-16 h-16 md:w-24 md:h-24 rounded shadow-sm overflow-hidden" preserveAspectRatio="none">
+                                        <div className="relative z-10 w-24 h-24 md:w-28 md:h-28 bg-white rounded-full flex items-center justify-center shrink-0 border-4 border-slate-700">
+                                           <svg viewBox="0 0 640 480" className="w-16 h-16 md:w-20 md:h-20 rounded shadow-sm overflow-hidden" preserveAspectRatio="none">
                                               <path fill="#00732f" d="M0 0h640v160H0z"/>
                                               <path fill="#fff" d="M0 160h640v160H0z"/>
                                               <path fill="#000" d="M0 320h640v160H0z"/>
@@ -268,13 +268,13 @@ const AboutPage: React.FC = () => {
                                         </div>
                                         
                                         <div className="relative z-10 flex-1 text-center md:text-start">
-                                            <div className="inline-block px-4 py-1 rounded-full bg-white/10 text-white/90 text-xs font-black uppercase tracking-widest mb-4 border border-white/20">
+                                            <div className="inline-block px-4 py-1 rounded-full bg-white/10 text-white/90 text-xs font-black uppercase tracking-widest mb-3 border border-white/20">
                                                 National Identity Wing
                                             </div>
-                                            <h4 className="text-3xl md:text-4xl lg:text-5xl font-black mb-4 leading-tight">
+                                            <h4 className="text-2xl md:text-3xl lg:text-4xl font-black mb-3 leading-tight">
                                                 {t('wing5')}
                                             </h4>
-                                            <p className="text-lg md:text-xl text-slate-300 font-bold leading-relaxed max-w-3xl">
+                                            <p className="text-base md:text-lg text-slate-300 font-bold leading-relaxed max-w-3xl">
                                                 {t('wing5Desc')}
                                             </p>
                                         </div>
@@ -288,14 +288,14 @@ const AboutPage: React.FC = () => {
                 {/* --- 3. خدمات المكتبة --- */}
                 <RevealOnScroll delay={150}>
                     <section className="relative z-10">
-                        <div className="bg-white dark:bg-slate-800 p-10 md:p-16 rounded-[3rem] border-4 border-slate-200 dark:border-slate-700 shadow-sm text-center relative">
-                            <h3 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-10">
+                        <div className="bg-white dark:bg-slate-800 p-8 md:p-14 rounded-[3rem] border-4 border-slate-200 dark:border-slate-700 shadow-sm text-center relative">
+                            <h3 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white mb-8">
                                 {t('libServices')}
                             </h3>
                             
-                            <div className="flex flex-wrap justify-center gap-4 md:gap-5">
+                            <div className="flex flex-wrap justify-center gap-3 md:gap-4">
                                 {t('servicesList').split(' • ').map((service, index) => (
-                                    <div key={index} className="px-6 py-3 md:px-8 md:py-4 bg-sky-100 dark:bg-slate-900 text-sky-700 dark:text-sky-400 rounded-full text-sm md:text-lg font-black border-2 border-sky-200 dark:border-slate-700 hover:bg-sky-500 hover:text-white hover:border-sky-600 cursor-default transition-colors">
+                                    <div key={index} className="px-5 py-2.5 md:px-7 md:py-3.5 bg-sky-100 dark:bg-slate-900 text-sky-700 dark:text-sky-400 rounded-full text-sm md:text-base font-black border-2 border-sky-200 dark:border-slate-700 hover:bg-sky-500 hover:text-white hover:border-sky-600 cursor-default transition-colors">
                                         {service}
                                     </div>
                                 ))}
@@ -310,26 +310,26 @@ const AboutPage: React.FC = () => {
                         
                         {/* مواعيد العمل */}
                         <div className="lg:col-span-7">
-                            <div className="h-full bg-white dark:bg-slate-800 p-8 md:p-12 rounded-[3rem] border-4 border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden">
-                                <div className="flex items-center gap-4 mb-8">
-                                    <div className="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-500 rounded-full flex items-center justify-center border-2 border-emerald-200 dark:border-emerald-800">
+                            <div className="h-full bg-white dark:bg-slate-800 p-8 md:p-10 rounded-[3rem] border-4 border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden flex flex-col justify-between">
+                                <div className="flex items-center gap-4 mb-6">
+                                    <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-500 rounded-full flex items-center justify-center border-2 border-emerald-200 dark:border-emerald-800">
                                        <ClockIcon />
                                     </div>
-                                    <h3 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white">{t('operatingHours')}</h3>
+                                    <h3 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white">{t('operatingHours')}</h3>
                                 </div>
 
-                                <div className="space-y-4 font-black text-sm md:text-lg text-slate-600 dark:text-slate-400">
-                                    <div className="flex flex-col md:flex-row justify-between md:items-center gap-3 p-4 md:p-5 bg-slate-50 dark:bg-slate-900 rounded-[2rem] border-2 border-slate-100 dark:border-slate-700">
+                                <div className="space-y-3 font-black text-sm md:text-base text-slate-600 dark:text-slate-400">
+                                    <div className="flex flex-col md:flex-row justify-between md:items-center gap-2 p-3.5 md:p-4 bg-slate-50 dark:bg-slate-900 rounded-[2rem] border-2 border-slate-100 dark:border-slate-700">
                                         <span>{t('monThu').split(' (')[0]}</span>
-                                        <span className="text-slate-900 dark:text-white bg-white dark:bg-slate-800 px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600">{t('monThu').split(' (')[1]?.replace(')', '')}</span>
+                                        <span className="text-slate-900 dark:text-white bg-white dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-600">{t('monThu').split(' (')[1]?.replace(')', '')}</span>
                                     </div>
-                                    <div className="flex flex-col md:flex-row justify-between md:items-center gap-3 p-4 md:p-5 bg-slate-50 dark:bg-slate-900 rounded-[2rem] border-2 border-slate-100 dark:border-slate-700">
+                                    <div className="flex flex-col md:flex-row justify-between md:items-center gap-2 p-3.5 md:p-4 bg-slate-50 dark:bg-slate-900 rounded-[2rem] border-2 border-slate-100 dark:border-slate-700">
                                         <span>{t('fri').split(' (')[0]}</span>
-                                        <span className="text-slate-900 dark:text-white bg-white dark:bg-slate-800 px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600">{t('fri').split(' (')[1]?.replace(')', '')}</span>
+                                        <span className="text-slate-900 dark:text-white bg-white dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-600">{t('fri').split(' (')[1]?.replace(')', '')}</span>
                                     </div>
-                                    <div className="flex flex-col md:flex-row justify-between md:items-center gap-3 p-4 md:p-5 bg-rose-50 dark:bg-rose-900/10 rounded-[2rem] border-2 border-rose-200 dark:border-rose-900/30">
+                                    <div className="flex flex-col md:flex-row justify-between md:items-center gap-2 p-3.5 md:p-4 bg-rose-50 dark:bg-rose-900/10 rounded-[2rem] border-2 border-rose-200 dark:border-rose-900/30">
                                         <span className="text-rose-600 dark:text-rose-400">{t('satSun').split(' (')[0]}</span>
-                                        <span className="text-rose-700 dark:text-rose-300 bg-white dark:bg-slate-800 px-4 py-2 rounded-xl border-2 border-rose-200 dark:border-rose-900/50">{t('satSun').split(' (')[1]?.replace(')', '')}</span>
+                                        <span className="text-rose-700 dark:text-rose-300 bg-white dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-rose-200 dark:border-rose-900/50">{t('satSun').split(' (')[1]?.replace(')', '')}</span>
                                     </div>
                                 </div>
                             </div>
@@ -339,27 +339,27 @@ const AboutPage: React.FC = () => {
                         <div className="lg:col-span-5 h-full">
                             <a 
                                 href="mailto:islam.ahmed@falcon-school.com"
-                                className="block h-full bg-rose-500 border-b-8 border-rose-700 p-8 md:p-12 rounded-[3rem] text-center group hover:-translate-y-2 active:border-b-0 active:translate-y-2 transition-all shadow-sm"
+                                className="block h-full bg-rose-500 border-b-8 border-rose-700 p-8 md:p-10 rounded-[3rem] text-center group hover:-translate-y-2 active:border-b-0 active:translate-y-2 transition-all shadow-sm"
                             >
                                 <div className="h-full flex flex-col justify-center items-center">
-                                    <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 border-2 border-white/30">
+                                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 border-2 border-white/30">
                                         <MailIcon />
                                     </div>
-                                    <h3 className="text-2xl md:text-3xl font-black mb-4 text-white">{t('contactLink')}</h3>
-                                    <p className="text-white font-bold text-sm md:text-lg break-all bg-black/10 px-5 py-3 rounded-[1.5rem] border-2 border-white/20">islam.ahmed@falcon-school.com</p>
+                                    <h3 className="text-xl md:text-2xl font-black mb-3 text-white">{t('contactLink')}</h3>
+                                    <p className="text-white font-bold text-xs md:text-sm break-all bg-black/10 px-4 py-2.5 rounded-[1.5rem] border border-white/20">islam.ahmed@falcon-school.com</p>
                                 </div>
                             </a>
                         </div>
                     </section>
                 </RevealOnScroll>
 
-                {/* --- والخاتمة --- */}
+                {/* --- الخاتمة --- */}
                 <RevealOnScroll delay={250}>
-                    <div className="mt-12 md:mt-20 text-center relative z-10">
-                        <p className="text-2xl md:text-4xl lg:text-5xl font-black text-slate-400 dark:text-slate-500 leading-relaxed italic px-4">
+                    <div className="mt-8 md:mt-12 text-center relative z-10">
+                        <p className="text-xl md:text-3xl lg:text-4xl font-black text-slate-400 dark:text-slate-500 leading-relaxed italic px-4">
                             "{t('motto')}"
                         </p>
-                        <div className="flex justify-center gap-3 mt-10">
+                        <div className="flex justify-center gap-3 mt-8">
                             <div className="h-2 w-12 bg-amber-400 rounded-full"></div>
                             <div className="h-2 w-3 bg-sky-400 rounded-full"></div>
                             <div className="h-2 w-3 bg-rose-400 rounded-full"></div>
