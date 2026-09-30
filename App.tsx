@@ -199,7 +199,7 @@ const Header: React.FC = () => {
   }, [location.pathname]);
 
   useEffect(() => {
-    if (location.pathname === '/' || location.pathname === '/admin-dashboard') {
+    if (location.pathname === '/' || location.pathname === '/admin-dashboard' || location.pathname === '/about') {
       return;
     }
 
@@ -219,9 +219,9 @@ const Header: React.FC = () => {
     return () => window.removeEventListener('scroll', controlNavbar);
   }, [lastScrollY, location.pathname]);
 
-  if (location.pathname === '/' || location.pathname === '/admin-dashboard') return null;
+  // تم إضافة إخفاء الشريط تماماً في صفحة AboutPage (/about)
+  if (location.pathname === '/' || location.pathname === '/admin-dashboard' || location.pathname === '/about') return null;
 
-  // تم إلغاء زر الرئيسية من الروابط
   const allLinks: NavLink[] = [
     { path: '/search', label: locale === 'en' ? 'Search' : 'البحث بالمكتبة', hint: 'Search', color: 'bg-rose-500', roles: ['student', 'teacher', 'admin'] },
     { path: '/digital-library', label: locale === 'en' ? 'Digital' : 'المكتبة الرقمية', hint: 'Digital', color: 'bg-blue-500', roles: ['student', 'teacher', 'admin'] },
@@ -240,10 +240,8 @@ const Header: React.FC = () => {
         isVisible ? 'translate-y-0 opacity-100' : '-translate-y-[150%] opacity-0 pointer-events-none'
       }`}
     >
-      {/* تم زيادة الشفافية والبلور (backdrop-blur-2xl with /50 opacity) */}
       <div className="w-full max-w-[98%] md:w-fit px-4 py-2.5 rounded-[2rem] border-4 border-white/70 dark:border-slate-700/40 flex items-center justify-between md:justify-center gap-4 shadow-2xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-2xl">
         
-        {/* الشعار يميل أكثر لليمين عبر هامش me-3 */}
         <Link to="/home" className="flex items-center gap-2 group flex-shrink-0 me-3">
           <img
             src="/school-logo.png"
@@ -348,6 +346,7 @@ const MainLayout: React.FC = () => {
   const hideFooter =
     location.pathname === '/' ||
     location.pathname === '/admin-dashboard' ||
+    location.pathname === '/about' ||
     location.pathname === '/game';
 
   return (
@@ -357,7 +356,7 @@ const MainLayout: React.FC = () => {
 
       <main
         className={`flex-1 relative z-10 w-full ${
-          location.pathname === '/' || location.pathname === '/admin-dashboard'
+          location.pathname === '/' || location.pathname === '/admin-dashboard' || location.pathname === '/about'
             ? 'pt-0'
             : 'pt-20 md:pt-24'
         }`}
