@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { bookData, type Book } from '../api/bookData'; 
 import { useLanguage } from '../App';
 import { trackActivity } from '../src/utils/tracker';
+import { useNavigate } from 'react-router-dom';
 
 // --- 1. الـ Hooks المساعدة ---
 const useDebounce = <T,>(value: T, delay: number): T => {
@@ -30,7 +31,8 @@ const translations = {
     aiSubject: "تصنيف صقر الذكي",
     close: "إغلاق",
     subjectLabel: "الموضوع",
-    officialAi: "تحليل صقر الذكي"
+    officialAi: "تحليل صقر الذكي",
+    back: "العودة"
   },
   en: {
     pageTitle: "Falcon School Library Index",
@@ -48,12 +50,13 @@ const translations = {
     aiSubject: "Saqr AI Classified",
     close: "Close",
     subjectLabel: "Topic",
-    officialAi: "Saqr AI Analysis"
+    officialAi: "Saqr AI Analysis",
+    back: "Back"
   }
 };
 
 // ==========================================
-// أيقونات SVG جذابة (بديلة للإيموجيز)
+// أيقونات SVG جذابة
 // ==========================================
 const UserIcon = () => (
   <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
@@ -85,6 +88,51 @@ const RobotSvg = () => (
     <line x1="16" y1="16" x2="16" y2="16" strokeWidth={4} />
   </svg>
 );
+
+// --- مكون التلاشي المخصص (Reveal Component) ---
+const RevealOnScroll = ({ children, delay = 0 }: { children: React.ReactNode, delay?: number }) => {
+    const [isVisible, setIsVisible] = useState(true);
+    const elementRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setIsVisible(true);
+                } else {
+                    setIsVisible(false);
+                }
+            },
+            {
+                threshold: 0.15,
+                rootMargin: "-20px 0px -20px 0px"
+            }
+        );
+
+        if (elementRef.current) {
+            observer.observe(elementRef.current);
+        }
+
+        return () => {
+            if (elementRef.current) {
+                observer.unobserve(elementRef.current);
+            }
+        };
+    }, []);
+
+    return (
+        <div
+            ref={elementRef}
+            className={`transition-all duration-700 ease-out transform w-full ${
+                isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-12 scale-95 pointer-events-none'
+            }`}
+            style={{ transitionDelay: `${delay}ms` }}
+        >
+            {children}
+        </div>
+    );
+};
+
 
 // --- 3. Component: BookModal ---
 const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
@@ -177,67 +225,53 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
     );
 };
 
-// --- 4. Component: BookCard (Realistic Book Design) ---
+// --- 4. Component: BookCard (2D Flat Design) ---
 const BookCard = React.memo(({ book, onClick, t }: { book: Book; onClick: () => void; t: any }) => {
   const isAi = !book.subject || book.subject === "Unknown";
-  // توليد لون عشوائي للغلاف بناءً على الحرف الأول لتنويع شكل الكتب
+
   const colors = [
-    'from-blue-500 to-blue-700 border-blue-800',
-    'from-emerald-500 to-emerald-700 border-emerald-800',
-    'from-rose-500 to-rose-700 border-rose-800',
-    'from-amber-500 to-amber-600 border-amber-700',
-    'from-purple-500 to-purple-700 border-purple-800'
+    'from-blue-500 to-sky-500 border-blue-200',
+    'from-emerald-500 to-teal-400 border-emerald-200',
+    'from-rose-500 to-pink-500 border-rose-200',
+    'from-amber-500 to-orange-400 border-amber-200',
+    'from-purple-500 to-indigo-500 border-purple-200'
   ];
   const colorClass = colors[book.title.length % colors.length];
 
   return (
-    <div onClick={onClick} className="relative group cursor-pointer w-full h-[320px] perspective-1000 flex items-end justify-center pb-2">
-      {/* تصميم الكتاب الواقعي */}
-      <div className={`book-volume w-[90%] h-full relative transform-style-3d transition-transform duration-500 group-hover:rotate-y-[-15deg] group-hover:-translate-y-4 group-hover:scale-105 rounded-r-2xl border-l-[16px] shadow-[-10px_10px_20px_rgba(0,0,0,0.15)] bg-gradient-to-br ${colorClass}`}>
+    <div onClick={onClick} className="relative group cursor-pointer w-full max-w-sm mx-auto h-[280px] md:h-[300px] flex items-stretch justify-center p-2">
+      
+      {/* تصميم البطاقة الثنائية الأبعاد */}
+      <div className={`w-full h-full relative rounded-[2rem] border-4 shadow-lg bg-gradient-to-br ${colorClass} transition-all duration-500 transform group-hover:-translate-y-3 group-hover:shadow-2xl overflow-hidden flex flex-col`}>
         
-        {/* الغلاف الأمامي (محتوى الكتاب) */}
-        <div className="absolute inset-0 flex flex-col p-5 overflow-hidden rounded-r-2xl">
-          {/* تأثير اللمعان على الغلاف */}
-          <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-black/20 pointer-events-none"></div>
+        {/* تأثير انعكاس الزجاج الخفيف */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-black/10 pointer-events-none"></div>
+        <div className="absolute top-0 left-0 w-full h-1/2 bg-white/10 skew-y-12 pointer-events-none"></div>
 
-          {/* التصنيف (تاغ علوي) */}
-          <div className="mb-auto mt-2">
-            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-white/20 text-white backdrop-blur-sm border border-white/30 shadow-sm max-w-full`}>
-               {isAi && <RobotSvg />}
+        <div className="p-5 md:p-6 flex flex-col h-full relative z-10">
+          
+          <div className="flex justify-between items-start flex-row-reverse mb-auto">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-white/25 text-white backdrop-blur-sm shadow-sm max-w-[70%]">
+               {isAi && <RobotSvg/>}
                <span className="truncate">{isAi ? t('aiSubject') : book.subject}</span>
             </span>
           </div>
           
-          {/* العنوان والمؤلف */}
-          <div className="relative z-10 flex-1 flex flex-col justify-center">
-            <h3 className="font-black text-lg md:text-xl text-white leading-snug drop-shadow-md line-clamp-3 mb-3">
+          <div className="flex-1 flex flex-col justify-end text-right mt-4">
+            <h3 className="font-black text-xl md:text-2xl text-white leading-tight drop-shadow-md line-clamp-3 mb-4">
                 {book.title}
             </h3>
-            <div className="flex items-center gap-2 text-white/80 mt-auto mb-2">
-                <UserIcon />
-                <p className="text-xs font-bold truncate uppercase">{book.author}</p>
+            <div className="flex items-center gap-2 text-white/90 flex-row-reverse justify-end bg-black/10 p-2.5 rounded-xl w-fit ms-auto backdrop-blur-sm">
+                <UserIcon/>
+                <p className="text-xs md:text-sm font-bold truncate uppercase tracking-wide">{book.author}</p>
             </div>
           </div>
-        </div>
-
-        {/* كعب الكتاب (الجانب الأيسر الثلاثي الأبعاد) */}
-        <div className="absolute top-0 left-[-16px] w-[16px] h-full bg-black/30 origin-right transform rotate-y-90 flex flex-col items-center justify-between py-6">
-           {/* خطوط تجميلية على كعب الكتاب */}
-           <div className="w-full h-1 bg-white/30"></div>
-           <div className="text-[10px] text-white/50 font-black -rotate-90 tracking-widest">{book.shelf}</div>
-           <div className="w-full h-1 bg-white/30"></div>
-        </div>
-
-        {/* صفحات الكتاب (الجانب الأيمن) */}
-        <div className="absolute top-2 right-[-6px] w-[6px] h-[calc(100%-4px)] bg-[#fdfbf7] origin-left transform rotate-y-[-90deg] rounded-r-sm shadow-inner border-y border-r border-[#e2e8f0]">
-           {/* خطوط الصفحات */}
-           <div className="w-full h-full bg-[repeating-linear-gradient(transparent,transparent_2px,#e2e8f0_2px,#e2e8f0_3px)] opacity-50"></div>
         </div>
 
       </div>
 
       {/* شريط الإحصائيات أسفل الكتاب (الرف والصف) */}
-      <div className="absolute bottom-0 w-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-y-4 group-hover:translate-y-0 bg-white dark:bg-slate-800 p-3 rounded-2xl shadow-xl border-2 border-slate-100 dark:border-slate-700 flex justify-between items-center z-50">
+      <div className="absolute bottom-[-10px] w-[90%] opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-y-4 group-hover:translate-y-0 bg-white dark:bg-slate-800 p-3 rounded-2xl shadow-xl border-2 border-slate-100 dark:border-slate-700 flex justify-between items-center z-50">
           <div className="flex gap-4">
               <div className="text-center">
                 <p className="text-[9px] text-amber-500 font-black uppercase">{t('shelf')}</p>
@@ -259,8 +293,16 @@ const BookCard = React.memo(({ book, onClick, t }: { book: Book; onClick: () => 
 
 // --- 5. Main Component: SearchPage ---
 const SearchPage: React.FC = () => {
+    // اللغة الافتراضية
     const { locale, dir } = useLanguage();
-    const t = (key: string) => (translations as any)[locale][key] || key;
+    const [currentLocale, setCurrentLocale] = useState(locale || 'en');
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        setCurrentLocale(locale);
+    }, [locale]);
+
+    const t = (key: keyof typeof translations.en) => translations[currentLocale as 'ar' | 'en']?.[key] as string;
     
     const [searchTerm, setSearchTerm] = useState('');
     const [subjectFilter, setSubjectFilter] = useState('all');
@@ -268,26 +310,26 @@ const SearchPage: React.FC = () => {
     const [shelfFilter, setShelfFilter] = useState('all');
     const [sortBy, setSortBy] = useState('alphabetical'); 
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
-    const [visibleCount, setVisibleCount] = useState(16);
+    const [visibleCount, setVisibleCount] = useState(12);
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-    const [showSearch, setShowSearch] = useState(true);
-    const [lastScrollY, setLastScrollY] = useState(0);
+    const [isVisible, setIsVisible] = useState(true);
+    const lastScrollY = useRef(0);
 
     useEffect(() => {
         const handleScroll = () => {
             const currentScrollY = window.scrollY;
-            if (currentScrollY > lastScrollY && currentScrollY > 100) {
-                setShowSearch(false); 
+            if (currentScrollY > lastScrollY.current && currentScrollY > 150) {
+                setIsVisible(false); 
             } else {
-                setShowSearch(true); 
+                setIsVisible(true); 
             }
-            setLastScrollY(currentScrollY);
+            lastScrollY.current = currentScrollY;
         };
 
         window.addEventListener('scroll', handleScroll, { passive: true });
         return () => window.removeEventListener('scroll', handleScroll);
-    }, [lastScrollY]);
+    }, []);
 
     const filters = useMemo(() => ({
         subjects: [...new Set(bookData.map(b => b.subject))].filter(s => s !== "Unknown").sort(),
@@ -306,26 +348,27 @@ const SearchPage: React.FC = () => {
         });
 
         if (sortBy === 'alphabetical') {
-            result = [...result].sort((a, b) => a.title.localeCompare(b.title, locale));
+            result = [...result].sort((a, b) => a.title.localeCompare(b.title, currentLocale));
         } else if (sortBy === 'author') {
-            result = [...result].sort((a, b) => a.author.localeCompare(b.author, locale));
+            result = [...result].sort((a, b) => a.author.localeCompare(b.author, currentLocale));
         }
         return result;
-    }, [debouncedSearchTerm, subjectFilter, authorFilter, shelfFilter, sortBy, locale]);
+    }, [debouncedSearchTerm, subjectFilter, authorFilter, shelfFilter, sortBy, currentLocale]);
 
     return (
         <div dir={dir} className="w-full min-h-screen bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300">
             
-            {/* 🌟 تصميم طفولي للخلفية */}
             <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-50 dark:opacity-20">
                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-amber-400/20 rounded-full blur-[100px] animate-blob"></div>
                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-sky-400/20 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
             </div>
 
-            <div className="max-w-[1400px] mx-auto px-4 md:px-6 pt-10 pb-40 relative z-10 antialiased">
+            <div className={`max-w-[1400px] mx-auto px-4 md:px-6 pt-10 pb-40 relative z-10 antialiased transition-all duration-700 ease-in-out transform origin-top ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-8 scale-95 pointer-events-none'}`}>
                 
-                {/* Title */}
-                <div className="text-center mb-10 md:mb-16">
+                <div className="text-center mb-10 md:mb-16 relative">
+                    <button onClick={() => navigate(-1)} className="absolute start-0 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-800 text-slate-800 dark:text-white px-5 py-2.5 rounded-full font-black text-sm hover:bg-slate-200 hover:-translate-x-1 active:translate-y-1 border-b-4 border-slate-300 dark:border-slate-700 active:border-b-0 transition-all flex items-center gap-2 shadow-sm">
+                        <span className="text-xl leading-none rtl:rotate-180">←</span> {t('back')}
+                    </button>
                     <h1 className="text-4xl md:text-6xl font-black text-slate-800 dark:text-white mb-6 uppercase tracking-tight">{t('pageTitle')}</h1>
                     <div className="flex justify-center gap-3">
                         <div className="w-8 h-2 bg-amber-400 rounded-full" />
@@ -334,15 +377,14 @@ const SearchPage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Search Bar */}
-                <div className={`sticky z-[100] mb-12 transition-all duration-500 ease-in-out ${showSearch ? 'top-4 md:top-6 opacity-100 translate-y-0' : '-top-40 opacity-0 -translate-y-full'}`}>
+                <div className="mb-12">
                     <div className="bg-white dark:bg-slate-800 p-5 md:p-8 rounded-[3rem] border-4 border-amber-300 dark:border-amber-600 shadow-xl max-w-5xl mx-auto">
                         <div className="flex flex-col gap-5">
                             <div className="relative group">
                                 <input 
                                   type="text" 
                                   placeholder={t('searchPlaceholder')} 
-                                  className="w-full p-4 md:p-5 ps-14 md:ps-16 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white border-4 border-slate-200 dark:border-slate-700 focus:border-sky-400 rounded-[2rem] outline-none transition-colors text-base md:text-lg font-black shadow-inner" 
+                                  className="w-full p-4 md:p-5 ps-14 md:ps-16 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white border-4 border-slate-200 dark:border-slate-700 focus:border-amber-400 rounded-[2rem] outline-none transition-colors text-base md:text-lg font-black shadow-inner" 
                                   value={searchTerm}
                                   onChange={(e) => setSearchTerm(e.target.value)} 
                                 />
@@ -364,7 +406,7 @@ const SearchPage: React.FC = () => {
                                             onChange={(e) => filter.set(e.target.value)} 
                                             className="w-full p-3 md:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 font-black text-xs md:text-sm cursor-pointer appearance-none text-center hover:border-amber-400 transition-colors outline-none focus:border-amber-500 text-slate-700 dark:text-slate-200"
                                         >
-                                            <option value={filter.id === 'sortBy' ? 'alphabetical' : 'all'}>{t(filter.id)}</option>
+                                            <option value={filter.id === 'sortBy' ? 'alphabetical' : 'all'}>{t(filter.id as keyof typeof translations.en)}</option>
                                             {filter.opts.map(o => <option key={o} value={o}>{filter.pre ? `${filter.pre}${o}` : o}</option>)}
                                         </select>
                                     </div>
@@ -374,21 +416,18 @@ const SearchPage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* عرض الكتب كأرفف مكتبة حقيقية */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-y-12 gap-x-4 md:gap-x-8 px-2 md:px-8">
-                    {filteredBooks.slice(0, visibleCount).map((book) => (
-                        <div key={book.id} className="relative">
-                           <BookCard 
-                               book={book} 
-                               t={t} 
-                               onClick={() => {
-                                   setSelectedBook(book); 
-                                   trackActivity('searched', book.title); 
-                               }} 
-                           />
-                           {/* خط الرف الخشبي أسفل الكتاب لإعطاء إيحاء المكتبة */}
-                           <div className="absolute -bottom-2 w-[110%] -left-[5%] h-4 bg-[#8B4513] rounded-sm shadow-md border-b-4 border-[#5C2E0B] -z-10"></div>
-                        </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-10 gap-x-4 md:gap-x-6 px-2 md:px-8">
+                    {filteredBooks.slice(0, visibleCount).map((book, index) => (
+                        <RevealOnScroll key={book.id} delay={(index % 4) * 100}>
+                            <BookCard 
+                                book={book} 
+                                t={t} 
+                                onClick={() => {
+                                    setSelectedBook(book); 
+                                    trackActivity('searched', book.title); 
+                                }} 
+                            />
+                        </RevealOnScroll>
                     ))}
                 </div>
 
@@ -404,8 +443,8 @@ const SearchPage: React.FC = () => {
                 {filteredBooks.length > visibleCount && (
                     <div className="mt-20 text-center">
                         <button 
-                            onClick={() => setVisibleCount(prev => prev + 16)} 
-                            className="bg-sky-500 text-white px-10 py-4 rounded-full font-black text-lg md:text-xl border-b-8 border-sky-700 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all shadow-md uppercase tracking-widest"
+                            onClick={() => setVisibleCount(prev => prev + 12)} 
+                            className="bg-amber-500 text-white px-10 py-4 rounded-full font-black text-lg md:text-xl border-b-8 border-amber-700 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all shadow-md uppercase tracking-widest w-full max-w-sm"
                         >
                             EXPLORE MORE
                         </button>
@@ -423,12 +462,6 @@ const SearchPage: React.FC = () => {
                 .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
                 .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
                 .dark .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; }
-                
-                /* إعدادات الشكل ثلاثي الأبعاد للكتاب */
-                .perspective-1000 { perspective: 1000px; }
-                .transform-style-3d { transform-style: preserve-3d; }
-                .rotate-y-90 { transform: rotateY(90deg); }
-                .-rotate-y-15 { transform: rotateY(-15deg); }
                 
                 @keyframes blob {
                   0% { transform: translate(0px, 0px) scale(1); }
