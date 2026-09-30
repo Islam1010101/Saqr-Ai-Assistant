@@ -298,6 +298,50 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
     );
 };
 
+// --- مكون التلاشي المخصص (Reveal Component) ---
+const RevealOnScroll = ({ children, delay = 0 }: { children: React.ReactNode, delay?: number }) => {
+    const [isVisible, setIsVisible] = useState(true);
+    const elementRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setIsVisible(true);
+                } else {
+                    setIsVisible(false);
+                }
+            },
+            {
+                threshold: 0.15,
+                rootMargin: "-20px 0px -20px 0px"
+            }
+        );
+
+        if (elementRef.current) {
+            observer.observe(elementRef.current);
+        }
+
+        return () => {
+            if (elementRef.current) {
+                observer.unobserve(elementRef.current);
+            }
+        };
+    }, []);
+
+    return (
+        <div
+            ref={elementRef}
+            className={`transition-all duration-700 ease-out transform w-full ${
+                isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-12 scale-95 pointer-events-none'
+            }`}
+            style={{ transitionDelay: `${delay}ms` }}
+        >
+            {children}
+        </div>
+    );
+};
+
 // --- 4. Component: BookCard (2D Flat Design) ---
 const BookCard = React.memo(({ book, onClick, t }: { book: any; onClick: () => void; t: any }) => {
   const isAi = !book.subject || book.subject === "Unknown";
@@ -314,7 +358,7 @@ const BookCard = React.memo(({ book, onClick, t }: { book: any; onClick: () => v
   const colorClass = colors[book.title.length % colors.length];
 
   return (
-    <div onClick={onClick} className="relative group cursor-pointer w-full h-[280px] md:h-[300px] flex items-stretch justify-center p-2">
+    <div onClick={onClick} className="relative group cursor-pointer w-full max-w-sm mx-auto h-[280px] md:h-[300px] flex items-stretch justify-center p-2">
       
       {/* هالة مضيئة خلف الكتاب في حالة وجود صوت */}
       {hasAudio && (
@@ -371,6 +415,7 @@ const ArabicLibraryInternalPage: React.FC = () => {
     }, [locale]);
 
     const t = (key: keyof typeof translations.en) => translations[currentLocale as 'ar' | 'en']?.[key] as string;
+    const isAr = currentLocale === 'ar';
     
     const [searchTerm, setSearchTerm] = useState('');
     const [subjectFilter, setSubjectFilter] = useState('all');
@@ -378,25 +423,7 @@ const ArabicLibraryInternalPage: React.FC = () => {
     const [sortBy, setSortBy] = useState('alphabetical'); 
     const [audioOnly, setAudioOnly] = useState(false);
     const [selectedBook, setSelectedBook] = useState<any | null>(null);
-    const [visibleCount, setVisibleCount] = useState(16);
-
-    const [isVisible, setIsVisible] = useState(true);
-    const lastScrollY = useRef(0);
-
-    // متابعة التمرير لتلاشي الصفحة
-    useEffect(() => {
-        const handleScroll = () => {
-            const currentScrollY = window.scrollY;
-            if (currentScrollY > lastScrollY.current && currentScrollY > 150) {
-                setIsVisible(false);
-            } else {
-                setIsVisible(true);
-            }
-            lastScrollY.current = currentScrollY;
-        };
-        window.addEventListener('scroll', handleScroll, { passive: true });
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
+    const [visibleCount, setVisibleCount] = useState(12); // تغيير ليكون العدد متوافق مع الموبايل
 
     const filters = useMemo(() => ({
         subjects: [...new Set(ARABIC_LIBRARY_DATABASE.map(b => b.subject))].filter(s => s !== "Unknown").sort(),
@@ -428,10 +455,9 @@ const ArabicLibraryInternalPage: React.FC = () => {
                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-amber-400/20 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
             </div>
 
-            {/* الحاوية الرئيسية التي تتلاشى عند التمرير لأسفل */}
-            <div className={`max-w-[1400px] mx-auto px-4 md:px-6 pb-20 relative z-10 antialiased overflow-x-hidden transition-all duration-700 ease-in-out transform origin-top ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-8 scale-95 pointer-events-none'}`}>
+            <div className="max-w-[1400px] mx-auto px-4 md:px-6 pb-20 relative z-10 antialiased overflow-x-hidden">
                 
-                <div className="text-center mt-12 mb-16 relative">
+                <div className="text-center mt-12 mb-12 relative animate-fade-in-up">
                     <button onClick={() => navigate(-1)} className="absolute start-0 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-800 text-slate-800 dark:text-white px-5 py-2.5 rounded-full font-black text-sm hover:bg-slate-200 hover:-translate-x-1 active:translate-y-1 border-b-4 border-slate-300 dark:border-slate-700 active:border-b-0 transition-all flex items-center gap-2 shadow-sm">
                         <span className="text-xl leading-none rtl:rotate-180">←</span> {t('back')}
                     </button>
@@ -443,8 +469,9 @@ const ArabicLibraryInternalPage: React.FC = () => {
                     </div>
                 </div>
 
+                {/* قسم البحث (لا يختفي، بل يبقى في مكانه) */}
                 <div className="mb-16">
-                    <div className="bg-white dark:bg-slate-800 p-5 md:p-8 rounded-[3rem] border-4 border-emerald-300 dark:border-emerald-600 shadow-xl max-w-5xl mx-auto">
+                    <div className="bg-white dark:bg-slate-800 p-5 md:p-8 rounded-[3rem] border-4 border-emerald-300 dark:border-emerald-600 shadow-xl max-w-5xl mx-auto animate-fade-in-up">
                         <div className="flex flex-col gap-5">
                             <div className="relative group">
                                 <input 
@@ -480,10 +507,10 @@ const ArabicLibraryInternalPage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* عرض البطاقات في عمود واحد على الجوال، و 2-5 أعمدة على الشاشات الأكبر */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-y-8 gap-x-4 md:gap-x-6 px-2 md:px-4">
-                    {filteredBooks.slice(0, visibleCount).map((book) => (
-                        <div key={book.id} className="relative z-10 w-full max-w-sm mx-auto">
+                {/* عرض البطاقات مع تلاشي لكل بطاقة بشكل منفصل وحصري عند التمرير */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-10 gap-x-4 md:gap-x-6 px-2 md:px-4">
+                    {filteredBooks.slice(0, visibleCount).map((book, index) => (
+                        <RevealOnScroll key={book.id} delay={(index % 4) * 100}>
                            <BookCard 
                                book={book} 
                                t={t} 
@@ -497,7 +524,7 @@ const ArabicLibraryInternalPage: React.FC = () => {
                                    }
                                }} 
                            />
-                        </div>
+                        </RevealOnScroll>
                     ))}
                 </div>
 
@@ -511,10 +538,10 @@ const ArabicLibraryInternalPage: React.FC = () => {
                 )}
 
                 {filteredBooks.length > visibleCount && (
-                    <div className="mt-16 text-center">
+                    <div className="mt-16 text-center w-full flex justify-center">
                         <button 
-                            onClick={() => setVisibleCount(prev => prev + 16)} 
-                            className="bg-emerald-500 text-white px-10 py-4 rounded-full font-black text-lg md:text-xl border-b-8 border-emerald-700 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all shadow-md uppercase tracking-widest w-full sm:w-auto"
+                            onClick={() => setVisibleCount(prev => prev + 12)} 
+                            className="bg-emerald-500 text-white px-10 py-4 rounded-full font-black text-lg md:text-xl border-b-8 border-emerald-700 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all shadow-md uppercase tracking-widest w-full max-w-sm"
                         >
                             EXPLORE MORE
                         </button>
