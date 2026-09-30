@@ -112,10 +112,51 @@ const ScheduleIcon = () => <svg className="w-6 h-6 stroke-[2.2] opacity-85" fill
 const GameIcon = () => <svg className="w-6 h-6 stroke-[2.2] opacity-85" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
 const AdminIcon = () => <svg className="w-6 h-6 stroke-[2.2] opacity-85" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>;
 
+// مكون Reveal المخصص (لجعل القسم يتلاشى ويظهر بذكاء بناءً على الرؤية)
+const RevealSection: React.FC<{ children: React.ReactNode, delay?: number }> = ({ children, delay = 0 }) => {
+    const [isVisible, setIsVisible] = useState(true);
+    const sectionRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setIsVisible(true);
+                } else {
+                    setIsVisible(false);
+                }
+            },
+            {
+                threshold: 0.1, // تفعيل التلاشي بمجرد خروج 90% من العنصر
+                rootMargin: "-50px 0px -50px 0px" // إعطاء هامش ذكي للأجهزة المحمولة
+            }
+        );
+
+        if (sectionRef.current) {
+            observer.observe(sectionRef.current);
+        }
+
+        return () => {
+            if (sectionRef.current) {
+                observer.unobserve(sectionRef.current);
+            }
+        };
+    }, []);
+
+    return (
+        <div
+            ref={sectionRef}
+            className={`transition-all duration-700 ease-in-out transform ${
+                isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-10 scale-95'
+            }`}
+            style={{ transitionDelay: `${delay}ms` }}
+        >
+            {children}
+        </div>
+    );
+};
+
 const HomePage: React.FC = () => {
-    // 1. تغيير اللغة الافتراضية هنا لتكون الإنجليزية إذا لم يكن هناك تحديد مسبق (لكن نعتمد على سياق التطبيق الرئيسي)
-    // نترك سياق useLanguage كما هو، فإذا أردت جعل الموقع ككل يبدأ إنجليزي يتم ذلك من App.tsx
-    // وللتأكيد في هذه الصفحة سنعكس الحالة فوراً إن لزم
     const { locale, dir } = useLanguage();
     const isAr = locale === 'ar';
     const t = (key: keyof typeof translations.ar) => translations[locale as 'ar' | 'en'][key];
@@ -137,27 +178,6 @@ const HomePage: React.FC = () => {
     const [showBubble, setShowBubble] = useState(false);
     const [daysLeft, setDaysLeft] = useState<number | null>(null);
     const [sparkles, setSparkles] = useState<SparkleItem[]>([]);
-    
-    // حالة للتحكم في ظهور وتلاشي عناصر الصفحة بناءً على السكرول
-    const [isVisible, setIsVisible] = useState(true);
-    const lastScrollY = useRef(0);
-
-    // متابعة حركة التمرير لتطبيق تأثير التلاشي والظهور
-    useEffect(() => {
-        const handleScroll = () => {
-            const currentScrollY = window.scrollY;
-            // إذا كان التمرير لأسفل يتم الإخفاء، وإذا كان للأعلى أو في القمة يتم الإظهار
-            if (currentScrollY > lastScrollY.current && currentScrollY > 50) {
-                setIsVisible(false);
-            } else {
-                setIsVisible(true);
-            }
-            lastScrollY.current = currentScrollY;
-        };
-
-        window.addEventListener('scroll', handleScroll, { passive: true });
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
 
     useEffect(() => {
         if (!userData || !userType) {
@@ -267,224 +287,239 @@ const HomePage: React.FC = () => {
                 </button>
             </div>
 
-            {/* الحاوية الرئيسية مع تأثير التلاشي أثناء السكرول - مدعومة للمس والموبايلات */}
-            <div className={`w-full max-w-[1300px] flex flex-col gap-10 mt-10 md:mt-6 transition-all duration-700 ease-in-out transform origin-top ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-8 scale-95 pointer-events-none'}`}>
+            <div className="w-full max-w-[1300px] flex flex-col gap-10 mt-10 md:mt-6">
                 
-                <div className="text-center space-y-3 max-w-4xl mx-auto">
-                    <div className="inline-block px-5 py-2 rounded-full bg-white/90 dark:bg-slate-800/90 backdrop-blur-md text-slate-700 dark:text-slate-200 font-bold text-xs md:text-sm shadow-md border-2 border-slate-200 dark:border-slate-700">
-                        {userType === 'admin' ? t('adminBadge') : userType === 'teacher' ? t('teacherBadge') : t('studentBadge')}
-                    </div>
-                    
-                    <div className="flex flex-col items-center gap-2 pt-1">
-                        <span className="text-base md:text-xl font-normal text-slate-500 dark:text-slate-400 tracking-wide">
-                            {t('welcomeUser')}
-                        </span>
+                {/* 1. قسم الترحيب واسم المستخدم */}
+                <RevealSection delay={100}>
+                    <div className="text-center space-y-3 max-w-4xl mx-auto">
+                        <div className="inline-block px-5 py-2 rounded-full bg-white/90 dark:bg-slate-800/90 backdrop-blur-md text-slate-700 dark:text-slate-200 font-bold text-xs md:text-sm shadow-md border-2 border-slate-200 dark:border-slate-700">
+                            {userType === 'admin' ? t('adminBadge') : userType === 'teacher' ? t('teacherBadge') : t('studentBadge')}
+                        </div>
                         
-                        <div 
-                            onClick={handleNameClick}
-                            className="group relative px-8 py-3.5 rounded-[2.5rem] bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border-2 border-white/90 dark:border-slate-800 shadow-2xl transition-all active:scale-95 cursor-pointer hover:scale-[1.02] duration-300 overflow-hidden"
-                        >
-                            <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full duration-1000 bg-gradient-to-r from-transparent via-white/40 dark:via-white/10 to-transparent transition-transform pointer-events-none"></div>
+                        <div className="flex flex-col items-center gap-2 pt-1">
+                            <span className="text-base md:text-xl font-normal text-slate-500 dark:text-slate-400 tracking-wide">
+                                {t('welcomeUser')}
+                            </span>
+                            
+                            <div 
+                                onClick={handleNameClick}
+                                className="group relative px-8 py-3.5 rounded-[2.5rem] bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border-2 border-white/90 dark:border-slate-800 shadow-2xl transition-all active:scale-95 cursor-pointer hover:scale-[1.02] duration-300 overflow-hidden"
+                            >
+                                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full duration-1000 bg-gradient-to-r from-transparent via-white/40 dark:via-white/10 to-transparent transition-transform pointer-events-none"></div>
+                                <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-slate-800 dark:text-white tracking-tight">
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-emerald-500">{getDisplayName()}</span>
+                                </h1>
+                            </div>
+                        </div>
+                        
+                        <p className="text-sm md:text-lg text-slate-600 dark:text-slate-400 font-normal max-w-xl mx-auto pt-2">
+                            {t('subWelcome')}
+                        </p>
+                    </div>
+                </RevealSection>
 
-                            {/* تم تعديل الخط ليكون Bold في الإنجليزية أيضاً */}
-                            <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-slate-800 dark:text-white tracking-tight">
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-emerald-500">{getDisplayName()}</span>
-                            </h1>
+                {/* 2. شريط جديدنا */}
+                <RevealSection delay={200}>
+                    <div className="w-full max-w-5xl mx-auto relative z-30 flex items-center bg-white dark:bg-slate-800 border-4 border-amber-300 dark:border-amber-700 rounded-full shadow-lg overflow-hidden h-14 md:h-16">
+                        <div className="bg-amber-400 text-slate-900 font-black px-5 md:px-8 h-full flex items-center gap-2 relative z-20 shrink-0 text-xs md:text-sm uppercase">
+                            <div className="w-3 h-3 bg-white rounded-full animate-ping"></div>
+                            {t('newsTitle')}
+                        </div>
+                        <div className="flex-1 overflow-hidden h-full flex items-center bg-amber-50 dark:bg-slate-800">
+                            <div className={`whitespace-nowrap inline-block ${isAr ? 'animate-marquee-rtl' : 'animate-marquee-ltr'} text-slate-800 dark:text-slate-100 font-bold text-xs md:text-base px-4`}>
+                                {t('newsContent')}
+                            </div>
                         </div>
                     </div>
-                    
-                    <p className="text-sm md:text-lg text-slate-600 dark:text-slate-400 font-normal max-w-xl mx-auto pt-2">
-                        {t('subWelcome')}
-                    </p>
-                </div>
+                </RevealSection>
 
-                <div className="w-full max-w-5xl mx-auto relative z-30 flex items-center bg-white dark:bg-slate-800 border-4 border-amber-300 dark:border-amber-700 rounded-full shadow-lg overflow-hidden h-14 md:h-16">
-                    <div className="bg-amber-400 text-slate-900 font-black px-5 md:px-8 h-full flex items-center gap-2 relative z-20 shrink-0 text-xs md:text-sm uppercase">
-                        <div className="w-3 h-3 bg-white rounded-full animate-ping"></div>
-                        {t('newsTitle')}
+                {/* 3. الروابط والأقسام السريعة */}
+                <RevealSection delay={300}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        
+                        <Link to="/search" className="group relative bg-sky-400 text-white p-6 rounded-[2.5rem] border-b-8 border-sky-600 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
+                            <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
+                                <SearchIcon />
+                            </div>
+                            <div>
+                                <h3 className="text-xl md:text-2xl font-black mb-1 tracking-tight">{t('manualSearch')}</h3>
+                                <p className="text-xs md:text-sm opacity-90 font-normal leading-snug">{t('manualDesc')}</p>
+                            </div>
+                        </Link>
+
+                        <Link to="/smart-search" className="group relative bg-emerald-400 text-white p-6 rounded-[2.5rem] border-b-8 border-emerald-600 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
+                            <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
+                                <SmartIcon />
+                            </div>
+                            <div>
+                                <h3 className="text-xl md:text-2xl font-black mb-1 tracking-tight">{t('smartSearch')}</h3>
+                                <p className="text-xs md:text-sm opacity-90 font-normal leading-snug">{t('smartDesc')}</p>
+                            </div>
+                        </Link>
+
+                        <Link to="/digital-library" className="group relative bg-indigo-400 text-white p-6 rounded-[2.5rem] border-b-8 border-indigo-600 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
+                            <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
+                                <BookIcon />
+                            </div>
+                            <div>
+                                <h3 className="text-xl md:text-2xl font-black mb-1 tracking-tight">{t('digitalLibrary')}</h3>
+                                <p className="text-xs md:text-sm opacity-90 font-normal leading-snug">{t('digitalDesc')}</p>
+                            </div>
+                        </Link>
+
+                        <Link to="/creators" className="group relative bg-purple-400 text-white p-6 rounded-[2.5rem] border-b-8 border-purple-600 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
+                            <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
+                                <CreatorIcon />
+                            </div>
+                            <div>
+                                <h3 className="text-xl md:text-2xl font-black mb-1 tracking-tight">{t('creators')}</h3>
+                                <p className="text-xs md:text-sm opacity-90 font-normal leading-snug">{t('creatorsDesc')}</p>
+                            </div>
+                        </Link>
+
+                        {(userType === 'student' || userType === 'admin') && (
+                            <Link to="/saqr-studio" className="group relative bg-blue-500 text-white p-6 rounded-[2.5rem] border-b-8 border-blue-700 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
+                                <div className="absolute top-4 end-4 bg-rose-500 text-white text-[10px] md:text-xs px-3 py-0.5 rounded-full font-black uppercase tracking-wider shadow-md animate-pulse">
+                                    {t('newBadge')}
+                                </div>
+                                <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
+                                    <StudioIcon />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl md:text-2xl font-black mb-1 tracking-tight">{t('saqrStudioBanner')}</h3>
+                                    <p className="text-xs md:text-sm opacity-90 font-normal leading-snug">{t('saqrStudioDesc')}</p>
+                                </div>
+                            </Link>
+                        )}
+
+                        {(userType === 'teacher' || userType === 'admin') && (
+                            <Link to="/schedule" className="group relative bg-teal-500 text-white p-6 rounded-[2.5rem] border-b-8 border-teal-700 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
+                                <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
+                                    <ScheduleIcon />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl md:text-2xl font-black mb-1 tracking-tight">{t('scheduleTitle')}</h3>
+                                    <p className="text-xs md:text-sm opacity-90 font-normal leading-snug">{t('scheduleDesc')}</p>
+                                </div>
+                            </Link>
+                        )}
+
+                        {(userType === 'student' || userType === 'admin') && (
+                            <Link to="/game" className="group relative bg-amber-400 text-slate-900 p-6 rounded-[2.5rem] border-b-8 border-amber-600 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
+                                <div className="absolute top-4 end-4 bg-rose-500 text-white text-[10px] md:text-xs px-3 py-0.5 rounded-full font-black uppercase tracking-wider shadow-md animate-pulse">
+                                    {t('newBadge')}
+                                </div>
+                                <div className="p-3.5 bg-slate-900/10 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 text-slate-900">
+                                    <GameIcon />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl md:text-2xl font-black mb-1 tracking-tight">{t('gameTitle')}</h3>
+                                    <p className="text-xs md:text-sm opacity-90 font-normal leading-snug">{t('gameDesc')}</p>
+                                </div>
+                            </Link>
+                        )}
+
+                        {userType === 'admin' && (
+                            <Link to="/admin-dashboard" className="group relative bg-rose-500 text-white p-6 rounded-[2.5rem] border-b-8 border-rose-700 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 sm:col-span-2 lg:col-span-3 overflow-hidden">
+                                <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
+                                    <AdminIcon />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl md:text-2xl font-black mb-1 tracking-tight">{t('adminSettingsTitle')}</h3>
+                                    <p className="text-xs md:text-sm opacity-90 font-normal leading-snug">{t('adminSettingsDesc')}</p>
+                                </div>
+                            </Link>
+                        )}
                     </div>
-                    <div className="flex-1 overflow-hidden h-full flex items-center bg-amber-50 dark:bg-slate-800">
-                        <div className={`whitespace-nowrap inline-block ${isAr ? 'animate-marquee-rtl' : 'animate-marquee-ltr'} text-slate-800 dark:text-slate-100 font-bold text-xs md:text-base px-4`}>
-                            {t('newsContent')}
-                        </div>
-                    </div>
-                </div>
+                </RevealSection>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    
-                    <Link to="/search" className="group relative bg-sky-400 text-white p-6 rounded-[2.5rem] border-b-8 border-sky-600 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
-                        <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
-                            <SearchIcon />
-                        </div>
-                        <div>
-                            <h3 className="text-xl md:text-2xl font-black mb-1 tracking-tight">{t('manualSearch')}</h3>
-                            <p className="text-xs md:text-sm opacity-90 font-normal leading-snug">{t('manualDesc')}</p>
-                        </div>
-                    </Link>
-
-                    <Link to="/smart-search" className="group relative bg-emerald-400 text-white p-6 rounded-[2.5rem] border-b-8 border-emerald-600 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
-                        <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
-                            <SmartIcon />
-                        </div>
-                        <div>
-                            <h3 className="text-xl md:text-2xl font-black mb-1 tracking-tight">{t('smartSearch')}</h3>
-                            <p className="text-xs md:text-sm opacity-90 font-normal leading-snug">{t('smartDesc')}</p>
-                        </div>
-                    </Link>
-
-                    <Link to="/digital-library" className="group relative bg-indigo-400 text-white p-6 rounded-[2.5rem] border-b-8 border-indigo-600 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
-                        <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
-                            <BookIcon />
-                        </div>
-                        <div>
-                            <h3 className="text-xl md:text-2xl font-black mb-1 tracking-tight">{t('digitalLibrary')}</h3>
-                            <p className="text-xs md:text-sm opacity-90 font-normal leading-snug">{t('digitalDesc')}</p>
-                        </div>
-                    </Link>
-
-                    <Link to="/creators" className="group relative bg-purple-400 text-white p-6 rounded-[2.5rem] border-b-8 border-purple-600 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
-                        <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
-                            <CreatorIcon />
-                        </div>
-                        <div>
-                            <h3 className="text-xl md:text-2xl font-black mb-1 tracking-tight">{t('creators')}</h3>
-                            <p className="text-xs md:text-sm opacity-90 font-normal leading-snug">{t('creatorsDesc')}</p>
-                        </div>
-                    </Link>
-
-                    {(userType === 'student' || userType === 'admin') && (
-                        <Link to="/saqr-studio" className="group relative bg-blue-500 text-white p-6 rounded-[2.5rem] border-b-8 border-blue-700 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
-                            <div className="absolute top-4 end-4 bg-rose-500 text-white text-[10px] md:text-xs px-3 py-0.5 rounded-full font-black uppercase tracking-wider shadow-md animate-pulse">
-                                {t('newBadge')}
-                            </div>
-                            <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
-                                <StudioIcon />
-                            </div>
-                            <div>
-                                <h3 className="text-xl md:text-2xl font-black mb-1 tracking-tight">{t('saqrStudioBanner')}</h3>
-                                <p className="text-xs md:text-sm opacity-90 font-normal leading-snug">{t('saqrStudioDesc')}</p>
-                            </div>
-                        </Link>
-                    )}
-
-                    {(userType === 'teacher' || userType === 'admin') && (
-                        <Link to="/schedule" className="group relative bg-teal-500 text-white p-6 rounded-[2.5rem] border-b-8 border-teal-700 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
-                            <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
-                                <ScheduleIcon />
-                            </div>
-                            <div>
-                                <h3 className="text-xl md:text-2xl font-black mb-1 tracking-tight">{t('scheduleTitle')}</h3>
-                                <p className="text-xs md:text-sm opacity-90 font-normal leading-snug">{t('scheduleDesc')}</p>
-                            </div>
-                        </Link>
-                    )}
-
-                    {(userType === 'student' || userType === 'admin') && (
-                        <Link to="/game" className="group relative bg-amber-400 text-slate-900 p-6 rounded-[2.5rem] border-b-8 border-amber-600 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
-                            <div className="absolute top-4 end-4 bg-rose-500 text-white text-[10px] md:text-xs px-3 py-0.5 rounded-full font-black uppercase tracking-wider shadow-md animate-pulse">
-                                {t('newBadge')}
-                            </div>
-                            <div className="p-3.5 bg-slate-900/10 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 text-slate-900">
-                                <GameIcon />
-                            </div>
-                            <div>
-                                <h3 className="text-xl md:text-2xl font-black mb-1 tracking-tight">{t('gameTitle')}</h3>
-                                <p className="text-xs md:text-sm opacity-90 font-normal leading-snug">{t('gameDesc')}</p>
-                            </div>
-                        </Link>
-                    )}
-
-                    {userType === 'admin' && (
-                        <Link to="/admin-dashboard" className="group relative bg-rose-500 text-white p-6 rounded-[2.5rem] border-b-8 border-rose-700 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 sm:col-span-2 lg:col-span-3 overflow-hidden">
-                            <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
-                                <AdminIcon />
-                            </div>
-                            <div>
-                                <h3 className="text-xl md:text-2xl font-black mb-1 tracking-tight">{t('adminSettingsTitle')}</h3>
-                                <p className="text-xs md:text-sm opacity-90 font-normal leading-snug">{t('adminSettingsDesc')}</p>
-                            </div>
-                        </Link>
-                    )}
-                </div>
-
+                {/* 4. قسم شخصية صقر ومعلومات الموطن */}
                 <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center mt-6">
                     
                     <div className="lg:col-span-5 flex flex-col items-center justify-center relative">
-                        <div onClick={handleMascotInteraction} className="relative cursor-pointer group flex flex-col items-center">
-                            <img src="/school-logo.png" alt="" className="absolute inset-0 m-auto w-72 h-72 object-contain opacity-10 dark:opacity-25 dark:brightness-0 dark:invert z-0 pointer-events-none transition-all duration-300" />
+                        <RevealSection delay={400}>
+                            <div onClick={handleMascotInteraction} className="relative cursor-pointer group flex flex-col items-center">
+                                <img src="/school-logo.png" alt="" className="absolute inset-0 m-auto w-72 h-72 object-contain opacity-10 dark:opacity-25 dark:brightness-0 dark:invert z-0 pointer-events-none transition-all duration-300" />
 
-                            {bursts.map((burst) => (
-                                <div key={burst.id} 
-                                    className={`absolute z-[100] animate-burst-steady pointer-events-none ${burst.color}`}
-                                    style={{ '--tx': `${burst.tx}px`, '--ty': `${burst.ty}px`, '--rot': `${burst.rot}deg` } as any}>
-                                    <StarIcon className="w-8 h-8 drop-shadow-md" />
-                                </div>
-                            ))}
+                                {bursts.map((burst) => (
+                                    <div key={burst.id} 
+                                        className={`absolute z-[100] animate-burst-steady pointer-events-none ${burst.color}`}
+                                        style={{ '--tx': `${burst.tx}px`, '--ty': `${burst.ty}px`, '--rot': `${burst.rot}deg` } as any}>
+                                        <StarIcon className="w-8 h-8 drop-shadow-md" />
+                                    </div>
+                                ))}
 
-                            {showBubble && (
-                                <div className="absolute -top-14 bg-white dark:bg-slate-800 px-6 py-2.5 rounded-2xl border-4 border-rose-500 shadow-2xl text-rose-600 dark:text-rose-400 font-black text-sm md:text-base animate-bounce z-30">
-                                    {isAr ? 'فخورين بالإمارات 🇦🇪' : 'Proud of the UAE 🇦🇪'}
-                                </div>
-                            )}
+                                {showBubble && (
+                                    <div className="absolute -top-14 bg-white dark:bg-slate-800 px-6 py-2.5 rounded-2xl border-4 border-rose-500 shadow-2xl text-rose-600 dark:text-rose-400 font-black text-sm md:text-base animate-bounce z-30">
+                                        {isAr ? 'فخورين بالإمارات 🇦🇪' : 'Proud of the UAE 🇦🇪'}
+                                    </div>
+                                )}
 
-                            <img src="/saqr-full.png" alt="Saqr Mascot" className="h-60 md:h-80 object-contain relative z-10 animate-float drop-shadow-2xl group-hover:scale-105 transition-transform duration-300" />
-                        </div>
+                                <img src="/saqr-full.png" alt="Saqr Mascot" className="h-60 md:h-80 object-contain relative z-10 animate-float drop-shadow-2xl group-hover:scale-105 transition-transform duration-300" />
+                            </div>
+                        </RevealSection>
                     </div>
 
                     <div className="lg:col-span-7 grid grid-cols-1 gap-6">
                         
-                        <div className="bg-gradient-to-br from-amber-100 via-amber-50 to-emerald-50 dark:from-slate-900 dark:to-slate-950 p-8 md:p-10 rounded-[3rem] border-4 border-amber-400 dark:border-amber-600 shadow-2xl relative overflow-hidden flex flex-col items-center text-center">
-                            
-                            <div className="absolute top-0 left-0 right-0 h-2.5 flex">
-                                <div className="bg-red-600 w-1/4"></div>
-                                <div className="bg-emerald-600 w-1/4"></div>
-                                <div className="bg-white w-1/4"></div>
-                                <div className="bg-black w-1/4"></div>
-                            </div>
-
-                            <div className="flex flex-col items-center gap-3 mb-6 mt-3">
-                                <div className="p-3 bg-white dark:bg-slate-800 rounded-3xl shadow-md border-2 border-amber-300 dark:border-amber-600">
-                                    <UaeFlagIcon />
+                        <RevealSection delay={500}>
+                            <div className="bg-gradient-to-br from-amber-100 via-amber-50 to-emerald-50 dark:from-slate-900 dark:to-slate-950 p-8 md:p-10 rounded-[3rem] border-4 border-amber-400 dark:border-amber-600 shadow-2xl relative overflow-hidden flex flex-col items-center text-center">
+                                
+                                <div className="absolute top-0 left-0 right-0 h-2.5 flex">
+                                    <div className="bg-red-600 w-1/4"></div>
+                                    <div className="bg-emerald-600 w-1/4"></div>
+                                    <div className="bg-white w-1/4"></div>
+                                    <div className="bg-black w-1/4"></div>
                                 </div>
-                                <h3 className="text-xl md:text-3xl font-black text-amber-800 dark:text-amber-400 tracking-wider">
-                                    {t('homelandTitle')}
-                                </h3>
+
+                                <div className="flex flex-col items-center gap-3 mb-6 mt-3">
+                                    <div className="p-3 bg-white dark:bg-slate-800 rounded-3xl shadow-md border-2 border-amber-300 dark:border-amber-600">
+                                        <UaeFlagIcon />
+                                    </div>
+                                    <h3 className="text-xl md:text-3xl font-black text-amber-800 dark:text-amber-400 tracking-wider">
+                                        {t('homelandTitle')}
+                                    </h3>
+                                </div>
+
+                                <p className="text-lg md:text-2xl text-slate-900 dark:text-white font-black leading-relaxed max-w-2xl">
+                                    {isAr ? dailyFact.ar : dailyFact.en}
+                                </p>
+
+                                <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-amber-400/20 rounded-full blur-3xl pointer-events-none"></div>
                             </div>
-
-                            <p className="text-lg md:text-2xl text-slate-900 dark:text-white font-black leading-relaxed max-w-2xl">
-                                {isAr ? dailyFact.ar : dailyFact.en}
-                            </p>
-
-                            <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-amber-400/20 rounded-full blur-3xl pointer-events-none"></div>
-                        </div>
+                        </RevealSection>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             
-                            <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border-4 border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between items-center text-center">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <div className="w-3 h-3 bg-emerald-500 rounded-full animate-ping"></div>
-                                    <span className="text-slate-600 dark:text-slate-400 font-bold text-xs md:text-sm">{t('visitorsLabel')}</span>
+                            <RevealSection delay={600}>
+                                <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border-4 border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between items-center text-center h-full">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <div className="w-3 h-3 bg-emerald-500 rounded-full animate-ping"></div>
+                                        <span className="text-slate-600 dark:text-slate-400 font-bold text-xs md:text-sm">{t('visitorsLabel')}</span>
+                                    </div>
+                                    <span className="text-slate-900 dark:text-white font-black text-3xl md:text-4xl">
+                                        {visitorCount.toLocaleString()}
+                                    </span>
+                                    <span className="text-slate-400 text-[11px] font-bold mt-2">{todayDate}</span>
                                 </div>
-                                <span className="text-slate-900 dark:text-white font-black text-3xl md:text-4xl">
-                                    {visitorCount.toLocaleString()}
-                                </span>
-                                <span className="text-slate-400 text-[11px] font-bold mt-2">{todayDate}</span>
-                            </div>
+                            </RevealSection>
 
-                            <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border-4 border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between items-center text-center">
-                                <span className="text-rose-600 dark:text-rose-400 font-black text-xs md:text-sm mb-1">
-                                    {t('upcomingEvents')}
-                                </span>
-                                <div className="flex items-baseline gap-2">
-                                    <span className="text-3xl md:text-5xl font-black text-slate-800 dark:text-white">
-                                        {daysLeft !== null ? daysLeft : 0}
+                            <RevealSection delay={700}>
+                                <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border-4 border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between items-center text-center h-full">
+                                    <span className="text-rose-600 dark:text-rose-400 font-black text-xs md:text-sm mb-1">
+                                        {t('upcomingEvents')}
                                     </span>
-                                    <span className="text-xs font-bold text-slate-500 uppercase">
-                                        {daysLeft === 1 ? t('dayUnit') : t('daysUnit')}
-                                    </span>
+                                    <div className="flex items-baseline gap-2">
+                                        <span className="text-3xl md:text-5xl font-black text-slate-800 dark:text-white">
+                                            {daysLeft !== null ? daysLeft : 0}
+                                        </span>
+                                        <span className="text-xs font-bold text-slate-500 uppercase">
+                                            {daysLeft === 1 ? t('dayUnit') : t('daysUnit')}
+                                        </span>
+                                    </div>
+                                    <span className="text-[11px] font-bold text-slate-500 mt-2">12 October 2026</span>
                                 </div>
-                                <span className="text-[11px] font-bold text-slate-500 mt-2">12 October 2026</span>
-                            </div>
+                            </RevealSection>
 
                         </div>
 
