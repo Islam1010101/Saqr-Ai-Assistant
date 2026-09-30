@@ -14,7 +14,7 @@ const translations = {
         adminSettings: "إدارة النظام",
         adminSettingsDesc: "التحكم الشامل في المنصة والبيانات",
         newsTitle: "جديدنا",
-        newsContent: "قريباً مسابقة بودكاست للطلاب! |  تم إضافة كتب جديدة في القسم العربي، الرجاء زيارة المكتبة للاطلاع عليها | 🎙️ استديو البودكاست متاح الآن للتسجيل ومشاركة إبداعاتكم الصوتية.",
+        newsContent: "قريباً مسابقة بودكاست للطلاب! |  تم إضافة كتب جديدة في القسم العربي، الرجاء زيارة المكتبة للاطلاع عليها | استديو البودكاست متاح الآن للتسجيل ومشاركة إبداعاتكم الصوتية.",
         manualSearch: "البحث اليدوي",
         manualDesc: "البحث عن كتاب ما في مكتبة المدرسة والوصول إليه.",
         smartSearch: "اسأل صقر الذكي",
@@ -50,7 +50,7 @@ const translations = {
         adminSettings: "System Admin",
         adminSettingsDesc: "Full platform and data control",
         newsTitle: "What's New",
-        newsContent: "Coming soon: Student podcast competition! |  New books have been added to the Arabic section, please visit the library | Podcast Studio is now live!",
+        newsContent: "Coming soon: Student podcast competition! |  New books have been added to the Arabic section, please visit the library |  Podcast Studio is now live!",
         manualSearch: "Manual Search",
         manualDesc: "Find and access a specific book in the school library.",
         smartSearch: "Ask Saqr (AI)",
@@ -103,7 +103,6 @@ const UaeFlagIcon = () => (
     </svg>
 );
 
-// أيقونات شفافة (أحادية) بمقاسات متناسقة 100%
 const SearchIcon = () => <svg className="w-6 h-6 stroke-[2.2] opacity-85" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>;
 const SmartIcon = () => <svg className="w-6 h-6 stroke-[2.2] opacity-85" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>;
 const BookIcon = () => <svg className="w-6 h-6 stroke-[2.2] opacity-85" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>;
@@ -114,6 +113,9 @@ const GameIcon = () => <svg className="w-6 h-6 stroke-[2.2] opacity-85" fill="no
 const AdminIcon = () => <svg className="w-6 h-6 stroke-[2.2] opacity-85" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>;
 
 const HomePage: React.FC = () => {
+    // 1. تغيير اللغة الافتراضية هنا لتكون الإنجليزية إذا لم يكن هناك تحديد مسبق (لكن نعتمد على سياق التطبيق الرئيسي)
+    // نترك سياق useLanguage كما هو، فإذا أردت جعل الموقع ككل يبدأ إنجليزي يتم ذلك من App.tsx
+    // وللتأكيد في هذه الصفحة سنعكس الحالة فوراً إن لزم
     const { locale, dir } = useLanguage();
     const isAr = locale === 'ar';
     const t = (key: keyof typeof translations.ar) => translations[locale as 'ar' | 'en'][key];
@@ -135,6 +137,27 @@ const HomePage: React.FC = () => {
     const [showBubble, setShowBubble] = useState(false);
     const [daysLeft, setDaysLeft] = useState<number | null>(null);
     const [sparkles, setSparkles] = useState<SparkleItem[]>([]);
+    
+    // حالة للتحكم في ظهور وتلاشي عناصر الصفحة بناءً على السكرول
+    const [isVisible, setIsVisible] = useState(true);
+    const lastScrollY = useRef(0);
+
+    // متابعة حركة التمرير لتطبيق تأثير التلاشي والظهور
+    useEffect(() => {
+        const handleScroll = () => {
+            const currentScrollY = window.scrollY;
+            // إذا كان التمرير لأسفل يتم الإخفاء، وإذا كان للأعلى أو في القمة يتم الإظهار
+            if (currentScrollY > lastScrollY.current && currentScrollY > 50) {
+                setIsVisible(false);
+            } else {
+                setIsVisible(true);
+            }
+            lastScrollY.current = currentScrollY;
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     useEffect(() => {
         if (!userData || !userType) {
@@ -189,7 +212,6 @@ const HomePage: React.FC = () => {
         return isAr ? (userData.name_ar || userData.name_en || 'زائر') : (userData.name_en || userData.name_ar || 'Guest');
     };
 
-    // تأثير النجوم المتطايرة عند الضغط على اسم المستخدم
     const handleNameClick = (e: React.MouseEvent) => {
         const rect = e.currentTarget.getBoundingClientRect();
         const newSparkles: SparkleItem[] = Array.from({ length: 15 }).map(() => ({
@@ -229,14 +251,13 @@ const HomePage: React.FC = () => {
     return (
         <div dir={dir} className="w-full min-h-[100dvh] flex flex-col items-center bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden p-4 md:p-8 transition-colors duration-500">
             
-            {/* النجوم المتطايرة عند الضغط على اسم المستخدم */}
+            {/* النجوم المتطايرة */}
             {sparkles.map(s => (
                 <div key={s.id} className="fixed z-[99999] pointer-events-none animate-fade-out" style={{ left: s.x, top: s.y }}>
                     <StarIcon className="w-6 h-6 text-amber-400 drop-shadow-md animate-spin" />
                 </div>
             ))}
 
-            {/* زر تسجيل الخروج الزجاجي */}
             <div className="absolute top-4 end-4 md:top-8 md:end-8 z-50">
                 <button 
                     onClick={handleLogout} 
@@ -246,9 +267,9 @@ const HomePage: React.FC = () => {
                 </button>
             </div>
 
-            <div className="w-full max-w-[1300px] flex flex-col gap-10 mt-10 md:mt-6">
+            {/* الحاوية الرئيسية مع تأثير التلاشي أثناء السكرول - مدعومة للمس والموبايلات */}
+            <div className={`w-full max-w-[1300px] flex flex-col gap-10 mt-10 md:mt-6 transition-all duration-700 ease-in-out transform origin-top ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-8 scale-95 pointer-events-none'}`}>
                 
-                {/* رأس الصفحة: "أهلاً بك يا" في سطر، واسم المستخدم في سطر مستقل مع لمحة الشيمير */}
                 <div className="text-center space-y-3 max-w-4xl mx-auto">
                     <div className="inline-block px-5 py-2 rounded-full bg-white/90 dark:bg-slate-800/90 backdrop-blur-md text-slate-700 dark:text-slate-200 font-bold text-xs md:text-sm shadow-md border-2 border-slate-200 dark:border-slate-700">
                         {userType === 'admin' ? t('adminBadge') : userType === 'teacher' ? t('teacherBadge') : t('studentBadge')}
@@ -265,6 +286,7 @@ const HomePage: React.FC = () => {
                         >
                             <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full duration-1000 bg-gradient-to-r from-transparent via-white/40 dark:via-white/10 to-transparent transition-transform pointer-events-none"></div>
 
+                            {/* تم تعديل الخط ليكون Bold في الإنجليزية أيضاً */}
                             <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-slate-800 dark:text-white tracking-tight">
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-emerald-500">{getDisplayName()}</span>
                             </h1>
@@ -276,7 +298,6 @@ const HomePage: React.FC = () => {
                     </p>
                 </div>
 
-                {/* شريط جديدنا المتحرك */}
                 <div className="w-full max-w-5xl mx-auto relative z-30 flex items-center bg-white dark:bg-slate-800 border-4 border-amber-300 dark:border-amber-700 rounded-full shadow-lg overflow-hidden h-14 md:h-16">
                     <div className="bg-amber-400 text-slate-900 font-black px-5 md:px-8 h-full flex items-center gap-2 relative z-20 shrink-0 text-xs md:text-sm uppercase">
                         <div className="w-3 h-3 bg-white rounded-full animate-ping"></div>
@@ -289,7 +310,6 @@ const HomePage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* أولاً: روابط التوجيه السريع والأقسام */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     
                     <Link to="/search" className="group relative bg-sky-400 text-white p-6 rounded-[2.5rem] border-b-8 border-sky-600 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
@@ -332,7 +352,6 @@ const HomePage: React.FC = () => {
                         </div>
                     </Link>
 
-                    {/* استديو صقر (للطلاب والأدمن فقط) مع علامة جديد */}
                     {(userType === 'student' || userType === 'admin') && (
                         <Link to="/saqr-studio" className="group relative bg-blue-500 text-white p-6 rounded-[2.5rem] border-b-8 border-blue-700 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
                             <div className="absolute top-4 end-4 bg-rose-500 text-white text-[10px] md:text-xs px-3 py-0.5 rounded-full font-black uppercase tracking-wider shadow-md animate-pulse">
@@ -348,7 +367,6 @@ const HomePage: React.FC = () => {
                         </Link>
                     )}
 
-                    {/* جدول المكتبة (للمعلم والأدمن فقط) */}
                     {(userType === 'teacher' || userType === 'admin') && (
                         <Link to="/schedule" className="group relative bg-teal-500 text-white p-6 rounded-[2.5rem] border-b-8 border-teal-700 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
                             <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
@@ -361,7 +379,6 @@ const HomePage: React.FC = () => {
                         </Link>
                     )}
 
-                    {/* رتب المكتبة (للطلاب والأدمن فقط) مع علامة جديد */}
                     {(userType === 'student' || userType === 'admin') && (
                         <Link to="/game" className="group relative bg-amber-400 text-slate-900 p-6 rounded-[2.5rem] border-b-8 border-amber-600 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
                             <div className="absolute top-4 end-4 bg-rose-500 text-white text-[10px] md:text-xs px-3 py-0.5 rounded-full font-black uppercase tracking-wider shadow-md animate-pulse">
@@ -377,7 +394,6 @@ const HomePage: React.FC = () => {
                         </Link>
                     )}
 
-                    {/* إدارة النظام (للأدمن فقط) */}
                     {userType === 'admin' && (
                         <Link to="/admin-dashboard" className="group relative bg-rose-500 text-white p-6 rounded-[2.5rem] border-b-8 border-rose-700 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 sm:col-span-2 lg:col-span-3 overflow-hidden">
                             <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
@@ -391,10 +407,8 @@ const HomePage: React.FC = () => {
                     )}
                 </div>
 
-                {/* ثانياً: قسم شخصية صقر التفاعلية ومعلومات الموطن (بتصميم تراثي إماراتي أصيل) */}
                 <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center mt-6">
                     
-                    {/* شخصية صقر والتاثيرات */}
                     <div className="lg:col-span-5 flex flex-col items-center justify-center relative">
                         <div onClick={handleMascotInteraction} className="relative cursor-pointer group flex flex-col items-center">
                             <img src="/school-logo.png" alt="" className="absolute inset-0 m-auto w-72 h-72 object-contain opacity-10 dark:opacity-25 dark:brightness-0 dark:invert z-0 pointer-events-none transition-all duration-300" />
@@ -417,13 +431,10 @@ const HomePage: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* معلومات الموطن والعد التنازلي والزوار */}
                     <div className="lg:col-span-7 grid grid-cols-1 gap-6">
                         
-                        {/* بلوك معلومات عن وطني (تصميم تراثي إماراتي أصيل) */}
                         <div className="bg-gradient-to-br from-amber-100 via-amber-50 to-emerald-50 dark:from-slate-900 dark:to-slate-950 p-8 md:p-10 rounded-[3rem] border-4 border-amber-400 dark:border-amber-600 shadow-2xl relative overflow-hidden flex flex-col items-center text-center">
                             
-                            {/* شريط ألوان الهوية الوطنية في الأعلى */}
                             <div className="absolute top-0 left-0 right-0 h-2.5 flex">
                                 <div className="bg-red-600 w-1/4"></div>
                                 <div className="bg-emerald-600 w-1/4"></div>
@@ -435,7 +446,6 @@ const HomePage: React.FC = () => {
                                 <div className="p-3 bg-white dark:bg-slate-800 rounded-3xl shadow-md border-2 border-amber-300 dark:border-amber-600">
                                     <UaeFlagIcon />
                                 </div>
-                                {/* العنوان مُعَدل، مُكبر، ومُوسّط */}
                                 <h3 className="text-xl md:text-3xl font-black text-amber-800 dark:text-amber-400 tracking-wider">
                                     {t('homelandTitle')}
                                 </h3>
@@ -448,10 +458,8 @@ const HomePage: React.FC = () => {
                             <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-amber-400/20 rounded-full blur-3xl pointer-events-none"></div>
                         </div>
 
-                        {/* قسم التاريخ، الزوار، والعد التنازلي للإجازة */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             
-                            {/* عداد الزوار */}
                             <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border-4 border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between items-center text-center">
                                 <div className="flex items-center gap-2 mb-2">
                                     <div className="w-3 h-3 bg-emerald-500 rounded-full animate-ping"></div>
@@ -463,7 +471,6 @@ const HomePage: React.FC = () => {
                                 <span className="text-slate-400 text-[11px] font-bold mt-2">{todayDate}</span>
                             </div>
 
-                            {/* العد التنازلي لإجازة منتصف الفصل */}
                             <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border-4 border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between items-center text-center">
                                 <span className="text-rose-600 dark:text-rose-400 font-black text-xs md:text-sm mb-1">
                                     {t('upcomingEvents')}
@@ -488,6 +495,9 @@ const HomePage: React.FC = () => {
             </div>
 
             <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
+                * { font-family: 'Cairo', sans-serif !important; }
+                
                 @keyframes burst-steady {
                     0% { transform: translate(0, 0) scale(0.5); opacity: 0; }
                     20% { transform: translate(var(--tx), var(--ty)) scale(1.2) rotate(var(--rot)); opacity: 1; }
