@@ -47,7 +47,8 @@ const FloatingSaqr: React.FC<{ onOpenModal: () => void }> = ({ onOpenModal }) =>
   const { dir } = useLanguage();
   const [ripples, setRipples] = useState<{ id: number; x: number; y: number }[]>([]);
 
-  if (location.pathname === '/' || location.pathname === '/admin-dashboard') return null;
+  // تم إلغاء ظهور صقر العائم في صفحة التعريف (/about) بجانب الصفحات الأخرى
+  if (location.pathname === '/' || location.pathname === '/admin-dashboard' || location.pathname === '/about') return null;
 
   const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
     const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
@@ -219,7 +220,6 @@ const Header: React.FC = () => {
     return () => window.removeEventListener('scroll', controlNavbar);
   }, [lastScrollY, location.pathname]);
 
-  // تم إضافة إخفاء الشريط تماماً في صفحة AboutPage (/about)
   if (location.pathname === '/' || location.pathname === '/admin-dashboard' || location.pathname === '/about') return null;
 
   const allLinks: NavLink[] = [
