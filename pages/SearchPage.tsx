@@ -89,7 +89,7 @@ const RobotSvg = () => (
   </svg>
 );
 
-// --- مكون التلاشي المخصص (Reveal Component) ---
+// --- مكون التلاشي المخصص (Reveal Component) مخصص لكل قسم على حدة ---
 const RevealOnScroll = ({ children, delay = 0 }: { children: React.ReactNode, delay?: number }) => {
     const [isVisible, setIsVisible] = useState(true);
     const elementRef = useRef<HTMLDivElement>(null);
@@ -185,7 +185,7 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                         <RobotSvg /> Saqr AI Insight
                     </div>
                     
-                    <h2 className="text-3xl md:text-4xl text-slate-900 dark:text-white font-black leading-tight mb-4 tracking-tight">{book.title}</h2>
+                    <h2 className="text-3xl md:text-4xl text-slate-900 dark:text-white font-black leading-tight mb-4 tracking-tight" dir="ltr">{book.title}</h2>
                     
                     <div className="flex items-center justify-center gap-2 text-lg text-emerald-600 dark:text-emerald-400 font-bold mb-8 bg-emerald-50 dark:bg-emerald-900/20 w-fit mx-auto px-6 py-2 rounded-full">
                         <UserIcon /> {book.author}
@@ -245,10 +245,10 @@ const BookCard = React.memo(({ book, onClick, t }: { book: Book; onClick: () => 
       <div className={`w-full h-full relative rounded-[2rem] border-4 shadow-lg bg-gradient-to-br ${colorClass} transition-all duration-500 transform group-hover:-translate-y-3 group-hover:shadow-2xl overflow-hidden flex flex-col`}>
         
         {/* تأثير انعكاس الزجاج الخفيف */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-black/10 pointer-events-none"></div>
+        <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-black/10 pointer-events-none z-10"></div>
         <div className="absolute top-0 left-0 w-full h-1/2 bg-white/10 skew-y-12 pointer-events-none"></div>
 
-        <div className="p-5 md:p-6 flex flex-col h-full relative z-10">
+        <div className="p-5 md:p-6 flex flex-col h-full relative z-20">
           
           <div className="flex justify-between items-start flex-row-reverse mb-auto">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-white/25 text-white backdrop-blur-sm shadow-sm max-w-[70%]">
@@ -258,7 +258,8 @@ const BookCard = React.memo(({ book, onClick, t }: { book: Book; onClick: () => 
           </div>
           
           <div className="flex-1 flex flex-col justify-end text-right mt-4">
-            <h3 className="font-black text-xl md:text-2xl text-white leading-tight drop-shadow-md line-clamp-3 mb-4">
+            {/* إزالة line-clamp ووضع overflow مخفي لضمان ظهور النص بدون سكرول */}
+            <h3 className="font-black text-xl md:text-2xl text-white leading-tight drop-shadow-md mb-4 overflow-hidden text-ellipsis" dir="ltr">
                 {book.title}
             </h3>
             <div className="flex items-center gap-2 text-white/90 flex-row-reverse justify-end bg-black/10 p-2.5 rounded-xl w-fit ms-auto backdrop-blur-sm">
@@ -313,16 +314,16 @@ const SearchPage: React.FC = () => {
     const [visibleCount, setVisibleCount] = useState(12);
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-    const [isVisible, setIsVisible] = useState(true);
+    const [showSearch, setShowSearch] = useState(true);
     const lastScrollY = useRef(0);
 
     useEffect(() => {
         const handleScroll = () => {
             const currentScrollY = window.scrollY;
             if (currentScrollY > lastScrollY.current && currentScrollY > 150) {
-                setIsVisible(false); 
+                setShowSearch(false); 
             } else {
-                setIsVisible(true); 
+                setShowSearch(true); 
             }
             lastScrollY.current = currentScrollY;
         };
@@ -363,21 +364,23 @@ const SearchPage: React.FC = () => {
                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-sky-400/20 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
             </div>
 
-            <div className={`max-w-[1400px] mx-auto px-4 md:px-6 pt-10 pb-40 relative z-10 antialiased transition-all duration-700 ease-in-out transform origin-top ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-8 scale-95 pointer-events-none'}`}>
+            <div className="max-w-[1400px] mx-auto px-4 md:px-6 pt-10 pb-40 relative z-10 antialiased">
                 
-                <div className="text-center mb-10 md:mb-16 relative">
-                    <button onClick={() => navigate(-1)} className="absolute start-0 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-800 text-slate-800 dark:text-white px-5 py-2.5 rounded-full font-black text-sm hover:bg-slate-200 hover:-translate-x-1 active:translate-y-1 border-b-4 border-slate-300 dark:border-slate-700 active:border-b-0 transition-all flex items-center gap-2 shadow-sm">
-                        <span className="text-xl leading-none rtl:rotate-180">←</span> {t('back')}
-                    </button>
-                    <h1 className="text-4xl md:text-6xl font-black text-slate-800 dark:text-white mb-6 uppercase tracking-tight">{t('pageTitle')}</h1>
-                    <div className="flex justify-center gap-3">
-                        <div className="w-8 h-2 bg-amber-400 rounded-full" />
-                        <div className="w-16 h-2 bg-sky-500 rounded-full" />
-                        <div className="w-8 h-2 bg-rose-500 rounded-full" />
+                <RevealOnScroll>
+                    <div className="text-center mb-10 md:mb-16 relative">
+                        <button onClick={() => navigate(-1)} className="absolute start-0 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-800 text-slate-800 dark:text-white px-5 py-2.5 rounded-full font-black text-sm hover:bg-slate-200 hover:-translate-x-1 active:translate-y-1 border-b-4 border-slate-300 dark:border-slate-700 active:border-b-0 transition-all flex items-center gap-2 shadow-sm">
+                            <span className="text-xl leading-none rtl:rotate-180">←</span> {t('back')}
+                        </button>
+                        <h1 className="text-4xl md:text-6xl font-black text-slate-800 dark:text-white mb-6 uppercase tracking-tight">{t('pageTitle')}</h1>
+                        <div className="flex justify-center gap-3">
+                            <div className="w-8 h-2 bg-amber-400 rounded-full" />
+                            <div className="w-16 h-2 bg-sky-500 rounded-full" />
+                            <div className="w-8 h-2 bg-rose-500 rounded-full" />
+                        </div>
                     </div>
-                </div>
+                </RevealOnScroll>
 
-                <div className="mb-12">
+                <div className={`sticky z-[100] mb-12 transition-all duration-500 ease-in-out ${showSearch ? 'top-4 md:top-6 opacity-100 translate-y-0' : '-top-40 opacity-0 -translate-y-full'}`}>
                     <div className="bg-white dark:bg-slate-800 p-5 md:p-8 rounded-[3rem] border-4 border-amber-300 dark:border-amber-600 shadow-xl max-w-5xl mx-auto">
                         <div className="flex flex-col gap-5">
                             <div className="relative group">
