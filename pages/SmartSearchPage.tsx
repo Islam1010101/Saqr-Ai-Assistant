@@ -80,6 +80,14 @@ const localization: any = {
   }
 };
 
+// دالة تنسيق الاسم لاستخراج الاسم الأول والاسم الأخير فقط
+const formatFirstAndLastName = (fullName: string) => {
+  if (!fullName) return '';
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length <= 1) return parts[0];
+  return `${parts[0]} ${parts[parts.length - 1]}`;
+};
+
 // ==========================================
 // أيقونات SVG جذابة ومطابقة للمواصفات
 // ==========================================
@@ -92,12 +100,6 @@ const SendIcon = () => (
 const DownloadIcon = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-  </svg>
-);
-
-const PlusIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
   </svg>
 );
 
@@ -174,18 +176,18 @@ const SmartSearchPage: React.FC = () => {
 
     if (storedUser && storedType) {
       const user = JSON.parse(storedUser);
-      const name = locale === 'ar' ? (user.name_ar || user.name_en) : (user.name_en || user.name_ar);
-      const firstName = name ? name.split(' ')[0] : '';
-      setUserName(name || firstName);
+      const rawName = locale === 'ar' ? (user.name_ar || user.name_en) : (user.name_en || user.name_ar);
+      const name = formatFirstAndLastName(rawName || '');
+      setUserName(name);
       
       if (storedType === 'student') {
         welcomeMessage = locale === 'ar' 
-          ? `أهلاً بك يا صديقي المبدع **${firstName}**! 🎓\nأنا "صقر"، المساعد الذكي لمكتبتك. هل نؤلف قصة ممتعة معاً اليوم، أم تبحث عن كتاب محدد لتقرأه؟`
-          : `Welcome my creative friend **${firstName}**! 🎓\nI'm 'Saqr', your AI Librarian. Shall we co-author a story today, or are you looking for a specific book?`;
+          ? `أهلاً بك يا صديقي المبدع **${name}**! 🎓\nأنا "صقر"، المساعد الذكي لمكتبتك. هل نؤلف قصة ممتعة معاً اليوم، أم تبحث عن كتاب محدد لتقرأه؟`
+          : `Welcome my creative friend **${name}**! 🎓\nI'm 'Saqr', your AI Librarian. Shall we co-author a story today, or are you looking for a specific book?`;
       } else if (storedType === 'teacher' || storedType === 'admin') {
         welcomeMessage = locale === 'ar'
-          ? `أهلاً بك أستاذي الفاضل **${firstName}**! 👨‍🏫\nأنا "صقر" في خدمتك. كيف يمكنني مساعدتك اليوم في البحث عن مصادر أو معلومات لمادتك؟`
-          : `Welcome esteemed teacher **${firstName}**! 👨‍🏫\nI am 'Saqr', at your service. How can I assist you today with resources or information?`;
+          ? `أهلاً بك أستاذي الفاضل **${name}**! 👨‍🏫\nأنا "صقر" في خدمتك. كيف يمكنني مساعدتك اليوم في البحث عن مصادر أو معلومات لمادتك؟`
+          : `Welcome esteemed teacher **${name}**! 👨‍🏫\nI am 'Saqr', at your service. How can I assist you today with resources or information?`;
       }
     } else {
       setUserName('');
@@ -290,7 +292,8 @@ const SmartSearchPage: React.FC = () => {
     let userContextInfo = "";
     if (storedUser) {
         const user = JSON.parse(storedUser);
-        const name = locale === 'ar' ? (user.name_ar || user.name_en) : (user.name_en || user.name_ar);
+        const rawName = locale === 'ar' ? (user.name_ar || user.name_en) : (user.name_en || user.name_ar);
+        const name = formatFirstAndLastName(rawName || '');
         const type = localStorage.getItem('user_type') === 'student' ? 'Student' : 'Teacher';
         userContextInfo = `\nCurrent User Context: The person talking to you is a ${type} named "${name}". Use their name occasionally to be friendly.`;
     }
@@ -384,7 +387,7 @@ const SmartSearchPage: React.FC = () => {
         )}
       </header>
 
-      {/* 🌟 عنوان الترحب باسم المستخدم (مثل تصميم Gemini في الصورة تماماً) */}
+      {/* 🌟 عنوان الترحيب باسم المستخدم (الأول والأخير) */}
       <div className="flex-shrink-0 text-center pt-4 pb-2 px-4 z-10">
         <h2 className="text-2xl md:text-4xl lg:text-5xl font-medium tracking-tight text-slate-800 dark:text-slate-100">
           {t('welcome')} <span className="font-bold text-sky-600 dark:text-sky-400">{userName || 'صديقي المبدع'}</span>
@@ -392,8 +395,8 @@ const SmartSearchPage: React.FC = () => {
       </div>
 
       {/* 🛠️ منطقة المحادثات والتلاشي التفاعلي للرسائل */}
-      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-4 no-scrollbar scroll-smooth relative z-10 pb-36">
-        <div className="max-w-4xl mx-auto flex flex-col justify-end min-h-fit space-y-6">
+      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-4 no-scrollbar scroll-smooth relative z-10 pb-20">
+        <div className="max-w-4xl mx-auto flex flex-col justify-end min-h-fit space-y-4">
           
           {messages.map((msg, index) => (
             <RevealMessage key={index}>
@@ -434,21 +437,16 @@ const SmartSearchPage: React.FC = () => {
             </RevealMessage>
           ))}
           
-          <div ref={messagesEndRef} className="h-4" />
+          <div ref={messagesEndRef} className="h-2" />
         </div>
       </div>
 
-      {/* 🌟 منطقة الإدخال - مطابقة للشريط البيضاوي في الصورة تماماً */}
-      <div className="absolute bottom-0 inset-x-0 px-4 pb-6 pt-2 w-full z-20 flex-shrink-0 bg-gradient-to-t from-white via-white/90 to-transparent dark:from-[#0b0f17] dark:via-[#0b0f17]/90 dark:to-transparent">
+      {/* 🌟 منطقة الإدخال - قريب جداً من الإجابات وبدون زوائد */}
+      <div className="absolute bottom-0 inset-x-0 px-4 pb-3 pt-1 w-full z-20 flex-shrink-0 bg-gradient-to-t from-white via-white/90 to-transparent dark:from-[#0b0f17] dark:via-[#0b0f17]/90 dark:to-transparent">
         <div className="max-w-3xl mx-auto flex flex-col gap-2">
           
           <div className="relative flex items-center bg-slate-100 dark:bg-[#1a1f2e] rounded-full border border-slate-200 dark:border-slate-700/60 shadow-lg px-3 py-1.5 focus-within:border-sky-500 dark:focus-within:border-sky-400 transition-all">
             
-            {/* أيقونة الإضافة (+) */}
-            <button type="button" className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white rounded-full transition-colors shrink-0">
-              <PlusIcon />
-            </button>
-
             <input
               type="text" 
               value={input} 
@@ -458,12 +456,6 @@ const SmartSearchPage: React.FC = () => {
               className="flex-1 bg-transparent border-0 focus:ring-0 py-3 px-3 text-slate-900 dark:text-white font-medium outline-none w-full placeholder-slate-400 dark:placeholder-slate-500 text-sm md:text-base"
               disabled={isLoading}
             />
-            
-            {/* شارة النموذج (Pro / EFIPS) */}
-            <div className="hidden sm:flex items-center gap-1 text-xs font-semibold px-2.5 py-1 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full shrink-0 mr-1">
-              <span>Pro</span>
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-            </div>
 
             {/* أيقونة المايكروفون */}
             <button type="button" className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white rounded-full transition-colors shrink-0">
@@ -496,16 +488,16 @@ const SmartSearchPage: React.FC = () => {
               <div className="absolute bottom-0 left-0 w-80 h-80 bg-red-50 rounded-tr-full -z-10"></div>
 
               <div className="flex justify-between items-center p-10 border-b-4 border-slate-100">
-                 <div className="flex items-center gap-6">
-                     <img src="https://www.efipslibrary.online/school-logo.png" className="w-24 object-contain" alt="EFIPS Logo" crossOrigin="anonymous" />
-                     <div>
-                         <h3 className="text-2xl font-black text-slate-800">{t('certSchool')}</h3>
-                         <h4 className="text-base font-black text-slate-400 uppercase mt-1" dir="ltr">EFIPS</h4>
-                     </div>
-                 </div>
-                 <div className="text-left">
-                     <div className="px-8 py-3 bg-red-600 text-white font-black rounded-full text-lg shadow-sm border-b-4 border-red-800">{t('certChallenge')}</div>
-                 </div>
+                  <div className="flex items-center gap-6">
+                      <img src="https://www.efipslibrary.online/school-logo.png" className="w-24 object-contain" alt="EFIPS Logo" crossOrigin="anonymous" />
+                      <div>
+                          <h3 className="text-2xl font-black text-slate-800">{t('certSchool')}</h3>
+                          <h4 className="text-base font-black text-slate-400 uppercase mt-1" dir="ltr">EFIPS</h4>
+                      </div>
+                  </div>
+                  <div className="text-left">
+                      <div className="px-8 py-3 bg-red-600 text-white font-black rounded-full text-lg shadow-sm border-b-4 border-red-800">{t('certChallenge')}</div>
+                  </div>
               </div>
 
               <div className="flex-1 flex flex-col items-center justify-center text-center px-16 mt-8">
@@ -523,16 +515,16 @@ const SmartSearchPage: React.FC = () => {
 
               <div className="flex justify-between items-end px-16 pt-8 border-t-4 border-slate-100 mt-auto">
                   <div className="text-center w-64">
-                     <p className="text-lg font-black text-slate-500 mb-2">{t('certDate')}</p>
-                     <p className="text-2xl font-black text-slate-900">{winnerData?.date}</p>
+                      <p className="text-lg font-black text-slate-500 mb-2">{t('certDate')}</p>
+                      <p className="text-2xl font-black text-slate-900">{winnerData?.date}</p>
                   </div>
                   <div className="text-center flex flex-col items-center flex-1">
-                     <img src="https://www.efipslibrary.online/school-logo.png" className="w-16 opacity-20 mb-2 grayscale" alt="Stamp" crossOrigin="anonymous" />
-                     <p className="text-xs font-black text-slate-400 uppercase">{t('certOfficial')}</p>
+                      <img src="https://www.efipslibrary.online/school-logo.png" className="w-16 opacity-20 mb-2 grayscale" alt="Stamp" crossOrigin="anonymous" />
+                      <p className="text-xs font-black text-slate-400 uppercase">{t('certOfficial')}</p>
                   </div>
                   <div className="text-center w-64">
-                     <p className="text-lg font-black text-slate-500 mb-2">{t('certAI')}</p>
-                     <p className="text-2xl font-black text-red-700">{t('certSaqr')}</p>
+                      <p className="text-lg font-black text-slate-500 mb-2">{t('certAI')}</p>
+                      <p className="text-2xl font-black text-red-700">{t('certSaqr')}</p>
                   </div>
               </div>
           </div>
