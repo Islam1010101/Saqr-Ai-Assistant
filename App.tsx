@@ -47,7 +47,6 @@ const FloatingSaqr: React.FC<{ onOpenModal: () => void }> = ({ onOpenModal }) =>
   const { dir } = useLanguage();
   const [ripples, setRipples] = useState<{ id: number; x: number; y: number }[]>([]);
 
-  // تم إلغاء ظهور صقر العائم في صفحة التعريف (/about) بجانب الصفحات الأخرى
   if (location.pathname === '/' || location.pathname === '/admin-dashboard' || location.pathname === '/about') return null;
 
   const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
@@ -298,7 +297,8 @@ const LanguageContext = createContext<any>(null);
 export const useLanguage = () => useContext(LanguageContext);
 
 const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [locale, setLocale] = useState<Locale>('ar');
+  // تم تغيير اللغة الافتراضية هنا إلى 'en' (الإنجليزية)
+  const [locale, setLocale] = useState<Locale>('en');
 
   useEffect(() => {
     document.documentElement.lang = locale;
