@@ -1,6 +1,6 @@
 import React, { useState, useEffect, createContext, useContext, ReactNode, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { HashRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { HashRouter, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 
 // ==========================================
 // استيراد جميع صفحات المنظومة
@@ -40,6 +40,19 @@ const CloseIcon = () => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
   </svg>
 );
+
+// -------- حماية المسارات (Route Guard) --------
+const ProtectedRoute: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const userType = localStorage.getItem('user_type');
+  const currentUser = localStorage.getItem('current_user');
+
+  // إذا لم يكن المستخدم مسجلاً دخوله، يتم إحالته لصفحة اللوج إن فوراً
+  if (!userType || !currentUser) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <>{children}</>;
+};
 
 // -------- 1. مساعد صقر العائم --------
 const FloatingSaqr: React.FC<{ onOpenModal: () => void }> = ({ onOpenModal }) => {
@@ -297,7 +310,6 @@ const LanguageContext = createContext<any>(null);
 export const useLanguage = () => useContext(LanguageContext);
 
 const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // تم تغيير اللغة الافتراضية هنا إلى 'en' (الإنجليزية)
   const [locale, setLocale] = useState<Locale>('en');
 
   useEffect(() => {
@@ -362,24 +374,27 @@ const MainLayout: React.FC = () => {
         }`}
       >
         <Routes>
+          {/* صفحة تسجيل الدخول العامة */}
           <Route path="/" element={<Login />} />
-          <Route path="/home" element={<HomePage />} />
-          <Route path="/admin-dashboard" element={<AdminDashboard />} />
-          <Route path="/search" element={<SearchPage />} />
-          <Route path="/map" element={<LibraryMapPage />} />
-          <Route path="/smart-search" element={<SmartSearchPage />} />
-          <Route path="/digital-library" element={<DigitalLibraryPage />} />
-          <Route path="/digital-library/arabic" element={<ArabicLibraryInternalPage />} />
-          <Route path="/digital-library/english" element={<EnglishLibraryInternalPage />} />
-          <Route path="/creators" element={<CreatorsPortalPage />} />
-          <Route path="/saqr-studio" element={<SaqrStudioPage />} />
-          <Route path="/podcast" element={<PodcastPage />} />
-          <Route path="/reports" element={<ReportsPage />} />
-          <Route path="/feedback" element={<FeedbackPage />} />
+          
+          {/* باقي الصفحات محمية تتطلب تسجيل الدخول */}
+          <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+          <Route path="/admin-dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
+          <Route path="/map" element={<ProtectedRoute><LibraryMapPage /></ProtectedRoute>} />
+          <Route path="/smart-search" element={<ProtectedRoute><SmartSearchPage /></ProtectedRoute>} />
+          <Route path="/digital-library" element={<ProtectedRoute><DigitalLibraryPage /></ProtectedRoute>} />
+          <Route path="/digital-library/arabic" element={<ProtectedRoute><ArabicLibraryInternalPage /></ProtectedRoute>} />
+          <Route path="/digital-library/english" element={<ProtectedRoute><EnglishLibraryInternalPage /></ProtectedRoute>} />
+          <Route path="/creators" element={<ProtectedRoute><CreatorsPortalPage /></ProtectedRoute>} />
+          <Route path="/saqr-studio" element={<ProtectedRoute><SaqrStudioPage /></ProtectedRoute>} />
+          <Route path="/podcast" element={<ProtectedRoute><PodcastPage /></ProtectedRoute>} />
+          <Route path="/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
+          <Route path="/feedback" element={<ProtectedRoute><FeedbackPage /></ProtectedRoute>} />
           <Route path="/about" element={<AboutPage />} />
-          <Route path="/new-arrivals" element={<NewArrivalsPage />} />
-          <Route path="/game" element={<DeweyGame />} />
-          <Route path="/schedule" element={<SchedulePage />} />
+          <Route path="/new-arrivals" element={<ProtectedRoute><NewArrivalsPage /></ProtectedRoute>} />
+          <Route path="/game" element={<ProtectedRoute><DeweyGame /></ProtectedRoute>} />
+          <Route path="/schedule" element={<ProtectedRoute><SchedulePage /></ProtectedRoute>} />
         </Routes>
       </main>
 
