@@ -57,7 +57,8 @@ const localization: any = {
     certDate: 'تاريخ الإصدار',
     certOfficial: 'وثيقة رسمية من المكتبة',
     certAI: 'الموثق المعتمد',
-    certSaqr: 'صقر - المساعد الذكي'
+    certSaqr: 'صقر - المساعد الذكي',
+    welcome: 'مرحباً بك،'
   },
   en: {
     input: 'Ask Saqr, search for a book or start a story...',
@@ -74,68 +75,80 @@ const localization: any = {
     certDate: 'Date of Issue',
     certOfficial: 'Official Library Document',
     certAI: 'Certified By',
-    certSaqr: 'Saqr - AI Librarian'
+    certSaqr: 'Saqr - AI Librarian',
+    welcome: "Let's jump in,"
   }
 };
 
 // ==========================================
-// أيقونات SVG جذابة
+// أيقونات SVG جذابة ومطابقة للمواصفات
 // ==========================================
 const SendIcon = () => (
-    <svg className="w-6 h-6 md:w-8 md:h-8" fill="currentColor" viewBox="0 0 24 24">
-        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-    </svg>
+  <svg className="w-5 h-5 md:w-6 md:h-6" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+  </svg>
 );
 
 const DownloadIcon = () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-    </svg>
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+  </svg>
+);
+
+const PlusIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+  </svg>
+);
+
+const MicIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+  </svg>
 );
 
 // --- مكون التلاشي المخصص للرسائل (Message Reveal Component) ---
 const RevealMessage = ({ children, delay = 0 }: { children: React.ReactNode, delay?: number }) => {
-    const [isVisible, setIsVisible] = useState(false);
-    const elementRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const elementRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                // يعطي تأثير الظهور عندما تكون الرسالة في منتصف الشاشة، ويتلاشى عندما تبتعد
-                if (entry.isIntersecting) {
-                    setIsVisible(true);
-                } else {
-                    setIsVisible(false);
-                }
-            },
-            {
-                threshold: 0.2, // يتفعل عند ظهور 20% من العنصر
-                rootMargin: "-10% 0px -10% 0px" // حواف مخفية من الأعلى والأسفل للتلاشي السلس
-            }
-        );
-
-        if (elementRef.current) {
-            observer.observe(elementRef.current);
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        } else {
+          setIsVisible(false);
         }
-
-        return () => {
-            if (elementRef.current) {
-                observer.unobserve(elementRef.current);
-            }
-        };
-    }, []);
-
-    return (
-        <div
-            ref={elementRef}
-            className={`transition-all duration-700 ease-out transform w-full ${
-                isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'
-            }`}
-            style={{ transitionDelay: `${delay}ms` }}
-        >
-            {children}
-        </div>
+      },
+      {
+        threshold: 0.15,
+        rootMargin: "-5% 0px -5% 0px"
+      }
     );
+
+    if (elementRef.current) {
+      observer.observe(elementRef.current);
+    }
+
+    return () => {
+      if (elementRef.current) {
+        observer.unobserve(elementRef.current);
+      }
+    };
+  }, []);
+
+  return (
+    <div
+      ref={elementRef}
+      className={`transition-all duration-500 ease-out transform w-full ${
+        isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-6 scale-[0.98]'
+      }`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
 };
 
 const SmartSearchPage: React.FC = () => {
@@ -146,6 +159,7 @@ const SmartSearchPage: React.FC = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [winnerData, setWinnerData] = useState<any>(null);
+  const [userName, setUserName] = useState<string>('');
   
   const [saqrState, setSaqrState] = useState<'idle' | 'thinking' | 'speaking' | 'victory'>('idle');
 
@@ -161,7 +175,8 @@ const SmartSearchPage: React.FC = () => {
     if (storedUser && storedType) {
       const user = JSON.parse(storedUser);
       const name = locale === 'ar' ? (user.name_ar || user.name_en) : (user.name_en || user.name_ar);
-      const firstName = name.split(' ')[0];
+      const firstName = name ? name.split(' ')[0] : '';
+      setUserName(name || firstName);
       
       if (storedType === 'student') {
         welcomeMessage = locale === 'ar' 
@@ -173,6 +188,7 @@ const SmartSearchPage: React.FC = () => {
           : `Welcome esteemed teacher **${firstName}**! 👨‍🏫\nI am 'Saqr', at your service. How can I assist you today with resources or information?`;
       }
     } else {
+      setUserName('');
       welcomeMessage = locale === 'ar'
         ? 'أهلاً بك! أنا "صقر"، المساعد الذكي لمكتبة المدرسة. هل نؤلف قصة معاً اليوم، أم تبحث عن كتاب محدد؟'
         : "Welcome! I'm 'Saqr', your AI Librarian. Shall we co-author a story today, or are you looking for a specific book?";
@@ -296,7 +312,7 @@ const SmartSearchPage: React.FC = () => {
       let reply = data.reply || '';
 
       if (reply.includes('[WINNER:')) {
-        const match = reply.match(/\[WINNER:\s*(.*?)\s*\Vert{}\s*Grade:\s*(.*?)\s*\Vert{}\s*Content:\s*(.*?)\]/s);
+        const match = reply.match(/\[WINNER:\s*(.*?)\s*\Vert{}?\s*Grade:\s*(.*?)\s*\Vert{}?\s*Content:\s*(.*?)\]/s);
         if (match) {
           const dateOptions: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
           const formattedDate = new Date().toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', dateOptions);
@@ -335,46 +351,49 @@ const SmartSearchPage: React.FC = () => {
   };
 
   return (
-    <div dir={dir} className="w-full h-[100dvh] flex flex-col bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-hidden text-slate-900 dark:text-slate-100 transition-colors duration-300">
+    <div dir={dir} className="w-full h-[100dvh] flex flex-col bg-white dark:bg-[#0b0f17] font-sans relative overflow-hidden text-slate-900 dark:text-slate-100 transition-colors duration-300">
       
-      {/* 🌟 الخلفية الديناميكية المبهجة */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-50 dark:opacity-20">
-         <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-sky-400/30 blur-[120px] rounded-full animate-blob"></div>
-         <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-amber-400/30 blur-[120px] rounded-full animate-blob animation-delay-2000"></div>
-      </div>
-      
-      {/* Header - الهيدر العلوي مكبر وبارز */}
-      <header className="flex-shrink-0 px-4 py-6 md:px-8 w-full max-w-5xl mx-auto flex justify-between items-center z-20 relative bg-white/40 dark:bg-slate-900/40 backdrop-blur-md rounded-b-[3rem] shadow-sm mb-4">
-         <div className="flex items-center gap-4">
-           {/* تكبير صورة صقر */}
-           <div className={`w-16 h-16 md:w-20 md:h-20 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden bg-white dark:bg-slate-800 border-4 border-sky-400 dark:border-sky-600 shadow-xl ${saqrState === 'thinking' ? 'ring-4 ring-amber-400 animate-pulse' : ''}`}>
-             <img 
-               src={getSaqrImageSrc()} 
-               alt="Saqr AI" 
-               className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-300"
-               onError={(e) => e.currentTarget.style.display = 'none'}
-             />
-           </div>
-           <div>
-             <h1 className="font-black text-3xl md:text-5xl text-slate-900 dark:text-white tracking-tight uppercase drop-shadow-sm">{t('status')}</h1>
-             <span className="inline-flex items-center gap-1.5 text-sm md:text-base text-emerald-600 dark:text-emerald-400 font-black uppercase mt-1">
-               <span className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]"></span> {t('online')}
-             </span>
-           </div>
-         </div>
+      {/* 🌟 الخلفية الديناميكية: مطابقة للصورة في الدارك مود (إضاءة زرقاء خافتة بالمنتصف) وبيضاء في اللايت مود */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-950/40 via-[#0b0f17] to-[#0b0f17] pointer-events-none -z-10 hidden dark:block" />
 
-         {winnerData && saqrState === 'victory' && (
-           <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-6 py-3 bg-rose-500 text-white font-black rounded-full border-b-4 border-rose-700 hover:-translate-y-1 active:border-b-0 active:translate-y-1 transition-all shadow-md uppercase text-sm md:text-base">
-             <DownloadIcon />
-             <span className="hidden md:inline">{t('download')}</span>
-             <span className="md:hidden">تحميل</span>
-           </button>
-         )}
+      {/* Header - الهيدر العلوي */}
+      <header className="flex-shrink-0 px-4 py-4 md:px-8 w-full max-w-5xl mx-auto flex justify-between items-center z-20 relative bg-white/80 dark:bg-transparent backdrop-blur-sm border-b border-slate-100 dark:border-transparent">
+        <div className="flex items-center gap-3 md:gap-4">
+          <div className={`w-10 h-10 md:w-14 md:h-14 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden bg-slate-100 dark:bg-slate-800 border-2 border-sky-400 dark:border-sky-500 shadow-md ${saqrState === 'thinking' ? 'ring-2 ring-amber-400 animate-pulse' : ''}`}>
+            <img 
+              src={getSaqrImageSrc()} 
+              alt="Saqr AI" 
+              className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300"
+              onError={(e) => e.currentTarget.style.display = 'none'}
+            />
+          </div>
+          <div>
+            <h1 className="font-bold text-lg md:text-2xl text-slate-900 dark:text-white tracking-tight">{t('status')}</h1>
+            <span className="inline-flex items-center gap-1.5 text-xs md:text-sm text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5">
+              <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> {t('online')}
+            </span>
+          </div>
+        </div>
+
+        {winnerData && saqrState === 'victory' && (
+          <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-4 py-2 bg-rose-600 text-white font-bold rounded-full hover:bg-rose-700 transition-all shadow-md text-xs md:text-sm">
+            <DownloadIcon />
+            <span className="hidden md:inline">{t('download')}</span>
+            <span className="md:hidden">تحميل</span>
+          </button>
+        )}
       </header>
 
-      {/* 🛠️ منطقة المحادثات والتلاشي التفاعلي للرسائل (تختفي من الأعلى والأسفل إذا بعدت عن المركز) */}
-      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-2 no-scrollbar scroll-smooth relative z-10 pb-40">
-        <div className="max-w-5xl mx-auto flex flex-col justify-end min-h-fit space-y-6 pt-2">
+      {/* 🌟 عنوان الترحب باسم المستخدم (مثل تصميم Gemini في الصورة تماماً) */}
+      <div className="flex-shrink-0 text-center pt-4 pb-2 px-4 z-10">
+        <h2 className="text-2xl md:text-4xl lg:text-5xl font-medium tracking-tight text-slate-800 dark:text-slate-100">
+          {t('welcome')} <span className="font-bold text-sky-600 dark:text-sky-400">{userName || 'صديقي المبدع'}</span>
+        </h2>
+      </div>
+
+      {/* 🛠️ منطقة المحادثات والتلاشي التفاعلي للرسائل */}
+      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-4 no-scrollbar scroll-smooth relative z-10 pb-36">
+        <div className="max-w-4xl mx-auto flex flex-col justify-end min-h-fit space-y-6">
           
           {messages.map((msg, index) => (
             <RevealMessage key={index}>
@@ -382,11 +401,10 @@ const SmartSearchPage: React.FC = () => {
                   
                   {/* رسائل صقر */}
                   {msg.role === 'assistant' && (
-                    <div className="flex flex-col gap-2 max-w-[95%] md:max-w-[85%] items-start">
-                      <div className="flex gap-3 md:gap-4 items-end" translate="no" lang={locale}>
-                        {/* حاوية نص رد الذكاء الاصطناعي الأنيقة بدون مسافات إضافية */}
-                        <div className="bg-white dark:bg-slate-800 border-4 border-slate-200 dark:border-slate-700 rounded-[2rem] rounded-bl-none px-6 py-5 shadow-lg text-slate-800 dark:text-slate-100 font-bold leading-relaxed text-lg md:text-2xl">
-                          <div className="prose prose-lg md:prose-xl dark:prose-invert max-w-none text-start font-cairo font-bold">
+                    <div className="flex flex-col gap-2 max-w-[92%] md:max-w-[85%] items-start">
+                      <div className="flex gap-3 items-end" translate="no" lang={locale}>
+                        <div className="bg-slate-50 dark:bg-[#1a1f2e] border border-slate-200 dark:border-slate-800 rounded-3xl rounded-bl-sm px-5 py-4 shadow-sm text-slate-800 dark:text-slate-100 font-medium leading-relaxed text-base md:text-lg">
+                          <div className="prose prose-slate dark:prose-invert max-w-none text-start font-cairo">
                             <ReactMarkdown>{msg.content}</ReactMarkdown>
                           </div>
                         </div>
@@ -395,7 +413,7 @@ const SmartSearchPage: React.FC = () => {
                       {/* زر التحميل المباشر أسفل رد الفوز */}
                       {winnerData && saqrState === 'victory' && index === messages.length - 1 && (
                         <div className="mt-2 w-full text-start animate-zoom-in">
-                          <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-6 py-3 bg-emerald-500 text-white font-black rounded-full border-b-4 border-emerald-700 shadow-sm hover:-translate-y-1 active:border-b-0 active:translate-y-1 transition-all text-sm uppercase">
+                          <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white font-bold rounded-full shadow-md hover:bg-emerald-700 transition-all text-xs md:text-sm">
                             <DownloadIcon />
                             <span>{t('download')}</span>
                           </button>
@@ -404,10 +422,10 @@ const SmartSearchPage: React.FC = () => {
                     </div>
                   )}
 
-                  {/* رسائل المستخدم الطالب */}
+                  {/* رسائل المستخدم */}
                   {msg.role === 'user' && (
-                    <div className="bg-amber-400 dark:bg-amber-500 text-slate-900 px-6 py-5 rounded-[2rem] rounded-br-none max-w-[85%] md:max-w-[75%] shadow-lg border-b-4 border-amber-600 transition-all hover:-translate-y-1">
-                      <div className="font-black leading-relaxed max-w-none text-start text-xl md:text-2xl">
+                    <div className="bg-sky-500 dark:bg-sky-600 text-white px-5 py-3.5 rounded-3xl rounded-br-sm max-w-[85%] md:max-w-[75%] shadow-md">
+                      <div className="font-semibold leading-relaxed max-w-none text-start text-base md:text-lg">
                         {msg.content}
                       </div>
                     </div>
@@ -420,33 +438,51 @@ const SmartSearchPage: React.FC = () => {
         </div>
       </div>
 
-      {/* منطقة الإدخال والبحث - مثبتة ومدمجة بالأسفل بتقليل الفراغات */}
-      <div className="absolute bottom-0 inset-x-0 bg-white dark:bg-slate-900 px-4 py-4 md:py-5 w-full z-20 flex-shrink-0 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.2)] rounded-t-[3rem] border-t-4 border-slate-100 dark:border-slate-800">
-        <div className="max-w-4xl mx-auto flex flex-col gap-2">
-          <div className="relative flex items-center bg-slate-50 dark:bg-slate-800 rounded-[3rem] border-4 border-slate-200 dark:border-slate-700 shadow-inner focus-within:border-sky-400 dark:focus-within:border-sky-500 transition-all pl-2 pr-2">
+      {/* 🌟 منطقة الإدخال - مطابقة للشريط البيضاوي في الصورة تماماً */}
+      <div className="absolute bottom-0 inset-x-0 px-4 pb-6 pt-2 w-full z-20 flex-shrink-0 bg-gradient-to-t from-white via-white/90 to-transparent dark:from-[#0b0f17] dark:via-[#0b0f17]/90 dark:to-transparent">
+        <div className="max-w-3xl mx-auto flex flex-col gap-2">
+          
+          <div className="relative flex items-center bg-slate-100 dark:bg-[#1a1f2e] rounded-full border border-slate-200 dark:border-slate-700/60 shadow-lg px-3 py-1.5 focus-within:border-sky-500 dark:focus-within:border-sky-400 transition-all">
             
+            {/* أيقونة الإضافة (+) */}
+            <button type="button" className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white rounded-full transition-colors shrink-0">
+              <PlusIcon />
+            </button>
+
             <input
               type="text" 
               value={input} 
               onChange={(e) => setInput(e.target.value)} 
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
               placeholder={t('input')}
-              className="flex-1 bg-transparent border-0 focus:ring-0 py-4 px-5 md:py-5 md:px-6 text-slate-900 dark:text-white font-black outline-none w-full placeholder-slate-400 dark:placeholder-slate-500 text-xl md:text-2xl relative z-10"
+              className="flex-1 bg-transparent border-0 focus:ring-0 py-3 px-3 text-slate-900 dark:text-white font-medium outline-none w-full placeholder-slate-400 dark:placeholder-slate-500 text-sm md:text-base"
               disabled={isLoading}
             />
             
+            {/* شارة النموذج (Pro / EFIPS) */}
+            <div className="hidden sm:flex items-center gap-1 text-xs font-semibold px-2.5 py-1 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full shrink-0 mr-1">
+              <span>Pro</span>
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+            </div>
+
+            {/* أيقونة المايكروفون */}
+            <button type="button" className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white rounded-full transition-colors shrink-0">
+              <MicIcon />
+            </button>
+
+            {/* زر الإرسال */}
             <button 
               onClick={handleSendMessage} 
               disabled={isLoading || !input.trim()} 
-              className="relative z-10 w-16 h-16 md:w-20 md:h-20 rounded-full bg-sky-500 hover:bg-sky-400 disabled:bg-slate-300 disabled:dark:bg-slate-700 disabled:border-b-0 border-b-4 border-sky-700 text-white flex items-center justify-center transition-all active:border-b-0 active:translate-y-1 rtl:rotate-180 m-2 shrink-0 shadow-lg"
+              className="w-10 h-10 rounded-full bg-sky-500 hover:bg-sky-600 disabled:bg-slate-300 disabled:dark:bg-slate-800 text-white flex items-center justify-center transition-all shrink-0 shadow-md ml-1 rtl:rotate-180"
             >
               <SendIcon />
             </button>
           </div>
 
-          {/* تأثير التحميل (Loader) المبهج والمدمج */}
+          {/* مؤشر التحميل */}
           {isLoading && (
-            <div className="w-[95%] mx-auto h-2.5 rounded-full overflow-hidden relative bg-slate-200 dark:bg-slate-800 mt-2">
+            <div className="w-[90%] mx-auto h-1 rounded-full overflow-hidden relative bg-slate-200 dark:bg-slate-800 mt-1">
               <div className="absolute inset-0 bg-gradient-to-r from-sky-400 via-amber-400 to-rose-400 animate-[shimmer_1.5s_infinite] w-[200%]"></div>
             </div>
           )}
@@ -503,35 +539,20 @@ const SmartSearchPage: React.FC = () => {
       </div>
 
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
         * { font-family: 'Cairo', sans-serif !important; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        
-        @keyframes blob {
-          0% { transform: translate(0px, 0px) scale(1); }
-          33% { transform: translate(30px, -50px) scale(1.1); }
-          66% { transform: translate(-20px, 20px) scale(0.9); }
-          100% { transform: translate(0px, 0px) scale(1); }
-        }
-        .animate-blob { animation: blob 7s infinite alternate ease-in-out; }
-        .animation-delay-2000 { animation-delay: 2s; }
 
         @keyframes shimmer { 
           0% { transform: translateX(-50%); }
           100% { transform: translateX(0%); } 
         }
 
-        @keyframes fade-in-up { 
-          0% { opacity: 0; transform: translateY(20px); } 
-          100% { opacity: 1; transform: translateY(0); } 
-        }
-        .animate-fade-in-up { animation: fade-in-up 0.5s ease-out forwards; }
-        
         @keyframes zoom-in { 
-          0% { opacity: 0; transform: scale(0.9); } 
+          0% { opacity: 0; transform: scale(0.95); } 
           100% { opacity: 1; transform: scale(1); } 
         }
-        .animate-zoom-in { animation: zoom-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-zoom-in { animation: zoom-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
       `}</style>
     </div>
   );
