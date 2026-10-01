@@ -9,12 +9,12 @@ const translations = {
         subtitle: "نظام إدارة المكتبة الذكية (EFIPS)",
         welcome: "مرحباً بك أستاذ",
         backToHome: "العودة للرئيسية",
-        statsTitle: "إحصائيات النظام الحية (حقيقية)",
+        statsTitle: "إحصائيات النظام الحية",
         totalStudents: "إجمالي الطلاب",
         totalTeachers: "إجمالي المعلمين",
         studentLogins: "طلاب قاموا بالدخول",
         teacherLogins: "معلمون قاموا بالدخول",
-        topBooksTitle: "أكثر الكتب طلباً وقراءة (حقيقي)",
+        topBooksTitle: "أكثر الكتب طلباً وقراءة",
         arabicBooks: "المكتبة العربية",
         englishBooks: "المكتبة الإنجليزية",
         studentManagement: "إدارة الطلاب",
@@ -44,12 +44,12 @@ const translations = {
         subtitle: "Smart Library Management System",
         welcome: "Welcome Mr.",
         backToHome: "Back to Home",
-        statsTitle: "Live Real-Time Statistics",
+        statsTitle: "Live Statistics",
         totalStudents: "Total Students",
         totalTeachers: "Total Teachers",
         studentLogins: "Students Logged In",
         teacherLogins: "Teachers Logged In",
-        topBooksTitle: "Most Popular Digital Books (Real)",
+        topBooksTitle: "Most Popular Digital Books",
         arabicBooks: "Arabic Library",
         englishBooks: "English Library",
         studentManagement: "Student Management",
@@ -336,7 +336,7 @@ const AdminDashboard: React.FC = () => {
 
             <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6">
                 
-                {/* إحصائيات الدخول الحقيقية */}
+                {/* إحصائيات الدخول */}
                 <div className="lg:col-span-4 bg-white dark:bg-slate-900/90 backdrop-blur-md border border-slate-200 dark:border-slate-700/50 p-6 rounded-[2.5rem] shadow-xl">
                     <h2 className="text-lg md:text-xl font-black mb-6 text-rose-500 flex items-center gap-2">
                         <span className="w-3 h-3 bg-rose-500 rounded-full animate-ping"></span>
@@ -366,7 +366,7 @@ const AdminDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                {/* الكتب الأكثر طلباً (حقيقي من جدول book_views) */}
+                {/* الكتب الأكثر طلباً ( من جدول book_views) */}
                 <div className="lg:col-span-4 grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="bg-white dark:bg-slate-900/90 backdrop-blur-md border border-slate-200 dark:border-slate-700/50 p-6 rounded-[2.5rem] shadow-xl">
                         <h3 className="text-base md:text-lg font-black mb-4 text-blue-500 flex items-center gap-2">
