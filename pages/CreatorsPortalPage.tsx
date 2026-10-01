@@ -231,7 +231,7 @@ const CreatorsPortalPage: React.FC = () => {
                         <div className="bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-200 dark:from-amber-600 dark:via-yellow-500 dark:to-amber-600 p-[4px] rounded-[3rem] shadow-2xl hover:scale-105 transition-transform duration-500 max-w-3xl w-full">
                             <div className="bg-white dark:bg-slate-900 rounded-[2.8rem] py-8 px-6 md:py-10 md:px-12 flex flex-col items-center justify-center relative overflow-hidden">
                                 <div className="absolute inset-0 bg-yellow-400/10 dark:bg-yellow-400/5 animate-pulse pointer-events-none"></div>
-                                <span className="text-4xl md:text-5xl mb-4 animate-bounce">🌟</span>
+                                <span className="text-4xl md:text-5xl mb-4 animate-bounce"></span>
                                 <h2 className="text-2xl md:text-4xl font-black text-slate-800 dark:text-white text-center leading-tight tracking-wide">
                                     {isAr ? 'قريباً.. ستكون أنت أحد هؤلاء المبدعين!' : 'Soon.. You will be one of these creators!'}
                                 </h2>
