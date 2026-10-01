@@ -41,12 +41,18 @@ const CloseIcon = () => (
   </svg>
 );
 
-// -------- حماية المسارات (Route Guard) --------
+// -------- حماية المسارات (Route Guard) الآمنة لجميع المتصفحات --------
 const ProtectedRoute: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const userType = localStorage.getItem('user_type');
-  const currentUser = localStorage.getItem('current_user');
+  let userType = null;
+  let currentUser = null;
 
-  // إذا لم يكن المستخدم مسجلاً دخوله، يتم إحالته لصفحة اللوج إن فوراً
+  try {
+    userType = localStorage.getItem('user_type');
+    currentUser = localStorage.getItem('current_user');
+  } catch (err) {
+    console.error("Storage access restricted:", err);
+  }
+
   if (!userType || !currentUser) {
     return <Navigate to="/" replace />;
   }
