@@ -5,7 +5,7 @@ const translations = {
     ar: {
         pageTitle: "تقييم الخدمات",
         subTitle: "القراءة ذكاء، والتطوير شراكة.. بصمتك اليوم ترسم مستقبل خدماتنا",
-        nameLabel: "الاسم الكامل (مستعرف تلقائياً)",
+        nameLabel: "الاسم الكامل",
         categoryLabel: "الصفة المدرسية",
         gradeLabel: "المرحلة الدراسية",
         ratingService: "تقييم خدمات المكتبة",
@@ -28,7 +28,7 @@ const translations = {
     en: {
         pageTitle: "Library Performance",
         subTitle: "Reading is Intelligence, Development is Partnership.. Your footprint today shapes the future of our Library.",
-        nameLabel: "Full Name (Auto-detected)",
+        nameLabel: "Full Name",
         categoryLabel: "School Affiliation",
         gradeLabel: "Grade Level",
         ratingService: "Library Services Rating",
