@@ -36,7 +36,7 @@ interface NavLink {
 }
 
 const CloseIcon = () => (
-  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
   </svg>
 );
@@ -87,7 +87,7 @@ const FloatingSaqr: React.FC<{ onOpenModal: () => void }> = ({ onOpenModal }) =>
       <button
         onMouseDown={handleInteraction}
         onTouchStart={handleInteraction}
-        className="group relative w-14 h-14 md:w-16 md:h-16 rounded-[1.8rem] border-4 border-slate-200 dark:border-slate-700 shadow-lg flex items-center justify-center overflow-hidden hover:scale-110 active:scale-95 transition-transform duration-300 bg-white dark:bg-slate-800"
+        className="group relative w-16 h-16 md:w-20 md:h-20 rounded-[2rem] border-4 border-slate-200 dark:border-slate-700 shadow-xl flex items-center justify-center overflow-hidden hover:scale-110 active:scale-95 transition-transform duration-300 bg-white dark:bg-slate-800"
       >
         {ripples.map(r => (
           <span
@@ -102,16 +102,16 @@ const FloatingSaqr: React.FC<{ onOpenModal: () => void }> = ({ onOpenModal }) =>
           className="w-[85%] h-[85%] object-contain animate-float"
           onError={(e) => { e.currentTarget.style.display = 'none'; }}
         />
-        <span className="absolute top-1.5 right-1.5 flex h-3 w-3">
+        <span className="absolute top-1.5 right-1.5 flex h-4 w-4">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 border-2 border-white dark:border-slate-800"></span>
+          <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-500 border-2 border-white dark:border-slate-800"></span>
         </span>
       </button>
     </div>
   );
 };
 
-// -------- 1.5. نافذة صقر المنبثقة --------
+// -------- 1.5. نافذة صقر المنبثقة (إعادة تصميم كاملة أكثر وضوحاً ورحابة) --------
 const DraggableSaqrModal: React.FC<{ isOpen: boolean; onClose: () => void; children: ReactNode }> = ({
   isOpen,
   onClose,
@@ -150,50 +150,61 @@ const DraggableSaqrModal: React.FC<{ isOpen: boolean; onClose: () => void; child
   if (!isOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[999999] pointer-events-none flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[999999] pointer-events-none flex items-end md:items-center justify-center p-2 md:p-4 pb-0 md:pb-4">
       <div
-        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm pointer-events-auto animate-fade-in"
+        className="absolute inset-0 bg-slate-900/70 backdrop-blur-md pointer-events-auto animate-fade-in"
         onClick={onClose}
       ></div>
 
-      <div className="animate-zoom-in flex items-center justify-center pointer-events-none w-full h-full absolute inset-0 p-4">
+      <div className="animate-zoom-in flex items-end md:items-center justify-center pointer-events-none w-full h-full absolute inset-0 md:p-4 pb-0">
         <div
           dir={dir}
-          className="relative w-full max-w-[400px] h-fit max-h-[85vh] bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border-4 border-slate-200 dark:border-slate-700 flex flex-col pointer-events-auto transition-all duration-300 m-0 p-0"
+          className="relative w-full max-w-[600px] md:h-fit h-[92vh] max-h-[95vh] bg-white dark:bg-slate-900 md:rounded-[3rem] rounded-t-[3rem] shadow-2xl border-x-4 border-t-4 md:border-b-4 border-slate-200 dark:border-slate-700 flex flex-col pointer-events-auto transition-all duration-300 m-0 p-0 overflow-hidden"
           style={{ transform: `translate(${position.x}px, ${position.y}px)`, touchAction: 'none' }}
         >
+          {/* رأس النافذة */}
           <div
-            className="w-full flex flex-col items-center justify-center cursor-grab active:cursor-grabbing select-none touch-none z-50 shrink-0 relative pt-6 pb-4 m-0 bg-slate-50 dark:bg-slate-800 rounded-t-[2.2rem] border-b-2 border-slate-200 dark:border-slate-700"
+            className="w-full flex flex-col items-center justify-center cursor-grab active:cursor-grabbing select-none touch-none z-50 shrink-0 relative pt-8 pb-6 m-0 bg-gradient-to-b from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 border-b-2 border-slate-100 dark:border-slate-800"
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
             onPointerCancel={handlePointerUp}
           >
+            {/* زر الإغلاق */}
             <button
               onPointerDown={(e) => e.stopPropagation()}
               onClick={(e) => {
                 e.stopPropagation();
                 onClose();
               }}
-              className="absolute top-4 right-4 rtl:left-4 rtl:right-auto p-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-rose-500 hover:text-white dark:hover:bg-rose-600 rounded-full transition-all pointer-events-auto shadow-sm active:scale-95 z-[60]"
+              className="absolute top-6 right-6 rtl:left-6 rtl:right-auto p-2 bg-slate-100 dark:bg-slate-800 hover:bg-rose-500 hover:text-white dark:hover:bg-rose-600 rounded-full transition-all pointer-events-auto shadow-sm active:scale-95 z-[60]"
             >
               <CloseIcon />
             </button>
 
-            <div className="w-16 h-16 rounded-full overflow-hidden bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 shadow-inner flex items-center justify-center mb-2 pointer-events-none">
-              <img
-                src="/saqr-avatar.png"
-                alt="Saqr"
-                className="w-[85%] h-[85%] object-contain"
-                onError={(e) => { e.currentTarget.style.display = 'none'; }}
-              />
+            {/* الأفاتار والاسم */}
+            <div className="relative">
+              <div className="w-24 h-24 rounded-full overflow-hidden bg-emerald-50 dark:bg-slate-800 border-4 border-emerald-100 dark:border-emerald-900/30 shadow-md flex items-center justify-center mb-3 pointer-events-none z-10 relative">
+                <img
+                  src="/saqr-avatar.png"
+                  alt="Saqr"
+                  className="w-[85%] h-[85%] object-contain"
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                />
+              </div>
+              <span className="absolute bottom-4 right-1 w-5 h-5 bg-emerald-400 border-4 border-white dark:border-slate-900 rounded-full z-20"></span>
             </div>
-            <h3 className="font-black text-lg text-slate-900 dark:text-white uppercase tracking-widest leading-none mb-1 pointer-events-none">
+            
+            <h3 className="font-black text-2xl text-slate-900 dark:text-white tracking-wide leading-none mb-1 pointer-events-none">
               صقر الذكي
             </h3>
+            <p className="text-sm font-bold text-slate-500 dark:text-slate-400 pointer-events-none">
+              {dir === 'rtl' ? 'مساعدك الرقمي الشخصي' : 'Your Digital Assistant'}
+            </p>
           </div>
 
-          <div className="w-full overflow-hidden relative pointer-events-auto cursor-auto flex flex-col m-0 saqr-modal-override bg-white dark:bg-slate-900 rounded-b-[2.5rem]">
+          {/* مساحة المحتوى والشات */}
+          <div className="w-full h-full overflow-y-auto relative pointer-events-auto cursor-auto flex flex-col m-0 saqr-modal-override bg-slate-50/50 dark:bg-slate-900/50 p-4 md:p-6 pb-20">
             {children}
           </div>
         </div>
@@ -260,7 +271,7 @@ const Header: React.FC = () => {
     >
       <div className="w-full max-w-[98%] md:w-fit px-4 py-2.5 rounded-[2rem] border-4 border-white/70 dark:border-slate-700/40 flex items-center justify-between md:justify-center gap-4 shadow-2xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-2xl">
         
-        <Link to="/home" className="flex items-center gap-2 group flex-shrink-0 me-3">
+        <Link to="/home" className="flex items-center gap-2 group flex-shrink-0 me-3 animate-fade-in-up" style={{ animationDelay: '0ms' }}>
           <img
             src="/school-logo.png"
             alt="EFIPS"
@@ -271,18 +282,19 @@ const Header: React.FC = () => {
 
         <nav className="flex-1 overflow-x-auto no-scrollbar flex items-center h-10 md:h-12 px-1">
           <div className="flex items-center gap-1.5 h-full mx-auto min-w-max">
-            {allowedLinks.map((l) => {
+            {allowedLinks.map((l, index) => {
               const isActive = location.pathname === l.path;
 
               return (
                 <Link
                   key={l.path}
                   to={l.path}
-                  className={`px-3 py-1.5 md:px-5 md:py-2 text-[10px] md:text-sm font-black rounded-full transition-all duration-300 shrink-0 ${
+                  className={`px-3 py-1.5 md:px-5 md:py-2 text-[10px] md:text-sm font-black rounded-full transition-all duration-300 shrink-0 animate-fade-in-up ${
                     isActive
                       ? `${l.color} text-white shadow-md`
                       : 'text-slate-600 dark:text-slate-300 bg-slate-100/80 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700'
                   }`}
+                  style={{ animationDelay: `${(index + 1) * 50}ms` }}
                 >
                   {l.label}
                 </Link>
@@ -294,13 +306,15 @@ const Header: React.FC = () => {
         <div className="flex items-center gap-1 flex-shrink-0">
           <button
             onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')}
-            className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-slate-700 dark:text-slate-200 font-black text-[10px] border-2 border-slate-300/80 dark:border-slate-600 rounded-full bg-slate-50/80 dark:bg-slate-800/80"
+            className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-slate-700 dark:text-slate-200 font-black text-[10px] border-2 border-slate-300/80 dark:border-slate-600 rounded-full bg-slate-50/80 dark:bg-slate-800/80 animate-fade-in-up"
+            style={{ animationDelay: `${(allowedLinks.length + 1) * 50}ms` }}
           >
             {locale === 'en' ? 'AR' : 'EN'}
           </button>
           <button
             onClick={toggleTheme}
-            className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-slate-100/80 dark:bg-slate-800/80 rounded-full text-sm border-2 border-slate-200/80 dark:border-slate-600"
+            className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-slate-100/80 dark:bg-slate-800/80 rounded-full text-sm border-2 border-slate-200/80 dark:border-slate-600 animate-fade-in-up"
+            style={{ animationDelay: `${(allowedLinks.length + 2) * 50}ms` }}
           >
             {theme === 'light' ? '🌙' : '☀️'}
           </button>
@@ -414,10 +428,50 @@ const MainLayout: React.FC = () => {
         isOpen={isSaqrModalOpen}
         onClose={() => setIsSaqrModalOpen(false)}
       >
-        <div className="w-full flex flex-col h-auto max-h-full">
+        <div className="w-full flex flex-col h-auto max-h-full saqr-chat-container">
           <SmartSearchPage />
         </div>
       </DraggableSaqrModal>
+
+      {/* الستايلات الخاصة بتنسيق الرسائل وتكبيرها داخل النافذة وتأثيرات التلاشي */}
+      <style>{`
+        .saqr-chat-container * {
+          font-size: 1.05rem !important; /* تكبير الخط العام */
+          line-height: 1.6 !important;
+        }
+        
+        .saqr-chat-container input {
+          font-size: 1.1rem !important;
+          padding: 1rem 1.5rem !important;
+        }
+
+        .saqr-chat-container .markdown-body {
+          font-size: 1.15rem !important; /* تكبير خط ردود صقر الذكي */
+        }
+        
+        .saqr-chat-container .markdown-body p, 
+        .saqr-chat-container .markdown-body li {
+          margin-bottom: 0.75rem !important;
+        }
+
+        @keyframes fade-in-up { 
+          0% { opacity: 0; transform: translateY(15px); } 
+          100% { opacity: 1; transform: translateY(0); } 
+        }
+        .animate-fade-in-up { animation: fade-in-up 0.5s ease-out forwards; opacity: 0; }
+        
+        @keyframes zoom-in { 
+          0% { opacity: 0; transform: scale(0.95); } 
+          100% { opacity: 1; transform: scale(1); } 
+        }
+        .animate-zoom-in { animation: zoom-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
+        @keyframes fade-in { 
+          0% { opacity: 0; } 
+          100% { opacity: 1; } 
+        }
+        .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
+      `}</style>
     </div>
   );
 };
