@@ -111,7 +111,7 @@ const FloatingSaqr: React.FC<{ onOpenModal: () => void }> = ({ onOpenModal }) =>
   );
 };
 
-// -------- 1.5. نافذة صقر المنبثقة (إعادة تصميم كاملة أكثر وضوحاً ورحابة) --------
+// -------- 1.5. نافذة صقر المنبثقة --------
 const DraggableSaqrModal: React.FC<{ isOpen: boolean; onClose: () => void; children: ReactNode }> = ({
   isOpen,
   onClose,
@@ -159,7 +159,7 @@ const DraggableSaqrModal: React.FC<{ isOpen: boolean; onClose: () => void; child
       <div className="animate-zoom-in flex items-end md:items-center justify-center pointer-events-none w-full h-full absolute inset-0 md:p-4 pb-0">
         <div
           dir={dir}
-          className="relative w-full max-w-[600px] md:h-fit h-[92vh] max-h-[95vh] bg-white dark:bg-slate-900 md:rounded-[3rem] rounded-t-[3rem] shadow-2xl border-x-4 border-t-4 md:border-b-4 border-slate-200 dark:border-slate-700 flex flex-col pointer-events-auto transition-all duration-300 m-0 p-0 overflow-hidden"
+          className="relative w-full max-w-[600px] h-[85vh] md:h-[90vh] bg-white dark:bg-slate-900 md:rounded-[3rem] rounded-t-[3rem] shadow-2xl border-x-4 border-t-4 md:border-b-4 border-slate-200 dark:border-slate-700 flex flex-col pointer-events-auto transition-all duration-300 m-0 p-0 overflow-hidden"
           style={{ transform: `translate(${position.x}px, ${position.y}px)`, touchAction: 'none' }}
         >
           {/* رأس النافذة */}
@@ -170,7 +170,6 @@ const DraggableSaqrModal: React.FC<{ isOpen: boolean; onClose: () => void; child
             onPointerUp={handlePointerUp}
             onPointerCancel={handlePointerUp}
           >
-            {/* زر الإغلاق */}
             <button
               onPointerDown={(e) => e.stopPropagation()}
               onClick={(e) => {
@@ -182,7 +181,6 @@ const DraggableSaqrModal: React.FC<{ isOpen: boolean; onClose: () => void; child
               <CloseIcon />
             </button>
 
-            {/* الأفاتار والاسم */}
             <div className="relative">
               <div className="w-24 h-24 rounded-full overflow-hidden bg-emerald-50 dark:bg-slate-800 border-4 border-emerald-100 dark:border-emerald-900/30 shadow-md flex items-center justify-center mb-3 pointer-events-none z-10 relative">
                 <img
@@ -203,8 +201,8 @@ const DraggableSaqrModal: React.FC<{ isOpen: boolean; onClose: () => void; child
             </p>
           </div>
 
-          {/* مساحة المحتوى والشات */}
-          <div className="w-full h-full overflow-y-auto relative pointer-events-auto cursor-auto flex flex-col m-0 saqr-modal-override bg-slate-50/50 dark:bg-slate-900/50 p-4 md:p-6 pb-20">
+          {/* مساحة المحتوى والشات - تم إلغاء التمرير الزائد من هنا والاعتماد على تمرير الشات نفسه */}
+          <div className="w-full flex-1 relative pointer-events-auto cursor-auto flex flex-col m-0 saqr-modal-override bg-slate-50/50 dark:bg-slate-900/50 overflow-hidden">
             {children}
           </div>
         </div>
@@ -428,25 +426,33 @@ const MainLayout: React.FC = () => {
         isOpen={isSaqrModalOpen}
         onClose={() => setIsSaqrModalOpen(false)}
       >
-        <div className="w-full flex flex-col h-auto max-h-full saqr-chat-container">
+        <div className="w-full h-full flex flex-col saqr-chat-container overflow-hidden">
           <SmartSearchPage />
         </div>
       </DraggableSaqrModal>
 
       {/* الستايلات الخاصة بتنسيق الرسائل وتكبيرها داخل النافذة وتأثيرات التلاشي */}
       <style>{`
-        .saqr-chat-container * {
-          font-size: 1.05rem !important; /* تكبير الخط العام */
-          line-height: 1.6 !important;
+        /* تحسينات الشات بحيث تلغي أي أشرطة تمرير زائدة في الحاويات الخارجية */
+        .saqr-modal-override {
+           overflow: hidden !important;
+        }
+
+        /* تحسين حجم خطوط وأحجام ردود المستخدم وصقر */
+        .saqr-chat-container .user-message {
+          font-size: 1.15rem !important; 
+          padding: 1rem 1.25rem !important;
+          line-height: 1.5 !important;
         }
         
+        .saqr-chat-container .markdown-body {
+          font-size: 1.15rem !important;
+          line-height: 1.6 !important;
+        }
+
         .saqr-chat-container input {
           font-size: 1.1rem !important;
           padding: 1rem 1.5rem !important;
-        }
-
-        .saqr-chat-container .markdown-body {
-          font-size: 1.15rem !important; /* تكبير خط ردود صقر الذكي */
         }
         
         .saqr-chat-container .markdown-body p, 
