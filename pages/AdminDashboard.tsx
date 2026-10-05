@@ -400,7 +400,18 @@ const AdminDashboard: React.FC = () => {
                             {modalMode === 'addBorrow' && (
                                 <>
                                     <div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">نوع المستعير</label>
-                                        <select value={formData.user_type} onChange={(e) => setFormData({ ...formData, user_type: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold">
+                                        <select 
+                                            value={formData.user_type} 
+                                            onChange={(e) => {
+                                                const type = e.target.value;
+                                                setFormData({ 
+                                                    ...formData, 
+                                                    user_type: type, 
+                                                    user_email: type === 'student' && formData.user_id ? `${formData.user_id.trim()}@falcon-school.com` : '' 
+                                                });
+                                            }} 
+                                            className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold"
+                                        >
                                             <option value="student">طالب</option>
                                             <option value="teacher">معلم</option>
                                         </select>
@@ -415,7 +426,7 @@ const AdminDashboard: React.FC = () => {
                                                 setFormData({ 
                                                     ...formData, 
                                                     user_id: id, 
-                                                    user_email: id ? `${id.trim()}@falcon-school.com` : '' 
+                                                    user_email: formData.user_type === 'student' ? (id ? `${id.trim()}@falcon-school.com` : '') : formData.user_email 
                                                 });
                                             }} 
                                             className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-mono" 
@@ -427,8 +438,13 @@ const AdminDashboard: React.FC = () => {
                                         <input 
                                             type="email" 
                                             value={formData.user_email} 
-                                            readOnly
-                                            className="w-full px-4 py-3 bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm text-slate-500 cursor-not-allowed" 
+                                            onChange={(e) => {
+                                                if (formData.user_type === 'teacher') {
+                                                    setFormData({ ...formData, user_email: e.target.value });
+                                                }
+                                            }}
+                                            readOnly={formData.user_type === 'student'}
+                                            className={`w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm ${formData.user_type === 'student' ? 'bg-slate-100 dark:bg-slate-800/50 text-slate-500 cursor-not-allowed' : 'bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white'}`} 
                                             required 
                                         />
                                     </div>
