@@ -242,8 +242,7 @@ const AdminDashboard: React.FC = () => {
                     status: 'active'
                 }]);
                 
-                // هنا يمكن استدعاء دالة الـ Edge Function المستقبلية لإرسال الإيميل
-                 await supabase.functions.invoke('send-borrow-email', { body: { email: formData.user_email, book: formData.book_name, date: formData.return_date } });
+                await supabase.functions.invoke('send-borrow-email', { body: { email: formData.user_email, book: formData.book_name, date: formData.return_date } });
             }
 
             setModalMode(null);
@@ -406,8 +405,33 @@ const AdminDashboard: React.FC = () => {
                                             <option value="teacher">معلم</option>
                                         </select>
                                     </div>
-                                    <div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">الرقم التعريفي (ID)</label><input type="text" value={formData.user_id} onChange={(e) => setFormData({ ...formData, user_id: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-mono" required /></div>
-                                    <div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">البريد الإلكتروني (لإرسال التذكير)</label><input type="email" value={formData.user_email} onChange={(e) => setFormData({ ...formData, user_email: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm" required /></div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">الرقم التعريفي (ID)</label>
+                                        <input 
+                                            type="text" 
+                                            value={formData.user_id} 
+                                            onChange={(e) => {
+                                                const id = e.target.value;
+                                                setFormData({ 
+                                                    ...formData, 
+                                                    user_id: id, 
+                                                    user_email: id ? `${id.trim()}@falcon-school.com` : '' 
+                                                });
+                                            }} 
+                                            className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-mono" 
+                                            required 
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">البريد الإلكتروني (لإرسال التذكير)</label>
+                                        <input 
+                                            type="email" 
+                                            value={formData.user_email} 
+                                            readOnly
+                                            className="w-full px-4 py-3 bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm text-slate-500 cursor-not-allowed" 
+                                            required 
+                                        />
+                                    </div>
                                     <div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">اسم الكتاب</label><input type="text" value={formData.book_name} onChange={(e) => setFormData({ ...formData, book_name: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold" required /></div>
                                     <div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">تاريخ الإرجاع المستهدف</label><input type="date" value={formData.return_date} onChange={(e) => setFormData({ ...formData, return_date: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm" required /></div>
                                 </>
