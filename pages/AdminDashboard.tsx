@@ -20,6 +20,7 @@ const translations = {
         studentManagement: "إدارة الطلاب",
         teacherManagement: "إدارة المعلمين",
         borrowManagement: "نظام الإعارة",
+        aiReports: "تقارير التحضير الذكي",
         addStudentBtn: "+ إضافة طالب جديد",
         addTeacherBtn: "+ إضافة معلم جديد",
         addBorrowBtn: "+ تسجيل إعارة كتاب",
@@ -33,6 +34,9 @@ const translations = {
         colActions: "الإجراءات",
         colBook: "الكتاب المستعار",
         colDate: "تاريخ الإرجاع",
+        colTopic: "موضوع الدرس",
+        colType: "نوع التحضير",
+        colReportDate: "تاريخ التحضير",
         modalAddStudent: "إضافة طالب جديد",
         modalAddTeacher: "إضافة معلم جديد",
         modalEditStudent: "تعديل بيانات الطالب",
@@ -40,7 +44,7 @@ const translations = {
         modalAddBorrow: "تسجيل إعارة جديدة",
         accessDenied: "عذراً، هذه الصفحة مخصصة لمدير النظام فقط.",
         loading: "جاري تحليل البيانات الحية...",
-        searchPlaceholder: "ابحث بالاسم أو الرقم...",
+        searchPlaceholder: "ابحث بالاسم أو الرقم أو الموضوع...",
         noResults: "لا توجد نتائج مطابقة."
     },
     en: {
@@ -59,6 +63,7 @@ const translations = {
         studentManagement: "Student Management",
         teacherManagement: "Teacher Management",
         borrowManagement: "Borrowing System",
+        aiReports: "Smart Planning Reports",
         addStudentBtn: "+ Add New Student",
         addTeacherBtn: "+ Add New Teacher",
         addBorrowBtn: "+ Register Borrowing",
@@ -72,6 +77,9 @@ const translations = {
         colActions: "Actions",
         colBook: "Borrowed Book",
         colDate: "Return Date",
+        colTopic: "Lesson Topic",
+        colType: "Plan Type",
+        colReportDate: "Prep Date",
         modalAddStudent: "Add New Student",
         modalAddTeacher: "Add New Teacher",
         modalEditStudent: "Edit Student Info",
@@ -79,7 +87,7 @@ const translations = {
         modalAddBorrow: "Register New Borrowing",
         accessDenied: "Access Denied. Admin privileges required.",
         loading: "Loading live dashboard data...",
-        searchPlaceholder: "Search by name or ID...",
+        searchPlaceholder: "Search by name, ID or topic...",
         noResults: "No matching results found."
     }
 };
@@ -102,14 +110,13 @@ const AdminDashboard: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
 
     const [stats, setStats] = useState({ students: 0, teachers: 0, studentLogins: 0, teacherLogins: 0 });
-    const [topArabicBooks, setTopArabicBooks] = useState<any[]>([]);
-    const [topEnglishBooks, setTopEnglishBooks] = useState<any[]>([]);
     const [studentsList, setStudentsList] = useState<any[]>([]);
     const [teachersList, setTeachersList] = useState<any[]>([]);
     const [borrowingsList, setBorrowingsList] = useState<any[]>([]);
+    const [lessonReportsList, setLessonReportsList] = useState<any[]>([]);
     
     // التبويبات المتاحة
-    const [activeTab, setActiveTab] = useState<'students' | 'teachers' | 'borrowings'>('students');
+    const [activeTab, setActiveTab] = useState<'students' | 'teachers' | 'borrowings' | 'reports'>('students');
 
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -165,23 +172,14 @@ const AdminDashboard: React.FC = () => {
 
             // جلب بيانات الإعارات النشطة
             const { data: borrowings } = await supabase.from('borrowings').select('*').eq('status', 'active');
+            
+            // جلب تقارير تحضير الدروس
+            const { data: reports } = await supabase.from('lesson_reports').select('*').order('created_at', { ascending: false });
 
             setStudentsList(allStudents);
             setTeachersList(allTeachers);
             setBorrowingsList(borrowings || []);
-
-            const { data: bookViews } = await supabase.from('book_views').select('book_title, language');
-            const arBooksCount: Record<string, number> = {};
-            const enBooksCount: Record<string, number> = {};
-            bookViews?.forEach(bv => {
-                if (bv.language === 'ar') arBooksCount[bv.book_title] = (arBooksCount[bv.book_title] || 0) + 1;
-                else enBooksCount[bv.book_title] = (enBooksCount[bv.book_title] || 0) + 1;
-            });
-            const sortedAr = Object.entries(arBooksCount).map(([title, count]) => ({ title, count })).sort((a, b) => b.count - a.count).slice(0, 3);
-            const sortedEn = Object.entries(enBooksCount).map(([title, count]) => ({ title, count })).sort((a, b) => b.count - a.count).slice(0, 3);
-
-            setTopArabicBooks(sortedAr);
-            setTopEnglishBooks(sortedEn);
+            setLessonReportsList(reports || []);
 
             setStats({
                 students: sCount || allStudents.length || 0,
@@ -205,11 +203,14 @@ const AdminDashboard: React.FC = () => {
         } else if (activeTab === 'teachers') {
             if (!term) return teachersList;
             return teachersList.filter(tch => (tch.name_ar && tch.name_ar.toLowerCase().includes(term)) || (tch.teacher_id && tch.teacher_id.toLowerCase().includes(term)));
-        } else {
+        } else if (activeTab === 'borrowings') {
             if (!term) return borrowingsList;
             return borrowingsList.filter(b => (b.user_id && b.user_id.toLowerCase().includes(term)) || (b.book_name && b.book_name.toLowerCase().includes(term)));
+        } else {
+            if (!term) return lessonReportsList;
+            return lessonReportsList.filter(r => (r.teacher_name && r.teacher_name.toLowerCase().includes(term)) || (r.lesson_topic && r.lesson_topic.toLowerCase().includes(term)) || (r.teacher_id && r.teacher_id.toLowerCase().includes(term)));
         }
-    }, [studentsList, teachersList, borrowingsList, searchQuery, activeTab]);
+    }, [studentsList, teachersList, borrowingsList, lessonReportsList, searchQuery, activeTab]);
 
     const handleReturnBook = async (id: number) => {
         try {
@@ -297,12 +298,13 @@ const AdminDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                {/* أزرار التبديل وإضافة الطلاب/المعلمين/الإعارات */}
+                {/* أزرار التبديل وإضافة الطلاب/المعلمين/الإعارات/التقارير */}
                 <div className="lg:col-span-4 flex flex-col md:flex-row items-center justify-between gap-4 bg-white dark:bg-slate-900/90 p-5 rounded-[2rem] border border-slate-200 dark:border-slate-700 shadow-sm">
                     <div className="flex flex-wrap gap-2 w-full md:w-auto">
                         <button onClick={() => { setActiveTab('students'); setSearchQuery(''); }} className={`px-5 py-3 rounded-2xl font-black text-xs md:text-sm transition-all ${activeTab === 'students' ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}>{t('studentManagement')} ({studentsList.length})</button>
                         <button onClick={() => { setActiveTab('teachers'); setSearchQuery(''); }} className={`px-5 py-3 rounded-2xl font-black text-xs md:text-sm transition-all ${activeTab === 'teachers' ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}>{t('teacherManagement')} ({teachersList.length})</button>
                         <button onClick={() => { setActiveTab('borrowings'); setSearchQuery(''); }} className={`px-5 py-3 rounded-2xl font-black text-xs md:text-sm transition-all ${activeTab === 'borrowings' ? 'bg-rose-500 text-white shadow-md' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}>{t('borrowManagement')} ({borrowingsList.length})</button>
+                        <button onClick={() => { setActiveTab('reports'); setSearchQuery(''); }} className={`px-5 py-3 rounded-2xl font-black text-xs md:text-sm transition-all ${activeTab === 'reports' ? 'bg-amber-500 text-white shadow-md' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}>{t('aiReports')} ({lessonReportsList.length})</button>
                     </div>
 
                     <div className="w-full md:w-auto flex justify-end">
@@ -326,11 +328,18 @@ const AdminDashboard: React.FC = () => {
                                 <tr className="text-slate-600 dark:text-slate-300 text-xs md:text-sm border-b border-slate-200 dark:border-slate-700">
                                     <th className="p-3.5 font-black">{t('colId')}</th>
                                     {activeTab !== 'borrowings' && <th className="p-3.5 font-black">{t('colName')}</th>}
+                                    
                                     {activeTab === 'students' && <th className="p-3.5 font-black">{t('colGrade')}</th>}
                                     {activeTab === 'students' && <th className="p-3.5 font-black text-center">{t('colPoints')}</th>}
+                                    
                                     {activeTab === 'borrowings' && <th className="p-3.5 font-black">{t('colBook')}</th>}
                                     {activeTab === 'borrowings' && <th className="p-3.5 font-black">{t('colDate')}</th>}
-                                    <th className="p-3.5 font-black text-center">{t('colActions')}</th>
+
+                                    {activeTab === 'reports' && <th className="p-3.5 font-black">{t('colTopic')}</th>}
+                                    {activeTab === 'reports' && <th className="p-3.5 font-black text-center">{t('colType')}</th>}
+                                    {activeTab === 'reports' && <th className="p-3.5 font-black">{t('colReportDate')}</th>}
+
+                                    {activeTab !== 'reports' && <th className="p-3.5 font-black text-center">{t('colActions')}</th>}
                                 </tr>
                             </thead>
                             <tbody>
@@ -338,22 +347,30 @@ const AdminDashboard: React.FC = () => {
                                     filteredList.map((item: any) => (
                                         <tr key={item.id} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                                             <td className="p-3.5 font-mono font-bold text-xs md:text-sm text-blue-600 dark:text-blue-400">
-                                                {activeTab === 'students' ? item.student_id : activeTab === 'teachers' ? item.teacher_id : item.user_id}
+                                                {activeTab === 'students' ? item.student_id : activeTab === 'teachers' ? item.teacher_id : activeTab === 'borrowings' ? item.user_id : item.teacher_id}
                                             </td>
-                                            {activeTab !== 'borrowings' && <td className="p-3.5 font-bold text-xs md:text-sm">{item.name_ar}</td>}
+                                            
+                                            {activeTab !== 'borrowings' && <td className="p-3.5 font-bold text-xs md:text-sm">{activeTab === 'reports' ? item.teacher_name : item.name_ar}</td>}
+                                            
                                             {activeTab === 'students' && <td className="p-3.5 text-xs md:text-sm text-slate-500 dark:text-slate-400">{item.grade}</td>}
                                             {activeTab === 'students' && <td className="p-3.5 text-center font-black text-emerald-600 dark:text-emerald-400">{item.points || 0}</td>}
                                             
                                             {activeTab === 'borrowings' && <td className="p-3.5 font-bold text-xs md:text-sm text-rose-500">{item.book_name}</td>}
                                             {activeTab === 'borrowings' && <td className="p-3.5 text-xs md:text-sm text-slate-500">{item.return_date}</td>}
                                             
-                                            <td className="p-3.5 text-center">
-                                                {activeTab === 'borrowings' ? (
-                                                    <button onClick={() => handleReturnBook(item.id)} className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-xs shadow-sm transition-all">إرجاع الكتاب</button>
-                                                ) : (
-                                                    <button onClick={() => { setSelectedItem(item); setFormData({ ...formData, [activeTab === 'students' ? 'student_id' : 'teacher_id']: activeTab === 'students' ? item.student_id : item.teacher_id, name_ar: item.name_ar, name_en: item.name_en, grade: item.grade || '', points: item.points || 0 }); setModalMode(activeTab === 'students' ? 'editStudent' : 'editTeacher'); }} className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs shadow-sm transition-all">{t('editIdBtn')}</button>
-                                                )}
-                                            </td>
+                                            {activeTab === 'reports' && <td className="p-3.5 font-bold text-xs md:text-sm text-slate-800 dark:text-slate-100">{item.lesson_topic}</td>}
+                                            {activeTab === 'reports' && <td className="p-3.5 text-center font-black text-xs md:text-sm text-indigo-600 dark:text-indigo-400">{item.plan_type}</td>}
+                                            {activeTab === 'reports' && <td className="p-3.5 text-xs md:text-sm text-slate-500">{new Date(item.created_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}</td>}
+
+                                            {activeTab !== 'reports' && (
+                                              <td className="p-3.5 text-center">
+                                                  {activeTab === 'borrowings' ? (
+                                                      <button onClick={() => handleReturnBook(item.id)} className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-xs shadow-sm transition-all">إرجاع الكتاب</button>
+                                                  ) : (
+                                                      <button onClick={() => { setSelectedItem(item); setFormData({ ...formData, [activeTab === 'students' ? 'student_id' : 'teacher_id']: activeTab === 'students' ? item.student_id : item.teacher_id, name_ar: item.name_ar, name_en: item.name_en, grade: item.grade || '', points: item.points || 0 }); setModalMode(activeTab === 'students' ? 'editStudent' : 'editTeacher'); }} className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs shadow-sm transition-all">{t('editIdBtn')}</button>
+                                                  )}
+                                              </td>
+                                            )}
                                         </tr>
                                     ))
                                 ) : (
