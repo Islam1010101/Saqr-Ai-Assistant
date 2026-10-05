@@ -34,6 +34,9 @@ LESSON PLAN GENERATOR INSTRUCTION:
 PRESENTATION STRUCTURE INSTRUCTION:
 "بناءً على موضوع الدرس الذي يحدده المعلم من منهج McGraw-Hill، قم بتقسيم المحتوى إلى هيكل عرض تقديمي احترافي مكون من الشرائح التالية: شريحة العنوان، شريحة التهيئة والتمهيد، 3-4 شرائح للمحتوى الأساسي (مع نقاط بارزة في كل شريحة)، شريحة نشاط تفاعلي للطلاب، وشريحة ختامية للتقييم. اكتب في كل شريحة عنواناً رئيسياً، نقاطاً مختصرة، وما يجب أن يقوله المعلم (Speaker Notes)."
 
+Formatting Rules for Responses:
+- Always structure your answers with clear headings, bullet points, and proper line spacing to ensure readability and prevent clustered text.
+
 Instructions for "Little Author" Challenge (STRICT RULES):
 1. UAE THEMES: Start stories inspired by UAE identity (Space, Pearl Diving, Desert Heritage, Falcons, Zayed's legacy).
 2. INTERACTION: Write ONLY ONE short sentence to continue the plot naturally. 
@@ -195,12 +198,12 @@ const SmartSearchPage: React.FC = () => {
       
       if (storedType === 'student') {
         welcomeMessage = locale === 'ar' 
-          ? `أهلاً بك يا صديقي المبدع **${name}**! 🎓\nأنا "صقر"، المساعد الذكي لمكتبتك. هل نؤلف قصة ممتعة معاً اليوم، أم تبحث عن كتاب محدد لتقرأه؟`
-          : `Welcome my creative friend **${name}**! 🎓\nI'm 'Saqr', your AI Librarian. Shall we co-author a story today, or are you looking for a specific book?`;
+          ? `أهلاً بك يا صديقي المبدع **${name}**! 🎓\n\nأنا "صقر"، المساعد الذكي لمكتبتك. هل نؤلف قصة ممتعة معاً اليوم، أم تبحث عن كتاب محدد لتقرأه؟`
+          : `Welcome my creative friend **${name}**! 🎓\n\nI'm 'Saqr', your AI Librarian. Shall we co-author a story today, or are you looking for a specific book?`;
       } else if (storedType === 'teacher' || storedType === 'admin') {
         welcomeMessage = locale === 'ar'
-          ? `أهلاً بك أستاذي الفاضل **${name}**! 👨‍🏫\nأنا "صقر" في خدمتك. كيف يمكنني مساعدتك اليوم في تحضير دروس منهج McGraw-Hill أو البحث عن مصادر لمادتك؟`
-          : `Welcome esteemed teacher **${name}**! 👨‍🏫\nI am 'Saqr', at your service. How can I assist you today with McGraw-Hill lesson planning or resources?`;
+          ? `أهلاً بك أستاذي الفاضل **${name}**! 👨‍🏫\n\nأنا "صقر" في خدمتك. كيف يمكنني مساعدتك اليوم في تحضير دروس منهج McGraw-Hill أو البحث عن مصادر لمادتك؟`
+          : `Welcome esteemed teacher **${name}**! 👨‍🏫\n\nI am 'Saqr', at your service. How can I assist you today with McGraw-Hill lesson planning or resources?`;
       }
     } else {
       setUserName('');
@@ -417,8 +420,8 @@ const SmartSearchPage: React.FC = () => {
                   {msg.role === 'assistant' && (
                     <div className="flex flex-col gap-2 max-w-[95%] md:max-w-[85%] items-start">
                       <div className="flex gap-3 items-end" translate="no" lang={locale}>
-                        <div className="bg-slate-50 dark:bg-[#1a1f2e] border border-slate-200 dark:border-slate-800 rounded-3xl rounded-bl-sm px-4 md:px-5 py-3 md:py-4 shadow-sm text-slate-800 dark:text-slate-100 font-medium leading-relaxed text-sm md:text-lg">
-                          <div className="prose prose-slate dark:prose-invert max-w-none text-start font-cairo">
+                        <div className="bg-slate-50 dark:bg-[#1a1f2e] border border-slate-200 dark:border-slate-800 rounded-3xl rounded-bl-sm px-4 md:px-6 py-4 md:py-5 shadow-sm text-slate-800 dark:text-slate-100 font-medium leading-relaxed text-sm md:text-lg">
+                          <div className="prose prose-slate dark:prose-invert max-w-none text-start font-cairo [&>ul]:list-disc [&>ul]:ps-5 [&>ul]:space-y-2 [&>ol]:list-decimal [&>ol]:ps-5 [&>ol]:space-y-2 [&>p]:mb-3 [&>h3]:font-bold [&>h3]:text-sky-600 dark:[&>h3]:text-sky-400 [&>h3]:mt-3 [&>h3]:mb-2">
                             <ReactMarkdown>{msg.content}</ReactMarkdown>
                           </div>
                         </div>
