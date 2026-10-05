@@ -282,16 +282,39 @@ const SmartSearchPage: React.FC = () => {
     const storedUser = localStorage.getItem('current_user');
     const storedType = localStorage.getItem('user_type');
     
+    // حساب الإدارة متاح له التحضير دائماً
+    if (storedType === 'admin') {
+      setInput(promptText);
+      return;
+    }
+
     if (storedType === 'teacher' && storedUser) {
       setIsLoading(true);
       const user = JSON.parse(storedUser);
+      const teacherId = (user.teacher_id || user.id || '').trim();
+      const teacherName = (user.name_ar || user.name_en || '').trim();
+
+      let isBooked = false;
+
       try {
-        const { data, error } = await supabase
-          .from('library_schedule') // تأكد أن هذا هو اسم جدول الحجوزات لديك
-          .select('id')
-          .eq('teacher_id', user.teacher_id);
-          
-        if (error || !data || data.length === 0) {
+        // الفحص في جدول library_schedule بالأعمدة المطابقة لقاعدة البيانات (user_id و teacher)
+        if (teacherId) {
+          const { data, error } = await supabase
+            .from('library_schedule')
+            .select('id')
+            .ilike('user_id', `%${teacherId}%`);
+          if (!error && data && data.length > 0) isBooked = true;
+        }
+
+        if (!isBooked && teacherName) {
+          const { data, error } = await supabase
+            .from('library_schedule')
+            .select('id')
+            .ilike('teacher', `%${teacherName}%`);
+          if (!error && data && data.length > 0) isBooked = true;
+        }
+
+        if (!isBooked) {
           setIsLoading(false);
           alert(locale === 'ar' 
             ? '⚠️ عذراً أستاذي، ميزة التحضير والعروض الحصرية متاحة فقط للمعلمين الذين قاموا بحجز حصة في جدول المكتبة.' 
@@ -299,7 +322,7 @@ const SmartSearchPage: React.FC = () => {
           return;
         }
       } catch (err) {
-        console.error(err);
+        console.error('Error checking schedule booking:', err);
       }
       setIsLoading(false);
     }
@@ -320,7 +343,7 @@ const SmartSearchPage: React.FC = () => {
     setSaqrState('thinking');
 
     // تسجيل التحضير في قاعدة بيانات الأدمن إذا استخدم الميزة
-    if (isTeacherOrAdmin && (userQuery.includes('تحضير درس') || userQuery.includes('هيكل عرض') || userQuery.includes('lesson plan') || userQuery.includes('presentation'))) {
+    if (isTeacherOrAdmin && (userQuery.includes('تحضير') || userQuery.includes('عرض') || userQuery.includes('lesson plan') || userQuery.includes('presentation'))) {
       try {
         const storedUser = localStorage.getItem('current_user');
         if (storedUser) {
