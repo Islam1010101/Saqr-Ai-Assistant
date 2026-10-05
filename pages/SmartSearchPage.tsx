@@ -32,7 +32,7 @@ LESSON PLAN GENERATOR INSTRUCTION:
 "أنت مساعد تربوي خبير في مناهج McGraw-Hill الدولية. قم بإعداد خطة درس تفصيلية استناداً إلى عنوان الوحدة أو الدرس الذي يزودك به المعلم. يجب أن تتضمن الخطة: الأهداف المعرفية والمهارية، المفردات الأساسية (Vocabulary)، دور المعلم والطلاب (استراتيجيات التعلم النشط)، أسئلة التحقق من الفهم، وأنشطة التمايز (Differentiation) للطلاب المتميزين وذوي الدعم، مع اقتراح مصادر من مكتبة المدرسة إن وجدت."
 
 PRESENTATION STRUCTURE INSTRUCTION:
-"بناءً على موضوع الدرس الذي يححده المعلم من منهج McGraw-Hill، قم بتقسيم المحتوى إلى هيكل عرض تقديمي احترافي مكون من الشرائح التالية: شريحة العنوان، شريحة التهيئة والتمهيد، 3-4 شرائح للمحتوى الأساسي (مع نقاط بارزة في كل شريحة)، شريحة نشاط تفاعلي للطلاب، وشريحة ختامية للتقييم. اكتب في كل شريحة عنواناً رئيسياً، نقاطاً مختصرة، وما يجب أن يقوله المعلم (Speaker Notes)."
+"بناءً على موضوع الدرس الذي يحدده المعلم من منهج McGraw-Hill، قم بتقسيم المحتوى إلى هيكل عرض تقديمي احترافي مكون من الشرائح التالية: شريحة العنوان، شريحة التهيئة والتمهيد، 3-4 شرائح للمحتوى الأساسي (مع نقاط بارزة في كل شريحة)، شريحة نشاط تفاعلي للطلاب، وشريحة ختامية للتقييم. اكتب في كل شريحة عنواناً رئيسياً، نقاطاً مختصرة، وما يجب أن يقوله المعلم (Speaker Notes)."
 
 Instructions for "Little Author" Challenge (STRICT RULES):
 1. UAE THEMES: Start stories inspired by UAE identity (Space, Pearl Diving, Desert Heritage, Falcons, Zayed's legacy).
@@ -69,7 +69,11 @@ const localization: any = {
     certOfficial: 'وثيقة رسمية من المكتبة',
     certAI: 'الموثق المعتمد',
     certSaqr: 'صقر - المساعد الذكي',
-    welcome: 'مرحباً بك،'
+    welcome: 'مرحباً بك،',
+    mcgrawLesson: 'تحضير درس McGraw-Hill',
+    mcgrawPres: 'تصميم عرض تقديمي',
+    lessonPrompt: 'أريد تحضير درس تفصيلي من منهج McGraw-Hill لموضوع: ',
+    presPrompt: 'أريد تصميم هيكل عرض تقديمي احترافي لموضوع: '
   },
   en: {
     input: 'Ask Saqr, search for a book or start a story...',
@@ -87,7 +91,11 @@ const localization: any = {
     certOfficial: 'Official Library Document',
     certAI: 'Certified By',
     certSaqr: 'Saqr - AI Librarian',
-    welcome: "Let's jump in,"
+    welcome: "Let's jump in,",
+    mcgrawLesson: 'McGraw-Hill Lesson Plan',
+    mcgrawPres: 'Presentation Structure',
+    lessonPrompt: 'I want a detailed lesson plan from McGraw-Hill for the topic: ',
+    presPrompt: 'I want to design a professional presentation structure for the topic: '
   }
 };
 
@@ -107,12 +115,6 @@ const SendIcon = () => (
 const DownloadIcon = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-  </svg>
-);
-
-const MicIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
   </svg>
 );
 
@@ -370,9 +372,9 @@ const SmartSearchPage: React.FC = () => {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-950/40 via-[#0b0f17] to-[#0b0f17] pointer-events-none -z-10 hidden dark:block" />
 
       {/* Header */}
-      <header className="flex-shrink-0 px-4 py-4 md:px-8 w-full max-w-5xl mx-auto flex justify-between items-center z-20 relative bg-white/80 dark:bg-transparent backdrop-blur-sm border-b border-slate-100 dark:border-transparent">
-        <div className="flex items-center gap-3 md:gap-4">
-          <div className={`w-10 h-10 md:w-14 md:h-14 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden bg-slate-100 dark:bg-slate-800 border-2 border-sky-400 dark:border-sky-500 shadow-md ${saqrState === 'thinking' ? 'ring-2 ring-amber-400 animate-pulse' : ''}`}>
+      <header className="flex-shrink-0 px-3 py-3 md:px-8 w-full max-w-5xl mx-auto flex justify-between items-center z-20 relative bg-white/80 dark:bg-transparent backdrop-blur-sm border-b border-slate-100 dark:border-transparent">
+        <div className="flex items-center gap-2.5 md:gap-4">
+          <div className={`w-9 h-9 md:w-14 md:h-14 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden bg-slate-100 dark:bg-slate-800 border-2 border-sky-400 dark:border-sky-500 shadow-md ${saqrState === 'thinking' ? 'ring-2 ring-amber-400 animate-pulse' : ''}`}>
             <img 
               src={getSaqrImageSrc()} 
               alt="Saqr AI" 
@@ -381,15 +383,15 @@ const SmartSearchPage: React.FC = () => {
             />
           </div>
           <div>
-            <h1 className="font-bold text-lg md:text-2xl text-slate-900 dark:text-white tracking-tight">{t('status')}</h1>
-            <span className="inline-flex items-center gap-1.5 text-xs md:text-sm text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5">
+            <h1 className="font-bold text-base md:text-2xl text-slate-900 dark:text-white tracking-tight">{t('status')}</h1>
+            <span className="inline-flex items-center gap-1.5 text-[11px] md:text-sm text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5">
               <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> {t('online')}
             </span>
           </div>
         </div>
 
         {winnerData && saqrState === 'victory' && (
-          <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-4 py-2 bg-rose-600 text-white font-bold rounded-full hover:bg-rose-700 transition-all shadow-md text-xs md:text-sm">
+          <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-3.5 py-2 bg-rose-600 text-white font-bold rounded-full hover:bg-rose-700 transition-all shadow-md text-xs md:text-sm shrink-0">
             <DownloadIcon />
             <span className="hidden md:inline">{t('download')}</span>
             <span className="md:hidden">تحميل</span>
@@ -398,24 +400,24 @@ const SmartSearchPage: React.FC = () => {
       </header>
 
       {/* Greeting */}
-      <div className="flex-shrink-0 text-center pt-4 pb-2 px-4 z-10">
-        <h2 className="text-2xl md:text-4xl lg:text-5xl font-medium tracking-tight text-slate-800 dark:text-slate-100">
-          {t('welcome')} <span className="font-bold text-sky-600 dark:text-sky-400">{userName || 'صديقي المبدع'}</span>
+      <div className="flex-shrink-0 text-center pt-2 pb-1 px-3 z-10">
+        <h2 className="text-xl md:text-4xl lg:text-5xl font-medium tracking-tight text-slate-800 dark:text-slate-100">
+          {t('welcome')} <span className="font-bold text-sky-600 dark:text-sky-400">{userName || (locale === 'ar' ? 'صديقي المبدع' : 'Creative Friend')}</span>
         </h2>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-4 no-scrollbar scroll-smooth relative z-10 pb-28">
-        <div className="max-w-4xl mx-auto flex flex-col justify-end min-h-fit space-y-4">
+      <div className="flex-1 overflow-y-auto px-3 md:px-8 py-3 no-scrollbar scroll-smooth relative z-10 pb-36 md:pb-28">
+        <div className="max-w-4xl mx-auto flex flex-col justify-end min-h-fit space-y-3">
           
           {messages.map((msg, index) => (
             <RevealMessage key={index}>
                 <div className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   
                   {msg.role === 'assistant' && (
-                    <div className="flex flex-col gap-2 max-w-[92%] md:max-w-[85%] items-start">
+                    <div className="flex flex-col gap-2 max-w-[95%] md:max-w-[85%] items-start">
                       <div className="flex gap-3 items-end" translate="no" lang={locale}>
-                        <div className="bg-slate-50 dark:bg-[#1a1f2e] border border-slate-200 dark:border-slate-800 rounded-3xl rounded-bl-sm px-5 py-4 shadow-sm text-slate-800 dark:text-slate-100 font-medium leading-relaxed text-base md:text-lg">
+                        <div className="bg-slate-50 dark:bg-[#1a1f2e] border border-slate-200 dark:border-slate-800 rounded-3xl rounded-bl-sm px-4 md:px-5 py-3 md:py-4 shadow-sm text-slate-800 dark:text-slate-100 font-medium leading-relaxed text-sm md:text-lg">
                           <div className="prose prose-slate dark:prose-invert max-w-none text-start font-cairo">
                             <ReactMarkdown>{msg.content}</ReactMarkdown>
                           </div>
@@ -424,7 +426,7 @@ const SmartSearchPage: React.FC = () => {
 
                       {winnerData && saqrState === 'victory' && index === messages.length - 1 && (
                         <div className="mt-2 w-full text-start animate-zoom-in">
-                          <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white font-bold rounded-full shadow-md hover:bg-emerald-700 transition-all text-xs md:text-sm">
+                          <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white font-bold rounded-full shadow-md hover:bg-emerald-700 transition-all text-xs md:text-sm">
                             <DownloadIcon />
                             <span>{t('download')}</span>
                           </button>
@@ -434,8 +436,8 @@ const SmartSearchPage: React.FC = () => {
                   )}
 
                   {msg.role === 'user' && (
-                    <div className="bg-sky-500 dark:bg-sky-600 text-white px-5 py-3.5 rounded-3xl rounded-br-sm max-w-[85%] md:max-w-[75%] shadow-md">
-                      <div className="font-semibold leading-relaxed max-w-none text-start text-base md:text-lg">
+                    <div className="bg-sky-500 dark:bg-sky-600 text-white px-4 md:px-5 py-3 rounded-3xl rounded-br-sm max-w-[90%] md:max-w-[75%] shadow-md">
+                      <div className="font-semibold leading-relaxed max-w-none text-start text-sm md:text-lg">
                         {msg.content}
                       </div>
                     </div>
@@ -449,28 +451,28 @@ const SmartSearchPage: React.FC = () => {
       </div>
 
       {/* Input & Teacher Quick Buttons */}
-      <div className="absolute bottom-0 inset-x-0 px-4 pb-3 pt-1 w-full z-20 flex-shrink-0 bg-gradient-to-t from-white via-white/90 to-transparent dark:from-[#0b0f17] dark:via-[#0b0f17]/90 dark:to-transparent">
+      <div className="absolute bottom-0 inset-x-0 px-3 pb-3 pt-2 w-full z-20 flex-shrink-0 bg-gradient-to-t from-white via-white/95 to-transparent dark:from-[#0b0f17] dark:via-[#0b0f17]/95 dark:to-transparent">
         <div className="max-w-3xl mx-auto flex flex-col gap-2">
           
-          {/* شريط الأزرار السريعة للمعلمين فقط فوق مربع الكتابة */}
+          {/* شريط الأزرار السريعة للمعلمين فقط فوق مربع الكتابة (متعدد اللغات) */}
           {isTeacherOrAdmin && (
-            <div className="flex items-center justify-center gap-2 px-2 animate-fade-in">
+            <div className="flex flex-wrap items-center justify-center gap-1.5 px-1 animate-fade-in">
               <button
-                onClick={() => setInput('أريد تحضير درس تفصيلي من منهج McGraw-Hill لموضوع: ')}
-                className="px-3.5 py-1.5 bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 rounded-full text-xs font-bold hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-all flex items-center gap-1.5 shadow-sm"
+                onClick={() => setInput(t('lessonPrompt'))}
+                className="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 rounded-full text-[11px] md:text-xs font-bold hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-all flex items-center gap-1.5 shadow-sm"
               >
-                <span>📑</span> تحضير درس McGraw-Hill
+                <span>📑</span> {t('mcgrawLesson')}
               </button>
               <button
-                onClick={() => setInput('أريد تصميم هيكل عرض تقديمي احترافي لموضوع: ')}
-                className="px-3.5 py-1.5 bg-purple-50 dark:bg-purple-950/70 border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 rounded-full text-xs font-bold hover:bg-purple-100 dark:hover:bg-purple-900/60 transition-all flex items-center gap-1.5 shadow-sm"
+                onClick={() => setInput(t('presPrompt'))}
+                className="px-3 py-1.5 bg-purple-50 dark:bg-purple-950/70 border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 rounded-full text-[11px] md:text-xs font-bold hover:bg-purple-100 dark:hover:bg-purple-900/60 transition-all flex items-center gap-1.5 shadow-sm"
               >
-                <span>📊</span> تصميم عرض تقديمي
+                <span>📊</span> {t('mcgrawPres')}
               </button>
             </div>
           )}
 
-          <div className="relative flex items-center bg-slate-100 dark:bg-[#1a1f2e] rounded-full border border-slate-200 dark:border-slate-700/60 shadow-lg px-3 py-1.5 focus-within:border-sky-500 dark:focus-within:border-sky-400 transition-all">
+          <div className="relative flex items-center bg-slate-100 dark:bg-[#1a1f2e] rounded-full border border-slate-200 dark:border-slate-700/60 shadow-lg px-2.5 md:px-3 py-1 focus-within:border-sky-500 dark:focus-within:border-sky-400 transition-all">
             
             <input
               type="text" 
@@ -478,18 +480,14 @@ const SmartSearchPage: React.FC = () => {
               onChange={(e) => setInput(e.target.value)} 
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
               placeholder={t('input')}
-              className="flex-1 bg-transparent border-0 focus:ring-0 py-3 px-3 text-slate-900 dark:text-white font-medium outline-none w-full placeholder-slate-400 dark:placeholder-slate-500 text-sm md:text-base"
+              className="flex-1 bg-transparent border-0 focus:ring-0 py-2.5 md:py-3 px-2 md:px-3 text-slate-900 dark:text-white font-medium outline-none w-full placeholder-slate-400 dark:placeholder-slate-500 text-xs md:text-base"
               disabled={isLoading}
             />
-
-            <button type="button" className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white rounded-full transition-colors shrink-0">
-              <MicIcon />
-            </button>
 
             <button 
               onClick={handleSendMessage} 
               disabled={isLoading || !input.trim()} 
-              className="w-10 h-10 rounded-full bg-sky-500 hover:bg-sky-600 disabled:bg-slate-300 disabled:dark:bg-slate-800 text-white flex items-center justify-center transition-all shrink-0 shadow-md ml-1 rtl:rotate-180"
+              className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-sky-500 hover:bg-sky-600 disabled:bg-slate-300 disabled:dark:bg-slate-800 text-white flex items-center justify-center transition-all shrink-0 shadow-md ml-1 rtl:rotate-180"
             >
               <SendIcon />
             </button>
