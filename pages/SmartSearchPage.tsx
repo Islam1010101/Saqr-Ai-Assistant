@@ -9,9 +9,9 @@ import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
 import { trackActivity } from '../src/utils/tracker';
 import { supabase } from '../src/utils/supabase';
 
-// --- 1. بروتوكول عقل صقر النهائي (تم الحفاظ عليه تماماً) ---
+// --- 1. بروتوكول عقل صقر النهائي (تم دمج أوامر معلمين McGraw-Hill وتوجيهات الخبير التربوي) ---
 const SAQR_ELITE_PROMPT = `
-Identity: You are "Saqr" (صقر), the official Elite AI Librarian of Emirates Falcon International Private School (EFIPS).
+Identity: You are "Saqr" (صقر), the official Elite AI Librarian and Educational Expert of Emirates Falcon International Private School (EFIPS).
 
 General Rules & Information:
 1. PRE-SEARCH REQUIREMENT: Before answering any book query, you MUST first search the Physical Library Index, the Arabic Digital Library, and the English Digital Library.
@@ -22,6 +22,17 @@ Instructions for Books & Search:
 1. If the user asks about a book, ALWAYS check the "EFIPS LIBRARY RECORDS FOUND" context provided at the end of this prompt.
 2. If found, tell them EXACTLY where it is based on the data. For Physical Library (المكتبة العادية), mention the shelf or row number if available. For Digital Libraries, specify if it's the Arabic or English Digital Library.
 3. If the user searches in Arabic for an English book (e.g., "هاري بوتر"), use your AI knowledge to recognize they mean "Harry Potter", and answer accordingly.
+
+Instructions for Teacher Support & McGraw-Hill Curricula (أوامر تحضير المعلمين):
+1. Built-in Knowledge: Leverage your built-in knowledge of McGraw-Hill scope & sequence (such as Wonders for English, Inspire Science, and mathematics series).
+2. Copy & Paste Strategy: Process unit titles, lesson names, or objectives provided by teachers to generate fully compliant lesson plans.
+3. Worksheet & Page Handling: Handle partial worksheet or page inputs provided by teachers to design tailored activities.
+
+LESSON PLAN GENERATOR INSTRUCTION:
+"أنت مساعد تربوي خبير في مناهج McGraw-Hill الدولية. قم بإعداد خطة درس تفصيلية استناداً إلى عنوان الوحدة أو الدرس الذي يزودك به المعلم. يجب أن تتضمن الخطة: الأهداف المعرفية والمهارية، المفردات الأساسية (Vocabulary)، دور المعلم والطلاب (استراتيجيات التعلم النشط)، أسئلة التحقق من الفهم، وأنشطة التمايز (Differentiation) للطلاب المتميزين وذوي الدعم، مع اقتراح مصادر من مكتبة المدرسة إن وجدت."
+
+PRESENTATION STRUCTURE INSTRUCTION:
+"بناءً على موضوع الدرس الذي يححده المعلم من منهج McGraw-Hill، قم بتقسيم المحتوى إلى هيكل عرض تقديمي احترافي مكون من الشرائح التالية: شريحة العنوان، شريحة التهيئة والتمهيد، 3-4 شرائح للمحتوى الأساسي (مع نقاط بارزة في كل شريحة)، شريحة نشاط تفاعلي للطلاب، وشريحة ختامية للتقييم. اكتب في كل شريحة عنواناً رئيسياً، نقاطاً مختصرة، وما يجب أن يقوله المعلم (Speaker Notes)."
 
 Instructions for "Little Author" Challenge (STRICT RULES):
 1. UAE THEMES: Start stories inspired by UAE identity (Space, Pearl Diving, Desert Heritage, Falcons, Zayed's legacy).
@@ -80,7 +91,6 @@ const localization: any = {
   }
 };
 
-// دالة تنسيق الاسم لاستخراج الاسم الأول والاسم الأخير فقط
 const formatFirstAndLastName = (fullName: string) => {
   if (!fullName) return '';
   const parts = fullName.trim().split(/\s+/);
@@ -88,9 +98,6 @@ const formatFirstAndLastName = (fullName: string) => {
   return `${parts[0]} ${parts[parts.length - 1]}`;
 };
 
-// ==========================================
-// أيقونات SVG جذابة ومطابقة للمواصفات
-// ==========================================
 const SendIcon = () => (
   <svg className="w-5 h-5 md:w-6 md:h-6" fill="currentColor" viewBox="0 0 24 24">
     <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
@@ -109,7 +116,6 @@ const MicIcon = () => (
   </svg>
 );
 
-// --- مكون التلاشي المخصص للرسائل (Message Reveal Component) ---
 const RevealMessage = ({ children, delay = 0 }: { children: React.ReactNode, delay?: number }) => {
   const [isVisible, setIsVisible] = useState(false);
   const elementRef = useRef<HTMLDivElement>(null);
@@ -162,6 +168,7 @@ const SmartSearchPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [winnerData, setWinnerData] = useState<any>(null);
   const [userName, setUserName] = useState<string>('');
+  const [isTeacherOrAdmin, setIsTeacherOrAdmin] = useState<boolean>(false);
   
   const [saqrState, setSaqrState] = useState<'idle' | 'thinking' | 'speaking' | 'victory'>('idle');
 
@@ -172,6 +179,10 @@ const SmartSearchPage: React.FC = () => {
     const storedUser = localStorage.getItem('current_user');
     const storedType = localStorage.getItem('user_type');
     
+    if (storedType === 'teacher' || storedType === 'admin') {
+      setIsTeacherOrAdmin(true);
+    }
+
     let welcomeMessage = '';
 
     if (storedUser && storedType) {
@@ -186,8 +197,8 @@ const SmartSearchPage: React.FC = () => {
           : `Welcome my creative friend **${name}**! 🎓\nI'm 'Saqr', your AI Librarian. Shall we co-author a story today, or are you looking for a specific book?`;
       } else if (storedType === 'teacher' || storedType === 'admin') {
         welcomeMessage = locale === 'ar'
-          ? `أهلاً بك أستاذي الفاضل **${name}**! 👨‍🏫\nأنا "صقر" في خدمتك. كيف يمكنني مساعدتك اليوم في البحث عن مصادر أو معلومات لمادتك؟`
-          : `Welcome esteemed teacher **${name}**! 👨‍🏫\nI am 'Saqr', at your service. How can I assist you today with resources or information?`;
+          ? `أهلاً بك أستاذي الفاضل **${name}**! 👨‍🏫\nأنا "صقر" في خدمتك. كيف يمكنني مساعدتك اليوم في تحضير دروس منهج McGraw-Hill أو البحث عن مصادر لمادتك؟`
+          : `Welcome esteemed teacher **${name}**! 👨‍🏫\nI am 'Saqr', at your service. How can I assist you today with McGraw-Hill lesson planning or resources?`;
       }
     } else {
       setUserName('');
@@ -356,10 +367,9 @@ const SmartSearchPage: React.FC = () => {
   return (
     <div dir={dir} className="w-full h-[100dvh] flex flex-col bg-white dark:bg-[#0b0f17] font-sans relative overflow-hidden text-slate-900 dark:text-slate-100 transition-colors duration-300">
       
-      {/* 🌟 الخلفية الديناميكية: مطابقة للصورة في الدارك مود (إضاءة زرقاء خافتة بالمنتصف) وبيضاء في اللايت مود */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-950/40 via-[#0b0f17] to-[#0b0f17] pointer-events-none -z-10 hidden dark:block" />
 
-      {/* Header - الهيدر العلوي */}
+      {/* Header */}
       <header className="flex-shrink-0 px-4 py-4 md:px-8 w-full max-w-5xl mx-auto flex justify-between items-center z-20 relative bg-white/80 dark:bg-transparent backdrop-blur-sm border-b border-slate-100 dark:border-transparent">
         <div className="flex items-center gap-3 md:gap-4">
           <div className={`w-10 h-10 md:w-14 md:h-14 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden bg-slate-100 dark:bg-slate-800 border-2 border-sky-400 dark:border-sky-500 shadow-md ${saqrState === 'thinking' ? 'ring-2 ring-amber-400 animate-pulse' : ''}`}>
@@ -387,22 +397,21 @@ const SmartSearchPage: React.FC = () => {
         )}
       </header>
 
-      {/* 🌟 عنوان الترحيب باسم المستخدم (الأول والأخير) */}
+      {/* Greeting */}
       <div className="flex-shrink-0 text-center pt-4 pb-2 px-4 z-10">
         <h2 className="text-2xl md:text-4xl lg:text-5xl font-medium tracking-tight text-slate-800 dark:text-slate-100">
           {t('welcome')} <span className="font-bold text-sky-600 dark:text-sky-400">{userName || 'صديقي المبدع'}</span>
         </h2>
       </div>
 
-      {/* 🛠️ منطقة المحادثات والتلاشي التفاعلي للرسائل */}
-      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-4 no-scrollbar scroll-smooth relative z-10 pb-20">
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-4 no-scrollbar scroll-smooth relative z-10 pb-28">
         <div className="max-w-4xl mx-auto flex flex-col justify-end min-h-fit space-y-4">
           
           {messages.map((msg, index) => (
             <RevealMessage key={index}>
                 <div className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   
-                  {/* رسائل صقر */}
                   {msg.role === 'assistant' && (
                     <div className="flex flex-col gap-2 max-w-[92%] md:max-w-[85%] items-start">
                       <div className="flex gap-3 items-end" translate="no" lang={locale}>
@@ -413,7 +422,6 @@ const SmartSearchPage: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* زر التحميل المباشر أسفل رد الفوز */}
                       {winnerData && saqrState === 'victory' && index === messages.length - 1 && (
                         <div className="mt-2 w-full text-start animate-zoom-in">
                           <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white font-bold rounded-full shadow-md hover:bg-emerald-700 transition-all text-xs md:text-sm">
@@ -425,7 +433,6 @@ const SmartSearchPage: React.FC = () => {
                     </div>
                   )}
 
-                  {/* رسائل المستخدم */}
                   {msg.role === 'user' && (
                     <div className="bg-sky-500 dark:bg-sky-600 text-white px-5 py-3.5 rounded-3xl rounded-br-sm max-w-[85%] md:max-w-[75%] shadow-md">
                       <div className="font-semibold leading-relaxed max-w-none text-start text-base md:text-lg">
@@ -441,10 +448,28 @@ const SmartSearchPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 🌟 منطقة الإدخال - قريب جداً من الإجابات وبدون زوائد */}
+      {/* Input & Teacher Quick Buttons */}
       <div className="absolute bottom-0 inset-x-0 px-4 pb-3 pt-1 w-full z-20 flex-shrink-0 bg-gradient-to-t from-white via-white/90 to-transparent dark:from-[#0b0f17] dark:via-[#0b0f17]/90 dark:to-transparent">
         <div className="max-w-3xl mx-auto flex flex-col gap-2">
           
+          {/* شريط الأزرار السريعة للمعلمين فقط فوق مربع الكتابة */}
+          {isTeacherOrAdmin && (
+            <div className="flex items-center justify-center gap-2 px-2 animate-fade-in">
+              <button
+                onClick={() => setInput('أريد تحضير درس تفصيلي من منهج McGraw-Hill لموضوع: ')}
+                className="px-3.5 py-1.5 bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 rounded-full text-xs font-bold hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-all flex items-center gap-1.5 shadow-sm"
+              >
+                <span>📑</span> تحضير درس McGraw-Hill
+              </button>
+              <button
+                onClick={() => setInput('أريد تصميم هيكل عرض تقديمي احترافي لموضوع: ')}
+                className="px-3.5 py-1.5 bg-purple-50 dark:bg-purple-950/70 border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 rounded-full text-xs font-bold hover:bg-purple-100 dark:hover:bg-purple-900/60 transition-all flex items-center gap-1.5 shadow-sm"
+              >
+                <span>📊</span> تصميم عرض تقديمي
+              </button>
+            </div>
+          )}
+
           <div className="relative flex items-center bg-slate-100 dark:bg-[#1a1f2e] rounded-full border border-slate-200 dark:border-slate-700/60 shadow-lg px-3 py-1.5 focus-within:border-sky-500 dark:focus-within:border-sky-400 transition-all">
             
             <input
@@ -457,12 +482,10 @@ const SmartSearchPage: React.FC = () => {
               disabled={isLoading}
             />
 
-            {/* أيقونة المايكروفون */}
             <button type="button" className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white rounded-full transition-colors shrink-0">
               <MicIcon />
             </button>
 
-            {/* زر الإرسال */}
             <button 
               onClick={handleSendMessage} 
               disabled={isLoading || !input.trim()} 
@@ -472,7 +495,6 @@ const SmartSearchPage: React.FC = () => {
             </button>
           </div>
 
-          {/* مؤشر التحميل */}
           {isLoading && (
             <div className="w-[90%] mx-auto h-1 rounded-full overflow-hidden relative bg-slate-200 dark:bg-slate-800 mt-1">
               <div className="absolute inset-0 bg-gradient-to-r from-sky-400 via-amber-400 to-rose-400 animate-[shimmer_1.5s_infinite] w-[200%]"></div>
@@ -481,50 +503,64 @@ const SmartSearchPage: React.FC = () => {
         </div>
       </div>
 
-      {/* --- تصميم الشهادة العرضية للتصدير (مخفية ومحمية تماماً) --- */}
+      {/* --- تصميم الشهادة العرضية المحدثة والفاخرة للتصدير --- */}
       <div className="fixed left-[-9999px] top-0 pointer-events-none">
-          <div ref={certificateRef} dir={locale === 'ar' ? 'rtl' : 'ltr'} className="w-[1123px] min-h-[794px] h-fit bg-white text-slate-900 relative overflow-hidden flex flex-col font-sans border-[20px] border-double border-red-700 pb-12">
-              <div className="absolute top-0 right-0 w-80 h-80 bg-red-50 rounded-bl-full -z-10"></div>
-              <div className="absolute bottom-0 left-0 w-80 h-80 bg-red-50 rounded-tr-full -z-10"></div>
+          <div ref={certificateRef} dir={locale === 'ar' ? 'rtl' : 'ltr'} className="w-[1123px] min-h-[794px] h-fit bg-gradient-to-br from-white via-slate-50 to-amber-50/20 text-slate-900 relative overflow-hidden flex flex-col font-sans border-[16px] border-solid border-amber-500 shadow-2xl pb-10">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-bl-full -z-10 pointer-events-none"></div>
+              <div className="absolute bottom-0 left-0 w-64 h-64 bg-amber-500/10 rounded-tr-full -z-10 pointer-events-none"></div>
 
-              <div className="flex justify-between items-center p-10 border-b-4 border-slate-100">
-                  <div className="flex items-center gap-6">
-                      <img src="https://www.efipslibrary.online/school-logo.png" className="w-24 object-contain" alt="EFIPS Logo" crossOrigin="anonymous" />
+              <div className="flex justify-between items-center px-12 pt-10 pb-6 border-b-2 border-slate-200">
+                  <div className="flex items-center gap-5">
+                      <img src="https://www.efipslibrary.online/school-logo.png" className="w-20 h-20 object-contain drop-shadow" alt="EFIPS Logo" crossOrigin="anonymous" />
                       <div>
-                          <h3 className="text-2xl font-black text-slate-800">{t('certSchool')}</h3>
-                          <h4 className="text-base font-black text-slate-400 uppercase mt-1" dir="ltr">EFIPS</h4>
+                          <h3 className="text-xl font-black text-slate-800 tracking-tight">{t('certSchool')}</h3>
+                          <h4 className="text-xs font-bold text-amber-700 tracking-widest uppercase mt-0.5" dir="ltr">Emirates Falcon International Private School</h4>
                       </div>
                   </div>
                   <div className="text-left">
-                      <div className="px-8 py-3 bg-red-600 text-white font-black rounded-full text-lg shadow-sm border-b-4 border-red-800">{t('certChallenge')}</div>
+                      <div className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-900 font-black rounded-full text-base shadow-md border border-amber-400">
+                          {t('certChallenge')}
+                      </div>
                   </div>
               </div>
 
-              <div className="flex-1 flex flex-col items-center justify-center text-center px-16 mt-8">
-                  <h1 className="text-5xl font-black text-red-700 mb-6">{t('certTitle')}</h1>
-                  <p className="text-2xl font-bold text-slate-600 mb-8">{t('certSubtitle')}</p>
+              <div className="flex-1 flex flex-col items-center justify-center text-center px-14 py-6">
+                  <h1 className="text-4xl lg:text-5xl font-black text-amber-700 tracking-wide mb-3 uppercase drop-shadow-sm">{t('certTitle')}</h1>
+                  <p className="text-xl font-bold text-slate-600 mb-6">{t('certSubtitle')}</p>
                   
-                  <h2 className="text-5xl font-black text-slate-900 mb-4 pb-2 border-b-8 border-red-600 px-12 inline-block leading-tight">{winnerData?.name}</h2>
-                  <p className="text-3xl font-black text-slate-500 mb-10">{t('certGrade')} <span className="text-red-600">{winnerData?.grade}</span></p>
+                  <div className="mb-4">
+                      <h2 className="text-4xl lg:text-5xl font-black text-slate-900 tracking-tight pb-2 border-b-4 border-amber-500 px-10 inline-block">
+                          {winnerData?.name}
+                      </h2>
+                  </div>
+                  <p className="text-2xl font-bold text-slate-600 mb-8">
+                      {t('certGrade')} <span className="text-amber-700 font-black">{winnerData?.grade}</span>
+                  </p>
                   
-                  <div className="bg-slate-50 p-8 rounded-[2rem] border-4 border-slate-200 w-full text-start relative shadow-inner mb-8">
-                      <span className={`absolute -top-5 ${locale === 'ar' ? 'right-10' : 'left-10'} bg-white px-6 py-2 text-red-700 font-black text-xl border-4 border-slate-200 rounded-full`}>{t('certStory')}</span>
-                      <p className={`text-2xl leading-[1.8] font-bold text-slate-800 mt-6 ${locale === 'ar' ? 'text-justify' : 'text-left'} whitespace-pre-wrap`}>{winnerData?.content}</p>
+                  <div className="bg-white/90 backdrop-blur p-6 rounded-3xl border-2 border-amber-200 w-full text-start relative shadow-sm mb-4">
+                      <span className={`absolute -top-4 ${locale === 'ar' ? 'right-10' : 'left-10'} bg-amber-500 text-slate-900 px-6 py-1.5 font-black text-lg border-2 border-amber-400 rounded-full shadow-sm`}>
+                          {t('certStory')}
+                      </span>
+                      <p className={`text-xl leading-[1.8] font-bold text-slate-800 mt-4 ${locale === 'ar' ? 'text-justify' : 'text-left'} whitespace-pre-wrap`}>
+                          {winnerData?.content}
+                      </p>
                   </div>
               </div>
 
-              <div className="flex justify-between items-end px-16 pt-8 border-t-4 border-slate-100 mt-auto">
-                  <div className="text-center w-64">
-                      <p className="text-lg font-black text-slate-500 mb-2">{t('certDate')}</p>
-                      <p className="text-2xl font-black text-slate-900">{winnerData?.date}</p>
+              <div className="flex justify-between items-end px-14 pt-6 border-t-2 border-slate-200 mt-auto">
+                  <div className="text-center w-60">
+                      <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">{t('certDate')}</p>
+                      <p className="text-lg font-black text-slate-800">{winnerData?.date}</p>
                   </div>
                   <div className="text-center flex flex-col items-center flex-1">
-                      <img src="https://www.efipslibrary.online/school-logo.png" className="w-16 opacity-20 mb-2 grayscale" alt="Stamp" crossOrigin="anonymous" />
-                      <p className="text-xs font-black text-slate-400 uppercase">{t('certOfficial')}</p>
+                      <div className="w-16 h-16 rounded-full border-2 border-amber-500/30 flex items-center justify-center bg-amber-50/50 mb-1">
+                          <span className="text-xl font-black text-amber-600">EFIPS</span>
+                      </div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('certOfficial')}</p>
                   </div>
-                  <div className="text-center w-64">
-                      <p className="text-lg font-black text-slate-500 mb-2">{t('certAI')}</p>
-                      <p className="text-2xl font-black text-red-700">{t('certSaqr')}</p>
+                  <div className="text-center w-60">
+                      <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">{t('certAI')}</p>
+                      <p className="text-xl font-black text-amber-700">{t('certSaqr')}</p>
                   </div>
               </div>
           </div>
