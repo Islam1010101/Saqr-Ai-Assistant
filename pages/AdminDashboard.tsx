@@ -243,7 +243,7 @@ const AdminDashboard: React.FC = () => {
                 }]);
                 
                 // هنا يمكن استدعاء دالة الـ Edge Function المستقبلية لإرسال الإيميل
-                // await supabase.functions.invoke('send-borrow-email', { body: { email: formData.user_email, book: formData.book_name, date: formData.return_date } });
+                 await supabase.functions.invoke('send-borrow-email', { body: { email: formData.user_email, book: formData.book_name, date: formData.return_date } });
             }
 
             setModalMode(null);
