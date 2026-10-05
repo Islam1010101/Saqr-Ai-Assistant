@@ -69,7 +69,7 @@ export default function Login() {
         return;
       }
 
-      const isAdmin = data.teacher_id === 'PASS254177';
+      const isAdmin = data.teacher_id === 'HR785';
 
       localStorage.setItem('user_type', isAdmin ? 'admin' : 'teacher'); 
       localStorage.setItem('current_user', JSON.stringify(data));
@@ -244,19 +244,14 @@ export default function Login() {
             <form onSubmit={handleTeacherLogin} className="space-y-5 animate-fade-in">
               <div className="space-y-2 text-start">
                 <label className="block text-xs md:text-sm font-black text-slate-600 px-1">
-                  {lang === 'ar' ? 'الرقم الوظيفي للمعلم (ADEK ID)' : 'Teacher ADEK ID'}
+                  {lang === 'ar' ? 'الرقم الوظيفي للمعلم (EFIPS ID)' : 'Teacher EFIPS ID'}
                 </label>
-                
-                <div className={`text-[10px] md:text-xs font-bold text-indigo-600 mb-2 px-1 flex items-start gap-1`}>
-                    <svg className="w-3.5 h-3.5 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    <span>{lang === 'ar' ? 'تلميح: الرقم الوظيفي الخاص بك يبدأ دائماً بكلمة PASS متبوعاً بالأرقام.' : 'Hint: Your official ID always starts with PASS followed by numbers.'}</span>
-                </div>
 
                 <input
                   type="text"
                   value={teacherId}
                   onChange={(e) => setTeacherId(e.target.value)}
-                  placeholder="PASSXXXXX"
+                  placeholder="HRXXXXX"
                   className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-200 rounded-[1.5rem] focus:outline-none focus:border-indigo-500 focus:bg-white transition-all text-slate-800 placeholder-slate-400 font-mono text-base md:text-lg tracking-widest text-center uppercase shadow-inner"
                   required
                 />
