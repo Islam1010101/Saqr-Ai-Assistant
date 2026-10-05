@@ -9,7 +9,7 @@ import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
 import { trackActivity } from '../src/utils/tracker';
 import { supabase } from '../src/utils/supabase';
 
-// --- 1. بروتوكول عقل صقر النهائي (تم تحديث وتفصيل تعليمات المعلمين للحصول على تحضير شامل وعروض مرتبة بالشرائح والنقاط) ---
+// --- 1. بروتوكول عقل صقر النهائي (تم دمج أوامر معلمين McGraw-Hill وتوجيهات الخبير التربوي) ---
 const SAQR_ELITE_PROMPT = `
 Identity: You are "Saqr" (صقر), the official Elite AI Librarian and Educational Expert of Emirates Falcon International Private School (EFIPS).
 
@@ -41,6 +41,7 @@ LESSON PLAN GENERATOR INSTRUCTION:
 - وقت المعلم.
 - التأكد من الفهم.
 - النشاط الرئيس 'أوراق العمل'.
+- إجراءات استخدام المكتبة ومصادرها أثناء الحصة (كيف سيتم توظيف المكتبة لخدمة الدرس).
 - تقييم النشاط الرئيس.
 - الواجب."
 
@@ -277,6 +278,35 @@ const SmartSearchPage: React.FC = () => {
     }
   };
 
+  const handleQuickPrompt = async (promptText: string) => {
+    const storedUser = localStorage.getItem('current_user');
+    const storedType = localStorage.getItem('user_type');
+    
+    if (storedType === 'teacher' && storedUser) {
+      setIsLoading(true);
+      const user = JSON.parse(storedUser);
+      try {
+        const { data, error } = await supabase
+          .from('library_schedule') // تأكد أن هذا هو اسم جدول الحجوزات لديك
+          .select('id')
+          .eq('teacher_id', user.teacher_id);
+          
+        if (error || !data || data.length === 0) {
+          setIsLoading(false);
+          alert(locale === 'ar' 
+            ? '⚠️ عذراً أستاذي، ميزة التحضير والعروض الحصرية متاحة فقط للمعلمين الذين قاموا بحجز حصة في جدول المكتبة.' 
+            : '⚠️ Sorry, this exclusive planning feature is only available for teachers who have booked a session in the Library Schedule.');
+          return;
+        }
+      } catch (err) {
+        console.error(err);
+      }
+      setIsLoading(false);
+    }
+    
+    setInput(promptText);
+  };
+
   const handleSendMessage = async () => {
     if (input.trim() === '' || isLoading) return;
     const userQuery = input.trim();
@@ -288,6 +318,27 @@ const SmartSearchPage: React.FC = () => {
     setIsLoading(true);
     
     setSaqrState('thinking');
+
+    // تسجيل التحضير في قاعدة بيانات الأدمن إذا استخدم الميزة
+    if (isTeacherOrAdmin && (userQuery.includes('تحضير درس') || userQuery.includes('هيكل عرض') || userQuery.includes('lesson plan') || userQuery.includes('presentation'))) {
+      try {
+        const storedUser = localStorage.getItem('current_user');
+        if (storedUser) {
+          const u = JSON.parse(storedUser);
+          const planType = (userQuery.includes('تحضير') || userQuery.includes('lesson')) ? 'تحضير درس (Lesson)' : 'عرض تقديمي (Presentation)';
+          const topic = userQuery.split(': ')[1] || userQuery;
+          
+          await supabase.from('lesson_reports').insert([{
+            teacher_id: u.teacher_id || 'Admin',
+            teacher_name: u.name_ar || u.name_en || 'Admin',
+            plan_type: planType,
+            lesson_topic: topic
+          }]);
+        }
+      } catch (e) {
+        console.error('Error logging report', e);
+      }
+    }
 
     const normalize = (text: string) => 
       text?.toString()
@@ -480,13 +531,13 @@ const SmartSearchPage: React.FC = () => {
           {isTeacherOrAdmin && (
             <div className="flex flex-wrap items-center justify-center gap-1.5 px-1 animate-fade-in">
               <button
-                onClick={() => setInput(t('lessonPrompt'))}
+                onClick={() => handleQuickPrompt(t('lessonPrompt'))}
                 className="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 rounded-full text-[11px] md:text-xs font-bold hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-all flex items-center gap-1.5 shadow-sm"
               >
                 <span>📑</span> {t('mcgrawLesson')}
               </button>
               <button
-                onClick={() => setInput(t('presPrompt'))}
+                onClick={() => handleQuickPrompt(t('presPrompt'))}
                 className="px-3 py-1.5 bg-purple-50 dark:bg-purple-950/70 border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 rounded-full text-[11px] md:text-xs font-bold hover:bg-purple-100 dark:hover:bg-purple-900/60 transition-all flex items-center gap-1.5 shadow-sm"
               >
                 <span>📊</span> {t('mcgrawPres')}
