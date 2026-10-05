@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../App';
+import { supabase } from '../src/utils/supabase';
 
 const translations = {
     ar: {
@@ -37,7 +38,10 @@ const translations = {
         dayUnit: "يوم",
         daysUnit: "أيام",
         newBadge: "جديد",
-        adminSettingsTitle: "إدارة النظام"
+        adminSettingsTitle: "إدارة النظام",
+        borrowTitle: "مكتبتي المستعارة",
+        borrowReturn: "تاريخ الإرجاع:",
+        addToCalendar: "تذكير التقويم"
     },
     en: {
         welcome: "Knowledge Portal at Falcon Int'l School",
@@ -73,7 +77,10 @@ const translations = {
         dayUnit: "Day",
         daysUnit: "Days",
         newBadge: "NEW",
-        adminSettingsTitle: "System Admin"
+        adminSettingsTitle: "System Admin",
+        borrowTitle: "My Borrowed Books",
+        borrowReturn: "Return Date:",
+        addToCalendar: "Add to Calendar"
     }
 };
 
@@ -112,7 +119,6 @@ const ScheduleIcon = () => <svg className="w-6 h-6 stroke-[2.2] opacity-85" fill
 const GameIcon = () => <svg className="w-6 h-6 stroke-[2.2] opacity-85" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
 const AdminIcon = () => <svg className="w-6 h-6 stroke-[2.2] opacity-85" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>;
 
-// مكون Reveal المخصص (لجعل القسم يتلاشى ويظهر بذكاء بناءً على الرؤية)
 const RevealSection: React.FC<{ children: React.ReactNode, delay?: number }> = ({ children, delay = 0 }) => {
     const [isVisible, setIsVisible] = useState(true);
     const sectionRef = useRef<HTMLDivElement>(null);
@@ -127,19 +133,14 @@ const RevealSection: React.FC<{ children: React.ReactNode, delay?: number }> = (
                 }
             },
             {
-                threshold: 0.1, // تفعيل التلاشي بمجرد خروج 90% من العنصر
-                rootMargin: "-50px 0px -50px 0px" // إعطاء هامش ذكي للأجهزة المحمولة
+                threshold: 0.1,
+                rootMargin: "-50px 0px -50px 0px"
             }
         );
 
-        if (sectionRef.current) {
-            observer.observe(sectionRef.current);
-        }
-
+        if (sectionRef.current) observer.observe(sectionRef.current);
         return () => {
-            if (sectionRef.current) {
-                observer.unobserve(sectionRef.current);
-            }
+            if (sectionRef.current) observer.unobserve(sectionRef.current);
         };
     }, []);
 
@@ -178,6 +179,9 @@ const HomePage: React.FC = () => {
     const [showBubble, setShowBubble] = useState(false);
     const [daysLeft, setDaysLeft] = useState<number | null>(null);
     const [sparkles, setSparkles] = useState<SparkleItem[]>([]);
+    
+    // حالة الكتب المستعارة
+    const [borrowedBooks, setBorrowedBooks] = useState<any[]>([]);
 
     useEffect(() => {
         if (!userData || !userType) {
@@ -185,17 +189,30 @@ const HomePage: React.FC = () => {
         }
     }, [userData, userType]);
 
-    // العد التنازلي لإجازة منتصف الفصل في 12 أكتوبر 2026
+    // جلب الكتب المستعارة النشطة
+    useEffect(() => {
+        const fetchBorrowings = async () => {
+            if (userData && userType && userType !== 'admin') {
+                const userId = userType === 'student' ? userData.student_id : userData.teacher_id;
+                const { data } = await supabase
+                    .from('borrowings')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .eq('status', 'active');
+                
+                if (data) setBorrowedBooks(data);
+            }
+        };
+        fetchBorrowings();
+    }, [userData, userType]);
+
     useEffect(() => {
         const updateCountdown = () => {
             const now = new Date().getTime();
             const targetDate = new Date('2026-10-12T00:00:00').getTime();
             const distance = targetDate - now;
-            if (distance > 0) {
-                setDaysLeft(Math.ceil(distance / (1000 * 60 * 60 * 24)));
-            } else {
-                setDaysLeft(0);
-            }
+            if (distance > 0) setDaysLeft(Math.ceil(distance / (1000 * 60 * 60 * 24)));
+            else setDaysLeft(0);
         };
         updateCountdown();
     }, []);
@@ -210,10 +227,7 @@ const HomePage: React.FC = () => {
 
     const todayDate = useMemo(() => {
         return new Date().toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
         });
     }, [locale]);
 
@@ -230,6 +244,21 @@ const HomePage: React.FC = () => {
     const getDisplayName = () => {
         if (!userData) return isAr ? 'زائر' : 'Guest';
         return isAr ? (userData.name_ar || userData.name_en || 'زائر') : (userData.name_en || userData.name_ar || 'Guest');
+    };
+
+    // تحويل التاريخ لحدث في جوجل كالندر
+    const createGoogleCalendarLink = (bookName: string, returnDate: string) => {
+        const date = new Date(returnDate);
+        const start = date.toISOString().replace(/-|:|\.\d\d\d/g, '').slice(0, 8) + 'T060000Z'; // 10 AM UAE
+        const end = date.toISOString().replace(/-|:|\.\d\d\d/g, '').slice(0, 8) + 'T070000Z';   // 11 AM UAE
+        
+        const url = new URL('https://calendar.google.com/calendar/render');
+        url.searchParams.append('action', 'TEMPLATE');
+        url.searchParams.append('text', isAr ? `تذكير إرجاع كتاب: ${bookName}` : `Book Return Reminder: ${bookName}`);
+        url.searchParams.append('dates', `${start}/${end}`);
+        url.searchParams.append('details', isAr ? `مرحباً، حان موعد إرجاع كتاب "${bookName}" إلى مكتبة مدرسة صقر الإمارات الدولية. شكراً لالتزامك!` : `Hello, it's time to return the book "${bookName}" to the EFIPS library. Thank you!`);
+        
+        return url.toString();
     };
 
     const handleNameClick = (e: React.MouseEvent) => {
@@ -317,6 +346,36 @@ const HomePage: React.FC = () => {
                         </p>
                     </div>
                 </RevealSection>
+
+                {/* 1.5. صندوق الاستعارات النشطة (يظهر فقط إذا كان هناك استعارات للطالب/المعلم) */}
+                {borrowedBooks.length > 0 && (
+                    <RevealSection delay={150}>
+                        <div className="w-full max-w-4xl mx-auto bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-4 border-amber-300 dark:border-amber-600 p-6 md:p-8 rounded-[2.5rem] shadow-xl relative overflow-hidden">
+                            <h3 className="text-lg md:text-2xl font-black text-amber-600 dark:text-amber-500 mb-6 flex items-center gap-2">
+                                📚 {t('borrowTitle')}
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {borrowedBooks.map((book) => (
+                                    <div key={book.id} className="bg-amber-50 dark:bg-slate-800 p-5 border-2 border-amber-200 dark:border-slate-700 rounded-2xl flex flex-col gap-3 transition-transform hover:-translate-y-1">
+                                        <div className="font-black text-slate-800 dark:text-white text-base md:text-lg">{book.book_name}</div>
+                                        <div className="flex flex-wrap justify-between text-xs md:text-sm font-bold text-slate-500 dark:text-slate-400">
+                                            <span className="text-rose-500 dark:text-rose-400">{t('borrowReturn')} {book.return_date}</span>
+                                        </div>
+                                        <a 
+                                            href={createGoogleCalendarLink(book.book_name, book.return_date)} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="mt-2 w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs md:text-sm transition-all shadow-md flex items-center justify-center gap-2"
+                                        >
+                                            <ScheduleIcon />
+                                            {t('addToCalendar')}
+                                        </a>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </RevealSection>
+                )}
 
                 {/* 2. شريط جديدنا */}
                 <RevealSection delay={200}>
