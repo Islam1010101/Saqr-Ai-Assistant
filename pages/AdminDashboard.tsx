@@ -20,7 +20,7 @@ const translations = {
         studentManagement: "إدارة الطلاب",
         teacherManagement: "إدارة المعلمين",
         borrowManagement: "الإعارات النشطة",
-        pendingRequests: "طلبات معلقة", // <-- جديد
+        pendingRequests: "طلبات معلقة",
         aiReports: "تقارير التحضير الذكي",
         addStudentBtn: "+ إضافة طالب جديد",
         addTeacherBtn: "+ إضافة معلم جديد",
@@ -28,8 +28,8 @@ const translations = {
         editIdBtn: "تعديل",
         saveBtn: "حفظ التغييرات",
         cancelBtn: "إلغاء",
-        approveBtn: "تأكيد الإعارة", // <-- جديد
-        rejectBtn: "رفض", // <-- جديد
+        approveBtn: "تأكيد الإعارة",
+        rejectBtn: "رفض",
         colId: "الرقم التعريفي",
         colName: "الاسم",
         colGrade: "الصف",
@@ -37,7 +37,7 @@ const translations = {
         colActions: "الإجراءات",
         colBook: "الكتاب المستعار",
         colDate: "تاريخ الإرجاع",
-        colReqDate: "تاريخ الطلب", // <-- جديد
+        colReqDate: "تاريخ الطلب",
         colTopic: "موضوع الدرس",
         colType: "نوع التحضير",
         colReportDate: "تاريخ التحضير",
@@ -46,7 +46,7 @@ const translations = {
         modalEditStudent: "تعديل بيانات الطالب",
         modalEditTeacher: "تعديل بيانات المعلم",
         modalAddBorrow: "تسجيل إعارة جديدة",
-        modalApproveBorrow: "تأكيد طلب الإعارة", // <-- جديد
+        modalApproveBorrow: "تأكيد طلب الإعارة",
         accessDenied: "عذراً، هذه الصفحة مخصصة لمدير النظام فقط.",
         loading: "جاري تحليل البيانات الحية...",
         searchPlaceholder: "ابحث بالاسم أو الرقم أو الموضوع...",
@@ -68,7 +68,7 @@ const translations = {
         studentManagement: "Student Management",
         teacherManagement: "Teacher Management",
         borrowManagement: "Active Borrowings",
-        pendingRequests: "Pending Requests", // <-- جديد
+        pendingRequests: "Pending Requests",
         aiReports: "Smart Planning Reports",
         addStudentBtn: "+ Add New Student",
         addTeacherBtn: "+ Add New Teacher",
@@ -76,8 +76,8 @@ const translations = {
         editIdBtn: "Edit",
         saveBtn: "Save Changes",
         cancelBtn: "Cancel",
-        approveBtn: "Approve", // <-- جديد
-        rejectBtn: "Reject", // <-- جديد
+        approveBtn: "Approve",
+        rejectBtn: "Reject",
         colId: "ID Number",
         colName: "Name",
         colGrade: "Grade",
@@ -85,7 +85,7 @@ const translations = {
         colActions: "Actions",
         colBook: "Borrowed Book",
         colDate: "Return Date",
-        colReqDate: "Request Date", // <-- جديد
+        colReqDate: "Request Date",
         colTopic: "Lesson Topic",
         colType: "Plan Type",
         colReportDate: "Prep Date",
@@ -94,7 +94,7 @@ const translations = {
         modalEditStudent: "Edit Student Info",
         modalEditTeacher: "Edit Teacher Info",
         modalAddBorrow: "Register New Borrowing",
-        modalApproveBorrow: "Approve Borrow Request", // <-- جديد
+        modalApproveBorrow: "Approve Borrow Request",
         accessDenied: "Access Denied. Admin privileges required.",
         loading: "Loading live dashboard data...",
         searchPlaceholder: "Search by name, ID or topic...",
@@ -123,7 +123,7 @@ const AdminDashboard: React.FC = () => {
     const [studentsList, setStudentsList] = useState<any[]>([]);
     const [teachersList, setTeachersList] = useState<any[]>([]);
     const [borrowingsList, setBorrowingsList] = useState<any[]>([]);
-    const [pendingRequestsList, setPendingRequestsList] = useState<any[]>([]); // قائمة الطلبات المعلقة
+    const [pendingRequestsList, setPendingRequestsList] = useState<any[]>([]);
     const [lessonReportsList, setLessonReportsList] = useState<any[]>([]);
     
     // التبويبات المتاحة
