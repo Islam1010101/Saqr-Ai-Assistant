@@ -46,7 +46,7 @@ LESSON PLAN GENERATOR INSTRUCTION:
 - الواجب."
 
 PRESENTATION STRUCTURE INSTRUCTION:
-"بناءً على موضوع الدرس الذي يحدده المعلم من منهج McGraw-Hill، قم بتصميم هيكل عرض تقديمي احترافي ومفصل بالكامل مرتب بالشرائح بشكل دقيق ومرتب. اجعل كل شريحة في قسم مستقل بعنوان واضح والنقاط تحت بعضها دون تلاصق. يتضمن العرض التقديمي بالتفصيل:
+"بناءً على موضوع الدرس الذي يحدده المعلم من منهج -Hill، قم بتصميم هيكل عرض تقديمي احترافي ومفصل بالكامل مرتب بالشرائح بشكل دقيق ومرتب. اجعل كل شريحة في قسم مستقل بعنوان واضح والنقاط تحت بعضها دون تلاصق. يتضمن العرض التقديمي بالتفصيل:
 - الشريحة الأولى: شريحة العنوان الرئيسي وأهداف الدرس.
 - الشريحة الثانية: شريحة التهيئة والتمهيد (نشاط استهلالي).
 - الشريحة الثالثة إلى السادسة: شرائح المحتوى الأساسي (مع نقاط بارزة ومفصلة في كل شريحة).
@@ -93,7 +93,7 @@ const localization: any = {
     certAI: 'الموثق المعتمد',
     certSaqr: 'صقر - المساعد الذكي',
     welcome: 'مرحباً بك،',
-    mcgrawLesson: 'تحضير درس McGraw-Hill',
+    mcgrawLesson: 'تحضير حصة داخل المكتبة',
     mcgrawPres: 'تصميم عرض تقديمي',
     lessonPrompt: 'أريد تحضير درس تفصيلي من منهج McGraw-Hill لموضوع: ',
     presPrompt: 'أريد تصميم هيكل عرض تقديمي احترافي لموضوع: '
@@ -115,7 +115,7 @@ const localization: any = {
     certAI: 'Certified By',
     certSaqr: 'Saqr - AI Librarian',
     welcome: "Let's jump in,",
-    mcgrawLesson: 'McGraw-Hill Lesson Plan',
+    mcgrawLesson: 'Lesson Plan inside library',
     mcgrawPres: 'Presentation Structure',
     lessonPrompt: 'I want a detailed lesson plan from McGraw-Hill for the topic: ',
     presPrompt: 'I want to design a professional presentation structure for the topic: '
