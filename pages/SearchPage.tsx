@@ -212,10 +212,10 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
             await supabase.from('borrowings').insert([{ 
                 user_id: userId, 
                 user_type: userType, 
-                user_email: '', // الأدمن من يضيفه
+                user_email: '', // الأدمن من يضيفه لاحقاً
                 book_name: book.title, 
                 borrow_date: new Date().toISOString().split('T')[0],
-                return_date: '', // الأدمن من يحدده
+                return_date: '', // الأدمن من يحدده لاحقاً
                 status: 'pending' // حالة الطلب قيد الانتظار
             }]);
             
