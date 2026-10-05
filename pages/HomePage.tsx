@@ -302,7 +302,7 @@ const HomePage: React.FC = () => {
             
             {/* النجوم المتطايرة */}
             {sparkles.map(s => (
-                <div key={s.id} className="fixed z-[99999] pointer-events-none animate-fade-out" style={{ left: s.x, top: s.y }}>
+                <div key={s.id} className="fixed z-[9999] pointer-events-none animate-fade-out" style={{ left: s.x, top: s.y }}>
                     <StarIcon className="w-6 h-6 text-amber-400 drop-shadow-md animate-spin" />
                 </div>
             ))}
@@ -322,7 +322,11 @@ const HomePage: React.FC = () => {
                 <RevealSection delay={100}>
                     <div className="text-center space-y-3 max-w-4xl mx-auto">
                         <div className="inline-block px-5 py-2 rounded-full bg-white/90 dark:bg-slate-800/90 backdrop-blur-md text-slate-700 dark:text-slate-200 font-bold text-xs md:text-sm shadow-md border-2 border-slate-200 dark:border-slate-700">
-                            {userType === 'admin' ? t('adminBadge') : userType === 'teacher' ? t('teacherBadge') : t('studentBadge')}
+                            {userData?.teacher_id === 'HR001' 
+                                ? (isAr ? 'حساب مدير المدرسة' : 'School Principal') 
+                                : userData?.teacher_id === 'HR061' 
+                                ? (isAr ? 'نائب مدير المدرسة' : 'VIS School Principal') 
+                                : (userType === 'admin' ? t('adminBadge') : userType === 'teacher' ? t('teacherBadge') : t('studentBadge'))}
                         </div>
                         
                         <div className="flex flex-col items-center gap-2 pt-1">
