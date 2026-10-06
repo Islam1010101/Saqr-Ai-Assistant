@@ -37,9 +37,7 @@ const translations = {
     requestBorrow: "طلب استعارة 📚",
     borrowPending: "جاري الإرسال...",
     borrowSuccessMsg: "✅ تم إرسال الطلب لإدارة المكتبة! سيصلك إشعار عند التأكيد.",
-    alreadyRequested: "عذراً، لديك طلب استعارة أو إعارة نشطة لهذا الكتاب بالفعل!",
-    teacherEmailLabel: "البريد الإلكتروني للمعلم (لاستلام الإشعار)",
-    teacherEmailPlaceholder: "أدخل بريدك الإلكتروني..."
+    alreadyRequested: "عذراً، لديك طلب استعارة أو إعارة نشطة لهذا الكتاب بالفعل!"
   },
   en: {
     pageTitle: "Falcon School Library Index",
@@ -62,14 +60,12 @@ const translations = {
     requestBorrow: "Request Borrow 📚",
     borrowPending: "Sending...",
     borrowSuccessMsg: "✅ Request sent to Library Admin! You'll be notified upon confirmation.",
-    alreadyRequested: "You already have an active or pending request for this book!",
-    teacherEmailLabel: "Teacher's Email (for notification)",
-    teacherEmailPlaceholder: "Enter your email..."
+    alreadyRequested: "You already have an active or pending request for this book!"
   }
 };
 
 // ==========================================
-// أيقونات SVG
+// أيقونات SVG جذابة
 // ==========================================
 const UserIcon = () => (
   <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
@@ -102,6 +98,7 @@ const RobotSvg = () => (
   </svg>
 );
 
+// --- مكون التلاشي المخصص (Reveal Component) مخصص لكل قسم على حدة ---
 const RevealOnScroll = ({ children, delay = 0 }: { children: React.ReactNode, delay?: number }) => {
     const [isVisible, setIsVisible] = useState(true);
     const elementRef = useRef<HTMLDivElement>(null);
@@ -145,13 +142,13 @@ const RevealOnScroll = ({ children, delay = 0 }: { children: React.ReactNode, de
     );
 };
 
+
 // --- 3. Component: BookModal ---
 const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
     const { locale, dir } = useLanguage();
     const [aiContent, setAiContent] = useState({ summary: '', genre: '' });
     const [loading, setLoading] = useState(false);
     const [requestStatus, setRequestStatus] = useState<'idle' | 'loading' | 'success'>('idle');
-    const [teacherEmail, setTeacherEmail] = useState('');
 
     const currentUser = JSON.parse(localStorage.getItem('current_user') || 'null');
     const userType = localStorage.getItem('user_type');
@@ -159,7 +156,6 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
     useEffect(() => {
         if (!book) {
             setRequestStatus('idle');
-            setTeacherEmail('');
             return;
         }
         
@@ -194,30 +190,15 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
     const handleBorrowRequest = async () => {
         if (!book || !currentUser || !userType) return;
         
-        const userId = userType === 'student' ? currentUser.student_id : (currentUser.teacher_id || currentUser.id);
-
-        if (!userId) {
-            alert(locale === 'ar' ? 'تعذر العثور على الرقم التعريفي للمستخدم!' : 'User ID not found!');
-            return;
-        }
-
-        // إذا كان معلماً، التحقق من إدخال البريد
-        if (userType === 'teacher' && !teacherEmail.trim()) {
-            alert(locale === 'ar' ? 'يرجى إدخال البريد الإلكتروني لإتمام طلب الاستعارة.' : 'Please enter your email to complete the borrow request.');
-            return;
-        }
-
         setRequestStatus('loading');
+        const userId = userType === 'student' ? currentUser.student_id : currentUser.teacher_id;
         
-        // إيميل الطالب إلزامي بلاحقة المدرسة، وإيميل المعلم هو ما يكتبه
-        const finalEmail = userType === 'student' ? `${userId.trim()}@falcon-school.com` : teacherEmail.trim();
-
         try {
             // التحقق إذا كان لديه طلب معلق أو نشط لنفس الكتاب
             const { data: existing } = await supabase
                 .from('borrowings')
                 .select('id')
-                .eq('user_id', userId.trim())
+                .eq('user_id', userId)
                 .eq('book_name', book.title)
                 .in('status', ['pending', 'active']);
 
@@ -228,28 +209,20 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
             }
 
             // إرسال الطلب
-            const { error: insertError } = await supabase.from('borrowings').insert([{ 
-                user_id: userId.trim(), 
+            await supabase.from('borrowings').insert([{ 
+                user_id: userId, 
                 user_type: userType, 
-                user_email: finalEmail, 
+                user_email: '', // الأدمن من يضيفه لاحقاً
                 book_name: book.title, 
                 borrow_date: new Date().toISOString().split('T')[0],
-                return_date: '', 
-                status: 'pending' 
+                return_date: '', // الأدمن من يحدده لاحقاً
+                status: 'pending' // حالة الطلب قيد الانتظار
             }]);
             
-            if (insertError) {
-                console.error("Supabase insert error:", insertError);
-                alert(locale === 'ar' ? 'حدث خطأ أثناء إرسال الطلب، يرجى المحاولة ثانية.' : 'Failed to send request, please try again.');
-                setRequestStatus('idle');
-                return;
-            }
-
             setRequestStatus('success');
             setTimeout(() => {
                 onClose();
                 setRequestStatus('idle');
-                setTeacherEmail('');
             }, 3000);
         } catch (error) {
             console.error("Error submitting borrow request:", error);
@@ -309,23 +282,6 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                         </div>
                     ) : null}
 
-                    {/* حقل إدخال إيميل المعلم عند طلبه الاستعارة */}
-                    {currentUser && userType === 'teacher' && requestStatus !== 'success' && (
-                        <div className="mb-6 text-start">
-                            <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-2">
-                                {t('teacherEmailLabel')}
-                            </label>
-                            <input 
-                                type="email"
-                                value={teacherEmail}
-                                onChange={(e) => setTeacherEmail(e.target.value)}
-                                placeholder={t('teacherEmailPlaceholder')}
-                                className="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-900 border-2 border-amber-300 dark:border-amber-600 rounded-2xl font-bold text-slate-900 dark:text-white outline-none focus:border-amber-500 shadow-inner text-sm"
-                                required
-                            />
-                        </div>
-                    )}
-
                     <div className="flex flex-col md:flex-row gap-4">
                         {currentUser && requestStatus !== 'success' && (
                             <button 
@@ -362,8 +318,10 @@ const BookCard = React.memo(({ book, onClick, t }: { book: Book; onClick: () => 
   return (
     <div onClick={onClick} className="relative group cursor-pointer w-full max-w-sm mx-auto h-[280px] md:h-[300px] flex items-stretch justify-center p-2">
       
+      {/* تصميم البطاقة الثنائية الأبعاد */}
       <div className={`w-full h-full relative rounded-[2rem] border-4 shadow-lg bg-gradient-to-br ${colorClass} transition-all duration-500 transform group-hover:-translate-y-3 group-hover:shadow-2xl overflow-hidden flex flex-col`}>
         
+        {/* تأثير انعكاس الزجاج الخفيف */}
         <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-black/10 pointer-events-none z-10"></div>
         <div className="absolute top-0 left-0 w-full h-1/2 bg-white/10 skew-y-12 pointer-events-none"></div>
 
@@ -389,6 +347,7 @@ const BookCard = React.memo(({ book, onClick, t }: { book: Book; onClick: () => 
 
       </div>
 
+      {/* شريط الإحصائيات أسفل الكتاب (الرف والصف) */}
       <div className="absolute bottom-[-10px] w-[90%] opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-y-4 group-hover:translate-y-0 bg-white dark:bg-slate-800 p-3 rounded-2xl shadow-xl border-2 border-slate-100 dark:border-slate-700 flex justify-between items-center z-50">
           <div className="flex gap-4">
               <div className="text-center">
@@ -411,6 +370,7 @@ const BookCard = React.memo(({ book, onClick, t }: { book: Book; onClick: () => 
 
 // --- 5. Main Component: SearchPage ---
 const SearchPage: React.FC = () => {
+    // اللغة الافتراضية
     const { locale, dir } = useLanguage();
     const [currentLocale, setCurrentLocale] = useState(locale || 'en');
     const navigate = useNavigate();
