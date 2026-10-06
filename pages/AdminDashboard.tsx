@@ -36,6 +36,7 @@ const translations = {
         colPoints: "النقاط",
         colActions: "الإجراءات",
         colBook: "الكتاب المستعار",
+        colEmail: "البريد الإلكتروني",
         colDate: "تاريخ الإرجاع",
         colReqDate: "تاريخ الطلب",
         colTopic: "موضوع الدرس",
@@ -49,7 +50,7 @@ const translations = {
         modalApproveBorrow: "تأكيد طلب الإعارة",
         accessDenied: "عذراً، هذه الصفحة مخصصة لمدير النظام فقط.",
         loading: "جاري تحليل البيانات الحية...",
-        searchPlaceholder: "ابحث بالاسم أو الرقم أو الموضوع...",
+        searchPlaceholder: "ابحث بالاسم أو الرقم أو الإيميل أو الموضوع...",
         noResults: "لا توجد نتائج مطابقة."
     },
     en: {
@@ -84,6 +85,7 @@ const translations = {
         colPoints: "Points",
         colActions: "Actions",
         colBook: "Borrowed Book",
+        colEmail: "Email",
         colDate: "Return Date",
         colReqDate: "Request Date",
         colTopic: "Lesson Topic",
@@ -97,7 +99,7 @@ const translations = {
         modalApproveBorrow: "Approve Borrow Request",
         accessDenied: "Access Denied. Admin privileges required.",
         loading: "Loading live dashboard data...",
-        searchPlaceholder: "Search by name, ID or topic...",
+        searchPlaceholder: "Search by name, ID, email or topic...",
         noResults: "No matching results found."
     }
 };
@@ -182,10 +184,10 @@ const AdminDashboard: React.FC = () => {
             }
 
             // جلب الإعارات النشطة
-            const { data: activeBorrowings } = await supabase.from('borrowings').select('*').eq('status', 'active');
+            const { data: activeBorrowings } = await supabase.from('borrowings').select('*').eq('status', 'active').order('created_at', { ascending: false });
             
             // جلب الطلبات المعلقة
-            const { data: pendingRequests } = await supabase.from('borrowings').select('*').eq('status', 'pending');
+            const { data: pendingRequests } = await supabase.from('borrowings').select('*').eq('status', 'pending').order('created_at', { ascending: false });
 
             // جلب تقارير تحضير الدروس
             const { data: reports } = await supabase.from('lesson_reports').select('*').order('created_at', { ascending: false });
@@ -220,10 +222,10 @@ const AdminDashboard: React.FC = () => {
             return teachersList.filter(tch => (tch.name_ar && tch.name_ar.toLowerCase().includes(term)) || (tch.teacher_id && tch.teacher_id.toLowerCase().includes(term)));
         } else if (activeTab === 'borrowings') {
             if (!term) return borrowingsList;
-            return borrowingsList.filter(b => (b.user_id && b.user_id.toLowerCase().includes(term)) || (b.book_name && b.book_name.toLowerCase().includes(term)));
+            return borrowingsList.filter(b => (b.user_id && b.user_id.toLowerCase().includes(term)) || (b.book_name && b.book_name.toLowerCase().includes(term)) || (b.user_email && b.user_email.toLowerCase().includes(term)));
         } else if (activeTab === 'pending') {
             if (!term) return pendingRequestsList;
-            return pendingRequestsList.filter(p => (p.user_id && p.user_id.toLowerCase().includes(term)) || (p.book_name && p.book_name.toLowerCase().includes(term)));
+            return pendingRequestsList.filter(p => (p.user_id && p.user_id.toLowerCase().includes(term)) || (p.book_name && p.book_name.toLowerCase().includes(term)) || (p.user_email && p.user_email.toLowerCase().includes(term)));
         } else {
             if (!term) return lessonReportsList;
             return lessonReportsList.filter(r => (r.teacher_name && r.teacher_name.toLowerCase().includes(term)) || (r.lesson_topic && r.lesson_topic.toLowerCase().includes(term)) || (r.teacher_id && r.teacher_id.toLowerCase().includes(term)));
@@ -273,7 +275,7 @@ const AdminDashboard: React.FC = () => {
                 }]);
                 
                 if (formData.user_email) {
-                    await supabase.functions.invoke('send-borrow-email', { body: { email: formData.user_email, book: formData.book_name, date: formData.return_date } });
+                    await supabase.functions.invoke('send-borrow-email', { body: { email: formData.user_email.trim(), book: formData.book_name, date: formData.return_date } });
                 }
             } else if (modalMode === 'approveBorrow') {
                 // تأكيد الطلب المعلق
@@ -379,6 +381,7 @@ const AdminDashboard: React.FC = () => {
                                     {activeTab === 'students' && <th className="p-3.5 font-black text-center">{t('colPoints')}</th>}
                                     
                                     {(activeTab === 'borrowings' || activeTab === 'pending') && <th className="p-3.5 font-black">{t('colBook')}</th>}
+                                    {(activeTab === 'borrowings' || activeTab === 'pending') && <th className="p-3.5 font-black">{t('colEmail')}</th>}
                                     {activeTab === 'borrowings' && <th className="p-3.5 font-black">{t('colDate')}</th>}
                                     {activeTab === 'pending' && <th className="p-3.5 font-black">{t('colReqDate')}</th>}
 
@@ -404,6 +407,13 @@ const AdminDashboard: React.FC = () => {
                                             
                                             {(activeTab === 'borrowings' || activeTab === 'pending') && <td className="p-3.5 font-bold text-xs md:text-sm text-rose-500">{item.book_name}</td>}
                                             
+                                            {/* خانة الإيميل للطلبات والإعارات */}
+                                            {(activeTab === 'borrowings' || activeTab === 'pending') && (
+                                                <td className="p-3.5 font-mono text-xs md:text-sm text-slate-600 dark:text-slate-300">
+                                                    {item.user_email || <span className="text-slate-400 italic">--</span>}
+                                                </td>
+                                            )}
+
                                             {activeTab === 'borrowings' && <td className="p-3.5 text-xs md:text-sm text-slate-500">{item.return_date}</td>}
                                             {activeTab === 'pending' && <td className="p-3.5 text-xs md:text-sm text-slate-500">{item.borrow_date}</td>}
                                             
@@ -419,8 +429,8 @@ const AdminDashboard: React.FC = () => {
                                                       <>
                                                           <button onClick={() => { 
                                                               setSelectedItem(item); 
-                                                              // تعبئة الإيميل تلقائياً للطالب، وتركه فارغاً أو كما كتبه للمعلم
-                                                              const autoEmail = item.user_type === 'student' ? `${item.user_id.trim()}@falcon-school.com` : (item.user_email || '');
+                                                              // تعبئة الإيميل من الطلب القادم مباشرة (سواء طالب أو معلم)
+                                                              const autoEmail = item.user_email || (item.user_type === 'student' ? `${item.user_id.trim()}@falcon-school.com` : '');
                                                               setFormData({ ...formData, user_id: item.user_id, user_type: item.user_type, user_email: autoEmail, book_name: item.book_name, return_date: '' }); 
                                                               setModalMode('approveBorrow'); 
                                                           }} className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-xs shadow-sm transition-all">{t('approveBtn')}</button>
@@ -434,7 +444,7 @@ const AdminDashboard: React.FC = () => {
                                         </tr>
                                     ))
                                 ) : (
-                                    <tr><td colSpan={6} className="p-8 text-center text-slate-400 font-bold text-sm">{t('noResults')}</td></tr>
+                                    <tr><td colSpan={7} className="p-8 text-center text-slate-400 font-bold text-sm">{t('noResults')}</td></tr>
                                 )}
                             </tbody>
                         </table>
@@ -521,7 +531,6 @@ const AdminDashboard: React.FC = () => {
                                             type="email" 
                                             value={formData.user_email} 
                                             onChange={(e) => {
-                                                // السماح بتعديل الإيميل للمعلم فقط
                                                 if (formData.user_type === 'teacher') {
                                                     setFormData({ ...formData, user_email: e.target.value });
                                                 }
