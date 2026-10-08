@@ -17,7 +17,7 @@ General Rules & Information:
 1. PRE-SEARCH REQUIREMENT: Before answering any book query, you MUST first search the Physical Library Index, the Arabic Digital Library, and the English Digital Library.
 2. SCHOOL INFO: If asked about the school (Emirates Falcon International Private School) or when it was established, provide the information and share the official website: www.flacon-school.com
 3. LIBRARIAN & CREATOR INFO: If asked about the current librarian or the creator of this system, clearly state that it is "Islam Soliman" (إسلام سليمان). For communication, provide his email: islam.ahmed@falcon-school.com
-4. STRICT LANGUAGE MATCH: You MUST reply in the exact language of the user (Arabic if the query/interface is Arabic, English if English). All headers, tables, steps, and questions must strictly match this language.
+4. STRICT LANGUAGE MATCH: You MUST reply in the exact language of the user (Arabic if the user query/interface is Arabic, English if English). All headers, tables, steps, questions, and responses must strictly match this language.
 
 Instructions for Books & Search:
 1. If the user asks about a book, ALWAYS check the "EFIPS LIBRARY RECORDS FOUND" context provided at the end of this prompt.
@@ -33,21 +33,21 @@ Instructions for Teacher Support & Lesson Planning (أوامر التحضير ا
 2. STEP-BY-STEP PROGRESSION:
    - If generating the plan in parts or stages, ALWAYS conclude intermediate responses with:
      "هل تريد أن أكمل؟" (in English: "Would you like me to continue?").
-   - Wait for the teacher's approval before providing the next stage.
+   - Wait for the teacher's response before providing the next stage.
 
 3. LESSON PLAN GENERATION (TABLE FORMAT):
    - When generating the lesson plan, format it as a Markdown TABLE suitable for A4 printing.
-   - Top of response must include the school logo image: ![EFIPS Logo](https://www.efipslibrary.online/school-logo.png)
-   - CRITICAL FORMATTING: Inside the table cells and across sections, EVERY item MUST be written as a separate bullet point on a distinct line (using <br/>• or bullet points). NEVER output clustered text or large paragraphs.
+   - DO NOT include image links or school logos in the chat markdown text (it is rendered on the print page automatically).
+   - CRITICAL FORMATTING: Inside table cells and in text, EVERY piece of information MUST be written as a separate bullet point on a distinct line (using bullet points and line breaks). NEVER combine points into paragraphs or clustered text.
    - The table MUST include these rows:
      * معلومات أساسية (Basic Info): [Teacher Name, Subject, Grade, Title, Day, Period] (Fill Day, Period, and Teacher Name automatically from system context).
-     * أهداف الدرس (Objectives): Formatted as "أن + الفعل المضارع" based on Bloom's Taxonomy (Arabic & English). Each objective MUST be on a separate line.
-     * نواتج التعلم (Learning Outcomes): Each outcome on a separate line.
-     * المفردات الجديدة (New Vocabulary): Bulleted points on separate lines.
+     * أهداف الدرس (Objectives): Formatted as "أن + الفعل المضارع" based on Bloom's Taxonomy (Arabic or English per language). Each objective MUST be on a separate line with a bullet.
+     * نواتج التعلم (Learning Outcomes): Specific to each objective, listed as separate bullet points on separate lines.
+     * المفردات الجديدة (New Vocabulary): Bulleted list on separate lines.
      * الربط بمواد أخرى (Cross-Curricular Link): Bulleted points on separate lines.
      * الربط بالحياة اليومية (Real-life Connection): Bulleted points on separate lines.
      * الربط بالهوية الوطنية الإماراتية (UAE National Identity Link): Bulleted points on separate lines.
-     * خطوات تنفيذ الدرس (Lesson Execution Steps): Must be distinctly bulleted on separate lines covering:
+     * خطوات تنفيذ الدرس (Lesson Execution Steps): YOU MUST separate these into distinct bullet points on new lines:
        - التهيئة الحافزة (Warm-up)
        - وقت المعلم (Teacher Time)
        - التأكد من الفهم (Checking for Understanding)
@@ -58,15 +58,15 @@ Instructions for Teacher Support & Lesson Planning (أوامر التحضير ا
      * الاعتماد (Sign-off): At the bottom: "تم إعداد هذه الخطة بواسطة المساعد الذكي صقر - مكتبة مدرسة صقر الإمارات" (Prepared by Saqr AI Assistant - EFIPS Library).
 
 4. CONCLUDING PRINT QUESTION:
-   - ONLY when the preparation is 100% complete, conclude outside the table with ONLY this question:
+   - ONLY when the full preparation is 100% complete, conclude outside the table with ONLY this question:
      "هل تود طباعة التحضير بصيغة PDF؟" (in English: "Would you like to print this plan as a PDF?").
    - DO NOT mention sending anything to email.
 
 PRESENTATION STRUCTURE INSTRUCTION:
-"بناءً على موضوع الدرس الذي يحدده المعلم من منهج McGraw-Hill أو غيره، قم بتصميم هيكل عرض تقديمي احترافي ومفصل بالكامل مرتب بالشرائح بشكل دقيق ومرتب. اجعل كل شريحة في قسم مستقل بعنوان واضح والنقاط تحت بعضها دون تلاصق كقائمة منقطة. يتضمن العرض التقديمي بالتفصيل:
+"بناءً على موضوع الدرس الذي يحدده المعلم، قم بتصميم هيكل عرض تقديمي احترافي ومفصل بالكامل مرتب بالشرائح بشكل دقيق ومرتب. اجعل كل شريحة في قسم مستقل بعنوان واضح والنقاط تحت بعضها دون تلاصق كقائمة منقطة. يتضمن العرض التقديمي بالتفصيل:
 - الشريحة الأولى: شريحة العنوان الرئيسي وأهداف الدرس.
 - الشريحة الثانية: شريحة التهيئة والتمهيد (نشاط استهلالي).
-- الشريحة الثالثة إلى السادسة: شرائح المحتوى الأساسي (مع نقاط بارزة ومفصلة في كل شريحة - نقاط منفصلة).
+- الشريحة الثالثة إلى السادسة: شرائح المحتوى الأساسي (مع نقاط بارزة ومفصلة في كل شريحة - نقاط منفصلة في أسطر مستقلة).
 - الشريحة قبل الأخيرة: شريحة نشاط تفاعلي تطبيقي للطلاب.
 - الشريحة الأخيرة: شريحة ختامية للتقييم والتأمل.
 - مع كتابة النقاط الرئيسية في كل شريحة بشكل منفصل، وإضافة ملاحظات المعلم (Speaker Notes) الخاصة بما يجب قوله أو شرحه في كل شريحة."
@@ -251,7 +251,7 @@ const SmartSearchPage: React.FC = () => {
           ? `أهلاً بك يا صديقي المبدع **${name}**! 🎓\n\nأنا "صقر"، المساعد الذكي لمكتبتك. هل نؤلف قصة ممتعة معاً اليوم، أم تبحث عن كتاب محدد لتقرأه؟`
           : `Welcome my creative friend **${name}**! 🎓\n\nI'm 'Saqr', your AI Librarian. Shall we co-author a story today, or are you looking for a specific book?`;
       } else if (storedType === 'teacher' || storedType === 'admin') {
-        welcomeMessage = locale === 'ar'
+        welcomeMessage = locale === 'ar' 
           ? `أهلاً بك أستاذي الفاضل **${name}**! 👨‍🏫\n\nأنا "صقر" في خدمتك. كيف يمكنني مساعدتك اليوم في تحضير دروسك أو البحث عن مصادر لمادتك؟`
           : `Welcome esteemed teacher **${name}**! 👨‍🏫\n\nI am 'Saqr', at your service. How can I assist you today with your lesson planning or resources?`;
 
@@ -280,7 +280,7 @@ const SmartSearchPage: React.FC = () => {
                 const row = data[0];
                 const day = row.day || (locale === 'ar' ? 'حسب الحجز' : 'Per Schedule');
                 const period = row.period || (locale === 'ar' ? 'حصة المكتبة' : 'Library Period');
-                setScheduleContext(`\n[TEACHER CONTEXT: Teacher Name is "${name}". Day is "${day}". Period is "${period}". CRITICAL: Use these values automatically. NEVER ask the teacher for their Name, Day, or Period!]`);
+                setScheduleContext(`\n[TEACHER CONTEXT: Teacher Name is "${name}". Day is "${day}". Period is "${period}". CRITICAL: Use these values automatically. NEVER ask the teacher for Name, Day, or Period!]`);
               } else {
                 setScheduleContext(`\n[TEACHER CONTEXT: Teacher Name is "${name}". Day is "حسب الجدول المعتمد". Period is "حصة المكتبة". NEVER ask for Name, Day, or Period!]`);
               }
@@ -293,7 +293,7 @@ const SmartSearchPage: React.FC = () => {
       }
     } else {
       setUserName('');
-      welcomeMessage = locale === 'ar'
+      welcomeMessage = locale === 'ar' 
         ? 'أهلاً بك! أنا "صقر"، المساعد الذكي لمكتبة المدرسة. هل نؤلف قصة معاً اليوم، أم تبحث عن كتاب محدد؟'
         : "Welcome! I'm 'Saqr', your AI Librarian. Shall we co-author a story today, or are you looking for a specific book?";
     }
@@ -344,12 +344,13 @@ const SmartSearchPage: React.FC = () => {
     }
   };
 
-  // دالة طباعة الـ PDF بهوامش A4 وجدول أنيق وشعار المدرسة
+  // دالة طباعة الـ PDF بهوامش A4 وجدول أنيق وشعار المدرسة فقط في صفحة الطباعة
   const handlePrintPDF = (contentToPrint: string) => {
     const printWindow = window.open('', '_blank');
     if (printWindow) {
       let cleanContent = contentToPrint
         .replace(/<button.*?>.*?<\/button>/g, '')
+        .replace(/!\[.*?\]\(.*?\)/g, '') // إزالة أي شعار نصي إن وجد ليحل محله الشعار الرسمي في الهيدر
         .replace(/هل تود طباعة التحضير بصيغة PDF؟/g, '')
         .replace(/Would you like to print this plan as a PDF\?/gi, '')
         .replace(/هل تريد أن أكمل؟/g, '')
@@ -358,12 +359,11 @@ const SmartSearchPage: React.FC = () => {
       let htmlContent = cleanContent
         .replace(/\|(.+)\|/g, '<tr><td>$1</td></tr>')
         .replace(/---/g, '')
-        .replace(/!\[.*?\]\((.*?)\)/g, '<div style="text-align:center; margin-bottom: 25px;"><img src="https://www.efipslibrary.online/school-logo.png" style="max-width: 160px; height: auto;" alt="EFIPS Logo"/></div>')
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
         .replace(/\*(.*?)\*/g, '<em>$1</em>')
         .replace(/\n/g, '<br/>');
 
-      htmlContent = htmlContent.replace(/(<tr><td>.*<\/td><\/tr>)/s, '<table style="width:100%; border-collapse: collapse; margin-top: 15px; border: 2px solid #1e293b;">$1</table>');
+      htmlContent = htmlContent.replace(/(<tr><td>.*<\/td><\/tr>)/s, '<table style="width:100%; border-collapse: collapse; margin-top: 15px; border: 2px solid #0f172a;">$1</table>');
       htmlContent = htmlContent.replace(/<td>(.*?)<\/td>/g, '<td style="padding: 10px 14px; border: 1px solid #cbd5e1; text-align: ' + (dir === 'rtl' ? 'right' : 'left') + '; vertical-align: top; font-size: 13px; line-height: 1.8;">$1</td>');
 
       printWindow.document.write(`
@@ -371,11 +371,12 @@ const SmartSearchPage: React.FC = () => {
           <head>
             <title>${locale === 'ar' ? 'خطة درس - صقر' : 'Lesson Plan - Saqr'}</title>
             <style>
-              @page { size: A4; margin: 15mm; }
+              @page { size: A4 portrait; margin: 12mm 15mm; }
               body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; color: #0f172a; line-height: 1.8; max-width: 900px; margin: auto; }
+              .header-logo { text-align: center; margin-bottom: 20px; }
+              .header-logo img { max-width: 150px; height: auto; }
               table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-              th, td { border: 1px solid #cbd5e1; padding: 12px; vertical-align: top; }
-              img { max-width: 160px; height: auto; margin-bottom: 15px; }
+              th, td { border: 1px solid #cbd5e1; padding: 10px 12px; vertical-align: top; }
               strong { color: #0f172a; }
               @media print {
                 body { padding: 0; }
@@ -386,6 +387,9 @@ const SmartSearchPage: React.FC = () => {
             </style>
           </head>
           <body>
+            <div class="header-logo">
+              <img src="https://www.efipslibrary.online/school-logo.png" alt="EFIPS Logo"/>
+            </div>
             ${htmlContent}
           </body>
         </html>
@@ -535,7 +539,7 @@ const SmartSearchPage: React.FC = () => {
         const rawName = locale === 'ar' ? (user.name_ar || user.name_en) : (user.name_en || user.name_ar);
         const name = formatFirstAndLastName(rawName || '');
         const type = localStorage.getItem('user_type') === 'student' ? 'Student' : 'Teacher';
-        userContextInfo = `\nCurrent User Context: The person talking to you is a ${type} named "${name}". Use their name occasionally to be friendly. Required Output Language: ${locale === 'ar' ? 'Arabic' : 'English'}.`;
+        userContextInfo = `\nCurrent User Context: The person talking to you is a ${type} named "${name}". Use their name occasionally to be friendly. Required Output Language: ${locale === 'ar' ? 'Arabic' : 'English'}. You MUST reply ONLY in ${locale === 'ar' ? 'Arabic' : 'English'}!`;
     }
 
     try {
@@ -605,14 +609,15 @@ const SmartSearchPage: React.FC = () => {
     return '/Search.gif';
   };
 
-  // التحقق المرن من وجود خطة درس لعرض زر الطباعة
+  // التحقق من وجود جدول في المحتوى
   const isLessonPlan = (content: string) => {
     return content.includes('|') && content.includes('---');
   };
 
+  // التحقق من وصول صقر لسؤال الطباعة النهائي
   const isAskingToPrint = (content: string) => {
     const c = content.toLowerCase();
-    return c.includes('هل تود طباعة') || c.includes('print this plan') || c.includes('طباعة التحضير');
+    return c.includes('هل تود طباعة') || c.includes('print this plan as a pdf') || c.includes('print as a pdf');
   };
 
   return (
@@ -664,11 +669,11 @@ const SmartSearchPage: React.FC = () => {
                 <div className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   
                   {msg.role === 'assistant' && (
-                    <div className="flex flex-col gap-2 max-w-[95%] md:max-w-[85%] items-start">
+                    <div className="flex flex-col gap-2 max-w-[95%] md:max-w-[85%] items-start w-full">
                       <div className="flex gap-3 items-end w-full" translate="no" lang={locale}>
                         <div className="bg-slate-50 dark:bg-[#1a1f2e] border border-slate-200 dark:border-slate-800 rounded-3xl rounded-bl-sm px-4 md:px-6 py-4 md:py-5 shadow-sm text-slate-800 dark:text-slate-100 font-medium leading-relaxed text-sm md:text-lg w-full">
                           
-                          {/* زر تصدير PDF للمدرسين أعلى أي جدول تحضير */}
+                          {/* زر تصدير PDF أعلى أي رسالة تتضمن جدول تحضير */}
                           {isTeacherOrAdmin && isLessonPlan(msg.content) && (
                               <div className="flex justify-end mb-3 no-print border-b border-slate-200 dark:border-slate-700 pb-2">
                                   <button 
@@ -680,18 +685,19 @@ const SmartSearchPage: React.FC = () => {
                               </div>
                           )}
 
-                          {/* تنسيق النصوص والجداول مع ضمان ظهور النقاط منفصلة عبر whitespace-pre-line */}
+                          {/* تنسيق النصوص والجداول مع ضمان ظهور النقاط منفصلة في أسطر مستقلة */}
                           <div className="prose prose-slate dark:prose-invert max-w-none text-start font-cairo [&>table]:w-full [&>table]:border-collapse [&>table_th]:border [&>table_th]:border-slate-300 dark:[&>table_th]:border-slate-700 [&>table_th]:p-3 [&>table_th]:bg-slate-100 dark:[&>table_th]:bg-slate-800 [&>table_td]:border [&>table_td]:border-slate-300 dark:[&>table_td]:border-slate-700 [&>table_td]:p-3 [&>table_td]:whitespace-pre-line [&>table_td]:align-top [&>ul]:list-disc [&>ul]:ps-5 [&>ul]:space-y-2 [&>ol]:list-decimal [&>ol]:ps-5 [&>ol]:space-y-2 [&>p]:mb-3 [&>h3]:font-bold [&>h3]:text-sky-600 dark:[&>h3]:text-sky-400 [&>h3]:mt-4 [&>h3]:mb-2 [&>h4]:font-bold [&>h4]:text-amber-600 dark:[&>h4]:text-amber-400 [&>h4]:mt-3 [&>h4]:mb-1">
                             <ReactMarkdown>{msg.content}</ReactMarkdown>
                           </div>
 
-                          {/* زر الطباعة المباشر يظهر في نهاية الرسالة عند طرح صقر لسؤال الطباعة */}
+                          {/* زر الطباعة المباشر أسفل الرسالة عند طرح صقر لسؤال الطباعة النهائي */}
                           {isTeacherOrAdmin && isAskingToPrint(msg.content) && (
                               <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-700 flex justify-start no-print">
                                   <button 
                                       onClick={() => {
-                                        // البحث عن محتوى الجدول المكتمل لطباعته
-                                        const planMsg = isLessonPlan(msg.content) ? msg.content : (messages[index - 1]?.content || msg.content);
+                                        const planMsg = isLessonPlan(msg.content) 
+                                          ? msg.content 
+                                          : ([...messages].reverse().find(m => m.role === 'assistant' && isLessonPlan(m.content))?.content || msg.content);
                                         handlePrintPDF(planMsg);
                                       }}
                                       className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full font-bold text-xs md:text-sm shadow-md transition-all active:scale-95"
