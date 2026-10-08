@@ -9,7 +9,7 @@ import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
 import { trackActivity } from '../src/utils/tracker';
 import { supabase } from '../src/utils/supabase';
 
-// --- 1. بروتوكول عقل صقر النهائي (تم دمج أوامر تحضير الجداول التفاعلية للمعلمين) ---
+// --- 1. بروتوكول عقل صقر النهائي (تم إضافة سؤال الطباعة في نهاية التحضير) ---
 const SAQR_ELITE_PROMPT = `
 Identity: You are "Saqr" (صقر), the official Elite AI Librarian and Educational Expert of Emirates Falcon International Private School (EFIPS).
 
@@ -46,7 +46,9 @@ Instructions for Teacher Support & Lesson Planning (أوامر التحضير ا
    - الربط بالهوية الوطنية الإماراتية (UAE National Identity Link).
    - خطوات تنفيذ الدرس (Lesson Execution Steps): Must be separated points covering: التهيئة الحافزة (Warm-up), وقت المعلم (Teacher Time), التأكد من الفهم (Checking for Understanding), النشاط الرئيس/أوراق العمل (Main Activity/Worksheets), تقييم النشاط (Activity Evaluation), الواجب (Homework).
    - إجراءات استخدام المكتبة (Library Integration): How the library resources will be used during this specific period.
-   - الاعتماد (Sign-off): At the very end, explicitly state "تم إعداد هذه الخطة بواسطة المساعد الذكي صقر - مكتبة مدرسة صقر الإمارات" (Prepared by Saqr AI Assistant - EFIPS Library).
+   - الاعتماد (Sign-off): At the very end of the table, explicitly state "تم إعداد هذه الخطة بواسطة المساعد الذكي صقر - مكتبة مدرسة صقر الإمارات" (Prepared by Saqr AI Assistant - EFIPS Library).
+
+   AFTER GENERATING THE TABLE: Ask the teacher a polite concluding question: "هل تود طباعة التحضير بصيغة PDF؟" (Would you like to print this plan as a PDF?).
 
 PRESENTATION STRUCTURE INSTRUCTION:
 "بناءً على موضوع الدرس الذي يحدده المعلم من منهج McGraw-Hill أو غيره، قم بتصميم هيكل عرض تقديمي احترافي ومفصل بالكامل مرتب بالشرائح بشكل دقيق ومرتب. اجعل كل شريحة في قسم مستقل بعنوان واضح والنقاط تحت بعضها دون تلاصق. يتضمن العرض التقديمي بالتفصيل:
@@ -345,6 +347,7 @@ const SmartSearchPage: React.FC = () => {
     const storedUser = localStorage.getItem('current_user');
     const storedType = localStorage.getItem('user_type');
     
+    // حساب الإدارة متاح له التحضير دائماً
     if (storedType === 'admin') {
       setInput(promptText);
       return;
@@ -359,6 +362,7 @@ const SmartSearchPage: React.FC = () => {
       let isBooked = false;
 
       try {
+        // الفحص في جدول library_schedule بالأعمدة المطابقة لقاعدة البيانات (user_id و teacher)
         let query = supabase.from('library_schedule').select('id');
         const filters: string[] = [];
         if (teacherId) {
@@ -411,20 +415,24 @@ const SmartSearchPage: React.FC = () => {
     
     setSaqrState('thinking');
 
-    if (isTeacherOrAdmin && (userQuery.includes('تحضير') || userQuery.includes('عرض') || userQuery.includes('lesson plan') || userQuery.includes('presentation'))) {
+    // تسجيل التحضير في قاعدة بيانات الأدمن إذا استخدم الميزة
+    if (isTeacherOrAdmin && (userQuery.includes('تحضير') || userQuery.includes('عرض') || userQuery.includes('lesson plan') || userQuery.includes('presentation') || userQuery.includes('print'))) {
       try {
         const storedUser = localStorage.getItem('current_user');
         if (storedUser) {
           const u = JSON.parse(storedUser);
-          const planType = (userQuery.includes('تحضير') || userQuery.includes('lesson')) ? 'تحضير درس (Lesson)' : 'عرض تقديمي (Presentation)';
-          const topic = userQuery.split(': ')[1] || userQuery;
+          const planType = (userQuery.includes('تحضير') || userQuery.includes('lesson') || userQuery.includes('print')) ? 'تحضير درس (Lesson)' : 'عرض تقديمي (Presentation)';
+          const topic = userQuery.split(': ')[1] || userQuery.substring(0, 30);
           
-          await supabase.from('lesson_reports').insert([{
-            teacher_id: u.teacher_id || 'Admin',
-            teacher_name: u.name_ar || u.name_en || 'Admin',
-            plan_type: planType,
-            lesson_topic: topic
-          }]);
+          // نمنع التسجيل المزدوج في نفس الجلسة إذا كان الرد مجرد "نعم أريد الطباعة"
+          if (!userQuery.includes('طباعة')) {
+             await supabase.from('lesson_reports').insert([{
+              teacher_id: u.teacher_id || 'Admin',
+              teacher_name: u.name_ar || u.name_en || 'Admin',
+              plan_type: planType,
+              lesson_topic: topic
+             }]);
+          }
         }
       } catch (e) {
         console.error('Error logging report', e);
@@ -515,6 +523,17 @@ const SmartSearchPage: React.FC = () => {
       }
       
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
+      
+      // إذا كان الرد من المعلم على سؤال الطباعة بالموافقة، نقوم بطباعة الرسالة السابقة تلقائياً (التي تحوي الجدول)
+      if ((userQuery.includes('نعم') || userQuery.includes('يس') || userQuery.includes('yes')) && messages.length >= 2) {
+          const lastAssistantMsg = messages[messages.length - 1].content;
+          if (isLessonPlan(lastAssistantMsg)) {
+              setTimeout(() => {
+                  handlePrintPDF(lastAssistantMsg);
+              }, 1000);
+          }
+      }
+
     } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: locale === 'ar' ? 'حدث خطأ في الاتصال، يرجى المحاولة مرة أخرى.' : 'Connection error, please try again.' }]);
       setSaqrState('idle');
@@ -679,6 +698,69 @@ const SmartSearchPage: React.FC = () => {
             </div>
           )}
         </div>
+      </div>
+
+      {/* --- تصميم الشهادة العرضية المحدثة والفاخرة للتصدير --- */}
+      <div className="fixed left-[-9999px] top-0 pointer-events-none">
+          <div ref={certificateRef} dir={locale === 'ar' ? 'rtl' : 'ltr'} className="w-[1123px] min-h-[794px] h-fit bg-gradient-to-br from-white via-slate-50 to-amber-50/20 text-slate-900 relative overflow-hidden flex flex-col font-sans border-[16px] border-solid border-amber-500 shadow-2xl pb-10">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-bl-full -z-10 pointer-events-none"></div>
+              <div className="absolute bottom-0 left-0 w-64 h-64 bg-amber-500/10 rounded-tr-full -z-10 pointer-events-none"></div>
+
+              <div className="flex justify-between items-center px-12 pt-10 pb-6 border-b-2 border-slate-200">
+                  <div className="flex items-center gap-5">
+                      <img src="https://www.efipslibrary.online/school-logo.png" className="w-20 h-20 object-contain drop-shadow" alt="EFIPS Logo" crossOrigin="anonymous" />
+                      <div>
+                          <h3 className="text-xl font-black text-slate-800 tracking-tight">{t('certSchool')}</h3>
+                          <h4 className="text-xs font-bold text-amber-700 tracking-widest uppercase mt-0.5" dir="ltr">Emirates Falcon International Private School</h4>
+                      </div>
+                  </div>
+                  <div className="text-left">
+                      <div className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-900 font-black rounded-full text-base shadow-md border border-amber-400">
+                          {t('certChallenge')}
+                      </div>
+                  </div>
+              </div>
+
+              <div className="flex-1 flex flex-col items-center justify-center text-center px-14 py-6">
+                  <h1 className="text-4xl lg:text-5xl font-black text-amber-700 tracking-wide mb-3 uppercase drop-shadow-sm">{t('certTitle')}</h1>
+                  <p className="text-xl font-bold text-slate-600 mb-6">{t('certSubtitle')}</p>
+                  
+                  <div className="mb-4">
+                      <h2 className="text-4xl lg:text-5xl font-black text-slate-900 tracking-tight pb-2 border-b-4 border-amber-500 px-10 inline-block">
+                          {winnerData?.name}
+                      </h2>
+                  </div>
+                  <p className="text-2xl font-bold text-slate-600 mb-8">
+                      {t('certGrade')} <span className="text-amber-700 font-black">{winnerData?.grade}</span>
+                  </p>
+                  
+                  <div className="bg-white/90 backdrop-blur p-6 rounded-3xl border-2 border-amber-200 w-full text-start relative shadow-sm mb-4">
+                      <span className={`absolute -top-4 ${locale === 'ar' ? 'right-10' : 'left-10'} bg-amber-500 text-slate-900 px-6 py-1.5 font-black text-lg border-2 border-amber-400 rounded-full shadow-sm`}>
+                          {t('certStory')}
+                      </span>
+                      <p className={`text-xl leading-[1.8] font-bold text-slate-800 mt-4 ${locale === 'ar' ? 'text-justify' : 'text-left'} whitespace-pre-wrap`}>
+                          {winnerData?.content}
+                      </p>
+                  </div>
+              </div>
+
+              <div className="flex justify-between items-end px-14 pt-6 border-t-2 border-slate-200 mt-auto">
+                  <div className="text-center w-60">
+                      <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">{t('certDate')}</p>
+                      <p className="text-lg font-black text-slate-800">{winnerData?.date}</p>
+                  </div>
+                  <div className="text-center flex flex-col items-center flex-1">
+                      <div className="w-16 h-16 rounded-full border-2 border-amber-500/30 flex items-center justify-center bg-amber-50/50 mb-1">
+                          <span className="text-xl font-black text-amber-600">EFIPS</span>
+                      </div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('certOfficial')}</p>
+                  </div>
+                  <div className="text-center w-60">
+                      <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">{t('certAI')}</p>
+                      <p className="text-xl font-black text-amber-700">{t('certSaqr')}</p>
+                  </div>
+              </div>
+          </div>
       </div>
 
       <style>{`
