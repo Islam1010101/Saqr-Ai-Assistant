@@ -9,7 +9,7 @@ import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
 import { trackActivity } from '../src/utils/tracker';
 import { supabase } from '../src/utils/supabase';
 
-// --- 1. بروتوكول عقل صقر النهائي ---
+// --- 1. بروتوكول عقل صقر النهائي (تم ترتيب النقاط، وإلغاء الإيميل، وضبط الطباعة، والالتزام باللغة) ---
 const SAQR_ELITE_PROMPT = `
 Identity: You are "Saqr" (صقر), the official Elite AI Librarian and Educational Expert of Emirates Falcon International Private School (EFIPS).
 
@@ -17,6 +17,7 @@ General Rules & Information:
 1. PRE-SEARCH REQUIREMENT: Before answering any book query, you MUST first search the Physical Library Index, the Arabic Digital Library, and the English Digital Library.
 2. SCHOOL INFO: If asked about the school (Emirates Falcon International Private School) or when it was established, provide the information and share the official website: www.flacon-school.com
 3. LIBRARIAN & CREATOR INFO: If asked about the current librarian or the creator of this system, clearly state that it is "Islam Soliman" (إسلام سليمان). For communication, provide his email: islam.ahmed@falcon-school.com
+4. LANGUAGE: Always respond in the language the user is using (Arabic for Arabic queries, English for English queries). Ensure all generated plans and questions match the user's language exactly.
 
 Instructions for Books & Search:
 1. If the user asks about a book, ALWAYS check the "EFIPS LIBRARY RECORDS FOUND" context provided at the end of this prompt.
@@ -25,24 +26,24 @@ Instructions for Books & Search:
 
 Instructions for Teacher Support & Lesson Planning (أوامر التحضير التفاعلي والجداول):
 1. INTERVIEW MODE: When a teacher asks to plan a lesson (تحضير درس) or design a presentation, DO NOT generate the plan immediately.
-   First, politely ask them to provide the following details ONLY if not already provided in the system context (Note: Day and Period might be provided automatically):
+   First, politely ask them to provide the following details ONLY if not already provided in the system context (Note: Day and Period might be provided automatically, do not ask for them if they are in the context):
    - اسم المعلم (Teacher Name)
    - المادة (Subject)
    - الصف (Grade)
    - عنوان الدرس (Lesson Title)
 
 2. LESSON PLAN GENERATION (TABLE FORMAT): Once the teacher provides the required details, generate the comprehensive lesson plan formatted as a Markdown TABLE suitable for A4 printing.
-   The very top of your response MUST include the school logo image: ![EFIPS Logo](https://www.efipslibrary.online/school-logo.png)
+   The very top of your response MUST include the school logo image: ![EFIPS Logo](public/school-logo.png)
    
    The table MUST include these specific rows with clear separation, formatted as clear bullet points within the table cells:
    - معلومات أساسية (Basic Info): [Teacher, Subject, Grade, Title, Day, Period]
-   - أهداف الدرس (Objectives): Formatted as "أن + الفعل المضارع" based on Bloom's Taxonomy (Arabic & English). Must be listed as separate points.
+   - أهداف الدرس (Objectives): Formatted as "أن + الفعل المضارع" based on Bloom's Taxonomy (Arabic & English). Must be listed as separate points (1. 2. 3.).
    - نواتج التعلم (Learning Outcomes): Specific to each objective. Listed as separate points.
    - المفردات الجديدة (New Vocabulary).
    - الربط بمواد أخرى (Cross-Curricular Link).
    - الربط بالحياة اليومية (Real-life Connection).
    - الربط بالهوية الوطنية الإماراتية (UAE National Identity Link).
-   - خطوات تنفيذ الدرس (Lesson Execution Steps): Must be separated points covering: 
+   - خطوات تنفيذ الدرس (Lesson Execution Steps): YOU MUST separate these into distinct bullet points: 
      * التهيئة الحافزة (Warm-up)
      * وقت المعلم (Teacher Time)
      * التأكد من الفهم (Checking for Understanding)
@@ -52,20 +53,21 @@ Instructions for Teacher Support & Lesson Planning (أوامر التحضير ا
    - إجراءات استخدام المكتبة (Library Integration): How the library resources will be used during this specific period.
    - الاعتماد (Sign-off): At the very end of the table, explicitly state "تم إعداد هذه الخطة بواسطة المساعد الذكي صقر - مكتبة مدرسة صقر الإمارات" (Prepared by Saqr AI Assistant - EFIPS Library).
 
-   AFTER GENERATING THE FULL PLAN (outside the table), you MUST ask the teacher a polite concluding question: "هل تود طباعة التحضير بصيغة PDF؟" (Would you like to print this plan as a PDF?).
+   AFTER GENERATING THE FULL PLAN (outside the table), you MUST ask the teacher a polite concluding question: "هل تود طباعة التحضير بصيغة PDF؟" (Would you like to print this plan as a PDF?). DO NOT mention sending it to email.
 
 PRESENTATION STRUCTURE INSTRUCTION:
-"بناءً على موضوع الدرس الذي يحدده المعلم من منهج McGraw-Hill أو غيره، قم بتصميم هيكل عرض تقديمي احترافي ومفصل بالكامل مرتب بالشرائح بشكل دقيق ومرتب. اجعل كل شريحة في قسم مستقل بعنوان واضح والنقاط تحت بعضها دون تلاصق. يتضمن العرض التقديمي بالتفصيل:
+"بناءً على موضوع الدرس الذي يحدده المعلم من منهج McGraw-Hill أو غيره، قم بتصميم هيكل عرض تقديمي احترافي ومفصل بالكامل مرتب بالشرائح بشكل دقيق ومرتب. اجعل كل شريحة في قسم مستقل بعنوان واضح والنقاط تحت بعضها دون تلاصق كقائمة منقطة. يتضمن العرض التقديمي بالتفصيل:
 - الشريحة الأولى: شريحة العنوان الرئيسي وأهداف الدرس.
 - الشريحة الثانية: شريحة التهيئة والتمهيد (نشاط استهلالي).
-- الشريحة الثالثة إلى السادسة: شرائح المحتوى الأساسي (مع نقاط بارزة ومفصلة في كل شريحة).
+- الشريحة الثالثة إلى السادسة: شرائح المحتوى الأساسي (مع نقاط بارزة ومفصلة في كل شريحة - استخدم النقاط المنفصلة).
 - الشريحة قبل الأخيرة: شريحة نشاط تفاعلي تطبيقي للطلاب.
 - الشريحة الأخيرة: شريحة ختامية للتقييم والتأمل.
 - مع كتابة النقاط الرئيسية في كل شريحة بشكل منفصل، وإضافة ملاحظات المعلم (Speaker Notes) الخاصة بما يجب قوله أو شرحه في كل شريحة."
+AFTER GENERATING THE PRESENTATION STRUCTURE, you MUST ask the teacher a polite concluding question: "هل تود طباعة الهيكل بصيغة PDF؟" (Would you like to print this structure as a PDF?).
 
 Formatting Rules for Responses:
 - Use Markdown tables properly.
-- Always structure your answers with clear headings, bullet points, and proper line spacing to ensure readability and prevent clustered text. Each section must be distinct and well-separated.
+- Always structure your answers with clear headings, bullet points, and proper line spacing to ensure readability and prevent clustered text. Each section must be distinct and well-separated. NEVER output large blocks of text.
 
 Instructions for "Little Author" Challenge (STRICT RULES):
 1. UAE THEMES: Start stories inspired by UAE identity (Space, Pearl Diving, Desert Heritage, Falcons, Zayed's legacy).
@@ -296,39 +298,42 @@ const SmartSearchPage: React.FC = () => {
     }
   };
 
-  // دالة طباعة الرسالة المحددة كـ PDF (للتحضير)
+  // دالة طباعة الرسالة المحددة كـ PDF (للتحضير) - منسقة لاحتواء الجداول وشعار المدرسة
   const handlePrintPDF = (contentToPrint: string) => {
     const printWindow = window.open('', '_blank');
     if (printWindow) {
-      // تجهيز محتوى الطباعة وتحويل الـ Markdown إلى HTML
-      let htmlContent = contentToPrint
+      // إزالة زر التصدير إذا كان موجوداً ضمن النص
+      let cleanContent = contentToPrint.replace(/<button.*?>.*?<\/button>/g, '');
+      
+      let htmlContent = cleanContent
         .replace(/\|(.+)\|/g, '<tr><td>$1</td></tr>')
         .replace(/---/g, '')
-        .replace(/!\[.*?\]\((.*?)\)/g, '<div style="text-align:center; margin-bottom: 20px;"><img src="$1" style="max-width: 150px;" alt="Logo"/></div>')
+        // وضع شعار المدرسة
+        .replace(/!\[.*?\]\((.*?)\)/g, '<div style="text-align:center; margin-bottom: 30px;"><img src="/school-logo.png" style="max-width: 180px;" alt="Logo"/></div>')
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
         .replace(/\n/g, '<br/>');
 
-      // معالجة الجدول البسيطة
-      htmlContent = htmlContent.replace(/(<tr><td>.*<\/td><\/tr>)/s, '<table style="width:100%; border-collapse: collapse; margin-top: 20px;" border="1">$1</table>');
-      htmlContent = htmlContent.replace(/<td>(.*?)<\/td>/g, '<td style="padding: 12px; border: 1px solid #ccc; text-align: right; vertical-align: top;">$1</td>');
+      // معالجة الجداول
+      htmlContent = htmlContent.replace(/(<tr><td>.*<\/td><\/tr>)/s, '<table style="width:100%; border-collapse: collapse; margin-top: 20px; border: 1px solid #333;">$1</table>');
+      htmlContent = htmlContent.replace(/<td>(.*?)<\/td>/g, '<td style="padding: 12px; border: 1px solid #ccc; text-align: right; vertical-align: top; font-size: 14px;">$1</td>');
 
       printWindow.document.write(`
-        <html dir="rtl" lang="ar">
+        <html dir="${dir}" lang="${locale}">
           <head>
-            <title>خطة درس - صقر</title>
+            <title>${locale === 'ar' ? 'خطة درس - صقر' : 'Lesson Plan - Saqr'}</title>
             <style>
-              body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; color: #333; line-height: 1.6; }
+              body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; color: #333; line-height: 1.8; max-width: 800px; margin: auto; }
               table { width: 100%; border-collapse: collapse; margin-top: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
-              th, td { border: 1px solid #e2e8f0; padding: 15px; text-align: right; vertical-align: top; }
+              th, td { border: 1px solid #e2e8f0; padding: 15px; text-align: ${dir === 'rtl' ? 'right' : 'left'}; vertical-align: top; }
               th { background-color: #f8fafc; font-weight: bold; }
-              h1, h2, h3 { color: #0f172a; margin-top: 20px; }
-              img { max-width: 150px; height: auto; margin-bottom: 20px; }
-              .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 20px; }
-              ul, ol { margin-top: 5px; margin-bottom: 5px; padding-right: 20px; }
-              li { margin-bottom: 5px; }
+              h1, h2, h3 { color: #0f172a; margin-top: 25px; margin-bottom: 15px; }
+              ul, ol { margin-top: 10px; margin-bottom: 10px; padding-${dir === 'rtl' ? 'right' : 'left'}: 25px; }
+              li { margin-bottom: 8px; }
+              img { max-width: 180px; height: auto; margin-bottom: 20px; }
               @media print {
-                body { padding: 0; }
-                table { box-shadow: none; border: 1px solid #000; }
+                body { padding: 20px; max-width: 100%; }
+                table { box-shadow: none; border: 1px solid #000; page-break-inside: avoid; }
                 th, td { border: 1px solid #000; }
                 .no-print { display: none !important; }
               }
@@ -341,10 +346,9 @@ const SmartSearchPage: React.FC = () => {
       `);
       printWindow.document.close();
       printWindow.focus();
-      // تأخير بسيط للتأكد من تحميل الصورة إن وجدت
       setTimeout(() => {
           printWindow.print();
-      }, 500);
+      }, 800);
     }
   };
 
@@ -383,7 +387,7 @@ const SmartSearchPage: React.FC = () => {
           const { data, error } = await query.or(filters.join(','));
           if (!error && data && data.length > 0) {
             isBooked = true;
-            scheduleInfo = `\n[ملاحظة لصقر: المعلم حجز في جدول المكتبة. اليوم: ${data[0].day || 'غير محدد'}، الحصة: ${data[0].period || 'غير محددة'}. استخدم هذه البيانات ولا تسأل عنها.]`;
+            scheduleInfo = `\n[Context: Teacher is booked. Day: ${data[0].day || 'Not specified'}, Period: ${data[0].period || 'Not specified'}. Use this data and do not ask for it.]`;
           }
         }
 
@@ -392,7 +396,7 @@ const SmartSearchPage: React.FC = () => {
           const { data, error } = await supabase.from('schedule').select('id, day, period').or(filters.join(','));
           if (!error && data && data.length > 0) {
             isBooked = true;
-            scheduleInfo = `\n[ملاحظة لصقر: المعلم حجز في جدول المكتبة. اليوم: ${data[0].day || 'غير محدد'}، الحصة: ${data[0].period || 'غير محددة'}. استخدم هذه البيانات ولا تسأل عنها.]`;
+            scheduleInfo = `\n[Context: Teacher is booked. Day: ${data[0].day || 'Not specified'}, Period: ${data[0].period || 'Not specified'}. Use this data and do not ask for it.]`;
           }
         }
 
@@ -405,7 +409,7 @@ const SmartSearchPage: React.FC = () => {
         }
 
         // إذا كان الزر المختار هو تحضير الدرس، نُضيف بيانات الحصة المجلوبة للـ prompt بصمت
-        if (promptText.includes('تحضير')) {
+        if (promptText.includes('تحضير') || promptText.includes('plan')) {
              setInput(promptText + scheduleInfo);
         } else {
              setInput(promptText);
@@ -443,7 +447,7 @@ const SmartSearchPage: React.FC = () => {
           const topic = userQuery.split(': ')[1] || userQuery.substring(0, 30);
           
           // نمنع التسجيل المزدوج في نفس الجلسة إذا كان الرد مجرد "نعم أريد الطباعة"
-          if (!userQuery.includes('طباعة')) {
+          if (!userQuery.includes('طباعة') && !userQuery.includes('print') && !userQuery.toLowerCase().includes('yes')) {
              await supabase.from('lesson_reports').insert([{
               teacher_id: u.teacher_id || 'Admin',
               teacher_name: u.name_ar || u.name_en || 'Admin',
@@ -498,7 +502,7 @@ const SmartSearchPage: React.FC = () => {
         const rawName = locale === 'ar' ? (user.name_ar || user.name_en) : (user.name_en || user.name_ar);
         const name = formatFirstAndLastName(rawName || '');
         const type = localStorage.getItem('user_type') === 'student' ? 'Student' : 'Teacher';
-        userContextInfo = `\nCurrent User Context: The person talking to you is a ${type} named "${name}". Use their name occasionally to be friendly.`;
+        userContextInfo = `\nCurrent User Context: The person talking to you is a ${type} named "${name}". Use their name occasionally to be friendly. Required Output Language: ${locale === 'ar' ? 'Arabic' : 'English'}.`;
     }
 
     try {
@@ -542,8 +546,9 @@ const SmartSearchPage: React.FC = () => {
       
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
       
-      // إذا كان الرد من المعلم على سؤال الطباعة بالموافقة، نقوم بطباعة الرسالة السابقة تلقائياً (التي تحوي الجدول)
-      if ((userQuery.includes('نعم') || userQuery.includes('يس') || userQuery.includes('yes')) && messages.length >= 2) {
+      // إذا كان الرد من المعلم على سؤال الطباعة بالموافقة، نقوم بطباعة الرسالة السابقة تلقائياً
+      const queryLower = userQuery.toLowerCase();
+      if ((queryLower.includes('نعم') || queryLower.includes('يس') || queryLower.includes('yes') || queryLower.includes('اطبع') || queryLower.includes('print')) && messages.length >= 2) {
           const lastAssistantMsg = messages[messages.length - 1].content;
           if (isLessonPlan(lastAssistantMsg)) {
               setTimeout(() => {
@@ -623,7 +628,7 @@ const SmartSearchPage: React.FC = () => {
                       <div className="flex gap-3 items-end" translate="no" lang={locale}>
                         <div className="bg-slate-50 dark:bg-[#1a1f2e] border border-slate-200 dark:border-slate-800 rounded-3xl rounded-bl-sm px-4 md:px-6 py-4 md:py-5 shadow-sm text-slate-800 dark:text-slate-100 font-medium leading-relaxed text-sm md:text-lg w-full">
                           
-                          {/* زر تصدير PDF يظهر فقط لرسائل التحضير التي تحتوي على جدول */}
+                          {/* زر تصدير PDF للمدرسين يظهر أعلى الرسالة التي بها خطة */}
                           {isTeacherOrAdmin && isLessonPlan(msg.content) && (
                               <div className="flex justify-end mb-3 no-print border-b border-slate-200 dark:border-slate-700 pb-3">
                                   <button 
