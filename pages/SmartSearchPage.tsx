@@ -9,7 +9,7 @@ import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
 import { trackActivity } from '../src/utils/tracker';
 import { supabase } from '../src/utils/supabase';
 
-// --- 1. بروتوكول عقل صقر النهائي (تم ترتيب النقاط، وإلغاء الإيميل، وضبط الطباعة، والالتزام باللغة) ---
+// --- 1. بروتوكول عقل صقر النهائي (تم ترتيب النقاط، جلب البيانات بصمت، سؤال الاستكمال والطباعة) ---
 const SAQR_ELITE_PROMPT = `
 Identity: You are "Saqr" (صقر), the official Elite AI Librarian and Educational Expert of Emirates Falcon International Private School (EFIPS).
 
@@ -26,8 +26,9 @@ Instructions for Books & Search:
 
 Instructions for Teacher Support & Lesson Planning (أوامر التحضير التفاعلي والجداول):
 1. INTERVIEW MODE: When a teacher asks to plan a lesson (تحضير درس) or design a presentation, DO NOT generate the plan immediately.
-   First, politely ask them to provide the following details ONLY if not already provided in the system context (Note: Day and Period might be provided automatically, do not ask for them if they are in the context):
-   - اسم المعلم (Teacher Name)
+   First, politely ask them to provide the following details ONLY if not already provided in the system context. 
+   CRITICAL: DO NOT ask for the Teacher's Name, Day, or Period (these are provided automatically in the system context).
+   Ask ONLY for:
    - المادة (Subject)
    - الصف (Grade)
    - عنوان الدرس (Lesson Title)
@@ -35,15 +36,15 @@ Instructions for Teacher Support & Lesson Planning (أوامر التحضير ا
 2. LESSON PLAN GENERATION (TABLE FORMAT): Once the teacher provides the required details, generate the comprehensive lesson plan formatted as a Markdown TABLE suitable for A4 printing.
    The very top of your response MUST include the school logo image: ![EFIPS Logo](public/school-logo.png)
    
-   The table MUST include these specific rows with clear separation, formatted as clear bullet points within the table cells:
+   The table MUST include these specific rows. ALL items inside the table MUST be formatted as distinct, separated bullet points (each on a new line). DO NOT use large paragraphs.
    - معلومات أساسية (Basic Info): [Teacher, Subject, Grade, Title, Day, Period]
    - أهداف الدرس (Objectives): Formatted as "أن + الفعل المضارع" based on Bloom's Taxonomy (Arabic & English). Must be listed as separate points (1. 2. 3.).
-   - نواتج التعلم (Learning Outcomes): Specific to each objective. Listed as separate points.
-   - المفردات الجديدة (New Vocabulary).
-   - الربط بمواد أخرى (Cross-Curricular Link).
-   - الربط بالحياة اليومية (Real-life Connection).
-   - الربط بالهوية الوطنية الإماراتية (UAE National Identity Link).
-   - خطوات تنفيذ الدرس (Lesson Execution Steps): YOU MUST separate these into distinct bullet points: 
+   - نواتج التعلم (Learning Outcomes): Specific to each objective. Listed as separate bullet points.
+   - المفردات الجديدة (New Vocabulary): Bulleted list.
+   - الربط بمواد أخرى (Cross-Curricular Link): Bulleted list.
+   - الربط بالحياة اليومية (Real-life Connection): Bulleted list.
+   - الربط بالهوية الوطنية الإماراتية (UAE National Identity Link): Bulleted list.
+   - خطوات تنفيذ الدرس (Lesson Execution Steps): YOU MUST separate these into distinct bullet points on new lines: 
      * التهيئة الحافزة (Warm-up)
      * وقت المعلم (Teacher Time)
      * التأكد من الفهم (Checking for Understanding)
@@ -53,7 +54,8 @@ Instructions for Teacher Support & Lesson Planning (أوامر التحضير ا
    - إجراءات استخدام المكتبة (Library Integration): How the library resources will be used during this specific period.
    - الاعتماد (Sign-off): At the very end of the table, explicitly state "تم إعداد هذه الخطة بواسطة المساعد الذكي صقر - مكتبة مدرسة صقر الإمارات" (Prepared by Saqr AI Assistant - EFIPS Library).
 
-   AFTER GENERATING THE FULL PLAN (outside the table), you MUST ask the teacher a polite concluding question: "هل تود طباعة التحضير بصيغة PDF؟" (Would you like to print this plan as a PDF?). DO NOT mention sending it to email.
+   INTERACTIVE GENERATION: If the plan is very long, pause before finishing and ask: "هل تريد أن أكمل بقية التحضير؟" (Would you like me to continue the rest of the plan?). 
+   ONLY AFTER GENERATING THE FULL, COMPLETED PLAN (outside the table), you MUST ask the teacher a polite concluding question: "هل تود طباعة التحضير بصيغة PDF؟" (Would you like to print this plan as a PDF?). DO NOT mention sending it to email.
 
 PRESENTATION STRUCTURE INSTRUCTION:
 "بناءً على موضوع الدرس الذي يحدده المعلم من منهج McGraw-Hill أو غيره، قم بتصميم هيكل عرض تقديمي احترافي ومفصل بالكامل مرتب بالشرائح بشكل دقيق ومرتب. اجعل كل شريحة في قسم مستقل بعنوان واضح والنقاط تحت بعضها دون تلاصق كقائمة منقطة. يتضمن العرض التقديمي بالتفصيل:
@@ -67,7 +69,7 @@ AFTER GENERATING THE PRESENTATION STRUCTURE, you MUST ask the teacher a polite c
 
 Formatting Rules for Responses:
 - Use Markdown tables properly.
-- Always structure your answers with clear headings, bullet points, and proper line spacing to ensure readability and prevent clustered text. Each section must be distinct and well-separated. NEVER output large blocks of text.
+- Always structure your answers with clear headings, bullet points, and proper line spacing (use \n\n) to ensure readability and prevent clustered text. Each section and point must be distinct and well-separated on a new line. NEVER output large blocks of text.
 
 Instructions for "Little Author" Challenge (STRICT RULES):
 1. UAE THEMES: Start stories inspired by UAE identity (Space, Pearl Diving, Desert Heritage, Falcons, Zayed's legacy).
@@ -93,7 +95,7 @@ const localization: any = {
     status: 'صقر الذكي (EFIPS)',
     online: 'متصل',
     download: 'تحميل شهادة المؤلف الصغير',
-    downloadPdf: 'تصدير كـ PDF',
+    downloadPdf: 'تصدير كـ PDF 🖨️',
     you: 'أنت',
     certSchool: 'مدرسة صقر الإمارات الدولية الخاصة',
     certChallenge: 'تحدي المؤلف الصغير',
@@ -108,7 +110,7 @@ const localization: any = {
     welcome: 'مرحباً بك،',
     mcgrawLesson: 'تحضير حصة داخل المكتبة',
     mcgrawPres: 'تصميم عرض تقديمي',
-    lessonPrompt: 'أريد تحضير درس تفصيلي من منهجي لتدريسه في المكتبة. ما هي البيانات التي تحتاجها؟',
+    lessonPrompt: 'أريد تحضير درس تفصيلي من منهجي لتدريسه في المكتبة.',
     presPrompt: 'أريد تصميم هيكل عرض تقديمي احترافي لموضوع: '
   },
   en: {
@@ -116,7 +118,7 @@ const localization: any = {
     status: 'Saqr AI Librarian',
     online: 'Online',
     download: 'Download Certificate',
-    downloadPdf: 'Export PDF',
+    downloadPdf: 'Export PDF 🖨️',
     you: 'YOU',
     certSchool: 'Emirates Falcon International Private School',
     certChallenge: 'Little Author Challenge',
@@ -131,7 +133,7 @@ const localization: any = {
     welcome: "Let's jump in,",
     mcgrawLesson: 'Library Lesson Plan',
     mcgrawPres: 'Presentation Structure',
-    lessonPrompt: 'I want a detailed lesson plan for a library session. What details do you need?',
+    lessonPrompt: 'I want a detailed lesson plan for a library session.',
     presPrompt: 'I want to design a professional presentation structure for the topic: '
   }
 };
@@ -214,6 +216,7 @@ const SmartSearchPage: React.FC = () => {
   const [winnerData, setWinnerData] = useState<any>(null);
   const [userName, setUserName] = useState<string>('');
   const [isTeacherOrAdmin, setIsTeacherOrAdmin] = useState<boolean>(false);
+  const [scheduleContext, setScheduleContext] = useState<string>(''); // لحفظ بيانات اليوم والحصة بصمت
   
   const [saqrState, setSaqrState] = useState<'idle' | 'thinking' | 'speaking' | 'victory'>('idle');
 
@@ -302,8 +305,10 @@ const SmartSearchPage: React.FC = () => {
   const handlePrintPDF = (contentToPrint: string) => {
     const printWindow = window.open('', '_blank');
     if (printWindow) {
-      // إزالة زر التصدير إذا كان موجوداً ضمن النص
-      let cleanContent = contentToPrint.replace(/<button.*?>.*?<\/button>/g, '');
+      // إزالة زر التصدير والأسئلة إذا كانت موجودة ضمن النص
+      let cleanContent = contentToPrint.replace(/<button.*?>.*?<\/button>/g, '')
+                                       .replace(/هل تود طباعة التحضير بصيغة PDF؟/g, '')
+                                       .replace(/Would you like to print this plan as a PDF\?/g, '');
       
       let htmlContent = cleanContent
         .replace(/\|(.+)\|/g, '<tr><td>$1</td></tr>')
@@ -369,7 +374,6 @@ const SmartSearchPage: React.FC = () => {
       const teacherName = (user.name_ar || user.name_en || '').trim();
 
       let isBooked = false;
-      let scheduleInfo = ''; // لتخزين اليوم والحصة
 
       try {
         // الفحص في جدول library_schedule
@@ -387,7 +391,8 @@ const SmartSearchPage: React.FC = () => {
           const { data, error } = await query.or(filters.join(','));
           if (!error && data && data.length > 0) {
             isBooked = true;
-            scheduleInfo = `\n[Context: Teacher is booked. Day: ${data[0].day || 'Not specified'}, Period: ${data[0].period || 'Not specified'}. Use this data and do not ask for it.]`;
+            // حفظ اليوم والحصة في متغير حالة للاستخدام في الخلفية دون إظهاره في الـ input
+            setScheduleContext(`\n[SYSTEM CONTEXT: Teacher Name is ${teacherName}. Day is ${data[0].day || 'Not specified'}. Period is ${data[0].period || 'Not specified'}. DO NOT ASK for the name, day, or period. Use this data directly.]`);
           }
         }
 
@@ -396,7 +401,7 @@ const SmartSearchPage: React.FC = () => {
           const { data, error } = await supabase.from('schedule').select('id, day, period').or(filters.join(','));
           if (!error && data && data.length > 0) {
             isBooked = true;
-            scheduleInfo = `\n[Context: Teacher is booked. Day: ${data[0].day || 'Not specified'}, Period: ${data[0].period || 'Not specified'}. Use this data and do not ask for it.]`;
+            setScheduleContext(`\n[SYSTEM CONTEXT: Teacher Name is ${teacherName}. Day is ${data[0].day || 'Not specified'}. Period is ${data[0].period || 'Not specified'}. DO NOT ASK for the name, day, or period. Use this data directly.]`);
           }
         }
 
@@ -408,12 +413,8 @@ const SmartSearchPage: React.FC = () => {
           return;
         }
 
-        // إذا كان الزر المختار هو تحضير الدرس، نُضيف بيانات الحصة المجلوبة للـ prompt بصمت
-        if (promptText.includes('تحضير') || promptText.includes('plan')) {
-             setInput(promptText + scheduleInfo);
-        } else {
-             setInput(promptText);
-        }
+        // وضع النص فقط في الـ input (الـ context سيتم تمريره في دالة الإرسال)
+        setInput(promptText);
 
       } catch (err) {
         console.error('Error checking schedule booking:', err);
@@ -437,8 +438,11 @@ const SmartSearchPage: React.FC = () => {
     
     setSaqrState('thinking');
 
+    // دمج الـ context الخاص بالجدول في الـ userQuery بصمت
+    const queryWithContext = userQuery + (scheduleContext ? ` ${scheduleContext}` : '');
+
     // تسجيل التحضير في قاعدة بيانات الأدمن إذا استخدم الميزة
-    if (isTeacherOrAdmin && (userQuery.includes('تحضير') || userQuery.includes('عرض') || userQuery.includes('lesson plan') || userQuery.includes('presentation') || userQuery.includes('print'))) {
+    if (isTeacherOrAdmin && (userQuery.includes('تحضير') || userQuery.includes('عرض') || userQuery.includes('lesson plan') || userQuery.includes('presentation'))) {
       try {
         const storedUser = localStorage.getItem('current_user');
         if (storedUser) {
@@ -446,7 +450,7 @@ const SmartSearchPage: React.FC = () => {
           const planType = (userQuery.includes('تحضير') || userQuery.includes('lesson') || userQuery.includes('print')) ? 'تحضير درس (Lesson)' : 'عرض تقديمي (Presentation)';
           const topic = userQuery.split(': ')[1] || userQuery.substring(0, 30);
           
-          // نمنع التسجيل المزدوج في نفس الجلسة إذا كان الرد مجرد "نعم أريد الطباعة"
+          // نمنع التسجيل المزدوج في نفس الجلسة إذا كان الرد مجرد إجابة لأسئلة أو "نعم للطباعة"
           if (!userQuery.includes('طباعة') && !userQuery.includes('print') && !userQuery.toLowerCase().includes('yes')) {
              await supabase.from('lesson_reports').insert([{
               teacher_id: u.teacher_id || 'Admin',
@@ -513,7 +517,7 @@ const SmartSearchPage: React.FC = () => {
           messages: [
             { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}` }, 
             ...messages, 
-            { role: 'user', content: userQuery }
+            { role: 'user', content: queryWithContext }
           ],
           locale,
         }),
@@ -546,7 +550,7 @@ const SmartSearchPage: React.FC = () => {
       
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
       
-      // إذا كان الرد من المعلم على سؤال الطباعة بالموافقة، نقوم بطباعة الرسالة السابقة تلقائياً
+      // إذا كان الرد من المعلم على سؤال الطباعة بالموافقة، نقوم بطباعة الرسالة السابقة تلقائياً (التي تحوي الجدول)
       const queryLower = userQuery.toLowerCase();
       if ((queryLower.includes('نعم') || queryLower.includes('يس') || queryLower.includes('yes') || queryLower.includes('اطبع') || queryLower.includes('print')) && messages.length >= 2) {
           const lastAssistantMsg = messages[messages.length - 1].content;
@@ -572,8 +576,10 @@ const SmartSearchPage: React.FC = () => {
     return '/Search.gif';
   };
 
-  // Helper check if message has a table (likely a lesson plan)
-  const isLessonPlan = (content: string) => content.includes('|') && content.includes('---');
+  // الدالة المعدلة للتحقق من وجود جدول خطة الدرس لتحديد موعد إظهار أيقونة الطباعة
+  const isLessonPlan = (content: string) => {
+    return content.includes('|') && content.includes('---') && (content.includes('أهداف') || content.includes('Objectives'));
+  };
 
   return (
     <div dir={dir} className="w-full h-[100dvh] flex flex-col bg-white dark:bg-[#0b0f17] font-sans relative overflow-hidden text-slate-900 dark:text-slate-100 transition-colors duration-300">
@@ -628,7 +634,7 @@ const SmartSearchPage: React.FC = () => {
                       <div className="flex gap-3 items-end" translate="no" lang={locale}>
                         <div className="bg-slate-50 dark:bg-[#1a1f2e] border border-slate-200 dark:border-slate-800 rounded-3xl rounded-bl-sm px-4 md:px-6 py-4 md:py-5 shadow-sm text-slate-800 dark:text-slate-100 font-medium leading-relaxed text-sm md:text-lg w-full">
                           
-                          {/* زر تصدير PDF للمدرسين يظهر أعلى الرسالة التي بها خطة */}
+                          {/* زر تصدير PDF يظهر أعلى الرسالة التي بها خطة بصيغة جدول */}
                           {isTeacherOrAdmin && isLessonPlan(msg.content) && (
                               <div className="flex justify-end mb-3 no-print border-b border-slate-200 dark:border-slate-700 pb-3">
                                   <button 
