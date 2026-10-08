@@ -9,7 +9,7 @@ import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
 import { trackActivity } from '../src/utils/tracker';
 import { supabase } from '../src/utils/supabase';
 
-// --- 1. بروتوكول عقل صقر النهائي ---
+// --- 1. بروتوكول عقل صقر النهائي (تم دمج أوامر معلمين McGraw-Hill وتوجيهات الخبير التربوي) ---
 const SAQR_ELITE_PROMPT = `
 Identity: You are "Saqr" (صقر), the official Elite AI Librarian and Educational Expert of Emirates Falcon International Private School (EFIPS).
 
@@ -17,66 +17,45 @@ General Rules & Information:
 1. PRE-SEARCH REQUIREMENT: Before answering any book query, you MUST first search the Physical Library Index, the Arabic Digital Library, and the English Digital Library.
 2. SCHOOL INFO: If asked about the school (Emirates Falcon International Private School) or when it was established, provide the information and share the official website: www.flacon-school.com
 3. LIBRARIAN & CREATOR INFO: If asked about the current librarian or the creator of this system, clearly state that it is "Islam Soliman" (إسلام سليمان). For communication, provide his email: islam.ahmed@falcon-school.com
-4. STRICT LANGUAGE MATCH: You MUST reply in the EXACT language requested in the User Context (Arabic if Arabic is set, English if English is set). Never mix languages. All greetings, questions, lesson plan tables, headings, and sign-offs must be 100% in that language.
 
 Instructions for Books & Search:
 1. If the user asks about a book, ALWAYS check the "EFIPS LIBRARY RECORDS FOUND" context provided at the end of this prompt.
 2. If found, tell them EXACTLY where it is based on the data. For Physical Library (المكتبة العادية), mention the shelf or row number if available. For Digital Libraries, specify if it's the Arabic or English Digital Library.
 3. If the user searches in Arabic for an English book (e.g., "هاري بوتر"), use your AI knowledge to recognize they mean "Harry Potter", and answer accordingly.
 
-Instructions for Teacher Support & Lesson Planning (أوامر تحضير الدروس والعروض):
-1. INTERVIEW MODE:
-   - You ALREADY have the Teacher's Name, Day, and Period provided in the system context.
-   - NEVER ask for: Teacher Name, Day, or Period.
-   - If the teacher hasn't provided Subject, Grade, or Lesson Title, politely ask ONLY for those missing items in the matching language:
-     * In Arabic: "يرجى تزويدي بـ: المادة، الصف الدراسي، وعنوان الدرس."
-     * In English: "Please provide: Subject, Grade Level, and Lesson Title."
+Instructions for Teacher Support & McGraw-Hill Curricula (أوامر تحضير المعلمين والتحضير المفصل):
+1. Built-in Knowledge: Leverage your built-in knowledge of McGraw-Hill scope & sequence (such as Wonders for English, Inspire Science, and mathematics series).
+2. Copy & Paste Strategy: Process unit titles, lesson names, or objectives provided by teachers to generate fully compliant lesson plans.
+3. Worksheet & Page Handling: Handle partial worksheet or page inputs provided by teachers to design tailored activities.
 
-2. STEP-BY-STEP PROGRESSION & INQUIRY:
-   - When preparing a lesson or presentation structure in parts, ALWAYS conclude intermediate responses with:
-     * In Arabic: "هل تريد أن أكمل؟"
-     * In English: "Would you like me to continue?"
-   - Wait for the user's confirmation before moving to the next part.
-
-3. LESSON PLAN FORMAT (SEPARATE BULLET POINTS & CLEAN TABLE):
-   - Format the final plan as a structured Markdown TABLE suitable for printing.
-   - DO NOT include image markdown links or school logos in the chat text (the logo is placed automatically on the print page).
-   - STRICT FORMATTING: Inside each section and table cell, EVERY point MUST be on its own separate line preceded by a bullet point (• or -). NEVER write dense paragraphs.
-   - The table MUST include:
-     * Basic Info (معلومات أساسية): Teacher Name, Subject, Grade, Title, Day, Period.
-     * Objectives (أهداف الدرس): Formatted as "أن + الفعل المضارع" (Arabic) or "Students will be able to + verb" (English) based on Bloom's Taxonomy. Each objective on a separate line.
-     * Learning Outcomes (نواتج التعلم): Each outcome on a separate line with a bullet.
-     * New Vocabulary (المفردات الجديدة): Bulleted on separate lines.
-     * Cross-Curricular Link (الربط بالمواد الأخرى): Bulleted on separate lines.
-     * Real-life Connection (الربط بالحياة اليومية): Bulleted on separate lines.
-     * UAE National Identity Link (الربط بالهوية الوطنية): Bulleted on separate lines.
-     * Lesson Execution Steps (خطوات تنفيذ الدرس): MUST be on separate lines with bullets:
-       - Warm-up (التهيئة الحافزة)
-       - Teacher Time (وقت المعلم)
-       - Checking for Understanding (التأكد من الفهم)
-       - Main Activity / Worksheets (النشاط الرئيس / أوراق العمل)
-       - Activity Evaluation (تقييم النشاط)
-       - Homework (الواجب)
-     * Library Integration (إجراءات استخدام المكتبة): Bulleted on separate lines.
-     * Sign-off (الاعتماد): 
-       - Arabic: "تم إعداد هذه الخطة بواسطة المساعد الذكي صقر - مكتبة مدرسة صقر الإمارات"
-       - English: "Prepared by Saqr AI Assistant - EFIPS Library"
-
-4. FINAL PRINT QUESTION:
-   - ONLY when the preparation is 100% complete, conclude outside the table with ONLY this exact question:
-     * In Arabic: "هل تود طباعة التحضير بصيغة PDF؟"
-     * In English: "Would you like to print the lesson plan as a PDF?"
-   - DO NOT mention sending anything to email.
+LESSON PLAN GENERATOR INSTRUCTION:
+"أنت مساعد تربوي خبير في مناهج McGraw-Hill الدولية. قم بإعداد خطة درس تفصيلية شاملة ومفصلة بالكامل استناداً إلى عنوان الوحدة أو الدرس الذي يزودك به المعلم. يجب أن تقدم تحضيراً كاملاً ومفصلاً مقسماً بعناوين رئيسية وواضحة، والنقاط مرتبة تحت بعضها بشكل منسق ومريح للقراءة. تتضمن الخطة بالتفصيل وكل نقطة بشكل مرتب ومنفصل: 
+- أهداف الدرس: وتكون مصاغة كـ (أن + الفعل المضارع) وتعتمد على تصنيف بلوم (باللغة العربية والإنجليزية).
+- نواتج التعلم لكل هدف.
+- المفردات الجديدة.
+- الربط بمادة أخرى.
+- الربط بالحياة اليومية.
+- الربط بالهوية الوطنية (الإماراتية).
+- خطوات تنفيذ الدرس.
+- التهيئة الحافزة.
+- وقت المعلم.
+- التأكد من الفهم.
+- النشاط الرئيس 'أوراق العمل'.
+- إجراءات استخدام المكتبة ومصادرها أثناء الحصة (كيف سيتم توظيف المكتبة لخدمة الدرس).
+- تقييم النشاط الرئيس.
+- الواجب."
 
 PRESENTATION STRUCTURE INSTRUCTION:
-"بناءً على موضوع الدرس الذي يحدده المعلم، قم بتصميم هيكل عرض تقديمي احترافي ومفصل بالكامل مرتب بالشرائح بشكل دقيق ومرتب. اجعل كل شريحة في قسم مستقل بعنوان واضح والنقاط تحت بعضها دون تلاصق كقائمة منقطة في أسطر مستقلة.
-بعد الانتهاء من هيكل العرض كاملاً، اختم بالسؤال:
-- باللغة العربية: 'هل تود طباعة الهيكل بصيغة PDF؟'
-- باللغة الإنجليزية: 'Would you like to print the structure as a PDF?'"
+"بناءً على موضوع الدرس الذي يحدده المعلم من منهج -Hill، قم بتصميم هيكل عرض تقديمي احترافي ومفصل بالكامل مرتب بالشرائح بشكل دقيق ومرتب. اجعل كل شريحة في قسم مستقل بعنوان واضح والنقاط تحت بعضها دون تلاصق. يتضمن العرض التقديمي بالتفصيل:
+- الشريحة الأولى: شريحة العنوان الرئيسي وأهداف الدرس.
+- الشريحة الثانية: شريحة التهيئة والتمهيد (نشاط استهلالي).
+- الشريحة الثالثة إلى السادسة: شرائح المحتوى الأساسي (مع نقاط بارزة ومفصلة في كل شريحة).
+- الشريحة قبل الأخيرة: شريحة نشاط تفاعلي تطبيقي للطلاب.
+- الشريحة الأخيرة: شريحة ختامية للتقييم والتأمل.
+- مع كتابة النقاط الرئيسية في كل شريحة بشكل منفصل، وإضافة ملاحظات المعلم (Speaker Notes) الخاصة بما يجب قوله أو شرحه في كل شريحة."
 
 Formatting Rules for Responses:
-- Every single point must be on a distinct new line with a bullet.
-- Do not output crowded paragraphs.
+- Always structure your answers with clear headings, bullet points, and proper line spacing to ensure readability and prevent clustered text. Each section must be distinct.
 
 Instructions for "Little Author" Challenge (STRICT RULES):
 1. UAE THEMES: Start stories inspired by UAE identity (Space, Pearl Diving, Desert Heritage, Falcons, Zayed's legacy).
@@ -102,8 +81,6 @@ const localization: any = {
     status: 'صقر الذكي (EFIPS)',
     online: 'متصل',
     download: 'تحميل شهادة المؤلف الصغير',
-    downloadPdf: 'طباعة التحضير (PDF) 🖨️',
-    printNow: 'نعم، اطبع التحضير الآن (PDF) 🖨️',
     you: 'أنت',
     certSchool: 'مدرسة صقر الإمارات الدولية الخاصة',
     certChallenge: 'تحدي المؤلف الصغير',
@@ -118,7 +95,7 @@ const localization: any = {
     welcome: 'مرحباً بك،',
     mcgrawLesson: 'تحضير حصة داخل المكتبة',
     mcgrawPres: 'تصميم عرض تقديمي',
-    lessonPrompt: 'أريد تحضير درس تفصيلي لتدريسه في المكتبة.',
+    lessonPrompt: 'أريد تحضير درس تفصيلي من منهج McGraw-Hill لموضوع: ',
     presPrompt: 'أريد تصميم هيكل عرض تقديمي احترافي لموضوع: '
   },
   en: {
@@ -126,8 +103,6 @@ const localization: any = {
     status: 'Saqr AI Librarian',
     online: 'Online',
     download: 'Download Certificate',
-    downloadPdf: 'Print Lesson Plan (PDF) 🖨️',
-    printNow: 'Yes, Print Lesson Plan (PDF) 🖨️',
     you: 'YOU',
     certSchool: 'Emirates Falcon International Private School',
     certChallenge: 'Little Author Challenge',
@@ -140,9 +115,9 @@ const localization: any = {
     certAI: 'Certified By',
     certSaqr: 'Saqr - AI Librarian',
     welcome: "Let's jump in,",
-    mcgrawLesson: 'Library Lesson Plan',
+    mcgrawLesson: 'Lesson Plan inside library',
     mcgrawPres: 'Presentation Structure',
-    lessonPrompt: 'I want a detailed lesson plan for a library session.',
+    lessonPrompt: 'I want a detailed lesson plan from McGraw-Hill for the topic: ',
     presPrompt: 'I want to design a professional presentation structure for the topic: '
   }
 };
@@ -163,12 +138,6 @@ const SendIcon = () => (
 const DownloadIcon = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-  </svg>
-);
-
-const PrinterIcon = () => (
-  <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
   </svg>
 );
 
@@ -225,7 +194,6 @@ const SmartSearchPage: React.FC = () => {
   const [winnerData, setWinnerData] = useState<any>(null);
   const [userName, setUserName] = useState<string>('');
   const [isTeacherOrAdmin, setIsTeacherOrAdmin] = useState<boolean>(false);
-  const [scheduleContext, setScheduleContext] = useState<string>(''); 
   
   const [saqrState, setSaqrState] = useState<'idle' | 'thinking' | 'speaking' | 'victory'>('idle');
 
@@ -253,57 +221,13 @@ const SmartSearchPage: React.FC = () => {
           ? `أهلاً بك يا صديقي المبدع **${name}**! 🎓\n\nأنا "صقر"، المساعد الذكي لمكتبتك. هل نؤلف قصة ممتعة معاً اليوم، أم تبحث عن كتاب محدد لتقرأه؟`
           : `Welcome my creative friend **${name}**! 🎓\n\nI'm 'Saqr', your AI Librarian. Shall we co-author a story today, or are you looking for a specific book?`;
       } else if (storedType === 'teacher' || storedType === 'admin') {
-        welcomeMessage = locale === 'ar' 
-          ? `أهلاً بك أستاذي الفاضل **${name}**! 👨‍🏫\n\nأنا "صقر" في خدمتك. كيف يمكنني مساعدتك اليوم في تحضير دروسك أو البحث عن مصادر لمادتك؟`
-          : `Welcome esteemed teacher **${name}**! 👨‍🏫\n\nI am 'Saqr', at your service. How can I assist you today with your lesson planning or resources?`;
-
-        // جلب جدول المعلم (اليوم والحصة) تلقائياً بصمت من قاعدة البيانات
-        const teacherId = (user.teacher_id || user.id || '').trim();
-        const teacherName = (user.name_ar || user.name_en || '').trim();
-
-        const fetchTeacherSchedule = async () => {
-          try {
-            const filters: string[] = [];
-            if (teacherId) {
-              filters.push(`user_id.ilike.%${teacherId}%`);
-              filters.push(`teacher.ilike.%${teacherId}%`);
-            }
-            if (teacherName) {
-              filters.push(`teacher.ilike.%${teacherName}%`);
-            }
-
-            if (filters.length > 0) {
-              let { data } = await supabase.from('library_schedule').select('*').or(filters.join(','));
-              if (!data || data.length === 0) {
-                const res2 = await supabase.from('schedule').select('*').or(filters.join(','));
-                data = res2.data;
-              }
-              if (data && data.length > 0) {
-                const row = data[0];
-                const day = row.day || (locale === 'ar' ? 'حسب الحجز' : 'Per Schedule');
-                const period = row.period || (locale === 'ar' ? 'حصة المكتبة' : 'Library Period');
-                if (locale === 'ar') {
-                  setScheduleContext(`\n[بيانات المعلم والجدول: اسم المعلم: "${name}". اليوم: "${day}". الحصة: "${period}". استخدام هذه البيانات تلقائياً وتجنب تماماً السؤال عن اسم المعلم أو اليوم أو الحصة!]`);
-                } else {
-                  setScheduleContext(`\n[TEACHER CONTEXT: Teacher Name is "${name}". Day is "${day}". Period is "${period}". Automatically use these values. NEVER ask for Teacher Name, Day, or Period!]`);
-                }
-              } else {
-                if (locale === 'ar') {
-                  setScheduleContext(`\n[بيانات المعلم والجدول: اسم المعلم: "${name}". اليوم: "حسب الجدول المعتمد". الحصة: "حصة المكتبة". تجنب السؤال عن الاسم أو اليوم أو الحصة!]`);
-                } else {
-                  setScheduleContext(`\n[TEACHER CONTEXT: Teacher Name is "${name}". Day is "Scheduled Day". Period is "Library Period". NEVER ask for Name, Day, or Period!]`);
-                }
-              }
-            }
-          } catch (e) {
-            console.error('Error auto-fetching teacher schedule:', e);
-          }
-        };
-        fetchTeacherSchedule();
+        welcomeMessage = locale === 'ar'
+          ? `أهلاً بك أستاذي الفاضل **${name}**! 👨‍🏫\n\nأنا "صقر" في خدمتك. كيف يمكنني مساعدتك اليوم؟`
+          : `Welcome esteemed teacher **${name}**! 👨‍🏫\n\nI am 'Saqr', at your service. How can I assist you today ?`;
       }
     } else {
       setUserName('');
-      welcomeMessage = locale === 'ar' 
+      welcomeMessage = locale === 'ar'
         ? 'أهلاً بك! أنا "صقر"، المساعد الذكي لمكتبة المدرسة. هل نؤلف قصة معاً اليوم، أم تبحث عن كتاب محدد؟'
         : "Welcome! I'm 'Saqr', your AI Librarian. Shall we co-author a story today, or are you looking for a specific book?";
     }
@@ -354,97 +278,11 @@ const SmartSearchPage: React.FC = () => {
     }
   };
 
-  // دالة تصدير الـ PDF - الشعار يظهر فقط في ورقة الطباعة بأعلى الصفحة
-  const handlePrintPDF = (contentToPrint: string) => {
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      let cleanContent = contentToPrint
-        .replace(/<button.*?>.*?<\/button>/g, '')
-        .replace(/!\[.*?\]\(.*?\)/g, '')
-        .replace(/هل تود طباعة التحضير بصيغة PDF؟/g, '')
-        .replace(/Would you like to print the lesson plan as a PDF\?/gi, '')
-        .replace(/Would you like to print this plan as a PDF\?/gi, '')
-        .replace(/هل تريد أن أكمل؟/g, '')
-        .replace(/Would you like me to continue\?/gi, '');
-      
-      let htmlContent = cleanContent
-        .replace(/\|(.+)\|/g, '<tr><td>$1</td></tr>')
-        .replace(/---/g, '')
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-        .replace(/\n/g, '<br/>');
-
-      htmlContent = htmlContent.replace(/(<tr><td>.*<\/td><\/tr>)/s, '<table class="print-table">$1</table>');
-      htmlContent = htmlContent.replace(/<td>(.*?)<\/td>/g, '<td class="print-td">$1</td>');
-
-      printWindow.document.write(`
-        <html dir="${dir}" lang="${locale}">
-          <head>
-            <title>${locale === 'ar' ? 'خطة درس - صقر' : 'Lesson Plan - Saqr'}</title>
-            <style>
-              @page { size: A4 portrait; margin: 15mm 20mm; }
-              body { 
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-                padding: 15px; 
-                color: #0f172a; 
-                line-height: 1.8; 
-                max-width: 850px; 
-                margin: auto; 
-                text-align: ${dir === 'rtl' ? 'right' : 'left'};
-              }
-              .header-logo { 
-                text-align: center; 
-                margin-bottom: 25px; 
-                border-bottom: 2px solid #e2e8f0;
-                padding-bottom: 15px;
-              }
-              .header-logo img { 
-                max-width: 140px; 
-                height: auto; 
-              }
-              .print-table { 
-                width: 100%; 
-                border-collapse: collapse; 
-                margin-top: 15px; 
-                border: 2px solid #1e293b; 
-              }
-              .print-td { 
-                padding: 10px 14px; 
-                border: 1px solid #cbd5e1; 
-                vertical-align: top; 
-                font-size: 13px; 
-                line-height: 1.8; 
-                text-align: ${dir === 'rtl' ? 'right' : 'left'};
-              }
-              strong { color: #0f172a; font-weight: 700; }
-              @media print {
-                body { padding: 0; }
-                .print-table { page-break-inside: auto; }
-                tr { page-break-inside: avoid; page-break-after: auto; }
-                .no-print { display: none !important; }
-              }
-            </style>
-          </head>
-          <body>
-            <div class="header-logo">
-              <img src="https://www.efipslibrary.online/school-logo.png" alt="EFIPS Logo"/>
-            </div>
-            ${htmlContent}
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.focus();
-      setTimeout(() => {
-        printWindow.print();
-      }, 700);
-    }
-  };
-
   const handleQuickPrompt = async (promptText: string) => {
     const storedUser = localStorage.getItem('current_user');
     const storedType = localStorage.getItem('user_type');
     
+    // حساب الإدارة متاح له التحضير دائماً
     if (storedType === 'admin') {
       setInput(promptText);
       return;
@@ -459,28 +297,21 @@ const SmartSearchPage: React.FC = () => {
       let isBooked = false;
 
       try {
-        let query = supabase.from('library_schedule').select('id');
-        const filters: string[] = [];
+        // الفحص في جدول library_schedule بالأعمدة المطابقة لقاعدة البيانات (user_id و teacher)
         if (teacherId) {
-          filters.push(`user_id.ilike.%${teacherId}%`);
-          filters.push(`teacher.ilike.%${teacherId}%`);
-        }
-        if (teacherName) {
-          filters.push(`teacher.ilike.%${teacherName}%`);
-        }
-
-        if (filters.length > 0) {
-          const { data, error } = await query.or(filters.join(','));
-          if (!error && data && data.length > 0) {
-            isBooked = true;
-          }
+          const { data, error } = await supabase
+            .from('library_schedule')
+            .select('id')
+            .ilike('user_id', `%${teacherId}%`);
+          if (!error && data && data.length > 0) isBooked = true;
         }
 
-        if (!isBooked && filters.length > 0) {
-          const { data, error } = await supabase.from('schedule').select('id').or(filters.join(','));
-          if (!error && data && data.length > 0) {
-            isBooked = true;
-          }
+        if (!isBooked && teacherName) {
+          const { data, error } = await supabase
+            .from('library_schedule')
+            .select('id')
+            .ilike('teacher', `%${teacherName}%`);
+          if (!error && data && data.length > 0) isBooked = true;
         }
 
         if (!isBooked) {
@@ -490,16 +321,13 @@ const SmartSearchPage: React.FC = () => {
             : '⚠️ Sorry, this exclusive planning feature is only available for teachers who have booked a session in the Library Schedule.');
           return;
         }
-
-        setInput(promptText);
       } catch (err) {
         console.error('Error checking schedule booking:', err);
-        setInput(promptText);
       }
       setIsLoading(false);
-    } else {
-      setInput(promptText);
     }
+    
+    setInput(promptText);
   };
 
   const handleSendMessage = async () => {
@@ -514,23 +342,21 @@ const SmartSearchPage: React.FC = () => {
     
     setSaqrState('thinking');
 
-    // تسجيل التحضير في قاعدة بيانات الأدمن
-    if (isTeacherOrAdmin && (userQuery.includes('تحضير') || userQuery.includes('عرض') || userQuery.toLowerCase().includes('lesson plan') || userQuery.toLowerCase().includes('presentation'))) {
+    // تسجيل التحضير في قاعدة بيانات الأدمن إذا استخدم الميزة
+    if (isTeacherOrAdmin && (userQuery.includes('تحضير') || userQuery.includes('عرض') || userQuery.includes('lesson plan') || userQuery.includes('presentation'))) {
       try {
         const storedUser = localStorage.getItem('current_user');
         if (storedUser) {
           const u = JSON.parse(storedUser);
-          const planType = (userQuery.includes('تحضير') || userQuery.toLowerCase().includes('lesson')) ? 'تحضير درس (Lesson)' : 'عرض تقديمي (Presentation)';
-          const topic = userQuery.split(': ')[1] || userQuery.substring(0, 30);
+          const planType = (userQuery.includes('تحضير') || userQuery.includes('lesson')) ? 'تحضير درس (Lesson)' : 'عرض تقديمي (Presentation)';
+          const topic = userQuery.split(': ')[1] || userQuery;
           
-          if (!userQuery.includes('طباعة') && !userQuery.toLowerCase().includes('print') && !userQuery.toLowerCase().includes('yes')) {
-            await supabase.from('lesson_reports').insert([{
-              teacher_id: u.teacher_id || 'Admin',
-              teacher_name: u.name_ar || u.name_en || 'Admin',
-              plan_type: planType,
-              lesson_topic: topic
-            }]);
-          }
+          await supabase.from('lesson_reports').insert([{
+            teacher_id: u.teacher_id || 'Admin',
+            teacher_name: u.name_ar || u.name_en || 'Admin',
+            plan_type: planType,
+            lesson_topic: topic
+          }]);
         }
       } catch (e) {
         console.error('Error logging report', e);
@@ -578,7 +404,7 @@ const SmartSearchPage: React.FC = () => {
         const rawName = locale === 'ar' ? (user.name_ar || user.name_en) : (user.name_en || user.name_ar);
         const name = formatFirstAndLastName(rawName || '');
         const type = localStorage.getItem('user_type') === 'student' ? 'Student' : 'Teacher';
-        userContextInfo = `\nCurrent User Context: The user is a ${type} named "${name}". Language Mode: STRICTLY ${locale === 'ar' ? 'Arabic' : 'English'}. You MUST reply ONLY in ${locale === 'ar' ? 'Arabic' : 'English'}!`;
+        userContextInfo = `\nCurrent User Context: The person talking to you is a ${type} named "${name}". Use their name occasionally to be friendly.`;
     }
 
     try {
@@ -587,7 +413,7 @@ const SmartSearchPage: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [
-            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${scheduleContext}\n\n${searchContext}` }, 
+            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}` }, 
             ...messages, 
             { role: 'user', content: userQuery }
           ],
@@ -621,19 +447,6 @@ const SmartSearchPage: React.FC = () => {
       }
       
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
-      
-      // تشغيل الطباعة التلقائية عند رد المعلم بالموافقة
-      const qLower = userQuery.toLowerCase().trim();
-      const affirmativeWords = ['نعم', 'أجل', 'اطبع', 'طباعة', 'yes', 'print', 'sure'];
-      if (affirmativeWords.some(w => qLower.includes(w)) && messages.length >= 1) {
-        const previousMsg = [...messages].reverse().find(m => m.role === 'assistant' && isLessonPlan(m.content))?.content || reply;
-        if (isLessonPlan(previousMsg)) {
-          setTimeout(() => {
-            handlePrintPDF(previousMsg);
-          }, 600);
-        }
-      }
-
     } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: locale === 'ar' ? 'حدث خطأ في الاتصال، يرجى المحاولة مرة أخرى.' : 'Connection error, please try again.' }]);
       setSaqrState('idle');
@@ -649,30 +462,13 @@ const SmartSearchPage: React.FC = () => {
     return '/Search.gif';
   };
 
-  // التحقق من وجود جدول أو خطة تحضير
-  const isLessonPlan = (content: string) => {
-    return (content.includes('|') && content.includes('---')) || 
-           (content.includes('أهداف') && content.includes('الدرس')) || 
-           (content.includes('Objectives') && content.includes('Lesson'));
-  };
-
-  // التحقق من وصول صقر لسؤال الطباعة النهائي
-  const isAskingToPrint = (content: string) => {
-    const c = content.toLowerCase();
-    return c.includes('هل تود طباعة') || 
-           c.includes('طباعة التحضير') || 
-           c.includes('print the lesson plan as a pdf') || 
-           c.includes('print this plan as a pdf') || 
-           c.includes('print as a pdf');
-  };
-
   return (
     <div dir={dir} className="w-full h-[100dvh] flex flex-col bg-white dark:bg-[#0b0f17] font-sans relative overflow-hidden text-slate-900 dark:text-slate-100 transition-colors duration-300">
       
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-950/40 via-[#0b0f17] to-[#0b0f17] pointer-events-none -z-10 hidden dark:block" />
 
       {/* Header */}
-      <header className="flex-shrink-0 px-3 py-3 md:px-8 w-full max-w-5xl mx-auto flex justify-between items-center z-20 relative bg-white/80 dark:bg-transparent backdrop-blur-sm border-b border-slate-100 dark:border-transparent no-print">
+      <header className="flex-shrink-0 px-3 py-3 md:px-8 w-full max-w-5xl mx-auto flex justify-between items-center z-20 relative bg-white/80 dark:bg-transparent backdrop-blur-sm border-b border-slate-100 dark:border-transparent">
         <div className="flex items-center gap-2.5 md:gap-4">
           <div className={`w-9 h-9 md:w-14 md:h-14 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden bg-slate-100 dark:bg-slate-800 border-2 border-sky-400 dark:border-sky-500 shadow-md ${saqrState === 'thinking' ? 'ring-2 ring-amber-400 animate-pulse' : ''}`}>
             <img 
@@ -700,7 +496,7 @@ const SmartSearchPage: React.FC = () => {
       </header>
 
       {/* Greeting */}
-      <div className="flex-shrink-0 text-center pt-2 pb-1 px-3 z-10 no-print">
+      <div className="flex-shrink-0 text-center pt-2 pb-1 px-3 z-10">
         <h2 className="text-xl md:text-4xl lg:text-5xl font-medium tracking-tight text-slate-800 dark:text-slate-100">
           {t('welcome')} <span className="font-bold text-sky-600 dark:text-sky-400">{userName || (locale === 'ar' ? 'صديقي المبدع' : 'Creative Friend')}</span>
         </h2>
@@ -715,49 +511,17 @@ const SmartSearchPage: React.FC = () => {
                 <div className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   
                   {msg.role === 'assistant' && (
-                    <div className="flex flex-col gap-2 max-w-[95%] md:max-w-[85%] items-start w-full">
-                      <div className="flex gap-3 items-end w-full" translate="no" lang={locale}>
-                        <div className="bg-slate-50 dark:bg-[#1a1f2e] border border-slate-200 dark:border-slate-800 rounded-3xl rounded-bl-sm px-4 md:px-6 py-4 md:py-5 shadow-sm text-slate-800 dark:text-slate-100 font-medium leading-relaxed text-sm md:text-lg w-full">
-                          
-                          {/* زر تصدير PDF أعلى أي رسالة تتضمن جدول تحضير */}
-                          {isTeacherOrAdmin && isLessonPlan(msg.content) && (
-                              <div className="flex justify-end mb-3 no-print border-b border-slate-200 dark:border-slate-700 pb-2">
-                                  <button 
-                                      onClick={() => handlePrintPDF(msg.content)} 
-                                      className="flex items-center gap-1.5 px-3.5 py-1.5 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-bold text-xs md:text-sm shadow-sm transition-all"
-                                  >
-                                      <PrinterIcon /> {t('downloadPdf')}
-                                  </button>
-                              </div>
-                          )}
-
-                          {/* تنسيق النصوص والجداول مع ضمان ظهور النقاط منفصلة عبر whitespace-pre-line */}
-                          <div className="prose prose-slate dark:prose-invert max-w-none text-start font-cairo [&>table]:w-full [&>table]:border-collapse [&_th]:border [&_th]:border-slate-300 dark:[&_th]:border-slate-700 [&_th]:p-3 [&_th]:bg-slate-100 dark:[&_th]:bg-slate-800 [&_td]:border [&_td]:border-slate-300 dark:[&_td]:border-slate-700 [&_td]:p-3 [&_td]:whitespace-pre-line [&_td]:align-top [&>ul]:list-disc [&>ul]:ps-5 [&>ul]:space-y-2 [&>ol]:list-decimal [&>ol]:ps-5 [&>ol]:space-y-2 [&>p]:mb-3 [&>p]:whitespace-pre-line [&>h3]:font-bold [&>h3]:text-sky-600 dark:[&>h3]:text-sky-400 [&>h3]:mt-4 [&>h3]:mb-2 [&>h4]:font-bold [&>h4]:text-amber-600 dark:[&>h4]:text-amber-400 [&>h4]:mt-3 [&>h4]:mb-1">
+                    <div className="flex flex-col gap-2 max-w-[95%] md:max-w-[85%] items-start">
+                      <div className="flex gap-3 items-end" translate="no" lang={locale}>
+                        <div className="bg-slate-50 dark:bg-[#1a1f2e] border border-slate-200 dark:border-slate-800 rounded-3xl rounded-bl-sm px-4 md:px-6 py-4 md:py-5 shadow-sm text-slate-800 dark:text-slate-100 font-medium leading-relaxed text-sm md:text-lg">
+                          <div className="prose prose-slate dark:prose-invert max-w-none text-start font-cairo [&>ul]:list-disc [&>ul]:ps-5 [&>ul]:space-y-2 [&>ol]:list-decimal [&>ol]:ps-5 [&>ol]:space-y-2 [&>p]:mb-3 [&>h3]:font-bold [&>h3]:text-sky-600 dark:[&>h3]:text-sky-400 [&>h3]:mt-4 [&>h3]:mb-2 [&>h4]:font-bold [&>h4]:text-amber-600 dark:[&>h4]:text-amber-400 [&>h4]:mt-3 [&>h4]:mb-1">
                             <ReactMarkdown>{msg.content}</ReactMarkdown>
                           </div>
-
-                          {/* زر الطباعة المباشر يظهر بأسفل الرد عند طرح صقر لسؤال الطباعة النهائي */}
-                          {isTeacherOrAdmin && isAskingToPrint(msg.content) && (
-                              <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-700 flex justify-start no-print">
-                                  <button 
-                                      onClick={() => {
-                                        const planMsg = isLessonPlan(msg.content) 
-                                          ? msg.content 
-                                          : ([...messages].reverse().find(m => m.role === 'assistant' && isLessonPlan(m.content))?.content || msg.content);
-                                        handlePrintPDF(planMsg);
-                                      }}
-                                      className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full font-bold text-xs md:text-sm shadow-md transition-all active:scale-95"
-                                  >
-                                      <PrinterIcon /> {t('printNow')}
-                                  </button>
-                              </div>
-                          )}
-
                         </div>
                       </div>
 
                       {winnerData && saqrState === 'victory' && index === messages.length - 1 && (
-                        <div className="mt-2 w-full text-start animate-zoom-in no-print">
+                        <div className="mt-2 w-full text-start animate-zoom-in">
                           <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white font-bold rounded-full shadow-md hover:bg-emerald-700 transition-all text-xs md:text-sm">
                             <DownloadIcon />
                             <span>{t('download')}</span>
@@ -768,7 +532,7 @@ const SmartSearchPage: React.FC = () => {
                   )}
 
                   {msg.role === 'user' && (
-                    <div className="bg-sky-500 dark:bg-sky-600 text-white px-4 md:px-5 py-3 rounded-3xl rounded-br-sm max-w-[90%] md:max-w-[75%] shadow-md no-print">
+                    <div className="bg-sky-500 dark:bg-sky-600 text-white px-4 md:px-5 py-3 rounded-3xl rounded-br-sm max-w-[90%] md:max-w-[75%] shadow-md">
                       <div className="font-semibold leading-relaxed max-w-none text-start text-sm md:text-lg">
                         {msg.content}
                       </div>
@@ -783,10 +547,10 @@ const SmartSearchPage: React.FC = () => {
       </div>
 
       {/* Input & Teacher Quick Buttons */}
-      <div className="absolute bottom-0 inset-x-0 px-3 pb-3 pt-2 w-full z-20 flex-shrink-0 bg-gradient-to-t from-white via-white/95 to-transparent dark:from-[#0b0f17] dark:via-[#0b0f17]/95 dark:to-transparent no-print">
+      <div className="absolute bottom-0 inset-x-0 px-3 pb-3 pt-2 w-full z-20 flex-shrink-0 bg-gradient-to-t from-white via-white/95 to-transparent dark:from-[#0b0f17] dark:via-[#0b0f17]/95 dark:to-transparent">
         <div className="max-w-3xl mx-auto flex flex-col gap-2">
           
-          {/* شريط الأزرار السريعة للمعلمين فقط فوق مربع الكتابة */}
+          {/* شريط الأزرار السريعة للمعلمين فقط فوق مربع الكتابة (متعدد اللغات) */}
           {isTeacherOrAdmin && (
             <div className="flex flex-wrap items-center justify-center gap-1.5 px-1 animate-fade-in">
               <button
@@ -833,7 +597,7 @@ const SmartSearchPage: React.FC = () => {
         </div>
       </div>
 
-      {/* --- تصميم الشهادة العرضية للتصدير --- */}
+      {/* --- تصميم الشهادة العرضية المحدثة والفاخرة للتصدير --- */}
       <div className="fixed left-[-9999px] top-0 pointer-events-none">
           <div ref={certificateRef} dir={locale === 'ar' ? 'rtl' : 'ltr'} className="w-[1123px] min-h-[794px] h-fit bg-gradient-to-br from-white via-slate-50 to-amber-50/20 text-slate-900 relative overflow-hidden flex flex-col font-sans border-[16px] border-solid border-amber-500 shadow-2xl pb-10">
               <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-bl-full -z-10 pointer-events-none"></div>
@@ -902,7 +666,7 @@ const SmartSearchPage: React.FC = () => {
         .no-scrollbar::-webkit-scrollbar { display: none; }
 
         @keyframes shimmer { 
-          0% { transform: translateX(-50%); } 
+          0% { transform: translateX(-50%); }
           100% { transform: translateX(0%); } 
         }
 
