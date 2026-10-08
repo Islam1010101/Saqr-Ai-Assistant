@@ -9,7 +9,7 @@ import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
 import { trackActivity } from '../src/utils/tracker';
 import { supabase } from '../src/utils/supabase';
 
-// --- 1. بروتوكول عقل صقر النهائي (تم دمج أوامر معلمين McGraw-Hill وتوجيهات الخبير التربوي) ---
+// --- 1. بروتوكول عقل صقر النهائي (تم دمج أوامر تحضير الجداول التفاعلية للمعلمين) ---
 const SAQR_ELITE_PROMPT = `
 Identity: You are "Saqr" (صقر), the official Elite AI Librarian and Educational Expert of Emirates Falcon International Private School (EFIPS).
 
@@ -23,30 +23,33 @@ Instructions for Books & Search:
 2. If found, tell them EXACTLY where it is based on the data. For Physical Library (المكتبة العادية), mention the shelf or row number if available. For Digital Libraries, specify if it's the Arabic or English Digital Library.
 3. If the user searches in Arabic for an English book (e.g., "هاري بوتر"), use your AI knowledge to recognize they mean "Harry Potter", and answer accordingly.
 
-Instructions for Teacher Support & McGraw-Hill Curricula (أوامر تحضير المعلمين والتحضير المفصل):
-1. Built-in Knowledge: Leverage your built-in knowledge of McGraw-Hill scope & sequence (such as Wonders for English, Inspire Science, and mathematics series).
-2. Copy & Paste Strategy: Process unit titles, lesson names, or objectives provided by teachers to generate fully compliant lesson plans.
-3. Worksheet & Page Handling: Handle partial worksheet or page inputs provided by teachers to design tailored activities.
+Instructions for Teacher Support & Lesson Planning (أوامر التحضير التفاعلي والجداول):
+1. INTERVIEW MODE: When a teacher asks to plan a lesson (تحضير درس) or design a presentation, DO NOT generate the plan immediately.
+   First, politely ask them to provide the following details if not already provided:
+   - اسم المعلم (Teacher Name)
+   - المادة (Subject)
+   - الصف (Grade)
+   - عنوان الدرس (Lesson Title)
+   - اليوم (Day)
+   - الحصة - حسب جدول المكتبة (Period)
 
-LESSON PLAN GENERATOR INSTRUCTION:
-"أنت مساعد تربوي خبير في مناهج McGraw-Hill الدولية. قم بإعداد خطة درس تفصيلية شاملة ومفصلة بالكامل استناداً إلى عنوان الوحدة أو الدرس الذي يزودك به المعلم. يجب أن تقدم تحضيراً كاملاً ومفصلاً مقسماً بعناوين رئيسية وواضحة، والنقاط مرتبة تحت بعضها بشكل منسق ومريح للقراءة. تتضمن الخطة بالتفصيل وكل نقطة بشكل مرتب ومنفصل: 
-- أهداف الدرس: وتكون مصاغة كـ (أن + الفعل المضارع) وتعتمد على تصنيف بلوم (باللغة العربية والإنجليزية).
-- نواتج التعلم لكل هدف.
-- المفردات الجديدة.
-- الربط بمادة أخرى.
-- الربط بالحياة اليومية.
-- الربط بالهوية الوطنية (الإماراتية).
-- خطوات تنفيذ الدرس.
-- التهيئة الحافزة.
-- وقت المعلم.
-- التأكد من الفهم.
-- النشاط الرئيس 'أوراق العمل'.
-- إجراءات استخدام المكتبة ومصادرها أثناء الحصة (كيف سيتم توظيف المكتبة لخدمة الدرس).
-- تقييم النشاط الرئيس.
-- الواجب."
+2. LESSON PLAN GENERATION (TABLE FORMAT): Once the teacher provides the required details, generate the comprehensive lesson plan formatted as a Markdown TABLE suitable for A4 printing.
+   The very top of your response MUST include the school logo image: ![EFIPS Logo](https://www.efipslibrary.online/school-logo.png)
+   
+   The table MUST include these specific rows with clear separation:
+   - معلومات أساسية (Basic Info): [Teacher, Subject, Grade, Title, Day, Period]
+   - أهداف الدرس (Objectives): Formatted as "أن + الفعل المضارع" based on Bloom's Taxonomy (Arabic & English).
+   - نواتج التعلم (Learning Outcomes): Specific to each objective.
+   - المفردات الجديدة (New Vocabulary).
+   - الربط بمواد أخرى (Cross-Curricular Link).
+   - الربط بالحياة اليومية (Real-life Connection).
+   - الربط بالهوية الوطنية الإماراتية (UAE National Identity Link).
+   - خطوات تنفيذ الدرس (Lesson Execution Steps): Must be separated points covering: التهيئة الحافزة (Warm-up), وقت المعلم (Teacher Time), التأكد من الفهم (Checking for Understanding), النشاط الرئيس/أوراق العمل (Main Activity/Worksheets), تقييم النشاط (Activity Evaluation), الواجب (Homework).
+   - إجراءات استخدام المكتبة (Library Integration): How the library resources will be used during this specific period.
+   - الاعتماد (Sign-off): At the very end, explicitly state "تم إعداد هذه الخطة بواسطة المساعد الذكي صقر - مكتبة مدرسة صقر الإمارات" (Prepared by Saqr AI Assistant - EFIPS Library).
 
 PRESENTATION STRUCTURE INSTRUCTION:
-"بناءً على موضوع الدرس الذي يحدده المعلم من منهج -Hill، قم بتصميم هيكل عرض تقديمي احترافي ومفصل بالكامل مرتب بالشرائح بشكل دقيق ومرتب. اجعل كل شريحة في قسم مستقل بعنوان واضح والنقاط تحت بعضها دون تلاصق. يتضمن العرض التقديمي بالتفصيل:
+"بناءً على موضوع الدرس الذي يحدده المعلم من منهج McGraw-Hill أو غيره، قم بتصميم هيكل عرض تقديمي احترافي ومفصل بالكامل مرتب بالشرائح بشكل دقيق ومرتب. اجعل كل شريحة في قسم مستقل بعنوان واضح والنقاط تحت بعضها دون تلاصق. يتضمن العرض التقديمي بالتفصيل:
 - الشريحة الأولى: شريحة العنوان الرئيسي وأهداف الدرس.
 - الشريحة الثانية: شريحة التهيئة والتمهيد (نشاط استهلالي).
 - الشريحة الثالثة إلى السادسة: شرائح المحتوى الأساسي (مع نقاط بارزة ومفصلة في كل شريحة).
@@ -55,6 +58,7 @@ PRESENTATION STRUCTURE INSTRUCTION:
 - مع كتابة النقاط الرئيسية في كل شريحة بشكل منفصل، وإضافة ملاحظات المعلم (Speaker Notes) الخاصة بما يجب قوله أو شرحه في كل شريحة."
 
 Formatting Rules for Responses:
+- Use Markdown tables properly.
 - Always structure your answers with clear headings, bullet points, and proper line spacing to ensure readability and prevent clustered text. Each section must be distinct.
 
 Instructions for "Little Author" Challenge (STRICT RULES):
@@ -81,6 +85,7 @@ const localization: any = {
     status: 'صقر الذكي (EFIPS)',
     online: 'متصل',
     download: 'تحميل شهادة المؤلف الصغير',
+    downloadPdf: 'تصدير كـ PDF',
     you: 'أنت',
     certSchool: 'مدرسة صقر الإمارات الدولية الخاصة',
     certChallenge: 'تحدي المؤلف الصغير',
@@ -95,7 +100,7 @@ const localization: any = {
     welcome: 'مرحباً بك،',
     mcgrawLesson: 'تحضير حصة داخل المكتبة',
     mcgrawPres: 'تصميم عرض تقديمي',
-    lessonPrompt: 'أريد تحضير درس تفصيلي من منهج McGraw-Hill لموضوع: ',
+    lessonPrompt: 'أريد تحضير درس تفصيلي من منهجي لتدريسه في المكتبة. ما هي البيانات التي تحتاجها؟',
     presPrompt: 'أريد تصميم هيكل عرض تقديمي احترافي لموضوع: '
   },
   en: {
@@ -103,6 +108,7 @@ const localization: any = {
     status: 'Saqr AI Librarian',
     online: 'Online',
     download: 'Download Certificate',
+    downloadPdf: 'Export PDF',
     you: 'YOU',
     certSchool: 'Emirates Falcon International Private School',
     certChallenge: 'Little Author Challenge',
@@ -115,9 +121,9 @@ const localization: any = {
     certAI: 'Certified By',
     certSaqr: 'Saqr - AI Librarian',
     welcome: "Let's jump in,",
-    mcgrawLesson: 'Lesson Plan inside library',
+    mcgrawLesson: 'Library Lesson Plan',
     mcgrawPres: 'Presentation Structure',
-    lessonPrompt: 'I want a detailed lesson plan from McGraw-Hill for the topic: ',
+    lessonPrompt: 'I want a detailed lesson plan for a library session. What details do you need?',
     presPrompt: 'I want to design a professional presentation structure for the topic: '
   }
 };
@@ -138,6 +144,12 @@ const SendIcon = () => (
 const DownloadIcon = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+  </svg>
+);
+
+const PrinterIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
   </svg>
 );
 
@@ -222,8 +234,8 @@ const SmartSearchPage: React.FC = () => {
           : `Welcome my creative friend **${name}**! 🎓\n\nI'm 'Saqr', your AI Librarian. Shall we co-author a story today, or are you looking for a specific book?`;
       } else if (storedType === 'teacher' || storedType === 'admin') {
         welcomeMessage = locale === 'ar'
-          ? `أهلاً بك أستاذي الفاضل **${name}**! 👨‍🏫\n\nأنا "صقر" في خدمتك. كيف يمكنني مساعدتك اليوم؟`
-          : `Welcome esteemed teacher **${name}**! 👨‍🏫\n\nI am 'Saqr', at your service. How can I assist you today ?`;
+          ? `أهلاً بك أستاذي الفاضل **${name}**! 👨‍🏫\n\nأنا "صقر" في خدمتك. كيف يمكنني مساعدتك اليوم في تحضير دروسك أو البحث عن مصادر لمادتك؟`
+          : `Welcome esteemed teacher **${name}**! 👨‍🏫\n\nI am 'Saqr', at your service. How can I assist you today with your lesson planning or resources?`;
       }
     } else {
       setUserName('');
@@ -278,11 +290,61 @@ const SmartSearchPage: React.FC = () => {
     }
   };
 
+  // دالة طباعة الرسالة المحددة كـ PDF (للتحضير)
+  const handlePrintPDF = (contentToPrint: string) => {
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      // تجهيز محتوى الطباعة بحيث يتم تحويل الـ Markdown الأساسي إلى HTML بسيط
+      // نعتمد هنا على تحويل الجداول بشكل أساسي
+      let htmlContent = contentToPrint
+        .replace(/\|(.+)\|/g, '<tr><td>$1</td></tr>')
+        .replace(/---/g, '')
+        .replace(/!\[.*?\]\((.*?)\)/g, '<div style="text-align:center; margin-bottom: 20px;"><img src="$1" style="max-width: 150px;" alt="Logo"/></div>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n/g, '<br/>');
+
+      // معالجة الجدول البسيطة
+      htmlContent = htmlContent.replace(/(<tr><td>.*<\/td><\/tr>)/s, '<table style="width:100%; border-collapse: collapse; margin-top: 20px;" border="1">$1</table>');
+      htmlContent = htmlContent.replace(/<td>(.*?)<\/td>/g, '<td style="padding: 12px; border: 1px solid #ccc; text-align: right; vertical-align: top;">$1</td>');
+
+      printWindow.document.write(`
+        <html dir="rtl" lang="ar">
+          <head>
+            <title>خطة درس - صقر</title>
+            <style>
+              body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; color: #333; line-height: 1.6; }
+              table { width: 100%; border-collapse: collapse; margin-top: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
+              th, td { border: 1px solid #e2e8f0; padding: 15px; text-align: right; vertical-align: top; }
+              th { background-color: #f8fafc; font-weight: bold; }
+              h1, h2, h3 { color: #0f172a; margin-top: 20px; }
+              img { max-width: 150px; height: auto; margin-bottom: 20px; }
+              .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+              @media print {
+                body { padding: 0; }
+                table { box-shadow: none; border: 1px solid #000; }
+                th, td { border: 1px solid #000; }
+                .no-print { display: none !important; }
+              }
+            </style>
+          </head>
+          <body>
+            ${htmlContent}
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+      // تأخير بسيط للتأكد من تحميل الصورة إن وجدت
+      setTimeout(() => {
+          printWindow.print();
+      }, 500);
+    }
+  };
+
   const handleQuickPrompt = async (promptText: string) => {
     const storedUser = localStorage.getItem('current_user');
     const storedType = localStorage.getItem('user_type');
     
-    // حساب الإدارة متاح له التحضير دائماً
     if (storedType === 'admin') {
       setInput(promptText);
       return;
@@ -297,21 +359,28 @@ const SmartSearchPage: React.FC = () => {
       let isBooked = false;
 
       try {
-        // الفحص في جدول library_schedule بالأعمدة المطابقة لقاعدة البيانات (user_id و teacher)
+        let query = supabase.from('library_schedule').select('id');
+        const filters: string[] = [];
         if (teacherId) {
-          const { data, error } = await supabase
-            .from('library_schedule')
-            .select('id')
-            .ilike('user_id', `%${teacherId}%`);
-          if (!error && data && data.length > 0) isBooked = true;
+          filters.push(`user_id.ilike.%${teacherId}%`);
+          filters.push(`teacher.ilike.%${teacherId}%`);
+        }
+        if (teacherName) {
+          filters.push(`teacher.ilike.%${teacherName}%`);
         }
 
-        if (!isBooked && teacherName) {
-          const { data, error } = await supabase
-            .from('library_schedule')
-            .select('id')
-            .ilike('teacher', `%${teacherName}%`);
-          if (!error && data && data.length > 0) isBooked = true;
+        if (filters.length > 0) {
+          const { data, error } = await query.or(filters.join(','));
+          if (!error && data && data.length > 0) {
+            isBooked = true;
+          }
+        }
+
+        if (!isBooked && filters.length > 0) {
+          const { data, error } = await supabase.from('schedule').select('id').or(filters.join(','));
+          if (!error && data && data.length > 0) {
+            isBooked = true;
+          }
         }
 
         if (!isBooked) {
@@ -342,7 +411,6 @@ const SmartSearchPage: React.FC = () => {
     
     setSaqrState('thinking');
 
-    // تسجيل التحضير في قاعدة بيانات الأدمن إذا استخدم الميزة
     if (isTeacherOrAdmin && (userQuery.includes('تحضير') || userQuery.includes('عرض') || userQuery.includes('lesson plan') || userQuery.includes('presentation'))) {
       try {
         const storedUser = localStorage.getItem('current_user');
@@ -462,13 +530,16 @@ const SmartSearchPage: React.FC = () => {
     return '/Search.gif';
   };
 
+  // Helper check if message has a table (likely a lesson plan)
+  const isLessonPlan = (content: string) => content.includes('|') && content.includes('---');
+
   return (
     <div dir={dir} className="w-full h-[100dvh] flex flex-col bg-white dark:bg-[#0b0f17] font-sans relative overflow-hidden text-slate-900 dark:text-slate-100 transition-colors duration-300">
       
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-950/40 via-[#0b0f17] to-[#0b0f17] pointer-events-none -z-10 hidden dark:block" />
 
       {/* Header */}
-      <header className="flex-shrink-0 px-3 py-3 md:px-8 w-full max-w-5xl mx-auto flex justify-between items-center z-20 relative bg-white/80 dark:bg-transparent backdrop-blur-sm border-b border-slate-100 dark:border-transparent">
+      <header className="flex-shrink-0 px-3 py-3 md:px-8 w-full max-w-5xl mx-auto flex justify-between items-center z-20 relative bg-white/80 dark:bg-transparent backdrop-blur-sm border-b border-slate-100 dark:border-transparent no-print">
         <div className="flex items-center gap-2.5 md:gap-4">
           <div className={`w-9 h-9 md:w-14 md:h-14 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden bg-slate-100 dark:bg-slate-800 border-2 border-sky-400 dark:border-sky-500 shadow-md ${saqrState === 'thinking' ? 'ring-2 ring-amber-400 animate-pulse' : ''}`}>
             <img 
@@ -496,7 +567,7 @@ const SmartSearchPage: React.FC = () => {
       </header>
 
       {/* Greeting */}
-      <div className="flex-shrink-0 text-center pt-2 pb-1 px-3 z-10">
+      <div className="flex-shrink-0 text-center pt-2 pb-1 px-3 z-10 no-print">
         <h2 className="text-xl md:text-4xl lg:text-5xl font-medium tracking-tight text-slate-800 dark:text-slate-100">
           {t('welcome')} <span className="font-bold text-sky-600 dark:text-sky-400">{userName || (locale === 'ar' ? 'صديقي المبدع' : 'Creative Friend')}</span>
         </h2>
@@ -513,15 +584,29 @@ const SmartSearchPage: React.FC = () => {
                   {msg.role === 'assistant' && (
                     <div className="flex flex-col gap-2 max-w-[95%] md:max-w-[85%] items-start">
                       <div className="flex gap-3 items-end" translate="no" lang={locale}>
-                        <div className="bg-slate-50 dark:bg-[#1a1f2e] border border-slate-200 dark:border-slate-800 rounded-3xl rounded-bl-sm px-4 md:px-6 py-4 md:py-5 shadow-sm text-slate-800 dark:text-slate-100 font-medium leading-relaxed text-sm md:text-lg">
-                          <div className="prose prose-slate dark:prose-invert max-w-none text-start font-cairo [&>ul]:list-disc [&>ul]:ps-5 [&>ul]:space-y-2 [&>ol]:list-decimal [&>ol]:ps-5 [&>ol]:space-y-2 [&>p]:mb-3 [&>h3]:font-bold [&>h3]:text-sky-600 dark:[&>h3]:text-sky-400 [&>h3]:mt-4 [&>h3]:mb-2 [&>h4]:font-bold [&>h4]:text-amber-600 dark:[&>h4]:text-amber-400 [&>h4]:mt-3 [&>h4]:mb-1">
+                        <div className="bg-slate-50 dark:bg-[#1a1f2e] border border-slate-200 dark:border-slate-800 rounded-3xl rounded-bl-sm px-4 md:px-6 py-4 md:py-5 shadow-sm text-slate-800 dark:text-slate-100 font-medium leading-relaxed text-sm md:text-lg w-full">
+                          
+                          {/* زر تصدير PDF يظهر فقط لرسائل التحضير التي تحتوي على جدول */}
+                          {isTeacherOrAdmin && isLessonPlan(msg.content) && (
+                              <div className="flex justify-end mb-3 no-print border-b border-slate-200 dark:border-slate-700 pb-3">
+                                  <button 
+                                      onClick={() => handlePrintPDF(msg.content)} 
+                                      className="flex items-center gap-1.5 px-3 py-1.5 bg-sky-500 hover:bg-sky-600 text-white rounded-lg font-bold text-xs shadow-sm transition-all"
+                                  >
+                                      <PrinterIcon /> {t('downloadPdf')}
+                                  </button>
+                              </div>
+                          )}
+
+                          <div className="prose prose-slate dark:prose-invert max-w-none text-start font-cairo [&>table]:w-full [&>table]:border-collapse [&>table_th]:border [&>table_th]:border-slate-300 [&>table_th]:p-3 [&>table_th]:bg-slate-100 dark:[&>table_th]:bg-slate-800 [&>table_td]:border [&>table_td]:border-slate-300 [&>table_td]:p-3 [&>ul]:list-disc [&>ul]:ps-5 [&>ul]:space-y-2 [&>ol]:list-decimal [&>ol]:ps-5 [&>ol]:space-y-2 [&>p]:mb-3 [&>h3]:font-bold [&>h3]:text-sky-600 dark:[&>h3]:text-sky-400 [&>h3]:mt-4 [&>h3]:mb-2 [&>h4]:font-bold [&>h4]:text-amber-600 dark:[&>h4]:text-amber-400 [&>h4]:mt-3 [&>h4]:mb-1">
                             <ReactMarkdown>{msg.content}</ReactMarkdown>
                           </div>
+
                         </div>
                       </div>
 
                       {winnerData && saqrState === 'victory' && index === messages.length - 1 && (
-                        <div className="mt-2 w-full text-start animate-zoom-in">
+                        <div className="mt-2 w-full text-start animate-zoom-in no-print">
                           <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white font-bold rounded-full shadow-md hover:bg-emerald-700 transition-all text-xs md:text-sm">
                             <DownloadIcon />
                             <span>{t('download')}</span>
@@ -532,7 +617,7 @@ const SmartSearchPage: React.FC = () => {
                   )}
 
                   {msg.role === 'user' && (
-                    <div className="bg-sky-500 dark:bg-sky-600 text-white px-4 md:px-5 py-3 rounded-3xl rounded-br-sm max-w-[90%] md:max-w-[75%] shadow-md">
+                    <div className="bg-sky-500 dark:bg-sky-600 text-white px-4 md:px-5 py-3 rounded-3xl rounded-br-sm max-w-[90%] md:max-w-[75%] shadow-md no-print">
                       <div className="font-semibold leading-relaxed max-w-none text-start text-sm md:text-lg">
                         {msg.content}
                       </div>
@@ -547,10 +632,9 @@ const SmartSearchPage: React.FC = () => {
       </div>
 
       {/* Input & Teacher Quick Buttons */}
-      <div className="absolute bottom-0 inset-x-0 px-3 pb-3 pt-2 w-full z-20 flex-shrink-0 bg-gradient-to-t from-white via-white/95 to-transparent dark:from-[#0b0f17] dark:via-[#0b0f17]/95 dark:to-transparent">
+      <div className="absolute bottom-0 inset-x-0 px-3 pb-3 pt-2 w-full z-20 flex-shrink-0 bg-gradient-to-t from-white via-white/95 to-transparent dark:from-[#0b0f17] dark:via-[#0b0f17]/95 dark:to-transparent no-print">
         <div className="max-w-3xl mx-auto flex flex-col gap-2">
           
-          {/* شريط الأزرار السريعة للمعلمين فقط فوق مربع الكتابة (متعدد اللغات) */}
           {isTeacherOrAdmin && (
             <div className="flex flex-wrap items-center justify-center gap-1.5 px-1 animate-fade-in">
               <button
@@ -595,69 +679,6 @@ const SmartSearchPage: React.FC = () => {
             </div>
           )}
         </div>
-      </div>
-
-      {/* --- تصميم الشهادة العرضية المحدثة والفاخرة للتصدير --- */}
-      <div className="fixed left-[-9999px] top-0 pointer-events-none">
-          <div ref={certificateRef} dir={locale === 'ar' ? 'rtl' : 'ltr'} className="w-[1123px] min-h-[794px] h-fit bg-gradient-to-br from-white via-slate-50 to-amber-50/20 text-slate-900 relative overflow-hidden flex flex-col font-sans border-[16px] border-solid border-amber-500 shadow-2xl pb-10">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-bl-full -z-10 pointer-events-none"></div>
-              <div className="absolute bottom-0 left-0 w-64 h-64 bg-amber-500/10 rounded-tr-full -z-10 pointer-events-none"></div>
-
-              <div className="flex justify-between items-center px-12 pt-10 pb-6 border-b-2 border-slate-200">
-                  <div className="flex items-center gap-5">
-                      <img src="https://www.efipslibrary.online/school-logo.png" className="w-20 h-20 object-contain drop-shadow" alt="EFIPS Logo" crossOrigin="anonymous" />
-                      <div>
-                          <h3 className="text-xl font-black text-slate-800 tracking-tight">{t('certSchool')}</h3>
-                          <h4 className="text-xs font-bold text-amber-700 tracking-widest uppercase mt-0.5" dir="ltr">Emirates Falcon International Private School</h4>
-                      </div>
-                  </div>
-                  <div className="text-left">
-                      <div className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-900 font-black rounded-full text-base shadow-md border border-amber-400">
-                          {t('certChallenge')}
-                      </div>
-                  </div>
-              </div>
-
-              <div className="flex-1 flex flex-col items-center justify-center text-center px-14 py-6">
-                  <h1 className="text-4xl lg:text-5xl font-black text-amber-700 tracking-wide mb-3 uppercase drop-shadow-sm">{t('certTitle')}</h1>
-                  <p className="text-xl font-bold text-slate-600 mb-6">{t('certSubtitle')}</p>
-                  
-                  <div className="mb-4">
-                      <h2 className="text-4xl lg:text-5xl font-black text-slate-900 tracking-tight pb-2 border-b-4 border-amber-500 px-10 inline-block">
-                          {winnerData?.name}
-                      </h2>
-                  </div>
-                  <p className="text-2xl font-bold text-slate-600 mb-8">
-                      {t('certGrade')} <span className="text-amber-700 font-black">{winnerData?.grade}</span>
-                  </p>
-                  
-                  <div className="bg-white/90 backdrop-blur p-6 rounded-3xl border-2 border-amber-200 w-full text-start relative shadow-sm mb-4">
-                      <span className={`absolute -top-4 ${locale === 'ar' ? 'right-10' : 'left-10'} bg-amber-500 text-slate-900 px-6 py-1.5 font-black text-lg border-2 border-amber-400 rounded-full shadow-sm`}>
-                          {t('certStory')}
-                      </span>
-                      <p className={`text-xl leading-[1.8] font-bold text-slate-800 mt-4 ${locale === 'ar' ? 'text-justify' : 'text-left'} whitespace-pre-wrap`}>
-                          {winnerData?.content}
-                      </p>
-                  </div>
-              </div>
-
-              <div className="flex justify-between items-end px-14 pt-6 border-t-2 border-slate-200 mt-auto">
-                  <div className="text-center w-60">
-                      <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">{t('certDate')}</p>
-                      <p className="text-lg font-black text-slate-800">{winnerData?.date}</p>
-                  </div>
-                  <div className="text-center flex flex-col items-center flex-1">
-                      <div className="w-16 h-16 rounded-full border-2 border-amber-500/30 flex items-center justify-center bg-amber-50/50 mb-1">
-                          <span className="text-xl font-black text-amber-600">EFIPS</span>
-                      </div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('certOfficial')}</p>
-                  </div>
-                  <div className="text-center w-60">
-                      <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">{t('certAI')}</p>
-                      <p className="text-xl font-black text-amber-700">{t('certSaqr')}</p>
-                  </div>
-              </div>
-          </div>
       </div>
 
       <style>{`
