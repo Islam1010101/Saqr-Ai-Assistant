@@ -185,6 +185,7 @@ const SmartSearchPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [winnerData, setWinnerData] = useState<any>(null);
   const [userName, setUserName] = useState<string>('');
+  const [userType, setUserType] = useState<string>('guest');
   const [isTeacherOrAdmin, setIsTeacherOrAdmin] = useState<boolean>(false);
   const [saqrState, setSaqrState] = useState<'idle' | 'thinking' | 'speaking' | 'victory'>('idle');
 
@@ -198,6 +199,7 @@ const SmartSearchPage: React.FC = () => {
     const storedType = localStorage.getItem('user_type');
 
     setIsTeacherOrAdmin(storedType === 'teacher' || storedType === 'admin');
+    setUserType(storedType || 'guest');
     let welcomeMessage = '';
 
     if (storedUser && storedType) {
@@ -233,7 +235,7 @@ const SmartSearchPage: React.FC = () => {
   }, [locale]);
 
   useEffect(() => {
-    // Scroll only the conversation pane, not the entire page.
+    // Scroll only the conversation history. The composer stays immediately after the latest turn.
     const container = messagesContainerRef.current;
     if (container) container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
   }, [messages, isLoading]);
@@ -474,6 +476,80 @@ const SmartSearchPage: React.FC = () => {
 
   const getSaqrImageSrc = () => saqrState === 'idle' ? '/search_still_frame.png' : '/Search.gif';
 
+  // The welcome response remains in the conversation context sent to the API,
+  // but is shown in the welcome banner instead of being duplicated in the chat.
+  const hasConversation = messages.some((message) => message.role === 'user');
+  const visibleMessages = hasConversation
+    ? messages.filter((message, index) => !(index === 0 && message.role === 'assistant'))
+    : [];
+
+  const welcomeTitle = locale === 'ar'
+    ? (userType === 'teacher' || userType === 'admin'
+        ? 'مرحباً بك أستاذنا الفاضل'
+        : userType === 'student'
+          ? 'مرحباً يا صديقي'
+          : 'مرحباً بك في مكتبة صقر')
+    : (userType === 'teacher' || userType === 'admin'
+        ? 'Welcome, esteemed teacher'
+        : userType === 'student'
+          ? 'Hello, my friend'
+          : 'Welcome to Saqr Library');
+
+  const composer = (
+    <footer className="saqr-composer-wrap">
+      <div className="saqr-composer-content">
+        {isTeacherOrAdmin && (
+          <div className="saqr-quick-actions">
+            <button
+              onClick={() => handleQuickPrompt(t('lessonPrompt'))}
+              className="saqr-quick-button saqr-quick-button-lesson"
+              type="button"
+            >
+              <span aria-hidden="true">📑</span>
+              <span>{t('mcgrawLesson')}</span>
+            </button>
+            <button
+              onClick={() => handleQuickPrompt(t('presPrompt'))}
+              className="saqr-quick-button saqr-quick-button-presentation"
+              type="button"
+            >
+              <span aria-hidden="true">📊</span>
+              <span>{t('mcgrawPres')}</span>
+            </button>
+          </div>
+        )}
+
+        <form
+          className={`saqr-composer ${isLoading ? 'saqr-composer-loading' : ''}`}
+          onSubmit={(event) => { event.preventDefault(); void handleSendMessage(); }}
+        >
+          <input
+            ref={composerInputRef}
+            type="text"
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
+            placeholder={t('input')}
+            className="saqr-input"
+            disabled={isLoading}
+            aria-label={t('input')}
+            autoComplete="off"
+          />
+          <button
+            type="submit"
+            disabled={isLoading || !input.trim()}
+            className="saqr-send-button"
+            aria-label={locale === 'ar' ? 'إرسال الرسالة' : 'Send message'}
+          >
+            <SendIcon />
+          </button>
+        </form>
+
+        {isLoading && <div className="saqr-progress-track"><span className="saqr-progress-bar" /></div>}
+        <p className="saqr-footer-note">{locale === 'ar' ? 'صقر • مساعد مكتبة EFIPS الذكي' : 'Saqr • EFIPS AI Library Assistant'}</p>
+      </div>
+    </footer>
+  );
+
   return (
     <div dir={dir} className="saqr-page bg-white text-slate-900 dark:bg-[#0b0f17] dark:text-slate-100">
       {/* الخلفية */}
@@ -514,7 +590,7 @@ const SmartSearchPage: React.FC = () => {
       {/* Compact welcome banner */}
       <section className="saqr-welcome-wrap" aria-label={locale === 'ar' ? 'رسالة الترحيب' : 'Welcome'}>
         <div className="saqr-welcome-card">
-          <p className="text-xs font-bold text-slate-600 dark:text-slate-300 sm:text-sm md:text-base">{t('welcome')}</p>
+          <p className="text-xs font-bold text-slate-600 dark:text-slate-300 sm:text-sm md:text-base">{welcomeTitle}</p>
           <div className="saqr-name-wrap">
             <span className="saqr-name-glow" aria-hidden="true" />
             <span className="saqr-name-text">
@@ -524,103 +600,80 @@ const SmartSearchPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Conversation: the input bar is in normal flex flow, so it cannot overlap answers. */}
-      <main ref={messagesContainerRef} className="saqr-messages" aria-live="polite">
-        <div className="saqr-messages-inner">
-          {messages.map((msg, index) => (
-            <RevealMessage key={`${index}-${msg.role}`}>
-              <div className={`saqr-message-row ${msg.role === 'user' ? 'saqr-message-row-user' : 'saqr-message-row-assistant'}`}>
-                {msg.role === 'assistant' ? (
-                  <div className="saqr-assistant-column">
-                    <div className="saqr-assistant-bubble" translate="no" lang={locale}>
-                      <div className="saqr-markdown prose prose-slate max-w-none text-start dark:prose-invert">
-                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+      {/*
+        Empty state: input sits immediately below the welcome banner.
+        Active state: new questions and answers stack above the input in a scrollable transcript.
+      */}
+      {!hasConversation ? (
+        <main className="saqr-empty-chat">
+          {composer}
+          <div className="saqr-empty-guidance" aria-hidden="true">
+            <div className="saqr-empty-orbit">
+              <img
+                src="/search_still_frame.png"
+                alt=""
+                onError={(event) => { event.currentTarget.style.display = 'none'; }}
+              />
+            </div>
+            <p className="saqr-empty-heading">
+              {locale === 'ar' ? 'كيف يمكن لصقر مساعدتك اليوم؟' : 'How can Saqr help you today?'}
+            </p>
+            <p className="saqr-empty-subheading">
+              {locale === 'ar'
+                ? 'ابحث عن كتاب، اسأل سؤالاً، أو ابدأ قصة إبداعية.'
+                : 'Find a book, ask a question, or start a creative story.'}
+            </p>
+          </div>
+        </main>
+      ) : (
+        <main className="saqr-active-chat">
+          <div ref={messagesContainerRef} className="saqr-messages" aria-live="polite">
+            <div className="saqr-messages-inner">
+              {visibleMessages.map((msg, index) => (
+                <RevealMessage key={`${index}-${msg.role}`}>
+                  <div className={`saqr-message-row ${msg.role === 'user' ? 'saqr-message-row-user' : 'saqr-message-row-assistant'}`}>
+                    {msg.role === 'assistant' ? (
+                      <div className="saqr-assistant-column">
+                        <div className="saqr-assistant-bubble" translate="no" lang={locale}>
+                          <div className="saqr-markdown prose prose-slate max-w-none text-start dark:prose-invert">
+                            <ReactMarkdown>{msg.content}</ReactMarkdown>
+                          </div>
+                        </div>
+                        {winnerData && saqrState === 'victory' && index === visibleMessages.length - 1 && (
+                          <div className="mt-2 text-start">
+                            <button onClick={handleDownloadJPG} className="saqr-inline-download" type="button">
+                              <DownloadIcon />
+                              <span>{t('download')}</span>
+                            </button>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                    {winnerData && saqrState === 'victory' && index === messages.length - 1 && (
-                      <div className="mt-2 text-start">
-                        <button onClick={handleDownloadJPG} className="saqr-inline-download" type="button">
-                          <DownloadIcon />
-                          <span>{t('download')}</span>
-                        </button>
+                    ) : (
+                      <div className="saqr-user-bubble">
+                        <span className="sr-only">{t('you')}: </span>
+                        {msg.content}
                       </div>
                     )}
                   </div>
-                ) : (
-                  <div className="saqr-user-bubble">
-                    <span className="sr-only">{t('you')}: </span>
-                    {msg.content}
-                  </div>
-                )}
-              </div>
-            </RevealMessage>
-          ))}
+                </RevealMessage>
+              ))}
 
-          {isLoading && (
-            <div className="saqr-loading-row" role="status" aria-label={locale === 'ar' ? 'صقر يكتب الرد' : 'Saqr is responding'}>
-              <span className="saqr-loading-dot" />
-              <span className="saqr-loading-dot" />
-              <span className="saqr-loading-dot" />
-              <span className="ms-1 text-xs text-slate-500 dark:text-slate-400">{locale === 'ar' ? 'صقر يجهز الإجابة...' : 'Saqr is preparing a reply...'}</span>
+              {isLoading && (
+                <div className="saqr-loading-row" role="status" aria-label={locale === 'ar' ? 'صقر يكتب الرد' : 'Saqr is responding'}>
+                  <span className="saqr-loading-dot" />
+                  <span className="saqr-loading-dot" />
+                  <span className="saqr-loading-dot" />
+                  <span className="ms-1 text-xs text-slate-500 dark:text-slate-400">
+                    {locale === 'ar' ? 'صقر يجهز الإجابة...' : 'Saqr is preparing a reply...'}
+                  </span>
+                </div>
+              )}
+              <div ref={messagesEndRef} className="h-px shrink-0" />
             </div>
-          )}
-          <div ref={messagesEndRef} className="h-px shrink-0" />
-        </div>
-      </main>
-
-      {/* Composer: occupies its own row in the page layout on mobile, tablet and desktop. */}
-      <footer className="saqr-composer-wrap">
-        <div className="saqr-composer-content">
-          {isTeacherOrAdmin && (
-            <div className="saqr-quick-actions">
-              <button
-                onClick={() => handleQuickPrompt(t('lessonPrompt'))}
-                className="saqr-quick-button saqr-quick-button-lesson"
-                type="button"
-              >
-                <span aria-hidden="true">📑</span>
-                <span>{t('mcgrawLesson')}</span>
-              </button>
-              <button
-                onClick={() => handleQuickPrompt(t('presPrompt'))}
-                className="saqr-quick-button saqr-quick-button-presentation"
-                type="button"
-              >
-                <span aria-hidden="true">📊</span>
-                <span>{t('mcgrawPres')}</span>
-              </button>
-            </div>
-          )}
-
-          <form
-            className={`saqr-composer ${isLoading ? 'saqr-composer-loading' : ''}`}
-            onSubmit={(event) => { event.preventDefault(); void handleSendMessage(); }}
-          >
-            <input
-              ref={composerInputRef}
-              type="text"
-              value={input}
-              onChange={(event) => setInput(event.target.value)}
-              placeholder={t('input')}
-              className="saqr-input"
-              disabled={isLoading}
-              aria-label={t('input')}
-              autoComplete="off"
-            />
-            <button
-              type="submit"
-              disabled={isLoading || !input.trim()}
-              className="saqr-send-button"
-              aria-label={locale === 'ar' ? 'إرسال الرسالة' : 'Send message'}
-            >
-              <SendIcon />
-            </button>
-          </form>
-
-          {isLoading && <div className="saqr-progress-track"><span className="saqr-progress-bar" /></div>}
-          <p className="saqr-footer-note">{locale === 'ar' ? 'صقر • مساعد مكتبة EFIPS الذكي' : 'Saqr • EFIPS AI Library Assistant'}</p>
-        </div>
-      </footer>
+          </div>
+          {composer}
+        </main>
+      )}
 
       {/* Certificate export surface. Its original 1123 × 794 baseline is retained. */}
       <div className="saqr-certificate-host" aria-hidden="true">
@@ -836,7 +889,52 @@ const SmartSearchPage: React.FC = () => {
         }
         .dark .saqr-name-text { background-image: linear-gradient(95deg, #38bdf8, #34d399); }
 
-        /* Main fix: flex child with min-height:0 and independent scrolling. */
+        /* Initial state puts the composer immediately below the greeting. Once chat starts,
+           the transcript gets the available height and scrolls independently above the composer. */
+        .saqr-empty-chat,
+        .saqr-active-chat {
+          display: flex;
+          flex: 1 1 auto;
+          flex-direction: column;
+          min-height: 0;
+          width: 100%;
+          overflow: hidden;
+        }
+        .saqr-empty-chat { justify-content: flex-start; }
+        .saqr-active-chat { justify-content: flex-end; }
+        .saqr-empty-chat .saqr-composer-wrap { flex: 0 0 auto; }
+        .saqr-empty-guidance {
+          display: flex;
+          flex: 1 1 auto;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          min-height: 100px;
+          padding: 12px 18px 24px;
+          text-align: center;
+          background: radial-gradient(ellipse at center, rgba(14, 165, 233, .055), transparent 68%);
+        }
+        .dark .saqr-empty-guidance { background: radial-gradient(ellipse at center, rgba(14, 165, 233, .08), transparent 68%); }
+        .saqr-empty-orbit {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: clamp(66px, 9vh, 100px);
+          height: clamp(66px, 9vh, 100px);
+          margin-bottom: 10px;
+          overflow: hidden;
+          border: 1px solid rgba(56, 189, 248, .28);
+          border-radius: 50%;
+          background: rgba(14, 165, 233, .055);
+          box-shadow: 0 0 0 8px rgba(14, 165, 233, .025), 0 8px 24px rgba(15, 23, 42, .045);
+        }
+        .saqr-empty-orbit img { width: 100%; height: 100%; object-fit: cover; }
+        .saqr-empty-heading { margin: 0; color: #334155; font-size: clamp(14px, 1.7vw, 19px); font-weight: 850; }
+        .dark .saqr-empty-heading { color: #e2e8f0; }
+        .saqr-empty-subheading { max-width: 420px; margin: 4px 0 0; color: #94a3b8; font-size: clamp(11px, 1.2vw, 13px); line-height: 1.6; }
+        .saqr-active-chat .saqr-messages { flex: 1 1 auto; }
+
+        /* Scroll only the conversation pane; the composer is directly beneath the latest turn. */
         .saqr-messages {
           position: relative;
           z-index: 1;
@@ -933,7 +1031,7 @@ const SmartSearchPage: React.FC = () => {
           z-index: 4;
           flex: 0 0 auto;
           width: 100%;
-          padding: 8px clamp(9px, 2vw, 20px) max(7px, env(safe-area-inset-bottom));
+          padding: 6px clamp(9px, 2vw, 20px) max(6px, env(safe-area-inset-bottom));
           border-top: 1px solid rgba(148, 163, 184, .18);
           background: rgba(255, 255, 255, .93);
           box-shadow: 0 -7px 22px rgba(15, 23, 42, .045);
@@ -946,6 +1044,7 @@ const SmartSearchPage: React.FC = () => {
           box-shadow: 0 -8px 24px rgba(0, 0, 0, .15);
         }
         .saqr-composer-content { width: 100%; max-width: 850px; margin-inline: auto; }
+        .saqr-empty-chat .saqr-composer-wrap { border-bottom: 1px solid rgba(148, 163, 184, .12); }
         .saqr-quick-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; padding: 0 0 7px; }
         .saqr-quick-button {
           display: inline-flex;
@@ -1090,6 +1189,15 @@ const SmartSearchPage: React.FC = () => {
           .saqr-composer { min-height: 46px; padding: 4px 5px 4px 10px; gap: 5px; }
           .saqr-input { min-height: 34px; font-size: 13px; }
           .saqr-send-button { width: 35px; height: 35px; }
+        }
+        @media (max-height: 650px) {
+          .saqr-empty-guidance { padding-top: 6px; padding-bottom: 10px; }
+          .saqr-empty-orbit { width: 52px; height: 52px; margin-bottom: 5px; }
+          .saqr-empty-subheading { margin-top: 2px; }
+        }
+        @media (max-width: 420px) {
+          .saqr-empty-guidance { padding-inline: 14px; }
+          .saqr-empty-orbit { width: 62px; height: 62px; }
         }
         @media (prefers-reduced-motion: reduce) {
           .saqr-page *, .saqr-page *::before, .saqr-page *::after {
