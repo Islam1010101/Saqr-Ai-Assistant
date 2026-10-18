@@ -86,7 +86,7 @@ const translations = {
 
 const HOMELAND_FACTS = [
     { ar: "تأسست دولة الإمارات العربية المتحدة في الثاني من ديسمبر عام 1971م على يد الشيخ زايد بن سلطان آل نهيان، طيب الله ثراه.", en: "The UAE was founded on Dec 2, 1971, by Sheikh Zayed bin Sultan Al Nahyan." },
-    { ar: "هل تعلم أن برج خليفة في دبي هو أطول بناء شيده الإنسان في العالم بارتفاع 828 متراً؟", en: "Did you know Burj Khalifa is the tallest man-made structure in the world at 828m?" },
+    { ar: "هل تعلم أن برج خليفة في دبي هو أطول بناء شيده الإنسان في العالم بارفاع 828 متراً؟", en: "Did you know Burj Khalifa is the tallest man-made structure in the world at 828m?" },
     { ar: "مسبار الأمل الإماراتي هو أول مهمة عربية تصل إلى مدار كوكب المريخ لاستكشاف غلافه الجوي.", en: "The Hope Probe is the first Arab mission to reach Mars to explore its atmosphere." },
     { ar: "تعتبر 'نخلة جميرا' أكبر جزيرة اصطناعية في العالم، ويمكن رؤيتها بوضوح من الفضاء الخارجي.", en: "Palm Jumeirah is the world's largest man-made island, visible from space." },
     { ar: "متحف اللوفر أبوظبي هو أول متحف عالمي في العالم العربي يعكس روح الانفتاح الثقافي.", en: "Louvre Abu Dhabi is the first universal museum in the Arab world reflecting cultural openness." }
@@ -94,6 +94,7 @@ const HOMELAND_FACTS = [
 
 interface BurstItem { id: number; tx: number; ty: number; rot: number; color: string; }
 interface SparkleItem { id: number; x: number; y: number; }
+interface FlagFlyItem { id: number; x: number; y: number; rot: number; }
 
 const StarIcon = ({ className }: { className: string }) => (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -101,8 +102,8 @@ const StarIcon = ({ className }: { className: string }) => (
     </svg>
 );
 
-const UaeFlagIcon = () => (
-    <svg viewBox="0 0 640 480" className="w-10 h-10 rounded shadow-sm overflow-hidden" preserveAspectRatio="none">
+const UaeFlagIcon = ({ className = "w-10 h-10" }: { className?: string }) => (
+    <svg viewBox="0 0 640 480" className={`${className} rounded shadow-sm overflow-hidden`} preserveAspectRatio="none">
         <path fill="#00732f" d="M0 0h640v160H0z"/>
         <path fill="#fff" d="M0 160h640v160H0z"/>
         <path fill="#000" d="M0 320h640v160H0z"/>
@@ -179,6 +180,7 @@ const HomePage: React.FC = () => {
     const [showBubble, setShowBubble] = useState(false);
     const [daysLeft, setDaysLeft] = useState<number | null>(null);
     const [sparkles, setSparkles] = useState<SparkleItem[]>([]);
+    const [flyingFlags, setFlyingFlags] = useState<FlagFlyItem[]>([]);
     
     // حالة الكتب المستعارة
     const [borrowedBooks, setBorrowedBooks] = useState<any[]>([]);
@@ -209,12 +211,15 @@ const HomePage: React.FC = () => {
     useEffect(() => {
         const updateCountdown = () => {
             const now = new Date().getTime();
-            const targetDate = new Date('2026-10-12T00:00:00').getTime();
+            // ضبط تاريخ إجازة عيد الاتحاد الـ 55 ليبدأ في 2 ديسمبر 2026
+            const targetDate = new Date('2026-12-02T00:00:00').getTime();
             const distance = targetDate - now;
             if (distance > 0) setDaysLeft(Math.ceil(distance / (1000 * 60 * 60 * 24)));
             else setDaysLeft(0);
         };
         updateCountdown();
+        const interval = setInterval(updateCountdown, 60000);
+        return () => clearInterval(interval);
     }, []);
 
     const visitorCount = useMemo(() => {
@@ -274,6 +279,21 @@ const HomePage: React.FC = () => {
         }, 1500);
     };
 
+    // تفاعل احتفالي بأعلام الإمارات عند الضغط على بطاقة عيد الاتحاد 55
+    const handleNationalDayCelebration = (e: React.MouseEvent) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const newFlags: FlagFlyItem[] = Array.from({ length: 12 }).map(() => ({
+            id: Math.random(),
+            x: rect.left + rect.width / 2 + (Math.random() - 0.5) * 260,
+            y: rect.top + (Math.random() - 0.5) * 140,
+            rot: (Math.random() - 0.5) * 45
+        }));
+        setFlyingFlags(prev => [...prev, ...newFlags]);
+        setTimeout(() => {
+            setFlyingFlags(prev => prev.filter(f => !newFlags.some(nf => nf.id === f.id)));
+        }, 1800);
+    };
+
     const handleMascotInteraction = useCallback(() => {
         setShowBubble(true);
         setTimeout(() => setShowBubble(false), 3000);
@@ -304,6 +324,15 @@ const HomePage: React.FC = () => {
             {sparkles.map(s => (
                 <div key={s.id} className="fixed z-[9999] pointer-events-none animate-fade-out" style={{ left: s.x, top: s.y }}>
                     <StarIcon className="w-6 h-6 text-amber-400 drop-shadow-md animate-spin" />
+                </div>
+            ))}
+
+            {/* أعلام الإمارات المتطايرة عند الاحتفال بعيد الاتحاد */}
+            {flyingFlags.map(f => (
+                <div key={f.id} className="fixed z-[9999] pointer-events-none animate-flag-float" style={{ left: f.x, top: f.y, transform: `rotate(${f.rot}deg)` }}>
+                    <div className="p-1 bg-white/90 rounded-lg shadow-xl border border-amber-300">
+                        <UaeFlagIcon className="w-8 h-6" />
+                    </div>
                 </div>
             ))}
 
@@ -567,20 +596,66 @@ const HomePage: React.FC = () => {
                                 </div>
                             </RevealSection>
 
+                            {/* بطاقة إجازة عيد الاتحاد الـ 55 المزينة بأعلام الإمارات والهوية الوطنية */}
                             <RevealSection delay={700}>
-                                <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border-4 border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between items-center text-center h-full">
-                                    <span className="text-rose-600 dark:text-rose-400 font-black text-xs md:text-sm mb-1">
-                                        {t('upcomingEvents')}
-                                    </span>
-                                    <div className="flex items-baseline gap-2">
-                                        <span className="text-3xl md:text-5xl font-black text-slate-800 dark:text-white">
-                                            {daysLeft !== null ? daysLeft : 0}
+                                <div 
+                                    onClick={handleNationalDayCelebration}
+                                    className="group relative bg-gradient-to-br from-white via-emerald-50/40 to-rose-50/40 dark:from-slate-900 dark:via-emerald-950/20 dark:to-rose-950/20 p-6 rounded-[2rem] border-4 border-emerald-500/80 dark:border-emerald-600 shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col justify-between items-center text-center h-full overflow-hidden cursor-pointer active:scale-95"
+                                >
+                                    {/* الشريط العلوي بألوان علم الإمارات */}
+                                    <div className="absolute top-0 left-0 right-0 h-2 flex">
+                                        <div className="bg-[#ff0000] w-1/4"></div>
+                                        <div className="bg-[#00732f] w-1/4"></div>
+                                        <div className="bg-white w-1/4"></div>
+                                        <div className="bg-black w-1/4"></div>
+                                    </div>
+
+                                    {/* أعلام الإمارات المرفرفة في الخلفية */}
+                                    <div className="absolute -right-3 -bottom-3 opacity-15 dark:opacity-20 pointer-events-none transform -rotate-12 group-hover:scale-110 transition-transform duration-500">
+                                        <UaeFlagIcon className="w-28 h-20" />
+                                    </div>
+                                    <div className="absolute -left-3 -top-3 opacity-10 dark:opacity-15 pointer-events-none transform rotate-12 group-hover:scale-110 transition-transform duration-500">
+                                        <UaeFlagIcon className="w-24 h-16" />
+                                    </div>
+
+                                    {/* رأس البطاقة مع العلمين المتحركين */}
+                                    <div className="flex items-center justify-center gap-2 mb-1 mt-1 relative z-10">
+                                        <div className="animate-flag-wave origin-bottom-left">
+                                            <UaeFlagIcon className="w-6 h-4 rounded-sm shadow" />
+                                        </div>
+                                        <span className="bg-gradient-to-r from-red-600 via-emerald-600 to-slate-900 dark:from-red-400 dark:via-emerald-400 dark:to-white bg-clip-text text-transparent font-black text-xs md:text-sm tracking-wide">
+                                            {t('upcomingEvents')}
                                         </span>
-                                        <span className="text-xs font-bold text-slate-500 uppercase">
-                                            {daysLeft === 1 ? t('dayUnit') : t('daysUnit')}
+                                        <div className="animate-flag-wave-delayed origin-bottom-right">
+                                            <UaeFlagIcon className="w-6 h-4 rounded-sm shadow" />
+                                        </div>
+                                    </div>
+
+                                    {/* العداد التنازلي وشعار الـ 55 */}
+                                    <div className="flex flex-col items-center my-1 relative z-10">
+                                        <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-0.5">
+                                            {t('startsIn')}
+                                        </span>
+                                        <div className="flex items-baseline gap-2">
+                                            <span className="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#ff0000] via-[#00732f] to-slate-900 dark:to-white drop-shadow-sm">
+                                                {daysLeft !== null ? daysLeft : 0}
+                                            </span>
+                                            <span className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase">
+                                                {daysLeft === 1 ? t('dayUnit') : t('daysUnit')}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* التاريخ وشعار روح الاتحاد 55 */}
+                                    <div className="flex items-center gap-2 mt-2 relative z-10 bg-white/90 dark:bg-slate-800/90 px-3.5 py-1 rounded-full border border-emerald-200 dark:border-emerald-800 shadow-sm">
+                                        <span className="w-2 h-2 rounded-full bg-red-600 animate-ping"></span>
+                                        <span className="text-[11px] font-black text-slate-700 dark:text-slate-200">
+                                            {isAr ? '2 ديسمبر 2026' : '2 December 2026'}
+                                        </span>
+                                        <span className="text-[10px] font-black px-1.5 py-0.2 bg-gradient-to-r from-red-600 to-emerald-600 text-white rounded-full">
+                                            55
                                         </span>
                                     </div>
-                                    <span className="text-[11px] font-bold text-slate-500 mt-2">2 December 2026</span>
                                 </div>
                             </RevealSection>
 
@@ -606,6 +681,20 @@ const HomePage: React.FC = () => {
                 
                 @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-12px); } }
                 .animate-float { animation: float 5s ease-in-out infinite; }
+
+                @keyframes flag-wave {
+                    0%, 100% { transform: rotate(-6deg) scale(1); }
+                    50% { transform: rotate(8deg) scale(1.08) skewY(2deg); }
+                }
+                .animate-flag-wave { animation: flag-wave 2.2s ease-in-out infinite; }
+                .animate-flag-wave-delayed { animation: flag-wave 2.2s ease-in-out 1.1s infinite; }
+
+                @keyframes flag-float {
+                    0% { opacity: 1; transform: scale(0.6) translateY(0) rotate(0deg); }
+                    50% { opacity: 1; transform: scale(1.15) translateY(-35px) rotate(12deg); }
+                    100% { opacity: 0; transform: scale(0.8) translateY(-75px) rotate(-10deg); }
+                }
+                .animate-flag-float { animation: flag-float 1.8s ease-out forwards; }
 
                 @keyframes marquee-ltr { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
                 @keyframes marquee-rtl { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
