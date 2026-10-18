@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../src/utils/supabase';
 
@@ -18,10 +18,22 @@ export default function Login() {
   const [error, setError] = useState('');
   const [showFlag, setShowFlag] = useState(false); // حالة إظهار علم الإمارات عند الضغط على صقر
 
+  const videoRef = useRef<HTMLVideoElement>(null);
+
   // اختيار فيديو عشوائي عند فتح الصفحة والتبديل العشوائي عند انتهاء كل فيديو
   const [currentVideoIndex, setCurrentVideoIndex] = useState<number>(() => 
     Math.floor(Math.random() * BACKGROUND_VIDEOS.length)
   );
+
+  // إجبار سفاري وباقي المتصفحات على التشغيل التلقائي عبر البرمجة عند تغيير الفيديو أو تحميل الصفحة
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = true;
+      videoRef.current.play().catch((error) => {
+        console.log("Safari autoplay prevented, attempting recovery:", error);
+      });
+    }
+  }, [currentVideoIndex]);
 
   const handleVideoEnd = () => {
     setCurrentVideoIndex((prevIndex) => {
@@ -121,14 +133,16 @@ export default function Login() {
         {/* ================= القسم الأول: الهوية البصرية وصقر (مع خلفية الفيديو العشوائية) ================= */}
         <div className="lg:w-1/2 p-8 lg:p-12 flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br from-blue-50/50 to-slate-100/50 border-b lg:border-b-0 lg:border-l border-slate-200">
           
-          {/* 🎥 خلفية الفيديو العشوائية بدون صوت ومتجاوبة مع كل الشاشات */}
+          {/* 🎥 خلفية الفيديو العشوائية بدون صوت ومتجاوبة مع كل الشاشات وتدعم سفاري */}
           <div className="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden">
             <video
+              ref={videoRef}
               key={BACKGROUND_VIDEOS[currentVideoIndex]}
               src={BACKGROUND_VIDEOS[currentVideoIndex]}
               autoPlay
               muted
               playsInline
+              preload="auto"
               onEnded={handleVideoEnd}
               onError={handleVideoEnd}
               className="w-full h-full object-cover object-center"
