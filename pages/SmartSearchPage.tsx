@@ -1,9 +1,10 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useLanguage } from '../App';
 import { ChatMessage } from '../types';
-import ReactMarkdown from 'react-markdown'; 
-import html2canvas from 'html2canvas'; 
-import { bookData } from '../api/bookData'; 
+import ReactMarkdown from 'react-markdown';
+import html2canvas from 'html2canvas';
+import { bookData } from '../api/bookData';
 import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
 import { trackActivity } from '../src/utils/tracker';
@@ -29,7 +30,7 @@ Instructions for Teacher Support & McGraw-Hill Curricula (أوامر تحضير 
 3. Worksheet & Page Handling: Handle partial worksheet or page inputs provided by teachers to design tailored activities.
 
 LESSON PLAN GENERATOR INSTRUCTION:
-"أنت مساعد تربوي خبير في مناهج McGraw-Hill الدولية. قم بإعداد خطة درس تفصيلية شاملة ومفصلة بالكامل استناداً إلى عنوان الوحدة أو الدرس الذي يزودك به المعلم. يجب أن تقدم تحضيراً كاملاً ومفصلاً مقسماً بعناوين رئيسية وواضحة، والنقاط مرتبة تحت بعضها بشكل منسق ومريح للقراءة. تتضمن الخطة بالتفصيل وكل نقطة بشكل مرتب ومنفصل: 
+"أنت مساعد تربوي خبير في مناهج McGraw-Hill الدولية. قم بإعداد خطة درس تفصيلية شاملة ومفصلة بالكامل استناداً إلى عنوان الوحدة أو الدرس الذي يزودك به المعلم. يجب أن تقدم تحضيراً كاملاً ومفصلاً مقسماً بعناوين رئيسية وواضحة، والنقاط مرتبة تحت بعضها بشكل منسق ومريح للقراءة. تتضمن الخطة بالتفصيل وكل نقطة بشكل مرتب ومنفصل:
 - أهداف الدرس: وتكون مصاغة كـ (أن + الفعل المضارع) وتعتمد على تصنيف بلوم (باللغة العربية والإنجليزية).
 - نواتج التعلم لكل هدف.
 - المفردات الجديدة.
@@ -59,14 +60,14 @@ Formatting Rules for Responses:
 
 Instructions for "Little Author" Challenge (STRICT RULES):
 1. UAE THEMES: Start stories inspired by UAE identity (Space, Pearl Diving, Desert Heritage, Falcons, Zayed's legacy).
-2. INTERACTION: Write ONLY ONE short sentence to continue the plot naturally. 
+2. INTERACTION: Write ONLY ONE short sentence to continue the plot naturally.
    - DO NOT give hints. DO NOT suggest what happens next.
    - DO NOT ask "Are you finished?", "What happens next?", or ANY questions. Just write your sentence and wait.
    - Use plain, clear text. DO NOT use weird symbols, markdown asterisks, or formatting in the story.
 3. SILENT CORRECTION: Check the student's text for spelling/grammar errors. ONLY IF there is an actual mistake, politely point it out and provide the correct word, then write your sentence to continue the story. If there are NO errors, JUST continue the story. NEVER ask if there are errors.
 4. ENDING THE STORY: 
    - Wait patiently until the student explicitly types "انتهت" or "finished".
-   - DO NOT output the WINNER tag yet. 
+   - DO NOT output the WINNER tag yet.
    - Praise their story, then EXPLICITLY ASK: "ما هو اسمك الكامل؟ وما هو مستواك الدراسي؟" (What is your full name and grade level?).
 5. ISSUING THE CERTIFICATE: 
    - ONLY AFTER the student replies with their Name and Grade, output this EXACT format at the very end of your message:
@@ -194,7 +195,7 @@ const SmartSearchPage: React.FC = () => {
   const [winnerData, setWinnerData] = useState<any>(null);
   const [userName, setUserName] = useState<string>('');
   const [isTeacherOrAdmin, setIsTeacherOrAdmin] = useState<boolean>(false);
-  
+
   const [saqrState, setSaqrState] = useState<'idle' | 'thinking' | 'speaking' | 'victory'>('idle');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -203,7 +204,7 @@ const SmartSearchPage: React.FC = () => {
   useEffect(() => {
     const storedUser = localStorage.getItem('current_user');
     const storedType = localStorage.getItem('user_type');
-    
+
     if (storedType === 'teacher' || storedType === 'admin') {
       setIsTeacherOrAdmin(true);
     }
@@ -215,9 +216,9 @@ const SmartSearchPage: React.FC = () => {
       const rawName = locale === 'ar' ? (user.name_ar || user.name_en) : (user.name_en || user.name_ar);
       const name = formatFirstAndLastName(rawName || '');
       setUserName(name);
-      
+
       if (storedType === 'student') {
-        welcomeMessage = locale === 'ar' 
+        welcomeMessage = locale === 'ar'
           ? `أهلاً بك يا صديقي المبدع **${name}**! 🎓\n\nأنا "صقر"، المساعد الذكي لمكتبتك. هل نؤلف قصة ممتعة معاً اليوم، أم تبحث عن كتاب محدد لتقرأه؟`
           : `Welcome my creative friend **${name}**! 🎓\n\nI'm 'Saqr', your AI Librarian. Shall we co-author a story today, or are you looking for a specific book?`;
       } else if (storedType === 'teacher' || storedType === 'admin') {
@@ -241,7 +242,7 @@ const SmartSearchPage: React.FC = () => {
 
   const handleDownloadJPG = async () => {
     if (!certificateRef.current) return;
-    
+
     const originalPosition = certificateRef.current.style.position;
     const originalLeft = certificateRef.current.style.left;
     const originalTop = certificateRef.current.style.top;
@@ -253,13 +254,13 @@ const SmartSearchPage: React.FC = () => {
     certificateRef.current.style.zIndex = '-9999';
 
     try {
-      const canvas = await html2canvas(certificateRef.current, { 
-        scale: 3, 
+      const canvas = await html2canvas(certificateRef.current, {
+        scale: 3,
         backgroundColor: '#ffffff',
         useCORS: true,
         allowTaint: true,
         logging: false,
-        width: 1123, 
+        width: 1123,
         height: certificateRef.current.offsetHeight || certificateRef.current.scrollHeight
       });
 
@@ -281,7 +282,7 @@ const SmartSearchPage: React.FC = () => {
   const handleQuickPrompt = async (promptText: string) => {
     const storedUser = localStorage.getItem('current_user');
     const storedType = localStorage.getItem('user_type');
-    
+
     // حساب الإدارة متاح له التحضير دائماً
     if (storedType === 'admin') {
       setInput(promptText);
@@ -297,7 +298,6 @@ const SmartSearchPage: React.FC = () => {
       let isBooked = false;
 
       try {
-        // الفحص في جدول library_schedule بالأعمدة المطابقة لقاعدة البيانات (user_id و teacher)
         if (teacherId) {
           const { data, error } = await supabase
             .from('library_schedule')
@@ -316,8 +316,8 @@ const SmartSearchPage: React.FC = () => {
 
         if (!isBooked) {
           setIsLoading(false);
-          alert(locale === 'ar' 
-            ? '⚠️ عذراً أستاذي، ميزة التحضير والعروض الحصرية متاحة فقط للمعلمين الذين قاموا بحجز حصة في جدول المكتبة.' 
+          alert(locale === 'ar'
+            ? '⚠️ عذراً أستاذي، ميزة التحضير والعروض الحصرية متاحة فقط للمعلمين الذين قاموا بحجز حصة في جدول المكتبة.'
             : '⚠️ Sorry, this exclusive planning feature is only available for teachers who have booked a session in the Library Schedule.');
           return;
         }
@@ -326,7 +326,7 @@ const SmartSearchPage: React.FC = () => {
       }
       setIsLoading(false);
     }
-    
+
     setInput(promptText);
   };
 
@@ -339,10 +339,9 @@ const SmartSearchPage: React.FC = () => {
     setMessages(prev => [...prev, { role: 'user', content: userQuery }]);
     setInput('');
     setIsLoading(true);
-    
+
     setSaqrState('thinking');
 
-    // تسجيل التحضير في قاعدة بيانات الأدمن إذا استخدم الميزة
     if (isTeacherOrAdmin && (userQuery.includes('تحضير') || userQuery.includes('عرض') || userQuery.includes('lesson plan') || userQuery.includes('presentation'))) {
       try {
         const storedUser = localStorage.getItem('current_user');
@@ -350,7 +349,7 @@ const SmartSearchPage: React.FC = () => {
           const u = JSON.parse(storedUser);
           const planType = (userQuery.includes('تحضير') || userQuery.includes('lesson')) ? 'تحضير درس (Lesson)' : 'عرض تقديمي (Presentation)';
           const topic = userQuery.split(': ')[1] || userQuery;
-          
+
           await supabase.from('lesson_reports').insert([{
             teacher_id: u.teacher_id || 'Admin',
             teacher_name: u.name_ar || u.name_en || 'Admin',
@@ -363,7 +362,7 @@ const SmartSearchPage: React.FC = () => {
       }
     }
 
-    const normalize = (text: string) => 
+    const normalize = (text: string) =>
       text?.toString()
           .replace(/[أإآا]/g, 'ا')
           .replace(/[ةه]/g, 'ه')
@@ -380,7 +379,7 @@ const SmartSearchPage: React.FC = () => {
       return db.filter(b => {
         const title = normalize(b?.title || '');
         const author = normalize(b?.author || '');
-        
+
         if (title.includes(qNormalized) || author.includes(qNormalized)) return true;
         return queryWords.length > 0 && queryWords.some(word => title.includes(word) || author.includes(word));
       }).map(b => ({ ...b, pageLocation: location }));
@@ -400,11 +399,11 @@ const SmartSearchPage: React.FC = () => {
     const storedUser = localStorage.getItem('current_user');
     let userContextInfo = "";
     if (storedUser) {
-        const user = JSON.parse(storedUser);
-        const rawName = locale === 'ar' ? (user.name_ar || user.name_en) : (user.name_en || user.name_ar);
-        const name = formatFirstAndLastName(rawName || '');
-        const type = localStorage.getItem('user_type') === 'student' ? 'Student' : 'Teacher';
-        userContextInfo = `\nCurrent User Context: The person talking to you is a ${type} named "${name}". Use their name occasionally to be friendly.`;
+      const user = JSON.parse(storedUser);
+      const rawName = locale === 'ar' ? (user.name_ar || user.name_en) : (user.name_en || user.name_ar);
+      const name = formatFirstAndLastName(rawName || '');
+      const type = localStorage.getItem('user_type') === 'student' ? 'Student' : 'Teacher';
+      userContextInfo = `\nCurrent User Context: The person talking to you is a ${type} named "${name}". Use their name occasionally to be friendly.`;
     }
 
     try {
@@ -413,8 +412,8 @@ const SmartSearchPage: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [
-            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}` }, 
-            ...messages, 
+            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}` },
+            ...messages,
             { role: 'user', content: userQuery }
           ],
           locale,
@@ -429,15 +428,15 @@ const SmartSearchPage: React.FC = () => {
           const dateOptions: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
           const formattedDate = new Date().toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', dateOptions);
 
-          const info = { 
-            name: match[1].trim(), 
-            grade: match[2].trim(), 
-            content: match[3].trim(), 
-            date: formattedDate 
+          const info = {
+            name: match[1].trim(),
+            grade: match[2].trim(),
+            content: match[3].trim(),
+            date: formattedDate
           };
           setWinnerData(info);
           localStorage.setItem('efips_challenge_reports', JSON.stringify([info, ...JSON.parse(localStorage.getItem('efips_challenge_reports') || '[]')]));
-          
+
           setSaqrState('victory');
         }
         reply = reply.replace(/\[WINNER:.*?\]/gs, '');
@@ -445,7 +444,7 @@ const SmartSearchPage: React.FC = () => {
         setSaqrState('speaking');
         setTimeout(() => setSaqrState('idle'), 2500);
       }
-      
+
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
     } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: locale === 'ar' ? 'حدث خطأ في الاتصال، يرجى المحاولة مرة أخرى.' : 'Connection error, please try again.' }]);
@@ -457,23 +456,23 @@ const SmartSearchPage: React.FC = () => {
 
   const getSaqrImageSrc = () => {
     if (saqrState === 'idle') {
-        return '/search_still_frame.png';
+      return '/search_still_frame.png';
     }
     return '/Search.gif';
   };
 
   return (
     <div dir={dir} className="w-full h-[100dvh] flex flex-col bg-white dark:bg-[#0b0f17] font-sans relative overflow-hidden text-slate-900 dark:text-slate-100 transition-colors duration-300">
-      
+
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-950/40 via-[#0b0f17] to-[#0b0f17] pointer-events-none -z-10 hidden dark:block" />
 
-      {/* Header */}
-      <header className="flex-shrink-0 px-3 py-2 md:px-6 w-full max-w-4xl mx-auto flex justify-between items-center z-20 relative bg-white/80 dark:bg-transparent backdrop-blur-sm border-b border-slate-100 dark:border-transparent">
+      {/* Header: تقليل الحشو مع الحفاظ على الأبعاد الأساسية */}
+      <header className="flex-shrink-0 px-3 py-1 md:px-5 md:py-1.5 w-full max-w-4xl mx-auto flex justify-between items-center z-20 relative bg-white/80 dark:bg-transparent backdrop-blur-sm border-b border-slate-100 dark:border-transparent">
         <div className="flex items-center gap-2 md:gap-3">
           <div className={`w-8 h-8 md:w-11 md:h-11 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden bg-slate-100 dark:bg-slate-800 border-2 border-sky-400 dark:border-sky-500 shadow-md ${saqrState === 'thinking' ? 'ring-2 ring-amber-400 animate-pulse' : ''}`}>
-            <img 
-              src={getSaqrImageSrc()} 
-              alt="Saqr AI" 
+            <img
+              src={getSaqrImageSrc()}
+              alt="Saqr AI"
               className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300"
               onError={(e) => e.currentTarget.style.display = 'none'}
             />
@@ -495,70 +494,70 @@ const SmartSearchPage: React.FC = () => {
         )}
       </header>
 
-      {/* Greeting & Enhanced Username Banner */}
-      <div className="flex-shrink-0 text-center pt-2 pb-1 px-3 z-10">
-        <div className="max-w-xl mx-auto py-2 px-4 rounded-3xl bg-gradient-to-r from-sky-500/10 via-amber-500/10 to-emerald-500/10 dark:from-sky-500/20 dark:via-amber-500/20 dark:to-emerald-500/20 border border-sky-200/50 dark:border-sky-800/50 shadow-sm backdrop-blur-md">
+      {/* Greeting: تقليل الفراغ حول اسم المستخدم */}
+      <div className="flex-shrink-0 text-center pt-1 pb-0.5 px-2 z-10">
+        <div className="max-w-xl mx-auto py-1.5 px-3 rounded-2xl bg-gradient-to-r from-sky-500/10 via-amber-500/10 to-emerald-500/10 dark:from-sky-500/20 dark:via-amber-500/20 dark:to-emerald-500/20 border border-sky-200/50 dark:border-sky-800/50 shadow-sm backdrop-blur-md">
           <h2 className="text-base sm:text-lg md:text-xl font-bold tracking-tight text-slate-700 dark:text-slate-300">
             {t('welcome')}
           </h2>
-          <div className="mt-1 inline-block relative group">
+          <div className="mt-0.5 inline-block relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-sky-600 via-amber-500 to-emerald-500 rounded-2xl blur-sm opacity-70 group-hover:opacity-100 transition duration-500 animate-pulse"></div>
-            <span className="relative px-4 py-1.5 bg-white dark:bg-slate-900 rounded-xl text-lg sm:text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-600 to-emerald-600 dark:from-sky-400 dark:to-emerald-400 tracking-wide block">
+            <span className="relative px-4 py-1 bg-white dark:bg-slate-900 rounded-xl text-lg sm:text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-600 to-emerald-600 dark:from-sky-400 dark:to-emerald-400 tracking-wide block">
               ✨ {userName || (locale === 'ar' ? 'صديقي المبدع' : 'Creative Friend')} ✨
             </span>
           </div>
         </div>
       </div>
 
-      {/* Messages (Minimized empty spaces) */}
-      <div className="flex-1 overflow-y-auto px-3 md:px-6 py-2 no-scrollbar scroll-smooth relative z-10 pb-28 md:pb-24">
-        <div className="max-w-3xl mx-auto flex flex-col justify-end min-h-fit space-y-2.5">
-          
+      {/* Messages: تقليل الفراغات واستغلال المساحة المتاحة */}
+      <div className="flex-1 min-h-0 overflow-y-auto px-2.5 sm:px-3 md:px-5 py-1 no-scrollbar scroll-smooth relative z-10 pb-24 md:pb-20">
+        <div className="max-w-3xl mx-auto flex flex-col justify-end min-h-fit space-y-2">
+
           {messages.map((msg, index) => (
             <RevealMessage key={index}>
-                <div className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  
-                  {msg.role === 'assistant' && (
-                    <div className="flex flex-col gap-1.5 max-w-[96%] md:max-w-[88%] items-start">
-                      <div className="flex gap-2.5 items-end" translate="no" lang={locale}>
-                        <div className="bg-slate-50 dark:bg-[#1a1f2e] border border-slate-200 dark:border-slate-800 rounded-3xl rounded-bl-sm px-3.5 md:px-5 py-3 md:py-4 shadow-sm text-slate-800 dark:text-slate-100 font-medium leading-relaxed text-xs sm:text-sm md:text-base">
-                          <div className="prose prose-slate dark:prose-invert max-w-none text-start font-cairo [&>ul]:list-disc [&>ul]:ps-4 [&>ul]:space-y-1 [&>ol]:list-decimal [&>ol]:ps-4 [&>ol]:space-y-1 [&>p]:mb-2 [&>h3]:font-bold [&>h3]:text-sky-600 dark:[&>h3]:text-sky-400 [&>h3]:mt-2 [&>h3]:mb-1 [&>h4]:font-bold [&>h4]:text-amber-600 dark:[&>h4]:text-amber-400 [&>h4]:mt-2 [&>h4]:mb-1">
-                            <ReactMarkdown>{msg.content}</ReactMarkdown>
-                          </div>
+              <div className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+
+                {msg.role === 'assistant' && (
+                  <div className="flex flex-col gap-1 max-w-[96%] md:max-w-[88%] items-start">
+                    <div className="flex gap-2 items-end" translate="no" lang={locale}>
+                      <div className="bg-slate-50 dark:bg-[#1a1f2e] border border-slate-200 dark:border-slate-800 rounded-3xl rounded-bl-sm px-3 md:px-4 py-2.5 md:py-3 shadow-sm text-slate-800 dark:text-slate-100 font-medium leading-relaxed text-xs sm:text-sm md:text-base">
+                        <div className="prose prose-slate dark:prose-invert max-w-none text-start font-cairo [&>ul]:list-disc [&>ul]:ps-4 [&>ul]:space-y-1 [&>ol]:list-decimal [&>ol]:ps-4 [&>ol]:space-y-1 [&>p]:mb-2 [&>h3]:font-bold [&>h3]:text-sky-600 dark:[&>h3]:text-sky-400 [&>h3]:mt-2 [&>h3]:mb-1 [&>h4]:font-bold [&>h4]:text-amber-600 dark:[&>h4]:text-amber-400 [&>h4]:mt-2 [&>h4]:mb-1">
+                          <ReactMarkdown>{msg.content}</ReactMarkdown>
                         </div>
                       </div>
-
-                      {winnerData && saqrState === 'victory' && index === messages.length - 1 && (
-                        <div className="mt-1 w-full text-start animate-zoom-in">
-                          <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-3 py-1.5 bg-emerald-600 text-white font-bold rounded-full shadow-md hover:bg-emerald-700 transition-all text-xs">
-                            <DownloadIcon />
-                            <span>{t('download')}</span>
-                          </button>
-                        </div>
-                      )}
                     </div>
-                  )}
 
-                  {msg.role === 'user' && (
-                    <div className="bg-sky-500 dark:bg-sky-600 text-white px-3.5 md:px-4 py-2.5 rounded-3xl rounded-br-sm max-w-[90%] md:max-w-[75%] shadow-md">
-                      <div className="font-semibold leading-relaxed max-w-none text-start text-xs sm:text-sm md:text-base">
-                        {msg.content}
+                    {winnerData && saqrState === 'victory' && index === messages.length - 1 && (
+                      <div className="mt-1 w-full text-start animate-zoom-in">
+                        <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-3 py-1.5 bg-emerald-600 text-white font-bold rounded-full shadow-md hover:bg-emerald-700 transition-all text-xs">
+                          <DownloadIcon />
+                          <span>{t('download')}</span>
+                        </button>
                       </div>
+                    )}
+                  </div>
+                )}
+
+                {msg.role === 'user' && (
+                  <div className="bg-sky-500 dark:bg-sky-600 text-white px-3 md:px-3.5 py-2 md:py-2.5 rounded-3xl rounded-br-sm max-w-[90%] md:max-w-[75%] shadow-md">
+                    <div className="font-semibold leading-relaxed max-w-none text-start text-xs sm:text-sm md:text-base">
+                      {msg.content}
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
+              </div>
             </RevealMessage>
           ))}
-          
+
           <div ref={messagesEndRef} className="h-1" />
         </div>
       </div>
 
       {/* Input & Teacher Quick Buttons */}
-      <div className="absolute bottom-0 inset-x-0 px-2 sm:px-4 pb-2.5 pt-1.5 w-full z-20 flex-shrink-0 bg-gradient-to-t from-white via-white/98 to-transparent dark:from-[#0b0f17] dark:via-[#0b0f17]/98 dark:to-transparent">
-        <div className="max-w-2xl mx-auto flex flex-col gap-1.5">
-          
-          {/* شريط الأزرار السريعة للمعلمين فقط فوق مربع الكتابة */}
+      <div className="absolute bottom-0 inset-x-0 px-2 sm:px-3 pb-1.5 pt-1 w-full z-20 flex-shrink-0 bg-gradient-to-t from-white via-white/98 to-transparent dark:from-[#0b0f17] dark:via-[#0b0f17]/98 dark:to-transparent">
+        <div className="max-w-2xl mx-auto flex flex-col gap-1">
+
+          {/* الأزرار السريعة للمعلمين والإدارة */}
           {isTeacherOrAdmin && (
             <div className="flex flex-wrap items-center justify-center gap-1.5 px-1 animate-fade-in">
               <button
@@ -576,21 +575,20 @@ const SmartSearchPage: React.FC = () => {
             </div>
           )}
 
-          <div className="relative flex items-center bg-slate-100 dark:bg-[#1a1f2e] rounded-full border border-slate-200 dark:border-slate-700/60 shadow-lg px-2.5 py-1 focus-within:border-sky-500 dark:focus-within:border-sky-400 transition-all">
-            
+          <div className="relative flex items-center bg-slate-100 dark:bg-[#1a1f2e] rounded-full border border-slate-200 dark:border-slate-700/60 shadow-lg px-2.5 py-0.5 focus-within:border-sky-500 dark:focus-within:border-sky-400 transition-all">
             <input
-              type="text" 
-              value={input} 
-              onChange={(e) => setInput(e.target.value)} 
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
               placeholder={t('input')}
               className="flex-1 bg-transparent border-0 focus:ring-0 py-2 px-2 text-slate-900 dark:text-white font-medium outline-none w-full placeholder-slate-400 dark:placeholder-slate-500 text-xs sm:text-sm md:text-base"
               disabled={isLoading}
             />
 
-            <button 
-              onClick={handleSendMessage} 
-              disabled={isLoading || !input.trim()} 
+            <button
+              onClick={handleSendMessage}
+              disabled={isLoading || !input.trim()}
               className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-sky-500 hover:bg-sky-600 disabled:bg-slate-300 disabled:dark:bg-slate-800 text-white flex items-center justify-center transition-all shrink-0 shadow-md ml-1 rtl:rotate-180"
             >
               <SendIcon />
@@ -605,84 +603,98 @@ const SmartSearchPage: React.FC = () => {
         </div>
       </div>
 
-      {/* --- تصميم الشهادة العرضية للتصدير --- */}
+      {/* تصميم الشهادة: الأبعاد والوظائف الأصلية محفوظة */}
       <div className="fixed left-[-9999px] top-0 pointer-events-none">
-          <div ref={certificateRef} dir={locale === 'ar' ? 'rtl' : 'ltr'} className="w-[1123px] min-h-[794px] h-fit bg-gradient-to-br from-white via-slate-50 to-amber-50/20 text-slate-900 relative overflow-hidden flex flex-col font-sans border-[16px] border-solid border-amber-500 shadow-2xl pb-10">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-bl-full -z-10 pointer-events-none"></div>
-              <div className="absolute bottom-0 left-0 w-64 h-64 bg-amber-500/10 rounded-tr-full -z-10 pointer-events-none"></div>
+        <div ref={certificateRef} dir={locale === 'ar' ? 'rtl' : 'ltr'} className="w-[1123px] min-h-[794px] h-fit bg-gradient-to-br from-white via-slate-50 to-amber-50/20 text-slate-900 relative overflow-hidden flex flex-col font-sans border-[16px] border-solid border-amber-500 shadow-2xl pb-10">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-bl-full -z-10 pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-amber-500/10 rounded-tr-full -z-10 pointer-events-none"></div>
 
-              <div className="flex justify-between items-center px-12 pt-10 pb-6 border-b-2 border-slate-200">
-                  <div className="flex items-center gap-5">
-                      <img src="https://www.efipslibrary.online/school-logo.png" className="w-20 h-20 object-contain drop-shadow" alt="EFIPS Logo" crossOrigin="anonymous" />
-                      <div>
-                          <h3 className="text-xl font-black text-slate-800 tracking-tight">{t('certSchool')}</h3>
-                          <h4 className="text-xs font-bold text-amber-700 tracking-widest uppercase mt-0.5" dir="ltr">Emirates Falcon International Private School</h4>
-                      </div>
-                  </div>
-                  <div className="text-left">
-                      <div className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-900 font-black rounded-full text-base shadow-md border border-amber-400">
-                          {t('certChallenge')}
-                      </div>
-                  </div>
+          <div className="flex justify-between items-center px-12 pt-10 pb-6 border-b-2 border-slate-200">
+            <div className="flex items-center gap-5">
+              <img src="https://www.efipslibrary.online/school-logo.png" className="w-20 h-20 object-contain drop-shadow" alt="EFIPS Logo" crossOrigin="anonymous" />
+              <div>
+                <h3 className="text-xl font-black text-slate-800 tracking-tight">{t('certSchool')}</h3>
+                <h4 className="text-xs font-bold text-amber-700 tracking-widest uppercase mt-0.5" dir="ltr">Emirates Falcon International Private School</h4>
               </div>
-
-              <div className="flex-1 flex flex-col items-center justify-center text-center px-14 py-6">
-                  <h1 className="text-4xl lg:text-5xl font-black text-amber-700 tracking-wide mb-3 uppercase drop-shadow-sm">{t('certTitle')}</h1>
-                  <p className="text-xl font-bold text-slate-600 mb-6">{t('certSubtitle')}</p>
-                  
-                  <div className="mb-4">
-                      <h2 className="text-4xl lg:text-5xl font-black text-slate-900 tracking-tight pb-2 border-b-4 border-amber-500 px-10 inline-block">
-                          {winnerData?.name}
-                      </h2>
-                  </div>
-                  <p className="text-2xl font-bold text-slate-600 mb-8">
-                      {t('certGrade')} <span className="text-amber-700 font-black">{winnerData?.grade}</span>
-                  </p>
-                  
-                  <div className="bg-white/90 backdrop-blur p-6 rounded-3xl border-2 border-amber-200 w-full text-start relative shadow-sm mb-4">
-                      <span className={`absolute -top-4 ${locale === 'ar' ? 'right-10' : 'left-10'} bg-amber-500 text-slate-900 px-6 py-1.5 font-black text-lg border-2 border-amber-400 rounded-full shadow-sm`}>
-                          {t('certStory')}
-                      </span>
-                      <p className={`text-xl leading-[1.8] font-bold text-slate-800 mt-4 ${locale === 'ar' ? 'text-justify' : 'text-left'} whitespace-pre-wrap`}>
-                          {winnerData?.content}
-                      </p>
-                  </div>
+            </div>
+            <div className="text-left">
+              <div className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-900 font-black rounded-full text-base shadow-md border border-amber-400">
+                {t('certChallenge')}
               </div>
-
-              <div className="flex justify-between items-end px-14 pt-6 border-t-2 border-slate-200 mt-auto">
-                  <div className="text-center w-60">
-                      <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">{t('certDate')}</p>
-                      <p className="text-lg font-black text-slate-800">{winnerData?.date}</p>
-                  </div>
-                  <div className="text-center flex flex-col items-center flex-1">
-                      <div className="w-16 h-16 rounded-full border-2 border-amber-500/30 flex items-center justify-center bg-amber-50/50 mb-1">
-                          <span className="text-xl font-black text-amber-600">EFIPS</span>
-                      </div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('certOfficial')}</p>
-                  </div>
-                  <div className="text-center w-60">
-                      <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">{t('certAI')}</p>
-                      <p className="text-xl font-black text-amber-700">{t('certSaqr')}</p>
-                  </div>
-              </div>
+            </div>
           </div>
+
+          <div className="flex-1 flex flex-col items-center justify-center text-center px-14 py-6">
+            <h1 className="text-4xl lg:text-5xl font-black text-amber-700 tracking-wide mb-3 uppercase drop-shadow-sm">{t('certTitle')}</h1>
+            <p className="text-xl font-bold text-slate-600 mb-6">{t('certSubtitle')}</p>
+
+            <div className="mb-4">
+              <h2 className="text-4xl lg:text-5xl font-black text-slate-900 tracking-tight pb-2 border-b-4 border-amber-500 px-10 inline-block">
+                {winnerData?.name}
+              </h2>
+            </div>
+            <p className="text-2xl font-bold text-slate-600 mb-8">
+              {t('certGrade')} <span className="text-amber-700 font-black">{winnerData?.grade}</span>
+            </p>
+
+            <div className="bg-white/90 backdrop-blur p-6 rounded-3xl border-2 border-amber-200 w-full text-start relative shadow-sm mb-4">
+              <span className={`absolute -top-4 ${locale === 'ar' ? 'right-10' : 'left-10'} bg-amber-500 text-slate-900 px-6 py-1.5 font-black text-lg border-2 border-amber-400 rounded-full shadow-sm`}>
+                {t('certStory')}
+              </span>
+              <p className={`text-xl leading-[1.8] font-bold text-slate-800 mt-4 ${locale === 'ar' ? 'text-justify' : 'text-left'} whitespace-pre-wrap`}>
+                {winnerData?.content}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex justify-between items-end px-14 pt-6 border-t-2 border-slate-200 mt-auto">
+            <div className="text-center w-60">
+              <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">{t('certDate')}</p>
+              <p className="text-lg font-black text-slate-800">{winnerData?.date}</p>
+            </div>
+            <div className="text-center flex flex-col items-center flex-1">
+              <div className="w-16 h-16 rounded-full border-2 border-amber-500/30 flex items-center justify-center bg-amber-50/50 mb-1">
+                <span className="text-xl font-black text-amber-600">EFIPS</span>
+              </div>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('certOfficial')}</p>
+            </div>
+            <div className="text-center w-60">
+              <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">{t('certAI')}</p>
+              <p className="text-xl font-black text-amber-700">{t('certSaqr')}</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
-        * { font-family: 'Cairo', sans-serif !important; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
 
-        @keyframes shimmer { 
+        * {
+          font-family: 'Cairo', sans-serif !important;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+
+        .no-scrollbar {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+
+        @keyframes shimmer {
           0% { transform: translateX(-50%); }
-          100% { transform: translateX(0%); } 
+          100% { transform: translateX(0%); }
         }
 
-        @keyframes zoom-in { 
-          0% { opacity: 0; transform: scale(0.95); } 
-          100% { opacity: 1; transform: scale(1); } 
+        @keyframes zoom-in {
+          0% { opacity: 0; transform: scale(0.95); }
+          100% { opacity: 1; transform: scale(1); }
         }
-        .animate-zoom-in { animation: zoom-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        .animate-zoom-in {
+          animation: zoom-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
       `}</style>
     </div>
   );
