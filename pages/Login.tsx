@@ -6,6 +6,8 @@ import { supabase } from '../src/utils/supabase';
 const StudentIcon = () => <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 14v7" /></svg>;
 const TeacherIcon = () => <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>;
 
+const BACKGROUND_VIDEOS = ['/1.mp4', '/2.mp4', '/3.mp4'];
+
 export default function Login() {
   // اللغة الافتراضية أصبحت الإنجليزية ('en')
   const [lang, setLang] = useState<'ar' | 'en'>('en');
@@ -15,6 +17,19 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showFlag, setShowFlag] = useState(false); // حالة إظهار علم الإمارات عند الضغط على صقر
+
+  // اختيار فيديو عشوائي عند فتح الصفحة والتبديل العشوائي عند انتهاء كل فيديو
+  const [currentVideoIndex, setCurrentVideoIndex] = useState<number>(() => 
+    Math.floor(Math.random() * BACKGROUND_VIDEOS.length)
+  );
+
+  const handleVideoEnd = () => {
+    setCurrentVideoIndex((prevIndex) => {
+      const availableIndices = BACKGROUND_VIDEOS.map((_, idx) => idx).filter(idx => idx !== prevIndex);
+      const nextRandomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+      return nextRandomIndex;
+    });
+  };
 
   // دالة تسجيل دخول الطلاب
   const handleStudentLogin = async (e: React.FormEvent) => {
@@ -103,17 +118,33 @@ export default function Login() {
 
       <div className="max-w-5xl w-full bg-white/90 backdrop-blur-xl border border-slate-200 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col lg:flex-row z-10">
         
-        {/* ================= القسم الأول: الهوية البصرية وصقر ================= */}
+        {/* ================= القسم الأول: الهوية البصرية وصقر (مع خلفية الفيديو العشوائية) ================= */}
         <div className="lg:w-1/2 p-8 lg:p-12 flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br from-blue-50/50 to-slate-100/50 border-b lg:border-b-0 lg:border-l border-slate-200">
           
-          <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+          {/* 🎥 خلفية الفيديو العشوائية بدون صوت ومتجاوبة مع كل الشاشات */}
+          <div className="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden">
+            <video
+              key={BACKGROUND_VIDEOS[currentVideoIndex]}
+              src={BACKGROUND_VIDEOS[currentVideoIndex]}
+              autoPlay
+              muted
+              playsInline
+              onEnded={handleVideoEnd}
+              onError={handleVideoEnd}
+              className="w-full h-full object-cover object-center"
+            />
+            {/* طبقة تفتيح خفيفة لضمان وضوح الشعار والنصوص وشخصية صقر فوق الفيديو */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/75 via-white/65 to-blue-50/75 backdrop-blur-[1px]"></div>
+          </div>
+
+          <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
             <div className="absolute -top-20 -right-20 w-72 h-72 bg-blue-400/10 rounded-full blur-[80px] animate-pulse-slow"></div>
             <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-indigo-400/10 rounded-full blur-[80px] animate-pulse-slow"></div>
           </div>
 
-          <div className="flex items-center justify-center w-full gap-3 md:gap-5 mb-8">
+          <div className="flex items-center justify-center w-full gap-3 md:gap-5 mb-8 relative z-10">
             <div className="flex-1 text-left">
-              <h2 className="text-slate-800 font-black text-[10px] sm:text-xs md:text-sm leading-snug">
+              <h2 className="text-slate-800 font-black text-[10px] sm:text-xs md:text-sm leading-snug drop-shadow-sm">
                 مدرسة صقر الإمارات<br className="hidden sm:block"/> الدولية الخاصة
               </h2>
             </div>
@@ -124,23 +155,23 @@ export default function Login() {
               <img 
                 src="/school-logo.png" 
                 alt="School Logo" 
-                className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain relative z-10 rotate-[30deg] transition-transform duration-500 group-hover:rotate-[38deg]"
+                className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain relative z-10 rotate-[30deg] transition-transform duration-500 group-hover:rotate-[38deg] drop-shadow-md"
               />
             </div>
 
             <div className="flex-1 text-right" dir="ltr">
-              <h2 className="text-slate-800 font-black text-[10px] sm:text-xs md:text-sm leading-snug">
+              <h2 className="text-slate-800 font-black text-[10px] sm:text-xs md:text-sm leading-snug drop-shadow-sm">
                 Emirates Falcon Int'l<br className="hidden sm:block"/> Private School
               </h2>
             </div>
           </div>
 
-          <div className="text-center z-10 mb-6">
+          <div className="text-center relative z-10 mb-6">
             {/* تم تكبير عنوان المكتبة الذكية بشكل أكبر وأكثر بروزاً */}
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 mb-3 drop-shadow-sm tracking-tight">
               {lang === 'ar' ? 'المكتبة الذكية' : 'Smart Library'}
             </h1>
-            <p className="text-slate-500 text-xs sm:text-sm max-w-sm mx-auto font-bold leading-relaxed">
+            <p className="text-slate-700 text-xs sm:text-sm max-w-sm mx-auto font-bold leading-relaxed drop-shadow-sm">
               {lang === 'ar' 
                 ? 'اكتشف عالماً من المعرفة، العب، وتعلم مع مساعدك الذكي "صقر"' 
                 : 'Discover a world of knowledge, play, and learn with Saqr!'}
@@ -148,7 +179,7 @@ export default function Login() {
           </div>
 
           {/* شخصية صقر التفاعلية مع ظهور علم الإمارات عند الضغط */}
-          <div onClick={handleSaqrClick} className="relative mt-2 mb-2 lg:mb-0 w-40 h-40 sm:w-56 sm:h-56 md:w-64 md:h-64 flex items-center justify-center cursor-pointer group">
+          <div onClick={handleSaqrClick} className="relative z-10 mt-2 mb-2 lg:mb-0 w-40 h-40 sm:w-56 sm:h-56 md:w-64 md:h-64 flex items-center justify-center cursor-pointer group">
             <div className="absolute bottom-0 w-3/4 h-6 bg-slate-300/40 rounded-[100%] blur-md"></div>
             
             {showFlag && (
@@ -167,7 +198,7 @@ export default function Login() {
         </div>
 
         {/* ================= القسم الثاني: نموذج تسجيل الدخول ================= */}
-        <div className="lg:w-1/2 p-6 sm:p-10 lg:p-12 flex flex-col justify-center bg-white relative">
+        <div className="lg:w-1/2 p-6 sm:p-10 lg:p-12 flex flex-col justify-center bg-white relative z-10">
           <div className="mb-6 text-center lg:text-start">
             <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-2">
               {lang === 'ar' ? 'تسجيل الدخول' : 'Sign In'}
