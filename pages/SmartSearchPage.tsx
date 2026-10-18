@@ -9,7 +9,7 @@ import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
 import { trackActivity } from '../src/utils/tracker';
 import { supabase } from '../src/utils/supabase';
 
-// --- 1. بروتوكول عقل صقر النهائي (تم دمج أوامر معلمين McGraw-Hill وتوجيهات الخبير التربوي) ---
+// --- 1. بروتوكول عقل صقر النهائي ---
 const SAQR_ELITE_PROMPT = `
 Identity: You are "Saqr" (صقر), the official Elite AI Librarian and Educational Expert of Emirates Falcon International Private School (EFIPS).
 
@@ -92,7 +92,7 @@ const localization: any = {
     certOfficial: 'وثيقة رسمية من المكتبة',
     certAI: 'الموثق المعتمد',
     certSaqr: 'صقر - المساعد الذكي',
-    welcome: 'مرحباً بك،',
+    welcome: 'مرحباً بك أستاذنا المبدع،',
     mcgrawLesson: 'تحضير حصة داخل المكتبة',
     mcgrawPres: 'تصميم عرض تقديمي',
     lessonPrompt: 'أريد تحضير درس تفصيلي من منهج McGraw-Hill لموضوع: ',
@@ -114,7 +114,7 @@ const localization: any = {
     certOfficial: 'Official Library Document',
     certAI: 'Certified By',
     certSaqr: 'Saqr - AI Librarian',
-    welcome: "Let's jump in,",
+    welcome: "Welcome aboard,",
     mcgrawLesson: 'Lesson Plan inside library',
     mcgrawPres: 'Presentation Structure',
     lessonPrompt: 'I want a detailed lesson plan from McGraw-Hill for the topic: ',
@@ -468,9 +468,9 @@ const SmartSearchPage: React.FC = () => {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-950/40 via-[#0b0f17] to-[#0b0f17] pointer-events-none -z-10 hidden dark:block" />
 
       {/* Header */}
-      <header className="flex-shrink-0 px-3 py-3 md:px-8 w-full max-w-5xl mx-auto flex justify-between items-center z-20 relative bg-white/80 dark:bg-transparent backdrop-blur-sm border-b border-slate-100 dark:border-transparent">
-        <div className="flex items-center gap-2.5 md:gap-4">
-          <div className={`w-9 h-9 md:w-14 md:h-14 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden bg-slate-100 dark:bg-slate-800 border-2 border-sky-400 dark:border-sky-500 shadow-md ${saqrState === 'thinking' ? 'ring-2 ring-amber-400 animate-pulse' : ''}`}>
+      <header className="flex-shrink-0 px-3 py-2 md:px-6 w-full max-w-4xl mx-auto flex justify-between items-center z-20 relative bg-white/80 dark:bg-transparent backdrop-blur-sm border-b border-slate-100 dark:border-transparent">
+        <div className="flex items-center gap-2 md:gap-3">
+          <div className={`w-8 h-8 md:w-11 md:h-11 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden bg-slate-100 dark:bg-slate-800 border-2 border-sky-400 dark:border-sky-500 shadow-md ${saqrState === 'thinking' ? 'ring-2 ring-amber-400 animate-pulse' : ''}`}>
             <img 
               src={getSaqrImageSrc()} 
               alt="Saqr AI" 
@@ -479,15 +479,15 @@ const SmartSearchPage: React.FC = () => {
             />
           </div>
           <div>
-            <h1 className="font-bold text-base md:text-2xl text-slate-900 dark:text-white tracking-tight">{t('status')}</h1>
-            <span className="inline-flex items-center gap-1.5 text-[11px] md:text-sm text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5">
-              <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> {t('online')}
+            <h1 className="font-bold text-sm md:text-lg text-slate-900 dark:text-white tracking-tight leading-none">{t('status')}</h1>
+            <span className="inline-flex items-center gap-1 text-[10px] md:text-xs text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5">
+              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> {t('online')}
             </span>
           </div>
         </div>
 
         {winnerData && saqrState === 'victory' && (
-          <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-3.5 py-2 bg-rose-600 text-white font-bold rounded-full hover:bg-rose-700 transition-all shadow-md text-xs md:text-sm shrink-0">
+          <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-3 py-1.5 bg-rose-600 text-white font-bold rounded-full hover:bg-rose-700 transition-all shadow-md text-xs shrink-0">
             <DownloadIcon />
             <span className="hidden md:inline">{t('download')}</span>
             <span className="md:hidden">تحميل</span>
@@ -495,34 +495,42 @@ const SmartSearchPage: React.FC = () => {
         )}
       </header>
 
-      {/* Greeting */}
+      {/* Greeting & Enhanced Username Banner */}
       <div className="flex-shrink-0 text-center pt-2 pb-1 px-3 z-10">
-        <h2 className="text-xl md:text-4xl lg:text-5xl font-medium tracking-tight text-slate-800 dark:text-slate-100">
-          {t('welcome')} <span className="font-bold text-sky-600 dark:text-sky-400">{userName || (locale === 'ar' ? 'صديقي المبدع' : 'Creative Friend')}</span>
-        </h2>
+        <div className="max-w-xl mx-auto py-2 px-4 rounded-3xl bg-gradient-to-r from-sky-500/10 via-amber-500/10 to-emerald-500/10 dark:from-sky-500/20 dark:via-amber-500/20 dark:to-emerald-500/20 border border-sky-200/50 dark:border-sky-800/50 shadow-sm backdrop-blur-md">
+          <h2 className="text-base sm:text-lg md:text-xl font-bold tracking-tight text-slate-700 dark:text-slate-300">
+            {t('welcome')}
+          </h2>
+          <div className="mt-1 inline-block relative group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-sky-600 via-amber-500 to-emerald-500 rounded-2xl blur-sm opacity-70 group-hover:opacity-100 transition duration-500 animate-pulse"></div>
+            <span className="relative px-4 py-1.5 bg-white dark:bg-slate-900 rounded-xl text-lg sm:text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-600 to-emerald-600 dark:from-sky-400 dark:to-emerald-400 tracking-wide block">
+              ✨ {userName || (locale === 'ar' ? 'صديقي المبدع' : 'Creative Friend')} ✨
+            </span>
+          </div>
+        </div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-3 md:px-8 py-3 no-scrollbar scroll-smooth relative z-10 pb-36 md:pb-28">
-        <div className="max-w-4xl mx-auto flex flex-col justify-end min-h-fit space-y-3">
+      {/* Messages (Minimized empty spaces) */}
+      <div className="flex-1 overflow-y-auto px-3 md:px-6 py-2 no-scrollbar scroll-smooth relative z-10 pb-28 md:pb-24">
+        <div className="max-w-3xl mx-auto flex flex-col justify-end min-h-fit space-y-2.5">
           
           {messages.map((msg, index) => (
             <RevealMessage key={index}>
                 <div className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   
                   {msg.role === 'assistant' && (
-                    <div className="flex flex-col gap-2 max-w-[95%] md:max-w-[85%] items-start">
-                      <div className="flex gap-3 items-end" translate="no" lang={locale}>
-                        <div className="bg-slate-50 dark:bg-[#1a1f2e] border border-slate-200 dark:border-slate-800 rounded-3xl rounded-bl-sm px-4 md:px-6 py-4 md:py-5 shadow-sm text-slate-800 dark:text-slate-100 font-medium leading-relaxed text-sm md:text-lg">
-                          <div className="prose prose-slate dark:prose-invert max-w-none text-start font-cairo [&>ul]:list-disc [&>ul]:ps-5 [&>ul]:space-y-2 [&>ol]:list-decimal [&>ol]:ps-5 [&>ol]:space-y-2 [&>p]:mb-3 [&>h3]:font-bold [&>h3]:text-sky-600 dark:[&>h3]:text-sky-400 [&>h3]:mt-4 [&>h3]:mb-2 [&>h4]:font-bold [&>h4]:text-amber-600 dark:[&>h4]:text-amber-400 [&>h4]:mt-3 [&>h4]:mb-1">
+                    <div className="flex flex-col gap-1.5 max-w-[96%] md:max-w-[88%] items-start">
+                      <div className="flex gap-2.5 items-end" translate="no" lang={locale}>
+                        <div className="bg-slate-50 dark:bg-[#1a1f2e] border border-slate-200 dark:border-slate-800 rounded-3xl rounded-bl-sm px-3.5 md:px-5 py-3 md:py-4 shadow-sm text-slate-800 dark:text-slate-100 font-medium leading-relaxed text-xs sm:text-sm md:text-base">
+                          <div className="prose prose-slate dark:prose-invert max-w-none text-start font-cairo [&>ul]:list-disc [&>ul]:ps-4 [&>ul]:space-y-1 [&>ol]:list-decimal [&>ol]:ps-4 [&>ol]:space-y-1 [&>p]:mb-2 [&>h3]:font-bold [&>h3]:text-sky-600 dark:[&>h3]:text-sky-400 [&>h3]:mt-2 [&>h3]:mb-1 [&>h4]:font-bold [&>h4]:text-amber-600 dark:[&>h4]:text-amber-400 [&>h4]:mt-2 [&>h4]:mb-1">
                             <ReactMarkdown>{msg.content}</ReactMarkdown>
                           </div>
                         </div>
                       </div>
 
                       {winnerData && saqrState === 'victory' && index === messages.length - 1 && (
-                        <div className="mt-2 w-full text-start animate-zoom-in">
-                          <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white font-bold rounded-full shadow-md hover:bg-emerald-700 transition-all text-xs md:text-sm">
+                        <div className="mt-1 w-full text-start animate-zoom-in">
+                          <button onClick={handleDownloadJPG} className="flex items-center gap-2 px-3 py-1.5 bg-emerald-600 text-white font-bold rounded-full shadow-md hover:bg-emerald-700 transition-all text-xs">
                             <DownloadIcon />
                             <span>{t('download')}</span>
                           </button>
@@ -532,8 +540,8 @@ const SmartSearchPage: React.FC = () => {
                   )}
 
                   {msg.role === 'user' && (
-                    <div className="bg-sky-500 dark:bg-sky-600 text-white px-4 md:px-5 py-3 rounded-3xl rounded-br-sm max-w-[90%] md:max-w-[75%] shadow-md">
-                      <div className="font-semibold leading-relaxed max-w-none text-start text-sm md:text-lg">
+                    <div className="bg-sky-500 dark:bg-sky-600 text-white px-3.5 md:px-4 py-2.5 rounded-3xl rounded-br-sm max-w-[90%] md:max-w-[75%] shadow-md">
+                      <div className="font-semibold leading-relaxed max-w-none text-start text-xs sm:text-sm md:text-base">
                         {msg.content}
                       </div>
                     </div>
@@ -542,33 +550,33 @@ const SmartSearchPage: React.FC = () => {
             </RevealMessage>
           ))}
           
-          <div ref={messagesEndRef} className="h-2" />
+          <div ref={messagesEndRef} className="h-1" />
         </div>
       </div>
 
       {/* Input & Teacher Quick Buttons */}
-      <div className="absolute bottom-0 inset-x-0 px-3 pb-3 pt-2 w-full z-20 flex-shrink-0 bg-gradient-to-t from-white via-white/95 to-transparent dark:from-[#0b0f17] dark:via-[#0b0f17]/95 dark:to-transparent">
-        <div className="max-w-3xl mx-auto flex flex-col gap-2">
+      <div className="absolute bottom-0 inset-x-0 px-2 sm:px-4 pb-2.5 pt-1.5 w-full z-20 flex-shrink-0 bg-gradient-to-t from-white via-white/98 to-transparent dark:from-[#0b0f17] dark:via-[#0b0f17]/98 dark:to-transparent">
+        <div className="max-w-2xl mx-auto flex flex-col gap-1.5">
           
-          {/* شريط الأزرار السريعة للمعلمين فقط فوق مربع الكتابة (متعدد اللغات) */}
+          {/* شريط الأزرار السريعة للمعلمين فقط فوق مربع الكتابة */}
           {isTeacherOrAdmin && (
             <div className="flex flex-wrap items-center justify-center gap-1.5 px-1 animate-fade-in">
               <button
                 onClick={() => handleQuickPrompt(t('lessonPrompt'))}
-                className="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 rounded-full text-[11px] md:text-xs font-bold hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-all flex items-center gap-1.5 shadow-sm"
+                className="px-3 py-1 bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 rounded-full text-[11px] md:text-xs font-bold hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-all flex items-center gap-1 shadow-sm"
               >
                 <span>📑</span> {t('mcgrawLesson')}
               </button>
               <button
                 onClick={() => handleQuickPrompt(t('presPrompt'))}
-                className="px-3 py-1.5 bg-purple-50 dark:bg-purple-950/70 border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 rounded-full text-[11px] md:text-xs font-bold hover:bg-purple-100 dark:hover:bg-purple-900/60 transition-all flex items-center gap-1.5 shadow-sm"
+                className="px-3 py-1 bg-purple-50 dark:bg-purple-950/70 border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 rounded-full text-[11px] md:text-xs font-bold hover:bg-purple-100 dark:hover:bg-purple-900/60 transition-all flex items-center gap-1 shadow-sm"
               >
                 <span>📊</span> {t('mcgrawPres')}
               </button>
             </div>
           )}
 
-          <div className="relative flex items-center bg-slate-100 dark:bg-[#1a1f2e] rounded-full border border-slate-200 dark:border-slate-700/60 shadow-lg px-2.5 md:px-3 py-1 focus-within:border-sky-500 dark:focus-within:border-sky-400 transition-all">
+          <div className="relative flex items-center bg-slate-100 dark:bg-[#1a1f2e] rounded-full border border-slate-200 dark:border-slate-700/60 shadow-lg px-2.5 py-1 focus-within:border-sky-500 dark:focus-within:border-sky-400 transition-all">
             
             <input
               type="text" 
@@ -576,28 +584,28 @@ const SmartSearchPage: React.FC = () => {
               onChange={(e) => setInput(e.target.value)} 
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
               placeholder={t('input')}
-              className="flex-1 bg-transparent border-0 focus:ring-0 py-2.5 md:py-3 px-2 md:px-3 text-slate-900 dark:text-white font-medium outline-none w-full placeholder-slate-400 dark:placeholder-slate-500 text-xs md:text-base"
+              className="flex-1 bg-transparent border-0 focus:ring-0 py-2 px-2 text-slate-900 dark:text-white font-medium outline-none w-full placeholder-slate-400 dark:placeholder-slate-500 text-xs sm:text-sm md:text-base"
               disabled={isLoading}
             />
 
             <button 
               onClick={handleSendMessage} 
               disabled={isLoading || !input.trim()} 
-              className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-sky-500 hover:bg-sky-600 disabled:bg-slate-300 disabled:dark:bg-slate-800 text-white flex items-center justify-center transition-all shrink-0 shadow-md ml-1 rtl:rotate-180"
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-sky-500 hover:bg-sky-600 disabled:bg-slate-300 disabled:dark:bg-slate-800 text-white flex items-center justify-center transition-all shrink-0 shadow-md ml-1 rtl:rotate-180"
             >
               <SendIcon />
             </button>
           </div>
 
           {isLoading && (
-            <div className="w-[90%] mx-auto h-1 rounded-full overflow-hidden relative bg-slate-200 dark:bg-slate-800 mt-1">
+            <div className="w-[90%] mx-auto h-0.5 rounded-full overflow-hidden relative bg-slate-200 dark:bg-slate-800 mt-0.5">
               <div className="absolute inset-0 bg-gradient-to-r from-sky-400 via-amber-400 to-rose-400 animate-[shimmer_1.5s_infinite] w-[200%]"></div>
             </div>
           )}
         </div>
       </div>
 
-      {/* --- تصميم الشهادة العرضية المحدثة والفاخرة للتصدير --- */}
+      {/* --- تصميم الشهادة العرضية للتصدير --- */}
       <div className="fixed left-[-9999px] top-0 pointer-events-none">
           <div ref={certificateRef} dir={locale === 'ar' ? 'rtl' : 'ltr'} className="w-[1123px] min-h-[794px] h-fit bg-gradient-to-br from-white via-slate-50 to-amber-50/20 text-slate-900 relative overflow-hidden flex flex-col font-sans border-[16px] border-solid border-amber-500 shadow-2xl pb-10">
               <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-bl-full -z-10 pointer-events-none"></div>
