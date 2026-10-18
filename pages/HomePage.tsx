@@ -33,8 +33,8 @@ const translations = {
         bubble: "فخورين بالإمارات",
         homelandTitle: "معلومات عن وطني",
         visitorsLabel: "زوار البوابة:",
-        upcomingEvents: "إجازة منتصف الفصل الأول",
-        startsIn: "تبدأ إجازة منتصف الفصل خلال:",
+        upcomingEvents: "إجازة عيد الإتحاد 55",
+        startsIn: "تبدأ إجازة عيد الإتحاد خلال:",
         dayUnit: "يوم",
         daysUnit: "أيام",
         newBadge: "جديد",
@@ -72,8 +72,8 @@ const translations = {
         bubble: "Proud of the UAE",
         homelandTitle: "Information About My Country",
         visitorsLabel: "Portal Visitors:",
-        upcomingEvents: "Mid-term Break",
-        startsIn: "Mid-term break starts in:",
+        upcomingEvents: "55th UAE National Day Break",
+        startsIn: "UAE National Day break starts in:",
         dayUnit: "Day",
         daysUnit: "Days",
         newBadge: "NEW",
@@ -580,7 +580,7 @@ const HomePage: React.FC = () => {
                                             {daysLeft === 1 ? t('dayUnit') : t('daysUnit')}
                                         </span>
                                     </div>
-                                    <span className="text-[11px] font-bold text-slate-500 mt-2">12 October 2026</span>
+                                    <span className="text-[11px] font-bold text-slate-500 mt-2">2 December 2026</span>
                                 </div>
                             </RevealSection>
 
