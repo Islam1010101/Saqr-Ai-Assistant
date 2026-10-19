@@ -278,16 +278,22 @@ const AdminDashboard: React.FC = () => {
                     await supabase.functions.invoke('send-borrow-email', { body: { email: formData.user_email.trim(), book: formData.book_name, date: formData.return_date } });
                 }
             } else if (modalMode === 'approveBorrow') {
-                // تأكيد الطلب المعلق
-                await supabase.from('borrowings').update({ 
-                    status: 'active',
-                    user_email: formData.user_email.trim(),
-                    return_date: formData.return_date
+                // يبدأ احتساب مدة الإعارة من تاريخ موافقة الأدمن ولمدة 15 يوماً
+                const approvedDate = new Date();
+                const borrowDate = approvedDate.toISOString().split('T')[0];
+                const dueDateObj = new Date(approvedDate);
+                dueDateObj.setDate(dueDateObj.getDate() + 15);
+                const dueDate = dueDateObj.toISOString().split('T')[0];
+                const email = formData.user_email.trim();
+                if (!email) throw new Error('Borrower email is required');
+                const { error: approvalError } = await supabase.from('borrowings').update({
+                    status: 'active', user_email: email, borrow_date: borrowDate, return_date: dueDate
                 }).eq('id', selectedItem.id);
-
-                if (formData.user_email) {
-                    await supabase.functions.invoke('send-borrow-email', { body: { email: formData.user_email.trim(), book: formData.book_name, date: formData.return_date } });
-                }
+                if (approvalError) throw approvalError;
+                const { error: emailError } = await supabase.functions.invoke('send-borrow-email', {
+                    body: { email, book: formData.book_name, date: dueDate, duration: 15, borrowDate }
+                });
+                if (emailError) console.error('Borrow approval email failed:', emailError);
             }
 
             setModalMode(null);
@@ -397,7 +403,7 @@ const AdminDashboard: React.FC = () => {
                                     filteredList.map((item: any) => (
                                         <tr key={item.id} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                                             <td className="p-3.5 font-mono font-bold text-xs md:text-sm text-blue-600 dark:text-blue-400">
-                                                {activeTab === 'students' ? item.student_id : activeTab === 'teachers' ? item.teacher_id : (item.user_id || item.teacher_id)}
+                                                {activeTab === 'students' ? item.student_id : activeTab === 'teachers' ? item.teacher_id : (item.user_id || item.teacher_id)}{(activeTab === 'pending' || activeTab === 'borrowings') && <div className="mt-1 font-sans text-slate-500 dark:text-slate-400">{item.user_name || ''}{item.user_grade ? ` · ${item.user_grade}` : ''}</div>}
                                             </td>
                                             
                                             {activeTab !== 'borrowings' && activeTab !== 'pending' && <td className="p-3.5 font-bold text-xs md:text-sm">{activeTab === 'reports' ? item.teacher_name : item.name_ar}</td>}
@@ -405,7 +411,7 @@ const AdminDashboard: React.FC = () => {
                                             {activeTab === 'students' && <td className="p-3.5 text-xs md:text-sm text-slate-500 dark:text-slate-400">{item.grade}</td>}
                                             {activeTab === 'students' && <td className="p-3.5 text-center font-black text-emerald-600 dark:text-emerald-400">{item.points || 0}</td>}
                                             
-                                            {(activeTab === 'borrowings' || activeTab === 'pending') && <td className="p-3.5 font-bold text-xs md:text-sm text-rose-500">{item.book_name}</td>}
+                                            {(activeTab === 'borrowings' || activeTab === 'pending') && <td className="p-3.5 font-bold text-xs md:text-sm text-rose-500">{item.book_name}<div className="mt-1 text-[11px] font-normal text-slate-500 dark:text-slate-400">{isAr ? 'الرف' : 'Shelf'}: {item.book_shelf || '-'} · {isAr ? 'الصف' : 'Row'}: {item.book_row || '-'}</div></td>}
                                             
                                             {/* خانة الإيميل للطلبات والإعارات */}
                                             {(activeTab === 'borrowings' || activeTab === 'pending') && (
@@ -544,10 +550,11 @@ const AdminDashboard: React.FC = () => {
                                         <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">اسم الكتاب</label>
                                         <input type="text" value={formData.book_name} readOnly={modalMode === 'approveBorrow'} onChange={(e) => setFormData({ ...formData, book_name: e.target.value })} className={`w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold ${modalMode === 'approveBorrow' ? 'bg-slate-100 dark:bg-slate-800/50 text-slate-500 cursor-not-allowed' : 'bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white'}`} required />
                                     </div>
-                                    <div>
-                                        <label className="block text-sm font-black text-amber-600 dark:text-amber-400 mb-1">تاريخ الإرجاع الإلزامي</label>
-                                        <input type="date" value={formData.return_date} onChange={(e) => setFormData({ ...formData, return_date: e.target.value })} className="w-full px-4 py-3 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border-4 border-amber-300 dark:border-amber-600 focus:border-amber-500 rounded-2xl font-black outline-none transition-colors" required />
-                                    </div>
+                                    {modalMode === 'approveBorrow' ? (
+                                        <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-300 dark:border-amber-700 text-sm font-bold text-amber-800 dark:text-amber-300">مدة الاستعارة 15 يوماً من تاريخ الموافقة، وسيتم تحديد تاريخ الإرجاع تلقائياً.</div>
+                                    ) : (
+                                        <div><label className="block text-sm font-black text-amber-600 dark:text-amber-400 mb-1">تاريخ الإرجاع الإلزامي</label><input type="date" value={formData.return_date} onChange={(e) => setFormData({ ...formData, return_date: e.target.value })} className="w-full px-4 py-3 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border-4 border-amber-300 dark:border-amber-600 focus:border-amber-500 rounded-2xl font-black outline-none transition-colors" required /></div>
+                                    )}
                                 </>
                             )}
 
