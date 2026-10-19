@@ -15,8 +15,6 @@ const translations = {
         studentLogins: "طلاب قاموا بالدخول",
         teacherLogins: "معلمون قاموا بالدخول",
         topBooksTitle: "أكثر الكتب طلباً وقراءة في المكتبة",
-        arabicBooks: "المكتبة العربية الرقمية",
-        englishBooks: "المكتبة الإنجليزية الرقمية",
         studentManagement: "إدارة الطلاب",
         teacherManagement: "إدارة المعلمين",
         borrowManagement: "الإستعارات النشطة",
@@ -51,7 +49,7 @@ const translations = {
         modalApproveBorrow: "تأكيد طلب الإستعارة وإرسال الإشعار",
         accessDenied: "عذراً، هذه الصفحة مخصصة لمدير النظام فقط.",
         loading: "جاري تحليل البيانات الحية...",
-        searchPlaceholder: "ابحث بالاسم أو الرقم ...",
+        searchPlaceholder: "ابحث بالاسم أو الرقم أو الكتاب...",
         noResults: "لا توجد نتائج مطابقة."
     },
     en: {
@@ -65,8 +63,6 @@ const translations = {
         studentLogins: "Students Logged In",
         teacherLogins: "Teachers Logged In",
         topBooksTitle: "Most Popular & Read Library Books",
-        arabicBooks: "Arabic Digital Library",
-        englishBooks: "English Digital Library",
         studentManagement: "Student Management",
         teacherManagement: "Teacher Management",
         borrowManagement: "Active Borrowings",
@@ -101,7 +97,7 @@ const translations = {
         modalApproveBorrow: "Approve Borrow Request & Notify",
         accessDenied: "Access Denied. Admin privileges required.",
         loading: "Loading live dashboard data...",
-        searchPlaceholder: "Search by name, ID,...",
+        searchPlaceholder: "Search by name, ID, book...",
         noResults: "No matching results found."
     }
 };
@@ -245,6 +241,7 @@ const AdminDashboard: React.FC = () => {
         });
     };
 
+    // جلب كافة السجلات من جدول borrowings بدون تقييد بالحالة أولاً لضمان عدم ضياع أي طلب معلق
     const refreshBorrowingsOnly = async (studentsOverride?: any[], teachersOverride?: any[]) => {
         setIsRefreshingBorrowings(true);
         setBorrowingsError('');
@@ -252,7 +249,6 @@ const AdminDashboard: React.FC = () => {
             const { data: allBorrowings, error } = await supabase
                 .from('borrowings')
                 .select('*')
-                .in('status', ['pending', 'active'])
                 .order('id', { ascending: false });
 
             if (error) throw error;
@@ -261,8 +257,19 @@ const AdminDashboard: React.FC = () => {
             const tList = teachersOverride || teachersList;
             const enriched = enrichBorrowingRecords(allBorrowings || [], sList, tList);
 
-            setPendingRequestsList(enriched.filter(b => b.status === 'pending'));
-            setBorrowingsList(enriched.filter(b => b.status === 'active'));
+            // تصفية مرنة تقبل pending بأي صيغة (حروف صغيرة أو كبيرة أو مسافات)
+            const pending = enriched.filter(b => {
+                const st = String(b.status || '').trim().toLowerCase();
+                return st === 'pending' || st === 'معلق' || st === 'requested';
+            });
+
+            const active = enriched.filter(b => {
+                const st = String(b.status || '').trim().toLowerCase();
+                return st === 'active' || st === 'approved' || st === 'موافق';
+            });
+
+            setPendingRequestsList(pending);
+            setBorrowingsList(active);
         } catch (err) {
             const message = err instanceof Error ? err.message : String(err);
             setBorrowingsError(message);
@@ -367,7 +374,6 @@ const AdminDashboard: React.FC = () => {
         return { data, durationDays };
     };
 
-    // حساب أكثر الكتب طلباً وقراءة من جدول الإعارات النشطة والسابقة
     const topBooksStats = useMemo(() => {
         const counts: Record<string, number> = {};
         borrowingsList.forEach(b => {
@@ -381,7 +387,6 @@ const AdminDashboard: React.FC = () => {
             .slice(0, 5);
     }, [borrowingsList]);
 
-    // دالة طباعة أو تنزيل التقرير كملف PDF
     const handlePrintDashboardReport = () => {
         const printWindow = window.open('', '_blank');
         if (printWindow) {
@@ -404,7 +409,6 @@ const AdminDashboard: React.FC = () => {
                         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
                         th, td { border: 1px solid #cbd5e1; padding: 10px; text-align: ${dir === 'rtl' ? 'right' : 'left'}; }
                         th { background-color: #f1f5f9; font-weight: bold; }
-                        @media print { .no-print { display: none !important; } }
                     </style>
                 </head>
                 <body>
@@ -413,38 +417,29 @@ const AdminDashboard: React.FC = () => {
                         <h1>${t('title')}</h1>
                         <p>${t('subtitle')} | ${new Date().toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}</p>
                     </div>
-
                     <div class="stats-grid">
                         <div class="stat-card"><div class="stat-num">${stats.students}</div><div class="stat-label">${t('totalStudents')}</div></div>
                         <div class="stat-card"><div class="stat-num">${stats.teachers}</div><div class="stat-label">${t('totalTeachers')}</div></div>
                         <div class="stat-card"><div class="stat-num">${stats.studentLogins}</div><div class="stat-label">${t('studentLogins')}</div></div>
                         <div class="stat-card"><div class="stat-num">${stats.teacherLogins}</div><div class="stat-label">${t('teacherLogins')}</div></div>
                     </div>
-
                     <h2>📚 ${t('topBooksTitle')}</h2>
                     <table>
                         <tr><th>#</th><th>${t('colBook')}</th><th>${isAr ? 'عدد مرات الاستعارة' : 'Borrow Count'}</th></tr>
                         ${topBooksStats.length > 0 ? topBooksStats.map(([book, count], idx) => `<tr><td>${idx + 1}</td><td><strong>${book}</strong></td><td>${count}</td></tr>`).join('') : `<tr><td colspan="3" style="text-align:center;">${t('noResults')}</td></tr>`}
                     </table>
-
                     <h2>📌 ${t('borrowManagement')} (${borrowingsList.length})</h2>
                     <table>
                         <tr><th>${t('colId')}</th><th>${t('colName')}</th><th>${t('colBook')}</th><th>${t('colEmail')}</th><th>${t('colDate')}</th></tr>
                         ${borrowingsList.length > 0 ? borrowingsList.map(b => `<tr><td>${b.user_id}</td><td>${b.user_name || '-'}</td><td>${b.book_name}</td><td>${b.user_email || '-'}</td><td>${b.return_date}</td></tr>`).join('') : `<tr><td colspan="5" style="text-align:center;">${t('noResults')}</td></tr>`}
                     </table>
-
-                    <div style="margin-top: 40px; text-align: center; font-size: 11px; color: #94a3b8;">
-                        مدرسة صقر الإمارات الدولية الخاصة (EFIPS) - تقرير نظام المكتبة الذكية الآلي
-                    </div>
                 </body>
                 </html>
             `;
             printWindow.document.write(htmlReport);
             printWindow.document.close();
             printWindow.focus();
-            setTimeout(() => {
-                printWindow.print();
-            }, 600);
+            setTimeout(() => { printWindow.print(); }, 600);
         }
     };
 
@@ -531,10 +526,10 @@ const AdminDashboard: React.FC = () => {
                         borrowDate: todayStr,
                         returnDate: targetReturnDate
                     });
-                    setBorrowingsNotice(isAr ? `✅ تم تسجيل الإعارة وإرسال إيميل التأكيد باللغتين إلى ${cleanEmail} (${durationDays} يوماً).` : `✅ Borrowing registered and bilingual email sent to ${cleanEmail}.`);
+                    setBorrowingsNotice(isAr ? `✅ تم تسجيل الإعارة وإرسال إيميل التأكيد باللغتين إلى ${cleanEmail} (${durationDays} يوماً).` : `✅ Borrowing registered and bilingual email sent.`);
                 } catch (emailErr) {
                     console.error('Email send warning:', emailErr);
-                    setBorrowingsNotice(isAr ? '✅ تم تسجيل الإعارة في النظام، ولكن تعذّر إرسال البريد الآلي.' : '✅ Borrowing saved, but email failed.');
+                    setBorrowingsNotice(isAr ? '✅ تم تسجيل الإعارة، ولكن تعذّر إرسال البريد.' : '✅ Borrowing saved, but email failed.');
                 }
             } else if (modalMode === 'approveBorrow') {
                 const todayStr = new Date().toISOString().split('T')[0];
@@ -557,14 +552,14 @@ const AdminDashboard: React.FC = () => {
                     const { durationDays } = await sendBilingualConfirmationEmail({
                         email: cleanEmail,
                         userName: selectedItem.user_name || formData.user_id,
-                        bookName: formData.book_name,
+                        bookName: selectedItem.book_name,
                         borrowDate: todayStr,
                         returnDate: targetReturnDate
                     });
-                    setBorrowingsNotice(isAr ? `✅ تمت الموافقة على استعارة «${formData.book_name}» وإرسال إيميل رسمي باللغتين إلى ${cleanEmail} (المدة: ${durationDays} يوماً - الإرجاع: ${targetReturnDate}).` : `✅ Approved “${formData.book_name}” and sent bilingual confirmation email to ${cleanEmail}.`);
+                    setBorrowingsNotice(isAr ? `✅ تمت الموافقة على استعارة «${selectedItem.book_name}» وإرسال إيميل رسمي باللغتين إلى ${cleanEmail} (المدة: ${durationDays} يوماً).` : `✅ Approved “${selectedItem.book_name}” and sent bilingual confirmation email.`);
                 } catch (emailErr) {
                     console.error('Email send warning:', emailErr);
-                    setBorrowingsNotice(isAr ? `✅ تمت الموافقة وتفعيل الإعارة حتى ${targetReturnDate}، لكن تعذّر إرسال البريد الآلي.` : `✅ Request approved until ${targetReturnDate}, but email sending failed.`);
+                    setBorrowingsNotice(isAr ? `✅ تمت الموافقة وتفعيل الإعارة، لكن تعذّر إرسال البريد.` : `✅ Request approved, but email sending failed.`);
                 }
             }
 
@@ -913,7 +908,7 @@ const AdminDashboard: React.FC = () => {
                                             <strong>عربي:</strong> تم بنجاح استعارة كتاب «{formData.book_name || '...'}» بتاريخ {previewBorrowDate} لمدة <strong>{previewDurationDays} يوماً</strong>، ويجب إرجاعه في موعد أقصاه <strong>{previewReturnDate}</strong> تجنباً لاعتبار الكتاب تالفاً أو مفقوداً.
                                         </p>
                                         <p className="text-slate-600 dark:text-slate-300" dir="ltr">
-                                            <strong>EN:</strong> Successfully borrowed “{formData.book_name || '...'}” on {previewBorrowDate} for <strong>{previewDurationDays} days</strong>. Must be returned by <strong>{previewReturnDate}</strong> to avoid being considered damaged or lost.
+                                            <strong>EN:</strong> Successfully borrowed “{formData.book_name || '...'}” on {previewBorrowDate} for <strong>{previewDurationDays} days</strong>. Must be returned by {previewReturnDate} to avoid being considered damaged or lost.
                                         </p>
                                     </div>
                                 </>
