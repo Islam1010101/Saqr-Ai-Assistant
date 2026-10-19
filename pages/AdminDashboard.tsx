@@ -14,9 +14,9 @@ const translations = {
         totalTeachers: "إجمالي المعلمين",
         studentLogins: "طلاب قاموا بالدخول",
         teacherLogins: "معلمون قاموا بالدخول",
-        topBooksTitle: "أكثر الكتب طلباً وقراءة",
-        arabicBooks: "المكتبة العربية",
-        englishBooks: "المكتبة الإنجليزية",
+        topBooksTitle: "أكثر الكتب طلباً وقراءة في المكتبة",
+        arabicBooks: "المكتبة العربية الرقمية",
+        englishBooks: "المكتبة الإنجليزية الرقمية",
         studentManagement: "إدارة الطلاب",
         teacherManagement: "إدارة المعلمين",
         borrowManagement: "الإعارات النشطة",
@@ -30,6 +30,7 @@ const translations = {
         cancelBtn: "إلغاء",
         approveBtn: "تأكيد الإعارة وإرسال الإيميل",
         rejectBtn: "رفض",
+        printPdfBtn: "🖨️ طباعة أو تنزيل التقرير (PDF)",
         colId: "الرقم التعريفي",
         colName: "الاسم",
         colGrade: "الصف",
@@ -63,9 +64,9 @@ const translations = {
         totalTeachers: "Total Teachers",
         studentLogins: "Students Logged In",
         teacherLogins: "Teachers Logged In",
-        topBooksTitle: "Most Popular Digital Books",
-        arabicBooks: "Arabic Library",
-        englishBooks: "English Library",
+        topBooksTitle: "Most Popular & Read Library Books",
+        arabicBooks: "Arabic Digital Library",
+        englishBooks: "English Digital Library",
         studentManagement: "Student Management",
         teacherManagement: "Teacher Management",
         borrowManagement: "Active Borrowings",
@@ -79,6 +80,7 @@ const translations = {
         cancelBtn: "Cancel",
         approveBtn: "Approve & Send Email",
         rejectBtn: "Reject",
+        printPdfBtn: "🖨️ Print / Download PDF Report",
         colId: "ID Number",
         colName: "Name",
         colGrade: "Grade",
@@ -111,14 +113,12 @@ const SearchSvg = () => (
     </svg>
 );
 
-// دالة مساعدة لإضافة أيام لتاريخ معين (الافتراضي 15 يوماً)
 const getDefaultReturnDate = (days = 15) => {
     const d = new Date();
     d.setDate(d.getDate() + days);
     return d.toISOString().split('T')[0];
 };
 
-// دالة حساب الفرق بالأيام بين تاريخ الاستعارة وتاريخ الإرجاع
 const calculateDurationDays = (borrowDate: string, returnDate: string): number => {
     const start = new Date(borrowDate);
     const end = new Date(returnDate);
@@ -126,7 +126,6 @@ const calculateDurationDays = (borrowDate: string, returnDate: string): number =
     return diff > 0 ? diff : 15;
 };
 
-// دالة توليد الرسالة ثنائية اللغة (عربي / إنجليزي) بكل التفاصيل والتحذير القانوني
 const buildBilingualBorrowEmail = (
     userName: string,
     bookName: string,
@@ -135,7 +134,6 @@ const buildBilingualBorrowEmail = (
     durationDays: number
 ) => {
     const subject = `تأكيد استعارة كتاب: ${bookName} | Book Borrowing Confirmation: ${bookName}`;
-
     const html = `
     <div style="font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif; max-width: 650px; margin: 0 auto; border: 2px solid #e2e8f0; border-radius: 20px; overflow: hidden; background-color: #ffffff;">
         <div style="background: linear-gradient(135deg, #0f172a, #1e3a8a); color: #ffffff; padding: 24px; text-align: center;">
@@ -143,8 +141,6 @@ const buildBilingualBorrowEmail = (
             <h2 style="margin: 0; font-size: 20px;">مكتبة مدرسة صقر الإمارات الدولية الخاصة</h2>
             <p style="margin: 4px 0 0; font-size: 13px; color: #fbbf24;">Emirates Falcon International Private School Library</p>
         </div>
-
-        <!-- القسم العربي -->
         <div dir="rtl" style="padding: 24px; text-align: right; border-bottom: 2px dashed #cbd5e1; color: #1e293b; line-height: 1.8;">
             <h3 style="color: #059669; margin-top: 0;">✅ تم تأكيد عملية الاستعارة بنجاح</h3>
             <p>مرحباً <strong>${userName || 'عزيزنا القارئ'}</strong>،</p>
@@ -159,8 +155,6 @@ const buildBilingualBorrowEmail = (
                 <strong>⚠️ تنبيه هام:</strong> يرجى الالتزام بإرجاع الكتاب في المدة المحددة أعلاه (${returnDate})، وذلك تجنباً لاعتبار الكتاب تالفاً أو مفقوداً وتحميلكم مسؤولية ذلك وفق لوائح المكتبة المدرسية.
             </div>
         </div>
-
-        <!-- English Section -->
         <div dir="ltr" style="padding: 24px; text-align: left; color: #1e293b; line-height: 1.8;">
             <h3 style="color: #059669; margin-top: 0;">✅ Book Borrowing Successfully Confirmed</h3>
             <p>Dear <strong>${userName || 'Reader'}</strong>,</p>
@@ -175,12 +169,10 @@ const buildBilingualBorrowEmail = (
                 <strong>⚠️ Important Notice:</strong> Please ensure that the book is returned within the specified period (by ${returnDate}) to avoid the book being considered damaged or lost under school library regulations.
             </div>
         </div>
-
         <div style="background: #f1f5f9; padding: 14px; text-align: center; font-size: 12px; color: #64748b;">
             مع تحيات المساعد الذكي صقر - مكتبة مدرسة صقر الإمارات الدولية الخاصة (EFIPS)
         </div>
     </div>`;
-
     return { subject, html };
 };
 
@@ -202,7 +194,6 @@ const AdminDashboard: React.FC = () => {
     const [pendingRequestsList, setPendingRequestsList] = useState<any[]>([]);
     const [lessonReportsList, setLessonReportsList] = useState<any[]>([]);
     
-    // التبويب الافتراضي هو الطلبات المعلقة ليراها الأدمن فوراً
     const [activeTab, setActiveTab] = useState<'students' | 'teachers' | 'borrowings' | 'pending' | 'reports'>('pending');
 
     const [searchQuery, setSearchQuery] = useState('');
@@ -210,7 +201,6 @@ const AdminDashboard: React.FC = () => {
     const [borrowingsNotice, setBorrowingsNotice] = useState('');
     const [isRefreshingBorrowings, setIsRefreshingBorrowings] = useState(false);
 
-    // متغيرات المودال
     const [modalMode, setModalMode] = useState<'addStudent' | 'addTeacher' | 'editStudent' | 'editTeacher' | 'addBorrow' | 'approveBorrow' | null>(null);
     const [selectedItem, setSelectedItem] = useState<any>(null);
     const [formData, setFormData] = useState({ 
@@ -234,7 +224,6 @@ const AdminDashboard: React.FC = () => {
         }
     }, [isAr]);
 
-    // دالة ربط معلومات اسم الطالب أو المعلم مع طلب الاستعارة
     const enrichBorrowingRecords = (records: any[], students: any[], teachers: any[]) => {
         const studentMap = new Map(students.map(s => [String(s.student_id).trim().toLowerCase(), s]));
         const teacherMap = new Map(teachers.map(tc => [String(tc.teacher_id).trim().toLowerCase(), tc]));
@@ -256,7 +245,6 @@ const AdminDashboard: React.FC = () => {
         });
     };
 
-    // جلب الطلبات المعلقة والنشطة مباشرة من جدول borrowings في Supabase
     const refreshBorrowingsOnly = async (studentsOverride?: any[], teachersOverride?: any[]) => {
         setIsRefreshingBorrowings(true);
         setBorrowingsError('');
@@ -278,7 +266,6 @@ const AdminDashboard: React.FC = () => {
         } catch (err) {
             const message = err instanceof Error ? err.message : String(err);
             setBorrowingsError(message);
-            console.error('Unable to load borrowing requests:', err);
         } finally {
             setIsRefreshingBorrowings(false);
         }
@@ -330,10 +317,8 @@ const AdminDashboard: React.FC = () => {
         }
     };
 
-    // اشتراك حي (Realtime) في جدول borrowings ليظهر أي طلب جديد من SearchPage في نفس اللحظة
     useEffect(() => {
         if (isAdmin !== true) return;
-
         const channel = supabase
             .channel('borrowings-realtime-admin')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'borrowings' }, () => {
@@ -346,7 +331,6 @@ const AdminDashboard: React.FC = () => {
         };
     }, [isAdmin, studentsList, teachersList]);
 
-    // دالة إرسال الإيميل الآلي ثنائي اللغة عبر Supabase Edge Function
     const sendBilingualConfirmationEmail = async (params: {
         email: string;
         userName: string;
@@ -375,9 +359,7 @@ const AdminDashboard: React.FC = () => {
                 return_date: params.returnDate,
                 duration_days: durationDays,
                 subject,
-                html,
-                message_ar: `تم بنجاح استعارة كتاب "${params.bookName}" بتاريخ ${params.borrowDate} لمدة ${durationDays} يوماً. يرجى إرجاعه في موعد أقصاه ${params.returnDate} تجنباً لاعتبار الكتاب تالفاً أو مفقوداً.`,
-                message_en: `You have successfully borrowed "${params.bookName}" on ${params.borrowDate} for ${durationDays} days. Please return it by ${params.returnDate} to avoid the book being considered damaged or lost.`
+                html
             }
         });
 
@@ -385,7 +367,87 @@ const AdminDashboard: React.FC = () => {
         return { data, durationDays };
     };
 
-    // فلترة الجداول
+    // حساب أكثر الكتب طلباً وقراءة من جدول الإعارات النشطة والسابقة
+    const topBooksStats = useMemo(() => {
+        const counts: Record<string, number> = {};
+        borrowingsList.forEach(b => {
+            if (b.book_name) {
+                const name = b.book_name.trim();
+                counts[name] = (counts[name] || 0) + 1;
+            }
+        });
+        return Object.entries(counts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5);
+    }, [borrowingsList]);
+
+    // دالة طباعة أو تنزيل التقرير كملف PDF
+    const handlePrintDashboardReport = () => {
+        const printWindow = window.open('', '_blank');
+        if (printWindow) {
+            const htmlReport = `
+                <html dir="${dir}" lang="${locale}">
+                <head>
+                    <title>${t('title')} - EFIPS</title>
+                    <style>
+                        @page { size: A4 portrait; margin: 15mm; }
+                        body { font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif; padding: 20px; color: #1e293b; line-height: 1.6; }
+                        .header { text-align: center; border-bottom: 3px solid #0f172a; padding-bottom: 15px; margin-bottom: 25px; }
+                        .header img { max-width: 90px; height: auto; margin-bottom: 8px; }
+                        h1 { margin: 0; font-size: 22px; color: #0f172a; }
+                        p { margin: 5px 0; font-size: 13px; color: #64748b; }
+                        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; }
+                        .stat-card { border: 1px solid #cbd5e1; border-radius: 12px; padding: 15px; text-align: center; background: #f8fafc; }
+                        .stat-num { font-size: 24px; font-weight: 900; color: #2563eb; }
+                        .stat-label { font-size: 11px; font-weight: bold; color: #475569; margin-top: 5px; text-transform: uppercase; }
+                        h2 { font-size: 16px; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; margin-top: 25px; color: #0f172a; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+                        th, td { border: 1px solid #cbd5e1; padding: 10px; text-align: ${dir === 'rtl' ? 'right' : 'left'}; }
+                        th { background-color: #f1f5f9; font-weight: bold; }
+                        @media print { .no-print { display: none !important; } }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <img src="https://www.efipslibrary.online/school-logo.png" alt="EFIPS Logo" />
+                        <h1>${t('title')}</h1>
+                        <p>${t('subtitle')} | ${new Date().toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}</p>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card"><div class="stat-num">${stats.students}</div><div class="stat-label">${t('totalStudents')}</div></div>
+                        <div class="stat-card"><div class="stat-num">${stats.teachers}</div><div class="stat-label">${t('totalTeachers')}</div></div>
+                        <div class="stat-card"><div class="stat-num">${stats.studentLogins}</div><div class="stat-label">${t('studentLogins')}</div></div>
+                        <div class="stat-card"><div class="stat-num">${stats.teacherLogins}</div><div class="stat-label">${t('teacherLogins')}</div></div>
+                    </div>
+
+                    <h2>📚 ${t('topBooksTitle')}</h2>
+                    <table>
+                        <tr><th>#</th><th>${t('colBook')}</th><th>${isAr ? 'عدد مرات الاستعارة' : 'Borrow Count'}</th></tr>
+                        ${topBooksStats.length > 0 ? topBooksStats.map(([book, count], idx) => `<tr><td>${idx + 1}</td><td><strong>${book}</strong></td><td>${count}</td></tr>`).join('') : `<tr><td colspan="3" style="text-align:center;">${t('noResults')}</td></tr>`}
+                    </table>
+
+                    <h2>📌 ${t('borrowManagement')} (${borrowingsList.length})</h2>
+                    <table>
+                        <tr><th>${t('colId')}</th><th>${t('colName')}</th><th>${t('colBook')}</th><th>${t('colEmail')}</th><th>${t('colDate')}</th></tr>
+                        ${borrowingsList.length > 0 ? borrowingsList.map(b => `<tr><td>${b.user_id}</td><td>${b.user_name || '-'}</td><td>${b.book_name}</td><td>${b.user_email || '-'}</td><td>${b.return_date}</td></tr>`).join('') : `<tr><td colspan="5" style="text-align:center;">${t('noResults')}</td></tr>`}
+                    </table>
+
+                    <div style="margin-top: 40px; text-align: center; font-size: 11px; color: #94a3b8;">
+                        مدرسة صقر الإمارات الدولية الخاصة (EFIPS) - تقرير نظام المكتبة الذكية الآلي
+                    </div>
+                </body>
+                </html>
+            `;
+            printWindow.document.write(htmlReport);
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => {
+                printWindow.print();
+            }, 600);
+        }
+    };
+
     const filteredList = useMemo(() => {
         const term = searchQuery.toLowerCase().trim();
         if (activeTab === 'students') {
@@ -469,25 +531,16 @@ const AdminDashboard: React.FC = () => {
                         borrowDate: todayStr,
                         returnDate: targetReturnDate
                     });
-                    setBorrowingsNotice(
-                        isAr
-                            ? `✅ تم تسجيل الإعارة وإرسال إيميل التأكيد باللغتين إلى ${cleanEmail} (المدة: ${durationDays} يوماً).`
-                            : `✅ Borrowing registered and bilingual email sent to ${cleanEmail} (${durationDays} days).`
-                    );
+                    setBorrowingsNotice(isAr ? `✅ تم تسجيل الإعارة وإرسال إيميل التأكيد باللغتين إلى ${cleanEmail} (${durationDays} يوماً).` : `✅ Borrowing registered and bilingual email sent to ${cleanEmail}.`);
                 } catch (emailErr) {
                     console.error('Email send warning:', emailErr);
-                    setBorrowingsNotice(
-                        isAr
-                            ? `✅ تم تسجيل الإعارة في النظام، ولكن تعذّر إرسال البريد الآلي (تأكد من تفعيل دالة send-borrow-email في Supabase).`
-                            : `✅ Borrowing saved in database, but automated email could not be sent (check send-borrow-email Edge Function).`
-                    );
+                    setBorrowingsNotice(isAr ? '✅ تم تسجيل الإعارة في النظام، ولكن تعذّر إرسال البريد الآلي.' : '✅ Borrowing saved, but email failed.');
                 }
             } else if (modalMode === 'approveBorrow') {
                 const todayStr = new Date().toISOString().split('T')[0];
                 const targetReturnDate = formData.return_date || getDefaultReturnDate(15);
                 const cleanEmail = formData.user_email.trim();
 
-                // 1. تحديث الطلب في Supabase ليصبح نشطاً (active)
                 const { error: updateErr } = await supabase
                     .from('borrowings')
                     .update({
@@ -500,7 +553,6 @@ const AdminDashboard: React.FC = () => {
 
                 if (updateErr) throw updateErr;
 
-                // 2. إرسال البريد الإلكتروني ثنائي اللغة للمستخدم
                 try {
                     const { durationDays } = await sendBilingualConfirmationEmail({
                         email: cleanEmail,
@@ -509,18 +561,10 @@ const AdminDashboard: React.FC = () => {
                         borrowDate: todayStr,
                         returnDate: targetReturnDate
                     });
-                    setBorrowingsNotice(
-                        isAr
-                            ? `✅ تمت الموافقة على استعارة «${formData.book_name}» وإرسال إيميل رسمي باللغتين إلى ${cleanEmail} (مدة الاستعارة: ${durationDays} يوماً - الإرجاع: ${targetReturnDate}).`
-                            : `✅ Approved “${formData.book_name}” and sent bilingual confirmation email to ${cleanEmail} (Duration: ${durationDays} days - Return by: ${targetReturnDate}).`
-                    );
+                    setBorrowingsNotice(isAr ? `✅ تمت الموافقة على استعارة «${formData.book_name}» وإرسال إيميل رسمي باللغتين إلى ${cleanEmail} (المدة: ${durationDays} يوماً - الإرجاع: ${targetReturnDate}).` : `✅ Approved “${formData.book_name}” and sent bilingual confirmation email to ${cleanEmail}.`);
                 } catch (emailErr) {
                     console.error('Email send warning:', emailErr);
-                    setBorrowingsNotice(
-                        isAr
-                            ? `✅ تمت الموافقة وتفعيل الإعارة حتى ${targetReturnDate}، لكن تعذّر إرسال البريد الآلي (تحقق من إعدادات دالة send-borrow-email).`
-                            : `✅ Request approved until ${targetReturnDate}, but email sending failed (check send-borrow-email function).`
-                    );
+                    setBorrowingsNotice(isAr ? `✅ تمت الموافقة وتفعيل الإعارة حتى ${targetReturnDate}، لكن تعذّر إرسال البريد الآلي.` : `✅ Request approved until ${targetReturnDate}, but email sending failed.`);
                 }
             }
 
@@ -529,7 +573,6 @@ const AdminDashboard: React.FC = () => {
             await fetchRealDashboardData(false);
         } catch (err) {
             const message = err instanceof Error ? err.message : String(err);
-            console.error('Operation error:', err);
             setBorrowingsError(message);
             window.alert(message);
         } finally {
@@ -566,7 +609,10 @@ const AdminDashboard: React.FC = () => {
                     <h1 className="text-2xl md:text-4xl font-black bg-gradient-to-r from-rose-500 to-amber-500 bg-clip-text text-transparent">{t('title')}</h1>
                     <p className="text-slate-500 dark:text-slate-400 font-bold text-xs md:text-sm mt-1">{t('welcome')} <span className="text-slate-900 dark:text-white font-black">{adminName}</span> | {t('subtitle')}</p>
                 </div>
-                <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+                <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
+                    <button onClick={handlePrintDashboardReport} className="px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all flex items-center gap-2">
+                        {t('printPdfBtn')}
+                    </button>
                     <button onClick={toggleTheme} className="px-4 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm shadow-inner transition-all">{theme === 'light' ? '🌙 Dark' : '☀️ Light'}</button>
                     <Link to="/home" className="px-6 py-3 bg-slate-900 dark:bg-slate-800 text-white hover:bg-slate-800 border border-slate-700 rounded-2xl font-bold text-sm transition-all shadow-md text-center">{t('backToHome')}</Link>
                 </div>
@@ -582,6 +628,30 @@ const AdminDashboard: React.FC = () => {
                         <div className="bg-slate-50 dark:bg-slate-800/80 border border-emerald-500/30 p-5 rounded-3xl text-center shadow-sm"><div className="text-3xl md:text-4xl font-black text-emerald-600 dark:text-emerald-400">{stats.teachers}</div><div className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-2 uppercase">{t('totalTeachers')}</div></div>
                         <div className="bg-slate-50 dark:bg-slate-800/80 border border-purple-500/30 p-5 rounded-3xl text-center shadow-sm"><div className="text-3xl md:text-4xl font-black text-purple-600 dark:text-purple-400">{stats.studentLogins}</div><div className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-2 uppercase">{t('studentLogins')}</div></div>
                         <div className="bg-slate-50 dark:bg-slate-800/80 border border-amber-500/30 p-5 rounded-3xl text-center shadow-sm"><div className="text-3xl md:text-4xl font-black text-amber-600 dark:text-amber-400">{stats.teacherLogins}</div><div className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-2 uppercase">{t('teacherLogins')}</div></div>
+                    </div>
+                </div>
+
+                {/* قسم أكثر الكتب قراءة وطلباً */}
+                <div className="lg:col-span-4 bg-white dark:bg-slate-900/90 backdrop-blur-md border border-slate-200 dark:border-slate-700/50 p-6 rounded-[2.5rem] shadow-xl">
+                    <h3 className="text-lg md:text-xl font-black mb-4 text-amber-500 flex items-center gap-2">
+                        📖 {t('topBooksTitle')}
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                        {topBooksStats.length > 0 ? (
+                            topBooksStats.map(([bookName, count], index) => (
+                                <div key={index} className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-slate-800 dark:to-slate-800/80 border-2 border-amber-200 dark:border-amber-700/50 p-4 rounded-2xl flex flex-col justify-between shadow-sm">
+                                    <div className="font-black text-slate-900 dark:text-white text-sm md:text-base line-clamp-2">{bookName}</div>
+                                    <div className="mt-3 flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400">
+                                        <span>المرتبة #{index + 1}</span>
+                                        <span className="px-2.5 py-1 bg-amber-500 text-white rounded-lg font-black">{count} استعارة</span>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="col-span-full text-center py-6 text-slate-400 font-bold text-sm">
+                                {isAr ? 'لا توجد سجلات استعارة كافية حالياً لعرض الكتب الأكثر طلباً.' : 'No borrowing records found yet.'}
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -688,7 +758,6 @@ const AdminDashboard: React.FC = () => {
                                                 </td>
                                             )}
                                             
-                                            {/* خانة الإيميل للطلبات والإعارات */}
                                             {(activeTab === 'borrowings' || activeTab === 'pending') && (
                                                 <td className="p-3.5 font-mono text-xs md:text-sm text-slate-600 dark:text-slate-300">
                                                     {item.user_email || <span className="text-slate-400 italic">--</span>}
@@ -754,7 +823,6 @@ const AdminDashboard: React.FC = () => {
                         </h3>
 
                         <form onSubmit={handleSubmitForm} className="space-y-4">
-                            {/* حقول الطالب */}
                             {(modalMode === 'addStudent' || modalMode === 'editStudent') && (
                                 <>
                                     <div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">{t('colId')}</label><input type="text" value={formData.student_id} onChange={(e) => setFormData({ ...formData, student_id: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-mono" required /></div>
@@ -763,7 +831,6 @@ const AdminDashboard: React.FC = () => {
                                 </>
                             )}
 
-                            {/* حقول المعلم */}
                             {(modalMode === 'addTeacher' || modalMode === 'editTeacher') && (
                                 <>
                                     <div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">{t('colId')} (مثال: PASS123)</label><input type="text" value={formData.teacher_id} onChange={(e) => setFormData({ ...formData, teacher_id: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-mono uppercase" required /></div>
@@ -771,7 +838,6 @@ const AdminDashboard: React.FC = () => {
                                 </>
                             )}
 
-                            {/* حقول نظام الاستعارة (المباشرة أو تأكيد الطلب المعلق) */}
                             {(modalMode === 'addBorrow' || modalMode === 'approveBorrow') && (
                                 <>
                                     {modalMode === 'addBorrow' && (
@@ -841,7 +907,6 @@ const AdminDashboard: React.FC = () => {
                                         />
                                     </div>
 
-                                    {/* معاينة نص البريد الآلي باللغتين قبل الإرسال */}
                                     <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 text-xs space-y-2 leading-relaxed">
                                         <div className="font-black text-emerald-600 dark:text-emerald-400">📧 معاينة رسالة البريد الآلي (عربي / EN):</div>
                                         <p className="text-slate-700 dark:text-slate-200">
