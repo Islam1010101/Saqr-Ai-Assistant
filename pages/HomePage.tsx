@@ -184,6 +184,24 @@ const HomePage: React.FC = () => {
     
     // حالة الكتب المستعارة
     const [borrowedBooks, setBorrowedBooks] = useState<any[]>([]);
+    const [borrowCountdownNow, setBorrowCountdownNow] = useState(Date.now());
+
+    useEffect(() => {
+        const timer = window.setInterval(() => setBorrowCountdownNow(Date.now()), 1000);
+        return () => window.clearInterval(timer);
+    }, []);
+
+    const getBorrowCountdown = (returnDate: string) => {
+        if (!returnDate) return isAr ? 'لم يحدد تاريخ الإرجاع' : 'Return date not set';
+        const due = new Date(`${returnDate}T23:59:59`).getTime();
+        const remaining = due - borrowCountdownNow;
+        if (remaining <= 0) return isAr ? 'انتهت مدة الاستعارة، يرجى إرجاع الكتاب' : 'Overdue: please return this book';
+        const days = Math.floor(remaining / 86400000);
+        const hours = Math.floor((remaining % 86400000) / 3600000);
+        const minutes = Math.floor((remaining % 3600000) / 60000);
+        const seconds = Math.floor((remaining % 60000) / 1000);
+        return isAr ? `متبقي ${days} يوم و${hours} ساعة و${minutes} دقيقة و${seconds} ثانية` : `${days}d ${hours}h ${minutes}m ${seconds}s remaining`;
+    };
 
     useEffect(() => {
         if (!userData || !userType) {
@@ -193,6 +211,7 @@ const HomePage: React.FC = () => {
 
     // جلب الكتب المستعارة النشطة
     useEffect(() => {
+        let mounted = true;
         const fetchBorrowings = async () => {
             if (userData && userType && userType !== 'admin') {
                 const userId = userType === 'student' ? userData.student_id : userData.teacher_id;
@@ -202,10 +221,12 @@ const HomePage: React.FC = () => {
                     .eq('user_id', userId)
                     .eq('status', 'active');
                 
-                if (data) setBorrowedBooks(data);
+                if (data && mounted) setBorrowedBooks(data);
             }
         };
         fetchBorrowings();
+        const refresh = window.setInterval(fetchBorrowings, 60000);
+        return () => { mounted = false; window.clearInterval(refresh); };
     }, [userData, userType]);
 
     useEffect(() => {
@@ -393,6 +414,7 @@ const HomePage: React.FC = () => {
                                         <div className="font-black text-slate-800 dark:text-white text-base md:text-lg">{book.book_name}</div>
                                         <div className="flex flex-wrap justify-between text-xs md:text-sm font-bold text-slate-500 dark:text-slate-400">
                                             <span className="text-rose-500 dark:text-rose-400">{t('borrowReturn')} {book.return_date}</span>
+                                            <span className="w-full mt-2 text-emerald-700 dark:text-emerald-400 font-black">⏳ {getBorrowCountdown(book.return_date)}</span>
                                         </div>
                                         <a 
                                             href={createGoogleCalendarLink(book.book_name, book.return_date)} 
