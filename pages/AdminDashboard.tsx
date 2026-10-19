@@ -132,6 +132,10 @@ const AdminDashboard: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'students' | 'teachers' | 'borrowings' | 'pending' | 'reports'>('pending');
 
     const [searchQuery, setSearchQuery] = useState('');
+    const [borrowAdminKey, setBorrowAdminKey] = useState('');
+    const [borrowingsError, setBorrowingsError] = useState('');
+    const [borrowingsNotice, setBorrowingsNotice] = useState('');
+    const [isRefreshingBorrowings, setIsRefreshingBorrowings] = useState(false);
 
     // متغيرات المودال
     const [modalMode, setModalMode] = useState<'addStudent' | 'addTeacher' | 'editStudent' | 'editTeacher' | 'addBorrow' | 'approveBorrow' | null>(null);
@@ -157,8 +161,58 @@ const AdminDashboard: React.FC = () => {
         }
     }, [isAr]);
 
-    const fetchRealDashboardData = async () => {
-        setIsLoading(true);
+    const callBorrowingsAdmin = async (payload: Record<string, unknown>) => {
+        const key = borrowAdminKey.trim();
+        if (!key) {
+            throw new Error(isAr
+                ? 'أدخل مفتاح إدارة الإعارات الموجود في إعدادات Edge Functions أولاً.'
+                : 'Enter the borrowing admin key configured in Edge Function secrets first.');
+        }
+        const { data, error } = await supabase.functions.invoke('admin-borrowings', {
+            body: payload,
+            headers: { 'x-admin-key': key }
+        });
+        if (error) {
+            let message = error.message || 'The borrowing management function failed.';
+            try {
+                const response = (error as any).context;
+                if (response && typeof response.json === 'function') {
+                    const details = await response.json();
+                    if (details?.error) message = details.error;
+                }
+            } catch { /* Keep the SDK error message if the response body is unavailable. */ }
+            throw new Error(message);
+        }
+        if (!data?.ok) throw new Error(data?.error || 'The borrowing management function returned an unexpected response.');
+        return data;
+    };
+
+    const refreshBorrowingsOnly = async () => {
+        if (!borrowAdminKey.trim()) {
+            setBorrowingsError(isAr
+                ? 'أدخل مفتاح إدارة الإعارات ثم اضغط «تحميل الطلبات».'
+                : 'Enter the borrowing admin key, then click “Load requests”.');
+            setPendingRequestsList([]);
+            setBorrowingsList([]);
+            return;
+        }
+        setIsRefreshingBorrowings(true);
+        try {
+            const result = await callBorrowingsAdmin({ action: 'list' });
+            setPendingRequestsList(Array.isArray(result.pending) ? result.pending : []);
+            setBorrowingsList(Array.isArray(result.active) ? result.active : []);
+            setBorrowingsError('');
+        } catch (err) {
+            const message = err instanceof Error ? err.message : String(err);
+            setBorrowingsError(message);
+            console.error('Unable to load borrowing requests:', err);
+        } finally {
+            setIsRefreshingBorrowings(false);
+        }
+    };
+
+    const fetchRealDashboardData = async (showLoading = true) => {
+        if (showLoading) setIsLoading(true);
         try {
             const { count: sCount } = await supabase.from('students').select('*', { count: 'exact', head: true });
             const { count: tCount } = await supabase.from('teachers').select('*', { count: 'exact', head: true });
@@ -183,33 +237,33 @@ const AdminDashboard: React.FC = () => {
                 else { allTeachers = [...allTeachers, ...data]; if (data.length < tStep) fetchMoreT = false; else tStart += tStep; }
             }
 
-            // جلب الإعارات النشطة
-            const { data: activeBorrowings } = await supabase.from('borrowings').select('*').eq('status', 'active').order('created_at', { ascending: false });
-            
-            // جلب الطلبات المعلقة
-            const { data: pendingRequests } = await supabase.from('borrowings').select('*').eq('status', 'pending').order('created_at', { ascending: false });
-
-            // جلب تقارير تحضير الدروس
             const { data: reports } = await supabase.from('lesson_reports').select('*').order('created_at', { ascending: false });
-
             setStudentsList(allStudents);
             setTeachersList(allTeachers);
-            setBorrowingsList(activeBorrowings || []);
-            setPendingRequestsList(pendingRequests || []);
             setLessonReportsList(reports || []);
-
             setStats({
                 students: sCount || allStudents.length || 0,
                 teachers: tCount || allTeachers.length || 0,
                 studentLogins: uniqueStudentLogins,
                 teacherLogins: uniqueTeacherLogins
             });
+
+            // الإعارات تُقرأ وتُعدّل من خلال Edge Function محمية، لا بسياسة قراءة عامة في قاعدة البيانات.
+            await refreshBorrowingsOnly();
         } catch (err) {
-            console.error('Error fetching admin stats:', err);
+            console.error('Error fetching admin dashboard data:', err);
         } finally {
-            setIsLoading(false);
+            if (showLoading) setIsLoading(false);
         }
     };
+
+    useEffect(() => {
+        if (isAdmin !== true || !borrowAdminKey.trim()) return;
+        const intervalId = window.setInterval(() => {
+            void refreshBorrowingsOnly();
+        }, 20000);
+        return () => window.clearInterval(intervalId);
+    }, [isAdmin, borrowAdminKey]);
 
     // فلترة الجداول
     const filteredList = useMemo(() => {
@@ -234,21 +288,26 @@ const AdminDashboard: React.FC = () => {
 
     const handleReturnBook = async (id: number) => {
         try {
-            await supabase.from('borrowings').update({ status: 'returned' }).eq('id', id);
-            fetchRealDashboardData();
+            await callBorrowingsAdmin({ action: 'return', id });
+            setBorrowingsNotice(isAr ? 'تم تسجيل إرجاع الكتاب.' : 'Book return recorded.');
+            await refreshBorrowingsOnly();
         } catch (err) {
-            console.error(err);
+            const message = err instanceof Error ? err.message : String(err);
+            setBorrowingsError(message);
+            window.alert(message);
         }
     };
 
     const handleRejectRequest = async (id: number) => {
-        if(window.confirm(isAr ? 'هل أنت متأكد من رفض طلب الاستعارة؟' : 'Are you sure you want to reject this request?')) {
-            try {
-                await supabase.from('borrowings').update({ status: 'rejected' }).eq('id', id);
-                fetchRealDashboardData();
-            } catch (err) {
-                console.error(err);
-            }
+        if (!window.confirm(isAr ? 'هل أنت متأكد من رفض طلب الاستعارة؟' : 'Are you sure you want to reject this request?')) return;
+        try {
+            await callBorrowingsAdmin({ action: 'reject', id });
+            setBorrowingsNotice(isAr ? 'تم رفض طلب الاستعارة.' : 'Borrowing request rejected.');
+            await refreshBorrowingsOnly();
+        } catch (err) {
+            const message = err instanceof Error ? err.message : String(err);
+            setBorrowingsError(message);
+            window.alert(message);
         }
     };
 
@@ -264,43 +323,33 @@ const AdminDashboard: React.FC = () => {
             } else if (modalMode === 'editTeacher') {
                 await supabase.from('teachers').update({ teacher_id: formData.teacher_id.trim().toUpperCase(), name_ar: formData.name_ar, name_en: formData.name_en }).eq('id', selectedItem.id);
             } else if (modalMode === 'addBorrow') {
-                await supabase.from('borrowings').insert([{ 
-                    user_id: formData.user_id.trim(), 
-                    user_type: formData.user_type, 
-                    user_email: formData.user_email.trim(), 
-                    book_name: formData.book_name, 
-                    borrow_date: new Date().toISOString().split('T')[0],
-                    return_date: formData.return_date,
-                    status: 'active'
-                }]);
-                
-                if (formData.user_email) {
-                    await supabase.functions.invoke('send-borrow-email', { body: { email: formData.user_email.trim(), book: formData.book_name, date: formData.return_date } });
-                }
-            } else if (modalMode === 'approveBorrow') {
-                // يبدأ احتساب مدة الإعارة من تاريخ موافقة الأدمن ولمدة 15 يوماً
-                const approvedDate = new Date();
-                const borrowDate = approvedDate.toISOString().split('T')[0];
-                const dueDateObj = new Date(approvedDate);
-                dueDateObj.setDate(dueDateObj.getDate() + 15);
-                const dueDate = dueDateObj.toISOString().split('T')[0];
-                const email = formData.user_email.trim();
-                if (!email) throw new Error('Borrower email is required');
-                const { error: approvalError } = await supabase.from('borrowings').update({
-                    status: 'active', user_email: email, borrow_date: borrowDate, return_date: dueDate
-                }).eq('id', selectedItem.id);
-                if (approvalError) throw approvalError;
-                const { error: emailError } = await supabase.functions.invoke('send-borrow-email', {
-                    body: { email, book: formData.book_name, date: dueDate, duration: 15, borrowDate }
+                const result = await callBorrowingsAdmin({
+                    action: 'direct',
+                    user_id: formData.user_id.trim(),
+                    user_type: formData.user_type,
+                    user_email: formData.user_email.trim(),
+                    book_name: formData.book_name,
+                    return_date: formData.return_date
                 });
-                if (emailError) console.error('Borrow approval email failed:', emailError);
+                setBorrowingsNotice(result.emailSent
+                    ? (isAr ? 'تم تسجيل الإعارة وإرسال رسالة البريد الإلكتروني بالعربية والإنجليزية.' : 'Borrowing registered; bilingual email sent.')
+                    : (isAr ? `تم تسجيل الإعارة، لكن تعذّر إرسال البريد: ${result.emailError || 'تحقق من إعدادات البريد'}` : `Borrowing registered, but email failed: ${result.emailError || 'check email settings'}`));
+            } else if (modalMode === 'approveBorrow') {
+                // يتولى الخادم تغيير الحالة وحساب موعد الإرجاع وإرسال الرسالة ثنائية اللغة.
+                const result = await callBorrowingsAdmin({ action: 'approve', id: selectedItem.id });
+                setBorrowingsNotice(result.emailSent
+                    ? (isAr ? `تمت الموافقة على «${selectedItem.book_name}» وإرسال البريد إلى ${result.email}. موعد الإرجاع: ${result.returnDate}.` : `Approved “${selectedItem.book_name}” and emailed ${result.email}. Due date: ${result.returnDate}.`)
+                    : (isAr ? `تمت الموافقة على الطلب، لكن لم يُرسل البريد الإلكتروني. ${result.emailError || 'تحقق من إعدادات البريد.'}` : `Request approved, but the email was not sent. ${result.emailError || 'Check email settings.'}`));
             }
 
             setModalMode(null);
             setSelectedItem(null);
-            fetchRealDashboardData();
+            await fetchRealDashboardData(false);
         } catch (err) {
+            const message = err instanceof Error ? err.message : String(err);
             console.error('Operation error:', err);
+            setBorrowingsError(message);
+            window.alert(message);
         }
     };
 
@@ -368,6 +417,19 @@ const AdminDashboard: React.FC = () => {
                     </div>
                 </div>
 
+                <div className="lg:col-span-4 bg-white dark:bg-slate-900/90 p-5 rounded-[2rem] border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+                    <div className="flex flex-col md:flex-row gap-3 md:items-end">
+                        <div className="flex-1">
+                            <label className="block text-sm font-black mb-2 text-slate-700 dark:text-slate-200">{isAr ? 'مفتاح إدارة الإعارات' : 'Borrowing admin key'}</label>
+                            <input type="password" autoComplete="off" value={borrowAdminKey} onChange={(e) => setBorrowAdminKey(e.target.value)} placeholder={isAr ? 'أدخل المفتاح المحفوظ في Supabase Edge Function Secrets' : 'Enter the key stored in Supabase Edge Function Secrets'} className="w-full p-3 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 focus:border-amber-400 rounded-xl outline-none font-mono text-sm" />
+                        </div>
+                        <button type="button" disabled={isRefreshingBorrowings} onClick={() => void refreshBorrowingsOnly()} className="px-6 py-3 bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white rounded-xl font-black text-sm">{isRefreshingBorrowings ? (isAr ? 'جاري التحميل...' : 'Loading...') : (isAr ? 'تحميل الطلبات / تحديث' : 'Load requests / Refresh')}</button>
+                    </div>
+                    {borrowingsError && <div role="alert" className="p-3 rounded-xl bg-rose-50 dark:bg-rose-900/20 border border-rose-300 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-sm font-bold">{isAr ? 'تعذّر تحميل طلبات الاستعارة: ' : 'Could not load borrowing requests: '}{borrowingsError}</div>}
+                    {borrowingsNotice && <div role="status" className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-sm font-bold">{borrowingsNotice}<button type="button" onClick={() => setBorrowingsNotice('')} className="ms-3 underline">{isAr ? 'إخفاء' : 'Dismiss'}</button></div>}
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{isAr ? 'بعد إدخال المفتاح، تُحدّث الطلبات تلقائياً كل 20 ثانية. لا تضع المفتاح في ملفات المشروع أو في كود الواجهة.' : 'After entering the key, requests refresh every 20 seconds. Do not put this key in project files or frontend environment variables.'}</p>
+                </div>
+
                 <div className="lg:col-span-4 bg-white dark:bg-slate-900/90 backdrop-blur-md p-4 md:p-5 rounded-[2rem] border border-slate-200 dark:border-slate-700/50 shadow-md">
                     <div className="relative group">
                         <input type="text" placeholder={t('searchPlaceholder')} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full p-4 ps-14 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white border-2 border-slate-200 dark:border-slate-700 focus:border-amber-400 rounded-2xl outline-none font-bold text-sm md:text-base shadow-inner transition-colors" />
@@ -421,7 +483,7 @@ const AdminDashboard: React.FC = () => {
                                             )}
 
                                             {activeTab === 'borrowings' && <td className="p-3.5 text-xs md:text-sm text-slate-500">{item.return_date}</td>}
-                                            {activeTab === 'pending' && <td className="p-3.5 text-xs md:text-sm text-slate-500">{item.borrow_date}</td>}
+                                            {activeTab === 'pending' && <td className="p-3.5 text-xs md:text-sm text-slate-500">{item.created_at ? new Date(item.created_at).toLocaleString(locale === 'ar' ? 'ar-EG' : 'en-US') : (item.borrow_date || '-')}</td>}
                                             
                                             {activeTab === 'reports' && <td className="p-3.5 font-bold text-xs md:text-sm text-slate-800 dark:text-slate-100">{item.lesson_topic}</td>}
                                             {activeTab === 'reports' && <td className="p-3.5 text-center font-black text-xs md:text-sm text-indigo-600 dark:text-indigo-400">{item.plan_type}</td>}
