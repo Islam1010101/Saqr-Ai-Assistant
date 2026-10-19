@@ -19,16 +19,16 @@ const translations = {
         englishBooks: "المكتبة الإنجليزية الرقمية",
         studentManagement: "إدارة الطلاب",
         teacherManagement: "إدارة المعلمين",
-        borrowManagement: "الإعارات النشطة",
+        borrowManagement: "الإستعارات النشطة",
         pendingRequests: "طلبات معلقة",
         aiReports: "تقارير التحضير الذكي",
         addStudentBtn: "+ إضافة طالب جديد",
         addTeacherBtn: "+ إضافة معلم جديد",
-        addBorrowBtn: "+ تسجيل إعارة مباشرة",
+        addBorrowBtn: "+ تسجيل إستعارة مباشرة",
         editIdBtn: "تعديل",
         saveBtn: "حفظ التغييرات",
         cancelBtn: "إلغاء",
-        approveBtn: "تأكيد الإعارة وإرسال الإيميل",
+        approveBtn: "تأكيد الإستعارة وإرسال الإيميل",
         rejectBtn: "رفض",
         printPdfBtn: "🖨️ طباعة أو تنزيل التقرير (PDF)",
         colId: "الرقم التعريفي",
@@ -47,11 +47,11 @@ const translations = {
         modalAddTeacher: "إضافة معلم جديد",
         modalEditStudent: "تعديل بيانات الطالب",
         modalEditTeacher: "تعديل بيانات المعلم",
-        modalAddBorrow: "تسجيل إعارة جديدة",
-        modalApproveBorrow: "تأكيد طلب الإعارة وإرسال الإشعار",
+        modalAddBorrow: "تسجيل إستعارة جديدة",
+        modalApproveBorrow: "تأكيد طلب الإستعارة وإرسال الإشعار",
         accessDenied: "عذراً، هذه الصفحة مخصصة لمدير النظام فقط.",
         loading: "جاري تحليل البيانات الحية...",
-        searchPlaceholder: "ابحث بالاسم أو الرقم أو الإيميل أو الموضوع...",
+        searchPlaceholder: "ابحث بالاسم أو الرقم ...",
         noResults: "لا توجد نتائج مطابقة."
     },
     en: {
@@ -101,7 +101,7 @@ const translations = {
         modalApproveBorrow: "Approve Borrow Request & Notify",
         accessDenied: "Access Denied. Admin privileges required.",
         loading: "Loading live dashboard data...",
-        searchPlaceholder: "Search by name, ID, email or topic...",
+        searchPlaceholder: "Search by name, ID,...",
         noResults: "No matching results found."
     }
 };
