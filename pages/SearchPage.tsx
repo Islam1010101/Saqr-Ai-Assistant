@@ -34,7 +34,7 @@ const translations = {
     subjectLabel: "الموضوع",
     officialAi: "تحليل صقر الذكي",
     back: "العودة",
-    requestBorrow: "طلب استعارة 📚",
+    requestBorrow: "طلب استعارة",
     borrowPending: "جاري الإرسال...",
     borrowSuccessMsg: "✅ تم إرسال الطلب لإدارة المكتبة! سيصلك إشعار عند التأكيد.",
     alreadyRequested: "عذراً، لديك طلب استعارة أو إعارة نشطة لهذا الكتاب بالفعل!"
@@ -57,7 +57,7 @@ const translations = {
     subjectLabel: "Topic",
     officialAi: "Saqr AI Analysis",
     back: "Back",
-    requestBorrow: "Request Borrow 📚",
+    requestBorrow: "Request Borrow",
     borrowPending: "Sending...",
     borrowSuccessMsg: "✅ Request sent to Library Admin! You'll be notified upon confirmation.",
     alreadyRequested: "You already have an active or pending request for this book!"
