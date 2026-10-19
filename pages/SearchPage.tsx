@@ -34,7 +34,7 @@ const translations = {
     subjectLabel: "الموضوع",
     officialAi: "تحليل صقر الذكي",
     back: "العودة",
-    requestBorrow: "طلب استعارة",
+    requestBorrow: "طلب استعارة 📚",
     borrowPending: "جاري الإرسال...",
     borrowSuccessMsg: "✅ تم إرسال الطلب لإدارة المكتبة! سيصلك إشعار عند التأكيد.",
     alreadyRequested: "عذراً، لديك طلب استعارة أو إعارة نشطة لهذا الكتاب بالفعل!"
@@ -57,7 +57,7 @@ const translations = {
     subjectLabel: "Topic",
     officialAi: "Saqr AI Analysis",
     back: "Back",
-    requestBorrow: "Request Borrow",
+    requestBorrow: "Request Borrow 📚",
     borrowPending: "Sending...",
     borrowSuccessMsg: "✅ Request sent to Library Admin! You'll be notified upon confirmation.",
     alreadyRequested: "You already have an active or pending request for this book!"
@@ -152,7 +152,11 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
     const [borrowerEmail, setBorrowerEmail] = useState('');
 
     const currentUser = JSON.parse(localStorage.getItem('current_user') || 'null');
-    const userType = localStorage.getItem('user_type');
+    // توحيد قيمة نوع المستخدم لأن بعض أنظمة تسجيل الدخول تحفظها بحروف كبيرة أو بعلامات اقتباس.
+    const userType = (localStorage.getItem('user_type') || '')
+        .replace(/^[\"']|[\"']$/g, '')
+        .trim()
+        .toLowerCase();
 
     useEffect(() => {
         if (!book) {
@@ -187,26 +191,55 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
         fetchAiDeepDive();
     }, [book, locale]);
 
-    // دالة إرسال الطلب للأدمن كـ Pending
+    // إرسال طلب الاستعارة للأدمن كطلب معلق، مع إظهار أي سبب يمنع الحفظ.
     const handleBorrowRequest = async () => {
-        if (!book || !currentUser || !userType) return;
-        
-        const userId = userType === 'student' ? currentUser.student_id : currentUser.teacher_id;
-        const userEmail = userType === 'student' ? `${String(userId || '').trim()}@falcon-school.com` : borrowerEmail.trim();
-        if (!userId || (userType === 'teacher' && !userEmail)) {
-            alert(locale === 'ar' ? 'يرجى إدخال البريد الإلكتروني للمعلم.' : 'Please enter the teacher email address.');
+        if (!book) return;
+
+        if (!currentUser) {
+            alert(locale === 'ar'
+                ? 'لم يتم العثور على بيانات المستخدم. سجّل الدخول مرة أخرى ثم حاول.'
+                : 'User information was not found. Please sign in again and retry.');
             return;
         }
+
+        if (userType !== 'student' && userType !== 'teacher') {
+            alert(locale === 'ar'
+                ? 'نوع الحساب غير معروف. سجّل الخروج ثم الدخول مرة أخرى.'
+                : 'Account type is missing or invalid. Please sign out and sign in again.');
+            return;
+        }
+
+        const userId = userType === 'student' ? currentUser.student_id : currentUser.teacher_id;
+        const userEmail = userType === 'student'
+            ? `${String(userId || '').trim()}@falcon-school.com`
+            : borrowerEmail.trim();
+
+        if (!String(userId || '').trim()) {
+            alert(locale === 'ar'
+                ? 'لم يتم العثور على رقم الطالب أو المعلم في بيانات الحساب. سجّل الدخول مرة أخرى.'
+                : 'The student/teacher ID is missing from the account. Please sign in again.');
+            return;
+        }
+
+        if (userType === 'teacher' && !userEmail) {
+            alert(locale === 'ar'
+                ? 'يرجى إدخال البريد الإلكتروني للمعلم.'
+                : 'Please enter the teacher email address.');
+            return;
+        }
+
         setRequestStatus('loading');
-        
+
         try {
-            // التحقق إذا كان لديه طلب معلق أو نشط لنفس الكتاب
-            const { data: existing } = await supabase
+            // التحقق من وجود طلب معلق أو إعارة نشطة لنفس الكتاب.
+            const { data: existing, error: existingError } = await supabase
                 .from('borrowings')
                 .select('id')
-                .eq('user_id', userId)
+                .eq('user_id', String(userId).trim())
                 .eq('book_name', book.title)
                 .in('status', ['pending', 'active']);
+
+            if (existingError) throw existingError;
 
             if (existing && existing.length > 0) {
                 alert(t('alreadyRequested'));
@@ -214,7 +247,6 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                 return;
             }
 
-            // إرسال الطلب
             const { error: insertError } = await supabase.from('borrowings').insert([{
                 user_id: String(userId).trim(),
                 user_type: userType,
@@ -228,15 +260,23 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                 return_date: null,
                 status: 'pending'
             }]);
+
             if (insertError) throw insertError;
-            
+
             setRequestStatus('success');
             setTimeout(() => {
                 onClose();
                 setRequestStatus('idle');
             }, 3000);
-        } catch (error) {
-            console.error("Error submitting borrow request:", error);
+        } catch (error: unknown) {
+            console.error('Error submitting borrow request:', error);
+            const message = typeof error === 'object' && error !== null && 'message' in error
+                ? String((error as { message?: unknown }).message || '')
+                : String(error);
+            alert((locale === 'ar'
+                ? 'تعذّر تسجيل طلب الاستعارة في قاعدة البيانات. التفاصيل: '
+                : 'The borrowing request could not be saved. Details: ') +
+                (message || (locale === 'ar' ? 'خطأ غير معروف' : 'Unknown error')));
             setRequestStatus('idle');
         }
     };
