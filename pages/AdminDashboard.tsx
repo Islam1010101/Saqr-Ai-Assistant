@@ -258,7 +258,6 @@ const AdminDashboard: React.FC = () => {
             if (!error && directRows && directRows.length > 0) {
                 rows = directRows;
             } else {
-                // محاولة احتياطية عبر الدالة السحابية في حال كان RLS مفعلاً
                 const { data: fnData } = await supabase.functions.invoke('send-borrow-email', {
                     body: { action: 'list' }
                 });
@@ -337,7 +336,6 @@ const AdminDashboard: React.FC = () => {
         }
     };
 
-    // اشتراك لحظي (Realtime) + تحديث دوري كل 3 ثوانٍ لظهور الطلبات المعلقة فوراً
     useEffect(() => {
         if (isAdmin !== true) return;
 
@@ -394,7 +392,6 @@ const AdminDashboard: React.FC = () => {
         return { data, durationDays };
     };
 
-    // الموافقة الفورية بضغطة زر واحدة وإرسال الإيميل تلقائياً
     const handleInstantApprove = async (item: any) => {
         setProcessingRowId(item.id);
         setBorrowingsError('');
@@ -418,7 +415,6 @@ const AdminDashboard: React.FC = () => {
 
             if (updateErr) throw updateErr;
 
-            // نقل الطلب فوراً على الشاشة من المعلقة إلى النشطة
             setPendingRequestsList(prev => prev.filter(p => p.id !== item.id));
             setBorrowingsList(prev => [{ ...item, status: 'active', user_email: cleanEmail, borrow_date: todayStr, return_date: targetReturnDate }, ...prev]);
 
@@ -461,7 +457,6 @@ const AdminDashboard: React.FC = () => {
         }
     };
 
-    // الرفض الفوري بضغطة زر واحدة
     const handleRejectRequest = async (id: number) => {
         setProcessingRowId(id);
         setBorrowingsError('');
@@ -495,7 +490,6 @@ const AdminDashboard: React.FC = () => {
         }
     };
 
-    // حساب أكثر الكتب طلباً وقراءة من جدول الإعارات
     const topBooksStats = useMemo(() => {
         const counts: Record<string, number> = {};
         [...borrowingsList, ...pendingRequestsList].forEach(b => {
@@ -509,7 +503,6 @@ const AdminDashboard: React.FC = () => {
             .slice(0, 5);
     }, [borrowingsList, pendingRequestsList]);
 
-    // دالة طباعة أو تنزيل التقرير كملف PDF
     const handlePrintDashboardReport = () => {
         const printWindow = window.open('', '_blank');
         if (printWindow) {
@@ -882,7 +875,7 @@ const AdminDashboard: React.FC = () => {
 
             </div>
 
-            {/* المودال لإضافة وتعديل الطلاب والمعلمين والإعارات المباشرة */}
+            {/* المودال */}
             {modalMode && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
                     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-8 rounded-[2.5rem] shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto scrollbar-thin">
