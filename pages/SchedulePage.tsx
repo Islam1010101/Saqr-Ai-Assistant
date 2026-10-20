@@ -404,7 +404,7 @@ const SchedulePage: React.FC = () => {
                 
                 <div className="text-center mb-10 flex flex-col items-center">
                     <div className="mb-2 inline-block px-4 py-1.5 rounded-full bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-black text-xs shadow-sm border border-slate-200 dark:border-slate-700">
-                        {userType === 'admin' ? "👑 نمط المسؤول النشط" : `👨‍🏫 مرحباً ${getDisplayName()}`}
+                        {userType === 'admin' ? "نمط المسؤول النشط" : `مرحباً ${getDisplayName()}`}
                     </div>
                     <h1 className="text-3xl md:text-5xl font-black bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-600 bg-clip-text text-transparent tracking-tight uppercase drop-shadow-sm">
                         {t('pageTitle')}
