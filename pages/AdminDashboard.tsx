@@ -15,18 +15,20 @@ const translations = {
         studentLogins: "طلاب قاموا بالدخول",
         teacherLogins: "معلمون قاموا بالدخول",
         topBooksTitle: "أكثر الكتب طلباً وقراءة في المكتبة",
+        arabicBooks: "المكتبة العربية الرقمية",
+        englishBooks: "المكتبة الإنجليزية الرقمية",
         studentManagement: "إدارة الطلاب",
         teacherManagement: "إدارة المعلمين",
-        borrowManagement: "الإستعارات النشطة",
+        borrowManagement: "الإعارات النشطة",
         pendingRequests: "طلبات معلقة",
         aiReports: "تقارير التحضير الذكي",
         addStudentBtn: "+ إضافة طالب جديد",
         addTeacherBtn: "+ إضافة معلم جديد",
-        addBorrowBtn: "+ تسجيل إستعارة مباشرة",
+        addBorrowBtn: "+ تسجيل إعارة مباشرة",
         editIdBtn: "تعديل",
         saveBtn: "حفظ التغييرات",
         cancelBtn: "إلغاء",
-        approveBtn: "تأكيد الإستعارة وإرسال الإيميل",
+        approveBtn: "تأكيد الإعارة وإرسال الإيميل",
         rejectBtn: "رفض",
         printPdfBtn: "🖨️ طباعة أو تنزيل التقرير (PDF)",
         colId: "الرقم التعريفي",
@@ -45,11 +47,11 @@ const translations = {
         modalAddTeacher: "إضافة معلم جديد",
         modalEditStudent: "تعديل بيانات الطالب",
         modalEditTeacher: "تعديل بيانات المعلم",
-        modalAddBorrow: "تسجيل إستعارة جديدة",
-        modalApproveBorrow: "تأكيد طلب الإستعارة وإرسال الإشعار",
+        modalAddBorrow: "تسجيل إعارة جديدة",
+        modalApproveBorrow: "تأكيد طلب الإعارة وإرسال الإشعار",
         accessDenied: "عذراً، هذه الصفحة مخصصة لمدير النظام فقط.",
         loading: "جاري تحليل البيانات الحية...",
-        searchPlaceholder: "ابحث بالاسم أو الرقم أو الكتاب...",
+        searchPlaceholder: "ابحث بالاسم أو الرقم أو الإيميل أو الموضوع...",
         noResults: "لا توجد نتائج مطابقة."
     },
     en: {
@@ -63,6 +65,8 @@ const translations = {
         studentLogins: "Students Logged In",
         teacherLogins: "Teachers Logged In",
         topBooksTitle: "Most Popular & Read Library Books",
+        arabicBooks: "Arabic Digital Library",
+        englishBooks: "English Digital Library",
         studentManagement: "Student Management",
         teacherManagement: "Teacher Management",
         borrowManagement: "Active Borrowings",
@@ -97,7 +101,7 @@ const translations = {
         modalApproveBorrow: "Approve Borrow Request & Notify",
         accessDenied: "Access Denied. Admin privileges required.",
         loading: "Loading live dashboard data...",
-        searchPlaceholder: "Search by name, ID, book...",
+        searchPlaceholder: "Search by name, ID, email or topic...",
         noResults: "No matching results found."
     }
 };
@@ -182,6 +186,7 @@ const AdminDashboard: React.FC = () => {
     const [adminName, setAdminName] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [processingRowId, setProcessingRowId] = useState<number | null>(null);
 
     const [stats, setStats] = useState({ students: 0, teachers: 0, studentLogins: 0, teacherLogins: 0 });
     const [studentsList, setStudentsList] = useState<any[]>([]);
@@ -197,7 +202,7 @@ const AdminDashboard: React.FC = () => {
     const [borrowingsNotice, setBorrowingsNotice] = useState('');
     const [isRefreshingBorrowings, setIsRefreshingBorrowings] = useState(false);
 
-    const [modalMode, setModalMode] = useState<'addStudent' | 'addTeacher' | 'editStudent' | 'editTeacher' | 'addBorrow' | 'approveBorrow' | null>(null);
+    const [modalMode, setModalMode] = useState<'addStudent' | 'addTeacher' | 'editStudent' | 'editTeacher' | 'addBorrow' | null>(null);
     const [selectedItem, setSelectedItem] = useState<any>(null);
     const [formData, setFormData] = useState({ 
         student_id: '', teacher_id: '', name_ar: '', name_en: '', grade: 'الصف الخامس', points: 0,
@@ -241,40 +246,48 @@ const AdminDashboard: React.FC = () => {
         });
     };
 
-    // جلب كافة السجلات من جدول borrowings بدون تقييد بالحالة أولاً لضمان عدم ضياع أي طلب معلق
-    const refreshBorrowingsOnly = async (studentsOverride?: any[], teachersOverride?: any[]) => {
-        setIsRefreshingBorrowings(true);
-        setBorrowingsError('');
+    const refreshBorrowingsOnly = async (studentsOverride?: any[], teachersOverride?: any[], silent = false) => {
+        if (!silent) setIsRefreshingBorrowings(true);
         try {
-            const { data: allBorrowings, error } = await supabase
+            let rows: any[] = [];
+            const { data: directRows, error } = await supabase
                 .from('borrowings')
                 .select('*')
                 .order('id', { ascending: false });
 
-            if (error) throw error;
+            if (!error && directRows && directRows.length > 0) {
+                rows = directRows;
+            } else {
+                // محاولة احتياطية عبر الدالة السحابية في حال كان RLS مفعلاً
+                const { data: fnData } = await supabase.functions.invoke('send-borrow-email', {
+                    body: { action: 'list' }
+                });
+                if (fnData?.ok) {
+                    rows = [...(fnData.pending || []), ...(fnData.active || [])];
+                } else if (error) {
+                    throw error;
+                }
+            }
 
             const sList = studentsOverride || studentsList;
             const tList = teachersOverride || teachersList;
-            const enriched = enrichBorrowingRecords(allBorrowings || [], sList, tList);
+            const enriched = enrichBorrowingRecords(rows, sList, tList);
 
-            // تصفية مرنة تقبل pending بأي صيغة (حروف صغيرة أو كبيرة أو مسافات)
-            const pending = enriched.filter(b => {
-                const st = String(b.status || '').trim().toLowerCase();
-                return st === 'pending' || st === 'معلق' || st === 'requested';
-            });
-
-            const active = enriched.filter(b => {
-                const st = String(b.status || '').trim().toLowerCase();
-                return st === 'active' || st === 'approved' || st === 'موافق';
-            });
-
-            setPendingRequestsList(pending);
-            setBorrowingsList(active);
+            setPendingRequestsList(
+                enriched.filter(b => {
+                    const st = String(b.status ?? 'pending').toLowerCase().trim();
+                    return st === 'pending' || st === 'معلق' || st === '' || st === 'waiting';
+                })
+            );
+            setBorrowingsList(
+                enriched.filter(b => String(b.status || '').toLowerCase().trim() === 'active')
+            );
+            setBorrowingsError('');
         } catch (err) {
             const message = err instanceof Error ? err.message : String(err);
             setBorrowingsError(message);
         } finally {
-            setIsRefreshingBorrowings(false);
+            if (!silent) setIsRefreshingBorrowings(false);
         }
     };
 
@@ -324,17 +337,24 @@ const AdminDashboard: React.FC = () => {
         }
     };
 
+    // اشتراك لحظي (Realtime) + تحديث دوري كل 3 ثوانٍ لظهور الطلبات المعلقة فوراً
     useEffect(() => {
         if (isAdmin !== true) return;
+
         const channel = supabase
             .channel('borrowings-realtime-admin')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'borrowings' }, () => {
-                void refreshBorrowingsOnly();
+                void refreshBorrowingsOnly(undefined, undefined, true);
             })
             .subscribe();
 
+        const intervalId = window.setInterval(() => {
+            void refreshBorrowingsOnly(undefined, undefined, true);
+        }, 3000);
+
         return () => {
             supabase.removeChannel(channel);
+            window.clearInterval(intervalId);
         };
     }, [isAdmin, studentsList, teachersList]);
 
@@ -374,9 +394,111 @@ const AdminDashboard: React.FC = () => {
         return { data, durationDays };
     };
 
+    // الموافقة الفورية بضغطة زر واحدة وإرسال الإيميل تلقائياً
+    const handleInstantApprove = async (item: any) => {
+        setProcessingRowId(item.id);
+        setBorrowingsError('');
+        try {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const targetReturnDate = getDefaultReturnDate(15);
+            const cleanEmail = (
+                item.user_email ||
+                (item.user_type === 'student' && item.user_id ? `${String(item.user_id).trim()}@falcon-school.com` : '')
+            ).trim();
+
+            const { error: updateErr } = await supabase
+                .from('borrowings')
+                .update({
+                    status: 'active',
+                    user_email: cleanEmail,
+                    borrow_date: todayStr,
+                    return_date: targetReturnDate
+                })
+                .eq('id', item.id);
+
+            if (updateErr) throw updateErr;
+
+            // نقل الطلب فوراً على الشاشة من المعلقة إلى النشطة
+            setPendingRequestsList(prev => prev.filter(p => p.id !== item.id));
+            setBorrowingsList(prev => [{ ...item, status: 'active', user_email: cleanEmail, borrow_date: todayStr, return_date: targetReturnDate }, ...prev]);
+
+            if (cleanEmail) {
+                try {
+                    const { durationDays } = await sendBilingualConfirmationEmail({
+                        email: cleanEmail,
+                        userName: item.user_name || item.user_id,
+                        bookName: item.book_name,
+                        borrowDate: todayStr,
+                        returnDate: targetReturnDate
+                    });
+                    setBorrowingsNotice(
+                        isAr
+                            ? `✅ تمت الموافقة على «${item.book_name}» وإرسال الإيميل باللغتين إلى ${cleanEmail} (المدة: ${durationDays} يوماً - الإرجاع: ${targetReturnDate}).`
+                            : `✅ Approved “${item.book_name}” and sent bilingual email to ${cleanEmail}.`
+                    );
+                } catch (emailErr) {
+                    console.error('Email send warning:', emailErr);
+                    setBorrowingsNotice(
+                        isAr
+                            ? `✅ تمت الموافقة وتفعيل الإعارة حتى ${targetReturnDate}، لكن تعذّر إرسال البريد الآلي.`
+                            : `✅ Request approved until ${targetReturnDate}, but email sending failed.`
+                    );
+                }
+            } else {
+                setBorrowingsNotice(
+                    isAr
+                        ? `✅ تمت الموافقة على استعارة «${item.book_name}» حتى ${targetReturnDate}.`
+                        : `✅ Approved “${item.book_name}” until ${targetReturnDate}.`
+                );
+            }
+
+            await refreshBorrowingsOnly(undefined, undefined, true);
+        } catch (err) {
+            const message = err instanceof Error ? err.message : String(err);
+            setBorrowingsError(message);
+        } finally {
+            setProcessingRowId(null);
+        }
+    };
+
+    // الرفض الفوري بضغطة زر واحدة
+    const handleRejectRequest = async (id: number) => {
+        setProcessingRowId(id);
+        setBorrowingsError('');
+        try {
+            const { error } = await supabase.from('borrowings').update({ status: 'rejected' }).eq('id', id);
+            if (error) throw error;
+            setPendingRequestsList(prev => prev.filter(p => p.id !== id));
+            setBorrowingsNotice(isAr ? '🚫 تم رفض طلب الاستعارة.' : '🚫 Borrowing request rejected.');
+            await refreshBorrowingsOnly(undefined, undefined, true);
+        } catch (err) {
+            const message = err instanceof Error ? err.message : String(err);
+            setBorrowingsError(message);
+        } finally {
+            setProcessingRowId(null);
+        }
+    };
+
+    const handleReturnBook = async (id: number) => {
+        setProcessingRowId(id);
+        try {
+            const { error } = await supabase.from('borrowings').update({ status: 'returned' }).eq('id', id);
+            if (error) throw error;
+            setBorrowingsList(prev => prev.filter(b => b.id !== id));
+            setBorrowingsNotice(isAr ? '✅ تم تسجيل إرجاع الكتاب بنجاح.' : '✅ Book return recorded.');
+            await refreshBorrowingsOnly(undefined, undefined, true);
+        } catch (err) {
+            const message = err instanceof Error ? err.message : String(err);
+            setBorrowingsError(message);
+        } finally {
+            setProcessingRowId(null);
+        }
+    };
+
+    // حساب أكثر الكتب طلباً وقراءة من جدول الإعارات
     const topBooksStats = useMemo(() => {
         const counts: Record<string, number> = {};
-        borrowingsList.forEach(b => {
+        [...borrowingsList, ...pendingRequestsList].forEach(b => {
             if (b.book_name) {
                 const name = b.book_name.trim();
                 counts[name] = (counts[name] || 0) + 1;
@@ -385,8 +507,9 @@ const AdminDashboard: React.FC = () => {
         return Object.entries(counts)
             .sort((a, b) => b[1] - a[1])
             .slice(0, 5);
-    }, [borrowingsList]);
+    }, [borrowingsList, pendingRequestsList]);
 
+    // دالة طباعة أو تنزيل التقرير كملف PDF
     const handlePrintDashboardReport = () => {
         const printWindow = window.open('', '_blank');
         if (printWindow) {
@@ -409,6 +532,7 @@ const AdminDashboard: React.FC = () => {
                         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
                         th, td { border: 1px solid #cbd5e1; padding: 10px; text-align: ${dir === 'rtl' ? 'right' : 'left'}; }
                         th { background-color: #f1f5f9; font-weight: bold; }
+                        @media print { .no-print { display: none !important; } }
                     </style>
                 </head>
                 <body>
@@ -417,29 +541,38 @@ const AdminDashboard: React.FC = () => {
                         <h1>${t('title')}</h1>
                         <p>${t('subtitle')} | ${new Date().toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}</p>
                     </div>
+
                     <div class="stats-grid">
                         <div class="stat-card"><div class="stat-num">${stats.students}</div><div class="stat-label">${t('totalStudents')}</div></div>
                         <div class="stat-card"><div class="stat-num">${stats.teachers}</div><div class="stat-label">${t('totalTeachers')}</div></div>
                         <div class="stat-card"><div class="stat-num">${stats.studentLogins}</div><div class="stat-label">${t('studentLogins')}</div></div>
                         <div class="stat-card"><div class="stat-num">${stats.teacherLogins}</div><div class="stat-label">${t('teacherLogins')}</div></div>
                     </div>
+
                     <h2>📚 ${t('topBooksTitle')}</h2>
                     <table>
                         <tr><th>#</th><th>${t('colBook')}</th><th>${isAr ? 'عدد مرات الاستعارة' : 'Borrow Count'}</th></tr>
                         ${topBooksStats.length > 0 ? topBooksStats.map(([book, count], idx) => `<tr><td>${idx + 1}</td><td><strong>${book}</strong></td><td>${count}</td></tr>`).join('') : `<tr><td colspan="3" style="text-align:center;">${t('noResults')}</td></tr>`}
                     </table>
+
                     <h2>📌 ${t('borrowManagement')} (${borrowingsList.length})</h2>
                     <table>
                         <tr><th>${t('colId')}</th><th>${t('colName')}</th><th>${t('colBook')}</th><th>${t('colEmail')}</th><th>${t('colDate')}</th></tr>
-                        ${borrowingsList.length > 0 ? borrowingsList.map(b => `<tr><td>${b.user_id}</td><td>${b.user_name || '-'}</td><td>${b.book_name}</td><td>${b.user_email || '-'}</td><td>${b.return_date}</td></tr>`).join('') : `<tr><td colspan="5" style="text-align:center;">${t('noResults')}</td></tr>`}
+                        ${borrowingsList.length > 0 ? borrowingsList.map(b => `<tr><td>${b.user_id}</td><td>${b.user_name \vert{}\vert{} '-'}</td><td>${b.book_name}</td><td>${b.user_email \vert{}\vert{} '-'}</td><td>${b.return_date}</td></tr>`).join('') : `<tr><td colspan="5" style="text-align:center;">${t('noResults')}</td></tr>`}
                     </table>
+
+                    <div style="margin-top: 40px; text-align: center; font-size: 11px; color: #94a3b8;">
+                        مدرسة صقر الإمارات الدولية الخاصة (EFIPS) - تقرير نظام المكتبة الذكية الآلي
+                    </div>
                 </body>
                 </html>
             `;
             printWindow.document.write(htmlReport);
             printWindow.document.close();
             printWindow.focus();
-            setTimeout(() => { printWindow.print(); }, 600);
+            setTimeout(() => {
+                printWindow.print();
+            }, 600);
         }
     };
 
@@ -462,31 +595,6 @@ const AdminDashboard: React.FC = () => {
             return lessonReportsList.filter(r => (r.teacher_name && r.teacher_name.toLowerCase().includes(term)) || (r.lesson_topic && r.lesson_topic.toLowerCase().includes(term)) || (r.teacher_id && r.teacher_id.toLowerCase().includes(term)));
         }
     }, [studentsList, teachersList, borrowingsList, pendingRequestsList, lessonReportsList, searchQuery, activeTab]);
-
-    const handleReturnBook = async (id: number) => {
-        try {
-            const { error } = await supabase.from('borrowings').update({ status: 'returned' }).eq('id', id);
-            if (error) throw error;
-            setBorrowingsNotice(isAr ? '✅ تم تسجيل إرجاع الكتاب بنجاح.' : '✅ Book return recorded.');
-            await refreshBorrowingsOnly();
-        } catch (err) {
-            const message = err instanceof Error ? err.message : String(err);
-            setBorrowingsError(message);
-        }
-    };
-
-    const handleRejectRequest = async (id: number) => {
-        if (!window.confirm(isAr ? 'هل أنت متأكد من رفض طلب الاستعارة؟' : 'Are you sure you want to reject this request?')) return;
-        try {
-            const { error } = await supabase.from('borrowings').update({ status: 'rejected' }).eq('id', id);
-            if (error) throw error;
-            setBorrowingsNotice(isAr ? 'تم رفض طلب الاستعارة.' : 'Borrowing request rejected.');
-            await refreshBorrowingsOnly();
-        } catch (err) {
-            const message = err instanceof Error ? err.message : String(err);
-            setBorrowingsError(message);
-        }
-    };
 
     const handleSubmitForm = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -526,40 +634,10 @@ const AdminDashboard: React.FC = () => {
                         borrowDate: todayStr,
                         returnDate: targetReturnDate
                     });
-                    setBorrowingsNotice(isAr ? `✅ تم تسجيل الإعارة وإرسال إيميل التأكيد باللغتين إلى ${cleanEmail} (${durationDays} يوماً).` : `✅ Borrowing registered and bilingual email sent.`);
+                    setBorrowingsNotice(isAr ? `✅ تم تسجيل الإعارة وإرسال إيميل التأكيد باللغتين إلى ${cleanEmail} (${durationDays} يوماً).` : `✅ Borrowing registered and bilingual email sent to ${cleanEmail}.`);
                 } catch (emailErr) {
                     console.error('Email send warning:', emailErr);
-                    setBorrowingsNotice(isAr ? '✅ تم تسجيل الإعارة، ولكن تعذّر إرسال البريد.' : '✅ Borrowing saved, but email failed.');
-                }
-            } else if (modalMode === 'approveBorrow') {
-                const todayStr = new Date().toISOString().split('T')[0];
-                const targetReturnDate = formData.return_date || getDefaultReturnDate(15);
-                const cleanEmail = formData.user_email.trim();
-
-                const { error: updateErr } = await supabase
-                    .from('borrowings')
-                    .update({
-                        status: 'active',
-                        user_email: cleanEmail,
-                        borrow_date: todayStr,
-                        return_date: targetReturnDate
-                    })
-                    .eq('id', selectedItem.id);
-
-                if (updateErr) throw updateErr;
-
-                try {
-                    const { durationDays } = await sendBilingualConfirmationEmail({
-                        email: cleanEmail,
-                        userName: selectedItem.user_name || formData.user_id,
-                        bookName: selectedItem.book_name,
-                        borrowDate: todayStr,
-                        returnDate: targetReturnDate
-                    });
-                    setBorrowingsNotice(isAr ? `✅ تمت الموافقة على استعارة «${selectedItem.book_name}» وإرسال إيميل رسمي باللغتين إلى ${cleanEmail} (المدة: ${durationDays} يوماً).` : `✅ Approved “${selectedItem.book_name}” and sent bilingual confirmation email.`);
-                } catch (emailErr) {
-                    console.error('Email send warning:', emailErr);
-                    setBorrowingsNotice(isAr ? `✅ تمت الموافقة وتفعيل الإعارة، لكن تعذّر إرسال البريد.` : `✅ Request approved, but email sending failed.`);
+                    setBorrowingsNotice(isAr ? '✅ تم تسجيل الإعارة في النظام، ولكن تعذّر إرسال البريد الآلي.' : '✅ Borrowing saved, but email failed.');
                 }
             }
 
@@ -769,23 +847,23 @@ const AdminDashboard: React.FC = () => {
                                             {activeTab !== 'reports' && (
                                               <td className="p-3.5 flex items-center justify-center gap-2">
                                                   {activeTab === 'borrowings' ? (
-                                                      <button onClick={() => handleReturnBook(item.id)} className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-xs shadow-sm transition-all">إرجاع الكتاب</button>
+                                                      <button disabled={processingRowId === item.id} onClick={() => handleReturnBook(item.id)} className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white rounded-xl font-bold text-xs shadow-sm transition-all">إرجاع الكتاب</button>
                                                   ) : activeTab === 'pending' ? (
                                                       <>
-                                                          <button onClick={() => { 
-                                                              setSelectedItem(item); 
-                                                              const autoEmail = item.user_email || (item.user_type === 'student' ? `${String(item.user_id).trim()}@falcon-school.com` : '');
-                                                              setFormData({ 
-                                                                  ...formData, 
-                                                                  user_id: item.user_id, 
-                                                                  user_type: item.user_type, 
-                                                                  user_email: autoEmail, 
-                                                                  book_name: item.book_name, 
-                                                                  return_date: getDefaultReturnDate(15) 
-                                                              }); 
-                                                              setModalMode('approveBorrow'); 
-                                                          }} className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-xs shadow-sm transition-all">{t('approveBtn')}</button>
-                                                          <button onClick={() => handleRejectRequest(item.id)} className="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold text-xs shadow-sm transition-all">{t('rejectBtn')}</button>
+                                                          <button 
+                                                              disabled={processingRowId === item.id}
+                                                              onClick={() => handleInstantApprove(item)} 
+                                                              className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white rounded-xl font-bold text-xs shadow-sm transition-all"
+                                                          >
+                                                              {processingRowId === item.id ? (isAr ? 'جاري التأكيد...' : 'Approving...') : t('approveBtn')}
+                                                          </button>
+                                                          <button 
+                                                              disabled={processingRowId === item.id}
+                                                              onClick={() => handleRejectRequest(item.id)} 
+                                                              className="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 disabled:opacity-50 text-white rounded-xl font-bold text-xs shadow-sm transition-all"
+                                                          >
+                                                              {t('rejectBtn')}
+                                                          </button>
                                                       </>
                                                   ) : (
                                                       <button onClick={() => { setSelectedItem(item); setFormData({ ...formData, [activeTab === 'students' ? 'student_id' : 'teacher_id']: activeTab === 'students' ? item.student_id : item.teacher_id, name_ar: item.name_ar, name_en: item.name_en, grade: item.grade || '', points: item.points || 0 }); setModalMode(activeTab === 'students' ? 'editStudent' : 'editTeacher'); }} className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs shadow-sm transition-all">{t('editIdBtn')}</button>
@@ -804,7 +882,7 @@ const AdminDashboard: React.FC = () => {
 
             </div>
 
-            {/* المودال */}
+            {/* المودال لإضافة وتعديل الطلاب والمعلمين والإعارات المباشرة */}
             {modalMode && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
                     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-8 rounded-[2.5rem] shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto scrollbar-thin">
@@ -814,7 +892,6 @@ const AdminDashboard: React.FC = () => {
                             {modalMode === 'editStudent' && t('modalEditStudent')}
                             {modalMode === 'editTeacher' && t('modalEditTeacher')}
                             {modalMode === 'addBorrow' && t('modalAddBorrow')}
-                            {modalMode === 'approveBorrow' && t('modalApproveBorrow')}
                         </h3>
 
                         <form onSubmit={handleSubmitForm} className="space-y-4">
@@ -833,34 +910,31 @@ const AdminDashboard: React.FC = () => {
                                 </>
                             )}
 
-                            {(modalMode === 'addBorrow' || modalMode === 'approveBorrow') && (
+                            {modalMode === 'addBorrow' && (
                                 <>
-                                    {modalMode === 'addBorrow' && (
-                                        <div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">نوع المستعير</label>
-                                            <select 
-                                                value={formData.user_type} 
-                                                onChange={(e) => {
-                                                    const type = e.target.value;
-                                                    setFormData({ 
-                                                        ...formData, 
-                                                        user_type: type, 
-                                                        user_email: type === 'student' && formData.user_id ? `${formData.user_id.trim()}@falcon-school.com` : '' 
-                                                    });
-                                                }} 
-                                                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold"
-                                            >
-                                                <option value="student">طالب</option>
-                                                <option value="teacher">معلم</option>
-                                            </select>
-                                        </div>
-                                    )}
+                                    <div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">نوع المستعير</label>
+                                        <select 
+                                            value={formData.user_type} 
+                                            onChange={(e) => {
+                                                const type = e.target.value;
+                                                setFormData({ 
+                                                    ...formData, 
+                                                    user_type: type, 
+                                                    user_email: type === 'student' && formData.user_id ? `${formData.user_id.trim()}@falcon-school.com` : '' 
+                                                });
+                                            }} 
+                                            className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold"
+                                        >
+                                            <option value="student">طالب</option>
+                                            <option value="teacher">معلم</option>
+                                        </select>
+                                    </div>
                                     
                                     <div>
                                         <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">الرقم التعريفي (ID)</label>
                                         <input 
                                             type="text" 
                                             value={formData.user_id} 
-                                            readOnly={modalMode === 'approveBorrow'}
                                             onChange={(e) => {
                                                 const id = e.target.value;
                                                 setFormData({ 
@@ -869,7 +943,7 @@ const AdminDashboard: React.FC = () => {
                                                     user_email: formData.user_type === 'student' ? (id ? `${id.trim()}@falcon-school.com` : '') : formData.user_email 
                                                 });
                                             }} 
-                                            className={`w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-mono ${modalMode === 'approveBorrow' ? 'bg-slate-100 dark:bg-slate-800/50 text-slate-500 cursor-not-allowed' : 'bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white'}`} 
+                                            className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-mono bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white" 
                                             required 
                                         />
                                     </div>
@@ -886,7 +960,7 @@ const AdminDashboard: React.FC = () => {
                                     </div>
                                     <div>
                                         <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">عنوان الكتاب</label>
-                                        <input type="text" value={formData.book_name} readOnly={modalMode === 'approveBorrow'} onChange={(e) => setFormData({ ...formData, book_name: e.target.value })} className={`w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold ${modalMode === 'approveBorrow' ? 'bg-slate-100 dark:bg-slate-800/50 text-slate-500 cursor-not-allowed' : 'bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white'}`} required />
+                                        <input type="text" value={formData.book_name} onChange={(e) => setFormData({ ...formData, book_name: e.target.value })} className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white" required />
                                     </div>
                                     <div>
                                         <label className="block text-sm font-black text-amber-600 dark:text-amber-400 mb-1">
@@ -901,23 +975,13 @@ const AdminDashboard: React.FC = () => {
                                             required 
                                         />
                                     </div>
-
-                                    <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 text-xs space-y-2 leading-relaxed">
-                                        <div className="font-black text-emerald-600 dark:text-emerald-400">📧 معاينة رسالة البريد الآلي (عربي / EN):</div>
-                                        <p className="text-slate-700 dark:text-slate-200">
-                                            <strong>عربي:</strong> تم بنجاح استعارة كتاب «{formData.book_name || '...'}» بتاريخ {previewBorrowDate} لمدة <strong>{previewDurationDays} يوماً</strong>، ويجب إرجاعه في موعد أقصاه <strong>{previewReturnDate}</strong> تجنباً لاعتبار الكتاب تالفاً أو مفقوداً.
-                                        </p>
-                                        <p className="text-slate-600 dark:text-slate-300" dir="ltr">
-                                            <strong>EN:</strong> Successfully borrowed “{formData.book_name || '...'}” on {previewBorrowDate} for <strong>{previewDurationDays} days</strong>. Must be returned by {previewReturnDate} to avoid being considered damaged or lost.
-                                        </p>
-                                    </div>
                                 </>
                             )}
 
                             <div className="flex gap-3 pt-4">
                                 <button type="button" onClick={() => setModalMode(null)} className="flex-1 py-3 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-2xl font-bold text-sm">{t('cancelBtn')}</button>
                                 <button type="submit" disabled={isSubmitting} className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white rounded-2xl font-black text-sm shadow-md">
-                                    {isSubmitting ? (isAr ? 'جاري التنفيذ...' : 'Processing...') : (modalMode === 'approveBorrow' ? t('approveBtn') : t('saveBtn'))}
+                                    {isSubmitting ? (isAr ? 'جاري التنفيذ...' : 'Processing...') : t('saveBtn')}
                                 </button>
                             </div>
                         </form>
