@@ -41,7 +41,18 @@ const translations = {
         adminSettingsTitle: "إدارة النظام",
         borrowTitle: "مكتبتي المستعارة",
         borrowReturn: "تاريخ الإرجاع:",
-        addToCalendar: "تذكير التقويم"
+        addToCalendar: "تذكير التقويم",
+        flagDayTitle: "تحدي راية المجد",
+        flagDayDesc: "يوم العلم الإماراتي 3 نوفمبر",
+        flagDayModalTitle: "تحدي راية المجد الإماراتي",
+        flagDayModalSub: "تفتح المسابقة الرسمية وفعاليات الصعود إلى قمة برج خليفة حصرياً يوم 3 نوفمبر لجميع الطلاب والمعلمين.",
+        flagDayModalCountdown: "متبقي على انطلاق التحدي:",
+        flagDayModalBtn: "حفظ والعودة للمنصة",
+        dayLabel: "يوم",
+        hourLabel: "ساعة",
+        minLabel: "دقيقة",
+        secLabel: "ثانية",
+        flagDayAlert: "استعدوا لرفع العلم وجمع النقاط وحصد الأوسمة الوطنية!"
     },
     en: {
         welcome: "Knowledge Portal at Falcon Int'l School",
@@ -80,7 +91,18 @@ const translations = {
         adminSettingsTitle: "System Admin",
         borrowTitle: "My Borrowed Books",
         borrowReturn: "Return Date:",
-        addToCalendar: "Add to Calendar"
+        addToCalendar: "Add to Calendar",
+        flagDayTitle: "Flag Day Challenge",
+        flagDayDesc: "UAE Flag Day - Nov 3",
+        flagDayModalTitle: "UAE Flag Day Glory Challenge",
+        flagDayModalSub: "The official competition and activities to climb Burj Khalifa peak will open exclusively on November 3 for all students and teachers.",
+        flagDayModalCountdown: "Time remaining until the challenge starts:",
+        flagDayModalBtn: "Save and Return",
+        dayLabel: "Day",
+        hourLabel: "Hours",
+        minLabel: "Mins",
+        secLabel: "Secs",
+        flagDayAlert: "Get ready to raise the flag and earn national badges!"
     }
 };
 
@@ -186,9 +208,42 @@ const HomePage: React.FC = () => {
     const [borrowedBooks, setBorrowedBooks] = useState<any[]>([]);
     const [borrowCountdownNow, setBorrowCountdownNow] = useState(Date.now());
 
+    // حالات زر العد التنازلي ليوم العلم (3 نوفمبر)
+    const [showFlagModal, setShowFlagModal] = useState(false);
+    const [flagTimeLeft, setFlagTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+
     useEffect(() => {
         const timer = window.setInterval(() => setBorrowCountdownNow(Date.now()), 1000);
         return () => window.clearInterval(timer);
+    }, []);
+
+    // حساب العد التنازلي ليوم 3 نوفمبر
+    useEffect(() => {
+        const nowYear = new Date().getFullYear();
+        let targetDate = new Date(nowYear, 10, 3, 0, 0, 0); // 3 نوفمبر (الشهر 10 في JavaScript Date هو نوفمبر)
+        if (new Date().getTime() > targetDate.getTime()) {
+            targetDate.setFullYear(nowYear + 1);
+        }
+
+        const updateFlagCountdown = () => {
+            const now = new Date().getTime();
+            const difference = targetDate.getTime() - now;
+
+            if (difference > 0) {
+                setFlagTimeLeft({
+                    days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+                    hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+                    minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
+                    seconds: Math.floor((difference % (1000 * 60)) / 1000),
+                });
+            } else {
+                setFlagTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+            }
+        };
+
+        updateFlagCountdown();
+        const flagInterval = setInterval(updateFlagCountdown, 1000);
+        return () => clearInterval(flagInterval);
     }, []);
 
     const getBorrowCountdown = (returnDate: string) => {
@@ -232,7 +287,6 @@ const HomePage: React.FC = () => {
     useEffect(() => {
         const updateCountdown = () => {
             const now = new Date().getTime();
-            // ضبط تاريخ إجازة عيد الاتحاد الـ 55 ليبدأ في 2 ديسمبر 2026
             const targetDate = new Date('2026-12-02T00:00:00').getTime();
             const distance = targetDate - now;
             if (distance > 0) setDaysLeft(Math.ceil(distance / (1000 * 60 * 60 * 24)));
@@ -272,11 +326,10 @@ const HomePage: React.FC = () => {
         return isAr ? (userData.name_ar || userData.name_en || 'زائر') : (userData.name_en || userData.name_ar || 'Guest');
     };
 
-    // تحويل التاريخ لحدث في جوجل كالندر
     const createGoogleCalendarLink = (bookName: string, returnDate: string) => {
         const date = new Date(returnDate);
-        const start = date.toISOString().replace(/-|:|\.\d\d\d/g, '').slice(0, 8) + 'T060000Z'; // 10 AM UAE
-        const end = date.toISOString().replace(/-|:|\.\d\d\d/g, '').slice(0, 8) + 'T070000Z';   // 11 AM UAE
+        const start = date.toISOString().replace(/-|:|\.\d\d\d/g, '').slice(0, 8) + 'T060000Z'; 
+        const end = date.toISOString().replace(/-|:|\.\d\d\d/g, '').slice(0, 8) + 'T070000Z';   
         
         const url = new URL('https://calendar.google.com/calendar/render');
         url.searchParams.append('action', 'TEMPLATE');
@@ -300,7 +353,6 @@ const HomePage: React.FC = () => {
         }, 1500);
     };
 
-    // تفاعل احتفالي بأعلام الإمارات عند الضغط على بطاقة عيد الاتحاد 55
     const handleNationalDayCelebration = (e: React.MouseEvent) => {
         const rect = e.currentTarget.getBoundingClientRect();
         const newFlags: FlagFlyItem[] = Array.from({ length: 12 }).map(() => ({
@@ -341,14 +393,12 @@ const HomePage: React.FC = () => {
     return (
         <div dir={dir} className="w-full min-h-[100dvh] flex flex-col items-center bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden p-4 md:p-8 transition-colors duration-500">
             
-            {/* النجوم المتطايرة */}
             {sparkles.map(s => (
                 <div key={s.id} className="fixed z-[9999] pointer-events-none animate-fade-out" style={{ left: s.x, top: s.y }}>
                     <StarIcon className="w-6 h-6 text-amber-400 drop-shadow-md animate-spin" />
                 </div>
             ))}
 
-            {/* أعلام الإمارات المتطايرة عند الاحتفال بعيد الاتحاد */}
             {flyingFlags.map(f => (
                 <div key={f.id} className="fixed z-[9999] pointer-events-none animate-flag-float" style={{ left: f.x, top: f.y, transform: `rotate(${f.rot}deg)` }}>
                     <div className="p-1 bg-white/90 rounded-lg shadow-xl border border-amber-300">
@@ -368,7 +418,6 @@ const HomePage: React.FC = () => {
 
             <div className="w-full max-w-[1300px] flex flex-col gap-10 mt-10 md:mt-6">
                 
-                {/* 1. قسم الترحيب واسم المستخدم */}
                 <RevealSection delay={100}>
                     <div className="text-center space-y-3 max-w-4xl mx-auto">
                         <div className="inline-block px-5 py-2 rounded-full bg-white/90 dark:bg-slate-800/90 backdrop-blur-md text-slate-700 dark:text-slate-200 font-bold text-xs md:text-sm shadow-md border-2 border-slate-200 dark:border-slate-700">
@@ -401,7 +450,6 @@ const HomePage: React.FC = () => {
                     </div>
                 </RevealSection>
 
-                {/* 1.5. صندوق الاستعارات النشطة (يظهر فقط إذا كان هناك استعارات للطالب/المعلم) */}
                 {borrowedBooks.length > 0 && (
                     <RevealSection delay={150}>
                         <div className="w-full max-w-4xl mx-auto bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-4 border-amber-300 dark:border-amber-600 p-6 md:p-8 rounded-[2.5rem] shadow-xl relative overflow-hidden">
@@ -432,7 +480,6 @@ const HomePage: React.FC = () => {
                     </RevealSection>
                 )}
 
-                {/* 2. شريط جديدنا */}
                 <RevealSection delay={200}>
                     <div className="w-full max-w-5xl mx-auto relative z-30 flex items-center bg-white dark:bg-slate-800 border-4 border-amber-300 dark:border-amber-700 rounded-full shadow-lg overflow-hidden h-14 md:h-16">
                         <div className="bg-amber-400 text-slate-900 font-black px-5 md:px-8 h-full flex items-center gap-2 relative z-20 shrink-0 text-xs md:text-sm uppercase">
@@ -447,7 +494,6 @@ const HomePage: React.FC = () => {
                     </div>
                 </RevealSection>
 
-                {/* 3. الروابط والأقسام السريعة */}
                 <RevealSection delay={300}>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         
@@ -547,7 +593,6 @@ const HomePage: React.FC = () => {
                     </div>
                 </RevealSection>
 
-                {/* 4. قسم شخصية صقر ومعلومات الموطن */}
                 <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center mt-6">
                     
                     <div className="lg:col-span-5 flex flex-col items-center justify-center relative">
@@ -618,13 +663,11 @@ const HomePage: React.FC = () => {
                                 </div>
                             </RevealSection>
 
-                            {/* بطاقة إجازة عيد الاتحاد الـ 55 المزينة بأعلام الإمارات والهوية الوطنية */}
                             <RevealSection delay={700}>
                                 <div 
                                     onClick={handleNationalDayCelebration}
                                     className="group relative bg-gradient-to-br from-white via-emerald-50/40 to-rose-50/40 dark:from-slate-900 dark:via-emerald-950/20 dark:to-rose-950/20 p-6 rounded-[2rem] border-4 border-emerald-500/80 dark:border-emerald-600 shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col justify-between items-center text-center h-full overflow-hidden cursor-pointer active:scale-95"
                                 >
-                                    {/* الشريط العلوي بألوان علم الإمارات */}
                                     <div className="absolute top-0 left-0 right-0 h-2 flex">
                                         <div className="bg-[#ff0000] w-1/4"></div>
                                         <div className="bg-[#00732f] w-1/4"></div>
@@ -632,7 +675,6 @@ const HomePage: React.FC = () => {
                                         <div className="bg-black w-1/4"></div>
                                     </div>
 
-                                    {/* أعلام الإمارات المرفرفة في الخلفية */}
                                     <div className="absolute -right-3 -bottom-3 opacity-15 dark:opacity-20 pointer-events-none transform -rotate-12 group-hover:scale-110 transition-transform duration-500">
                                         <UaeFlagIcon className="w-28 h-20" />
                                     </div>
@@ -640,7 +682,6 @@ const HomePage: React.FC = () => {
                                         <UaeFlagIcon className="w-24 h-16" />
                                     </div>
 
-                                    {/* رأس البطاقة مع العلمين المتحركين */}
                                     <div className="flex items-center justify-center gap-2 mb-1 mt-1 relative z-10">
                                         <div className="animate-flag-wave origin-bottom-left">
                                             <UaeFlagIcon className="w-6 h-4 rounded-sm shadow" />
@@ -653,7 +694,6 @@ const HomePage: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    {/* العداد التنازلي وشعار الـ 55 */}
                                     <div className="flex flex-col items-center my-1 relative z-10">
                                         <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-0.5">
                                             {t('startsIn')}
@@ -668,7 +708,6 @@ const HomePage: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    {/* التاريخ وشعار روح الاتحاد 55 */}
                                     <div className="flex items-center gap-2 mt-2 relative z-10 bg-white/90 dark:bg-slate-800/90 px-3.5 py-1 rounded-full border border-emerald-200 dark:border-emerald-800 shadow-sm">
                                         <span className="w-2 h-2 rounded-full bg-red-600 animate-ping"></span>
                                         <span className="text-[11px] font-black text-slate-700 dark:text-slate-200">
@@ -688,6 +727,88 @@ const HomePage: React.FC = () => {
                 </div>
 
             </div>
+
+            {/* ================= زر يوم العلم الاحتفالي للطلاب والمعلمين ================= */}
+            <div className="fixed bottom-6 left-6 z-40">
+                <button
+                    onClick={() => setShowFlagModal(true)}
+                    className="group relative px-5 py-3.5 bg-gradient-to-r from-red-600 via-emerald-600 to-slate-900 text-white font-black rounded-2xl shadow-2xl hover:shadow-emerald-500/30 transition-all duration-300 flex items-center gap-3 border-2 border-amber-300/60 animate-bounce hover:scale-105"
+                >
+                    <span className="text-2xl">🇦🇪</span>
+                    <div className="text-right">
+                        <div className="text-[10px] text-amber-200 uppercase tracking-wider">{t('flagDayTitle')}</div>
+                        <div className="text-xs sm:text-sm font-black">{t('flagDayDesc')}</div>
+                    </div>
+                </button>
+            </div>
+
+            {/* ================= نافذة العد التنازلي ليوم العلم (3 نوفمبر) ================= */}
+            {showFlagModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-fade-in" dir={dir}>
+                    <div className="relative w-full max-w-md bg-white dark:bg-slate-900 border-4 border-amber-400 rounded-[2.5rem] shadow-2xl p-6 sm:p-8 text-center overflow-hidden">
+                        
+                        <div className="absolute top-0 left-0 right-0 h-3 flex">
+                            <div className="bg-[#ff0000] w-1/4"></div>
+                            <div className="bg-[#00732f] w-1/4"></div>
+                            <div className="bg-white w-1/4"></div>
+                            <div className="bg-black w-1/4"></div>
+                        </div>
+
+                        <button
+                            onClick={() => setShowFlagModal(false)}
+                            className="absolute top-5 left-5 text-slate-400 hover:text-rose-500 font-black text-lg p-1"
+                        >
+                            ✕
+                        </button>
+
+                        <div className="w-16 h-16 mx-auto rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-3xl mb-4 mt-2">
+                            🇦🇪
+                        </div>
+
+                        <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mb-1">
+                            {t('flagDayModalTitle')}
+                        </h3>
+                        <p className="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
+                            {t('flagDayModalSub')}
+                        </p>
+
+                        <div className="text-xs font-bold text-slate-600 dark:text-slate-300 mb-2">
+                            {t('flagDayModalCountdown')}
+                        </div>
+
+                        <div className="grid grid-cols-4 gap-2 mb-6">
+                            <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-2xl border border-slate-200 dark:border-slate-700">
+                                <div className="text-lg sm:text-xl font-black text-emerald-600 dark:text-emerald-400 font-mono">{flagTimeLeft.days}</div>
+                                <div className="text-[10px] font-bold text-slate-400 mt-0.5">{t('dayLabel')}</div>
+                            </div>
+                            <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-2xl border border-slate-200 dark:border-slate-700">
+                                <div className="text-lg sm:text-xl font-black text-blue-600 dark:text-blue-400 font-mono">{flagTimeLeft.hours}</div>
+                                <div className="text-[10px] font-bold text-slate-400 mt-0.5">{t('hourLabel')}</div>
+                            </div>
+                            <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-2xl border border-slate-200 dark:border-slate-700">
+                                <div className="text-lg sm:text-xl font-black text-amber-600 dark:text-amber-400 font-mono">{flagTimeLeft.minutes}</div>
+                                <div className="text-[10px] font-bold text-slate-400 mt-0.5">{t('minLabel')}</div>
+                            </div>
+                            <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-2xl border border-slate-200 dark:border-slate-700">
+                                <div className="text-lg sm:text-xl font-black text-rose-600 dark:text-rose-400 font-mono">{flagTimeLeft.seconds}</div>
+                                <div className="text-[10px] font-bold text-slate-400 mt-0.5">{t('secLabel')}</div>
+                            </div>
+                        </div>
+
+                        <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-800 text-xs font-bold text-amber-800 dark:text-amber-300 mb-6">
+                            {t('flagDayAlert')}
+                        </div>
+
+                        <button
+                            onClick={() => setShowFlagModal(false)}
+                            className="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black rounded-2xl shadow-md transition-all text-sm"
+                        >
+                            {t('flagDayModalBtn')}
+                        </button>
+
+                    </div>
+                </div>
+            )}
 
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
