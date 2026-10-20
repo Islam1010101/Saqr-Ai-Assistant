@@ -7,7 +7,7 @@ import { supabase } from '../src/utils/supabase';
 const translations = {
     ar: {
         pageTitle: "جدول حجز حصص المكتبة",
-        subtitle: "نظام حجز وتنسيق حصص زيارة المكتبة المدرسية بطريقة ذكية ومبتكرة",
+        subtitle: "نظام حجز وتنسيق حصص زيارة المكتبة المدرسية بطريقة منظمة ومبتكرة",
         days: ["الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"],
         periods: [1, 2, 3, 4, 5, 6, 7, 8],
         periodLabel: "الحصة",
@@ -28,7 +28,7 @@ const translations = {
         addToGoogleCal: "إضافة إلى Google Calendar",
         downloadIcs: "تحميل الحصة (.ics)",
         noClassesFound: "لم يتم العثور على حصص مسجلة باسمك.",
-        loading: "جاري تحميل جدول الحصص السحري...",
+        loading: "جاري تحميل جدول الحصص...",
         schoolNameAr: "مدرسة صقر الإمارات الدولية الخاصة",
         schoolNameEn: "Emirates Falcon International Private School",
         printHeader: "الجدول الزمني المعتمد لزيارات المكتبة المدرسية",
@@ -38,7 +38,7 @@ const translations = {
     },
     en: {
         pageTitle: "Library Schedule",
-        subtitle: "Smart and vibrant library visit booking and coordination system",
+        subtitle: "Organized and vibrant library visit booking and coordination system",
         days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
         periods: [1, 2, 3, 4, 5, 6, 7, 8],
         periodLabel: "Period",
@@ -59,7 +59,7 @@ const translations = {
         addToGoogleCal: "Add to Google Calendar",
         downloadIcs: "Download Period (.ics)",
         noClassesFound: "No classes found registered under your name.",
-        loading: "Loading magical schedule...",
+        loading: "Loading schedule...",
         schoolNameAr: "مدرسة صقر الإمارات الدولية الخاصة",
         schoolNameEn: "Emirates Falcon International Private School",
         printHeader: "Certified Library Visit Timetable",
@@ -75,17 +75,25 @@ const SchedulePage: React.FC = () => {
     const t = (key: keyof typeof translations.ar) => translations[locale as 'ar' | 'en'][key];
 
     // ==========================================
-    // نظام الجلسات والمصادقة (التحديث الجديد)
+    // نظام الجلسات والمصادقة
     // ==========================================
     const [userData, setUserData] = useState<any>(null);
     const [userType, setUserType] = useState<'student' | 'teacher' | 'admin' | null>(null);
+
+    // تأثير حركة المؤشر على العنوان
+    const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width - 0.5;
+        const y = (e.clientY - rect.top) / rect.height - 0.5;
+        setMousePos({ x: x * 20, y: y * 20 });
+    };
 
     useEffect(() => {
         const storedUser = localStorage.getItem('current_user');
         const storedType = localStorage.getItem('user_type');
 
         if (storedUser && storedType) {
-            // منع الطلاب من الدخول لصفحة الجدول
             if (storedType === 'student') {
                 window.location.href = '/home';
             } else {
@@ -114,7 +122,7 @@ const SchedulePage: React.FC = () => {
     const [formGrade, setFormGrade] = useState('');
 
     const days = translations[locale as 'ar' | 'en'].days;
-    const periods = translations[locale as 'ar' | 'en'].periods;
+    const allPeriods = translations[locale as 'ar' | 'en'].periods;
 
     const fetchSchedule = async () => {
         setIsLoading(true);
@@ -144,13 +152,11 @@ const SchedulePage: React.FC = () => {
         const key = `${day}_${period}`;
         const current = scheduleData[key];
 
-        // حماية: إذا كانت الحصة محجوزة لمعلم آخر وأنت لست الأدمن
         if (current?.user_id && current.user_id !== userData.teacher_id && userType !== 'admin') {
             alert(t('alreadyBooked'));
             return;
         }
 
-        // ملء اسم المعلم تلقائياً إذا كان يحجز حصة جديدة
         setFormTeacher(current?.teacher || getDisplayName());
         setFormSubject(current?.subject || '');
         setFormGrade(current?.grade || '');
@@ -167,7 +173,7 @@ const SchedulePage: React.FC = () => {
             teacher: formTeacher, 
             subject: formSubject, 
             grade: formGrade,
-            user_id: userData.teacher_id // حفظ الـ ID لمعرفة من حجز الحصة
+            user_id: userData.teacher_id 
         };
 
         try {
@@ -189,7 +195,6 @@ const SchedulePage: React.FC = () => {
         const key = `${selectedSlot.day}_${selectedSlot.period}`;
         const current = scheduleData[key];
 
-        // حماية الحذف: الأدمن يمكنه حذف أي شيء، المعلم يحذف حصصه فقط
         if (userType !== 'admin' && current?.user_id !== userData.teacher_id) {
             alert(t('unauthorizedDelete'));
             return;
@@ -212,9 +217,6 @@ const SchedulePage: React.FC = () => {
         }
     };
 
-    // ==========================================
-    // دوال التقويم والوقت (كما هي من الكود الأصلي)
-    // ==========================================
     const getNextDayOfWeek = (dayName: string) => {
         const dayMap: Record<string, number> = { 
             "الأحد": 0, "الإثنين": 1, "الثلاثاء": 2, "الأربعاء": 3, "الخميس": 4, "الجمعة": 5, "السبت": 6,
@@ -238,7 +240,7 @@ const SchedulePage: React.FC = () => {
     };
 
     const handleDownloadMySchedule = () => {
-        const searchId = userData.teacher_id; // البحث أصبح تلقائي برقم المعلم بدلاً من كتابة الاسم
+        const searchId = userData.teacher_id; 
         let icsEvents = [
             'BEGIN:VCALENDAR',
             'VERSION:2.0',
@@ -359,7 +361,7 @@ const SchedulePage: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {periods.map((period) => (
+                            {allPeriods.map((period) => (
                                 <tr key={period} className="border-b border-black h-[11%]">
                                     <td className="p-1 border-r border-black text-center font-black bg-gray-100 whitespace-nowrap">
                                         {t('periodLabel')} {period}
@@ -367,6 +369,11 @@ const SchedulePage: React.FC = () => {
                                     {days.map((day, dIdx) => {
                                         const key = `${day}_${period}`;
                                         const slot = scheduleData[key];
+                                        // إذا كان يوم الجمعة والحصة أكبر من 4، لا تعرض شيئاً في جدول الطباعة
+                                        const isFriday = day === "الجمعة" || day === "Friday";
+                                        if (isFriday && period > 4) {
+                                            return <td key={dIdx} className="p-1 border-r border-black text-center align-middle bg-gray-50">-</td>;
+                                        }
                                         return (
                                             <td key={dIdx} className="p-1 border-r border-black text-center align-middle overflow-hidden">
                                                 {slot?.teacher ? (
@@ -400,16 +407,23 @@ const SchedulePage: React.FC = () => {
             </div>
             {/* --- نهاية قسم الطباعة المخصص --- */}
 
-            <div className="max-w-[1400px] mx-auto print:hidden relative z-10">
+            <div className="max-w-[1400px] mx-auto print:hidden relative z-10" onMouseMove={handleMouseMove}>
                 
                 <div className="text-center mb-10 flex flex-col items-center">
                     <div className="mb-2 inline-block px-4 py-1.5 rounded-full bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-black text-xs shadow-sm border border-slate-200 dark:border-slate-700">
-                        {userType === 'admin' ? "نمط المسؤول النشط" : `مرحباً ${getDisplayName()}`}
+                        {userType === 'admin' ? "نمط المسؤول النشط" : getDisplayName()}
                     </div>
-                    <h1 className="text-3xl md:text-5xl font-black bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-600 bg-clip-text text-transparent tracking-tight uppercase drop-shadow-sm">
+                    {/* العنوان متحرك مع المؤشر، بخط بولد جداً وبارز */}
+                    <h1 
+                        className="text-3xl md:text-6xl font-black bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-600 bg-clip-text text-transparent tracking-tight uppercase drop-shadow-md transition-transform duration-100 ease-out py-2"
+                        style={{
+                            transform: `translate(${mousePos.x}px, ${mousePos.y}px) scale(1.02)`,
+                            fontWeight: 900
+                        }}
+                    >
                         {t('pageTitle')}
                     </h1>
-                    <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-2">{t('subtitle')}</p>
+                    <p className="text-sm md:text-base font-bold text-slate-500 dark:text-slate-400 mt-2">{t('subtitle')}</p>
                 </div>
 
                 <div className="flex flex-wrap justify-end gap-4 mb-6">
@@ -454,7 +468,7 @@ const SchedulePage: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {periods.map((period) => (
+                                {allPeriods.map((period) => (
                                     <tr key={period} className="border-b border-slate-100 dark:border-slate-800/60 hover:bg-teal-50/20 transition-colors">
                                         <td className="p-4 text-center font-black bg-slate-100 dark:bg-slate-800/80 rounded-2xl m-2 text-slate-700 dark:text-slate-300 shadow-inner">
                                             {t('periodLabel')} {period}
@@ -462,6 +476,19 @@ const SchedulePage: React.FC = () => {
                                         {days.map((day, dIdx) => {
                                             const key = `${day}_${period}`;
                                             const slot = scheduleData[key];
+                                            const isFriday = day === "الجمعة" || day === "Friday";
+                                            
+                                            // إذا كان يوم الجمعة والحصة أكبر من 4، نعرض خانة غير متاحة
+                                            if (isFriday && period > 4) {
+                                                return (
+                                                    <td key={dIdx} className="p-3 text-center">
+                                                        <div className="p-3 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-900/40 min-h-[105px] flex flex-col justify-center items-center opacity-40 select-none">
+                                                            <span className="text-xs font-bold text-slate-400">غير معتمد (4 حصص فقط)</span>
+                                                        </div>
+                                                    </td>
+                                                );
+                                            }
+
                                             return (
                                                 <td key={dIdx} className="p-3 text-center">
                                                     <div 
