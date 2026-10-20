@@ -7,7 +7,7 @@ const translations = {
     ar: {
         welcome: "بوابة المعرفة في مدرسة صقر الإمارات",
         subWelcome: "بوابتك الذكية للوصول إلى المعلومات والإبداع.",
-        welcomeUser: "أهلاً بك يا",
+        welcomeUser: "أهلاً بك",
         logout: "تسجيل الخروج",
         adminBadge: "مدير النظام",
         teacherBadge: "حساب معلم",
