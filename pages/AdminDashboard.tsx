@@ -17,6 +17,10 @@ const translations = {
         topBooksTitle: "أكثر الكتب طلباً وقراءة في المكتبة",
         arabicBooks: "المكتبة العربية الرقمية",
         englishBooks: "المكتبة الإنجليزية الرقمية",
+        digitalReadAnalyticsTitle: "أكثر الكتب قراءة في المكتبات الرقمية",
+        digitalReadCount: "مرات الفتح / القراءة",
+        noDigitalReads: "لا توجد قراءات رقمية مسجلة لهذا القسم حتى الآن.",
+        digitalReadsSetupRequired: "تعذرت قراءة إحصائيات الكتب من جدول book_views. تحقق من صلاحيات قراءة الجدول في Supabase.",
         studentManagement: "إدارة الطلاب",
         teacherManagement: "إدارة المعلمين",
         borrowManagement: "الإعارات النشطة",
@@ -67,6 +71,10 @@ const translations = {
         topBooksTitle: "Most Popular & Read Library Books",
         arabicBooks: "Arabic Digital Library",
         englishBooks: "English Digital Library",
+        digitalReadAnalyticsTitle: "Most-Read Digital Library Books",
+        digitalReadCount: "Opens / Reads",
+        noDigitalReads: "No digital book reads have been recorded for this section yet.",
+        digitalReadsSetupRequired: "Could not read book analytics from book_views. Check the table's read permissions in Supabase.",
         studentManagement: "Student Management",
         teacherManagement: "Teacher Management",
         borrowManagement: "Active Borrowings",
@@ -191,6 +199,9 @@ const AdminDashboard: React.FC = () => {
     const [stats, setStats] = useState({ students: 0, teachers: 0, studentLogins: 0, teacherLogins: 0 });
     // Raw login events power the usage chart and the Top 10 ranking.
     const [loginActivity, setLoginActivity] = useState<any[]>([]);
+    // Aggregated digital-library book-open counts are calculated from the existing book_views table.
+    const [digitalBookReadStats, setDigitalBookReadStats] = useState<any[]>([]);
+    const [digitalBookReadStatsAvailable, setDigitalBookReadStatsAvailable] = useState<boolean | null>(null);
     const [studentsList, setStudentsList] = useState<any[]>([]);
     const [teachersList, setTeachersList] = useState<any[]>([]);
     const [borrowingsList, setBorrowingsList] = useState<any[]>([]);
@@ -246,6 +257,87 @@ const AdminDashboard: React.FC = () => {
                 user_email: resolvedEmail
             };
         });
+    };
+
+    const fetchDigitalBookReadStats = async () => {
+        try {
+            // Use the table that already exists in this Supabase project.
+            // Read in pages so projects with more than 1,000 views are counted correctly.
+            const allViews: any[] = [];
+            const pageSize = 1000;
+            let start = 0;
+            let hasMore = true;
+
+            while (hasMore) {
+                const { data, error } = await supabase
+                    .from('book_views')
+                    .select('book_title, language, viewed_at')
+                    .order('viewed_at', { ascending: false })
+                    .range(start, start + pageSize - 1);
+
+                if (error) throw error;
+                const page = data || [];
+                allViews.push(...page);
+                hasMore = page.length === pageSize;
+                start += page.length;
+            }
+
+            const counts = new Map<string, {
+                library_type: 'arabic' | 'english';
+                book_title: string;
+                read_count: number;
+                last_read_at: string | null;
+            }>();
+
+            allViews.forEach((view) => {
+                const bookTitle = String(view.book_title || '').trim();
+                if (!bookTitle) return;
+
+                const rawLanguage = String(view.language || '').trim().toLowerCase();
+                const normalizedLanguage = rawLanguage.replace(/[أإآ]/g, 'ا');
+                let libraryType: 'arabic' | 'english' | null = null;
+
+                if (rawLanguage === 'ar' || rawLanguage.includes('arab') || normalizedLanguage.includes('عرب')) {
+                    libraryType = 'arabic';
+                } else if (rawLanguage === 'en' || rawLanguage.includes('english') || normalizedLanguage.includes('انجليز')) {
+                    libraryType = 'english';
+                }
+
+                // Do not guess a library for unknown language values.
+                if (!libraryType) return;
+
+                const key = `${libraryType}:${bookTitle.toLocaleLowerCase()}`;
+                const viewedAt = view.viewed_at ? String(view.viewed_at) : null;
+                const current = counts.get(key);
+
+                if (!current) {
+                    counts.set(key, {
+                        library_type: libraryType,
+                        book_title: bookTitle,
+                        read_count: 1,
+                        last_read_at: viewedAt
+                    });
+                } else {
+                    current.read_count += 1;
+                    if (viewedAt && (!current.last_read_at || Date.parse(viewedAt) > Date.parse(current.last_read_at))) {
+                        current.last_read_at = viewedAt;
+                    }
+                }
+            });
+
+            const aggregated = Array.from(counts.values()).sort((a, b) =>
+                b.read_count - a.read_count ||
+                Date.parse(b.last_read_at || '') - Date.parse(a.last_read_at || '')
+            );
+
+            setDigitalBookReadStats(aggregated);
+            setDigitalBookReadStatsAvailable(true);
+        } catch (error) {
+            // Analytics are optional; failure must never break the core admin dashboard.
+            console.warn('Could not read digital book views from book_views:', error);
+            setDigitalBookReadStats([]);
+            setDigitalBookReadStatsAvailable(false);
+        }
     };
 
     const refreshBorrowingsOnly = async (studentsOverride?: any[], teachersOverride?: any[], silent = false) => {
@@ -322,6 +414,9 @@ const AdminDashboard: React.FC = () => {
 
             const { data: reports } = await supabase.from('lesson_reports').select('*').order('created_at', { ascending: false });
 
+            // Load digital-library reading analytics independently of the core admin data.
+            await fetchDigitalBookReadStats();
+
             setStudentsList(allStudents);
             setTeachersList(allTeachers);
             setLessonReportsList(reports || []);
@@ -359,6 +454,28 @@ const AdminDashboard: React.FC = () => {
             window.clearInterval(intervalId);
         };
     }, [isAdmin, studentsList, teachersList]);
+
+    // Refresh digital reading statistics after each recorded book open.
+    useEffect(() => {
+        if (isAdmin !== true) return;
+
+        const channel = supabase
+            .channel('book-views-realtime-admin')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'book_views' }, () => {
+                void fetchDigitalBookReadStats();
+            })
+            .subscribe();
+
+        // A periodic refresh also covers deployments where Realtime is not enabled.
+        const intervalId = window.setInterval(() => {
+            void fetchDigitalBookReadStats();
+        }, 15000);
+
+        return () => {
+            supabase.removeChannel(channel);
+            window.clearInterval(intervalId);
+        };
+    }, [isAdmin]);
 
     // Keep the activity ranking fresh when the database records a new login.
     useEffect(() => {
@@ -583,6 +700,16 @@ const AdminDashboard: React.FC = () => {
             });
     }, [loginActivity, studentsList, teachersList, isAr]);
 
+    const topArabicDigitalReads = useMemo(() => digitalBookReadStats
+        .filter((row) => ['arabic', 'ar'].includes(String(row.library_type || '').trim().toLowerCase()))
+        .sort((a, b) => Number(b.read_count || 0) - Number(a.read_count || 0))
+        .slice(0, 10), [digitalBookReadStats]);
+
+    const topEnglishDigitalReads = useMemo(() => digitalBookReadStats
+        .filter((row) => ['english', 'en'].includes(String(row.library_type || '').trim().toLowerCase()))
+        .sort((a, b) => Number(b.read_count || 0) - Number(a.read_count || 0))
+        .slice(0, 10), [digitalBookReadStats]);
+
     const handlePrintDashboardReport = () => {
         const printWindow = window.open('', '_blank');
         if (printWindow) {
@@ -626,6 +753,18 @@ const AdminDashboard: React.FC = () => {
                     <table>
                         <tr><th>#</th><th>${t('colBook')}</th><th>${isAr ? 'عدد مرات الاستعارة' : 'Borrow Count'}</th></tr>
                         ${topBooksStats.length > 0 ? topBooksStats.map(([book, count], idx) => `<tr><td>${idx + 1}</td><td><strong>${book}</strong></td><td>${count}</td></tr>`).join('') : `<tr><td colspan="3" style="text-align:center;">${t('noResults')}</td></tr>`}
+                    </table>
+
+                    <h2>📗 ${t('arabicBooks')} - ${t('digitalReadAnalyticsTitle')}</h2>
+                    <table>
+                        <tr><th>#</th><th>${t('colBook')}</th><th>${t('digitalReadCount')}</th></tr>
+                        ${topArabicDigitalReads.length > 0 ? topArabicDigitalReads.map((book, idx) => `<tr><td>${idx + 1}</td><td><strong>${book.book_title}</strong></td><td>${Number(book.read_count || 0)}</td></tr>`).join('') : `<tr><td colspan="3" style="text-align:center;">${digitalBookReadStatsAvailable === false ? t('digitalReadsSetupRequired') : t('noDigitalReads')}</td></tr>`}
+                    </table>
+
+                    <h2>📘 ${t('englishBooks')} - ${t('digitalReadAnalyticsTitle')}</h2>
+                    <table>
+                        <tr><th>#</th><th>${t('colBook')}</th><th>${t('digitalReadCount')}</th></tr>
+                        ${topEnglishDigitalReads.length > 0 ? topEnglishDigitalReads.map((book, idx) => `<tr><td>${idx + 1}</td><td><strong>${book.book_title}</strong></td><td>${Number(book.read_count || 0)}</td></tr>`).join('') : `<tr><td colspan="3" style="text-align:center;">${digitalBookReadStatsAvailable === false ? t('digitalReadsSetupRequired') : t('noDigitalReads')}</td></tr>`}
                     </table>
 
                     <h2>👥 ${isAr ? 'أكثر 10 مستخدمين نشاطاً' : 'Top 10 Most Active Users'}</h2>
@@ -889,6 +1028,65 @@ const AdminDashboard: React.FC = () => {
                         )}
                     </div>
                 </div>
+
+                {/* أكثر الكتب قراءة في المكتبتين الرقميتين، منفصل عن إحصائيات الإعارة الورقية */}
+                <section className="lg:col-span-4 bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/70 p-5 md:p-6 rounded-3xl shadow-sm">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5">
+                        <div className="flex items-center gap-3">
+                            <span className="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 flex items-center justify-center text-xl" aria-hidden="true">📊</span>
+                            <div>
+                                <h3 className="text-lg font-black text-slate-800 dark:text-slate-100">{t('digitalReadAnalyticsTitle')}</h3>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{isAr ? 'الترتيب حسب سجلات فتح الكتب في كل مكتبة رقمية' : 'Ranked by recorded book opens in each digital library'}</p>
+                            </div>
+                        </div>
+                        <span className="text-[11px] text-slate-400 dark:text-slate-500">{isAr ? 'تتحدث الإحصائيات تلقائياً عند تسجيل مشاهدة كتاب جديدة' : 'Statistics refresh as new book views are recorded'}</span>
+                    </div>
+
+                    {digitalBookReadStatsAvailable === false ? (
+                        <div className="rounded-2xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/25 p-4 text-sm font-bold leading-7 text-amber-800 dark:text-amber-200">
+                            {t('digitalReadsSetupRequired')}
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+                            {[
+                                { key: 'arabic', title: t('arabicBooks'), data: topArabicDigitalReads, accent: 'bg-emerald-500', badge: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300', icon: '📗' },
+                                { key: 'english', title: t('englishBooks'), data: topEnglishDigitalReads, accent: 'bg-sky-500', badge: 'bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300', icon: '📘' }
+                            ].map((section) => {
+                                const maxReads = Math.max(...section.data.map((book: any) => Number(book.read_count || 0)), 1);
+                                return (
+                                    <div key={section.key} className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 p-4 md:p-5 min-w-0">
+                                        <h4 className="font-black text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-4"><span aria-hidden="true">{section.icon}</span>{section.title}</h4>
+                                        {section.data.length > 0 ? (
+                                            <div className="space-y-4">
+                                                {section.data.map((book: any, index: number) => {
+                                                    const count = Number(book.read_count || 0);
+                                                    const width = Math.max(4, (count / maxReads) * 100);
+                                                    return (
+                                                        <div key={`${section.key}-${book.book_id || book.book_title}-${index}`}>
+                                                            <div className="flex items-start justify-between gap-3 mb-2">
+                                                                <div className="flex items-start gap-3 min-w-0">
+                                                                    <span className={`inline-flex shrink-0 items-center justify-center w-7 h-7 rounded-lg text-xs font-black ${index < 3 ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-300'}`}>{index + 1}</span>
+                                                                    <span className="text-sm font-bold text-slate-700 dark:text-slate-200 break-words">{book.book_title}</span>
+                                                                </div>
+                                                                <span className={`shrink-0 px-2.5 py-1 rounded-lg text-xs font-black tabular-nums ${section.badge}`}>{count.toLocaleString(isAr ? 'ar-EG' : 'en-US')}</span>
+                                                            </div>
+                                                            <div className="h-2.5 rounded-full bg-slate-200/80 dark:bg-slate-700 overflow-hidden" role="img" aria-label={`${book.book_title}: ${count}`}>
+                                                                <div className={`h-full rounded-full ${section.accent} transition-all duration-500`} style={{ width: `${width}%` }} />
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        ) : (
+                                            <div className="py-8 text-center text-sm font-bold text-slate-400 dark:text-slate-500">{t('noDigitalReads')}</div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                    <p className="mt-4 text-[11px] leading-5 text-slate-400 dark:text-slate-500">{isAr ? 'يُسجل النظام فتح الكتاب من المكتبة الرقمية. هذا المؤشر يعكس مرات فتح الكتب المسجلة في book_views، وليس إثباتاً بأن الكتاب قُرئ بالكامل.' : 'The system records book opens from the digital libraries. This measures opens recorded in book_views, not proof that a book was fully read.'}</p>
+                </section>
 
                 {/* أزرار التبديل والتحكم */}
                 <div className="lg:col-span-4 flex flex-col md:flex-row items-center justify-between gap-4 bg-white dark:bg-slate-900/90 p-5 rounded-[2rem] border border-slate-200 dark:border-slate-700 shadow-sm overflow-x-auto">
