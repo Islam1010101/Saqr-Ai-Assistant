@@ -181,9 +181,9 @@ export default function Login() {
           </div>
 
           <div className="text-center relative z-10 mb-6">
-            {/* تم تكبير عنوان المكتبة الذكية بشكل أكبر وأكثر بروزاً */}
+            {/* تم تكبير عنوان مكتبة صقر الإمارات بشكل أكبر وأكثر بروزاً */}
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 mb-3 drop-shadow-sm tracking-tight">
-              {lang === 'ar' ? 'المكتبة الذكية' : 'Smart Library'}
+              {lang === 'ar' ? 'مكتبة صقر الإمارات' : 'EFIPS Library'}
             </h1>
             <p className="text-slate-700 text-xs sm:text-sm max-w-sm mx-auto font-bold leading-relaxed drop-shadow-sm">
               {lang === 'ar' 
