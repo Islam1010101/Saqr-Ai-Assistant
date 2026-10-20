@@ -189,6 +189,8 @@ const AdminDashboard: React.FC = () => {
     const [processingRowId, setProcessingRowId] = useState<number | null>(null);
 
     const [stats, setStats] = useState({ students: 0, teachers: 0, studentLogins: 0, teacherLogins: 0 });
+    // Raw login events power the usage chart and the Top 10 ranking.
+    const [loginActivity, setLoginActivity] = useState<any[]>([]);
     const [studentsList, setStudentsList] = useState<any[]>([]);
     const [teachersList, setTeachersList] = useState<any[]>([]);
     const [borrowingsList, setBorrowingsList] = useState<any[]>([]);
@@ -297,8 +299,10 @@ const AdminDashboard: React.FC = () => {
             const { count: tCount } = await supabase.from('teachers').select('*', { count: 'exact', head: true });
 
             const { data: loginLogs } = await supabase.from('login_logs').select('user_id, user_type');
-            const uniqueStudentLogins = new Set(loginLogs?.filter(l => l.user_type === 'student').map(l => l.user_id)).size;
-            const uniqueTeacherLogins = new Set(loginLogs?.filter(l => l.user_type === 'teacher' || l.user_type === 'admin').map(l => l.user_id)).size;
+            const safeLoginLogs = loginLogs || [];
+            setLoginActivity(safeLoginLogs);
+            const uniqueStudentLogins = new Set(safeLoginLogs.filter(l => String(l.user_type || '').toLowerCase() === 'student').map(l => l.user_id)).size;
+            const uniqueTeacherLogins = new Set(safeLoginLogs.filter(l => ['teacher', 'admin'].includes(String(l.user_type || '').toLowerCase())).map(l => l.user_id)).size;
 
             let allStudents: any[] = [];
             let step = 1000, start = 0; let fetchMore = true;
@@ -355,6 +359,33 @@ const AdminDashboard: React.FC = () => {
             window.clearInterval(intervalId);
         };
     }, [isAdmin, studentsList, teachersList]);
+
+    // Keep the activity ranking fresh when the database records a new login.
+    useEffect(() => {
+        if (isAdmin !== true) return;
+
+        const channel = supabase
+            .channel('login-activity-realtime-admin')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'login_logs' }, async () => {
+                const { data, error } = await supabase.from('login_logs').select('user_id, user_type');
+                if (error) {
+                    console.error('Unable to refresh login activity:', error);
+                    return;
+                }
+                const logs = data || [];
+                setLoginActivity(logs);
+                setStats((previous) => ({
+                    ...previous,
+                    studentLogins: new Set(logs.filter((entry) => String(entry.user_type || '').toLowerCase() === 'student').map((entry) => entry.user_id)).size,
+                    teacherLogins: new Set(logs.filter((entry) => ['teacher', 'admin'].includes(String(entry.user_type || '').toLowerCase())).map((entry) => entry.user_id)).size
+                }));
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [isAdmin]);
 
     const sendBilingualConfirmationEmail = async (params: {
         email: string;
@@ -503,6 +534,55 @@ const AdminDashboard: React.FC = () => {
             .slice(0, 5);
     }, [borrowingsList, pendingRequestsList]);
 
+    // Count recorded login events (not just unique accounts), then resolve their
+    // displayed names against the current student/teacher directory.
+    const loginActivityStats = useMemo(() => {
+        const totals = { students: 0, teachers: 0 };
+        loginActivity.forEach((entry) => {
+            const type = String(entry.user_type || '').trim().toLowerCase();
+            if (type === 'student') totals.students += 1;
+            if (type === 'teacher') totals.teachers += 1;
+        });
+        return totals;
+    }, [loginActivity]);
+
+    const topUsersStats = useMemo(() => {
+        const counts = new Map<string, { user_id: string; user_type: 'student' | 'teacher'; count: number }>();
+        loginActivity.forEach((entry) => {
+            const type = String(entry.user_type || '').trim().toLowerCase();
+            if (type !== 'student' && type !== 'teacher') return;
+            const userId = String(entry.user_id ?? '').trim();
+            if (!userId) return;
+            const key = `${type}:${userId.toLowerCase()}`;
+            const existing = counts.get(key);
+            if (existing) existing.count += 1;
+            else counts.set(key, { user_id: userId, user_type: type, count: 1 });
+        });
+
+        const studentMap = new Map<string, any>(studentsList.map((item) => [String(item.student_id ?? '').trim().toLowerCase(), item] as [string, any]));
+        const teacherMap = new Map<string, any>(teachersList.map((item) => [String(item.teacher_id ?? '').trim().toLowerCase(), item] as [string, any]));
+
+        return Array.from(counts.values())
+            .sort((a, b) => b.count - a.count || a.user_id.localeCompare(b.user_id))
+            .slice(0, 10)
+            .map((item) => {
+                const directoryItem = item.user_type === 'student'
+                    ? studentMap.get(item.user_id.toLowerCase())
+                    : teacherMap.get(item.user_id.toLowerCase());
+                return {
+                    ...item,
+                    name: directoryItem
+                        ? (isAr
+                            ? (directoryItem.name_ar || directoryItem.name_en || item.user_id)
+                            : (directoryItem.name_en || directoryItem.name_ar || item.user_id))
+                        : (isAr ? 'غير موجود في سجل المستخدمين' : 'Not found in directory'),
+                    categoryLabel: item.user_type === 'student'
+                        ? (isAr ? 'طالب' : 'Student')
+                        : (isAr ? 'معلم' : 'Teacher')
+                };
+            });
+    }, [loginActivity, studentsList, teachersList, isAr]);
+
     const handlePrintDashboardReport = () => {
         const printWindow = window.open('', '_blank');
         if (printWindow) {
@@ -546,6 +626,12 @@ const AdminDashboard: React.FC = () => {
                     <table>
                         <tr><th>#</th><th>${t('colBook')}</th><th>${isAr ? 'عدد مرات الاستعارة' : 'Borrow Count'}</th></tr>
                         ${topBooksStats.length > 0 ? topBooksStats.map(([book, count], idx) => `<tr><td>${idx + 1}</td><td><strong>${book}</strong></td><td>${count}</td></tr>`).join('') : `<tr><td colspan="3" style="text-align:center;">${t('noResults')}</td></tr>`}
+                    </table>
+
+                    <h2>👥 ${isAr ? 'أكثر 10 مستخدمين نشاطاً' : 'Top 10 Most Active Users'}</h2>
+                    <table>
+                        <tr><th>#</th><th>${isAr ? 'الكود' : 'User Code'}</th><th>${isAr ? 'الاسم' : 'Name'}</th><th>${isAr ? 'الفئة' : 'Type'}</th><th>${isAr ? 'مرات الدخول' : 'Logins'}</th></tr>
+                        ${topUsersStats.length > 0 ? topUsersStats.map((user, idx) => `<tr><td>${idx + 1}</td><td>${user.user_id}</td><td>${user.name}</td><td>${user.categoryLabel}</td><td>${user.count}</td></tr>`).join('') : `<tr><td colspan="5" style="text-align:center;">${t('noResults')}</td></tr>`}
                     </table>
 
                     <h2>📌 ${t('borrowManagement')} (${borrowingsList.length})</h2>
@@ -676,8 +762,11 @@ const AdminDashboard: React.FC = () => {
                     <p className="text-slate-500 dark:text-slate-400 font-bold text-xs md:text-sm mt-1">{t('welcome')} <span className="text-slate-900 dark:text-white font-black">{adminName}</span> | {t('subtitle')}</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
+                    <button type="button" onClick={() => void fetchRealDashboardData()} className="px-4 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all flex items-center gap-2">
+                        <span aria-hidden="true">↻</span>{isAr ? 'تحديث البيانات' : 'Refresh Data'}
+                    </button>
                     <button onClick={handlePrintDashboardReport} className="px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all flex items-center gap-2">
-                        {t('printPdfBtn')}
+                        <span aria-hidden="true">▤</span>{t('printPdfBtn')}
                     </button>
                     <button onClick={toggleTheme} className="px-4 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm shadow-inner transition-all">{theme === 'light' ? '🌙 Dark' : '☀️ Light'}</button>
                     <Link to="/home" className="px-6 py-3 bg-slate-900 dark:bg-slate-800 text-white hover:bg-slate-800 border border-slate-700 rounded-2xl font-bold text-sm transition-all shadow-md text-center">{t('backToHome')}</Link>
@@ -687,15 +776,94 @@ const AdminDashboard: React.FC = () => {
             <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6">
                 
                 {/* إحصائيات الدخول */}
-                <div className="lg:col-span-4 bg-white dark:bg-slate-900/90 backdrop-blur-md border border-slate-200 dark:border-slate-700/50 p-6 rounded-[2.5rem] shadow-xl">
-                    <h2 className="text-lg md:text-xl font-black mb-6 text-rose-500 flex items-center gap-2"><span className="w-3 h-3 bg-rose-500 rounded-full animate-ping"></span>{t('statsTitle')}</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div className="bg-slate-50 dark:bg-slate-800/80 border border-blue-500/30 p-5 rounded-3xl text-center shadow-sm"><div className="text-3xl md:text-4xl font-black text-blue-600 dark:text-blue-400">{stats.students}</div><div className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-2 uppercase">{t('totalStudents')}</div></div>
-                        <div className="bg-slate-50 dark:bg-slate-800/80 border border-emerald-500/30 p-5 rounded-3xl text-center shadow-sm"><div className="text-3xl md:text-4xl font-black text-emerald-600 dark:text-emerald-400">{stats.teachers}</div><div className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-2 uppercase">{t('totalTeachers')}</div></div>
-                        <div className="bg-slate-50 dark:bg-slate-800/80 border border-purple-500/30 p-5 rounded-3xl text-center shadow-sm"><div className="text-3xl md:text-4xl font-black text-purple-600 dark:text-purple-400">{stats.studentLogins}</div><div className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-2 uppercase">{t('studentLogins')}</div></div>
-                        <div className="bg-slate-50 dark:bg-slate-800/80 border border-amber-500/30 p-5 rounded-3xl text-center shadow-sm"><div className="text-3xl md:text-4xl font-black text-amber-600 dark:text-amber-400">{stats.teacherLogins}</div><div className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-2 uppercase">{t('teacherLogins')}</div></div>
+                <section className="lg:col-span-4 bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/70 p-5 md:p-7 rounded-3xl shadow-sm">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5">
+                        <h2 className="text-lg md:text-xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-3">
+                            <span className="w-10 h-10 rounded-2xl bg-rose-50 dark:bg-rose-900/30 text-rose-600 flex items-center justify-center text-xl" aria-hidden="true">▦</span>
+                            {t('statsTitle')}
+                        </h2>
+                        <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{isAr ? 'ملخص حسابات المستخدمين المسجلة' : 'Registered user account overview'}</span>
                     </div>
-                </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                        <div className="relative overflow-hidden bg-blue-50/80 dark:bg-blue-950/25 border border-blue-100 dark:border-blue-900/60 p-5 rounded-2xl">
+                            <div className="flex items-start justify-between gap-3"><div><div className="text-3xl font-black text-blue-700 dark:text-blue-300 tabular-nums">{stats.students.toLocaleString(isAr ? 'ar-EG' : 'en-US')}</div><div className="text-xs font-bold text-slate-600 dark:text-slate-300 mt-2">{t('totalStudents')}</div></div><span className="w-11 h-11 rounded-xl bg-white/80 dark:bg-slate-800 text-blue-600 dark:text-blue-300 flex items-center justify-center text-2xl shadow-sm" aria-hidden="true">🎓</span></div>
+                            <div className="h-1.5 bg-blue-100 dark:bg-blue-900/50 rounded-full mt-4 overflow-hidden"><div className="h-full w-full bg-blue-500 rounded-full" /></div>
+                        </div>
+                        <div className="relative overflow-hidden bg-emerald-50/80 dark:bg-emerald-950/25 border border-emerald-100 dark:border-emerald-900/60 p-5 rounded-2xl">
+                            <div className="flex items-start justify-between gap-3"><div><div className="text-3xl font-black text-emerald-700 dark:text-emerald-300 tabular-nums">{stats.teachers.toLocaleString(isAr ? 'ar-EG' : 'en-US')}</div><div className="text-xs font-bold text-slate-600 dark:text-slate-300 mt-2">{t('totalTeachers')}</div></div><span className="w-11 h-11 rounded-xl bg-white/80 dark:bg-slate-800 text-emerald-600 dark:text-emerald-300 flex items-center justify-center text-2xl shadow-sm" aria-hidden="true">🧑‍🏫</span></div>
+                            <div className="h-1.5 bg-emerald-100 dark:bg-emerald-900/50 rounded-full mt-4 overflow-hidden"><div className="h-full w-full bg-emerald-500 rounded-full" /></div>
+                        </div>
+                        <div className="relative overflow-hidden bg-violet-50/80 dark:bg-violet-950/25 border border-violet-100 dark:border-violet-900/60 p-5 rounded-2xl">
+                            <div className="flex items-start justify-between gap-3"><div><div className="text-3xl font-black text-violet-700 dark:text-violet-300 tabular-nums">{stats.studentLogins.toLocaleString(isAr ? 'ar-EG' : 'en-US')}</div><div className="text-xs font-bold text-slate-600 dark:text-slate-300 mt-2">{t('studentLogins')}</div></div><span className="w-11 h-11 rounded-xl bg-white/80 dark:bg-slate-800 text-violet-600 dark:text-violet-300 flex items-center justify-center text-2xl shadow-sm" aria-hidden="true">↗</span></div>
+                            <div className="h-1.5 bg-violet-100 dark:bg-violet-900/50 rounded-full mt-4 overflow-hidden"><div className="h-full w-full bg-violet-500 rounded-full" /></div>
+                        </div>
+                        <div className="relative overflow-hidden bg-amber-50/80 dark:bg-amber-950/25 border border-amber-100 dark:border-amber-900/60 p-5 rounded-2xl">
+                            <div className="flex items-start justify-between gap-3"><div><div className="text-3xl font-black text-amber-700 dark:text-amber-300 tabular-nums">{stats.teacherLogins.toLocaleString(isAr ? 'ar-EG' : 'en-US')}</div><div className="text-xs font-bold text-slate-600 dark:text-slate-300 mt-2">{t('teacherLogins')}</div></div><span className="w-11 h-11 rounded-xl bg-white/80 dark:bg-slate-800 text-amber-600 dark:text-amber-300 flex items-center justify-center text-2xl shadow-sm" aria-hidden="true">↗</span></div>
+                            <div className="h-1.5 bg-amber-100 dark:bg-amber-900/50 rounded-full mt-4 overflow-hidden"><div className="h-full w-full bg-amber-500 rounded-full" /></div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* تحليلات الاستخدام وترتيب أكثر المستخدمين نشاطاً */}
+                <section className="lg:col-span-4 grid grid-cols-1 xl:grid-cols-5 gap-5 items-start">
+                    <div className="xl:col-span-2 min-w-0 bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/70 p-5 md:p-6 rounded-3xl shadow-sm">
+                        <div className="flex items-center gap-3 mb-2">
+                            <span className="w-10 h-10 rounded-2xl bg-sky-50 dark:bg-sky-900/30 text-sky-600 dark:text-sky-300 flex items-center justify-center text-xl" aria-hidden="true">▥</span>
+                            <div><h3 className="font-black text-slate-800 dark:text-slate-100">{isAr ? 'مؤشر نشاط الدخول' : 'Login Activity'}</h3><p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{isAr ? 'إجمالي مرات الدخول المسجلة حسب الفئة' : 'Recorded login events by user type'}</p></div>
+                        </div>
+                        <div className="mt-5 mb-5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-700 p-4">
+                            <div className="text-xs font-bold text-slate-500 dark:text-slate-400">{isAr ? 'إجمالي مرات الدخول (طلاب ومعلمون)' : 'Total logins (students and teachers)'}</div>
+                            <div className="text-3xl font-black text-slate-900 dark:text-white mt-1 tabular-nums">{(loginActivityStats.students + loginActivityStats.teachers).toLocaleString(isAr ? 'ar-EG' : 'en-US')}</div>
+                        </div>
+                        {[
+                            { key: 'students', label: isAr ? 'الطلاب' : 'Students', count: loginActivityStats.students, color: 'bg-sky-500', text: 'text-sky-700 dark:text-sky-300', icon: '🎓' },
+                            { key: 'teachers', label: isAr ? 'المعلمون' : 'Teachers', count: loginActivityStats.teachers, color: 'bg-emerald-500', text: 'text-emerald-700 dark:text-emerald-300', icon: '🧑‍🏫' }
+                        ].map((item) => {
+                            const maxEvents = Math.max(loginActivityStats.students, loginActivityStats.teachers, 1);
+                            const width = item.count === 0 ? 0 : Math.max(4, (item.count / maxEvents) * 100);
+                            return (
+                                <div key={item.key} className="mb-5 last:mb-0">
+                                    <div className="flex items-center justify-between gap-3 mb-2 text-sm"><span className="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2"><span aria-hidden="true">{item.icon}</span>{item.label}</span><strong className={`tabular-nums ${item.text}`}>{item.count.toLocaleString(isAr ? 'ar-EG' : 'en-US')}</strong></div>
+                                    <div className="h-3 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden" role="img" aria-label={`${item.label}: ${item.count}`}><div className={`h-full ${item.color} rounded-full transition-all duration-500`} style={{ width: `${width}%` }} /></div>
+                                </div>
+                            );
+                        })}
+                        {loginActivityStats.students + loginActivityStats.teachers === 0 && <p className="mt-4 text-xs text-slate-500 dark:text-slate-400">{isAr ? 'لا توجد سجلات دخول متاحة حتى الآن.' : 'No login records are available yet.'}</p>}
+                        <p className="mt-5 text-[11px] leading-5 text-slate-400 dark:text-slate-500">{isAr ? 'يعتمد الرسم على عدد السجلات في جدول login_logs، وليس عدد الحسابات الفريدة.' : 'Chart counts rows in login_logs, not unique accounts.'}</p>
+                    </div>
+
+                    <div className="xl:col-span-3 min-w-0 bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/70 p-5 md:p-6 rounded-3xl shadow-sm">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                            <div className="flex items-center gap-3"><span className="w-10 h-10 rounded-2xl bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-300 flex items-center justify-center text-xl" aria-hidden="true">🏆</span><div><h3 className="font-black text-slate-800 dark:text-slate-100">{isAr ? 'أكثر 10 مستخدمين نشاطاً' : 'Top 10 Most Active Users'}</h3><p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{isAr ? 'الترتيب حسب عدد مرات الدخول المسجلة، مع كود كل مستخدم' : 'Ranked by recorded logins, including each user code'}</p></div></div>
+                            <span className="self-start sm:self-auto px-3 py-1.5 rounded-xl bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 text-xs font-black">{topUsersStats.length}/10</span>
+                        </div>
+                        <div className="overflow-x-auto rounded-2xl border border-slate-100 dark:border-slate-800">
+                            <table className="w-full min-w-[560px] text-sm border-collapse">
+                                <thead className="bg-slate-50 dark:bg-slate-800/90 text-slate-500 dark:text-slate-300"><tr>
+                                    <th className="px-3 py-3 text-center font-black w-14">#</th>
+                                    <th className="px-3 py-3 text-start font-black">{isAr ? 'الكود' : 'User Code'}</th>
+                                    <th className="px-3 py-3 text-start font-black">{isAr ? 'اسم المستخدم' : 'User Name'}</th>
+                                    <th className="px-3 py-3 text-start font-black">{isAr ? 'الفئة' : 'Type'}</th>
+                                    <th className="px-3 py-3 text-start font-black min-w-32">{isAr ? 'مرات الدخول' : 'Logins'}</th>
+                                </tr></thead>
+                                <tbody>
+                                    {topUsersStats.length > 0 ? topUsersStats.map((user, index) => {
+                                        const maxCount = Math.max(topUsersStats[0]?.count || 1, 1);
+                                        const barWidth = Math.max(5, (user.count / maxCount) * 100);
+                                        return <tr key={`${user.user_type}-${user.user_id}`} className="border-t border-slate-100 dark:border-slate-800 hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
+                                            <td className="px-3 py-3 text-center"><span className={`inline-flex items-center justify-center w-7 h-7 rounded-lg text-xs font-black ${index < 3 ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-300'}`}>{index + 1}</span></td>
+                                            <td className="px-3 py-3 font-mono font-black text-sky-700 dark:text-sky-300 whitespace-nowrap">{user.user_id}</td>
+                                            <td className="px-3 py-3 font-bold text-slate-800 dark:text-slate-100">{user.name}</td>
+                                            <td className="px-3 py-3"><span className={`inline-flex px-2.5 py-1 rounded-lg text-xs font-bold ${user.user_type === 'student' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' : 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'}`}>{user.categoryLabel}</span></td>
+                                            <td className="px-3 py-3"><div className="flex items-center gap-2"><span className="font-black tabular-nums text-slate-700 dark:text-slate-200 min-w-6">{user.count.toLocaleString(isAr ? 'ar-EG' : 'en-US')}</span><div className="flex-1 h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden"><div className={`h-full rounded-full ${user.user_type === 'student' ? 'bg-sky-500' : 'bg-emerald-500'}`} style={{ width: `${barWidth}%` }} /></div></div></td>
+                                        </tr>;
+                                    }) : <tr><td colSpan={5} className="px-4 py-10 text-center text-slate-400 font-bold">{isAr ? 'لا توجد سجلات دخول للطلاب أو المعلمين لعرض الترتيب.' : 'No student or teacher login records are available for ranking.'}</td></tr>}
+                                </tbody>
+                            </table>
+                        </div>
+                        <p className="mt-3 text-[11px] leading-5 text-slate-400 dark:text-slate-500">{isAr ? 'يتم عرض الحسابات الموجودة في سجلات الدخول فقط. إذا كان الاسم غير موجود في قائمة الطلاب أو المعلمين سيظهر الكود مع تنبيه بذلك.' : 'Only accounts present in login_logs are ranked. If a code is not found in the directory, it is still shown with a notice.'}</p>
+                    </div>
+                </section>
 
                 {/* قسم أكثر الكتب قراءة وطلباً */}
                 <div className="lg:col-span-4 bg-white dark:bg-slate-900/90 backdrop-blur-md border border-slate-200 dark:border-slate-700/50 p-6 rounded-[2.5rem] shadow-xl">
@@ -706,10 +874,11 @@ const AdminDashboard: React.FC = () => {
                         {topBooksStats.length > 0 ? (
                             topBooksStats.map(([bookName, count], index) => (
                                 <div key={index} className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-slate-800 dark:to-slate-800/80 border-2 border-amber-200 dark:border-amber-700/50 p-4 rounded-2xl flex flex-col justify-between shadow-sm">
-                                    <div className="font-black text-slate-900 dark:text-white text-sm md:text-base line-clamp-2">{bookName}</div>
-                                    <div className="mt-3 flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400">
-                                        <span>المرتبة #{index + 1}</span>
-                                        <span className="px-2.5 py-1 bg-amber-500 text-white rounded-lg font-black">{count} استعارة</span>
+                                    <div className="font-black text-slate-900 dark:text-white text-sm md:text-base line-clamp-2 min-h-10">{bookName}</div>
+                                    <div className="mt-4 h-2 rounded-full bg-amber-100 dark:bg-slate-700 overflow-hidden"><div className="h-full rounded-full bg-amber-500" style={{ width: `${Math.max(5, (count / Math.max(topBooksStats[0]?.[1] || 1, 1)) * 100)}%` }} /></div>
+                                    <div className="mt-3 flex items-center justify-between gap-2 text-xs font-bold text-slate-500 dark:text-slate-400">
+                                        <span>{isAr ? `المرتبة #${index + 1}` : `Rank #${index + 1}`}</span>
+                                        <span className="px-2.5 py-1 bg-amber-500 text-white rounded-lg font-black whitespace-nowrap">{count} {isAr ? 'استعارة' : 'borrowings'}</span>
                                     </div>
                                 </div>
                             ))
@@ -725,13 +894,13 @@ const AdminDashboard: React.FC = () => {
                 <div className="lg:col-span-4 flex flex-col md:flex-row items-center justify-between gap-4 bg-white dark:bg-slate-900/90 p-5 rounded-[2rem] border border-slate-200 dark:border-slate-700 shadow-sm overflow-x-auto">
                     <div className="flex gap-2 w-full md:w-auto whitespace-nowrap pb-2 md:pb-0 scrollbar-thin">
                         <button onClick={() => { setActiveTab('pending'); setSearchQuery(''); }} className={`px-5 py-3 rounded-2xl font-black text-xs md:text-sm transition-all relative ${activeTab === 'pending' ? 'bg-rose-500 text-white shadow-md' : 'bg-rose-50 dark:bg-slate-800 text-rose-600 dark:text-rose-400'}`}>
-                            {t('pendingRequests')} ({pendingRequestsList.length})
+                            <span aria-hidden="true">◷ </span>{t('pendingRequests')} ({pendingRequestsList.length})
                             {pendingRequestsList.length > 0 && <span className="absolute -top-2 -end-2 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center text-xs shadow-md animate-bounce">{pendingRequestsList.length}</span>}
                         </button>
-                        <button onClick={() => { setActiveTab('borrowings'); setSearchQuery(''); }} className={`px-5 py-3 rounded-2xl font-black text-xs md:text-sm transition-all ${activeTab === 'borrowings' ? 'bg-amber-500 text-white shadow-md' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}>{t('borrowManagement')} ({borrowingsList.length})</button>
-                        <button onClick={() => { setActiveTab('students'); setSearchQuery(''); }} className={`px-5 py-3 rounded-2xl font-black text-xs md:text-sm transition-all ${activeTab === 'students' ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}>{t('studentManagement')} ({studentsList.length})</button>
-                        <button onClick={() => { setActiveTab('teachers'); setSearchQuery(''); }} className={`px-5 py-3 rounded-2xl font-black text-xs md:text-sm transition-all ${activeTab === 'teachers' ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}>{t('teacherManagement')} ({teachersList.length})</button>
-                        <button onClick={() => { setActiveTab('reports'); setSearchQuery(''); }} className={`px-5 py-3 rounded-2xl font-black text-xs md:text-sm transition-all ${activeTab === 'reports' ? 'bg-emerald-500 text-white shadow-md' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}>{t('aiReports')} ({lessonReportsList.length})</button>
+                        <button onClick={() => { setActiveTab('borrowings'); setSearchQuery(''); }} className={`px-5 py-3 rounded-2xl font-black text-xs md:text-sm transition-all ${activeTab === 'borrowings' ? 'bg-amber-500 text-white shadow-md' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}><span aria-hidden="true">📚 </span>{t('borrowManagement')} ({borrowingsList.length})</button>
+                        <button onClick={() => { setActiveTab('students'); setSearchQuery(''); }} className={`px-5 py-3 rounded-2xl font-black text-xs md:text-sm transition-all ${activeTab === 'students' ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}><span aria-hidden="true">🎓 </span>{t('studentManagement')} ({studentsList.length})</button>
+                        <button onClick={() => { setActiveTab('teachers'); setSearchQuery(''); }} className={`px-5 py-3 rounded-2xl font-black text-xs md:text-sm transition-all ${activeTab === 'teachers' ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}><span aria-hidden="true">🧑‍🏫 </span>{t('teacherManagement')} ({teachersList.length})</button>
+                        <button onClick={() => { setActiveTab('reports'); setSearchQuery(''); }} className={`px-5 py-3 rounded-2xl font-black text-xs md:text-sm transition-all ${activeTab === 'reports' ? 'bg-emerald-500 text-white shadow-md' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}><span aria-hidden="true">▤ </span>{t('aiReports')} ({lessonReportsList.length})</button>
                     </div>
 
                     <div className="w-full md:w-auto flex items-center gap-2 justify-end shrink-0">
