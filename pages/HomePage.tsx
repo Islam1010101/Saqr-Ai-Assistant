@@ -42,17 +42,17 @@ const translations = {
         borrowTitle: "مكتبتي المستعارة",
         borrowReturn: "تاريخ الإرجاع:",
         addToCalendar: "تذكير التقويم",
-        flagDayTitle: "تحدي راية المجد",
-        flagDayDesc: "يوم العلم الإماراتي 3 نوفمبر",
-        flagDayModalTitle: "تحدي راية المجد الإماراتي",
-        flagDayModalSub: "تفتح المسابقة الرسمية وفعاليات الصعود إلى قمة برج خليفة حصرياً يوم 3 نوفمبر لجميع الطلاب والمعلمين.",
-        flagDayModalCountdown: "متبقي على انطلاق التحدي:",
+        flagDayCelebrationBtn: "احتفالي يوم العلم",
+        flagDayCelebrationDesc: "العد التنازلي لانطلاق تحدي 3 نوفمبر",
+        flagDayModalTitle: "احتفالي يوم العلم الإماراتي",
+        flagDayModalSub: "العد التنازلي لانطلاق فعاليات ومسابقة تحدي راية المجد والصعود إلى قمة برج خليفة.",
+        flagDayModalCountdown: "متبقي على انطلاق الاحتفال:",
         flagDayModalBtn: "حفظ والعودة للمنصة",
         dayLabel: "يوم",
         hourLabel: "ساعة",
         minLabel: "دقيقة",
         secLabel: "ثانية",
-        flagDayAlert: "استعدوا لرفع العلم وجمع النقاط وحصد الأوسمة الوطنية!"
+        flagDayAlert: "✨ استعدوا لرفع العلم وجمع النقاط وحصد الأوسمة الوطنية!"
     },
     en: {
         welcome: "Knowledge Portal at Falcon Int'l School",
@@ -92,17 +92,17 @@ const translations = {
         borrowTitle: "My Borrowed Books",
         borrowReturn: "Return Date:",
         addToCalendar: "Add to Calendar",
-        flagDayTitle: "Flag Day Challenge",
-        flagDayDesc: "UAE Flag Day - Nov 3",
-        flagDayModalTitle: "UAE Flag Day Glory Challenge",
-        flagDayModalSub: "The official competition and activities to climb Burj Khalifa peak will open exclusively on November 3 for all students and teachers.",
-        flagDayModalCountdown: "Time remaining until the challenge starts:",
+        flagDayCelebrationBtn: "Flag Day Celebration",
+        flagDayCelebrationDesc: "Countdown to November 3 challenge",
+        flagDayModalTitle: "UAE Flag Day Celebration",
+        flagDayModalSub: "Countdown to the launch of Flag Day events and the Burj Khalifa peak climbing challenge.",
+        flagDayModalCountdown: "Time remaining until celebration starts:",
         flagDayModalBtn: "Save and Return",
         dayLabel: "Day",
         hourLabel: "Hours",
         minLabel: "Mins",
         secLabel: "Secs",
-        flagDayAlert: "Get ready to raise the flag and earn national badges!"
+        flagDayAlert: "✨ Get ready to raise the flag and earn national badges!"
     }
 };
 
@@ -204,7 +204,6 @@ const HomePage: React.FC = () => {
     const [sparkles, setSparkles] = useState<SparkleItem[]>([]);
     const [flyingFlags, setFlyingFlags] = useState<FlagFlyItem[]>([]);
     
-    // حالة الكتب المستعارة
     const [borrowedBooks, setBorrowedBooks] = useState<any[]>([]);
     const [borrowCountdownNow, setBorrowCountdownNow] = useState(Date.now());
 
@@ -217,10 +216,9 @@ const HomePage: React.FC = () => {
         return () => window.clearInterval(timer);
     }, []);
 
-    // حساب العد التنازلي ليوم 3 نوفمبر
     useEffect(() => {
         const nowYear = new Date().getFullYear();
-        let targetDate = new Date(nowYear, 10, 3, 0, 0, 0); // 3 نوفمبر (الشهر 10 في JavaScript Date هو نوفمبر)
+        let targetDate = new Date(nowYear, 10, 3, 0, 0, 0); // 3 نوفمبر
         if (new Date().getTime() > targetDate.getTime()) {
             targetDate.setFullYear(nowYear + 1);
         }
@@ -264,7 +262,6 @@ const HomePage: React.FC = () => {
         }
     }, [userData, userType]);
 
-    // جلب الكتب المستعارة النشطة
     useEffect(() => {
         let mounted = true;
         const fetchBorrowings = async () => {
@@ -537,6 +534,25 @@ const HomePage: React.FC = () => {
                             </div>
                         </Link>
 
+                        {/* ================= زر احتفالي يوم العلم في منطقة الأزرار ================= */}
+                        <button
+                            onClick={() => setShowFlagModal(true)}
+                            className="group relative bg-gradient-to-br from-red-600 via-emerald-600 to-amber-500 text-white p-6 rounded-[2.5rem] border-b-8 border-amber-700 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden text-right w-full cursor-pointer"
+                        >
+                            <div className="absolute top-3 end-3 bg-white/20 text-white text-[10px] md:text-xs px-3 py-0.5 rounded-full font-black uppercase tracking-wider shadow-md animate-pulse">
+                                3 Nov
+                            </div>
+                            <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 text-2xl">
+                                🇦🇪
+                            </div>
+                            <div>
+                                <h3 className="text-xl md:text-2xl font-black mb-1 tracking-tight">{t('flagDayCelebrationBtn')}</h3>
+                                <p className="text-xs md:text-sm opacity-95 font-bold leading-snug">
+                                    {flagTimeLeft.days} {t('dayLabel')} و {flagTimeLeft.hours} {t('hourLabel')} متبقية
+                                </p>
+                            </div>
+                        </button>
+
                         {(userType === 'student' || userType === 'admin') && (
                             <Link to="/saqr-studio" className="group relative bg-blue-500 text-white p-6 rounded-[2.5rem] border-b-8 border-blue-700 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
                                 <div className="absolute top-4 end-4 bg-rose-500 text-white text-[10px] md:text-xs px-3 py-0.5 rounded-full font-black uppercase tracking-wider shadow-md animate-pulse">
@@ -726,20 +742,6 @@ const HomePage: React.FC = () => {
 
                 </div>
 
-            </div>
-
-            {/* ================= زر يوم العلم الاحتفالي للطلاب والمعلمين ================= */}
-            <div className="fixed bottom-6 left-6 z-40">
-                <button
-                    onClick={() => setShowFlagModal(true)}
-                    className="group relative px-5 py-3.5 bg-gradient-to-r from-red-600 via-emerald-600 to-slate-900 text-white font-black rounded-2xl shadow-2xl hover:shadow-emerald-500/30 transition-all duration-300 flex items-center gap-3 border-2 border-amber-300/60 animate-bounce hover:scale-105"
-                >
-                    <span className="text-2xl">🇦🇪</span>
-                    <div className="text-right">
-                        <div className="text-[10px] text-amber-200 uppercase tracking-wider">{t('flagDayTitle')}</div>
-                        <div className="text-xs sm:text-sm font-black">{t('flagDayDesc')}</div>
-                    </div>
-                </button>
             </div>
 
             {/* ================= نافذة العد التنازلي ليوم العلم (3 نوفمبر) ================= */}
