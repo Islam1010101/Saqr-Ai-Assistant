@@ -199,7 +199,7 @@ export default function Login() {
             {showFlag && (
               <div className="absolute -top-10 z-30 animate-bounce bg-white/90 backdrop-blur-md px-4 py-2 rounded-2xl shadow-xl border-2 border-emerald-500 flex items-center gap-2">
                 <span className="text-2xl">🇦🇪</span>
-                <span className="font-black text-xs text-slate-800">{lang === 'ar' ? 'الإمارات العظمى' : 'Proud UAE'}</span>
+                <span className="font-black text-xs text-slate-800">{lang === 'ar' ? 'مرحبا بكم أنا صقر' : 'Wellcome Iam Saqr'}</span>
               </div>
             )}
 
