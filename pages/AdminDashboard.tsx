@@ -551,7 +551,7 @@ const AdminDashboard: React.FC = () => {
                     <h2>📌 ${t('borrowManagement')} (${borrowingsList.length})</h2>
                     <table>
                         <tr><th>${t('colId')}</th><th>${t('colName')}</th><th>${t('colBook')}</th><th>${t('colEmail')}</th><th>${t('colDate')}</th></tr>
-                        ${borrowingsList.length > 0 ? borrowingsList.map(b => `<tr><td>${b.user_id}</td><td>${b.user_name \vert{}\vert{} '-'}</td><td>${b.book_name}</td><td>${b.user_email \vert{}\vert{} '-'}</td><td>${b.return_date}</td></tr>`).join('') : `<tr><td colspan="5" style="text-align:center;">${t('noResults')}</td></tr>`}
+                        ${borrowingsList.length > 0 ? borrowingsList.map(b => `<tr><td>${b.user_id}</td><td>${b.user_name || '-'}</td><td>${b.book_name}</td><td>${b.user_email || '-'}</td><td>${b.return_date}</td></tr>`).join('') : `<tr><td colspan="5" style="text-align:center;">${t('noResults')}</td></tr>`}
                     </table>
 
                     <div style="margin-top: 40px; text-align: center; font-size: 11px; color: #94a3b8;">
