@@ -42,8 +42,8 @@ const translations = {
         borrowTitle: "مكتبتي المستعارة",
         borrowReturn: "تاريخ الإرجاع:",
         addToCalendar: "تذكير التقويم",
-        flagDayCelebrationBtn: "احتفالي يوم العلم",
-        flagDayCelebrationDesc: "العد التنازلي لانطلاق تحدي 3 نوفمبر",
+        festiveBtn: "احتفالي",
+        festiveDesc: "العد التنازلي ليوم 3 نوفمبر",
         flagDayModalTitle: "احتفالي يوم العلم الإماراتي",
         flagDayModalSub: "العد التنازلي لانطلاق فعاليات ومسابقة تحدي راية المجد والصعود إلى قمة برج خليفة.",
         flagDayModalCountdown: "متبقي على انطلاق الاحتفال:",
@@ -52,7 +52,7 @@ const translations = {
         hourLabel: "ساعة",
         minLabel: "دقيقة",
         secLabel: "ثانية",
-        flagDayAlert: "✨ استعدوا لرفع العلم وجمع النقاط وحصد الأوسمة الوطنية!"
+        flagDayAlert: "استعدوا لرفع العلم وجمع النقاط وحصد الأوسمة الوطنية!"
     },
     en: {
         welcome: "Knowledge Portal at Falcon Int'l School",
@@ -92,8 +92,8 @@ const translations = {
         borrowTitle: "My Borrowed Books",
         borrowReturn: "Return Date:",
         addToCalendar: "Add to Calendar",
-        flagDayCelebrationBtn: "Flag Day Celebration",
-        flagDayCelebrationDesc: "Countdown to November 3 challenge",
+        festiveBtn: "Festive",
+        festiveDesc: "Countdown to November 3",
         flagDayModalTitle: "UAE Flag Day Celebration",
         flagDayModalSub: "Countdown to the launch of Flag Day events and the Burj Khalifa peak climbing challenge.",
         flagDayModalCountdown: "Time remaining until celebration starts:",
@@ -102,7 +102,7 @@ const translations = {
         hourLabel: "Hours",
         minLabel: "Mins",
         secLabel: "Secs",
-        flagDayAlert: "✨ Get ready to raise the flag and earn national badges!"
+        flagDayAlert: "Get ready to raise the flag and earn national badges!"
     }
 };
 
@@ -534,10 +534,10 @@ const HomePage: React.FC = () => {
                             </div>
                         </Link>
 
-                        {/* ================= زر احتفالي يوم العلم في منطقة الأزرار ================= */}
+                        {/* ================= زر احتفالي بألوان علم الإمارات واسمه احتفالي فقط ================= */}
                         <button
                             onClick={() => setShowFlagModal(true)}
-                            className="group relative bg-gradient-to-br from-red-600 via-emerald-600 to-amber-500 text-white p-6 rounded-[2.5rem] border-b-8 border-amber-700 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden text-right w-full cursor-pointer"
+                            className="group relative bg-gradient-to-r from-[#ff0000] via-[#00732f] to-[#000000] text-white p-6 rounded-[2.5rem] border-b-8 border-amber-500 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden text-right w-full cursor-pointer"
                         >
                             <div className="absolute top-3 end-3 bg-white/20 text-white text-[10px] md:text-xs px-3 py-0.5 rounded-full font-black uppercase tracking-wider shadow-md animate-pulse">
                                 3 Nov
@@ -546,7 +546,7 @@ const HomePage: React.FC = () => {
                                 🇦🇪
                             </div>
                             <div>
-                                <h3 className="text-xl md:text-2xl font-black mb-1 tracking-tight">{t('flagDayCelebrationBtn')}</h3>
+                                <h3 className="text-xl md:text-2xl font-black mb-1 tracking-tight">{t('festiveBtn')}</h3>
                                 <p className="text-xs md:text-sm opacity-95 font-bold leading-snug">
                                     {flagTimeLeft.days} {t('dayLabel')} و {flagTimeLeft.hours} {t('hourLabel')} متبقية
                                 </p>
