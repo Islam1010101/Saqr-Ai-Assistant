@@ -41,6 +41,13 @@ const translations = {
         adminSettingsTitle: "إدارة النظام",
         borrowTitle: "مكتبتي المستعارة",
         borrowReturn: "تاريخ الإرجاع:",
+        notificationsTitle: "تنبيهاتك",
+        notificationsSubtitle: "تذكيرات الاستعارات وجدول استخدام المكتبة",
+        teacherScheduleTitle: "جدول استخدام المكتبة الخاص بك",
+        teacherScheduleSubtitle: "حصصك المحجوزة لهذا الأسبوع",
+        periodLabel: "الحصة",
+        gradeLabel: "الصف",
+        subjectLabel: "المادة",
         addToCalendar: "تذكير التقويم",
         festiveBtn: "احتفالي",
         festiveDesc: "العد التنازلي ليوم 3 نوفمبر",
@@ -91,6 +98,13 @@ const translations = {
         adminSettingsTitle: "System Admin",
         borrowTitle: "My Borrowed Books",
         borrowReturn: "Return Date:",
+        notificationsTitle: "Your Notifications",
+        notificationsSubtitle: "Borrowing reminders and your library schedule",
+        teacherScheduleTitle: "Your Library Schedule",
+        teacherScheduleSubtitle: "Your booked library periods this week",
+        periodLabel: "Period",
+        gradeLabel: "Grade",
+        subjectLabel: "Subject",
         addToCalendar: "Add to Calendar",
         festiveBtn: "Festive",
         festiveDesc: "Countdown to November 3",
@@ -205,6 +219,7 @@ const HomePage: React.FC = () => {
     const [flyingFlags, setFlyingFlags] = useState<FlagFlyItem[]>([]);
     
     const [borrowedBooks, setBorrowedBooks] = useState<any[]>([]);
+    const [teacherSchedule, setTeacherSchedule] = useState<any[]>([]);
     const [borrowCountdownNow, setBorrowCountdownNow] = useState(Date.now());
 
     // حالات زر العد التنازلي ليوم العلم (3 نوفمبر)
@@ -247,6 +262,7 @@ const HomePage: React.FC = () => {
     const getBorrowCountdown = (returnDate: string) => {
         if (!returnDate) return isAr ? 'لم يحدد تاريخ الإرجاع' : 'Return date not set';
         const due = new Date(`${returnDate}T23:59:59`).getTime();
+        if (!Number.isFinite(due)) return isAr ? 'تاريخ الإرجاع غير صالح' : 'Invalid return date';
         const remaining = due - borrowCountdownNow;
         if (remaining <= 0) return isAr ? 'انتهت مدة الاستعارة، يرجى إرجاع الكتاب' : 'Overdue: please return this book';
         const days = Math.floor(remaining / 86400000);
@@ -280,6 +296,78 @@ const HomePage: React.FC = () => {
         const refresh = window.setInterval(fetchBorrowings, 60000);
         return () => { mounted = false; window.clearInterval(refresh); };
     }, [userData, userType]);
+
+    // إظهار حصص المكتبة الخاصة بالمعلم الحالي فقط، باستخدام نفس جدول الحجز المستخدم في صفحة الجدول.
+    useEffect(() => {
+        let mounted = true;
+
+        const fetchTeacherSchedule = async () => {
+            if (userType !== 'teacher' || !userData?.teacher_id) {
+                if (mounted) setTeacherSchedule([]);
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase
+                    .from('library_schedule')
+                    .select('id, teacher, subject, grade, user_id');
+
+                if (error) throw error;
+
+                const teacherNames = [userData.name_ar, userData.name_en]
+                    .filter((name: unknown): name is string => typeof name === 'string' && name.trim().length > 0);
+                const mine = (data || []).filter((slot: any) =>
+                    String(slot.user_id ?? '') === String(userData.teacher_id) ||
+                    (typeof slot.teacher === 'string' && teacherNames.includes(slot.teacher))
+                );
+
+                const dayOrder: Record<string, number> = {
+                    'الأحد': 0, Sunday: 0,
+                    'الإثنين': 1, Monday: 1,
+                    'الثلاثاء': 2, Tuesday: 2,
+                    'الأربعاء': 3, Wednesday: 3,
+                    'الخميس': 4, Thursday: 4,
+                    'الجمعة': 5, Friday: 5,
+                    'السبت': 6, Saturday: 6,
+                };
+                mine.sort((a: any, b: any) => {
+                    const parseSlot = (slot: any) => {
+                        const id = String(slot.id ?? '');
+                        const separator = id.lastIndexOf('_');
+                        const day = separator >= 0 ? id.slice(0, separator) : id;
+                        const period = separator >= 0 ? Number(id.slice(separator + 1)) : 0;
+                        return (dayOrder[day] ?? 99) * 100 + (Number.isFinite(period) ? period : 0);
+                    };
+                    return parseSlot(a) - parseSlot(b);
+                });
+
+                if (mounted) setTeacherSchedule(mine);
+            } catch (error) {
+                console.error('Error fetching the teacher library schedule:', error);
+                if (mounted) setTeacherSchedule([]);
+            }
+        };
+
+        fetchTeacherSchedule();
+        const refresh = window.setInterval(fetchTeacherSchedule, 60000);
+        return () => {
+            mounted = false;
+            window.clearInterval(refresh);
+        };
+    }, [userData, userType]);
+
+    const getScheduleDayLabel = (day: string) => {
+        const dayLabels: Record<string, { ar: string; en: string }> = {
+            'الأحد': { ar: 'الأحد', en: 'Sunday' }, Sunday: { ar: 'الأحد', en: 'Sunday' },
+            'الإثنين': { ar: 'الإثنين', en: 'Monday' }, Monday: { ar: 'الإثنين', en: 'Monday' },
+            'الثلاثاء': { ar: 'الثلاثاء', en: 'Tuesday' }, Tuesday: { ar: 'الثلاثاء', en: 'Tuesday' },
+            'الأربعاء': { ar: 'الأربعاء', en: 'Wednesday' }, Wednesday: { ar: 'الأربعاء', en: 'Wednesday' },
+            'الخميس': { ar: 'الخميس', en: 'Thursday' }, Thursday: { ar: 'الخميس', en: 'Thursday' },
+            'الجمعة': { ar: 'الجمعة', en: 'Friday' }, Friday: { ar: 'الجمعة', en: 'Friday' },
+            'السبت': { ar: 'السبت', en: 'Saturday' }, Saturday: { ar: 'السبت', en: 'Saturday' },
+        };
+        return dayLabels[day]?.[isAr ? 'ar' : 'en'] || day;
+    };
 
     useEffect(() => {
         const updateCountdown = () => {
@@ -447,33 +535,120 @@ const HomePage: React.FC = () => {
                     </div>
                 </RevealSection>
 
-                {borrowedBooks.length > 0 && (
+                {(borrowedBooks.length > 0 || teacherSchedule.length > 0) && (
                     <RevealSection delay={150}>
-                        <div className="w-full max-w-4xl mx-auto bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-4 border-amber-300 dark:border-amber-600 p-6 md:p-8 rounded-[2.5rem] shadow-xl relative overflow-hidden">
-                            <h3 className="text-lg md:text-2xl font-black text-amber-600 dark:text-amber-500 mb-6 flex items-center gap-2">
-                                📚 {t('borrowTitle')}
-                            </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {borrowedBooks.map((book) => (
-                                    <div key={book.id} className="bg-amber-50 dark:bg-slate-800 p-5 border-2 border-amber-200 dark:border-slate-700 rounded-2xl flex flex-col gap-3 transition-transform hover:-translate-y-1">
-                                        <div className="font-black text-slate-800 dark:text-white text-base md:text-lg">{book.book_name}</div>
-                                        <div className="flex flex-wrap justify-between text-xs md:text-sm font-bold text-slate-500 dark:text-slate-400">
-                                            <span className="text-rose-500 dark:text-rose-400">{t('borrowReturn')} {book.return_date}</span>
-                                            <span className="w-full mt-2 text-emerald-700 dark:text-emerald-400 font-black">⏳ {getBorrowCountdown(book.return_date)}</span>
-                                        </div>
-                                        <a 
-                                            href={createGoogleCalendarLink(book.book_name, book.return_date)} 
-                                            target="_blank" 
-                                            rel="noopener noreferrer"
-                                            className="mt-2 w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs md:text-sm transition-all shadow-md flex items-center justify-center gap-2"
-                                        >
-                                            <ScheduleIcon />
-                                            {t('addToCalendar')}
-                                        </a>
+                        <section
+                            aria-labelledby="homepage-notifications-title"
+                            className="homepage-alerts w-full max-w-5xl mx-auto relative overflow-hidden rounded-[2rem] md:rounded-[2.5rem] border border-emerald-200 dark:border-emerald-900/80 bg-gradient-to-br from-white via-emerald-50/80 to-teal-50/70 dark:from-slate-900 dark:via-slate-900 dark:to-emerald-950/40 shadow-[0_18px_55px_rgba(15,118,110,0.13)] p-4 sm:p-6 md:p-8"
+                        >
+                            <div className="pointer-events-none absolute -top-20 -end-16 h-48 w-48 rounded-full bg-emerald-300/20 dark:bg-emerald-400/10 blur-3xl" />
+                            <div className="pointer-events-none absolute -bottom-24 -start-12 h-48 w-48 rounded-full bg-amber-300/20 dark:bg-teal-400/10 blur-3xl" />
+
+                            <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 md:mb-7">
+                                <div className="flex items-start gap-3 min-w-0">
+                                    <div className="shrink-0 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-lg shadow-emerald-900/15 text-2xl" aria-hidden="true">
+                                        {borrowedBooks.length > 0 ? '📚' : '▦'}
                                     </div>
-                                ))}
+                                    <div className="min-w-0">
+                                        <h2 id="homepage-notifications-title" className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                                            {t('notificationsTitle')}
+                                        </h2>
+                                        <p className="mt-1 text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300 leading-relaxed">
+                                            {t('notificationsSubtitle')}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="self-start sm:self-auto inline-flex items-center gap-2 rounded-full border border-emerald-200 dark:border-emerald-800 bg-white/80 dark:bg-slate-800/80 px-3.5 py-2 text-xs font-black text-emerald-800 dark:text-emerald-300 shadow-sm">
+                                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                                    {borrowedBooks.length + teacherSchedule.length} {isAr ? 'تنبيه' : 'items'}
+                                </div>
                             </div>
-                        </div>
+
+                            {borrowedBooks.length > 0 && (
+                                <div className="relative mb-6 last:mb-0">
+                                    <div className="flex items-center gap-2.5 mb-3">
+                                        <span className="h-8 w-1.5 rounded-full bg-amber-500" />
+                                        <h3 className="text-base sm:text-lg font-black text-slate-800 dark:text-white">{t('borrowTitle')}</h3>
+                                        <span className="rounded-full bg-amber-100 dark:bg-amber-900/40 px-2.5 py-1 text-[11px] font-black text-amber-800 dark:text-amber-300">{borrowedBooks.length}</span>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                                        {borrowedBooks.map((book) => (
+                                            <article key={book.id} className="homepage-alert-card group relative bg-white/90 dark:bg-slate-800/90 p-4 sm:p-5 border border-amber-200 dark:border-amber-800/70 rounded-2xl sm:rounded-3xl flex flex-col gap-3 shadow-sm hover:shadow-xl touch-manipulation active:scale-[0.99]">
+                                                <div className="flex items-start gap-3">
+                                                    <div className="shrink-0 h-10 w-10 rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 flex items-center justify-center text-xl" aria-hidden="true">📖</div>
+                                                    <div className="min-w-0 flex-1">
+                                                        <p className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 mb-1">{isAr ? 'عنوان الكتاب' : 'Book title'}</p>
+                                                        <h4 className="font-black text-slate-900 dark:text-white text-base sm:text-lg leading-snug break-words">{book.book_name || (isAr ? 'كتاب بدون عنوان' : 'Untitled book')}</h4>
+                                                    </div>
+                                                </div>
+                                                <div className="rounded-xl bg-amber-50 dark:bg-slate-900/70 border border-amber-100 dark:border-slate-700 px-3.5 py-3">
+                                                    <p className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 mb-1">{t('borrowReturn')}</p>
+                                                    <p className="font-black text-rose-600 dark:text-rose-400 text-sm sm:text-base">
+                                                        {book.return_date && Number.isFinite(new Date(`${book.return_date}T12:00:00`).getTime())
+                                                            ? new Date(`${book.return_date}T12:00:00`).toLocaleDateString(isAr ? 'ar-AE' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+                                                            : (isAr ? 'لم يحدد تاريخ الإرجاع' : 'Return date not set')}
+                                                    </p>
+                                                    <p className={`mt-1.5 text-xs sm:text-sm font-extrabold leading-relaxed ${book.return_date && Number.isFinite(new Date(`${book.return_date}T23:59:59`).getTime()) && new Date(`${book.return_date}T23:59:59`).getTime() <= borrowCountdownNow ? 'text-rose-700 dark:text-rose-300' : 'text-emerald-700 dark:text-emerald-300'}`}>⏳ {getBorrowCountdown(book.return_date)}</p>
+                                                </div>
+                                                {book.return_date && Number.isFinite(new Date(book.return_date).getTime()) && (
+                                                    <a
+                                                        href={createGoogleCalendarLink(book.book_name, book.return_date)}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="mt-auto w-full min-h-11 py-2.5 px-3 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white rounded-xl font-extrabold text-xs sm:text-sm transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2 touch-manipulation"
+                                                    >
+                                                        <ScheduleIcon />
+                                                        {t('addToCalendar')}
+                                                    </a>
+                                                )}
+                                            </article>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {teacherSchedule.length > 0 && (
+                                <div className="relative">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+                                        <div className="flex items-center gap-2.5">
+                                            <span className="h-8 w-1.5 rounded-full bg-emerald-600" />
+                                            <h3 className="text-base sm:text-lg font-black text-slate-800 dark:text-white">{t('teacherScheduleTitle')}</h3>
+                                            <span className="rounded-full bg-emerald-100 dark:bg-emerald-900/50 px-2.5 py-1 text-[11px] font-black text-emerald-800 dark:text-emerald-300">{teacherSchedule.length}</span>
+                                        </div>
+                                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">{t('teacherScheduleSubtitle')}</p>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                        {teacherSchedule.map((slot) => {
+                                            const slotId = String(slot.id ?? '');
+                                            const separator = slotId.lastIndexOf('_');
+                                            const day = separator >= 0 ? slotId.slice(0, separator) : slotId;
+                                            const period = separator >= 0 ? slotId.slice(separator + 1) : '';
+                                            return (
+                                                <article key={slot.id} className="homepage-alert-card group relative bg-white/90 dark:bg-slate-800/90 border border-emerald-200 dark:border-emerald-800/70 rounded-2xl sm:rounded-3xl p-4 shadow-sm hover:shadow-xl touch-manipulation active:scale-[0.99]">
+                                                    <div className="flex items-start justify-between gap-3 mb-3">
+                                                        <div className="min-w-0">
+                                                            <p className="text-[11px] font-extrabold text-emerald-700 dark:text-emerald-300 mb-1">{isAr ? 'يوم الحصة' : 'Class day'}</p>
+                                                            <h4 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white break-words">{getScheduleDayLabel(day)}</h4>
+                                                        </div>
+                                                        <span className="shrink-0 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-200 px-3 py-2 text-xs font-black">
+                                                            {t('periodLabel')} {period}
+                                                        </span>
+                                                    </div>
+                                                    <div className="space-y-2 border-t border-slate-100 dark:border-slate-700 pt-3">
+                                                        <p className="text-sm font-black text-slate-800 dark:text-white break-words">
+                                                            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">{t('subjectLabel')}: </span>{slot.subject || '—'}
+                                                        </p>
+                                                        <p className="text-xs font-bold text-slate-600 dark:text-slate-300 break-words">
+                                                            {t('gradeLabel')}: {slot.grade || '—'}
+                                                        </p>
+                                                    </div>
+                                                </article>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+                        </section>
                     </RevealSection>
                 )}
 
@@ -851,6 +1026,36 @@ const HomePage: React.FC = () => {
                     100% { opacity: 0; transform: scale(0.3) translateY(-40px); }
                 }
                 .animate-fade-out { animation: fade-out 1.5s ease-out forwards; }
+
+                /* Motion is scoped only to the notification cards, leaving the rest of the page unchanged. */
+                .homepage-alert-card {
+                    position: relative;
+                    overflow: hidden;
+                    transform: translateZ(0);
+                    transition: transform 260ms cubic-bezier(0.2, 0.75, 0.25, 1), box-shadow 260ms ease, border-color 260ms ease;
+                    -webkit-tap-highlight-color: transparent;
+                }
+                .homepage-alert-card::after {
+                    content: "";
+                    position: absolute;
+                    inset: 0;
+                    pointer-events: none;
+                    background: linear-gradient(115deg, transparent 20%, rgba(255,255,255,0.42) 48%, transparent 70%);
+                    transform: translateX(-125%);
+                    transition: transform 650ms cubic-bezier(0.2, 0.7, 0.2, 1);
+                }
+                @media (hover: hover) and (pointer: fine) {
+                    .homepage-alert-card:hover {
+                        transform: translateY(-4px) scale(1.008);
+                        border-color: rgba(16, 185, 129, 0.55);
+                    }
+                    .homepage-alert-card:hover::after { transform: translateX(125%); }
+                }
+                .homepage-alert-card:active { transform: scale(0.985); }
+                @media (prefers-reduced-motion: reduce) {
+                    .homepage-alert-card, .homepage-alert-card::after { transition: none !important; }
+                    .homepage-alert-card:hover, .homepage-alert-card:active { transform: none; }
+                }
             `}</style>
         </div>
     );
