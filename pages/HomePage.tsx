@@ -280,20 +280,99 @@ const HomePage: React.FC = () => {
 
     useEffect(() => {
         let mounted = true;
-        const fetchBorrowings = async () => {
-            if (userData && userType && userType !== 'admin') {
-                const userId = userType === 'student' ? userData.student_id : userData.teacher_id;
-                const { data } = await supabase
-                    .from('borrowings')
-                    .select('*')
-                    .eq('user_id', userId)
-                    .eq('status', 'active');
-                
-                if (data && mounted) setBorrowedBooks(data);
-            }
+
+        // Normalize IDs and statuses because legacy borrowing records may contain
+        // numeric/string IDs or differently-cased status values.
+        const normalizeValue = (value: unknown) =>
+            String(value ?? '').normalize('NFKC').trim().toLocaleLowerCase();
+
+        const isActiveBorrowing = (row: any) => {
+            const status = normalizeValue(row?.status);
+            return [
+                'active', 'borrowed', 'issued', 'checked out', 'checked_out',
+                'checked-out', 'on loan', 'on_loan',
+                'قيد الاستعارة', 'مستعار', 'مستعارة', 'نشط', 'نشطة'
+            ].includes(status);
         };
-        fetchBorrowings();
-        const refresh = window.setInterval(fetchBorrowings, 60000);
+
+        const fetchBorrowings = async () => {
+            const role = normalizeValue(userType);
+            if (!userData || !role || role === 'admin') {
+                if (mounted) setBorrowedBooks([]);
+                return;
+            }
+
+            const ids = role === 'student'
+                ? [userData.student_id, userData.id, userData.user_id]
+                : [userData.teacher_id, userData.id, userData.user_id, userData.employee_id, userData.staff_id];
+            const names = [userData.name_ar, userData.name_en, userData.email, userData.username];
+            // Keep original casing for the database lookup (IDs such as HR001 can be case-sensitive),
+            // and use normalized copies only when comparing returned values locally.
+            const toLookupValues = (values: unknown[]) => [...new Set(values
+                .map((value) => String(value ?? '').normalize('NFKC').trim())
+                .filter(Boolean))];
+            const idLookupValues = toLookupValues(ids);
+            const nameLookupValues = toLookupValues(names);
+            const identities = new Set([...idLookupValues, ...nameLookupValues].map(normalizeValue));
+            const found = new Map<string, any>();
+
+            // Prefer exact ID matching first; try legacy name-based user_id values only if needed.
+            const lookupByUserId = async (values: string[]) => {
+                for (const identity of values) {
+                    try {
+                        const { data, error } = await supabase
+                            .from('borrowings')
+                            .select('*')
+                            .eq('user_id', identity);
+
+                        if (error) {
+                            console.error('Error fetching borrowings by user_id:', error);
+                            continue;
+                        }
+
+                        (data || []).forEach((row: any, index: number) => {
+                            if (!isActiveBorrowing(row)) return;
+                            const key = String(row.id ?? `${row.user_id}-${row.book_name}-${row.return_date}-${index}`);
+                            found.set(key, row);
+                        });
+                    } catch (error) {
+                        console.error('Unexpected error fetching borrowings:', error);
+                    }
+                }
+            };
+
+            await lookupByUserId(idLookupValues);
+            if (found.size === 0) await lookupByUserId(nameLookupValues);
+
+            // Some older records store the borrower in a named owner field instead of user_id.
+            // Run this compatibility fallback only when the indexed owner lookups returned nothing.
+            if (found.size === 0) {
+                try {
+                    const { data, error } = await supabase.from('borrowings').select('*');
+                    if (error) {
+                        console.error('Error in borrowing compatibility lookup:', error);
+                    } else {
+                        const ownerFields = /^(user_id|teacher_id|student_id|borrower_id|member_id|employee_id|staff_id|user_name|teacher_name|student_name|borrower_name|borrower|email|username|name)$/i;
+                        (data || []).forEach((row: any, index: number) => {
+                            if (!isActiveBorrowing(row)) return;
+                            const belongsToUser = Object.entries(row).some(([field, value]) =>
+                                ownerFields.test(field) && identities.has(normalizeValue(value))
+                            );
+                            if (!belongsToUser) return;
+                            const key = String(row.id ?? `${row.user_id}-${row.book_name}-${row.return_date}-${index}`);
+                            found.set(key, row);
+                        });
+                    }
+                } catch (error) {
+                    console.error('Unexpected compatibility lookup error:', error);
+                }
+            }
+
+            if (mounted) setBorrowedBooks(Array.from(found.values()));
+        };
+
+        void fetchBorrowings();
+        const refresh = window.setInterval(() => { void fetchBorrowings(); }, 60000);
         return () => { mounted = false; window.clearInterval(refresh); };
     }, [userData, userType]);
 
@@ -572,27 +651,32 @@ const HomePage: React.FC = () => {
                                         <span className="rounded-full bg-amber-100 dark:bg-amber-900/40 px-2.5 py-1 text-[11px] font-black text-amber-800 dark:text-amber-300">{borrowedBooks.length}</span>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                                        {borrowedBooks.map((book) => (
-                                            <article key={book.id} className="homepage-alert-card group relative bg-white/90 dark:bg-slate-800/90 p-4 sm:p-5 border border-amber-200 dark:border-amber-800/70 rounded-2xl sm:rounded-3xl flex flex-col gap-3 shadow-sm hover:shadow-xl touch-manipulation active:scale-[0.99]">
+                                        {borrowedBooks.map((book) => {
+                                            const bookTitle = book.book_name || book.book_title || book.title || book.name;
+                                            const returnDate = book.return_date || book.due_date || book.expected_return_date;
+                                            const validReturnDate = Boolean(returnDate && Number.isFinite(new Date(`${returnDate}T12:00:00`).getTime()));
+                                            const isOverdue = Boolean(returnDate && Number.isFinite(new Date(`${returnDate}T23:59:59`).getTime()) && new Date(`${returnDate}T23:59:59`).getTime() <= borrowCountdownNow);
+                                            return (
+                                            <article key={book.id ?? `${bookTitle}-${returnDate}`} className="homepage-alert-card group relative bg-white/90 dark:bg-slate-800/90 p-4 sm:p-5 border border-amber-200 dark:border-amber-800/70 rounded-2xl sm:rounded-3xl flex flex-col gap-3 shadow-sm hover:shadow-xl touch-manipulation active:scale-[0.99]">
                                                 <div className="flex items-start gap-3">
                                                     <div className="shrink-0 h-10 w-10 rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 flex items-center justify-center text-xl" aria-hidden="true">📖</div>
                                                     <div className="min-w-0 flex-1">
                                                         <p className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 mb-1">{isAr ? 'عنوان الكتاب' : 'Book title'}</p>
-                                                        <h4 className="font-black text-slate-900 dark:text-white text-base sm:text-lg leading-snug break-words">{book.book_name || (isAr ? 'كتاب بدون عنوان' : 'Untitled book')}</h4>
+                                                        <h4 className="font-black text-slate-900 dark:text-white text-base sm:text-lg leading-snug break-words">{bookTitle || (isAr ? 'كتاب بدون عنوان' : 'Untitled book')}</h4>
                                                     </div>
                                                 </div>
                                                 <div className="rounded-xl bg-amber-50 dark:bg-slate-900/70 border border-amber-100 dark:border-slate-700 px-3.5 py-3">
                                                     <p className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 mb-1">{t('borrowReturn')}</p>
                                                     <p className="font-black text-rose-600 dark:text-rose-400 text-sm sm:text-base">
-                                                        {book.return_date && Number.isFinite(new Date(`${book.return_date}T12:00:00`).getTime())
-                                                            ? new Date(`${book.return_date}T12:00:00`).toLocaleDateString(isAr ? 'ar-AE' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+                                                        {validReturnDate
+                                                            ? new Date(`${returnDate}T12:00:00`).toLocaleDateString(isAr ? 'ar-AE' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
                                                             : (isAr ? 'لم يحدد تاريخ الإرجاع' : 'Return date not set')}
                                                     </p>
-                                                    <p className={`mt-1.5 text-xs sm:text-sm font-extrabold leading-relaxed ${book.return_date && Number.isFinite(new Date(`${book.return_date}T23:59:59`).getTime()) && new Date(`${book.return_date}T23:59:59`).getTime() <= borrowCountdownNow ? 'text-rose-700 dark:text-rose-300' : 'text-emerald-700 dark:text-emerald-300'}`}>⏳ {getBorrowCountdown(book.return_date)}</p>
+                                                    <p className={`mt-1.5 text-xs sm:text-sm font-extrabold leading-relaxed ${isOverdue ? 'text-rose-700 dark:text-rose-300' : 'text-emerald-700 dark:text-emerald-300'}`}>⏳ {getBorrowCountdown(returnDate)}</p>
                                                 </div>
-                                                {book.return_date && Number.isFinite(new Date(book.return_date).getTime()) && (
+                                                {validReturnDate && (
                                                     <a
-                                                        href={createGoogleCalendarLink(book.book_name, book.return_date)}
+                                                        href={createGoogleCalendarLink(bookTitle || (isAr ? 'كتاب مستعار' : 'Borrowed book'), returnDate)}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="mt-auto w-full min-h-11 py-2.5 px-3 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white rounded-xl font-extrabold text-xs sm:text-sm transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2 touch-manipulation"
@@ -602,7 +686,8 @@ const HomePage: React.FC = () => {
                                                     </a>
                                                 )}
                                             </article>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}
