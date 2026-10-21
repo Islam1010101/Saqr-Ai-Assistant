@@ -53,7 +53,12 @@ const T = {
         tutCh2Desc: "اقرأ عنوان الكتاب، وحرّك صاروخك تحت كوكب التصنيف الصحيح ثم أطلق الليزر. الإجابة الصحيحة = 20 نقطة!",
         tutCh3Title: "التحدي 3: ترتيب الأرفف",
         tutCh3Desc: "انظر للرف المطلوب في الأعلى، ثم اسحب الكتاب الصحيح من الخيارات بالأسفل وضعه عليه. الإجابة الصحيحة = 20 نقطة!",
-        pointsSaved: "تمت إضافة النقاط لملفك بنجاح! 🌟"
+        pointsSaved: "تمت إضافة النقاط لملفك بنجاح! 🌟",
+        lightMode: "الوضع الفاتح",
+        darkMode: "الوضع الداكن",
+        switchToLight: "التبديل إلى الوضع الفاتح",
+        switchToDark: "التبديل إلى الوضع الداكن",
+        progress: "تقدم المغامرة"
     },
     en: {
         title: "Library's Heroes",
@@ -99,7 +104,12 @@ const T = {
         tutCh2Desc: "Read the book title, position your rocket beneath the correct category planet and shoot! Each hit = 20 pts!",
         tutCh3Title: "Challenge 3: Fill Shelves",
         tutCh3Desc: "Check the designated shelf category above, then drag the matching book from below onto it. Each correct book = 20 pts!",
-        pointsSaved: "Points saved to your profile successfully! 🌟"
+        pointsSaved: "Points saved to your profile successfully! 🌟",
+        lightMode: "Light mode",
+        darkMode: "Dark mode",
+        switchToLight: "Switch to light mode",
+        switchToDark: "Switch to dark mode",
+        progress: "Adventure progress"
     }
 };
 
@@ -163,24 +173,55 @@ const BANK_SHELVES = [
     { shelfCode: "800", arShelf: "800: قصص وحكايات", enShelf: "800: Literature & Stories", arCorrect: "حكايات كليلة ودمنة الشهيرة", enCorrect: "Kalila wa Dimna Fables", arWrongs: ["لغات البرمجة السحابية", "تفسير سورة الكهف", "قوانين الديناميكا الحرارية"], enWrongs: ["Cloud Coding", "Quran Exegesis", "Thermodynamics"] }
 ];
 
-const shuffleArray = (array: any[]) => [...array].sort(() => 0.5 - Math.random());
+const shuffleArray = <T,>(array: T[]): T[] => {
+    // Fisher–Yates avoids the biased ordering of sort(() => Math.random() - 0.5).
+    const result = [...array];
+    for (let i = result.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result;
+};
 
 // ==========================================
 // 3. المكون الرئيسي للعبة
 // ==========================================
 const DeweyGame: React.FC = () => {
-    const { locale, dir } = useLanguage();
+    const { locale } = useLanguage();
     const lang = locale as 'ar' | 'en';
     const dict = T[lang];
 
     // ==========================================
     // المصادقة وجلب بيانات المستخدم
     // ==========================================
+    const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+        if (typeof window === 'undefined') return 'dark';
+        try {
+            const saved = window.localStorage.getItem('dewey-game-theme');
+            if (saved === 'light' || saved === 'dark') return saved;
+        } catch {
+            // Fall back to the device preference if storage is unavailable.
+        }
+        try {
+            return window.matchMedia?.('(prefers-color-scheme: light)')?.matches ? 'light' : 'dark';
+        } catch {
+            return 'dark';
+        }
+    });
+
     const [userData, setUserData] = useState<any>(null);
     const [userType, setUserType] = useState<'student' | 'teacher' | 'admin' | null>(null);
     const [studentName, setStudentName] = useState('');
     const [studentGrade, setStudentGrade] = useState('');
     const [pointsSaved, setPointsSaved] = useState(false);
+
+    useEffect(() => {
+        try {
+            window.localStorage.setItem('dewey-game-theme', theme);
+        } catch {
+            // The game still works when storage is disabled by browser privacy settings.
+        }
+    }, [theme]);
 
     useEffect(() => {
         const storedUser = localStorage.getItem('current_user');
@@ -193,7 +234,13 @@ const DeweyGame: React.FC = () => {
                 return;
             }
             
-            const user = JSON.parse(storedUser);
+            let user: any;
+            try {
+                user = JSON.parse(storedUser);
+            } catch {
+                window.location.href = '/login';
+                return;
+            }
             setUserData(user);
             setUserType(storedType as 'student' | 'admin');
             
@@ -225,9 +272,13 @@ const DeweyGame: React.FC = () => {
     const [hoveredDropZone, setHoveredDropZone] = useState<string | null>(null);
 
     const isDraggingRef = useRef(false);
+    const pointerIdRef = useRef<number | null>(null);
     const dragDataRef = useRef<{ id: string, type: 'q' | 'opt', content?: string } | null>(null);
     const floatingElementRef = useRef<HTMLDivElement | null>(null);
     const dropZonesRef = useRef<Map<string, HTMLDivElement>>(new Map());
+    const stageRef = useRef(stage);
+    stageRef.current = stage;
+    const handleAnswerRef = useRef<(providedAnswer: string) => void>(() => undefined);
 
     // === متغيرات لعبة الصاروخ ===
     const [rocketPos, setRocketPos] = useState(1);
@@ -299,6 +350,11 @@ const DeweyGame: React.FC = () => {
     }, []);
 
     const handleStart = () => {
+        setScore(0);
+        setTotalTime(0);
+        setQuestionTimer(20);
+        setPointsSaved(false);
+        setFeedback(null);
         setStage('learn');
     };
 
@@ -350,42 +406,6 @@ const DeweyGame: React.FC = () => {
         setStage('challenge3');
     };
 
-    const handleTimeout = () => {
-        setFeedback('wrong');
-        cleanupDrag();
-        setTimeout(() => nextQuestion(), 1400);
-    };
-
-    const handleAnswer = (providedAnswer: string) => {
-        if (feedback) return; 
-        let isCorrect = false;
-        if (stage === 'challenge3') {
-            isCorrect = providedAnswer === currentQuestions[qIndex].correct;
-        } else {
-            isCorrect = providedAnswer === currentQuestions[qIndex].answer;
-        }
-
-        if (isCorrect) {
-            setScore(s => s + 20); 
-            setFeedback('correct');
-        } else {
-            setFeedback('wrong');
-        }
-        cleanupDrag();
-        setTimeout(() => nextQuestion(), 1400);
-    };
-
-    const cleanupDrag = () => {
-        isDraggingRef.current = false;
-        dragDataRef.current = null;
-        setIsDraggingState(false);
-        setDragItemInfo(null);
-        setHoveredDropZone(null);
-        if (floatingElementRef.current) {
-            floatingElementRef.current.style.display = 'none';
-        }
-    };
-
     const nextQuestion = () => {
         setFeedback(null);
         setIsShooting(false);
@@ -412,17 +432,17 @@ const DeweyGame: React.FC = () => {
         return `${m > 0 ? m + ' ' + dict.minutes + ' ' : ''}${s} ${dict.seconds}`;
     };
 
-    // === Drag and Drop ===
+    // === Pointer-based drag and drop (mouse, pen, and touch) ===
     const updateFloatingPos = (clientX: number, clientY: number) => {
         if (floatingElementRef.current) {
-            floatingElementRef.current.style.transform = `translate3d(${clientX}px, ${clientY}px, 0) translate(-50%, -50%) scale(1.05)`;
+            floatingElementRef.current.style.transform = `translate3d(${clientX}px, ${clientY}px, 0) translate(-50%, -50%) scale(1.04)`;
         }
     };
 
     const checkDropZones = (clientX: number, clientY: number) => {
         let foundZone: string | null = null;
         dropZonesRef.current.forEach((el, key) => {
-            if (!el) return;
+            if (!el || !el.isConnected) return;
             const rect = el.getBoundingClientRect();
             if (clientX >= rect.left && clientX <= rect.right &&
                 clientY >= rect.top && clientY <= rect.bottom) {
@@ -433,68 +453,110 @@ const DeweyGame: React.FC = () => {
         return foundZone;
     };
 
-    const handleDragStart = (e: React.TouchEvent | React.MouseEvent, id: string, type: 'q' | 'opt', content?: string) => {
-        if (feedback) return;
-        const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
-        const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
-        
+    const cleanupDrag = useCallback(() => {
+        isDraggingRef.current = false;
+        pointerIdRef.current = null;
+        dragDataRef.current = null;
+        setIsDraggingState(false);
+        setDragItemInfo(null);
+        setHoveredDropZone(null);
+        if (floatingElementRef.current) {
+            floatingElementRef.current.style.display = 'none';
+        }
+    }, []);
+
+    const handleDragStart = (e: React.PointerEvent<HTMLDivElement>, id: string, type: 'q' | 'opt', content?: string) => {
+        if (feedback || (e.pointerType === 'mouse' && e.button !== 0)) return;
+        e.preventDefault();
+        pointerIdRef.current = e.pointerId;
         isDraggingRef.current = true;
         const itemObj = { id, type, content };
         dragDataRef.current = itemObj;
-        
         setDragItemInfo(itemObj);
         setIsDraggingState(true);
 
+        try {
+            e.currentTarget.setPointerCapture(e.pointerId);
+        } catch {
+            // Pointer capture is an enhancement; coordinate-based hit testing remains available.
+        }
         if (floatingElementRef.current) {
             floatingElementRef.current.style.display = 'flex';
-            updateFloatingPos(clientX, clientY);
+            updateFloatingPos(e.clientX, e.clientY);
         }
     };
 
-    const handleDragMove = useCallback((e: TouchEvent | MouseEvent) => {
-        if (!isDraggingRef.current || !dragDataRef.current) return;
-        const clientX = 'touches' in e ? (e as TouchEvent).touches[0].clientX : (e as MouseEvent).clientX;
-        const clientY = 'touches' in e ? (e as TouchEvent).touches[0].clientY : (e as MouseEvent).clientY;
-        
-        updateFloatingPos(clientX, clientY);
-        checkDropZones(clientX, clientY);
-    }, []);
-
-    const handleDragEnd = useCallback((e: TouchEvent | MouseEvent) => {
-        if (!isDraggingRef.current || !dragDataRef.current) return;
-        
-        const clientX = 'changedTouches' in e ? (e as TouchEvent).changedTouches[0].clientX : (e as MouseEvent).clientX;
-        const clientY = 'changedTouches' in e ? (e as TouchEvent).changedTouches[0].clientY : (e as MouseEvent).clientY;
-        
-        const droppedOn = checkDropZones(clientX, clientY);
-
-        if (droppedOn) {
-            if (stage === 'challenge3') {
-                handleAnswer(dragDataRef.current.content || dragDataRef.current.id);
-            } else {
-                handleAnswer(droppedOn);
-            }
+    const handleAnswer = (providedAnswer: string) => {
+        if (feedback || !currentQuestions[qIndex]) return;
+        let isCorrect = false;
+        if (stage === 'challenge3') {
+            isCorrect = providedAnswer === currentQuestions[qIndex].correct;
+        } else {
+            isCorrect = providedAnswer === currentQuestions[qIndex].answer;
         }
-        
+
+        if (isCorrect) {
+            setScore(s => s + 20);
+            setFeedback('correct');
+        } else {
+            setFeedback('wrong');
+        }
         cleanupDrag();
-    }, [stage, handleAnswer]);
+        window.setTimeout(() => nextQuestion(), 1400);
+    };
+    handleAnswerRef.current = handleAnswer;
+
+    const handleTimeout = () => {
+        if (feedback) return;
+        setFeedback('wrong');
+        cleanupDrag();
+        window.setTimeout(() => nextQuestion(), 1400);
+    };
 
     useEffect(() => {
-        window.addEventListener('mousemove', handleDragMove, { passive: false });
-        window.addEventListener('mouseup', handleDragEnd);
-        window.addEventListener('touchmove', handleDragMove, { passive: false });
-        window.addEventListener('touchend', handleDragEnd);
-        return () => {
-            window.removeEventListener('mousemove', handleDragMove);
-            window.removeEventListener('mouseup', handleDragEnd);
-            window.removeEventListener('touchmove', handleDragMove);
-            window.removeEventListener('touchend', handleDragEnd);
+        const handlePointerMove = (e: PointerEvent) => {
+            if (!isDraggingRef.current || !dragDataRef.current) return;
+            if (pointerIdRef.current !== null && e.pointerId !== pointerIdRef.current) return;
+            e.preventDefault();
+            updateFloatingPos(e.clientX, e.clientY);
+            checkDropZones(e.clientX, e.clientY);
         };
-    }, [handleDragMove, handleDragEnd]);
+
+        const handlePointerUp = (e: PointerEvent) => {
+            if (!isDraggingRef.current || !dragDataRef.current) return;
+            if (pointerIdRef.current !== null && e.pointerId !== pointerIdRef.current) return;
+
+            const droppedOn = checkDropZones(e.clientX, e.clientY);
+            const draggedItem = dragDataRef.current;
+            const activeStage = stageRef.current;
+            if (droppedOn) {
+                if (activeStage === 'challenge3') {
+                    handleAnswerRef.current(draggedItem.content || draggedItem.id);
+                } else {
+                    handleAnswerRef.current(droppedOn);
+                }
+            }
+            cleanupDrag();
+        };
+
+        const handlePointerCancel = (e: PointerEvent) => {
+            if (pointerIdRef.current !== null && e.pointerId !== pointerIdRef.current) return;
+            cleanupDrag();
+        };
+
+        window.addEventListener('pointermove', handlePointerMove, { passive: false });
+        window.addEventListener('pointerup', handlePointerUp);
+        window.addEventListener('pointercancel', handlePointerCancel);
+        return () => {
+            window.removeEventListener('pointermove', handlePointerMove);
+            window.removeEventListener('pointerup', handlePointerUp);
+            window.removeEventListener('pointercancel', handlePointerCancel);
+        };
+    }, [cleanupDrag]);
 
     // === Rocket Shooter ===
     const handleShoot = useCallback(() => {
-        if (feedback || isShooting) return;
+        if (feedback || isShooting || !ch2Options[rocketPos]) return;
         setIsShooting(true);
         const shotCategory = ch2Options[rocketPos].code;
         
@@ -532,7 +594,7 @@ const DeweyGame: React.FC = () => {
     }
 
     return (
-        <div className={`min-h-[100dvh] bg-slate-900 text-slate-100 font-sans flex flex-col items-center justify-center p-2 md:p-4 relative select-none ${lang === 'ar' ? 'dir-rtl' : 'dir-ltr'} ${stage.startsWith('challenge') ? 'overflow-hidden touch-none' : 'overflow-y-auto'}`}>
+        <div className={`dewey-game ${theme === 'light' ? 'light-mode' : 'dark-mode'} min-h-screen min-h-[100dvh] bg-slate-900 text-slate-100 font-sans flex flex-col items-center justify-center p-2 md:p-4 relative select-none ${lang === 'ar' ? 'dir-rtl' : 'dir-ltr'} ${stage.startsWith('challenge') ? 'overflow-hidden touch-none' : 'overflow-y-auto'}`}>
             
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
@@ -565,7 +627,110 @@ const DeweyGame: React.FC = () => {
                 .cert-font { font-family: 'Cairo', sans-serif !important; }
                 
                 .compact-layout { display: flex; flex-direction: column; height: 100%; max-height: 95vh; justify-content: space-between; }
+
+                /* A layered, lightweight backdrop that stays decorative and never blocks input. */
+                .dewey-game {
+                    --surface-line: rgba(148,163,184,.22);
+                    isolation: isolate;
+                    background-image:
+                        radial-gradient(ellipse at 12% 8%, rgba(20,184,166,.14), transparent 36%),
+                        radial-gradient(ellipse at 88% 86%, rgba(59,130,246,.14), transparent 34%);
+                    font-family: 'Cairo', ui-sans-serif, system-ui, sans-serif;
+                }
+                .dewey-game::before {
+                    content: '';
+                    position: fixed;
+                    inset: 0;
+                    z-index: -1;
+                    pointer-events: none;
+                    opacity: .5;
+                    background-image: radial-gradient(rgba(148,163,184,.28) .7px, transparent .7px);
+                    background-size: 22px 22px;
+                }
+                .dewey-game.light-mode {
+                    color: #172033 !important;
+                    background-color: #f2f7fc !important;
+                    background-image:
+                        radial-gradient(ellipse at 10% 5%, rgba(13,148,136,.13), transparent 38%),
+                        radial-gradient(ellipse at 90% 90%, rgba(59,130,246,.10), transparent 35%);
+                }
+                .dewey-game.light-mode::before { opacity: .35; background-image: radial-gradient(rgba(71,85,105,.2) .7px, transparent .7px); }
+                .dewey-game.light-mode [class*="bg-slate-950"],
+                .dewey-game.light-mode [class*="bg-slate-900"],
+                .dewey-game.light-mode [class*="bg-slate-800"] {
+                    background-color: rgba(255,255,255,.88) !important;
+                }
+                .dewey-game.light-mode [class*="border-slate-700"] { border-color: rgba(100,116,139,.28) !important; }
+                .dewey-game.light-mode .text-slate-100,
+                .dewey-game.light-mode .text-slate-200,
+                .dewey-game.light-mode .text-slate-300 { color: #263449 !important; }
+                .dewey-game.light-mode .text-slate-400 { color: #526176 !important; }
+                .dewey-game.light-mode .text-white { color: #1f2937 !important; }
+                .dewey-game.light-mode button.text-white,
+                .dewey-game.light-mode .dewey-category,
+                .dewey-game.light-mode .planet-chip { color: #fff !important; }
+                .dewey-game.light-mode .realistic-book {
+                    background: linear-gradient(135deg, #ffffff 0%, #edf4fb 100%);
+                    color: #1f2937;
+                    border-color: #0f766e;
+                    box-shadow: 0 8px 22px rgba(15,23,42,.10);
+                }
+                .dewey-game.light-mode .realistic-book h3,
+                .dewey-game.light-mode .realistic-book span { color: #1e293b; }
+                .dewey-game.light-mode .realistic-book.text-amber-300 { color: #92400e !important; }
+                .dewey-game.light-mode .wood-shelf {
+                    background: linear-gradient(180deg, #d9a66b 0%, #a86f3d 100%);
+                    border-bottom-color: #704421;
+                    box-shadow: inset 0 -2px 6px rgba(60,35,12,.18), 0 6px 14px rgba(15,23,42,.12);
+                }
+                .dewey-game.light-mode .space-arena,
+                .dewey-game.light-mode .space-arena [class*="bg-slate"] {
+                    background-color: #07172e !important;
+                    color: #f8fafc !important;
+                }
+                .dewey-game.light-mode .space-arena {
+                    background-image: radial-gradient(circle at 20% 20%, rgba(34,211,238,.14), transparent 25%), radial-gradient(circle at 80% 65%, rgba(99,102,241,.18), transparent 30%) !important;
+                }
+                .glass-card { box-shadow: 0 18px 55px rgba(2,8,23,.16); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+                .game-action { min-height: 44px; touch-action: manipulation; transition: transform .18s ease, box-shadow .18s ease, filter .18s ease; }
+                .game-action:hover { filter: brightness(1.04); }
+                .game-action:focus-visible { outline: 3px solid #38bdf8; outline-offset: 3px; }
+                .drop-target { min-height: 82px; }
+                .progress-track { height: 7px; overflow: hidden; border-radius: 999px; background: rgba(148,163,184,.2); }
+                .progress-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg,#14b8a6,#38bdf8,#f59e0b); transition: width .35s ease; }
+                .dewey-game .realistic-book { transition: box-shadow .18s ease, border-color .18s ease, filter .18s ease; }
+                .dewey-game .realistic-book:active { filter: brightness(1.05); }
+                .dewey-game .realistic-book, .dewey-game .wood-shelf { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+                @media (max-width: 420px) {
+                    .compact-layout { max-height: 96dvh; }
+                    .dewey-game .drop-target { min-height: 70px; }
+                }
+                @media (max-height: 650px) and (orientation: landscape) {
+                    .compact-layout { max-height: 98dvh; }
+                    .dewey-game .float-anim { animation-duration: 4.5s; }
+                }
+                @media (prefers-reduced-motion: reduce) {
+                    .dewey-game *, .dewey-game *::before, .dewey-game *::after {
+                        animation-duration: .01ms !important;
+                        animation-iteration-count: 1 !important;
+                        scroll-behavior: auto !important;
+                        transition-duration: .01ms !important;
+                    }
+                }
             `}</style>
+
+            {!stage.startsWith('challenge') && (
+                <button
+                    type="button"
+                    onClick={() => setTheme(current => current === 'dark' ? 'light' : 'dark')}
+                    aria-label={theme === 'dark' ? dict.switchToLight : dict.switchToDark}
+                    title={theme === 'dark' ? dict.switchToLight : dict.switchToDark}
+                    className="fixed top-3 right-3 z-[100] print:hidden flex min-h-11 items-center gap-2 rounded-full border border-slate-500/30 bg-slate-800/90 px-3 py-2 text-xs font-black text-amber-300 shadow-xl backdrop-blur-lg transition hover:-translate-y-0.5 hover:shadow-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400"
+                >
+                    <span aria-hidden="true" className="text-base">{theme === 'dark' ? '☀️' : '🌙'}</span>
+                    <span>{theme === 'dark' ? dict.lightMode : dict.darkMode}</span>
+                </button>
+            )}
 
             {/* --- العنصر الممسوك --- */}
             <div 
@@ -578,7 +743,7 @@ const DeweyGame: React.FC = () => {
 
             {/* 1. شاشة البداية */}
             {stage === 'intro' && (
-                <div className="max-w-md w-full bg-slate-800/90 backdrop-blur-xl border border-slate-700 rounded-3xl p-6 shadow-2xl text-center animate-fade-in-up relative z-10">
+                <div className="max-w-md w-full bg-slate-800/90 backdrop-blur-xl border border-slate-700 rounded-3xl p-6 shadow-2xl text-center animate-fade-in-up relative z-10 glass-card">
                     <img src="/Game.png" alt="Game Logo" className="w-28 h-28 md:w-36 md:h-36 mx-auto mb-3 object-contain magic-glow" onError={(e) => e.currentTarget.style.display = 'none'} />
                     <h1 className="text-2xl md:text-3xl font-black text-amber-400 mb-1">{dict.title}</h1>
                     <p className="text-xs md:text-sm text-slate-300 mb-5 font-bold">{dict.subtitle}</p>
@@ -602,7 +767,7 @@ const DeweyGame: React.FC = () => {
                         </div>
                     </div>
 
-                    <button onClick={handleStart} className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-black text-base md:text-xl rounded-xl shadow-lg hover:shadow-amber-500/25 transition-all active:scale-95 float-anim tracking-wide">
+                    <button onClick={handleStart} className="game-action w-full py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-black text-base md:text-xl rounded-xl shadow-lg hover:shadow-amber-500/25 transition-all active:scale-95 float-anim tracking-wide">
                         {dict.start}
                     </button>
                 </div>
@@ -610,7 +775,7 @@ const DeweyGame: React.FC = () => {
 
             {/* 2. شاشة التعلم */}
             {stage === 'learn' && (
-                <div className="max-w-3xl w-full bg-slate-800/90 backdrop-blur-xl border border-slate-700 rounded-3xl p-4 md:p-8 shadow-2xl animate-zoom-in relative z-10 text-center flex flex-col max-h-[90dvh] my-auto">
+                <div className="max-w-3xl w-full bg-slate-800/90 backdrop-blur-xl border border-slate-700 rounded-3xl p-4 md:p-8 shadow-2xl animate-zoom-in relative z-10 text-center flex flex-col max-h-[90dvh] my-auto glass-card">
                     <div className="overflow-y-auto flex-1 px-1 pb-2">
                         <div className="w-14 h-14 md:w-20 md:h-20 bg-amber-500/10 border border-amber-500/30 rounded-full mx-auto flex items-center justify-center mb-2 shrink-0">
                             <svg className="w-8 h-8 md:w-10 md:h-10 text-amber-400 magic-glow" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
@@ -623,14 +788,14 @@ const DeweyGame: React.FC = () => {
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 mb-2 content-start px-1">
                             {DEWEY_CATEGORIES.map(cat => (
-                                <div key={cat.code} className="p-2.5 rounded-xl text-[10px] md:text-xs font-black shadow-md text-white flex items-center justify-center text-center border border-white/10" style={{ backgroundColor: cat.color }}>
+                                <div key={cat.code} className="dewey-category p-2.5 rounded-xl text-[10px] md:text-xs font-black shadow-md text-white flex items-center justify-center text-center border border-white/10" style={{ backgroundColor: cat.color }}>
                                     {lang === 'ar' ? cat.ar : cat.en}
                                 </div>
                             ))}
                         </div>
                     </div>
                     <div className="pt-2 pb-1 shrink-0 w-full bg-slate-800 border-t border-slate-700">
-                        <button onClick={() => setStage('tut1')} className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black rounded-xl shadow-lg transition-transform active:scale-95 text-base md:text-xl border-b-4 border-emerald-800 active:border-b-0">
+                        <button onClick={() => setStage('tut1')} className="game-action w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black rounded-xl shadow-lg transition-transform active:scale-95 text-base md:text-xl border-b-4 border-emerald-800 active:border-b-0">
                             {dict.readyBtn}
                         </button>
                     </div>
@@ -686,6 +851,16 @@ const DeweyGame: React.FC = () => {
                         </div>
                     </div>
 
+                    <div className="mb-3 shrink-0 px-1" aria-label={`${dict.progress}: ${qIndex + 1} / 5`}>
+                        <div className="mb-1 flex items-center justify-between gap-3 text-[9px] md:text-xs font-bold text-slate-400">
+                            <span>{dict.progress}</span>
+                            <span>{qIndex + 1} / 5</span>
+                        </div>
+                        <div className="progress-track">
+                            <div className="progress-fill" style={{ width: `${((qIndex + 1) / 5) * 100}%` }} />
+                        </div>
+                    </div>
+
                     <div className="flex-1 flex flex-col justify-between relative overflow-hidden">
                         {feedback && (
                             <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/90 z-50 backdrop-blur-md rounded-2xl animate-zoom-in">
@@ -709,7 +884,7 @@ const DeweyGame: React.FC = () => {
                                 <div className="flex flex-col items-center justify-center shrink-0 min-h-[85px] md:min-h-[140px] relative z-20 mb-2">
                                     {stage === 'challenge3' ? (
                                         <div 
-                                            ref={(el) => { if(el) dropZonesRef.current.set(currentQuestions[qIndex].shelfCode, el); }}
+                                            ref={(el) => { if (el) dropZonesRef.current.set(currentQuestions[qIndex].shelfCode, el); else dropZonesRef.current.delete(currentQuestions[qIndex].shelfCode); }}
                                             className={`w-full md:w-2/3 h-16 md:h-20 relative wood-shelf flex items-center justify-center shadow-2xl my-2 cursor-pointer transition-all duration-150 ${hoveredDropZone === currentQuestions[qIndex].shelfCode ? 'ring-4 ring-amber-400 brightness-125 scale-105' : ''}`}
                                         >
                                             <div className="absolute -top-3.5 md:-top-4 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 px-5 py-1 rounded-full font-black text-slate-950 shadow-xl border-2 border-amber-200 text-xs md:text-base w-fit max-w-[92%] text-center truncate tracking-wide">
@@ -723,9 +898,8 @@ const DeweyGame: React.FC = () => {
                                         <div className="text-center w-full">
                                             <p className="text-[10px] md:text-sm font-black text-amber-400 mb-1.5 bg-slate-800/60 inline-block px-3 py-1 rounded-full border border-slate-700">{dict.dragInstruction}</p>
                                             <div 
-                                                onMouseDown={(e) => handleDragStart(e, 'q', 'q')}
-                                                onTouchStart={(e) => handleDragStart(e, 'q', 'q')}
-                                                className={`realistic-book p-3.5 md:p-6 max-w-[280px] md:max-w-xl mx-auto cursor-grab active:cursor-grabbing flex items-center justify-center text-center float-anim border border-slate-700`}
+                                                onPointerDown={(e) => handleDragStart(e, 'q', 'q')}
+                                                className={`realistic-book p-3.5 md:p-6 max-w-[280px] md:max-w-xl mx-auto cursor-grab active:cursor-grabbing flex items-center justify-center text-center float-anim border border-slate-700 shadow-xl`}
                                                 style={{ touchAction: 'none', opacity: isDraggingState && dragDataRef.current?.type === 'q' ? 0.25 : 1 }}
                                             >
                                                 <h3 className="font-black text-xs md:text-xl text-white leading-relaxed pointer-events-none">
@@ -742,9 +916,8 @@ const DeweyGame: React.FC = () => {
                                             {currentQuestions[qIndex].options.map((opt: string, idx: number) => (
                                                 <div 
                                                     key={idx}
-                                                    onMouseDown={(e) => handleDragStart(e, opt, 'opt', opt)}
-                                                    onTouchStart={(e) => handleDragStart(e, opt, 'opt', opt)}
-                                                    className={`realistic-book p-2.5 md:p-4 font-black text-[10px] md:text-sm text-center flex items-center justify-center min-h-[50px] md:min-h-[75px] cursor-grab active:cursor-grabbing text-slate-200 border border-slate-700/80 hover:border-amber-400/80`}
+                                                    onPointerDown={(e) => handleDragStart(e, opt, 'opt', opt)}
+                                                    className={`realistic-book p-2.5 md:p-4 font-black text-[10px] md:text-sm text-center flex items-center justify-center min-h-[60px] md:min-h-[80px] cursor-grab active:cursor-grabbing text-slate-200 border border-slate-700/80 hover:border-amber-400/80 drop-target`}
                                                     style={{ touchAction: 'none', opacity: isDraggingState && dragDataRef.current?.id === opt ? 0.25 : 1 }}
                                                 >
                                                     <span className="pointer-events-none leading-snug px-1">{opt}</span>
@@ -756,7 +929,7 @@ const DeweyGame: React.FC = () => {
                                             {ch1Options.map(cat => (
                                                 <div 
                                                     key={cat.code} 
-                                                    ref={(el) => { if(el) dropZonesRef.current.set(cat.code, el); }}
+                                                    ref={(el) => { if (el) dropZonesRef.current.set(cat.code, el); else dropZonesRef.current.delete(cat.code); }}
                                                     className={`wood-shelf h-20 md:h-32 flex flex-col justify-end items-center pb-2 cursor-pointer transition-all duration-150 ${hoveredDropZone === cat.code ? 'ring-4 ring-amber-400 brightness-125 scale-105' : ''}`}
                                                 >
                                                     <div className="bg-slate-900/90 text-white text-[10px] md:text-sm font-black px-2 py-1 md:px-3 md:py-2 rounded-lg shadow mb-1 text-center w-[92%] truncate pointer-events-none border border-slate-700" style={{ borderBottom: `3px solid ${cat.color}` }}>
@@ -771,7 +944,7 @@ const DeweyGame: React.FC = () => {
                         )}
 
                         {stage === 'challenge2' && (
-                            <div className="flex-1 flex flex-col bg-slate-950 rounded-2xl overflow-hidden relative border-2 border-slate-800 shadow-inner p-2 md:p-4">
+                            <div className="space-arena flex-1 flex flex-col bg-slate-950 rounded-2xl overflow-hidden relative border-2 border-slate-800 shadow-inner p-2 md:p-4">
                                 <div className="text-center mb-1 md:mb-3 z-20 shrink-0">
                                     <p className="text-[9px] md:text-xs font-black text-cyan-400 mb-0.5">{dict.shootInstruction}</p>
                                     <div className="bg-slate-900/90 border border-slate-700 text-amber-300 p-2 md:p-3 rounded-xl inline-block max-w-[280px] md:max-w-xl text-[11px] md:text-lg font-black shadow-lg leading-tight">
@@ -782,7 +955,7 @@ const DeweyGame: React.FC = () => {
                                 <div className="flex justify-between w-full px-1 md:px-10 relative z-20 shrink-0 mt-2">
                                     {ch2Options.map((opt, idx) => (
                                         <div key={idx} className="flex flex-col items-center w-1/4 px-0.5">
-                                            <div className="w-12 h-12 md:w-20 md:h-20 rounded-full flex items-center justify-center font-black text-[8px] md:text-xs text-white shadow-[0_0_12px_rgba(255,255,255,0.2)] float-anim text-center leading-tight p-0.5 border border-white/20" style={{ backgroundColor: opt.color, animationDelay: `${idx * 0.2}s` }}>
+                                            <div className="planet-chip w-12 h-12 md:w-20 md:h-20 rounded-full flex items-center justify-center font-black text-[8px] md:text-xs text-white shadow-[0_0_12px_rgba(255,255,255,0.2)] float-anim text-center leading-tight p-0.5 border border-white/20" style={{ backgroundColor: opt.color, animationDelay: `${idx * 0.2}s` }}>
                                                 {lang === 'ar' ? opt.shortAr : opt.shortEn}
                                             </div>
                                         </div>
@@ -811,13 +984,13 @@ const DeweyGame: React.FC = () => {
                                 </div>
 
                                 <div className="md:hidden flex justify-between items-center mt-1 gap-1.5 z-30 shrink-0">
-                                    <button onTouchStart={(e) => {e.preventDefault(); setRocketPos(p => (lang === 'ar' ? Math.min(3, p + 1) : Math.max(0, p - 1)))}} className="flex-1 bg-slate-800 text-cyan-400 p-2.5 rounded-xl active:bg-slate-700 text-lg font-black shadow border border-slate-700">
+                                    <button onClick={() => setRocketPos(p => (lang === 'ar' ? Math.min(3, p + 1) : Math.max(0, p - 1)))} className="game-action flex-1 bg-slate-800 text-cyan-400 p-2.5 rounded-xl active:bg-slate-700 text-lg font-black shadow border border-slate-700">
                                         {lang === 'ar' ? '►' : '◄'}
                                     </button>
-                                    <button onTouchStart={(e) => {e.preventDefault(); handleShoot();}} className="flex-[2] bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 p-2.5 rounded-xl active:scale-95 font-black text-xs uppercase tracking-widest shadow-[0_0_15px_rgba(6,182,212,0.4)]">
+                                    <button onClick={handleShoot} className="game-action flex-[2] bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 p-2.5 rounded-xl active:scale-95 font-black text-xs uppercase tracking-widest shadow-[0_0_15px_rgba(6,182,212,0.4)]">
                                         {dict.fireBtn}
                                     </button>
-                                    <button onTouchStart={(e) => {e.preventDefault(); setRocketPos(p => (lang === 'ar' ? Math.max(0, p - 1) : Math.min(3, p + 1)))}} className="flex-1 bg-slate-800 text-cyan-400 p-2.5 rounded-xl active:bg-slate-700 text-lg font-black shadow border border-slate-700">
+                                    <button onClick={() => setRocketPos(p => (lang === 'ar' ? Math.max(0, p - 1) : Math.min(3, p + 1)))} className="game-action flex-1 bg-slate-800 text-cyan-400 p-2.5 rounded-xl active:bg-slate-700 text-lg font-black shadow border border-slate-700">
                                         {lang === 'ar' ? '◄' : '►'}
                                     </button>
                                 </div>
