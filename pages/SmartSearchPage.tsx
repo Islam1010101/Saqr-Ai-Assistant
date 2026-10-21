@@ -255,6 +255,10 @@ const SmartSearchPage: React.FC = () => {
     certificate.style.zIndex = '-9999';
 
     try {
+      // Ensure Arabic glyphs use the intended Cairo font before html2canvas captures the certificate.
+      if (typeof document !== 'undefined' && document.fonts?.ready) {
+        await document.fonts.ready;
+      }
       const canvas = await html2canvas(certificate, {
         scale: 3,
         backgroundColor: '#ffffff',
@@ -601,14 +605,21 @@ const SmartSearchPage: React.FC = () => {
       </section>
 
       {/*
-        Empty state: input sits immediately below the welcome banner.
-        Active state: new questions and answers stack above the input in a scrollable transcript.
+        Empty state: a compact visual hero occupies the flexible space, while the composer stays at the bottom.
+        Active state: the transcript scrolls independently and the same composer remains available.
       */}
       {!hasConversation ? (
         <main className="saqr-empty-chat">
-          {composer}
-          <div className="saqr-empty-guidance" aria-hidden="true">
+          <div className="saqr-empty-guidance">
+            <div className="saqr-hero-kicker">
+              <span className="saqr-hero-kicker-dot" aria-hidden="true" />
+              <span>{locale === 'ar' ? 'مساحة للمعرفة والإبداع' : 'A SPACE FOR KNOWLEDGE & CREATIVITY'}</span>
+            </div>
             <div className="saqr-empty-orbit">
+              <span className="saqr-orbit-ring saqr-orbit-ring-one" aria-hidden="true" />
+              <span className="saqr-orbit-ring saqr-orbit-ring-two" aria-hidden="true" />
+              <span className="saqr-orbit-spark saqr-orbit-spark-one" aria-hidden="true">✦</span>
+              <span className="saqr-orbit-spark saqr-orbit-spark-two" aria-hidden="true">✧</span>
               <img
                 src="/search_still_frame.png"
                 alt=""
@@ -623,7 +634,13 @@ const SmartSearchPage: React.FC = () => {
                 ? 'ابحث عن كتاب، اسأل سؤالاً، أو ابدأ قصة إبداعية.'
                 : 'Find a book, ask a question, or start a creative story.'}
             </p>
+            <div className="saqr-feature-chips" aria-hidden="true">
+              <span>{locale === 'ar' ? 'اكتشف كتاباً' : 'Discover a book'}</span>
+              <span>{locale === 'ar' ? 'اسأل صقر' : 'Ask Saqr'}</span>
+              <span>{locale === 'ar' ? 'ابتكر قصة' : 'Create a story'}</span>
+            </div>
           </div>
+          {composer}
         </main>
       ) : (
         <main className="saqr-active-chat">
@@ -726,7 +743,7 @@ const SmartSearchPage: React.FC = () => {
             </div>
             <div className="flex flex-1 flex-col items-center text-center">
               <div className="mb-1 flex h-16 w-16 items-center justify-center rounded-full border-2 border-amber-500/30 bg-amber-50/50">
-                <span className="text-xl font-black text-amber-600">EFIPS</span>
+                <span dir="ltr" className="text-xl font-black text-amber-600">EFIPS</span>
               </div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{t('certOfficial')}</p>
             </div>
@@ -751,27 +768,58 @@ const SmartSearchPage: React.FC = () => {
           height: 100dvh;
           min-height: 0;
           overflow: hidden;
+          color: #0f172a;
+          background: linear-gradient(135deg, #fbfdff 0%, #f3faff 52%, #fffdf5 100%);
           font-family: 'Cairo', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           -webkit-font-smoothing: antialiased;
           text-rendering: optimizeLegibility;
         }
-
+        .dark .saqr-page { color: #f1f5f9; background: #0b0f17; }
         .saqr-page, .saqr-page * { box-sizing: border-box; }
         .saqr-background {
           position: absolute;
           z-index: -1;
           inset: 0;
+          overflow: hidden;
           pointer-events: none;
           background:
-            radial-gradient(ellipse at 8% 0%, rgba(14, 165, 233, .09), transparent 38%),
-            radial-gradient(ellipse at 95% 100%, rgba(16, 185, 129, .07), transparent 32%);
+            radial-gradient(ellipse at 8% 0%, rgba(14, 165, 233, .12), transparent 38%),
+            radial-gradient(ellipse at 95% 100%, rgba(16, 185, 129, .10), transparent 32%),
+            radial-gradient(ellipse at 72% 18%, rgba(245, 158, 11, .055), transparent 30%);
+        }
+        .saqr-background::before,
+        .saqr-background::after {
+          position: absolute;
+          display: block;
+          content: '';
+          width: clamp(180px, 32vw, 460px);
+          aspect-ratio: 1;
+          border-radius: 50%;
+          filter: blur(58px);
+          opacity: .24;
+          will-change: transform;
+          animation: saqr-ambient-drift 18s ease-in-out infinite alternate;
+        }
+        .saqr-background::before {
+          top: 13%;
+          inset-inline-start: -12%;
+          background: radial-gradient(circle, rgba(56, 189, 248, .46), rgba(56, 189, 248, 0) 68%);
+        }
+        .saqr-background::after {
+          right: -12%;
+          bottom: 3%;
+          background: radial-gradient(circle, rgba(16, 185, 129, .30), rgba(16, 185, 129, 0) 68%);
+          animation-delay: -8s;
         }
         .dark .saqr-background {
           background:
-            radial-gradient(ellipse at 12% 0%, rgba(14, 165, 233, .15), transparent 38%),
-            radial-gradient(ellipse at 95% 100%, rgba(16, 185, 129, .07), transparent 32%),
+            radial-gradient(ellipse at 12% 0%, rgba(14, 165, 233, .17), transparent 38%),
+            radial-gradient(ellipse at 95% 100%, rgba(16, 185, 129, .09), transparent 32%),
+            radial-gradient(ellipse at 72% 18%, rgba(245, 158, 11, .045), transparent 30%),
             #0b0f17;
         }
+        .dark .saqr-background::before { opacity: .20; }
+        .dark .saqr-background::after { opacity: .16; }
 
         .saqr-header {
           position: relative;
@@ -782,28 +830,32 @@ const SmartSearchPage: React.FC = () => {
           justify-content: space-between;
           gap: 12px;
           width: 100%;
-          max-width: 920px;
+          max-width: 1080px;
           margin-inline: auto;
-          padding: 8px clamp(12px, 2.4vw, 24px);
+          padding: 10px clamp(12px, 2.4vw, 28px);
           border-bottom: 1px solid rgba(148, 163, 184, .20);
-          background: rgba(255, 255, 255, .80);
-          -webkit-backdrop-filter: blur(12px);
-          backdrop-filter: blur(12px);
+          background: rgba(255, 255, 255, .72);
+          box-shadow: 0 8px 26px rgba(15, 23, 42, .025);
+          -webkit-backdrop-filter: blur(18px);
+          backdrop-filter: blur(18px);
         }
-        .dark .saqr-header { background: rgba(11, 15, 23, .72); border-bottom-color: rgba(71, 85, 105, .23); }
+        .dark .saqr-header { background: rgba(11, 15, 23, .76); border-bottom-color: rgba(71, 85, 105, .28); box-shadow: 0 8px 26px rgba(0, 0, 0, .08); }
         .saqr-avatar {
+          position: relative;
           display: flex;
           flex: 0 0 auto;
           align-items: center;
           justify-content: center;
-          width: 38px;
-          height: 38px;
+          width: 42px;
+          height: 42px;
           overflow: hidden;
           border: 2px solid #38bdf8;
           border-radius: 50%;
           background: #e2e8f0;
-          box-shadow: 0 3px 10px rgba(14, 165, 233, .18);
+          box-shadow: 0 0 0 4px rgba(56, 189, 248, .09), 0 5px 16px rgba(14, 165, 233, .20);
+          transition: box-shadow .25s ease, transform .25s ease;
         }
+        .saqr-avatar:hover { transform: translateY(-1px); box-shadow: 0 0 0 5px rgba(56, 189, 248, .12), 0 8px 20px rgba(14, 165, 233, .24); }
         .dark .saqr-avatar { background: #1e293b; border-color: #0ea5e9; }
         .saqr-avatar-thinking { animation: saqr-ring-pulse 1.25s ease-in-out infinite; }
         .saqr-thinking-label { font-weight: 600; }
@@ -836,25 +888,27 @@ const SmartSearchPage: React.FC = () => {
           position: relative;
           z-index: 2;
           flex: 0 0 auto;
-          padding: 8px clamp(10px, 2vw, 20px) 7px;
+          padding: 10px clamp(10px, 2vw, 22px) 8px;
           text-align: center;
         }
         .saqr-welcome-card {
+          position: relative;
           width: fit-content;
-          max-width: min(100%, 640px);
+          max-width: min(100%, 680px);
           margin-inline: auto;
-          padding: 7px 18px 8px;
-          border: 1px solid rgba(56, 189, 248, .24);
-          border-radius: 18px;
-          background: linear-gradient(110deg, rgba(14, 165, 233, .075), rgba(245, 158, 11, .075), rgba(16, 185, 129, .075));
-          box-shadow: 0 5px 18px rgba(15, 23, 42, .035);
-          -webkit-backdrop-filter: blur(9px);
-          backdrop-filter: blur(9px);
+          padding: 9px clamp(16px, 2.2vw, 26px) 10px;
+          border: 1px solid rgba(56, 189, 248, .30);
+          border-radius: 20px;
+          background: linear-gradient(110deg, rgba(255, 255, 255, .76), rgba(240, 249, 255, .84) 43%, rgba(255, 251, 235, .76));
+          box-shadow: 0 8px 26px rgba(15, 23, 42, .045), inset 0 1px 0 rgba(255, 255, 255, .82);
+          -webkit-backdrop-filter: blur(14px);
+          backdrop-filter: blur(14px);
+          animation: saqr-card-in .55s cubic-bezier(.2,.75,.25,1) both;
         }
         .dark .saqr-welcome-card {
-          border-color: rgba(56, 189, 248, .20);
-          background: linear-gradient(110deg, rgba(14, 165, 233, .11), rgba(245, 158, 11, .075), rgba(16, 185, 129, .08));
-          box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+          border-color: rgba(56, 189, 248, .22);
+          background: linear-gradient(110deg, rgba(15, 23, 42, .84), rgba(12, 39, 55, .78) 43%, rgba(69, 49, 15, .22));
+          box-shadow: 0 8px 28px rgba(0, 0, 0, .18), inset 0 1px 0 rgba(148, 163, 184, .07);
         }
         .saqr-name-wrap {
           position: relative;
@@ -900,38 +954,85 @@ const SmartSearchPage: React.FC = () => {
           width: 100%;
           overflow: hidden;
         }
-        .saqr-empty-chat { justify-content: flex-start; }
+        .saqr-empty-chat { justify-content: space-between; }
         .saqr-active-chat { justify-content: flex-end; }
         .saqr-empty-chat .saqr-composer-wrap { flex: 0 0 auto; }
         .saqr-empty-guidance {
+          position: relative;
+          isolation: isolate;
           display: flex;
           flex: 1 1 auto;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          min-height: 100px;
-          padding: 12px 18px 24px;
+          min-height: 120px;
+          padding: clamp(8px, 2vh, 20px) 18px clamp(12px, 2.8vh, 28px);
           text-align: center;
-          background: radial-gradient(ellipse at center, rgba(14, 165, 233, .055), transparent 68%);
+          background: radial-gradient(ellipse at center, rgba(14, 165, 233, .075), transparent 67%);
         }
-        .dark .saqr-empty-guidance { background: radial-gradient(ellipse at center, rgba(14, 165, 233, .08), transparent 68%); }
+        .saqr-empty-guidance::before {
+          position: absolute;
+          z-index: -1;
+          top: 15%;
+          left: 50%;
+          width: min(76vw, 480px);
+          aspect-ratio: 1;
+          border: 1px solid rgba(56, 189, 248, .075);
+          border-radius: 50%;
+          content: '';
+          transform: translateX(-50%);
+          pointer-events: none;
+        }
+        .dark .saqr-empty-guidance { background: radial-gradient(ellipse at center, rgba(14, 165, 233, .10), transparent 68%); }
+        .saqr-hero-kicker {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          max-width: 100%;
+          margin-bottom: clamp(8px, 1.7vh, 16px);
+          padding: 6px 12px;
+          border: 1px solid rgba(14, 165, 233, .18);
+          border-radius: 999px;
+          color: #0369a1;
+          background: rgba(255, 255, 255, .64);
+          box-shadow: 0 4px 14px rgba(15, 23, 42, .035);
+          font-size: clamp(9px, 1.05vw, 11px);
+          font-weight: 900;
+          letter-spacing: .035em;
+          animation: saqr-card-in .65s .05s both;
+        }
+        .dark .saqr-hero-kicker { color: #7dd3fc; border-color: rgba(56, 189, 248, .22); background: rgba(15, 23, 42, .70); }
+        .saqr-hero-kicker-dot { width: 6px; height: 6px; flex: 0 0 auto; border-radius: 50%; background: #10b981; box-shadow: 0 0 0 4px rgba(16, 185, 129, .10); }
         .saqr-empty-orbit {
+          position: relative;
           display: flex;
           align-items: center;
           justify-content: center;
-          width: clamp(66px, 9vh, 100px);
-          height: clamp(66px, 9vh, 100px);
-          margin-bottom: 10px;
-          overflow: hidden;
-          border: 1px solid rgba(56, 189, 248, .28);
+          width: clamp(76px, 11vh, 116px);
+          height: clamp(76px, 11vh, 116px);
+          margin-bottom: clamp(10px, 1.8vh, 17px);
+          overflow: visible;
+          border: 1px solid rgba(56, 189, 248, .42);
           border-radius: 50%;
-          background: rgba(14, 165, 233, .055);
-          box-shadow: 0 0 0 8px rgba(14, 165, 233, .025), 0 8px 24px rgba(15, 23, 42, .045);
+          background: linear-gradient(145deg, rgba(255, 255, 255, .87), rgba(224, 242, 254, .58));
+          box-shadow: 0 0 0 8px rgba(14, 165, 233, .035), 0 0 0 18px rgba(14, 165, 233, .022), 0 12px 34px rgba(15, 23, 42, .075), inset 0 1px 0 rgba(255, 255, 255, .8);
+          animation: saqr-orbit-float 5s ease-in-out infinite;
         }
-        .saqr-empty-orbit img { width: 100%; height: 100%; object-fit: cover; }
-        .saqr-empty-heading { margin: 0; color: #334155; font-size: clamp(14px, 1.7vw, 19px); font-weight: 850; }
+        .dark .saqr-empty-orbit { border-color: rgba(56, 189, 248, .32); background: linear-gradient(145deg, rgba(30, 41, 59, .9), rgba(14, 116, 144, .20)); box-shadow: 0 0 0 8px rgba(14, 165, 233, .045), 0 0 0 18px rgba(14, 165, 233, .025), 0 14px 38px rgba(0, 0, 0, .20); }
+        .saqr-empty-orbit img { position: relative; z-index: 2; width: 100%; height: 100%; overflow: hidden; border-radius: 50%; object-fit: cover; }
+        .saqr-orbit-ring { position: absolute; z-index: 1; inset: -10px; border: 1px solid rgba(14, 165, 233, .19); border-radius: 50%; pointer-events: none; }
+        .saqr-orbit-ring-one { animation: saqr-ring-rotate 16s linear infinite; border-top-color: rgba(14, 165, 233, .56); border-bottom-color: rgba(245, 158, 11, .32); }
+        .saqr-orbit-ring-two { inset: -17px; border-style: dashed; border-color: rgba(16, 185, 129, .15); animation: saqr-ring-rotate 24s linear infinite reverse; }
+        .saqr-orbit-spark { position: absolute; z-index: 3; color: #d97706; text-shadow: 0 2px 12px rgba(245, 158, 11, .32); line-height: 1; }
+        .saqr-orbit-spark-one { top: 5%; inset-inline-end: -15%; font-size: 20px; animation: saqr-sparkle 2.8s ease-in-out infinite; }
+        .saqr-orbit-spark-two { bottom: 8%; inset-inline-start: -15%; color: #0ea5e9; font-size: 17px; animation: saqr-sparkle 3.4s .6s ease-in-out infinite; }
+        .saqr-empty-heading { margin: 0; color: #1e3a5f; font-size: clamp(16px, 2vw, 23px); font-weight: 900; letter-spacing: -.025em; line-height: 1.45; animation: saqr-card-in .7s .1s both; }
         .dark .saqr-empty-heading { color: #e2e8f0; }
-        .saqr-empty-subheading { max-width: 420px; margin: 4px 0 0; color: #94a3b8; font-size: clamp(11px, 1.2vw, 13px); line-height: 1.6; }
+        .saqr-empty-subheading { max-width: 460px; margin: 5px 0 0; color: #64748b; font-size: clamp(11px, 1.2vw, 14px); line-height: 1.75; animation: saqr-card-in .7s .16s both; }
+        .dark .saqr-empty-subheading { color: #94a3b8; }
+        .saqr-feature-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; margin-top: clamp(10px, 2vh, 18px); animation: saqr-card-in .7s .22s both; }
+        .saqr-feature-chips span { padding: 5px 11px; border: 1px solid rgba(148, 163, 184, .22); border-radius: 999px; color: #475569; background: rgba(255, 255, 255, .56); box-shadow: 0 3px 10px rgba(15, 23, 42, .025); font-size: 10px; font-weight: 800; }
+        .dark .saqr-feature-chips span { color: #cbd5e1; border-color: rgba(71, 85, 105, .42); background: rgba(15, 23, 42, .62); }
         .saqr-active-chat .saqr-messages { flex: 1 1 auto; }
 
         /* Scroll only the conversation pane; the composer is directly beneath the latest turn. */
@@ -977,10 +1078,10 @@ const SmartSearchPage: React.FC = () => {
           min-width: 0;
           padding: 10px 14px;
           border: 1px solid rgba(148, 163, 184, .22);
-          border-radius: 19px 19px 19px 5px;
+          border-radius: 20px 20px 20px 6px;
           color: #1e293b;
-          background: rgba(248, 250, 252, .95);
-          box-shadow: 0 3px 12px rgba(15, 23, 42, .035);
+          background: linear-gradient(145deg, rgba(255, 255, 255, .98), rgba(248, 250, 252, .94));
+          box-shadow: 0 6px 20px rgba(15, 23, 42, .045), inset 0 1px 0 rgba(255, 255, 255, .9);
           font-size: clamp(13px, 1.15vw, 15px);
           font-weight: 500;
           line-height: 1.65;
@@ -1010,8 +1111,8 @@ const SmartSearchPage: React.FC = () => {
           border: 1px solid rgba(255, 255, 255, .18);
           border-radius: 19px 19px 5px 19px;
           color: #fff;
-          background: linear-gradient(135deg, #0ea5e9, #0284c7);
-          box-shadow: 0 4px 12px rgba(2, 132, 199, .16);
+          background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 72%, #0369a1 100%);
+          box-shadow: 0 7px 18px rgba(2, 132, 199, .20), inset 0 1px 0 rgba(255, 255, 255, .18);
           font-size: clamp(13px, 1.1vw, 15px);
           font-weight: 650;
           line-height: 1.6;
@@ -1031,12 +1132,12 @@ const SmartSearchPage: React.FC = () => {
           z-index: 4;
           flex: 0 0 auto;
           width: 100%;
-          padding: 6px clamp(9px, 2vw, 20px) max(6px, env(safe-area-inset-bottom));
-          border-top: 1px solid rgba(148, 163, 184, .18);
-          background: rgba(255, 255, 255, .93);
-          box-shadow: 0 -7px 22px rgba(15, 23, 42, .045);
-          -webkit-backdrop-filter: blur(14px);
-          backdrop-filter: blur(14px);
+          padding: 9px clamp(9px, 2vw, 24px) max(8px, env(safe-area-inset-bottom));
+          border-top: 1px solid rgba(148, 163, 184, .19);
+          background: rgba(255, 255, 255, .82);
+          box-shadow: 0 -10px 30px rgba(15, 23, 42, .055);
+          -webkit-backdrop-filter: blur(20px);
+          backdrop-filter: blur(20px);
         }
         .dark .saqr-composer-wrap {
           border-top-color: rgba(71, 85, 105, .28);
@@ -1074,15 +1175,16 @@ const SmartSearchPage: React.FC = () => {
           gap: 8px;
           width: 100%;
           min-height: 48px;
-          padding: 5px 6px 5px 13px;
-          border: 1px solid rgba(148, 163, 184, .38);
-          border-radius: 999px;
-          background: #f1f5f9;
-          box-shadow: 0 4px 15px rgba(15, 23, 42, .06), inset 0 1px 0 rgba(255, 255, 255, .7);
-          transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
+          padding: 6px 7px 6px 15px;
+          border: 1px solid rgba(148, 163, 184, .34);
+          border-radius: 22px;
+          background: rgba(248, 250, 252, .94);
+          box-shadow: 0 6px 22px rgba(15, 23, 42, .07), inset 0 1px 0 rgba(255, 255, 255, .9);
+          transition: border-color .22s ease, box-shadow .22s ease, background-color .22s ease, transform .22s ease;
         }
-        .dark .saqr-composer { border-color: rgba(71, 85, 105, .7); background: #1a1f2e; box-shadow: 0 4px 16px rgba(0, 0, 0, .17); }
-        .saqr-composer:focus-within { border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14, 165, 233, .13), 0 5px 18px rgba(15, 23, 42, .07); }
+        .dark .saqr-composer { border-color: rgba(71, 85, 105, .7); background: rgba(26, 31, 46, .94); box-shadow: 0 5px 20px rgba(0, 0, 0, .20); }
+        .saqr-composer:focus-within { border-color: #0ea5e9; background: #fff; box-shadow: 0 0 0 4px rgba(14, 165, 233, .12), 0 8px 24px rgba(15, 23, 42, .09); transform: translateY(-1px); }
+        .dark .saqr-composer:focus-within { background: #111827; }
         .saqr-input {
           display: block;
           flex: 1 1 auto;
@@ -1139,27 +1241,48 @@ const SmartSearchPage: React.FC = () => {
           border: 16px solid #f59e0b;
           color: #0f172a;
           background: linear-gradient(135deg, #fff, #f8fafc, rgba(255, 251, 235, .65));
-          font-family: 'Cairo', sans-serif;
+          font-family: 'Cairo', Tahoma, Arial, sans-serif;
+          font-kerning: normal;
+          text-rendering: optimizeLegibility;
         }
+        .saqr-certificate[dir="rtl"],
+        .saqr-certificate[dir="rtl"] * {
+          letter-spacing: normal !important;
+          word-spacing: normal;
+          font-kerning: normal;
+        }
+        .saqr-certificate [dir="ltr"] { direction: ltr; unicode-bidi: isolate; }
+        .saqr-certificate[dir="rtl"] [dir="ltr"] { letter-spacing: .08em !important; }
+        .saqr-certificate p,
+        .saqr-certificate h1,
+        .saqr-certificate h2,
+        .saqr-certificate h3,
+        .saqr-certificate h4 { font-variant-ligatures: common-ligatures contextual; }
 
         @keyframes saqr-ring-pulse {
           0%, 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, .10); }
           50% { box-shadow: 0 0 0 4px rgba(251, 191, 36, .34); }
         }
+        @keyframes saqr-ambient-drift { 0% { transform: translate3d(0, 0, 0) scale(1); } 100% { transform: translate3d(7%, -5%, 0) scale(1.12); } }
+        @keyframes saqr-orbit-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        @keyframes saqr-ring-rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes saqr-sparkle { 0%, 100% { opacity: .55; transform: scale(.85) rotate(-8deg); } 50% { opacity: 1; transform: scale(1.12) rotate(10deg); } }
+        @keyframes saqr-card-in { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes saqr-glow-breathe { 0%, 100% { opacity: .18; transform: scale(.98); } 50% { opacity: .34; transform: scale(1.025); } }
         @keyframes saqr-dot-bounce { 0%, 60%, 100% { transform: translateY(0); opacity: .55; } 30% { transform: translateY(-4px); opacity: 1; } }
         @keyframes saqr-progress { 0% { left: -45%; } 100% { left: 110%; } }
 
         @media (min-width: 640px) {
-          .saqr-avatar { width: 42px; height: 42px; }
-          .saqr-welcome-wrap { padding-top: 9px; padding-bottom: 8px; }
-          .saqr-welcome-card { padding: 8px 22px 9px; }
-          .saqr-assistant-bubble { padding: 11px 16px; }
-          .saqr-composer-wrap { padding-top: 9px; }
-          .saqr-composer { min-height: 52px; padding-inline-start: 15px; }
+          .saqr-avatar { width: 46px; height: 46px; }
+          .saqr-welcome-wrap { padding-top: 10px; padding-bottom: 9px; }
+          .saqr-welcome-card { padding: 9px 24px 10px; }
+          .saqr-assistant-bubble { padding: 12px 17px; }
+          .saqr-composer-wrap { padding-top: 10px; }
+          .saqr-composer { min-height: 54px; padding-inline-start: 16px; }
           .saqr-input { font-size: 15px; }
-          .saqr-send-button { width: 40px; height: 40px; }
-          .saqr-quick-button { font-size: 12px; padding: 6px 13px; }
+          .saqr-send-button { width: 42px; height: 42px; }
+          .saqr-quick-button { font-size: 12px; padding: 7px 14px; }
+          .saqr-feature-chips span { font-size: 11px; padding: 6px 13px; }
         }
         @media (min-width: 1024px) {
           .saqr-header { padding-top: 9px; padding-bottom: 9px; }
@@ -1177,27 +1300,44 @@ const SmartSearchPage: React.FC = () => {
           .saqr-name-text { font-size: 17px; }
           .saqr-composer-wrap { padding-top: 5px; }
           .saqr-footer-note { display: none; }
+          .saqr-hero-kicker { margin-bottom: 5px; padding-block: 4px; }
+          .saqr-empty-orbit { width: 58px; height: 58px; margin-bottom: 7px; }
+          .saqr-orbit-ring { inset: -6px; }
+          .saqr-orbit-ring-two { inset: -11px; }
+          .saqr-feature-chips { margin-top: 6px; }
+          .saqr-feature-chips span { padding-block: 3px; }
+          .saqr-empty-guidance { padding-top: 4px; padding-bottom: 8px; }
         }
         @media (max-width: 420px) {
           .saqr-header { padding-inline: 10px; }
-          .saqr-welcome-card { padding-inline: 12px; }
+          .saqr-welcome-wrap { padding-inline: 8px; }
+          .saqr-welcome-card { padding-inline: 12px; border-radius: 16px; }
           .saqr-assistant-column { max-width: 97%; }
           .saqr-assistant-bubble { padding: 9px 11px; border-radius: 16px 16px 16px 4px; font-size: 13px; }
           .saqr-user-bubble { max-width: 91%; padding: 8px 12px; }
           .saqr-quick-actions { gap: 5px; }
           .saqr-quick-button { min-height: 29px; padding: 5px 8px; font-size: 10px; }
-          .saqr-composer { min-height: 46px; padding: 4px 5px 4px 10px; gap: 5px; }
+          .saqr-composer-wrap { padding-inline: 9px; }
+          .saqr-composer { min-height: 46px; padding: 4px 5px 4px 10px; gap: 5px; border-radius: 19px; }
           .saqr-input { min-height: 34px; font-size: 13px; }
           .saqr-send-button { width: 35px; height: 35px; }
-        }
-        @media (max-height: 650px) {
-          .saqr-empty-guidance { padding-top: 6px; padding-bottom: 10px; }
-          .saqr-empty-orbit { width: 52px; height: 52px; margin-bottom: 5px; }
-          .saqr-empty-subheading { margin-top: 2px; }
-        }
-        @media (max-width: 420px) {
           .saqr-empty-guidance { padding-inline: 14px; }
-          .saqr-empty-orbit { width: 62px; height: 62px; }
+          .saqr-empty-orbit { width: 68px; height: 68px; }
+          .saqr-feature-chips { gap: 5px; }
+          .saqr-feature-chips span { padding: 4px 8px; font-size: 9px; }
+          .saqr-hero-kicker { font-size: 9px; }
+        }
+        @media (max-width: 340px) {
+          .saqr-feature-chips { display: none; }
+          .saqr-empty-subheading { max-width: 280px; }
+          .saqr-hero-kicker { max-width: calc(100vw - 36px); letter-spacing: 0; }
+        }
+        @media (max-width: 420px) and (max-height: 650px) {
+          .saqr-empty-orbit { width: 52px; height: 52px; margin-bottom: 5px; }
+          .saqr-orbit-ring { inset: -5px; }
+          .saqr-orbit-ring-two { inset: -9px; }
+          .saqr-feature-chips { display: none; }
+          .saqr-empty-subheading { margin-top: 2px; }
         }
         @media (prefers-reduced-motion: reduce) {
           .saqr-page *, .saqr-page *::before, .saqr-page *::after {
