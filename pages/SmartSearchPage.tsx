@@ -478,8 +478,6 @@ const SmartSearchPage: React.FC = () => {
     }
   };
 
-  const getSaqrImageSrc = () => saqrState === 'idle' ? '/search_still_frame.png' : '/Search.gif';
-
   // The welcome response remains in the conversation context sent to the API,
   // but is shown in the welcome banner instead of being duplicated in the chat.
   const hasConversation = messages.some((message) => message.role === 'user');
@@ -558,38 +556,6 @@ const SmartSearchPage: React.FC = () => {
     <div dir={dir} className="saqr-page bg-white text-slate-900 dark:bg-[#0b0f17] dark:text-slate-100">
       {/* الخلفية */}
       <div className="saqr-background" aria-hidden="true" />
-
-      {/* Header */}
-      <header className="saqr-header">
-        <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
-          <div className={`saqr-avatar ${saqrState === 'thinking' ? 'saqr-avatar-thinking' : ''}`}>
-            <img
-              src={getSaqrImageSrc()}
-              alt="Saqr AI"
-              className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
-              onError={(event) => { event.currentTarget.style.display = 'none'; }}
-            />
-          </div>
-          <div className="min-w-0">
-            <h1 className="text-sm font-extrabold leading-tight tracking-tight text-slate-900 dark:text-white sm:text-base md:text-lg">
-              {t('status')}
-            </h1>
-            <span className="mt-0.5 inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 sm:text-xs">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
-              {t('online')}
-              {saqrState === 'thinking' && <span className="saqr-thinking-label">· {locale === 'ar' ? 'يفكر الآن' : 'Thinking'}</span>}
-            </span>
-          </div>
-        </div>
-
-        {winnerData && saqrState === 'victory' && (
-          <button onClick={handleDownloadJPG} className="saqr-download-button" type="button">
-            <DownloadIcon />
-            <span className="hidden sm:inline">{t('download')}</span>
-            <span className="sm:hidden">{locale === 'ar' ? 'تحميل' : 'Download'}</span>
-          </button>
-        )}
-      </header>
 
       {/* Compact welcome banner */}
       <section className="saqr-welcome-wrap" aria-label={locale === 'ar' ? 'رسالة الترحيب' : 'Welcome'}>
@@ -821,44 +787,6 @@ const SmartSearchPage: React.FC = () => {
         .dark .saqr-background::before { opacity: .20; }
         .dark .saqr-background::after { opacity: .16; }
 
-        .saqr-header {
-          position: relative;
-          z-index: 3;
-          display: flex;
-          flex: 0 0 auto;
-          align-items: center;
-          justify-content: space-between;
-          gap: 12px;
-          width: 100%;
-          max-width: 1080px;
-          margin-inline: auto;
-          padding: 10px clamp(12px, 2.4vw, 28px);
-          border-bottom: 1px solid rgba(148, 163, 184, .20);
-          background: rgba(255, 255, 255, .72);
-          box-shadow: 0 8px 26px rgba(15, 23, 42, .025);
-          -webkit-backdrop-filter: blur(18px);
-          backdrop-filter: blur(18px);
-        }
-        .dark .saqr-header { background: rgba(11, 15, 23, .76); border-bottom-color: rgba(71, 85, 105, .28); box-shadow: 0 8px 26px rgba(0, 0, 0, .08); }
-        .saqr-avatar {
-          position: relative;
-          display: flex;
-          flex: 0 0 auto;
-          align-items: center;
-          justify-content: center;
-          width: 42px;
-          height: 42px;
-          overflow: hidden;
-          border: 2px solid #38bdf8;
-          border-radius: 50%;
-          background: #e2e8f0;
-          box-shadow: 0 0 0 4px rgba(56, 189, 248, .09), 0 5px 16px rgba(14, 165, 233, .20);
-          transition: box-shadow .25s ease, transform .25s ease;
-        }
-        .saqr-avatar:hover { transform: translateY(-1px); box-shadow: 0 0 0 5px rgba(56, 189, 248, .12), 0 8px 20px rgba(14, 165, 233, .24); }
-        .dark .saqr-avatar { background: #1e293b; border-color: #0ea5e9; }
-        .saqr-avatar-thinking { animation: saqr-ring-pulse 1.25s ease-in-out infinite; }
-        .saqr-thinking-label { font-weight: 600; }
         .saqr-download-button, .saqr-inline-download {
           display: inline-flex;
           align-items: center;
@@ -1273,7 +1201,7 @@ const SmartSearchPage: React.FC = () => {
         @keyframes saqr-progress { 0% { left: -45%; } 100% { left: 110%; } }
 
         @media (min-width: 640px) {
-          .saqr-avatar { width: 46px; height: 46px; }
+
           .saqr-welcome-wrap { padding-top: 10px; padding-bottom: 9px; }
           .saqr-welcome-card { padding: 9px 24px 10px; }
           .saqr-assistant-bubble { padding: 12px 17px; }
@@ -1285,15 +1213,12 @@ const SmartSearchPage: React.FC = () => {
           .saqr-feature-chips span { font-size: 11px; padding: 6px 13px; }
         }
         @media (min-width: 1024px) {
-          .saqr-header { padding-top: 9px; padding-bottom: 9px; }
           .saqr-welcome-wrap { padding-top: 10px; padding-bottom: 8px; }
           .saqr-messages { padding-inline: 24px; }
           .saqr-messages-inner { gap: 10px; }
           .saqr-composer-wrap { padding-top: 10px; }
         }
         @media (max-height: 650px) {
-          .saqr-header { padding-top: 5px; padding-bottom: 5px; }
-          .saqr-avatar { width: 32px; height: 32px; }
           .saqr-welcome-wrap { padding-top: 4px; padding-bottom: 3px; }
           .saqr-welcome-card { padding-top: 4px; padding-bottom: 5px; }
           .saqr-name-wrap { margin-top: 1px; }
@@ -1309,7 +1234,6 @@ const SmartSearchPage: React.FC = () => {
           .saqr-empty-guidance { padding-top: 4px; padding-bottom: 8px; }
         }
         @media (max-width: 420px) {
-          .saqr-header { padding-inline: 10px; }
           .saqr-welcome-wrap { padding-inline: 8px; }
           .saqr-welcome-card { padding-inline: 12px; border-radius: 16px; }
           .saqr-assistant-column { max-width: 97%; }
@@ -1347,6 +1271,123 @@ const SmartSearchPage: React.FC = () => {
             transition-duration: .01ms !important;
           }
         }
+
+        /* Clean monochrome canvas: light mode is white; dark mode is pure black. */
+        .saqr-page {
+          background: #ffffff !important;
+          background-image: none !important;
+          color: #111827;
+        }
+        .dark .saqr-page {
+          background: #000000 !important;
+          background-image: none !important;
+          color: #f9fafb !important;
+        }
+        .saqr-background,
+        .saqr-background::before,
+        .saqr-background::after {
+          display: none !important;
+          background: none !important;
+          background-image: none !important;
+          animation: none !important;
+        }
+
+        /* Keep the welcome content, but remove the tinted/glass gradient card. */
+        .saqr-welcome-card,
+        .dark .saqr-welcome-card {
+          background: transparent !important;
+          background-image: none !important;
+          box-shadow: none !important;
+          -webkit-backdrop-filter: none !important;
+          backdrop-filter: none !important;
+        }
+        .saqr-name-glow { display: none !important; animation: none !important; }
+        .saqr-name-text {
+          background: none !important;
+          background-image: none !important;
+          color: #0284c7 !important;
+          -webkit-text-fill-color: #0284c7 !important;
+        }
+        .dark .saqr-name-text {
+          background: none !important;
+          background-image: none !important;
+          color: #38bdf8 !important;
+          -webkit-text-fill-color: #38bdf8 !important;
+        }
+        .saqr-empty-guidance,
+        .dark .saqr-empty-guidance {
+          background: transparent !important;
+          background-image: none !important;
+        }
+        .saqr-empty-guidance::before { display: none !important; content: none !important; }
+        .saqr-hero-kicker,
+        .dark .saqr-hero-kicker {
+          background: transparent !important;
+          background-image: none !important;
+          box-shadow: none !important;
+        }
+        .saqr-empty-orbit,
+        .dark .saqr-empty-orbit {
+          background: transparent !important;
+          background-image: none !important;
+          box-shadow: none !important;
+        }
+        /* The concentric rings and sparkles continue orbiting the icon. */
+        .saqr-orbit-ring-one { animation-duration: 13s !important; }
+        .saqr-orbit-ring-two { animation-duration: 19s !important; }
+        .saqr-feature-chips span,
+        .dark .saqr-feature-chips span {
+          background: transparent !important;
+          background-image: none !important;
+          box-shadow: none !important;
+        }
+
+        /* Message and input surfaces use solid colors, not gradients. */
+        .saqr-assistant-bubble {
+          background: #f8fafc !important;
+          background-image: none !important;
+        }
+        .dark .saqr-assistant-bubble {
+          background: #0b0b0b !important;
+          background-image: none !important;
+        }
+        .saqr-user-bubble,
+        .dark .saqr-user-bubble {
+          background: #0284c7 !important;
+          background-image: none !important;
+        }
+        .saqr-composer-wrap {
+          background: #ffffff !important;
+          background-image: none !important;
+          box-shadow: none !important;
+          -webkit-backdrop-filter: none !important;
+          backdrop-filter: none !important;
+        }
+        .dark .saqr-composer-wrap {
+          background: #000000 !important;
+          background-image: none !important;
+          box-shadow: none !important;
+        }
+        .saqr-composer {
+          background: #ffffff !important;
+          background-image: none !important;
+          box-shadow: none !important;
+        }
+        .dark .saqr-composer {
+          background: #080808 !important;
+          background-image: none !important;
+          box-shadow: none !important;
+        }
+        .saqr-send-button,
+        .dark .saqr-send-button {
+          background: #0284c7 !important;
+          background-image: none !important;
+        }
+        .saqr-progress-bar {
+          background: #0ea5e9 !important;
+          background-image: none !important;
+        }
+
       `}</style>
     </div>
   );
