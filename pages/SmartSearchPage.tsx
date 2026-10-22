@@ -630,7 +630,7 @@ const SmartSearchPage: React.FC = () => {
                     {msg.role === 'assistant' ? (
                       <div className="saqr-assistant-column">
                         <div className="saqr-assistant-bubble" translate="no" lang={locale}>
-                          <div className="saqr-markdown prose prose-slate max-w-none text-start dark:prose-invert">
+                          <div className={`saqr-markdown prose prose-slate max-w-none text-start dark:prose-invert ${index > 0 && isLessonPlanRequest(visibleMessages[index - 1]?.content || '') ? 'saqr-lesson-markdown' : ''}`}>
                             <ReactMarkdown>{msg.role === 'assistant' && index > 0 && isLessonPlanRequest(visibleMessages[index - 1]?.content || '') ? formatLessonPlanDisplay(msg.content) : msg.content}</ReactMarkdown>
                           </div>
                         </div>
@@ -1039,10 +1039,10 @@ const SmartSearchPage: React.FC = () => {
         .saqr-markdown p { margin-top: .25em; margin-bottom: .55em; }
         .saqr-markdown ul, .saqr-markdown ol { margin-top: .35em; margin-bottom: .6em; padding-inline-start: 1.35em; }
         .saqr-markdown li { margin-block: .15em; }
-        .saqr-markdown li { display: list-item; line-height: 1.85; }
-        .saqr-markdown li + li { margin-block-start: .55em; }
-        .saqr-markdown li > p { margin: 0; }
-        .saqr-markdown ul, .saqr-markdown ol { list-style-position: outside; }
+        .saqr-lesson-markdown li { display: list-item; line-height: 1.85; }
+        .saqr-lesson-markdown li + li { margin-block-start: .55em; }
+        .saqr-lesson-markdown li > p { margin: 0; }
+        .saqr-lesson-markdown ul, .saqr-lesson-markdown ol { list-style-position: outside; }
 
         .saqr-markdown h1, .saqr-markdown h2, .saqr-markdown h3, .saqr-markdown h4 { margin-top: .75em; margin-bottom: .3em; font-weight: 800; line-height: 1.4; }
         .saqr-markdown h1, .saqr-markdown h2, .saqr-markdown h3 { color: #0284c7; }
