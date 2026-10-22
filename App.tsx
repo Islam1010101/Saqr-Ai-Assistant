@@ -24,6 +24,7 @@ import PodcastPage from './pages/PodcastPage';
 import NewArrivalsPage from './pages/NewArrivalsPage';
 import DeweyGame from './pages/game';
 import SchedulePage from './pages/SchedulePage';
+import TutorialPage from './pages/TutorialPage';
 
 export type Locale = 'en' | 'ar';
 
@@ -66,7 +67,7 @@ const FloatingSaqr: React.FC<{ onOpenModal: () => void }> = ({ onOpenModal }) =>
   const { dir } = useLanguage();
   const [ripples, setRipples] = useState<{ id: number; x: number; y: number }[]>([]);
 
-  if (location.pathname === '/' || location.pathname === '/admin-dashboard' || location.pathname === '/about') return null;
+  if (location.pathname === '/' || location.pathname === '/admin-dashboard' || location.pathname === '/about' || location.pathname === '/tutorial') return null;
 
   const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
     const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
@@ -227,7 +228,7 @@ const Header: React.FC = () => {
   }, [location.pathname]);
 
   useEffect(() => {
-    if (location.pathname === '/' || location.pathname === '/admin-dashboard' || location.pathname === '/about') {
+    if (location.pathname === '/' || location.pathname === '/admin-dashboard' || location.pathname === '/about' || location.pathname === '/tutorial') {
       return;
     }
 
@@ -247,7 +248,7 @@ const Header: React.FC = () => {
     return () => window.removeEventListener('scroll', controlNavbar);
   }, [lastScrollY, location.pathname]);
 
-  if (location.pathname === '/' || location.pathname === '/admin-dashboard' || location.pathname === '/about') return null;
+  if (location.pathname === '/' || location.pathname === '/admin-dashboard' || location.pathname === '/about' || location.pathname === '/tutorial') return null;
 
   const allLinks: NavLink[] = [
     { path: '/search', label: locale === 'en' ? 'Search' : 'البحث بالمكتبة', hint: 'Search', color: 'bg-rose-500', roles: ['student', 'teacher', 'admin'] },
@@ -377,7 +378,8 @@ const MainLayout: React.FC = () => {
     location.pathname === '/' ||
     location.pathname === '/admin-dashboard' ||
     location.pathname === '/about' ||
-    location.pathname === '/game';
+    location.pathname === '/game' ||
+    location.pathname === '/tutorial';
 
   return (
     <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 font-sans transition-colors duration-300 flex flex-col relative">
@@ -386,14 +388,15 @@ const MainLayout: React.FC = () => {
 
       <main
         className={`flex-1 relative z-10 w-full ${
-          location.pathname === '/' || location.pathname === '/admin-dashboard' || location.pathname === '/about'
+          location.pathname === '/' || location.pathname === '/admin-dashboard' || location.pathname === '/about' || location.pathname === '/tutorial'
             ? 'pt-0'
             : 'pt-20 md:pt-24'
         }`}
       >
         <Routes>
-          {/* صفحة تسجيل الدخول العامة */}
+          {/* صفحات عامة لا تتطلب تسجيل الدخول */}
           <Route path="/" element={<Login />} />
+          <Route path="/tutorial" element={<TutorialPage />} />
           
           {/* باقي الصفحات محمية تتطلب تسجيل الدخول */}
           <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
