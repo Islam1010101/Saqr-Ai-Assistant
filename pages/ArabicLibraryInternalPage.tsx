@@ -5,6 +5,7 @@ import { trackActivity } from '../src/utils/tracker';
 import { supabase } from '../src/utils/supabase';
 import { useReadingPassport, digitalBookKey } from '../src/utils/readingPassport';
 import DigitalBookRating from '../src/components/DigitalBookRating';
+import VerifiedReaderAccess from '../src/components/VerifiedReaderAccess';
 
 // --- 1. قاعدة البيانات ---
 export const ARABIC_LIBRARY_DATABASE = [
@@ -473,6 +474,7 @@ const ArabicLibraryInternalPage: React.FC = () => {
             </div>
 
             <div className="max-w-[1400px] mx-auto px-4 md:px-6 pb-20 relative z-10 antialiased overflow-x-hidden">
+                <div className="flex justify-center pt-7"><VerifiedReaderAccess /></div>
                 
                 <div className="text-center mt-12 mb-12 relative animate-fade-in-up">
                     <button onClick={() => navigate(-1)} className="absolute start-0 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-800 text-slate-800 dark:text-white px-5 py-2.5 rounded-full font-black text-sm hover:bg-slate-200 hover:-translate-x-1 active:translate-y-1 border-b-4 border-slate-300 dark:border-slate-700 active:border-b-0 transition-all flex items-center gap-2 shadow-sm">
