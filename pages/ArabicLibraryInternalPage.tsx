@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { trackActivity } from '../src/utils/tracker';
 import { supabase } from '../src/utils/supabase';
 import { useReadingPassport, digitalBookKey } from '../src/utils/readingPassport';
+import DigitalBookRating from '../src/components/DigitalBookRating';
 
 // --- 1. قاعدة البيانات ---
 export const ARABIC_LIBRARY_DATABASE = [
@@ -291,6 +292,8 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
                             <p className="text-2xl font-black text-rose-600 truncate">{loading ? '...' : (ageGroup || 'عام')}</p>
                         </div>
 
+                        <DigitalBookRating bookId={digitalBookKey('ar', book)} compact={false} />
+
                         <div className="pt-6">
                             <a href={book.driveLink} target="_blank" rel="noreferrer" className="w-full block bg-emerald-500 text-white font-black py-4 rounded-[2rem] hover:-translate-y-1 active:translate-y-2 border-b-8 border-emerald-700 active:border-b-0 transition-all text-center uppercase tracking-widest text-base shadow-md">
                                 {t('read')}
@@ -408,6 +411,7 @@ const BookCard = React.memo(({ book, onClick, t }: { book: any; onClick: () => v
                 <UserIcon/>
                 <p className="text-xs md:text-sm font-bold truncate uppercase tracking-wide">{book.author}</p>
             </div>
+            <DigitalBookRating bookId={readingKey} />
           </div>
         </div>
 
