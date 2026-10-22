@@ -69,3 +69,33 @@ export const persistCloudSaved = async (uid: string, key: string, saved: boolean
     if (error) throw error;
   }
 };
+
+export const currentReadingMonth = (): string => {
+  const now = new Date();
+  return now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-01';
+};
+export const loadReadingProgress = async (uid: string, month: string) => {
+  const [goals, completions] = await Promise.all([
+    supabase.from('efips_reading_goals').select('target_books').eq('user_id', uid).eq('goal_month',month).maybeSingle(),
+    supabase.from('efips_reading_completions').select('book_key,completed_on').eq('user_id',uid).limit(1000)
+  ]);
+  if(goals.error) throw goals.error;
+  if(completions.error) throw completions.error;
+  return { goal: goals.data?.target_books == null ? null : Number(goals.data.target_books),
+    completed: (completions.data || []).map(r=>({key: String(r.book_key),date: String(r.completed_on)})) };
+};
+export const saveReadingGoal = async(uid:string,month:string,target:number) => {
+  const user = await getVerifiedReader(); if(!user || user.id!==uid) throw new Error('Verification required');
+  const {error}=await supabase.from('efips_reading_goals').upsert({user_id:uid,goal_month:month,target_books:target,updated_at:new Date().toISOString()},{onConflict:'user_id,goal_month'});
+  if(error) throw error;
+};
+export const saveReadingCompletion = async(uid:string,key:string,date:string|null) => {
+  const user=await getVerifiedReader(); if(!user || user.id!==uid) throw new Error('Verification required');
+  if(date) {
+    const {error}=await supabase.from('efips_reading_completions').upsert({user_id:uid,book_key:key,completed_on:date},{onConflict:'user_id,book_key'});
+    if(error) throw error;
+  } else {
+    const {error}=await supabase.from('efips_reading_completions').delete().eq('user_id',uid).eq('book_key',key);
+    if(error) throw error;
+  }
+};
