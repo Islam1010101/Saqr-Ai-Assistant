@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { bookData } from '../../api/bookData';
 
 export type ReadingBook = {
@@ -112,7 +112,5 @@ export const useReadingPassport = () => {
   const setGoal = useCallback((goal: number) => change(prev => ({
     ...prev, goal: Math.max(1, Math.min(20, Math.round(goal)))
   })), [change]);
-  const savedBooks = useMemo(() => data.saved.map(key => readingCatalogByKey.get(key)).filter((b): b is ReadingBook => !!b), [data.saved]);
-  const completedBooks = useMemo(() => data.completed.map(key => readingCatalogByKey.get(key)).filter((b): b is ReadingBook => !!b), [data.completed]);
-  return { data, savedBooks, completedBooks, toggleSaved, toggleCompleted, setGoal };
+  return { data, toggleSaved, toggleCompleted, setGoal };
 };
