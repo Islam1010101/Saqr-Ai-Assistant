@@ -27,7 +27,7 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
   const ar = locale === 'ar';
   const { data, toggleSaved, toggleCompleted, setGoal } = useReadingPassport();
   const [category, setCategory] = useState<'all' | 'physical' | 'ar' | 'en'>('all');
-  const [tab, setTab] = useState<'saved' | 'suggested'>('saved');
+  const [tab, setTab] = useState<'saved' | 'suggested'>('suggested');
   const [expanded, setExpanded] = useState(false);
   const savedBooks = useMemo(() => data.saved.map(key => catalogByKey.get(key)).filter((book): book is ReadingBook => !!book), [data.saved]);
   const completedBooks = useMemo(() => data.completed.map(key => catalogByKey.get(key)).filter((book): book is ReadingBook => !!book), [data.completed]);
