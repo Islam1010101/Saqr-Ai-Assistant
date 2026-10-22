@@ -5,7 +5,6 @@ import { ARABIC_LIBRARY_DATABASE } from '../../pages/ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from '../../pages/EnglishLibraryInternalPage';
 import { digitalBookKey, physicalReadingCatalog, type ReadingBook, useReadingPassport } from '../utils/readingPassport';
 import { getLocalizedSubject } from '../../api/bookData';
-import VerifiedReaderAccess from './VerifiedReaderAccess';
 
 const digitalCatalog: ReadingBook[] = [
   ...ARABIC_LIBRARY_DATABASE.map(book => ({
@@ -70,7 +69,6 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
       <div aria-hidden="true" className="pointer-events-none absolute -top-16 -end-16 w-52 h-52 bg-slate-200/20 dark:bg-slate-800/10 rounded-full blur-3xl" />
       <div aria-hidden="true" className="pointer-events-none absolute -bottom-20 -start-16 w-52 h-52 bg-slate-200/20 dark:bg-slate-800/10 rounded-full blur-3xl" />
       <div className="relative">
-        {variant === 'books' && <div className="mb-5"><VerifiedReaderAccess /></div>}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
             <div className="shrink-0 flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-lg" aria-hidden="true">
@@ -112,7 +110,7 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
                 <a href="#reading-passport" className="text-xs sm:text-sm font-black text-teal-700 dark:text-teal-300 underline-offset-4 hover:underline">{ar?'عرض قائمة القراءة':'Open reading list'}</a>
               </div>
             </div>
-            <p className="mt-3 text-[11px] text-slate-500 dark:text-slate-400 font-semibold">{ar?'الإنجازات مسجلة على هذا الجهاز فقط وليست نقاطًا رسمية.':'Progress stays on this device and does not award official points.'}</p>
+            <p className="mt-3 text-[11px] text-slate-500 dark:text-slate-400 font-semibold">{ar?'الأهداف تُحفظ في Supabase للحساب الموثّق، وإلا فتبقى على الجهاز. ولا تُمنح نقاط رسمية.':'Reading goals sync to Supabase with a verified account; otherwise saved on this device. No official points.'}</p>
           </>
         )}
         {variant === 'books' && (
