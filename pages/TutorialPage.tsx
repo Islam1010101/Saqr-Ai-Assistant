@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { useLanguage, useTheme } from '../App';
 
@@ -29,59 +30,120 @@ type HintTargetProps = HintState & {
 type TooltipPosition = { top: number; left: number; below: boolean };
 
 const HintTarget: React.FC<HintTargetProps> = ({
-  id, title, description, children, className = '', interactive = true,
-  tooltipBelow = false, activeHint, pinnedHint, isAr, setActiveHint, setPinnedHint
+  id,
+  title,
+  description,
+  children,
+  className = '',
+  interactive = true,
+  tooltipBelow = false,
+  activeHint,
+  pinnedHint,
+  isAr,
+  setActiveHint,
+  setPinnedHint
 }) => {
   const visible = activeHint === id || pinnedHint === id;
+  const anchorRef = React.useRef<HTMLElement | null>(null);
+  const tooltipRef = React.useRef<HTMLDivElement | null>(null);
   const [tipMounted, setTipMounted] = useState(false);
   const [tipVisible, setTipVisible] = useState(false);
-  const [position, setPosition] = useState<TooltipPosition>({ top: 90, left: 16, below: true });
+  const [position, setPosition] = useState<TooltipPosition>({ top: 92, left: 12, below: true });
 
   const placeTooltip = (element: HTMLElement) => {
+    anchorRef.current = element;
     const rect = element.getBoundingClientRect();
-    const width = Math.min(340, Math.max(220, window.innerWidth - 24));
-    const estimatedHeight = 150;
-    let below = tooltipBelow || rect.top < 185;
-    let top = below ? rect.bottom + 12 : rect.top - estimatedHeight;
+    const width = Math.min(340, window.innerWidth - 24);
+    const estimatedHeight = 170;
+    const viewportHeight = window.innerHeight;
+    let below = tooltipBelow || rect.top < 190;
+    let top = below ? rect.bottom + 12 : rect.top - estimatedHeight - 12;
 
-    if (!below && top < 82) {
+    if (below && top + estimatedHeight > viewportHeight - 8 && rect.top > estimatedHeight + 24) {
+      below = false;
+      top = rect.top - estimatedHeight - 12;
+    } else if (!below && top < 8 && rect.bottom + estimatedHeight + 12 < viewportHeight - 8) {
       below = true;
       top = rect.bottom + 12;
     }
 
-    if (top + estimatedHeight > window.innerHeight - 8) {
-      if (rect.top > estimatedHeight + 20) {
-        below = false;
-        top = rect.top - estimatedHeight - 10;
-      } else {
-        top = Math.max(8, window.innerHeight - estimatedHeight - 8);
-      }
-    }
-
+    top = Math.max(8, Math.min(top, viewportHeight - estimatedHeight - 8));
     const left = Math.max(12, Math.min(
       rect.left + rect.width / 2 - width / 2,
       window.innerWidth - width - 12
     ));
 
-    setPosition({ top: Math.max(8, top), left, below });
+    setPosition({ top, left, below });
   };
 
   useEffect(() => {
-    if (visible) {
-      setTipMounted(true);
-      const frame = window.requestAnimationFrame(() => setTipVisible(true));
-      return () => window.cancelAnimationFrame(frame);
+    if (!visible) {
+      setTipVisible(false);
+      const timer = window.setTimeout(() => setTipMounted(false), 300);
+      return () => window.clearTimeout(timer);
     }
 
-    setTipVisible(false);
-    const timer = window.setTimeout(() => setTipMounted(false), 240);
-    return () => window.clearTimeout(timer);
-  }, [visible]);
+    setTipMounted(true);
+    const frame = window.requestAnimationFrame(() => {
+      setTipVisible(true);
+      const anchor = anchorRef.current;
+      const tooltip = tooltipRef.current;
+      if (!anchor || !tooltip) return;
+
+      const rect = anchor.getBoundingClientRect();
+      const tipHeight = tooltip.getBoundingClientRect().height;
+      let below = tooltipBelow || rect.top < tipHeight + 24;
+      let top = below ? rect.bottom + 12 : rect.top - tipHeight - 12;
+
+      if (below && top + tipHeight > window.innerHeight - 8 && rect.top > tipHeight + 20) {
+        below = false;
+        top = rect.top - tipHeight - 12;
+      }
+
+      top = Math.max(8, Math.min(top, window.innerHeight - tipHeight - 8));
+      const width = tooltip.getBoundingClientRect().width;
+      const left = Math.max(12, Math.min(
+        rect.left + rect.width / 2 - width / 2,
+        window.innerWidth - width - 12
+      ));
+      setPosition({ top, left, below });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [visible, tooltipBelow]);
+
+  useEffect(() => {
+    if (!visible) return;
+
+    const updatePosition = () => {
+      if (anchorRef.current?.isConnected) placeTooltip(anchorRef.current);
+    };
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, true);
+    return () => {
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition, true);
+    };
+  }, [visible, tooltipBelow]);
+
+  useEffect(() => {
+    if (!visible || pinnedHint !== id) return;
+
+    const dismissOutside = (event: PointerEvent) => {
+      const target = event.target;
+      if (target instanceof Node && anchorRef.current?.contains(target)) return;
+      setActiveHint((current) => current === id ? null : current);
+      setPinnedHint((current) => current === id ? null : current);
+    };
+
+    document.addEventListener('pointerdown', dismissOutside, true);
+    return () => document.removeEventListener('pointerdown', dismissOutside, true);
+  }, [visible, pinnedHint, id, setActiveHint, setPinnedHint]);
 
   const showHint = (element: HTMLElement) => {
     placeTooltip(element);
-    setActiveHint(id);
     setPinnedHint(null);
+    setActiveHint(id);
   };
 
   const toggleHint = (element: HTMLElement) => {
@@ -102,12 +164,23 @@ const HintTarget: React.FC<HintTargetProps> = ({
       tabIndex={interactive ? 0 : undefined}
       aria-expanded={visible}
       aria-label={title}
-      onMouseEnter={(event) => showHint(event.currentTarget)}
-      onMouseLeave={() => setActiveHint((current) => current === id ? null : current)}
+      onPointerEnter={(event) => {
+        if (event.pointerType !== 'touch') showHint(event.currentTarget);
+      }}
+      onPointerLeave={(event) => {
+        if (event.pointerType !== 'touch' && pinnedHint !== id) {
+          setActiveHint((current) => current === id ? null : current);
+        }
+      }}
       onFocus={(event) => showHint(event.currentTarget)}
       onBlur={() => setActiveHint((current) => current === id ? null : current)}
       onClick={(event) => toggleHint(event.currentTarget)}
       onKeyDown={(event) => {
+        if (event.key === 'Escape') {
+          setPinnedHint((current) => current === id ? null : current);
+          setActiveHint((current) => current === id ? null : current);
+          return;
+        }
         if (interactive && (event.key === 'Enter' || event.key === ' ')) {
           event.preventDefault();
           toggleHint(event.currentTarget);
@@ -115,12 +188,14 @@ const HintTarget: React.FC<HintTargetProps> = ({
       }}
     >
       {children}
-      {tipMounted && (
+      {tipMounted && typeof document !== 'undefined' && createPortal(
         <div
+          ref={tooltipRef}
+          id={'hint-' + id}
           role="tooltip"
           aria-hidden={!tipVisible}
           className={
-            'fixed z-[999999] w-[min(340px,calc(100vw-24px))] rounded-2xl border-2 border-emerald-300 bg-slate-950/95 px-4 py-3.5 text-start text-white shadow-[0_18px_65px_rgba(2,6,23,0.55)] shadow-emerald-950/20 backdrop-blur-xl transition-[opacity,transform] duration-200 ease-out ' +
+            'fixed z-[999999] w-[min(340px,calc(100vw-24px))] max-h-[calc(100dvh-16px)] overflow-y-auto rounded-2xl border-2 border-emerald-300 bg-slate-950/95 px-4 py-3.5 text-start text-white shadow-[0_18px_65px_rgba(2,6,23,0.55)] shadow-emerald-950/20 backdrop-blur-xl transition-[opacity,transform,filter] duration-300 ease-[cubic-bezier(.2,.75,.25,1)] ' +
             (tipVisible ? 'translate-y-0 scale-100 opacity-100' : (position.below ? '-translate-y-2 scale-[.97]' : 'translate-y-2 scale-[.97]') + ' opacity-0')
           }
           style={{ top: position.top, left: position.left, pointerEvents: 'none' }}
@@ -140,7 +215,8 @@ const HintTarget: React.FC<HintTargetProps> = ({
               ? (isAr ? 'اضغط مرة أخرى لإغلاق التلميح' : 'Tap again to close this hint')
               : (isAr ? 'مرّر المؤشر أو المس لعرض التفاصيل' : 'Hover or tap to see details')}
           </span>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
@@ -313,12 +389,12 @@ export default function TutorialPage() {
   ];
 
   const navItems = [
-    { id: 'nav-search', text: label('البحث', 'Search'), description: label('يفتح فهرس البحث عن الكتب.', 'Opens the book search catalogue.') },
+    { id: 'nav-search', text: label('البحث بالمكتبة', 'Search'), description: label('يفتح فهرس البحث عن الكتب.', 'Opens the book search catalogue.') },
     { id: 'nav-digital', text: label('المكتبة الرقمية', 'Digital'), description: label('ينقلك إلى مصادر المكتبة الرقمية.', 'Takes you to digital library resources.') },
-    { id: 'nav-creators', text: label('المبدعون', 'Creators'), description: label('مساحة المشاركات والأعمال الإبداعية.', 'A space for creative contributions.') },
-    { id: 'nav-games', text: label('الألعاب', 'Games'), description: label('أنشطة تفاعلية للتعلم باللعب.', 'Interactive learning activities.') },
-    { id: 'nav-schedule', text: label('الجدول', 'Schedule'), description: label('خدمات جدول المكتبة للمعلمين.', 'Library schedule tools for teachers.') },
-    { id: 'nav-ideas', text: label('المقترحات', 'Ideas'), description: label('استعراض وإرسال المقترحات في الموقع الحقيقي.', 'View and submit feedback on the live site.') },
+    { id: 'nav-creators', text: label('بوابة المبدعين', 'Creators'), description: label('مساحة المشاركات والأعمال الإبداعية.', 'A space for creative contributions.') },
+    { id: 'nav-games', text: label('ألعاب', 'Games'), description: label('أنشطة تفاعلية للتعلم باللعب.', 'Interactive learning activities.') },
+    { id: 'nav-schedule', text: label('جدول المكتبة', 'Schedule'), description: label('خدمات جدول المكتبة للمعلمين.', 'Library schedule tools for teachers.') },
+    { id: 'nav-ideas', text: label('مقترحات', 'Ideas'), description: label('استعراض وإرسال المقترحات في الموقع الحقيقي.', 'View and submit feedback on the live site.') },
     { id: 'nav-admin', text: label('الإدارة', 'Admin'), description: label('قسم محمي لا يظهر محتواه إلا للمخولين.', 'A protected area visible only to authorized staff.') }
   ];
 
@@ -341,34 +417,42 @@ export default function TutorialPage() {
 
       {/* The real site's pill-shaped navigation, reproduced without live links. */}
       <header className="fixed top-4 left-0 right-0 z-[100] flex justify-center px-2">
-        <div className="flex w-full max-w-[98%] items-center justify-between gap-3 rounded-[2rem] border-4 border-white/70 bg-white/70 px-3 py-2.5 shadow-2xl backdrop-blur-2xl dark:border-slate-700/40 dark:bg-slate-900/75 md:w-fit md:gap-4 md:px-4">
+        <div className="w-full max-w-[98%] px-4 py-2.5 rounded-[2rem] border-4 border-white/70 dark:border-slate-700/40 flex items-center justify-between md:justify-center gap-4 shadow-2xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-2xl">
           <HintTarget id="school-logo" title={label('هوية المدرسة', 'School identity')} description={label('شعار مدرسة صقر الإمارات الدولية الخاصة، كما يظهر في الموقع الفعلي.', 'The Emirates Falcon International Private School logo used throughout the live site.')} className="shrink-0" tooltipBelow {...hintState}>
-            <div className="flex items-center gap-2 me-1">
-              <img src="/school-logo.png" alt="EFIPS" className="h-8 w-8 shrink-0 object-contain md:h-10 md:w-10" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+            <div className="flex items-center gap-2 group flex-shrink-0 me-3 animate-fade-in-up" style={{ animationDelay: '0ms' }}>
+              <img src="/school-logo.png" alt="EFIPS" className="h-8 w-8 md:h-10 md:w-10 object-contain dark:brightness-0 dark:invert shrink-0 transition-transform group-hover:scale-110" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
             </div>
           </HintTarget>
-          <nav className="no-scrollbar flex h-10 flex-1 items-center overflow-x-auto px-1 md:h-12 md:flex-none">
-            <div className="mx-auto flex h-full min-w-max items-center gap-1.5">
-              {navItems.map((item, index) => {
-                const colors = ['bg-rose-500', 'bg-blue-500', 'bg-purple-500', 'bg-amber-500', 'bg-teal-500', 'bg-emerald-500', 'bg-rose-600'];
-                return (
-                  <HintTarget key={item.id} id={item.id} title={item.text} description={item.description} className="shrink-0" {...hintState}>
-                    <div className={'rounded-full px-3 py-1.5 text-[10px] font-black transition-all md:px-4 md:py-2 md:text-xs ' + (index === 0 ? colors[index] + ' text-white shadow-md' : 'bg-slate-100/90 text-slate-600 hover:bg-slate-200 dark:bg-slate-800/90 dark:text-slate-300 dark:hover:bg-slate-700')}>
-                      {item.text}
-                    </div>
-                  </HintTarget>
-                );
-              })}
+          <nav className="flex-1 overflow-x-auto no-scrollbar flex items-center h-10 md:h-12 px-1">
+            <div className="flex items-center gap-1.5 h-full mx-auto min-w-max">
+              {navItems.map((item, index) => (
+                <HintTarget
+                  key={item.id}
+                  id={item.id}
+                  title={item.text}
+                  description={item.description}
+                  className="shrink-0"
+                  tooltipBelow
+                  {...hintState}
+                >
+                  <div
+                    className="px-3 py-1.5 md:px-5 md:py-2 text-[10px] md:text-sm font-black rounded-full transition-all duration-300 shrink-0 animate-fade-in-up text-slate-600 dark:text-slate-300 bg-slate-100/80 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700"
+                    style={{ animationDelay: ((index + 1) * 50) + 'ms' }}
+                  >
+                    {item.text}
+                  </div>
+                </HintTarget>
+              ))}
             </div>
           </nav>
           <div className="flex shrink-0 items-center gap-1">
             <HintTarget id="language-switch" title={label('تبديل اللغة', 'Language switch')} description={label('بدّل بين العربية والإنجليزية؛ يتغير اتجاه الصفحة تلقائيًا.', 'Switch between Arabic and English. The page direction adapts automatically.')} interactive={false} className="flex shrink-0" tooltipBelow {...hintState}>
-              <button type="button" onClick={() => setLocale(isAr ? 'en' : 'ar')} className="h-8 w-8 rounded-full border-2 border-slate-300/80 bg-slate-50/80 text-[10px] font-black text-slate-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 md:h-10 md:w-10">
+              <button type="button" onClick={() => setLocale(isAr ? 'en' : 'ar')} className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-slate-700 dark:text-slate-200 font-black text-[10px] border-2 border-slate-300/80 dark:border-slate-600 rounded-full bg-slate-50/80 dark:bg-slate-800/80 animate-fade-in-up">
                 {isAr ? 'EN' : 'AR'}
               </button>
             </HintTarget>
-            <HintTarget id="theme-switch" title={label('الوضع الفاتح والداكن', 'Light and dark mode')} description={label('غيّر مظهر الموقع مع الحفاظ على نفس الألوان والهوية البصرية.', 'Change the site appearance while preserving its visual identity.')} interactive={false} className="flex shrink-0" {...hintState}>
-              <button type="button" onClick={toggleTheme} aria-label={label('تغيير المظهر', 'Toggle theme')} className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-slate-200/80 bg-slate-100/80 text-sm dark:border-slate-600 dark:bg-slate-800 md:h-10 md:w-10">
+            <HintTarget id="theme-switch" title={label('الوضع الفاتح والداكن', 'Light and dark mode')} description={label('غيّر مظهر الموقع مع الحفاظ على نفس الألوان والهوية البصرية.', 'Change the site appearance while preserving its visual identity.')} interactive={false} className="flex shrink-0" tooltipBelow {...hintState}>
+              <button type="button" onClick={toggleTheme} aria-label={label('تغيير المظهر', 'Toggle theme')} className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-slate-100/80 dark:bg-slate-800/80 rounded-full text-sm border-2 border-slate-200/80 dark:border-slate-600 animate-fade-in-up">
                 {theme === 'light' ? '🌙' : '☀️'}
               </button>
             </HintTarget>
