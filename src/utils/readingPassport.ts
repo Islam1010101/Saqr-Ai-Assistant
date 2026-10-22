@@ -75,9 +75,10 @@ const saveToDevice = (key: string, next: ReadingPassport) => {
   } catch { /* Device storage may be blocked; never write sensitive data to Supabase. */ }
 };
 export const useReadingPassport = () => {
-  const storageKey = getStorageKey();
-  const [data, setData] = useState<ReadingPassport>(() => readFromDevice(storageKey));
   const { user: cloudUser } = useCloudReader();
+  // Keep each verified email account separate from locally entered school IDs.
+  const storageKey = cloudUser ? 'efips-reading-passport-v1:cloud:' + cloudUser.id : getStorageKey();
+  const [data, setData] = useState<ReadingPassport>(() => readFromDevice(storageKey));
   const [cloudReady, setCloudReady] = useState(false);
   useEffect(() => {
     if (!cloudUser) { setCloudReady(false); return; }
@@ -88,14 +89,9 @@ export const useReadingPassport = () => {
         const remote = await loadCloudSaved(cloudUser.id);
         if (!active) return;
         const local = readFromDevice(storageKey);
-        // Existing local saves are preserved on this device; verified remote books also appear here.
-        const merged = Array.from(new Set([...local.saved, ...remote])).filter(isValidReadingKey).slice(0,500);
-        saveToDevice(storageKey, { ...local, saved: merged });
-        const missing = local.saved.filter(key => !remote.includes(key) && isValidReadingKey(key));
-        for (const bookKey of missing) {
-          if (!active) return;
-          await persistCloudSaved(cloudUser.id, bookKey, true);
-        }
+        // Server-owned saved books are authoritative for verified accounts.
+        // Do not auto-upload data associated with a self-asserted school ID.
+        saveToDevice(storageKey, { ...local, saved: remote.filter(isValidReadingKey) });
         if (active) setCloudReady(true);
       } catch (error) {
         console.warn('Cloud reading list unavailable; device list remains accessible.', error);
