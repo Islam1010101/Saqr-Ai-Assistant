@@ -81,7 +81,10 @@ const DigitalBookRating: React.FC<{ bookId: string; compact?: boolean }> = ({ bo
   }, [verifiedUser?.id, bookId, key]);
   const handleRating = async (value: number) => {
     if (!verifiedUser) {
-      window.dispatchEvent(new Event('efips-request-reader-verification'));
+      // The school ID is a presentation identity, not an authenticated DB identity.
+      // Keep its rating personal on this device; never post a forged public vote.
+      setRating(value);
+      saveRating(key, bookId, value);
       return;
     }
     const old = rating;
@@ -99,11 +102,11 @@ const DigitalBookRating: React.FC<{ bookId: string; compact?: boolean }> = ({ bo
   };
   return (
     <div className={compact
-      ? 'relative z-30 mt-3 rounded-2xl border border-white/30 bg-black/20 backdrop-blur-md px-3 py-2 w-fit ms-auto max-w-full'
+      ? 'relative z-30 mx-auto w-fit max-w-full rounded-2xl border border-white/40 bg-white/10 backdrop-blur-md px-3 py-2 text-center shadow-sm group-hover:bg-white/15 transition-colors'
       : 'relative z-30 rounded-2xl border border-amber-200 dark:border-slate-700 bg-amber-50 dark:bg-slate-900/70 px-4 py-3'}
       onClick={e=>e.stopPropagation()} onPointerDown={e=>e.stopPropagation()} onKeyDown={e=>e.stopPropagation()}
       role="group" aria-label={ar ? 'قيّم هذا الكتاب من نجمة إلى خمس نجوم' : 'Rate this book from one to five stars'}>
-      <div className={'flex flex-wrap items-center gap-2 ' + (compact ? 'text-white' : 'text-slate-800 dark:text-white')}>
+      <div className={'flex flex-wrap items-center justify-center gap-2 ' + (compact ? 'text-white' : 'text-slate-800 dark:text-white')}>
         <span className="text-[11px] font-black">{ar ? 'تقييمي' : 'My rating'}</span>
         <div dir="ltr" className="flex items-center gap-0.5" onMouseLeave={()=>setHovered(0)}>
           {[1,2,3,4,5].map(value=><button
@@ -120,11 +123,11 @@ const DigitalBookRating: React.FC<{ bookId: string; compact?: boolean }> = ({ bo
         </div>
         {rating > 0 && <span className="text-[11px] font-black tabular-nums">{rating}/5</span>}
       </div>
-      <div className={'mt-1.5 text-[11px] font-bold ' + (compact ? 'text-white/90' : 'text-slate-700 dark:text-slate-200')}>
+      <div className={'mt-1.5 text-[11px] font-bold text-center ' + (compact ? 'text-white/90' : 'text-slate-700 dark:text-slate-200')}>
         {globalRating ? (ar ? 'تقييم القراء: ' : 'Readers: ') + globalRating.average.toFixed(1) + '/5 · ' + globalRating.count + (ar ? ' تقييم' : ' ratings') : (ar ? 'لا توجد تقييمات عامة بعد' : 'No public ratings yet')}
       </div>
-      {!verifiedUser && <p className={'mt-1 text-[10px] font-medium ' + (compact ? 'text-white/90' : 'text-slate-500 dark:text-slate-400')}>{ar ? 'للتقييم العام: تحقق من بريدك أولاً' : 'Verify email to submit a public rating'}</p>}
-      {!compact && <p className="mt-2 text-[11px] font-semibold text-slate-500 dark:text-slate-400">{ar ? 'التقييم العام يُسجّل بحساب بريد موثّق، دون عرض هويتك للقراء.' : 'Your public rating requires verified email; your identity is private.'}</p>}
+      {!verifiedUser && <p className={'mt-1 text-[10px] font-medium ' + (compact ? 'text-white/90' : 'text-slate-500 dark:text-slate-400')}>{ar ? 'تقييمك الشخصي محفوظ لهذا الحساب على الجهاز' : 'Personal rating saved on this device'}</p>}
+      {!compact && <p className="mt-2 text-[11px] font-semibold text-slate-500 dark:text-slate-400">{ar ? 'التقييم الشخصي مرتبط بكود الحساب على الجهاز؛ ويُعرض متوسط التقييمات العامة منفصلًا.' : 'Personal rating stays with this device account; public average is shown separately.'}</p>}
     </div>
   );
 };
