@@ -40,7 +40,22 @@ const HomeReadingHub: React.FC = () => {
     const pool = catalog.filter(book => (category === 'all' || book.format === category) &&
       !data.completed.includes(book.key) && !data.saved.includes(book.key));
     const matched = preferredSubjects.length ? pool.filter(book => preferredSubjects.includes(book.subject)) : [];
-    return (matched.length ? matched : pool).slice(0, 12);
+    const ranked = matched.length ? matched : pool;
+    if (category !== 'all') return ranked.slice(0, 12);
+    // Balance print, Arabic digital and English digital recommendations in the overview.
+    const groups = {
+      physical: ranked.filter(book => book.format === 'physical'),
+      ar: ranked.filter(book => book.format === 'ar'),
+      en: ranked.filter(book => book.format === 'en')
+    };
+    const mixed: ReadingBook[] = [];
+    for (let index = 0; index < 12; index++) {
+      for (const group of [groups.physical, groups.ar, groups.en]) {
+        if (mixed.length < 12 && group.length) mixed.push(group.shift()!);
+      }
+      if (mixed.length >= 12 || !groups.physical.length && !groups.ar.length && !groups.en.length) break;
+    }
+    return mixed;
   }, [category, data.completed, data.saved, preferredSubjects]);
   const today = new Date();
   const thisMonth = String(today.getFullYear()) + '-' + String(today.getMonth() + 1).padStart(2, '0');
