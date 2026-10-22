@@ -304,7 +304,6 @@ const Header: React.FC = () => {
           <button
             onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')}
             aria-label={locale === 'ar' ? 'تغيير لغة الموقع إلى الإنجليزية' : 'Change website language to Arabic'}
-            title={locale === 'ar' ? 'تغيير اللغة' : 'Change language'}
             className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-slate-700 dark:text-slate-200 font-black text-[10px] border-2 border-slate-300/80 dark:border-slate-600 rounded-full bg-slate-50/80 dark:bg-slate-800/80 animate-fade-in-up"
             style={{ animationDelay: `${(allowedLinks.length + 1) * 50}ms` }}
           >
@@ -313,7 +312,6 @@ const Header: React.FC = () => {
           <button
             onClick={toggleTheme}
             aria-label={locale === 'ar' ? 'تبديل الوضع الفاتح والداكن' : 'Toggle light and dark mode'}
-            title={locale === 'ar' ? 'تبديل المظهر' : 'Toggle appearance'}
             className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-slate-100/80 dark:bg-slate-800/80 rounded-full text-sm border-2 border-slate-200/80 dark:border-slate-600 animate-fade-in-up"
             style={{ animationDelay: `${(allowedLinks.length + 2) * 50}ms` }}
           >
@@ -396,7 +394,7 @@ class ApplicationErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    console.error('[Saqr Tutorial] Runtime render error:', error, info.componentStack);
+    console.error('[Saqr App] Runtime render error:', error, info.componentStack);
   }
 
   render() {
@@ -562,15 +560,6 @@ const MainLayout: React.FC = () => {
         }
         .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
 
-        /* Respect operating-system motion preferences without changing the visual design. */
-        @media (prefers-reduced-motion: reduce) {
-          *, *::before, *::after {
-            scroll-behavior: auto !important;
-            animation-duration: 0.01ms !important;
-            animation-iteration-count: 1 !important;
-            transition-duration: 0.01ms !important;
-          }
-        }
       `}</style>
     </div>
   );
