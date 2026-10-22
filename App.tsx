@@ -11,20 +11,18 @@ import AdminDashboard from './pages/AdminDashboard';
 
 import SearchPage from './pages/SearchPage';
 import SmartSearchPage from './pages/SmartSearchPage';
-import ReportsPage from './pages/ReportsPage';
 import AboutPage from './pages/AboutPage';
 import DigitalLibraryPage from './pages/DigitalLibraryPage';
 import ArabicLibraryInternalPage from './pages/ArabicLibraryInternalPage';
 import EnglishLibraryInternalPage from './pages/EnglishLibraryInternalPage';
 import FeedbackPage from './pages/FeedbackPage';
 import CreatorsPortalPage from './pages/CreatorsPortalPage';
-import LibraryMapPage from './pages/LibraryMapPage';
 import SaqrStudioPage from './pages/SaqrStudioPage';
 import PodcastPage from './pages/PodcastPage';
-import NewArrivalsPage from './pages/NewArrivalsPage';
 import DeweyGame from './pages/game';
 import SchedulePage from './pages/SchedulePage';
 import TutorialPage from './pages/TutorialPage';
+import FlagDayChallenge from './pages/FlagDayChallenge'; // Prepared for future activation; intentionally not routed.
 
 export type Locale = 'en' | 'ar';
 
@@ -402,7 +400,6 @@ const MainLayout: React.FC = () => {
           <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
           <Route path="/admin-dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
           <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
-          <Route path="/map" element={<ProtectedRoute><LibraryMapPage /></ProtectedRoute>} />
           <Route path="/smart-search" element={<ProtectedRoute><SmartSearchPage /></ProtectedRoute>} />
           <Route path="/digital-library" element={<ProtectedRoute><DigitalLibraryPage /></ProtectedRoute>} />
           <Route path="/digital-library/arabic" element={<ProtectedRoute><ArabicLibraryInternalPage /></ProtectedRoute>} />
@@ -410,10 +407,8 @@ const MainLayout: React.FC = () => {
           <Route path="/creators" element={<ProtectedRoute><CreatorsPortalPage /></ProtectedRoute>} />
           <Route path="/saqr-studio" element={<ProtectedRoute><SaqrStudioPage /></ProtectedRoute>} />
           <Route path="/podcast" element={<ProtectedRoute><PodcastPage /></ProtectedRoute>} />
-          <Route path="/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
           <Route path="/feedback" element={<ProtectedRoute><FeedbackPage /></ProtectedRoute>} />
           <Route path="/about" element={<AboutPage />} />
-          <Route path="/new-arrivals" element={<ProtectedRoute><NewArrivalsPage /></ProtectedRoute>} />
           <Route path="/game" element={<ProtectedRoute><DeweyGame /></ProtectedRoute>} />
           <Route path="/schedule" element={<ProtectedRoute><SchedulePage /></ProtectedRoute>} />
         </Routes>

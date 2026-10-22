@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage, useTheme } from '../App';
 
@@ -11,6 +11,7 @@ import { useLanguage, useTheme } from '../App';
 type HintState = {
   activeHint: string | null;
   pinnedHint: string | null;
+  isAr: boolean;
   setActiveHint: (id: string | null) => void;
   setPinnedHint: (id: string | null) => void;
 };
@@ -25,12 +26,66 @@ type HintTargetProps = HintState & {
   tooltipBelow?: boolean;
 };
 
+type TooltipPosition = { top: number; left: number; below: boolean };
+
 const HintTarget: React.FC<HintTargetProps> = ({
   id, title, description, children, className = '', interactive = true,
-  tooltipBelow = false, activeHint, pinnedHint, setActiveHint, setPinnedHint
+  tooltipBelow = false, activeHint, pinnedHint, isAr, setActiveHint, setPinnedHint
 }) => {
   const visible = activeHint === id || pinnedHint === id;
-  const toggle = () => {
+  const [tipMounted, setTipMounted] = useState(false);
+  const [tipVisible, setTipVisible] = useState(false);
+  const [position, setPosition] = useState<TooltipPosition>({ top: 90, left: 16, below: true });
+
+  const placeTooltip = (element: HTMLElement) => {
+    const rect = element.getBoundingClientRect();
+    const width = Math.min(340, Math.max(220, window.innerWidth - 24));
+    const estimatedHeight = 150;
+    let below = tooltipBelow || rect.top < 185;
+    let top = below ? rect.bottom + 12 : rect.top - estimatedHeight;
+
+    if (!below && top < 82) {
+      below = true;
+      top = rect.bottom + 12;
+    }
+
+    if (top + estimatedHeight > window.innerHeight - 8) {
+      if (rect.top > estimatedHeight + 20) {
+        below = false;
+        top = rect.top - estimatedHeight - 10;
+      } else {
+        top = Math.max(8, window.innerHeight - estimatedHeight - 8);
+      }
+    }
+
+    const left = Math.max(12, Math.min(
+      rect.left + rect.width / 2 - width / 2,
+      window.innerWidth - width - 12
+    ));
+
+    setPosition({ top: Math.max(8, top), left, below });
+  };
+
+  useEffect(() => {
+    if (visible) {
+      setTipMounted(true);
+      const frame = window.requestAnimationFrame(() => setTipVisible(true));
+      return () => window.cancelAnimationFrame(frame);
+    }
+
+    setTipVisible(false);
+    const timer = window.setTimeout(() => setTipMounted(false), 240);
+    return () => window.clearTimeout(timer);
+  }, [visible]);
+
+  const showHint = (element: HTMLElement) => {
+    placeTooltip(element);
+    setActiveHint(id);
+    setPinnedHint(null);
+  };
+
+  const toggleHint = (element: HTMLElement) => {
+    placeTooltip(element);
     if (pinnedHint === id) {
       setPinnedHint(null);
       setActiveHint(null);
@@ -47,40 +102,68 @@ const HintTarget: React.FC<HintTargetProps> = ({
       tabIndex={interactive ? 0 : undefined}
       aria-expanded={visible}
       aria-label={title}
-      onMouseEnter={() => {
-        setActiveHint(id);
-        setPinnedHint(null);
-      }}
+      onMouseEnter={(event) => showHint(event.currentTarget)}
       onMouseLeave={() => setActiveHint((current) => current === id ? null : current)}
-      onClick={toggle}
+      onFocus={(event) => showHint(event.currentTarget)}
+      onBlur={() => setActiveHint((current) => current === id ? null : current)}
+      onClick={(event) => toggleHint(event.currentTarget)}
       onKeyDown={(event) => {
         if (interactive && (event.key === 'Enter' || event.key === ' ')) {
           event.preventDefault();
-          toggle();
+          toggleHint(event.currentTarget);
         }
       }}
     >
       {children}
-      {visible && (
+      {tipMounted && (
         <div
           role="tooltip"
+          aria-hidden={!tipVisible}
           className={
-            'absolute z-[300] ' +
-            (tooltipBelow ? 'top-full mt-3' : 'bottom-full mb-3') +
-            ' left-1/2 -translate-x-1/2 w-[min(300px,85vw)] rounded-2xl border border-emerald-300/70 dark:border-emerald-700 bg-slate-950 text-white px-4 py-3.5 shadow-2xl shadow-slate-950/25 text-start pointer-events-none'
+            'fixed z-[999999] w-[min(340px,calc(100vw-24px))] rounded-2xl border-2 border-emerald-300 bg-slate-950/95 px-4 py-3.5 text-start text-white shadow-[0_18px_65px_rgba(2,6,23,0.55)] shadow-emerald-950/20 backdrop-blur-xl transition-[opacity,transform] duration-200 ease-out ' +
+            (tipVisible ? 'translate-y-0 scale-100 opacity-100' : (position.below ? '-translate-y-2 scale-[.97]' : 'translate-y-2 scale-[.97]') + ' opacity-0')
           }
+          style={{ top: position.top, left: position.left, pointerEvents: 'none' }}
         >
-          <span className="absolute left-1/2 -translate-x-1/2 bottom-[-6px] h-3 w-3 rotate-45 bg-slate-950 border-r border-b border-emerald-300/70 dark:border-emerald-700" />
-          <span className="relative block text-sm font-black leading-5">{title}</span>
-          <span className="relative mt-1 block text-xs font-medium leading-5 text-slate-200">{description}</span>
-          <span className="relative mt-2 block text-[10px] font-bold text-emerald-300">
-            {pinnedHint === id ? '✓' : '⌖'} {pinnedHint === id ? 'Tap again to close' : 'Hover or tap to explore'}
+          <span className={
+            'absolute left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-emerald-300 bg-slate-950 ' +
+            (position.below ? '-top-[7px] border-l-2 border-t-2' : '-bottom-[7px] border-b-2 border-r-2')
+          } />
+          <span className="relative block text-[15px] font-black leading-6 text-white">{title}</span>
+          <span className="relative mt-1 block text-sm font-semibold leading-6 text-slate-100">{description}</span>
+          <span className="relative mt-2 flex items-center gap-1.5 border-t border-white/15 pt-2 text-xs font-black text-emerald-300">
+            <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18V6m-5 5 5-5 5 5" />
+              <circle cx="12" cy="12" r="9" />
+            </svg>
+            {pinnedHint === id
+              ? (isAr ? 'اضغط مرة أخرى لإغلاق التلميح' : 'Tap again to close this hint')
+              : (isAr ? 'مرّر المؤشر أو المس لعرض التفاصيل' : 'Hover or tap to see details')}
           </span>
         </div>
       )}
     </div>
   );
 };
+
+type SparkleItem = { id: number; x: number; y: number };
+type FlagFlyItem = { id: number; x: number; y: number; rot: number };
+type BurstItem = { id: number; tx: number; ty: number; rot: number; color: string };
+
+const StarIcon = ({ className }: { className: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+  </svg>
+);
+
+const UaeFlagIcon = ({ className = "w-10 h-10" }: { className?: string }) => (
+  <svg viewBox="0 0 640 480" className={className + " rounded shadow-sm overflow-hidden"} preserveAspectRatio="none">
+    <path fill="#00732f" d="M0 0h640v160H0z" />
+    <path fill="#fff" d="M0 160h640v160H0z" />
+    <path fill="#000" d="M0 320h640v160H0z" />
+    <path fill="#ff0000" d="M0 0h220v480H0z" />
+  </svg>
+);
 
 const SearchIcon = () => <svg className="w-6 h-6 stroke-[2.2] opacity-85" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>;
 const SmartIcon = () => <svg className="w-6 h-6 stroke-[2.2] opacity-85" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>;
@@ -92,14 +175,85 @@ const GameIcon = () => <svg className="w-6 h-6 stroke-[2.2] opacity-85" fill="no
 const AdminIcon = () => <svg className="w-6 h-6 stroke-[2.2] opacity-85" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543-.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>;
 const EyeIcon = () => <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5-9.5-6.5-9.5-6.5Z" /><circle cx="12" cy="12" r="2.5" /></svg>;
 
+
+const RevealSection: React.FC<{ children: React.ReactNode; delay?: number }> = ({ children, delay = 0 }) => {
+  const [isVisible, setIsVisible] = useState(true);
+  const sectionRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!sectionRef.current || typeof IntersectionObserver === 'undefined') return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.1, rootMargin: '-50px 0px -50px 0px' }
+    );
+    observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={sectionRef}
+      className={'transform transition-all duration-700 ease-in-out ' + (isVisible ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-10 scale-95 opacity-0')}
+      style={{ transitionDelay: delay + 'ms' }}
+    >
+      {children}
+    </div>
+  );
+};
+
 export default function TutorialPage() {
   const { locale, setLocale, dir } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const isAr = locale === 'ar';
   const [activeHint, setActiveHint] = useState<string | null>(null);
   const [pinnedHint, setPinnedHint] = useState<string | null>(null);
-  const hintState: HintState = { activeHint, pinnedHint, setActiveHint, setPinnedHint };
+  const hintState: HintState = { activeHint, pinnedHint, isAr, setActiveHint, setPinnedHint };
+  const [sparkles, setSparkles] = useState<SparkleItem[]>([]);
+  const [flyingFlags, setFlyingFlags] = useState<FlagFlyItem[]>([]);
+  const [bursts, setBursts] = useState<BurstItem[]>([]);
+  const [showBubble, setShowBubble] = useState(false);
   const label = (ar: string, en: string) => isAr ? ar : en;
+
+  const handleMascotInteraction = (event: React.MouseEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setShowBubble(true);
+    window.setTimeout(() => setShowBubble(false), 3000);
+
+    const newSparkles: SparkleItem[] = Array.from({ length: 15 }).map(() => ({
+      id: Math.random(),
+      x: rect.left + rect.width / 2 + (Math.random() - 0.5) * 350,
+      y: rect.top + (Math.random() - 0.5) * 200
+    }));
+    setSparkles((prev) => [...prev, ...newSparkles]);
+    window.setTimeout(() => {
+      setSparkles((prev) => prev.filter((item) => !newSparkles.some((next) => next.id === item.id)));
+    }, 1500);
+
+    const newFlags: FlagFlyItem[] = Array.from({ length: 12 }).map(() => ({
+      id: Math.random(),
+      x: rect.left + rect.width / 2 + (Math.random() - 0.5) * 260,
+      y: rect.top + (Math.random() - 0.5) * 140,
+      rot: (Math.random() - 0.5) * 45
+    }));
+    setFlyingFlags((prev) => [...prev, ...newFlags]);
+    window.setTimeout(() => {
+      setFlyingFlags((prev) => prev.filter((item) => !newFlags.some((next) => next.id === item.id)));
+    }, 1800);
+
+    const id = Date.now();
+    const colors = ['text-red-500', 'text-blue-500', 'text-yellow-400', 'text-green-500', 'text-emerald-500'];
+    const newBursts: BurstItem[] = Array.from({ length: 6 }).map((_, index) => ({
+      id: id + index,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      tx: (Math.random() - 0.5) * 220,
+      ty: -90 - Math.random() * 120,
+      rot: (Math.random() - 0.5) * 180
+    }));
+    setBursts((prev) => [...prev, ...newBursts]);
+    window.setTimeout(() => {
+      setBursts((prev) => prev.filter((item) => !newBursts.some((next) => next.id === item.id)));
+    }, 2500);
+  };
 
   const featureCards = [
     {
@@ -169,16 +323,26 @@ export default function TutorialPage() {
   ];
 
   return (
-    <div dir={dir} className="min-h-screen w-full overflow-x-hidden bg-[#f8fafc] font-sans text-slate-900 transition-colors duration-500 dark:bg-slate-950 dark:text-white">
+    <div dir={dir} className="tutorial-page min-h-screen w-full overflow-x-hidden bg-[#f8fafc] font-sans text-slate-900 transition-colors duration-500 dark:bg-slate-950 dark:text-white">
+      {sparkles.map((sparkle) => (
+        <div key={sparkle.id} className="pointer-events-none fixed z-[9998] animate-fade-out" style={{ left: sparkle.x, top: sparkle.y }}>
+          <StarIcon className="h-6 w-6 animate-spin text-amber-400 drop-shadow-md" />
+        </div>
+      ))}
+      {flyingFlags.map((flag) => (
+        <div key={flag.id} className="pointer-events-none fixed z-[9998] animate-flag-float" style={{ left: flag.x, top: flag.y, transform: 'rotate(' + flag.rot + 'deg)' }}>
+          <div className="rounded-lg border border-amber-300 bg-white/90 p-1 shadow-xl"><UaeFlagIcon className="h-6 w-8" /></div>
+        </div>
+      ))}
       <div className="pointer-events-none fixed inset-0 z-0 opacity-70 dark:opacity-50">
-        <div className="absolute -top-32 -right-20 h-96 w-96 rounded-full bg-emerald-300/20 blur-3xl" />
-        <div className="absolute top-[45%] -left-28 h-96 w-96 rounded-full bg-sky-300/15 blur-3xl" />
+        <div className="tutorial-ambient-glow absolute -top-32 -right-20 h-96 w-96 rounded-full bg-emerald-300/20 blur-3xl" />
+        <div className="tutorial-ambient-glow absolute top-[45%] -left-28 h-96 w-96 rounded-full bg-sky-300/15 blur-3xl" style={{ animationDelay: "2s" }} />
       </div>
 
       {/* The real site's pill-shaped navigation, reproduced without live links. */}
       <header className="fixed top-4 left-0 right-0 z-[100] flex justify-center px-2">
         <div className="flex w-full max-w-[98%] items-center justify-between gap-3 rounded-[2rem] border-4 border-white/70 bg-white/70 px-3 py-2.5 shadow-2xl backdrop-blur-2xl dark:border-slate-700/40 dark:bg-slate-900/75 md:w-fit md:gap-4 md:px-4">
-          <HintTarget id="school-logo" title={label('هوية المدرسة', 'School identity')} description={label('شعار مدرسة صقر الإمارات الدولية الخاصة، كما يظهر في الموقع الفعلي.', 'The Emirates Falcon International Private School logo used throughout the live site.')} className="shrink-0" {...hintState}>
+          <HintTarget id="school-logo" title={label('هوية المدرسة', 'School identity')} description={label('شعار مدرسة صقر الإمارات الدولية الخاصة، كما يظهر في الموقع الفعلي.', 'The Emirates Falcon International Private School logo used throughout the live site.')} className="shrink-0" tooltipBelow {...hintState}>
             <div className="flex items-center gap-2 me-1">
               <img src="/school-logo.png" alt="EFIPS" className="h-8 w-8 shrink-0 object-contain md:h-10 md:w-10" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
             </div>
@@ -198,7 +362,7 @@ export default function TutorialPage() {
             </div>
           </nav>
           <div className="flex shrink-0 items-center gap-1">
-            <HintTarget id="language-switch" title={label('تبديل اللغة', 'Language switch')} description={label('بدّل بين العربية والإنجليزية؛ يتغير اتجاه الصفحة تلقائيًا.', 'Switch between Arabic and English. The page direction adapts automatically.')} interactive={false} className="flex shrink-0" {...hintState}>
+            <HintTarget id="language-switch" title={label('تبديل اللغة', 'Language switch')} description={label('بدّل بين العربية والإنجليزية؛ يتغير اتجاه الصفحة تلقائيًا.', 'Switch between Arabic and English. The page direction adapts automatically.')} interactive={false} className="flex shrink-0" tooltipBelow {...hintState}>
               <button type="button" onClick={() => setLocale(isAr ? 'en' : 'ar')} className="h-8 w-8 rounded-full border-2 border-slate-300/80 bg-slate-50/80 text-[10px] font-black text-slate-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 md:h-10 md:w-10">
                 {isAr ? 'EN' : 'AR'}
               </button>
@@ -268,7 +432,7 @@ export default function TutorialPage() {
                     <p className="mt-1.5 text-xs font-extrabold leading-relaxed text-emerald-700 dark:text-emerald-300">{label('تفاصيل مخفية في الجولة', 'Details hidden in this tour')}</p>
                   </div>
                 </div>
-                <div className="rounded-2xl border border-emerald-200 bg-white/90 p-4 shadow-sm dark:border-emerald-800/70 dark:bg-slate-800/90 sm:rounded-3xl sm:p-5">
+                <div className="homepage-alert-card rounded-2xl border border-emerald-200 bg-white/90 p-4 shadow-sm dark:border-emerald-800/70 dark:bg-slate-800/90 sm:rounded-3xl sm:p-5">
                   <div className="mb-3 flex items-center gap-2.5">
                     <span className="h-8 w-1.5 rounded-full bg-emerald-600" />
                     <h3 className="text-base font-black text-slate-800 dark:text-white sm:text-lg">{label('جدول استخدام المكتبة', 'Library Schedule')}</h3>
@@ -311,7 +475,7 @@ export default function TutorialPage() {
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {featureCards.map((card) => (
                 <HintTarget key={card.id} id={card.id} title={card.title} description={card.hint} tooltipBelow {...hintState}>
-                  <div className={'group relative flex min-h-[140px] cursor-pointer items-center gap-5 overflow-visible rounded-[2.5rem] border-b-8 p-6 text-white shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl active:translate-y-1 active:border-b-0 ' + card.color + ' ' + card.border}>
+                  <div style={{ animation: 'tutorial-fade-up .65s ease-out ' + (index * 65) + 'ms both' }} className={'tutorial-feature-card group relative flex min-h-[140px] cursor-pointer items-center gap-5 overflow-hidden rounded-[2.5rem] border-b-8 p-6 text-white shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl active:translate-y-1 active:border-b-0 ' + card.color + ' ' + card.border}>
                     <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[2.4rem]">
                       <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/10 blur-2xl transition-transform group-hover:scale-125" />
                     </div>
@@ -334,7 +498,17 @@ export default function TutorialPage() {
 
           <section className="mt-2 grid w-full grid-cols-1 items-center gap-8 lg:grid-cols-12">
             <HintTarget id="saqr-mascot" title={label('شخصية صقر', 'Saqr mascot')} description={label('اضغط أو المس شخصية صقر في الموقع الحقيقي لمشاهدة التفاعل والرسائل الترحيبية.', 'The live site mascot offers small interactive moments and welcoming messages.')} interactive={false} className="lg:col-span-5 flex flex-col items-center justify-center" {...hintState}>
-              <div className="group relative flex cursor-pointer flex-col items-center">
+              <div onClick={handleMascotInteraction} className="group relative flex cursor-pointer flex-col items-center">
+                {bursts.map((burst) => (
+                  <div key={burst.id} className={'pointer-events-none absolute z-[100] animate-burst-steady ' + burst.color} style={{ '--tx': burst.tx + 'px', '--ty': burst.ty + 'px', '--rot': burst.rot + 'deg' } as React.CSSProperties}>
+                    <StarIcon className="h-8 w-8 drop-shadow-md" />
+                  </div>
+                ))}
+                {showBubble && (
+                  <div className="animate-bounce absolute -top-14 z-30 rounded-2xl border-4 border-rose-500 bg-white px-6 py-2.5 text-sm font-black text-rose-600 shadow-2xl dark:bg-slate-800 dark:text-rose-400 md:text-base">
+                    {label('فخورين بالإمارات', 'Proud of the UAE')} <UaeFlagIcon className="inline-block h-5 w-7 align-middle" />
+                  </div>
+                )}
                 <img src="/school-logo.png" alt="" className="pointer-events-none absolute inset-0 z-0 m-auto h-72 w-72 object-contain opacity-10 transition-all duration-300 dark:opacity-25 dark:brightness-0 dark:invert" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                 <img src="/saqr-full.png" alt="Saqr mascot" className="relative z-10 h-60 object-contain drop-shadow-2xl transition-transform duration-300 group-hover:scale-105 md:h-80" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
               </div>
@@ -363,7 +537,7 @@ export default function TutorialPage() {
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <HintTarget id="visitor-counter" title={label('عداد الزوار', 'Visitor counter')} description={label('يعرض عدد الزيارات وتاريخها في الموقع الفعلي. الرقم والتاريخ الفعليان مخفيان في المعاينة.', 'Shows site visits and date in the live portal. The real count and date are hidden here.')} interactive={false} {...hintState}>
-                  <div className="flex h-full flex-col items-center justify-between rounded-[2rem] border-4 border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                  <div className="homepage-alert-card flex h-full flex-col items-center justify-between rounded-[2rem] border-4 border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
                     <div className="mb-2 flex items-center gap-2">
                       <span className="h-3 w-3 animate-ping rounded-full bg-emerald-500" />
                       <span className="text-xs font-bold text-slate-600 dark:text-slate-400 md:text-sm">{label('زوار البوابة:', 'Portal Visitors:')}</span>
@@ -373,12 +547,14 @@ export default function TutorialPage() {
                   </div>
                 </HintTarget>
                 <HintTarget id="national-event" title={label('المناسبات الوطنية', 'National events')} description={label('بطاقة المناسبات والعد التنازلي. التواريخ والأرقام الحية لا تظهر في صفحة التوتوريال.', 'An events and countdown card. Live dates and numbers are not shown in the tutorial.')} interactive={false} {...hintState}>
-                  <div className="relative flex h-full flex-col items-center justify-between overflow-hidden rounded-[2rem] border-4 border-emerald-500/80 bg-gradient-to-br from-white via-emerald-50/40 to-rose-50/40 p-6 text-center shadow-xl dark:border-emerald-600 dark:from-slate-900 dark:via-emerald-950/20 dark:to-rose-950/20">
+                  <div className="homepage-alert-card relative flex h-full flex-col items-center justify-between overflow-hidden rounded-[2rem] border-4 border-emerald-500/80 bg-gradient-to-br from-white via-emerald-50/40 to-rose-50/40 p-6 text-center shadow-xl dark:border-emerald-600 dark:from-slate-900 dark:via-emerald-950/20 dark:to-rose-950/20">
                     <div className="absolute left-0 right-0 top-0 flex h-2">
                       <div className="w-1/4 bg-[#ff0000]" /><div className="w-1/4 bg-[#00732f]" /><div className="w-1/4 bg-white" /><div className="w-1/4 bg-black" />
                     </div>
                     <div className="relative z-10 mt-1 flex items-center justify-center gap-2">
+                      <div className="animate-flag-wave origin-bottom-left"><UaeFlagIcon className="h-4 w-6 rounded-sm shadow" /></div>
                       <span className="text-xs font-black text-emerald-700 dark:text-emerald-400">{label('إجازة عيد الاتحاد', 'UAE National Day Break')}</span>
+                      <div className="animate-flag-wave-delayed origin-bottom-right"><UaeFlagIcon className="h-4 w-6 rounded-sm shadow" /></div>
                     </div>
                     <div className="relative z-10 my-3">
                       <span className="block text-[10px] font-bold text-slate-500 dark:text-slate-400">{label('العد التنازلي', 'Countdown')}</span>
@@ -418,6 +594,7 @@ export default function TutorialPage() {
         <p className="text-xs font-black text-slate-500">EFIPS • Library • 2026</p>
         <p className="mt-1 text-[10px] font-semibold text-slate-400">{label('نسخة معاينة — البيانات الحقيقية غير معروضة', 'Preview mode — live data is not displayed')}</p>
       </footer>
+      <style>{"\n        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');\n        .tutorial-page, .tutorial-page * { font-family: 'Cairo', sans-serif; }\n        @keyframes burst-steady {\n          0% { transform: translate(0, 0) scale(.5); opacity: 0; }\n          20% { transform: translate(var(--tx), var(--ty)) scale(1.2) rotate(var(--rot)); opacity: 1; }\n          80% { transform: translate(var(--tx), var(--ty)) scale(1) rotate(var(--rot)); opacity: 1; }\n          100% { transform: translate(var(--tx), calc(var(--ty) - 20px)) scale(.8) rotate(var(--rot)); opacity: 0; }\n        }\n        .animate-burst-steady { animation: burst-steady 2s cubic-bezier(.19,1,.22,1) forwards; }\n        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }\n        .animate-float { animation: float 5s ease-in-out infinite; }\n        @keyframes flag-wave { 0%, 100% { transform: rotate(-6deg) scale(1); } 50% { transform: rotate(8deg) scale(1.08) skewY(2deg); } }\n        .animate-flag-wave { animation: flag-wave 2.2s ease-in-out infinite; }\n        .animate-flag-wave-delayed { animation: flag-wave 2.2s ease-in-out 1.1s infinite; }\n        @keyframes flag-float {\n          0% { opacity: 1; transform: scale(.6) translateY(0) rotate(0); }\n          50% { opacity: 1; transform: scale(1.15) translateY(-35px) rotate(12deg); }\n          100% { opacity: 0; transform: scale(.8) translateY(-75px) rotate(-10deg); }\n        }\n        .animate-flag-float { animation: flag-float 1.8s ease-out forwards; }\n        @keyframes fade-out { 0% { opacity: 1; transform: scale(1) translateY(0); } 100% { opacity: 0; transform: scale(.3) translateY(-40px); } }\n        .animate-fade-out { animation: fade-out 1.5s ease-out forwards; }\n        @keyframes tutorial-fade-up { 0% { opacity: 0; transform: translateY(18px) scale(.985); } 100% { opacity: 1; transform: translateY(0) scale(1); } }\n        .tutorial-feature-card { isolation: isolate; transform: translateZ(0); -webkit-tap-highlight-color: transparent; }\n        .tutorial-feature-card::after {\n          content: \"\"; position: absolute; inset: 0; z-index: 1; pointer-events: none; border-radius: inherit;\n          background: linear-gradient(115deg, transparent 20%, rgba(255,255,255,.35) 48%, transparent 70%);\n          transform: translateX(-125%); transition: transform 650ms cubic-bezier(.2,.7,.2,1);\n        }\n        @media (hover: hover) and (pointer: fine) {\n          .tutorial-feature-card:hover { box-shadow: 0 24px 48px rgba(15,23,42,.22); }\n          .tutorial-feature-card:hover::after { transform: translateX(125%); }\n        }\n        .homepage-alert-card { position: relative; overflow: hidden; transform: translateZ(0); transition: transform 260ms cubic-bezier(.2,.75,.25,1), box-shadow 260ms ease, border-color 260ms ease; -webkit-tap-highlight-color: transparent; }\n        .homepage-alert-card::after { content: \"\"; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(115deg, transparent 20%, rgba(255,255,255,.42) 48%, transparent 70%); transform: translateX(-125%); transition: transform 650ms cubic-bezier(.2,.7,.2,1); }\n        @media (hover: hover) and (pointer: fine) { .homepage-alert-card:hover { transform: translateY(-4px) scale(1.008); border-color: rgba(16,185,129,.55); } .homepage-alert-card:hover::after { transform: translateX(125%); } }\n        .homepage-alert-card:active { transform: scale(.985); }\n        @keyframes tutorial-glow { 0%,100% { opacity:.45; transform:scale(1); } 50% { opacity:.85; transform:scale(1.1); } }\n        .tutorial-ambient-glow { animation: tutorial-glow 8s ease-in-out infinite; }\n        @media (prefers-reduced-motion: reduce) {\n          .tutorial-page *, .tutorial-page *::before, .tutorial-page *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }\n        }\n"}</style>
     </div>
   );
 }
