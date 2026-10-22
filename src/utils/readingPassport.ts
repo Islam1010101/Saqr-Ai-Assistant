@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { bookData } from '../../api/bookData';
-import { useCloudReader, loadCloudSaved, persistCloudSaved } from './efipsCloud';
+import { useCloudReader, loadCloudSaved, persistCloudSaved, loadReadingProgress, saveReadingGoal, saveReadingCompletion, currentReadingMonth } from './efipsCloud';
 
 export type ReadingBook = {
   key: string;
@@ -86,12 +86,14 @@ export const useReadingPassport = () => {
     setCloudReady(false);
     const sync = async () => {
       try {
-        const remote = await loadCloudSaved(cloudUser.id);
+        const [remote, progress] = await Promise.all([loadCloudSaved(cloudUser.id), loadReadingProgress(cloudUser.id, currentReadingMonth())]);
         if (!active) return;
         const local = readFromDevice(storageKey);
         // Server-owned saved books are authoritative for verified accounts.
         // Do not auto-upload data associated with a self-asserted school ID.
-        saveToDevice(storageKey, { ...local, saved: remote.filter(isValidReadingKey) });
+        const verifiedCompleted = progress.completed.filter(item => isValidReadingKey(item.key));
+        const completedOn = Object.fromEntries(verifiedCompleted.map(item => [item.key,item.date]));
+        saveToDevice(storageKey, { ...local, saved: remote.filter(isValidReadingKey), completed: verifiedCompleted.map(item=>item.key), completedOn, goal: progress.goal ?? local.goal });
         if (active) setCloudReady(true);
       } catch (error) {
         console.warn('Cloud reading list unavailable; device list remains accessible.', error);
@@ -130,18 +132,23 @@ export const useReadingPassport = () => {
     }
   }, [change, storageKey, cloudUser?.id, cloudReady]);
   const toggleCompleted = useCallback((key: string) => {
-    if (!readingCatalogByKey.has(key)) return;
+    if (!isValidReadingKey(key)) return;
+    const before = readFromDevice(storageKey).completed.includes(key);
+    const today = [new Date().getFullYear(), String(new Date().getMonth()+1).padStart(2,'0'), String(new Date().getDate()).padStart(2,'0')].join('-');
     change(prev => {
       const done = prev.completed.includes(key);
       const completedOn = { ...prev.completedOn };
       if (done) delete completedOn[key];
-      else completedOn[key] = [new Date().getFullYear(), String(new Date().getMonth()+1).padStart(2,'0'), String(new Date().getDate()).padStart(2,'0')].join('-');
+      else completedOn[key] = today;
       return { ...prev, completed: done ? prev.completed.filter(item => item !== key) :
         [...prev.completed, key], completedOn };
     });
-  }, [change]);
-  const setGoal = useCallback((goal: number) => change(prev => ({
-    ...prev, goal: Math.max(1, Math.min(20, Math.round(goal)))
-  })), [change]);
+    if(cloudUser && cloudReady) void saveReadingCompletion(cloudUser.id,key,before?null:today).catch(error=>console.warn('Could not synchronize reading completion',error));
+  }, [change,storageKey,cloudUser?.id,cloudReady]);
+  const setGoal = useCallback((goal: number) => {
+    const target = Math.max(1, Math.min(20, Math.round(goal)));
+    change(prev => ({...prev,goal:target}));
+    if(cloudUser && cloudReady) void saveReadingGoal(cloudUser.id,currentReadingMonth(),target).catch(error=>console.warn('Could not synchronize goal',error));
+  }, [change,cloudUser?.id,cloudReady]);
   return { data, toggleSaved, toggleCompleted, setGoal, cloudUser, cloudReady };
 };
