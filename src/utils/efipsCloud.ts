@@ -37,7 +37,7 @@ export const requestReaderCode = async (email: string): Promise<void> => {
     throw new Error('Enter a valid email address.');
   const { error } = await supabase.auth.signInWithOtp({
     email: trimmed,
-    options: { shouldCreateUser: true }
+    options: { shouldCreateUser: true, emailRedirectTo: window.location.origin + window.location.pathname + '#/home' }
   });
   if (error) throw error;
 };
