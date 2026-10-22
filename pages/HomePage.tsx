@@ -949,7 +949,7 @@ const HomePage: React.FC = () => {
                     <>
                         
                         <RevealSection delay={500}>
-                            <div className="bg-gradient-to-br from-amber-100 via-amber-50 to-emerald-50 dark:from-slate-900 dark:to-slate-950 p-5 lg:p-4 lg:p-5 rounded-[2rem] border-4 border-amber-400 dark:border-amber-600 shadow-2xl relative overflow-hidden flex flex-col items-center text-center">
+                            <div className="bg-gradient-to-br from-amber-100 via-amber-50 to-emerald-50 dark:from-slate-900 dark:to-slate-950 p-4 lg:p-5 rounded-[2rem] border-4 border-amber-400 dark:border-amber-600 shadow-2xl relative overflow-hidden flex flex-col items-center text-center">
                                 
                                 <div className="absolute top-0 left-0 right-0 h-2.5 flex">
                                     <div className="bg-red-600 w-1/4"></div>
