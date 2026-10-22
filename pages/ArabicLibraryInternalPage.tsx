@@ -5,7 +5,6 @@ import { trackActivity } from '../src/utils/tracker';
 import { supabase } from '../src/utils/supabase';
 import { useReadingPassport, digitalBookKey } from '../src/utils/readingPassport';
 import DigitalBookRating from '../src/components/DigitalBookRating';
-import VerifiedReaderAccess from '../src/components/VerifiedReaderAccess';
 
 // --- 1. قاعدة البيانات ---
 export const ARABIC_LIBRARY_DATABASE = [
@@ -371,12 +370,6 @@ const BookCard = React.memo(({ book, onClick, t }: { book: any; onClick: () => v
 
   return (
     <div onClick={onClick} className="relative group cursor-pointer w-full max-w-sm mx-auto h-[280px] md:h-[300px] flex items-stretch justify-center p-2">
-      <button type="button" aria-pressed={isSaved} title={isSaved ? (t('readLaterRemove')) : t('readLater')}
-        onClick={(event) => { event.stopPropagation(); toggleSaved(readingKey); }}
-        className={`absolute top-14 end-4 z-40 rounded-xl border border-white/70 dark:border-slate-600 px-3 py-2 text-[11px] font-black shadow-lg backdrop-blur-md transition-all hover:scale-105 active:scale-95 ${isSaved ? 'bg-amber-400 text-slate-900' : 'bg-white/95 text-emerald-700 dark:bg-slate-900/95 dark:text-emerald-300'}`}>
-        {isSaved ? t('readLaterRemove') : t('readLater')}
-      </button>
-      
       {/* هالة مضيئة خلف الكتاب في حالة وجود صوت */}
       {hasAudio && (
         <div className="absolute inset-0 bg-rose-400/20 blur-2xl rounded-[2rem] scale-95 group-hover:scale-105 opacity-60 animate-pulse transition-all duration-500 pointer-events-none -z-10"></div>
@@ -391,6 +384,14 @@ const BookCard = React.memo(({ book, onClick, t }: { book: any; onClick: () => v
 
         <div className="p-5 md:p-6 flex flex-col h-full relative z-10">
           
+          <div className="relative z-30 flex justify-center mb-2">
+            <button type="button" aria-pressed={isSaved} title={isSaved ? t('readLaterRemove') : t('readLater')}
+              onClick={(event) => { event.stopPropagation(); toggleSaved(readingKey); }}
+              className={`inline-flex items-center justify-center gap-2 rounded-full border-2 px-4 py-2 text-xs font-black text-white backdrop-blur-md transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white ${isSaved ? 'bg-white/25 border-amber-200 shadow-md' : 'bg-black/10 border-white/60 hover:bg-white/20'}`}>
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill={isSaved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" className="w-4 h-4 shrink-0"><path strokeLinejoin="round" strokeLinecap="round" d="M6 4h12v17l-6-4-6 4V4z" /></svg>
+              {isSaved ? t('readLaterRemove') : t('readLater')}
+            </button>
+          </div>
           <div className="flex justify-between items-start flex-row-reverse mb-auto">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-white/25 text-white backdrop-blur-sm shadow-sm max-w-[70%]">
                {isAi && <RobotSvg/>}
@@ -404,6 +405,10 @@ const BookCard = React.memo(({ book, onClick, t }: { book: any; onClick: () => v
             )}
           </div>
           
+          <div className="relative z-30 flex items-center justify-center my-3" onClick={(e) => e.stopPropagation()}>
+            <DigitalBookRating bookId={readingKey} />
+          </div>
+
           <div className="flex-1 flex flex-col justify-end text-right mt-4">
             <h3 className="font-black text-xl md:text-2xl text-white leading-tight drop-shadow-md line-clamp-3 mb-4">
                 {book.title}
@@ -412,7 +417,7 @@ const BookCard = React.memo(({ book, onClick, t }: { book: any; onClick: () => v
                 <UserIcon/>
                 <p className="text-xs md:text-sm font-bold truncate uppercase tracking-wide">{book.author}</p>
             </div>
-            <DigitalBookRating bookId={readingKey} />
+            
           </div>
         </div>
 
@@ -474,7 +479,6 @@ const ArabicLibraryInternalPage: React.FC = () => {
             </div>
 
             <div className="max-w-[1400px] mx-auto px-4 md:px-6 pb-20 relative z-10 antialiased overflow-x-hidden">
-                <div className="flex justify-center pt-7"><VerifiedReaderAccess /></div>
                 
                 <div className="text-center mt-12 mb-12 relative animate-fade-in-up">
                     <button onClick={() => navigate(-1)} className="absolute start-0 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-800 text-slate-800 dark:text-white px-5 py-2.5 rounded-full font-black text-sm hover:bg-slate-200 hover:-translate-x-1 active:translate-y-1 border-b-4 border-slate-300 dark:border-slate-700 active:border-b-0 transition-all flex items-center gap-2 shadow-sm">
