@@ -4,6 +4,9 @@ export type Book = {
   title: string;
   author: string;
   subject: string;
+  isbn?: string;
+  isbnStatus?: 'candidate' | 'verified';
+  isbnCandidates?: Array<{ isbn13: string; publisher: string; year: number; source: string }>;
   shelf: number;
   row: number;
   level?: string;
@@ -3424,6 +3427,91 @@ const inferredSubject = (title: string, author: string, topicHint: string, shelf
   return 'General Knowledge';
 };
 
+
+// مراجعة ISBN: بيانات طبعات محتملة وليست أرقامًا مثبتة لنسخ المكتبة الفعلية.
+// لا يتم نسب ISBN إلى نسخة بعينها قبل مطابقة صفحة حقوق النشر أو الباركود.
+const editionCandidates: Array<{
+  title: string; author: string;
+  candidates: Array<{ isbn13: string; publisher: string; year: number; source: string }>;
+}> = [
+  {
+    "title": "CREATING EXCELLENCE",
+    "author": "Craig R. Hickman",
+    "candidates": [
+      {
+        "isbn13": "9780452258105",
+        "publisher": "New American Library",
+        "year": 1984,
+        "source": "https://books.google.com/books?id=dJYoAQAAMAAJ"
+      }
+    ]
+  },
+  {
+    "title": "PREPARING FOR ADOLESCENCE",
+    "author": "James Dobson",
+    "candidates": [
+      {
+        "isbn13": "9780884490340",
+        "publisher": "Vision House Publishers",
+        "year": 1978,
+        "source": "https://books.google.com/books/about/Preparing_for_Adolescence.html?id=Qwj0FLPomOMC"
+      },
+      {
+        "isbn13": "9780830712588",
+        "publisher": "Regal Books",
+        "year": 1989,
+        "source": "https://books.google.com/books/about/Preparing_for_Adolescence.html?hl=en&id=XyREFd12s1EC&output=html_text"
+      },
+      {
+        "isbn13": "9780842350372",
+        "publisher": "Tyndale House",
+        "year": 1992,
+        "source": "https://books.google.com/books/about/Preparing_for_Adolescence.html?id=nGLs1DJMtJUC"
+      }
+    ]
+  },
+  {
+    "title": "Black Canadians",
+    "author": "Joseph Mensah",
+    "candidates": [
+      {
+        "isbn13": "9781552660904",
+        "publisher": "Fernwood Publishing",
+        "year": 2004,
+        "source": "https://cup.columbia.edu/book/black-canadians-second-edition/9781552660904/"
+      },
+      {
+        "isbn13": "9781552663455",
+        "publisher": "Fernwood Publishing",
+        "year": 2010,
+        "source": "https://fernwoodpublishing.ca/books/black-canadians-second-edition"
+      }
+    ]
+  },
+  {
+    "title": "PRINCIPLE-CENTERED LEADERSHIP",
+    "author": "STEPHEN R. COVEY",
+    "candidates": [
+      {
+        "isbn13": "9780671792800",
+        "publisher": "Free Press / Simon & Schuster",
+        "year": 1992,
+        "source": "https://www.simonandschuster.com/books/Principle-Centered-Leadership/Stephen-R-Covey/9780671792800"
+      },
+      {
+        "isbn13": "9780671711351",
+        "publisher": "Simon & Schuster",
+        "year": 1992,
+        "source": "https://books.google.com/books/about/Principle_centered_Leadership.html?id=_kBZbPAxmgYC"
+      }
+    ]
+  }
+];
+const canonicalBookKey = (text: string) => text.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+const editionCandidateMap = new Map(editionCandidates.map(item =>
+  [canonicalBookKey(item.title) + '|' + canonicalBookKey(item.author), item.candidates]
+));
+
 // 3. دالة معالجة البيانات
 const processBookData = (rawData: any[]): Book[] => {
   return rawData.map((rawBook, index) => {
@@ -3449,12 +3537,18 @@ const processBookData = (rawData: any[]): Book[] => {
     }
 
     subject = inferredSubject(String(rawBook.title || ''), author, topicMatch?.[1] || '', Number(rawBook.shelf));
+    const isbnCandidates = editionCandidateMap.get(canonicalBookKey(String(rawBook.title || '')) + '|' + canonicalBookKey(author));
+    const isbn = isbnCandidates?.length === 1 ? isbnCandidates[0].isbn13 : undefined;
+
 
     return {
       id: `${rawBook.shelf}-${rawBook.row}-${index + 1}`,
       title: rawBook.title,
       author: author,
       subject: subject,
+      isbn,
+      isbnStatus: isbn ? 'candidate' : undefined,
+      isbnCandidates,
       shelf: rawBook.shelf,
       row: rawBook.row,
       level: 'General',
