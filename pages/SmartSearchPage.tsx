@@ -80,11 +80,11 @@ const isLessonPlanRequest = (text: string): boolean =>
   /(?:تحضير\s+(?:درس|حصة)|خطة\s+درس|lesson\s+plan|prepare\s+(?:a\s+)?lesson|lesson\s+preparation)/i.test(text);
 
 const formatLessonPlanDisplay = (content: string): string => {
-  // Recover individual learning objectives when the model joins them in one paragraph.
-  // Only run this on lesson-plan responses, never on ordinary chat or story writing.
+  // Presentation-only: split inline objectives where the model missed list line breaks.
+  // Arabic words are Unicode, so use whitespace/punctuation lookaheads rather than JS \b.
   return content
-    .replace(/([^\n])\s+(?=(?:[-•]\s*)?أن\s+(?:يصف|يحلل|يحدد|يشرح|يفسر|يقارن|يستنتج|يطبق|يذكر|يميز|يصنف|يقيّم|يناقش|يوضح|يعدد|يستخرج|يستكشف|يصمم|يكتب|يقرأ|يستخدم|يتعرف)\b)/g, '$1\n- ')
-    .replace(/([^\n])\s+(?=(?:[-•]\s*)?(?:Students?\s+will\s+be\s+able\s+to|To\s+(?:describe|analyze|identify|explain|compare|evaluate|apply|list|demonstrate|classify))\b)/gi, '$1\n- ');
+    .replace(/([^\n])\s+(?=أن\s+(?:يصف|يحلل|يحدد|يشرح|يفسر|يقارن|يستنتج|يطبق|يذكر|يميز|يصنف|يقيم|يقيّم|يناقش|يوضح|يعدد|يستخرج|يستكشف|يصمم|يكتب|يقرأ|يستخدم|يتعرف)(?=\s|[،؛:.,]))/g, '$1\n- ')
+    .replace(/([^\n])\s+(?=(?:Students?\s+will\s+be\s+able\s+to|To\s+(?:describe|analyze|identify|explain|compare|evaluate|apply|list|demonstrate|classify))\b)/gi, '$1\n- ');
 };
 
 const localization: any = {
