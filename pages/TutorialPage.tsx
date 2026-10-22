@@ -475,7 +475,7 @@ export default function TutorialPage() {
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {featureCards.map((card) => (
                 <HintTarget key={card.id} id={card.id} title={card.title} description={card.hint} tooltipBelow {...hintState}>
-                  <div className={'group relative flex min-h-[140px] cursor-pointer items-center gap-5 overflow-visible rounded-[2.5rem] border-b-8 p-6 text-white shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl active:translate-y-1 active:border-b-0 ' + card.color + ' ' + card.border}>
+                  <div style={{ animation: 'tutorial-fade-up .65s ease-out ' + (index * 65) + 'ms both' }} className={'tutorial-feature-card group relative flex min-h-[140px] cursor-pointer items-center gap-5 overflow-hidden rounded-[2.5rem] border-b-8 p-6 text-white shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl active:translate-y-1 active:border-b-0 ' + card.color + ' ' + card.border}>
                     <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[2.4rem]">
                       <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/10 blur-2xl transition-transform group-hover:scale-125" />
                     </div>
@@ -537,7 +537,7 @@ export default function TutorialPage() {
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <HintTarget id="visitor-counter" title={label('عداد الزوار', 'Visitor counter')} description={label('يعرض عدد الزيارات وتاريخها في الموقع الفعلي. الرقم والتاريخ الفعليان مخفيان في المعاينة.', 'Shows site visits and date in the live portal. The real count and date are hidden here.')} interactive={false} {...hintState}>
-                  <div className="flex h-full flex-col items-center justify-between rounded-[2rem] border-4 border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                  <div className="homepage-alert-card flex h-full flex-col items-center justify-between rounded-[2rem] border-4 border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
                     <div className="mb-2 flex items-center gap-2">
                       <span className="h-3 w-3 animate-ping rounded-full bg-emerald-500" />
                       <span className="text-xs font-bold text-slate-600 dark:text-slate-400 md:text-sm">{label('زوار البوابة:', 'Portal Visitors:')}</span>
@@ -547,12 +547,14 @@ export default function TutorialPage() {
                   </div>
                 </HintTarget>
                 <HintTarget id="national-event" title={label('المناسبات الوطنية', 'National events')} description={label('بطاقة المناسبات والعد التنازلي. التواريخ والأرقام الحية لا تظهر في صفحة التوتوريال.', 'An events and countdown card. Live dates and numbers are not shown in the tutorial.')} interactive={false} {...hintState}>
-                  <div className="relative flex h-full flex-col items-center justify-between overflow-hidden rounded-[2rem] border-4 border-emerald-500/80 bg-gradient-to-br from-white via-emerald-50/40 to-rose-50/40 p-6 text-center shadow-xl dark:border-emerald-600 dark:from-slate-900 dark:via-emerald-950/20 dark:to-rose-950/20">
+                  <div className="homepage-alert-card relative flex h-full flex-col items-center justify-between overflow-hidden rounded-[2rem] border-4 border-emerald-500/80 bg-gradient-to-br from-white via-emerald-50/40 to-rose-50/40 p-6 text-center shadow-xl dark:border-emerald-600 dark:from-slate-900 dark:via-emerald-950/20 dark:to-rose-950/20">
                     <div className="absolute left-0 right-0 top-0 flex h-2">
                       <div className="w-1/4 bg-[#ff0000]" /><div className="w-1/4 bg-[#00732f]" /><div className="w-1/4 bg-white" /><div className="w-1/4 bg-black" />
                     </div>
                     <div className="relative z-10 mt-1 flex items-center justify-center gap-2">
+                      <div className="animate-flag-wave origin-bottom-left"><UaeFlagIcon className="h-4 w-6 rounded-sm shadow" /></div>
                       <span className="text-xs font-black text-emerald-700 dark:text-emerald-400">{label('إجازة عيد الاتحاد', 'UAE National Day Break')}</span>
+                      <div className="animate-flag-wave-delayed origin-bottom-right"><UaeFlagIcon className="h-4 w-6 rounded-sm shadow" /></div>
                     </div>
                     <div className="relative z-10 my-3">
                       <span className="block text-[10px] font-bold text-slate-500 dark:text-slate-400">{label('العد التنازلي', 'Countdown')}</span>
