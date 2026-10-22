@@ -3336,11 +3336,99 @@ const rawBookData = [
 { "title": "New Webster's Dictionary And Roget's Thesaurus", "author": "Book Essentials Inc", "shelf": 6, "row": 2 }
 ];
 
+
+// موضوعات الفهرس: تُستنتج من بيانات الكتاب المتاحة (العنوان والمؤلف والموضوع الوارد أصلاً).
+// لا تُعدّ هذه التصنيفات فهرسة معتمدة أو بديلاً عن مراجعة أمين المكتبة.
+const subjectRules: Array<{ en: string; ar: string; pattern: RegExp }> = [
+  { en: 'Astronomy & Space', ar: 'الفلك والفضاء', pattern: /astronom|astrophys|cosmos|cosmic|universe|planet|solar system|space explor|stars? and planet|galax|telescope|الفلك|الفضاء|الكواكب|النجوم|المجرات|رواد الفضاء|علماء الفلك/i },
+  { en: 'Mathematics & Statistics', ar: 'الرياضيات والإحصاء', pattern: /mathemat|algebra|geometry|trigonom|calculus|statistics|probability|number theory|maths|math puzzle|الرياضيات|الأرقام|الحساب|الجبر|الهندسة الرياضية|الإحصاء|المنطق الرياضي/i },
+  { en: 'Physics', ar: 'الفيزياء', pattern: /physics|physicist|quantum|thermodynamic|newton|relativity|mechanics and heat|الفيزياء|نيوتن|الذرة|ميكانيكا الكم|علماء الفيزياء/i },
+  { en: 'Chemistry', ar: 'الكيمياء', pattern: /chemistry|chemical|biochem|periodic table|الكيمياء|الكيميائي|العناصر الكيميائية/i },
+  { en: 'Biology & Life Sciences', ar: 'الأحياء وعلوم الحياة', pattern: /biolog|genetic|genome|dna\b|cellular|microbiolog|botan|evolution|zoolog|الأحياء|البيولوجيا|الجينات|الجينوم|علم النبات|الكائنات الحية|علوم الحياة/i },
+  { en: 'Environment & Sustainability', ar: 'البيئة والاستدامة', pattern: /environment|ecolog|climate|global warming|recycl|sustainab|renewable energy|green energy|pollution|conservation|water crisis|البيئة|الاستدامة|التغير المناخي|المناخ|الطاقة البديلة|الطاقة المتجددة|التلوث|الاحتباس الحراري|الماء|الشواطئ/i },
+  { en: 'Medicine & Healthcare', ar: 'الطب والرعاية الصحية', pattern: /medic(al|ine)|clinical|nurs(ing|e)|patholog|pharmac|prescription|surg(ery|ical)|physician|doctor|cancer|disease|hospital|patient|anatomy|arthritis|cardiolog|diabetes|psychiatr|طب|الأطباء|التمريض|الأمراض|العلاج|الصحة الطبية|المستشفيات|الجراحة/i },
+  { en: 'Nutrition & Diet', ar: 'التغذية والحمية', pattern: /nutrition|diet|vitamin|cholesterol|carbohydrate|calorie|weight loss|weight control|healthy eat|low salt|food science|التغذية|الحمية|السعرات|الفيتامين|السمنة|الغذاء الصحي/i },
+  { en: 'Mental Health & Psychology', ar: 'علم النفس والصحة النفسية', pattern: /psycholog|psychotherap|mental health|neuro(sis|tic|science)|stress management|anxiety|depression|emotional intelligence|mindfulness|psycho-|self-esteem|علم النفس|النفسي|الصحة النفسية|الذكاء العاطفي|المشاعر|الاكتئاب|القلق/i },
+  { en: 'Health & Fitness', ar: 'الصحة واللياقة', pattern: /fitness|exercise|physical activity|wellness|healthy living|bodybuilding|health and safety|health guide|first aid|yoga|walking for health|الصحة|اللياقة|الرياضة البدنية|الإسعافات|اليوغا|المشي/i },
+  { en: 'Computers & Programming', ar: 'الحاسوب والبرمجة', pattern: /programming|software|computer|windows \d|web design|internet|database|javascript|java\b|python\b|xml\b|html\b|linux|microsoft|excel|word processor|photoshop|illustrator|autocad|3d studio|network security|information technolog|الحاسوب|الكمبيوتر|البرمجة|تقنية المعلومات|البرمجيات|الإنترنت|التطبيقات/i },
+  { en: 'Engineering & Technology', ar: 'الهندسة والتكنولوجيا', pattern: /engineering|electronic|telecommunicat|communications? systems|robotic|machinery|mechanical design|construction|architecture technology|الهندسة|التقنية|التكنولوجيا|الاتصالات|الروبوت|الميكانيكا/i },
+  { en: 'Business & Management', ar: 'إدارة الأعمال', pattern: /business|entrepreneur|management|manager|leadership|executive|corporat|office administration|meetings work|human resources|marketing|advertis|sales(man|person)?\b|customer service|العمل التجاري|الأعمال|الإدارة|التسويق|المشروعات|ريادة الأعمال|القيادة الإدارية/i },
+  { en: 'Economics & Finance', ar: 'الاقتصاد والتمويل', pattern: /econom(y|ic|ics|etric)|financ|invest|stock market|wall street|bank(ing|er)|mortgage|wealth|rich|tax(es|ation|man)?\b|accounting|debt|money|shareowner|interest rates|real estate|property investment|budgeting|الاقتصاد|الاقتصادي|المال|التمويل|الاستثمار|المصارف|المصرفية|الضرائب|المحاسبة|التجارة|الأسواق المالية/i },
+  { en: 'Law & Government', ar: 'القانون والحكومة', pattern: /law\b|legal|justice|court|constitution|human rights|criminal|governance|government|presidenc|parliament|legislation|legislative|القانون|الحقوق|القضاء|العدالة|الدستور|الحكومة|التشريعات/i },
+  { en: 'Politics & International Relations', ar: 'السياسة والعلاقات الدولية', pattern: /politic|diplomac|foreign policy|international relations|capitalis|socialis|communis|geopolitic|democra|cold war|world war|الحرب العالمية|السياسة|السياسي|العلاقات الدولية|الدبلوماسية|الرأسمالية|الصراعات الدولية/i },
+  { en: 'History & Civilizations', ar: 'التاريخ والحضارات', pattern: /history|historical|civilization|empire|dynasty|medieval|ancient|archaeolog|roman world|ottoman|victorian|heritage history|world war|crusad|prehistor|التاريخ|التاريخي|الحضارة|الحضارات|العثمانية|الروماني|الأثري|الآثار|التراث التاريخي|القرون الوسطى/i },
+  { en: 'Geography & Travel', ar: 'الجغرافيا والسفر', pattern: /geograph|atlas|travel|touris|journey|explor(er|ation)|map[s]?\b|guide to (paris|london|rome)|lonely planet|countries of|geographical|geographic|الجغرافيا|الأطلس|السفر|الرحلات|الرحلة إلى|المستكشفون|الاستكشاف|دليل السفر|البلدان/i },
+  { en: 'UAE Heritage & Culture', ar: 'تراث الإمارات وثقافتها', pattern: /emirat|united arab emirates|abu dhabi|dubai|sharjah|falconry|الإمارات|أبو ?ظبي|دبي|الشارقة|الخليج العربي|الصقور|التراث الإماراتي|تاريخ الإمارات/i },
+  { en: 'Islamic Studies & Religion', ar: 'الدراسات الإسلامية والأديان', pattern: /islam|quran|koran|hadith|prophet|religion|theology|bible|church|christian|faith|spiritual|sufis|mosque|القرآن|الإسلام|الإسلامية|الحديث الشريف|الأنبياء|الفقه|الدين|الأديان|التفسير|الصوفية|المسجد|السيرة النبوية/i },
+  { en: 'Philosophy & Thought', ar: 'الفلسفة والفكر', pattern: /philosoph|existential|ethics|metaphysic|logic and reason|stoicis|plato|aristotle|nietzsche|zen and|الفلسفة|الفيلسوف|الفكر الفلسفي|المنطق|الأخلاق|التأمل|الفكر النقدي/i },
+  { en: 'Education & Teaching', ar: 'التربية والتعليم', pattern: /educat|teach(ing|er)|classroom|curricul|learn(ing|er)|school handbook|pedagog|student|literacy|lesson plan|التعليم|التربية|التدريس|المعلم|المدرسة|المناهج|المتعلم|المتعلمين/i },
+  { en: 'Parenting & Family', ar: 'الأسرة وتربية الأطفال', pattern: /parent(ing|s)?\b|child rearing|baby|babies|toddler|family relationship|marriage|adolescen|teenag|step(parent|mother|father)|الأبناء|تربية الطفل|تربية الأطفال|الأسرة|الطفل|المراهقة|الأمومة|الأبوة|العائلة/i },
+  { en: 'Personal Development', ar: 'التنمية الذاتية', pattern: /self.help|self.improvement|motivation|success|habits|confidence|personal growth|how to be happy|think positive|creativ(e|ity) living|life skills|تحقيق الذات|التنمية الذاتية|تطوير الذات|النجاح|التحفيز|العادات|الثقة بالنفس|الإبداع الشخصي/i },
+  { en: 'Sociology & Society', ar: 'علم الاجتماع والمجتمع', pattern: /sociolog|anthropolog|societ(y|ies)|social studies|social issues|social class|race, class|culture and society|migration|gender studies|feminism|علم الاجتماع|المجتمع|الاجتماعي|الأنثروبولوجيا|الهجرة|التغير الاجتماعي|الهوية الثقافية/i },
+  { en: 'Language & Linguistics', ar: 'اللغة واللسانيات', pattern: /linguistic|grammar|vocabular|language learning|english language|french language|arabic language|syntax|translation|اللغة|اللسانيات|النحو|الصرف|المعاجم اللغوية|الترجمة|تعليم الإنجليزية/i },
+  { en: 'Dictionaries & Encyclopedias', ar: 'المعاجم والموسوعات', pattern: /dictionary|thesaurus|encyclop|guinness|world records|reference handbook|yearbook|almanac|القاموس|قاموس|معجم|الموسوعة|موسوعة|دائرة المعارف|الأطلس المصور/i },
+  { en: 'Literary Studies & Criticism', ar: 'الدراسات والنقد الأدبي', pattern: /literary critic|literature study|comparative literature|poetic theory|literary theory|literary studies|النقد الأدبي|الأدب المقارن|البلاغة|النقد السينمائي|السرد العربي|الدراسات الأدبية|النصوص الأدبية/i },
+  { en: 'Poetry', ar: 'الشعر', pattern: /poems?\b|poetry|sonnets?|ديوان|أشعار|شعر|قصائد|قصيدة|الشعر العربي/i },
+  { en: 'Arts & Design', ar: 'الفنون والتصميم', pattern: /art history|fine art|painting|sketching|drawing|sculpture|graphic design|visual art|photograph|calligraph|art and architecture|الفن|الفنون|الرسم|التصوير|الخط العربي|الفنون التشكيلية|الكاريكاتير|العمارة الإسلامية|العمارة/i },
+  { en: 'Music & Performing Arts', ar: 'الموسيقى والفنون الأدائية', pattern: /music|musical|orchestra|opera|instrument|theatre|theater|drama|cinema|film|acting|dance|الموسيقى|الموسيقا|المسرح|التمثيل|السينما|الغناء|الألحان|الآلات الموسيقية/i },
+  { en: 'Sports & Games', ar: 'الرياضة والألعاب', pattern: /soccer|football|basketball|tennis|swimming|golf|hockey|olympic|sports?|athlet|chess|crossword|puzzle|games? and|كرة القدم|الرياضة|الألعاب|الشطرنج|الألغاز|كرة السلة/i },
+  { en: 'Animals & Nature', ar: 'الحيوانات والطبيعة', pattern: /animals?|wildlife|dogs?\b|cats?\b|horses?\b|birds?\b|dinosaurs?|pets?\b|aquarium|garden(ing)?\b|nature|butterfl(y|ies)|honey|الحيوانات|الطبيعة|الطيور|القطط|الكلاب|الخيول|الفراشات|الحشرات|العسل|النباتات/i },
+  { en: 'Cooking & Home', ar: 'الطبخ والمنزل', pattern: /cookbook|cooking|recipes?|baking|culinary|food and drink|home improvement|housekeeping|interior decor|الطبخ|المطبخ|وصفات الطعام|الحلويات|الديكور|المنزل/i },
+  { en: 'Crafts & Hobbies', ar: 'الحرف والهوايات', pattern: /crafts?|hobbies|handmade|knitting|crochet|sewing|origami|stamps? collect|model making|scrapbook|الهوايات|الحرف|الخياطة|الأشغال اليدوية|صناعة الورق|التطريز/i },
+  { en: 'Biography & Memoirs', ar: 'السير والتراجم', pattern: /biograph|autobiograph|memoir|confessions of|life of (a|the|an) |lives of|who was|my life|story of my|سيرة|السيرة الذاتية|مذكرات|تراجم|حياة العظماء|شخصيات/i },
+  { en: 'Mystery & Crime Fiction', ar: 'روايات الغموض والجريمة', pattern: /mystery|detective|murder|crime novel|sherlock|agatha christie|whodunit|thriller|secret agent|سرقة|اللغز|لغز|الجريمة|تحقيق|المحقق|رواية بوليسية/i },
+  { en: 'Fantasy & Science Fiction', ar: 'الخيال العلمي والفانتازيا', pattern: /fantasy|science fiction|sci.fi|magic(al)? (kingdom|world|tree)|wizard|dragon|lord of the rings|harry potter|time travel|alien invasion|الخيال العلمي|الفانتازيا|السحر|التنين|عوالم خيالية/i },
+  { en: 'Children’s Stories', ar: 'قصص الأطفال', pattern: /children'?s (stor|book|fiction)|bedtime stor|fairy tale|picture book|nursery rhyme|geronimo stilton|baby.sitters club|amelia bedelia|boxcar children|pinocchio|storybook|قصص الأطفال|قصة للأطفال|حكايات الأطفال|الحكايات الخرافية|قصص الناشئة/i },
+  { en: 'Adventure Stories', ar: 'قصص المغامرات', pattern: /adventure|treasure island|shipwreck|pirate|explorer[s]? club|jungle quest|secret island|مغامرة|مغامرات|الكنز|القراصنة|جزيرة الأسرار/i },
+  { en: 'Literature & Fiction', ar: 'الأدب والروايات', pattern: /novels?|fiction|literature|classic(s)?\b|short stor|romance novel|love story|oliver twist|moby dick|little women|huckleberry finn|shakespeare|رواية|الروايات|الأدب|قصة|قصص|حكاية|الحكايات|مسرحية أدبية/i }
+];
+
+const subjectFallbacks: Record<string, [string, string]> = {
+  'History & Culture': ['History & Culture', 'التاريخ والثقافة'],
+  'General Reference': ['General Reference', 'مراجع عامة'],
+  'General Nonfiction': ['General Nonfiction', 'كتب معرفية عامة'],
+  'General Knowledge': ['General Knowledge', 'المعرفة العامة']
+};
+const subjectArabic = new Map<string, string>([
+  ...subjectRules.map(rule => [rule.en, rule.ar] as [string,string]),
+  ...Object.values(subjectFallbacks)
+]);
+export const getLocalizedSubject = (subject: string, locale: string): string =>
+  locale === 'ar' ? (subjectArabic.get(subject) ?? subject) : subject;
+
+const authorSubjectHints: Array<[RegExp,string]> = [
+  [/machiavelli/i,'Politics & International Relations'],
+  [/shakespeare|charles dickens|jane austen|tolkien|agatha christie|stephen king|danielle steel|john grisham|dan brown|danielle steele|j\.?k\.? rowling/i,'Literature & Fiction'],
+  [/sigmund freud|carl jung/i,'Mental Health & Psychology'],
+  [/stephen r\.? covey|napoleon hill/i,'Personal Development'],
+  [/peter f\.? drucker/i,'Business & Management'],
+  [/ابن خلدون/,'Sociology & Society'],
+  [/نجيب محفوظ|طه حسين|توفيق الحكيم/,'Literature & Fiction']
+];
+const inferredSubject = (title: string, author: string, topicHint: string, shelf: number): string => {
+  // بيانات الموضوع الصريحة تتقدم على الاستنتاج، مع توحيد فئات البحث قدر الإمكان.
+  if (topicHint.trim()) {
+    const hint = topicHint.trim();
+    for (const rule of subjectRules) if (rule.pattern.test(hint)) return rule.en;
+    if (/kids|juvenile|children/i.test(hint)) return 'Children’s Stories';
+    if (/fiction|novel/i.test(hint)) return 'Literature & Fiction';
+  }
+  for (const rule of subjectRules) if (rule.pattern.test(title)) return rule.en;
+  for (const [pattern,subject] of authorSubjectHints) if (pattern.test(author)) return subject;
+  // هذا ترتيب احتياطي واسع حسب مجموعات الرفوف، دون ادعاء معرفة محتوى الكتاب.
+  if (shelf >= 13 && shelf <= 20) return 'Literature & Fiction';
+  if (shelf === 35) return 'Children’s Stories';
+  if (shelf === 39 || shelf === 6) return 'General Reference';
+  if (shelf === 31 || shelf === 32 || shelf === 33 || shelf === 38) return 'History & Culture';
+  if (shelf >= 1 && shelf <= 12) return 'General Nonfiction';
+  return 'General Knowledge';
+};
+
 // 3. دالة معالجة البيانات
 const processBookData = (rawData: any[]): Book[] => {
   return rawData.map((rawBook, index) => {
     let author = (rawBook.author || "").toString();
-    let subject = 'Uncategorized';
+    let subject = 'General Knowledge';
 
     // التمييز بين العربية والإنجليزية
     const arabicRegex = /[\u0600-\u06FF]/;
@@ -3349,7 +3437,6 @@ const processBookData = (rawData: any[]): Book[] => {
     // استخراج الموضوع إذا كان موجوداً في خانة المؤلف بتنسيق (Topic: ...)
     const topicMatch = author.match(/\(Topic: (.*?)\)/);
     if (topicMatch) {
-      subject = topicMatch[1];
       author = 'Unknown Author';
     } else if (!author || author.trim() === "") {
       author = language === 'AR' ? 'مؤلف غير معروف' : 'Unknown Author';
@@ -3360,6 +3447,8 @@ const processBookData = (rawData: any[]): Book[] => {
     if (author.startsWith('(') && author.endsWith(')')) {
         author = author.slice(1, -1);
     }
+
+    subject = inferredSubject(String(rawBook.title || ''), author, topicMatch?.[1] || '', Number(rawBook.shelf));
 
     return {
       id: `${rawBook.shelf}-${rawBook.row}-${index + 1}`,
