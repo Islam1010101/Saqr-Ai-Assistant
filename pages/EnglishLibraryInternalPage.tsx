@@ -381,41 +381,38 @@ const BookCard = React.memo(({ book, onClick, t }: { book: any; onClick: () => v
         <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-black/10 pointer-events-none"></div>
         <div className="absolute top-0 left-0 w-full h-1/2 bg-white/10 skew-y-12 pointer-events-none"></div>
 
-        <div className="p-5 md:p-6 flex flex-col h-full relative z-10">
-          
-          <div className="relative z-30 flex justify-center mb-2">
-            <button type="button" aria-pressed={isSaved} title={isSaved ? t('readLaterRemove') : t('readLater')}
-              onClick={(event) => { event.stopPropagation(); toggleSaved(readingKey); }}
-              className={`inline-flex items-center justify-center gap-2 rounded-full border-2 px-4 py-2 text-xs font-black text-white backdrop-blur-md transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white ${isSaved ? 'bg-white/25 border-amber-200 shadow-md' : 'bg-black/10 border-white/60 hover:bg-white/20'}`}>
-              <svg aria-hidden="true" viewBox="0 0 24 24" fill={isSaved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" className="w-4 h-4 shrink-0"><path strokeLinejoin="round" strokeLinecap="round" d="M6 4h12v17l-6-4-6 4V4z" /></svg>
-              {isSaved ? t('readLaterRemove') : t('readLater')}
-            </button>
-          </div>
-          <div className="flex justify-between items-start flex-row-reverse mb-auto">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-white/25 text-white backdrop-blur-sm shadow-sm max-w-[70%]">
-               {isAi && <RobotSvg/>}
-               <span className="truncate">{isAi ? t('aiSubject') : book.subject}</span>
+        <div className="p-4 md:p-5 flex flex-col h-full relative z-10 gap-2.5">
+          <div className="flex items-start justify-between gap-2 flex-row-reverse">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/25 border border-white/20 px-2.5 py-1 text-white backdrop-blur-sm shadow-sm text-[10px] font-black max-w-[75%]">
+              {isAi && <RobotSvg/>}
+              <span className="truncate">{isAi ? t('aiSubject') : book.subject}</span>
             </span>
-            
             {hasAudio && (
-              <div className="bg-sky-500 backdrop-blur-md p-2 rounded-full text-white shadow-md animate-bounce flex items-center justify-center">
+              <div className="shrink-0 bg-sky-500 backdrop-blur-md p-2 rounded-full text-white shadow-md animate-bounce flex items-center justify-center">
                 <HeadphonesIcon/>
               </div>
             )}
           </div>
-          
-          <div className="relative z-30 flex items-center justify-center my-3" onClick={(e) => e.stopPropagation()}>
-            <DigitalBookRating bookId={readingKey} />
+          <div className="flex flex-row items-start gap-2 mt-auto min-w-0" dir={book.title && /[\u0600-\u06FF]/.test(book.title) ? 'rtl' : 'ltr'}>
+            <h3 className="flex-1 min-w-0 font-black text-lg md:text-xl text-white leading-snug drop-shadow-md line-clamp-3 text-start" dir="auto">{book.title}</h3>
+            <button type="button" aria-pressed={isSaved} aria-label={isSaved ? t('readLaterRemove') : t('readLater')}
+              title={isSaved ? t('readLaterRemove') : t('readLater')}
+              onClick={(event) => { event.stopPropagation(); toggleSaved(readingKey); }}
+              className={`shrink-0 inline-flex items-center justify-center w-10 h-10 rounded-xl border-2 border-white/70 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white/20 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white ${isSaved ? 'bg-white/25 shadow-md' : 'bg-transparent'}`}>
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill={isSaved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path strokeLinejoin="round" strokeLinecap="round" d="M6 4h12v17l-6-4-6 4V4z" /></svg>
+            </button>
           </div>
-          <div className="flex-1 flex flex-col justify-end text-right mt-4">
-            <h3 className="font-black text-xl md:text-2xl text-white leading-tight drop-shadow-md line-clamp-3 mb-4">
-                {book.title}
-            </h3>
-            <div className="flex items-center gap-2 text-white/90 flex-row-reverse justify-end bg-black/10 p-2.5 rounded-xl w-fit ms-auto backdrop-blur-sm">
-                <UserIcon/>
-                <p className="text-xs md:text-sm font-bold truncate uppercase tracking-wide">{book.author}</p>
+          <div className="flex flex-wrap items-center gap-2 text-white/95 text-xs font-bold min-w-0" dir="auto">
+            <span className="inline-flex items-center gap-1 min-w-0 max-w-full">
+              <UserIcon/><span className="truncate">{book.author}</span>
+            </span>
+            {book.publisher && <span className="min-w-0 max-w-full truncate border-s border-white/40 ps-2 text-white/85">{book.publisher}</span>}
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-2 mt-1">
+            <span className="text-white/95 text-xs font-black max-w-[55%] truncate" dir="auto">{isAi ? t('aiSubject') : book.subject}</span>
+            <div className="shrink-0 relative z-30" onClick={(event)=>event.stopPropagation()}>
+              <DigitalBookRating bookId={readingKey} />
             </div>
-            
           </div>
         </div>
 
