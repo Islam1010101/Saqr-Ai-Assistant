@@ -496,7 +496,17 @@ const HomePage: React.FC = () => {
     }, [locale]);
 
     const handleLogout = () => {
+        // Keep locally saved reading passports while clearing every session setting.
+        const readingPassports: Array<[string, string]> = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key?.startsWith('efips-reading-passport-v1:')) {
+                const value = localStorage.getItem(key);
+                if (value !== null) readingPassports.push([key, value]);
+            }
+        }
         localStorage.clear();
+        for (const [key, value] of readingPassports) localStorage.setItem(key, value);
         window.location.href = '#/';
     };
 
