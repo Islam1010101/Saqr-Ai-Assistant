@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { bookData, type Book } from '../api/bookData'; 
+import { bookData, getLocalizedSubject, type Book } from '../api/bookData'; 
 import { useLanguage } from '../App';
 import { trackActivity } from '../src/utils/tracker';
 import { useNavigate } from 'react-router-dom';
@@ -17,8 +17,8 @@ const useDebounce = <T,>(value: T, delay: number): T => {
 
 const translations = {
   ar: {
-    pageTitle: "مكتبة مدرسة صقر الإمارات",
-    searchPlaceholder: "ابحث عن عنوان أو مؤلف...",
+    pageTitle: "دليل كتب المكتبة",
+    searchPlaceholder: "ابحث عن كتاب أو مؤلف أو موضوع...",
     allSubjects: "المواضيع",
     allAuthors: "المؤلفين",
     allShelves: "الرفوف",
@@ -40,8 +40,8 @@ const translations = {
     alreadyRequested: "عذراً، لديك طلب استعارة أو إعارة نشطة لهذا الكتاب بالفعل!"
   },
   en: {
-    pageTitle: "Falcon School Library Index",
-    searchPlaceholder: "Search title or author...",
+    pageTitle: "Library Book Catalog",
+    searchPlaceholder: "Search books, authors or subjects...",
     allSubjects: "Subjects",
     allAuthors: "Authors",
     allShelves: "Shelves",
@@ -183,7 +183,7 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
             } catch (err) {
                 setAiContent({ 
                     summary: book.summary || (locale === 'ar' ? "كتاب متميز يفتح آفاق المعرفة للقارئ." : "An exceptional book that expands the reader's horizons."),
-                    genre: book.subject !== "Unknown" ? book.subject : (locale === 'ar' ? "عام" : "General")
+                    genre: getLocalizedSubject(book.subject, locale)
                 });
             } finally { setLoading(false); }
         };
@@ -313,7 +313,7 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                         </div>
                         <div className="col-span-2 bg-sky-50 dark:bg-slate-700 p-5 rounded-[2rem] border-4 border-sky-200 dark:border-slate-600 shadow-sm flex flex-col items-center justify-center">
                             <p className="text-xs font-black text-sky-600 dark:text-sky-400 uppercase mb-2">{t('subjectLabel')}</p>
-                            <p className="text-xl md:text-2xl font-black text-slate-800 dark:text-white">{loading ? '...' : (aiContent.genre || book.subject)}</p>
+                            <p className="text-xl md:text-2xl font-black text-slate-800 dark:text-white">{loading ? '...' : getLocalizedSubject(book.subject, locale)}</p>
                         </div>
                     </div>
 
@@ -361,7 +361,7 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
 };
 
 // --- 4. Component: BookCard (2D Flat Design) ---
-const BookCard = React.memo(({ book, onClick, t }: { book: Book; onClick: () => void; t: any }) => {
+const BookCard = React.memo(({ book, onClick, t, locale }: { book: Book; onClick: () => void; t: any; locale: string }) => {
   const isAi = !book.subject || book.subject === "Unknown";
 
   const colors = [
@@ -388,7 +388,7 @@ const BookCard = React.memo(({ book, onClick, t }: { book: Book; onClick: () => 
           <div className="flex justify-between items-start flex-row-reverse mb-auto">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-white/25 text-white backdrop-blur-sm shadow-sm max-w-[70%]">
                {isAi && <RobotSvg/>}
-               <span className="truncate">{isAi ? t('aiSubject') : book.subject}</span>
+               <span className="truncate">{isAi ? t('aiSubject') : getLocalizedSubject(book.subject, locale)}</span>
             </span>
           </div>
           
@@ -467,15 +467,15 @@ const SearchPage: React.FC = () => {
     }, []);
 
     const filters = useMemo(() => ({
-        subjects: [...new Set(bookData.map(b => b.subject))].filter(s => s !== "Unknown").sort(),
+        subjects: [...new Set(bookData.map(b => b.subject))].filter(s => s !== "Unknown").sort((a, b) => getLocalizedSubject(a, currentLocale).localeCompare(getLocalizedSubject(b, currentLocale), currentLocale)),
         authors: [...new Set(bookData.map(b => b.author))].filter(a => a !== 'Unknown Author').sort(),
         shelves: [...new Set(bookData.map(b => b.shelf.toString()))].sort((a, b) => parseInt(a) - parseInt(b))
-    }), []);
+    }), [currentLocale]);
 
     const filteredBooks = useMemo(() => {
         const term = debouncedSearchTerm.toLowerCase().trim();
         let result = bookData.filter(b => {
-            const matchesTerm = !term || b.title.toLowerCase().includes(term) || b.author.toLowerCase().includes(term);
+            const matchesTerm = !term || b.title.toLowerCase().includes(term) || b.author.toLowerCase().includes(term) || b.subject.toLowerCase().includes(term) || getLocalizedSubject(b.subject, 'ar').toLowerCase().includes(term);
             const matchesSub = subjectFilter === 'all' || b.subject === subjectFilter;
             const matchesAuth = authorFilter === 'all' || b.author === authorFilter;
             const matchesShelf = shelfFilter === 'all' || b.shelf.toString() === shelfFilter;
@@ -544,7 +544,7 @@ const SearchPage: React.FC = () => {
                                             className="w-full p-3 md:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 font-black text-xs md:text-sm cursor-pointer appearance-none text-center hover:border-amber-400 transition-colors outline-none focus:border-amber-500 text-slate-700 dark:text-slate-200"
                                         >
                                             <option value={filter.id === 'sortBy' ? 'alphabetical' : 'all'}>{t(filter.id as keyof typeof translations.en)}</option>
-                                            {filter.opts.map(o => <option key={o} value={o}>{filter.pre ? `${filter.pre}${o}` : o}</option>)}
+                                            {filter.opts.map(o => <option key={o} value={o}>{filter.pre ? `${filter.pre}${o}` : filter.id === 'allSubjects' ? getLocalizedSubject(o, currentLocale) : o}</option>)}
                                         </select>
                                     </div>
                                 ))}
@@ -558,7 +558,8 @@ const SearchPage: React.FC = () => {
                         <RevealOnScroll key={book.id} delay={(index % 4) * 100}>
                             <BookCard 
                                 book={book} 
-                                t={t} 
+                                t={t}
+                                locale={currentLocale} 
                                 onClick={() => {
                                     setSelectedBook(book); 
                                     trackActivity('searched', book.title); 
