@@ -31,8 +31,8 @@ const saveRating = (key: string, bookId: string, rating: number) => {
 const DigitalBookRating: React.FC<{ bookId: string; compact?: boolean }> = ({ bookId, compact = true }) => {
   const { locale } = useLanguage();
   const ar = locale === 'ar';
-  const key = accountPrefix();
   const { user: verifiedUser } = useCloudReader();
+  const key = verifiedUser ? 'efips-digital-ratings-v1:cloud:' + verifiedUser.id : accountPrefix();
   const [globalRating, setGlobalRating] = useState<{count:number; average:number}|null>(null);
   const [rating, setRating] = useState(() => readRating(key, bookId));
   const [hovered, setHovered] = useState(0);
