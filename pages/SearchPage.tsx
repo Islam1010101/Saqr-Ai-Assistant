@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { bookData, getLocalizedSubject, type Book } from '../api/bookData'; 
+import { bookData, getLocalizedSubject, type Book } from '../api/bookData';
+import { useReadingPassport, physicalBookKey } from '../src/utils/readingPassport'; 
 import { useLanguage } from '../App';
 import { trackActivity } from '../src/utils/tracker';
 import { useNavigate } from 'react-router-dom';
@@ -18,6 +19,8 @@ const useDebounce = <T,>(value: T, delay: number): T => {
 const translations = {
   ar: {
     pageTitle: "دليل كتب المكتبة",
+    readLater: "القراءة لاحقًا",
+    readLaterRemove: "محفوظ ✓",
     searchPlaceholder: "ابحث عن كتاب أو مؤلف أو موضوع...",
     allSubjects: "المواضيع",
     allAuthors: "المؤلفين",
@@ -46,6 +49,8 @@ const translations = {
   },
   en: {
     pageTitle: "Library Book Catalog",
+    readLater: "Read later",
+    readLaterRemove: "Saved ✓",
     searchPlaceholder: "Search books, authors or subjects...",
     allSubjects: "Subjects",
     allAuthors: "Authors",
@@ -382,6 +387,9 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
 
 // --- 4. Component: BookCard (2D Flat Design) ---
 const BookCard = React.memo(({ book, onClick, t, locale }: { book: Book; onClick: () => void; t: any; locale: string }) => {
+  const { data: passport, toggleSaved } = useReadingPassport();
+  const readingKey = physicalBookKey(book);
+  const isSaved = passport.saved.includes(readingKey);
   const isAi = !book.subject || book.subject === "Unknown";
 
   const colors = [
@@ -395,6 +403,11 @@ const BookCard = React.memo(({ book, onClick, t, locale }: { book: Book; onClick
 
   return (
     <div onClick={onClick} className="relative group cursor-pointer w-full max-w-sm mx-auto h-[280px] md:h-[300px] flex items-stretch justify-center p-2">
+      <button type="button" aria-pressed={isSaved} title={isSaved ? t('readLaterRemove') : t('readLater')}
+        onClick={(event) => { event.stopPropagation(); toggleSaved(readingKey); }}
+        className={`absolute top-14 end-4 z-40 rounded-xl border border-white/70 dark:border-slate-600 px-3 py-2 text-[11px] font-black shadow-lg backdrop-blur-md transition-all hover:scale-105 active:scale-95 ${isSaved ? 'bg-amber-400 text-slate-900' : 'bg-white/95 text-emerald-700 dark:bg-slate-900/95 dark:text-emerald-300'}`}>
+        {isSaved ? t('readLaterRemove') : t('readLater')}
+      </button>
       
       {/* تصميم البطاقة الثنائية الأبعاد */}
       <div className={`w-full h-full relative rounded-[2rem] border-4 shadow-lg bg-gradient-to-br ${colorClass} transition-all duration-500 transform group-hover:-translate-y-3 group-hover:shadow-2xl overflow-hidden flex flex-col`}>

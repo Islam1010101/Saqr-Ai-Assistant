@@ -3,6 +3,7 @@ import { useLanguage } from '../App';
 import { useNavigate } from 'react-router-dom';
 import { trackActivity } from '../src/utils/tracker';
 import { supabase } from '../src/utils/supabase';
+import { useReadingPassport, digitalBookKey } from '../src/utils/readingPassport';
 
 // --- 1. تعريف واجهة البيانات وقاعدة البيانات ---
 interface Book {
@@ -67,6 +68,8 @@ export const ENGLISH_LIBRARY_DATABASE: Book[] = [
 
 const translations = {
     en: {
+        readLater: "Read later",
+        readLaterRemove: "Saved ✓",
         pageTitle: "English Library",
         searchPlaceholder: "Search title or author...",
         allSubjects: "Subjects",
@@ -89,6 +92,8 @@ const translations = {
         aiSubject: "AI Category"
     },
     ar: {
+        readLater: "القراءة لاحقًا",
+        readLaterRemove: "محفوظ ✓",
         pageTitle: "المكتبة الإنجليزية",
         searchPlaceholder: "ابحث عن عنوان أو مؤلف...",
         allSubjects: "المواضيع",
@@ -343,6 +348,9 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
 
 // --- 4. Component: BookCard (2D Flat Design) ---
 const BookCard = React.memo(({ book, onClick, t }: { book: any; onClick: () => void; t: any }) => {
+  const { data: passport, toggleSaved } = useReadingPassport();
+  const readingKey = digitalBookKey('en', book);
+  const isSaved = passport.saved.includes(readingKey);
   const isAi = !book.subject || book.subject === "Unknown";
   const hasAudio = !!book.audioId;
 
@@ -358,6 +366,11 @@ const BookCard = React.memo(({ book, onClick, t }: { book: any; onClick: () => v
 
   return (
     <div onClick={onClick} className="relative group cursor-pointer w-full max-w-sm mx-auto h-[280px] md:h-[300px] flex items-stretch justify-center p-2">
+      <button type="button" aria-pressed={isSaved} title={isSaved ? (t('readLaterRemove')) : t('readLater')}
+        onClick={(event) => { event.stopPropagation(); toggleSaved(readingKey); }}
+        className={`absolute top-14 end-4 z-40 rounded-xl border border-white/70 dark:border-slate-600 px-3 py-2 text-[11px] font-black shadow-lg backdrop-blur-md transition-all hover:scale-105 active:scale-95 ${isSaved ? 'bg-amber-400 text-slate-900' : 'bg-white/95 text-emerald-700 dark:bg-slate-900/95 dark:text-emerald-300'}`}>
+        {isSaved ? t('readLaterRemove') : t('readLater')}
+      </button>
       
       {/* هالة مضيئة خلف الكتاب في حالة وجود صوت */}
       {hasAudio && (
