@@ -482,6 +482,17 @@ export default function TutorialPage() {
             </section>
           </HintTarget>
 
+          <HintTarget id="monthly-reading-goal" title={label('تحدي القراءة الشهري', 'Monthly Reading Challenge')} description={label('اختر هدف القراءة الشهري من 1 إلى 20 كتابًا، وسجّل الكتب التي أنهيتها. في الموقع الفعلي تُزامَن أهداف الحساب الموثّق مع قاعدة البيانات؛ هذا المثال بلا بيانات أو اتصال.', 'Set a monthly target and mark finished books. Verified readers can sync their goals to the database on the live site. This tour uses no user data or network.')} interactive={false} {...hintState}>
+            <section className="homepage-alerts w-full overflow-hidden rounded-[2.5rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-black p-5 sm:p-6 md:p-8 shadow-[0_18px_55px_rgba(15,23,42,0.12)]">
+              <div className="flex flex-wrap justify-between items-center gap-4">
+                <div className="flex gap-3 items-center"><div className="rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 p-3 text-white shadow-lg"><BookIcon /></div><div><h2 className="text-xl md:text-3xl font-black text-slate-900 dark:text-white">{label('تحدي القراءة الشهري','Monthly Reading Challenge')}</h2><p className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-semibold">{label('جواز القارئ — هدف شخصي','Reading Passport — personal goal')}</p></div></div>
+                <span className="rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2 text-slate-500 dark:text-slate-300 font-black">•• / ••</span>
+              </div>
+              <div className="mt-5 h-4 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden"><div className="h-full w-2/5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-700" /></div>
+              <p className="mt-3 text-xs text-slate-500 dark:text-slate-400 font-bold">{label('مؤشر توضيحي فقط — الأرقام الحقيقية محجوبة','Illustrative progress only — real values are hidden')}</p>
+            </section>
+          </HintTarget>
+
           {/* Notifications are rendered with deliberately masked sample fields. */}
           <HintTarget id="notifications" title={label('التنبيهات الشخصية', 'Personal notifications')} description={label('تظهر هنا تذكيرات الاستعارات ومواعيد استخدام المكتبة عندما تكون متاحة لحسابك. القيم الشخصية محجوبة بالكامل.', 'Borrowing reminders and library bookings appear here when available. Personal values are deliberately masked.')} interactive={false} {...hintState}>
             <section className="homepage-alerts relative mx-auto w-full max-w-5xl overflow-hidden rounded-[2rem] border border-emerald-200 bg-gradient-to-br from-white via-emerald-50/80 to-teal-50/70 p-4 shadow-[0_18px_55px_rgba(15,118,110,0.13)] dark:border-emerald-900/80 dark:from-slate-900 dark:via-slate-900 dark:to-emerald-950/40 sm:p-6 md:rounded-[2.5rem] md:p-8">
@@ -579,6 +590,23 @@ export default function TutorialPage() {
               ))}
             </div>
           </section>
+
+          <HintTarget id="reading-suggestions" title={label('مكتبتي واقتراحات القراءة', 'My Books & Reading Suggestions')} description={label('تظهر الاقتراحات بعرض الصفحة الكامل قبل معلومات عن وطني، مع تصفية الكتب الورقية والرقمية، وحفظ كل عنوان للقراءة لاحقًا. النجوم في المكتبات الرقمية تسمح بتقييم شخصي وتعرض المتوسط العام منفصلًا. هذه بطاقات شكلية فقط.', 'Full-width book suggestions appear before the UAE facts. Filter physical/digital titles and save for later. Digital book cards allow personal star ratings and show public averages separately. These are sample-only cards.')} interactive={false} {...hintState}>
+            <section className="w-full rounded-[2.5rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-black p-5 sm:p-6 md:p-8 shadow-lg">
+              <div className="flex flex-wrap justify-between gap-4 items-center">
+                <div><h2 className="text-xl md:text-3xl font-black text-slate-900 dark:text-white">{label('مكتبتي واقتراحات القراءة','My Books & Reading Suggestions')}</h2><p className="mt-1 text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300">{label('كتب ورقية ورقمية مناسبة للاكتشاف','Discover physical and digital books')}</p></div>
+                <span className="rounded-full bg-emerald-600 px-4 py-2 text-white text-xs font-black">{label('اقتراحات القراءة','Reading suggestions')}</span>
+              </div>
+              <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {['physical','ar','en','saved'].map((category, index)=><div key={category} className="homepage-alert-card rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl">
+                  <span className="text-[11px] text-emerald-700 dark:text-emerald-300 font-black">{[label('كتاب ورقي','Physical'),label('رقمي عربي','Arabic digital'),label('رقمي إنجليزي','English digital'),label('القراءة لاحقًا','Read later')][index]}</span>
+                  <div className="mt-4 h-3 w-4/5 rounded-full bg-slate-200 dark:bg-slate-700" /><div className="mt-3 h-3 w-3/5 rounded-full bg-slate-100 dark:bg-slate-800" />
+                  <div className="mt-6 flex flex-wrap gap-2 items-center"><span className="rounded-full border border-slate-300 dark:border-slate-600 px-3 py-1.5 text-xs font-bold text-slate-600 dark:text-slate-200">{label('القراءة لاحقًا','Read later')}</span><span className="text-amber-500 text-base" aria-hidden="true">★★★★★</span></div>
+                </div>)}
+              </div>
+              <p className="mt-4 text-[11px] font-semibold text-slate-500 dark:text-slate-400">{label('معاينة تعليمية بلا بيانات مستفيدين أو اتصال بالمكتبة الفعلية','Safe visual tutorial — no real user data or live library requests')}</p>
+            </section>
+          </HintTarget>
 
           <section className="mt-2 grid w-full grid-cols-1 items-center gap-8 lg:grid-cols-12">
             <HintTarget id="saqr-mascot" title={label('شخصية صقر', 'Saqr mascot')} description={label('اضغط أو المس شخصية صقر في الموقع الحقيقي لمشاهدة التفاعل والرسائل الترحيبية.', 'The live site mascot offers small interactive moments and welcoming messages.')} interactive={false} className="lg:col-span-5 flex flex-col items-center justify-center" {...hintState}>
