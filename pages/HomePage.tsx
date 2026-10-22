@@ -40,6 +40,8 @@ const translations = {
         newBadge: "جديد",
         adminSettingsTitle: "إدارة النظام",
         borrowTitle: "مكتبتي المستعارة",
+        myLibraryHub: "مكتبتي الشخصية",
+        myLibraryHubDesc: "قائمة القراءة وجواز القارئ والكتب المقترحة.",
         borrowReturn: "تاريخ الإرجاع:",
         notificationsTitle: "تنبيهاتك",
         notificationsSubtitle: "تذكيرات الاستعارات وجدول استخدام المكتبة",
@@ -97,6 +99,8 @@ const translations = {
         newBadge: "NEW",
         adminSettingsTitle: "System Admin",
         borrowTitle: "My Borrowed Books",
+        myLibraryHub: "My Personal Library",
+        myLibraryHubDesc: "Reading list, reading passport and book suggestions.",
         borrowReturn: "Return Date:",
         notificationsTitle: "Your Notifications",
         notificationsSubtitle: "Borrowing reminders and your library schedule",
@@ -666,6 +670,9 @@ const HomePage: React.FC = () => {
                                             const returnDate = book.return_date || book.due_date || book.expected_return_date;
                                             const validReturnDate = Boolean(returnDate && Number.isFinite(new Date(`${returnDate}T12:00:00`).getTime()));
                                             const isOverdue = Boolean(returnDate && Number.isFinite(new Date(`${returnDate}T23:59:59`).getTime()) && new Date(`${returnDate}T23:59:59`).getTime() <= borrowCountdownNow);
+                                            const daysToReturn = validReturnDate ? Math.ceil((new Date(`${returnDate}T23:59:59`).getTime() - borrowCountdownNow) / 86400000) : null;
+                                            const dueSoon = daysToReturn !== null && daysToReturn > 0 && daysToReturn <= 3;
+
                                             return (
                                             <article key={book.id ?? `${bookTitle}-${returnDate}`} className="homepage-alert-card group relative bg-white/90 dark:bg-slate-800/90 p-4 sm:p-5 border border-amber-200 dark:border-amber-800/70 rounded-2xl sm:rounded-3xl flex flex-col gap-3 shadow-sm hover:shadow-xl touch-manipulation active:scale-[0.99]">
                                                 <div className="flex items-start gap-3">
@@ -684,6 +691,11 @@ const HomePage: React.FC = () => {
                                                     </p>
                                                     <p className={`mt-1.5 text-sm sm:text-base font-extrabold leading-relaxed flex items-center gap-1.5 ${isOverdue ? 'text-rose-700 dark:text-rose-300' : 'text-emerald-700 dark:text-emerald-300'}`}><svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 7v5l3 2" /></svg>{getBorrowCountdown(returnDate)}</p>
                                                 </div>
+                                                {(dueSoon || isOverdue) && (
+                                                    <p role="status" className={`text-xs sm:text-sm rounded-xl border px-3 py-2 font-black ${isOverdue ? 'border-rose-300 bg-rose-100 dark:bg-rose-950/50 text-rose-800 dark:text-rose-200' : 'border-amber-300 bg-amber-100 dark:bg-amber-950/50 text-amber-900 dark:text-amber-200'}`}>
+                                                        {isOverdue ? (isAr ? 'تنبيه: تجاوز الكتاب موعد الإرجاع.' : 'Reminder: this book is overdue.') : (isAr ? `تذكير تلقائي: موعد إرجاع الكتاب خلال ${daysToReturn} يوم.` : `Automatic reminder: return due in ${daysToReturn} day(s).`)}
+                                                    </p>
+                                                )}
                                                 {validReturnDate && (
                                                     <a
                                                         href={createGoogleCalendarLink(bookTitle || (isAr ? 'كتاب مستعار' : 'Borrowed book'), returnDate)}
@@ -764,6 +776,10 @@ const HomePage: React.FC = () => {
                 <RevealSection delay={300}>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         
+                        <Link to="/my-library" className="group relative bg-teal-500 text-white p-6 rounded-[2.5rem] border-b-8 border-teal-700 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
+                            <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 transition-transform duration-300"><BookIcon /></div>
+                            <div><h3 className="text-xl md:text-2xl font-black mb-1 tracking-tight">{t('myLibraryHub')}</h3><p className="text-xs md:text-sm opacity-90 font-normal leading-snug">{t('myLibraryHubDesc')}</p></div>
+                        </Link>
                         <Link to="/search" className="group relative bg-sky-400 text-white p-6 rounded-[2.5rem] border-b-8 border-sky-600 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
                             <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
                                 <SearchIcon />

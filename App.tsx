@@ -7,6 +7,7 @@ import { HashRouter, Routes, Route, Link, useLocation, Navigate } from 'react-ro
 // ==========================================
 import Login from './pages/Login';
 import HomePage from './pages/HomePage';
+import MyLibraryPage from './pages/MyLibraryPage';
 import AdminDashboard from './pages/AdminDashboard';
 
 import SearchPage from './pages/SearchPage';
@@ -482,6 +483,7 @@ const MainLayout: React.FC = () => {
           
           {/* باقي الصفحات محمية تتطلب تسجيل الدخول */}
           <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+          <Route path="/my-library" element={<ProtectedRoute><MyLibraryPage /></ProtectedRoute>} />
           <Route path="/admin-dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
           <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
           <Route path="/smart-search" element={<ProtectedRoute><SmartSearchPage /></ProtectedRoute>} />
