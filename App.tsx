@@ -367,6 +367,68 @@ const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   );
 };
 
+// Keep a failure inside the public tutorial route from turning into a blank page.
+// The original error is also written to the browser console for diagnostics.
+class TutorialPageErrorBoundary extends React.Component<
+  { children: ReactNode },
+  { errorMessage: string | null }
+> {
+  state = { errorMessage: null as string | null };
+
+  static getDerivedStateFromError(error: Error) {
+    return {
+      errorMessage: error instanceof Error ? error.message : String(error || 'Unknown runtime error')
+    };
+  }
+
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error('[Saqr Tutorial] Runtime render error:', error, info.componentStack);
+  }
+
+  render() {
+    if (!this.state.errorMessage) return this.props.children;
+
+    return (
+      <section
+        dir="rtl"
+        role="alert"
+        className="min-h-[75vh] w-full flex items-center justify-center px-4 py-12 bg-[#f8fafc] dark:bg-slate-950"
+      >
+        <div className="w-full max-w-2xl rounded-[2rem] border-2 border-emerald-200 dark:border-emerald-900 bg-white/95 dark:bg-slate-900/95 p-6 sm:p-9 shadow-2xl text-center">
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">
+            <svg className="h-9 w-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M10.3 3.9 1.8 18.6A1.6 1.6 0 0 0 3.2 21h17.6a1.6 1.6 0 0 0 1.4-2.4L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+            </svg>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">تعذر تحميل صفحة التوتوريال</h1>
+          <p className="mt-3 text-sm sm:text-base leading-7 text-slate-600 dark:text-slate-300">
+            حدث خطأ أثناء تشغيل الجولة. تم إيقاف الجزء المتسبب في الخطأ بدلًا من ترك الصفحة بيضاء.
+          </p>
+          <div className="mt-5 rounded-2xl border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/30 p-4 text-start">
+            <p className="text-xs font-black text-amber-800 dark:text-amber-300 mb-2">رسالة التشخيص</p>
+            <code dir="ltr" className="block break-words text-xs sm:text-sm leading-6 text-slate-800 dark:text-slate-100">{this.state.errorMessage}</code>
+          </div>
+          <div className="mt-6 flex flex-col sm:flex-row justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white px-6 py-3 font-black transition-colors"
+            >
+              إعادة المحاولة
+            </button>
+            <a
+              href="#/"
+              className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-100 px-6 py-3 font-black transition-colors"
+            >
+              العودة لتسجيل الدخول
+            </a>
+          </div>
+        </div>
+      </section>
+    );
+  }
+}
+
 // -------- 4. المكون الرئيسي --------
 const MainLayout: React.FC = () => {
   const [isSaqrModalOpen, setIsSaqrModalOpen] = useState(false);
@@ -394,7 +456,7 @@ const MainLayout: React.FC = () => {
         <Routes>
           {/* صفحات عامة لا تتطلب تسجيل الدخول */}
           <Route path="/" element={<Login />} />
-          <Route path="/tutorial" element={<TutorialPage />} />
+          <Route path="/tutorial" element={<TutorialPageErrorBoundary><TutorialPage /></TutorialPageErrorBoundary>} />
           
           {/* باقي الصفحات محمية تتطلب تسجيل الدخول */}
           <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
