@@ -633,7 +633,7 @@ export default function TutorialPage() {
           <section className="mt-2 grid w-full grid-cols-1 md:grid-cols-3 items-stretch gap-4 lg:gap-6">
             <>
               <HintTarget id="uae-feature" title={label('معلومات عن وطني', 'Information About My Country')} description={label('بطاقة ثقافية تعليمية تعرض معلومة عامة عن دولة الإمارات. استخدمنا خطوطًا بديلة هنا بدلًا من بيانات متغيرة.', 'An educational UAE culture card. This tour uses sample placeholder lines instead of changing live content.')} interactive={false} {...hintState}>
-                <div className="relative flex flex-col items-center overflow-hidden rounded-[3rem] border-4 border-amber-400 bg-gradient-to-br from-amber-100 via-amber-50 to-emerald-50 p-4 md:p-5 text-center shadow-2xl dark:border-amber-600 dark:from-slate-900 dark:to-slate-950 md:p-5">
+                <div className="relative flex flex-col items-center overflow-hidden rounded-[3rem] border-4 border-amber-400 bg-gradient-to-br from-amber-100 via-amber-50 to-emerald-50 p-4 md:p-5 text-center shadow-2xl dark:border-amber-600 dark:from-slate-900 dark:to-slate-950">
                   <div className="absolute left-0 right-0 top-0 flex h-2.5">
                     <div className="w-1/4 bg-red-600" /><div className="w-1/4 bg-emerald-600" /><div className="w-1/4 bg-white" /><div className="w-1/4 bg-black" />
                   </div>
