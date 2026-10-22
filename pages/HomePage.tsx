@@ -500,7 +500,7 @@ const HomePage: React.FC = () => {
         const readingPassports: Array<[string, string]> = [];
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
-            if (key?.startsWith('efips-reading-passport-v1:')) {
+            if ((key?.startsWith('efips-reading-passport-v1:') || key?.startsWith('efips-digital-ratings-v1:'))) {
                 const value = localStorage.getItem(key);
                 if (value !== null) readingPassports.push([key, value]);
             }
