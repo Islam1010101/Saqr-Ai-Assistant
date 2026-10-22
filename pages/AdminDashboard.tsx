@@ -493,6 +493,16 @@ const AdminDashboard: React.FC = () => {
     const topArabicDigitalReads = useMemo(() => digitalBookReadStats.filter(row => ['arabic', 'ar'].includes(String(row.library_type || '').trim().toLowerCase())).sort((a, b) => Number(b.read_count || 0) - Number(a.read_count || 0)).slice(0, 10), [digitalBookReadStats]);
     const topEnglishDigitalReads = useMemo(() => digitalBookReadStats.filter(row => ['english', 'en'].includes(String(row.library_type || '').trim().toLowerCase())).sort((a, b) => Number(b.read_count || 0) - Number(a.read_count || 0)).slice(0, 10), [digitalBookReadStats]);
 
+    // Read-only impact overview from existing dashboard aggregates; never reads student reading passports.
+    const libraryImpact = useMemo(() => {
+        const today = new Date().toISOString().slice(0, 10);
+        const overdue = borrowingsList.filter(b => b.return_date && String(b.return_date).slice(0, 10) < today).length;
+        const digitalOpens = digitalBookReadStats.reduce((total, row) => total + Number(row.read_count || 0), 0);
+        return { active: borrowingsList.length, pending: pendingRequestsList.length, overdue,
+            lessonPlans: lessonReportsList.length, digitalOpens: Number.isFinite(digitalOpens) ? digitalOpens : 0,
+            uniqueTitles: new Set([...borrowingsList,...pendingRequestsList].map(b => String(b.book_name || '').trim().toLowerCase()).filter(Boolean)).size };
+    }, [borrowingsList, pendingRequestsList, lessonReportsList, digitalBookReadStats]);
+
     const handlePrintDashboardReport = () => {
         const printWindow = window.open('', '_blank');
         if (!printWindow) { setBorrowingsError(isAr ? 'تعذر فتح نافذة الطباعة. يرجى السماح بالنوافذ المنبثقة.' : 'Could not open print window. Please allow pop-ups.'); return; }
@@ -501,6 +511,7 @@ const AdminDashboard: React.FC = () => {
         @page{size:A4 portrait;margin:15mm}body{font-family:'Cairo','Segoe UI',Tahoma,sans-serif;padding:20px;color:#1e293b;line-height:1.6}.header{text-align:center;border-bottom:3px solid #0f172a;padding-bottom:15px;margin-bottom:25px}.header img{max-width:90px;height:auto;margin-bottom:8px}h1{margin:0;font-size:22px;color:#0f172a}p{margin:5px 0;font-size:13px;color:#64748b}.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:25px}.stat-card{border:1px solid #cbd5e1;border-radius:12px;padding:15px;text-align:center;background:#f8fafc}.stat-num{font-size:24px;font-weight:900;color:#2563eb}.stat-label{font-size:11px;font-weight:bold;color:#475569;margin-top:5px}h2{font-size:16px;border-bottom:2px solid #e2e8f0;padding-bottom:6px;margin-top:25px;color:#0f172a}table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px}th,td{border:1px solid #cbd5e1;padding:10px;text-align:${dir === 'rtl' ? 'right' : 'left'}}th{background:#f1f5f9;font-weight:bold}@media print{.no-print{display:none!important}}
         </style></head><body><div class="header"><img src="https://www.efipslibrary.online/school-logo.png" alt="EFIPS Logo"/><h1>${t('title')}</h1><p>${t('subtitle')} | ${new Date().toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}</p></div>
         <div class="stats-grid"><div class="stat-card"><div class="stat-num">${stats.students}</div><div class="stat-label">${t('totalStudents')}</div></div><div class="stat-card"><div class="stat-num">${stats.teachers}</div><div class="stat-label">${t('totalTeachers')}</div></div><div class="stat-card"><div class="stat-num">${stats.studentLogins}</div><div class="stat-label">${t('studentLogins')}</div></div><div class="stat-card"><div class="stat-num">${stats.teacherLogins}</div><div class="stat-label">${t('teacherLogins')}</div></div></div>
+        <h2>${isAr ? 'مؤشرات أثر المكتبة' : 'Library Impact Indicators'}</h2><table><tr><th>${isAr ? 'إعارات نشطة' : 'Active loans'}</th><th>${isAr ? 'طلبات معلقة' : 'Pending requests'}</th><th>${isAr ? 'إعارات متأخرة' : 'Overdue loans'}</th><th>${isAr ? 'فتح الكتب الرقمية' : 'Digital opens'}</th><th>${isAr ? 'سجلات التحضير' : 'Lesson records'}</th></tr><tr><td>${libraryImpact.active}</td><td>${libraryImpact.pending}</td><td>${libraryImpact.overdue}</td><td>${digitalBookReadStatsAvailable === false ? '-' : libraryImpact.digitalOpens}</td><td>${libraryImpact.lessonPlans}</td></tr></table>
         <h2>${t('topBooksTitle')}</h2><table><tr><th>#</th><th>${t('colBook')}</th><th>${isAr ? 'عدد مرات الاستعارة' : 'Borrow Count'}</th></tr>${topBooksStats.length ? topBooksStats.map(([book, count], idx) => `<tr><td>${idx + 1}</td><td><strong>${book}</strong></td><td>${count}</td></tr>`).join('') : `<tr><td colspan="3" style="text-align:center">${t('noResults')}</td></tr>`}</table>
         <h2>${t('arabicBooks')} - ${t('digitalReadAnalyticsTitle')}</h2><table><tr><th>#</th><th>${t('colBook')}</th><th>${t('digitalReadCount')}</th></tr>${topArabicDigitalReads.length ? topArabicDigitalReads.map((book, idx) => `<tr><td>${idx + 1}</td><td><strong>${book.book_title}</strong></td><td>${Number(book.read_count || 0)}</td></tr>`).join('') : `<tr><td colspan="3" style="text-align:center">${digitalBookReadStatsAvailable === false ? t('digitalReadsSetupRequired') : t('noDigitalReads')}</td></tr>`}</table>
         <h2>${t('englishBooks')} - ${t('digitalReadAnalyticsTitle')}</h2><table><tr><th>#</th><th>${t('colBook')}</th><th>${t('digitalReadCount')}</th></tr>${topEnglishDigitalReads.length ? topEnglishDigitalReads.map((book, idx) => `<tr><td>${idx + 1}</td><td><strong>${book.book_title}</strong></td><td>${Number(book.read_count || 0)}</td></tr>`).join('') : `<tr><td colspan="3" style="text-align:center">${digitalBookReadStatsAvailable === false ? t('digitalReadsSetupRequired') : t('noDigitalReads')}</td></tr>`}</table>
@@ -593,6 +604,29 @@ const AdminDashboard: React.FC = () => {
                             <div className={`h-1.5 rounded-full mt-4 overflow-hidden ${card.trackClass}`}><div className={`h-full w-full rounded-full ${card.barClass}`} /></div>
                         </div>)}
                     </div>
+                </section>
+
+                <section className="lg:col-span-4 rounded-3xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/70 p-5 md:p-6 shadow-sm">
+                    <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                        <div>
+                            <h2 className="text-lg md:text-xl font-black">{isAr ? 'مؤشرات أثر المكتبة' : 'Library Impact Indicators'}</h2>
+                            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{isAr ? 'مؤشرات تشغيلية من السجلات الحالية، وليست قياسًا مباشرًا لمستوى القراءة أو التحصيل.' : 'Operational indicators from existing records, not direct measures of reading attainment.'}</p>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+                        {[
+                            { label: isAr ? 'إعارات نشطة' : 'Active loans', value: libraryImpact.active },
+                            { label: isAr ? 'طلبات معلقة' : 'Pending requests', value: libraryImpact.pending },
+                            { label: isAr ? 'إعارات متأخرة' : 'Overdue loans', value: libraryImpact.overdue },
+                            { label: isAr ? 'عناوين مطلوبة' : 'Requested titles', value: libraryImpact.uniqueTitles },
+                            { label: isAr ? 'فتح الكتب الرقمية' : 'Digital book opens', value: digitalBookReadStatsAvailable === false ? '—' : libraryImpact.digitalOpens },
+                            { label: isAr ? 'سجلات التحضير' : 'Lesson plan records', value: libraryImpact.lessonPlans }
+                        ].map((metric) => <div key={metric.label} className="rounded-2xl border border-emerald-100 dark:border-slate-700 bg-emerald-50/50 dark:bg-slate-800/50 p-4">
+                            <div className="text-2xl font-black text-emerald-700 dark:text-emerald-300 tabular-nums">{metric.value}</div>
+                            <div className="mt-2 text-xs font-bold text-slate-600 dark:text-slate-300">{metric.label}</div>
+                        </div>)}
+                    </div>
+                    <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">{isAr ? 'البيانات تعكس السجلات المتاحة حاليًا؛ وعدد فتح الكتب الرقمية لا يعني بالضرورة إكمال قراءتها.' : 'Figures reflect currently available records; a digital book open does not necessarily mean the book was read.'}</p>
                 </section>
 
                 <section className="lg:col-span-4 grid grid-cols-1 xl:grid-cols-5 gap-5 items-start">
