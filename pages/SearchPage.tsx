@@ -312,30 +312,15 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                         <UserIcon /> {book.author}
                     </div>
                     
-                    <div className="mb-6 rounded-2xl border border-emerald-200 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-900/20 px-4 py-3 text-start">
-                        <p className="text-xs font-black uppercase tracking-wide text-emerald-700 dark:text-emerald-300">{t('isbnLabel')}</p>
-                        {book.isbnCandidates?.length ? (
-                            <>
-                                <p className="text-xs text-amber-800 dark:text-amber-300 mt-1 font-bold">{t('isbnCandidate')}</p>
-                                <div className="mt-2 flex flex-wrap gap-2">
-                                    {book.isbnCandidates.map((entry) => (
-                                        <a key={entry.isbn13} href={entry.source} target="_blank" rel="noopener noreferrer"
-                                            onClick={(event) => event.stopPropagation()}
-                                            className="inline-flex flex-col rounded-xl border border-emerald-200 dark:border-emerald-700 bg-white dark:bg-slate-900 px-3 py-2 hover:border-emerald-500 transition-colors"
-                                            title={t('isbnReview')}>
-                                            <span className="text-base font-black font-mono text-slate-900 dark:text-white" dir="ltr">{entry.isbn13}</span>
-                                            <span className="text-[11px] text-slate-600 dark:text-slate-300">{entry.publisher} · {entry.year}</span>
-                                        </a>
-                                    ))}
-                                </div>
-                                <p className="mt-2 text-xs text-slate-600 dark:text-slate-300">{t('isbnReview')}</p>
-                            </>
-                        ) : book.isbn ? (
+                    {book.isbn && (
+                        <div className="mb-6 rounded-2xl border border-emerald-200 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-900/20 px-4 py-3 text-start">
+                            <p className="text-xs font-black uppercase tracking-wide text-emerald-700 dark:text-emerald-300">{t('isbnLabel')}</p>
                             <p className="mt-1 font-mono text-lg font-black text-slate-900 dark:text-white" dir="ltr">{book.isbn}</p>
-                        ) : (
-                            <p className="mt-1 text-sm text-slate-600 dark:text-slate-300 font-bold">{t('isbnMissing')}</p>
-                        )}
-                    </div>
+                            {book.isbnStatus === 'candidate' && (
+                                <p className="mt-1 text-xs font-bold text-amber-800 dark:text-amber-300">{t('isbnCandidate')}</p>
+                            )}
+                        </div>
+                    )}
 
                     <div className="grid grid-cols-2 gap-4 md:gap-6 mb-8">
                         <div className="bg-amber-50 dark:bg-slate-700 p-5 rounded-[2rem] border-4 border-amber-200 dark:border-slate-600 shadow-sm">
@@ -435,21 +420,16 @@ const BookCard = React.memo(({ book, onClick, t, locale }: { book: Book; onClick
                 <UserIcon/>
                 <p className="text-xs md:text-sm font-bold truncate uppercase tracking-wide">{book.author}</p>
             </div>
-            <div className="mt-3 inline-flex flex-wrap items-center gap-2 rounded-xl bg-slate-950/25 border border-white/30 px-3 py-2 text-white shadow-sm max-w-full"
-                 title={book.isbnCandidates?.length ? t('isbnCandidate') : t('isbnMissing')}>
-                <svg className="w-4 h-4 shrink-0 opacity-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 5v14M7 5v14M10 5v14M14 5v14M17 5v14M20 5v14" />
-                </svg>
-                <span className="text-[11px] font-black uppercase">{t('isbnLabel')}</span>
-                <span dir="ltr" className="text-xs font-mono font-bold truncate max-w-[175px]">
-                    {book.isbnCandidates?.length === 1 ? book.isbnCandidates[0].isbn13
-                        : book.isbnCandidates?.length ? `${book.isbnCandidates.length} ${t('isbnEditions')}`
-                        : book.isbn || t('isbnMissing')}
-                </span>
-                {book.isbnCandidates?.length ? (
-                    <span className="text-[10px] font-bold rounded-md bg-amber-300 text-slate-900 px-1.5 py-0.5">{locale === 'ar' ? 'محتمل' : 'Candidate'}</span>
-                ) : null}
-            </div>
+            {book.isbn && (
+                <div className="mt-3 inline-flex flex-wrap items-center gap-2 rounded-xl bg-slate-950/25 border border-white/30 px-3 py-2 text-white shadow-sm max-w-full"
+                     title={book.isbnStatus === 'candidate' ? t('isbnCandidate') : t('isbnLabel')}>
+                    <svg className="w-4 h-4 shrink-0 opacity-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 5v14M7 5v14M10 5v14M14 5v14M17 5v14M20 5v14" />
+                    </svg>
+                    <span className="text-[11px] font-black uppercase">{t('isbnLabel')}</span>
+                    <span dir="ltr" className="text-xs font-mono font-bold truncate">{book.isbn}</span>
+                </div>
+            )}
           </div>
         </div>
 

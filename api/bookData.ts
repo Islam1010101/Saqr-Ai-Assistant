@@ -3506,6 +3506,55 @@ const editionCandidates: Array<{
       }
     ]
   }
+,
+{
+  "title": "THE PRINCE",
+  "author": "MACHIAVELLI",
+  "candidates": [
+    {
+      "isbn13": "9781784287009",
+      "publisher": "Arcturus Publishing Ltd",
+      "year": 2017,
+      "source": "https://www.virginmegastore.ae/en/books/fiction-books/classic-fiction-books/the-prince-niccolo-machiavelli/p/700950"
+    }
+  ]
+},
+{
+  "title": "THE WEALTHY BARBER",
+  "author": "David Chilton",
+  "candidates": [
+    {
+      "isbn13": "9780968394731",
+      "publisher": "Stoddart Pub",
+      "year": 2002,
+      "source": "https://openlibrary.org/works/OL34631264W/The_Wealthy_Barber"
+    }
+  ]
+},
+{
+  "title": "LITTLE WOMEN",
+  "author": "Louisa May Alcott",
+  "candidates": [
+    {
+      "isbn13": "9780316031059",
+      "publisher": "Little, Brown Young Readers",
+      "year": 1994,
+      "source": "https://www.betterworldbooks.com/product/detail/little-women-from-the-original-publisher-9780316031059"
+    }
+  ]
+},
+{
+  "title": "THE ADVENTURES OF PINOCCHIO",
+  "author": "Carlo Collodi",
+  "candidates": [
+    {
+      "isbn13": "9780448110011",
+      "publisher": "Grosset & Dunlap",
+      "year": 1982,
+      "source": "https://openlibrary.org/books/OL7540045M/The_Adventures_of_Pinnochio"
+    }
+  ]
+}
 ];
 const canonicalBookKey = (text: string) => text.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
 const editionCandidateMap = new Map(editionCandidates.map(item =>
@@ -3538,7 +3587,7 @@ const processBookData = (rawData: any[]): Book[] => {
 
     subject = inferredSubject(String(rawBook.title || ''), author, topicMatch?.[1] || '', Number(rawBook.shelf));
     const isbnCandidates = editionCandidateMap.get(canonicalBookKey(String(rawBook.title || '')) + '|' + canonicalBookKey(author));
-    const isbn = isbnCandidates?.length === 1 ? isbnCandidates[0].isbn13 : undefined;
+    const isbn = isbnCandidates?.[0]?.isbn13;
 
 
     return {
