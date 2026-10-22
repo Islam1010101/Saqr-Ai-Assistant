@@ -22,7 +22,7 @@ const labelFor = (b: ReadingBook, ar: boolean) =>
   b.format === 'physical' ? (ar ? 'كتاب ورقي' : 'Physical') :
   b.format === 'ar' ? (ar ? 'رقمي عربي' : 'Arabic digital') : (ar ? 'رقمي إنجليزي' : 'English digital');
 
-const HomeReadingHub: React.FC = () => {
+const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant = 'books' }) => {
   const { locale, dir } = useLanguage();
   const ar = locale === 'ar';
   const { data, toggleSaved, toggleCompleted, setGoal } = useReadingPassport();
@@ -65,7 +65,7 @@ const HomeReadingHub: React.FC = () => {
   const shown = expanded ? visible : visible.slice(0, 6);
 
   return (
-    <section id="reading-passport" dir={dir} className="homepage-alerts relative mx-auto w-full max-w-6xl overflow-hidden rounded-[2rem] md:rounded-[2.5rem] border border-emerald-200 dark:border-emerald-900/80 bg-gradient-to-br from-white via-emerald-50/70 to-teal-50/70 dark:from-slate-900 dark:via-slate-900 dark:to-emerald-950/30 shadow-[0_18px_55px_rgba(15,118,110,0.13)] p-4 sm:p-6 md:p-8">
+    <section id={variant === 'challenge' ? 'monthly-reading-challenge' : 'reading-passport'} dir={dir} className="homepage-alerts relative mx-auto w-full max-w-6xl overflow-hidden rounded-[2rem] md:rounded-[2.5rem] border border-emerald-200 dark:border-emerald-900/80 bg-gradient-to-br from-white via-emerald-50/70 to-teal-50/70 dark:from-slate-900 dark:via-slate-900 dark:to-emerald-950/30 shadow-[0_18px_55px_rgba(15,118,110,0.13)] p-4 sm:p-6 md:p-8">
       <div aria-hidden="true" className="pointer-events-none absolute -top-16 -end-16 w-52 h-52 bg-emerald-300/20 dark:bg-emerald-500/10 rounded-full blur-3xl" />
       <div aria-hidden="true" className="pointer-events-none absolute -bottom-20 -start-16 w-52 h-52 bg-amber-300/20 dark:bg-teal-400/10 rounded-full blur-3xl" />
       <div className="relative">
@@ -75,8 +75,8 @@ const HomeReadingHub: React.FC = () => {
               <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 7v14M3 18V4c4-1 7-1 9 2 2-3 5-3 9-2v14c-4-1-7-1-9 2-2-3-5-3-9-2Z"/></svg>
             </div>
             <div>
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 dark:text-white">{ar ? 'جواز القارئ ومكتبتي' : 'Reading Passport & My Books'}</h2>
-              <p className="text-xs sm:text-sm mt-1 font-semibold text-slate-600 dark:text-slate-300">{ar ? 'كتب ورقية ورقمية، قائمة القراءة لاحقًا، وتحدٍّ شهري ممتع' : 'Physical and digital books, your read-later list and a monthly challenge'}</p>
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 dark:text-white">{variant === 'challenge' ? (ar ? 'تحدي القراءة الشهري' : 'Monthly Reading Challenge') : (ar ? 'مكتبتي واقتراحات القراءة' : 'My Books & Reading Suggestions')}</h2>
+              <p className="text-xs sm:text-sm mt-1 font-semibold text-slate-600 dark:text-slate-300">{variant === 'challenge' ? (ar ? 'أنجز هدفك الشهري خطوة بخطوة واحتفل بكل كتاب' : 'Reach your monthly reading goal, one book at a time') : (ar ? 'كتبك المحفوظة واقتراحات من المكتبة الورقية والرقمية' : 'Saved books and suggestions from the physical and digital libraries')}</p>
             </div>
           </div>
           <div className="rounded-2xl bg-white/80 dark:bg-slate-800/80 border border-emerald-200 dark:border-slate-700 shadow-sm px-4 py-3 text-emerald-800 dark:text-emerald-200 font-black text-sm">
@@ -84,26 +84,36 @@ const HomeReadingHub: React.FC = () => {
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-4 mb-6">
-          <div className="lg:col-span-2 rounded-3xl border border-emerald-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 p-5 sm:p-6 shadow-sm hover:shadow-lg transition-shadow">
-            <div className="flex flex-wrap justify-between gap-3 items-center">
-              <div><h3 className="font-black text-lg text-slate-900 dark:text-white">{ar ? 'تحدي القراءة الشهري' : 'Monthly Reading Challenge'}</h3><p className="text-xs mt-1 text-slate-500 dark:text-slate-300">{ar ? 'حدّد هدفك وسجّل الكتب التي أنهيت قراءتها' : 'Choose a goal and mark finished books'}</p></div>
-              <div className="flex items-center gap-2"><strong className="text-2xl font-black text-emerald-700 dark:text-emerald-300">{count}/{data.goal}</strong><label className="sr-only" htmlFor="reading-goal">{ar?'هدفك الشهري':'Monthly goal'}</label><select id="reading-goal" value={data.goal} onChange={e => setGoal(Number(e.target.value))} className="rounded-xl border border-emerald-200 dark:border-slate-600 bg-emerald-50 dark:bg-slate-900 text-slate-900 dark:text-white p-2 text-sm font-bold">{[1,2,3,4,5,6,8,10,12,15,20].map(n=><option key={n} value={n}>{n}</option>)}</select></div>
+        {variant === 'challenge' && (
+          <>
+            <div className="relative rounded-3xl border border-emerald-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 p-5 sm:p-6 shadow-sm hover:shadow-lg transition-all duration-300 group">
+              <div className="flex flex-wrap justify-between gap-4 items-center">
+                <div>
+                  <div className="flex items-center gap-2 text-amber-600 dark:text-amber-300 mb-2">
+                    <svg className="w-6 h-6 transition-transform group-hover:rotate-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="m8 21 4-3 4 3V6H8v15ZM5 6V3h14v3M8 10h8"/></svg>
+                    <span className="text-sm font-black">{ar?'جواز القارئ':'Reading Passport'}</span>
+                  </div>
+                  <h3 className="font-black text-lg text-slate-900 dark:text-white">{ar?'هدف هذا الشهر':'This month’s goal'}</h3>
+                  <p className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-semibold">{ar?'سجّل الكتب التي أنهيتها واختر هدفك.':'Track completed books and set a personal goal.'}</p>
+                </div>
+                <div className="flex gap-3 items-center">
+                  <strong className="text-3xl font-black text-emerald-700 dark:text-emerald-300 tabular-nums">{count}<span className="text-base text-slate-400">/{data.goal}</span></strong>
+                  <label htmlFor="reading-goal" className="sr-only">{ar?'الهدف الشهري':'Monthly goal'}</label>
+                  <select id="reading-goal" value={data.goal} onChange={e=>setGoal(Number(e.target.value))} className="rounded-xl border border-emerald-200 dark:border-slate-600 bg-emerald-50 dark:bg-slate-900 text-slate-900 dark:text-white p-2 text-sm font-bold">{[1,2,3,4,5,6,8,10,12,15,20].map(n=><option value={n} key={n}>{n}</option>)}</select>
+                </div>
+              </div>
+              <div role="progressbar" aria-label={ar?'تقدم القراءة الشهري':'Monthly reading progress'} aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} className="mt-5 rounded-full h-4 bg-emerald-100 dark:bg-slate-700 overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-emerald-500 via-teal-500 to-amber-400 rounded-full transition-all duration-700 ease-out" style={{width:progress+'%'}} />
+              </div>
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                <p className="text-sm font-bold text-emerald-800 dark:text-emerald-300">{progress === 100 ? (ar?'أحسنت! اكتمل تحديك الشهري.':'Wonderful! Your monthly challenge is complete.') : (ar?'كل كتاب يقربك من تحقيق هدفك!':'Every finished book brings you closer!')}</p>
+                <a href="#reading-passport" className="text-xs sm:text-sm font-black text-teal-700 dark:text-teal-300 underline-offset-4 hover:underline">{ar?'عرض قائمة القراءة':'Open reading list'}</a>
+              </div>
             </div>
-            <div role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress} className="mt-5 rounded-full h-4 bg-emerald-100 dark:bg-slate-700 overflow-hidden"><div className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-700" style={{width:progress+'%'}} /></div>
-            <p className="mt-3 text-sm font-bold text-emerald-800 dark:text-emerald-300">{progress >= 100 ? (ar ? 'أحسنت! حققت هدف القراءة الشهري.' : 'Great work! You completed your monthly goal.') : (ar ? 'كل كتاب تُنهيه يقربك من هدفك.' : 'Every finished book brings you closer to your goal.')}</p>
-          </div>
-          <div className="rounded-3xl border border-amber-200 dark:border-slate-700 bg-amber-50/90 dark:bg-slate-800/90 p-5 sm:p-6 flex flex-col justify-center shadow-sm">
-            <h3 className="font-black text-base text-slate-900 dark:text-white">{ar ? 'ابدأ رحلة جديدة' : 'Start your next read'}</h3>
-            <p className="mt-2 text-xs leading-relaxed font-semibold text-slate-600 dark:text-slate-300">{ar ? 'ابحث عن كتاب على الرف أو اختر كتابًا رقميًا، ثم احفظه للقراءة لاحقًا.' : 'Explore the physical catalog or a digital book, then save it for later.'}</p>
-            <div className="flex flex-wrap gap-2 mt-4">
-              <Link to="/search" className="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-xl text-white font-bold text-xs transition-colors">{ar?'الكتب الورقية':'Physical catalog'}</Link>
-              <Link to="/digital-library" className="px-3 py-2 bg-sky-600 hover:bg-sky-700 rounded-xl text-white font-bold text-xs transition-colors">{ar?'المكتبة الرقمية':'Digital library'}</Link>
-            </div>
-          </div>
-        </div>
-        <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-5">{ar ? 'جواز القارئ شخصي ومحفوظ على هذا الجهاز فقط. إنجازات القراءة ليست نقاطًا رسمية، ولا تؤكد استعارة كتاب أو إتمام قراءة المحتوى تلقائيًا.' : 'Your reading passport is stored on this device only. Progress does not grant official points or confirm a borrowing or finished digital reading.'}</p>
-
+            <p className="mt-3 text-[11px] text-slate-500 dark:text-slate-400 font-semibold">{ar?'الإنجازات مسجلة على هذا الجهاز فقط وليست نقاطًا رسمية.':'Progress stays on this device and does not award official points.'}</p>
+          </>
+        )}
+        {variant === 'books' && (
         <div className="flex flex-wrap gap-2 sm:gap-3 items-center justify-between mb-5">
           <div className="flex gap-2 flex-wrap">
             <button type="button" onClick={()=>{setTab('saved');setExpanded(false);}} className={'px-4 py-2.5 rounded-xl font-black text-xs sm:text-sm transition-all '+(tab==='saved'?'bg-emerald-600 text-white shadow-md':'bg-white/85 dark:bg-slate-800 text-slate-700 dark:text-white border border-slate-200 dark:border-slate-700')}>{ar?'القراءة لاحقًا':'Read later'} ({savedBooks.length})</button>
@@ -127,6 +137,7 @@ const HomeReadingHub: React.FC = () => {
           </article>;
         })}</div>:<p className="py-8 text-center text-slate-600 dark:text-slate-300 font-bold bg-white/60 dark:bg-slate-800/60 rounded-2xl">{tab==='saved'?(ar?'قائمة القراءة لاحقًا فارغة. احفظ كتابًا من المكتبة الرقمية أو دليل المكتبة.':'No saved books yet. Save a title from the digital or physical catalog.'):(ar?'لا توجد اقتراحات متاحة لهذا النوع.':'No suggestions for this book type.')}</p>}
         {!expanded && visible.length>6 && <button type="button" onClick={()=>setExpanded(true)} className="block mx-auto mt-5 text-sm font-black px-6 py-3 rounded-xl border border-emerald-300 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-slate-800 transition-colors">{ar?'عرض المزيد':'Show more'} ({visible.length-6})</button>}
+        )}
       </div>
     </section>
   );
