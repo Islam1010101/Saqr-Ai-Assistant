@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { bookData } from '../../api/bookData';
+import { useCloudReader, loadCloudSaved, persistCloudSaved } from './efipsCloud';
 
 export type ReadingBook = {
   key: string;
@@ -74,8 +75,32 @@ const saveToDevice = (key: string, next: ReadingPassport) => {
   } catch { /* Device storage may be blocked; never write sensitive data to Supabase. */ }
 };
 export const useReadingPassport = () => {
-  const storageKey = getStorageKey();
+  const { user: cloudUser } = useCloudReader();
+  // Keep each verified email account separate from locally entered school IDs.
+  const storageKey = cloudUser ? 'efips-reading-passport-v1:cloud:' + cloudUser.id : getStorageKey();
   const [data, setData] = useState<ReadingPassport>(() => readFromDevice(storageKey));
+  const [cloudReady, setCloudReady] = useState(false);
+  useEffect(() => {
+    if (!cloudUser) { setCloudReady(false); return; }
+    let active = true;
+    setCloudReady(false);
+    const sync = async () => {
+      try {
+        const remote = await loadCloudSaved(cloudUser.id);
+        if (!active) return;
+        const local = readFromDevice(storageKey);
+        // Server-owned saved books are authoritative for verified accounts.
+        // Do not auto-upload data associated with a self-asserted school ID.
+        saveToDevice(storageKey, { ...local, saved: remote.filter(isValidReadingKey) });
+        if (active) setCloudReady(true);
+      } catch (error) {
+        console.warn('Cloud reading list unavailable; device list remains accessible.', error);
+      }
+    };
+    void sync();
+    return () => { active = false; };
+  }, [cloudUser?.id, storageKey]);
+
   useEffect(() => {
     const update = () => setData(readFromDevice(storageKey));
     const onChange = (evt: Event) => {
@@ -94,10 +119,16 @@ export const useReadingPassport = () => {
     saveToDevice(storageKey, next);
   }, [storageKey]);
   const toggleSaved = useCallback((key: string) => {
-    if (!readingCatalogByKey.has(key)) return;
+    if (!isValidReadingKey(key)) return;
+    const isCurrentlySaved = readFromDevice(storageKey).saved.includes(key);
     change(prev => ({ ...prev, saved: prev.saved.includes(key) ?
       prev.saved.filter(item => item !== key) : [...prev.saved, key] }));
-  }, [change]);
+    if (cloudUser && cloudReady) {
+      void persistCloudSaved(cloudUser.id, key, !isCurrentlySaved).catch(error => {
+        console.warn('Could not synchronize reading list; device copy preserved.', error);
+      });
+    }
+  }, [change, storageKey, cloudUser?.id, cloudReady]);
   const toggleCompleted = useCallback((key: string) => {
     if (!readingCatalogByKey.has(key)) return;
     change(prev => {
@@ -112,5 +143,5 @@ export const useReadingPassport = () => {
   const setGoal = useCallback((goal: number) => change(prev => ({
     ...prev, goal: Math.max(1, Math.min(20, Math.round(goal)))
   })), [change]);
-  return { data, toggleSaved, toggleCompleted, setGoal };
+  return { data, toggleSaved, toggleCompleted, setGoal, cloudUser, cloudReady };
 };
