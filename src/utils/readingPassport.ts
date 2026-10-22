@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { bookData } from '../../api/bookData';
-import { ARABIC_LIBRARY_DATABASE } from '../../pages/ArabicLibraryInternalPage';
-import { ENGLISH_LIBRARY_DATABASE } from '../../pages/EnglishLibraryInternalPage';
 
 export type ReadingBook = {
   key: string;
@@ -28,22 +26,13 @@ export const physicalBookKey = (book: { id: string }) => 'physical:' + book.id;
 export const digitalBookKey = (language: 'ar' | 'en', book: { id: string | number }) =>
   'digital:' + language + ':' + String(book.id);
 
-export const readingCatalog: ReadingBook[] = [
-  ...bookData.map(book => ({
-    key: physicalBookKey(book), title: book.title, author: book.author,
-    subject: book.subject, format: 'physical' as const, href: '/search',
-    shelf: book.shelf, row: book.row
-  })),
-  ...ARABIC_LIBRARY_DATABASE.map(book => ({
-    key: digitalBookKey('ar', book), title: book.title, author: book.author,
-    subject: book.subject, format: 'ar' as const, href: book.driveLink
-  })),
-  ...ENGLISH_LIBRARY_DATABASE.map(book => ({
-    key: digitalBookKey('en', book), title: book.title, author: book.author,
-    subject: book.subject, format: 'en' as const, href: book.driveLink
-  }))
-];
-export const readingCatalogByKey = new Map(readingCatalog.map(book => [book.key, book]));
+export const physicalReadingCatalog: ReadingBook[] = bookData.map(book => ({
+  key: physicalBookKey(book), title: book.title, author: book.author,
+  subject: book.subject, format: 'physical' as const, href: '/search',
+  shelf: book.shelf, row: book.row
+}));
+export const isValidReadingKey = (key: string): boolean =>
+  physicalReadingCatalog.some(book => book.key === key) || /^digital:(ar|en):[a-zA-Z0-9_-]+$/.test(key);
 const legacyPhysicalKeyMap = new Map(bookData.map(book =>
   [legacyKey(book.title, book.author, book.shelf, book.row), physicalBookKey(book)]
 ));
@@ -51,7 +40,7 @@ const legacyPhysicalKeyMap = new Map(bookData.map(book =>
 const safeList = (value: unknown): string[] =>
   Array.isArray(value) ? Array.from(new Set(value.filter((v): v is string => typeof v === 'string').map(key =>
     legacyPhysicalKeyMap.get(key) || key
-  ).filter(key => readingCatalogByKey.has(key)))).slice(0, 500) : [];
+  ).filter(key => isValidReadingKey(key)))).slice(0, 500) : [];
 
 const getStorageKey = (): string => {
   if (typeof window === 'undefined') return '';
@@ -115,7 +104,7 @@ export const useReadingPassport = () => {
       const done = prev.completed.includes(key);
       const completedOn = { ...prev.completedOn };
       if (done) delete completedOn[key];
-      else completedOn[key] = new Date().toLocaleDateString('en-CA');
+      else completedOn[key] = [new Date().getFullYear(), String(new Date().getMonth()+1).padStart(2,'0'), String(new Date().getDate()).padStart(2,'0')].join('-');
       return { ...prev, completed: done ? prev.completed.filter(item => item !== key) :
         [...prev.completed, key], completedOn };
     });
