@@ -3515,7 +3515,7 @@ const editionCandidates: Array<{
       "isbn13": "9781784287009",
       "publisher": "Arcturus Publishing Ltd",
       "year": 2017,
-      "source": "https://openlibrary.org/books/OL42994715M/The_Prince"
+      "source": "https://www.virginmegastore.ae/en/books/fiction-books/classic-fiction-books/the-prince-niccolo-machiavelli/p/700950"
     }
   ]
 },
@@ -3539,7 +3539,7 @@ const editionCandidates: Array<{
       "isbn13": "9780316031059",
       "publisher": "Little, Brown Young Readers",
       "year": 1994,
-      "source": "https://openlibrary.org/books/OL9899997M/Little_Women"
+      "source": "https://www.betterworldbooks.com/product/detail/little-women-from-the-original-publisher-9780316031059"
     }
   ]
 },
