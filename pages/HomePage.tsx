@@ -287,7 +287,7 @@ const HomePage: React.FC = () => {
             String(value ?? '').normalize('NFKC').trim().toLocaleLowerCase();
 
         const isActiveBorrowing = (row: any) => {
-            const status = normalizeValue(row?.status).replace(/[\\s-]+/g, '_');
+            const status = normalizeValue(row?.status).replace(/[\s-]+/g, '_');
             return [
                 'active', 'approved', 'confirmed', 'borrowed', 'issued',
                 'checked_out', 'checkedout', 'on_loan',
