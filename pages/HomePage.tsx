@@ -495,16 +495,21 @@ const HomePage: React.FC = () => {
         return HOMELAND_FACTS[dayIndex];
     }, [locale]);
 
-    const handleLogout = () => {
-        // Keep locally saved reading passports while clearing every session setting.
+    const handleLogout = async () => {
+        // Local reading notes may persist, but verified email account caches must not
+        // survive sign-out on a shared school device.
         const readingPassports: Array<[string, string]> = [];
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
-            if ((key?.startsWith('efips-reading-passport-v1:') || key?.startsWith('efips-digital-ratings-v1:'))) {
+            if (key && !key.includes(':cloud:') && (
+                key.startsWith('efips-reading-passport-v1:') ||
+                key.startsWith('efips-digital-ratings-v1:')
+            )) {
                 const value = localStorage.getItem(key);
                 if (value !== null) readingPassports.push([key, value]);
             }
         }
+        try { await supabase.auth.signOut(); } catch (error) { console.warn('Reader signout warning', error); }
         localStorage.clear();
         for (const [key, value] of readingPassports) localStorage.setItem(key, value);
         window.location.href = '#/';
