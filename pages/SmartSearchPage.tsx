@@ -75,6 +75,18 @@ Instructions for "Little Author" Challenge (STRICT RULES):
 Style: Professional, empathetic, uses flawless Fos'ha Arabic or English based on user input. NO emojis in the certificate content.
 `;
 
+// Presentation-only formatting for lesson-plan replies. Preserve the original conversation text.
+const isLessonPlanRequest = (text: string): boolean =>
+  /(?:تحضير\s+(?:درس|حصة)|خطة\s+درس|lesson\s+plan|prepare\s+(?:a\s+)?lesson|lesson\s+preparation)/i.test(text);
+
+const formatLessonPlanDisplay = (content: string): string => {
+  // Presentation-only: split inline objectives where the model missed list line breaks.
+  // Arabic words are Unicode, so use whitespace/punctuation lookaheads rather than JS \b.
+  return content
+    .replace(/([^-\n•*])[ \t]+(?=أن\s+(?:يصف|يحلل|يحدد|يشرح|يفسر|يقارن|يستنتج|يطبق|يذكر|يميز|يصنف|يقيم|يقيّم|يناقش|يوضح|يعدد|يستخرج|يستكشف|يصمم|يكتب|يقرأ|يستخدم|يتعرف)(?=\s|[،؛:.,]))/g, '$1\n- ')
+    .replace(/([^-\n•*])[ \t]+(?=(?:[Ss]tudents?\s+will\s+be\s+able\s+to|To\s+(?:describe|analyze|identify|explain|compare|evaluate|apply|list|demonstrate|classify))\b)/g, '$1\n- ');
+};
+
 const localization: any = {
   ar: {
     input: 'اسأل صقر أو ابحث عن كتاب أو ابدأ قصة مبدعة...',
@@ -95,7 +107,7 @@ const localization: any = {
     welcome: 'مرحباً بك أستاذنا المبدع،',
     mcgrawLesson: 'تحضير حصة داخل المكتبة',
     mcgrawPres: 'تصميم عرض تقديمي',
-    lessonPrompt: 'أريد تحضير درس تفصيلي من منهج McGraw-Hill لموضوع: ',
+    lessonPrompt: 'أريد تحضير درس تفصيلي من منهج McGraw-Hill باللغة العربية، مع كتابة كل هدف تعلم وكل نقطة في سطر مستقل ومنفصل عن النقطة التالية، لموضوع: ',
     presPrompt: 'أريد تصميم هيكل عرض تقديمي احترافي لموضوع: '
   },
   en: {
@@ -117,7 +129,7 @@ const localization: any = {
     welcome: 'Welcome aboard,',
     mcgrawLesson: 'Lesson Plan inside library',
     mcgrawPres: 'Presentation Structure',
-    lessonPrompt: 'I want a detailed lesson plan from McGraw-Hill for the topic: ',
+    lessonPrompt: 'I want a detailed McGraw-Hill lesson plan entirely in English, with each learning objective and each point on its own separate line, for the topic: ',
     presPrompt: 'I want to design a professional presentation structure for the topic: '
   }
 };
@@ -618,8 +630,8 @@ const SmartSearchPage: React.FC = () => {
                     {msg.role === 'assistant' ? (
                       <div className="saqr-assistant-column">
                         <div className="saqr-assistant-bubble" translate="no" lang={locale}>
-                          <div className="saqr-markdown prose prose-slate max-w-none text-start dark:prose-invert">
-                            <ReactMarkdown>{msg.content}</ReactMarkdown>
+                          <div className={`saqr-markdown prose prose-slate max-w-none text-start dark:prose-invert ${index > 0 && isLessonPlanRequest(visibleMessages[index - 1]?.content || '') ? 'saqr-lesson-markdown' : ''}`}>
+                            <ReactMarkdown>{msg.role === 'assistant' && index > 0 && isLessonPlanRequest(visibleMessages[index - 1]?.content || '') ? formatLessonPlanDisplay(msg.content) : msg.content}</ReactMarkdown>
                           </div>
                         </div>
                         {winnerData && saqrState === 'victory' && index === visibleMessages.length - 1 && (
@@ -1027,6 +1039,11 @@ const SmartSearchPage: React.FC = () => {
         .saqr-markdown p { margin-top: .25em; margin-bottom: .55em; }
         .saqr-markdown ul, .saqr-markdown ol { margin-top: .35em; margin-bottom: .6em; padding-inline-start: 1.35em; }
         .saqr-markdown li { margin-block: .15em; }
+        .saqr-lesson-markdown li { display: list-item; line-height: 1.85; }
+        .saqr-lesson-markdown li + li { margin-block-start: .55em; }
+        .saqr-lesson-markdown li > p { margin: 0; }
+        .saqr-lesson-markdown ul, .saqr-lesson-markdown ol { list-style-position: outside; }
+
         .saqr-markdown h1, .saqr-markdown h2, .saqr-markdown h3, .saqr-markdown h4 { margin-top: .75em; margin-bottom: .3em; font-weight: 800; line-height: 1.4; }
         .saqr-markdown h1, .saqr-markdown h2, .saqr-markdown h3 { color: #0284c7; }
         .dark .saqr-markdown h1, .dark .saqr-markdown h2, .dark .saqr-markdown h3 { color: #38bdf8; }
@@ -1213,6 +1230,12 @@ const SmartSearchPage: React.FC = () => {
           .saqr-feature-chips span { font-size: 11px; padding: 6px 13px; }
         }
         @media (min-width: 1024px) {
+          /* Keep the desktop welcome, suggestions and composer as one compact group. */
+          .saqr-empty-chat { justify-content: center; gap: clamp(12px, 2.5vh, 28px); }
+          .saqr-empty-guidance { flex: 0 1 auto; min-height: 0; padding-block: clamp(10px, 2vh, 22px); }
+          .saqr-messages-inner { max-width: 1160px; }
+          .saqr-assistant-column { max-width: min(96%, 1040px); }
+          .saqr-user-bubble { max-width: min(92%, 880px); }
           .saqr-welcome-wrap { padding-top: 10px; padding-bottom: 8px; }
           .saqr-messages { padding-inline: 24px; }
           .saqr-messages-inner { gap: 10px; }
