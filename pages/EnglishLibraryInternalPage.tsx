@@ -5,6 +5,7 @@ import { trackActivity } from '../src/utils/tracker';
 import { supabase } from '../src/utils/supabase';
 import { useReadingPassport, digitalBookKey } from '../src/utils/readingPassport';
 import DigitalBookRating from '../src/components/DigitalBookRating';
+import VerifiedReaderAccess from '../src/components/VerifiedReaderAccess';
 
 // --- 1. تعريف واجهة البيانات وقاعدة البيانات ---
 interface Book {
@@ -471,6 +472,7 @@ const EnglishLibraryInternalPage: React.FC = () => {
             </div>
 
             <div className="max-w-[1400px] mx-auto px-4 md:px-6 pb-20 relative z-10 antialiased overflow-x-hidden">
+                <div className="flex justify-center pt-7"><VerifiedReaderAccess /></div>
                 
                 <RevealOnScroll>
                     <div className="text-center mt-12 mb-12 relative">
