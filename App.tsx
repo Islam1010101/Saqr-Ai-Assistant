@@ -303,6 +303,8 @@ const Header: React.FC = () => {
         <div className="flex items-center gap-1 flex-shrink-0">
           <button
             onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')}
+            aria-label={locale === 'ar' ? 'تغيير لغة الموقع إلى الإنجليزية' : 'Change website language to Arabic'}
+            title={locale === 'ar' ? 'تغيير اللغة' : 'Change language'}
             className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-slate-700 dark:text-slate-200 font-black text-[10px] border-2 border-slate-300/80 dark:border-slate-600 rounded-full bg-slate-50/80 dark:bg-slate-800/80 animate-fade-in-up"
             style={{ animationDelay: `${(allowedLinks.length + 1) * 50}ms` }}
           >
@@ -310,6 +312,8 @@ const Header: React.FC = () => {
           </button>
           <button
             onClick={toggleTheme}
+            aria-label={locale === 'ar' ? 'تبديل الوضع الفاتح والداكن' : 'Toggle light and dark mode'}
+            title={locale === 'ar' ? 'تبديل المظهر' : 'Toggle appearance'}
             className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-slate-100/80 dark:bg-slate-800/80 rounded-full text-sm border-2 border-slate-200/80 dark:border-slate-600 animate-fade-in-up"
             style={{ animationDelay: `${(allowedLinks.length + 2) * 50}ms` }}
           >
@@ -346,13 +350,23 @@ const ThemeContext = createContext<any>(null);
 export const useTheme = () => useContext(ThemeContext);
 
 const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [theme, setTheme] = useState<'light' | 'dark'>(
-    () => (localStorage.getItem('saqr_theme') as any) || 'light'
-  );
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    try {
+      const storedTheme = localStorage.getItem('saqr_theme');
+      return storedTheme === 'dark' ? 'dark' : 'light';
+    } catch {
+      // Storage can be blocked in private or restricted browser contexts.
+      return 'light';
+    }
+  });
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
-    localStorage.setItem('saqr_theme', theme);
+    try {
+      localStorage.setItem('saqr_theme', theme);
+    } catch {
+      // The current page theme still works even when persistence is unavailable.
+    }
   }, [theme]);
 
   return (
@@ -369,7 +383,7 @@ const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 
 // Keep a failure inside the public tutorial route from turning into a blank page.
 // The original error is also written to the browser console for diagnostics.
-class TutorialPageErrorBoundary extends React.Component<
+class ApplicationErrorBoundary extends React.Component<
   { children: ReactNode },
   { errorMessage: string | null }
 > {
@@ -400,9 +414,9 @@ class TutorialPageErrorBoundary extends React.Component<
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M10.3 3.9 1.8 18.6A1.6 1.6 0 0 0 3.2 21h17.6a1.6 1.6 0 0 0 1.4-2.4L13.7 3.9a2 2 0 0 0-3.4 0Z" />
             </svg>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">تعذر تحميل صفحة التوتوريال</h1>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">تعذر تحميل الصفحة</h1>
           <p className="mt-3 text-sm sm:text-base leading-7 text-slate-600 dark:text-slate-300">
-            حدث خطأ أثناء تشغيل الجولة. تم إيقاف الجزء المتسبب في الخطأ بدلًا من ترك الصفحة بيضاء.
+            حدث خطأ أثناء تشغيل الصفحة. تم منع انهيار الواجهة بالكامل وإظهار رسالة التشخيص بدلًا من ترك الشاشة بيضاء.
           </p>
           <div className="mt-5 rounded-2xl border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/30 p-4 text-start">
             <p className="text-xs font-black text-amber-800 dark:text-amber-300 mb-2">رسالة التشخيص</p>
@@ -433,6 +447,7 @@ class TutorialPageErrorBoundary extends React.Component<
 const MainLayout: React.FC = () => {
   const [isSaqrModalOpen, setIsSaqrModalOpen] = useState(false);
   const location = useLocation();
+  const { locale } = useLanguage();
 
   const hideFooter =
     location.pathname === '/' ||
@@ -443,11 +458,20 @@ const MainLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 font-sans transition-colors duration-300 flex flex-col relative">
+      <button
+        type="button"
+        onClick={() => document.getElementById('main-content')?.focus()}
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:start-3 focus:z-[1000000] focus:rounded-xl focus:bg-emerald-700 focus:px-4 focus:py-3 focus:font-black focus:text-white focus:shadow-xl"
+      >
+        {locale === 'ar' ? 'تخطي إلى المحتوى الرئيسي' : 'Skip to main content'}
+      </button>
       <Header />
       <FloatingSaqr onOpenModal={() => setIsSaqrModalOpen(true)} />
 
       <main
-        className={`flex-1 relative z-10 w-full ${
+        id="main-content"
+        tabIndex={-1}
+        className={`flex-1 relative z-10 w-full focus:outline-none ${
           location.pathname === '/' || location.pathname === '/admin-dashboard' || location.pathname === '/about' || location.pathname === '/tutorial'
             ? 'pt-0'
             : 'pt-20 md:pt-24'
@@ -456,7 +480,7 @@ const MainLayout: React.FC = () => {
         <Routes>
           {/* صفحات عامة لا تتطلب تسجيل الدخول */}
           <Route path="/" element={<Login />} />
-          <Route path="/tutorial" element={<TutorialPageErrorBoundary><TutorialPage /></TutorialPageErrorBoundary>} />
+          <Route path="/tutorial" element={<TutorialPage />} />
           
           {/* باقي الصفحات محمية تتطلب تسجيل الدخول */}
           <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
@@ -537,6 +561,16 @@ const MainLayout: React.FC = () => {
           100% { opacity: 1; } 
         }
         .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
+
+        /* Respect operating-system motion preferences without changing the visual design. */
+        @media (prefers-reduced-motion: reduce) {
+          *, *::before, *::after {
+            scroll-behavior: auto !important;
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+          }
+        }
       `}</style>
     </div>
   );
@@ -544,13 +578,15 @@ const MainLayout: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <ThemeProvider>
-      <LanguageProvider>
-        <HashRouter>
-          <MainLayout />
-        </HashRouter>
-      </LanguageProvider>
-    </ThemeProvider>
+    <ApplicationErrorBoundary>
+      <ThemeProvider>
+        <LanguageProvider>
+          <HashRouter>
+            <MainLayout />
+          </HashRouter>
+        </LanguageProvider>
+      </ThemeProvider>
+    </ApplicationErrorBoundary>
   );
 };
 
