@@ -913,6 +913,10 @@ const HomePage: React.FC = () => {
                     </div>
                 </RevealSection>
 
+                <RevealSection delay={460}>
+                    <HomeReadingHub variant="books" />
+                </RevealSection>
+
                 <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center mt-6">
                     
                     <div className="lg:col-span-5 flex flex-col items-center justify-center relative">
@@ -941,10 +945,6 @@ const HomePage: React.FC = () => {
 
                     <div className="lg:col-span-7 grid grid-cols-1 gap-6">
                         
-                        <RevealSection delay={470}>
-                            <HomeReadingHub variant="books" />
-                        </RevealSection>
-
                         <RevealSection delay={500}>
                             <div className="bg-gradient-to-br from-amber-100 via-amber-50 to-emerald-50 dark:from-slate-900 dark:to-slate-950 p-8 md:p-10 rounded-[3rem] border-4 border-amber-400 dark:border-amber-600 shadow-2xl relative overflow-hidden flex flex-col items-center text-center">
                                 
