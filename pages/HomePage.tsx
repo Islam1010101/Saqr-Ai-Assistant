@@ -639,6 +639,10 @@ const HomePage: React.FC = () => {
                     </div>
                 </RevealSection>
 
+                <RevealSection delay={140}>
+                    <HomeReadingHub variant="challenge" />
+                </RevealSection>
+
                 {(borrowedBooks.length > 0 || teacherSchedule.length > 0) && (
                     <RevealSection delay={150}>
                         <section
@@ -770,9 +774,7 @@ const HomePage: React.FC = () => {
                     </RevealSection>
                 )}
 
-                <RevealSection delay={180}>
-                    <HomeReadingHub />
-                </RevealSection>
+
 
                 <RevealSection delay={200}>
                     <div className="w-full max-w-5xl mx-auto relative z-30 flex items-center bg-white dark:bg-slate-800 border-4 border-amber-300 dark:border-amber-700 rounded-full shadow-lg overflow-hidden h-14 md:h-16">
@@ -934,6 +936,10 @@ const HomePage: React.FC = () => {
 
                     <div className="lg:col-span-7 grid grid-cols-1 gap-6">
                         
+                        <RevealSection delay={470}>
+                            <HomeReadingHub variant="books" />
+                        </RevealSection>
+
                         <RevealSection delay={500}>
                             <div className="bg-gradient-to-br from-amber-100 via-amber-50 to-emerald-50 dark:from-slate-900 dark:to-slate-950 p-8 md:p-10 rounded-[3rem] border-4 border-amber-400 dark:border-amber-600 shadow-2xl relative overflow-hidden flex flex-col items-center text-center">
                                 
