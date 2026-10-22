@@ -83,8 +83,8 @@ const formatLessonPlanDisplay = (content: string): string => {
   // Presentation-only: split inline objectives where the model missed list line breaks.
   // Arabic words are Unicode, so use whitespace/punctuation lookaheads rather than JS \b.
   return content
-    .replace(/([^\n])\s+(?=أن\s+(?:يصف|يحلل|يحدد|يشرح|يفسر|يقارن|يستنتج|يطبق|يذكر|يميز|يصنف|يقيم|يقيّم|يناقش|يوضح|يعدد|يستخرج|يستكشف|يصمم|يكتب|يقرأ|يستخدم|يتعرف)(?=\s|[،؛:.,]))/g, '$1\n- ')
-    .replace(/([^\n])\s+(?=(?:Students?\s+will\s+be\s+able\s+to|To\s+(?:describe|analyze|identify|explain|compare|evaluate|apply|list|demonstrate|classify))\b)/gi, '$1\n- ');
+    .replace(/([^\n])[ \t]+(?=أن\s+(?:يصف|يحلل|يحدد|يشرح|يفسر|يقارن|يستنتج|يطبق|يذكر|يميز|يصنف|يقيم|يقيّم|يناقش|يوضح|يعدد|يستخرج|يستكشف|يصمم|يكتب|يقرأ|يستخدم|يتعرف)(?=\s|[،؛:.,]))/g, '$1\n- ')
+    .replace(/([^\n])[ \t]+(?=(?:[Ss]tudents?\s+will\s+be\s+able\s+to|To\s+(?:describe|analyze|identify|explain|compare|evaluate|apply|list|demonstrate|classify))\b)/g, '$1\n- ');
 };
 
 const localization: any = {
