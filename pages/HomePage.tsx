@@ -287,11 +287,11 @@ const HomePage: React.FC = () => {
             String(value ?? '').normalize('NFKC').trim().toLocaleLowerCase();
 
         const isActiveBorrowing = (row: any) => {
-            const status = normalizeValue(row?.status);
+            const status = normalizeValue(row?.status).replace(/[\\s-]+/g, '_');
             return [
-                'active', 'borrowed', 'issued', 'checked out', 'checked_out',
-                'checked-out', 'on loan', 'on_loan',
-                'قيد الاستعارة', 'مستعار', 'مستعارة', 'نشط', 'نشطة'
+                'active', 'approved', 'confirmed', 'borrowed', 'issued',
+                'checked_out', 'checkedout', 'on_loan',
+                'قيد_الاستعارة', 'مستعار', 'مستعارة', 'معار', 'نشط', 'نشطة'
             ].includes(status);
         };
 
@@ -372,8 +372,18 @@ const HomePage: React.FC = () => {
         };
 
         void fetchBorrowings();
+        // Keep the 60-second safety refresh and also react immediately to loan approvals/returns.
         const refresh = window.setInterval(() => { void fetchBorrowings(); }, 60000);
-        return () => { mounted = false; window.clearInterval(refresh); };
+        const channel = supabase.channel('homepage-borrowings-notifications')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'borrowings' }, () => {
+                void fetchBorrowings();
+            })
+            .subscribe();
+        return () => {
+            mounted = false;
+            window.clearInterval(refresh);
+            void supabase.removeChannel(channel);
+        };
     }, [userData, userType]);
 
     // إظهار حصص المكتبة الخاصة بالمعلم الحالي فقط، باستخدام نفس جدول الحجز المستخدم في صفحة الجدول.
@@ -626,13 +636,13 @@ const HomePage: React.FC = () => {
                             <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 md:mb-7">
                                 <div className="flex items-start gap-3 min-w-0">
                                     <div className="shrink-0 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-lg shadow-emerald-900/15 text-2xl" aria-hidden="true">
-                                        {borrowedBooks.length > 0 ? '📚' : '▦'}
+                                        {borrowedBooks.length > 0 ? <BookIcon /> : <ScheduleIcon />}
                                     </div>
                                     <div className="min-w-0">
                                         <h2 id="homepage-notifications-title" className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                                             {t('notificationsTitle')}
                                         </h2>
-                                        <p className="mt-1 text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300 leading-relaxed">
+                                        <p className="mt-1 text-sm sm:text-base font-semibold text-slate-600 dark:text-slate-300 leading-relaxed">
                                             {t('notificationsSubtitle')}
                                         </p>
                                     </div>
@@ -648,7 +658,7 @@ const HomePage: React.FC = () => {
                                     <div className="flex items-center gap-2.5 mb-3">
                                         <span className="h-8 w-1.5 rounded-full bg-amber-500" />
                                         <h3 className="text-base sm:text-lg font-black text-slate-800 dark:text-white">{t('borrowTitle')}</h3>
-                                        <span className="rounded-full bg-amber-100 dark:bg-amber-900/40 px-2.5 py-1 text-[11px] font-black text-amber-800 dark:text-amber-300">{borrowedBooks.length}</span>
+                                        <span className="rounded-full bg-amber-100 dark:bg-amber-900/40 px-2.5 py-1 text-xs sm:text-sm font-black text-amber-800 dark:text-amber-300">{borrowedBooks.length}</span>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                                         {borrowedBooks.map((book) => {
@@ -659,9 +669,9 @@ const HomePage: React.FC = () => {
                                             return (
                                             <article key={book.id ?? `${bookTitle}-${returnDate}`} className="homepage-alert-card group relative bg-white/90 dark:bg-slate-800/90 p-4 sm:p-5 border border-amber-200 dark:border-amber-800/70 rounded-2xl sm:rounded-3xl flex flex-col gap-3 shadow-sm hover:shadow-xl touch-manipulation active:scale-[0.99]">
                                                 <div className="flex items-start gap-3">
-                                                    <div className="shrink-0 h-10 w-10 rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 flex items-center justify-center text-xl" aria-hidden="true">📖</div>
+                                                    <div className="shrink-0 h-10 w-10 rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 flex items-center justify-center text-xl" aria-hidden="true"><BookIcon /></div>
                                                     <div className="min-w-0 flex-1">
-                                                        <p className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 mb-1">{isAr ? 'عنوان الكتاب' : 'Book title'}</p>
+                                                        <p className="text-xs sm:text-sm font-extrabold text-slate-500 dark:text-slate-400 mb-1">{isAr ? 'عنوان الكتاب' : 'Book title'}</p>
                                                         <h4 className="font-black text-slate-900 dark:text-white text-base sm:text-lg leading-snug break-words">{bookTitle || (isAr ? 'كتاب بدون عنوان' : 'Untitled book')}</h4>
                                                     </div>
                                                 </div>
@@ -672,7 +682,7 @@ const HomePage: React.FC = () => {
                                                             ? new Date(`${returnDate}T12:00:00`).toLocaleDateString(isAr ? 'ar-AE' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
                                                             : (isAr ? 'لم يحدد تاريخ الإرجاع' : 'Return date not set')}
                                                     </p>
-                                                    <p className={`mt-1.5 text-xs sm:text-sm font-extrabold leading-relaxed ${isOverdue ? 'text-rose-700 dark:text-rose-300' : 'text-emerald-700 dark:text-emerald-300'}`}>⏳ {getBorrowCountdown(returnDate)}</p>
+                                                    <p className={`mt-1.5 text-sm sm:text-base font-extrabold leading-relaxed flex items-center gap-1.5 ${isOverdue ? 'text-rose-700 dark:text-rose-300' : 'text-emerald-700 dark:text-emerald-300'}`}><svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 7v5l3 2" /></svg>{getBorrowCountdown(returnDate)}</p>
                                                 </div>
                                                 {validReturnDate && (
                                                     <a
@@ -698,7 +708,7 @@ const HomePage: React.FC = () => {
                                         <div className="flex items-center gap-2.5">
                                             <span className="h-8 w-1.5 rounded-full bg-emerald-600" />
                                             <h3 className="text-base sm:text-lg font-black text-slate-800 dark:text-white">{t('teacherScheduleTitle')}</h3>
-                                            <span className="rounded-full bg-emerald-100 dark:bg-emerald-900/50 px-2.5 py-1 text-[11px] font-black text-emerald-800 dark:text-emerald-300">{teacherSchedule.length}</span>
+                                            <span className="rounded-full bg-emerald-100 dark:bg-emerald-900/50 px-2.5 py-1 text-xs sm:text-sm font-black text-emerald-800 dark:text-emerald-300">{teacherSchedule.length}</span>
                                         </div>
                                         <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">{t('teacherScheduleSubtitle')}</p>
                                     </div>
@@ -712,7 +722,7 @@ const HomePage: React.FC = () => {
                                                 <article key={slot.id} className="homepage-alert-card group relative bg-white/90 dark:bg-slate-800/90 border border-emerald-200 dark:border-emerald-800/70 rounded-2xl sm:rounded-3xl p-4 shadow-sm hover:shadow-xl touch-manipulation active:scale-[0.99]">
                                                     <div className="flex items-start justify-between gap-3 mb-3">
                                                         <div className="min-w-0">
-                                                            <p className="text-[11px] font-extrabold text-emerald-700 dark:text-emerald-300 mb-1">{isAr ? 'يوم الحصة' : 'Class day'}</p>
+                                                            <p className="text-xs sm:text-sm font-extrabold text-emerald-700 dark:text-emerald-300 mb-1">{isAr ? 'يوم الحصة' : 'Class day'}</p>
                                                             <h4 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white break-words">{getScheduleDayLabel(day)}</h4>
                                                         </div>
                                                         <span className="shrink-0 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-200 px-3 py-2 text-xs font-black">
