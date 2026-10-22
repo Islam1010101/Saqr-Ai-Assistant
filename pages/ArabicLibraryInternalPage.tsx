@@ -68,8 +68,6 @@ export const ARABIC_LIBRARY_DATABASE = [
 ];
 
 const translations = {
-        readLater: "القراءة لاحقًا",
-        readLaterRemove: "محفوظ ✓",
     en: {
         readLater: "Read later",
         readLaterRemove: "Saved ✓",
@@ -95,6 +93,8 @@ const translations = {
         aiSubject: "AI Category"
     },
     ar: {
+        readLater: "القراءة لاحقًا",
+        readLaterRemove: "محفوظ ✓",
         pageTitle: "المكتبة العربية",
         searchPlaceholder: "ابحث عن عنوان أو مؤلف...",
         allSubjects: "المواضيع",
