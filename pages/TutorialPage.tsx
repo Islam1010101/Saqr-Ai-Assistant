@@ -482,16 +482,38 @@ export default function TutorialPage() {
             </section>
           </HintTarget>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-center">
           <HintTarget id="monthly-reading-goal" title={label('تحدي القراءة الشهري', 'Monthly Reading Challenge')} description={label('اختر هدف القراءة الشهري من 1 إلى 20 كتابًا، وسجّل الكتب التي أنهيتها. في الموقع الفعلي تُزامَن أهداف الحساب الموثّق مع قاعدة البيانات؛ هذا المثال بلا بيانات أو اتصال.', 'Set a monthly target and mark finished books. Verified readers can sync their goals to the database on the live site. This tour uses no user data or network.')} interactive={false} {...hintState}>
-            <section className="homepage-alerts w-full overflow-hidden rounded-[2.5rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-black p-5 sm:p-6 md:p-8 shadow-[0_18px_55px_rgba(15,23,42,0.12)]">
+            <section className="homepage-alerts w-full overflow-hidden rounded-[1.75rem] border-2 border-amber-300 dark:border-amber-500/50 bg-gradient-to-br from-blue-600 via-emerald-600 to-teal-600 dark:from-blue-800 dark:via-emerald-800 dark:to-teal-900 p-4 sm:p-5 shadow-xl text-white transition-all hover:-translate-y-1 hover:shadow-2xl">
               <div className="flex flex-wrap justify-between items-center gap-4">
-                <div className="flex gap-3 items-center"><div className="rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 p-3 text-white shadow-lg"><BookIcon /></div><div><h2 className="text-xl md:text-3xl font-black text-slate-900 dark:text-white">{label('تحدي القراءة الشهري','Monthly Reading Challenge')}</h2><p className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-semibold">{label('جواز القارئ — هدف شخصي','Reading Passport — personal goal')}</p></div></div>
-                <span className="rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2 text-slate-500 dark:text-slate-300 font-black">•• / ••</span>
+                <div className="flex gap-3 items-center"><div className="rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 p-3 text-white shadow-lg"><BookIcon /></div><div><h2 className="text-base md:text-lg font-black text-white">{label('تحدي القراءة الشهري','Monthly Reading Challenge')}</h2><p className="mt-1 text-xs sm:text-sm text-white/90 font-semibold">{label('جواز القارئ — هدف شخصي','Reading Passport — personal goal')}</p></div></div>
+                <span className="rounded-xl border border-white/30 bg-white/15 px-3 py-2 text-white font-black">•• / ••</span>
               </div>
-              <div className="mt-5 h-4 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden"><div className="h-full w-2/5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-700" /></div>
-              <p className="mt-3 text-xs text-slate-500 dark:text-slate-400 font-bold">{label('مؤشر توضيحي فقط — الأرقام الحقيقية محجوبة','Illustrative progress only — real values are hidden')}</p>
+              <div className="mt-5 h-2.5 rounded-full bg-white/25 overflow-hidden"><div className="h-full w-2/5 rounded-full bg-gradient-to-r from-amber-200 to-white transition-all duration-700" /></div>
+              <p className="mt-3 text-xs text-white/90 font-bold">{label('مؤشر توضيحي فقط — الأرقام الحقيقية محجوبة','Illustrative progress only — real values are hidden')}</p>
             </section>
           </HintTarget>
+
+
+            <HintTarget id="saqr-mascot" title={label('شخصية صقر', 'Saqr mascot')} description={label('اضغط أو المس شخصية صقر في الموقع الحقيقي لمشاهدة التفاعل والرسائل الترحيبية.', 'The live site mascot offers small interactive moments and welcoming messages.')} interactive={false} className="min-w-0 flex flex-col items-center justify-center" {...hintState}>
+              <div onClick={handleMascotInteraction} className="group relative flex cursor-pointer flex-col items-center">
+                {bursts.map((burst) => (
+                  <div key={burst.id} className={'pointer-events-none absolute z-[100] animate-burst-steady ' + burst.color} style={{ '--tx': burst.tx + 'px', '--ty': burst.ty + 'px', '--rot': burst.rot + 'deg' } as React.CSSProperties}>
+                    <StarIcon className="h-8 w-8 drop-shadow-md" />
+                  </div>
+                ))}
+                {showBubble && (
+                  <div className="animate-bounce absolute -top-14 z-30 rounded-2xl border-4 border-rose-500 bg-white px-6 py-2.5 text-sm font-black text-rose-600 shadow-2xl dark:bg-slate-800 dark:text-rose-400 md:text-base">
+                    {label('فخورين بالإمارات', 'Proud of the UAE')} <UaeFlagIcon className="inline-block h-5 w-7 align-middle" />
+                  </div>
+                )}
+                <img src="/school-logo.png" alt="" className="pointer-events-none absolute inset-0 z-0 m-auto h-48 w-48 md:h-56 md:w-56 object-contain opacity-10 transition-all duration-300 dark:opacity-25 dark:brightness-0 dark:invert" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                <img src="/saqr-full.png" alt="Saqr mascot" className="relative z-10 h-40 object-contain drop-shadow-2xl transition-transform duration-300 group-hover:scale-105 md:h-56" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+              </div>
+            </HintTarget>
+
+
+          </div>
 
           {/* Notifications are rendered with deliberately masked sample fields. */}
           <HintTarget id="notifications" title={label('التنبيهات الشخصية', 'Personal notifications')} description={label('تظهر هنا تذكيرات الاستعارات ومواعيد استخدام المكتبة عندما تكون متاحة لحسابك. القيم الشخصية محجوبة بالكامل.', 'Borrowing reminders and library bookings appear here when available. Personal values are deliberately masked.')} interactive={false} {...hintState}>
@@ -608,35 +630,18 @@ export default function TutorialPage() {
             </section>
           </HintTarget>
 
-          <section className="mt-2 grid w-full grid-cols-1 items-center gap-8 lg:grid-cols-12">
-            <HintTarget id="saqr-mascot" title={label('شخصية صقر', 'Saqr mascot')} description={label('اضغط أو المس شخصية صقر في الموقع الحقيقي لمشاهدة التفاعل والرسائل الترحيبية.', 'The live site mascot offers small interactive moments and welcoming messages.')} interactive={false} className="lg:col-span-5 flex flex-col items-center justify-center" {...hintState}>
-              <div onClick={handleMascotInteraction} className="group relative flex cursor-pointer flex-col items-center">
-                {bursts.map((burst) => (
-                  <div key={burst.id} className={'pointer-events-none absolute z-[100] animate-burst-steady ' + burst.color} style={{ '--tx': burst.tx + 'px', '--ty': burst.ty + 'px', '--rot': burst.rot + 'deg' } as React.CSSProperties}>
-                    <StarIcon className="h-8 w-8 drop-shadow-md" />
-                  </div>
-                ))}
-                {showBubble && (
-                  <div className="animate-bounce absolute -top-14 z-30 rounded-2xl border-4 border-rose-500 bg-white px-6 py-2.5 text-sm font-black text-rose-600 shadow-2xl dark:bg-slate-800 dark:text-rose-400 md:text-base">
-                    {label('فخورين بالإمارات', 'Proud of the UAE')} <UaeFlagIcon className="inline-block h-5 w-7 align-middle" />
-                  </div>
-                )}
-                <img src="/school-logo.png" alt="" className="pointer-events-none absolute inset-0 z-0 m-auto h-72 w-72 object-contain opacity-10 transition-all duration-300 dark:opacity-25 dark:brightness-0 dark:invert" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                <img src="/saqr-full.png" alt="Saqr mascot" className="relative z-10 h-60 object-contain drop-shadow-2xl transition-transform duration-300 group-hover:scale-105 md:h-80" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-              </div>
-            </HintTarget>
-
-            <div className="grid grid-cols-1 gap-6 lg:col-span-7">
+          <section className="mt-2 grid w-full grid-cols-1 md:grid-cols-3 items-stretch gap-4 lg:gap-6">
+            <>
               <HintTarget id="uae-feature" title={label('معلومات عن وطني', 'Information About My Country')} description={label('بطاقة ثقافية تعليمية تعرض معلومة عامة عن دولة الإمارات. استخدمنا خطوطًا بديلة هنا بدلًا من بيانات متغيرة.', 'An educational UAE culture card. This tour uses sample placeholder lines instead of changing live content.')} interactive={false} {...hintState}>
-                <div className="relative flex flex-col items-center overflow-hidden rounded-[3rem] border-4 border-amber-400 bg-gradient-to-br from-amber-100 via-amber-50 to-emerald-50 p-8 text-center shadow-2xl dark:border-amber-600 dark:from-slate-900 dark:to-slate-950 md:p-10">
+                <div className="relative flex flex-col items-center overflow-hidden rounded-[3rem] border-4 border-amber-400 bg-gradient-to-br from-amber-100 via-amber-50 to-emerald-50 p-4 md:p-5 text-center shadow-2xl dark:border-amber-600 dark:from-slate-900 dark:to-slate-950">
                   <div className="absolute left-0 right-0 top-0 flex h-2.5">
                     <div className="w-1/4 bg-red-600" /><div className="w-1/4 bg-emerald-600" /><div className="w-1/4 bg-white" /><div className="w-1/4 bg-black" />
                   </div>
-                  <div className="mt-3 mb-6 flex flex-col items-center gap-3">
+                  <div className="mt-2 mb-3 flex flex-col items-center gap-3">
                     <div className="rounded-3xl border-2 border-amber-300 bg-white p-3 shadow-md dark:border-amber-600 dark:bg-slate-800">
                       <svg viewBox="0 0 24 24" className="h-10 w-10 text-emerald-700 dark:text-emerald-300" fill="none" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5v-16Z" /><path strokeLinecap="round" d="M4 6v15m4-13h8m-8 4h8" /></svg>
                     </div>
-                    <h3 className="text-xl font-black tracking-wider text-amber-800 dark:text-amber-400 md:text-3xl">{label('معلومات عن وطني', 'Information About My Country')}</h3>
+                    <h3 className="text-base font-black tracking-wider text-amber-800 dark:text-amber-400 md:text-xl">{label('معلومات عن وطني', 'Information About My Country')}</h3>
                   </div>
                   <div className="w-full max-w-xl space-y-3" aria-label={label('محتوى مخفي', 'Hidden content')}>
                     <div className="mx-auto h-3 w-11/12 rounded-full bg-amber-200/90 dark:bg-slate-700" />
@@ -647,14 +652,14 @@ export default function TutorialPage() {
                 </div>
               </HintTarget>
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <>
                 <HintTarget id="visitor-counter" title={label('عداد الزوار', 'Visitor counter')} description={label('يعرض عدد الزيارات وتاريخها في الموقع الفعلي. الرقم والتاريخ الفعليان مخفيان في المعاينة.', 'Shows site visits and date in the live portal. The real count and date are hidden here.')} interactive={false} {...hintState}>
-                  <div className="homepage-alert-card flex h-full flex-col items-center justify-between rounded-[2rem] border-4 border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                  <div className="homepage-alert-card flex h-full flex-col items-center justify-between rounded-[2rem] border-4 border-slate-200 bg-white p-4 lg:p-5 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
                     <div className="mb-2 flex items-center gap-2">
                       <span className="h-3 w-3 animate-ping rounded-full bg-emerald-500" />
                       <span className="text-xs font-bold text-slate-600 dark:text-slate-400 md:text-sm">{label('زوار البوابة:', 'Portal Visitors:')}</span>
                     </div>
-                    <span className="text-3xl font-black text-slate-900 dark:text-white md:text-4xl">••••</span>
+                    <span className="text-2xl font-black text-slate-900 dark:text-white md:text-3xl">••••</span>
                     <span className="mt-2 text-[11px] font-bold text-slate-400">•• / •• / ••••</span>
                   </div>
                 </HintTarget>
@@ -675,8 +680,8 @@ export default function TutorialPage() {
                     <span className="relative z-10 rounded-full border border-emerald-200 bg-white/90 px-3.5 py-1 text-[10px] font-black text-slate-700 shadow-sm dark:border-emerald-800 dark:bg-slate-800/90 dark:text-slate-200">{label('تفاصيل الموعد مخفية', 'Event details hidden')}</span>
                   </div>
                 </HintTarget>
-              </div>
-            </div>
+              </>
+            </>
           </section>
 
           <section className="rounded-[2rem] border border-emerald-200 bg-white/80 p-5 shadow-sm backdrop-blur-xl dark:border-emerald-900 dark:bg-slate-900/80 sm:p-7">

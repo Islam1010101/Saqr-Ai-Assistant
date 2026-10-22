@@ -100,12 +100,12 @@ const DigitalBookRating: React.FC<{ bookId: string; compact?: boolean }> = ({ bo
   };
   return (
     <div className={compact
-      ? 'relative z-30 mx-auto w-fit max-w-full rounded-2xl border border-white/40 bg-white/10 backdrop-blur-md px-3 py-2 text-center shadow-sm transition-colors hover:bg-white/15'
+      ? 'relative z-30 mx-auto w-fit max-w-full rounded-xl border border-white/30 bg-black/10 backdrop-blur-md px-2 py-1.5 text-center shadow-sm transition-all duration-300 hover:bg-black/20'
       : 'relative z-30 rounded-2xl border border-amber-200 dark:border-slate-700 bg-amber-50 dark:bg-slate-900/70 px-4 py-3'}
       onClick={e=>e.stopPropagation()} onPointerDown={e=>e.stopPropagation()} onKeyDown={e=>e.stopPropagation()}
       role="group" aria-label={ar ? 'قيّم هذا الكتاب من نجمة إلى خمس نجوم' : 'Rate this book from one to five stars'}>
       <div className={'flex flex-wrap items-center justify-center gap-2 ' + (compact ? 'text-white' : 'text-slate-800 dark:text-white')}>
-        <span className="text-[11px] font-black">{ar ? 'تقييمي' : 'My rating'}</span>
+        {!compact && <span className="text-[11px] font-black">{ar ? 'تقييمي' : 'My rating'}</span>}
         <div dir="ltr" className="flex items-center gap-0.5" onMouseLeave={()=>setHovered(0)}>
           {[1,2,3,4,5].map(value=><button
             key={value} type="button"
@@ -119,12 +119,13 @@ const DigitalBookRating: React.FC<{ bookId: string; compact?: boolean }> = ({ bo
             className="p-0.5 transition-transform duration-200 hover:scale-125 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400 touch-manipulation"
           ><svg className={'w-4 h-4 sm:w-5 sm:h-5 transition-colors ' + (value <= (hovered || rating) ? 'text-amber-300 fill-amber-300' : compact ? 'text-white/70' : 'text-slate-400')} viewBox="0 0 24 24" fill={value <= (hovered || rating) ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="m12 2 3.1 6.35 7 .99-5.05 4.94 1.19 6.97L12 17.96l-6.24 3.29 1.19-6.97L1.9 9.34l7-.99L12 2Z"/></svg></button>)}
         </div>
-        {rating > 0 && <span className="text-[11px] font-black tabular-nums">{rating}/5</span>}
+        {!compact && rating > 0 && <span className="text-[11px] font-black tabular-nums">{rating}/5</span>}
       </div>
-      <div className={'mt-1.5 text-[11px] font-bold text-center ' + (compact ? 'text-white/90' : 'text-slate-700 dark:text-slate-200')}>
-        {globalRating ? (ar ? 'تقييم القراء: ' : 'Readers: ') + globalRating.average.toFixed(1) + '/5 · ' + globalRating.count + (ar ? ' تقييم' : ' ratings') : (ar ? 'لا توجد تقييمات عامة بعد' : 'No public ratings yet')}
-      </div>
-      {!verifiedUser && <p className={'mt-1 text-[10px] font-medium ' + (compact ? 'text-white/90' : 'text-slate-500 dark:text-slate-400')}>{ar ? 'تقييم شخصي محفوظ بكود الحساب على هذا الجهاز' : 'Personal rating saved to this account on this device'}</p>}
+      {!compact && globalRating && (
+        <div className="mt-1.5 text-center text-[11px] font-bold text-slate-700 dark:text-slate-200">
+          {globalRating.average.toFixed(1)}/5 · {globalRating.count}
+        </div>
+      )}
       {!compact && <p className="mt-2 text-[11px] font-semibold text-slate-500 dark:text-slate-400">{ar ? 'تقييمك الشخصي محفوظ على الجهاز؛ ويظهر متوسط التقييم العام منفصلًا.' : 'Personal rating saved on this device; the public average appears separately.'}</p>}
     </div>
   );

@@ -65,10 +65,11 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
   const shown = expanded ? visible : visible.slice(0, 6);
 
   return (
-    <section id={variant === 'challenge' ? 'monthly-reading-challenge' : 'reading-passport'} dir={dir} className="homepage-alerts relative mx-auto w-full max-w-none overflow-hidden rounded-[2rem] md:rounded-[2.5rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-black shadow-[0_18px_55px_rgba(15,118,110,0.13)] p-4 sm:p-6 md:p-8">
-      <div aria-hidden="true" className="pointer-events-none absolute -top-16 -end-16 w-52 h-52 bg-slate-200/20 dark:bg-slate-800/10 rounded-full blur-3xl" />
-      <div aria-hidden="true" className="pointer-events-none absolute -bottom-20 -start-16 w-52 h-52 bg-slate-200/20 dark:bg-slate-800/10 rounded-full blur-3xl" />
+    <section id={variant === 'challenge' ? 'monthly-reading-challenge' : 'reading-passport'} dir={dir} className={variant === 'challenge' ? "homepage-alerts relative w-full max-w-none bg-transparent border-0 p-0 shadow-none" : "homepage-alerts relative mx-auto w-full max-w-none overflow-hidden rounded-[2rem] md:rounded-[2.5rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-black shadow-[0_18px_55px_rgba(15,118,110,0.13)] p-4 sm:p-6 md:p-8"}>
+      {variant === 'books' && <div aria-hidden="true" className="pointer-events-none absolute -top-16 -end-16 w-52 h-52 bg-slate-200/20 dark:bg-slate-800/10 rounded-full blur-3xl" />}
+      {variant === 'books' && <div aria-hidden="true" className="pointer-events-none absolute -bottom-20 -start-16 w-52 h-52 bg-slate-200/20 dark:bg-slate-800/10 rounded-full blur-3xl" />}
       <div className="relative">
+        {variant === 'books' && (
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
             <div className="shrink-0 flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-lg" aria-hidden="true">
@@ -84,34 +85,30 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
           </div>
         </div>
 
+        )}
         {variant === 'challenge' && (
-          <>
-            <div className="relative rounded-3xl border border-emerald-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-5 sm:p-6 shadow-sm hover:shadow-lg transition-all duration-300 group">
-              <div className="flex flex-wrap justify-between gap-4 items-center">
-                <div>
-                  <div className="flex items-center gap-2 text-amber-600 dark:text-amber-300 mb-2">
-                    <svg className="w-6 h-6 transition-transform group-hover:rotate-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="m8 21 4-3 4 3V6H8v15ZM5 6V3h14v3M8 10h8"/></svg>
-                    <span className="text-sm font-black">{ar?'جواز القارئ':'Reading Passport'}</span>
-                  </div>
-                  <h3 className="font-black text-lg text-slate-900 dark:text-white">{ar?'هدف هذا الشهر':'This month’s goal'}</h3>
-                  <p className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-semibold">{ar?'سجّل الكتب التي أنهيتها واختر هدفك.':'Track completed books and set a personal goal.'}</p>
-                </div>
-                <div className="flex gap-3 items-center">
-                  <strong className="text-3xl font-black text-emerald-700 dark:text-emerald-300 tabular-nums">{count}<span className="text-base text-slate-400">/{data.goal}</span></strong>
-                  <label htmlFor="reading-goal" className="sr-only">{ar?'الهدف الشهري':'Monthly goal'}</label>
-                  <select id="reading-goal" value={data.goal} onChange={e=>setGoal(Number(e.target.value))} className="rounded-xl border border-emerald-200 dark:border-slate-600 bg-emerald-50 dark:bg-slate-900 text-slate-900 dark:text-white p-2 text-sm font-bold">{[1,2,3,4,5,6,8,10,12,15,20].map(n=><option value={n} key={n}>{n}</option>)}</select>
-                </div>
+          <div className="relative rounded-[1.75rem] border-2 border-amber-300/80 dark:border-amber-500/50 bg-gradient-to-br from-blue-600/90 via-emerald-600/90 to-teal-600/95 dark:from-blue-800/80 dark:via-emerald-800/80 dark:to-teal-900/90 text-white p-4 sm:p-5 shadow-xl shadow-emerald-900/15 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 group">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="rounded-xl bg-white/20 p-2 backdrop-blur-md transition-transform group-hover:rotate-12" aria-hidden="true">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 21V5h8v16l-4-3-4 3ZM5 5V2h14v3"/></svg>
+                </span>
+                <h3 className="text-base sm:text-lg font-black">{ar?'تحدي القراءة الشهري':'Monthly Reading Challenge'}</h3>
               </div>
-              <div role="progressbar" aria-label={ar?'تقدم القراءة الشهري':'Monthly reading progress'} aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} className="mt-5 rounded-full h-4 bg-emerald-100 dark:bg-slate-700 overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-emerald-500 via-teal-500 to-amber-400 rounded-full transition-all duration-700 ease-out" style={{width:progress+'%'}} />
-              </div>
-              <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-                <p className="text-sm font-bold text-emerald-800 dark:text-emerald-300">{progress === 100 ? (ar?'أحسنت! اكتمل تحديك الشهري.':'Wonderful! Your monthly challenge is complete.') : (ar?'كل كتاب يقربك من تحقيق هدفك!':'Every finished book brings you closer!')}</p>
-                <a href="#reading-passport" className="text-xs sm:text-sm font-black text-teal-700 dark:text-teal-300 underline-offset-4 hover:underline">{ar?'عرض قائمة القراءة':'Open reading list'}</a>
-              </div>
+              <strong className="text-xl sm:text-2xl font-black tabular-nums shrink-0">{count}<span className="opacity-80">/{data.goal}</span></strong>
             </div>
-            <p className="mt-3 text-[11px] text-slate-500 dark:text-slate-400 font-semibold">{ar?'الأهداف تُحفظ في Supabase للحساب الموثّق، وإلا فتبقى على الجهاز. ولا تُمنح نقاط رسمية.':'Reading goals sync to Supabase with a verified account; otherwise saved on this device. No official points.'}</p>
-          </>
+            <div className="flex items-center gap-3 mt-3">
+              <label htmlFor="reading-goal" className="text-xs font-bold shrink-0">{ar?'الهدف':'Goal'}</label>
+              <select id="reading-goal" value={data.goal} onChange={e=>setGoal(Number(e.target.value))} className="rounded-lg border border-white/40 bg-white/20 px-3 py-1.5 text-white text-xs font-black backdrop-blur-md focus-visible:outline focus-visible:outline-amber-300">
+                {[1,2,3,4,5,6,8,10,12,15,20].map(n=><option className="text-slate-900" key={n} value={n}>{n}</option>)}
+              </select>
+              <span className="text-[11px] font-bold opacity-90">{progress===100?(ar?'اكتمل الهدف!':'Goal complete!'):(ar?'تابع الإنجاز':'Keep reading')}</span>
+            </div>
+            <div role="progressbar" aria-label={ar?'تقدم القراءة':'Reading progress'} aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} className="mt-3 h-2.5 rounded-full bg-white/25 overflow-hidden">
+              <div className="h-full rounded-full bg-gradient-to-r from-amber-200 via-white to-amber-300 transition-all duration-700" style={{width:progress+'%'}} />
+            </div>
+            <a href="#reading-passport" className="inline-block mt-3 text-xs font-black underline underline-offset-4 hover:text-amber-200 transition-colors">{ar?'قائمة القراءة':'Reading list'}</a>
+          </div>
         )}
         {variant === 'books' && (
           <>

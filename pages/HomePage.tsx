@@ -644,9 +644,36 @@ const HomePage: React.FC = () => {
                     </div>
                 </RevealSection>
 
-                <RevealSection delay={140}>
-                    <HomeReadingHub variant="challenge" />
-                </RevealSection>
+                <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-center">
+                    <RevealSection delay={140}>
+                        <HomeReadingHub variant="challenge" />
+                    </RevealSection>
+                    <div className="min-w-0 flex flex-col items-center justify-center relative">
+                        <RevealSection delay={400}>
+                            <div onClick={handleMascotInteraction} className="relative cursor-pointer group flex flex-col items-center">
+                                <img src="/school-logo.png" alt="" className="absolute inset-0 m-auto w-48 h-48 md:w-56 md:h-56 object-contain opacity-10 dark:opacity-25 dark:brightness-0 dark:invert z-0 pointer-events-none transition-all duration-300" />
+
+                                {bursts.map((burst) => (
+                                    <div key={burst.id} 
+                                        className={`absolute z-[100] animate-burst-steady pointer-events-none ${burst.color}`}
+                                        style={{ '--tx': `${burst.tx}px`, '--ty': `${burst.ty}px`, '--rot': `${burst.rot}deg` } as any}>
+                                        <StarIcon className="w-8 h-8 drop-shadow-md" />
+                                    </div>
+                                ))}
+
+                                {showBubble && (
+                                    <div className="absolute -top-14 bg-white dark:bg-slate-800 px-6 py-2.5 rounded-2xl border-4 border-rose-500 shadow-2xl text-rose-600 dark:text-rose-400 font-black text-sm md:text-base animate-bounce z-30">
+                                        {isAr ? 'فخورين بالإمارات 🇦🇪' : 'Proud of the UAE 🇦🇪'}
+                                    </div>
+                                )}
+
+                                <img src="/saqr-full.png" alt="Saqr Mascot" className="h-40 md:h-56 object-contain relative z-10 animate-float drop-shadow-2xl group-hover:scale-105 transition-transform duration-300" />
+                            </div>
+                        </RevealSection>
+                    </div>
+
+
+                </div>
 
                 {(borrowedBooks.length > 0 || teacherSchedule.length > 0) && (
                     <RevealSection delay={150}>
@@ -917,36 +944,12 @@ const HomePage: React.FC = () => {
                     <HomeReadingHub variant="books" />
                 </RevealSection>
 
-                <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center mt-6">
+                <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 items-stretch mt-6">
                     
-                    <div className="lg:col-span-5 flex flex-col items-center justify-center relative">
-                        <RevealSection delay={400}>
-                            <div onClick={handleMascotInteraction} className="relative cursor-pointer group flex flex-col items-center">
-                                <img src="/school-logo.png" alt="" className="absolute inset-0 m-auto w-72 h-72 object-contain opacity-10 dark:opacity-25 dark:brightness-0 dark:invert z-0 pointer-events-none transition-all duration-300" />
-
-                                {bursts.map((burst) => (
-                                    <div key={burst.id} 
-                                        className={`absolute z-[100] animate-burst-steady pointer-events-none ${burst.color}`}
-                                        style={{ '--tx': `${burst.tx}px`, '--ty': `${burst.ty}px`, '--rot': `${burst.rot}deg` } as any}>
-                                        <StarIcon className="w-8 h-8 drop-shadow-md" />
-                                    </div>
-                                ))}
-
-                                {showBubble && (
-                                    <div className="absolute -top-14 bg-white dark:bg-slate-800 px-6 py-2.5 rounded-2xl border-4 border-rose-500 shadow-2xl text-rose-600 dark:text-rose-400 font-black text-sm md:text-base animate-bounce z-30">
-                                        {isAr ? 'فخورين بالإمارات 🇦🇪' : 'Proud of the UAE 🇦🇪'}
-                                    </div>
-                                )}
-
-                                <img src="/saqr-full.png" alt="Saqr Mascot" className="h-60 md:h-80 object-contain relative z-10 animate-float drop-shadow-2xl group-hover:scale-105 transition-transform duration-300" />
-                            </div>
-                        </RevealSection>
-                    </div>
-
-                    <div className="lg:col-span-7 grid grid-cols-1 gap-6">
+                    <>
                         
                         <RevealSection delay={500}>
-                            <div className="bg-gradient-to-br from-amber-100 via-amber-50 to-emerald-50 dark:from-slate-900 dark:to-slate-950 p-8 md:p-10 rounded-[3rem] border-4 border-amber-400 dark:border-amber-600 shadow-2xl relative overflow-hidden flex flex-col items-center text-center">
+                            <div className="bg-gradient-to-br from-amber-100 via-amber-50 to-emerald-50 dark:from-slate-900 dark:to-slate-950 p-4 lg:p-5 rounded-[2rem] border-4 border-amber-400 dark:border-amber-600 shadow-2xl relative overflow-hidden flex flex-col items-center text-center">
                                 
                                 <div className="absolute top-0 left-0 right-0 h-2.5 flex">
                                     <div className="bg-red-600 w-1/4"></div>
@@ -955,16 +958,16 @@ const HomePage: React.FC = () => {
                                     <div className="bg-black w-1/4"></div>
                                 </div>
 
-                                <div className="flex flex-col items-center gap-3 mb-6 mt-3">
+                                <div className="flex flex-col items-center gap-2 mb-3 mt-2">
                                     <div className="p-3 bg-white dark:bg-slate-800 rounded-3xl shadow-md border-2 border-amber-300 dark:border-amber-600">
                                         <UaeFlagIcon />
                                     </div>
-                                    <h3 className="text-xl md:text-3xl font-black text-amber-800 dark:text-amber-400 tracking-wider">
+                                    <h3 className="text-base lg:text-xl font-black text-amber-800 dark:text-amber-400 tracking-wider">
                                         {t('homelandTitle')}
                                     </h3>
                                 </div>
 
-                                <p className="text-lg md:text-2xl text-slate-900 dark:text-white font-black leading-relaxed max-w-2xl">
+                                <p className="text-sm lg:text-base text-slate-900 dark:text-white font-black leading-relaxed max-w-2xl">
                                     {isAr ? dailyFact.ar : dailyFact.en}
                                 </p>
 
@@ -972,7 +975,7 @@ const HomePage: React.FC = () => {
                             </div>
                         </RevealSection>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <>
                             
                             <RevealSection delay={600}>
                                 <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border-4 border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between items-center text-center h-full">
@@ -980,7 +983,7 @@ const HomePage: React.FC = () => {
                                         <div className="w-3 h-3 bg-emerald-500 rounded-full animate-ping"></div>
                                         <span className="text-slate-600 dark:text-slate-400 font-bold text-xs md:text-sm">{t('visitorsLabel')}</span>
                                     </div>
-                                    <span className="text-slate-900 dark:text-white font-black text-3xl md:text-4xl">
+                                    <span className="text-slate-900 dark:text-white font-black text-2xl md:text-3xl">
                                         {visitorCount.toLocaleString()}
                                     </span>
                                     <span className="text-slate-400 text-[11px] font-bold mt-2">{todayDate}</span>
@@ -1023,7 +1026,7 @@ const HomePage: React.FC = () => {
                                             {t('startsIn')}
                                         </span>
                                         <div className="flex items-baseline gap-2">
-                                            <span className="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#ff0000] via-[#00732f] to-slate-900 dark:to-white drop-shadow-sm">
+                                            <span className="text-2xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#ff0000] via-[#00732f] to-slate-900 dark:to-white drop-shadow-sm">
                                                 {daysLeft !== null ? daysLeft : 0}
                                             </span>
                                             <span className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase">
@@ -1044,10 +1047,8 @@ const HomePage: React.FC = () => {
                                 </div>
                             </RevealSection>
 
-                        </div>
-
-                    </div>
-
+                        </>
+                    </>
                 </div>
 
             </div>
