@@ -66,9 +66,9 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
   const shown = expanded ? visible : visible.slice(0, 6);
 
   return (
-    <section id={variant === 'challenge' ? 'monthly-reading-challenge' : 'reading-passport'} dir={dir} className="homepage-alerts relative mx-auto w-full max-w-6xl overflow-hidden rounded-[2rem] md:rounded-[2.5rem] border border-emerald-200 dark:border-emerald-900/80 bg-gradient-to-br from-white via-emerald-50/70 to-teal-50/70 dark:from-slate-900 dark:via-slate-900 dark:to-emerald-950/30 shadow-[0_18px_55px_rgba(15,118,110,0.13)] p-4 sm:p-6 md:p-8">
-      <div aria-hidden="true" className="pointer-events-none absolute -top-16 -end-16 w-52 h-52 bg-emerald-300/20 dark:bg-emerald-500/10 rounded-full blur-3xl" />
-      <div aria-hidden="true" className="pointer-events-none absolute -bottom-20 -start-16 w-52 h-52 bg-amber-300/20 dark:bg-teal-400/10 rounded-full blur-3xl" />
+    <section id={variant === 'challenge' ? 'monthly-reading-challenge' : 'reading-passport'} dir={dir} className="homepage-alerts relative mx-auto w-full max-w-none overflow-hidden rounded-[2rem] md:rounded-[2.5rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-black shadow-[0_18px_55px_rgba(15,118,110,0.13)] p-4 sm:p-6 md:p-8">
+      <div aria-hidden="true" className="pointer-events-none absolute -top-16 -end-16 w-52 h-52 bg-slate-200/20 dark:bg-slate-800/10 rounded-full blur-3xl" />
+      <div aria-hidden="true" className="pointer-events-none absolute -bottom-20 -start-16 w-52 h-52 bg-slate-200/20 dark:bg-slate-800/10 rounded-full blur-3xl" />
       <div className="relative">
         {variant === 'books' && <div className="mb-5"><VerifiedReaderAccess /></div>}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
@@ -81,14 +81,14 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
               <p className="text-xs sm:text-sm mt-1 font-semibold text-slate-600 dark:text-slate-300">{variant === 'challenge' ? (ar ? 'أنجز هدفك الشهري خطوة بخطوة واحتفل بكل كتاب' : 'Reach your monthly reading goal, one book at a time') : (ar ? 'كتبك المحفوظة واقتراحات من المكتبة الورقية والرقمية' : 'Saved books and suggestions from the physical and digital libraries')}</p>
             </div>
           </div>
-          <div className="rounded-2xl bg-white/80 dark:bg-slate-800/80 border border-emerald-200 dark:border-slate-700 shadow-sm px-4 py-3 text-emerald-800 dark:text-emerald-200 font-black text-sm">
+          <div className="rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm px-4 py-3 text-emerald-800 dark:text-emerald-200 font-black text-sm">
             {ar ? 'المحفوظة' : 'Saved'}: {savedBooks.length} · {ar ? 'المقروءة' : 'Read'}: {completedBooks.length}
           </div>
         </div>
 
         {variant === 'challenge' && (
           <>
-            <div className="relative rounded-3xl border border-emerald-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 p-5 sm:p-6 shadow-sm hover:shadow-lg transition-all duration-300 group">
+            <div className="relative rounded-3xl border border-emerald-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-5 sm:p-6 shadow-sm hover:shadow-lg transition-all duration-300 group">
               <div className="flex flex-wrap justify-between gap-4 items-center">
                 <div>
                   <div className="flex items-center gap-2 text-amber-600 dark:text-amber-300 mb-2">
@@ -119,16 +119,16 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
           <>
         <div className="flex flex-wrap gap-2 sm:gap-3 items-center justify-between mb-5">
           <div className="flex gap-2 flex-wrap">
-            <button type="button" onClick={()=>{setTab('saved');setExpanded(false);}} className={'px-4 py-2.5 rounded-xl font-black text-xs sm:text-sm transition-all '+(tab==='saved'?'bg-emerald-600 text-white shadow-md':'bg-white/85 dark:bg-slate-800 text-slate-700 dark:text-white border border-slate-200 dark:border-slate-700')}>{ar?'القراءة لاحقًا':'Read later'} ({savedBooks.length})</button>
+            <button type="button" onClick={()=>{setTab('saved');setExpanded(false);}} className={'px-4 py-2.5 rounded-xl font-black text-xs sm:text-sm transition-all '+(tab==='saved'?'bg-emerald-600 text-white shadow-md':'bg-white dark:bg-slate-950 text-slate-700 dark:text-white border border-slate-200 dark:border-slate-700')}>{ar?'القراءة لاحقًا':'Read later'} ({savedBooks.length})</button>
             <button type="button" onClick={()=>{setTab('suggested');setExpanded(false);}} className={'px-4 py-2.5 rounded-xl font-black text-xs sm:text-sm transition-all '+(tab==='suggested'?'bg-emerald-600 text-white shadow-md':'bg-white/85 dark:bg-slate-800 text-slate-700 dark:text-white border border-slate-200 dark:border-slate-700')}>{ar?'اقتراحات القراءة':'Book suggestions'}</button>
           </div>
           <label className="text-xs font-bold text-slate-700 dark:text-slate-200">{ar?'نوع الكتاب':'Book type'} <select value={category} onChange={e=>{setCategory(e.target.value as typeof category);setExpanded(false);}} className="rounded-xl ms-2 px-3 py-2 border border-emerald-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
             <option value="all">{ar?'الكل':'All'}</option><option value="physical">{ar?'ورقي':'Physical'}</option><option value="ar">{ar?'رقمي عربي':'Arabic digital'}</option><option value="en">{ar?'رقمي إنجليزي':'English digital'}</option>
           </select></label>
         </div>
-        {shown.length ? <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">{shown.map(book=>{
+        {shown.length ? <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">{shown.map(book=>{
           const saved = data.saved.includes(book.key), completed=data.completed.includes(book.key);
-          return <article key={book.key} className="homepage-alert-card group relative rounded-2xl border border-emerald-100 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 p-4 sm:p-5 shadow-sm hover:shadow-xl touch-manipulation transition-all active:scale-[.99] flex flex-col gap-3 min-w-0">
+          return <article key={book.key} className="homepage-alert-card group relative rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 sm:p-5 shadow-sm hover:shadow-xl touch-manipulation transition-all active:scale-[.99] flex flex-col gap-3 min-w-0">
             <span className="self-start rounded-full bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-100 dark:border-emerald-800 px-3 py-1 text-[11px] text-emerald-800 dark:text-emerald-200 font-black">{labelFor(book, ar)}</span>
             <div dir="auto"><h4 className="text-base sm:text-lg font-black text-slate-900 dark:text-white break-words">{book.title}</h4><p className="text-sm font-semibold text-slate-500 dark:text-slate-300 mt-1">{book.author}</p></div>
             <p className="text-xs text-slate-600 dark:text-slate-300 font-semibold">{book.format==='physical'?getLocalizedSubject(book.subject,locale):book.subject}{book.shelf!==undefined?' · '+(ar?'رف':'Shelf')+' '+book.shelf:''}</p>
@@ -138,7 +138,7 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
               <button type="button" onClick={()=>toggleCompleted(book.key)} className="rounded-xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-200 px-3 py-2 text-xs font-bold">{completed?(ar?'إلغاء تمت القراءة':'Undo read'):(ar?'تمت القراءة':'Finished')}</button>
             </div>
           </article>;
-        })}</div>:<p className="py-8 text-center text-slate-600 dark:text-slate-300 font-bold bg-white/60 dark:bg-slate-800/60 rounded-2xl">{tab==='saved'?(ar?'قائمة القراءة لاحقًا فارغة. احفظ كتابًا من المكتبة الرقمية أو دليل المكتبة.':'No saved books yet. Save a title from the digital or physical catalog.'):(ar?'لا توجد اقتراحات متاحة لهذا النوع.':'No suggestions for this book type.')}</p>}
+        })}</div>:<p className="py-8 text-center text-slate-600 dark:text-slate-300 font-bold bg-white dark:bg-black rounded-2xl">{tab==='saved'?(ar?'قائمة القراءة لاحقًا فارغة. احفظ كتابًا من المكتبة الرقمية أو دليل المكتبة.':'No saved books yet. Save a title from the digital or physical catalog.'):(ar?'لا توجد اقتراحات متاحة لهذا النوع.':'No suggestions for this book type.')}</p>}
         {!expanded && visible.length>6 && <button type="button" onClick={()=>setExpanded(true)} className="block mx-auto mt-5 text-sm font-black px-6 py-3 rounded-xl border border-emerald-300 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-slate-800 transition-colors">{ar?'عرض المزيد':'Show more'} ({visible.length-6})</button>}
           </>
         )}
