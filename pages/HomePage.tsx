@@ -670,6 +670,9 @@ const HomePage: React.FC = () => {
                                             const returnDate = book.return_date || book.due_date || book.expected_return_date;
                                             const validReturnDate = Boolean(returnDate && Number.isFinite(new Date(`${returnDate}T12:00:00`).getTime()));
                                             const isOverdue = Boolean(returnDate && Number.isFinite(new Date(`${returnDate}T23:59:59`).getTime()) && new Date(`${returnDate}T23:59:59`).getTime() <= borrowCountdownNow);
+                                            const daysToReturn = validReturnDate ? Math.ceil((new Date(`${returnDate}T23:59:59`).getTime() - borrowCountdownNow) / 86400000) : null;
+                                            const dueSoon = daysToReturn !== null && daysToReturn > 0 && daysToReturn <= 3;
+
                                             return (
                                             <article key={book.id ?? `${bookTitle}-${returnDate}`} className="homepage-alert-card group relative bg-white/90 dark:bg-slate-800/90 p-4 sm:p-5 border border-amber-200 dark:border-amber-800/70 rounded-2xl sm:rounded-3xl flex flex-col gap-3 shadow-sm hover:shadow-xl touch-manipulation active:scale-[0.99]">
                                                 <div className="flex items-start gap-3">
@@ -688,6 +691,11 @@ const HomePage: React.FC = () => {
                                                     </p>
                                                     <p className={`mt-1.5 text-sm sm:text-base font-extrabold leading-relaxed flex items-center gap-1.5 ${isOverdue ? 'text-rose-700 dark:text-rose-300' : 'text-emerald-700 dark:text-emerald-300'}`}><svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 7v5l3 2" /></svg>{getBorrowCountdown(returnDate)}</p>
                                                 </div>
+                                                {(dueSoon || isOverdue) && (
+                                                    <p role="status" className={`text-xs sm:text-sm rounded-xl border px-3 py-2 font-black ${isOverdue ? 'border-rose-300 bg-rose-100 dark:bg-rose-950/50 text-rose-800 dark:text-rose-200' : 'border-amber-300 bg-amber-100 dark:bg-amber-950/50 text-amber-900 dark:text-amber-200'}`}>
+                                                        {isOverdue ? (isAr ? 'تنبيه: تجاوز الكتاب موعد الإرجاع.' : 'Reminder: this book is overdue.') : (isAr ? `تذكير تلقائي: موعد إرجاع الكتاب خلال ${daysToReturn} يوم.` : `Automatic reminder: return due in ${daysToReturn} day(s).`)}
+                                                    </p>
+                                                )}
                                                 {validReturnDate && (
                                                     <a
                                                         href={createGoogleCalendarLink(bookTitle || (isAr ? 'كتاب مستعار' : 'Borrowed book'), returnDate)}
