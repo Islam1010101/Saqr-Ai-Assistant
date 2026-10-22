@@ -397,16 +397,15 @@ const AdminDashboard: React.FC = () => {
         return () => { supabase.removeChannel(channel); };
     }, [isAdmin]);
 
-    const sendBilingualConfirmationEmail = async (params: { email: string; userName: string; bookName: string; borrowDate: string; returnDate: string }) => {
-        if (!params.email.trim()) throw new Error(isAr ? 'البريد الإلكتروني غير موجود.' : 'Email address is missing.');
-        const durationDays = calculateDurationDays(params.borrowDate, params.returnDate);
-        const { subject, html } = buildBilingualBorrowEmail(params.userName, params.bookName, params.borrowDate, params.returnDate, durationDays);
+    const sendBilingualConfirmationEmail = async (borrowingId: string | number) => {
         const { data, error } = await supabase.functions.invoke('send-borrow-email', {
-            body: { email: params.email, to: params.email, user_name: params.userName, book: params.bookName, book_name: params.bookName, borrow_date: params.borrowDate, date: params.returnDate, return_date: params.returnDate, duration_days: durationDays, subject, html }
+            body: { action: 'notify-approved', borrowing_id: borrowingId }
         });
         if (error) throw error;
-        if (data && data.ok === false) throw new Error(data.error || data.message || 'Email delivery failed');
-        return { data, durationDays };
+        if (!data || data.ok !== true || data.emailSent !== true) {
+            throw new Error(data?.error || data?.message || 'Email was not confirmed by Resend');
+        }
+        return data;
     };
 
     const handleInstantApprove = async (item: any) => {
@@ -417,13 +416,14 @@ const AdminDashboard: React.FC = () => {
             const todayStr = new Date().toISOString().split('T')[0];
             const targetReturnDate = getDefaultReturnDate(15);
             const cleanEmail = String(item.user_email || (item.user_type === 'student' && item.user_id ? `${String(item.user_id).trim()}@falcon-school.com` : '')).trim();
-            const { error: updateErr } = await supabase.from('borrowings').update({ status: 'active', user_email: cleanEmail, borrow_date: todayStr, return_date: targetReturnDate }).eq('id', item.id);
+            const { error: updateErr } = await supabase.from('borrowings').update({ status: 'active', user_email: cleanEmail, borrow_date: todayStr, return_date: targetReturnDate, approval_email_status: 'pending' }).eq('id', item.id);
             if (updateErr) throw updateErr;
             setPendingRequestsList(prev => prev.filter(p => String(p.id) !== String(item.id)));
             setBorrowingsList(prev => [{ ...item, status: 'active', user_email: cleanEmail, borrow_date: todayStr, return_date: targetReturnDate }, ...prev.filter(p => String(p.id) !== String(item.id))]);
             if (cleanEmail) {
                 try {
-                    const { durationDays } = await sendBilingualConfirmationEmail({ email: cleanEmail, userName: item.user_name || item.user_id, bookName: item.book_name, borrowDate: todayStr, returnDate: targetReturnDate });
+                    await sendBilingualConfirmationEmail(item.id);
+                    const durationDays = calculateDurationDays(todayStr, targetReturnDate);
                     setBorrowingsNotice(isAr ? `تمت الموافقة على «${item.book_name}» وإرسال البريد الإلكتروني إلى ${cleanEmail} (المدة: ${durationDays} يوماً، والإرجاع: ${targetReturnDate}).` : `Approved “${item.book_name}” and sent email to ${cleanEmail}.`);
                 } catch (emailErr) {
                     console.error('Email send warning:', emailErr);
@@ -539,10 +539,11 @@ const AdminDashboard: React.FC = () => {
                 const todayStr = new Date().toISOString().split('T')[0];
                 const targetReturnDate = formData.return_date || getDefaultReturnDate(15);
                 const cleanEmail = formData.user_email.trim();
-                const { error: insertErr } = await supabase.from('borrowings').insert([{ user_id: formData.user_id.trim(), user_type: formData.user_type, user_email: cleanEmail, book_name: formData.book_name.trim(), borrow_date: todayStr, return_date: targetReturnDate, status: 'active' }]);
+                const { data: insertedBorrowing, error: insertErr } = await supabase.from('borrowings').insert([{ user_id: formData.user_id.trim(), user_type: formData.user_type, user_email: cleanEmail, book_name: formData.book_name.trim(), borrow_date: todayStr, return_date: targetReturnDate, status: 'active', approval_email_status: 'pending' }]).select('id').single();
                 if (insertErr) throw insertErr;
                 try {
-                    const { durationDays } = await sendBilingualConfirmationEmail({ email: cleanEmail, userName: formData.user_id.trim(), bookName: formData.book_name.trim(), borrowDate: todayStr, returnDate: targetReturnDate });
+                    await sendBilingualConfirmationEmail(insertedBorrowing.id);
+                    const durationDays = calculateDurationDays(todayStr, targetReturnDate);
                     setBorrowingsNotice(isAr ? `تم تسجيل الإعارة وإرسال بريد التأكيد إلى ${cleanEmail} (${durationDays} يوماً).` : `Borrowing registered and confirmation email sent to ${cleanEmail}.`);
                 } catch (emailErr) {
                     console.error('Email send warning:', emailErr);
