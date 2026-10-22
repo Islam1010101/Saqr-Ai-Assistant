@@ -67,8 +67,6 @@ export const ENGLISH_LIBRARY_DATABASE: Book[] = [
 ];
 
 const translations = {
-        readLater: "القراءة لاحقًا",
-        readLaterRemove: "محفوظ ✓",
     en: {
         readLater: "Read later",
         readLaterRemove: "Saved ✓",
@@ -94,6 +92,8 @@ const translations = {
         aiSubject: "AI Category"
     },
     ar: {
+        readLater: "القراءة لاحقًا",
+        readLaterRemove: "محفوظ ✓",
         pageTitle: "المكتبة الإنجليزية",
         searchPlaceholder: "ابحث عن عنوان أو مؤلف...",
         allSubjects: "المواضيع",
