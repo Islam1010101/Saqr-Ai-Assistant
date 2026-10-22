@@ -427,7 +427,7 @@ export default function TutorialPage() {
               <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-800"><p className="text-xs text-slate-500">{isAr ? 'الرف التجريبي' : 'Sample shelf'}</p><p className="mt-1 font-black">{selectedBook.shelf}</p></div>
               <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-800"><p className="text-xs text-slate-500">{isAr ? 'الصف التجريبي' : 'Sample row'}</p><p className="mt-1 font-black">{selectedBook.row}</p></div>
             </div>
-            <button type="button" onClick={() => setNotice(isAr ? 'هذه تجربة فقط: لم يتم تسجيل استعارة ولم تُرسل أي بيانات.' : 'Demo only: no loan has been recorded and no data was sent.')} className="mt-6 w-full rounded-xl bg-emerald-600 px-4 py-3 font-black text-white transition hover:bg-emerald-700">{isAr ? 'جرّب زر الاستعارة' : 'Try the borrow action'}</button>
+            <button type="button" onClick={() => { setNotice(isAr ? 'هذه تجربة فقط: لم يتم تسجيل استعارة ولم تُرسل أي بيانات.' : 'Demo only: no loan has been recorded and no data was sent.'); setSelectedBook(null); }} className="mt-6 w-full rounded-xl bg-emerald-600 px-4 py-3 font-black text-white transition hover:bg-emerald-700">{isAr ? 'جرّب زر الاستعارة' : 'Try the borrow action'}</button>
             <p className="mt-3 text-center text-xs leading-5 text-slate-500">{isAr ? 'الزر يعرض رسالة توضيحية فقط ولا ينشئ طلباً حقيقياً.' : 'This button only displays a demo notice. It does not create a real request.'}</p>
           </div>
         </div>
