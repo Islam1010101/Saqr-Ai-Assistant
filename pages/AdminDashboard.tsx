@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { Link } from 'react-router-dom';
 import { useLanguage, useTheme } from '../App';
 import { supabase } from '../src/utils/supabase';
+import AdminReadingChallenge from '../src/components/AdminReadingChallenge';
 
 const translations = {
     ar: {
@@ -160,6 +161,7 @@ const AdminDashboard: React.FC = () => {
     const [pendingRequestsList, setPendingRequestsList] = useState<any[]>([]);
     const [lessonReportsList, setLessonReportsList] = useState<any[]>([]);
     const [activeTab, setActiveTab] = useState<'students' | 'teachers' | 'borrowings' | 'pending' | 'reports'>('pending');
+    const [showReadingReport, setShowReadingReport] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [borrowingsError, setBorrowingsError] = useState('');
     const [borrowingsNotice, setBorrowingsNotice] = useState('');
@@ -503,21 +505,42 @@ const AdminDashboard: React.FC = () => {
             uniqueTitles: new Set([...borrowingsList,...pendingRequestsList].map(b => String(b.book_name || '').trim().toLowerCase()).filter(Boolean)).size };
     }, [borrowingsList, pendingRequestsList, lessonReportsList, digitalBookReadStats]);
 
+    const safePrintText = (value: any) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[character] as string));
     const handlePrintDashboardReport = () => {
         const printWindow = window.open('', '_blank');
         if (!printWindow) { setBorrowingsError(isAr ? 'تعذر فتح نافذة الطباعة. يرجى السماح بالنوافذ المنبثقة.' : 'Could not open print window. Please allow pop-ups.'); return; }
         const htmlReport = `
         <html dir="${dir}" lang="${locale}"><head><title>${t('title')} - EFIPS</title><style>
-        @page{size:A4 portrait;margin:15mm}body{font-family:'Cairo','Segoe UI',Tahoma,sans-serif;padding:20px;color:#1e293b;line-height:1.6}.header{text-align:center;border-bottom:3px solid #0f172a;padding-bottom:15px;margin-bottom:25px}.header img{max-width:90px;height:auto;margin-bottom:8px}h1{margin:0;font-size:22px;color:#0f172a}p{margin:5px 0;font-size:13px;color:#64748b}.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:25px}.stat-card{border:1px solid #cbd5e1;border-radius:12px;padding:15px;text-align:center;background:#f8fafc}.stat-num{font-size:24px;font-weight:900;color:#2563eb}.stat-label{font-size:11px;font-weight:bold;color:#475569;margin-top:5px}h2{font-size:16px;border-bottom:2px solid #e2e8f0;padding-bottom:6px;margin-top:25px;color:#0f172a}table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px}th,td{border:1px solid #cbd5e1;padding:10px;text-align:${dir === 'rtl' ? 'right' : 'left'}}th{background:#f1f5f9;font-weight:bold}@media print{.no-print{display:none!important}}
-        </style></head><body><div class="header"><img src="https://www.efipslibrary.online/school-logo.png" alt="EFIPS Logo"/><h1>${t('title')}</h1><p>${t('subtitle')} | ${new Date().toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}</p></div>
+        @page{size:A4 portrait;margin:13mm 11mm 15mm}
+         *{box-sizing:border-box}body{font-family:'Cairo',Tahoma,'Segoe UI',sans-serif;margin:0;padding:0;color:#172033;line-height:1.55;font-size:10px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+         .header{text-align:center;border-bottom:3px solid #0d8875;padding-bottom:12px;margin-bottom:12px;break-inside:avoid}
+         .header img{max-width:70px;max-height:70px;object-fit:contain;margin-bottom:5px}
+         h1{margin:0;font-size:18px;font-weight:900;color:#0c695e}
+         p{margin:3px 0;font-size:10px;color:#475569}
+         .stats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:13px}
+         .stat-card{border:1px solid #cde4df;border-radius:9px;padding:9px;text-align:center;background:#f4faf8;break-inside:avoid}
+         .stat-num{font-size:20px;font-weight:900;color:#087a69}
+         .stat-label{font-size:9px;font-weight:bold;color:#475569;margin-top:4px}
+         h2{font-size:13px;border-bottom:2px solid #b6ddd3;padding-bottom:5px;margin:14px 0 6px;color:#0a6b5e;break-after:avoid}
+         table{width:100%;table-layout:fixed;border-collapse:collapse;margin-top:7px;font-size:9px}
+         thead{display:table-header-group}tr{break-inside:avoid;page-break-inside:avoid}
+         th,td{border:1px solid #cbd5e1;padding:6px 5px;vertical-align:top;text-align:${dir === 'rtl' ? 'right' : 'left'};overflow-wrap:anywhere}
+         th{background:#e6f5f0;font-weight:900;color:#0b6257}
+         tbody tr:nth-child(even){background:#f8fafc}
+         .school-name{font-size:13px;font-weight:900;color:#0c695e}
+         .report-footer{margin-top:19px;border-top:1px solid #cbd5e1;padding-top:8px;text-align:center;color:#64748b;font-size:9px}
+         @media print{.no-print{display:none!important}}
+        </style></head><body><div class="header"><img src="https://www.efipslibrary.online/school-logo.png" alt="EFIPS Logo"/><div class="school-name">مدرسة صقر الإمارات الدولية الخاصة</div><p>Emirates Falcon International Private School</p><h1>${t('title')}</h1><p>${t('subtitle')} | ${new Date().toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}</p></div>
         <div class="stats-grid"><div class="stat-card"><div class="stat-num">${stats.students}</div><div class="stat-label">${t('totalStudents')}</div></div><div class="stat-card"><div class="stat-num">${stats.teachers}</div><div class="stat-label">${t('totalTeachers')}</div></div><div class="stat-card"><div class="stat-num">${stats.studentLogins}</div><div class="stat-label">${t('studentLogins')}</div></div><div class="stat-card"><div class="stat-num">${stats.teacherLogins}</div><div class="stat-label">${t('teacherLogins')}</div></div></div>
         <h2>${isAr ? 'مؤشرات أثر المكتبة' : 'Library Impact Indicators'}</h2><table><tr><th>${isAr ? 'إعارات نشطة' : 'Active loans'}</th><th>${isAr ? 'طلبات معلقة' : 'Pending requests'}</th><th>${isAr ? 'إعارات متأخرة' : 'Overdue loans'}</th><th>${isAr ? 'فتح الكتب الرقمية' : 'Digital opens'}</th><th>${isAr ? 'سجلات التحضير' : 'Lesson records'}</th></tr><tr><td>${libraryImpact.active}</td><td>${libraryImpact.pending}</td><td>${libraryImpact.overdue}</td><td>${digitalBookReadStatsAvailable === false ? '-' : libraryImpact.digitalOpens}</td><td>${libraryImpact.lessonPlans}</td></tr></table>
-        <h2>${t('topBooksTitle')}</h2><table><tr><th>#</th><th>${t('colBook')}</th><th>${isAr ? 'عدد مرات الاستعارة' : 'Borrow Count'}</th></tr>${topBooksStats.length ? topBooksStats.map(([book, count], idx) => `<tr><td>${idx + 1}</td><td><strong>${book}</strong></td><td>${count}</td></tr>`).join('') : `<tr><td colspan="3" style="text-align:center">${t('noResults')}</td></tr>`}</table>
-        <h2>${t('arabicBooks')} - ${t('digitalReadAnalyticsTitle')}</h2><table><tr><th>#</th><th>${t('colBook')}</th><th>${t('digitalReadCount')}</th></tr>${topArabicDigitalReads.length ? topArabicDigitalReads.map((book, idx) => `<tr><td>${idx + 1}</td><td><strong>${book.book_title}</strong></td><td>${Number(book.read_count || 0)}</td></tr>`).join('') : `<tr><td colspan="3" style="text-align:center">${digitalBookReadStatsAvailable === false ? t('digitalReadsSetupRequired') : t('noDigitalReads')}</td></tr>`}</table>
+        <h2>${t('topBooksTitle')}</h2><table><tr><th>#</th><th>${t('colBook')}</th><th>${isAr ? 'عدد مرات الاستعارة' : 'Borrow Count'}</th></tr>${topBooksStats.length ? topBooksStats.map(([book, count], idx) => `<tr><td>${idx + 1}</td><td><strong>${safePrintText(book)}</strong></td><td>${count}</td></tr>`).join('') : `<tr><td colspan="3" style="text-align:center">${t('noResults')}</td></tr>`}</table>
+        <h2>${t('arabicBooks')} - ${t('digitalReadAnalyticsTitle')}</h2><table><tr><th>#</th><th>${t('colBook')}</th><th>${t('digitalReadCount')}</th></tr>${topArabicDigitalReads.length ? topArabicDigitalReads.map((book, idx) => `<tr><td>${idx + 1}</td><td><strong>${safePrintText(book.book_title)}</strong></td><td>${Number(book.read_count || 0)}</td></tr>`).join('') : `<tr><td colspan="3" style="text-align:center">${digitalBookReadStatsAvailable === false ? t('digitalReadsSetupRequired') : t('noDigitalReads')}</td></tr>`}</table>
         <h2>${t('englishBooks')} - ${t('digitalReadAnalyticsTitle')}</h2><table><tr><th>#</th><th>${t('colBook')}</th><th>${t('digitalReadCount')}</th></tr>${topEnglishDigitalReads.length ? topEnglishDigitalReads.map((book, idx) => `<tr><td>${idx + 1}</td><td><strong>${book.book_title}</strong></td><td>${Number(book.read_count || 0)}</td></tr>`).join('') : `<tr><td colspan="3" style="text-align:center">${digitalBookReadStatsAvailable === false ? t('digitalReadsSetupRequired') : t('noDigitalReads')}</td></tr>`}</table>
-        <h2>${isAr ? 'أكثر 10 مستخدمين نشاطاً' : 'Top 10 Most Active Users'}</h2><table><tr><th>#</th><th>${isAr ? 'الكود' : 'User Code'}</th><th>${isAr ? 'الاسم' : 'Name'}</th><th>${isAr ? 'الفئة' : 'Type'}</th><th>${isAr ? 'مرات الدخول' : 'Logins'}</th></tr>${topUsersStats.length ? topUsersStats.map((user, idx) => `<tr><td>${idx + 1}</td><td>${user.user_id}</td><td>${user.name}</td><td>${user.categoryLabel}</td><td>${user.count}</td></tr>`).join('') : `<tr><td colspan="5" style="text-align:center">${t('noResults')}</td></tr>`}</table>
-        <h2>${t('borrowManagement')} (${borrowingsList.length})</h2><table><tr><th>${t('colId')}</th><th>${t('colName')}</th><th>${t('colBook')}</th><th>${t('colEmail')}</th><th>${t('colDate')}</th></tr>${borrowingsList.length ? borrowingsList.map(b => `<tr><td>${b.user_id}</td><td>${b.user_name || '-'}</td><td>${b.book_name}</td><td>${b.user_email || '-'}</td><td>${b.return_date || '-'}</td></tr>`).join('') : `<tr><td colspan="5" style="text-align:center">${t('noResults')}</td></tr>`}</table>
-        <div style="margin-top:40px;text-align:center;font-size:11px;color:#94a3b8">مدرسة صقر الإمارات الدولية الخاصة (EFIPS) - تقرير نظام المكتبة الذكية</div></body></html>`;
+        <h2>${isAr ? 'أكثر 10 مستخدمين نشاطاً' : 'Top 10 Most Active Users'}</h2><table><tr><th>#</th><th>${isAr ? 'الكود' : 'User Code'}</th><th>${isAr ? 'الاسم' : 'Name'}</th><th>${isAr ? 'الفئة' : 'Type'}</th><th>${isAr ? 'مرات الدخول' : 'Logins'}</th></tr>${topUsersStats.length ? topUsersStats.map((user, idx) => `<tr><td>${idx + 1}</td><td>${safePrintText(user.user_id)}</td><td>${safePrintText(user.name)}</td><td>${safePrintText(user.categoryLabel)}</td><td>${user.count}</td></tr>`).join('') : `<tr><td colspan="5" style="text-align:center">${t('noResults')}</td></tr>`}</table>
+        <h2>${t('borrowManagement')} (${borrowingsList.length})</h2><table><tr><th>${t('colId')}</th><th>${t('colName')}</th><th>${t('colBook')}</th><th>${t('colEmail')}</th><th>${t('colDate')}</th></tr>${borrowingsList.length ? borrowingsList.map(b => `<tr><td>${safePrintText(b.user_id)}</td><td>${safePrintText(b.user_name || '-')}</td><td>${safePrintText(b.book_name)}</td><td>${safePrintText(b.user_email || '-')}</td><td>${safePrintText(b.return_date || '-')}</td></tr>`).join('') : `<tr><td colspan="5" style="text-align:center">${t('noResults')}</td></tr>`}</table>
+        <div class="report-footer">مدرسة صقر الإمارات الدولية الخاصة — Emirates Falcon International Private School — EFIPS Library</div></body></html>`;
         printWindow.document.write(htmlReport); printWindow.document.close(); printWindow.focus(); window.setTimeout(() => printWindow.print(), 600);
     };
 
@@ -583,13 +606,13 @@ const AdminDashboard: React.FC = () => {
     ];
 
     return (
-        <div dir={dir} className="min-h-[100dvh] bg-[#f8fafc] dark:bg-[#0f172a] text-slate-800 dark:text-slate-100 font-sans p-4 md:p-8 pb-24 transition-colors duration-300">
+        <div dir={dir} className="min-h-[100dvh] bg-white dark:bg-black text-slate-800 dark:text-slate-100 font-sans p-4 md:p-8 pb-24 transition-colors duration-300">
             <style>{`@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap'); * { font-family: 'Cairo', sans-serif !important; }`}</style>
             <header className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 mb-8 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200 dark:border-slate-700/50 p-6 rounded-[2.5rem] shadow-xl mt-4 md:mt-6">
-                <div><h1 className="text-2xl md:text-4xl font-black bg-gradient-to-r from-rose-500 to-amber-500 bg-clip-text text-transparent">{t('title')}</h1><p className="text-slate-500 dark:text-slate-400 font-bold text-xs md:text-sm mt-1">{t('welcome')} <span className="text-slate-900 dark:text-white font-black">{adminName}</span> | {t('subtitle')}</p></div>
+                <div><h1 className="text-2xl md:text-4xl font-black bg-gradient-to-r from-emerald-700 via-teal-600 to-sky-500 bg-clip-text text-transparent">{t('title')}</h1><p className="text-slate-500 dark:text-slate-400 font-bold text-xs md:text-sm mt-1">{t('welcome')} <span className="text-slate-900 dark:text-white font-black">{adminName}</span> | {t('subtitle')}</p></div>
                 <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
-                    <button type="button" onClick={() => void fetchRealDashboardData()} className="px-4 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all flex items-center gap-2"><OutlineIcon name="refresh" />{isAr ? 'تحديث البيانات' : 'Refresh Data'}</button>
-                    <button type="button" onClick={handlePrintDashboardReport} className="px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all flex items-center gap-2"><OutlineIcon name="printer" />{t('printPdfBtn')}</button>
+                    <button type="button" onClick={() => void fetchRealDashboardData()} className="px-4 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95 flex items-center gap-2"><OutlineIcon name="refresh" />{isAr ? 'تحديث البيانات' : 'Refresh Data'}</button>
+                    <button type="button" onClick={handlePrintDashboardReport} className="px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95 flex items-center gap-2"><OutlineIcon name="printer" />{t('printPdfBtn')}</button>
                     <button type="button" onClick={toggleTheme} className="px-4 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm shadow-inner transition-all flex items-center gap-2"><OutlineIcon name={theme === 'light' ? 'moon' : 'sun'} />{theme === 'light' ? 'Dark' : 'Light'}</button>
                     <Link to="/home" className="px-6 py-3 bg-slate-900 dark:bg-slate-800 text-white hover:bg-slate-800 border border-slate-700 rounded-2xl font-bold text-sm transition-all shadow-md text-center">{t('backToHome')}</Link>
                 </div>
@@ -599,12 +622,27 @@ const AdminDashboard: React.FC = () => {
                 <section className="lg:col-span-4 bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/70 p-5 md:p-7 rounded-3xl shadow-sm">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5"><h2 className="text-lg md:text-xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-3"><span className="w-10 h-10 rounded-2xl bg-rose-50 dark:bg-rose-900/30 text-rose-600 flex items-center justify-center"><OutlineIcon name="grid" className="h-5 w-5" /></span>{t('statsTitle')}</h2><span className="text-xs font-bold text-slate-500 dark:text-slate-400">{isAr ? 'ملخص حسابات المستخدمين المسجلة' : 'Registered user account overview'}</span></div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-                        {statCards.map(card => <div key={card.key} className={`relative overflow-hidden border p-5 rounded-2xl ${card.cardClass}`}>
+                        {statCards.map(card => <div key={card.key} className={`relative overflow-hidden border p-5 rounded-2xl shadow-sm hover:-translate-y-1.5 hover:shadow-xl hover:scale-[1.015] transition-all duration-300 ${card.cardClass}`}>
                             <div className="flex items-start justify-between gap-3"><div><div className={`text-3xl font-black tabular-nums ${card.valueClass}`}>{Number(card.value).toLocaleString(isAr ? 'ar-EG' : 'en-US')}</div><div className="text-xs font-bold text-slate-600 dark:text-slate-300 mt-2">{card.label}</div></div><span className={`w-11 h-11 rounded-xl bg-white/80 dark:bg-slate-800 flex items-center justify-center shadow-sm ${card.iconClass}`}><OutlineIcon name={card.icon} className="h-6 w-6" /></span></div>
                             <div className={`h-1.5 rounded-full mt-4 overflow-hidden ${card.trackClass}`}><div className={`h-full w-full rounded-full ${card.barClass}`} /></div>
                         </div>)}
                     </div>
                 </section>
+
+                <section className="lg:col-span-4 rounded-3xl border border-emerald-200 dark:border-emerald-900/70 bg-gradient-to-r from-emerald-50 via-white to-sky-50 dark:from-emerald-950/30 dark:via-black dark:to-sky-950/20 shadow-sm p-5 md:p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                            <span className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 flex justify-center items-center text-white shadow-lg"><OutlineIcon name="trophy" className="w-7 h-7" /></span>
+                            <div><h2 className="text-lg md:text-xl font-black text-slate-900 dark:text-white">{isAr ? 'تحدي القراءة الشهري — تقارير المعلمين والطلاب' : 'Monthly Reading Challenge — Students & Teachers'}</h2>
+                            <p className="text-xs mt-1 text-slate-600 dark:text-slate-300">{isAr ? 'عدد الكتب المنجزة وعناوينها والأهداف، حسب الشهر والحساب المرتبط بهوية مدرسية معتمدة.' : 'Completed titles and targets by month for school-verified reading identities.'}</p></div>
+                        </div>
+                        <button type="button" aria-expanded={showReadingReport} onClick={() => setShowReadingReport(value => !value)}
+                            className="shrink-0 px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-black text-sm shadow-lg hover:-translate-y-1 hover:shadow-xl active:scale-95 transition-all duration-300">
+                            {showReadingReport ? (isAr ? 'إغلاق تقرير التحدي' : 'Close Challenge Report') : (isAr ? 'فتح تقرير تحدي القراءة' : 'Open Reading Challenge Report')}
+                        </button>
+                    </div>
+                </section>
+                {showReadingReport && <AdminReadingChallenge isAr={isAr} />}
 
                 <section className="lg:col-span-4 rounded-3xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/70 p-5 md:p-6 shadow-sm">
                     <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
@@ -621,7 +659,7 @@ const AdminDashboard: React.FC = () => {
                             { label: isAr ? 'عناوين مطلوبة' : 'Requested titles', value: libraryImpact.uniqueTitles },
                             { label: isAr ? 'فتح الكتب الرقمية' : 'Digital book opens', value: digitalBookReadStatsAvailable === false ? '—' : libraryImpact.digitalOpens },
                             { label: isAr ? 'سجلات التحضير' : 'Lesson plan records', value: libraryImpact.lessonPlans }
-                        ].map((metric) => <div key={metric.label} className="rounded-2xl border border-emerald-100 dark:border-slate-700 bg-emerald-50/50 dark:bg-slate-800/50 p-4">
+                        ].map((metric) => <div key={metric.label} className="rounded-2xl border border-emerald-100 dark:border-slate-700 bg-emerald-50/50 dark:bg-slate-800/50 p-4 shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all duration-300">
                             <div className="text-2xl font-black text-emerald-700 dark:text-emerald-300 tabular-nums">{metric.value}</div>
                             <div className="mt-2 text-xs font-bold text-slate-600 dark:text-slate-300">{metric.label}</div>
                         </div>)}
