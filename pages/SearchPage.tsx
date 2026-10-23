@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { bookData, getLocalizedSubject, type Book } from '../api/bookData';
 import { useReadingPassport, physicalBookKey } from '../src/utils/readingPassport'; 
 import { useLanguage } from '../App';
-import { trackActivity } from '../src/utils/tracker';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../src/utils/supabase';
 
@@ -606,7 +605,6 @@ const SearchPage: React.FC = () => {
                                 locale={currentLocale} 
                                 onClick={() => {
                                     setSelectedBook(book); 
-                                    trackActivity('searched', book.title); 
                                 }} 
                             />
                         </RevealOnScroll>

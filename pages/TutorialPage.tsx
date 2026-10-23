@@ -5,7 +5,7 @@ import { useLanguage, useTheme } from '../App';
 
 /**
  * Public, visual-only replica of the real EFIPS library home screen.
- * It intentionally contains no Supabase/Firebase calls and never displays
+ * It intentionally contains no live database calls and never displays
  * any personal, loan, timetable, analytics, or other live records.
  */
 

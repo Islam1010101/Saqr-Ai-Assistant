@@ -7,7 +7,6 @@ import { jsPDF } from 'jspdf';
 import { bookData } from '../api/bookData';
 import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
-import { trackActivity } from '../src/utils/tracker';
 import { supabase } from '../src/utils/supabase';
 
 // --- بروتوكول عقل صقر ---
@@ -342,7 +341,6 @@ const SmartSearchPage: React.FC = () => {
     if (input.trim() === '' || isLoading) return;
     const userQuery = input.trim();
 
-    trackActivity('ai', userQuery);
     setMessages(prev => [...prev, { role: 'user', content: userQuery }]);
     setInput('');
     setIsLoading(true);

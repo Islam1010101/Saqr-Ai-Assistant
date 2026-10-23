@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useLanguage } from '../App';
 import { useNavigate } from 'react-router-dom';
-import { trackActivity } from '../src/utils/tracker';
 import { supabase } from '../src/utils/supabase';
 import { useReadingPassport, digitalBookKey } from '../src/utils/readingPassport';
 import DigitalBookRating from '../src/components/DigitalBookRating';
@@ -536,7 +535,6 @@ const EnglishLibraryInternalPage: React.FC = () => {
                                t={t} 
                                onClick={async () => {
                                    setSelectedBook(book); 
-                                   trackActivity('digital', book.title); 
                                    try {
                                        await supabase.from('book_views').insert([{ book_title: book.title, language: 'en' }]);
                                    } catch (e) {

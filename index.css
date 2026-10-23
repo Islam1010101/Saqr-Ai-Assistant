@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { bookData, type Book } from '../api/bookData'; 
 import { useLanguage } from '../App';
-// 🚀 استيراد التراكر الجديد
-import { trackActivity } from '../src/utils/tracker';
 
 // --- مساعدات التصميم ---
 const ReflectionLayer = () => (
@@ -90,10 +88,9 @@ const SearchPage: React.FC = () => {
     const [shelfFilter, setShelfFilter] = useState('all');
     const [sortBy, setSortBy] = useState('alphabetical');
 
-    // 🚀 دالة معالجة اختيار الكتاب مع التسجيل في فايربيز
+    // دالة معالجة اختيار الكتاب
     const handleSelectBook = (book: Book) => {
         setSelectedBook(book);
-        trackActivity('digital', book.title); // تسجيل تفاعل المكتبة الرقمية
     };
 
     const filteredBooks = useMemo(() => {
@@ -127,8 +124,6 @@ const SearchPage: React.FC = () => {
                               onChange={(e) => {
                                   const val = e.target.value;
                                   setSearchTerm(val);
-                                  // 📉 تسجيل البحث في فايربيز لو أكتر من 3 حروف
-                                  if (val.length > 3) trackActivity('searched', val);
                               }} 
                             />
                             <svg className="absolute start-6 top-1/2 -translate-y-1/2 h-7 w-7 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
