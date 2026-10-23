@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../App';
 
 const translations = {
     ar: {
@@ -156,22 +157,9 @@ const RevealOnScroll = ({ children, delay = 0 }: { children: React.ReactNode, de
 };
 
 const AboutPage: React.FC = () => {
-    // ربط لغة الصفحة بلغة صفحة الـ Login المخزنة في localStorage
-    const [lang, setLang] = useState<'ar' | 'en'>(() => {
-        return (localStorage.getItem('saqr_lang') as 'ar' | 'en') || 'en';
-    });
-
-    useEffect(() => {
-        const handleStorage = () => {
-            const storedLang = localStorage.getItem('saqr_lang') as 'ar' | 'en';
-            if (storedLang) setLang(storedLang);
-        };
-        window.addEventListener('storage', handleStorage);
-        return () => window.removeEventListener('storage', handleStorage);
-    }, []);
-
+    // Keep this public page synchronized with the login and tutorial language.
+    const { locale: lang, dir } = useLanguage();
     const isAr = lang === 'ar';
-    const dir = isAr ? 'rtl' : 'ltr';
     const t = (key: keyof typeof translations.ar) => translations[lang][key];
     const navigate = useNavigate();
 

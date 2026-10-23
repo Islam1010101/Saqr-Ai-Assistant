@@ -329,12 +329,34 @@ const LanguageContext = createContext<any>(null);
 export const useLanguage = () => useContext(LanguageContext);
 
 const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [locale, setLocale] = useState<Locale>('en');
+  // English is the default; a valid visitor choice is shared across all routes.
+  const [locale, setLocale] = useState<Locale>(() => {
+    try {
+      return localStorage.getItem('saqr_lang') === 'ar' ? 'ar' : 'en';
+    } catch {
+      return 'en';
+    }
+  });
 
   useEffect(() => {
     document.documentElement.lang = locale;
     document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr';
+    try {
+      localStorage.setItem('saqr_lang', locale);
+    } catch {
+      // Language switching still works when browser storage is unavailable.
+    }
   }, [locale]);
+
+  useEffect(() => {
+    const syncLanguage = (event: StorageEvent) => {
+      if (event.key === 'saqr_lang' || event.key === null) {
+        setLocale(event.newValue === 'ar' ? 'ar' : 'en');
+      }
+    };
+    window.addEventListener('storage', syncLanguage);
+    return () => window.removeEventListener('storage', syncLanguage);
+  }, []);
 
   return (
     <LanguageContext.Provider value={{ locale, setLocale, dir: locale === 'ar' ? 'rtl' : 'ltr' }}>
