@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { Link } from 'react-router-dom';
 import { useLanguage, useTheme } from '../App';
 import { supabase } from '../src/utils/supabase';
+import AdminReadingChallenge from '../src/components/AdminReadingChallenge';
 
 const translations = {
     ar: {
@@ -160,6 +161,7 @@ const AdminDashboard: React.FC = () => {
     const [pendingRequestsList, setPendingRequestsList] = useState<any[]>([]);
     const [lessonReportsList, setLessonReportsList] = useState<any[]>([]);
     const [activeTab, setActiveTab] = useState<'students' | 'teachers' | 'borrowings' | 'pending' | 'reports'>('pending');
+    const [showReadingReport, setShowReadingReport] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [borrowingsError, setBorrowingsError] = useState('');
     const [borrowingsNotice, setBorrowingsNotice] = useState('');
@@ -583,13 +585,13 @@ const AdminDashboard: React.FC = () => {
     ];
 
     return (
-        <div dir={dir} className="min-h-[100dvh] bg-[#f8fafc] dark:bg-[#0f172a] text-slate-800 dark:text-slate-100 font-sans p-4 md:p-8 pb-24 transition-colors duration-300">
+        <div dir={dir} className="min-h-[100dvh] bg-white dark:bg-black text-slate-800 dark:text-slate-100 font-sans p-4 md:p-8 pb-24 transition-colors duration-300">
             <style>{`@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap'); * { font-family: 'Cairo', sans-serif !important; }`}</style>
             <header className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 mb-8 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200 dark:border-slate-700/50 p-6 rounded-[2.5rem] shadow-xl mt-4 md:mt-6">
-                <div><h1 className="text-2xl md:text-4xl font-black bg-gradient-to-r from-rose-500 to-amber-500 bg-clip-text text-transparent">{t('title')}</h1><p className="text-slate-500 dark:text-slate-400 font-bold text-xs md:text-sm mt-1">{t('welcome')} <span className="text-slate-900 dark:text-white font-black">{adminName}</span> | {t('subtitle')}</p></div>
+                <div><h1 className="text-2xl md:text-4xl font-black bg-gradient-to-r from-emerald-700 via-teal-600 to-sky-500 bg-clip-text text-transparent">{t('title')}</h1><p className="text-slate-500 dark:text-slate-400 font-bold text-xs md:text-sm mt-1">{t('welcome')} <span className="text-slate-900 dark:text-white font-black">{adminName}</span> | {t('subtitle')}</p></div>
                 <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
-                    <button type="button" onClick={() => void fetchRealDashboardData()} className="px-4 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all flex items-center gap-2"><OutlineIcon name="refresh" />{isAr ? 'تحديث البيانات' : 'Refresh Data'}</button>
-                    <button type="button" onClick={handlePrintDashboardReport} className="px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all flex items-center gap-2"><OutlineIcon name="printer" />{t('printPdfBtn')}</button>
+                    <button type="button" onClick={() => void fetchRealDashboardData()} className="px-4 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95 flex items-center gap-2"><OutlineIcon name="refresh" />{isAr ? 'تحديث البيانات' : 'Refresh Data'}</button>
+                    <button type="button" onClick={handlePrintDashboardReport} className="px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95 flex items-center gap-2"><OutlineIcon name="printer" />{t('printPdfBtn')}</button>
                     <button type="button" onClick={toggleTheme} className="px-4 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm shadow-inner transition-all flex items-center gap-2"><OutlineIcon name={theme === 'light' ? 'moon' : 'sun'} />{theme === 'light' ? 'Dark' : 'Light'}</button>
                     <Link to="/home" className="px-6 py-3 bg-slate-900 dark:bg-slate-800 text-white hover:bg-slate-800 border border-slate-700 rounded-2xl font-bold text-sm transition-all shadow-md text-center">{t('backToHome')}</Link>
                 </div>
@@ -599,12 +601,27 @@ const AdminDashboard: React.FC = () => {
                 <section className="lg:col-span-4 bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/70 p-5 md:p-7 rounded-3xl shadow-sm">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5"><h2 className="text-lg md:text-xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-3"><span className="w-10 h-10 rounded-2xl bg-rose-50 dark:bg-rose-900/30 text-rose-600 flex items-center justify-center"><OutlineIcon name="grid" className="h-5 w-5" /></span>{t('statsTitle')}</h2><span className="text-xs font-bold text-slate-500 dark:text-slate-400">{isAr ? 'ملخص حسابات المستخدمين المسجلة' : 'Registered user account overview'}</span></div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-                        {statCards.map(card => <div key={card.key} className={`relative overflow-hidden border p-5 rounded-2xl ${card.cardClass}`}>
+                        {statCards.map(card => <div key={card.key} className={`relative overflow-hidden border p-5 rounded-2xl shadow-sm hover:-translate-y-1.5 hover:shadow-xl hover:scale-[1.015] transition-all duration-300 ${card.cardClass}`}>
                             <div className="flex items-start justify-between gap-3"><div><div className={`text-3xl font-black tabular-nums ${card.valueClass}`}>{Number(card.value).toLocaleString(isAr ? 'ar-EG' : 'en-US')}</div><div className="text-xs font-bold text-slate-600 dark:text-slate-300 mt-2">{card.label}</div></div><span className={`w-11 h-11 rounded-xl bg-white/80 dark:bg-slate-800 flex items-center justify-center shadow-sm ${card.iconClass}`}><OutlineIcon name={card.icon} className="h-6 w-6" /></span></div>
                             <div className={`h-1.5 rounded-full mt-4 overflow-hidden ${card.trackClass}`}><div className={`h-full w-full rounded-full ${card.barClass}`} /></div>
                         </div>)}
                     </div>
                 </section>
+
+                <section className="lg:col-span-4 rounded-3xl border border-emerald-200 dark:border-emerald-900/70 bg-gradient-to-r from-emerald-50 via-white to-sky-50 dark:from-emerald-950/30 dark:via-black dark:to-sky-950/20 shadow-sm p-5 md:p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                            <span className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 flex justify-center items-center text-white shadow-lg"><OutlineIcon name="trophy" className="w-7 h-7" /></span>
+                            <div><h2 className="text-lg md:text-xl font-black text-slate-900 dark:text-white">{isAr ? 'تحدي القراءة الشهري — تقارير المعلمين والطلاب' : 'Monthly Reading Challenge — Students & Teachers'}</h2>
+                            <p className="text-xs mt-1 text-slate-600 dark:text-slate-300">{isAr ? 'عدد الكتب المنجزة وعناوينها والأهداف، حسب الشهر والحساب المرتبط بهوية مدرسية معتمدة.' : 'Completed titles and targets by month for school-verified reading identities.'}</p></div>
+                        </div>
+                        <button type="button" aria-expanded={showReadingReport} onClick={() => setShowReadingReport(value => !value)}
+                            className="shrink-0 px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-black text-sm shadow-lg hover:-translate-y-1 hover:shadow-xl active:scale-95 transition-all duration-300">
+                            {showReadingReport ? (isAr ? 'إغلاق تقرير التحدي' : 'Close Challenge Report') : (isAr ? 'فتح تقرير تحدي القراءة' : 'Open Reading Challenge Report')}
+                        </button>
+                    </div>
+                </section>
+                {showReadingReport && <AdminReadingChallenge isAr={isAr} />}
 
                 <section className="lg:col-span-4 rounded-3xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/70 p-5 md:p-6 shadow-sm">
                     <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
@@ -621,7 +638,7 @@ const AdminDashboard: React.FC = () => {
                             { label: isAr ? 'عناوين مطلوبة' : 'Requested titles', value: libraryImpact.uniqueTitles },
                             { label: isAr ? 'فتح الكتب الرقمية' : 'Digital book opens', value: digitalBookReadStatsAvailable === false ? '—' : libraryImpact.digitalOpens },
                             { label: isAr ? 'سجلات التحضير' : 'Lesson plan records', value: libraryImpact.lessonPlans }
-                        ].map((metric) => <div key={metric.label} className="rounded-2xl border border-emerald-100 dark:border-slate-700 bg-emerald-50/50 dark:bg-slate-800/50 p-4">
+                        ].map((metric) => <div key={metric.label} className="rounded-2xl border border-emerald-100 dark:border-slate-700 bg-emerald-50/50 dark:bg-slate-800/50 p-4 shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all duration-300">
                             <div className="text-2xl font-black text-emerald-700 dark:text-emerald-300 tabular-nums">{metric.value}</div>
                             <div className="mt-2 text-xs font-bold text-slate-600 dark:text-slate-300">{metric.label}</div>
                         </div>)}
