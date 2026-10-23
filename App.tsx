@@ -268,7 +268,6 @@ const Header: React.FC = () => {
     { path: '/search', label: locale === 'en' ? 'Search' : 'البحث بالمكتبة', hint: 'Search', color: 'bg-rose-500', roles: ['student', 'teacher', 'admin'] },
     { path: '/digital-library', label: locale === 'en' ? 'Digital' : 'المكتبة الرقمية', hint: 'Digital', color: 'bg-blue-500', roles: ['student', 'teacher', 'admin'] },
     { path: '/creators', label: locale === 'en' ? 'Creators' : 'بوابة المبدعين', hint: 'Creators', color: 'bg-purple-500', roles: ['student', 'admin'] },
-    { path: '/game', label: locale === 'en' ? 'Games' : 'ألعاب', hint: 'Games', color: 'bg-amber-500', roles: ['student', 'admin'] },
     { path: '/saqr-national-identity', label: locale === 'en' ? 'UAE Heritage' : 'صقر وهوية وطن', hint: 'UAE Heritage', color: 'bg-emerald-700', roles: ['student', 'admin'] },
     { path: '/schedule', label: locale === 'en' ? 'Schedule' : 'جدول المكتبة', hint: 'Schedule', color: 'bg-teal-500', roles: ['teacher', 'admin'] },
     { path: '/feedback', label: locale === 'en' ? 'Ideas' : 'مقترحات', hint: 'Feedback', color: 'bg-emerald-500', roles: ['student', 'teacher', 'admin'] },

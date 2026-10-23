@@ -200,7 +200,6 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
     </div> : <>
       <header className="text-center mx-auto mb-6 max-w-3xl">
         <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 dark:text-white">{ar?'مكتبتي واقتراحات القراءة':'My Books & Reading Suggestions'}</h2>
-        <p className="mt-2 text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300">{ar?'كتب ملونة من الفهرس والمكتبتين الرقميتين، واقتراحات حسب نوع الحساب واهتماماتك':'Colorful titles from the catalog and digital libraries, suggested using account type and reading interests'}</p>
       </header>
       <div className="flex flex-wrap justify-between items-center gap-3 mb-5">
         <div className="flex flex-wrap gap-2">

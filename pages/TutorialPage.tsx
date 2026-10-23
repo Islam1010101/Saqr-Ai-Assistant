@@ -404,7 +404,6 @@ export default function TutorialPage() {
     { id: 'nav-search', text: label('البحث بالمكتبة', 'Search'), description: label('يفتح فهرس البحث عن الكتب.', 'Opens the book search catalogue.') },
     { id: 'nav-digital', text: label('المكتبة الرقمية', 'Digital'), description: label('ينقلك إلى مصادر المكتبة الرقمية.', 'Takes you to digital library resources.') },
     { id: 'nav-creators', text: label('بوابة المبدعين', 'Creators'), description: label('مساحة المشاركات والأعمال الإبداعية.', 'A space for creative contributions.') },
-    { id: 'nav-games', text: label('ألعاب', 'Games'), description: label('أنشطة تفاعلية للتعلم باللعب.', 'Interactive learning activities.') },
     { id: 'nav-identity', text: label('صقر وهوية وطن', 'UAE Heritage'), description: label('أربع تجارب تراثية وثقافية، متاحة للطلاب والإدارة فقط.', 'Four UAE heritage activities available to students and administrators only.') },
     { id: 'nav-schedule', text: label('جدول المكتبة', 'Schedule'), description: label('خدمات جدول المكتبة للمعلمين.', 'Library schedule tools for teachers.') },
     { id: 'nav-ideas', text: label('مقترحات', 'Ideas'), description: label('استعراض وإرسال المقترحات في الموقع الحقيقي.', 'View and submit feedback on the live site.') },
@@ -593,7 +592,7 @@ export default function TutorialPage() {
               </div>
               <div className="flex h-full flex-1 items-center overflow-hidden bg-amber-50 dark:bg-slate-800">
                 <div className="whitespace-nowrap px-4 text-xs font-bold text-slate-800 dark:text-slate-100 md:text-base">
-                  {label('أهلاً بك في الجولة التعريفية — المس أو مرّر المؤشر على البطاقات والأيقونات لمعرفة وظائفها.', 'Welcome to the guided tour — hover or tap cards and icons to learn what each feature does.')}
+                  {label('جديدنا: صقر وهوية وطن بأربع تجارب تراثية جديدة | قائمة الكتب المكتملة في تحدي القراءة | جولة تعريفية محدّثة | استديو صقر | إصدارات وكتب جديدة في المكتبة، نراكم فيها قريبًا!', "What's New: Saqr & National Identity with four heritage activities | Monthly completed-books list | Updated virtual tour | Saqr Studio | New books and editions at the library. See you soon!")}
                 </div>
               </div>
             </div>
