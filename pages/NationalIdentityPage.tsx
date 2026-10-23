@@ -167,13 +167,17 @@ const NationalIdentityPage: React.FC = () => {
   const tr = (x:L) => x[lang];
   const [identity] = useState(() => {
     try {
-      if (localStorage.getItem('user_type') !== 'student') return '';
+      const role = localStorage.getItem('user_type');
+      if (role !== 'student' && role !== 'admin') return '';
       const user = JSON.parse(localStorage.getItem('current_user') || 'null');
-      return typeof user?.student_id === 'string' || typeof user?.student_id === 'number'
-        ? String(user.student_id).trim() : '';
+      const id = role === 'student' ? user?.student_id : user?.teacher_id;
+      if (typeof id !== 'string' && typeof id !== 'number') return '';
+      const normalizedId = String(id).trim();
+      return normalizedId ? role + ':' + normalizedId : '';
     } catch { return ''; }
   });
-  const storageKey = useMemo(() => 'efips-national-identity-v1:student:' + identity, [identity]);
+  // Keep existing student progress keys unchanged; administrators have separate progress.
+  const storageKey = useMemo(() => 'efips-national-identity-v1:' + identity, [identity]);
   const [progress,setProgress] = useState<Progress>(() => identity ? readSaved(storageKey) : emptyProgress());
   const [mode,setMode] = useState<Mode>('home');
   const [flagChallengeOpen, setFlagChallengeOpen] = useState(false);
@@ -184,7 +188,7 @@ const NationalIdentityPage: React.FC = () => {
     try { localStorage.setItem(storageKey,JSON.stringify(progress)); } catch { /* Reading tasks still work without storage. */ }
   },[storageKey,identity,progress]);
   if (!identity) return <Navigate to="/home" replace />;
-  // Render the existing game unchanged, with its built-in close callback and student rewards.
+  // Reuse the existing game unchanged; its own rules grant rewards to students only.
   if (flagChallengeOpen) return <FlagDayChallenge onClose={() => setFlagChallengeOpen(false)} />;
 
   const currentMode: Exclude<Mode,'home'> = mode === 'home' ? 'passport' : mode;

@@ -837,7 +837,7 @@ const HomePage: React.FC = () => {
                             </div>
                         </Link>
 
-                        {userType === 'student' && (
+                        {(userType === 'student' || userType === 'admin') && (
                             <Link to="/saqr-national-identity"
                                 className="group relative flex items-center gap-5 overflow-hidden rounded-[2.5rem] border-b-8 border-emerald-900 bg-gradient-to-br from-[#075B49] via-[#087555] to-[#116759] p-6 text-white shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl active:translate-y-2 active:border-b-0">
                                 <div aria-hidden="true" className="absolute top-0 end-0 flex h-1.5 w-32 overflow-hidden rounded-bl-xl">

@@ -60,12 +60,13 @@ const ProtectedRoute: React.FC<{ children: ReactNode }> = ({ children }) => {
   return <>{children}</>;
 };
 
-// Only students may open the new cultural activities route.
-// This matches the existing local school-login role convention.
-const StudentOnlyRoute: React.FC<{ children: ReactNode }> = ({ children }) => {
+// National identity activities are open to student and administrator accounts.
+const NationalIdentityRoute: React.FC<{ children: ReactNode }> = ({ children }) => {
   try {
     const account = JSON.parse(localStorage.getItem('current_user') || 'null');
-    if (localStorage.getItem('user_type') === 'student' && account?.student_id) {
+    const role = localStorage.getItem('user_type');
+    if ((role === 'student' && account?.student_id) ||
+        (role === 'admin' && account?.teacher_id)) {
       return <>{children}</>;
     }
   } catch {
@@ -268,13 +269,13 @@ const Header: React.FC = () => {
     { path: '/digital-library', label: locale === 'en' ? 'Digital' : 'المكتبة الرقمية', hint: 'Digital', color: 'bg-blue-500', roles: ['student', 'teacher', 'admin'] },
     { path: '/creators', label: locale === 'en' ? 'Creators' : 'بوابة المبدعين', hint: 'Creators', color: 'bg-purple-500', roles: ['student', 'admin'] },
     { path: '/game', label: locale === 'en' ? 'Games' : 'ألعاب', hint: 'Games', color: 'bg-amber-500', roles: ['student', 'admin'] },
-    { path: '/saqr-national-identity', label: locale === 'en' ? 'UAE Heritage' : 'صقر وهوية وطن', hint: 'UAE Heritage', color: 'bg-emerald-700', roles: ['student'] },
+    { path: '/saqr-national-identity', label: locale === 'en' ? 'UAE Heritage' : 'صقر وهوية وطن', hint: 'UAE Heritage', color: 'bg-emerald-700', roles: ['student', 'admin'] },
     { path: '/schedule', label: locale === 'en' ? 'Schedule' : 'جدول المكتبة', hint: 'Schedule', color: 'bg-teal-500', roles: ['teacher', 'admin'] },
     { path: '/feedback', label: locale === 'en' ? 'Ideas' : 'مقترحات', hint: 'Feedback', color: 'bg-emerald-500', roles: ['student', 'teacher', 'admin'] },
     { path: '/admin-dashboard', label: locale === 'en' ? 'Admin' : 'الإدارة', hint: 'Admin', color: 'bg-rose-600', roles: ['admin'] },
   ];
 
-  const allowedLinks = allLinks.filter(link => link.path === '/saqr-national-identity' ? userRole === 'student' : !userRole || link.roles.includes(userRole));
+  const allowedLinks = allLinks.filter(link => link.path === '/saqr-national-identity' ? (userRole === 'student' || userRole === 'admin') : !userRole || link.roles.includes(userRole));
 
   return (
     <header
@@ -533,7 +534,7 @@ const MainLayout: React.FC = () => {
           <Route path="/feedback" element={<ProtectedRoute><FeedbackPage /></ProtectedRoute>} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/game" element={<ProtectedRoute><DeweyGame /></ProtectedRoute>} />
-          <Route path="/saqr-national-identity" element={<ProtectedRoute><StudentOnlyRoute><NationalIdentityPage /></StudentOnlyRoute></ProtectedRoute>} />
+          <Route path="/saqr-national-identity" element={<ProtectedRoute><NationalIdentityRoute><NationalIdentityPage /></NationalIdentityRoute></ProtectedRoute>} />
           <Route path="/schedule" element={<ProtectedRoute><SchedulePage /></ProtectedRoute>} />
         </Routes>
       </main>

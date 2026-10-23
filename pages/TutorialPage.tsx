@@ -288,7 +288,17 @@ export default function TutorialPage() {
   const [flyingFlags, setFlyingFlags] = useState<FlagFlyItem[]>([]);
   const [bursts, setBursts] = useState<BurstItem[]>([]);
   const [showBubble, setShowBubble] = useState(false);
+  const [readingPreviewOpen, setReadingPreviewOpen] = useState(false);
   const label = (ar: string, en: string) => isAr ? ar : en;
+
+  useEffect(() => {
+    if (!readingPreviewOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setReadingPreviewOpen(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [readingPreviewOpen]);
 
   const handleMascotInteraction = (event: React.MouseEvent<HTMLDivElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -357,10 +367,12 @@ export default function TutorialPage() {
       hint: label('مساحة لاستعراض الأعمال والمشروعات الإبداعية. محتوى المشاركات الحقيقية مخفي في هذه الجولة.', 'A space for creative work and projects. Real submissions are hidden in this tour.')
     },
     {
-      id: 'flag-day', title: label('احتفالي', 'Festive'),
-      description: label('اكتشف المناسبات والأنشطة الوطنية.', 'Explore national celebrations and activities.'),
-      color: 'bg-gradient-to-r from-[#ff0000] via-[#00732f] to-[#000000]', border: 'border-amber-500', icon: <span className="text-2xl leading-none">🇦🇪</span>,
-      hint: label('يفتح في الموقع الحقيقي نافذة فعاليات ومواعيد وطنية. هنا يظهر مثال شكلي فقط دون بيانات مباشرة.', 'The live site opens a national events and countdown panel. This is a visual sample only.')
+      id: 'national-identity', title: label('صقر وهوية وطن', 'Saqr & National Identity'),
+      description: label('رحلات ثقافية إماراتية للطلاب والإدارة.', 'UAE heritage learning for students and administrators.'),
+      color: 'bg-gradient-to-br from-[#075B49] via-[#087555] to-[#116759]', border: 'border-emerald-900',
+      icon: <svg className="h-9 w-9" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M24 11C18 7 11 7 5 9v29c7-2 14-1 19 3 5-4 12-5 19-3V9c-6-2-13-2-19 2ZM24 11v30"/><path d="m30 19 3-6 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1Z" fill="currentColor" fillOpacity=".24"/></svg>,
+      hint: label('قسم جديد للطلاب والإدارة يضم جواز صقر الثقافي، وكنوز لغتنا الإماراتية، ومحقق ذاكرة الوطن، وتحدي راية المجد ليوم العلم. نقاط اللعبة للطلاب فقط. المعاينة لا تشغّل الألعاب.',
+        'A new section for students and administrators: Cultural Passport, Emirati Language Treasures, Heritage Research Detective, and the Flag Day Challenge. Only students receive game points. This tour does not launch games.')
     },
     {
       id: 'studio', title: label('استديو صقر', 'Saqr Studio'),
@@ -393,6 +405,7 @@ export default function TutorialPage() {
     { id: 'nav-digital', text: label('المكتبة الرقمية', 'Digital'), description: label('ينقلك إلى مصادر المكتبة الرقمية.', 'Takes you to digital library resources.') },
     { id: 'nav-creators', text: label('بوابة المبدعين', 'Creators'), description: label('مساحة المشاركات والأعمال الإبداعية.', 'A space for creative contributions.') },
     { id: 'nav-games', text: label('ألعاب', 'Games'), description: label('أنشطة تفاعلية للتعلم باللعب.', 'Interactive learning activities.') },
+    { id: 'nav-identity', text: label('صقر وهوية وطن', 'UAE Heritage'), description: label('أربع تجارب تراثية وثقافية، متاحة للطلاب والإدارة فقط.', 'Four UAE heritage activities available to students and administrators only.') },
     { id: 'nav-schedule', text: label('جدول المكتبة', 'Schedule'), description: label('خدمات جدول المكتبة للمعلمين.', 'Library schedule tools for teachers.') },
     { id: 'nav-ideas', text: label('مقترحات', 'Ideas'), description: label('استعراض وإرسال المقترحات في الموقع الحقيقي.', 'View and submit feedback on the live site.') },
     { id: 'nav-admin', text: label('الإدارة', 'Admin'), description: label('قسم محمي لا يظهر محتواه إلا للمخولين.', 'A protected area visible only to authorized staff.') }
@@ -483,14 +496,20 @@ export default function TutorialPage() {
           </HintTarget>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-center">
-          <HintTarget id="monthly-reading-goal" title={label('تحدي القراءة الشهري', 'Monthly Reading Challenge')} description={label('اختر هدف القراءة الشهري من 1 إلى 20 كتابًا، وسجّل الكتب التي أنهيتها. في الموقع الفعلي تُزامَن أهداف الحساب الموثّق مع قاعدة البيانات؛ هذا المثال بلا بيانات أو اتصال.', 'Set a monthly target and mark finished books. Verified readers can sync their goals to the database on the live site. This tour uses no user data or network.')} interactive={false} {...hintState}>
+          <HintTarget id="monthly-reading-goal" title={label('تحدي القراءة الشهري', 'Monthly Reading Challenge')} description={label('اختر هدف القراءة الشهري وسجّل الكتب التي أنهيتها؛ زر «قائمة القراءة» يفتح قائمة منبثقة تضم الكتب المكتملة خلال الشهر نفسه، بنفس عدد العداد. الحسابات الموثقة يمكنها مزامنة التقدم؛ لا توجد بيانات حقيقية في الجولة.', 'Set a monthly reading goal and mark books finished. The Reading list button opens a popup listing this month’s completed books, matching the counter. Verified accounts may sync progress; this tour shows no real data.')} interactive={false} {...hintState}>
             <section className="homepage-alerts w-full overflow-hidden rounded-[1.75rem] border-2 border-amber-300 dark:border-amber-500/50 bg-gradient-to-br from-blue-600 via-emerald-600 to-teal-600 dark:from-blue-800 dark:via-emerald-800 dark:to-teal-900 p-4 sm:p-5 shadow-xl text-white transition-all hover:-translate-y-1 hover:shadow-2xl">
               <div className="flex flex-wrap justify-between items-center gap-4">
                 <div className="flex gap-3 items-center"><div className="rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 p-3 text-white shadow-lg"><BookIcon /></div><div><h2 className="text-base md:text-lg font-black text-white">{label('تحدي القراءة الشهري','Monthly Reading Challenge')}</h2><p className="mt-1 text-xs sm:text-sm text-white/90 font-semibold">{label('جواز القارئ — هدف شخصي','Reading Passport — personal goal')}</p></div></div>
                 <span className="rounded-xl border border-white/30 bg-white/15 px-3 py-2 text-white font-black">•• / ••</span>
               </div>
               <div className="mt-5 h-2.5 rounded-full bg-white/25 overflow-hidden"><div className="h-full w-2/5 rounded-full bg-gradient-to-r from-amber-200 to-white transition-all duration-700" /></div>
-              <p className="mt-3 text-xs text-white/90 font-bold">{label('مؤشر توضيحي فقط — الأرقام الحقيقية محجوبة','Illustrative progress only — real values are hidden')}</p>
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                <button type="button" onClick={(event) => { event.stopPropagation(); setReadingPreviewOpen(true); }}
+                  className="text-start text-xs font-black text-white underline underline-offset-4 hover:text-amber-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">
+                  {label('قائمة القراءة', 'Reading list')}
+                </button>
+                <span className="text-[11px] font-bold text-white/85">{label('معاينة توضيحية بدون بيانات حقيقية','Illustrative preview · no live records')}</span>
+              </div>
             </section>
           </HintTarget>
 
@@ -613,6 +632,44 @@ export default function TutorialPage() {
             </div>
           </section>
 
+          <section aria-labelledby="heritage-tour-title" className="rounded-[2rem] border border-emerald-200/80 dark:border-emerald-900/60 bg-emerald-50/50 dark:bg-emerald-950/15 p-4 sm:p-6">
+            <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-black text-emerald-700 dark:text-emerald-400">{label('داخل قسم صقر وهوية وطن', 'INSIDE SAQR & NATIONAL IDENTITY')}</p>
+                <h2 id="heritage-tour-title" className="mt-1 text-lg sm:text-xl font-black text-slate-900 dark:text-white">{label('أربع مغامرات تحكي تراث الإمارات', 'Four journeys through UAE heritage')}</h2>
+              </div>
+              <span className="rounded-full border border-emerald-200 bg-white dark:bg-slate-900 dark:border-emerald-900 px-3 py-2 text-xs font-bold text-emerald-800 dark:text-emerald-200">{label('للطلاب والإدارة فقط', 'Students & admins only')}</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {[
+                { id:'heritage-passport', ar:'جواز صقر الثقافي', en:'Saqr Cultural Passport', arHint:'جولة قراءة وبحث عبر الإمارات السبع للحصول على الأختام.', enHint:'Explore all seven emirates with reading tasks and collect stamps.', color:'from-emerald-700 to-teal-600', icon:'passport' },
+                { id:'heritage-words', ar:'كنوز لغتنا الإماراتية', en:'Emirati Language Treasures', arHint:'مفردات تراثية وأسئلة وجمل من تأليف الطالب.', enHint:'Heritage vocabulary, comprehension questions and sentences.', color:'from-amber-600 to-orange-600', icon:'weave' },
+                { id:'heritage-detective', ar:'محقق ذاكرة الوطن', en:'Heritage Research Detective', arHint:'ملفات مبنية على المصادر لتدريب الطالب على التحقق من المعلومات.', enHint:'Source-based research files for learning how to verify facts.', color:'from-sky-700 to-indigo-700', icon:'document' },
+                { id:'heritage-flag', ar:'تحدي راية المجد', en:'Flag Day Challenge', arHint:'لعبة رفع العلم عبر معالم الإمارات؛ النقاط للطلاب فقط، ولا تفتح اللعبة داخل الجولة.', enHint:'Raise the UAE flag through landmarks; points are awarded to students only. The game does not open in this tour.', color:'from-emerald-700 to-slate-900', icon:'flag' }
+              ].map(activity => (
+                <HintTarget key={activity.id} id={activity.id} title={label(activity.ar,activity.en)} description={label(activity.arHint,activity.enHint)} tooltipBelow {...hintState}>
+                  <div className="overflow-hidden rounded-[1.5rem] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-lg transition-shadow">
+                    <div className={'flex items-center justify-between bg-gradient-to-br '+activity.color+' p-4 text-white'}>
+                      {activity.icon === 'flag'
+                        ? <UaeFlagIcon className="h-9 w-12"/>
+                        : <svg viewBox="0 0 48 48" className="h-10 w-10" stroke="currentColor" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            {activity.icon==='passport'?<><path d="M24 11C18 7 11 7 5 9v29c7-2 14-1 19 3 5-4 12-5 19-3V9c-6-2-13-2-19 2ZM24 11v30"/><path d="m18 23 4 4 8-9"/></>
+                              :activity.icon==='weave'?<><path d="M6 8h36v32H6zM6 16h36M6 32h36M14 8v32M30 8v32M22 8v32M38 8v32"/><path d="m14 24 8-8 8 8-8 8-8-8Z"/></>
+                              :<><path d="M12 5h17l9 9v29H12zM29 5v10h9M18 23h14M18 29h14M18 35h9"/><circle cx="31" cy="36" r="7"/></>}
+                          </svg>}
+                      <span className="rounded-full bg-white/15 border border-white/25 px-2 py-1 text-[10px] font-bold">{label('اكتشف', 'Discover')}</span>
+                    </div>
+                    <div className="p-4">
+                      <h3 className="min-h-[46px] font-black text-sm leading-6 text-slate-900 dark:text-white">{label(activity.ar,activity.en)}</h3>
+                      <p className="mt-2 text-xs leading-6 text-slate-600 dark:text-slate-300">{label(activity.arHint,activity.enHint)}</p>
+                    </div>
+                  </div>
+                </HintTarget>
+              ))}
+            </div>
+            <p className="mt-3 text-xs font-semibold text-slate-500 dark:text-slate-400">{label('هذه معاينة تعليمية للأنشطة؛ لا يتم تسجيل تقدم أو منح نقاط هنا.', 'This is a visual tour only. No progress or game points are recorded here.')}</p>
+          </section>
+
           <HintTarget id="reading-suggestions" title={label('مكتبتي واقتراحات القراءة','My Books & Reading Suggestions')}
             description={label('تُعرض أربعة اقتراحات مبدئيًا بناءً على نوع الحساب والمرحلة والاهتمامات؛ يعرض زر المزيد نافذة مستقلة ببقية الخيارات. الكتب ملونة مثل المكتبتين الرقميتين، وقائمة القراءة لاحقًا منفصلة. لا تُعرض بيانات مستفيدين حقيقية هنا.', 'Four starting recommendations based on role, grade and interests. More choices open in a separate dialog. Cards match the digital libraries, with a separate read-later list. This tour displays no private data.')}
             interactive={false} {...hintState}>
@@ -732,6 +789,32 @@ export default function TutorialPage() {
           </span>
         </div>
       </HintTarget>
+
+      {readingPreviewOpen && createPortal(
+        <div role="presentation" onMouseDown={event => {if(event.target===event.currentTarget)setReadingPreviewOpen(false);}}
+          className="fixed inset-0 z-[6000] flex items-center justify-center bg-slate-950/75 backdrop-blur-md p-3 sm:p-6">
+          <div role="dialog" aria-modal="true" aria-labelledby="tutorial-read-list-title" dir={dir}
+            className="w-full max-w-xl overflow-hidden rounded-[2rem] border-2 border-emerald-200 dark:border-emerald-900 bg-white dark:bg-slate-950 shadow-2xl">
+            <div className="flex items-start justify-between gap-4 bg-gradient-to-br from-emerald-600 to-teal-700 p-5 text-white">
+              <div>
+                <p className="text-xs font-bold text-white/90">{label('تحدي القراءة الشهري', 'Monthly Reading Challenge')}</p>
+                <h2 id="tutorial-read-list-title" className="mt-1 text-xl font-black">{label('قائمة الكتب المكتملة', 'Completed reading list')}</h2>
+              </div>
+              <button type="button" onClick={() => setReadingPreviewOpen(false)} aria-label={label('إغلاق','Close')}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/40 bg-white/15 text-white hover:bg-white/25">
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M5 5 19 19M19 5 5 19"/></svg>
+              </button>
+            </div>
+            <div className="p-6 text-center">
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300"><BookIcon/></div>
+              <p className="font-black text-slate-900 dark:text-white">{label('هنا تظهر الكتب التي أُكملت خلال الشهر الحالي', 'Books completed this month appear here')}</p>
+              <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">{label('يعرض الموقع الحقيقي اسم الكتاب والمؤلف وتاريخ الإتمام، ويطابق عدد الكتب العداد أعلى التحدي. لا تعرض هذه الجولة بيانات أي طالب.', 'The live site shows each title, author and completion date, matching the counter above the challenge. This tour shows no student records.')}</p>
+              <span className="mt-4 inline-block rounded-xl bg-amber-50 dark:bg-amber-950/40 px-4 py-2 text-xs font-black text-amber-900 dark:text-amber-200">{label('معاينة آمنة فقط', 'Safe preview only')}</span>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
 
       <footer className="relative z-10 border-t-4 border-slate-200 px-4 py-6 text-center dark:border-slate-800">
         <p className="text-xs font-black text-slate-500">EFIPS • Library • 2026</p>
