@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../App';
 import { ARABIC_LIBRARY_DATABASE } from '../../pages/ArabicLibraryInternalPage';
@@ -18,10 +18,6 @@ const digitalCatalog: ReadingBook[] = [
 ];
 const catalog = [...physicalReadingCatalog, ...digitalCatalog];
 const catalogByKey = new Map(catalog.map(book => [book.key, book]));
-const labelFor = (b: ReadingBook, ar: boolean) =>
-  b.format === 'physical' ? (ar ? 'كتاب ورقي' : 'Physical') :
-  b.format === 'ar' ? (ar ? 'رقمي عربي' : 'Arabic digital') : (ar ? 'رقمي إنجليزي' : 'English digital');
-
 const BOOK_GRADIENTS = [
   'from-blue-500 to-sky-500 border-blue-200',
   'from-emerald-500 to-teal-400 border-emerald-200',
@@ -70,6 +66,12 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
   const [category, setCategory] = useState<'all'|'physical'|'ar'|'en'>('all');
   const [tab, setTab] = useState<'saved'|'suggested'>('suggested');
   const [modalOpen, setModalOpen] = useState(false);
+  useEffect(() => {
+    if (!modalOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => { if (event.key === 'Escape') setModalOpen(false); };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [modalOpen]);
   const profile = useMemo(getSchoolProfile, []);
   const savedBooks = useMemo(()=>data.saved.map(key=>catalogByKey.get(key)).filter((b):b is ReadingBook=>!!b),[data.saved]);
   const completedBooks = useMemo(()=>data.completed.map(key=>catalogByKey.get(key)).filter((b):b is ReadingBook=>!!b),[data.completed]);
@@ -182,9 +184,9 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
       {visible.length ? <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {visible.slice(0,4).map(book=>card(book,false))}
       </div> : <p className="py-8 rounded-2xl text-center font-semibold text-slate-500 dark:text-slate-300">{tab==='saved'?(ar?'قائمة القراءة لاحقًا فارغة':'Your read-later list is empty'):(ar?'لا توجد اقتراحات لهذا الاختيار':'No suggestions in this category')}</p>}
-      {visible.length>4 && <button type="button" onClick={()=>setModalOpen(true)}
+      {(visible.length>4 || (tab==='saved' && visible.length>0)) && <button type="button" onClick={()=>setModalOpen(true)}
         className="block mx-auto mt-6 px-6 py-3 rounded-xl border-2 border-emerald-400 text-emerald-700 dark:text-emerald-300 bg-transparent hover:bg-emerald-50 dark:hover:bg-slate-900 font-black text-sm shadow-sm transition-all hover:-translate-y-0.5 active:scale-95">
-        {ar?'عرض المزيد':'View more'}
+        {tab==='saved' ? (ar?'إدارة قائمة القراءة':'Manage reading list') : (ar?'عرض المزيد':'View more')}
       </button>}
       {modalOpen && <div role="presentation" className="fixed inset-0 z-[5000] bg-slate-950/75 backdrop-blur-md p-2 sm:p-5 flex justify-center items-center" onClick={()=>setModalOpen(false)}>
         <div role="dialog" aria-modal="true" aria-label={tab==='saved'?(ar?'قائمة القراءة لاحقًا':'Saved reading list'):(ar?'اقتراحات القراءة':'Reading suggestions')}
