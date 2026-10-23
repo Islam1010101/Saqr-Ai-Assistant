@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { Link } from 'react-router-dom';
 import { useLanguage, useTheme } from '../App';
 import { supabase } from '../src/utils/supabase';
+import { printA4Html } from '../src/utils/printA4Html';
 import AdminReadingChallenge from '../src/components/AdminReadingChallenge';
 
 const translations = {
@@ -509,8 +510,6 @@ const AdminDashboard: React.FC = () => {
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
     }[character] as string));
     const handlePrintDashboardReport = () => {
-        const printWindow = window.open('', '_blank');
-        if (!printWindow) { setBorrowingsError(isAr ? 'تعذر فتح نافذة الطباعة. يرجى السماح بالنوافذ المنبثقة.' : 'Could not open print window. Please allow pop-ups.'); return; }
         const htmlReport = `
         <html dir="${dir}" lang="${locale}"><head><title>${t('title')} - EFIPS</title><style>
         @page{size:A4 portrait;margin:13mm 11mm 15mm}
@@ -537,11 +536,14 @@ const AdminDashboard: React.FC = () => {
         <h2>${isAr ? 'مؤشرات أثر المكتبة' : 'Library Impact Indicators'}</h2><table><tr><th>${isAr ? 'إعارات نشطة' : 'Active loans'}</th><th>${isAr ? 'طلبات معلقة' : 'Pending requests'}</th><th>${isAr ? 'إعارات متأخرة' : 'Overdue loans'}</th><th>${isAr ? 'فتح الكتب الرقمية' : 'Digital opens'}</th><th>${isAr ? 'سجلات التحضير' : 'Lesson records'}</th></tr><tr><td>${libraryImpact.active}</td><td>${libraryImpact.pending}</td><td>${libraryImpact.overdue}</td><td>${digitalBookReadStatsAvailable === false ? '-' : libraryImpact.digitalOpens}</td><td>${libraryImpact.lessonPlans}</td></tr></table>
         <h2>${t('topBooksTitle')}</h2><table><tr><th>#</th><th>${t('colBook')}</th><th>${isAr ? 'عدد مرات الاستعارة' : 'Borrow Count'}</th></tr>${topBooksStats.length ? topBooksStats.map(([book, count], idx) => `<tr><td>${idx + 1}</td><td><strong>${safePrintText(book)}</strong></td><td>${count}</td></tr>`).join('') : `<tr><td colspan="3" style="text-align:center">${t('noResults')}</td></tr>`}</table>
         <h2>${t('arabicBooks')} - ${t('digitalReadAnalyticsTitle')}</h2><table><tr><th>#</th><th>${t('colBook')}</th><th>${t('digitalReadCount')}</th></tr>${topArabicDigitalReads.length ? topArabicDigitalReads.map((book, idx) => `<tr><td>${idx + 1}</td><td><strong>${safePrintText(book.book_title)}</strong></td><td>${Number(book.read_count || 0)}</td></tr>`).join('') : `<tr><td colspan="3" style="text-align:center">${digitalBookReadStatsAvailable === false ? t('digitalReadsSetupRequired') : t('noDigitalReads')}</td></tr>`}</table>
-        <h2>${t('englishBooks')} - ${t('digitalReadAnalyticsTitle')}</h2><table><tr><th>#</th><th>${t('colBook')}</th><th>${t('digitalReadCount')}</th></tr>${topEnglishDigitalReads.length ? topEnglishDigitalReads.map((book, idx) => `<tr><td>${idx + 1}</td><td><strong>${book.book_title}</strong></td><td>${Number(book.read_count || 0)}</td></tr>`).join('') : `<tr><td colspan="3" style="text-align:center">${digitalBookReadStatsAvailable === false ? t('digitalReadsSetupRequired') : t('noDigitalReads')}</td></tr>`}</table>
+        <h2>${t('englishBooks')} - ${t('digitalReadAnalyticsTitle')}</h2><table><tr><th>#</th><th>${t('colBook')}</th><th>${t('digitalReadCount')}</th></tr>${topEnglishDigitalReads.length ? topEnglishDigitalReads.map((book, idx) => `<tr><td>${idx + 1}</td><td><strong>${safePrintText(book.book_title)}</strong></td><td>${Number(book.read_count || 0)}</td></tr>`).join('') : `<tr><td colspan="3" style="text-align:center">${digitalBookReadStatsAvailable === false ? t('digitalReadsSetupRequired') : t('noDigitalReads')}</td></tr>`}</table>
         <h2>${isAr ? 'أكثر 10 مستخدمين نشاطاً' : 'Top 10 Most Active Users'}</h2><table><tr><th>#</th><th>${isAr ? 'الكود' : 'User Code'}</th><th>${isAr ? 'الاسم' : 'Name'}</th><th>${isAr ? 'الفئة' : 'Type'}</th><th>${isAr ? 'مرات الدخول' : 'Logins'}</th></tr>${topUsersStats.length ? topUsersStats.map((user, idx) => `<tr><td>${idx + 1}</td><td>${safePrintText(user.user_id)}</td><td>${safePrintText(user.name)}</td><td>${safePrintText(user.categoryLabel)}</td><td>${user.count}</td></tr>`).join('') : `<tr><td colspan="5" style="text-align:center">${t('noResults')}</td></tr>`}</table>
         <h2>${t('borrowManagement')} (${borrowingsList.length})</h2><table><tr><th>${t('colId')}</th><th>${t('colName')}</th><th>${t('colBook')}</th><th>${t('colEmail')}</th><th>${t('colDate')}</th></tr>${borrowingsList.length ? borrowingsList.map(b => `<tr><td>${safePrintText(b.user_id)}</td><td>${safePrintText(b.user_name || '-')}</td><td>${safePrintText(b.book_name)}</td><td>${safePrintText(b.user_email || '-')}</td><td>${safePrintText(b.return_date || '-')}</td></tr>`).join('') : `<tr><td colspan="5" style="text-align:center">${t('noResults')}</td></tr>`}</table>
         <div class="report-footer">مدرسة صقر الإمارات الدولية الخاصة — Emirates Falcon International Private School — EFIPS Library</div></body></html>`;
-        printWindow.document.write(htmlReport); printWindow.document.close(); printWindow.focus(); window.setTimeout(() => printWindow.print(), 600);
+        void printA4Html(htmlReport).catch((error) => {
+            console.error('Dashboard A4 print failed:', error);
+            setBorrowingsError(isAr ? 'تعذر تشغيل الطباعة. يرجى التحقق من إعدادات المتصفح.' : 'Unable to launch printing. Check browser print settings.');
+        });
     };
 
     const filteredList = useMemo(() => {
