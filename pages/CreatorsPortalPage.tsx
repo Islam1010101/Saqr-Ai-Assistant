@@ -66,51 +66,51 @@ const RevealOnScroll = ({ children, delay = 0 }: { children: React.ReactNode, de
 // --- بطاقة الكتاب بالتصميم الثنائي الأبعاد (2D Flat Design) المتطابق مع الموقع ---
 const CreatorCard = React.memo(({ work, isPlaying, onPlayToggle, isAr }: { work: any, isPlaying: boolean, onPlayToggle: (id: string) => void, isAr: boolean }) => {
     const colors = [
-        'from-blue-500 to-sky-500 border-blue-200',
-        'from-emerald-500 to-teal-400 border-emerald-200',
-        'from-rose-500 to-pink-500 border-rose-200',
-        'from-amber-500 to-orange-400 border-amber-200',
-        'from-purple-500 to-indigo-500 border-purple-200'
+        'from-sky-100 via-blue-50 to-indigo-100 dark:from-sky-950 dark:via-slate-900 dark:to-indigo-950',
+        'from-emerald-100 via-teal-50 to-cyan-100 dark:from-emerald-950 dark:via-slate-900 dark:to-teal-950',
+        'from-rose-100 via-pink-50 to-orange-100 dark:from-rose-950 dark:via-slate-900 dark:to-rose-950',
+        'from-amber-100 via-orange-50 to-yellow-100 dark:from-amber-950 dark:via-slate-900 dark:to-orange-950',
+        'from-violet-100 via-purple-50 to-sky-100 dark:from-violet-950 dark:via-slate-900 dark:to-purple-950'
     ];
     const colorClass = colors[work.title.length % colors.length];
 
     return (
-        <div className="relative group w-full h-[320px] md:h-[350px] flex items-stretch justify-center p-2">
+        <div className="creator-work-shell relative group flex w-full h-full min-h-[405px] md:min-h-[425px] items-stretch justify-center p-1">
             
             {isPlaying && (
-                <div className="absolute inset-0 bg-white/30 blur-3xl rounded-[2rem] scale-105 opacity-80 animate-pulse transition-all duration-500 pointer-events-none -z-10"></div>
+                <div className="creator-playing-halo absolute inset-0 bg-emerald-300/20 dark:bg-emerald-600/10 blur-2xl rounded-[2rem] scale-105 pointer-events-none -z-10"></div>
             )}
 
-            <div className={`w-full h-full relative rounded-[2rem] border-4 shadow-lg bg-gradient-to-br ${colorClass} transition-all duration-500 transform group-hover:-translate-y-3 group-hover:shadow-2xl overflow-hidden flex flex-col`}>
+            <div className="creator-work-card w-full h-full relative rounded-[1.85rem] border border-emerald-100 dark:border-slate-800 shadow-lg bg-white dark:bg-slate-950 transition-all duration-500 group-hover:-translate-y-2 group-hover:border-emerald-300 dark:group-hover:border-emerald-700 group-hover:shadow-2xl overflow-hidden flex flex-col">
                 
-                <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-black/10 pointer-events-none z-10"></div>
+                <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-emerald-600 via-teal-400 to-amber-400 pointer-events-none z-30"></div>
                 
-                <div className="relative h-1/2 w-full overflow-hidden rounded-t-[1.5rem] z-20">
-                    <img src={work.cover} alt={work.title} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
-                    <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                        <a href={work.pdfUrl} target="_blank" rel="noopener noreferrer" className="bg-white/90 text-slate-900 font-black px-6 py-2.5 rounded-full flex items-center gap-2 hover:scale-105 hover:bg-white transition-all shadow-xl text-xs uppercase translate-y-4 group-hover:translate-y-0 duration-300">
+                <div className={`relative h-[210px] w-full shrink-0 overflow-hidden bg-gradient-to-br ${colorClass} z-20`}>
+                    <img src={work.cover} alt={work.title} className="w-full h-full object-contain p-4 drop-shadow-xl transform group-hover:scale-105 transition-transform duration-700" loading="lazy" decoding="async" />
+                    <div className="absolute inset-x-3 bottom-3 z-30 flex items-center justify-center">
+                        <a href={work.pdfUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-10 items-center gap-2 rounded-full border border-white/80 bg-white/95 px-5 py-2 text-xs font-black text-emerald-900 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500">
                             {isAr ? 'قراءة الكتاب' : 'Read Book'} <IconRead />
                         </a>
                     </div>
                 </div>
 
-                <div className="p-4 md:p-5 flex flex-col flex-1 relative z-20 bg-black/20 backdrop-blur-md">
+                <div className="p-4 sm:p-5 flex flex-col flex-1 relative z-20 bg-white dark:bg-slate-950">
                     
                     <div className="flex-1 flex flex-col justify-center text-center mt-1">
-                        <h3 className="font-black text-lg md:text-xl text-white leading-tight drop-shadow-md line-clamp-2 mb-2">
+                        <h3 className="min-h-[54px] font-black text-base sm:text-lg text-slate-900 dark:text-white leading-7 line-clamp-2 mb-2">
                             {work.title}
                         </h3>
-                        <div className="flex items-center gap-2 text-white/90 justify-center bg-black/20 p-2 rounded-xl w-fit mx-auto backdrop-blur-sm mb-4">
+                        <div className="flex max-w-full items-center gap-2 text-slate-600 dark:text-slate-300 justify-center bg-emerald-50 dark:bg-emerald-950/40 px-3 py-2 rounded-xl w-fit mx-auto mb-4">
                             <UserIcon />
-                            <p className="text-xs md:text-sm font-bold truncate uppercase tracking-wide">{work.author}</p>
+                            <p className="text-xs sm:text-sm font-bold break-words" dir="auto">{work.author}</p>
                         </div>
                     </div>
 
                     <button 
-                        onClick={() => onPlayToggle(work.id)} 
-                        className={`w-full py-2.5 rounded-xl font-black text-xs md:text-sm flex items-center justify-center gap-2 transition-all duration-300 relative overflow-hidden mt-auto ${isPlaying ? 'bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.6)] border border-rose-300' : 'bg-white/20 text-white hover:bg-white hover:text-slate-900 border border-white/40'}`}
+                        onClick={() => onPlayToggle(work.id)} type="button" aria-pressed={isPlaying}
+                        className={`creator-audio-button w-full min-h-11 py-2.5 rounded-xl font-black text-xs md:text-sm flex items-center justify-center gap-2 transition-all duration-300 relative overflow-hidden mt-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500 ${isPlaying ? 'bg-rose-600 text-white shadow-lg border border-rose-500' : 'bg-emerald-700 text-white hover:bg-emerald-800 border border-emerald-700 hover:shadow-lg'}`}
                     >
-                        {isPlaying && <div className="absolute inset-0 bg-white/20 animate-pulse pointer-events-none"></div>}
+                        {isPlaying && <div className="creator-audio-glow absolute inset-0 bg-white/10 pointer-events-none"></div>}
                         <span className="relative z-10 flex items-center gap-2 uppercase tracking-widest">
                             {isPlaying ? <><IconStop /> {isAr ? 'إيقاف' : 'Stop'}</> : <><HeadphonesIcon /> {isAr ? 'استمع للملخص' : 'Play Summary'}</>}
                         </span>
@@ -178,36 +178,49 @@ const CreatorsPortalPage: React.FC = () => {
     };
 
     return (
-        <div dir={dir} className="w-full min-h-[100dvh] flex flex-col items-center bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-500 pb-20">
+        <div dir={dir} className="creators-portal w-full min-h-[100dvh] flex flex-col items-center bg-[#F8FAF9] dark:bg-black font-sans relative overflow-x-hidden text-slate-900 dark:text-white transition-colors duration-500 pb-16">
             
-            <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-50 dark:opacity-20">
-               <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-500/20 rounded-full blur-[100px] animate-blob"></div>
-               <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-pink-500/20 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
+            <div className="absolute inset-0 w-full h-full overflow-hidden z-0 pointer-events-none opacity-60 dark:opacity-30">
+               <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-400/20 rounded-full blur-[100px] animate-blob"></div>
+               <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-amber-400/15 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
             </div>
 
-            <div className={`w-full max-w-[1400px] mx-auto px-4 md:px-6 relative z-10 antialiased overflow-x-hidden transition-all duration-700 ease-in-out transform origin-top`}>
+            <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 antialiased">
                 
-                <div className={`text-center mt-12 mb-16 relative transition-all duration-700 ease-in-out transform origin-top ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-8 scale-95 pointer-events-none'}`}>
-                    <button onClick={() => navigate(-1)} className="absolute start-0 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-800 text-slate-800 dark:text-white px-5 py-2.5 rounded-full font-black text-sm hover:bg-slate-200 hover:-translate-x-1 active:translate-y-1 border-b-4 border-slate-300 dark:border-slate-700 active:border-b-0 transition-all flex items-center gap-2 shadow-sm">
-                        <span className="text-xl leading-none rtl:rotate-180">←</span> {isAr ? 'العودة' : 'Back'}
+                <nav className="mb-5 mt-6 flex flex-wrap items-center justify-between gap-3" aria-label={isAr ? 'التنقل' : 'Navigation'}>
+                    <button type="button" onClick={() => navigate(-1)} className="inline-flex min-h-11 items-center gap-2 rounded-2xl border border-emerald-200 dark:border-emerald-900 bg-white/90 dark:bg-slate-950 px-4 py-2.5 text-sm font-black text-emerald-800 dark:text-emerald-200 shadow-sm hover:-translate-y-0.5 hover:border-emerald-400 transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500">
+                        <svg viewBox="0 0 24 24" className={'w-4 h-4 ' + (isAr ? 'rotate-180' : '')} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m14 5-7 7 7 7"/></svg>
+                        {isAr ? 'العودة' : 'Back'}
                     </button>
-                    
-                    <h1 className={`text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-500 uppercase tracking-tight`}>
-                        {isAr ? 'ركن المبدعين' : 'CREATORS CORNER'}
-                    </h1>
-                    <p className="text-sm md:text-lg text-slate-600 dark:text-slate-400 font-bold max-w-2xl mx-auto pt-4">
-                        {isAr ? 'مساحة حيث تلتقي الأفكار المبتكرة لتشكل المستقبل. استكشف إبداعات زملائك في عالم التأليف.' : 'A space where innovative ideas meet to shape the future. Explore your peers\' authoring creations.'}
-                    </p>
-                    <div className="flex justify-center gap-3 mt-6">
-                        <div className="w-16 h-2 bg-purple-500 rounded-full" />
-                        <div className="w-8 h-2 bg-pink-400 rounded-full" />
+                    <span className="inline-flex items-center gap-2 text-xs font-black text-slate-500 dark:text-slate-400"><img src="/school-logo.png" alt="EFIPS" className="h-8 w-8 object-contain"/>{isAr ? 'مكتبة صقر الإمارات' : 'EFIPS Library'}</span>
+                </nav>
+                <header className="creator-hero relative isolate mb-10 overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] border border-emerald-900/20 bg-[#075543] px-6 py-8 sm:px-9 sm:py-10 lg:px-12 text-white shadow-[0_28px_70px_rgba(5,79,64,0.18)]">
+                    <div className="absolute inset-x-0 top-0 flex h-1.5" aria-hidden="true"><span className="w-1/4 bg-[#E23D40]"/><span className="w-1/4 bg-[#079457]"/><span className="w-1/4 bg-white"/><span className="w-1/4 bg-[#111C1A]"/></div>
+                    <div className="pointer-events-none absolute -end-16 -top-20 h-72 w-72 rounded-full border-[45px] border-white/5" aria-hidden="true"/>
+                    <svg viewBox="0 0 600 280" preserveAspectRatio="xMidYMid slice" className="pointer-events-none absolute inset-0 h-full w-full opacity-20" fill="none" aria-hidden="true"><path d="M0 240C130 150 250 300 370 215S520 165 600 190M0 260C130 170 250 320 370 235S520 185 600 210" stroke="#E6D3A3" strokeWidth="4"/><path d="M410 45h160M420 65h160M430 85h160" stroke="#E6D3A3" strokeWidth="2" strokeDasharray="8 8"/></svg>
+                    <div className="relative grid grid-cols-1 lg:grid-cols-[1.4fr_.6fr] items-center gap-6">
+                        <div>
+                            <span className="inline-flex gap-2 items-center rounded-full border border-amber-200/40 bg-white/10 px-4 py-2 text-xs font-black text-amber-100">{isAr ? 'من أقلام طلابنا إلى مكتبتنا' : 'WRITTEN BY OUR STUDENTS'}</span>
+                            <h1 className="mt-5 text-3xl sm:text-4xl lg:text-5xl font-black leading-relaxed tracking-tight">{isAr ? 'ركن المبدعين' : 'CREATORS CORNER'}</h1>
+                            <p className="mt-2 max-w-2xl text-sm sm:text-base font-semibold leading-8 text-emerald-50/95">{isAr ? 'مساحة تلتقي فيها القصص والأفكار. اقرأ أعمال طلاب مدرسة صقر الإمارات واستمع إلى ملخصاتهم الصوتية.' : 'A home for stories and ideas. Explore creative writing by EFIPS students, read their works and listen to audio summaries.'}</p>
+                            <div className="mt-6 inline-flex items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-4 py-2.5 text-xs font-black"><IconRead /> {studentWorks.length} {isAr ? 'أعمال إبداعية' : 'Student creations'}</div>
+                        </div>
+                        <div className="hidden lg:flex justify-center">
+                            <div className={'creator-hero-art flex h-44 w-44 items-center justify-center rounded-[2.5rem] border border-white/20 bg-white/10 backdrop-blur-sm shadow-xl transition-opacity ' + (isVisible ? 'opacity-100' : 'opacity-80')}>
+                                <svg viewBox="0 0 140 140" className="h-36 w-36" fill="none" aria-hidden="true"><path d="M20 49c19-9 36-8 50 0 14-8 31-9 50 0v73c-17-6-34-5-50 4-16-9-33-10-50-4V49Z" fill="#FCF7E9" stroke="#E7C483" strokeWidth="3"/><path d="M70 49v77M28 64c12-4 23-2 34 3M28 79c12-4 23-2 34 3M78 66c12-4 24-5 34-3M78 82c12-4 24-5 34-3" stroke="#158163" strokeWidth="4" strokeLinecap="round"/><path d="m70 10 7 13 15 2-11 10 3 15-14-7-14 7 3-15-11-10 15-2 7-13Z" fill="#EAC16F"/></svg>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                </header>
+                <section className="mb-6 flex flex-wrap items-end justify-between gap-3">
+                    <div><p className="text-xs font-black text-emerald-700 dark:text-emerald-400">{isAr ? 'مكتبة الإبداع' : 'CREATIVE COLLECTION'}</p><h2 className="mt-1 text-xl sm:text-2xl font-black text-slate-900 dark:text-white">{isAr ? 'اكتشف إبداعات طلابنا' : 'Explore student creations'}</h2><p className="mt-2 text-sm font-semibold text-slate-600 dark:text-slate-300">{isAr ? 'اقرأ العمل أو استمع إلى ملخصه باستخدام الأزرار أسفل كل كتاب.' : 'Read a work or listen to its summary using the buttons on each book.'}</p></div>
+                    <span className="rounded-full border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/40 px-4 py-2 text-xs font-black text-emerald-800 dark:text-emerald-200">{studentWorks.length} {isAr ? 'أعمال' : 'works'}</span>
+                </section>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-10 gap-x-4 md:gap-x-6 px-2 md:px-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6 items-stretch">
                     {studentWorks.map((work, index) => (
                         <RevealOnScroll key={work.id} delay={(index % 4) * 100}>
-                            <div className="w-full max-w-sm mx-auto">
+                            <div className="w-full max-w-[420px] h-full mx-auto">
                                 <CreatorCard 
                                     work={work} 
                                     isAr={isAr}
@@ -227,24 +240,22 @@ const CreatorsPortalPage: React.FC = () => {
                 </div>
 
                 <RevealOnScroll delay={300}>
-                    <div className="mt-20 w-full text-center flex justify-center px-4">
-                        <div className="bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-200 dark:from-amber-600 dark:via-yellow-500 dark:to-amber-600 p-[4px] rounded-[3rem] shadow-2xl hover:scale-105 transition-transform duration-500 max-w-3xl w-full">
-                            <div className="bg-white dark:bg-slate-900 rounded-[2.8rem] py-8 px-6 md:py-10 md:px-12 flex flex-col items-center justify-center relative overflow-hidden">
-                                <div className="absolute inset-0 bg-yellow-400/10 dark:bg-yellow-400/5 animate-pulse pointer-events-none"></div>
-                                <span className="text-4xl md:text-5xl mb-4 animate-bounce"></span>
-                                <h2 className="text-2xl md:text-4xl font-black text-slate-800 dark:text-white text-center leading-tight tracking-wide">
-                                    {isAr ? 'قريباً.. ستكون أنت أحد هؤلاء المبدعين!' : 'Soon.. You will be one of these creators!'}
-                                </h2>
+                    <section className="relative mt-12 sm:mt-16 overflow-hidden rounded-[2rem] border border-amber-200 dark:border-amber-900/60 bg-gradient-to-br from-[#FFF7E7] via-white to-emerald-50 dark:from-[#211B12] dark:via-slate-950 dark:to-emerald-950/20 p-6 sm:p-9 shadow-lg">
+                        <div className="pointer-events-none absolute -end-14 -bottom-14 h-40 w-40 rounded-full border-[25px] border-amber-300/20" aria-hidden="true"/>
+                        <div className="relative flex flex-col sm:flex-row items-center gap-5 text-center sm:text-start">
+                            <div className="shrink-0 flex h-16 w-16 items-center justify-center rounded-2xl border border-amber-200 dark:border-amber-800 bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-200">
+                                <svg viewBox="0 0 48 48" className="w-10 h-10" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M8 8h27v30H8zM14 16h15M14 22h15M14 28h10M36 14l6 6-15 15-8 2 2-8 15-15Z"/><path d="m33 17 6 6"/></svg>
                             </div>
+                            <div><p className="mb-1 text-xs font-black text-amber-700 dark:text-amber-300">{isAr ? 'المبدع القادم' : 'YOUR NEXT CHAPTER'}</p><h2 className="text-xl sm:text-2xl lg:text-3xl font-black leading-relaxed text-slate-900 dark:text-white">{isAr ? 'قريباً.. ستكون أنت أحد هؤلاء المبدعين!' : 'Soon.. You will be one of these creators!'}</h2></div>
                         </div>
-                    </div>
+                    </section>
                 </RevealOnScroll>
 
             </div>
 
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
-                * { font-family: 'Cairo', sans-serif !important; }
+                .creators-portal, .creators-portal * { font-family: 'Cairo', Tahoma, Arial, sans-serif; }
                 .scrollbar-thin::-webkit-scrollbar { width: 6px; }
                 .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
                 .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -262,6 +273,14 @@ const CreatorsPortalPage: React.FC = () => {
                 
                 @keyframes fade-in-up { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
                 .animate-fade-in-up { animation: fade-in-up 0.5s ease-out forwards; }
+                .creators-portal .creator-work-card { transform: translateZ(0); }
+                .creators-portal .creator-hero-art { animation: creator-art-float 6s ease-in-out infinite; }
+                .creators-portal .creator-audio-glow, .creators-portal .creator-playing-halo { animation: creator-audio-pulse 2s ease-in-out infinite; }
+                @keyframes creator-art-float { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-10px) rotate(2deg); } }
+                @keyframes creator-audio-pulse { 0%,100% { opacity: 0.35; } 50% { opacity: 1; } }
+                @media (prefers-reduced-motion: reduce) {
+                    .creators-portal *, .creators-portal *::before, .creators-portal *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+                }
             `}</style>
         </div>
     );
