@@ -29,6 +29,8 @@ const translations = {
         scheduleDesc: "حجز وتنسيق حصص زيارة المكتبة للمعلمين.",
         gameTitle: "رتب المكتبة",
         gameDesc: "العب، استمتع، وتعلم كيفية تصنيف الكتب.",
+        nationalIdentityTitle: "صقر وهوية وطن",
+        nationalIdentityDesc: "مغامرات تراثية وثقافية عبر الإمارات السبع وكلماتنا وذاكرة الوطن.",
         saqrStudioBanner: "استديو صقر",
         saqrStudioDesc: "سجل إبداعاتك الصوتية وشارك في البودكاست.",
         bubble: "فخورين بالإمارات",
@@ -88,6 +90,8 @@ const translations = {
         scheduleDesc: "Book and coordinate library visits for teachers.",
         gameTitle: "Library Game",
         gameDesc: "Play, enjoy, and learn book classification.",
+        nationalIdentityTitle: "Saqr & National Identity",
+        nationalIdentityDesc: "Explore the seven emirates, heritage words and our nation's memory.",
         saqrStudioBanner: "Saqr Studio",
         saqrStudioDesc: "Record your voice and share in the podcast.",
         bubble: "Proud of the UAE",
@@ -864,6 +868,25 @@ const HomePage: React.FC = () => {
                                 <p className="text-xs md:text-sm opacity-90 font-normal leading-snug">{t('creatorsDesc')}</p>
                             </div>
                         </Link>
+
+                        {userType === 'student' && (
+                            <Link to="/saqr-national-identity"
+                                className="group relative flex items-center gap-5 overflow-hidden rounded-[2.5rem] border-b-8 border-emerald-900 bg-gradient-to-br from-[#075B49] via-[#087555] to-[#116759] p-6 text-white shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl active:translate-y-2 active:border-b-0">
+                                <div aria-hidden="true" className="absolute top-0 end-0 flex h-1.5 w-32 overflow-hidden rounded-bl-xl">
+                                    <span className="w-1/4 bg-red-500" /><span className="w-1/4 bg-emerald-400" /><span className="w-1/4 bg-white" /><span className="w-1/4 bg-slate-950" />
+                                </div>
+                                <div className="relative shrink-0 rounded-2xl border border-white/25 bg-white/15 p-3.5 backdrop-blur-md transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6">
+                                    <svg className="h-9 w-9" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                        <path d="M24 11C18 7 11 7 5 9v29c7-2 14-1 19 3 5-4 12-5 19-3V9c-6-2-13-2-19 2ZM24 11v30" />
+                                        <path d="m30 19 3-6 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1Z" fill="currentColor" fillOpacity=".24" />
+                                    </svg>
+                                </div>
+                                <div className="relative min-w-0">
+                                    <h3 className="mb-1 text-xl font-black tracking-tight md:text-2xl">{t('nationalIdentityTitle')}</h3>
+                                    <p className="text-xs font-semibold leading-relaxed text-white/90 md:text-sm">{t('nationalIdentityDesc')}</p>
+                                </div>
+                            </Link>
+                        )}
 
                         {/* ================= زر احتفالي بألوان علم الإمارات واسمه احتفالي فقط ================= */}
                         <button

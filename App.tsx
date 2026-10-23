@@ -23,6 +23,7 @@ import DeweyGame from './pages/game';
 import SchedulePage from './pages/SchedulePage';
 import TutorialPage from './pages/TutorialPage';
 import FlagDayChallenge from './pages/FlagDayChallenge'; // Prepared for future activation; intentionally not routed.
+import NationalIdentityPage from './pages/NationalIdentityPage';
 
 export type Locale = 'en' | 'ar';
 
@@ -57,6 +58,20 @@ const ProtectedRoute: React.FC<{ children: ReactNode }> = ({ children }) => {
   }
 
   return <>{children}</>;
+};
+
+// Only students may open the new cultural activities route.
+// This matches the existing local school-login role convention.
+const StudentOnlyRoute: React.FC<{ children: ReactNode }> = ({ children }) => {
+  try {
+    const account = JSON.parse(localStorage.getItem('current_user') || 'null');
+    if (localStorage.getItem('user_type') === 'student' && account?.student_id) {
+      return <>{children}</>;
+    }
+  } catch {
+    // Treat missing or unavailable local session data as unauthorized.
+  }
+  return <Navigate to="/home" replace />;
 };
 
 // -------- 1. مساعد صقر العائم --------
@@ -253,12 +268,13 @@ const Header: React.FC = () => {
     { path: '/digital-library', label: locale === 'en' ? 'Digital' : 'المكتبة الرقمية', hint: 'Digital', color: 'bg-blue-500', roles: ['student', 'teacher', 'admin'] },
     { path: '/creators', label: locale === 'en' ? 'Creators' : 'بوابة المبدعين', hint: 'Creators', color: 'bg-purple-500', roles: ['student', 'admin'] },
     { path: '/game', label: locale === 'en' ? 'Games' : 'ألعاب', hint: 'Games', color: 'bg-amber-500', roles: ['student', 'admin'] },
+    { path: '/saqr-national-identity', label: locale === 'en' ? 'UAE Heritage' : 'صقر وهوية وطن', hint: 'UAE Heritage', color: 'bg-emerald-700', roles: ['student'] },
     { path: '/schedule', label: locale === 'en' ? 'Schedule' : 'جدول المكتبة', hint: 'Schedule', color: 'bg-teal-500', roles: ['teacher', 'admin'] },
     { path: '/feedback', label: locale === 'en' ? 'Ideas' : 'مقترحات', hint: 'Feedback', color: 'bg-emerald-500', roles: ['student', 'teacher', 'admin'] },
     { path: '/admin-dashboard', label: locale === 'en' ? 'Admin' : 'الإدارة', hint: 'Admin', color: 'bg-rose-600', roles: ['admin'] },
   ];
 
-  const allowedLinks = allLinks.filter(link => !userRole || link.roles.includes(userRole));
+  const allowedLinks = allLinks.filter(link => link.path === '/saqr-national-identity' ? userRole === 'student' : !userRole || link.roles.includes(userRole));
 
   return (
     <header
@@ -517,6 +533,7 @@ const MainLayout: React.FC = () => {
           <Route path="/feedback" element={<ProtectedRoute><FeedbackPage /></ProtectedRoute>} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/game" element={<ProtectedRoute><DeweyGame /></ProtectedRoute>} />
+          <Route path="/saqr-national-identity" element={<ProtectedRoute><StudentOnlyRoute><NationalIdentityPage /></StudentOnlyRoute></ProtectedRoute>} />
           <Route path="/schedule" element={<ProtectedRoute><SchedulePage /></ProtectedRoute>} />
         </Routes>
       </main>
