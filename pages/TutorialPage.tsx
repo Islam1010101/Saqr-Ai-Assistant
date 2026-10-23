@@ -613,20 +613,46 @@ export default function TutorialPage() {
             </div>
           </section>
 
-          <HintTarget id="reading-suggestions" title={label('مكتبتي واقتراحات القراءة', 'My Books & Reading Suggestions')} description={label('تظهر الاقتراحات بعرض الصفحة الكامل قبل معلومات عن وطني، مع تصفية الكتب الورقية والرقمية، وحفظ كل عنوان للقراءة لاحقًا. النجوم في المكتبات الرقمية تسمح بتقييم شخصي وتعرض المتوسط العام منفصلًا. هذه بطاقات شكلية فقط.', 'Full-width book suggestions appear before the UAE facts. Filter physical/digital titles and save for later. Digital book cards allow personal star ratings and show public averages separately. These are sample-only cards.')} interactive={false} {...hintState}>
-            <section className="w-full rounded-[2.5rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-black p-5 sm:p-6 md:p-8 shadow-lg">
-              <div className="flex flex-wrap justify-between gap-4 items-center">
-                <div><h2 className="text-xl md:text-3xl font-black text-slate-900 dark:text-white">{label('مكتبتي واقتراحات القراءة','My Books & Reading Suggestions')}</h2><p className="mt-1 text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300">{label('كتب ورقية ورقمية مناسبة للاكتشاف','Discover physical and digital books')}</p></div>
-                <span className="rounded-full bg-emerald-600 px-4 py-2 text-white text-xs font-black">{label('اقتراحات القراءة','Reading suggestions')}</span>
+          <HintTarget id="reading-suggestions" title={label('مكتبتي واقتراحات القراءة','My Books & Reading Suggestions')}
+            description={label('تُعرض أربعة اقتراحات مبدئيًا بناءً على نوع الحساب والمرحلة والاهتمامات؛ يعرض زر المزيد نافذة مستقلة ببقية الخيارات. الكتب ملونة مثل المكتبتين الرقميتين، وقائمة القراءة لاحقًا منفصلة. لا تُعرض بيانات مستفيدين حقيقية هنا.', 'Four starting recommendations based on role, grade and interests. More choices open in a separate dialog. Cards match the digital libraries, with a separate read-later list. This tour displays no private data.')}
+            interactive={false} {...hintState}>
+            <section className="relative w-full rounded-[2.5rem] border border-slate-200/60 dark:border-slate-800/60 bg-transparent p-4 sm:p-6 md:p-8">
+              <header className="mb-6 text-center">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 dark:text-white">{label('مكتبتي واقتراحات القراءة','My Books & Reading Suggestions')}</h2>
+                <p className="mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-semibold">{label('كتب ورقية ورقمية حسب نوع الحساب واهتمامات القراءة','Physical and digital books based on account type and reading interests')}</p>
+              </header>
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+                <div className="flex gap-2">
+                  <span className="rounded-xl bg-emerald-600 text-white px-4 py-2.5 font-black text-xs">{label('اقتراحات القراءة','Suggestions')}</span>
+                  <span className="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white px-4 py-2.5 font-black text-xs">{label('القراءة لاحقًا','Read later')}</span>
+                </div>
+                <span className="rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2 text-xs text-slate-600 dark:text-slate-300">{label('نوع الكتاب: الكل','Book type: All')}</span>
               </div>
-              <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {['physical','ar','en','saved'].map((category, index)=><div key={category} className="homepage-alert-card rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl">
-                  <span className="text-[11px] text-emerald-700 dark:text-emerald-300 font-black">{[label('كتاب ورقي','Physical'),label('رقمي عربي','Arabic digital'),label('رقمي إنجليزي','English digital'),label('القراءة لاحقًا','Read later')][index]}</span>
-                  <div className="mt-4 h-3 w-4/5 rounded-full bg-slate-200 dark:bg-slate-700" /><div className="mt-3 h-3 w-3/5 rounded-full bg-slate-100 dark:bg-slate-800" />
-                  <div className="mt-6 flex flex-wrap gap-2 items-center"><span className="rounded-full border border-slate-300 dark:border-slate-600 px-3 py-1.5 text-xs font-bold text-slate-600 dark:text-slate-200">{label('القراءة لاحقًا','Read later')}</span><span className="text-amber-500 text-base" aria-hidden="true">★★★★★</span></div>
-                </div>)}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                  { kind:label('كتاب ورقي','Physical book'), color:'from-blue-500 to-sky-500 border-blue-200'},
+                  { kind:label('رقمي عربي','Arabic digital'), color:'from-emerald-500 to-teal-400 border-emerald-200'},
+                  { kind:label('رقمي إنجليزي','English digital'), color:'from-rose-500 to-pink-500 border-rose-200'},
+                  { kind:label('كتاب مقترح','Suggested book'), color:'from-purple-500 to-indigo-500 border-purple-200'}
+                ].map((card,index)=><article key={index} className={'homepage-alert-card group min-h-[200px] rounded-[1.75rem] border-4 bg-gradient-to-br p-4 sm:p-5 text-white shadow-lg transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl flex flex-col gap-4 '+card.color}>
+                  <span className="self-start rounded-full border border-white/30 bg-white/20 px-3 py-1 text-[11px] font-black">{card.kind}</span>
+                  <div className="flex items-start gap-2 justify-between">
+                    <div className="flex-1 space-y-2">
+                      <div className="h-3 w-full rounded-full bg-white/80"/>
+                      <div className="h-3 w-3/4 rounded-full bg-white/60"/>
+                    </div>
+                    <div className="shrink-0 w-10 h-10 rounded-xl border-2 border-white/70 bg-transparent flex items-center justify-center">
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 4h12v17l-6-4-6 4V4z"/></svg>
+                    </div>
+                  </div>
+                  <div className="h-2.5 w-2/3 rounded-full bg-white/45"/>
+                  <span className="mt-auto text-xs font-black rounded-xl bg-white/20 border border-white/40 px-3 py-2 self-start">{label('عرض الكتاب','View book')}</span>
+                </article>)}
               </div>
-              <p className="mt-4 text-[11px] font-semibold text-slate-500 dark:text-slate-400">{label('معاينة تعليمية بلا بيانات مستفيدين أو اتصال بالمكتبة الفعلية','Safe visual tutorial — no real user data or live library requests')}</p>
+              <div className="mt-5 flex justify-center">
+                <span className="rounded-xl border-2 border-emerald-400 bg-transparent px-6 py-3 text-sm font-black text-emerald-700 dark:text-emerald-300">{label('عرض المزيد — نافذة منبثقة','View more — popup dialog')}</span>
+              </div>
+              <p className="mt-4 text-center text-[11px] font-semibold text-slate-500 dark:text-slate-400">{label('معاينة تعليمية بدون بيانات أو استعلامات حقيقية','Sample-only preview with no live data or requests')}</p>
             </section>
           </HintTarget>
 
