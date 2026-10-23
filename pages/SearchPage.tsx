@@ -403,12 +403,6 @@ const BookCard = React.memo(({ book, onClick, t, locale }: { book: Book; onClick
 
   return (
     <div onClick={onClick} className="relative group cursor-pointer w-full max-w-sm mx-auto h-[280px] md:h-[300px] flex items-stretch justify-center p-2">
-      <button type="button" aria-pressed={isSaved} title={isSaved ? t('readLaterRemove') : t('readLater')}
-        onClick={(event) => { event.stopPropagation(); toggleSaved(readingKey); }}
-        className={`absolute top-14 end-4 z-40 rounded-xl border border-white/70 dark:border-slate-600 px-3 py-2 text-[11px] font-black shadow-lg backdrop-blur-md transition-all hover:scale-105 active:scale-95 ${isSaved ? 'bg-amber-400 text-slate-900' : 'bg-white/95 text-emerald-700 dark:bg-slate-900/95 dark:text-emerald-300'}`}>
-        {isSaved ? t('readLaterRemove') : t('readLater')}
-      </button>
-      
       {/* تصميم البطاقة الثنائية الأبعاد */}
       <div className={`w-full h-full relative rounded-[2rem] border-4 shadow-lg bg-gradient-to-br ${colorClass} transition-all duration-500 transform group-hover:-translate-y-3 group-hover:shadow-2xl overflow-hidden flex flex-col`}>
         
@@ -426,9 +420,16 @@ const BookCard = React.memo(({ book, onClick, t, locale }: { book: Book; onClick
           </div>
           
           <div className="flex-1 flex flex-col justify-end text-right mt-4">
-            <h3 className="font-black text-xl md:text-2xl text-white leading-tight drop-shadow-md mb-4 overflow-hidden text-ellipsis" dir="ltr">
-                {book.title}
-            </h3>
+            <div className="flex items-start gap-2 mb-3 min-w-0" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+                <h3 className="flex-1 min-w-0 font-black text-lg md:text-xl text-white leading-tight drop-shadow-md line-clamp-3 break-words text-start" dir="auto">{book.title}</h3>
+                <button type="button" aria-pressed={isSaved}
+                    title={isSaved ? t('readLaterRemove') : t('readLater')}
+                    aria-label={isSaved ? t('readLaterRemove') : t('readLater')}
+                    onClick={(event) => { event.stopPropagation(); toggleSaved(readingKey); }}
+                    className={`relative z-30 shrink-0 inline-flex items-center justify-center w-10 h-10 rounded-xl border-2 border-white/70 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white/20 active:scale-95 focus-visible:outline-2 focus-visible:outline-white ${isSaved ? 'bg-white/25 shadow-md' : 'bg-transparent'}`}>
+                    <svg aria-hidden="true" viewBox="0 0 24 24" fill={isSaved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M6 4h12v17l-6-4-6 4V4z"/></svg>
+                </button>
+            </div>
             <div className="flex items-center gap-2 text-white/90 flex-row-reverse justify-end bg-black/10 p-2.5 rounded-xl w-fit ms-auto backdrop-blur-sm">
                 <UserIcon/>
                 <p className="text-xs md:text-sm font-bold truncate uppercase tracking-wide">{book.author}</p>
