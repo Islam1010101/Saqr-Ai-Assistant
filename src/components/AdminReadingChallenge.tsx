@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { supabase } from '../utils/supabase';
+import { printA4Html } from '../utils/printA4Html';
 import { bookData } from '../../api/bookData';
 import { ARABIC_LIBRARY_DATABASE } from '../../pages/ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from '../../pages/EnglishLibraryInternalPage';
@@ -58,8 +59,6 @@ const AdminReadingChallenge:React.FC<{isAr:boolean}> = ({isAr})=>{
   }),[members]);
   const print=()=>{
     if(!report)return;
-    const w=window.open('','_blank');
-    if(!w){setError(isAr?'الرجاء السماح بالنوافذ المنبثقة للطباعة.':'Allow popups to print the report.');return;}
     const date=new Date().toLocaleDateString(locale);
     const monthLabel=new Date(report.month+'T12:00:00').toLocaleDateString(locale,{year:'numeric',month:'long'});
     const headings=isAr?['#','الصفة','الكود','الاسم','الصف','الهدف','العدد','عناوين الكتب المنجزة وتواريخها']:['#','Role','School ID','Name','Grade','Target','Count','Completed titles and dates'];
@@ -76,8 +75,8 @@ const AdminReadingChallenge:React.FC<{isAr:boolean}> = ({isAr})=>{
       [[isAr?'الطلاب':'Students',overall.students],[isAr?'المعلمون':'Teachers',overall.teachers],[isAr?'كتب منجزة':'Completed books',overall.books],[isAr?'محققو الهدف':'Goal achieved',overall.goals]].map(([n,v])=>'<div class="metric"><b>'+v+'</b><span>'+n+'</span></div>').join('')+
       '</div><h2>'+title+'</h2><table><thead><tr>'+headings.map(h=>'<th>'+htmlSafe(h)+'</th>').join('')+'</tr></thead><tbody>'+(rows||'<tr><td colspan="8" style="text-align:center">'+(isAr?'لا توجد سجلات موثقة لهذا الشهر':'No verified records for this month')+'</td></tr>')+'</tbody></table>'+
       '<p style="margin-top:9px;color:#64748b;font-size:9px">'+(isAr?'الإنجازات مسجلة ذاتيًا بواسطة القراء؛ ولا تعني التحقق المستقل من قراءة الكتاب كاملًا. السجلات غير المرتبطة بهوية مدرسية معتمدة مستبعدة.':'Reading completion is self-reported, not independent evidence of finishing each book. Unverified school mappings are excluded.')+'</p><div class="foot">EFIPS Library • '+htmlSafe(date)+'</div>'+
-      '<script>window.addEventListener("load",()=>{setTimeout(()=>window.print(),500)})</scr'+'ipt></body></html>';
-    w.document.open();w.document.write(html);w.document.close();
+      '</body></html>';
+    void printA4Html(html).catch(error=>{console.error('Challenge report print failed:',error);setError(isAr?'تعذر تشغيل الطباعة. تحقق من إعدادات المتصفح.':'Print could not start; check browser settings.');});
   };
   return <section dir={isAr?'rtl':'ltr'} className="lg:col-span-4 rounded-[2.25rem] border border-emerald-200/80 dark:border-emerald-800/60 bg-white dark:bg-black p-5 md:p-7 shadow-xl hover:shadow-2xl transition-shadow duration-500">
     <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 mb-6">
