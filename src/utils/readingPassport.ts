@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { bookData } from '../../api/bookData';
+import { queueSchoolReadingSubmission } from './schoolReadingSubmissions';
 import { useCloudReader, loadCloudSaved, persistCloudSaved, loadReadingProgress, saveReadingGoal, saveReadingCompletion, currentReadingMonth } from './efipsCloud';
 
 export type ReadingBook = {
@@ -80,6 +81,11 @@ export const useReadingPassport = () => {
   const storageKey = cloudUser ? 'efips-reading-passport-v1:cloud:' + cloudUser.id : getStorageKey();
   const [data, setData] = useState<ReadingPassport>(() => readFromDevice(storageKey));
   const [cloudReady, setCloudReady] = useState(false);
+  useEffect(() => {
+    // School codes identify unverified reports only; no private DB access is granted.
+    if (!cloudUser) queueSchoolReadingSubmission(data);
+  }, [cloudUser?.id, data]);
+
   useEffect(() => {
     if (!cloudUser) { setCloudReady(false); return; }
     let active = true;

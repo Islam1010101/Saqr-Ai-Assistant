@@ -8,7 +8,7 @@ import { digitalBookKey, physicalBookKey } from '../utils/readingPassport';
 
 type Completed = { book_key:string; completed_on:string };
 type Member = { user_type:'student'|'teacher';school_user_id:string;name_ar:string;name_en:string;grade:string;goal:number|null;completed_count:number;books:Completed[] };
-type Report = { month:string;members:Member[];verified_count:number;incomplete:boolean };
+type Report = { month:string;members:Member[];pending?: (Member & {review_status:'unverified';received_at:string})[];verified_count:number;incomplete:boolean };
 const titles = new Map<string,string>([
   ...bookData.map(book=>[physicalBookKey(book),book.title] as [string,string]),
   ...ARABIC_LIBRARY_DATABASE.map(book=>[digitalBookKey('ar',book),book.title] as [string,string]),
@@ -107,6 +107,23 @@ const AdminReadingChallenge:React.FC<{isAr:boolean}> = ({isAr})=>{
         </select>
         <input value={term} onChange={e=>setTerm(e.target.value)} placeholder={isAr?'ابحث بالاسم أو الكود أو الكتاب':'Search name, ID or title'} className="rounded-xl border border-slate-200 dark:border-slate-700 p-3 bg-white dark:bg-slate-900 text-sm text-slate-800 dark:text-white flex-1"/>
       </div>
+      {!!report.pending?.length && <section className="mb-6 rounded-2xl border-2 border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20 p-4 sm:p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+          <h3 className="font-black text-lg text-amber-900 dark:text-amber-200">{isAr?'إنجازات مقدمة بالكود — بانتظار اعتماد الإدارة':'School-code submissions — awaiting verification'}</h3>
+          <span className="px-3 py-1.5 rounded-full bg-amber-200 dark:bg-amber-800 text-amber-950 dark:text-amber-100 text-xs font-black">{report.pending.length}</span>
+        </div>
+        <p className="text-xs text-amber-900 dark:text-amber-200 mb-4">{isAr?'هذه بيانات أرسلها مستخدمون باستخدام كود المدرسة فقط، وليست إثباتًا للهوية أو لإنهاء القراءة. لا تدخل في الإحصائيات الرسمية أو تقرير الطباعة المعتمد.':'Submitted using a school code alone. Not identity-verified or independently verified reading. Excluded from official metrics and certified print reports.'}</p>
+        <div className="overflow-x-auto"><table className="w-full min-w-[630px] text-xs text-start">
+          <thead><tr>{(isAr?['الصفة','الكود','الاسم','الهدف','كتب مقدمة','العناوين']:['Role','School ID','Name','Goal','Reported books','Titles']).map(x=><th key={x} className="p-2 text-start border-b border-amber-300">{x}</th>)}</tr></thead>
+          <tbody>{report.pending.filter(m=>role==='all'||m.user_type===role).filter(m=>!term||[m.school_user_id,m.name_ar,m.name_en,...m.books.map(b=>titles.get(b.book_key)||b.book_key)].some(v=>String(v).toLowerCase().includes(term.toLowerCase()))).map(m=>
+            <tr key={m.user_type+':'+m.school_user_id} className="border-b border-amber-200 dark:border-amber-900">
+              <td className="p-2">{m.user_type==='student'?(isAr?'طالب':'Student'):(isAr?'معلم':'Teacher')}</td>
+              <td className="p-2 font-mono">{m.school_user_id}</td><td className="p-2">{isAr?(m.name_ar||m.name_en):(m.name_en||m.name_ar)}</td>
+              <td className="p-2">{m.goal??'—'}</td><td className="p-2">{m.completed_count}</td>
+              <td className="p-2">{m.books.map((b,i)=><div key={b.book_key+i}>{titles.get(b.book_key)||b.book_key}</div>)}</td>
+            </tr>)}</tbody>
+        </table></div>
+      </section>}
       {!members.length?<div className="rounded-2xl border border-slate-200 dark:border-slate-700 p-7 text-center text-slate-600 dark:text-slate-300 text-sm font-semibold">{isAr?'لا توجد إنجازات مرتبطة بهويات مدرسية معتمدة لهذا الشهر.':'No reading records linked to verified school identities for this month.'}</div>:
       <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-700">
         <table className="w-full min-w-[720px] border-collapse text-xs md:text-sm">
