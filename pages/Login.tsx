@@ -334,7 +334,7 @@ export default function Login() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
               </svg>
-              {lang === 'ar' ? 'جولة افتراضية' : 'Virtual tour-Demo'}
+              {lang === 'ar' ? 'جولة افتراضية للبوابة' : 'Website Virtual tour'}
             </Link>
           </div>
         </div>
