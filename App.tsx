@@ -485,12 +485,8 @@ const MainLayout: React.FC = () => {
   const location = useLocation();
   const { locale } = useLanguage();
 
-  const hideFooter =
-    location.pathname === '/' ||
-    location.pathname === '/admin-dashboard' ||
-    location.pathname === '/about' ||
-    location.pathname === '/game' ||
-    location.pathname === '/tutorial';
+  // The tutorial has its own matching footer, so show this footer everywhere else.
+  const hideFooter = location.pathname === '/tutorial';
 
   return (
     <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 font-sans transition-colors duration-300 flex flex-col relative">
@@ -540,7 +536,9 @@ const MainLayout: React.FC = () => {
 
       {!hideFooter && (
         <footer className="relative z-10 py-8 text-center border-t-4 border-slate-200 dark:border-slate-800 mx-4 md:mx-20 mt-10">
-          <p className="font-black text-xs text-slate-500">EFIPS • Library • 2026</p>
+          <p className="font-black text-xs text-slate-500 dark:text-slate-400" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+            {locale === 'ar' ? "© 2026 جميع الحقوق محفوظة لمدرسة صقر الإمارات الدولية الخاصة." : "© 2026 EFIPS. All rights reserved."}
+          </p>
         </footer>
       )}
 
