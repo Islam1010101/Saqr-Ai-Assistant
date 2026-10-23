@@ -455,8 +455,8 @@ const SchedulePage: React.FC = () => {
                     <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 text-center py-16 sm:py-20 px-4 text-lg sm:text-xl font-black text-emerald-600 dark:text-emerald-400 animate-pulse" role="status">{t('loading')}</div>
                 ) : (
                     <>
-                        {/* Mobile and tablet layout: day selector + readable, tappable period cards. */}
-                        <section className="xl:hidden rounded-3xl border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl p-3 sm:p-5 shadow-[0_16px_40px_rgba(15,23,42,0.07)] dark:shadow-black/20">
+                        {/* Preserve the existing day-selector cards for phones, tablets and narrow/touch screens. */}
+                        <section className="schedule-compact-view rounded-3xl border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl p-3 sm:p-5 shadow-[0_16px_40px_rgba(15,23,42,0.07)] dark:shadow-black/20">
                             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-4">
                                 <div>
                                     <p className="text-xs font-extrabold text-emerald-700 dark:text-emerald-400 mb-1">{isAr ? 'عرض الهاتف والتابلت' : 'Mobile and tablet view'}</p>
@@ -537,17 +537,21 @@ const SchedulePage: React.FC = () => {
                             </div>
                         </section>
 
-                        {/* Full weekly matrix on large screens. */}
-                        <section className="hidden xl:block rounded-3xl border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl p-4 lg:p-5 shadow-[0_18px_45px_rgba(15,23,42,0.07)] dark:shadow-black/20">
+                        {/* Standard weekly timetable for desktop browser windows, not touch-only tablet screens. */}
+                        <section className="schedule-desktop-view rounded-3xl border border-emerald-200/80 dark:border-emerald-900/60 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl p-4 lg:p-5 shadow-[0_18px_45px_rgba(15,118,110,0.09)] dark:shadow-black/25">
                             <div className="flex items-center justify-between gap-4 mb-4 px-1">
                                 <div>
                                     <h2 className="text-xl font-black text-slate-900 dark:text-white">{isAr ? 'الجدول الأسبوعي' : 'Weekly schedule'}</h2>
                                     <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 mt-1">{isAr ? 'اختر خانة لعرض خيارات الحجز والتعديل' : 'Select a period to book or edit it'}</p>
                                 </div>
-                                <span className="text-xs font-bold rounded-full px-3 py-2 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-900">{isAr ? 'عرض كامل للأسبوع' : 'Full-week view'}</span>
+                                <div className="flex flex-wrap items-center justify-end gap-2 text-[11px] font-extrabold">
+                                    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-2 text-emerald-800 dark:text-emerald-200"><span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true" />{isAr ? 'محجوزة' : 'Booked'}</span>
+                                    <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 px-3 py-2 text-amber-800 dark:text-amber-200"><span className="h-2 w-2 rounded-full bg-amber-500" aria-hidden="true" />{isAr ? 'حصصي' : 'My periods'}</span>
+                                    <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-200 dark:border-teal-800 bg-teal-50 dark:bg-teal-950/40 px-3 py-2 text-teal-800 dark:text-teal-200"><span className="h-2 w-2 rounded-full bg-teal-500" aria-hidden="true" />{isAr ? 'متاحة' : 'Available'}</span>
+                                </div>
                             </div>
                             <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800">
-                                <table className="w-full min-w-[1120px] table-fixed border-collapse">
+                                <table className="w-full min-w-[850px] table-fixed border-separate border-spacing-[5px]" aria-label={isAr ? 'جدول حجز حصص المكتبة الأسبوعي' : 'Weekly library booking timetable'}>
                                     <thead>
                                         <tr className="bg-slate-50 dark:bg-slate-950/70 border-b border-slate-200 dark:border-slate-800">
                                             <th scope="col" className="w-28 p-3 text-center font-black text-slate-500 dark:text-slate-400 text-sm">{isAr ? 'الحصة' : 'Period'}</th>
@@ -565,9 +569,9 @@ const SchedulePage: React.FC = () => {
                                     </thead>
                                     <tbody>
                                         {allPeriods.map((period) => (
-                                            <tr key={period} className="border-b border-slate-100 dark:border-slate-800/80 last:border-b-0">
+                                            <tr key={period} className="group/period transition-colors hover:bg-emerald-50/40 dark:hover:bg-emerald-950/15">
                                                 <th scope="row" className="p-2 align-top bg-slate-50/80 dark:bg-slate-950/40">
-                                                    <div className="min-h-[116px] rounded-xl bg-slate-100 dark:bg-slate-800 flex flex-col items-center justify-center gap-1 px-2 py-3">
+                                                    <div className="min-h-[104px] rounded-xl border border-slate-200 dark:border-slate-700 bg-gradient-to-b from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-900 flex flex-col items-center justify-center gap-1 px-2 py-3 transition-all duration-200 group-hover/period:border-emerald-300 dark:group-hover/period:border-emerald-800 group-hover/period:shadow-sm">
                                                         <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">{t('periodLabel')}</span>
                                                         <span className="text-2xl font-black text-slate-800 dark:text-white tabular-nums">{period}</span>
                                                     </div>
@@ -579,13 +583,13 @@ const SchedulePage: React.FC = () => {
                                                     const isUnavailable = isFriday && period > 4;
                                                     const isMine = Boolean(slot?.teacher) && slot.user_id === userData.teacher_id;
                                                     return (
-                                                        <td key={day} className="p-2 align-top border-s border-slate-100 dark:border-slate-800/70">
+                                                        <td key={day} className="p-1 align-top">
                                                             {isUnavailable ? (
-                                                                <div className="min-h-[116px] rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-100/70 dark:bg-slate-950/60 flex flex-col items-center justify-center text-center px-2 py-3 text-slate-400">
+                                                                <div className="min-h-[104px] rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-100/70 dark:bg-slate-950/60 flex flex-col items-center justify-center text-center px-2 py-3 text-slate-400">
                                                                     <span className="text-sm font-black">—</span><span className="text-[10px] leading-relaxed font-bold mt-1">{isAr ? 'غير متاح\nأربع حصص فقط' : 'Unavailable\nFour periods only'}</span>
                                                                 </div>
                                                             ) : slot?.teacher ? (
-                                                                <div className="min-h-[116px] rounded-xl border border-emerald-200 dark:border-emerald-900/80 bg-emerald-50/70 dark:bg-emerald-950/20 hover:border-emerald-400 dark:hover:border-emerald-700 transition-colors p-3 flex flex-col items-stretch">
+                                                                <div className={`min-h-[104px] rounded-xl border p-2.5 flex flex-col items-stretch transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg ${isMine ? 'border-amber-300 dark:border-amber-800 bg-amber-50/80 dark:bg-amber-950/20 hover:border-amber-500 hover:shadow-amber-300/15' : 'border-emerald-200 dark:border-emerald-900/80 bg-emerald-50/80 dark:bg-emerald-950/20 hover:border-emerald-500 hover:shadow-emerald-300/15'}`}>
                                                                     <button type="button" onClick={() => handleOpenModal(day, period)} className="text-start min-w-0 flex-1 rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500" aria-label={`${isAr ? 'تعديل حصة' : 'Edit period'} ${period}, ${slot.teacher}`}>
                                                                         <div className="flex items-start gap-1.5 mb-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0 mt-1.5" aria-hidden="true" /><span className="font-black text-slate-900 dark:text-white text-xs leading-relaxed break-words">{slot.teacher}</span></div>
                                                                         <p className="text-xs font-bold text-emerald-700 dark:text-emerald-300 leading-relaxed break-words">{slot.subject}</p>
@@ -597,8 +601,8 @@ const SchedulePage: React.FC = () => {
                                                                     </div>
                                                                 </div>
                                                             ) : (
-                                                                <button type="button" onClick={() => handleOpenModal(day, period)} className="w-full min-h-[116px] rounded-xl border border-dashed border-slate-300 dark:border-slate-700 bg-white/70 dark:bg-slate-900/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 hover:border-emerald-400 dark:hover:border-emerald-700 text-slate-500 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-300 p-3 flex flex-col items-center justify-center gap-2 transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500">
-                                                                    <span className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-lg font-black" aria-hidden="true">+</span>
+                                                                <button type="button" onClick={() => handleOpenModal(day, period)} className="group/free w-full min-h-[104px] rounded-xl border-2 border-dashed border-teal-200 dark:border-teal-900/80 bg-teal-50/40 dark:bg-teal-950/10 hover:bg-teal-100/80 dark:hover:bg-teal-950/35 hover:border-teal-500 dark:hover:border-teal-500 text-teal-700 dark:text-teal-300 p-2.5 flex flex-col items-center justify-center gap-2 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-teal-400/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500">
+                                                                    <span className="w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-950 flex items-center justify-center text-lg font-black transition-transform duration-200 group-hover/free:scale-110" aria-hidden="true">+</span>
                                                                     <span className="text-xs font-extrabold text-center leading-relaxed">{t('bookSlotText')}</span>
                                                                 </button>
                                                             )}
@@ -655,6 +659,14 @@ const SchedulePage: React.FC = () => {
             </main>
 
             <style>{`
+                /* Desktop timetable starts at laptop-sized windows when a mouse/trackpad is present.
+                   The original day-card interface stays unchanged on phones, tablets and touch-only screens. */
+                .schedule-compact-view { display: block; }
+                .schedule-desktop-view { display: none; }
+                @media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+                    .schedule-compact-view { display: none; }
+                    .schedule-desktop-view { display: block; }
+                }
                 @media print {
                     @page { size: A4 landscape; margin: 5mm; }
                     body { background: white !important; color: black !important; margin: 0 !important; padding: 0 !important; height: 100vh !important; }
