@@ -3,6 +3,7 @@ import { useLanguage } from '../App';
 import { ChatMessage } from '../types';
 import ReactMarkdown from 'react-markdown';
 import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 import { bookData } from '../api/bookData';
 import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
@@ -92,7 +93,7 @@ const localization: any = {
     input: 'اسأل صقر أو ابحث عن كتاب أو ابدأ قصة مبدعة...',
     status: 'صقر الذكي (EFIPS)',
     online: 'متصل',
-    download: 'تحميل شهادة المؤلف الصغير',
+    download: 'تحميل شهادة المؤلف الصغير PDF',
     you: 'أنت',
     certSchool: 'مدرسة صقر الإمارات الدولية الخاصة',
     certChallenge: 'تحدي المؤلف الصغير',
@@ -114,7 +115,7 @@ const localization: any = {
     input: 'Ask Saqr, search for a book or start a story...',
     status: 'Saqr AI Librarian',
     online: 'Online',
-    download: 'Download Certificate',
+    download: 'Download A4 PDF Certificate',
     you: 'YOU',
     certSchool: 'Emirates Falcon International Private School',
     certChallenge: 'Little Author Challenge',
@@ -252,47 +253,36 @@ const SmartSearchPage: React.FC = () => {
     if (container) container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
   }, [messages, isLoading]);
 
-  const handleDownloadJPG = async () => {
+  const handleDownloadCertificatePDF = async () => {
     if (!certificateRef.current) return;
 
     const certificate = certificateRef.current;
-    const originalPosition = certificate.style.position;
-    const originalLeft = certificate.style.left;
-    const originalTop = certificate.style.top;
-    const originalZIndex = certificate.style.zIndex;
-
-    certificate.style.position = 'fixed';
-    certificate.style.left = '0px';
-    certificate.style.top = '0px';
-    certificate.style.zIndex = '-9999';
-
+    const original = { position:certificate.style.position,left:certificate.style.left,top:certificate.style.top,zIndex:certificate.style.zIndex };
+    certificate.style.position='fixed';certificate.style.left='0px';certificate.style.top='0px';certificate.style.zIndex='-9999';
     try {
-      // Ensure Arabic glyphs use the intended Cairo font before html2canvas captures the certificate.
-      if (typeof document !== 'undefined' && document.fonts?.ready) {
-        await document.fonts.ready;
+      if(document.fonts?.ready) await document.fonts.ready;
+      await Promise.all(Array.from(certificate.querySelectorAll('img')).map(img => img.complete ? Promise.resolve() : new Promise<void>(resolve => { img.addEventListener('load',()=>resolve(),{once:true});img.addEventListener('error',()=>resolve(),{once:true});setTimeout(resolve,2200); })));
+      const canvas=await html2canvas(certificate,{scale:2,backgroundColor:'#ffffff',useCORS:true,allowTaint:false,logging:false,width:794,height:Math.max(1123,certificate.scrollHeight)});
+      const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true});
+      const perPage=Math.floor(canvas.width*(297/210));
+      const pages=Math.ceil(canvas.height/perPage);
+      for(let i=0;i<pages;i++){
+        if(i>0)pdf.addPage();
+        const start=i*perPage;
+        const h=Math.min(perPage,canvas.height-start);
+        const slice=document.createElement('canvas');slice.width=canvas.width;slice.height=perPage;
+        const context=slice.getContext('2d');if(!context)throw new Error('Canvas unavailable');
+        context.fillStyle='#ffffff';context.fillRect(0,0,slice.width,slice.height);
+        context.drawImage(canvas,0,start,canvas.width,h,0,0,canvas.width,h);
+        pdf.addImage(slice.toDataURL('image/jpeg',0.93),'JPEG',0,0,210,297,undefined,'FAST');
       }
-      const canvas = await html2canvas(certificate, {
-        scale: 3,
-        backgroundColor: '#ffffff',
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        width: 1123,
-        height: certificate.offsetHeight || certificate.scrollHeight
-      });
-
-      const imgData = canvas.toDataURL('image/jpeg', 1.0);
-      const link = document.createElement('a');
-      link.href = imgData;
-      link.download = `EFIPS_Author_${winnerData?.name ? winnerData.name.replace(/\s+/g, '_') : 'Certificate'}.jpg`;
-      link.click();
-    } catch (error) {
-      console.error('Error generating certificate image:', error);
+      const filename=String(winnerData?.name||'Certificate').replace(/[\\/:*?"<>|]/g,'_').slice(0,50);
+      pdf.save('EFIPS_Little_Author_'+filename+'.pdf');
+    } catch(error) {
+      console.error('Certificate PDF export failed:',error);
+      alert(locale==='ar'?'تعذر تحميل شهادة PDF. يرجى المحاولة مجددًا.':'Unable to export PDF certificate. Please retry.');
     } finally {
-      certificate.style.position = originalPosition;
-      certificate.style.left = originalLeft;
-      certificate.style.top = originalTop;
-      certificate.style.zIndex = originalZIndex;
+      certificate.style.position=original.position;certificate.style.left=original.left;certificate.style.top=original.top;certificate.style.zIndex=original.zIndex;
     }
   };
 
@@ -636,7 +626,7 @@ const SmartSearchPage: React.FC = () => {
                         </div>
                         {winnerData && saqrState === 'victory' && index === visibleMessages.length - 1 && (
                           <div className="mt-2 text-start">
-                            <button onClick={handleDownloadJPG} className="saqr-inline-download" type="button">
+                            <button onClick={handleDownloadCertificatePDF} className="saqr-inline-download" type="button">
                               <DownloadIcon />
                               <span>{t('download')}</span>
                             </button>
@@ -670,69 +660,32 @@ const SmartSearchPage: React.FC = () => {
         </main>
       )}
 
-      {/* Certificate export surface. Its original 1123 × 794 baseline is retained. */}
+      {/* A4 certificate export only; no alteration to Saqr AI or challenge logic. */}
       <div className="saqr-certificate-host" aria-hidden="true">
-        <div
-          ref={certificateRef}
-          dir={locale === 'ar' ? 'rtl' : 'ltr'}
-          className="saqr-certificate"
-        >
-          <div className="absolute right-0 top-0 h-64 w-64 rounded-bl-full bg-amber-500/10" />
-          <div className="absolute bottom-0 left-0 h-64 w-64 rounded-tr-full bg-amber-500/10" />
-
-          <div className="relative flex items-center justify-between border-b-2 border-slate-200 px-12 pb-6 pt-10">
-            <div className="flex items-center gap-5">
-              <img src="https://www.efipslibrary.online/school-logo.png" className="h-20 w-20 object-contain drop-shadow" alt="EFIPS Logo" crossOrigin="anonymous" />
-              <div>
-                <h3 className="text-xl font-black tracking-tight text-slate-800">{t('certSchool')}</h3>
-                <h4 className="mt-0.5 text-xs font-bold uppercase tracking-widest text-amber-700" dir="ltr">Emirates Falcon International Private School</h4>
-              </div>
-            </div>
-            <div className="text-left">
-              <div className="rounded-full border border-amber-400 bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-2.5 text-base font-black text-slate-900 shadow-md">
-                {t('certChallenge')}
-              </div>
-            </div>
-          </div>
-
-          <div className="relative flex flex-1 flex-col items-center justify-center px-14 py-6 text-center">
-            <h1 className="mb-3 text-4xl font-black uppercase tracking-wide text-amber-700 drop-shadow-sm lg:text-5xl">{t('certTitle')}</h1>
-            <p className="mb-6 text-xl font-bold text-slate-600">{t('certSubtitle')}</p>
-            <div className="mb-4">
-              <h2 className="inline-block border-b-4 border-amber-500 px-10 pb-2 text-4xl font-black tracking-tight text-slate-900 lg:text-5xl">{winnerData?.name}</h2>
-            </div>
-            <p className="mb-8 text-2xl font-bold text-slate-600">
-              {t('certGrade')} <span className="font-black text-amber-700">{winnerData?.grade}</span>
-            </p>
-            <div className="relative mb-4 w-full rounded-3xl border-2 border-amber-200 bg-white/90 p-6 text-start shadow-sm backdrop-blur">
-              <span className={`absolute -top-4 ${locale === 'ar' ? 'right-10' : 'left-10'} rounded-full border-2 border-amber-400 bg-amber-500 px-6 py-1.5 text-lg font-black text-slate-900 shadow-sm`}>
-                {t('certStory')}
-              </span>
-              <p className={`mt-4 whitespace-pre-wrap text-xl font-bold leading-[1.8] text-slate-800 ${locale === 'ar' ? 'text-justify' : 'text-left'}`}>
-                {winnerData?.content}
-              </p>
-            </div>
-          </div>
-
-          <div className="relative mt-auto flex items-end justify-between border-t-2 border-slate-200 px-14 pt-6">
-            <div className="w-60 text-center">
-              <p className="mb-1 text-sm font-bold uppercase tracking-wider text-slate-400">{t('certDate')}</p>
-              <p className="text-lg font-black text-slate-800">{winnerData?.date}</p>
-            </div>
-            <div className="flex flex-1 flex-col items-center text-center">
-              <div className="mb-1 flex h-16 w-16 items-center justify-center rounded-full border-2 border-amber-500/30 bg-amber-50/50">
-                <span dir="ltr" className="text-xl font-black text-amber-600">EFIPS</span>
-              </div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{t('certOfficial')}</p>
-            </div>
-            <div className="w-60 text-center">
-              <p className="mb-1 text-sm font-bold uppercase tracking-wider text-slate-400">{t('certAI')}</p>
-              <p className="text-xl font-black text-amber-700">{t('certSaqr')}</p>
-            </div>
-          </div>
+        <div ref={certificateRef} className="saqr-certificate" dir={locale === 'ar' ? 'rtl' : 'ltr'} lang={locale}>
+          <div className="cert-top-stripe" />
+          <header className="cert-header">
+            <img src="https://www.efipslibrary.online/school-logo.png" crossOrigin="anonymous" className="cert-logo" alt="EFIPS" />
+            <div className="cert-school"><h3>مدرسة صقر الإمارات الدولية الخاصة</h3><p dir="ltr">Emirates Falcon International Private School</p><span>{t('certChallenge')}</span></div>
+            <div className="cert-seal" dir="ltr">EFIPS</div>
+          </header>
+          <main className="cert-body">
+            <span className="cert-ornament" aria-hidden="true">✦ ✧ ✦</span>
+            <h1>{t('certTitle')}</h1>
+            <p className="cert-subtitle">{t('certSubtitle')}</p>
+            <h2 className="cert-winner" dir="auto">{winnerData?.name || '—'}</h2>
+            <p className="cert-grade">{t('certGrade')} <strong>{winnerData?.grade || '—'}</strong></p>
+            <section className="cert-summary"><h3>{locale === 'ar' ? 'ملخص القصة المؤلَّفة' : 'Summary of the Creative Story'}</h3><p dir="auto">{winnerData?.content || '—'}</p></section>
+            <p className="cert-commendation">{locale === 'ar' ? 'إبداع يستحق التقدير، وقصة تستحق أن تُروى' : 'An imagination worth celebrating, a story worth sharing'}</p>
+          </main>
+          <footer className="cert-footer">
+            <div><span>{t('certDate')}</span><strong>{winnerData?.date}</strong></div>
+            <div className="cert-library" dir="ltr">EFIPS ✦ LIBRARY</div>
+            <div><span>{locale === 'ar' ? 'توقيع صقر' : 'Saqr Signature'}</span><strong className="cert-signature">{locale === 'ar' ? 'صقر' : 'Saqr'}</strong><small>{t('certSaqr')}</small></div>
+          </footer>
+          <div className="cert-bottom-stripe" />
         </div>
       </div>
-
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
 
@@ -1173,37 +1126,33 @@ const SmartSearchPage: React.FC = () => {
         .saqr-progress-bar { position: absolute; inset-block: 0; left: 0; width: 45%; border-radius: inherit; background: linear-gradient(90deg, #0ea5e9, #f59e0b, #10b981); animation: saqr-progress 1.4s ease-in-out infinite; }
         .saqr-footer-note { margin: 4px 0 0; color: #94a3b8; font-size: 9px; line-height: 1.3; text-align: center; }
 
-        .saqr-certificate-host { position: fixed; top: 0; left: -9999px; width: 1123px; pointer-events: none; }
-        .saqr-certificate {
-          position: relative;
-          display: flex;
-          flex-direction: column;
-          width: 1123px;
-          min-height: 794px;
-          height: fit-content;
-          overflow: hidden;
-          padding-bottom: 40px;
-          border: 16px solid #f59e0b;
-          color: #0f172a;
-          background: linear-gradient(135deg, #fff, #f8fafc, rgba(255, 251, 235, .65));
-          font-family: 'Cairo', Tahoma, Arial, sans-serif;
-          font-kerning: normal;
-          text-rendering: optimizeLegibility;
-        }
-        .saqr-certificate[dir="rtl"],
-        .saqr-certificate[dir="rtl"] * {
-          letter-spacing: normal !important;
-          word-spacing: normal;
-          font-kerning: normal;
-        }
-        .saqr-certificate [dir="ltr"] { direction: ltr; unicode-bidi: isolate; }
-        .saqr-certificate[dir="rtl"] [dir="ltr"] { letter-spacing: .08em !important; }
-        .saqr-certificate p,
-        .saqr-certificate h1,
-        .saqr-certificate h2,
-        .saqr-certificate h3,
-        .saqr-certificate h4 { font-variant-ligatures: common-ligatures contextual; }
-
+        .saqr-certificate-host { position:fixed;top:0;left:-9999px;width:794px;pointer-events:none; }
+        .saqr-certificate { box-sizing:border-box;display:flex;flex-direction:column;position:relative;width:794px;min-height:1123px;height:auto;overflow:visible;padding:55px 56px 48px;border:11px solid #087e72;background:#fff;color:#203549;font-family:'Cairo',Tahoma,Arial,sans-serif;line-height:1.55;letter-spacing:normal;text-rendering:optimizeLegibility; }
+        .saqr-certificate[dir='rtl'],.saqr-certificate[dir='rtl'] * { letter-spacing:normal!important;word-spacing:normal!important;font-kerning:normal!important; }
+        .saqr-certificate [dir='ltr'] { direction:ltr;unicode-bidi:isolate; }
+        .cert-top-stripe,.cert-bottom-stripe { position:absolute;left:0;right:0;height:8px;background:linear-gradient(90deg,#d92332 0 25%,#009c6b 25% 50%,#edbe63 50% 75%,#162c40 75%); }
+        .cert-top-stripe {top:0}.cert-bottom-stripe {bottom:0}
+        .cert-header {display:flex;gap:17px;align-items:center;border-bottom:2px solid #cde6df;padding-bottom:23px}
+        .cert-logo {width:92px;height:92px;object-fit:contain;flex-shrink:0}
+        .cert-school {flex:1;text-align:start}.cert-school h3 {font-size:18px;font-weight:900;color:#0b695c;margin:0}
+        .cert-school p {font:700 11px Arial,sans-serif;color:#475569;margin:6px 0}
+        .cert-school span {display:inline-block;padding:5px 13px;border-radius:18px;background:#e9f7f3;color:#087e72;font-size:13px;font-weight:900}
+        .cert-seal {width:70px;height:70px;border-radius:50%;border:3px solid #cba151;display:flex;align-items:center;justify-content:center;color:#a98432;font:900 16px Arial,sans-serif;flex-shrink:0}
+        .cert-body {flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;min-height:645px;padding-top:28px}
+        .cert-ornament {color:#c89b45;font-size:25px}
+        .cert-body h1 {font-size:35px;line-height:1.4;color:#087e72;font-weight:900;margin:12px 0}
+        .cert-subtitle {font-size:17px;font-weight:700;color:#475569;margin:3px 0 18px}
+        .cert-winner {width:100%;font-size:30px;font-weight:900;border-bottom:3px solid #d5a64c;padding:0 8px 10px;margin:0;overflow-wrap:anywhere}
+        .cert-grade {font-size:17px;color:#475569;font-weight:700;margin:16px 0 25px}.cert-grade strong{color:#087e72}
+        .cert-summary {box-sizing:border-box;width:100%;min-height:245px;border:2px solid #c5e2da;border-radius:20px;background:#f4faf8;padding:18px 23px 22px;text-align:start}
+        .cert-summary h3 {font-size:19px;font-weight:900;color:#087e72;margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid #cde8df}
+        .cert-summary p {font-size:16px;font-weight:700;color:#203549;margin:0;line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere;unicode-bidi:plaintext;text-align:start}
+        .cert-commendation {font-size:15px;font-weight:800;color:#ac8738;margin:25px 0 15px}
+        .cert-footer {display:flex;align-items:flex-end;justify-content:space-between;gap:14px;border-top:2px solid #cce8df;margin-top:25px;padding-top:22px}
+        .cert-footer>div:not(.cert-library) {display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;width:180px;color:#64748b;font-size:13px;font-weight:700}
+        .cert-footer strong {font-size:17px;color:#193447;font-weight:900}.cert-footer small{font-size:11px}
+        .cert-library {height:94px;width:94px;border:2px solid #b9dad2;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#087e72;font:900 12px Arial,sans-serif;text-align:center}
+        .cert-footer strong.cert-signature {font-family:'Cairo',Tahoma,sans-serif;font-size:36px;color:#087e72;font-style:italic;transform:rotate(-5deg);}
         @keyframes saqr-ring-pulse {
           0%, 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, .10); }
           50% { box-shadow: 0 0 0 4px rgba(251, 191, 36, .34); }
