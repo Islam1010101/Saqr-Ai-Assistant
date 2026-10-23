@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useLanguage } from '../App';
+import FlagDayChallenge from './FlagDayChallenge';
 
 type L = { ar: string; en: string };
 type Mode = 'home' | 'passport' | 'language' | 'archive';
@@ -175,6 +176,7 @@ const NationalIdentityPage: React.FC = () => {
   const storageKey = useMemo(() => 'efips-national-identity-v1:student:' + identity, [identity]);
   const [progress,setProgress] = useState<Progress>(() => identity ? readSaved(storageKey) : emptyProgress());
   const [mode,setMode] = useState<Mode>('home');
+  const [flagChallengeOpen, setFlagChallengeOpen] = useState(false);
   const [index,setIndex] = useState(0);
   const [chosen,setChosen] = useState<number|null>(null);
   useEffect(() => {
@@ -182,6 +184,8 @@ const NationalIdentityPage: React.FC = () => {
     try { localStorage.setItem(storageKey,JSON.stringify(progress)); } catch { /* Reading tasks still work without storage. */ }
   },[storageKey,identity,progress]);
   if (!identity) return <Navigate to="/home" replace />;
+  // Render the existing game unchanged, with its built-in close callback and student rewards.
+  if (flagChallengeOpen) return <FlagDayChallenge onClose={() => setFlagChallengeOpen(false)} />;
 
   const currentMode: Exclude<Mode,'home'> = mode === 'home' ? 'passport' : mode;
   const entries = activities[currentMode];
@@ -240,10 +244,10 @@ const NationalIdentityPage: React.FC = () => {
       </section>
       {mode === 'home' ? <>
         <div className="mt-9 mb-5 flex flex-wrap items-end justify-between gap-3">
-          <div><p className="text-xs font-black text-emerald-700 dark:text-emerald-400">{tr(l('ثلاث مغامرات ثقافية','THREE CULTURAL ADVENTURES'))}</p><h2 className="text-xl sm:text-2xl font-black mt-1">{tr(l('اختر رحلتك','Choose your journey'))}</h2></div>
+          <div><p className="text-xs font-black text-emerald-700 dark:text-emerald-400">{tr(l('أربع مغامرات ثقافية','FOUR CULTURAL ADVENTURES'))}</p><h2 className="text-xl sm:text-2xl font-black mt-1">{tr(l('اختر رحلتك','Choose your journey'))}</h2></div>
           <div className="rounded-full bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 px-4 py-2 text-xs font-black text-amber-800 dark:text-amber-200">{totalCompleted}/15 {tr(l('مهمة مكتملة','missions completed'))}</div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5">
           {modules.map(m=><button type="button" key={m.id} onClick={()=>go(m.id)} className="group overflow-hidden text-start rounded-[1.8rem] bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 shadow-lg hover:shadow-2xl hover:-translate-y-1 hover:border-emerald-400 dark:hover:border-emerald-700 transition-all focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-500">
             <div className={'relative bg-gradient-to-br '+m.color+' p-6 text-white overflow-hidden'}>
               <div className="absolute -end-5 -top-6 h-36 w-36 border-[17px] rounded-full border-white/10"/>
@@ -259,6 +263,34 @@ const NationalIdentityPage: React.FC = () => {
               <span className="inline-flex mt-5 gap-2 items-center text-emerald-700 dark:text-emerald-300 text-sm font-black">{tr(l('ابدأ الاستكشاف','Start exploring'))}<Icon kind="arrow" className={'w-5 h-5 '+(lang==='ar'?'rotate-180':'')}/></span>
             </div>
           </button>)}
+          <button type="button" onClick={() => setFlagChallengeOpen(true)}
+            className="group overflow-hidden text-start rounded-[1.8rem] bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 shadow-lg hover:shadow-2xl hover:-translate-y-1 hover:border-emerald-400 dark:hover:border-emerald-700 transition-all focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-500"
+            aria-label={tr(l('ابدأ تحدي راية المجد في يوم العلم','Play the UAE Flag Day Challenge'))}>
+            <div className="relative overflow-hidden bg-gradient-to-br from-[#127C58] via-[#075B49] to-[#0D403D] p-6 text-white">
+              <div aria-hidden="true" className="absolute top-0 inset-x-0 flex h-1.5"><span className="w-1/4 bg-red-500"/><span className="w-1/4 bg-emerald-400"/><span className="w-1/4 bg-white"/><span className="w-1/4 bg-slate-950"/></div>
+              <div aria-hidden="true" className="absolute -end-5 -top-6 h-36 w-36 rounded-full border-[17px] border-white/10"/>
+              <svg viewBox="0 0 64 64" className="relative h-14 w-14" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.7" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 7v51M8 58h8"/>
+                <path d="M14 11h39v28H14z" stroke="none" fill="#FFFFFF"/>
+                <path d="M14 11h11v28H14z" stroke="none" fill="#E31D3A"/>
+                <path d="M25 11h28v9H25z" stroke="none" fill="#07924D"/>
+                <path d="M25 30h28v9H25z" stroke="none" fill="#161616"/>
+                <path d="M12 7v51M8 58h8" />
+                <path d="m45 49 3 5 6-10" stroke="#FFE0A3" strokeWidth="3"/>
+              </svg>
+              <div className="mt-5 text-xs font-black text-white/80">{tr(l('تحدي تفاعلي · يوم العلم','INTERACTIVE · FLAG DAY'))}</div>
+              <h3 className="relative mt-1 text-xl font-black leading-snug">{tr(l('تحدي راية المجد','Flag Day Challenge'))}</h3>
+            </div>
+            <div className="p-5 sm:p-6">
+              <p className="min-h-[84px] text-sm leading-7 font-semibold text-slate-600 dark:text-slate-300">{tr(l('ارفع علم الإمارات بالإجابات الصحيحة، واصعد عبر المعالم حتى قمة برج خليفة.','Answer UAE Flag Day questions, raise the flag and climb past landmarks toward the Burj Khalifa.'))}</p>
+              <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                <div className="h-full w-full rounded-full bg-gradient-to-r from-red-500 via-emerald-500 to-amber-400 opacity-80"/>
+              </div>
+              <span className="mt-5 inline-flex items-center gap-2 text-sm font-black text-emerald-700 dark:text-emerald-300">
+                {tr(l('ابدأ التحدي','Start the challenge'))}<Icon kind="arrow" className={'h-5 w-5 '+(lang==='ar'?'rotate-180':'')}/>
+              </span>
+            </div>
+          </button>
         </div>
         {progress.stamps.length===7 && <div role="status" className="mt-6 rounded-[1.5rem] border-2 border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/25 px-6 py-5 text-amber-900 dark:text-amber-200 font-black">
           {tr(l('أحسنت! جمعت أختام الإمارات السبع وأكملت جواز صقر الثقافي.','Well done! You have collected all seven emirate stamps and completed your cultural passport.'))}

@@ -231,41 +231,9 @@ const HomePage: React.FC = () => {
     const [teacherSchedule, setTeacherSchedule] = useState<any[]>([]);
     const [borrowCountdownNow, setBorrowCountdownNow] = useState(Date.now());
 
-    // حالات زر العد التنازلي ليوم العلم (3 نوفمبر)
-    const [showFlagModal, setShowFlagModal] = useState(false);
-    const [flagTimeLeft, setFlagTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-
     useEffect(() => {
         const timer = window.setInterval(() => setBorrowCountdownNow(Date.now()), 1000);
         return () => window.clearInterval(timer);
-    }, []);
-
-    useEffect(() => {
-        const nowYear = new Date().getFullYear();
-        let targetDate = new Date(nowYear, 10, 3, 0, 0, 0); // 3 نوفمبر
-        if (new Date().getTime() > targetDate.getTime()) {
-            targetDate.setFullYear(nowYear + 1);
-        }
-
-        const updateFlagCountdown = () => {
-            const now = new Date().getTime();
-            const difference = targetDate.getTime() - now;
-
-            if (difference > 0) {
-                setFlagTimeLeft({
-                    days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-                    hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-                    minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
-                    seconds: Math.floor((difference % (1000 * 60)) / 1000),
-                });
-            } else {
-                setFlagTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-            }
-        };
-
-        updateFlagCountdown();
-        const flagInterval = setInterval(updateFlagCountdown, 1000);
-        return () => clearInterval(flagInterval);
     }, []);
 
     const getBorrowCountdown = (returnDate: string) => {
@@ -888,25 +856,6 @@ const HomePage: React.FC = () => {
                             </Link>
                         )}
 
-                        {/* ================= زر احتفالي بألوان علم الإمارات واسمه احتفالي فقط ================= */}
-                        <button
-                            onClick={() => setShowFlagModal(true)}
-                            className="group relative bg-gradient-to-r from-[#ff0000] via-[#00732f] to-[#000000] text-white p-6 rounded-[2.5rem] border-b-8 border-amber-500 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden text-right w-full cursor-pointer"
-                        >
-                            <div className="absolute top-3 end-3 bg-white/20 text-white text-[10px] md:text-xs px-3 py-0.5 rounded-full font-black uppercase tracking-wider shadow-md animate-pulse">
-                                3 Nov
-                            </div>
-                            <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 text-2xl">
-                                🇦🇪
-                            </div>
-                            <div>
-                                <h3 className="text-xl md:text-2xl font-black mb-1 tracking-tight">{t('festiveBtn')}</h3>
-                                <p className="text-xs md:text-sm opacity-95 font-bold leading-snug">
-                                    {flagTimeLeft.days} {t('dayLabel')} و {flagTimeLeft.hours} {t('hourLabel')} متبقية
-                                </p>
-                            </div>
-                        </button>
-
                         {(userType === 'student' || userType === 'admin') && (
                             <Link to="/saqr-studio" className="group relative bg-blue-500 text-white p-6 rounded-[2.5rem] border-b-8 border-blue-700 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
                                 <div className="absolute top-4 end-4 bg-rose-500 text-white text-[10px] md:text-xs px-3 py-0.5 rounded-full font-black uppercase tracking-wider shadow-md animate-pulse">
@@ -1075,74 +1024,6 @@ const HomePage: React.FC = () => {
                 </div>
 
             </div>
-
-            {/* ================= نافذة العد التنازلي ليوم العلم (3 نوفمبر) ================= */}
-            {showFlagModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-fade-in" dir={dir}>
-                    <div className="relative w-full max-w-md bg-white dark:bg-slate-900 border-4 border-amber-400 rounded-[2.5rem] shadow-2xl p-6 sm:p-8 text-center overflow-hidden">
-                        
-                        <div className="absolute top-0 left-0 right-0 h-3 flex">
-                            <div className="bg-[#ff0000] w-1/4"></div>
-                            <div className="bg-[#00732f] w-1/4"></div>
-                            <div className="bg-white w-1/4"></div>
-                            <div className="bg-black w-1/4"></div>
-                        </div>
-
-                        <button
-                            onClick={() => setShowFlagModal(false)}
-                            className="absolute top-5 left-5 text-slate-400 hover:text-rose-500 font-black text-lg p-1"
-                        >
-                            ✕
-                        </button>
-
-                        <div className="w-16 h-16 mx-auto rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-3xl mb-4 mt-2">
-                            🇦🇪
-                        </div>
-
-                        <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mb-1">
-                            {t('flagDayModalTitle')}
-                        </h3>
-                        <p className="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
-                            {t('flagDayModalSub')}
-                        </p>
-
-                        <div className="text-xs font-bold text-slate-600 dark:text-slate-300 mb-2">
-                            {t('flagDayModalCountdown')}
-                        </div>
-
-                        <div className="grid grid-cols-4 gap-2 mb-6">
-                            <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-2xl border border-slate-200 dark:border-slate-700">
-                                <div className="text-lg sm:text-xl font-black text-emerald-600 dark:text-emerald-400 font-mono">{flagTimeLeft.days}</div>
-                                <div className="text-[10px] font-bold text-slate-400 mt-0.5">{t('dayLabel')}</div>
-                            </div>
-                            <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-2xl border border-slate-200 dark:border-slate-700">
-                                <div className="text-lg sm:text-xl font-black text-blue-600 dark:text-blue-400 font-mono">{flagTimeLeft.hours}</div>
-                                <div className="text-[10px] font-bold text-slate-400 mt-0.5">{t('hourLabel')}</div>
-                            </div>
-                            <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-2xl border border-slate-200 dark:border-slate-700">
-                                <div className="text-lg sm:text-xl font-black text-amber-600 dark:text-amber-400 font-mono">{flagTimeLeft.minutes}</div>
-                                <div className="text-[10px] font-bold text-slate-400 mt-0.5">{t('minLabel')}</div>
-                            </div>
-                            <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-2xl border border-slate-200 dark:border-slate-700">
-                                <div className="text-lg sm:text-xl font-black text-rose-600 dark:text-rose-400 font-mono">{flagTimeLeft.seconds}</div>
-                                <div className="text-[10px] font-bold text-slate-400 mt-0.5">{t('secLabel')}</div>
-                            </div>
-                        </div>
-
-                        <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-800 text-xs font-bold text-amber-800 dark:text-amber-300 mb-6">
-                            {t('flagDayAlert')}
-                        </div>
-
-                        <button
-                            onClick={() => setShowFlagModal(false)}
-                            className="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black rounded-2xl shadow-md transition-all text-sm"
-                        >
-                            {t('flagDayModalBtn')}
-                        </button>
-
-                    </div>
-                </div>
-            )}
 
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
