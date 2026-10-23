@@ -289,28 +289,28 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
     if (!book) return null;
 
     return (
-        <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300" onClick={onClose}>
+        <div className="fixed inset-0 z-[2000] flex items-center justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300" onClick={onClose}>
             <div 
-                className="relative w-full max-w-3xl mx-auto bg-white dark:bg-slate-800 rounded-[3rem] border-4 border-sky-400 dark:border-slate-700 shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] animate-in zoom-in-95 duration-300 cursor-default"
+                className="relative w-full max-w-3xl mx-auto bg-white dark:bg-slate-800 rounded-2xl sm:rounded-[3rem] border-2 sm:border-4 border-sky-400 dark:border-slate-700 shadow-2xl overflow-y-auto md:overflow-hidden flex flex-col md:flex-row max-h-[96dvh] md:max-h-[90vh] animate-in zoom-in-95 duration-300 cursor-default"
                 onClick={(e) => e.stopPropagation()}
             >
-                <button onClick={onClose} className="absolute top-4 end-4 z-50 p-2 bg-rose-500 text-white rounded-full hover:bg-rose-600 transition-transform shadow-lg active:scale-90 active:translate-y-1">
+                <button onClick={onClose} className="sticky top-2 self-end me-2 md:absolute md:top-4 md:end-4 z-50 p-2 bg-rose-500 text-white rounded-full hover:bg-rose-600 transition-transform shadow-lg active:scale-90 active:translate-y-1">
                     <CloseSvg/>
                 </button>
 
-                <div className="flex-1 p-8 overflow-y-auto scrollbar-thin text-start flex flex-col mt-4 md:mt-0">
-                    <h2 className="text-3xl md:text-4xl text-slate-900 dark:text-white font-black leading-tight mb-4">{book.title}</h2>
+                <div className="flex-1 min-w-0 p-4 sm:p-6 md:p-8 md:overflow-y-auto scrollbar-thin text-start flex flex-col mt-0 md:mt-0">
+                    <h2 className="text-xl sm:text-2xl md:text-4xl text-slate-900 dark:text-white font-black leading-snug break-words mb-3 md:mb-4">{book.title}</h2>
                     
-                    <div className="relative group/author inline-flex items-center gap-2 mb-8 bg-sky-50 dark:bg-slate-700 w-fit px-4 py-2 rounded-full border-2 border-sky-200 dark:border-slate-600 cursor-help">
+                    <div className="relative group/author inline-flex max-w-full flex-wrap items-center gap-2 mb-4 md:mb-8 bg-sky-50 dark:bg-slate-700 w-fit px-4 py-2 rounded-full border-2 border-sky-200 dark:border-slate-600 cursor-help">
                         <UserIcon/>
-                        <p className="text-base text-sky-600 dark:text-sky-400 font-bold">{book.author}</p>
-                        <div className="absolute top-full mt-2 start-0 w-64 p-4 bg-slate-900 text-white text-xs rounded-2xl opacity-0 invisible group-hover/author:opacity-100 group-hover/author:visible transition-all shadow-xl z-50 font-medium leading-relaxed">
+                        <p className="text-sm sm:text-base text-sky-600 dark:text-sky-400 font-bold break-words">{book.author}</p>
+                        <div className="absolute top-full mt-2 start-0 w-[min(16rem,calc(100vw-4rem))] p-4 bg-slate-900 text-white text-xs rounded-2xl opacity-0 invisible group-hover/author:opacity-100 group-hover/author:visible transition-all shadow-xl z-50 font-medium leading-relaxed">
                             <strong className="block mb-2 text-sky-400 font-black uppercase">{t('bioLabel')}</strong>
                             {book.bio}
                         </div>
                     </div>
                     
-                    <div className="bg-slate-50 dark:bg-slate-900 p-6 md:p-8 rounded-[2rem] border-4 border-slate-200 dark:border-slate-700 shadow-inner text-start flex-grow">
+                    <div className="bg-slate-50 dark:bg-slate-900 p-4 sm:p-5 md:p-8 rounded-[2rem] border-4 border-slate-200 dark:border-slate-700 shadow-inner text-start flex-grow">
                         <div className="flex items-center gap-2 mb-4">
                            <span className="w-3 h-3 rounded-full bg-sky-500"></span>
                            <p className="text-xs text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest">{t('summaryLabel')}</p>
@@ -323,21 +323,21 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
                     {book.audioId && <SaqrAudioPlayer audioSrc={book.audioId} t={t}/>}
                 </div>
 
-                <div className="w-full md:w-[280px] bg-slate-100 dark:bg-slate-900/50 p-8 flex flex-col justify-center items-center border-t-4 md:border-t-0 md:border-s-4 border-slate-200 dark:border-slate-700 shrink-0">
-                    <div className="w-full text-center space-y-6">
-                        <div className="bg-white dark:bg-slate-800 p-5 rounded-[2rem] border-4 border-slate-200 dark:border-slate-600 shadow-sm">
+                <div className="w-full md:w-[280px] bg-slate-100 dark:bg-slate-900/50 p-4 sm:p-5 md:p-8 flex flex-col justify-center items-center border-t-4 md:border-t-0 md:border-s-4 border-slate-200 dark:border-slate-700 shrink-0">
+                    <div className="w-full text-center space-y-3 md:space-y-6">
+                        <div className="bg-white dark:bg-slate-800 p-3 md:p-5 rounded-xl md:rounded-[2rem] border-4 border-slate-200 dark:border-slate-600 shadow-sm">
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{t('subjectLabel')}</p>
-                            <p className="text-xl font-black text-slate-900 dark:text-white truncate">{book.subject}</p>
+                            <p className="text-base md:text-xl font-black text-slate-900 dark:text-white break-words">{book.subject}</p>
                         </div>
                         
-                        <div className="bg-sky-50 dark:bg-slate-800 p-5 rounded-[2rem] border-4 border-sky-200 dark:border-slate-600 shadow-sm">
+                        <div className="bg-sky-50 dark:bg-slate-800 p-3 md:p-5 rounded-xl md:rounded-[2rem] border-4 border-sky-200 dark:border-slate-600 shadow-sm">
                             <p className="text-[10px] font-black text-sky-400 uppercase tracking-widest mb-2">{t('ageClassification')}</p>
-                            <p className="text-2xl font-black text-sky-600 truncate">{loading ? '...' : (ageGroup || 'General')}</p>
+                            <p className="text-lg md:text-2xl font-black text-sky-600 break-words">{loading ? '...' : (ageGroup || 'General')}</p>
                         </div>
 
                         <DigitalBookRating bookId={digitalBookKey('en', book)} compact={false} />
 
-                        <div className="pt-6">
+                        <div className="pt-2 md:pt-6">
                             <a href={book.driveLink} target="_blank" rel="noreferrer" className="w-full block bg-sky-500 text-white font-black py-4 rounded-[2rem] hover:-translate-y-1 active:translate-y-2 border-b-8 border-sky-700 active:border-b-0 transition-all text-center uppercase tracking-widest text-base shadow-md">
                                 {t('read')}
                             </a>
