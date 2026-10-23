@@ -369,7 +369,7 @@ const BookCard = React.memo(({ book, onClick, t }: { book: any; onClick: () => v
   const colorClass = colors[book.title.length % colors.length];
 
   return (
-    <div onClick={onClick} className="relative group cursor-pointer w-full max-w-sm mx-auto h-[280px] md:h-[300px] flex items-stretch justify-center p-2">
+    <div onClick={onClick} className="relative group cursor-pointer w-full max-w-sm mx-auto min-h-[290px] h-auto md:min-h-[300px] flex items-stretch justify-center p-1.5 sm:p-2">
       {/* هالة مضيئة خلف الكتاب في حالة وجود صوت */}
       {hasAudio && (
         <div className="absolute inset-0 bg-rose-400/20 blur-2xl rounded-[2rem] scale-95 group-hover:scale-105 opacity-60 animate-pulse transition-all duration-500 pointer-events-none -z-10"></div>
@@ -382,7 +382,7 @@ const BookCard = React.memo(({ book, onClick, t }: { book: any; onClick: () => v
         <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-black/10 pointer-events-none"></div>
         <div className="absolute top-0 left-0 w-full h-1/2 bg-white/10 skew-y-12 pointer-events-none"></div>
 
-        <div className="p-4 md:p-5 flex flex-col h-full relative z-10 gap-2.5">
+        <div className="p-3.5 sm:p-4 md:p-5 flex flex-col min-h-[290px] md:min-h-[300px] h-full relative z-10 gap-2.5">
           <div className="flex items-start justify-between gap-2 flex-row-reverse">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/25 border border-white/20 px-2.5 py-1 text-white backdrop-blur-sm shadow-sm text-[10px] font-black max-w-[75%]">
               {isAi && <RobotSvg/>}
@@ -395,7 +395,7 @@ const BookCard = React.memo(({ book, onClick, t }: { book: any; onClick: () => v
             )}
           </div>
           <div className="flex flex-row items-start gap-2 mt-auto min-w-0" dir={book.title && /[\u0600-\u06FF]/.test(book.title) ? 'rtl' : 'ltr'}>
-            <h3 className="flex-1 min-w-0 font-black text-lg md:text-xl text-white leading-snug drop-shadow-md line-clamp-3 text-start" dir="auto">{book.title}</h3>
+            <h3 className="flex-1 min-w-0 font-black text-lg md:text-xl text-white leading-snug drop-shadow-md break-words line-clamp-3 text-start" dir="auto">{book.title}</h3>
             <button type="button" aria-pressed={isSaved} aria-label={isSaved ? t('readLaterRemove') : t('readLater')}
               title={isSaved ? t('readLaterRemove') : t('readLater')}
               onClick={(event) => { event.stopPropagation(); toggleSaved(readingKey); }}
@@ -403,7 +403,7 @@ const BookCard = React.memo(({ book, onClick, t }: { book: any; onClick: () => v
               <svg aria-hidden="true" viewBox="0 0 24 24" fill={isSaved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path strokeLinejoin="round" strokeLinecap="round" d="M6 4h12v17l-6-4-6 4V4z" /></svg>
             </button>
           </div>
-          <div className="flex flex-wrap items-center gap-2 text-white/95 text-xs font-bold min-w-0" dir="auto">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-white/95 text-xs font-bold min-w-0" dir="auto">
             <span className="inline-flex items-center gap-1 min-w-0 max-w-full">
               <UserIcon/><span className="truncate">{book.author}</span>
             </span>
