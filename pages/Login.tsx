@@ -20,28 +20,71 @@ export default function Login() {
   const [showFlag, setShowFlag] = useState(false); // حالة إظهار علم الإمارات عند الضغط على صقر
 
   const videoRef = useRef<HTMLVideoElement>(null);
+  const failedVideosRef = useRef<Set<number>>(new Set());
+  const [videoUnavailable, setVideoUnavailable] = useState(false);
 
-  // اختيار فيديو عشوائي عند فتح الصفحة والتبديل العشوائي عند انتهاء كل فيديو
-  const [currentVideoIndex, setCurrentVideoIndex] = useState<number>(() => 
+  // Keep the original random order, but reuse one video element to avoid extra Safari setup.
+  const [currentVideoIndex, setCurrentVideoIndex] = useState<number>(() =>
     Math.floor(Math.random() * BACKGROUND_VIDEOS.length)
   );
 
-  // إجبار سفاري وباقي المتصفحات على التشغيل التلقائي عبر البرمجة عند تغيير الفيديو أو تحميل الصفحة
-  useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.muted = true;
-      videoRef.current.play().catch((error) => {
-        console.log("Safari autoplay prevented, attempting recovery:", error);
+  const requestVideoPlayback = () => {
+    const video = videoRef.current;
+    if (!video || videoUnavailable || document.hidden) return;
+    // Safari must see the video muted and inline before any playback request.
+    video.defaultMuted = true;
+    video.muted = true;
+    video.playsInline = true;
+    if (!video.paused) return;
+
+    const attempt = video.play();
+    if (attempt) {
+      void attempt.catch(() => {
+        // Safari may defer autoplay because of system/browser policy.
+        // Retry when media is ready, the tab returns, or the visitor interacts.
       });
     }
-  }, [currentVideoIndex]);
+  };
+
+  useEffect(() => {
+    if (videoUnavailable) return;
+    const onResume = () => requestVideoPlayback();
+    document.addEventListener('visibilitychange', onResume);
+    window.addEventListener('pageshow', onResume);
+    window.addEventListener('pointerdown', onResume, { passive: true });
+    window.addEventListener('keydown', onResume);
+    requestVideoPlayback();
+    return () => {
+      document.removeEventListener('visibilitychange', onResume);
+      window.removeEventListener('pageshow', onResume);
+      window.removeEventListener('pointerdown', onResume);
+      window.removeEventListener('keydown', onResume);
+    };
+  }, [currentVideoIndex, videoUnavailable]);
 
   const handleVideoEnd = () => {
-    setCurrentVideoIndex((prevIndex) => {
-      const availableIndices = BACKGROUND_VIDEOS.map((_, idx) => idx).filter(idx => idx !== prevIndex);
-      const nextRandomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
-      return nextRandomIndex;
-    });
+    const candidates = BACKGROUND_VIDEOS.map((_, idx) => idx)
+      .filter(idx => idx !== currentVideoIndex && !failedVideosRef.current.has(idx));
+
+    if (!candidates.length) {
+      // If just one playable clip remains, repeat it rather than choosing a broken file.
+      const video = videoRef.current;
+      if (video && !failedVideosRef.current.has(currentVideoIndex)) {
+        video.currentTime = 0;
+        requestVideoPlayback();
+      }
+      return;
+    }
+    setCurrentVideoIndex(candidates[Math.floor(Math.random() * candidates.length)]);
+  };
+
+  const handleVideoError = () => {
+    failedVideosRef.current.add(currentVideoIndex);
+    if (failedVideosRef.current.size >= BACKGROUND_VIDEOS.length) {
+      setVideoUnavailable(true);
+      return;
+    }
+    handleVideoEnd();
   };
 
   // دالة تسجيل دخول الطلاب
@@ -134,20 +177,23 @@ export default function Login() {
         {/* ================= القسم الأول: الهوية البصرية وصقر (مع خلفية الفيديو العشوائية) ================= */}
         <div className="lg:w-1/2 p-8 lg:p-12 flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br from-blue-50/50 to-slate-100/50 border-b lg:border-b-0 lg:border-l border-slate-200">
           
-          {/* 🎥 خلفية الفيديو العشوائية بدون صوت ومتجاوبة مع كل الشاشات وتدعم سفاري */}
-          <div className="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden">
-            <video
-              ref={videoRef}
-              key={BACKGROUND_VIDEOS[currentVideoIndex]}
-              src={BACKGROUND_VIDEOS[currentVideoIndex]}
-              autoPlay
-              muted
-              playsInline
-              preload="auto"
-              onEnded={handleVideoEnd}
-              onError={handleVideoEnd}
-              className="w-full h-full object-cover object-center"
-            />
+          {/* Muted inline playback with Safari resume and a static background fallback. */}
+          <div className="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden bg-gradient-to-br from-blue-100 to-slate-200">
+            {!videoUnavailable && (
+              <video
+                ref={videoRef}
+                src={BACKGROUND_VIDEOS[currentVideoIndex]}
+                autoPlay
+                muted
+                playsInline
+                preload="auto"
+                onLoadedData={requestVideoPlayback}
+                onCanPlay={requestVideoPlayback}
+                onEnded={handleVideoEnd}
+                onError={handleVideoError}
+                className="w-full h-full object-cover object-center"
+              />
+            )}
             {/* طبقة تفتيح خفيفة لضمان وضوح الشعار والنصوص وشخصية صقر فوق الفيديو */}
             <div className="absolute inset-0 bg-gradient-to-br from-white/75 via-white/65 to-blue-50/75 backdrop-blur-[1px]"></div>
           </div>
@@ -157,26 +203,21 @@ export default function Login() {
             <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-indigo-400/10 rounded-full blur-[80px] animate-pulse-slow"></div>
           </div>
 
-          <div className="flex items-center justify-center w-full gap-3 md:gap-5 mb-8 relative z-10">
-            <div className="flex-1 text-left">
-              <h2 className="text-slate-800 font-black text-[10px] sm:text-xs md:text-sm leading-snug drop-shadow-sm">
-                مدرسة صقر الإمارات<br className="hidden sm:block"/> الدولية الخاصة
-              </h2>
-            </div>
-            
-            {/* تم إمالة شعار المدرسة بحدود 30 درجة لليمين */}
+          <div className="relative z-10 mb-8 flex w-full flex-col items-center justify-center gap-2 text-center">
             <div className="relative group shrink-0">
-              <div className="absolute inset-0 bg-blue-100 rounded-full blur-xl group-hover:bg-blue-200 transition-all duration-500 -z-10"></div>
-              <img 
-                src="/school-logo.png" 
-                alt="School Logo" 
-                className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain relative z-10 rotate-[30deg] transition-transform duration-500 group-hover:rotate-[38deg] drop-shadow-md"
+              <div className="absolute inset-0 -z-10 rounded-full bg-blue-100 blur-xl transition-all duration-500 group-hover:bg-blue-200"></div>
+              <img
+                src="/school-logo.png"
+                alt="School Logo"
+                className="relative z-10 h-16 w-16 object-contain drop-shadow-md transition-transform duration-500 group-hover:scale-105 sm:h-20 sm:w-20 md:h-24 md:w-24"
               />
             </div>
-
-            <div className="flex-1 text-right" dir="ltr">
-              <h2 className="text-slate-800 font-black text-[10px] sm:text-xs md:text-sm leading-snug drop-shadow-sm">
-                Emirates Falcon Int'l<br className="hidden sm:block"/> Private School
+            <div className="w-full min-w-0 space-y-1">
+              <h2 dir="rtl" className="whitespace-nowrap text-[clamp(10px,2.3vw,14px)] font-black leading-tight tracking-tight text-slate-800 drop-shadow-sm">
+                مدرسة صقر الإمارات الدولية الخاصة
+              </h2>
+              <h2 dir="ltr" className="whitespace-nowrap text-[clamp(9px,2.1vw,14px)] font-black leading-tight tracking-tight text-slate-800 drop-shadow-sm">
+                Emirates Falcon Int'l Private School
               </h2>
             </div>
           </div>
