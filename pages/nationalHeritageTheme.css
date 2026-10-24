@@ -1,0 +1,22 @@
+
+.national-heritage{--nh-gold:#d6a65b;--nh-green:#075b49}
+.national-heritage .nh-hero{isolation:isolate;background:linear-gradient(130deg,#064535,#07674d 58%,#124e43);box-shadow:0 22px 65px rgba(17,79,52,.2)}
+.national-heritage .nh-hero:before{content:"";pointer-events:none;position:absolute;inset:0;opacity:.17;background:repeating-linear-gradient(45deg,transparent 0 18px,#eecb8d 19px 21px,transparent 22px 40px);mask-image:linear-gradient(90deg,transparent,#000)}
+.national-heritage .nh-hero:after{content:"";pointer-events:none;position:absolute;bottom:0;left:0;right:0;height:26px;background:repeating-linear-gradient(90deg,#e0b476 0 16px,#9f653a 16px 25px,#f1d3a4 25px 40px,#0b6249 40px 54px);opacity:.65;clip-path:polygon(0 55%,3% 5%,6% 55%,9% 5%,12% 55%,15% 5%,18% 55%,21% 5%,24% 55%,27% 5%,30% 55%,33% 5%,36% 55%,39% 5%,42% 55%,45% 5%,48% 55%,51% 5%,54% 55%,57% 5%,60% 55%,63% 5%,66% 55%,69% 5%,72% 55%,75% 5%,78% 55%,81% 5%,84% 55%,87% 5%,90% 55%,93% 5%,96% 55%,100% 5%,100% 100%,0 100%)}
+.national-heritage .nh-hero-art{position:relative;min-height:225px;align-items:end;isolation:isolate}
+.national-heritage .nh-hero-art>svg{max-width:370px;opacity:.85;filter:drop-shadow(0 12px 22px #0019)}
+.national-heritage .nh-saqr{position:absolute;z-index:2;bottom:-5px;inset-inline-end:5%;height:clamp(142px,18vw,233px);max-width:48%;object-fit:contain;filter:drop-shadow(0 10px 13px #0005);animation:nh-float 5s ease-in-out infinite}
+.national-heritage .nh-challenge-card{position:relative;isolation:isolate;transition:transform .28s ease,box-shadow .28s ease;touch-action:manipulation}
+.national-heritage .nh-challenge-card:after{content:"";position:absolute;inset-inline:13px;bottom:0;height:5px;border-radius:50%;background:linear-gradient(90deg,#ab6e3b,#d9aa61,#076d51);opacity:.7}
+.national-heritage .nh-challenge-card:hover{transform:translateY(-6px) rotate(-.35deg)}
+.national-heritage .nh-tier{display:inline-flex;margin-top:10px;border:1px solid #dcb873;color:#765018;background:#fff4db;padding:5px 12px;border-radius:999px;font-size:11px;font-weight:900}
+.dark .national-heritage .nh-tier{background:#443319;color:#f8d799;border-color:#7e6035}
+.national-heritage .nh-level-label{display:block;margin-top:4px;font-size:10px;opacity:.7}
+.national-heritage .nh-challenges{align-items:stretch}
+.national-heritage .nh-challenges>button{min-width:0}
+.national-heritage .nh-hero img,.national-heritage svg{max-width:100%}
+.national-heritage .nh-options>button{touch-action:manipulation;overflow-wrap:anywhere}
+.national-heritage .nh-options>button:active{transform:scale(.98)}
+@keyframes nh-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@media(max-width:640px){.national-heritage .nh-hero-art{min-height:185px}.national-heritage .nh-saqr{height:150px}.national-heritage .nh-challenge-card:hover{transform:none}.national-heritage .nh-options>button{min-height:60px}}
+@media(prefers-reduced-motion:reduce){.national-heritage .nh-saqr{animation:none}.national-heritage .nh-challenge-card{transition:none}}
