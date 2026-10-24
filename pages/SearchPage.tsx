@@ -206,12 +206,19 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                         }]
                     })
                 });
+                if (!response.ok) throw new Error('Summary service unavailable: '+response.status);
                 const data = await response.json();
-                const parsed = JSON.parse(data.reply.replace(/```json|```/g, '').trim());
-                setAiContent(parsed);
+                if (typeof data.reply !== 'string') throw new Error('Invalid summary response');
+                const match = data.reply.match(/\{[\s\S]*\}/);
+                const parsed = JSON.parse((match ? match[0] : data.reply).replace(/```json|```/gi,'').trim());
+                if (typeof parsed.summary !== 'string' || typeof parsed.genre !== 'string') throw new Error('Invalid summary fields');
+                const summary = parsed.summary.trim();
+                const placeholder = /a summary for the book|ملخص كتاب.*سيكون متاحا قريب|will be available soon/i.test(summary);
+                setAiContent({ summary: !placeholder && summary ? summary : (locale === 'ar' ? 'لا يوجد ملخص موثوق متاح لهذا الكتاب حاليًا.' : 'A reliable summary is not available for this book yet.'), genre: parsed.genre.trim() || getLocalizedSubject(book.subject, locale) });
             } catch (err) {
-                setAiContent({ 
-                    summary: book.summary || (locale === 'ar' ? "كتاب متميز يفتح آفاق المعرفة للقارئ." : "An exceptional book that expands the reader's horizons."),
+                console.warn('Book summary service unavailable', err);
+                setAiContent({
+                    summary: locale === 'ar' ? 'تعذر تحميل ملخص موثوق للكتاب حاليًا. يمكنك الاطلاع على عنوان الكتاب وموضوعه ومكانه في الفهرس.' : 'A reliable book summary could not be loaded right now. The catalog title, topic and shelf location are still available.',
                     genre: getLocalizedSubject(book.subject, locale)
                 });
             } finally { setLoading(false); }
