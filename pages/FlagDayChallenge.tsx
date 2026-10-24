@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { supabase } from '../src/utils/supabase';
+import HeritageQuestArt from './HeritageQuestArt';
 
 type Difficulty = 'easy' | 'medium' | 'hard';
 
@@ -384,6 +385,15 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
         .fg-scene:after{content:"";pointer-events:none;position:absolute;z-index:0;bottom:0;inset-inline:0;height:19px;background:repeating-linear-gradient(90deg,#c8965b 0 14px,#f1d5a2 14px 28px,#0c6653 28px 42px);opacity:.8}
         @keyframes fg-choice-pop{50%{transform:scale(1.025)}}@keyframes fg-feedback-pop{from{opacity:.2;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
         @media(prefers-reduced-motion:reduce){.fg-option,.fg-feedback,.fg-loc-tag{animation:none!important;transition:none!important}}
+
+        .fg-journey-art{position:absolute;top:14%;right:2%;width:35%;height:150px;z-index:1;opacity:.33;pointer-events:none;filter:drop-shadow(0 5px 15px #0003)}
+        .fg-journey-art .nh-quest-illustration{width:100%;height:100%}
+        .fg-identity-kicker{color:#a8813e;font-weight:900;font-size:10px;letter-spacing:.08em;margin-bottom:6px}
+        .fg-quest-stripe{height:5px;display:flex;position:absolute;top:0;inset-inline:0}
+        .fg-quest-stripe span{flex:1}.fg-quest-stripe span:nth-child(1){background:#da2d40}.fg-quest-stripe span:nth-child(2){background:#088c58}.fg-quest-stripe span:nth-child(3){background:#fff}.fg-quest-stripe span:nth-child(4){background:#131717}
+        .fg-question-card{box-shadow:0 10px 26px #17624815}.fg-scene-head{border:1px solid #e8c38588}.fg-visual{isolation:isolate}
+        @media(max-width:600px){.fg-journey-art{height:85px;top:19%;width:33%}}
+        @media(prefers-reduced-motion:reduce){.fg-journey-art{animation:none!important}}
       `}</style>
 
       <div className="fg-ribbon" aria-hidden="true"><span className="r" /><span className="g" /><span className="w" /><span className="b" /></div>
@@ -413,6 +423,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
             </>
           )}
 
+          <div className="fg-journey-art" aria-hidden="true"><HeritageQuestArt kind="flag"/></div>
           <header className="fg-scene-head">
             <div className="fg-school-brand">
               <div className="fg-school-mark" aria-hidden="true"><UaeFlagIcon/></div>
@@ -518,7 +529,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
 
         <section className="fg-panel" aria-live="polite">
           <header className="fg-panel-head">
-            <div className="fg-title-wrap">
+            <div className="fg-title-wrap"><div className="fg-identity-kicker">رحلة وطنية · سارية المجد · معالم الإمارات</div>
               <h1 className="fg-title">تحدّي راية المجد</h1>
               <p className="fg-subtitle">أجب عن أسئلة العلم الإماراتي. الإجابة الصحيحة ترفع الراية، والخاطئة تُنزلها درجة.</p>
             </div>
@@ -537,7 +548,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
                 </div>
               </div>
 
-              <article className="fg-question-card">
+              <article className="fg-question-card"><div className="fg-quest-stripe"><span/><span/><span/><span/></div>
                 <div className="fg-question-label"><span>؟</span> سؤال الرحلة</div>
                 <h2 className="fg-question-text">{currentQuestion.question}</h2>
               </article>
