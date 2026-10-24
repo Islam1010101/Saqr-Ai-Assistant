@@ -449,11 +449,10 @@ const HomePage: React.FC = () => {
     }, []);
 
     const visitorCount = useMemo(() => {
-        const baseCount = 3015;
-        const startDate = new Date('2026-02-01').getTime();
-        const today = new Date().getTime();
-        const diffDays = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
-        return baseCount + (Math.max(0, diffDays) * 20);
+        const baseCount = 640;
+        const startDay = Date.UTC(2026, 9, 24) / 86400000;
+        const uaeDay = Math.floor((Date.now() + 4 * 60 * 60 * 1000) / 86400000);
+        return baseCount + (Math.max(0, uaeDay - startDay) * 10);
     }, []);
 
     const todayDate = useMemo(() => {
