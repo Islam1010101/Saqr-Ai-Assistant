@@ -412,7 +412,12 @@ const SmartSearchPage: React.FC = () => {
         })
       });
 
-      if (!response.ok) throw new Error(`Chat request failed: ${response.status}`);
+      if (!response.ok) {
+        const detail = await response.json().catch(() => ({}));
+        console.error('Saqr API error:', response.status, detail?.code || detail?.error || 'unavailable');
+        throw new Error(response.status === 502 || response.status === 503
+          ? 'AI_PROVIDER_UNAVAILABLE' : 'CHAT_REQUEST_FAILED');
+      }
       const data = await response.json();
       let reply = data.reply || '';
 
@@ -448,9 +453,12 @@ const SmartSearchPage: React.FC = () => {
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
     } catch (error) {
       console.error('Error sending chat message:', error);
+      const providerUnavailable = error instanceof Error && error.message === 'AI_PROVIDER_UNAVAILABLE';
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: locale === 'ar' ? 'حدث خطأ في الاتصال، يرجى المحاولة مرة أخرى.' : 'Connection error, please try again.'
+        content: providerUnavailable
+          ? (locale === 'ar' ? 'خدمة الذكاء الاصطناعي غير متاحة مؤقتًا. يمكنك تجربة البحث في دليل الكتب، أو إعادة المحاولة.' : 'The AI service is temporarily unavailable. You can search the book catalogue or try again.')
+          : (locale === 'ar' ? 'تعذر إكمال الطلب الآن، يرجى المحاولة مرة أخرى.' : 'Could not complete the request. Please try again.')
       }]);
       setSaqrState('idle');
     } finally {
