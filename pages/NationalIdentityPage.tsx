@@ -205,9 +205,7 @@ const NationalIdentityPage: React.FC = () => {
     if (!identity) return;
     try { localStorage.setItem(storageKey,JSON.stringify(progress)); } catch { /* Reading tasks still work without storage. */ }
   },[storageKey,identity,progress]);
-  if (!identity) return <Navigate to="/home" replace />;
-  // Reuse the existing game unchanged; its own rules grant rewards to students only.
-  if (flagChallengeOpen) return <FlagDayChallenge onClose={() => setFlagChallengeOpen(false)} />;
+  // Navigation guards follow all hooks to keep hook order stable.
 
   const currentMode: Exclude<Mode,'home'> = mode === 'home' ? 'passport' : mode;
   const entries = useMemo(() => {
@@ -246,6 +244,8 @@ const NationalIdentityPage: React.FC = () => {
     {id:'archive' as const,icon:'document' as const,title:l('محقق ذاكرة الوطن','Heritage Research Detective'),desc:l('حلّل الأدلة واقرأ المصادر وتعلّم كيف تتحقق من المعلومات.','Study evidence, read sources and learn how to verify information.'),total:expandedCases.length,count:progress.cases.length,color:'from-sky-700 to-indigo-700'}
   ];
   const selectedModule = modules.find(x=>x.id===currentMode) || modules[0];
+  if (!identity) return <Navigate to="/home" replace />;
+  if (flagChallengeOpen) return <FlagDayChallenge onClose={() => setFlagChallengeOpen(false)} />;
   return <div dir={dir} className="national-heritage relative min-h-[100dvh] overflow-hidden bg-white dark:bg-black text-slate-900 dark:text-slate-100">
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
       <div className="absolute -top-48 -right-48 h-[500px] w-[500px] rounded-full bg-emerald-300/15 dark:bg-emerald-600/10 blur-3xl"/>
