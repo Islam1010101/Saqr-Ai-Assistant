@@ -1,5 +1,6 @@
 import {physicalReadingCatalog, type ReadingBook} from './readingPassport';
 import {ARABIC_LIBRARY_DATABASE,ENGLISH_LIBRARY_DATABASE} from '../../api/digitalBookData';
+import {bookData} from '../../api/bookData';
 
 const catalogs:ReadingBook[]=[
  ...physicalReadingCatalog,
@@ -34,4 +35,12 @@ export const toSaqrShelfContext=(shelf:ReaderShelf,locale:'ar'|'en'):string=>{
  return 'CURRENT READER LIBRARY (verified only within data readable to this account; do not claim a remote record if not visible): '+JSON.stringify({
  borrowed:shelf.borrowed,saved:shelf.saved.slice(0,12).map(book),completed:shelf.completed.slice(0,12).map(book),monthlyGoal:shelf.goal
  })+'. Summarize or encourage reading of these actual books only. If details are incomplete, ask for the title or text; never pretend to have read its full content. Distinguish physical loans, digital/physical saved reading and completed reading. Language: '+locale+'.';
+};
+
+export const catalogBookSynopsis=(title:string):string|null=>{
+ const normalize=(value:string)=>String(value??'').normalize('NFKC').toLowerCase().trim();
+ const needle=normalize(title);
+ if(!needle)return null;
+ const found=[...bookData,...ARABIC_LIBRARY_DATABASE,...ENGLISH_LIBRARY_DATABASE].find(b=>normalize(b.title)===needle);
+ return found?.summary?.trim()||null;
 };
