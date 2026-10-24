@@ -142,11 +142,17 @@ export const isCrossLanguageTitleQuery=(question:string):boolean=>{
   return TITLE_ALIASES.some(pair=>pair.arabic.test(q)||pair.english.test(q));
 };
 
+// A UAE-specific request needs UAE-specific catalog evidence. Words like
+// "heritage", "Arab", "history" and "العين" alone do not prove a UAE subject.
+const UAE_QUERY = /الامارات|اماراتي|اماراتيه|ابوظبي|ابو ظبي|دبي|الشارقه|(?:مدينه|واحه) العين|(?:^|\s)uae(?:\s|$)|united arab emirates|emirati|abu dhabi|(?:^|\s)dubai(?:\s|$)|(?:^|\s)sharjah(?:\s|$)/;
+const UAE_EVIDENCE = /الامارات|اماراتي|اماراتيه|ابوظبي|ابو ظبي|دبي|الشارقه|(?:مدينه|واحه) العين|(?:^|\s)uae(?:\s|$)|united arab emirates|emirati|abu dhabi|(?:^|\s)dubai(?:\s|$)|(?:^|\s)sharjah(?:\s|$)/;
+
 const bookIntent = /(?:\b(?:books?|novels?|catalog(?:ue)?|library|booklist|read(?:ing)?|reference(?:s)?|recommend\w*|titles?)\b|كتب|كتاب|الكتب|المكتبه|مكتبه|فهرس|مراجع|روايات|اقترح|رشح|ترشح|للقراءه|للقراءة|عندكم|توجد كتب|هل يوجد)/;
 
 /** Preserve exact title/author matching even if the user didn't say "book". */
 export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=12):SaqrBookMatch[] => {
   const normalizedQuery = normalize(question);
+  const needsUaeEvidence = UAE_QUERY.test(normalizedQuery);
   const tokens = [...new Set(wordsOf(question).filter(word=>word.length>=3 && !STOP_WORDS.has(word)))];
   const hasBookIntent = bookIntent.test(normalizedQuery) || isCrossLanguageTitleQuery(question);
   const aliasHints = TITLE_ALIASES.filter(pair=>pair.arabic.test(normalizedQuery)||pair.english.test(normalizedQuery));
@@ -171,6 +177,8 @@ export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=
       const authorText=normalize(author);
       const subjectText=normalize(subject);
       const descriptionText=normalize(book.summary);
+      // Do not recommend unrelated Arabic heritage or general histories for UAE.
+      if(needsUaeEvidence && ![titleText,subjectText,descriptionText].some(text=>UAE_EVIDENCE.test(text)))continue;
       let score=0;
       let subjectMatch=false;
       let titleMatch=false;
