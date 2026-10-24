@@ -396,7 +396,19 @@ const SmartSearchPage: React.FC = () => {
             ...messages,
             { role: 'user', content: userQuery }
           ],
-          locale
+          locale,
+          // Advisory reading level only; permissions remain managed by existing routes.
+          reader: (() => {
+            let grade: number | null = null;
+            let role = localStorage.getItem('user_type') || 'guest';
+            try {
+              const user = JSON.parse(localStorage.getItem('current_user') || 'null');
+              const rawGrade = user?.grade ?? user?.grade_level ?? user?.class_grade ?? user?.student_grade;
+              const matched = String(rawGrade ?? '').match(/(?:^|\D)(1[0-2]|[1-9])(?:\D|$)/);
+              if (matched) grade = Number(matched[1]);
+            } catch { /* no persisted profile */ }
+            return { role, grade };
+          })()
         })
       });
 
