@@ -38,7 +38,13 @@ export function renderSaqrCatalogAnswer(question:string,matches:SaqrBookMatch[],
   const output:string[]=[ar?'## نتائج البحث في فهارس مكتبة EFIPS':'## Verified EFIPS catalog results'];
   for(const [kind,label] of groups){
     const items=valid.filter(book=>collection(book)===kind);
-    if(!items.length)continue;
+    if(!items.length){
+      if(scope==='all' || scope===kind){
+        output.push('### '+label);
+        output.push(ar?'لا توجد نتائج مؤكدة مطابقة للموضوع في هذا الفهرس.':'No verified catalog results match this topic in this collection.');
+      }
+      continue;
+    }
     output.push('### '+label);
     for(const [i,book] of items.entries()){
       const title=escapeMd(book.title),author=escapeMd(book.author|| (ar?'غير مسجل':'Not recorded'));

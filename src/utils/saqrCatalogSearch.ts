@@ -142,11 +142,20 @@ export const isCrossLanguageTitleQuery=(question:string):boolean=>{
   return TITLE_ALIASES.some(pair=>pair.arabic.test(q)||pair.english.test(q));
 };
 
+// A UAE-specific request needs UAE-specific catalog evidence. Words like
+// "heritage", "Arab", "history" and "العين" alone do not prove a UAE subject.
+// Explicit Unicode-safe geographical terms. Without complete word boundaries,
+// "دبي" accidentally matches "أدبي", creating false digital recommendations.
+const UAE_TERMS = String.raw`(?:الامارات(?:يه|ي)?|بالامارات|للامارات|اماراتي(?:ه)?|ابوظبي|ابو\s+ظبي|دبي|الشارقه|راس\s+الخيمه|الفجيره|عجمان|ام\s+القيوين|united\s+arab\s+emirates|uae|emirati|emirates|abu\s+dhabi|dubai|sharjah|ras\s+al\s+khaimah|fujairah|ajman|umm\s+al\s+quwain)`;
+const UAE_GEO_PATTERN = new RegExp(String.raw`(?:^|[^\p{L}\p{N}])`+UAE_TERMS+String.raw`(?=$|[^\p{L}\p{N}])`,'u');
+const isUaeExplicit = (text:string):boolean=>UAE_GEO_PATTERN.test(text);
+
 const bookIntent = /(?:\b(?:books?|novels?|catalog(?:ue)?|library|booklist|read(?:ing)?|reference(?:s)?|recommend\w*|titles?)\b|كتب|كتاب|الكتب|المكتبه|مكتبه|فهرس|مراجع|روايات|اقترح|رشح|ترشح|للقراءه|للقراءة|عندكم|توجد كتب|هل يوجد)/;
 
 /** Preserve exact title/author matching even if the user didn't say "book". */
 export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=12):SaqrBookMatch[] => {
   const normalizedQuery = normalize(question);
+  const needsUaeEvidence = isUaeExplicit(normalizedQuery);
   const tokens = [...new Set(wordsOf(question).filter(word=>word.length>=3 && !STOP_WORDS.has(word)))];
   const hasBookIntent = bookIntent.test(normalizedQuery) || isCrossLanguageTitleQuery(question);
   const aliasHints = TITLE_ALIASES.filter(pair=>pair.arabic.test(normalizedQuery)||pair.english.test(normalizedQuery));
@@ -171,6 +180,14 @@ export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=
       const authorText=normalize(author);
       const subjectText=normalize(subject);
       const descriptionText=normalize(book.summary);
+      // Do not recommend unrelated Arabic heritage or general histories for UAE.
+      if(needsUaeEvidence){
+        // Physical catalog subject tags are inferred from the title by
+        // bookData.ts; generic falconry/Gulf heritage is NOT proof of UAE.
+        const evidence = origin.source==='physical'
+          ? [titleText] : [titleText,subjectText,descriptionText];
+        if(!evidence.some(isUaeExplicit))continue;
+      }
       let score=0;
       let subjectMatch=false;
       let titleMatch=false;
