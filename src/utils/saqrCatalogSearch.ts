@@ -1,0 +1,184 @@
+/**
+ * Catalog retrieval for Saqr's existing chat context only.
+ * Searches the three existing libraries, without changing Saqr's system prompt,
+ * chat API, conversation state, lessons, creative writing or rewards.
+ */
+type BookRecord = {
+  id?: string | number;
+  title?: string;
+  author?: string;
+  subject?: string;
+  summary?: string;
+  shelf?: number;
+  row?: number;
+  driveLink?: string;
+};
+type Catalogs = {
+  physical: BookRecord[];
+  arabic: BookRecord[];
+  english: BookRecord[];
+};
+export type SaqrBookMatch = {
+  title: string;
+  author: string;
+  subject: string;
+  pageLocation: string;
+  shelf?: number;
+  row?: number;
+  driveLink?: string;
+  matchBasis: string;
+};
+
+const normalize = (value: unknown): string => String(value ?? '')
+  .normalize('NFKC').toLowerCase()
+  .replace(/[\u064b-\u065f\u0670\u0640]/g, '')
+  .replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه')
+  .replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+
+const wordsOf = (text: string): string[] => normalize(text).split(/\s+/).filter(Boolean);
+
+const STOP_WORDS = new Set([
+  'a','an','the','and','or','of','to','in','at','is','are','i','me','my','we','you',
+  'find','search','show','give','please','want','need','looking','look','have','has',
+  'books','book','titles','title','library','available','recommend','recommendations',
+  'about','on','for','related','topic','subject','topics','references','read','reading',
+  'where','what','any','can','some','with','from','do',
+  'اريد','عايز','عاوزه','عايزة','محتاج','محتاجه','ممكن','لو','عندك','عندكم',
+  'في','عن','حول','على','الي','من','فيه','فيها','هل','اي','ايه','ما','هي','هو',
+  'كتب','كتاب','الكتب','كتبا','كتابي','مكتبه','المكتبه','فهرس','دليل','الموضوع',
+  'موضوع','موضوعات','تخصص','اقترح','ترشح','رشحلي','توصيات','ابحث','عاوز',
+  'هات','اعطني','اديني','عندي','عليه','هذا','هذه','اللي','هناك','موجود','متاح',
+  'فين','اين','اسم','اسماء','واحد','بعض','قائمه','قائمة','لديكم','لي','بدي'
+]);
+
+/** Bilingual subject intent: tested against titles, category tags and summaries. */
+const TOPICS: Array<{ key:string; query:RegExp; signals:RegExp }> = [
+  {key:'Education & Teaching',
+    query:/\b(?:educat\w*|teach\w*|pedagog\w*|curricul\w*|classroom|schooling|literacy)\b|تربيه|تعليم|تدريس|المعلم|المعلمين|المناهج|طرق التدريس|التعلم/,
+    signals:/\b(?:educat\w*|teach\w*|pedagog\w*|curricul\w*|classroom|schooling|literacy|student learning|phonics)\b|تربيه|تعليم|تدريس|المعلم|المناهج|التعلم/},
+  {key:'Mathematics & Statistics',
+    query:/\b(?:math(?:s|ematics)?|algebra|geometry|calculus|statistics)\b|رياضيات|الرياضيات|الحساب|الجبر|الهندسه|الاحصاء/,
+    signals:/\b(?:math(?:s|ematics)?|algebra|geometry|calculus|statistics|numeracy)\b|رياضيات|حساب|جبر|هندسه|احصاء/},
+  {key:'Science & Physics',
+    query:/\b(?:science|physics|physicist|astronomy|space|chemistry|biology)\b|علوم|العلوم|الفيزياء|كيمياء|الكيمياء|الاحياء|الفضاء/,
+    signals:/\b(?:science|physics|physicist|astronomy|space|chemistry|biology|scientific)\b|علوم|فيزياء|كيمياء|احياء|فضاء/},
+  {key:'Technology & Programming',
+    query:/\b(?:technology|computer\w*|coding|programming|software|internet|artificial intelligence|ai)\b|التكنولوجيا|التقنيه|الحاسوب|الكمبيوتر|البرمجه|الذكاء الاصطناعي/,
+    signals:/\b(?:technology|computer\w*|coding|programming|software|internet|artificial intelligence|informatics)\b|تكنولوجيا|تقنيه|حاسوب|كمبيوتر|برمجه|ذكاء اصطناعي/},
+  {key:'History & Culture',
+    query:/\b(?:history|historical|heritage|culture|civilization)\b|تاريخ|التاريخ|تراث|التراث|ثقافه|الحضاره/,
+    signals:/\b(?:history|historical|heritage|culture|civilization|archaeology)\b|تاريخ|تراث|ثقافه|حضاره|اثار/},
+  {key:'UAE & Emirati Heritage',
+    query:/\b(?:uae|emirates|emirati|abu dhabi|dubai)\b|الامارات|اماراتي|الاماراتي|ابوظبي|دبي|العين/,
+    signals:/\b(?:uae|emirates|emirati|abu dhabi|dubai)\b|الامارات|اماراتي|ابوظبي|دبي|العين/},
+  {key:'Psychology',
+    query:/\b(?:psycholog\w*|mental health|counsel\w*)\b|علم النفس|نفسي|الصحه النفسيه/,
+    signals:/\b(?:psycholog\w*|mental health|counsel\w*|psychiatr\w*)\b|علم النفس|نفسي|الصحه النفسيه/},
+  {key:'Health & Medicine',
+    query:/\b(?:health|medicine|medical|nursing|disease|nutrition)\b|الصحه|الطب|التمريض|التغذيه/,
+    signals:/\b(?:health|medicine|medical|nursing|disease|nutrition)\b|صحه|طب|تمريض|تغذيه/},
+  {key:'Business & Management',
+    query:/\b(?:business|management|leadership|entrepreneurship|marketing|economics)\b|اداره الاعمال|الاداره|رياده الاعمال|الاقتصاد|القياده/,
+    signals:/\b(?:business|management|leadership|entrepreneurship|marketing|economics)\b|اداره|اعمال|الاقتصاد|القياده/},
+  {key:'Environment & Sustainability',
+    query:/\b(?:environment|ecology|climate|sustainab\w*|renewable energy|recycling)\b|البيئه|الاستدامه|المناخ|الطاقه المتجدده/,
+    signals:/\b(?:environment|ecology|climate|sustainab\w*|renewable energy|recycling)\b|بيئه|استدامه|مناخ|طاقه متجدده/},
+  {key:'Language & Linguistics',
+    query:/\b(?:language|linguistics|grammar|translation|english learning|arabic learning)\b|لغات|اللغات|اللسانيات|الانجليزيه|القواعد اللغويه|النحو/,
+    signals:/\b(?:language|linguistics|grammar|translation|english learning|arabic learning)\b|لغات|اللغه|لسانيات|انجليزيه|نحو|الترجمه/},
+  {key:'Literature & Fiction',
+    query:/\b(?:novels?|fiction|literature|poetry|stories)\b|روايات|الروايات|الادب|الشعر|القصص/,
+    signals:/\b(?:novels?|fiction|literature|poetry|stories|short story)\b|روايات|ادب|شعر|قصص/},
+  {key:'Children’s Stories',
+    query:/\b(?:children\w*|kids|picture books?|fairy tales?)\b|الاطفال|الصغار|قصص الاطفال/,
+    signals:/\b(?:children\w*|kids|picture books?|fairy tales?)\b|اطفال|الصغار|قصص الاطفال/},
+  {key:'Islamic Studies',
+    query:/\b(?:islam(?:ic)?|quran|hadith)\b|اسلام|اسلامي|التربيه الاسلاميه|القران|الحديث|الفقه/,
+    signals:/\b(?:islam(?:ic)?|quran|hadith|religion)\b|اسلام|اسلامي|القران|الحديث|الفقه/},
+  {key:'Geography & Travel',
+    query:/\b(?:geography|geographic|travel|world atlas|countries)\b|جغرافيا|الجغرافيا|البلدان|الاطلس/,
+    signals:/\b(?:geography|geographic|travel|world atlas|countries)\b|جغرافيا|البلدان|الاطلس/},
+  {key:'Art & Design',
+    query:/\b(?:art|painting|design|architecture|drawing)\b|الفنون|الرسم|التصميم|العماره/,
+    signals:/\b(?:art|painting|design|architecture|drawing)\b|فنون|الرسم|تصميم|عماره/}
+];
+
+const bookIntent = /(?:\b(?:books?|novels?|catalog(?:ue)?|library|booklist|read(?:ing)?|reference(?:s)?|recommend\w*|titles?)\b|كتب|كتاب|الكتب|المكتبه|مكتبه|فهرس|مراجع|روايات|اقترح|رشح|ترشح|للقراءه|للقراءة|عندكم|توجد كتب|هل يوجد)/;
+
+/** Preserve exact title/author matching even if the user didn't say "book". */
+export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=12):SaqrBookMatch[] => {
+  const normalizedQuery = normalize(question);
+  const tokens = [...new Set(wordsOf(question).filter(word=>word.length>=3 && !STOP_WORDS.has(word)))];
+  const hasBookIntent = bookIntent.test(normalizedQuery);
+  const detectedTopics = hasBookIntent ? TOPICS.filter(topic=>topic.query.test(normalizedQuery)) : [];
+  if (!tokens.length && !detectedTopics.length) return [];
+
+  const origins: Array<{records:BookRecord[];source:'physical'|'arabic'|'english';label:string}> = [
+    {records:catalogs.physical,source:'physical',label:'المكتبة العادية (Physical Library)'},
+    {records:catalogs.arabic,source:'arabic',label:'المكتبة الرقمية العربية (Arabic Digital Library)'},
+    {records:catalogs.english,source:'english',label:'المكتبة الرقمية الإنجليزية (English Digital Library)'}
+  ];
+  type Candidate={score:number;origin:string;value:SaqrBookMatch};
+  const candidates:Candidate[]=[];
+  for (const origin of origins) {
+    for (const book of origin.records ?? []) {
+      const title=String(book.title ?? '').trim();
+      if (!title) continue;
+      const author=String(book.author ?? '').trim();
+      const subject=String(book.subject ?? '').trim();
+      const titleText=normalize(title);
+      const authorText=normalize(author);
+      const subjectText=normalize(subject);
+      const descriptionText=normalize(book.summary);
+      let score=0;
+      let subjectMatch=false;
+      let titleMatch=false;
+      // Exact phrases and proper book titles are the strongest evidence.
+      if(normalizedQuery.length>=4 && (titleText.includes(normalizedQuery) || authorText.includes(normalizedQuery))) {
+        score+=180;titleMatch=true;
+      }
+      for(const word of tokens.slice(0,8)){
+        if(titleText.split(' ').some(v=>v===word || (word.length>=5 && v.startsWith(word)))) {score+=32;titleMatch=true;}
+        if(authorText.split(' ').some(v=>v===word || (word.length>=5 && v.startsWith(word)))) score+=15;
+        if(subjectText.split(' ').some(v=>v===word || (word.length>=5 && v.startsWith(word)))) {score+=23;subjectMatch=true;}
+        if(descriptionText.split(' ').some(v=>v===word || (word.length>=5 && v.startsWith(word)))) score+=3;
+      }
+      for(const topic of detectedTopics){
+        if(topic.key===subject) {score+=110;subjectMatch=true;}
+        else if(topic.signals.test(subjectText)) {score+=75;subjectMatch=true;}
+        if(topic.signals.test(titleText)) {score+=60;titleMatch=true;}
+        if(topic.signals.test(descriptionText)) score+=22;
+      }
+      // A generic category such as General Knowledge is not evidence of a topic.
+      if(score<12) continue;
+      const value:SaqrBookMatch={
+        title,author,subject,pageLocation:origin.label,
+        ...(origin.source==='physical' ? {shelf:book.shelf,row:book.row} : {driveLink:book.driveLink}),
+        matchBasis: subjectMatch ? 'Catalog subject/topic' : titleMatch ? 'Book title' : 'Description/author'
+      };
+      candidates.push({score,origin:origin.source,value});
+    }
+  }
+  candidates.sort((a,b)=>b.score-a.score || a.value.title.localeCompare(b.value.title));
+  // Keep the best matches, then make room for genuinely matching digital and
+  // print items; the former first-ten-physical ordering hid bilingual results.
+  const chosen:Candidate[]=[];
+  const seen=new Set<string>();
+  const counts:{[key:string]:number}={physical:0,arabic:0,english:0};
+  const caps:{[key:string]:number}={physical:7,arabic:4,english:4};
+  const add=(entry:Candidate)=>{
+    const key=entry.origin+'|'+normalize(entry.value.title);
+    if(seen.has(key)) return;
+    chosen.push(entry);seen.add(key);counts[entry.origin]++;
+  };
+  for(const entry of candidates){
+    if(chosen.length>=limit)break;
+    if(counts[entry.origin]>=caps[entry.origin])continue;
+    add(entry);
+  }
+  for(const entry of candidates){
+    if(chosen.length>=limit)break;
+    add(entry);
+  }
+  return chosen.map(entry=>entry.value);
+};
