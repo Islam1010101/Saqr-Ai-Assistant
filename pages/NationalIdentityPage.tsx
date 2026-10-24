@@ -210,7 +210,7 @@ const NationalIdentityPage: React.FC = () => {
   const currentMode: Exclude<Mode,'home'> = mode === 'home' ? 'passport' : mode;
   const entries = useMemo(() => {
     const source = activities[currentMode];
-    if (currentMode === 'passport') return [...source].sort(() => 0);
+    if (currentMode === 'passport') { const copy=[...source]; for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]];} return copy; }
     const groups = [1,2,3,4].map(tier => source.filter(item => (item.difficulty||1) === tier));
     // Randomised once per visit and each replay, keeping easy -> expert progression.
     const shuffled = groups.flatMap(group => {const copy=[...group];for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]];}return copy;});
