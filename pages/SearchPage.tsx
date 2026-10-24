@@ -403,6 +403,8 @@ const BookCard = React.memo(({ book, onClick, t, locale }: { book: Book; onClick
   const readingKey = physicalBookKey(book);
   const isSaved = passport.saved.includes(readingKey);
   const isAi = !book.subject || book.subject === "Unknown";
+  const readingAudience = classifyBookAudience(book);
+  const audienceTag = readingAudience === 'children' ? (locale==='ar'?'للصغار':'Younger readers') : readingAudience === 'teens' ? (locale==='ar'?'لليافعين 9–12':'Teens 9–12') : readingAudience === 'specialist' ? (locale==='ar'?'للمتخصصين':'Specialists') : (locale==='ar'?'يحتاج مراجعة':'Needs review');
 
   const colors = [
     'from-blue-500 to-sky-500 border-blue-200',
@@ -425,6 +427,7 @@ const BookCard = React.memo(({ book, onClick, t, locale }: { book: Book; onClick
         <div className="p-5 md:p-6 flex flex-col h-full relative z-20">
           
           <div className="flex justify-between items-start flex-row-reverse mb-auto">
+            <span className="inline-flex items-center rounded-full border border-white/60 bg-black/20 px-2.5 py-1 text-[10px] font-black text-white max-w-[55%]" title={locale==='ar'?'فئة قرائية إرشادية':'Provisional reading group'}>{audienceTag}</span>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-white/25 text-white backdrop-blur-sm shadow-sm max-w-[70%]">
                {isAi && <RobotSvg/>}
                <span className="truncate">{isAi ? t('aiSubject') : getLocalizedSubject(book.subject, locale)}</span>
