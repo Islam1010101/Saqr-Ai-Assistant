@@ -1,11 +1,12 @@
 import type {SaqrBookMatch} from './saqrCatalogSearch.ts';
+import {isCrossLanguageTitleQuery} from './saqrCatalogSearch.ts';
 
 // Verified holding answers are assembled from recorded catalog data, not LLM guesses.
 const overview = /(?:^|\s)(?:books?|novels?|catalog(?:ue)?|ebooks?|titles?|reading\s+list)(?:\s|$)|كتب|كتاب|فهرس|المكتبة|مكتبة|روايات|اقترح|رشح|الرف|مكان\s+الكتاب/i;
 const summarize = /(?:لخص|تلخيص|ملخص|ملخّص|اشرح\s+(?:لي\s+)?(?:الكتاب|رواية)|summary|summari[sz]e|what is the (?:book|story) about|analy[sz]e (?:this|the) book|حلل\s+(?:هذا\s+)?(?:الكتاب|الرواية))/i;
 const discussion = /(?:ناقشني|نتناقش|نناقش|مناقش[ةه]|خلينا نتكلم|discuss|discussion|debate)/i;
 export const isSaqrCatalogLookup = (query:string):boolean =>
-  overview.test(query) && !summarize.test(query) && !discussion.test(query);
+  (overview.test(query)||isCrossLanguageTitleQuery(query)) && !summarize.test(query) && !discussion.test(query);
 
 export const selectSaqrCatalogScope=(question:string):'physical'|'arabic'|'english'|'all'=>{
   if(/المكتبة\s*(?:الرقمية\s*)?(?:ال[إا]نجليزية|ال[إا]نكليزية)|english\s+(?:digital\s+)?library|english\s+(?:ebooks?|catalog)/i.test(question))return 'english';
