@@ -435,7 +435,7 @@ const NationalIdentityPage: React.FC = () => {
         </div>
       </section>}
       <footer className="mt-10 pt-6 border-t border-emerald-100 dark:border-slate-800 text-xs leading-7 text-slate-500 dark:text-slate-400 text-center">
-        {tr(l('المحتوى تعليمي مستند إلى مصادر رسمية وتراثية. التقدم الشخصي يُحفظ على هذا الجهاز فقط، ولا يؤثر في نقاط الألعاب أو بيانات المكتبة.','Educational content based on official and heritage sources. Progress is stored on this device only and does not change game points or library records.'))}
+        {tr(l('المحتوى تعليمي مستند إلى مصادر رسمية وتراثية.','Educational content based on official and heritage sources.'))}
       </footer>
     </div>
   </div>;
