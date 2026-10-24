@@ -9,6 +9,8 @@ import { searchSaqrBookCatalog } from '../src/utils/saqrCatalogSearch';
 import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
 import { supabase } from '../src/utils/supabase';
+import { stripSaqrEmoji } from '../src/utils/saqrText';
+import { isSaqrCatalogLookup, renderSaqrCatalogAnswer } from '../src/utils/saqrCatalogReply';
 import { saqrExtraContext, isNewDiscussion, discussionOpening } from '../src/utils/saqrSafeEnhancements';
 
 // --- بروتوكول عقل صقر ---
@@ -382,6 +384,16 @@ const SmartSearchPage: React.FC = () => {
       english: ENGLISH_LIBRARY_DATABASE
     });
 
+    // A factual catalog lookup needs no generative model; keep summaries and all
+    // educational/story functions on their existing chat path.
+    if(isSaqrCatalogLookup(userQuery)){
+      const answer=renderSaqrCatalogAnswer(userQuery,foundBooks,locale==='ar'?'ar':'en');
+      setMessages(prev=>[...prev,{role:'assistant',content:answer}]);
+      setSaqrState('idle');
+      setIsLoading(false);
+      return;
+    }
+
     const safeReader = (() => {
       const roleValue = localStorage.getItem('user_type');
       const role: 'student'|'teacher'|'admin'|'guest' =
@@ -419,7 +431,7 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         const user = JSON.parse(storedUser);
         const rawName = locale === 'ar' ? (user.name_ar || user.name_en) : (user.name_en || user.name_ar);
         const name = formatFirstAndLastName(rawName || '');
-        const type = localStorage.getItem('user_type') === 'student' ? 'Student' : 'Teacher';
+        const type = localStorage.getItem('user_type') === 'student' ? 'Student' : (localStorage.getItem('user_type') === 'teacher' ? 'Teacher' : 'Administrator');
         userContextInfo = `\nCurrent User Context: The person talking to you is a ${type} named "${name}". Use their name occasionally to be friendly.`;
       } catch (error) {
         console.error('Could not parse current user context:', error);
@@ -445,7 +457,7 @@ When the user asks for books, identify the matching titles exactly as recorded, 
       let reply = data.reply || '';
       // Filter assistant prose only: preserve Markdown, links, author certificates
       // and all of Saqr's existing UI illustrations.
-      reply = reply.replace(/[\\p{Extended_Pictographic}\\uFE0E\\uFE0F]/gu, '').replace(/\\u200D(?=\\s|$)/g, '');
+      reply = stripSaqrEmoji(reply);
 
       if (reply.includes('[WINNER:')) {
         // Parse the exact winner format while accepting the required pipe separators.
@@ -628,7 +640,7 @@ When the user asks for books, identify the matching titles exactly as recorded, 
                   <div className={`saqr-message-row ${msg.role === 'user' ? 'saqr-message-row-user' : 'saqr-message-row-assistant'}`}>
                     {msg.role === 'assistant' ? (
                       <div className="saqr-assistant-column">
-                        <div className="saqr-assistant-bubble" translate="no" lang={locale}>
+                        <div className="saqr-assistant-bubble" lang={locale}>
                           <div className={`saqr-markdown prose prose-slate max-w-none text-start dark:prose-invert ${index > 0 && isLessonPlanRequest(visibleMessages[index - 1]?.content || '') ? 'saqr-lesson-markdown' : ''}`}>
                             <ReactMarkdown>{msg.role === 'assistant' && index > 0 && isLessonPlanRequest(visibleMessages[index - 1]?.content || '') ? formatLessonPlanDisplay(msg.content) : msg.content}</ReactMarkdown>
                           </div>
@@ -984,9 +996,9 @@ When the user asks for books, identify the matching titles exactly as recorded, 
           color: #1e293b;
           background: linear-gradient(145deg, rgba(255, 255, 255, .98), rgba(248, 250, 252, .94));
           box-shadow: 0 6px 20px rgba(15, 23, 42, .045), inset 0 1px 0 rgba(255, 255, 255, .9);
-          font-size: clamp(13px, 1.15vw, 15px);
+          font-size: clamp(15px, 1.25vw, 17px);
           font-weight: 500;
-          line-height: 1.65;
+          line-height: 1.9;
           overflow-wrap: anywhere;
         }
         .dark .saqr-assistant-bubble {
@@ -995,18 +1007,18 @@ When the user asks for books, identify the matching titles exactly as recorded, 
           background: rgba(26, 31, 46, .94);
           box-shadow: 0 4px 16px rgba(0, 0, 0, .10);
         }
-        .saqr-markdown { min-width: 0; width: 100%; overflow-wrap: anywhere; word-break: normal; }
+        .saqr-markdown { min-width: 0; width: 100%; overflow-wrap: break-word; word-break: normal; white-space: normal; font-family: 'Tajawal','Cairo',system-ui,sans-serif; font-size: 1rem; letter-spacing: normal; }
         .saqr-markdown > :first-child { margin-top: 0 !important; }
         .saqr-markdown > :last-child { margin-bottom: 0 !important; }
-        .saqr-markdown p { margin-top: .25em; margin-bottom: .55em; }
+        .saqr-markdown p { margin-top: .5em; margin-bottom: .85em; line-height: 1.95; }
         .saqr-markdown ul, .saqr-markdown ol { margin-top: .35em; margin-bottom: .6em; padding-inline-start: 1.35em; }
-        .saqr-markdown li { margin-block: .15em; }
+        .saqr-markdown li { margin-block: .45em; line-height: 1.9; }
         .saqr-lesson-markdown li { display: list-item; line-height: 1.85; }
         .saqr-lesson-markdown li + li { margin-block-start: .55em; }
         .saqr-lesson-markdown li > p { margin: 0; }
         .saqr-lesson-markdown ul, .saqr-lesson-markdown ol { list-style-position: outside; }
 
-        .saqr-markdown h1, .saqr-markdown h2, .saqr-markdown h3, .saqr-markdown h4 { margin-top: .75em; margin-bottom: .3em; font-weight: 800; line-height: 1.4; }
+        .saqr-markdown h1, .saqr-markdown h2, .saqr-markdown h3, .saqr-markdown h4 { margin-top: 1.1em; margin-bottom: .6em; font-weight: 800; line-height: 1.55; }
         .saqr-markdown h1, .saqr-markdown h2, .saqr-markdown h3 { color: #0284c7; }
         .dark .saqr-markdown h1, .dark .saqr-markdown h2, .dark .saqr-markdown h3 { color: #38bdf8; }
         .saqr-markdown pre { max-width: 100%; overflow-x: auto; border-radius: 10px; }
