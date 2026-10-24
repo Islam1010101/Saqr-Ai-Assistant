@@ -29,14 +29,14 @@ type StoredStudent = Record<string, unknown> & {
 const MAX_LEVEL = 7;
 
 const UAE_LANDMARKS: LandmarkLevel[] = [
-  { level: 0, name: 'قلعة الجاهلي', city: 'العين', heightLabel: 'نقطة الانطلاق', icon: '🏰' },
-  { level: 1, name: 'جامع الشيخ زايد الكبير', city: 'أبوظبي', heightLabel: 'المحطة الأولى', icon: '🕌' },
-  { level: 2, name: 'متحف المستقبل', city: 'دبي', heightLabel: 'المحطة الثانية', icon: '🏛️' },
-  { level: 3, name: 'برواز دبي', city: 'دبي', heightLabel: 'المحطة الثالثة', icon: '🖼️' },
-  { level: 4, name: 'برج العرب', city: 'دبي', heightLabel: 'المحطة الرابعة', icon: '⛵' },
-  { level: 5, name: 'أبراج الاتحاد', city: 'أبوظبي', heightLabel: 'المحطة الخامسة', icon: '🏙️' },
-  { level: 6, name: 'أبراج الإمارات', city: 'دبي', heightLabel: 'قبل القمة', icon: '🏢' },
-  { level: 7, name: 'قمة برج خليفة', city: 'دبي', heightLabel: '828 متراً – قمة المجد', icon: '✨' },
+  { level: 0, name: 'قلعة الجاهلي', city: 'العين', heightLabel: 'نقطة الانطلاق', icon: 'fort' },
+  { level: 1, name: 'جامع الشيخ زايد الكبير', city: 'أبوظبي', heightLabel: 'المحطة الأولى', icon: 'mosque' },
+  { level: 2, name: 'متحف المستقبل', city: 'دبي', heightLabel: 'المحطة الثانية', icon: 'museum' },
+  { level: 3, name: 'برواز دبي', city: 'دبي', heightLabel: 'المحطة الثالثة', icon: 'frame' },
+  { level: 4, name: 'برج العرب', city: 'دبي', heightLabel: 'المحطة الرابعة', icon: 'sail' },
+  { level: 5, name: 'أبراج الاتحاد', city: 'أبوظبي', heightLabel: 'المحطة الخامسة', icon: 'towers' },
+  { level: 6, name: 'أبراج الإمارات', city: 'دبي', heightLabel: 'قبل القمة', icon: 'buildings' },
+  { level: 7, name: 'قمة برج خليفة', city: 'دبي', heightLabel: '828 متراً – قمة المجد', icon: 'summit' },
 ];
 
 const QUESTION_BANK: FlagQuestion[] = [
@@ -76,6 +76,30 @@ const QUESTION_BANK: FlagQuestion[] = [
   { id: 34, difficulty: 'hard', question: "كيف تتحقق من معلومة تاريخية عن العلم؟", options: ["بمصدر رسمي موثق","بمنشور مجهول","بصورة بلا سياق","بتخمين شخصي"], correct: 0, fact: "الرجوع لمصادر موثوقة يساعد في التحقق من التاريخ." },
   { id: 35, difficulty: 'hard', question: "ما الفرق بين يوم العلم وعيد الاتحاد؟", options: ["كلاهما في اليوم نفسه","يوم العلم في نوفمبر وعيد الاتحاد في ديسمبر","يوم العلم في يناير","عيد الاتحاد في مارس"], correct: 1, fact: "يوم العلم 3 نوفمبر وعيد الاتحاد 2 ديسمبر." },
   { id: 36, difficulty: 'hard', question: "أي مشروع يعزز فهم الهوية الوطنية أكثر؟", options: ["نسخ معلومات مجهولة","ربط رموز العلم بتاريخ الاتحاد بمراجع موثوقة","اختيار لون فقط","تجاهل التاريخ"], correct: 1, fact: "الربط بالمصادر والسياق التاريخي يعزز الفهم." },
+  { id: 37, difficulty: 'easy', question: "ما اسم العاصمة الاتحادية لدولة الإمارات؟", options: ["أبوظبي","دبي","عجمان","الفجيرة"], correct: 0, fact: "أبوظبي هي عاصمة الدولة الاتحادية." },
+  { id: 38, difficulty: 'easy', question: "كم إمارة تتكوّن منها دولة الإمارات؟", options: ["خمس","ست","سبع","ثمان"], correct: 2, fact: "دولة الإمارات اتحاد يضم سبع إمارات." },
+  { id: 39, difficulty: 'easy', question: "ما اللون الممتد عموديًا بجانب السارية؟", options: ["الأبيض","الأحمر","الأسود","الأخضر"], correct: 1, fact: "الشريط الأحمر العمودي متصل بسارية العلم." },
+  { id: 40, difficulty: 'easy', question: "ما اللون الأوسط بين الأخضر والأسود؟", options: ["الأبيض","الأصفر","الأزرق","الأحمر"], correct: 0, fact: "الأبيض هو اللون الأوسط في أشرطة العلم الأفقية." },
+  { id: 41, difficulty: 'easy', question: "أين يقع برج خليفة؟", options: ["الشارقة","العين","دبي","أم القيوين"], correct: 2, fact: "برج خليفة من أشهر معالم دبي." },
+  { id: 42, difficulty: 'easy', question: "ما اسم العيد الوطني الذي يوافق 2 ديسمبر؟", options: ["عيد الاتحاد","يوم العلم","يوم الطفل","يوم التراث"], correct: 0, fact: "عيد الاتحاد يُحتفل به في 2 ديسمبر." },
+  { id: 43, difficulty: 'easy', question: "ما السلوك المناسب عند رفع العلم؟", options: ["العبث بالراية","الوقوف باحترام","ترك العلم على الأرض","إخفاء العلم"], correct: 1, fact: "احترام مراسم العلم يعكس الانتماء." },
+  { id: 44, difficulty: 'easy', question: "ما الشريط الأفقي الأول أعلى العلم؟", options: ["الأسود","الأبيض","الأخضر","الأحمر"], correct: 2, fact: "الأخضر يأتي في أعلى الأشرطة الأفقية." },
+  { id: 45, difficulty: 'medium', question: "ما المقصود بالسدو في تراث الإمارات؟", options: ["فن نسج تقليدي","قارب صيد","قناة ري","أداة غوص"], correct: 0, fact: "السدو من مهارات النسج التقليدي المرتبطة بالتراث المحلي." },
+  { id: 46, difficulty: 'medium', question: "ما معنى النوخذة في التراث البحري؟", options: ["حرفي تطريز","قائد السفينة","مزارع الواحة","صانع الفخار"], correct: 1, fact: "النوخذة هو قائد السفينة التقليدية." },
+  { id: 47, difficulty: 'medium', question: "أين تقع قلعة الجاهلي؟", options: ["رأس الخيمة","دبي","العين","الشارقة"], correct: 2, fact: "قلعة الجاهلي تقع في مدينة العين." },
+  { id: 48, difficulty: 'medium', question: "ما اسم نظام توزيع الماء التقليدي بالواحات؟", options: ["الأفلاج","المحامل","القراقير","المندوس"], correct: 0, fact: "الأفلاج نظم تقليدية لنقل مياه الري." },
+  { id: 49, difficulty: 'medium', question: "أي فن إماراتي يجمع الإنشاد والأداء الشعبي؟", options: ["الخوص","العيالة","المحمل","الفلج"], correct: 1, fact: "العيالة فن أداء جماعي تراثي." },
+  { id: 50, difficulty: 'medium', question: "أين يقع جبل جيس؟", options: ["الفجيرة","عجمان","رأس الخيمة","أبوظبي"], correct: 2, fact: "جبل جيس في رأس الخيمة." },
+  { id: 51, difficulty: 'medium', question: "أي سلوك يحافظ على ذاكرة الوطن؟", options: ["نقل معلومات بلا تحقق","توثيق روايات التراث بموافقة أصحابها","إهمال المصادر","إتلاف الصور"], correct: 1, fact: "الاستئذان وتوثيق المصادر يحفظان التراث." },
+  { id: 52, difficulty: 'medium', question: "ما البيئة التي ارتبطت بالغوص على اللؤلؤ؟", options: ["الجبال","الواحات","البحر","الصحراء فقط"], correct: 2, fact: "الغوص على اللؤلؤ من المهن البحرية التراثية." },
+  { id: 53, difficulty: 'hard', question: "أي مصدر أنسب للتحقق من معلومات رسمية عن الإمارات؟", options: ["تعليق مجهول","منشور بلا تاريخ","البوابة الحكومية الرسمية","تخمين شخصي"], correct: 2, fact: "الرجوع للمصادر الرسمية يساعد على التحقق." },
+  { id: 54, difficulty: 'hard', question: "أي عبارة تربط الواحات بالاستقرار في العين؟", options: ["الأفلاج ساعدت على نقل مياه الزراعة","لم توجد زراعة في المنطقة","الواحات لا تحتاج إلى مياه","الثلوج غذّت المزارع"], correct: 0, fact: "الأفلاج والواحات تدل على تقنيات ريّ عريقة." },
+  { id: 55, difficulty: 'hard', question: "كيف نميز التراث المادي عن غير المادي؟", options: ["كلاهما صور فقط","المباني مادية والفنون الشعبية غير مادية","كلاهما أدوات زراعة","لا فرق بينهما"], correct: 1, fact: "المبنى تراث مادي، والفنون والممارسات تراث غير مادي." },
+  { id: 56, difficulty: 'hard', question: "كيف تتحقق من نسبة قصة تراثية إلى راوٍ؟", options: ["نشرها بلا إذن","تغييرها دون بيان","تسجيل المصدر والحصول على الموافقة","الاعتماد على التخمين"], correct: 2, fact: "الأمانة في الرواية تتطلب موافقة وتوثيقًا." },
+  { id: 57, difficulty: 'hard', question: "كيف يعبّر تنوع البيئات في الإمارات عن تراثها؟", options: ["جميع المهن متطابقة","البحر والصحراء والواحات أسهمت في تنوع الحرف","لا يرتبط التراث بالبيئة","تاريخ السكان بدأ حديثًا"], correct: 1, fact: "ارتبطت الحرف بالموارد والبيئات المحلية." },
+  { id: 58, difficulty: 'hard', question: "ما التصرف الصحيح عند اختلاف مصدرين تاريخيين؟", options: ["تفضيل الأكثر انتشارًا","اختيار أقصر إجابة","مقارنة المصادر والأدلة الأصلية","تجاهل التاريخ"], correct: 2, fact: "تتبع المصادر الأصلية يعطي تفسيرًا موثوقًا." },
+  { id: 59, difficulty: 'hard', question: "أي مشروع مدرسي يوثق تاريخ الاتحاد بصورة مسؤولة؟", options: ["مقابلات بموافقة ومراجع رسمية","نسخ إشاعة","صورة مجهولة","حذف أسماء المصادر"], correct: 0, fact: "التوثيق والمصادر الرسمية يعززان البحث الوطني." },
+  { id: 60, difficulty: 'hard', question: "ما فائدة مقارنة صور موقع تراثي عبر الزمن؟", options: ["توقع المستقبل","توثيق تغيرات المكان","معرفة عدد الإعجابات","إخفاء التاريخ"], correct: 1, fact: "مقارنة صور مؤرخة تساعد في دراسة التغير التاريخي." },
 ];
 
 function getDifficulty(level: number): Difficulty {
@@ -146,6 +170,10 @@ function playTone(type: 'up' | 'down' | 'victory') {
   }
 }
 
+
+const UaeFlagIcon = () => <svg viewBox="0 0 60 40" width="33" height="25" aria-hidden="true"><rect width="60" height="40" rx="3" fill="#fff"/><path d="M0 0h15v40H0z" fill="#E21C3B"/><path d="M15 0h45v13.4H15z" fill="#00843D"/><path d="M15 26.6h45V40H15z" fill="#131313"/></svg>;
+const ResultIcon = ({good=false}:{good?:boolean}) => <svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{good?<path d="m4 13 5 5L20 6"/>:<path d="M6 6 18 18M18 6 6 18"/>}</svg>;
+const LandmarkIcon = ({name}:{name:string}) => <svg viewBox="0 0 32 32" className="fg-landmark-icon" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{name==='fort'?<><path d="M4 29V10h5V5h5v5h5V5h5v5h4v19z"/><path d="M12 29V19h8v10"/></>:name==='mosque'?<><path d="M4 29V16h24v13M6 16Q16 0 26 16M2 29V8m28 21V8M12 29v-8h8v8"/></>:name==='museum'?<><path d="M3 28h26M6 28V12l10-8 10 8v16M10 16h12M10 21h12"/></>:name==='frame'?<><rect x="6" y="4" width="20" height="24" rx="1"/><rect x="11" y="9" width="10" height="14"/></>:name==='sail'?<><path d="M6 26h20l-4 4H10zM16 3v23M16 6 7 23h9M18 8 26 24h-8"/></>:name==='summit'?<><path d="M12 29V13h8v16M16 13V2M9 29h14M5 29h22"/></>:<><path d="M4 29V9h9v20M16 29V3h12v26M1 29h30M7 15h3m-3 6h3m12-10h3m-3 7h3"/></>}</svg>;
 interface FlagDayChallengeProps {
   onClose?: () => void;
 }
@@ -341,6 +369,21 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
         @keyframes fg-flag-wave{0%,100%{transform:perspective(500px) rotateY(0) skewY(0)}25%{transform:perspective(500px) rotateY(-8deg) skewY(1.4deg)}55%{transform:perspective(500px) rotateY(5deg) skewY(-1.2deg)}78%{transform:perspective(500px) rotateY(-4deg) skewY(.8deg)}}@keyframes fg-twinkle{from{opacity:.35}to{opacity:.8}}@keyframes fg-drift{0%,100%{transform:translateX(0)}50%{transform:translateX(-20px)}}@keyframes fg-rise{from{opacity:0;transform:translateY(11px)}to{opacity:1;transform:translateY(0)}}@keyframes fg-win-bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-7px) rotate(3deg)}}@keyframes fg-banner-in{from{opacity:0;transform:translate(-50%,-12px) scale(.86)}to{opacity:1;transform:translate(-50%,0) scale(1)}}@keyframes fg-burst-life{0%,7%{opacity:0;transform:scale(.1)}12%{opacity:1;transform:scale(1)}62%{opacity:.85}100%{opacity:0;transform:scale(1.3)}}@keyframes fg-spark-life{0%{opacity:0}12%{opacity:1}58%{opacity:.9}100%{opacity:0}}@media(prefers-reduced-motion:reduce){.flag-game *, .flag-game *:before,.flag-game *:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
         @media(max-width:980px){.fg-shell{grid-template-columns:minmax(0,1fr);max-width:760px}.fg-scene{min-height:560px;order:0}.fg-panel{order:1;padding:24px}.fg-visual{min-height:390px;max-height:470px}.fg-pole{left:19%;height:79%}.fg-pole-base{left:calc(19% - 14px)}.fg-flag-holder{width:clamp(130px,23vw,175px);height:clamp(65px,11vw,86px)}.fg-loc-tag{top:40%;max-width:45%}.fg-victory-banner{top:15%}}
         @media(max-width:560px){.flag-game{padding:8px}.fg-shell{border-radius:22px;min-height:calc(100dvh - 25px)}.fg-scene{min-height:430px;padding:12px;border-radius:0}.fg-scene-head{padding:10px;border-radius:15px}.fg-school-mark{width:32px;height:32px;flex-basis:32px;font-size:17px}.fg-school-name{font-size:9px}.fg-scene-title{font-size:11px}.fg-level-pill{font-size:9px;padding:7px 8px}.fg-visual{min-height:300px;margin:7px -4px}.fg-pole{left:16%;height:80%;width:10px}.fg-pole-shaft{inset:0 2px}.fg-pole-base{left:calc(16% - 14px);bottom:3%;width:35px}.fg-flag-holder{left:7px;width:clamp(115px,37vw,150px);height:clamp(57px,18vw,72px)}.fg-loc-tag{right:0;top:42%;max-width:53%;padding:8px 9px}.fg-loc-tag small{font-size:9px}.fg-loc-tag strong{font-size:10px}.fg-step-track{right:1%;top:8%;bottom:17%}.fg-step-dots{top:8%;bottom:17%}.fg-step-dots span{width:10px;height:10px}.fg-scene-foot{padding:10px;border-radius:15px}.fg-scene-foot strong{font-size:10px}.fg-mini-progress{min-width:55px}.fg-mini-progress strong{font-size:17px}.fg-panel{padding:18px 14px 15px}.fg-panel-head{padding-bottom:15px;margin-bottom:15px;gap:7px}.fg-title{font-size:22px}.fg-subtitle{font-size:10px}.fg-head-actions{gap:5px}.fg-close-btn{height:34px;min-width:34px;border-radius:10px;font-size:14px}.fg-close-btn{padding:0 8px;font-size:10px}.fg-stats{gap:7px;margin-bottom:13px}.fg-stat{padding:10px;border-radius:13px}.fg-stat-line{font-size:9px;align-items:flex-start;flex-direction:column;gap:5px}.fg-stat strong{font-size:11px}.fg-difficulty{font-size:9px}.fg-question-card{padding:16px 14px;border-radius:18px;margin-bottom:12px}.fg-question-label{font-size:10px}.fg-question-text{font-size:15px;line-height:1.95}.fg-options{gap:8px;margin-bottom:12px}.fg-option{min-height:52px;padding:9px 10px;border-radius:14px;font-size:11px;gap:7px}.fg-option-number{flex-basis:27px;width:27px;height:27px;border-radius:9px}.fg-feedback{padding:12px;border-radius:14px}.fg-feedback-heading{font-size:11px}.fg-fact{font-size:10px}.fg-hint{font-size:10px;padding:10px;border-radius:13px}.fg-panel-foot{font-size:9px;gap:8px;margin-top:16px}.fg-victory{padding-top:12px}.fg-win-emblem{width:82px;height:82px}.fg-win-emblem-inner{font-size:38px}.fg-victory-kicker{font-size:9px;margin-top:14px}.fg-victory-title{font-size:28px}.fg-victory-name{font-size:21px}.fg-victory-copy{font-size:11px}.fg-reward-card{padding:13px}.fg-reward-points{font-size:19px}.fg-victory-actions{gap:7px}.fg-victory-actions .fg-play-again{font-size:10px;padding:10px}.fg-return-btn{padding:0 10px;font-size:10px}.fg-victory-banner{max-width:90%;top:14%;padding:8px 13px;border-radius:14px}.fg-victory-banner strong{font-size:19px}.fg-victory-banner span{font-size:9px}}
+
+        /* UAE flag and geometric artwork replace all icon emoji. */
+        .fg-school-mark svg{width:30px;height:23px;filter:drop-shadow(0 3px 4px #0004)}
+        .fg-landmark-icon{width:22px;height:22px;vertical-align:middle;display:inline-block;color:#ffe09d;margin-inline-end:5px}
+        .fg-result-mark{display:inline-grid;place-items:center}
+        .fg-cloud{width:90px;height:27px;opacity:.22;border-radius:45px;background:#fff;filter:blur(2px)}
+        .fg-cloud:before,.fg-cloud:after{content:"";position:absolute;border-radius:50%;background:#fff;bottom:8px}
+        .fg-cloud:before{left:13px;width:42px;height:38px}.fg-cloud:after{right:12px;width:35px;height:31px}
+        .fg-scene{background:linear-gradient(170deg,#103d4a,#097159 48%,#d3a16c 100%)}
+        .fg-option{transition:transform .25s,box-shadow .25s,border-color .25s}.fg-option:not(:disabled):hover{transform:translateY(-4px);box-shadow:0 12px 22px #0c684a25}.fg-option.correct{animation:fg-choice-pop .5s ease}.fg-feedback.good{animation:fg-feedback-pop .45s ease}.fg-flag-holder{filter:drop-shadow(0 9px 14px #0006)}
+        .fg-question-card{border:2px solid #d8b67875}
+        .fg-stat,.fg-loc-tag{transition:transform .35s}.fg-loc-tag{animation:fg-feedback-pop .45s ease}
+        .fg-scene:after{content:"";pointer-events:none;position:absolute;z-index:0;bottom:0;inset-inline:0;height:19px;background:repeating-linear-gradient(90deg,#c8965b 0 14px,#f1d5a2 14px 28px,#0c6653 28px 42px);opacity:.8}
+        @keyframes fg-choice-pop{50%{transform:scale(1.025)}}@keyframes fg-feedback-pop{from{opacity:.2;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        @media(prefers-reduced-motion:reduce){.fg-option,.fg-feedback,.fg-loc-tag{animation:none!important;transition:none!important}}
       `}</style>
 
       <div className="fg-ribbon" aria-hidden="true"><span className="r" /><span className="g" /><span className="w" /><span className="b" /></div>
@@ -349,8 +392,8 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
         <section className="fg-scene" aria-label="مشهد سارية علم الإمارات ومعالم الدولة">
           <img src="/saqr-full.png" alt="" aria-hidden="true" style={{position:"absolute",bottom:"12%",right:"6%",height:"min(13vw,115px)",maxHeight:115,minHeight:56,maxWidth:"24%",objectFit:"contain",pointerEvents:"none",zIndex:3,filter:"drop-shadow(0 8px 12px #0006)"}} />
           <div className="fg-stars" aria-hidden="true" />
-          <div className="fg-cloud c1" aria-hidden="true">☁</div>
-          <div className="fg-cloud c2" aria-hidden="true">☁</div>
+          <div className="fg-cloud c1" aria-hidden="true"/>
+          <div className="fg-cloud c2" aria-hidden="true"/>
 
           {isVictory && (
             <>
@@ -365,14 +408,14 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
               </div>
               <div className="fg-victory-banner">
                 <strong>دام عزك يا إمارات</strong>
-                <span>رايتنا عالية… ومجدنا مستمر 🇦🇪</span>
+                <span>رايتنا عالية… ومجدنا مستمر</span>
               </div>
             </>
           )}
 
           <header className="fg-scene-head">
             <div className="fg-school-brand">
-              <div className="fg-school-mark" aria-hidden="true">🇦🇪</div>
+              <div className="fg-school-mark" aria-hidden="true"><UaeFlagIcon/></div>
               <div>
                 <div className="fg-school-name">مدرسة صقر الإمارات الدولية الخاصة</div>
                 <div className="fg-scene-title">رحلة راية المجد إلى القمة</div>
@@ -463,7 +506,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
 
             <div className="fg-loc-tag">
               <small>المحطة الحالية · {currentLandmark.city}</small>
-              <strong>{currentLandmark.icon} {currentLandmark.name}</strong>
+              <strong><LandmarkIcon name={currentLandmark.icon}/> {currentLandmark.name}</strong>
             </div>
           </div>
 
@@ -476,7 +519,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
         <section className="fg-panel" aria-live="polite">
           <header className="fg-panel-head">
             <div className="fg-title-wrap">
-              <h1 className="fg-title">تحدّي راية المجد 🇦🇪</h1>
+              <h1 className="fg-title">تحدّي راية المجد</h1>
               <p className="fg-subtitle">أجب عن أسئلة العلم الإماراتي. الإجابة الصحيحة ترفع الراية، والخاطئة تُنزلها درجة.</p>
             </div>
             {onClose && <div className="fg-head-actions"><button className="fg-close-btn" type="button" onClick={onClose}>إغلاق ✕</button></div>}
@@ -489,7 +532,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
                   <div className="fg-stat-line"><span>درجة الصعوبة</span><span className={`fg-difficulty ${currentDifficulty}`}>{difficultyLabel}</span></div>
                 </div>
                 <div className="fg-stat">
-                  <div className="fg-stat-line"><span>المتبقي للقمة</span><strong>{MAX_LEVEL - flagLevel} {MAX_LEVEL - flagLevel === 1 ? 'خطوة' : 'خطوات'} 🚀</strong></div>
+                  <div className="fg-stat-line"><span>المتبقي للقمة</span><strong>{MAX_LEVEL - flagLevel} {MAX_LEVEL - flagLevel === 1 ? 'خطوة' : 'خطوات'}</strong></div>
                   <div className="fg-progress" role="progressbar" aria-valuemin={0} aria-valuemax={MAX_LEVEL} aria-valuenow={flagLevel} aria-label="التقدم نحو القمة"><div className="fg-progress-fill" style={{ width: `${progressPercent}%` }} /></div>
                 </div>
               </div>
@@ -510,8 +553,8 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
                   return (
                     <button className={`fg-option ${optionClass}`} key={`${currentQuestion.id}-${index}`} type="button" disabled={isAnswered} onClick={() => handleOptionSelect(index)}>
                       <span className="fg-option-leading"><span className="fg-option-number">{['أ', 'ب', 'ج', 'د'][index]}</span><span className="fg-option-text">{option}</span></span>
-                      {isAnswered && index === currentQuestion.correct && <span aria-label="الإجابة الصحيحة">✅</span>}
-                      {isAnswered && selectedOption === index && index !== currentQuestion.correct && <span aria-label="إجابة غير صحيحة">↘️</span>}
+                      {isAnswered && index === currentQuestion.correct && <span className="fg-result-mark" aria-label="الإجابة الصحيحة"><ResultIcon good/></span>}
+                      {isAnswered && selectedOption === index && index !== currentQuestion.correct && <span className="fg-result-mark" aria-label="إجابة غير صحيحة"><ResultIcon/></span>}
                     </button>
                   );
                 })}
@@ -521,39 +564,39 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
                 <div className={`fg-feedback ${lastResult === 'correct' ? 'good' : 'bad'}`} role="status">
                   <div className="fg-feedback-heading">
                     {lastResult === 'correct'
-                      ? (flagLevel === MAX_LEVEL ? '🎉 إجابة صحيحة! وصلت الراية إلى القمة!' : '🎉 أحسنت! ارتفعت الراية درجة نحو القمة.')
-                      : (flagLevel === 0 ? '💪 إجابة غير صحيحة؛ العلم باقٍ عند نقطة الانطلاق. حاول مجدداً!' : '↘️ ليست الإجابة الصحيحة؛ نزل العلم درجة. لا تستسلم!')}
+                      ? (flagLevel === MAX_LEVEL ? 'إجابة صحيحة! وصلت الراية إلى القمة!' : 'أحسنت! ارتفعت الراية درجة نحو القمة.')
+                      : (flagLevel === 0 ? 'إجابة غير صحيحة؛ العلم باقٍ عند نقطة الانطلاق. حاول مجدداً!' : 'ليست الإجابة الصحيحة؛ نزل العلم درجة. لا تستسلم!')}
                   </div>
-                  <p className="fg-fact">💡 معلومة مفيدة: {currentQuestion.fact}</p>
-                  <button className="fg-next-btn" type="button" onClick={handleFeedbackAction}>{flagLevel === MAX_LEVEL ? 'عرض النتيجة والاحتفال 🏆' : 'السؤال التالي ←'}</button>
+                  <p className="fg-fact">معلومة مفيدة: {currentQuestion.fact}</p>
+                  <button className="fg-next-btn" type="button" onClick={handleFeedbackAction}>{flagLevel === MAX_LEVEL ? 'عرض النتيجة والاحتفال' : 'السؤال التالي ←'}</button>
                 </div>
               ) : (
-                <div className="fg-hint"><span className="fg-hint-icon">💡</span><span>اختر إجابة واحدة. تذكّر: كل إجابة صحيحة تقرّب علم الإمارات من قمة برج خليفة، ويمكنك المحاولة من جديد بعد كل سؤال.</span></div>
+                <div className="fg-hint"><span className="fg-hint-icon"><ResultIcon good/></span><span>اختر إجابة واحدة. تذكّر: كل إجابة صحيحة تقرّب علم الإمارات من قمة برج خليفة، ويمكنك المحاولة من جديد بعد كل سؤال.</span></div>
               )}
             </>
           ) : (
             <div className="fg-victory">
-              <div className="fg-win-emblem"><div className="fg-win-emblem-inner">🇦🇪</div></div>
-              <div className="fg-victory-kicker">🏆 وصلت إلى قمة برج خليفة · 828 متراً</div>
+              <div className="fg-win-emblem"><div className="fg-win-emblem-inner"><UaeFlagIcon/></div></div>
+              <div className="fg-victory-kicker">وصلت إلى قمة برج خليفة · 828 متراً</div>
               <h2 className="fg-victory-title">دام عزك يا إمارات</h2>
               <p className="fg-victory-name">أحسنت يا {studentName}!</p>
               <p className="fg-victory-copy">رفعت راية الاتحاد عالياً بعلمك واجتهادك. تستحق أن تحتفل بهذا الإنجاز الوطني الجميل!</p>
               <div className="fg-reward-card">
                 <div className="fg-reward-label">مكافأة التحدي الوطني</div>
-                <div className="fg-reward-points">{awardStatus === 'saved' ? '+100 نقطة مكتبية 🌟' : awardStatus === 'saving' ? 'جارٍ تسجيل المكافأة…' : awardStatus === 'error' ? 'تعذّر تسجيل النقاط' : awardStatus === 'unavailable' ? 'إنجاز وطني يستحق الفخر 🇦🇪' : 'إنجاز وطني يستحق الفخر 🇦🇪'}</div>
+                <div className="fg-reward-points">{awardStatus === 'saved' ? '+100 نقطة مكتبية' : awardStatus === 'saving' ? 'جارٍ تسجيل المكافأة…' : awardStatus === 'error' ? 'تعذّر تسجيل النقاط' : awardStatus === 'unavailable' ? 'إنجاز وطني يستحق الفخر' : 'إنجاز وطني يستحق الفخر'}</div>
                 <div className="fg-award-status">
                   {awardStatus === 'saved' ? 'تمت إضافة 100 نقطة إلى رصيدك في قاعدة بيانات المدرسة.' : awardStatus === 'saving' ? 'يتم التحقق من سجل الطالب وتحديث رصيد النقاط.' : awardStatus === 'error' ? 'تم الوصول إلى القمة، لكن لم نتمكن من تحديث النقاط. يرجى مراجعة مسؤول النظام.' : awardStatus === 'unavailable' ? 'تم إكمال التحدي. تُسجّل النقاط عند اللعب بحساب طالب مرتبط بقاعدة البيانات.' : 'اكتمل التحدي بنجاح.'}
                 </div>
-                <div className="fg-medal">🎖️ وسام «فارس الراية الإماراتية» · {correctAnswersCount} إجابة صحيحة</div>
+                <div className="fg-medal">وسام «فارس الراية الإماراتية» · {correctAnswersCount} إجابة صحيحة</div>
               </div>
               <div className="fg-victory-actions">
-                <button className="fg-play-again" type="button" onClick={handleRestart}>🔄 العب مرة أخرى</button>
+                <button className="fg-play-again" type="button" onClick={handleRestart}>العب مرة أخرى</button>
                 {onClose && <button className="fg-return-btn" type="button" onClick={onClose}>العودة</button>}
               </div>
             </div>
           )}
 
-          <footer className="fg-panel-foot"><span>ارفعه عالياً ليبقى شامخاً 🇦🇪</span><span>المكتبة الذكية · مدرسة صقر الإمارات الدولية الخاصة</span></footer>
+          <footer className="fg-panel-foot"><span>ارفعه عالياً ليبقى شامخاً</span><span>المكتبة الذكية · مدرسة صقر الإمارات الدولية الخاصة</span></footer>
         </section>
       </main>
     </div>
