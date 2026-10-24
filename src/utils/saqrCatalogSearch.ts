@@ -27,6 +27,7 @@ export type SaqrBookMatch = {
   row?: number;
   driveLink?: string;
   matchBasis: string;
+  summary?: string;
 };
 
 const normalize = (value: unknown): string => String(value ?? '')
@@ -103,6 +104,26 @@ const TOPICS: Array<{ key:string; query:RegExp; signals:RegExp }> = [
     signals:/\b(?:art|painting|design|architecture|drawing)\b|فنون|الرسم|تصميم|عماره/}
 ];
 
+// Bilingual concept hints. A match still requires evidence in catalog metadata.
+const THEMES: Array<{query:RegExp;evidence:RegExp}> = [
+  {query:/فضاء|الكواكب|كواكب|النجوم|مجرات|الفلك|space|astronom|planet|galax|cosmos/,
+   evidence:/فضاء|كواكب|نجوم|مجرات|الفلك|space|astronom|planet|galax|cosmos|universe|solar system/},
+  {query:/التراث|تراث|الهوية الوطنيه|اماراتي|الامارات|heritage|emirati|uae/,
+   evidence:/تراث|الامارات|اماراتي|الهوية الوطنيه|heritage|emirati|uae|united arab emirates|abu dhabi|dubai/},
+  {query:/الاستدامه|البيئه|التلوث|المناخ|الطبيعه|environment|ecolog|sustainab|climate/,
+   evidence:/استدامه|بيئه|تلوث|مناخ|طبيعه|environment|ecolog|sustainab|climate|pollution|recycl|nature/},
+  {query:/الشجاعه|شجاعه|الجرأه|courage|bravery|brave/,
+   evidence:/شجاعه|الجرأه|courage|bravery|brave|fearless/},
+  {query:/التسامح|التعاطف|الرحمه|الطيبه|الاخلاق|القيم|kindness|empathy|compassion|values|morals/,
+   evidence:/تسامح|تعاطف|رحمه|طيبه|اخلاق|القيم|kindness|empathy|compassion|values|morals|ethics/},
+  {query:/المياه|الماء|العطش|الري|water|thirst|irrigat/,
+   evidence:/مياه|الماء|عطش|الري|water|thirst|irrigat/},
+  {query:/البرمجه|الحاسوب|التقنيه|الروبوت|coding|programming|computer|robot/,
+   evidence:/برمجه|حاسوب|تقنيه|روبوت|coding|programming|computer|robot|software/},
+  {query:/التعليم|التعلم|التدريس|المعلم|education|learning|teaching|pedagog/,
+   evidence:/تعليم|تعلم|تدريس|معلم|education|learning|teaching|pedagog|classroom/}
+];
+
 const bookIntent = /(?:\b(?:books?|novels?|catalog(?:ue)?|library|booklist|read(?:ing)?|reference(?:s)?|recommend\w*|titles?)\b|كتب|كتاب|الكتب|المكتبه|مكتبه|فهرس|مراجع|روايات|اقترح|رشح|ترشح|للقراءه|للقراءة|عندكم|توجد كتب|هل يوجد)/;
 
 /** Preserve exact title/author matching even if the user didn't say "book". */
@@ -111,7 +132,8 @@ export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=
   const tokens = [...new Set(wordsOf(question).filter(word=>word.length>=3 && !STOP_WORDS.has(word)))];
   const hasBookIntent = bookIntent.test(normalizedQuery);
   const detectedTopics = hasBookIntent ? TOPICS.filter(topic=>topic.query.test(normalizedQuery)) : [];
-  if (!tokens.length && !detectedTopics.length) return [];
+  const detectedThemes = hasBookIntent ? THEMES.filter(theme=>theme.query.test(normalizedQuery)) : [];
+  if (!tokens.length && !detectedTopics.length && !detectedThemes.length) return [];
 
   const origins: Array<{records:BookRecord[];source:'physical'|'arabic'|'english';label:string}> = [
     {records:catalogs.physical,source:'physical',label:'المكتبة العادية (Physical Library)'},
@@ -149,10 +171,16 @@ export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=
         if(topic.signals.test(titleText)) {score+=60;titleMatch=true;}
         if(topic.signals.test(descriptionText)) score+=22;
       }
+      for(const theme of detectedThemes) {
+        if(theme.evidence.test(titleText)) {score+=48;titleMatch=true;}
+        if(theme.evidence.test(subjectText)) {score+=65;subjectMatch=true;}
+        if(theme.evidence.test(descriptionText)) {score+=30;subjectMatch=true;}
+      }
       // A generic category such as General Knowledge is not evidence of a topic.
       if(score<12) continue;
       const value:SaqrBookMatch={
         title,author,subject,pageLocation:origin.label,
+        ...(book.summary ? {summary:String(book.summary).slice(0,500)} : {}),
         ...(origin.source==='physical' ? {shelf:book.shelf,row:book.row} : {driveLink:book.driveLink}),
         matchBasis: subjectMatch ? 'Catalog subject/topic' : titleMatch ? 'Book title' : 'Description/author'
       };
@@ -171,6 +199,13 @@ export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=
     if(seen.has(key)) return;
     chosen.push(entry);seen.add(key);counts[entry.origin]++;
   };
+  // Reserve genuine results for each catalog before filling by relevance.
+  for(const source of ['physical','arabic','english']){
+    for(const entry of candidates.filter(item=>item.origin===source).slice(0,2)){
+      if(chosen.length>=limit)break;
+      add(entry);
+    }
+  }
   for(const entry of candidates){
     if(chosen.length>=limit)break;
     if(counts[entry.origin]>=caps[entry.origin])continue;
