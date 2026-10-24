@@ -347,6 +347,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
 
       <main className="fg-shell">
         <section className="fg-scene" aria-label="مشهد سارية علم الإمارات ومعالم الدولة">
+          <img src="/saqr-full.png" alt="" aria-hidden="true" style={{position:"absolute",bottom:"12%",right:"6%",height:"min(13vw,115px)",maxHeight:115,minHeight:56,maxWidth:"24%",objectFit:"contain",pointerEvents:"none",zIndex:3,filter:"drop-shadow(0 8px 12px #0006)"}} />
           <div className="fg-stars" aria-hidden="true" />
           <div className="fg-cloud c1" aria-hidden="true">☁</div>
           <div className="fg-cloud c2" aria-hidden="true">☁</div>
