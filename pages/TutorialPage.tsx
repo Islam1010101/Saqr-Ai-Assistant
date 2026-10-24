@@ -368,11 +368,11 @@ export default function TutorialPage() {
     },
     {
       id: 'national-identity', title: label('صقر وهوية وطن', 'Saqr & National Identity'),
-      description: label('رحلات ثقافية إماراتية للطلاب والإدارة.', 'UAE heritage learning for students and administrators.'),
+      description: label('رحلات ثقافية إماراتية للطلاب.', 'UAE heritage learning for students and administrators.'),
       color: 'bg-gradient-to-br from-[#075B49] via-[#087555] to-[#116759]', border: 'border-emerald-900',
       icon: <svg className="h-9 w-9" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M24 11C18 7 11 7 5 9v29c7-2 14-1 19 3 5-4 12-5 19-3V9c-6-2-13-2-19 2ZM24 11v30"/><path d="m30 19 3-6 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1Z" fill="currentColor" fillOpacity=".24"/></svg>,
-      hint: label('قسم جديد للطلاب والإدارة يضم جواز صقر الثقافي، وكنوز لغتنا الإماراتية، ومحقق ذاكرة الوطن، وتحدي راية المجد ليوم العلم. نقاط اللعبة للطلاب فقط. المعاينة لا تشغّل الألعاب.',
-        'A new section for students and administrators: Cultural Passport, Emirati Language Treasures, Heritage Research Detective, and the Flag Day Challenge. Only students receive game points. This tour does not launch games.')
+      hint: label('قسم جديد للطلاب يضم جواز صقر الثقافي، وكنوز ثقافتنا الإماراتية، ومحقق ذاكرة الوطن، وتحدي راية المجد ليوم العلم. نقاط اللعبة للطلاب فقط. المعاينة لا تشغّل الألعاب.',
+        'A new section for students: Cultural Passport, Emirati Treasures, Heritage Research Detective, and the Flag Day Challenge. Only students receive game points. This tour does not launch games.')
     },
     {
       id: 'studio', title: label('استديو صقر', 'Saqr Studio'),
@@ -404,7 +404,7 @@ export default function TutorialPage() {
     { id: 'nav-search', text: label('البحث بالمكتبة', 'Search'), description: label('يفتح فهرس البحث عن الكتب.', 'Opens the book search catalogue.') },
     { id: 'nav-digital', text: label('المكتبة الرقمية', 'Digital'), description: label('ينقلك إلى مصادر المكتبة الرقمية.', 'Takes you to digital library resources.') },
     { id: 'nav-creators', text: label('بوابة المبدعين', 'Creators'), description: label('مساحة المشاركات والأعمال الإبداعية.', 'A space for creative contributions.') },
-    { id: 'nav-identity', text: label('صقر وهوية وطن', 'UAE Heritage'), description: label('أربع تجارب تراثية وثقافية، متاحة للطلاب والإدارة فقط.', 'Four UAE heritage activities available to students and administrators only.') },
+    { id: 'nav-identity', text: label('صقر وهوية وطن', 'UAE Heritage'), description: label('أربع تجارب تراثية وثقافية، متاحة للطلاب فقط.', 'Four UAE heritage activities available to students only.') },
     { id: 'nav-schedule', text: label('جدول المكتبة', 'Schedule'), description: label('خدمات جدول المكتبة للمعلمين.', 'Library schedule tools for teachers.') },
     { id: 'nav-ideas', text: label('مقترحات', 'Ideas'), description: label('استعراض وإرسال المقترحات في الموقع الحقيقي.', 'View and submit feedback on the live site.') },
     { id: 'nav-admin', text: label('الإدارة', 'Admin'), description: label('قسم محمي لا يظهر محتواه إلا للمخولين.', 'A protected area visible only to authorized staff.') }
@@ -637,7 +637,7 @@ export default function TutorialPage() {
                 <p className="text-xs font-black text-emerald-700 dark:text-emerald-400">{label('داخل قسم صقر وهوية وطن', 'INSIDE SAQR & NATIONAL IDENTITY')}</p>
                 <h2 id="heritage-tour-title" className="mt-1 text-lg sm:text-xl font-black text-slate-900 dark:text-white">{label('أربع مغامرات تحكي تراث الإمارات', 'Four journeys through UAE heritage')}</h2>
               </div>
-              <span className="rounded-full border border-emerald-200 bg-white dark:bg-slate-900 dark:border-emerald-900 px-3 py-2 text-xs font-bold text-emerald-800 dark:text-emerald-200">{label('للطلاب والإدارة فقط', 'Students & admins only')}</span>
+              <span className="rounded-full border border-emerald-200 bg-white dark:bg-slate-900 dark:border-emerald-900 px-3 py-2 text-xs font-bold text-emerald-800 dark:text-emerald-200">{label('للطلاب فقط', 'Students only')}</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {[
