@@ -9,7 +9,7 @@ import { searchSaqrBookCatalog } from '../src/utils/saqrCatalogSearch';
 import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
 import { supabase } from '../src/utils/supabase';
-import { saqrExtraContext } from '../src/utils/saqrSafeEnhancements';
+import { saqrExtraContext, isNewDiscussion, discussionOpening } from '../src/utils/saqrSafeEnhancements';
 
 // --- بروتوكول عقل صقر ---
 const SAQR_ELITE_PROMPT = `
@@ -225,11 +225,11 @@ const SmartSearchPage: React.FC = () => {
 
         if (storedType === 'student') {
           welcomeMessage = locale === 'ar'
-            ? `أهلاً بك يا صديقي المبدع **${name}**! 🎓\n\nأنا "صقر"، المساعد الذكي لمكتبتك. هل نؤلف قصة ممتعة معاً اليوم، أم تبحث عن كتاب محدد لتقرأه؟`
+            ? `أهلاً بك يا صديقي المبدع **${name}**! \n\nأنا "صقر"، المساعد الذكي لمكتبتك. هل نؤلف قصة ممتعة معاً اليوم، أم تبحث عن كتاب محدد لتقرأه؟`
             : `Welcome my creative friend **${name}**! 🎓\n\nI'm 'Saqr', your AI Librarian. Shall we co-author a story today, or are you looking for a specific book?`;
         } else if (storedType === 'teacher' || storedType === 'admin') {
           welcomeMessage = locale === 'ar'
-            ? `أهلاً بك أستاذي الفاضل **${name}**! 👨‍🏫\n\nأنا "صقر" في خدمتك. كيف يمكنني مساعدتك اليوم؟`
+            ? `أهلاً بك أستاذي الفاضل **${name}**! \n\nأنا "صقر" في خدمتك. كيف يمكنني مساعدتك اليوم؟`
             : `Welcome esteemed teacher **${name}**! 👨‍🏫\n\nI am 'Saqr', at your service. How can I assist you today ?`;
         }
       } catch (error) {
@@ -400,10 +400,17 @@ const SmartSearchPage: React.FC = () => {
       grade:safeReader.grade,locale:locale==='ar'?'ar':'en',matches:foundBooks
     });
 
+    if (isNewDiscussion(userQuery,messages)) {
+      setMessages(prev => [...prev,{role:'assistant',content:discussionOpening(locale==='ar'?'ar':'en')}]);
+      setIsLoading(false);
+      setSaqrState('idle');
+      return;
+    }
+
     const searchContext = foundBooks.length > 0
       ? `EFIPS LIBRARY RECORDS FOUND (relevance-ranked, bilingual topic matching): ${JSON.stringify(foundBooks)}.
 When the user asks for books, identify the matching titles exactly as recorded, grouped clearly by physical, Arabic digital and English digital library. For physical books provide the actual shelf (shelf) and row (row); for digital books provide their existing driveLink. Answer in the user's requested language. Do not invent titles, shelves, rows, summaries or links. Some physical-book subject tags are inferred from titles and may be approximate.`
-      : '';
+      : 'EFIPS LIBRARY RECORDS FOUND: No verified matching records supplied. Do not invent a library title, shelf, row or digital link.';
 
     const storedUser = localStorage.getItem('current_user');
     let userContextInfo = '';
@@ -436,6 +443,9 @@ When the user asks for books, identify the matching titles exactly as recorded, 
       if (!response.ok) throw new Error(`Chat request failed: ${response.status}`);
       const data = await response.json();
       let reply = data.reply || '';
+      // Filter assistant prose only: preserve Markdown, links, author certificates
+      // and all of Saqr's existing UI illustrations.
+      reply = reply.replace(/[\\p{Extended_Pictographic}\\uFE0E\\uFE0F]/gu, '').replace(/\\u200D(?=\\s|$)/g, '');
 
       if (reply.includes('[WINNER:')) {
         // Parse the exact winner format while accepting the required pipe separators.
