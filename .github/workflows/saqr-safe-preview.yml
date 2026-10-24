@@ -15,7 +15,8 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-      - run: npm ci
+      # Existing repository lockfile predates package.json; keep it unchanged.
+      - run: npm install --no-save --package-lock=false --no-audit --no-fund
       - name: Run Saqr regression checks (no AI API calls)
         run: node --experimental-strip-types tests/saqrSafeEnhancements.test.ts
       - name: Verify TypeScript
