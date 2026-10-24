@@ -31,10 +31,10 @@ export function decideSaqrMode(question:string, history:ChatTurn[]):SaqrMode{
   // Continue Little Author's original strict interaction throughout that conversation.
   if(history.some(m=>m.role==='user'&&challenge.test(m.content)))return 'none';
   if(about.test(q)||aboutArabic.test(q))return 'about';
-  if(history.some((m,i)=>m.role==='user' && dialogue.test(m.content) && !history.slice(i+1).some(n=>n.role==='user' && (lesson.test(n.content)||challenge.test(n.content)))))return 'discussion';
-  if(dialogue.test(q))return 'discussion';
   if(recommendations.test(q))return 'recommend';
   if(books.test(q))return 'catalog';
+  if(history.some((m,i)=>m.role==='user' && dialogue.test(m.content) && !history.slice(i+1).some(n=>n.role==='user' && (lesson.test(n.content)||challenge.test(n.content)))))return 'discussion';
+  if(dialogue.test(q))return 'discussion';
   return 'none';
 }
 
@@ -119,7 +119,7 @@ export function saqrExtraContext(args:{
   if(mode==='none')return {mode,context:'',recommendations:[]};
   const lang=args.locale==='ar'?'Arabic':'English';
   const age = reader.grade===null?'unknown reading level':'grade '+reader.grade;
-  const lead='OPTIONAL BOOK-GUIDANCE FORMAT (not a change to your identity, lessons, presentations or Little Author rules). Answer in '+lang+'. Reader '+reader.role+', '+age+'. Never use grade to authorize access. ';
+  const lead='DO NOT use emoji or decorative Unicode symbols. Write in well-spaced clear Markdown with readable paragraphs. Preserve Little Author spelling/grammar correction exactly as originally instructed. OPTIONAL BOOK-GUIDANCE FORMAT (not a change to your identity, lessons, presentations or Little Author rules). Answer in '+lang+'. Reader '+reader.role+', '+age+'. Never use grade to authorize access. ';
   if(mode==='about'){
     const links=services.filter(([,,who])=>who==='all'||who==='teacher'&&(reader.role==='teacher'||reader.role==='admin')||who==='student'&&(reader.role==='student'||reader.role==='admin'))
       .map(([name,path])=>name+': '+site+path).join('\n');
@@ -128,7 +128,7 @@ export function saqrExtraContext(args:{
   if(mode==='discussion'){
     const links=trustedTopicSources(args.question,reader).map(x=>x.name+': '+x.url).join('\n');
     return {mode,recommendations:[],context:lead+
-      'GUIDED DISCUSSION, not a quiz. If the user has not chosen a topic or book, ask what they would like to discuss first and do not invent a topic. In subsequent turns, interpret the reader specific answer before asking one connected question. Respond to the reader’s last point, distinguish facts from interpretations and ask ONE open-ended question per turn. Student: approachable, curious and age-sensitive. Teacher: deeper explanation and teaching discussion angles. If discussing a particular book, avoid invented plots or quotes. You may point to matching catalog books only if they appear in the verified EFIPS results. The following are trusted institutional EXTERNAL PORTALS (not evidence of a specific source page or book availability):\n'+links+'\nUse short headings and a clear answer.'};
+      'GUIDED DISCUSSION, not a quiz. If the user has not chosen a topic or book, ask what they would like to discuss first and do not invent a topic. In subsequent turns, interpret the reader specific answer before asking one connected question. Respond to the reader’s last point, distinguish facts from interpretations and ask ONE open-ended question per turn. Student in grades 1-5: use simple concrete sentences and one gentle question; grades 6-8: ask for reasons and examples; grades 9-12: compare perspectives and evidence. When student grade is unknown, do not assume their age; use accessible wording. Teacher or administrator: explore pedagogy, critical analysis, evidence and classroom application with one substantive follow-up question. If discussing a particular book, avoid invented plots or quotes. You may point to matching catalog books only if they appear in the verified EFIPS results. The following are trusted institutional EXTERNAL PORTALS (not evidence of a specific source page or book availability):\n'+links+'\nUse short headings and a clear answer.'};
   }
   if(mode==='catalog'){
     return {mode,recommendations:[],context:lead+
