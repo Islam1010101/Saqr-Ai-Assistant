@@ -4,6 +4,7 @@ import { useReadingPassport, physicalBookKey } from '../src/utils/readingPasspor
 import { useLanguage } from '../App';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../src/utils/supabase';
+import { classifyBookAudience, type BookAudience } from '../api/bookAudience';
 
 // --- 1. الـ Hooks المساعدة ---
 const useDebounce = <T,>(value: T, delay: number): T => {
@@ -24,6 +25,12 @@ const translations = {
     allSubjects: "المواضيع",
     allAuthors: "المؤلفين",
     allShelves: "الرفوف",
+    audience: "الفئة القرائية",
+    audienceChildren: "للصغار",
+    audienceTeens: "لليافعين (الصفوف 9–12)",
+    audienceSpecialist: "للمتخصصين",
+    audienceReview: "يحتاج مراجعة",
+    audienceNotice: "تصنيف إرشادي حسب بيانات الكتاب، وليس تقييمًا عمريًا معتمدًا.",
     sortBy: "فرز حسب",
     alphabetical: "أبجدياً",
     authorName: "المؤلف",
@@ -54,6 +61,12 @@ const translations = {
     allSubjects: "Subjects",
     allAuthors: "Authors",
     allShelves: "Shelves",
+    audience: "Reading audience",
+    audienceChildren: "Younger readers",
+    audienceTeens: "Teens (Grades 9–12)",
+    audienceSpecialist: "Specialists",
+    audienceReview: "Needs review",
+    audienceNotice: "Provisional guidance from catalog data, not verified age ratings.",
     sortBy: "Sort By",
     alphabetical: "Alphabetical",
     authorName: "Author",
@@ -486,6 +499,7 @@ const SearchPage: React.FC = () => {
     const [subjectFilter, setSubjectFilter] = useState('all');
     const [authorFilter, setAuthorFilter] = useState('all');
     const [shelfFilter, setShelfFilter] = useState('all');
+    const [audienceFilter, setAudienceFilter] = useState<BookAudience | 'all'>('all');
     const [sortBy, setSortBy] = useState('alphabetical'); 
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
     const [visibleCount, setVisibleCount] = useState(12);
@@ -522,7 +536,8 @@ const SearchPage: React.FC = () => {
             const matchesSub = subjectFilter === 'all' || b.subject === subjectFilter;
             const matchesAuth = authorFilter === 'all' || b.author === authorFilter;
             const matchesShelf = shelfFilter === 'all' || b.shelf.toString() === shelfFilter;
-            return matchesTerm && matchesSub && matchesAuth && matchesShelf;
+            const matchesAudience = audienceFilter === 'all' || classifyBookAudience(b) === audienceFilter;
+            return matchesTerm && matchesSub && matchesAuth && matchesShelf && matchesAudience;
         });
 
         if (sortBy === 'alphabetical') {
@@ -531,7 +546,7 @@ const SearchPage: React.FC = () => {
             result = [...result].sort((a, b) => a.author.localeCompare(b.author, currentLocale));
         }
         return result;
-    }, [debouncedSearchTerm, subjectFilter, authorFilter, shelfFilter, sortBy, currentLocale]);
+    }, [debouncedSearchTerm, subjectFilter, authorFilter, shelfFilter, audienceFilter, sortBy, currentLocale]);
 
     return (
         <div dir={dir} className="w-full min-h-screen bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300">
@@ -573,6 +588,18 @@ const SearchPage: React.FC = () => {
                                 </div>
                             </div>
                             
+                            <div className="mb-2 flex flex-wrap items-center gap-3">
+                                <label htmlFor="efips-audience" className="text-xs font-black text-slate-700 dark:text-slate-200">{t('audience')}</label>
+                                <select id="efips-audience" value={audienceFilter} onChange={e=>{setAudienceFilter(e.target.value as BookAudience|'all');setVisibleCount(12);}}
+                                    className="min-w-[170px] max-w-full rounded-2xl border-2 border-amber-300 dark:border-amber-700 bg-slate-50 dark:bg-slate-900 px-4 py-3 text-sm font-black text-slate-800 dark:text-white focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-500">
+                                    <option value="all">{currentLocale==='ar'?'كل الفئات':'All audiences'}</option>
+                                    <option value="children">{t('audienceChildren')}</option>
+                                    <option value="teens">{t('audienceTeens')}</option>
+                                    <option value="specialist">{t('audienceSpecialist')}</option>
+                                    <option value="review">{t('audienceReview')}</option>
+                                </select>
+                                <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">{t('audienceNotice')}</span>
+                            </div>
                             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                                 {[
                                     { id: 'sortBy', val: sortBy, set: setSortBy, opts: ['alphabetical', 'author'] },
