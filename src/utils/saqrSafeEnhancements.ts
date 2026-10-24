@@ -30,6 +30,7 @@ export function decideSaqrMode(question:string, history:ChatTurn[]):SaqrMode{
   // Continue Little Author's original strict interaction throughout that conversation.
   if(history.some(m=>m.role==='user'&&challenge.test(m.content)))return 'none';
   if(about.test(q))return 'about';
+  if(history.some((m,i)=>m.role==='user' && dialogue.test(m.content) && !history.slice(i+1).some(n=>n.role==='user' && (lesson.test(n.content)||challenge.test(n.content)))))return 'discussion';
   if(dialogue.test(q))return 'discussion';
   if(recommendations.test(q))return 'recommend';
   if(books.test(q))return 'catalog';
@@ -64,10 +65,11 @@ const services=[
   ['Physical book catalog','/#/search','all'],
   ['Arabic digital library','/#/digital-library/arabic','all'],
   ['English digital library','/#/digital-library/english','all'],
-  ['Reading list and borrowing reminders','/#/home','all'],
+  ['Reading goals, reading lists, borrowed-book due dates and reminders','/#/home','all'],
   ['Book a library period','/#/schedule','teacher'],
   ['Creators portal','/#/creators','student'],
-  ['Saqr & UAE National Identity','/#/saqr-national-identity','student'],
+  ['Little Author interactive storytelling and existing certificate','/#/smart-search','all'],
+  ['Saqr & UAE National Identity','/#/saqr-national-identity','all'],
   ['Saqr Studio','/#/saqr-studio','all'],
   ['Podcast','/#/podcast','all']
 ] as const;
@@ -91,6 +93,22 @@ export function trustedTopicSources(q:string,reader:ReaderInfo){
   const permitted=references.filter(v=>v.tag===topic);
   return permitted.filter(x=>!(reader.role==='student' && reader.grade!==null && reader.grade<9 && x.name==='OpenStax')).slice(0,2);
 }
+const heritageGuide = [
+  'Saqr & National Identity contains four challenges, all located at /#/saqr-national-identity:',
+  '1. Saqr Cultural Passport: discover all seven UAE emirates and earn each emirate stamp after answering.',
+  '2. Treasures of Emirati Language: explore traditional Emirati vocabulary and use terms in original sentences.',
+  '3. Heritage Research Detective (محقق ذاكرة وطن): assess evidence, read source references and check historical claims.',
+  '4. Flag of Glory challenge (تحدي راية المجد): answer UAE Flag Day landmark questions to raise the flag in the game.',
+  'These are website experiences, not functions you can complete or award through chat. Do not invent points, rewards or completion statuses.'
+].join('\\n');
+export const discussionOpening=(locale:'ar'|'en'):string => locale==='ar'
+  ? 'تحب نتناقش في إيه؟ في موضوع معين ولا كتاب قرأته؟'
+  : 'What would you like to discuss: a particular topic or a book you have read?';
+export const isNewDiscussion=(question:string,history:ChatTurn[]):boolean =>
+  /(?:discuss|discussion|debate|talk about|let.s talk|let.s discuss|نناقش|نتناقش|ناقشني|خلينا نتكلم|تحاور)/i.test(question) &&
+  !/(?:حول|عن|about|book\\s+|كتاب\\s+|التراث|التعليم|البيئه|الامارات)/i.test(question) &&
+  !history.some(m=>m.role==='user' && /(?:discuss|discussion|نناقش|نتناقش|ناقشني|تحاور)/i.test(m.content));
+
 export function saqrExtraContext(args:{
   question:string;history:ChatTurn[];role:ReaderInfo['role'];grade:number|null;
   locale:'ar'|'en';matches:SaqrBookMatch[];
@@ -104,12 +122,12 @@ export function saqrExtraContext(args:{
   if(mode==='about'){
     const links=services.filter(([,,who])=>who==='all'||who==='teacher'&&(reader.role==='teacher'||reader.role==='admin')||who==='student'&&(reader.role==='student'||reader.role==='admin'))
       .map(([name,path])=>name+': '+site+path).join('\n');
-    return {mode,recommendations:[],context:lead+'When asked to introduce yourself, present verified EFIPS library capabilities: book discovery, shelf locations, digital reading, guided dialogue, lesson plans and slide outlines for teachers, Little Author story challenge and its existing certificate. Explain website services with relevant real links; do not claim to make bookings, approve loans, or have searched external sites.\n'+links};
+    return {mode,recommendations:[],context:lead+'When asked to introduce yourself, present verified EFIPS library capabilities: book discovery, shelf locations, digital reading, guided dialogue, lesson plans and slide outlines for teachers, Little Author story challenge and its existing certificate. Explain all four National Identity challenges accurately from the following verified page guide: \\n'+heritageGuide+'\\n Explain website services with relevant real links; do not claim to make bookings, approve loans, or have searched external sites.\n'+links};
   }
   if(mode==='discussion'){
     const links=trustedTopicSources(args.question,reader).map(x=>x.name+': '+x.url).join('\n');
     return {mode,recommendations:[],context:lead+
-      'GUIDED DISCUSSION, not a quiz. Respond to the reader’s last point, distinguish facts from interpretations and ask ONE open-ended question per turn. Student: approachable, curious and age-sensitive. Teacher: deeper explanation and teaching discussion angles. If discussing a particular book, avoid invented plots or quotes. You may point to matching catalog books only if they appear in the verified EFIPS results. The following are trusted institutional EXTERNAL PORTALS (not evidence of a specific source page or book availability):\n'+links+'\nUse short headings and a clear answer.'};
+      'GUIDED DISCUSSION, not a quiz. If the user has not chosen a topic or book, ask what they would like to discuss first and do not invent a topic. In subsequent turns, interpret the user's specific answer before asking one connected question. Respond to the reader’s last point, distinguish facts from interpretations and ask ONE open-ended question per turn. Student: approachable, curious and age-sensitive. Teacher: deeper explanation and teaching discussion angles. If discussing a particular book, avoid invented plots or quotes. You may point to matching catalog books only if they appear in the verified EFIPS results. The following are trusted institutional EXTERNAL PORTALS (not evidence of a specific source page or book availability):\n'+links+'\nUse short headings and a clear answer.'};
   }
   if(mode==='catalog'){
     return {mode,recommendations:[],context:lead+
