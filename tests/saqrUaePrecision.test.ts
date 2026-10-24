@@ -23,7 +23,7 @@ assert.ok(found.some(x=>x.driveLink==='https://example.org/uae'));
 console.log('PASS UAE-specific holdings and empty digital collection safeguards');
 
 const real=searchSaqrBookCatalog('كتب عن الإمارات',{physical:bookData,arabic:ARABIC_LIBRARY_DATABASE,english:ENGLISH_LIBRARY_DATABASE});
-assert.ok(real.every(x=>/الإمارات|الامارات|امارات|Emirates|Emirati|UAE|أبوظبي|ابوظبي|Dubai|دبي|الشارقة/i.test(x.title)), 'all real UAE results must be explicitly grounded in a book title');
+assert.ok(real.every(x=>/الإمارات|الامارات|امارات|Emirates|Emirati|UAE|أبوظبي|ابوظبي|أبو ظبي|ابو ظبي|Dubai|دبي|الشارقة|الشـارقة|عجمان|الفجيرة|رأس الخيمة|ام القيوين/i.test(x.title)), 'unexpected real title: '+real.map(x=>x.title).join(' | '));
 assert.equal(real.filter(x=>x.driveLink).length,0,'current digital catalogs contain no verified UAE-specific digital title');
 const renderedReal=renderSaqrCatalogAnswer('كتب عن الإمارات',real,'ar');
 assert.ok(!renderedReal.includes('مغامرات جحا')&&!renderedReal.includes('ألف اختراع واختراع')&&!renderedReal.includes('أدبي'),'real irrelevant matches are excluded');
