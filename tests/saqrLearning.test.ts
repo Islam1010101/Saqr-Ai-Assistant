@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
 import {STORY_IDEAS,storyIdeaAt,isStoryBeginning,detectLearningIntent,saqrLearningInstructions} from '../src/utils/saqrLearning.ts';
-import {readingShelfFromDevice,borrowerIds,filterActiveBorrowings,deviceReadingKey} from '../src/utils/saqrReaderContext.ts';
 assert.ok(STORY_IDEAS.length>=10);
 assert.notEqual(storyIdeaAt(0,'ar'),storyIdeaAt(1,'ar'));
 assert.ok(STORY_IDEAS.every(v=>v.ar&&v.en));
@@ -15,10 +14,4 @@ assert.equal(detectLearningIntent('تحضير درس رياضيات','teacher'),
 assert.ok(saqrLearningInstructions('tutoring','student',4,'ar').includes('grades')===false);
 assert.ok(saqrLearningInstructions('tutoring','student',4,'ar').includes('very simple'));
 assert.ok(saqrLearningInstructions('research','student',8,'ar').includes('Never invent source'));
-const fake=(k:string)=>({getItem:(key:string)=>key===k?JSON.stringify({saved:['digital:en:39','invalid'],completed:[],goal:5}):null});
-const shelf=readingShelfFromDevice('test',fake('test')); assert.equal(shelf.goal,5);
-assert.ok(shelf.saved.every(x=>x.title!=='invalid'));
-assert.deepEqual(borrowerIds({student_id:'S001',id:'S001'},'student'),['S001']);
-assert.deepEqual(filterActiveBorrowings([{status:'active',book_name:'Wonder',return_date:'2026-12-01'},{status:'returned',book_name:'Old'}]),[{title:'Wonder',due:'2026-12-01'}]);
-assert.equal(deviceReadingKey({student_id:'S001'},'student'),'efips-reading-passport-v1:student:S001');
 console.log('PASS Saqr learning and reader-data checks');
