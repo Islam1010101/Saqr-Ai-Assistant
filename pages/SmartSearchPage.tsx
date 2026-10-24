@@ -397,7 +397,9 @@ const SmartSearchPage: React.FC = () => {
     }
     // A factual catalog lookup needs no generative model; keep summaries and all
     // educational/story functions on their existing chat path.
-    if(isSaqrCatalogLookup(userQuery)){
+    const initialRole=localStorage.getItem('user_type')||'guest';
+    const preIntent=detectLearningIntent(userQuery,initialRole as 'student'|'teacher'|'admin'|'guest',messages);
+    if(preIntent==='none' && isSaqrCatalogLookup(userQuery)){
       const answer=renderSaqrCatalogAnswer(userQuery,foundBooks,locale==='ar'?'ar':'en');
       setMessages(prev=>[...prev,{role:'assistant',content:answer}]);
       setSaqrState('idle');
@@ -432,9 +434,22 @@ const SmartSearchPage: React.FC = () => {
 
     const learningIntent=detectLearningIntent(userQuery,safeReader.role,messages);
     if(learningIntent==='schedule'){
+      const selectedDay=/(?:الاثنين|الإثنين|الثلاثاء|الأربعاء|الاربعاء|الخميس|الجمعة|monday|tuesday|wednesday|thursday|friday)/i.exec(userQuery)?.[0];
+      const period=/(?:الحصة|حصه|period)\\s*([1-8])/i.exec(userQuery)?.[1];
+      let status='';
+      try {
+        const {data,error}=await supabase.from('library_schedule').select('id,teacher,subject,grade').limit(60);
+        if(error)throw error;
+        const reservations=(data||[]).filter((slot:any)=>slot.teacher);
+        const target=selectedDay&&period ? reservations.find((slot:any)=>String(slot.id).endsWith('_'+period) && (String(slot.id).startsWith(selectedDay)||String(slot.id).toLowerCase().startsWith(selectedDay.toLowerCase()))) : null;
+        status=selectedDay&&period ? (target
+           ? (locale==='ar'?'الحصة المطلوبة تظهر محجوزة بالفعل؛ اختر حصة أخرى.':'That period appears booked; choose another.')
+           : (locale==='ar'?'لا يظهر حجز لهذه الحصة في البيانات المقروءة، لكن تأكد من توفرها داخل الجدول قبل الحفظ.':'No matching booking was visible in readable records; confirm availability in the timetable before saving.'))
+           : (locale==='ar'?'تحب تحجز يوم إيه ورقم الحصة كام؟':'Which day and period would you like to book?');
+      } catch {status=locale==='ar'?'لم أتمكن من تأكيد حالة الحصص حاليًا.':'I could not verify the timetable right now.';}
       setMessages(prev=>[...prev,{role:'assistant',content:locale==='ar'
-        ? 'يمكنني مساعدتك في الوصول إلى جدول المكتبة. افتح [جدول حجز حصص المكتبة](https://www.efipslibrary.com/#/schedule)، ثم اختر اليوم والحصة المتاحة وأدخل المادة والصف واحفظ الحجز بنفسك. لا أُجري الحجز بالنيابة عنك، ولا أعتبر أي حصة متاحة دون فحص الجدول.'
-        : 'I can guide you to the [library booking timetable](https://www.efipslibrary.com/#/schedule). Choose an available day and period, enter the subject and class, and submit the booking there. I cannot book it for you or confirm availability without checking the schedule.'}]);
+        ? 'أقدر أساعدك تختار حصة مناسبة. '+status+' افتح [جدول حجز المكتبة](https://www.efipslibrary.com/#/schedule) لإتمام الحجز بنفسك؛ لا يتم حفظ حجز من المحادثة.'
+        : 'I can help you choose a library period. '+status+' Use the [library schedule](https://www.efipslibrary.com/#/schedule) to submit it; chat cannot save a booking.'}]);
       setIsLoading(false);setSaqrState('idle');return;
     }
     if(learningIntent==='personal-library'){
