@@ -4,6 +4,8 @@ import { ChatMessage } from '../types';
 import ReactMarkdown from 'react-markdown';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
+import { STORY_IDEAS, storyIdeaAt, isStoryBeginning, detectLearningIntent, researchHasTopic, researchPdfPrompt, saqrLearningInstructions } from '../src/utils/saqrLearning';
+import { borrowerIds, deviceReadingKey, filterActiveBorrowings, readingShelfFromDevice, toSaqrShelfContext } from '../src/utils/saqrReaderContext';
 import { bookData } from '../api/bookData';
 import { searchSaqrBookCatalog } from '../src/utils/saqrCatalogSearch';
 import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
@@ -197,6 +199,8 @@ const SmartSearchPage: React.FC = () => {
   const t = (key: string) => localization[locale]?.[key] ?? localization.ar[key] ?? key;
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [researchAnswer,setResearchAnswer]=useState<string>('');
+  const [researchReady,setResearchReady]=useState(false);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [winnerData, setWinnerData] = useState<any>(null);
@@ -344,6 +348,7 @@ const SmartSearchPage: React.FC = () => {
   const handleSendMessage = async () => {
     if (input.trim() === '' || isLoading) return;
     const userQuery = input.trim();
+    setResearchReady(false);
 
     setMessages(prev => [...prev, { role: 'user', content: userQuery }]);
     setInput('');
@@ -384,6 +389,12 @@ const SmartSearchPage: React.FC = () => {
       english: ENGLISH_LIBRARY_DATABASE
     });
 
+    // Offer varied national-identity plots without touching the strict author story flow.
+    if(isStoryBeginning(userQuery) && /(?:أفكار|افكار|اقترح|اختار|مواضيع|variety|ideas|topics)/i.test(userQuery)){
+      const ideas=STORY_IDEAS.map((idea,i)=>String(i+1)+'. '+idea[locale==='ar'?'ar':'en']).join('\n');
+      setMessages(prev=>[...prev,{role:'assistant',content:(locale==='ar'?'اختر فكرة من أفكار قصص الهوية الوطنية، ثم اكتب «تحدي المؤلف الصغير» مع الفكرة التي اخترتها:\n\n':'Choose a UAE story idea, then start Little Author with your choice:\n\n')+ideas}]);
+      setIsLoading(false);setSaqrState('idle');return;
+    }
     // A factual catalog lookup needs no generative model; keep summaries and all
     // educational/story functions on their existing chat path.
     if(isSaqrCatalogLookup(userQuery)){
@@ -419,6 +430,47 @@ const SmartSearchPage: React.FC = () => {
       return;
     }
 
+    const learningIntent=detectLearningIntent(userQuery,safeReader.role,messages);
+    if(learningIntent==='schedule'){
+      setMessages(prev=>[...prev,{role:'assistant',content:locale==='ar'
+        ? 'يمكنني مساعدتك في الوصول إلى جدول المكتبة. افتح [جدول حجز حصص المكتبة](https://www.efipslibrary.com/#/schedule)، ثم اختر اليوم والحصة المتاحة وأدخل المادة والصف واحفظ الحجز بنفسك. لا أُجري الحجز بالنيابة عنك، ولا أعتبر أي حصة متاحة دون فحص الجدول.'
+        : 'I can guide you to the [library booking timetable](https://www.efipslibrary.com/#/schedule). Choose an available day and period, enter the subject and class, and submit the booking there. I cannot book it for you or confirm availability without checking the schedule.'}]);
+      setIsLoading(false);setSaqrState('idle');return;
+    }
+    if(learningIntent==='personal-library'){
+      const stored=localStorage.getItem('current_user');
+      const user=stored?JSON.parse(stored):{};
+      const identifier=String(user.student_id||user.teacher_id||user.id||user.user_id||'').trim();
+      let shelf=readingShelfFromDevice(deviceReadingKey(user,safeReader.role),localStorage);
+      // Only verified Supabase-authenticated readers may use cloud reading lists.
+      const {data:{user:cloudUser}}=await supabase.auth.getUser();
+      if(cloudUser){
+        const [{data:saved},{data:completed}]=await Promise.all([
+          supabase.from('efips_saved_books').select('book_key').eq('user_id',cloudUser.id).limit(40),
+          supabase.from('efips_reading_completions').select('book_key').eq('user_id',cloudUser.id).limit(40)
+        ]);
+        const reading=(keys:string[])=>readingShelfFromDevice('efips-saqr-temporary',{getItem:()=>JSON.stringify({saved:keys,completed:keys,goal:shelf.goal})});
+        if(saved){shelf={...shelf,saved:reading(saved.map((r:any)=>String(r.book_key))).saved};}
+        if(completed){shelf={...shelf,completed:reading(completed.map((r:any)=>String(r.book_key))).completed};}
+      }
+      let borrowed:{title:string;due:string}[]=[];
+      if(identifier && safeReader.role!=='guest'){
+        const ids=borrowerIds(user,safeReader.role);
+        const sets=await Promise.all(ids.map(id=>supabase.from('borrowings').select('book_name,book_title,title,name,return_date,due_date,expected_return_date,status').eq('user_id',id).limit(25)));
+        borrowed=filterActiveBorrowings(sets.flatMap(result=>result.error?[]:result.data||[]));
+      }
+      const full={...shelf,borrowed};
+      const summary=toSaqrShelfContext(full,locale==='ar'?'ar':'en');
+      const entries=[...borrowed.map(b=>b.title),...shelf.saved.map(b=>b.title)];
+      const intro=locale==='ar'?'هذه كتبك المسجلة لديّ حاليًا:\n':'Your recorded library books:\n';
+      const response=entries.length?intro+entries.slice(0,12).map((title,i)=>String(i+1)+'. '+title).join('\n')+
+       (locale==='ar'?'\n\nيلا نقرأ! قل لي اسم كتاب من القائمة لألخص لك موضوعه من وصف الفهرس، أو أساعدك تناقشه.':'\n\nLet’s read! Name one of these books and I can summarize its catalog description or discuss it with you.')
+        :(locale==='ar'?'لم أجد كتبًا محفوظة أو استعارات نشطة يمكن لهذا الحساب قراءتها. أضف كتابًا لقائمة القراءة أو راجع الاستعارات في الصفحة الرئيسية.':'No saved books or active loans were visible to this account. Add a book to the reading list or check Home.');
+      setMessages(prev=>[...prev,{role:'assistant',content:response}]);
+      setIsLoading(false);setSaqrState('idle');return;
+    }
+    const learningContext=saqrLearningInstructions(learningIntent,safeReader.role,safeReader.grade,locale==='ar'?'ar':'en');
+
     const searchContext = foundBooks.length > 0
       ? `EFIPS LIBRARY RECORDS FOUND (relevance-ranked, bilingual topic matching): ${JSON.stringify(foundBooks)}.
 When the user asks for books, identify the matching titles exactly as recorded, grouped clearly by physical, Arabic digital and English digital library. For physical books provide the actual shelf (shelf) and row (row); for digital books provide their existing driveLink. Answer in the user's requested language. Do not invent titles, shelves, rows, summaries or links. Some physical-book subject tags are inferred from titles and may be approximate.`
@@ -444,7 +496,7 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [
-            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}${safeEnhancement.context ? '\n\n'+safeEnhancement.context : ''}` },
+            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}${safeEnhancement.context ? '\n\n'+safeEnhancement.context : ''}${learningContext ? '\n\n'+learningContext : ''}${isStoryBeginning(userQuery) ? '\n\nIf the user requests a NEW Little Author story without a specific theme, begin with exactly one short story sentence inspired by this rotating Emirati idea: '+storyIdeaAt(messages.filter(m=>m.role==='user').length,locale==='ar'?'ar':'en')+'. Preserve all established Little Author spelling correction, one-sentence response, ending and certificate instructions.' : ''}` },
             ...messages,
             { role: 'user', content: userQuery }
           ],
@@ -488,6 +540,11 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         window.setTimeout(() => setSaqrState('idle'), 2500);
       }
 
+      if(learningIntent==='research'&&researchHasTopic(userQuery)&&reply.trim()){
+        setResearchAnswer(reply);
+        setResearchReady(true);
+        reply+='\n\n'+researchPdfPrompt(locale==='ar'?'ar':'en');
+      }
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
     } catch (error) {
       console.error('Error sending chat message:', error);
@@ -499,6 +556,29 @@ When the user asks for books, identify the matching titles exactly as recorded, 
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const downloadResearchPdf=async()=>{
+    if(!researchAnswer)return;
+    try{
+      const container=document.createElement('div');
+      container.setAttribute('dir',locale==='ar'?'rtl':'ltr');
+      container.style.cssText='position:fixed;left:-10000px;top:0;width:790px;padding:45px;background:white;color:#172334;font-size:19px;line-height:1.85;white-space:pre-wrap;font-family:Tajawal,Cairo,sans-serif;overflow-wrap:break-word';
+      container.textContent=(locale==='ar'?'بحث دراسي - مكتبة مدرسة صقر الإمارات\n\n':'School Research - EFIPS Library\n\n')+researchAnswer;
+      document.body.appendChild(container);
+      try{
+        if(document.fonts?.ready)await document.fonts.ready;
+        const canvas=await html2canvas(container,{backgroundColor:'#fff',scale:1.5,useCORS:false});
+        const pdf=new jsPDF({unit:'mm',format:'a4'});
+        const pageWidth=210,pageHeight=297;
+        const totalHeight=canvas.height*pageWidth/canvas.width;
+        for(let y=0;y<totalHeight;y+=pageHeight){
+          if(y>0)pdf.addPage();
+          pdf.addImage(canvas.toDataURL('image/png'),'PNG',0,-y,pageWidth,totalHeight);
+        }
+        pdf.save('EFIPS_Student_Research.pdf');
+      }finally{container.remove();}
+    }catch(err){console.error('Research PDF export error',err);alert(locale==='ar'?'تعذر إعداد ملف البحث.':'Research PDF could not be generated.');}
   };
 
   // The welcome response remains in the conversation context sent to the API,
@@ -645,6 +725,11 @@ When the user asks for books, identify the matching titles exactly as recorded, 
                             <ReactMarkdown>{msg.role === 'assistant' && index > 0 && isLessonPlanRequest(visibleMessages[index - 1]?.content || '') ? formatLessonPlanDisplay(msg.content) : msg.content}</ReactMarkdown>
                           </div>
                         </div>
+                        {researchReady && researchAnswer && index === visibleMessages.length - 1 && msg.role==='assistant' && (
+                          <button type="button" className="saqr-inline-download mt-3" onClick={()=>void downloadResearchPdf()}>
+                            <DownloadIcon /><span>{locale==='ar'?'تحميل البحث PDF':'Download research PDF'}</span>
+                          </button>
+                        )}
                         {winnerData && saqrState === 'victory' && index === visibleMessages.length - 1 && (
                           <div className="mt-2 text-start">
                             <button onClick={handleDownloadCertificatePDF} className="saqr-inline-download" type="button">
