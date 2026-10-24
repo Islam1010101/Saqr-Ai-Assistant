@@ -144,9 +144,9 @@ const readSaved = (key: string): Progress => {
       Array.from(new Set(arr.filter((item): item is string => typeof item === 'string' && items.some(entry=>entry.id === item)))) : [];
     const notes: Record<string,string> = {};
     if (value.notes && typeof value.notes === 'object') {
-      for (const entry of words) if (typeof value.notes[entry.id] === 'string') notes[entry.id] = value.notes[entry.id].slice(0,180);
+      for (const entry of expandedWords) if (typeof value.notes[entry.id] === 'string') notes[entry.id] = value.notes[entry.id].slice(0,180);
     }
-    return {stamps:valid(value.stamps,emirates),words:valid(value.words,words),cases:valid(value.cases,cases),notes};
+    return {stamps:valid(value.stamps,emirates),words:valid(value.words,expandedWords),cases:valid(value.cases,expandedCases),notes};
   } catch { return emptyProgress(); }
 };
 const Icon: React.FC<{kind:'book'|'stamp'|'weave'|'document'|'check'|'arrow'|'lock'; className?:string}> = ({kind,className='w-7 h-7'}) => {
@@ -197,6 +197,8 @@ const NationalIdentityPage: React.FC = () => {
   const [mode,setMode] = useState<Mode>('home');
   const [flagChallengeOpen, setFlagChallengeOpen] = useState(false);
   const [index,setIndex] = useState(0);
+  const [round,setRound] = useState(0);
+  const [stage,setStage] = useState<'discover'|'play'>('discover');
   const [chosen,setChosen] = useState<number|null>(null);
   const [advancedPassport,setAdvancedPassport] = useState(false);
   useEffect(() => {
@@ -208,7 +210,14 @@ const NationalIdentityPage: React.FC = () => {
   if (flagChallengeOpen) return <FlagDayChallenge onClose={() => setFlagChallengeOpen(false)} />;
 
   const currentMode: Exclude<Mode,'home'> = mode === 'home' ? 'passport' : mode;
-  const entries = activities[currentMode];
+  const entries = useMemo(() => {
+    const source = activities[currentMode];
+    if (currentMode === 'passport') return [...source].sort(() => 0);
+    const groups = [1,2,3,4].map(tier => source.filter(item => (item.difficulty||1) === tier));
+    // Randomised once per visit and each replay, keeping easy -> expert progression.
+    const shuffled = groups.flatMap(group => {const copy=[...group];for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]];}return copy;});
+    return shuffled;
+  }, [currentMode,round]);
   const item = entries[index] || entries[0];
   const questionItem = currentMode === 'passport' && advancedPassport ? {...item,...passportFollowUps[item.id]} : item;
   const completedIds = progress[progressField[currentMode]];
@@ -216,9 +225,14 @@ const NationalIdentityPage: React.FC = () => {
   const difficulty = mode==='passport'?(advancedPassport?3:1):(item.difficulty||1);
   const difficultyName = [l('سهل','Easy'),l('متوسط','Intermediate'),l('متقدم','Advanced'),l('خبير','Expert')][Math.min(4,difficulty)-1];
   const selectedCorrect = chosen === questionItem.correct;
+  const choicesOrder = useMemo(() => {
+    const indexes = [0,1,2];
+    for (let i=indexes.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[indexes[i],indexes[j]]=[indexes[j],indexes[i]];}
+    return indexes;
+  }, [currentMode,index,round,advancedPassport]);
   const totalCompleted = progress.stamps.length + progress.words.length + progress.cases.length;
-  const go = (next: Mode) => { setMode(next);setIndex(0);setChosen(null);setAdvancedPassport(false); };
-  const selectEntry = (nextIndex: number) => {setIndex(nextIndex);setChosen(null);setAdvancedPassport(false);};
+  const go = (next: Mode) => { setMode(next);setIndex(0);setChosen(null);setAdvancedPassport(false);setStage('discover');setRound(n=>n+1); };
+  const selectEntry = (nextIndex: number) => {setIndex(nextIndex);setChosen(null);setAdvancedPassport(false);setStage('discover');};
   const submitAnswer = (answer: number) => {
     setChosen(answer);
     if (answer !== questionItem.correct) return;
@@ -228,8 +242,8 @@ const NationalIdentityPage: React.FC = () => {
   };
   const modules = [
     {id:'passport' as const,icon:'stamp' as const,title:l('جواز صقر الثقافي','Saqr Cultural Passport'),desc:l('اكتشف الإمارات السبع، واقرأ حكاية كل إمارة واجمع ختمها.','Explore all seven emirates, read their stories and collect their stamps.'),total:emirates.length,count:progress.stamps.length,color:'from-emerald-700 to-teal-600'},
-    {id:'language' as const,icon:'weave' as const,title:l('كنوز لغتنا الإماراتية','Treasures of Emirati Language'),desc:l('تعرّف على مفردات التراث واستعملها في جمل من تأليفك.','Discover heritage terms and use them in your own sentences.'),total:words.length,count:progress.words.length,color:'from-amber-600 to-orange-600'},
-    {id:'archive' as const,icon:'document' as const,title:l('محقق ذاكرة الوطن','Heritage Research Detective'),desc:l('حلّل الأدلة واقرأ المصادر وتعلّم كيف تتحقق من المعلومات.','Study evidence, read sources and learn how to verify information.'),total:cases.length,count:progress.cases.length,color:'from-sky-700 to-indigo-700'}
+    {id:'language' as const,icon:'weave' as const,title:l('كنوز لغتنا الإماراتية','Treasures of Emirati Language'),desc:l('تعرّف على مفردات التراث واستعملها في جمل من تأليفك.','Discover heritage terms and use them in your own sentences.'),total:expandedWords.length,count:progress.words.length,color:'from-amber-600 to-orange-600'},
+    {id:'archive' as const,icon:'document' as const,title:l('محقق ذاكرة الوطن','Heritage Research Detective'),desc:l('حلّل الأدلة واقرأ المصادر وتعلّم كيف تتحقق من المعلومات.','Study evidence, read sources and learn how to verify information.'),total:expandedCases.length,count:progress.cases.length,color:'from-sky-700 to-indigo-700'}
   ];
   const selectedModule = modules.find(x=>x.id===currentMode) || modules[0];
   return <div dir={dir} className="national-heritage relative min-h-[100dvh] overflow-hidden bg-white dark:bg-black text-slate-900 dark:text-slate-100">
@@ -376,11 +390,11 @@ const NationalIdentityPage: React.FC = () => {
                 <div className="flex items-center justify-center bg-[#F4E9D5] text-amber-900 dark:bg-amber-950 dark:text-amber-300 w-11 h-11 rounded-xl"><Icon kind="document" className="w-6 h-6"/></div>
                 <h3 className="font-black text-lg">{tr(l('اختبر فهمك','Test your understanding'))}</h3>
               </div>
-              <p className="font-bold text-base sm:text-lg leading-8 mb-4">{tr(questionItem.question)}</p>
+              {stage==='discover' ? <div className="nh-discovery"><div className="nh-discovery-mark"><Icon kind={selectedModule.icon} className="w-14 h-14"/></div><h3 className="font-black text-xl sm:text-2xl">{tr(item.name)}</h3><p className="mt-3 text-sm sm:text-base leading-8">{tr(item.story)}</p><button type="button" onClick={()=>setStage('play')} className="nh-launch">{tr(l('ابدأ التحدي واكشف السر','Start the mission'))}<Icon kind="arrow" className="w-5 h-5"/></button></div> : <><div className="nh-stage-label">{tr(l('مهمة اكتشاف · اختر الدليل الصحيح','Discovery mission · choose the right clue'))}</div><p className="font-bold text-base sm:text-lg leading-8 mb-4">{tr(questionItem.question)}</p>
               <div className="nh-options grid grid-cols-1 md:grid-cols-3 gap-3">
-                {questionItem.choices.map((choice,i)=><button key={i} type="button" onClick={()=>submitAnswer(i)}
-                  aria-pressed={chosen===i} className={'min-h-[76px] text-start flex items-center gap-3 rounded-2xl border-2 px-4 py-3 font-bold text-sm leading-6 transition-all hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-400 '+(chosen===i?(selectedCorrect?'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-950 dark:text-emerald-100':'border-rose-400 bg-rose-50 dark:bg-rose-950/35 text-rose-900 dark:text-rose-100'):'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 hover:border-emerald-400') }>
-                  <span className="flex shrink-0 w-8 h-8 rounded-full items-center justify-center border border-current/20 text-xs font-black">{i+1}</span>{tr(choice)}
+                {choicesOrder.map((originalIndex,i)=><button key={originalIndex} type="button" onClick={()=>submitAnswer(originalIndex)}
+                  aria-pressed={chosen===originalIndex} className={'nh-answer min-h-[76px] text-start flex items-center gap-3 rounded-2xl border-2 px-4 py-3 font-bold text-sm leading-6 transition-all hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-400 '+(chosen===originalIndex?(selectedCorrect?'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-950 dark:text-emerald-100':'border-rose-400 bg-rose-50 dark:bg-rose-950/35 text-rose-900 dark:text-rose-100'):'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 hover:border-emerald-400') }>
+                  <span className="flex shrink-0 w-8 h-8 rounded-full items-center justify-center border border-current/20 text-xs font-black">{i+1}</span>{tr(questionItem.choices[originalIndex])}
                 </button>)}
               </div>
               {chosen !== null && <div role="status" aria-live="polite" className={'mt-5 rounded-xl border p-4 '+(selectedCorrect?'border-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-100':'border-amber-300 bg-amber-50 dark:bg-amber-950/30 text-amber-900 dark:text-amber-100')}>
@@ -388,8 +402,9 @@ const NationalIdentityPage: React.FC = () => {
                 {selectedCorrect && <p className="mt-1 text-sm leading-7">{tr(questionItem.explanation)}</p>}
               </div>}
               {done && chosen === null && <div className="mt-4 text-sm font-black text-emerald-700 dark:text-emerald-300 flex gap-2 items-center"><Icon kind="check" className="w-5 h-5"/>{tr(l('أكملت هذه المهمة سابقًا؛ يمكنك إعادتها.','You have already completed this mission. You can replay it.'))}</div>}
-              {mode==='passport' && <button type="button" onClick={()=>{setAdvancedPassport(previous=>!previous);setChosen(null);}} className="nh-tier mt-4 rounded-xl border-2 border-amber-400 px-4 py-2.5 font-black text-xs sm:text-sm">{tr(advancedPassport?l('العودة للسؤال الأول','Return to first question'):l('سؤال إماراتي أصعب','Try a harder emirate question'))}</button>}
-              {mode==='language' && <div className="mt-6 pt-5 border-t border-slate-200 dark:border-slate-800">
+              </>}
+              {mode==='passport' && stage==='play' && <button type="button" onClick={()=>{setAdvancedPassport(previous=>!previous);setChosen(null);}} className="nh-tier mt-4 rounded-xl border-2 border-amber-400 px-4 py-2.5 font-black text-xs sm:text-sm">{tr(advancedPassport?l('العودة للسؤال الأول','Return to first question'):l('سؤال إماراتي أصعب','Try a harder emirate question'))}</button>}
+              {mode==='language' && stage==='play' && <div className="mt-6 pt-5 border-t border-slate-200 dark:border-slate-800">
                 <label htmlFor={'heritage-note-'+item.id} className="block font-black text-sm mb-2">{tr(l('اكتب جملة من تأليفك (اختياري)','Write your own sentence (optional)'))}</label>
                 <textarea id={'heritage-note-'+item.id} maxLength={180} rows={3} value={progress.notes[item.id] || ''}
                   placeholder={tr(l('استخدم الكلمة في جملة تحكي عن التراث...','Use this word in a sentence about heritage...'))}
