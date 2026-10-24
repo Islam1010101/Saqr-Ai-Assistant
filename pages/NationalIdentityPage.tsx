@@ -3,6 +3,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { useLanguage } from '../App';
 import FlagDayChallenge from './FlagDayChallenge';
 import './nationalHeritageTheme.css';
+import HeritageQuestArt from './HeritageQuestArt';
 
 type L = { ar: string; en: string };
 type Mode = 'home' | 'passport' | 'language' | 'archive';
@@ -287,9 +288,9 @@ const NationalIdentityPage: React.FC = () => {
         </div>
         <div className="nh-challenges grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5">
           {modules.map(m=><button type="button" key={m.id} onClick={()=>go(m.id)} className="nh-challenge-card group overflow-hidden text-start rounded-[1.8rem] bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 shadow-lg hover:shadow-2xl hover:-translate-y-1 hover:border-emerald-400 dark:hover:border-emerald-700 transition-all focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-500">
-            <div className={'relative bg-gradient-to-br '+m.color+' p-6 text-white overflow-hidden'}>
+            <div className={'nh-card-top nh-card-top-'+m.id+' relative bg-gradient-to-br '+m.color+' p-6 text-white overflow-hidden'}>
               <div className="absolute -end-5 -top-6 h-36 w-36 border-[17px] rounded-full border-white/10"/>
-              <Icon kind={m.icon} className="relative h-14 w-14"/>
+              <div className="nh-card-scene"><HeritageQuestArt kind={m.id}/></div><span className="nh-card-symbol"><Icon kind={m.icon} className="relative h-9 w-9"/></span>
               <div className="mt-5 text-xs text-white/80 font-black">{m.count}/{m.total} {tr(l('مهمات','tasks'))}</div>
               <h3 className="relative mt-1 font-black text-xl leading-snug">{tr(m.title)}</h3>
             </div>
@@ -304,10 +305,10 @@ const NationalIdentityPage: React.FC = () => {
           <button type="button" onClick={() => setFlagChallengeOpen(true)}
             className="nh-challenge-card group overflow-hidden text-start rounded-[1.8rem] bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 shadow-lg hover:shadow-2xl hover:-translate-y-1 hover:border-emerald-400 dark:hover:border-emerald-700 transition-all focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-500"
             aria-label={tr(l('ابدأ تحدي راية المجد في يوم العلم','Play the UAE Flag Day Challenge'))}>
-            <div className="relative overflow-hidden bg-gradient-to-br from-[#127C58] via-[#075B49] to-[#0D403D] p-6 text-white">
+            <div className="nh-card-top nh-card-top-flag relative overflow-hidden bg-gradient-to-br from-[#127C58] via-[#075B49] to-[#0D403D] p-6 text-white">
               <div aria-hidden="true" className="absolute top-0 inset-x-0 flex h-1.5"><span className="w-1/4 bg-red-500"/><span className="w-1/4 bg-emerald-400"/><span className="w-1/4 bg-white"/><span className="w-1/4 bg-slate-950"/></div>
               <div aria-hidden="true" className="absolute -end-5 -top-6 h-36 w-36 rounded-full border-[17px] border-white/10"/>
-              <svg viewBox="0 0 64 64" className="relative h-14 w-14" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.7" strokeLinecap="round" strokeLinejoin="round">
+              <div className="nh-card-scene"><HeritageQuestArt kind="flag"/></div><svg viewBox="0 0 64 64" className="relative h-14 w-14" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.7" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 7v51M8 58h8"/>
                 <path d="M14 11h39v28H14z" stroke="none" fill="#FFFFFF"/>
                 <path d="M14 11h11v28H14z" stroke="none" fill="#E31D3A"/>
@@ -333,15 +334,24 @@ const NationalIdentityPage: React.FC = () => {
         {progress.stamps.length===7 && <div role="status" className="mt-6 rounded-[1.5rem] border-2 border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/25 px-6 py-5 text-amber-900 dark:text-amber-200 font-black">
           {tr(l('أحسنت! جمعت أختام الإمارات السبع وأكملت جواز صقر الثقافي.','Well done! You have collected all seven emirate stamps and completed your cultural passport.'))}
         </div>}
-      </> : <section className="mt-7">
+      </> : <section className={'nh-quest-page nh-quest-'+mode+' mt-7'}>
         <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
           <button type="button" onClick={()=>go('home')} className="inline-flex items-center gap-2 rounded-xl bg-slate-100 dark:bg-slate-900 px-4 py-2.5 text-xs sm:text-sm font-black hover:bg-emerald-50 dark:hover:bg-emerald-950/60 transition-colors">
             <Icon kind="arrow" className={'w-4 h-4 '+(lang==='ar'?'rotate-180':'')}/>{tr(l('كل المغامرات','All adventures'))}
           </button>
           <div className="text-sm font-black text-emerald-700 dark:text-emerald-300">{tr(selectedModule.title)} · {selectedModule.count}/{selectedModule.total}</div>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-[285px_minmax(0,1fr)] gap-5">
-          <aside className="h-fit rounded-[1.7rem] p-4 bg-[#F8F5EC] dark:bg-[#11150F] border border-amber-200 dark:border-amber-900/60">
+        <div className="nh-mode-hero" role="img" aria-label={tr(selectedModule.title)}>
+          <div className="nh-mode-hero-copy">
+            <span className="nh-mode-kicker">{tr(mode==='passport'?l('جواز التراث الإماراتي','THE EMIRATI HERITAGE PASSPORT'):mode==='language'?l('كنوز من لغتنا وموروثنا','WORDS & CULTURAL TREASURES'):l('ملفات أدلة ومعالم الإمارات','MYSTERY FILES & UAE LANDMARKS'))}</span>
+            <h2>{tr(selectedModule.title)}</h2>
+            <p>{tr(selectedModule.desc)}</p>
+            <div className="nh-mode-counter">{selectedModule.count} / {selectedModule.total} {tr(mode==='passport'?l('أختام مكتشفة','stamps collected'):mode==='language'?l('كنوز مكتشفة','treasures collected'):l('قضايا محلولة','cases solved'))}</div>
+          </div>
+          <HeritageQuestArt kind={mode==='passport'?'passport':mode==='language'?'language':'archive'} className="nh-mode-illustration"/>
+        </div>
+        <div className="nh-game-layout grid grid-cols-1 lg:grid-cols-[285px_minmax(0,1fr)] gap-5">
+          <aside className="nh-game-path h-fit rounded-[1.7rem] p-4 bg-[#F8F5EC] dark:bg-[#11150F] border border-amber-200 dark:border-amber-900/60">
             <h2 className="font-black text-lg mb-3 px-2">{mode==='passport'?tr(l('صفحات الجواز','Passport pages')):mode==='language'?tr(l('مفردات التراث','Heritage vocabulary')):tr(l('ملفات المحقق','Detective files'))}</h2>
             <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
               {entries.map((entry,i)=><button type="button" key={entry.id} aria-current={index===i?'step':undefined}
@@ -353,8 +363,8 @@ const NationalIdentityPage: React.FC = () => {
               </button>)}
             </div>
           </aside>
-          <div className="min-w-0 space-y-5">
-            <article className="rounded-[1.7rem] border border-emerald-100 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-lg overflow-hidden">
+          <div className="nh-game-content min-w-0 space-y-5">
+            <article className="nh-story-card rounded-[1.7rem] border border-emerald-100 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-lg overflow-hidden">
               <div className="border-b border-emerald-100 dark:border-slate-800 bg-gradient-to-r from-emerald-50 via-[#FFF8E9] to-white dark:from-emerald-950/35 dark:via-amber-950/15 dark:to-slate-950 p-5 sm:p-7">
                 <div className="flex justify-between gap-3 items-start">
                   <div className="min-w-0">
@@ -386,12 +396,12 @@ const NationalIdentityPage: React.FC = () => {
                 </div>
               </div>
             </article>
-            <article className="rounded-[1.7rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-5 sm:p-7 shadow-lg">
+            <article className="nh-challenge-play rounded-[1.7rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-5 sm:p-7 shadow-lg">
               <div className="flex gap-3 items-center mb-4">
                 <div className="flex items-center justify-center bg-[#F4E9D5] text-amber-900 dark:bg-amber-950 dark:text-amber-300 w-11 h-11 rounded-xl"><Icon kind="document" className="w-6 h-6"/></div>
-                <h3 className="font-black text-lg">{tr(l('اختبر فهمك','Test your understanding'))}</h3>
+                <h3 className="font-black text-lg">{tr(mode==='passport'?l('اختم صفحة الجواز','Stamp Your Passport'):mode==='language'?l('افتح كنز الكلمة','Unlock the Word Treasure'):l('حل قضية ذاكرة وطن','Solve the Heritage Mystery'))}</h3>
               </div>
-              {stage==='discover' ? <div className="nh-discovery"><div className="nh-discovery-mark"><Icon kind={selectedModule.icon} className="w-14 h-14"/></div><h3 className="font-black text-xl sm:text-2xl">{tr(item.name)}</h3><p className="mt-3 text-sm sm:text-base leading-8">{tr(item.story)}</p><button type="button" onClick={()=>setStage('play')} className="nh-launch">{tr(l('ابدأ التحدي واكشف السر','Start the mission'))}<Icon kind="arrow" className="w-5 h-5"/></button></div> : <><div className="nh-stage-label">{tr(l('مهمة اكتشاف · اختر الدليل الصحيح','Discovery mission · choose the right clue'))}</div><p className="font-bold text-base sm:text-lg leading-8 mb-4">{tr(questionItem.question)}</p>
+              {stage==='discover' ? <div className="nh-discovery"><div className="nh-discovery-art"><HeritageQuestArt kind={mode==='passport'?'passport':mode==='language'?'language':'archive'}/></div><h3 className="font-black text-xl sm:text-2xl">{tr(item.name)}</h3><p className="mt-3 text-sm sm:text-base leading-8">{tr(item.story)}</p><button type="button" onClick={()=>setStage('play')} className="nh-launch">{tr(l('ابدأ التحدي واكشف السر','Start the mission'))}<Icon kind="arrow" className="w-5 h-5"/></button></div> : <><div className="nh-stage-label">{tr(l('مهمة اكتشاف · اختر الدليل الصحيح','Discovery mission · choose the right clue'))}</div><p className="font-bold text-base sm:text-lg leading-8 mb-4">{tr(questionItem.question)}</p>
               <div className="nh-options grid grid-cols-1 md:grid-cols-3 gap-3">
                 {choicesOrder.map((originalIndex,i)=><button key={originalIndex} type="button" onClick={()=>submitAnswer(originalIndex)}
                   aria-pressed={chosen===originalIndex} className={'nh-answer min-h-[76px] text-start flex items-center gap-3 rounded-2xl border-2 px-4 py-3 font-bold text-sm leading-6 transition-all hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-400 '+(chosen===originalIndex?(selectedCorrect?'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-950 dark:text-emerald-100':'border-rose-400 bg-rose-50 dark:bg-rose-950/35 text-rose-900 dark:text-rose-100'):'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 hover:border-emerald-400') }>
@@ -399,7 +409,7 @@ const NationalIdentityPage: React.FC = () => {
                 </button>)}
               </div>
               {chosen !== null && <div role="status" aria-live="polite" className={'mt-5 rounded-xl border p-4 '+(selectedCorrect?'border-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-100':'border-amber-300 bg-amber-50 dark:bg-amber-950/30 text-amber-900 dark:text-amber-100')}>
-                <strong className="font-black">{selectedCorrect?tr(l('إجابة صحيحة! أحسنت.','Correct! Well done.')):tr(l('حاول مرة أخرى بعد مراجعة النص.','Try again after reviewing the text.'))}</strong>
+                <strong className="font-black">{selectedCorrect?tr(mode==='passport'?l('تم ختم صفحة الجواز!','Passport page stamped!'):mode==='language'?l('تم اكتشاف الكنز اللغوي!','Word treasure unlocked!'):l('تم كشف الدليل وحل القضية!','Evidence revealed, case solved!')):tr(l('حاول مرة أخرى بعد مراجعة النص.','Try again after reviewing the text.'))}</strong>
                 {selectedCorrect && <p className="mt-1 text-sm leading-7">{tr(questionItem.explanation)}</p>}
               </div>}
               {done && chosen === null && <div className="mt-4 text-sm font-black text-emerald-700 dark:text-emerald-300 flex gap-2 items-center"><Icon kind="check" className="w-5 h-5"/>{tr(l('أكملت هذه المهمة سابقًا؛ يمكنك إعادتها.','You have already completed this mission. You can replay it.'))}</div>}
