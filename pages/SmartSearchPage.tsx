@@ -456,7 +456,7 @@ const SmartSearchPage: React.FC = () => {
       let borrowed:{title:string;due:string}[]=[];
       if(identifier && safeReader.role!=='guest'){
         const ids=borrowerIds(user,safeReader.role);
-        const sets=await Promise.all(ids.map(id=>supabase.from('borrowings').select('book_name,book_title,title,name,return_date,due_date,expected_return_date,status').eq('user_id',id).limit(25)));
+        const sets=await Promise.all(ids.map(id=>supabase.from('borrowings').select('*').eq('user_id',id).limit(25)));
         borrowed=filterActiveBorrowings(sets.flatMap(result=>result.error?[]:result.data||[]));
       }
       const full={...shelf,borrowed};
