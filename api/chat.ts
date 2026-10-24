@@ -22,7 +22,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const { messages = [], locale = 'en' } = req.body || {};
-    if (!Array.isArray(messages) || messages.length > 35 || messages.some((m:any)=>!m || !['user','assistant','system'].includes(m.role) || typeof m.content !== 'string' || m.content.length > 12000)) return res.status(400).json({error:'Invalid message input'});
+    if (!Array.isArray(messages) || messages.length > 160 || messages.some((m:any)=>!m || !['user','assistant','system'].includes(m.role) || typeof m.content !== 'string' || m.content.length > 18000)) return res.status(400).json({error:'Invalid message input'});
     const userMsg = messages[messages.length - 1]?.content || '';
 
     const isBookQuery = bookRequest.test(String(userMsg));
@@ -30,7 +30,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const context = found.length ? found.map((b,i)=>{
       const location = b.shelf !== undefined ? `Shelf ${b.shelf}, Row ${b.row}` : b.pageLocation;
       return `${i+1}. ${JSON.stringify(b.title)} — ${b.author}; Subject: ${b.subject}; ${location}${b.driveLink ? '; Link: '+b.driveLink : ''}`;
-    }).join('\\n') : 'No verified matching book records found for this request.';
+    }).join('\n') : 'No verified matching book records found for this request.';
 
     const groq = new Groq({ apiKey: apiKey.trim() });
     
