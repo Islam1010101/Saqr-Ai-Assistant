@@ -9,6 +9,7 @@ import { searchSaqrBookCatalog } from '../src/utils/saqrCatalogSearch';
 import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
 import { supabase } from '../src/utils/supabase';
+import { saqrExtraContext } from '../src/utils/saqrSafeEnhancements';
 
 // --- بروتوكول عقل صقر ---
 const SAQR_ELITE_PROMPT = `
@@ -381,6 +382,24 @@ const SmartSearchPage: React.FC = () => {
       english: ENGLISH_LIBRARY_DATABASE
     });
 
+    const safeReader = (() => {
+      const roleValue = localStorage.getItem('user_type');
+      const role: 'student'|'teacher'|'admin'|'guest' =
+        roleValue==='student'||roleValue==='teacher'||roleValue==='admin'?roleValue:'guest';
+      let grade: number|null = null;
+      try {
+        const user = JSON.parse(localStorage.getItem('current_user')||'null');
+        const candidate = String(user?.grade ?? user?.grade_level ?? user?.class_grade ?? '');
+        const match = candidate.match(/(?:^|\D)(1[0-2]|[1-9])(?:\D|$)/);
+        if(match) grade=Number(match[1]);
+      } catch { /* No optional reader grade */ }
+      return {role,grade};
+    })();
+    const safeEnhancement = saqrExtraContext({
+      question:userQuery,history:messages,role:safeReader.role,
+      grade:safeReader.grade,locale:locale==='ar'?'ar':'en',matches:foundBooks
+    });
+
     const searchContext = foundBooks.length > 0
       ? `EFIPS LIBRARY RECORDS FOUND (relevance-ranked, bilingual topic matching): ${JSON.stringify(foundBooks)}.
 When the user asks for books, identify the matching titles exactly as recorded, grouped clearly by physical, Arabic digital and English digital library. For physical books provide the actual shelf (shelf) and row (row); for digital books provide their existing driveLink. Answer in the user's requested language. Do not invent titles, shelves, rows, summaries or links. Some physical-book subject tags are inferred from titles and may be approximate.`
@@ -406,7 +425,7 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [
-            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}` },
+            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}${safeEnhancement.context ? '\n\n'+safeEnhancement.context : ''}` },
             ...messages,
             { role: 'user', content: userQuery }
           ],
