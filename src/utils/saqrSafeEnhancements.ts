@@ -20,6 +20,7 @@ export const normalizeReader=(x:unknown):ReaderInfo=>{
 const lesson = /تحضير\s*(?:درس|حصة)|خطة\s*درس|عرض\s*تقديمي|lesson\s*plan|prepare\s*(?:a\s*)?lesson|presentation\s*(?:slides|structure)|mcgraw/i;
 const challenge = /تحدي\s*المؤلف|المؤلف\s*الصغير|نؤلف\s*قص[ةه]|نألف\s*قص[ةه]|ابدأ\s*قص[ةه]|let.s\s*(?:write|create)\s*(?:a\s*)?story|little\s*author/i;
 const about = /(?:who are you|what can you do|what does (?:this|the) (?:site|portal) offer|about saqr|your services|your features|introduce yourself|عرف\s*نفسك|عرفني\s*بنفسك|مين\s*انت|من\s*انت|ماذا\s*تقدم|خدماتك|مميزات\s*الموقع|ماذا\s*يقدم\s*الموقع|تقدر\s*تعمل\s*ايه)/i;
+const aboutArabic = /(?:انت مين|إنت مين|ايه الخدمات|إيه الخدمات|خدمات المكتبة|خدمات المكتبه|خدمات الموقع|صقر وهوية وطن|ذاكرة وطن|راية المجد|جواز صقر|كنوز لغتنا|محقق ذاكرة)/i;
 const dialogue = /(?:discuss|discussion|debate|talk about|let.s talk|let.s discuss|analy[sz]e with me|نناقش|نتناقش|ناقشني|خلينا نتكلم|حوار\s*حول|نتكلم\s*عن|تحدث\s*معي|تحاور\s*معي)/i;
 const recommendations = /(?:recommend|suggest (?:a |some )?books?|suitable books|reading list|books? for (?:grade|children|teenagers)|رشح\s*لي|رشحلي|ترشح|اقترح\s*لي|توصيات|كتب\s*مناسب[ةه]|لليافعين|للصغار|حسب\s*مستواي)/i;
 const books = /(?:\bbooks?\b|novels?|library catalog|ebooks?|catalogue|shelf|where (?:is|can i find)|كتب|كتاب|الكتب|الروايات|رف|الرف|المكتبة|المكتبه|دليل\s*الكتب|مراجع)/i;
@@ -29,7 +30,7 @@ export function decideSaqrMode(question:string, history:ChatTurn[]):SaqrMode{
   if(!q||lesson.test(q)||challenge.test(q))return 'none';
   // Continue Little Author's original strict interaction throughout that conversation.
   if(history.some(m=>m.role==='user'&&challenge.test(m.content)))return 'none';
-  if(about.test(q))return 'about';
+  if(about.test(q)||aboutArabic.test(q))return 'about';
   if(history.some((m,i)=>m.role==='user' && dialogue.test(m.content) && !history.slice(i+1).some(n=>n.role==='user' && (lesson.test(n.content)||challenge.test(n.content)))))return 'discussion';
   if(dialogue.test(q))return 'discussion';
   if(recommendations.test(q))return 'recommend';
