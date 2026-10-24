@@ -557,7 +557,7 @@ When the user asks for books, identify the matching titles exactly as recorded, 
       if(learningIntent==='research'&&researchHasTopic(userQuery)&&reply.trim()){
         setResearchAnswer(reply);
         setResearchReady(true);
-        reply+='\n\n'+researchPdfPrompt(locale==='ar'?'ar':'en');
+        // PDF is offered as a separate download button, leaving the learning question at the end.
       }
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
     } catch (error) {
