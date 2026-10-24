@@ -5,7 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import { STORY_IDEAS, storyIdeaAt, isStoryBeginning, detectLearningIntent, researchHasTopic, researchPdfPrompt, saqrLearningInstructions } from '../src/utils/saqrLearning';
-import { borrowerIds, deviceReadingKey, filterActiveBorrowings, readingShelfFromDevice, toSaqrShelfContext } from '../src/utils/saqrReaderContext';
+import { borrowerIds, deviceReadingKey, filterActiveBorrowings, readingShelfFromDevice, catalogBookSynopsis } from '../src/utils/saqrReaderContext';
 import { bookData } from '../api/bookData';
 import { searchSaqrBookCatalog } from '../src/utils/saqrCatalogSearch';
 import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
@@ -460,7 +460,6 @@ const SmartSearchPage: React.FC = () => {
         borrowed=filterActiveBorrowings(sets.flatMap(result=>result.error?[]:result.data||[]));
       }
       const full={...shelf,borrowed};
-      const summary=toSaqrShelfContext(full,locale==='ar'?'ar':'en');
       const entries=[...borrowed.map(b=>b.title),...shelf.saved.map(b=>b.title)];
       const intro=locale==='ar'?'هذه كتبك المسجلة لديّ حاليًا:\n':'Your recorded library books:\n';
       const response=entries.length?intro+entries.slice(0,12).map((title,i)=>String(i+1)+'. '+title).join('\n')+
