@@ -41,3 +41,47 @@
 @keyframes nh-selected{0%,100%{filter:brightness(1)}50%{filter:brightness(1.15)}}
 @media(max-width:650px){.national-heritage .nh-discovery{padding:24px 12px}.national-heritage .nh-answer{min-height:74px}.national-heritage .nh-launch{width:100%}.national-heritage .nh-stage-track{scroll-snap-type:x mandatory}.national-heritage .nh-stage-track button{scroll-snap-align:center}}
 @media(prefers-reduced-motion:reduce){.national-heritage .nh-discovery,.national-heritage .nh-discovery-mark,.national-heritage .nh-play-area>article,.national-heritage .nh-answer{animation:none!important;transition:none!important}}
+
+/* Distinct illustration-led identities for all four UAE cultural games. */
+.national-heritage .nh-card-top{min-height:250px;isolation:isolate;padding-bottom:20px}
+.national-heritage .nh-card-scene{position:relative;z-index:1;height:138px;margin:-20px -16px 2px;display:flex;align-items:center;justify-content:center}
+.national-heritage .nh-quest-illustration{width:min(100%,330px);height:100%;overflow:visible;filter:drop-shadow(0 12px 13px #0018)}
+.national-heritage .nh-card-symbol{position:absolute;top:16px;inset-inline-start:17px;display:grid;place-items:center;border-radius:12px;padding:6px;background:#ffffff2e;z-index:2}
+.national-heritage .nh-card-top-passport{background:linear-gradient(145deg,#094c3e,#0a8060,#0a5043)}
+.national-heritage .nh-card-top-language{background:linear-gradient(145deg,#915120,#e3a341,#b75b2b)}
+.national-heritage .nh-card-top-archive{background:linear-gradient(145deg,#194e69,#367c8a,#1b3955)}
+.national-heritage .nh-card-top-flag{background:linear-gradient(145deg,#064b3c,#15835d,#0d524b)}
+.national-heritage .nh-card-top h3{position:relative;z-index:2;text-shadow:0 2px 4px #0014}
+.national-heritage .nh-mode-hero{--q1:#064b3c;--q2:#13846b;--q3:#e8c184;position:relative;isolation:isolate;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(230px,.8fr);align-items:center;gap:12px;border-radius:32px;padding:clamp(20px,4vw,35px);margin-bottom:20px;min-height:245px;color:#fff;background:linear-gradient(120deg,var(--q1),var(--q2));border:2px solid var(--q3);box-shadow:0 18px 35px #112f3129}
+.national-heritage .nh-quest-language .nh-mode-hero{--q1:#72451e;--q2:#b77732;--q3:#f5d898}
+.national-heritage .nh-quest-archive .nh-mode-hero{--q1:#123e5b;--q2:#23768b;--q3:#d4b47d}
+.national-heritage .nh-mode-hero:before{content:"";position:absolute;pointer-events:none;inset:0;z-index:-1;background:repeating-linear-gradient(135deg,transparent 0 27px,#fff1 28px 30px,transparent 31px 57px);mask-image:linear-gradient(90deg,#000,transparent)}
+.national-heritage .nh-mode-hero-copy{position:relative;z-index:2;min-width:0}
+.national-heritage .nh-mode-kicker{font-weight:900;font-size:11px;letter-spacing:.065em;color:#ffe5ad}
+.national-heritage .nh-mode-hero h2{font-weight:900;font-size:clamp(22px,3.5vw,34px);line-height:1.5;margin:7px 0}
+.national-heritage .nh-mode-hero p{font-size:clamp(12px,1.5vw,15px);line-height:1.9;color:#f4fff8}
+.national-heritage .nh-mode-counter{display:inline-flex;margin-top:17px;border-radius:999px;border:1px solid #fff7;background:#ffffff26;padding:8px 14px;font-size:12px;font-weight:900}
+.national-heritage .nh-mode-illustration{height:210px;width:100%;max-width:355px;justify-self:center}
+.national-heritage .nh-quest-passport .nh-game-path{border:2px solid #d9b87f;background-image:linear-gradient(140deg,#f9f0d8,#e7d6ac)}
+.national-heritage .nh-quest-language .nh-game-path{border:2px solid #d4a45e;background-image:linear-gradient(140deg,#fff4db,#eecfa0)}
+.national-heritage .nh-quest-archive .nh-game-path{border:2px solid #8bb4bc;background-image:linear-gradient(140deg,#f1ecdb,#d7e5e4)}
+.dark .national-heritage .nh-quest-passport .nh-game-path,.dark .national-heritage .nh-quest-language .nh-game-path,.dark .national-heritage .nh-quest-archive .nh-game-path{background-image:linear-gradient(140deg,#1c2923,#32291f)}
+.national-heritage .nh-game-content>article{position:relative}
+.national-heritage .nh-quest-passport .nh-story-card{border:2px solid #bc9c66;border-radius:18px 30px 30px 18px;box-shadow:inset 9px 0 #bd965866,0 12px 20px #6d51331f}
+.national-heritage .nh-quest-language .nh-story-card{border:2px solid #d7aa63;box-shadow:0 9px 25px #ab6c2624}
+.national-heritage .nh-quest-archive .nh-story-card{border:2px dashed #6eacb4;box-shadow:0 9px 25px #14566d1b}
+.national-heritage .nh-quest-language .nh-challenge-play{border:2px solid #d4a65d}
+.national-heritage .nh-quest-archive .nh-challenge-play{border:2px dashed #78b0b8}
+.national-heritage .nh-quest-passport .nh-challenge-play{border:2px solid #a8c2a3}
+.national-heritage .nh-discovery-art{height:164px;width:min(100%,300px);margin:0 auto 9px}
+.national-heritage .nh-discovery-art .nh-quest-illustration{height:100%}
+.national-heritage .nh-art-word{animation:nh-word-rise 4s ease-in-out infinite}.national-heritage .word-2{animation-delay:-1.2s}.national-heritage .word-3{animation-delay:-2.6s}
+.national-heritage .nh-art-magnifier{transform-origin:207px 79px;animation:nh-lens-search 5s ease-in-out infinite}
+.national-heritage .nh-art-stamp{animation:nh-stamp-in 3.5s ease-in-out infinite;transform-origin:center}
+.national-heritage .nh-art-flag{animation:nh-flag-wave 3.1s ease-in-out infinite;transform-origin:188px 80px}
+@keyframes nh-word-rise{50%{transform:translateY(-8px)}}
+@keyframes nh-lens-search{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+@keyframes nh-stamp-in{0%,100%{opacity:.8;transform:scale(.98)}50%{opacity:1;transform:scale(1.07)}}
+@keyframes nh-flag-wave{50%{transform:skewY(2deg)}}
+@media(max-width:700px){.national-heritage .nh-mode-hero{grid-template-columns:minmax(0,1fr);gap:0;text-align:center;border-radius:23px}.national-heritage .nh-mode-illustration{height:175px}.national-heritage .nh-card-top{min-height:225px}.national-heritage .nh-card-scene{height:130px}.national-heritage .nh-quest-illustration{max-width:270px}.national-heritage .nh-discovery-art{height:135px}}
+@media(prefers-reduced-motion:reduce){.national-heritage .nh-art-word,.national-heritage .nh-art-magnifier,.national-heritage .nh-art-stamp,.national-heritage .nh-art-flag{animation:none!important}}
