@@ -446,7 +446,7 @@ const SmartSearchPage: React.FC = () => {
       const {data:{user:cloudUser}}=await supabase.auth.getUser();
       if(cloudUser){
         const [{data:saved},{data:completed}]=await Promise.all([
-          supabase.from('efips_saved_books').select('book_key').eq('user_id',cloudUser.id).limit(40),
+          supabase.from('efips_read_later').select('book_key').eq('user_id',cloudUser.id).limit(40),
           supabase.from('efips_reading_completions').select('book_key').eq('user_id',cloudUser.id).limit(40)
         ]);
         const reading=(keys:string[])=>readingShelfFromDevice('efips-saqr-temporary',{getItem:()=>JSON.stringify({saved:keys,completed:keys,goal:shelf.goal})});
