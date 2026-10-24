@@ -415,8 +415,7 @@ const SmartSearchPage: React.FC = () => {
       if (!response.ok) {
         const detail = await response.json().catch(() => ({}));
         console.error('Saqr API error:', response.status, detail?.code || detail?.error || 'unavailable');
-        throw new Error(response.status === 502 || response.status === 503
-          ? 'AI_PROVIDER_UNAVAILABLE' : 'CHAT_REQUEST_FAILED');
+        throw new Error(typeof detail?.code === 'string' ? detail.code : 'CHAT_REQUEST_FAILED');
       }
       const data = await response.json();
       let reply = data.reply || '';
@@ -453,12 +452,19 @@ const SmartSearchPage: React.FC = () => {
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
     } catch (error) {
       console.error('Error sending chat message:', error);
-      const providerUnavailable = error instanceof Error && error.message === 'AI_PROVIDER_UNAVAILABLE';
+      const errorCode = error instanceof Error ? error.message : '';
+      const providerUnavailable = ['AI_PROVIDER_UNAVAILABLE','AI_NOT_CONFIGURED','AI_AUTH_REJECTED','AI_MODEL_UNAVAILABLE','AI_REQUEST_REJECTED','AI_RATE_LIMIT'].includes(errorCode);
+      const rateLimited = errorCode === 'AI_RATE_LIMIT';
+      const notConfigured = errorCode === 'AI_NOT_CONFIGURED' || errorCode === 'AI_AUTH_REJECTED';
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: providerUnavailable
-          ? (locale === 'ar' ? 'خدمة الذكاء الاصطناعي غير متاحة مؤقتًا. يمكنك تجربة البحث في دليل الكتب، أو إعادة المحاولة.' : 'The AI service is temporarily unavailable. You can search the book catalogue or try again.')
-          : (locale === 'ar' ? 'تعذر إكمال الطلب الآن، يرجى المحاولة مرة أخرى.' : 'Could not complete the request. Please try again.')
+        content: rateLimited
+          ? (locale === 'ar' ? 'وصلت خدمة الذكاء الاصطناعي إلى حد الطلبات المسموح مؤقتًا. يرجى المحاولة لاحقًا.' : 'The AI service has temporarily reached its request limit. Please try later.')
+          : notConfigured
+            ? (locale === 'ar' ? 'خدمة صقر تحتاج إلى مراجعة إعدادات الاتصال بمزود الذكاء الاصطناعي من إدارة النظام.' : 'Saqr needs its AI provider configuration checked by the administrator.')
+            : providerUnavailable
+              ? (locale === 'ar' ? 'خدمة الذكاء الاصطناعي غير متاحة حاليًا. يمكنك البحث في دليل الكتب، أو المحاولة لاحقًا.' : 'The AI provider is currently unavailable. You can use the book catalogue or try later.')
+              : (locale === 'ar' ? 'تعذر إرسال الطلب للخادم. يرجى تحديث الصفحة والمحاولة مجددًا.' : 'The request could not reach the server. Please refresh and retry.')
       }]);
       setSaqrState('idle');
     } finally {
