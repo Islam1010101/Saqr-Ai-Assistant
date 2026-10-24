@@ -4,6 +4,7 @@ import { useLanguage } from '../App';
 import FlagDayChallenge from './FlagDayChallenge';
 import './nationalHeritageTheme.css';
 import HeritageQuestArt from './HeritageQuestArt';
+import PassportStampCard from './PassportStampCard';
 
 type L = { ar: string; en: string };
 type Mode = 'home' | 'passport' | 'language' | 'archive';
@@ -24,9 +25,10 @@ type Progress = {
   words: string[];
   cases: string[];
   notes: Record<string, string>;
+  stampDates: Record<string, string>;
 };
 const l = (ar: string, en: string): L => ({ ar, en });
-const emptyProgress = (): Progress => ({ stamps: [], words: [], cases: [], notes: {} });
+const emptyProgress = (): Progress => ({ stamps: [], words: [], cases: [], notes: {}, stampDates: {} });
 const SEVEN_EMIRATES = 'https://u.ae/en/about-the-uae/the-seven-emirates';
 const UNESCO_AL_AIN = 'https://whc.unesco.org/en/list/1343';
 const UNESCO_SADU = 'https://ich.unesco.org/en/RL/al-sadu-traditional-weaving-skills-in-the-united-arab-emirates-02223';
@@ -147,7 +149,16 @@ const readSaved = (key: string): Progress => {
     if (value.notes && typeof value.notes === 'object') {
       for (const entry of expandedWords) if (typeof value.notes[entry.id] === 'string') notes[entry.id] = value.notes[entry.id].slice(0,180);
     }
-    return {stamps:valid(value.stamps,emirates),words:valid(value.words,expandedWords),cases:valid(value.cases,expandedCases),notes};
+    const stamps = valid(value.stamps,emirates);
+    // Only dates recorded at actual completion are displayed. Legacy stamps have no invented dates.
+    const stampDates: Record<string,string> = {};
+    if (value.stampDates && typeof value.stampDates === 'object') {
+      for (const id of stamps) {
+        const stored = value.stampDates[id];
+        if (typeof stored === 'string' && !Number.isNaN(Date.parse(stored))) stampDates[id] = stored;
+      }
+    }
+    return {stamps,words:valid(value.words,expandedWords),cases:valid(value.cases,expandedCases),notes,stampDates};
   } catch { return emptyProgress(); }
 };
 const Icon: React.FC<{kind:'book'|'stamp'|'weave'|'document'|'check'|'arrow'|'lock'; className?:string}> = ({kind,className='w-7 h-7'}) => {
@@ -202,6 +213,17 @@ const NationalIdentityPage: React.FC = () => {
   const [stage,setStage] = useState<'discover'|'play'>('discover');
   const [chosen,setChosen] = useState<number|null>(null);
   const [advancedPassport,setAdvancedPassport] = useState(false);
+  const [albumOpen,setAlbumOpen] = useState(false);
+  const [newlyStamped,setNewlyStamped] = useState<string|null>(null);
+  const passportHolder = useMemo(() => {
+    try {
+      const user = JSON.parse(localStorage.getItem('current_user') || 'null');
+      if (!user || typeof user !== 'object') return '';
+      const name = ['student_name','full_name','arabic_name','display_name','name']
+        .map(key => user[key]).find(value => typeof value === 'string' && value.trim());
+      return typeof name === 'string' ? name.trim().slice(0,90) : '';
+    } catch { return ''; }
+  }, [identity]);
   useEffect(() => {
     if (!identity) return;
     try { localStorage.setItem(storageKey,JSON.stringify(progress)); } catch { /* Reading tasks still work without storage. */ }
@@ -230,14 +252,21 @@ const NationalIdentityPage: React.FC = () => {
     return indexes;
   }, [currentMode,index,round,advancedPassport]);
   const totalCompleted = progress.stamps.length + progress.words.length + progress.cases.length;
-  const go = (next: Mode) => { setMode(next);setIndex(0);setChosen(null);setAdvancedPassport(false);setStage('discover');setRound(n=>n+1); };
-  const selectEntry = (nextIndex: number) => {setIndex(nextIndex);setChosen(null);setAdvancedPassport(false);setStage('discover');};
+  const go = (next: Mode) => { setMode(next);setIndex(0);setChosen(null);setAdvancedPassport(false);setStage('discover');setNewlyStamped(null);setRound(n=>n+1); };
+  const selectEntry = (nextIndex: number) => {setIndex(nextIndex);setChosen(null);setAdvancedPassport(false);setStage('discover');setNewlyStamped(null);};
   const submitAnswer = (answer: number) => {
     setChosen(answer);
     if (answer !== questionItem.correct) return;
     const field = progressField[currentMode];
-    setProgress(prev => prev[field].includes(item.id) ? prev :
-      {...prev,[field]:[...prev[field],item.id]});
+    const firstCompletion = !progress[field].includes(item.id);
+    if (currentMode === 'passport' && firstCompletion) setNewlyStamped(item.id);
+    setProgress(prev => prev[field].includes(item.id) ? prev : {
+      ...prev,
+      [field]: [...prev[field],item.id],
+      ...(currentMode === 'passport' ? {
+        stampDates: {...prev.stampDates,[item.id]:new Date().toISOString()}
+      } : {})
+    });
   };
   const modules = [
     {id:'passport' as const,icon:'stamp' as const,title:l('جواز صقر الثقافي','Saqr Cultural Passport'),desc:l('اكتشف الإمارات السبع، واقرأ حكاية كل إمارة واجمع ختمها.','Explore all seven emirates, read their stories and collect their stamps.'),total:emirates.length,count:progress.stamps.length,color:'from-emerald-700 to-teal-600'},
@@ -350,6 +379,26 @@ const NationalIdentityPage: React.FC = () => {
           </div>
           <HeritageQuestArt kind={mode==='passport'?'passport':mode==='language'?'language':'archive'} className="nh-mode-illustration"/>
         </div>
+        {mode==='passport' && <section className="nh-stamp-album" aria-label={tr(l('سجل أختام جواز صقر','Saqr passport stamp album'))}>
+          <button type="button" className="nh-stamp-album-toggle" onClick={()=>setAlbumOpen(open=>!open)} aria-expanded={albumOpen} aria-controls="nh-passport-album">
+            <span className="nh-album-icon"><Icon kind="stamp" className="h-7 w-7"/></span>
+            <span className="nh-album-title"><strong>{tr(l('سجل أختام الإمارات السبع','My Seven Emirates Stamp Album'))}</strong>
+              <small>{tr(l('كل مهمة تنجح فيها تمنحك ورقة إنجاز مختومة بشعار المدرسة','Every completed mission earns a school-branded stamped page'))}</small>
+            </span>
+            <span className="nh-album-count">{progress.stamps.length} / 7</span>
+            <Icon kind="arrow" className={'nh-album-arrow h-5 w-5 '+(albumOpen?'nh-album-expanded':'')}/>
+          </button>
+          {albumOpen && <div id="nh-passport-album" className="nh-stamp-album-grid">
+            {emirates.map(emirate => progress.stamps.includes(emirate.id)
+              ? <PassportStampCard key={emirate.id} emirate={emirate} language={lang}
+                  beneficiaryName={passportHolder} issuedAt={progress.stampDates[emirate.id]} compact/>
+              : <div key={emirate.id} className="nh-stamp-locked">
+                  <div className="nh-locked-seal" aria-hidden="true"><Icon kind="lock" className="w-9 h-9"/></div>
+                  <strong>{tr(emirate.name)}</strong>
+                  <small>{tr(l('في انتظار اجتياز المهمة','Awaiting mission completion'))}</small>
+                </div>)}
+          </div>}
+        </section>}
         <div className="nh-game-layout grid grid-cols-1 lg:grid-cols-[285px_minmax(0,1fr)] gap-5">
           <aside className="nh-game-path h-fit rounded-[1.7rem] p-4 bg-[#F8F5EC] dark:bg-[#11150F] border border-amber-200 dark:border-amber-900/60">
             <h2 className="font-black text-lg mb-3 px-2">{mode==='passport'?tr(l('صفحات الجواز','Passport pages')):mode==='language'?tr(l('مفردات التراث','Heritage vocabulary')):tr(l('ملفات المحقق','Detective files'))}</h2>
@@ -413,6 +462,19 @@ const NationalIdentityPage: React.FC = () => {
                 {selectedCorrect && <p className="mt-1 text-sm leading-7">{tr(questionItem.explanation)}</p>}
               </div>}
               {done && chosen === null && <div className="mt-4 text-sm font-black text-emerald-700 dark:text-emerald-300 flex gap-2 items-center"><Icon kind="check" className="w-5 h-5"/>{tr(l('أكملت هذه المهمة سابقًا؛ يمكنك إعادتها.','You have already completed this mission. You can replay it.'))}</div>}
+              {mode==='passport' && selectedCorrect && <div className="nh-stamp-unlock" role="status" aria-live="polite">
+                <div className="nh-unlock-heading"><Icon kind="stamp" className="h-6 w-6"/><strong>{tr(l('انطبعت بصمة النجاح على صفحة جوازك!','Your new passport achievement is stamped!'))}</strong></div>
+                <PassportStampCard key={item.id} emirate={item} language={lang}
+                  beneficiaryName={passportHolder} issuedAt={progress.stampDates[item.id]}
+                  animate={newlyStamped===item.id}/>
+                <button className="nh-view-album" type="button" onClick={()=>setAlbumOpen(true)}>
+                  {tr(l('عرض سجل الأختام السبعة','Open the Seven Emirates stamp album'))}
+                </button>
+              </div>}
+              {mode==='passport' && done && chosen === null && <div className="nh-previous-stamp">
+                <PassportStampCard emirate={item} language={lang}
+                  beneficiaryName={passportHolder} issuedAt={progress.stampDates[item.id]} compact/>
+              </div>}
               </>}
               {mode==='passport' && stage==='play' && <button type="button" onClick={()=>{setAdvancedPassport(previous=>!previous);setChosen(null);}} className="nh-tier mt-4 rounded-xl border-2 border-amber-400 px-4 py-2.5 font-black text-xs sm:text-sm">{tr(advancedPassport?l('العودة للسؤال الأول','Return to first question'):l('سؤال إماراتي أصعب','Try a harder emirate question'))}</button>}
               {mode==='language' && stage==='play' && <div className="mt-6 pt-5 border-t border-slate-200 dark:border-slate-800">
