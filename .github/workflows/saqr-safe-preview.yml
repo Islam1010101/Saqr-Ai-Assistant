@@ -1,0 +1,24 @@
+name: Saqr Safe Reading Preview
+on:
+  push:
+    branches:
+      - saqr-safe-reading-preview-20261024
+  workflow_dispatch:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Run Saqr regression checks (no AI API calls)
+        run: node --experimental-strip-types tests/saqrSafeEnhancements.test.ts
+      - name: Verify TypeScript
+        run: npx tsc --noEmit
+      - name: Verify Vite build
+        run: npm run build
