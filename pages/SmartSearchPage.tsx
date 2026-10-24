@@ -4,10 +4,6 @@ import { ChatMessage } from '../types';
 import ReactMarkdown from 'react-markdown';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
-import { bookData } from '../api/bookData';
-import { searchSaqrBookCatalog } from '../src/utils/saqrCatalogSearch';
-import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
-import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
 import { supabase } from '../src/utils/supabase';
 
 // --- بروتوكول عقل صقر ---
@@ -373,18 +369,8 @@ const SmartSearchPage: React.FC = () => {
       }
     }
 
-    // Retrieve verified catalog records across Arabic/English subjects and titles.
-    // This changes only the book context; Saqr's system prompt and chat flow stay intact.
-    const foundBooks = searchSaqrBookCatalog(userQuery, {
-      physical: bookData,
-      arabic: ARABIC_LIBRARY_DATABASE,
-      english: ENGLISH_LIBRARY_DATABASE
-    });
-
-    const searchContext = foundBooks.length > 0
-      ? `EFIPS LIBRARY RECORDS FOUND (relevance-ranked, bilingual topic matching): ${JSON.stringify(foundBooks)}.
-When the user asks for books, identify the matching titles exactly as recorded, grouped clearly by physical, Arabic digital and English digital library. For physical books provide the actual shelf (shelf) and row (row); for digital books provide their existing driveLink. Answer in the user's requested language. Do not invent titles, shelves, rows, summaries or links. Some physical-book subject tags are inferred from titles and may be approximate.`
-      : '';
+    // Catalog matches are now retrieved and verified once on the server.
+    // Keep Saqr's original personality and teacher/story instructions unchanged.
 
     const storedUser = localStorage.getItem('current_user');
     let userContextInfo = '';
@@ -406,7 +392,7 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [
-            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}` },
+            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}` },
             ...messages,
             { role: 'user', content: userQuery }
           ],
