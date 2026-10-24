@@ -29,7 +29,7 @@ const scheduling=/(?:حجز\s*(?:حصة|حصص|المكتبة|المكتبه)|(?
 const personal=/(?:كتبي\s*المستعارة|استعاراتي|الكتب\s*(?:اللي\s*)?(?:استعرتها|مستعيرها)|قائمة\s*القراءة|تحدي\s*القراءة\s*الشهري|الكتب\s*(?:اللي\s*)?(?:حفظتها|حاططها|أضفتها)|my\s+(?:borrowed|saved)\s+books|my\s+reading\s+(?:list|challenge))/i;
 export const detectLearningIntent=(question:string,role:SaqrRole,history:Array<{role:string;content:string}>=[]):SaqrLearningIntent=>{
   if(protectedRequest.test(question)||history.some(m=>m.role==='user' && isStoryBeginning(m.content)))return 'none';
-  if((role==='teacher'||role==='admin') && history.slice(-8).some(m=>m.role==='user'&&scheduling.test(m.content)) && /^(?:ال[إا]ثنين|الثلاثاء|ال[أا]ربعاء|الخميس|الجمعة|الاحد|monday|tuesday|wednesday|thursday|friday|الحصة\s*\d+|[1-8]|(?:ال[أا]ولى|الثانية|الثالثة|الرابعة|الخامسة|السادسة|السابعة|الثامنة))\b/i.test(question.trim()))return 'schedule';
+  if((role==='teacher'||role==='admin') && history.slice(-8).some(m=>m.role==='user'&&scheduling.test(m.content)) && /^(?:ال[إا]ثنين|الثلاثاء|ال[أا]ربعاء|الخميس|الجمعة|الاحد|monday|tuesday|wednesday|thursday|friday|الحصة\s*\d+|[1-8]|(?:ال[أا]ولى|الثانية|الثالثة|الرابعة|الخامسة|السادسة|السابعة|الثامنة))(?:\s|$)/i.test(question.trim()))return 'schedule';
   if(scheduling.test(question) && (role==='teacher'||role==='admin'))return 'schedule';
   if(personal.test(question) && (role==='student'||role==='teacher'))return 'personal-library';
   if(research.test(question))return 'research';
