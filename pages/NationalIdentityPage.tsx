@@ -246,6 +246,7 @@ const NationalIdentityPage: React.FC = () => {
   const selectedModule = modules.find(x=>x.id===currentMode) || modules[0];
   if (!identity) return <Navigate to="/home" replace />;
   if (flagChallengeOpen) return <FlagDayChallenge onClose={() => setFlagChallengeOpen(false)} />;
+  // Navigation guards are below all memo hooks.
   return <div dir={dir} className="national-heritage relative min-h-[100dvh] overflow-hidden bg-white dark:bg-black text-slate-900 dark:text-slate-100">
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
       <div className="absolute -top-48 -right-48 h-[500px] w-[500px] rounded-full bg-emerald-300/15 dark:bg-emerald-600/10 blur-3xl"/>
