@@ -31,10 +31,10 @@ export function decideSaqrMode(question:string, history:ChatTurn[]):SaqrMode{
   // Continue Little Author's original strict interaction throughout that conversation.
   if(history.some(m=>m.role==='user'&&challenge.test(m.content)))return 'none';
   if(about.test(q)||aboutArabic.test(q))return 'about';
+  if(dialogue.test(q))return 'discussion';
   if(recommendations.test(q))return 'recommend';
   if(books.test(q))return 'catalog';
   if(history.some((m,i)=>m.role==='user' && dialogue.test(m.content) && !history.slice(i+1).some(n=>n.role==='user' && (lesson.test(n.content)||challenge.test(n.content)))))return 'discussion';
-  if(dialogue.test(q))return 'discussion';
   return 'none';
 }
 
