@@ -4,6 +4,10 @@ import { ChatMessage } from '../types';
 import ReactMarkdown from 'react-markdown';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
+import { bookData } from '../api/bookData';
+import { searchSaqrBookCatalog } from '../src/utils/saqrCatalogSearch';
+import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
+import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
 import { supabase } from '../src/utils/supabase';
 
 // --- بروتوكول عقل صقر ---
@@ -369,8 +373,18 @@ const SmartSearchPage: React.FC = () => {
       }
     }
 
-    // Catalog matches are now retrieved and verified once on the server.
-    // Keep Saqr's original personality and teacher/story instructions unchanged.
+    // Retrieve verified catalog records across Arabic/English subjects and titles.
+    // This changes only the book context; Saqr's system prompt and chat flow stay intact.
+    const foundBooks = searchSaqrBookCatalog(userQuery, {
+      physical: bookData,
+      arabic: ARABIC_LIBRARY_DATABASE,
+      english: ENGLISH_LIBRARY_DATABASE
+    });
+
+    const searchContext = foundBooks.length > 0
+      ? `EFIPS LIBRARY RECORDS FOUND (relevance-ranked, bilingual topic matching): ${JSON.stringify(foundBooks)}.
+When the user asks for books, identify the matching titles exactly as recorded, grouped clearly by physical, Arabic digital and English digital library. For physical books provide the actual shelf (shelf) and row (row); for digital books provide their existing driveLink. Answer in the user's requested language. Do not invent titles, shelves, rows, summaries or links. Some physical-book subject tags are inferred from titles and may be approximate.`
+      : '';
 
     const storedUser = localStorage.getItem('current_user');
     let userContextInfo = '';
@@ -392,31 +406,15 @@ const SmartSearchPage: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [
-            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}` },
+            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}` },
             ...messages,
             { role: 'user', content: userQuery }
           ],
-          locale,
-          // Advisory reading level only; permissions remain managed by existing routes.
-          reader: (() => {
-            let grade: number | null = null;
-            let role = localStorage.getItem('user_type') || 'guest';
-            try {
-              const user = JSON.parse(localStorage.getItem('current_user') || 'null');
-              const rawGrade = user?.grade ?? user?.grade_level ?? user?.class_grade ?? user?.student_grade;
-              const matched = String(rawGrade ?? '').match(/(?:^|\D)(1[0-2]|[1-9])(?:\D|$)/);
-              if (matched) grade = Number(matched[1]);
-            } catch { /* no persisted profile */ }
-            return { role, grade };
-          })()
+          locale
         })
       });
 
-      if (!response.ok) {
-        const detail = await response.json().catch(() => ({}));
-        console.error('Saqr API error:', response.status, detail?.code || detail?.error || 'unavailable');
-        throw new Error(typeof detail?.code === 'string' ? detail.code : 'CHAT_REQUEST_FAILED');
-      }
+      if (!response.ok) throw new Error(`Chat request failed: ${response.status}`);
       const data = await response.json();
       let reply = data.reply || '';
 
@@ -452,19 +450,9 @@ const SmartSearchPage: React.FC = () => {
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
     } catch (error) {
       console.error('Error sending chat message:', error);
-      const errorCode = error instanceof Error ? error.message : '';
-      const providerUnavailable = ['AI_PROVIDER_UNAVAILABLE','AI_NOT_CONFIGURED','AI_AUTH_REJECTED','AI_MODEL_UNAVAILABLE','AI_REQUEST_REJECTED','AI_RATE_LIMIT'].includes(errorCode);
-      const rateLimited = errorCode === 'AI_RATE_LIMIT';
-      const notConfigured = errorCode === 'AI_NOT_CONFIGURED' || errorCode === 'AI_AUTH_REJECTED';
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: rateLimited
-          ? (locale === 'ar' ? 'وصلت خدمة الذكاء الاصطناعي إلى حد الطلبات المسموح مؤقتًا. يرجى المحاولة لاحقًا.' : 'The AI service has temporarily reached its request limit. Please try later.')
-          : notConfigured
-            ? (locale === 'ar' ? 'خدمة صقر تحتاج إلى مراجعة إعدادات الاتصال بمزود الذكاء الاصطناعي من إدارة النظام.' : 'Saqr needs its AI provider configuration checked by the administrator.')
-            : providerUnavailable
-              ? (locale === 'ar' ? 'خدمة الذكاء الاصطناعي غير متاحة حاليًا. يمكنك البحث في دليل الكتب، أو المحاولة لاحقًا.' : 'The AI provider is currently unavailable. You can use the book catalogue or try later.')
-              : (locale === 'ar' ? 'تعذر إرسال الطلب للخادم. يرجى تحديث الصفحة والمحاولة مجددًا.' : 'The request could not reach the server. Please refresh and retry.')
+        content: locale === 'ar' ? 'حدث خطأ في الاتصال، يرجى المحاولة مرة أخرى.' : 'Connection error, please try again.'
       }]);
       setSaqrState('idle');
     } finally {
