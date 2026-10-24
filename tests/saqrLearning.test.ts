@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {STORY_IDEAS,storyIdeaAt,isStoryBeginning,detectLearningIntent,saqrLearningInstructions} from '../src/utils/saqrLearning.ts';
+assert.ok(STORY_IDEAS.length>=10);
+assert.notEqual(storyIdeaAt(0,'ar'),storyIdeaAt(1,'ar'));
+assert.ok(STORY_IDEAS.every(v=>v.ar&&v.en));
+assert.equal(isStoryBeginning('تحدي المؤلف الصغير'),true);
+assert.equal(detectLearningIntent('اعمل لي بحث دراسي عن المياه','student'),'research');
+assert.equal(detectLearningIntent('ساعدني أحل واجب رياضيات','student'),'tutoring');
+assert.equal(detectLearningIntent('عايز احجز حصة مكتبة','teacher'),'schedule');
+assert.equal(detectLearningIntent('عايز احجز حصة مكتبة','student'),'none');
+assert.equal(detectLearningIntent('قائمة القراءة','student'),'personal-library');
+assert.equal(detectLearningIntent('تابع القصة','student',[{role:'user',content:'تحدي المؤلف الصغير'}]),'none');
+assert.equal(detectLearningIntent('تحضير درس رياضيات','teacher'),'none');
+assert.ok(saqrLearningInstructions('tutoring','student',4,'ar').includes('grades')===false);
+assert.ok(saqrLearningInstructions('tutoring','student',4,'ar').includes('very simple'));
+assert.ok(saqrLearningInstructions('research','student',8,'ar').includes('Never invent source'));
+console.log('PASS Saqr learning and reader-data checks');

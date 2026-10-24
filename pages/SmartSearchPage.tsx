@@ -4,12 +4,16 @@ import { ChatMessage } from '../types';
 import ReactMarkdown from 'react-markdown';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
+import { STORY_IDEAS, storyIdeaAt, isStoryBeginning, detectLearningIntent, researchHasTopic, researchPdfPrompt, saqrLearningInstructions } from '../src/utils/saqrLearning';
+import { borrowerIds, deviceReadingKey, filterActiveBorrowings, readingShelfFromDevice, catalogBookSynopsis } from '../src/utils/saqrReaderContext';
 import { bookData } from '../api/bookData';
 import { searchSaqrBookCatalog } from '../src/utils/saqrCatalogSearch';
 import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
 import { supabase } from '../src/utils/supabase';
-import { saqrExtraContext } from '../src/utils/saqrSafeEnhancements';
+import { stripSaqrEmoji } from '../src/utils/saqrText';
+import { isSaqrCatalogLookup, renderSaqrCatalogAnswer } from '../src/utils/saqrCatalogReply';
+import { saqrExtraContext, isNewDiscussion, discussionOpening } from '../src/utils/saqrSafeEnhancements';
 
 // --- بروتوكول عقل صقر ---
 const SAQR_ELITE_PROMPT = `
@@ -195,6 +199,8 @@ const SmartSearchPage: React.FC = () => {
   const t = (key: string) => localization[locale]?.[key] ?? localization.ar[key] ?? key;
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [researchAnswer,setResearchAnswer]=useState<string>('');
+  const [researchReady,setResearchReady]=useState(false);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [winnerData, setWinnerData] = useState<any>(null);
@@ -225,11 +231,11 @@ const SmartSearchPage: React.FC = () => {
 
         if (storedType === 'student') {
           welcomeMessage = locale === 'ar'
-            ? `أهلاً بك يا صديقي المبدع **${name}**! 🎓\n\nأنا "صقر"، المساعد الذكي لمكتبتك. هل نؤلف قصة ممتعة معاً اليوم، أم تبحث عن كتاب محدد لتقرأه؟`
+            ? `أهلاً بك يا صديقي المبدع **${name}**! \n\nأنا "صقر"، المساعد الذكي لمكتبتك. هل نؤلف قصة ممتعة معاً اليوم، أم تبحث عن كتاب محدد لتقرأه؟`
             : `Welcome my creative friend **${name}**! 🎓\n\nI'm 'Saqr', your AI Librarian. Shall we co-author a story today, or are you looking for a specific book?`;
         } else if (storedType === 'teacher' || storedType === 'admin') {
           welcomeMessage = locale === 'ar'
-            ? `أهلاً بك أستاذي الفاضل **${name}**! 👨‍🏫\n\nأنا "صقر" في خدمتك. كيف يمكنني مساعدتك اليوم؟`
+            ? `أهلاً بك أستاذي الفاضل **${name}**! \n\nأنا "صقر" في خدمتك. كيف يمكنني مساعدتك اليوم؟`
             : `Welcome esteemed teacher **${name}**! 👨‍🏫\n\nI am 'Saqr', at your service. How can I assist you today ?`;
         }
       } catch (error) {
@@ -342,6 +348,7 @@ const SmartSearchPage: React.FC = () => {
   const handleSendMessage = async () => {
     if (input.trim() === '' || isLoading) return;
     const userQuery = input.trim();
+    setResearchReady(false);
 
     setMessages(prev => [...prev, { role: 'user', content: userQuery }]);
     setInput('');
@@ -382,6 +389,24 @@ const SmartSearchPage: React.FC = () => {
       english: ENGLISH_LIBRARY_DATABASE
     });
 
+    // Offer varied national-identity plots without touching the strict author story flow.
+    if(isStoryBeginning(userQuery) && /(?:أفكار|افكار|اقترح|اختار|مواضيع|variety|ideas|topics)/i.test(userQuery)){
+      const ideas=STORY_IDEAS.map((idea,i)=>String(i+1)+'. '+idea[locale==='ar'?'ar':'en']).join('\n');
+      setMessages(prev=>[...prev,{role:'assistant',content:(locale==='ar'?'اختر فكرة من أفكار قصص الهوية الوطنية، ثم اكتب «تحدي المؤلف الصغير» مع الفكرة التي اخترتها:\n\n':'Choose a UAE story idea, then start Little Author with your choice:\n\n')+ideas}]);
+      setIsLoading(false);setSaqrState('idle');return;
+    }
+    // A factual catalog lookup needs no generative model; keep summaries and all
+    // educational/story functions on their existing chat path.
+    const initialRole=localStorage.getItem('user_type')||'guest';
+    const preIntent=detectLearningIntent(userQuery,initialRole as 'student'|'teacher'|'admin'|'guest',messages);
+    if(preIntent==='none' && isSaqrCatalogLookup(userQuery)){
+      const answer=renderSaqrCatalogAnswer(userQuery,foundBooks,locale==='ar'?'ar':'en');
+      setMessages(prev=>[...prev,{role:'assistant',content:answer}]);
+      setSaqrState('idle');
+      setIsLoading(false);
+      return;
+    }
+
     const safeReader = (() => {
       const roleValue = localStorage.getItem('user_type');
       const role: 'student'|'teacher'|'admin'|'guest' =
@@ -400,10 +425,70 @@ const SmartSearchPage: React.FC = () => {
       grade:safeReader.grade,locale:locale==='ar'?'ar':'en',matches:foundBooks
     });
 
+    if (isNewDiscussion(userQuery,messages)) {
+      setMessages(prev => [...prev,{role:'assistant',content:discussionOpening(locale==='ar'?'ar':'en')}]);
+      setIsLoading(false);
+      setSaqrState('idle');
+      return;
+    }
+
+    const learningIntent=detectLearningIntent(userQuery,safeReader.role,messages);
+    if(learningIntent==='schedule'){
+      const selectedDay=/(?:الاثنين|الإثنين|الثلاثاء|الأربعاء|الاربعاء|الخميس|الجمعة|monday|tuesday|wednesday|thursday|friday)/i.exec(userQuery)?.[0];
+      const period=/(?:الحصة|حصه|period)\\s*([1-8])/i.exec(userQuery)?.[1];
+      let status='';
+      try {
+        const {data,error}=await supabase.from('library_schedule').select('id,teacher,subject,grade').limit(60);
+        if(error)throw error;
+        const reservations=(data||[]).filter((slot:any)=>slot.teacher);
+        const target=selectedDay&&period ? reservations.find((slot:any)=>String(slot.id).endsWith('_'+period) && (String(slot.id).startsWith(selectedDay)||String(slot.id).toLowerCase().startsWith(selectedDay.toLowerCase()))) : null;
+        status=selectedDay&&period ? (target
+           ? (locale==='ar'?'الحصة المطلوبة تظهر محجوزة بالفعل؛ اختر حصة أخرى.':'That period appears booked; choose another.')
+           : (locale==='ar'?'لا يظهر حجز لهذه الحصة في البيانات المقروءة، لكن تأكد من توفرها داخل الجدول قبل الحفظ.':'No matching booking was visible in readable records; confirm availability in the timetable before saving.'))
+           : (locale==='ar'?'تحب تحجز يوم إيه ورقم الحصة كام؟':'Which day and period would you like to book?');
+      } catch {status=locale==='ar'?'لم أتمكن من تأكيد حالة الحصص حاليًا.':'I could not verify the timetable right now.';}
+      setMessages(prev=>[...prev,{role:'assistant',content:locale==='ar'
+        ? 'أقدر أساعدك تختار حصة مناسبة. '+status+' افتح [جدول حجز المكتبة](https://www.efipslibrary.com/#/schedule) لإتمام الحجز بنفسك؛ لا يتم حفظ حجز من المحادثة.'
+        : 'I can help you choose a library period. '+status+' Use the [library schedule](https://www.efipslibrary.com/#/schedule) to submit it; chat cannot save a booking.'}]);
+      setIsLoading(false);setSaqrState('idle');return;
+    }
+    if(learningIntent==='personal-library'){
+      const stored=localStorage.getItem('current_user');
+      const user=stored?JSON.parse(stored):{};
+      const identifier=String(user.student_id||user.teacher_id||user.id||user.user_id||'').trim();
+      let shelf=readingShelfFromDevice(deviceReadingKey(user,safeReader.role),localStorage);
+      // Only verified Supabase-authenticated readers may use cloud reading lists.
+      const {data:{user:cloudUser}}=await supabase.auth.getUser();
+      if(cloudUser){
+        const [{data:saved},{data:completed}]=await Promise.all([
+          supabase.from('efips_read_later').select('book_key').eq('user_id',cloudUser.id).limit(40),
+          supabase.from('efips_reading_completions').select('book_key').eq('user_id',cloudUser.id).limit(40)
+        ]);
+        const reading=(keys:string[])=>readingShelfFromDevice('efips-saqr-temporary',{getItem:()=>JSON.stringify({saved:keys,completed:keys,goal:shelf.goal})});
+        if(saved){shelf={...shelf,saved:reading(saved.map((r:any)=>String(r.book_key))).saved};}
+        if(completed){shelf={...shelf,completed:reading(completed.map((r:any)=>String(r.book_key))).completed};}
+      }
+      let borrowed:{title:string;due:string}[]=[];
+      if(identifier && safeReader.role!=='guest'){
+        const ids=borrowerIds(user,safeReader.role);
+        const sets=await Promise.all(ids.map(id=>supabase.from('borrowings').select('*').eq('user_id',id).limit(25)));
+        borrowed=filterActiveBorrowings(sets.flatMap(result=>result.error?[]:result.data||[]));
+      }
+      const full={...shelf,borrowed};
+      const entries=[...borrowed.map(b=>b.title),...shelf.saved.map(b=>b.title)];
+      const intro=locale==='ar'?'هذه كتبك المسجلة لديّ حاليًا:\n':'Your recorded library books:\n';
+      const response=entries.length?intro+entries.slice(0,12).map((title,i)=>String(i+1)+'. '+title).join('\n')+
+       (locale==='ar'?'\n\nيلا نقرأ! قل لي اسم كتاب من القائمة لألخص لك موضوعه من وصف الفهرس، أو أساعدك تناقشه.':'\n\nLet’s read! Name one of these books and I can summarize its catalog description or discuss it with you.')
+        :(locale==='ar'?'لم أجد كتبًا محفوظة أو استعارات نشطة يمكن لهذا الحساب قراءتها. أضف كتابًا لقائمة القراءة أو راجع الاستعارات في الصفحة الرئيسية.':'No saved books or active loans were visible to this account. Add a book to the reading list or check Home.');
+      setMessages(prev=>[...prev,{role:'assistant',content:response}]);
+      setIsLoading(false);setSaqrState('idle');return;
+    }
+    const learningContext=saqrLearningInstructions(learningIntent,safeReader.role,safeReader.grade,locale==='ar'?'ar':'en');
+
     const searchContext = foundBooks.length > 0
       ? `EFIPS LIBRARY RECORDS FOUND (relevance-ranked, bilingual topic matching): ${JSON.stringify(foundBooks)}.
 When the user asks for books, identify the matching titles exactly as recorded, grouped clearly by physical, Arabic digital and English digital library. For physical books provide the actual shelf (shelf) and row (row); for digital books provide their existing driveLink. Answer in the user's requested language. Do not invent titles, shelves, rows, summaries or links. Some physical-book subject tags are inferred from titles and may be approximate.`
-      : '';
+      : 'EFIPS LIBRARY RECORDS FOUND: No verified matching records supplied. Do not invent a library title, shelf, row or digital link.';
 
     const storedUser = localStorage.getItem('current_user');
     let userContextInfo = '';
@@ -412,7 +497,7 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         const user = JSON.parse(storedUser);
         const rawName = locale === 'ar' ? (user.name_ar || user.name_en) : (user.name_en || user.name_ar);
         const name = formatFirstAndLastName(rawName || '');
-        const type = localStorage.getItem('user_type') === 'student' ? 'Student' : 'Teacher';
+        const type = localStorage.getItem('user_type') === 'student' ? 'Student' : (localStorage.getItem('user_type') === 'teacher' ? 'Teacher' : 'Administrator');
         userContextInfo = `\nCurrent User Context: The person talking to you is a ${type} named "${name}". Use their name occasionally to be friendly.`;
       } catch (error) {
         console.error('Could not parse current user context:', error);
@@ -425,7 +510,7 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [
-            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}${safeEnhancement.context ? '\n\n'+safeEnhancement.context : ''}` },
+            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}${safeEnhancement.context ? '\n\n'+safeEnhancement.context : ''}${learningContext ? '\n\n'+learningContext : ''}${isStoryBeginning(userQuery) ? '\n\nIf the user requests a NEW Little Author story without a specific theme, begin with exactly one short story sentence inspired by this rotating Emirati idea: '+storyIdeaAt(messages.filter(m=>m.role==='user').length,locale==='ar'?'ar':'en')+'. Preserve all established Little Author spelling correction, one-sentence response, ending and certificate instructions.' : ''}` },
             ...messages,
             { role: 'user', content: userQuery }
           ],
@@ -436,6 +521,9 @@ When the user asks for books, identify the matching titles exactly as recorded, 
       if (!response.ok) throw new Error(`Chat request failed: ${response.status}`);
       const data = await response.json();
       let reply = data.reply || '';
+      // Filter assistant prose only: preserve Markdown, links, author certificates
+      // and all of Saqr's existing UI illustrations.
+      reply = stripSaqrEmoji(reply);
 
       if (reply.includes('[WINNER:')) {
         // Parse the exact winner format while accepting the required pipe separators.
@@ -466,6 +554,11 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         window.setTimeout(() => setSaqrState('idle'), 2500);
       }
 
+      if(learningIntent==='research'&&researchHasTopic(userQuery)&&reply.trim()){
+        setResearchAnswer(reply);
+        setResearchReady(true);
+        // PDF is offered as a separate download button, leaving the learning question at the end.
+      }
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
     } catch (error) {
       console.error('Error sending chat message:', error);
@@ -477,6 +570,29 @@ When the user asks for books, identify the matching titles exactly as recorded, 
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const downloadResearchPdf=async()=>{
+    if(!researchAnswer)return;
+    try{
+      const container=document.createElement('div');
+      container.setAttribute('dir',locale==='ar'?'rtl':'ltr');
+      container.style.cssText='position:fixed;left:-10000px;top:0;width:790px;padding:45px;background:white;color:#172334;font-size:19px;line-height:1.85;white-space:pre-wrap;font-family:Tajawal,Cairo,sans-serif;overflow-wrap:break-word';
+      container.textContent=(locale==='ar'?'بحث دراسي - مكتبة مدرسة صقر الإمارات\n\n':'School Research - EFIPS Library\n\n')+researchAnswer;
+      document.body.appendChild(container);
+      try{
+        if(document.fonts?.ready)await document.fonts.ready;
+        const canvas=await html2canvas(container,{backgroundColor:'#fff',scale:1.5,useCORS:false});
+        const pdf=new jsPDF({unit:'mm',format:'a4'});
+        const pageWidth=210,pageHeight=297;
+        const totalHeight=canvas.height*pageWidth/canvas.width;
+        for(let y=0;y<totalHeight;y+=pageHeight){
+          if(y>0)pdf.addPage();
+          pdf.addImage(canvas.toDataURL('image/png'),'PNG',0,-y,pageWidth,totalHeight);
+        }
+        pdf.save('EFIPS_Student_Research.pdf');
+      }finally{container.remove();}
+    }catch(err){console.error('Research PDF export error',err);alert(locale==='ar'?'تعذر إعداد ملف البحث.':'Research PDF could not be generated.');}
   };
 
   // The welcome response remains in the conversation context sent to the API,
@@ -618,11 +734,16 @@ When the user asks for books, identify the matching titles exactly as recorded, 
                   <div className={`saqr-message-row ${msg.role === 'user' ? 'saqr-message-row-user' : 'saqr-message-row-assistant'}`}>
                     {msg.role === 'assistant' ? (
                       <div className="saqr-assistant-column">
-                        <div className="saqr-assistant-bubble" translate="no" lang={locale}>
+                        <div className="saqr-assistant-bubble" lang={locale}>
                           <div className={`saqr-markdown prose prose-slate max-w-none text-start dark:prose-invert ${index > 0 && isLessonPlanRequest(visibleMessages[index - 1]?.content || '') ? 'saqr-lesson-markdown' : ''}`}>
                             <ReactMarkdown>{msg.role === 'assistant' && index > 0 && isLessonPlanRequest(visibleMessages[index - 1]?.content || '') ? formatLessonPlanDisplay(msg.content) : msg.content}</ReactMarkdown>
                           </div>
                         </div>
+                        {researchReady && researchAnswer && index === visibleMessages.length - 1 && msg.role==='assistant' && (
+                          <button type="button" className="saqr-inline-download mt-3" onClick={()=>void downloadResearchPdf()}>
+                            <DownloadIcon /><span>{locale==='ar'?'تحميل البحث PDF':'Download research PDF'}</span>
+                          </button>
+                        )}
                         {winnerData && saqrState === 'victory' && index === visibleMessages.length - 1 && (
                           <div className="mt-2 text-start">
                             <button onClick={handleDownloadCertificatePDF} className="saqr-inline-download" type="button">
@@ -974,9 +1095,9 @@ When the user asks for books, identify the matching titles exactly as recorded, 
           color: #1e293b;
           background: linear-gradient(145deg, rgba(255, 255, 255, .98), rgba(248, 250, 252, .94));
           box-shadow: 0 6px 20px rgba(15, 23, 42, .045), inset 0 1px 0 rgba(255, 255, 255, .9);
-          font-size: clamp(13px, 1.15vw, 15px);
+          font-size: clamp(15px, 1.25vw, 17px);
           font-weight: 500;
-          line-height: 1.65;
+          line-height: 1.9;
           overflow-wrap: anywhere;
         }
         .dark .saqr-assistant-bubble {
@@ -985,18 +1106,18 @@ When the user asks for books, identify the matching titles exactly as recorded, 
           background: rgba(26, 31, 46, .94);
           box-shadow: 0 4px 16px rgba(0, 0, 0, .10);
         }
-        .saqr-markdown { min-width: 0; width: 100%; overflow-wrap: anywhere; word-break: normal; }
+        .saqr-markdown { min-width: 0; width: 100%; overflow-wrap: break-word; word-break: normal; white-space: normal; font-family: 'Tajawal','Cairo',system-ui,sans-serif; font-size: 1rem; letter-spacing: normal; }
         .saqr-markdown > :first-child { margin-top: 0 !important; }
         .saqr-markdown > :last-child { margin-bottom: 0 !important; }
-        .saqr-markdown p { margin-top: .25em; margin-bottom: .55em; }
+        .saqr-markdown p { margin-top: .5em; margin-bottom: .85em; line-height: 1.95; }
         .saqr-markdown ul, .saqr-markdown ol { margin-top: .35em; margin-bottom: .6em; padding-inline-start: 1.35em; }
-        .saqr-markdown li { margin-block: .15em; }
+        .saqr-markdown li { margin-block: .45em; line-height: 1.9; }
         .saqr-lesson-markdown li { display: list-item; line-height: 1.85; }
         .saqr-lesson-markdown li + li { margin-block-start: .55em; }
         .saqr-lesson-markdown li > p { margin: 0; }
         .saqr-lesson-markdown ul, .saqr-lesson-markdown ol { list-style-position: outside; }
 
-        .saqr-markdown h1, .saqr-markdown h2, .saqr-markdown h3, .saqr-markdown h4 { margin-top: .75em; margin-bottom: .3em; font-weight: 800; line-height: 1.4; }
+        .saqr-markdown h1, .saqr-markdown h2, .saqr-markdown h3, .saqr-markdown h4 { margin-top: 1.1em; margin-bottom: .6em; font-weight: 800; line-height: 1.55; }
         .saqr-markdown h1, .saqr-markdown h2, .saqr-markdown h3 { color: #0284c7; }
         .dark .saqr-markdown h1, .dark .saqr-markdown h2, .dark .saqr-markdown h3 { color: #38bdf8; }
         .saqr-markdown pre { max-width: 100%; overflow-x: auto; border-radius: 10px; }

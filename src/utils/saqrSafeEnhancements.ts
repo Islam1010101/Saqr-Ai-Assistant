@@ -20,6 +20,7 @@ export const normalizeReader=(x:unknown):ReaderInfo=>{
 const lesson = /تحضير\s*(?:درس|حصة)|خطة\s*درس|عرض\s*تقديمي|lesson\s*plan|prepare\s*(?:a\s*)?lesson|presentation\s*(?:slides|structure)|mcgraw/i;
 const challenge = /تحدي\s*المؤلف|المؤلف\s*الصغير|نؤلف\s*قص[ةه]|نألف\s*قص[ةه]|ابدأ\s*قص[ةه]|let.s\s*(?:write|create)\s*(?:a\s*)?story|little\s*author/i;
 const about = /(?:who are you|what can you do|what does (?:this|the) (?:site|portal) offer|about saqr|your services|your features|introduce yourself|عرف\s*نفسك|عرفني\s*بنفسك|مين\s*انت|من\s*انت|ماذا\s*تقدم|خدماتك|مميزات\s*الموقع|ماذا\s*يقدم\s*الموقع|تقدر\s*تعمل\s*ايه)/i;
+const aboutArabic = /(?:انت مين|إنت مين|ايه الخدمات|إيه الخدمات|خدمات المكتبة|خدمات المكتبه|خدمات الموقع|صقر وهوية وطن|ذاكرة وطن|راية المجد|جواز صقر|كنوز لغتنا|محقق ذاكرة)/i;
 const dialogue = /(?:discuss|discussion|debate|talk about|let.s talk|let.s discuss|analy[sz]e with me|نناقش|نتناقش|ناقشني|خلينا نتكلم|حوار\s*حول|نتكلم\s*عن|تحدث\s*معي|تحاور\s*معي)/i;
 const recommendations = /(?:recommend|suggest (?:a |some )?books?|suitable books|reading list|books? for (?:grade|children|teenagers)|رشح\s*لي|رشحلي|ترشح|اقترح\s*لي|توصيات|كتب\s*مناسب[ةه]|لليافعين|للصغار|حسب\s*مستواي)/i;
 const books = /(?:\bbooks?\b|novels?|library catalog|ebooks?|catalogue|shelf|where (?:is|can i find)|كتب|كتاب|الكتب|الروايات|رف|الرف|المكتبة|المكتبه|دليل\s*الكتب|مراجع)/i;
@@ -29,10 +30,11 @@ export function decideSaqrMode(question:string, history:ChatTurn[]):SaqrMode{
   if(!q||lesson.test(q)||challenge.test(q))return 'none';
   // Continue Little Author's original strict interaction throughout that conversation.
   if(history.some(m=>m.role==='user'&&challenge.test(m.content)))return 'none';
-  if(about.test(q))return 'about';
+  if(about.test(q)||aboutArabic.test(q))return 'about';
   if(dialogue.test(q))return 'discussion';
   if(recommendations.test(q))return 'recommend';
   if(books.test(q))return 'catalog';
+  if(history.some((m,i)=>m.role==='user' && dialogue.test(m.content) && !history.slice(i+1).some(n=>n.role==='user' && (lesson.test(n.content)||challenge.test(n.content)))))return 'discussion';
   return 'none';
 }
 
@@ -64,10 +66,11 @@ const services=[
   ['Physical book catalog','/#/search','all'],
   ['Arabic digital library','/#/digital-library/arabic','all'],
   ['English digital library','/#/digital-library/english','all'],
-  ['Reading list and borrowing reminders','/#/home','all'],
+  ['Reading goals, reading lists, borrowed-book due dates and reminders','/#/home','all'],
   ['Book a library period','/#/schedule','teacher'],
   ['Creators portal','/#/creators','student'],
-  ['Saqr & UAE National Identity','/#/saqr-national-identity','student'],
+  ['Little Author interactive storytelling and existing certificate','/#/smart-search','all'],
+  ['Saqr & UAE National Identity','/#/saqr-national-identity','all'],
   ['Saqr Studio','/#/saqr-studio','all'],
   ['Podcast','/#/podcast','all']
 ] as const;
@@ -91,6 +94,22 @@ export function trustedTopicSources(q:string,reader:ReaderInfo){
   const permitted=references.filter(v=>v.tag===topic);
   return permitted.filter(x=>!(reader.role==='student' && reader.grade!==null && reader.grade<9 && x.name==='OpenStax')).slice(0,2);
 }
+const heritageGuide = [
+  'Saqr & National Identity contains four challenges, all located at /#/saqr-national-identity:',
+  '1. Saqr Cultural Passport: discover all seven UAE emirates and earn each emirate stamp after answering.',
+  '2. Treasures of Emirati Language: explore traditional Emirati vocabulary and use terms in original sentences.',
+  '3. Heritage Research Detective (محقق ذاكرة وطن): assess evidence, read source references and check historical claims.',
+  '4. Flag of Glory challenge (تحدي راية المجد): answer UAE Flag Day landmark questions to raise the flag in the game.',
+  'These are website experiences, not functions you can complete or award through chat. Do not invent points, rewards or completion statuses.'
+].join('\\n');
+export const discussionOpening=(locale:'ar'|'en'):string => locale==='ar'
+  ? 'تحب نتناقش في إيه؟ في موضوع معين ولا كتاب قرأته؟'
+  : 'What would you like to discuss: a particular topic or a book you have read?';
+export const isNewDiscussion=(question:string,history:ChatTurn[]):boolean =>
+  /(?:discuss|discussion|debate|talk about|let.s talk|let.s discuss|نناقش|نتناقش|ناقشني|خلينا نتكلم|تحاور)/i.test(question) &&
+  !/(?:حول|عن|about|book\\s+|كتاب\\s+|التراث|التعليم|البيئه|الامارات)/i.test(question) &&
+  !history.some(m=>m.role==='user' && /(?:discuss|discussion|نناقش|نتناقش|ناقشني|تحاور)/i.test(m.content));
+
 export function saqrExtraContext(args:{
   question:string;history:ChatTurn[];role:ReaderInfo['role'];grade:number|null;
   locale:'ar'|'en';matches:SaqrBookMatch[];
@@ -100,16 +119,16 @@ export function saqrExtraContext(args:{
   if(mode==='none')return {mode,context:'',recommendations:[]};
   const lang=args.locale==='ar'?'Arabic':'English';
   const age = reader.grade===null?'unknown reading level':'grade '+reader.grade;
-  const lead='OPTIONAL BOOK-GUIDANCE FORMAT (not a change to your identity, lessons, presentations or Little Author rules). Answer in '+lang+'. Reader '+reader.role+', '+age+'. Never use grade to authorize access. ';
+  const lead='DO NOT use emoji or decorative Unicode symbols. Write in well-spaced clear Markdown with readable paragraphs. Preserve Little Author spelling/grammar correction exactly as originally instructed. OPTIONAL BOOK-GUIDANCE FORMAT (not a change to your identity, lessons, presentations or Little Author rules). Answer in '+lang+'. Reader '+reader.role+', '+age+'. Never use grade to authorize access. ';
   if(mode==='about'){
     const links=services.filter(([,,who])=>who==='all'||who==='teacher'&&(reader.role==='teacher'||reader.role==='admin')||who==='student'&&(reader.role==='student'||reader.role==='admin'))
       .map(([name,path])=>name+': '+site+path).join('\n');
-    return {mode,recommendations:[],context:lead+'When asked to introduce yourself, present verified EFIPS library capabilities: book discovery, shelf locations, digital reading, guided dialogue, lesson plans and slide outlines for teachers, Little Author story challenge and its existing certificate. Explain website services with relevant real links; do not claim to make bookings, approve loans, or have searched external sites.\n'+links};
+    return {mode,recommendations:[],context:lead+'When asked to introduce yourself, present verified EFIPS library capabilities: book discovery, shelf locations, digital reading, guided dialogue, lesson plans and slide outlines for teachers, Little Author story challenge and its existing certificate. Explain all four National Identity challenges accurately from the following verified page guide: \\n'+heritageGuide+'\\n Explain website services with relevant real links; do not claim to make bookings, approve loans, or have searched external sites.\n'+links};
   }
   if(mode==='discussion'){
     const links=trustedTopicSources(args.question,reader).map(x=>x.name+': '+x.url).join('\n');
     return {mode,recommendations:[],context:lead+
-      'GUIDED DISCUSSION, not a quiz. Respond to the reader’s last point, distinguish facts from interpretations and ask ONE open-ended question per turn. Student: approachable, curious and age-sensitive. Teacher: deeper explanation and teaching discussion angles. If discussing a particular book, avoid invented plots or quotes. You may point to matching catalog books only if they appear in the verified EFIPS results. The following are trusted institutional EXTERNAL PORTALS (not evidence of a specific source page or book availability):\n'+links+'\nUse short headings and a clear answer.'};
+      'GUIDED DISCUSSION, not a quiz. If the user has not chosen a topic or book, ask what they would like to discuss first and do not invent a topic. In subsequent turns, interpret the reader specific answer before asking one connected question. ALWAYS first answer the actual learner question with an accurate, substantive and conversational response, then put exactly ONE meaningful follow-up question on a new final line under the heading Question / سؤال للنقاش. Connect that question to the learner answer; do not produce stand-alone quiz prompts. Distinguish facts from interpretations. Student in grades 1-5: use simple concrete sentences and one gentle question; grades 6-8: ask for reasons and examples; grades 9-12: compare perspectives and evidence. When student grade is unknown, do not assume their age; use accessible wording. Teacher or administrator: explore pedagogy, critical analysis, evidence and classroom application with one substantive follow-up question. If discussing a particular book, avoid invented plots or quotes. You may point to matching catalog books only if they appear in the verified EFIPS results. The following are trusted institutional EXTERNAL PORTALS (not evidence of a specific source page or book availability):\n'+links+'\nUse short headings and a clear answer.'};
   }
   if(mode==='catalog'){
     return {mode,recommendations:[],context:lead+
