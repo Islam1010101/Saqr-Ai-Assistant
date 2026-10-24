@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import { bookData } from '../api/bookData';
+import { searchSaqrBookCatalog } from '../src/utils/saqrCatalogSearch';
 import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
 import { supabase } from '../src/utils/supabase';
@@ -372,36 +373,17 @@ const SmartSearchPage: React.FC = () => {
       }
     }
 
-    const normalize = (text: string) =>
-      text?.toString()
-        .replace(/[أإآا]/g, 'ا')
-        .replace(/[ةه]/g, 'ه')
-        .replace(/[ىي]/g, 'ي')
-        .toLowerCase()
-        .trim() || '';
-
-    const qNormalized = normalize(userQuery);
-    const stopWords = ['the', 'book', 'about', 'summary', 'عن', 'كتاب', 'تلخيص', 'ملخص', 'اريد', 'ابحث'];
-    const queryWords = qNormalized.split(/\s+/).filter(word => word.length > 2 && !stopWords.includes(word));
-
-    const searchIn = (database: any[], location: string) => {
-      if (!database || !Array.isArray(database)) return [];
-      return database.filter(book => {
-        const title = normalize(book?.title || '');
-        const author = normalize(book?.author || '');
-        if (title.includes(qNormalized) || author.includes(qNormalized)) return true;
-        return queryWords.length > 0 && queryWords.some(word => title.includes(word) || author.includes(word));
-      }).map(book => ({ ...book, pageLocation: location }));
-    };
-
-    const foundBooks = [
-      ...searchIn(bookData, 'المكتبة العادية (Physical Library)'),
-      ...searchIn(ARABIC_LIBRARY_DATABASE, 'المكتبة الرقمية العربية (Arabic Digital Library)'),
-      ...searchIn(ENGLISH_LIBRARY_DATABASE, 'المكتبة الرقمية الإنجليزية (English Digital Library)')
-    ];
+    // Retrieve verified catalog records across Arabic/English subjects and titles.
+    // This changes only the book context; Saqr's system prompt and chat flow stay intact.
+    const foundBooks = searchSaqrBookCatalog(userQuery, {
+      physical: bookData,
+      arabic: ARABIC_LIBRARY_DATABASE,
+      english: ENGLISH_LIBRARY_DATABASE
+    });
 
     const searchContext = foundBooks.length > 0
-      ? `EFIPS LIBRARY RECORDS FOUND: ${JSON.stringify(foundBooks.slice(0, 10))}.`
+      ? `EFIPS LIBRARY RECORDS FOUND (relevance-ranked, bilingual topic matching): ${JSON.stringify(foundBooks)}.
+When the user asks for books, identify the matching titles exactly as recorded, grouped clearly by physical, Arabic digital and English digital library. For physical books provide the actual shelf (shelf) and row (row); for digital books provide their existing driveLink. Answer in the user's requested language. Do not invent titles, shelves, rows, summaries or links. Some physical-book subject tags are inferred from titles and may be approximate.`
       : '';
 
     const storedUser = localStorage.getItem('current_user');
