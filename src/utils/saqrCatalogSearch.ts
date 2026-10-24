@@ -146,8 +146,8 @@ export const isCrossLanguageTitleQuery=(question:string):boolean=>{
 // "heritage", "Arab", "history" and "العين" alone do not prove a UAE subject.
 // Explicit Unicode-safe geographical terms. Without complete word boundaries,
 // "دبي" accidentally matches "أدبي", creating false digital recommendations.
-const UAE_TERMS = String.raw\`(?:الامارات(?:يه|ي)?|بالامارات|للامارات|اماراتي(?:ه)?|ابوظبي|ابو\s+ظبي|دبي|الشارقه|راس\s+الخيمه|الفجيره|عجمان|ام\s+القيوين|united\s+arab\s+emirates|uae|emirati|emirates|abu\s+dhabi|dubai|sharjah|ras\s+al\s+khaimah|fujairah|ajman|umm\s+al\s+quwain)\`;
-const UAE_GEO_PATTERN = new RegExp(String.raw\`(?:^|[^\p{L}\p{N}])\`+UAE_TERMS+String.raw\`(?=$|[^\p{L}\p{N}])\`,'u');
+const UAE_TERMS = String.raw`(?:الامارات(?:يه|ي)?|بالامارات|للامارات|اماراتي(?:ه)?|ابوظبي|ابو\s+ظبي|دبي|الشارقه|راس\s+الخيمه|الفجيره|عجمان|ام\s+القيوين|united\s+arab\s+emirates|uae|emirati|emirates|abu\s+dhabi|dubai|sharjah|ras\s+al\s+khaimah|fujairah|ajman|umm\s+al\s+quwain)`;
+const UAE_GEO_PATTERN = new RegExp(String.raw`(?:^|[^\p{L}\p{N}])`+UAE_TERMS+String.raw`(?=$|[^\p{L}\p{N}])`,'u');
 const isUaeExplicit = (text:string):boolean=>UAE_GEO_PATTERN.test(text);
 
 const bookIntent = /(?:\b(?:books?|novels?|catalog(?:ue)?|library|booklist|read(?:ing)?|reference(?:s)?|recommend\w*|titles?)\b|كتب|كتاب|الكتب|المكتبه|مكتبه|فهرس|مراجع|روايات|اقترح|رشح|ترشح|للقراءه|للقراءة|عندكم|توجد كتب|هل يوجد)/;
