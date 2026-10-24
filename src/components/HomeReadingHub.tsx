@@ -5,7 +5,7 @@ import { useLanguage } from '../../App';
 import { ARABIC_LIBRARY_DATABASE } from '../../pages/ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from '../../pages/EnglishLibraryInternalPage';
 import { digitalBookKey, physicalReadingCatalog, type ReadingBook, useReadingPassport } from '../utils/readingPassport';
-import { getLocalizedSubject } from '../../api/bookData';
+import { bookData, getLocalizedSubject } from '../../api/bookData';
 
 const digitalCatalog: ReadingBook[] = [
   ...ARABIC_LIBRARY_DATABASE.map(book => ({
@@ -19,6 +19,38 @@ const digitalCatalog: ReadingBook[] = [
 ];
 const catalog = [...physicalReadingCatalog, ...digitalCatalog];
 const catalogByKey = new Map(catalog.map(book => [book.key, book]));
+
+// Respect the language of each book (including physical copies), not the reader's name.
+const physicalBookLanguages = new Map<string, 'ar' | 'en'>(
+  bookData.map(book => ['physical:' + book.id, book.language === 'AR' ? 'ar' : 'en'])
+);
+const bookLanguage = (book: ReadingBook): 'ar' | 'en' => {
+  if (book.format === 'ar' || book.format === 'en') return book.format;
+  const arabic = (book.title.match(/[\u0600-\u06ff]/g) || []).length;
+  const latin = (book.title.match(/[a-z]/gi) || []).length;
+  if (arabic > latin) return 'ar';
+  if (latin > arabic) return 'en';
+  return physicalBookLanguages.get(book.key) || 'en';
+};
+const normalizeBookText = (value: string) => value.toLowerCase()
+  .replace(/[\u064b-\u065f\u0670\u0640]/g, '')
+  .replace(/[إأآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه');
+
+// Faith-focused material is never pushed as a cold-start recommendation.
+// This detects book topics, NOT a reader's religious identity.
+const isFaithFocused = (book: ReadingBook): boolean => {
+  const subject = normalizeBookText(book.subject);
+  const title = normalizeBookText(book.title);
+  if (/islamic studies|religion|religious studies|theology|الدراسات الاسلاميه|التربيه الاسلاميه|الاديان|العقيده|الفقه|علوم القران|علوم الحديث/.test(subject)) return true;
+  return /(?:^|[^\p{L}])(?:islam|islamic|quran|koran|hadith|sunnah|sharia|fiqh|bible|religion|religious|theology|christianity|judaism|buddhism|hinduism|holy scripture|prayers?|اسلام|اسلامي|اسلاميه|الاسلام|الاسلامي|الاسلاميه|القران|الحديث|الاحاديث|الفقه|التفسير|التجويد|العقيده|السيره النبويه|السنه النبويه|العبادات|الاذكار|الدعاء|الادعيه|الصلاه|الزكاه|الانبياء)(?=$|[^\p{L}])/u.test(title);
+};
+const isAdvancedAdultTopic = (book: ReadingBook): boolean =>
+  /accounting|taxation|mortgage|corporate|stock market|clinical medicine|pharmacology|adult psychiatry|المحاسبه|الضرائب|القروض العقاريه|الاستثمار المالي|الطب السريري/.test(
+    normalizeBookText(book.subject + ' ' + book.title)
+  );
+const meaningfulTitleWords = (value: string) => normalizeBookText(value)
+  .split(/[^\p{L}\p{N}]+/u)
+  .filter(word => word.length > 2 && !/^(the|and|for|with|from|book|story|stories|novel|volume|كتاب|كتب|روايه|قصه|التي|الذي|هذا|هذه|على|الى)$/.test(word));
 const BOOK_GRADIENTS = [
   'from-blue-500 to-sky-500 border-blue-200',
   'from-emerald-500 to-teal-400 border-emerald-200',
@@ -40,11 +72,14 @@ const getSchoolProfile = () => {
     return { role, grade: Number.isFinite(number) ? number : 0 };
   } catch { return { role: 'student', grade: 0 }; }
 };
-const relevanceScore = (book:ReadingBook, role:string, grade:number, subjects:string[]) => {
-  const text = (book.subject + ' ' + book.title).toLowerCase();
-  const teacherTopics = /education|teaching|teacher|leadership|curriculum|lesson|education|تربية|تعليم|تدريس|معلم|مناهج|قيادة|تطوير/;
-  const youngerTopics = /child|kids|children|fairy|picture|story|قصص الأطفال|أطفال|حكايات|ناشئة|صغار/;
-  const olderTopics = /science|physics|math|history|technology|novel|literature|biolog|chemistry|علوم|فيزياء|رياضيات|تاريخ|تكنولوجيا|روايات|أدب/;
+const relevanceScore = (
+  book: ReadingBook, role: string, grade: number, subjects: string[], history: ReadingBook[],
+  languageWeights: Record<'ar' | 'en', number>
+) => {
+  const text = normalizeBookText(book.subject + ' ' + book.title);
+  const teacherTopics = /education|teaching|teacher|leadership|curriculum|lesson|تربيه|تعليم|تدريس|معلم|مناهج|قياده|تطوير/;
+  const youngerTopics = /child|kids|children|fairy|picture|story|قصص الاطفال|اطفال|حكايات|ناشئه|صغار/;
+  const olderTopics = /science|physics|math|history|technology|novel|literature|biolog|chemistry|علوم|فيزياء|رياضيات|تاريخ|تكنولوجيا|روايات|ادب/;
   let score = subjects.includes(book.subject) ? 45 : 0;
   if (role === 'teacher' || role === 'admin') {
     if (teacherTopics.test(text)) score += 30;
@@ -56,6 +91,20 @@ const relevanceScore = (book:ReadingBook, role:string, grade:number, subjects:st
     if (olderTopics.test(text)) score += 25;
     if (youngerTopics.test(text)) score -= 16;
   } else if (youngerTopics.test(text)) score += 8;
+  const lang = bookLanguage(book);
+  score += languageWeights[lang] * 5;
+  // Reader-selected books provide stronger evidence of interests than a personal name.
+  const words = new Set(meaningfulTitleWords(book.title));
+  let maxSharedWords = 0;
+  for (const previous of history) {
+    maxSharedWords = Math.max(maxSharedWords,
+      meaningfulTitleWords(previous.title).filter(word => words.has(word)).length);
+    const author = normalizeBookText(book.author);
+    const previousAuthor = normalizeBookText(previous.author);
+    if (author.length > 3 && author === previousAuthor &&
+      !/unknown|غير معروف|مؤلفين/.test(author)) score += 4;
+  }
+  score += Math.min(3, maxSharedWords) * 9;
   // Prefer usable digital records for discovery; never assert verified age suitability.
   if (book.format !== 'physical' && book.href) score += 8;
   return score;
@@ -100,28 +149,64 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
     return [...count.entries()].sort((a,b)=>b[1]-a[1]).slice(0,3).map(([subject])=>subject);
   },[savedBooks,completedBooks]);
   const suggestions = useMemo(()=>{
-    const candidates = catalog.filter(b=>(category==='all'||b.format===category)&&
-      !data.completed.includes(b.key)&&!data.saved.includes(b.key));
-    const ranked = candidates.map(b=>({book:b,score:relevanceScore(b,profile.role,profile.grade,preferredSubjects)}))
-      .sort((a,b)=>b.score-a.score||a.book.title.localeCompare(b.book.title,locale));
-    if(category!=='all') return ranked.slice(0,36).map(item=>item.book);
-    // Rotate across print, Arabic digital and English digital catalogs.
-    const groups = {
-      physical:ranked.filter(item=>item.book.format==='physical'),
-      ar:ranked.filter(item=>item.book.format==='ar'),
-      en:ranked.filter(item=>item.book.format==='en')
-    };
-    const mixed:ReadingBook[] = [];
-    let index=0;
-    while(mixed.length<36 && (groups.physical.length || groups.ar.length || groups.en.length)) {
-      for(const group of [groups.physical,groups.ar,groups.en]) {
-        const entry=group.shift();
-        if(entry && mixed.length<36) mixed.push(entry.book);
-      }
-      if(++index>36) break;
+    // Reading choices and UI language are signals of book-language preference,
+    // never proof of nationality, mother tongue, or religious identity.
+    const history = [...completedBooks, ...savedBooks].slice(-24);
+    const languageWeights: Record<'ar' | 'en', number> = { ar: 0, en: 0 };
+    completedBooks.forEach(book => { languageWeights[bookLanguage(book)] += 3; });
+    savedBooks.forEach(book => { languageWeights[bookLanguage(book)] += 2; });
+    const total = languageWeights.ar + languageWeights.en;
+    const observedLanguage: 'ar' | 'en' | 'both' = total === 0
+      ? (ar ? 'ar' : 'en')
+      : (Math.min(languageWeights.ar, languageWeights.en) / total >= 0.35
+        ? 'both' : (languageWeights.ar > languageWeights.en ? 'ar' : 'en'));
+    const suggestedLanguages = observedLanguage === 'both'
+      ? new Set<'ar' | 'en'>(['ar', 'en'])
+      : new Set<'ar' | 'en'>([observedLanguage]);
+    const interestedInFaithBooks = history.some(isFaithFocused);
+    const candidates = catalog.filter(book => {
+      if (category !== 'all' && book.format !== category) return false;
+      if (data.completed.includes(book.key) || data.saved.includes(book.key)) return false;
+      // Direct choices of Arabic/English digital catalogs remain available as before.
+      if ((category === 'all' || category === 'physical') &&
+        !suggestedLanguages.has(bookLanguage(book))) return false;
+      // Do not assign religious identity from names or automatically promote faith books.
+      // Only a person's own saved/completed reading choices can indicate topic interest.
+      if (!interestedInFaithBooks && isFaithFocused(book)) return false;
+      if (profile.role === 'student' && profile.grade > 0 && profile.grade <= 6 &&
+        isAdvancedAdultTopic(book)) return false;
+      return true;
+    });
+    const ranked = candidates.map(book => ({
+      book, score: relevanceScore(book,profile.role,profile.grade,preferredSubjects,history,languageWeights)
+    })).sort((a,b)=>b.score-a.score || a.book.title.localeCompare(b.book.title,locale));
+    const selected: ReadingBook[] = [];
+    const seenTitles = new Set<string>();
+    const formatCounts: Record<ReadingBook['format'], number> = { physical: 0, ar: 0, en: 0 };
+    const subjectCounts = new Map<string,number>();
+    // Avoid recommending the same title or flooding the first cards with one subject.
+    for (const entry of ranked) {
+      if (selected.length >= 36) break;
+      const book = entry.book;
+      const title = normalizeBookText(book.title).trim();
+      if (seenTitles.has(title)) continue;
+      if (selected.length < 8 && category === 'all' && formatCounts[book.format] >= 5) continue;
+      if (selected.length < 12 && (subjectCounts.get(book.subject) || 0) >= 4) continue;
+      selected.push(book);
+      seenTitles.add(title);
+      formatCounts[book.format] += 1;
+      subjectCounts.set(book.subject,(subjectCounts.get(book.subject) || 0) + 1);
     }
-    return mixed;
-  },[category,data.completed,data.saved,preferredSubjects,profile.grade,profile.role,locale]);
+    // Fill any gaps without restricting the catalog beyond relevance/language safeguards.
+    if (selected.length < 36) {
+      for (const entry of ranked) {
+        if (selected.length >= 36) break;
+        const title = normalizeBookText(entry.book.title).trim();
+        if (!seenTitles.has(title)) { selected.push(entry.book); seenTitles.add(title); }
+      }
+    }
+    return selected;
+  },[category,data.completed,data.saved,preferredSubjects,profile.grade,profile.role,locale,savedBooks,completedBooks,ar]);
   const today = new Date();
   const monthKey = today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0');
   // Use one source for both the challenge counter and the completed-books popup.
