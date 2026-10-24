@@ -124,13 +124,32 @@ const THEMES: Array<{query:RegExp;evidence:RegExp}> = [
    evidence:/تعليم|تعلم|تدريس|معلم|education|learning|teaching|pedagog|classroom/}
 ];
 
+// Cross-script aliases are ONLY query-expansion hints. A title is returned
+// exclusively when an actual recorded holding contains the counterpart name.
+const TITLE_ALIASES: Array<{arabic:RegExp;english:RegExp}> = [
+  {arabic:/هاري\s+بوتر/,english:/\bharry\s+potter\b/},
+  {arabic:/شيرلوك\s+هولمز|شرلوك\s+هولمز/,english:/\bsherlock\s+holmes\b/},
+  {arabic:/الامير\s+الصغير/,english:/\bthe\s+little\s+prince\b/},
+  {arabic:/الاسد\s+الملك/,english:/\bthe\s+lion\s+king\b/},
+  {arabic:/العادات\s+الذريه/,english:/\batomic\s+habits\b/},
+  {arabic:/الهوبيت/,english:/\bthe\s+hobbit\b/},
+  {arabic:/وندر|اعجوبه/,english:/\bwonder\b/},
+  {arabic:/الف\s+ليله\s+وليله/,english:/\b(?:one\s+thousand\s+and\s+one\s+nights|arabian\s+nights)\b/}
+];
+// Both Arabic and English queries activate the same verified-title evidence.
+export const isCrossLanguageTitleQuery=(question:string):boolean=>{
+  const q=normalize(question);
+  return TITLE_ALIASES.some(pair=>pair.arabic.test(q)||pair.english.test(q));
+};
+
 const bookIntent = /(?:\b(?:books?|novels?|catalog(?:ue)?|library|booklist|read(?:ing)?|reference(?:s)?|recommend\w*|titles?)\b|كتب|كتاب|الكتب|المكتبه|مكتبه|فهرس|مراجع|روايات|اقترح|رشح|ترشح|للقراءه|للقراءة|عندكم|توجد كتب|هل يوجد)/;
 
 /** Preserve exact title/author matching even if the user didn't say "book". */
 export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=12):SaqrBookMatch[] => {
   const normalizedQuery = normalize(question);
   const tokens = [...new Set(wordsOf(question).filter(word=>word.length>=3 && !STOP_WORDS.has(word)))];
-  const hasBookIntent = bookIntent.test(normalizedQuery);
+  const hasBookIntent = bookIntent.test(normalizedQuery) || isCrossLanguageTitleQuery(question);
+  const aliasHints = TITLE_ALIASES.filter(pair=>pair.arabic.test(normalizedQuery)||pair.english.test(normalizedQuery));
   const detectedTopics = hasBookIntent ? TOPICS.filter(topic=>topic.query.test(normalizedQuery)) : [];
   const detectedThemes = hasBookIntent ? THEMES.filter(theme=>theme.query.test(normalizedQuery)) : [];
   if (!tokens.length && !detectedTopics.length && !detectedThemes.length) return [];
@@ -155,6 +174,12 @@ export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=
       let score=0;
       let subjectMatch=false;
       let titleMatch=false;
+      // Match transliterated titles against real metadata; do not infer holdings.
+      for(const pair of aliasHints){
+        if(pair.arabic.test(titleText)||pair.english.test(titleText)){
+          score+=320;titleMatch=true;
+        }
+      }
       // Exact phrases and proper book titles are the strongest evidence.
       if(normalizedQuery.length>=4 && (titleText.includes(normalizedQuery) || authorText.includes(normalizedQuery))) {
         score+=180;titleMatch=true;
