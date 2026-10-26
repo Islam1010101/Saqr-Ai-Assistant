@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import lamejs from 'lamejs';
+import * as lamejs from '@breezystack/lamejs';
 const e=new lamejs.Mp3Encoder(1,44100,128);
 const samples=new Int16Array(44100);
 for(let i=0;i<samples.length;i++)samples[i]=Math.round(Math.sin(2*Math.PI*440*i/44100)*12000);
