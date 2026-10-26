@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';
+const edge=readFileSync('supabase/functions/library-attendance-admin/index.ts','utf8');
+const sql=readFileSync('supabase/attendance-cloud-isolated.sql','utf8');
+assert.match(edge,/auth\.getUser\(bearer\)/);assert.match(edge,/user\.app_metadata\?\.efips_library_attendance_admin!==true/);
+assert.match(edge,/library_attendance_records/);assert.match(edge,/library_attendance_archives/);
+assert.match(edge,/\.from\('library_schedule'\)\.select/);
+assert.doesNotMatch(edge,/\.from\('library_schedule'\)\.(?:insert|upsert|update|delete)/);
+assert.doesNotMatch(edge,/localStorage|user_type|current_user/);
+assert.match(sql,/revoke all on table public\.library_attendance_records from public, anon, authenticated/);
+assert.match(edge,/user\.email_confirmed_at/);\nassert.match(edge,/islam\.ahmed@falcon-school\.com/);\nconsole.log('PASS verified school admin-only API; zero booking writes');
