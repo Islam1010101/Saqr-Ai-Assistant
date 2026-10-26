@@ -11,14 +11,14 @@ export async function attendanceAdminSession(){
  const {data:{session},error}=await attendanceAuth.auth.getSession();
  if(error||!session)return null;
  const {data:{user}}=await attendanceAuth.auth.getUser();
- if(user?.app_metadata?.efips_library_attendance_admin!==true)return null;
+ if(!user?.email_confirmed_at || user.email?.trim().toLowerCase()!=='islam.ahmed@falcon-school.com')return null;
  return session;
 }
 export async function attendanceAdminSignIn(email:string){
  if(!/^\S+@\S+\.\S+$/.test(email))throw new Error('Enter a valid school email');
  const {error}=await attendanceAuth.auth.signInWithOtp({
    email,
-   options:{emailRedirectTo:window.location.origin+'/#/admin',shouldCreateUser:false}
+   options:{emailRedirectTo:window.location.origin+'/#/admin',shouldCreateUser:true}
  });
  if(error)throw error;
 }
