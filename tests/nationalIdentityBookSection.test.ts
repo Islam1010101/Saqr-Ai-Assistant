@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const s=readFileSync('pages/NationalIdentityPage.tsx','utf8');
+const gridStart=s.indexOf('className="nh-challenges grid');
+const gridEnd=s.indexOf('</div>',s.indexOf('aria-label={tr(l(\'ابدأ تحدي راية المجد',gridStart));
+assert.ok(gridStart>=0);
+assert.ok(s.includes('aria-labelledby="nh-identity-library-heading"'));
+assert.equal((s.match(/to="\/saqr-national-identity\/books"/g)||[]).length,1);
+assert.ok(s.indexOf('aria-labelledby="nh-identity-library-heading"')>gridStart);
+assert.ok(s.includes('للقراءة والبحث'));
+assert.ok(s.includes('دليل كتب الهوية الوطنية'));
+assert.ok(s.includes("setFlagChallengeOpen(true)"));
+assert.ok(s.includes('modules.map(m=>'));
+assert.ok(!s.includes('className="nh-challenge-card group overflow-hidden text-start rounded-[1.8rem] bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 shadow-lg hover:shadow-2xl hover:-translate-y-1 hover:border-emerald-400 dark:hover:border-emerald-700 transition-all focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-500"'));
+console.log('PASS book catalog isolated from game cards, unchanged game triggers');
