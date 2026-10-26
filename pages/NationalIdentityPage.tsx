@@ -378,7 +378,7 @@ const NationalIdentityPage: React.FC = () => {
             <div className="absolute inset-x-0 top-0 flex h-2" aria-hidden="true"><span className="w-1/4 bg-[#E03137]"/><span className="w-1/4 bg-[#078147]"/><span className="w-1/4 bg-white"/><span className="w-1/4 bg-[#10191A]"/></div>
             <div className="relative grid items-center gap-5 p-6 pt-8 sm:p-8 sm:pt-10 md:grid-cols-[minmax(0,1fr)_220px] lg:gap-12">
               <div>
-                <span className="inline-flex rounded-full bg-white dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-3 py-1.5 text-xs font-black text-emerald-800 dark:text-emerald-200">{tr(l('دليل الكتب الورقية · الرف 41','PHYSICAL CATALOG · SHELF 41'))}</span>
+                <span className="inline-flex rounded-full bg-white dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-3 py-1.5 text-xs font-black text-emerald-800 dark:text-emerald-200">{tr(l('دليل الكتب الورقية','PHYSICAL CATALOG'))}</span>
                 <h3 className="mt-4 text-2xl sm:text-3xl font-black text-[#064D3E] dark:text-emerald-100">{tr(l('دليل كتب الهوية الوطنية','National Identity Book Catalog'))}</h3>
                 <p className="mt-3 max-w-2xl text-sm sm:text-base leading-8 text-slate-700 dark:text-slate-300">{tr(l('اكتشف كتب تاريخ الإمارات وتراثها وشخصياتها، وابحث بعنوان الكتاب أو اسم المؤلف، واعرف موقعه في المكتبة بالرف والصف.','Explore books about UAE history, heritage and people. Search by title or author and find each book by its shelf and row.'))}</p>
                 <span className="mt-6 inline-flex items-center justify-center gap-3 rounded-xl bg-[#086847] group-hover:bg-[#064B37] px-6 py-3.5 text-sm font-black text-white transition-colors">
