@@ -1,0 +1,1 @@
+declare module 'lamejs' { const lamejs: { Mp3Encoder: new(channels:number,sampleRate:number,kbps:number)=>{encodeBuffer(data:Int16Array):Int8Array|Uint8Array;flush():Int8Array|Uint8Array} };export default lamejs; }
