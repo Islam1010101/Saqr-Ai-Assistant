@@ -106,3 +106,25 @@ export const teacherAttendanceTotals=(rows:AttendanceRow[])=>{
   }
   return [...result.values()].sort((a,b)=>b.attended+b.absent-a.attended-a.absent||a.teacher.localeCompare(b.teacher));
 };
+
+/** Save one tiny archive marker to prevent the repeating timetable from
+ * reconstructing an erased historical week. Never touches Supabase.
+ */
+export const archiveStorageKey=(adminId:string,monday:string)=>
+  'efips-admin-library-attendance-archived-v1:'+encodeURIComponent(adminId)+':'+monday;
+export type AttendanceStore=Pick<Storage,'getItem'|'setItem'|'removeItem'>;
+export const isWeekArchived=(store:Pick<Storage,'getItem'>,adminId:string,monday:string):boolean=>
+  store.getItem(archiveStorageKey(adminId,monday))==='archived';
+export const canArchiveWeek=(monday:string,today:Date):boolean=>
+  /^\d{4}-\d{2}-\d{2}$/.test(monday) &&
+  startOfWeek(new Date(monday+'T12:00:00'))===monday &&
+  weekDayISO(monday,4)<localISODate(today);
+export const archivePastAttendanceWeek=(
+  store:AttendanceStore,adminId:string,monday:string,today=new Date()
+):boolean=>{
+  if(!canArchiveWeek(monday,today))return false;
+  const key=archiveStorageKey(adminId,monday);
+  store.setItem(key,'archived');
+  store.removeItem(attendanceStorageKey(adminId,monday));
+  return true;
+};
