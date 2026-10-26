@@ -1,4 +1,4 @@
-import {audienceByShelf} from './shelfAudience';
+import {audienceByShelf} from './shelfAudience.ts';
 // Reader-audience discovery labels are provisional, based on catalog metadata only.
 // No inference about a student's identity and no claim of verified publisher age ratings.
 export type BookAudience = 'children' | 'youth' | 'teens' | 'specialist' | 'nationalIdentity' | 'review';
