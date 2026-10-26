@@ -1,4 +1,4 @@
-import { physicalBookAdditions } from './bookAdditions';
+import { physicalBookAdditions } from './bookAdditions.ts';
 // 1. تعريف نوع البيانات
 export type Book = {
   id: string;
