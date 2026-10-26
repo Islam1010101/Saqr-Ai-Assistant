@@ -4,6 +4,7 @@ import { useLanguage, useTheme } from '../App';
 import { supabase } from '../src/utils/supabase';
 import { printA4Html } from '../src/utils/printA4Html';
 import AdminReadingChallenge from '../src/components/AdminReadingChallenge';
+import AdminLibraryAttendance from '../src/components/AdminLibraryAttendance';
 
 const translations = {
     ar: {
@@ -621,6 +622,7 @@ const AdminDashboard: React.FC = () => {
             </header>
 
             <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <AdminLibraryAttendance locale={locale} adminId={adminName || 'efips-admin'} />
                 <section className="lg:col-span-4 bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/70 p-5 md:p-7 rounded-3xl shadow-sm">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5"><h2 className="text-lg md:text-xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-3"><span className="w-10 h-10 rounded-2xl bg-rose-50 dark:bg-rose-900/30 text-rose-600 flex items-center justify-center"><OutlineIcon name="grid" className="h-5 w-5" /></span>{t('statsTitle')}</h2><span className="text-xs font-bold text-slate-500 dark:text-slate-400">{isAr ? 'ملخص حسابات المستخدمين المسجلة' : 'Registered user account overview'}</span></div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
