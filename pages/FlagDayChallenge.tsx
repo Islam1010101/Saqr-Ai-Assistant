@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { supabase } from '../src/utils/supabase';
 import HeritageQuestArt from './HeritageQuestArt';
+import {useLanguage} from '../App';
+import {FLAG_STEPS,chooseFlagQuestion,type FlagQuestionBilingual} from '../src/utils/uaeFlagQuestions';
 
 type Difficulty = 'easy' | 'medium' | 'hard';
 
@@ -47,7 +49,7 @@ const QUESTION_BANK: FlagQuestion[] = [
   { id: 4, difficulty: 'easy', question: 'في أي ساعة تُرفع الأعلام في المؤسسات المشاركة في فعالية يوم العلم؟', options: ['8:00 صباحاً', '10:00 صباحاً', '11:00 صباحاً', '12:00 ظهراً'], correct: 2, fact: 'ترتبط فعالية يوم العلم برفع العلم في تمام الساعة 11 صباحاً.' },
   { id: 5, difficulty: 'easy', question: 'ما اللون الذي يتوسط الأشرطة الأفقية الثلاثة في علم الإمارات؟', options: ['الأبيض', 'الأخضر', 'الأسود', 'الأحمر'], correct: 0, fact: 'يأتي الشريط الأبيض بين الأخضر في الأعلى والأسود في الأسفل.' },
   { id: 6, difficulty: 'easy', question: 'في أي عام رُفع علم دولة الإمارات مع إعلان قيام الاتحاد؟', options: ['1968', '1971', '1975', '1980'], correct: 1, fact: 'أُعلن قيام دولة الإمارات العربية المتحدة في 2 ديسمبر 1971.' },
-  { id: 7, difficulty: 'easy', question: 'أي عبارة تعبّر عن الاعتزاز براية الإمارات؟', options: ['ارفعه عالياً ليبقى شامخاً', 'علمنا في قلوبنا فقط', 'راية البحر', 'فوق السحاب دائماً'], correct: 0, fact: 'تعكس العبارة الاعتزاز بالعلم والحرص على بقائه شامخاً.' },
+  { id: 7, difficulty: 'easy', question: 'أي عبارة تعبّر عن الاعتزاز براية الإمارات؟', options: ['{tr('ارفعه عالياً ليبقى شامخاً','Raise it high and proud')}', 'علمنا في قلوبنا فقط', 'راية البحر', 'فوق السحاب دائماً'], correct: 0, fact: 'تعكس العبارة الاعتزاز بالعلم والحرص على بقائه شامخاً.' },
   { id: 8, difficulty: 'easy', question: 'ما اللون الموجود في الجزء العلوي الأفقي من علم الإمارات؟', options: ['الأحمر', 'الأخضر', 'الأبيض', 'الأسود'], correct: 1, fact: 'الشريط العلوي من العلم أخضر.' },
   { id: 9, difficulty: 'medium', question: 'من هو مصمم علم دولة الإمارات العربية المتحدة؟', options: ['عبدالله محمد المعينة', 'أحمد بن سليم', 'راشد المخاوي', 'سعيد بن غباش'], correct: 0, fact: 'صمّم العلم عبدالله محمد المعينة، وفاز تصميمه في المسابقة التي أُعلنت عام 1971.' },
   { id: 10, difficulty: 'medium', question: 'من هو القائد المؤسس الذي رفع علم دولة الإمارات لأول مرة؟', options: ['الشيخ زايد بن سلطان آل نهيان', 'الشيخ راشد بن سعيد آل مكتوم', 'الشيخ خليفة بن زايد آل نهيان', 'الشيخ خالد بن محمد'], correct: 0, fact: 'رفع المغفور له الشيخ زايد بن سلطان آل نهيان علم الاتحاد عند إعلان قيام الدولة.' },
@@ -180,9 +182,13 @@ interface FlagDayChallengeProps {
 }
 
 export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
+  const {locale}=useLanguage();
+  const english=locale==='en';
+  const tr=(ar:string,en:string)=>english?en:ar;
+  const [stepsCompleted,setStepsCompleted]=useState(0);
   const [flagLevel, setFlagLevel] = useState(0);
   const [usedQuestionIds, setUsedQuestionIds] = useState<number[]>([]);
-  const [currentQuestion, setCurrentQuestion] = useState<FlagQuestion>(() => pickQuestion(0, []));
+  const [currentQuestion, setCurrentQuestion] = useState<FlagQuestionBilingual>(() => chooseFlagQuestion(0, []));
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [lastResult, setLastResult] = useState<'correct' | 'wrong' | null>(null);
@@ -193,16 +199,17 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
   const awardStarted = useRef(false);
   const victoryTimer = useRef<number | null>(null);
 
-  const currentDifficulty = getDifficulty(flagLevel);
+  const currentDifficulty = stepsCompleted<4?'easy':stepsCompleted<7?'medium':'hard';
+  const currentText=currentQuestion[english?'en':'ar'];
   const currentLandmark = UAE_LANDMARKS[flagLevel] ?? UAE_LANDMARKS[0];
   const flagHeightPercent = 4 + (flagLevel / MAX_LEVEL) * 72;
-  const progressPercent = Math.round((flagLevel / MAX_LEVEL) * 100);
+  const progressPercent = Math.round((stepsCompleted / FLAG_STEPS) * 100);
 
   const difficultyLabel = useMemo(() => {
-    if (currentDifficulty === 'easy') return 'سهلة · بداية الصعود';
-    if (currentDifficulty === 'medium') return 'متوسطة · بين المعالم';
-    return 'متقدمة · الاقتراب من القمة';
-  }, [currentDifficulty]);
+    if (currentDifficulty === 'easy') return tr('سهلة · بداية الصعود','Easy · Starting out');
+    if (currentDifficulty === 'medium') return tr('متوسطة · بين المعالم','Medium · Moving higher');
+    return tr('متقدمة · الاقتراب من القمة','Advanced · Approaching the summit');
+  }, [currentDifficulty,english]);
 
   useEffect(() => {
     let alive = true;
@@ -292,15 +299,17 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
       setLastResult('correct');
       setCorrectAnswersCount((previous) => previous + 1);
       playTone('up');
-      const nextLevel = Math.min(MAX_LEVEL, flagLevel + 1);
+      const nextStep=Math.min(FLAG_STEPS,stepsCompleted+1);
+      setStepsCompleted(nextStep);
+      const nextLevel = Math.min(MAX_LEVEL, Math.floor(nextStep * MAX_LEVEL / FLAG_STEPS));
       setFlagLevel(nextLevel);
-      if (nextLevel === MAX_LEVEL) {
+      if (nextStep === FLAG_STEPS) {
         victoryTimer.current = window.setTimeout(() => setIsVictory(true), 900);
       }
     } else {
       setLastResult('wrong');
       playTone('down');
-      setFlagLevel((previous) => Math.max(0, previous - 1));
+      // Incorrect answers do not undo completed questions.
     }
   };
 
@@ -309,14 +318,14 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
       ? usedQuestionIds
       : [...usedQuestionIds, currentQuestion.id];
     setUsedQuestionIds(nextUsed);
-    setCurrentQuestion(pickQuestion(flagLevel, nextUsed));
+    setCurrentQuestion(chooseFlagQuestion(stepsCompleted, nextUsed));
     setSelectedOption(null);
     setIsAnswered(false);
     setLastResult(null);
   };
 
   const handleFeedbackAction = () => {
-    if (flagLevel === MAX_LEVEL) {
+    if (stepsCompleted === FLAG_STEPS) {
       if (victoryTimer.current !== null) window.clearTimeout(victoryTimer.current);
       victoryTimer.current = null;
       setIsVictory(true);
@@ -330,8 +339,9 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
     victoryTimer.current = null;
     awardStarted.current = false;
     setFlagLevel(0);
+    setStepsCompleted(0);
     setUsedQuestionIds([]);
-    setCurrentQuestion(pickQuestion(0, []));
+    setCurrentQuestion(chooseFlagQuestion(0, []));
     setSelectedOption(null);
     setIsAnswered(false);
     setLastResult(null);
@@ -341,7 +351,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
   };
 
   return (
-    <div className="flag-game" dir="rtl">
+    <div className="flag-game" dir={english?"ltr":"rtl"}>
       <style>{`
         .flag-game{--page:#edf3f6;--panel:#ffffff;--panel-soft:#f6f9fb;--ink:#172638;--muted:#637487;--line:#dce5eb;--accent:#087e58;--accent2:#0d9a6a;--gold:#f6c453;--shadow:0 24px 75px rgba(22,43,65,.17);min-height:100dvh;padding:clamp(10px,2.3vw,28px);display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 8% 8%,rgba(14,165,119,.10),transparent 28%),radial-gradient(ellipse at 95% 90%,rgba(246,196,83,.17),transparent 30%),var(--page);color:var(--ink);font-family:Tahoma,Arial,sans-serif;box-sizing:border-box;isolation:isolate}
         .flag-game *{box-sizing:border-box}
@@ -417,7 +427,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
                 ))}
               </div>
               <div className="fg-victory-banner">
-                <strong>دام عزك يا إمارات</strong>
+                <strong>{tr('دام عزك يا إمارات','Long Live the UAE')}</strong>
                 <span>رايتنا عالية… ومجدنا مستمر</span>
               </div>
             </>
@@ -428,11 +438,11 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
             <div className="fg-school-brand">
               <div className="fg-school-mark" aria-hidden="true"><UaeFlagIcon/></div>
               <div>
-                <div className="fg-school-name">مدرسة صقر الإمارات الدولية الخاصة</div>
-                <div className="fg-scene-title">رحلة راية المجد إلى القمة</div>
+                <div className="fg-school-name">{tr('مدرسة صقر الإمارات الدولية الخاصة','Emirates Falcon International Private School')}</div>
+                <div className="fg-scene-title">{tr('رحلة راية المجد إلى القمة','The Flag of Glory Journey')}</div>
               </div>
             </div>
-            <div className="fg-level-pill">المستوى {flagLevel} / {MAX_LEVEL}</div>
+            <div className="fg-level-pill">{tr('المستوى','Level')} {flagLevel} / {MAX_LEVEL}</div>
           </header>
 
           <div className="fg-visual">
@@ -529,32 +539,32 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
 
         <section className="fg-panel" aria-live="polite">
           <header className="fg-panel-head">
-            <div className="fg-title-wrap"><div className="fg-identity-kicker">رحلة وطنية · سارية المجد · معالم الإمارات</div>
-              <h1 className="fg-title">تحدّي راية المجد</h1>
-              <p className="fg-subtitle">أجب عن أسئلة العلم الإماراتي. الإجابة الصحيحة ترفع الراية، والخاطئة تُنزلها درجة.</p>
+            <div className="fg-title-wrap"><div className="fg-identity-kicker">{tr('رحلة وطنية · سارية المجد · معالم الإمارات','National Journey · UAE Flag')}</div>
+              <h1 className="fg-title">{tr('تحدّي راية المجد','Flag of Glory Challenge')}</h1>
+              <p className="fg-subtitle">{tr('أجب عن عشرة أسئلة عن علم الإمارات من السهل إلى الصعب.','Answer 10 UAE flag questions, from easy to hard.')}</p>
             </div>
-            {onClose && <div className="fg-head-actions"><button className="fg-close-btn" type="button" onClick={onClose}>إغلاق ✕</button></div>}
+            {onClose && <div className="fg-head-actions"><button className="fg-close-btn" type="button" onClick={onClose}>{tr('إغلاق','Close')} ×</button></div>}
           </header>
 
           {!isVictory ? (
             <>
               <div className="fg-stats">
                 <div className="fg-stat">
-                  <div className="fg-stat-line"><span>درجة الصعوبة</span><span className={`fg-difficulty ${currentDifficulty}`}>{difficultyLabel}</span></div>
+                  <div className="fg-stat-line"><span>{tr('درجة الصعوبة','Difficulty')}</span><span className={`fg-difficulty ${currentDifficulty}`}>{difficultyLabel}</span></div>
                 </div>
                 <div className="fg-stat">
-                  <div className="fg-stat-line"><span>المتبقي للقمة</span><strong>{MAX_LEVEL - flagLevel} {MAX_LEVEL - flagLevel === 1 ? 'خطوة' : 'خطوات'}</strong></div>
-                  <div className="fg-progress" role="progressbar" aria-valuemin={0} aria-valuemax={MAX_LEVEL} aria-valuenow={flagLevel} aria-label="التقدم نحو القمة"><div className="fg-progress-fill" style={{ width: `${progressPercent}%` }} /></div>
+                  <div className="fg-stat-line"><span>{tr('الأسئلة المتبقية','Questions remaining')}</span><strong>{FLAG_STEPS - stepsCompleted}</strong></div>
+                  <div className="fg-progress" role="progressbar" aria-valuemin={0} aria-valuemax={MAX_LEVEL} aria-valuenow={flagLevel} aria-label={tr('التقدم نحو القمة','Progress towards summit')}><div className="fg-progress-fill" style={{ width: `${progressPercent}%` }} /></div>
                 </div>
               </div>
 
               <article className="fg-question-card"><div className="fg-quest-stripe"><span/><span/><span/><span/></div>
-                <div className="fg-question-label"><span>؟</span> سؤال الرحلة</div>
-                <h2 className="fg-question-text">{currentQuestion.question}</h2>
+                <div className="fg-question-label"><span>؟</span> {tr('سؤال الرحلة','Journey question')}</div>
+                <h2 className="fg-question-text">{currentText.question}</h2>
               </article>
 
-              <div className="fg-options" role="group" aria-label="خيارات الإجابة">
-                {currentQuestion.options.map((option, index) => {
+              <div className="fg-options" role="group" aria-label={tr('خيارات الإجابة','Answer choices')}>
+                {currentText.options.map((option, index) => {
                   let optionClass = '';
                   if (isAnswered) {
                     if (index === currentQuestion.correct) optionClass = 'correct';
@@ -563,7 +573,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
                   }
                   return (
                     <button className={`fg-option ${optionClass}`} key={`${currentQuestion.id}-${index}`} type="button" disabled={isAnswered} onClick={() => handleOptionSelect(index)}>
-                      <span className="fg-option-leading"><span className="fg-option-number">{['أ', 'ب', 'ج', 'د'][index]}</span><span className="fg-option-text">{option}</span></span>
+                      <span className="fg-option-leading"><span className="fg-option-number">{(english?['A','B','C','D']:['أ','ب','ج','د'])[index]}</span><span className="fg-option-text">{option}</span></span>
                       {isAnswered && index === currentQuestion.correct && <span className="fg-result-mark" aria-label="الإجابة الصحيحة"><ResultIcon good/></span>}
                       {isAnswered && selectedOption === index && index !== currentQuestion.correct && <span className="fg-result-mark" aria-label="إجابة غير صحيحة"><ResultIcon/></span>}
                     </button>
@@ -575,39 +585,39 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
                 <div className={`fg-feedback ${lastResult === 'correct' ? 'good' : 'bad'}`} role="status">
                   <div className="fg-feedback-heading">
                     {lastResult === 'correct'
-                      ? (flagLevel === MAX_LEVEL ? 'إجابة صحيحة! وصلت الراية إلى القمة!' : 'أحسنت! ارتفعت الراية درجة نحو القمة.')
-                      : (flagLevel === 0 ? 'إجابة غير صحيحة؛ العلم باقٍ عند نقطة الانطلاق. حاول مجدداً!' : 'ليست الإجابة الصحيحة؛ نزل العلم درجة. لا تستسلم!')}
+                      ? (flagLevel === MAX_LEVEL ? tr('إجابة صحيحة! وصلت الراية إلى القمة!','Correct! The flag has reached the summit!') : tr('أحسنت! ارتفعت الراية نحو القمة.','Well done! The flag rises toward the summit.'))
+                      : (flagLevel === 0 ? tr('إجابة غير صحيحة؛ حاول مجدداً!','Not quite. Try again!') : tr('ليست الإجابة الصحيحة؛ حاول مجدداً!','Not quite; try again!'))}
                   </div>
-                  <p className="fg-fact">معلومة مفيدة: {currentQuestion.fact}</p>
-                  <button className="fg-next-btn" type="button" onClick={handleFeedbackAction}>{flagLevel === MAX_LEVEL ? 'عرض النتيجة والاحتفال' : 'السؤال التالي ←'}</button>
+                  <p className="fg-fact">{tr('معلومة مفيدة:','Did you know?')} {currentText.fact}</p>
+                  <button className="fg-next-btn" type="button" onClick={handleFeedbackAction}>{stepsCompleted===FLAG_STEPS?tr('عرض النتيجة والاحتفال','See results'):tr('السؤال التالي','Next question')}</button>
                 </div>
               ) : (
-                <div className="fg-hint"><span className="fg-hint-icon"><ResultIcon good/></span><span>اختر إجابة واحدة. تذكّر: كل إجابة صحيحة تقرّب علم الإمارات من قمة برج خليفة، ويمكنك المحاولة من جديد بعد كل سؤال.</span></div>
+                <div className="fg-hint"><span className="fg-hint-icon"><ResultIcon good/></span><span>{tr('اختر إجابة واحدة عن علم الإمارات، وستصل القمة بعد 10 إجابات صحيحة.','Choose an answer about the UAE flag. Reach the summit after 10 correct answers.')}</span></div>
               )}
             </>
           ) : (
             <div className="fg-victory">
               <div className="fg-win-emblem"><div className="fg-win-emblem-inner"><UaeFlagIcon/></div></div>
-              <div className="fg-victory-kicker">وصلت إلى قمة برج خليفة · 828 متراً</div>
-              <h2 className="fg-victory-title">دام عزك يا إمارات</h2>
-              <p className="fg-victory-name">أحسنت يا {studentName}!</p>
-              <p className="fg-victory-copy">رفعت راية الاتحاد عالياً بعلمك واجتهادك. تستحق أن تحتفل بهذا الإنجاز الوطني الجميل!</p>
+              <div className="fg-victory-kicker">{tr('وصلت إلى قمة برج خليفة · 828 متراً','Burj Khalifa Summit · 828 m')}</div>
+              <h2 className="fg-victory-title">{tr('دام عزك يا إمارات','Long Live the UAE')}</h2>
+              <p className="fg-victory-name">{tr('أحسنت يا','Well done,')} {studentName}!</p>
+              <p className="fg-victory-copy">{tr('رفعت راية الاتحاد عالياً بعلمك واجتهادك.','You raised the UAE flag high with your knowledge!')}</p>
               <div className="fg-reward-card">
-                <div className="fg-reward-label">مكافأة التحدي الوطني</div>
+                <div className="fg-reward-label">{tr('مكافأة التحدي الوطني','National challenge reward')}</div>
                 <div className="fg-reward-points">{awardStatus === 'saved' ? '+100 نقطة مكتبية' : awardStatus === 'saving' ? 'جارٍ تسجيل المكافأة…' : awardStatus === 'error' ? 'تعذّر تسجيل النقاط' : awardStatus === 'unavailable' ? 'إنجاز وطني يستحق الفخر' : 'إنجاز وطني يستحق الفخر'}</div>
                 <div className="fg-award-status">
                   {awardStatus === 'saved' ? 'تمت إضافة 100 نقطة إلى رصيدك في قاعدة بيانات المدرسة.' : awardStatus === 'saving' ? 'يتم التحقق من سجل الطالب وتحديث رصيد النقاط.' : awardStatus === 'error' ? 'تم الوصول إلى القمة، لكن لم نتمكن من تحديث النقاط. يرجى مراجعة مسؤول النظام.' : awardStatus === 'unavailable' ? 'تم إكمال التحدي. تُسجّل النقاط عند اللعب بحساب طالب مرتبط بقاعدة البيانات.' : 'اكتمل التحدي بنجاح.'}
                 </div>
-                <div className="fg-medal">وسام «فارس الراية الإماراتية» · {correctAnswersCount} إجابة صحيحة</div>
+                <div className="fg-medal">{tr('وسام فارس الراية الإماراتية','UAE Flag Champion Medal')} · {correctAnswersCount} {tr('إجابة صحيحة','correct answers')}</div>
               </div>
               <div className="fg-victory-actions">
-                <button className="fg-play-again" type="button" onClick={handleRestart}>العب مرة أخرى</button>
-                {onClose && <button className="fg-return-btn" type="button" onClick={onClose}>العودة</button>}
+                <button className="fg-play-again" type="button" onClick={handleRestart}>{tr('العب مرة أخرى','Play again')}</button>
+                {onClose && <button className="fg-return-btn" type="button" onClick={onClose}>{tr('العودة','Back')}</button>}
               </div>
             </div>
           )}
 
-          <footer className="fg-panel-foot"><span>ارفعه عالياً ليبقى شامخاً</span><span>المكتبة الذكية · مدرسة صقر الإمارات الدولية الخاصة</span></footer>
+          <footer className="fg-panel-foot"><span>{tr('ارفعه عالياً ليبقى شامخاً','Raise it high and proud')}</span><span>المكتبة الذكية · {tr('مدرسة صقر الإمارات الدولية الخاصة','Emirates Falcon International Private School')}</span></footer>
         </section>
       </main>
     </div>
