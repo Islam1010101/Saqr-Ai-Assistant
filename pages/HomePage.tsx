@@ -16,7 +16,7 @@ const translations = {
         adminSettings: "إدارة النظام",
         adminSettingsDesc: "التحكم الشامل في المنصة والبيانات",
         newsTitle: "جديدنا",
-        newsContent: "جديدنا: قسم «صقر وهوية وطن» متاح للطلاب ، ويضم جواز صقر الثقافي وكنوز ثقافتنا الإماراتية ومحقق ذاكرة الوطن وتحدي راية المجد ليوم العلم | جديد تحدي القراءة الشهري: اضغط «قائمة القراءة» لاستعراض الكتب التي أنهيتها هذا الشهر | اكتشف اقتراحات الكتب وقائمة «القراءة لاحقًا» | تم تحديث الجولة التعريفية للموقع | استديو صقر متاح الآن لتسجيل إبداعاتكم الصوتية والبودكاست | إصدارات وكتب جديدة في مكتبة المدرسة بانتظاركم، نراكم فيها قريبًا!",
+        newsContent: "جناح الهوية الوطنية فتح أبوابه: اكتشف كتب الإمارات وابحث عن مؤلفك المفضل! | راية المجد تنتظرك: عشرة أسئلة مشوقة عن علم الإمارات نحو القمة! | تحدي القراءة الشهري: كم كتابًا أنهيت؟ افتح قائمة القراءة واحتفل بإنجازك! | صقر الذكي يساعدك في اكتشاف كتب المكتبة الورقية والرقمية | صوتك يستحق أن يُسمع: سجل حلقتك في بودكاست صقر! | كتب وإصدارات جديدة في مكتبتنا الورقية بانتظار قراءتك!",
         manualSearch: "دليل كتب المكتبة",
         manualDesc: "استكشف وتعرف واستعر الكتب المتوفرة في مكتبة المدرسة",
         smartSearch: "اسأل صقر الذكي",
@@ -77,7 +77,7 @@ const translations = {
         adminSettings: "System Admin",
         adminSettingsDesc: "Full platform and data control",
         newsTitle: "What's New",
-        newsContent: "What's New: Saqr & National Identity is available to students, featuring the Cultural Passport, Emirati Treasures, Heritage Research Detective, and the Flag Day Challenge | Monthly Reading Challenge: open Reading list to see books completed this month | Explore book suggestions and Read later | The website virtual tour has been updated | Saqr Studio is open for your podcasts and audio creations | New titles and editions are waiting for you in the school library. See you there soon!",
+        newsContent: "Explore the National Identity Pavilion: discover UAE books and their authors! | Take the Flag of Glory Challenge: ten exciting UAE flag questions to the summit! | Monthly Reading Challenge: how many books have you finished? Celebrate your progress! | Ask Saqr to discover books across our physical and digital libraries | Your voice belongs here: record a Saqr Podcast episode! | Fresh books are arriving in our school library: your next great read awaits!",
         manualSearch: "Library Book Catalog",
         manualDesc: "Explore,Find and Borrow the school library’s",
         smartSearch: "Ask Saqr (AI)",
@@ -1055,8 +1055,8 @@ const HomePage: React.FC = () => {
 
                 @keyframes marquee-ltr { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
                 @keyframes marquee-rtl { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-                .animate-marquee-ltr { animation: marquee-ltr 40s linear infinite; }
-                .animate-marquee-rtl { animation: marquee-rtl 40s linear infinite; }
+                .animate-marquee-ltr { animation: marquee-ltr 65s linear infinite; }
+                .animate-marquee-rtl { animation: marquee-rtl 65s linear infinite; }
 
                 @keyframes fade-out {
                     0% { opacity: 1; transform: scale(1) translateY(0); }
