@@ -5,6 +5,7 @@ import FlagDayChallenge from './FlagDayChallenge';
 import './nationalHeritageTheme.css';
 import HeritageQuestArt from './HeritageQuestArt';
 import PassportStampCard from './PassportStampCard';
+import NationalIdentityBookCorner from '../src/components/NationalIdentityBookCorner';
 
 type L = { ar: string; en: string };
 type Mode = 'home' | 'passport' | 'language' | 'archive';
@@ -310,6 +311,7 @@ const NationalIdentityPage: React.FC = () => {
           <div className="nh-hero-art flex justify-center"><HeritageArt/><img className="nh-saqr" src="/saqr-full.png" alt={tr(l('صقر مع مشهد تراثي إماراتي','Saqr with traditional Emirati heritage scenery'))}/></div>
         </div>
       </section>
+      {mode === 'home' && <NationalIdentityBookCorner lang={lang} />}
       {mode === 'home' ? <>
         <div className="mt-9 mb-5 flex flex-wrap items-end justify-between gap-3">
           <div><p className="text-xs font-black text-emerald-700 dark:text-emerald-400">{tr(l('أربع مغامرات ثقافية','FOUR CULTURAL ADVENTURES'))}</p><h2 className="text-xl sm:text-2xl font-black mt-1">{tr(l('اختر رحلتك','Choose your journey'))}</h2></div>
