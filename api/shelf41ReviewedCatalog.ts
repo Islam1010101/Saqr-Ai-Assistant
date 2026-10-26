@@ -91,8 +91,8 @@ const sourceRows:Shelf41ReviewedRaw[] = [
 ] as const;
 export type Shelf41ReviewedBook={id:string;title:string;author:string;subject:string;shelf:41;row:number;language:'AR'|'EN';summary:string;publisher?:string;year?:number;isbn?:string;isbnStatus?:'candidate';pages?:number;copies:number;needsReview:boolean};
 export const reviewedShelf41Books:Shelf41ReviewedBook[]=sourceRows.map(([title,author,row,subject,publisher,year,isbn,pages,language,copies],i)=>({
- id:'shelf41-reviewed-'+String(i+1).padStart(3,'0'),title,author:author||(/[\\u0600-\\u06FF]/.test(title)?'مؤلف غير مسجل':'Unknown Author'),
- shelf:41,row,language:language?.includes('الإنجليزية')&&!language.includes('العربية')?'EN':/[\\u0600-\\u06FF]/.test(title)?'AR':'EN',subject:subject||'هوية وطنية؛ كتب الرف 41',
+ id:'shelf41-reviewed-'+String(i+1).padStart(3,'0'),title,author:author||(/[\u0600-\u06FF]/.test(title)?'مؤلف غير مسجل':'Unknown Author'),
+ shelf:41,row,language:language?.includes('الإنجليزية')&&!language.includes('العربية')?'EN':/[\u0600-\u06FF]/.test(title)?'AR':'EN',subject:subject||'هوية وطنية؛ كتب الرف 41',
  summary: 'بيانات الكتاب مأخوذة من الفهرس الورقي للرف 41. لا يوجد ملخص معتمد لمحتوى الكتاب.',copies,
  ...(publisher?{publisher}:{}),...(year?{year}:{}),...(isbn?{isbn,isbnStatus:'candidate' as const}:{}),...(pages?{pages}:{}),
  needsReview:!author||title.includes('عنوان الكتيب غير مكتمل')
