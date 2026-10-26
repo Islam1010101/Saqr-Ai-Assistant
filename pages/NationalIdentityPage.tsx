@@ -5,7 +5,7 @@ import FlagDayChallenge from './FlagDayChallenge';
 import './nationalHeritageTheme.css';
 import HeritageQuestArt from './HeritageQuestArt';
 import PassportStampCard from './PassportStampCard';
-import NationalIdentityBookCorner from '../src/components/NationalIdentityBookCorner';
+
 
 type L = { ar: string; en: string };
 type Mode = 'home' | 'passport' | 'language' | 'archive';
@@ -311,7 +311,7 @@ const NationalIdentityPage: React.FC = () => {
           <div className="nh-hero-art flex justify-center"><HeritageArt/><img className="nh-saqr" src="/saqr-full.png" alt={tr(l('صقر مع مشهد تراثي إماراتي','Saqr with traditional Emirati heritage scenery'))}/></div>
         </div>
       </section>
-      {mode === 'home' && <NationalIdentityBookCorner lang={lang} />}
+
       {mode === 'home' ? <>
         <div className="mt-9 mb-5 flex flex-wrap items-end justify-between gap-3">
           <div><p className="text-xs font-black text-emerald-700 dark:text-emerald-400">{tr(l('أربع مغامرات ثقافية','FOUR CULTURAL ADVENTURES'))}</p><h2 className="text-xl sm:text-2xl font-black mt-1">{tr(l('اختر رحلتك','Choose your journey'))}</h2></div>
@@ -333,6 +333,22 @@ const NationalIdentityPage: React.FC = () => {
               <span className="inline-flex mt-5 gap-2 items-center text-emerald-700 dark:text-emerald-300 text-sm font-black">{tr(l('ابدأ الاستكشاف','Start exploring'))}<Icon kind="arrow" className={'w-5 h-5 '+(lang==='ar'?'rotate-180':'')}/></span>
             </div>
           </button>)}
+          <Link to="/saqr-national-identity/books" className="nh-challenge-card group overflow-hidden text-start rounded-[1.8rem] bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 shadow-lg hover:shadow-2xl hover:-translate-y-1 hover:border-emerald-400 dark:hover:border-emerald-700 transition-all focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-500">
+            <div className="nh-card-top relative bg-[#075B49] p-6 text-white overflow-hidden">
+              <div aria-hidden="true" className="absolute inset-x-0 top-0 flex h-2"><span className="w-1/4 bg-[#E03137]"/><span className="w-1/4 bg-[#078147]"/><span className="w-1/4 bg-white"/><span className="w-1/4 bg-[#10191A]"/></div>
+              <svg className="w-32 h-32 mx-auto" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+                <path d="M27 22h58a8 8 0 0 1 8 8v69H35a9 9 0 0 1-9-9V30a8 8 0 0 1 8-8z" fill="#fff" stroke="#EAC58B" strokeWidth="5"/>
+                <path d="M28 24h19v70H28z" fill="#E03137"/><path d="M47 24h44v23H47z" fill="#078147"/><path d="M47 71h44v23H47z" fill="#10191A"/>
+                <path d="M26 98h65" stroke="#EAC58B" strokeWidth="5" strokeLinecap="round"/>
+              </svg>
+              <p className="text-xs font-black text-emerald-100 mt-2">{tr(l('دليل الكتب الورقية','PHYSICAL BOOK CATALOG'))}</p>
+              <h3 className="text-xl font-black leading-snug mt-2">{tr(l('ركن الهوية الوطنية','National Identity Book Corner'))}</h3>
+            </div>
+            <div className="p-5 sm:p-6">
+              <p className="min-h-[84px] text-sm leading-7 font-semibold text-slate-600 dark:text-slate-300">{tr(l('تصفح كتب التراث والهوية الإماراتية في صفحة خاصة، وابحث بالعنوان أو المؤلف.','Explore UAE heritage books in their own page; search titles and authors.'))}</p>
+              <span className="inline-flex mt-5 gap-2 items-center text-emerald-700 dark:text-emerald-300 text-sm font-black">{tr(l('افتح دليل الكتب','Open book catalog'))}<Icon kind="arrow" className={'w-5 h-5 '+(lang==='ar'?'rotate-180':'')}/></span>
+            </div>
+          </Link>
           <button type="button" onClick={() => setFlagChallengeOpen(true)}
             className="nh-challenge-card group overflow-hidden text-start rounded-[1.8rem] bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 shadow-lg hover:shadow-2xl hover:-translate-y-1 hover:border-emerald-400 dark:hover:border-emerald-700 transition-all focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-500"
             aria-label={tr(l('ابدأ تحدي راية المجد في يوم العلم','Play the UAE Flag Day Challenge'))}>
