@@ -33,3 +33,5 @@ assert.ok(podcast.includes("grade:studentGrade.trim()"));
 assert.ok(podcast.includes('setStudentName(user.name_en || user.name_ar'));
 assert.ok(mp3.includes('[name,grade].map'));
 console.log('PASS no podcast title and shelf-specific book-card decorations');
+assert.ok(!readFileSync('pages/SearchPage.tsx','utf8').includes('Saqr AI Insight'));
+console.log('PASS removed visible Saqr AI Insight detail badge');
