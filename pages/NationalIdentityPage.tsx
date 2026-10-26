@@ -333,22 +333,6 @@ const NationalIdentityPage: React.FC = () => {
               <span className="inline-flex mt-5 gap-2 items-center text-emerald-700 dark:text-emerald-300 text-sm font-black">{tr(l('ابدأ الاستكشاف','Start exploring'))}<Icon kind="arrow" className={'w-5 h-5 '+(lang==='ar'?'rotate-180':'')}/></span>
             </div>
           </button>)}
-          <Link to="/saqr-national-identity/books" className="nh-challenge-card group overflow-hidden text-start rounded-[1.8rem] bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 shadow-lg hover:shadow-2xl hover:-translate-y-1 hover:border-emerald-400 dark:hover:border-emerald-700 transition-all focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-500">
-            <div className="nh-card-top relative bg-[#075B49] p-6 text-white overflow-hidden">
-              <div aria-hidden="true" className="absolute inset-x-0 top-0 flex h-2"><span className="w-1/4 bg-[#E03137]"/><span className="w-1/4 bg-[#078147]"/><span className="w-1/4 bg-white"/><span className="w-1/4 bg-[#10191A]"/></div>
-              <svg className="w-32 h-32 mx-auto" viewBox="0 0 120 120" fill="none" aria-hidden="true">
-                <path d="M27 22h58a8 8 0 0 1 8 8v69H35a9 9 0 0 1-9-9V30a8 8 0 0 1 8-8z" fill="#fff" stroke="#EAC58B" strokeWidth="5"/>
-                <path d="M28 24h19v70H28z" fill="#E03137"/><path d="M47 24h44v23H47z" fill="#078147"/><path d="M47 71h44v23H47z" fill="#10191A"/>
-                <path d="M26 98h65" stroke="#EAC58B" strokeWidth="5" strokeLinecap="round"/>
-              </svg>
-              <p className="text-xs font-black text-emerald-100 mt-2">{tr(l('دليل الكتب الورقية','PHYSICAL BOOK CATALOG'))}</p>
-              <h3 className="text-xl font-black leading-snug mt-2">{tr(l('ركن الهوية الوطنية','National Identity Book Corner'))}</h3>
-            </div>
-            <div className="p-5 sm:p-6">
-              <p className="min-h-[84px] text-sm leading-7 font-semibold text-slate-600 dark:text-slate-300">{tr(l('تصفح كتب التراث والهوية الإماراتية في صفحة خاصة، وابحث بالعنوان أو المؤلف.','Explore UAE heritage books in their own page; search titles and authors.'))}</p>
-              <span className="inline-flex mt-5 gap-2 items-center text-emerald-700 dark:text-emerald-300 text-sm font-black">{tr(l('افتح دليل الكتب','Open book catalog'))}<Icon kind="arrow" className={'w-5 h-5 '+(lang==='ar'?'rotate-180':'')}/></span>
-            </div>
-          </Link>
           <button type="button" onClick={() => setFlagChallengeOpen(true)}
             className="nh-challenge-card group overflow-hidden text-start rounded-[1.8rem] bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 shadow-lg hover:shadow-2xl hover:-translate-y-1 hover:border-emerald-400 dark:hover:border-emerald-700 transition-all focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-500"
             aria-label={tr(l('ابدأ تحدي راية المجد في يوم العلم','Play the UAE Flag Day Challenge'))}>
@@ -381,6 +365,41 @@ const NationalIdentityPage: React.FC = () => {
         {progress.stamps.length===7 && <div role="status" className="mt-6 rounded-[1.5rem] border-2 border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/25 px-6 py-5 text-amber-900 dark:text-amber-200 font-black">
           {tr(l('أحسنت! جمعت أختام الإمارات السبع وأكملت جواز صقر الثقافي.','Well done! You have collected all seven emirate stamps and completed your cultural passport.'))}
         </div>}
+        <section aria-labelledby="nh-identity-library-heading" className="mt-12 sm:mt-14">
+          <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="text-xs font-black tracking-wider text-emerald-700 dark:text-emerald-400">{tr(l('قسم القراءة والمراجع','BOOKS & REFERENCE COLLECTION'))}</p>
+              <h2 id="nh-identity-library-heading" className="mt-1 text-xl sm:text-2xl font-black">{tr(l('مكتبة الهوية الوطنية','National Identity Library'))}</h2>
+              <p className="mt-2 text-sm leading-7 text-slate-600 dark:text-slate-300">{tr(l('قسم مستقل للكتب والمراجع، وليس من التحديات أو الألعاب.','A separate collection of books and references, not part of the games or challenges.'))}</p>
+            </div>
+            <span className="inline-flex items-center rounded-full border border-emerald-200 dark:border-emerald-800 px-4 py-2 text-xs font-bold text-emerald-800 dark:text-emerald-200 bg-emerald-50 dark:bg-emerald-950/40">{tr(l('للقراءة والبحث','For reading and research'))}</span>
+          </div>
+          <Link to="/saqr-national-identity/books" aria-label={tr(l('افتح دليل كتب الهوية الوطنية','Open National Identity Book Catalog'))} className="group relative block overflow-hidden rounded-[2rem] border-2 border-emerald-800/25 dark:border-emerald-600/40 bg-[#F5F9F4] dark:bg-[#0D1A15] shadow-[0_18px_45px_rgba(4,78,51,.09)] hover:shadow-[0_24px_55px_rgba(4,78,51,.17)] hover:border-emerald-600 dark:hover:border-emerald-400 focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-500 transition-all">
+            <div className="absolute inset-x-0 top-0 flex h-2" aria-hidden="true"><span className="w-1/4 bg-[#E03137]"/><span className="w-1/4 bg-[#078147]"/><span className="w-1/4 bg-white"/><span className="w-1/4 bg-[#10191A]"/></div>
+            <div className="relative grid items-center gap-5 p-6 pt-8 sm:p-8 sm:pt-10 md:grid-cols-[minmax(0,1fr)_220px] lg:gap-12">
+              <div>
+                <span className="inline-flex rounded-full bg-white dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-3 py-1.5 text-xs font-black text-emerald-800 dark:text-emerald-200">{tr(l('دليل الكتب الورقية · الرف 41','PHYSICAL CATALOG · SHELF 41'))}</span>
+                <h3 className="mt-4 text-2xl sm:text-3xl font-black text-[#064D3E] dark:text-emerald-100">{tr(l('دليل كتب الهوية الوطنية','National Identity Book Catalog'))}</h3>
+                <p className="mt-3 max-w-2xl text-sm sm:text-base leading-8 text-slate-700 dark:text-slate-300">{tr(l('اكتشف كتب تاريخ الإمارات وتراثها وشخصياتها، وابحث بعنوان الكتاب أو اسم المؤلف، واعرف موقعه في المكتبة بالرف والصف.','Explore books about UAE history, heritage and people. Search by title or author and find each book by its shelf and row.'))}</p>
+                <span className="mt-6 inline-flex items-center justify-center gap-3 rounded-xl bg-[#086847] group-hover:bg-[#064B37] px-6 py-3.5 text-sm font-black text-white transition-colors">
+                  {tr(l('تصفح دليل الكتب','Browse the book catalog'))}
+                  <Icon kind="arrow" className={'h-5 w-5 '+(lang==='ar'?'rotate-180':'')}/>
+                </span>
+              </div>
+              <div className="relative mx-auto flex h-44 w-full max-w-[220px] items-center justify-center rounded-[1.8rem] bg-white dark:bg-[#132A20] border border-emerald-200 dark:border-emerald-800 shadow-inner">
+                <svg viewBox="0 0 220 175" className="h-[150px] w-[190px]" fill="none" role="img" aria-label={tr(l('رسم كتاب بألوان علم الإمارات','Book illustration in the colors of the UAE flag'))}>
+                  <path d="M40 22c0-8 7-14 16-14h105c12 0 20 8 20 20v126H58c-10 0-18-8-18-18V22Z" fill="#F8FAF7" stroke="#0D6749" strokeWidth="5"/>
+                  <path d="M42 18h35v128H42V18Z" fill="#DB2937"/>
+                  <path d="M77 18h103v39H77Z" fill="#078B4C"/>
+                  <path d="M77 103h103v43H77Z" fill="#161C1B"/>
+                  <path d="M40 146c0 10 7 16 18 16h122" stroke="#0D6749" strokeWidth="5" strokeLinecap="round"/>
+                  <path d="M95 78h68" stroke="#BC9B65" strokeWidth="4" strokeLinecap="round"/>
+                  <path d="M95 88h52" stroke="#BC9B65" strokeWidth="3" strokeLinecap="round"/>
+                </svg>
+              </div>
+            </div>
+          </Link>
+        </section>
       </> : <section className={'nh-quest-page nh-quest-'+mode+' mt-7'}>
         <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
           <button type="button" onClick={()=>go('home')} className="inline-flex items-center gap-2 rounded-xl bg-slate-100 dark:bg-slate-900 px-4 py-2.5 text-xs sm:text-sm font-black hover:bg-emerald-50 dark:hover:bg-emerald-950/60 transition-colors">
