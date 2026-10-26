@@ -1,3 +1,4 @@
+import { physicalBookAdditions } from './bookAdditions';
 // 1. تعريف نوع البيانات
 export type Book = {
   id: string;
@@ -3610,7 +3611,19 @@ const processBookData = (rawData: any[]): Book[] => {
 };
 
 // 4. تصدير البيانات النهائية
-export const bookData: Book[] = processBookData(rawBookData);
+const existingCatalog = processBookData(rawBookData);
+const sameBook=(b:Book,title:string,author:string,shelf:number,row:number)=>{
+  const n=(v:string)=>v.normalize('NFKC').toLocaleLowerCase().replace(/[^\p{L}\p{N}]/gu,'');
+  return b.shelf===shelf&&b.row===row&&n(b.title)===n(title)&&n(b.author)===n(author);
+};
+const addedBooks:Book[] = physicalBookAdditions.filter(b=>!existingCatalog.some(x=>sameBook(x,b.title,b.author,b.shelf,b.row))).map((b,i)=>({
+  id:'addition-20261026-'+(i+1),title:b.title,author:b.author,shelf:b.shelf,row:b.row,
+  language:/[\u0600-\u06FF]/.test(b.title)?'AR':'EN',
+  subject:inferredSubject(b.title,b.author,'',b.shelf),
+  level:'General',summary:/[\u0600-\u06FF]/.test(b.title)?'الوصف التفصيلي لهذا الكتاب غير متاح في الفهرس بعد.':'A verified book description is not yet available.',
+  ...(b.isbn?{isbn:b.isbn,isbnStatus:'candidate' as const}: {})
+}));
+export const bookData: Book[] = [...existingCatalog,...addedBooks];
 
 // 5. دالة البحث المخصصة للاستخدام في تطبيق الويب
 export function findInCatalog(q: string): Book[] {
