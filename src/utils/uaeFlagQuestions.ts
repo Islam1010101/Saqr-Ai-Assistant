@@ -6,5 +6,11 @@ export const chooseFlagQuestion=(step:number,used:number[]):FlagQuestionBilingua
  const pool=flagQuestionBank.filter(q=>q.difficulty===difficultyForStep(step)&&!used.includes(q.id));
  const fallback=flagQuestionBank.filter(q=>q.difficulty===difficultyForStep(step));
  const collection=pool.length?pool:fallback;
- return collection[Math.floor(Math.random()*collection.length)];
+ const chosen=collection[Math.floor(Math.random()*collection.length)];
+ const order=[0,1,2,3];
+ for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
+ return {...chosen,correct:order.indexOf(chosen.correct),
+   ar:{...chosen.ar,options:order.map(i=>chosen.ar.options[i])},
+   en:{...chosen.en,options:order.map(i=>chosen.en.options[i])}};
+
 };
