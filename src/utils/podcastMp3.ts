@@ -31,4 +31,4 @@ export async function recordingToMp3(blob:Blob):Promise<Blob>{
  }finally{await context.close().catch(()=>undefined);}
 }
 export const safePodcastFileName=(name:string,grade:string,title:string):string=>
- [name,grade,title].map(x=>x.trim().replace(/[\\/<>:"|?*\\x00-\\x1F]/g,'-').replace(/\\s+/g,' ').slice(0,55)).join(' - ')+'.mp3';
+ [name,grade,title].map(x=>x.trim().replace(/[/\\<>:"|?*\u0000-\u001f]/g,'-').replace(/\s+/g,' ').slice(0,55)).join(' - ')+'.mp3';
