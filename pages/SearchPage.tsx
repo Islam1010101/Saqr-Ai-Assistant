@@ -26,7 +26,9 @@ const translations = {
     allAuthors: "المؤلفين",
     allShelves: "الرفوف",
     audience: "الفئة القرائية",
-    audienceChildren: "للصغار",
+    audienceChildren: "للأطفال",
+    audienceYouth: "للشباب",
+    audienceIdentity: "ركن الهوية الوطنية",
     audienceTeens: "لليافعين (الصفوف 9–12)",
     audienceSpecialist: "للمتخصصين",
     audienceReview: "يحتاج مراجعة",
@@ -62,7 +64,9 @@ const translations = {
     allAuthors: "Authors",
     allShelves: "Shelves",
     audience: "Reading audience",
-    audienceChildren: "Younger readers",
+    audienceChildren: "Children",
+    audienceYouth: "Youth",
+    audienceIdentity: "National Identity Corner",
     audienceTeens: "Teens (Grades 9–12)",
     audienceSpecialist: "Specialists",
     audienceReview: "Needs review",
@@ -404,7 +408,7 @@ const BookCard = React.memo(({ book, onClick, t, locale }: { book: Book; onClick
   const isSaved = passport.saved.includes(readingKey);
   const isAi = !book.subject || book.subject === "Unknown";
   const readingAudience = classifyBookAudience(book);
-  const audienceTag = readingAudience === 'children' ? (locale==='ar'?'للصغار':'Younger readers') : readingAudience === 'teens' ? (locale==='ar'?'لليافعين 9–12':'Teens 9–12') : readingAudience === 'specialist' ? (locale==='ar'?'للمتخصصين':'Specialists') : (locale==='ar'?'يحتاج مراجعة':'Needs review');
+  const audienceTag = readingAudience === 'children' ? (locale==='ar'?'للصغار':'Younger readers') : readingAudience === 'youth' ? (locale==='ar'?'للشباب':'Youth') : readingAudience === 'nationalIdentity' ? (locale==='ar'?'ركن الهوية الوطنية':'National identity') : readingAudience === 'teens' ? (locale==='ar'?'لليافعين 9–12':'Teens 9–12') : readingAudience === 'specialist' ? (locale==='ar'?'للمتخصصين':'Specialists') : (locale==='ar'?'يحتاج مراجعة':'Needs review');
 
   const colors = [
     'from-blue-500 to-sky-500 border-blue-200',
@@ -597,6 +601,8 @@ const SearchPage: React.FC = () => {
                                     className="min-w-[170px] max-w-full rounded-2xl border-2 border-amber-300 dark:border-amber-700 bg-slate-50 dark:bg-slate-900 px-4 py-3 text-sm font-black text-slate-800 dark:text-white focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-500">
                                     <option value="all">{currentLocale==='ar'?'كل الفئات':'All audiences'}</option>
                                     <option value="children">{t('audienceChildren')}</option>
+                                    <option value="youth">{t('audienceYouth')}</option>
+                                    <option value="nationalIdentity">{t('audienceIdentity')}</option>
                                     <option value="teens">{t('audienceTeens')}</option>
                                     <option value="specialist">{t('audienceSpecialist')}</option>
                                     <option value="review">{t('audienceReview')}</option>

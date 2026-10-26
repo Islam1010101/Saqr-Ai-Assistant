@@ -1,10 +1,18 @@
+import {audienceByShelf} from './shelfAudience.ts';
 // Reader-audience discovery labels are provisional, based on catalog metadata only.
 // No inference about a student's identity and no claim of verified publisher age ratings.
-export type BookAudience = 'children' | 'teens' | 'specialist' | 'review';
+export type BookAudience = 'children' | 'youth' | 'teens' | 'specialist' | 'nationalIdentity' | 'review';
 type AudienceBook = { title: string; subject: string; shelf: number; level?: string };
 const normalize = (s: string) => (s || '').toLowerCase().replace(/[إأآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه');
 const matches = (text:string, expression:RegExp) => expression.test(text);
 export function classifyBookAudience(book: AudienceBook): BookAudience {
+  const shelfCategory=audienceByShelf(book.shelf);
+  if(shelfCategory==='specialist')return 'specialist';
+  if(shelfCategory==='children')return 'children';
+  if(shelfCategory==='youth')return 'youth';
+  if(shelfCategory==='youthTeens')return 'teens';
+  if(shelfCategory==='nationalIdentity')return 'nationalIdentity';
+  if(shelfCategory==='review')return 'review';
   const title = normalize(book.title);
   const subject = normalize(book.subject);
   const text = title + ' ' + subject;

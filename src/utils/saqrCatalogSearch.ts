@@ -186,7 +186,7 @@ export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=
         // bookData.ts; generic falconry/Gulf heritage is NOT proof of UAE.
         const evidence = origin.source==='physical'
           ? [titleText] : [titleText,subjectText,descriptionText];
-        if(!evidence.some(isUaeExplicit))continue;
+        if(!evidence.some(isUaeExplicit) && !(origin.source==='physical'&&book.shelf===41))continue;
       }
       let score=0;
       let subjectMatch=false;
