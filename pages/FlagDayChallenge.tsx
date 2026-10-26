@@ -409,7 +409,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
       <div className="fg-ribbon" aria-hidden="true"><span className="r" /><span className="g" /><span className="w" /><span className="b" /></div>
 
       <main className="fg-shell">
-        <section className="fg-scene" aria-label="مشهد سارية علم الإمارات ومعالم الدولة">
+        <section className="fg-scene" aria-label={tr('مشهد سارية علم الإمارات ومعالم الدولة','UAE flag and landmarks scene')}>
           <img src="/saqr-full.png" alt="" aria-hidden="true" style={{position:"absolute",bottom:"12%",right:"6%",height:"min(13vw,115px)",maxHeight:115,minHeight:56,maxWidth:"24%",objectFit:"contain",pointerEvents:"none",zIndex:3,filter:"drop-shadow(0 8px 12px #0006)"}} />
           <div className="fg-stars" aria-hidden="true" />
           <div className="fg-cloud c1" aria-hidden="true"/>
@@ -428,7 +428,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
               </div>
               <div className="fg-victory-banner">
                 <strong>{tr('دام عزك يا إمارات','Long Live the UAE')}</strong>
-                <span>رايتنا عالية… ومجدنا مستمر</span>
+                <span>{tr('رايتنا عالية… ومجدنا مستمر','Our flag flies high and our glory continues')}</span>
               </div>
             </>
           )}
@@ -526,14 +526,14 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
             <div className="fg-pole-base" aria-hidden="true" />
 
             <div className="fg-loc-tag">
-              <small>المحطة الحالية · {currentLandmark.city}</small>
+              <small>{tr('المحطة الحالية','Current landmark')} · {currentLandmark.city}</small>
               <strong><LandmarkIcon name={currentLandmark.icon}/> {currentLandmark.name}</strong>
             </div>
           </div>
 
           <footer className="fg-scene-foot">
-            <div><small>هدف الرحلة</small><strong>ارفع العلم حتى قمة برج خليفة</strong></div>
-            <div className="fg-mini-progress"><small>التقدّم</small><strong>{progressPercent}%</strong></div>
+            <div><small>{tr('هدف الرحلة','Goal')}</small><strong>{tr('ارفع العلم حتى قمة برج خليفة','Raise the flag to Burj Khalifa')}</strong></div>
+            <div className="fg-mini-progress"><small>{tr('التقدّم','Progress')}</small><strong>{progressPercent}%</strong></div>
           </footer>
         </section>
 
@@ -554,7 +554,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
                 </div>
                 <div className="fg-stat">
                   <div className="fg-stat-line"><span>{tr('الأسئلة المتبقية','Questions remaining')}</span><strong>{FLAG_STEPS - stepsCompleted}</strong></div>
-                  <div className="fg-progress" role="progressbar" aria-valuemin={0} aria-valuemax={MAX_LEVEL} aria-valuenow={flagLevel} aria-label={tr('التقدم نحو القمة','Progress towards summit')}><div className="fg-progress-fill" style={{ width: `${progressPercent}%` }} /></div>
+                  <div className="fg-progress" role="progressbar" aria-valuemin={0} aria-valuemax={FLAG_STEPS} aria-valuenow={stepsCompleted} aria-label={tr('التقدم نحو القمة','Progress towards summit')}><div className="fg-progress-fill" style={{ width: `${progressPercent}%` }} /></div>
                 </div>
               </div>
 
@@ -574,8 +574,8 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
                   return (
                     <button className={`fg-option ${optionClass}`} key={`${currentQuestion.id}-${index}`} type="button" disabled={isAnswered} onClick={() => handleOptionSelect(index)}>
                       <span className="fg-option-leading"><span className="fg-option-number">{(english?['A','B','C','D']:['أ','ب','ج','د'])[index]}</span><span className="fg-option-text">{option}</span></span>
-                      {isAnswered && index === currentQuestion.correct && <span className="fg-result-mark" aria-label="الإجابة الصحيحة"><ResultIcon good/></span>}
-                      {isAnswered && selectedOption === index && index !== currentQuestion.correct && <span className="fg-result-mark" aria-label="إجابة غير صحيحة"><ResultIcon/></span>}
+                      {isAnswered && index === currentQuestion.correct && <span className="fg-result-mark" aria-label={tr('الإجابة الصحيحة','Correct answer')}><ResultIcon good/></span>}
+                      {isAnswered && selectedOption === index && index !== currentQuestion.correct && <span className="fg-result-mark" aria-label={tr('إجابة غير صحيحة','Incorrect answer')}><ResultIcon/></span>}
                     </button>
                   );
                 })}
@@ -585,7 +585,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
                 <div className={`fg-feedback ${lastResult === 'correct' ? 'good' : 'bad'}`} role="status">
                   <div className="fg-feedback-heading">
                     {lastResult === 'correct'
-                      ? (flagLevel === MAX_LEVEL ? tr('إجابة صحيحة! وصلت الراية إلى القمة!','Correct! The flag has reached the summit!') : tr('أحسنت! ارتفعت الراية نحو القمة.','Well done! The flag rises toward the summit.'))
+                      ? (stepsCompleted === FLAG_STEPS ? tr('إجابة صحيحة! وصلت الراية إلى القمة!','Correct! The flag has reached the summit!') : tr('أحسنت! ارتفعت الراية نحو القمة.','Well done! The flag rises toward the summit.'))
                       : (flagLevel === 0 ? tr('إجابة غير صحيحة؛ حاول مجدداً!','Not quite. Try again!') : tr('ليست الإجابة الصحيحة؛ حاول مجدداً!','Not quite; try again!'))}
                   </div>
                   <p className="fg-fact">{tr('معلومة مفيدة:','Did you know?')} {currentText.fact}</p>
@@ -604,9 +604,9 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
               <p className="fg-victory-copy">{tr('رفعت راية الاتحاد عالياً بعلمك واجتهادك.','You raised the UAE flag high with your knowledge!')}</p>
               <div className="fg-reward-card">
                 <div className="fg-reward-label">{tr('مكافأة التحدي الوطني','National challenge reward')}</div>
-                <div className="fg-reward-points">{awardStatus === 'saved' ? '+100 نقطة مكتبية' : awardStatus === 'saving' ? 'جارٍ تسجيل المكافأة…' : awardStatus === 'error' ? 'تعذّر تسجيل النقاط' : awardStatus === 'unavailable' ? 'إنجاز وطني يستحق الفخر' : 'إنجاز وطني يستحق الفخر'}</div>
+                <div className="fg-reward-points">{awardStatus === 'saved' ? tr('+100 نقطة مكتبية','+100 library points') : awardStatus === 'saving' ? tr('جارٍ تسجيل المكافأة…','Saving your reward…') : awardStatus === 'error' ? tr('تعذّر تسجيل النقاط','Points update failed') : tr('إنجاز وطني يستحق الفخر','A national achievement')}</div>
                 <div className="fg-award-status">
-                  {awardStatus === 'saved' ? 'تمت إضافة 100 نقطة إلى رصيدك في قاعدة بيانات المدرسة.' : awardStatus === 'saving' ? 'يتم التحقق من سجل الطالب وتحديث رصيد النقاط.' : awardStatus === 'error' ? 'تم الوصول إلى القمة، لكن لم نتمكن من تحديث النقاط. يرجى مراجعة مسؤول النظام.' : awardStatus === 'unavailable' ? 'تم إكمال التحدي. تُسجّل النقاط عند اللعب بحساب طالب مرتبط بقاعدة البيانات.' : 'اكتمل التحدي بنجاح.'}
+                  {awardStatus === 'saved' ? tr('تمت إضافة 100 نقطة إلى رصيدك في قاعدة بيانات المدرسة.','100 points were credited to your school account.') : awardStatus === 'saving' ? tr('جارٍ تحديث رصيد النقاط.','Updating your points…') : awardStatus === 'error' ? tr('يرجى مراجعة مسؤول النظام بشأن النقاط.','Please contact the administrator about the points.') : tr('اكتمل التحدي بنجاح.','Challenge completed.')}
                 </div>
                 <div className="fg-medal">{tr('وسام فارس الراية الإماراتية','UAE Flag Champion Medal')} · {correctAnswersCount} {tr('إجابة صحيحة','correct answers')}</div>
               </div>
