@@ -1,13 +1,14 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../App';
+import {recordingToMp3,safePodcastFileName} from '../src/utils/podcastMp3';
 
 const podcastHeaderImg = '/Saqr Podcast.png'; 
 
 const translations = {
   ar: {
     pageTitle: "بودكاست صقر",
-    subTitle: "منبرك الصوتي لمشاركة المعرفة والإبداع",
+    subTitle: "من الفكرة إلى الميكروفون: سجّل صوتك، راجع أداءك، وشارك حلقتك مع مكتبتك.",
     arabicLibrary: "المكتبة الرقمية العربية",
     englishLibrary: "المكتبة الرقمية الإنجليزية",
     libraryDesc: "اختر كتابك من هنا قبل البدء بالتسجيل.",
@@ -17,29 +18,30 @@ const translations = {
     inst3: "يمكنك تسجيل ملخص للكتاب، أو عرض لأهم ما تعلمته منه.",
     inst4: "بإمكانك تسجيل الحوارات واللقاءات الثنائية حول الكتاب.",
     inst5: "استخدم مؤثرات الاستديو بعد التسجيل لمعاينة الصوت وتحسينه.",
-    inst6: "تأكد من كتابة اسمك الرباعي وصفك الدراسي بشكل صحيح قبل الضغط على إرسال.",
+    inst6: "سيظهر اسمك وصفك تلقائيًا من حساب المدرسة؛ راجعهما قبل الإرسال.",
     inst7: "سيخضع التسجيل للمراجعة من قبلنا قبل اعتماده ووضعه مع الكتاب المناسب.",
-    studioTitle: "غرفة التسجيل الذكية",
+    studioTitle: "استديو التسجيل والبودكاست",
     startRecord: "بدء التسجيل",
     stopRecord: "إنهاء وحفظ",
     recording: "جاري التسجيل الآن...",
     previewTitle: "معاينة هندسة الصوت",
-    effectsTitle: "مؤثرات الاستديو (للمعاينة)",
+    effectsTitle: "مؤثرات الاستديو — للمعاينة فقط",
     effEcho: "إضافة صدى",
     effNoise: "عزل الضوضاء",
     effPitch: "تغيير النبرة",
     speed: "السرعة:",
     studentName: "اسم الطالب الرباعي",
     studentGrade: "الصف الدراسي",
+    mp3Info: "يُرسل ملف MP3 واحد تلقائيًا باسم الطالب وصفه المسجلين في حساب المدرسة.",
     submit: "إرسال إلى الاستديو",
     submitting: "جاري الرفع...",
     success: "تم إرسال تسجيلك بنجاح! شكراً لمشاركتك المتميزة.",
     error: "حدث خطأ غير متوقع، يرجى التحقق من الشبكة والمحاولة مرة أخرى.",
-    fillRequired: "يرجى تسجيل الصوت أولاً، وتعبئة حقول الاسم والصف بدقة."
+    fillRequired: "سجّل الصوت أولًا وتأكد من ظهور اسمك وصفك تلقائيًا من حساب المدرسة."
   },
   en: {
     pageTitle: "Saqr Podcast",
-    subTitle: "Your Vocal Platform to Share Knowledge & Creativity",
+    subTitle: "From story to microphone: record, review and share your voice with the library.",
     arabicLibrary: "Arabic Digital Library",
     englishLibrary: "English Digital Library",
     libraryDesc: "Select your book from here before starting the recording.",
@@ -49,25 +51,26 @@ const translations = {
     inst3: "You can record a book summary or a presentation of your key learnings.",
     inst4: "You can record dialogues and interviews about the book.",
     inst5: "Use studio effects after recording to preview and enhance the audio.",
-    inst6: "Ensure you enter your full name and grade correctly before clicking submit.",
+    inst6: "Your name and grade appear automatically from your school account; check them before submitting.",
     inst7: "The recording will undergo review before being approved and placed with the appropriate book.",
-    studioTitle: "Smart Recording Room",
+    studioTitle: "Podcast Recording Studio",
     startRecord: "Start Recording",
     stopRecord: "Stop & Save",
     recording: "Recording in progress...",
     previewTitle: "Audio Engineering Preview",
-    effectsTitle: "Studio Effects (Preview)",
+    effectsTitle: "Studio Effects — Preview Only",
     effEcho: "Add Echo",
     effNoise: "Noise Reduction",
     effPitch: "Voice Changer",
     speed: "Speed:",
     studentName: "Full Student Name",
     studentGrade: "Grade",
+    mp3Info: "One MP3 is submitted using your school account name and grade automatically.",
     submit: "Submit to Studio",
     submitting: "Uploading...",
     success: "Your recording was submitted successfully! Thank you for your contribution.",
     error: "An unexpected error occurred. Please check your network and try again.",
-    fillRequired: "Please record audio first, and accurately fill in the name and grade fields."
+    fillRequired: "Record audio first and confirm your school account name and grade are shown automatically."
   }
 };
 
@@ -176,6 +179,9 @@ const PodcastPage: React.FC = () => {
   // Form States - جلب البيانات تلقائياً من localStorage
   const [studentName, setStudentName] = useState('');
   const [studentGrade, setStudentGrade] = useState('');
+  const uploadInFlight=useRef(false);
+  const sentRecordingIds=useRef(new Set<string>());
+  const recordingId=useRef<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{type: 'success' | 'error' | '', text: string}>({type: '', text: ''});
 
@@ -200,7 +206,7 @@ const PodcastPage: React.FC = () => {
       if (storedUser) {
         const user = JSON.parse(storedUser);
         setStudentName(user.name_en || user.name_ar || '');
-        setStudentGrade(user.grade || 'Unknown Grade');
+        setStudentGrade(user.grade || '');
       }
     } catch (error) {
       console.error('Failed to parse user data from localStorage', error);
@@ -244,6 +250,7 @@ const PodcastPage: React.FC = () => {
       mediaRecorder.start(200); // تقسيم البيانات لضمان عدم ضياعها في سفاري
       setIsRecording(true);
       setRecordingTime(0);
+      recordingId.current=crypto.randomUUID();
       setAudioBlob(null);
       setAudioUrl(null);
       setEffects({ echo: false, noise: false, pitch: false });
@@ -357,47 +364,46 @@ const PodcastPage: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (!audioBlob || !studentName.trim() || !studentGrade.trim() || isSubmitting) {
-      setStatusMessage({ type: 'error', text: t('fillRequired') });
+    if (!audioBlob || !studentName.trim() || !studentGrade.trim() || uploadInFlight.current) {
+      setStatusMessage({type:'error',text:t('fillRequired')});
       return;
     }
-
+    const attemptId=recordingId.current;
+    if(!attemptId || sentRecordingIds.current.has(attemptId))return;
+    uploadInFlight.current=true;
     setIsSubmitting(true);
-    setStatusMessage({type: '', text: ''});
-
-    try {
-      const reader = new FileReader();
-      reader.readAsDataURL(audioBlob);
-      reader.onloadend = async () => {
-        const base64Audio = (reader.result as string).split(',')[1]; 
-
-        const payload = {
-          name: studentName,
-          grade: studentGrade,
-          audioData: base64Audio,
-          mimeType: audioBlob.type,
-          effectsApplied: JSON.stringify({ ...effects, playbackRate })
-        };
-
-        const response = await fetch('https://script.google.com/macros/s/AKfycbzA8P-nF32I4Ponw18GynsgFCuf5LYH6kf16f4k7UjjPgod4mVGxSk12monYmYcCmFW/exec', {
-          method: 'POST',
-          body: JSON.stringify(payload)
-        });
-
-        if (response.ok) {
-          setStatusMessage({ type: 'success', text: t('success') });
-          setAudioBlob(null); // لمنع الإرسال المزدوج
-          setAudioUrl(null);
-          setRecordingTime(0);
-          setEffects({ echo: false, noise: false, pitch: false });
-        } else {
-          throw new Error('Network response was not ok.');
-        }
-      };
-    } catch (error) {
-      console.error(error);
-      setStatusMessage({ type: 'error', text: t('error') });
-    } finally {
+    setStatusMessage({type:'',text:''});
+    try{
+      const mp3=await recordingToMp3(audioBlob);
+      const data=await new Promise<string>((resolve,reject)=>{
+        const reader=new FileReader();
+        reader.onerror=()=>reject(new Error('Failed to encode MP3'));
+        reader.onload=()=>resolve(String(reader.result||'').split(',')[1]||'');
+        reader.readAsDataURL(mp3);
+      });
+      if(!data)throw new Error('Empty MP3 data');
+      const fileName=safePodcastFileName(studentName,studentGrade);
+      // The request is intentionally never retried from this recording session.
+      // The receiving Apps Script should also enforce submissionId deduplication.
+      sentRecordingIds.current.add(attemptId);
+      const response=await fetch('https://script.google.com/macros/s/AKfycbzA8P-nF32I4Ponw18GynsgFCuf5LYH6kf16f4k7UjjPgod4mVGxSk12monYmYcCmFW/exec',{
+        method:'POST',
+        body:JSON.stringify({
+          name:studentName.trim(),grade:studentGrade.trim(),
+          fileName,submissionId:attemptId,mimeType:'audio/mpeg',
+          audioData:data,effectsApplied:JSON.stringify({...effects,playbackRate}),
+          originalMimeType:audioBlob.type
+        })
+      });
+      if(!response.ok)throw new Error('Upload endpoint rejected recording');
+      setStatusMessage({type:'success',text:t('success')});
+      setAudioBlob(null);setAudioUrl(null);setRecordingTime(0);
+      setEffects({echo:false,noise:false,pitch:false});
+    }catch(error){
+      console.error('Podcast MP3 upload failed',error);
+      setStatusMessage({type:'error',text:(isAr?'تعذر تأكيد وصول التسجيل. لمنع أي نسخة مكررة، سجّل حلقة جديدة إذا تأكدت أنها لم تصل.':'Delivery could not be confirmed. To avoid duplicates, start a new recording only after checking the first was not received.')});
+    }finally{
+      uploadInFlight.current=false;
       setIsSubmitting(false);
     }
   };
@@ -406,7 +412,7 @@ const PodcastPage: React.FC = () => {
   const inputClass = "w-full p-4 md:p-5 rounded-2xl bg-slate-100 dark:bg-slate-800 border-4 border-slate-200 dark:border-slate-700 outline-none font-black text-slate-500 dark:text-slate-400 text-sm md:text-lg cursor-not-allowed shadow-inner text-center";
 
   return (
-    <div dir={dir} className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 py-10 px-4 md:py-16 font-sans antialiased text-slate-800 dark:text-slate-200 relative overflow-x-hidden">
+    <div dir={dir} className="min-h-screen bg-white dark:bg-black py-10 px-4 md:py-16 font-sans antialiased text-slate-800 dark:text-slate-200 relative overflow-x-hidden">
       
       {/* 🌟 تصميم طفولي للخلفية 🌟 */}
       <div className="fixed inset-0 overflow-hidden -z-10 pointer-events-none opacity-50 dark:opacity-20">
@@ -414,7 +420,7 @@ const PodcastPage: React.FC = () => {
          <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-sky-400/20 blur-[100px] rounded-full animate-blob animation-delay-2000"></div>
       </div>
 
-      <div className="max-w-6xl mx-auto space-y-12 animate-fade-in-up relative z-10 pb-20">
+      <div className="max-w-6xl mx-auto space-y-10 animate-fade-in-up relative z-10 pb-20">
         
         {/* الهيدر العلوي */}
         <div className="text-center flex flex-col items-center">
@@ -443,7 +449,7 @@ const PodcastPage: React.FC = () => {
               onError={(e) => e.currentTarget.style.display = 'none'}
             />
           </div>
-          <h1 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tight mb-4 uppercase">{t('pageTitle')}</h1>
+          <h1 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tight mb-4">{t('pageTitle')}</h1>
           <p className="text-lg md:text-2xl text-slate-600 dark:text-slate-400 font-bold leading-relaxed max-w-2xl mx-auto">{t('subTitle')}</p>
           <div className="flex justify-center gap-3 mt-6">
              <div className="h-2 w-16 bg-rose-500 rounded-full"></div>
@@ -451,9 +457,20 @@ const PodcastPage: React.FC = () => {
           </div>
         </div>
 
+        <section className="grid grid-cols-1 sm:grid-cols-3 gap-4" aria-label={isAr?'مراحل إنتاج الحلقة':'Episode steps'}>
+          {[
+            {n:'01',ar:'اختر كتابك',en:'Choose your book',icon:<ListIcon/>},
+            {n:'02',ar:'سجّل وراجع',en:'Record & review',icon:<MicIcon/>},
+            {n:'03',ar:'أرسل حلقة MP3 واحدة',en:'Send one MP3',icon:<HeadphonesIcon/>}
+          ].map(step=><div key={step.n} className="relative overflow-hidden flex items-center gap-4 rounded-2xl border border-emerald-200 dark:border-emerald-900 bg-white dark:bg-slate-950 p-5 shadow-sm">
+            <span className="text-2xl font-black tabular-nums text-emerald-600 dark:text-emerald-400">{step.n}</span>
+            <strong className="text-sm sm:text-base text-slate-800 dark:text-white">{isAr?step.ar:step.en}</strong>
+            <span className="ms-auto text-emerald-700 dark:text-emerald-300 [&_svg]:h-6 [&_svg]:w-6">{step.icon}</span>
+          </div>)}
+        </section>
         {/* أزرار المكتبات */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-          <Link to="/digital-library/arabic" className="group bg-white dark:bg-slate-800 p-8 rounded-[3rem] border-4 border-slate-200 dark:border-slate-700 border-b-8 hover:border-emerald-400 dark:hover:border-emerald-500 hover:-translate-y-2 active:border-b-4 active:translate-y-2 transition-all flex items-center gap-6 shadow-sm">
+          <Link to="/digital-library/arabic" className="group bg-white dark:bg-slate-800 p-8 rounded-[3rem] border-2 border-emerald-200 dark:border-emerald-900 border-b-4 hover:border-emerald-400 dark:hover:border-emerald-500 hover:-translate-y-2 active:border-b-4 active:translate-y-2 transition-all flex items-center gap-6 shadow-sm">
             <div className="w-16 h-16 bg-emerald-50 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center border-4 border-emerald-200 dark:border-emerald-800 group-hover:scale-110 group-hover:rotate-6 transition-transform shrink-0">
                <UAEFlagIcon />
             </div>
@@ -462,7 +479,7 @@ const PodcastPage: React.FC = () => {
               <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-bold">{t('libraryDesc')}</p>
             </div>
           </Link>
-          <Link to="/digital-library/english" className="group bg-white dark:bg-slate-800 p-8 rounded-[3rem] border-4 border-slate-200 dark:border-slate-700 border-b-8 hover:border-sky-400 dark:hover:border-sky-500 hover:-translate-y-2 active:border-b-4 active:translate-y-2 transition-all flex items-center gap-6 shadow-sm">
+          <Link to="/digital-library/english" className="group bg-white dark:bg-slate-800 p-8 rounded-[3rem] border-2 border-emerald-200 dark:border-emerald-900 border-b-4 hover:border-sky-400 dark:hover:border-sky-500 hover:-translate-y-2 active:border-b-4 active:translate-y-2 transition-all flex items-center gap-6 shadow-sm">
             <div className="w-16 h-16 bg-sky-50 dark:bg-sky-900/30 text-sky-500 rounded-2xl flex items-center justify-center border-4 border-sky-200 dark:border-sky-800 group-hover:scale-110 group-hover:-rotate-6 transition-transform shrink-0">
                <GlobeIcon />
             </div>
@@ -474,7 +491,7 @@ const PodcastPage: React.FC = () => {
         </div>
 
         {/* دليل التسجيل */}
-        <div className="bg-amber-50 dark:bg-slate-800 p-8 md:p-12 rounded-[3rem] border-4 border-amber-300 dark:border-slate-700 shadow-sm relative overflow-hidden">
+        <div className="bg-emerald-50/70 dark:bg-slate-950 p-8 md:p-12 rounded-[2rem] border-2 border-emerald-200 dark:border-emerald-900 shadow-sm relative overflow-hidden">
           <ListIcon />
           <h2 className="text-3xl font-black mb-8 text-slate-900 dark:text-white relative z-10 tracking-tight">
              {t('instructionsTitle')}
@@ -490,7 +507,7 @@ const PodcastPage: React.FC = () => {
         </div>
 
         {/* غرفة التسجيل الذكية */}
-        <div className="bg-white dark:bg-slate-900 p-8 md:p-12 rounded-[4rem] shadow-xl border-4 border-slate-200 dark:border-slate-700 relative overflow-hidden animate-fade-in">
+        <div className="bg-white dark:bg-slate-950 p-8 md:p-12 rounded-[2.25rem] shadow-xl border-2 border-emerald-200 dark:border-emerald-900 relative overflow-hidden animate-fade-in">
           
           <h2 className="text-3xl md:text-4xl font-black mb-12 text-center text-slate-900 dark:text-white tracking-tight relative z-10 uppercase">
              {t('studioTitle')}
@@ -577,6 +594,7 @@ const PodcastPage: React.FC = () => {
             />
           </div>
 
+          <p className="mb-7 relative z-10 text-sm font-semibold leading-7 text-emerald-800 dark:text-emerald-200 text-center">{t('mp3Info')}</p>
           {/* رسائل الخطأ والنجاح */}
           {statusMessage.text && (
             <div className={`p-6 rounded-[2rem] mb-10 text-center font-black text-base md:text-lg relative z-10 border-4 ${statusMessage.type === 'error' ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800' : 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'}`}>
@@ -587,8 +605,8 @@ const PodcastPage: React.FC = () => {
           {/* زر الإرسال النهائي */}
           <button 
             onClick={handleSubmit}
-            disabled={isSubmitting || !audioBlob}
-            className={`w-full py-5 md:py-6 rounded-[2rem] font-black text-xl md:text-2xl transition-all flex items-center justify-center gap-4 relative z-10 transform active:scale-95 border-b-8 active:border-b-0 active:translate-y-2 uppercase tracking-widest ${(!audioBlob || isSubmitting) ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 border-slate-300 dark:border-slate-900 cursor-not-allowed' : 'bg-gradient-to-r from-rose-500 to-rose-600 border-rose-700 text-white shadow-lg'}`}
+            disabled={isSubmitting || !audioBlob || !studentName.trim() || !studentGrade.trim()}
+            className={`w-full py-5 md:py-6 rounded-[2rem] font-black text-xl md:text-2xl transition-all flex items-center justify-center gap-4 relative z-10 transform active:scale-95 border-b-8 active:border-b-0 active:translate-y-2 uppercase tracking-widest ${(!audioBlob || isSubmitting || !studentName.trim() || !studentGrade.trim()) ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 border-slate-300 dark:border-slate-900 cursor-not-allowed' : 'bg-gradient-to-r from-rose-500 to-rose-600 border-rose-700 text-white shadow-lg'}`}
           >
             {isSubmitting ? <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin"></div> : <RocketIcon />}
             {isSubmitting ? t('submitting') : t('submit')}
@@ -619,7 +637,7 @@ const PodcastPage: React.FC = () => {
         @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-15px); } }
         .animate-float { animation: float 6s ease-in-out infinite; }
         
-        /* 💥 أنيميشن الانفجار الصوتي 💥 */
+        /* SVG audio animation */
         @keyframes audio-burst {
           0% { transform: translate(0, 0) scale(0) rotate(0deg); opacity: 1; filter: blur(0px); }
           50% { opacity: 1; }

@@ -7,10 +7,10 @@ export default function NationalIdentityBookCorner({lang}:{lang:'ar'|'en'}){
  const [showAll,setShowAll]=useState(false);
  const books=useMemo(()=>searchNationalIdentityBooks(query),[query]);
  const displayed=query.trim()||showAll?books:books.slice(0,12);
- return <section className="mt-8 rounded-[2rem] border-2 border-emerald-700/30 dark:border-emerald-600/40 overflow-hidden bg-[#F9FBF7] dark:bg-[#0C1511]" aria-label={ar?'ركن الهوية الوطنية':'National Identity Book Corner'}>
+ return <section className="mt-8 rounded-[2rem] border-2 border-emerald-700/30 dark:border-emerald-600/40 overflow-hidden bg-[#F9FBF7] dark:bg-[#0C1511]" aria-label={ar?'جناح الهوية الوطنية':'National Identity Pavilion'}>
    <div className="flex h-2" aria-hidden="true"><span className="w-1/4 bg-red-600"/><span className="w-1/4 bg-emerald-600"/><span className="w-1/4 bg-white"/><span className="w-1/4 bg-black"/></div>
    <div className="p-5 sm:p-8">
-     <div className="flex flex-wrap gap-4 justify-between items-center"><div className="flex items-center gap-3"><FlagBook/><div><p className="font-bold text-xs text-emerald-700 dark:text-emerald-300">{ar?'من ذاكرة الوطن':'Emirati Heritage'}</p><h2 className="font-black text-2xl mt-1">{ar?'ركن الهوية الوطنية':'National Identity Book Corner'}</h2></div></div></div>
+     <div className="flex flex-wrap gap-4 justify-between items-center"><div className="flex items-center gap-3"><FlagBook/><div><p className="font-bold text-xs text-emerald-700 dark:text-emerald-300">{ar?'من ذاكرة الوطن':'Emirati Heritage'}</p><h2 className="font-black text-2xl mt-1">{ar?'جناح الهوية الوطنية':'National Identity Pavilion'}</h2></div></div></div>
      <label htmlFor="nh-book-search" className="font-bold text-sm block mt-7 mb-2">{ar?'ابحث بالعنوان أو المؤلف':'Search title or author'}</label>
      <input id="nh-book-search" type="search" value={query} onChange={e=>{setQuery(e.target.value);setShowAll(false)}} className="block w-full max-w-xl p-3 rounded-xl border-2 border-emerald-200 dark:border-emerald-900 bg-white dark:bg-slate-950 focus:border-emerald-600 outline-none" placeholder={ar?'عنوان الكتاب أو اسم المؤلف...':'Book title or author...'}/>
      {query.trim() && <p role="status" className="mt-3 text-xs font-bold text-emerald-700 dark:text-emerald-300">{ar?'نتائج البحث: ':'Results: '}{books.length}</p>}

@@ -371,14 +371,14 @@ export default function TutorialPage() {
       description: label('رحلات ثقافية إماراتية للطلاب.', 'UAE heritage learning for students and administrators.'),
       color: 'bg-gradient-to-br from-[#075B49] via-[#087555] to-[#116759]', border: 'border-emerald-900',
       icon: <svg className="h-9 w-9" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M24 11C18 7 11 7 5 9v29c7-2 14-1 19 3 5-4 12-5 19-3V9c-6-2-13-2-19 2ZM24 11v30"/><path d="m30 19 3-6 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1Z" fill="currentColor" fillOpacity=".24"/></svg>,
-      hint: label('قسم جديد للطلاب يضم جواز صقر الثقافي، وكنوز ثقافتنا الإماراتية، ومحقق ذاكرة الوطن، وتحدي راية المجد ليوم العلم. نقاط اللعبة للطلاب فقط. المعاينة لا تشغّل الألعاب.',
-        'A new section for students: Cultural Passport, Emirati Treasures, Heritage Research Detective, and the Flag Day Challenge. Only students receive game points. This tour does not launch games.')
+      hint: label('جواز صقر الثقافي وكنوز لغتنا ومحقق ذاكرة الوطن وتحدي راية المجد بعشرة أسئلة عن علم الإمارات، بالإضافة إلى جناح مستقل لكتب الهوية الوطنية. نقاط اللعبة حسب صلاحية الحساب. المعاينة لا تشغّل الألعاب.',
+        'Explore the Cultural Passport, Language Treasures, Heritage Research Detective, a 10-question UAE Flag Challenge and the separate National Identity Pavilion. Only students receive game points. This tour does not launch games.')
     },
     {
       id: 'studio', title: label('استديو صقر', 'Saqr Studio'),
-      description: label('شارك بإبداعاتك الصوتية والبودكاست.', 'Create audio work and contribute to podcasts.'),
+      description: label('سجّل بودكاست بعنوانه ثم راجع حلقتك قبل إرسال MP3.', 'Record a titled podcast, review it, and submit one MP3.'),
       color: 'bg-blue-500', border: 'border-blue-700', icon: <StudioIcon />,
-      hint: label('يعرض الاستديو تجربة التسجيل والمحتوى الصوتي. لن يتم تسجيل صوت أو رفع ملف في هذه الجولة.', 'The studio demonstrates audio and podcast tools. This tour will not record audio or upload files.')
+      hint: label('تعرّف على تسجيل الصوت ومعاينة المؤثرات وإرسال حلقة MP3 بعنوانها واسم الطالب وصفه؛ الجولة لا تسجل ولا ترفع ملفات.', 'Explore recording, preview effects, and one MP3 podcast submission with title, student name and grade. No audio is recorded or uploaded during this tour.')
     },
     {
       id: 'schedule', title: label('جدول المكتبة', 'Library Schedule'),
@@ -404,7 +404,7 @@ export default function TutorialPage() {
     { id: 'nav-search', text: label('البحث بالمكتبة', 'Search'), description: label('يفتح فهرس البحث عن الكتب.', 'Opens the book search catalogue.') },
     { id: 'nav-digital', text: label('المكتبة الرقمية', 'Digital'), description: label('ينقلك إلى مصادر المكتبة الرقمية.', 'Takes you to digital library resources.') },
     { id: 'nav-creators', text: label('بوابة المبدعين', 'Creators'), description: label('مساحة المشاركات والأعمال الإبداعية.', 'A space for creative contributions.') },
-    { id: 'nav-identity', text: label('صقر وهوية وطن', 'UAE Heritage'), description: label('أربع تجارب تراثية وثقافية، متاحة للطلاب فقط.', 'Four UAE heritage activities available to students only.') },
+    { id: 'nav-identity', text: label('صقر وهوية وطن', 'UAE Heritage'), description: label('تحديات تراثية وجناح مستقل لكتب الهوية الوطنية؛ تظهر الخدمات بحسب صلاحية الحساب.', 'UAE heritage activities and a separate book pavilion; access follows account permissions.') },
     { id: 'nav-schedule', text: label('جدول المكتبة', 'Schedule'), description: label('خدمات جدول المكتبة للمعلمين.', 'Library schedule tools for teachers.') },
     { id: 'nav-ideas', text: label('مقترحات', 'Ideas'), description: label('استعراض وإرسال المقترحات في الموقع الحقيقي.', 'View and submit feedback on the live site.') },
     { id: 'nav-admin', text: label('الإدارة', 'Admin'), description: label('قسم محمي لا يظهر محتواه إلا للمخولين.', 'A protected area visible only to authorized staff.') }
@@ -592,7 +592,7 @@ export default function TutorialPage() {
               </div>
               <div className="flex h-full flex-1 items-center overflow-hidden bg-amber-50 dark:bg-slate-800">
                 <div className="whitespace-nowrap px-4 text-xs font-bold text-slate-800 dark:text-slate-100 md:text-base">
-                  {label('جديدنا: صقر وهوية وطن بأربع تجارب تراثية جديدة | قائمة الكتب المكتملة في تحدي القراءة | جولة تعريفية محدّثة | استديو صقر | إصدارات وكتب جديدة في المكتبة، نراكم فيها قريبًا!', "What's New: Saqr & National Identity with four heritage activities | Monthly completed-books list | Updated virtual tour | Saqr Studio | New books and editions at the library. See you soon!")}
+                  {label('تحدي راية المجد: عشرة أسئلة جديدة عن العلم | جناح الهوية الوطنية: اكتشف الكتب والمؤلفين | قائمة قراءتك الشهرية | سجل صوتك في بودكاست صقر | جديد الكتب بانتظارك!', "Explore the National Identity Pavilion | Ten UAE flag questions | Track your monthly reading | Record a Saqr Podcast MP3 | Discover the latest books in our library!")}
                 </div>
               </div>
             </div>
@@ -635,16 +635,16 @@ export default function TutorialPage() {
             <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-black text-emerald-700 dark:text-emerald-400">{label('داخل قسم صقر وهوية وطن', 'INSIDE SAQR & NATIONAL IDENTITY')}</p>
-                <h2 id="heritage-tour-title" className="mt-1 text-lg sm:text-xl font-black text-slate-900 dark:text-white">{label('أربع مغامرات تحكي تراث الإمارات', 'Four journeys through UAE heritage')}</h2>
+                <h2 id="heritage-tour-title" className="mt-1 text-lg sm:text-xl font-black text-slate-900 dark:text-white">{label('تحديات ثقافية وجناح الهوية الوطنية', 'Cultural challenges and the National Identity Pavilion')}</h2>
               </div>
-              <span className="rounded-full border border-emerald-200 bg-white dark:bg-slate-900 dark:border-emerald-900 px-3 py-2 text-xs font-bold text-emerald-800 dark:text-emerald-200">{label('للطلاب فقط', 'Students only')}</span>
+              <span className="rounded-full border border-emerald-200 bg-white dark:bg-slate-900 dark:border-emerald-900 px-3 py-2 text-xs font-bold text-emerald-800 dark:text-emerald-200">{label('حسب صلاحية الحساب', 'Role-based access')}</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {[
                 { id:'heritage-passport', ar:'جواز صقر الثقافي', en:'Saqr Cultural Passport', arHint:'جولة قراءة وبحث عبر الإمارات السبع للحصول على الأختام.', enHint:'Explore all seven emirates with reading tasks and collect stamps.', color:'from-emerald-700 to-teal-600', icon:'passport' },
                 { id:'heritage-words', ar:'كنوز لغتنا الإماراتية', en:'Emirati Language Treasures', arHint:'مفردات تراثية وأسئلة وجمل من تأليف الطالب.', enHint:'Heritage vocabulary, comprehension questions and sentences.', color:'from-amber-600 to-orange-600', icon:'weave' },
                 { id:'heritage-detective', ar:'محقق ذاكرة الوطن', en:'Heritage Research Detective', arHint:'ملفات مبنية على المصادر لتدريب الطالب على التحقق من المعلومات.', enHint:'Source-based research files for learning how to verify facts.', color:'from-sky-700 to-indigo-700', icon:'document' },
-                { id:'heritage-flag', ar:'تحدي راية المجد', en:'Flag Day Challenge', arHint:'لعبة رفع العلم عبر معالم الإمارات؛ النقاط للطلاب فقط، ولا تفتح اللعبة داخل الجولة.', enHint:'Raise the UAE flag through landmarks; points are awarded to students only. The game does not open in this tour.', color:'from-emerald-700 to-slate-900', icon:'flag' }
+                { id:'heritage-flag', ar:'تحدي راية المجد', en:'Flag Day Challenge', arHint:'لعبة رفع العلم عبر معالم الإمارات؛ النقاط حسب صلاحية الحساب، ولا تفتح اللعبة داخل الجولة.', enHint:'Ten progressive, randomized questions about the UAE flag in your selected language. This is a preview only.', color:'from-emerald-700 to-slate-900', icon:'flag' }
               ].map(activity => (
                 <HintTarget key={activity.id} id={activity.id} title={label(activity.ar,activity.en)} description={label(activity.arHint,activity.enHint)} tooltipBelow {...hintState}>
                   <div className="overflow-hidden rounded-[1.5rem] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-lg transition-shadow">

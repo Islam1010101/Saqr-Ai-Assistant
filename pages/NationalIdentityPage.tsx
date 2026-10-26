@@ -314,7 +314,7 @@ const NationalIdentityPage: React.FC = () => {
 
       {mode === 'home' ? <>
         <div className="mt-9 mb-5 flex flex-wrap items-end justify-between gap-3">
-          <div><p className="text-xs font-black text-emerald-700 dark:text-emerald-400">{tr(l('أربع مغامرات ثقافية','FOUR CULTURAL ADVENTURES'))}</p><h2 className="text-xl sm:text-2xl font-black mt-1">{tr(l('اختر رحلتك','Choose your journey'))}</h2></div>
+          <div><p className="text-xs font-black text-emerald-700 dark:text-emerald-400">{tr(l('تحديات الهوية الوطنية','NATIONAL IDENTITY CHALLENGES'))}</p><h2 className="text-xl sm:text-2xl font-black mt-1">{tr(l('اختر رحلتك','Choose your journey'))}</h2></div>
           <div className="rounded-full bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 px-4 py-2 text-xs font-black text-amber-800 dark:text-amber-200">{totalCompleted}/{emirates.length+expandedWords.length+expandedCases.length} {tr(l('مهمة مكتملة','missions completed'))}</div>
         </div>
         <div className="nh-challenges grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5">
@@ -369,8 +369,8 @@ const NationalIdentityPage: React.FC = () => {
           <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-xs font-black tracking-wider text-emerald-700 dark:text-emerald-400">{tr(l('قسم القراءة والمراجع','BOOKS & REFERENCE COLLECTION'))}</p>
-              <h2 id="nh-identity-library-heading" className="mt-1 text-xl sm:text-2xl font-black">{tr(l('مكتبة الهوية الوطنية','National Identity Library'))}</h2>
-              <p className="mt-2 text-sm leading-7 text-slate-600 dark:text-slate-300">{tr(l('قسم مستقل للكتب والمراجع، وليس من التحديات أو الألعاب.','A separate collection of books and references, not part of the games or challenges.'))}</p>
+              <h2 id="nh-identity-library-heading" className="mt-1 text-xl sm:text-2xl font-black">{tr(l('جناح الهوية الوطنية','National Identity Pavilion'))}</h2>
+              
             </div>
             <span className="inline-flex items-center rounded-full border border-emerald-200 dark:border-emerald-800 px-4 py-2 text-xs font-bold text-emerald-800 dark:text-emerald-200 bg-emerald-50 dark:bg-emerald-950/40">{tr(l('للقراءة والبحث','For reading and research'))}</span>
           </div>

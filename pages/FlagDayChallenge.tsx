@@ -2,17 +2,10 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { supabase } from '../src/utils/supabase';
 import HeritageQuestArt from './HeritageQuestArt';
+import {useLanguage} from '../App';
+import {FLAG_STEPS,chooseFlagQuestion,type FlagQuestionBilingual} from '../src/utils/uaeFlagQuestions';
 
 type Difficulty = 'easy' | 'medium' | 'hard';
-
-type FlagQuestion = {
-  id: number;
-  difficulty: Difficulty;
-  question: string;
-  options: string[];
-  correct: number;
-  fact: string;
-};
 
 type LandmarkLevel = {
   level: number;
@@ -28,6 +21,17 @@ type StoredStudent = Record<string, unknown> & {
 };
 
 const MAX_LEVEL = 7;
+const LANDMARK_EN=[
+ {name:'Al Jahili Fort',city:'Al Ain'},
+ {name:'Sheikh Zayed Grand Mosque',city:'Abu Dhabi'},
+ {name:'Museum of the Future',city:'Dubai'},
+ {name:'Dubai Frame',city:'Dubai'},
+ {name:'Burj Al Arab',city:'Dubai'},
+ {name:'Etihad Towers',city:'Abu Dhabi'},
+ {name:'Emirates Towers',city:'Dubai'},
+ {name:'Burj Khalifa Summit',city:'Dubai'}
+] as const;
+
 
 const UAE_LANDMARKS: LandmarkLevel[] = [
   { level: 0, name: 'قلعة الجاهلي', city: 'العين', heightLabel: 'نقطة الانطلاق', icon: 'fort' },
@@ -39,82 +43,6 @@ const UAE_LANDMARKS: LandmarkLevel[] = [
   { level: 6, name: 'أبراج الإمارات', city: 'دبي', heightLabel: 'قبل القمة', icon: 'buildings' },
   { level: 7, name: 'قمة برج خليفة', city: 'دبي', heightLabel: '828 متراً – قمة المجد', icon: 'summit' },
 ];
-
-const QUESTION_BANK: FlagQuestion[] = [
-  { id: 1, difficulty: 'easy', question: 'في أي تاريخ تحتفل دولة الإمارات العربية المتحدة بـ «يوم العلم» من كل عام؟', options: ['3 نوفمبر', '2 ديسمبر', '1 يناير', '30 نوفمبر'], correct: 0, fact: 'يوافق يوم العلم 3 نوفمبر من كل عام، وهو مناسبة للتعبير عن الولاء والانتماء للوطن.' },
-  { id: 2, difficulty: 'easy', question: 'كم يبلغ عدد ألوان علم دولة الإمارات العربية المتحدة؟', options: ['3 ألوان', '4 ألوان', '5 ألوان', 'لونان'], correct: 1, fact: 'يتكون العلم من أربعة ألوان: الأحمر والأخضر والأبيض والأسود.' },
-  { id: 3, difficulty: 'easy', question: 'ما لون الجزء العمودي المجاور لسارية العلم؟', options: ['الأخضر', 'الأسود', 'الأحمر', 'الأبيض'], correct: 2, fact: 'الجزء العمودي الملاصق للسارية أحمر، وتمتد إلى جانبه الأشرطة الأفقية الخضراء والبيضاء والسوداء.' },
-  { id: 4, difficulty: 'easy', question: 'في أي ساعة تُرفع الأعلام في المؤسسات المشاركة في فعالية يوم العلم؟', options: ['8:00 صباحاً', '10:00 صباحاً', '11:00 صباحاً', '12:00 ظهراً'], correct: 2, fact: 'ترتبط فعالية يوم العلم برفع العلم في تمام الساعة 11 صباحاً.' },
-  { id: 5, difficulty: 'easy', question: 'ما اللون الذي يتوسط الأشرطة الأفقية الثلاثة في علم الإمارات؟', options: ['الأبيض', 'الأخضر', 'الأسود', 'الأحمر'], correct: 0, fact: 'يأتي الشريط الأبيض بين الأخضر في الأعلى والأسود في الأسفل.' },
-  { id: 6, difficulty: 'easy', question: 'في أي عام رُفع علم دولة الإمارات مع إعلان قيام الاتحاد؟', options: ['1968', '1971', '1975', '1980'], correct: 1, fact: 'أُعلن قيام دولة الإمارات العربية المتحدة في 2 ديسمبر 1971.' },
-  { id: 7, difficulty: 'easy', question: 'أي عبارة تعبّر عن الاعتزاز براية الإمارات؟', options: ['ارفعه عالياً ليبقى شامخاً', 'علمنا في قلوبنا فقط', 'راية البحر', 'فوق السحاب دائماً'], correct: 0, fact: 'تعكس العبارة الاعتزاز بالعلم والحرص على بقائه شامخاً.' },
-  { id: 8, difficulty: 'easy', question: 'ما اللون الموجود في الجزء العلوي الأفقي من علم الإمارات؟', options: ['الأحمر', 'الأخضر', 'الأبيض', 'الأسود'], correct: 1, fact: 'الشريط العلوي من العلم أخضر.' },
-  { id: 9, difficulty: 'medium', question: 'من هو مصمم علم دولة الإمارات العربية المتحدة؟', options: ['عبدالله محمد المعينة', 'أحمد بن سليم', 'راشد المخاوي', 'سعيد بن غباش'], correct: 0, fact: 'صمّم العلم عبدالله محمد المعينة، وفاز تصميمه في المسابقة التي أُعلنت عام 1971.' },
-  { id: 10, difficulty: 'medium', question: 'من هو القائد المؤسس الذي رفع علم دولة الإمارات لأول مرة؟', options: ['الشيخ زايد بن سلطان آل نهيان', 'الشيخ راشد بن سعيد آل مكتوم', 'الشيخ خليفة بن زايد آل نهيان', 'الشيخ خالد بن محمد'], correct: 0, fact: 'رفع المغفور له الشيخ زايد بن سلطان آل نهيان علم الاتحاد عند إعلان قيام الدولة.' },
-  { id: 11, difficulty: 'medium', question: 'أين رُفع علم الإمارات مع إعلان الاتحاد عام 1971؟', options: ['قصر الحصن في أبوظبي', 'دار الاتحاد في دبي', 'قلعة الجاهلي في العين', 'ساحة الوصل'], correct: 1, fact: 'شهدت دار الاتحاد في دبي لحظة إعلان قيام دولة الإمارات ورفع علمها.' },
-  { id: 12, difficulty: 'medium', question: 'ألوان العلم الأربعة مستلهمة من بيت شعر شهير لأي شاعر؟', options: ['أبو الطيب المتنبي', 'صفي الدين الحلي', 'أحمد شوقي', 'حسان بن ثابت'], correct: 1, fact: 'يرتبط اختيار الألوان ببيت صفي الدين الحلي: «بيضٌ صنائعنا، سودٌ وقائعنا، خضرٌ مرابعنا، حمرٌ مواضينا».' },
-  { id: 13, difficulty: 'medium', question: 'إلى ماذا يرتبط اللون الأسود في دلالات ألوان العلم؟', options: ['النفط والثروة فقط', 'القوة والمنعة وشدة البأس', 'الليل والهدوء', 'الجبال الشاهقة'], correct: 1, fact: 'يُربط اللون الأسود في البيت الشعري بالقوة والوقائع، وليس بالنفط وحده.' },
-  { id: 14, difficulty: 'medium', question: 'من أطلق مبادرة الاحتفال بـ «يوم العلم» عام 2013؟', options: ['الشيخ محمد بن راشد آل مكتوم', 'الشيخ خليفة بن زايد آل نهيان', 'الشيخ سلطان القاسمي', 'الشيخ حمدان بن محمد'], correct: 0, fact: 'أُطلقت مبادرة يوم العلم في عام 2013 بمبادرة من صاحب السمو الشيخ محمد بن راشد آل مكتوم.' },
-  { id: 15, difficulty: 'medium', question: 'ما المعنى الأقرب لعبارة «بيضٌ صنائعنا» في البيت الشعري المرتبط بألوان العلم؟', options: ['أعمال الخير والسلام والعطاء', 'الرمال البيضاء', 'الملابس الرسمية', 'اللؤلؤ الطبيعي'], correct: 0, fact: '«صنائعنا» تعني أعمالنا ومآثرنا، وترتبط العبارة بالخير والعطاء.' },
-  { id: 16, difficulty: 'medium', question: 'ما اسم النشيد الوطني لدولة الإمارات؟', options: ['عيشي بلادي', 'موطني', 'حماة الحمى', 'دار زايد'], correct: 0, fact: '«عيشي بلادي» هو السلام الوطني لدولة الإمارات العربية المتحدة.' },
-  { id: 17, difficulty: 'hard', question: 'من كتب كلمات النشيد الوطني «عيشي بلادي»؟', options: ['مانع سعيد العتيبة', 'عارف الشيخ عبدالله الحسن', 'سعد جمعة', 'سلطان بن علي العويس'], correct: 1, fact: 'كتب كلمات النشيد الوطني الدكتور عارف الشيخ عبدالله الحسن.' },
-  { id: 18, difficulty: 'hard', question: 'ما النسبة القياسية لطول علم الإمارات إلى عرضه؟', options: ['الطول ضعف العرض (2:1)', 'الطول يساوي العرض (1:1)', 'ثلاثة أضعاف العرض (3:1)', 'مرة ونصف (1.5:1)'], correct: 0, fact: 'تكون نسبة طول العلم إلى عرضه 2:1.' },
-  { id: 19, difficulty: 'hard', question: 'ما نسبة عرض الجزء الأحمر العمودي إلى طول العلم الكلي؟', options: ['نصف طول العلم', 'ربع طول العلم', 'ثلث طول العلم', 'خُمس طول العلم'], correct: 1, fact: 'يشغل الجزء الأحمر العمودي ربع طول العلم، وتمتد الأشرطة الأفقية على بقية المساحة.' },
-  { id: 20, difficulty: 'hard', question: 'كم بلغ عدد التصاميم المشاركة في مسابقة تصميم علم الإمارات عام 1971؟', options: ['نحو 100 تصميم', 'نحو 500 تصميم', '1030 تصميماً', '3000 تصميم'], correct: 2, fact: 'تذكر الروايات التاريخية أن المسابقة استقبلت 1030 تصميماً.' },
-  { id: 21, difficulty: 'hard', question: 'لماذا اختير يوم 3 نوفمبر للاحتفال بيوم العلم؟', options: ['تزامناً مع ذكرى تولي الشيخ خليفة بن زايد رئاسة الدولة', 'ذكرى إعلان مسابقة التصميم', 'ذكرى افتتاح برج خليفة', 'اليوم الوطني الأول'], correct: 0, fact: 'يتزامن يوم 3 نوفمبر مع ذكرى تولي المغفور له الشيخ خليفة بن زايد آل نهيان رئاسة الدولة عام 2004.' },
-  { id: 22, difficulty: 'hard', question: 'ما أهم ما يجب مراعاته عند تعليق العلم عمودياً؟', options: ['اتباع الاتجاه المعتمد للألوان كما في الدليل الرسمي', 'جعل الأحمر في الأسفل دائماً', 'وضع الأسود على السارية', 'أنه لا يجوز تعليقه عمودياً مطلقاً'], correct: 0, fact: 'عند عرض العلم عمودياً ينبغي الالتزام بالاتجاه المعتمد في الدليل الرسمي لرفع وعرض العلم.' },
-  { id: 23, difficulty: 'hard', question: 'في أي صحيفة نُشر إعلان مسابقة تصميم علم الإمارات عام 1971؟', options: ['جريدة الاتحاد', 'جريدة الخليج', 'جريدة البيان', 'جريدة الوحدة'], correct: 0, fact: 'نُشر إعلان المسابقة في جريدة الاتحاد، وشارك فيها عبدالله محمد المعينة.' },
-  { id: 24, difficulty: 'hard', question: 'في أي إمارة تقع جزيرة العلم التي تضم سارية وطنية بارزة؟', options: ['الشارقة', 'عجمان', 'الفجيرة', 'أم القيوين'], correct: 0, fact: 'تقع جزيرة العلم في إمارة الشارقة وتضم سارية علم وطنية بارزة.' },
-  { id: 25, difficulty: 'easy', question: "كم شريطًا أفقيًا يوجد في علم الإمارات؟", options: ["اثنان","ثلاثة","أربعة","خمسة"], correct: 1, fact: "ثلاثة أشرطة أفقية بالأخضر والأبيض والأسود." },
-  { id: 26, difficulty: 'easy', question: "ماذا يمثل علم الدولة؟", options: ["الانقسام","الوحدة","إمارة واحدة","فريق رياضي"], correct: 1, fact: "علم الإمارات رمز الاتحاد والوحدة." },
-  { id: 27, difficulty: 'easy', question: "ما المناسبة التي نحتفل بها في 2 ديسمبر؟", options: ["يوم العلم","عيد الاتحاد","يوم البيئة","يوم القراءة"], correct: 1, fact: "عيد الاتحاد في الثاني من ديسمبر." },
-  { id: 28, difficulty: 'easy', question: "ما لون الشريط الأفقي السفلي؟", options: ["الأخضر","الأبيض","الأسود","الأحمر"], correct: 2, fact: "الأسود هو الشريط السفلي في العلم." },
-  { id: 29, difficulty: 'medium', question: "ما ترتيب أشرطة العلم الأفقية من الأعلى؟", options: ["أخضر فأبيض فأسود","أسود فأخضر فأبيض","أبيض فأسود فأخضر","أحمر فأبيض فأخضر"], correct: 0, fact: "ترتيبها أخضر ثم أبيض ثم أسود." },
-  { id: 30, difficulty: 'medium', question: "أين شهدت الدولة إعلان الاتحاد عام 1971؟", options: ["دار الاتحاد في دبي","قلعة الجاهلي","متحف المستقبل","جبل جيس"], correct: 0, fact: "شهدت دار الاتحاد في دبي إعلان قيام دولة الإمارات." },
-  { id: 31, difficulty: 'medium', question: "ما الاسم المرتبط بفن نسج تراثي إماراتي؟", options: ["السدو","الفلج","المحمل","النوخذة"], correct: 0, fact: "السدو من الحرف التقليدية الإماراتية." },
-  { id: 32, difficulty: 'medium', question: "أي سلوك يدل على احترام العلم؟", options: ["العناية به أثناء العرض","وضعه على الأرض","تمزيقه","العبث به"], correct: 0, fact: "العناية بالعلم والالتزام بإرشادات عرضه من مظاهر احترامه." },
-  { id: 33, difficulty: 'hard', question: "أي معلم يرتبط بمدينة العين؟", options: ["برج خليفة","قلعة الجاهلي","جبل جيس","قلب الشارقة"], correct: 1, fact: "قلعة الجاهلي معلم تاريخي في العين." },
-  { id: 34, difficulty: 'hard', question: "كيف تتحقق من معلومة تاريخية عن العلم؟", options: ["بمصدر رسمي موثق","بمنشور مجهول","بصورة بلا سياق","بتخمين شخصي"], correct: 0, fact: "الرجوع لمصادر موثوقة يساعد في التحقق من التاريخ." },
-  { id: 35, difficulty: 'hard', question: "ما الفرق بين يوم العلم وعيد الاتحاد؟", options: ["كلاهما في اليوم نفسه","يوم العلم في نوفمبر وعيد الاتحاد في ديسمبر","يوم العلم في يناير","عيد الاتحاد في مارس"], correct: 1, fact: "يوم العلم 3 نوفمبر وعيد الاتحاد 2 ديسمبر." },
-  { id: 36, difficulty: 'hard', question: "أي مشروع يعزز فهم الهوية الوطنية أكثر؟", options: ["نسخ معلومات مجهولة","ربط رموز العلم بتاريخ الاتحاد بمراجع موثوقة","اختيار لون فقط","تجاهل التاريخ"], correct: 1, fact: "الربط بالمصادر والسياق التاريخي يعزز الفهم." },
-  { id: 37, difficulty: 'easy', question: "ما اسم العاصمة الاتحادية لدولة الإمارات؟", options: ["أبوظبي","دبي","عجمان","الفجيرة"], correct: 0, fact: "أبوظبي هي عاصمة الدولة الاتحادية." },
-  { id: 38, difficulty: 'easy', question: "كم إمارة تتكوّن منها دولة الإمارات؟", options: ["خمس","ست","سبع","ثمان"], correct: 2, fact: "دولة الإمارات اتحاد يضم سبع إمارات." },
-  { id: 39, difficulty: 'easy', question: "ما اللون الممتد عموديًا بجانب السارية؟", options: ["الأبيض","الأحمر","الأسود","الأخضر"], correct: 1, fact: "الشريط الأحمر العمودي متصل بسارية العلم." },
-  { id: 40, difficulty: 'easy', question: "ما اللون الأوسط بين الأخضر والأسود؟", options: ["الأبيض","الأصفر","الأزرق","الأحمر"], correct: 0, fact: "الأبيض هو اللون الأوسط في أشرطة العلم الأفقية." },
-  { id: 41, difficulty: 'easy', question: "أين يقع برج خليفة؟", options: ["الشارقة","العين","دبي","أم القيوين"], correct: 2, fact: "برج خليفة من أشهر معالم دبي." },
-  { id: 42, difficulty: 'easy', question: "ما اسم العيد الوطني الذي يوافق 2 ديسمبر؟", options: ["عيد الاتحاد","يوم العلم","يوم الطفل","يوم التراث"], correct: 0, fact: "عيد الاتحاد يُحتفل به في 2 ديسمبر." },
-  { id: 43, difficulty: 'easy', question: "ما السلوك المناسب عند رفع العلم؟", options: ["العبث بالراية","الوقوف باحترام","ترك العلم على الأرض","إخفاء العلم"], correct: 1, fact: "احترام مراسم العلم يعكس الانتماء." },
-  { id: 44, difficulty: 'easy', question: "ما الشريط الأفقي الأول أعلى العلم؟", options: ["الأسود","الأبيض","الأخضر","الأحمر"], correct: 2, fact: "الأخضر يأتي في أعلى الأشرطة الأفقية." },
-  { id: 45, difficulty: 'medium', question: "ما المقصود بالسدو في تراث الإمارات؟", options: ["فن نسج تقليدي","قارب صيد","قناة ري","أداة غوص"], correct: 0, fact: "السدو من مهارات النسج التقليدي المرتبطة بالتراث المحلي." },
-  { id: 46, difficulty: 'medium', question: "ما معنى النوخذة في التراث البحري؟", options: ["حرفي تطريز","قائد السفينة","مزارع الواحة","صانع الفخار"], correct: 1, fact: "النوخذة هو قائد السفينة التقليدية." },
-  { id: 47, difficulty: 'medium', question: "أين تقع قلعة الجاهلي؟", options: ["رأس الخيمة","دبي","العين","الشارقة"], correct: 2, fact: "قلعة الجاهلي تقع في مدينة العين." },
-  { id: 48, difficulty: 'medium', question: "ما اسم نظام توزيع الماء التقليدي بالواحات؟", options: ["الأفلاج","المحامل","القراقير","المندوس"], correct: 0, fact: "الأفلاج نظم تقليدية لنقل مياه الري." },
-  { id: 49, difficulty: 'medium', question: "أي فن إماراتي يجمع الإنشاد والأداء الشعبي؟", options: ["الخوص","العيالة","المحمل","الفلج"], correct: 1, fact: "العيالة فن أداء جماعي تراثي." },
-  { id: 50, difficulty: 'medium', question: "أين يقع جبل جيس؟", options: ["الفجيرة","عجمان","رأس الخيمة","أبوظبي"], correct: 2, fact: "جبل جيس في رأس الخيمة." },
-  { id: 51, difficulty: 'medium', question: "أي سلوك يحافظ على ذاكرة الوطن؟", options: ["نقل معلومات بلا تحقق","توثيق روايات التراث بموافقة أصحابها","إهمال المصادر","إتلاف الصور"], correct: 1, fact: "الاستئذان وتوثيق المصادر يحفظان التراث." },
-  { id: 52, difficulty: 'medium', question: "ما البيئة التي ارتبطت بالغوص على اللؤلؤ؟", options: ["الجبال","الواحات","البحر","الصحراء فقط"], correct: 2, fact: "الغوص على اللؤلؤ من المهن البحرية التراثية." },
-  { id: 53, difficulty: 'hard', question: "أي مصدر أنسب للتحقق من معلومات رسمية عن الإمارات؟", options: ["تعليق مجهول","منشور بلا تاريخ","البوابة الحكومية الرسمية","تخمين شخصي"], correct: 2, fact: "الرجوع للمصادر الرسمية يساعد على التحقق." },
-  { id: 54, difficulty: 'hard', question: "أي عبارة تربط الواحات بالاستقرار في العين؟", options: ["الأفلاج ساعدت على نقل مياه الزراعة","لم توجد زراعة في المنطقة","الواحات لا تحتاج إلى مياه","الثلوج غذّت المزارع"], correct: 0, fact: "الأفلاج والواحات تدل على تقنيات ريّ عريقة." },
-  { id: 55, difficulty: 'hard', question: "كيف نميز التراث المادي عن غير المادي؟", options: ["كلاهما صور فقط","المباني مادية والفنون الشعبية غير مادية","كلاهما أدوات زراعة","لا فرق بينهما"], correct: 1, fact: "المبنى تراث مادي، والفنون والممارسات تراث غير مادي." },
-  { id: 56, difficulty: 'hard', question: "كيف تتحقق من نسبة قصة تراثية إلى راوٍ؟", options: ["نشرها بلا إذن","تغييرها دون بيان","تسجيل المصدر والحصول على الموافقة","الاعتماد على التخمين"], correct: 2, fact: "الأمانة في الرواية تتطلب موافقة وتوثيقًا." },
-  { id: 57, difficulty: 'hard', question: "كيف يعبّر تنوع البيئات في الإمارات عن تراثها؟", options: ["جميع المهن متطابقة","البحر والصحراء والواحات أسهمت في تنوع الحرف","لا يرتبط التراث بالبيئة","تاريخ السكان بدأ حديثًا"], correct: 1, fact: "ارتبطت الحرف بالموارد والبيئات المحلية." },
-  { id: 58, difficulty: 'hard', question: "ما التصرف الصحيح عند اختلاف مصدرين تاريخيين؟", options: ["تفضيل الأكثر انتشارًا","اختيار أقصر إجابة","مقارنة المصادر والأدلة الأصلية","تجاهل التاريخ"], correct: 2, fact: "تتبع المصادر الأصلية يعطي تفسيرًا موثوقًا." },
-  { id: 59, difficulty: 'hard', question: "أي مشروع مدرسي يوثق تاريخ الاتحاد بصورة مسؤولة؟", options: ["مقابلات بموافقة ومراجع رسمية","نسخ إشاعة","صورة مجهولة","حذف أسماء المصادر"], correct: 0, fact: "التوثيق والمصادر الرسمية يعززان البحث الوطني." },
-  { id: 60, difficulty: 'hard', question: "ما فائدة مقارنة صور موقع تراثي عبر الزمن؟", options: ["توقع المستقبل","توثيق تغيرات المكان","معرفة عدد الإعجابات","إخفاء التاريخ"], correct: 1, fact: "مقارنة صور مؤرخة تساعد في دراسة التغير التاريخي." },
-];
-
-function getDifficulty(level: number): Difficulty {
-  if (level <= 2) return 'easy';
-  if (level <= 4) return 'medium';
-  return 'hard';
-}
-
-function pickQuestion(level: number, usedIds: number[]): FlagQuestion {
-  const difficulty = getDifficulty(level);
-  let pool = QUESTION_BANK.filter((question) => question.difficulty === difficulty && !usedIds.includes(question.id));
-  if (pool.length === 0) pool = QUESTION_BANK.filter((question) => question.difficulty === difficulty);
-  return pool[Math.floor(Math.random() * pool.length)] ?? QUESTION_BANK[0];
-}
 
 function getNameFromRecord(record: Record<string, unknown> | null | undefined): string | null {
   if (!record) return null;
@@ -180,9 +108,14 @@ interface FlagDayChallengeProps {
 }
 
 export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
+  const {locale}=useLanguage();
+  const english=locale==='en';
+  const tr=(ar:string,en:string)=>english?en:ar;
+  const [stepsCompleted,setStepsCompleted]=useState(0);
+  const [visualPenalty,setVisualPenalty]=useState(0);
   const [flagLevel, setFlagLevel] = useState(0);
   const [usedQuestionIds, setUsedQuestionIds] = useState<number[]>([]);
-  const [currentQuestion, setCurrentQuestion] = useState<FlagQuestion>(() => pickQuestion(0, []));
+  const [currentQuestion, setCurrentQuestion] = useState<FlagQuestionBilingual>(() => chooseFlagQuestion(0, []));
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [lastResult, setLastResult] = useState<'correct' | 'wrong' | null>(null);
@@ -193,16 +126,17 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
   const awardStarted = useRef(false);
   const victoryTimer = useRef<number | null>(null);
 
-  const currentDifficulty = getDifficulty(flagLevel);
+  const currentDifficulty = stepsCompleted<4?'easy':stepsCompleted<7?'medium':'hard';
+  const currentText=currentQuestion[english?'en':'ar'];
   const currentLandmark = UAE_LANDMARKS[flagLevel] ?? UAE_LANDMARKS[0];
-  const flagHeightPercent = 4 + (flagLevel / MAX_LEVEL) * 72;
-  const progressPercent = Math.round((flagLevel / MAX_LEVEL) * 100);
+  const flagHeightPercent = 4 + (Math.max(0,stepsCompleted-visualPenalty) / FLAG_STEPS) * 72;
+  const progressPercent = Math.round((stepsCompleted / FLAG_STEPS) * 100);
 
   const difficultyLabel = useMemo(() => {
-    if (currentDifficulty === 'easy') return 'سهلة · بداية الصعود';
-    if (currentDifficulty === 'medium') return 'متوسطة · بين المعالم';
-    return 'متقدمة · الاقتراب من القمة';
-  }, [currentDifficulty]);
+    if (currentDifficulty === 'easy') return tr('سهلة · بداية الصعود','Easy · Starting out');
+    if (currentDifficulty === 'medium') return tr('متوسطة · بين المعالم','Medium · Moving higher');
+    return tr('متقدمة · الاقتراب من القمة','Advanced · Approaching the summit');
+  }, [currentDifficulty,english]);
 
   useEffect(() => {
     let alive = true;
@@ -292,15 +226,19 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
       setLastResult('correct');
       setCorrectAnswersCount((previous) => previous + 1);
       playTone('up');
-      const nextLevel = Math.min(MAX_LEVEL, flagLevel + 1);
+      const nextStep=Math.min(FLAG_STEPS,stepsCompleted+1);
+      setStepsCompleted(nextStep);
+      setVisualPenalty(0);
+      const nextLevel = Math.min(MAX_LEVEL, Math.floor(nextStep * MAX_LEVEL / FLAG_STEPS));
       setFlagLevel(nextLevel);
-      if (nextLevel === MAX_LEVEL) {
+      if (nextStep === FLAG_STEPS) {
         victoryTimer.current = window.setTimeout(() => setIsVictory(true), 900);
       }
     } else {
       setLastResult('wrong');
       playTone('down');
-      setFlagLevel((previous) => Math.max(0, previous - 1));
+      setVisualPenalty(previous=>Math.min(2,previous+1));
+      setFlagLevel(previous=>Math.max(0,previous-1));
     }
   };
 
@@ -309,14 +247,14 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
       ? usedQuestionIds
       : [...usedQuestionIds, currentQuestion.id];
     setUsedQuestionIds(nextUsed);
-    setCurrentQuestion(pickQuestion(flagLevel, nextUsed));
+    setCurrentQuestion(chooseFlagQuestion(stepsCompleted, nextUsed));
     setSelectedOption(null);
     setIsAnswered(false);
     setLastResult(null);
   };
 
   const handleFeedbackAction = () => {
-    if (flagLevel === MAX_LEVEL) {
+    if (stepsCompleted === FLAG_STEPS) {
       if (victoryTimer.current !== null) window.clearTimeout(victoryTimer.current);
       victoryTimer.current = null;
       setIsVictory(true);
@@ -330,8 +268,10 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
     victoryTimer.current = null;
     awardStarted.current = false;
     setFlagLevel(0);
+    setStepsCompleted(0);
+    setVisualPenalty(0);
     setUsedQuestionIds([]);
-    setCurrentQuestion(pickQuestion(0, []));
+    setCurrentQuestion(chooseFlagQuestion(0, []));
     setSelectedOption(null);
     setIsAnswered(false);
     setLastResult(null);
@@ -341,7 +281,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
   };
 
   return (
-    <div className="flag-game" dir="rtl">
+    <div className="flag-game" dir={english?"ltr":"rtl"}>
       <style>{`
         .flag-game{--page:#edf3f6;--panel:#ffffff;--panel-soft:#f6f9fb;--ink:#172638;--muted:#637487;--line:#dce5eb;--accent:#087e58;--accent2:#0d9a6a;--gold:#f6c453;--shadow:0 24px 75px rgba(22,43,65,.17);min-height:100dvh;padding:clamp(10px,2.3vw,28px);display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 8% 8%,rgba(14,165,119,.10),transparent 28%),radial-gradient(ellipse at 95% 90%,rgba(246,196,83,.17),transparent 30%),var(--page);color:var(--ink);font-family:Tahoma,Arial,sans-serif;box-sizing:border-box;isolation:isolate}
         .flag-game *{box-sizing:border-box}
@@ -399,7 +339,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
       <div className="fg-ribbon" aria-hidden="true"><span className="r" /><span className="g" /><span className="w" /><span className="b" /></div>
 
       <main className="fg-shell">
-        <section className="fg-scene" aria-label="مشهد سارية علم الإمارات ومعالم الدولة">
+        <section className="fg-scene" aria-label={tr('مشهد سارية علم الإمارات ومعالم الدولة','UAE flag and landmarks scene')}>
           <img src="/saqr-full.png" alt="" aria-hidden="true" style={{position:"absolute",bottom:"12%",right:"6%",height:"min(13vw,115px)",maxHeight:115,minHeight:56,maxWidth:"24%",objectFit:"contain",pointerEvents:"none",zIndex:3,filter:"drop-shadow(0 8px 12px #0006)"}} />
           <div className="fg-stars" aria-hidden="true" />
           <div className="fg-cloud c1" aria-hidden="true"/>
@@ -417,8 +357,8 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
                 ))}
               </div>
               <div className="fg-victory-banner">
-                <strong>دام عزك يا إمارات</strong>
-                <span>رايتنا عالية… ومجدنا مستمر</span>
+                <strong>{tr('دام عزك يا إمارات','Long Live the UAE')}</strong>
+                <span>{tr('رايتنا عالية… ومجدنا مستمر','Our flag flies high and our glory continues')}</span>
               </div>
             </>
           )}
@@ -428,15 +368,15 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
             <div className="fg-school-brand">
               <div className="fg-school-mark" aria-hidden="true"><UaeFlagIcon/></div>
               <div>
-                <div className="fg-school-name">مدرسة صقر الإمارات الدولية الخاصة</div>
-                <div className="fg-scene-title">رحلة راية المجد إلى القمة</div>
+                <div className="fg-school-name">{tr('مدرسة صقر الإمارات الدولية الخاصة','Emirates Falcon International Private School')}</div>
+                <div className="fg-scene-title">{tr('رحلة راية المجد إلى القمة','The Flag of Glory Journey')}</div>
               </div>
             </div>
-            <div className="fg-level-pill">المستوى {flagLevel} / {MAX_LEVEL}</div>
+            <div className="fg-level-pill">{tr('سؤال','Question')} {Math.min(FLAG_STEPS,stepsCompleted+1)} / {FLAG_STEPS}</div>
           </header>
 
           <div className="fg-visual">
-            <svg className="fg-skyline" viewBox="0 0 620 560" role="img" aria-label="رسم كرتوني لمعالم من دولة الإمارات" preserveAspectRatio="xMidYMax slice">
+            <svg className="fg-skyline" viewBox="0 0 620 560" role="img" aria-label={tr('رسم كرتوني لمعالم من دولة الإمارات','Illustration of UAE landmarks')} preserveAspectRatio="xMidYMax slice">
               <defs>
                 <linearGradient id="fg-burj" x1="0" x2="1"><stop offset="0" stopColor="#8ec6d4"/><stop offset=".46" stopColor="#edf6ed"/><stop offset="1" stopColor="#83b8d1"/></linearGradient>
                 <linearGradient id="fg-building" x1="0" x2="1"><stop offset="0" stopColor="#54859f"/><stop offset=".5" stopColor="#b4d4dc"/><stop offset="1" stopColor="#42677f"/></linearGradient>
@@ -502,12 +442,12 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
               })}
             </div>
 
-            <div className="fg-pole" aria-label={`ارتفاع العلم: المستوى ${flagLevel} من ${MAX_LEVEL}`}>
+            <div className="fg-pole" aria-label={tr(`ارتفاع العلم: المستوى ${flagLevel} من ${MAX_LEVEL}`,`Flag height: level ${flagLevel} of ${MAX_LEVEL}`)}>
               <div className="fg-pole-shaft" />
               <div className="fg-pole-tip" />
               <div className="fg-flag-holder" style={{ bottom: `${flagHeightPercent}%` }}>
                 <div className="fg-flag-ties" aria-hidden="true"><span /><span /></div>
-                <div className="fg-flag" aria-label="علم دولة الإمارات العربية المتحدة">
+                <div className="fg-flag" aria-label={tr('علم دولة الإمارات العربية المتحدة','UAE flag')}>
                   <div className="fg-flag-red" />
                   <div className="fg-flag-stripes"><span className="green" /><span className="white" /><span className="black" /></div>
                 </div>
@@ -516,45 +456,45 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
             <div className="fg-pole-base" aria-hidden="true" />
 
             <div className="fg-loc-tag">
-              <small>المحطة الحالية · {currentLandmark.city}</small>
-              <strong><LandmarkIcon name={currentLandmark.icon}/> {currentLandmark.name}</strong>
+              <small>{tr('المحطة الحالية','Current landmark')} · {english?LANDMARK_EN[flagLevel].city:currentLandmark.city}</small>
+              <strong><LandmarkIcon name={currentLandmark.icon}/> {english?LANDMARK_EN[flagLevel].name:currentLandmark.name}</strong>
             </div>
           </div>
 
           <footer className="fg-scene-foot">
-            <div><small>هدف الرحلة</small><strong>ارفع العلم حتى قمة برج خليفة</strong></div>
-            <div className="fg-mini-progress"><small>التقدّم</small><strong>{progressPercent}%</strong></div>
+            <div><small>{tr('هدف الرحلة','Goal')}</small><strong>{tr('ارفع العلم حتى قمة برج خليفة','Raise the flag to Burj Khalifa')}</strong></div>
+            <div className="fg-mini-progress"><small>{tr('التقدّم','Progress')}</small><strong>{progressPercent}%</strong></div>
           </footer>
         </section>
 
         <section className="fg-panel" aria-live="polite">
           <header className="fg-panel-head">
-            <div className="fg-title-wrap"><div className="fg-identity-kicker">رحلة وطنية · سارية المجد · معالم الإمارات</div>
-              <h1 className="fg-title">تحدّي راية المجد</h1>
-              <p className="fg-subtitle">أجب عن أسئلة العلم الإماراتي. الإجابة الصحيحة ترفع الراية، والخاطئة تُنزلها درجة.</p>
+            <div className="fg-title-wrap"><div className="fg-identity-kicker">{tr('رحلة وطنية · سارية المجد · معالم الإمارات','National Journey · UAE Flag')}</div>
+              <h1 className="fg-title">{tr('تحدّي راية المجد','Flag of Glory Challenge')}</h1>
+              <p className="fg-subtitle">{tr('أجب عن عشرة أسئلة عن علم الإمارات من السهل إلى الصعب.','Answer 10 UAE flag questions, from easy to hard.')}</p>
             </div>
-            {onClose && <div className="fg-head-actions"><button className="fg-close-btn" type="button" onClick={onClose}>إغلاق ✕</button></div>}
+            {onClose && <div className="fg-head-actions"><button className="fg-close-btn" type="button" onClick={onClose}>{tr('إغلاق','Close')} ×</button></div>}
           </header>
 
           {!isVictory ? (
             <>
               <div className="fg-stats">
                 <div className="fg-stat">
-                  <div className="fg-stat-line"><span>درجة الصعوبة</span><span className={`fg-difficulty ${currentDifficulty}`}>{difficultyLabel}</span></div>
+                  <div className="fg-stat-line"><span>{tr('درجة الصعوبة','Difficulty')}</span><span className={`fg-difficulty ${currentDifficulty}`}>{difficultyLabel}</span></div>
                 </div>
                 <div className="fg-stat">
-                  <div className="fg-stat-line"><span>المتبقي للقمة</span><strong>{MAX_LEVEL - flagLevel} {MAX_LEVEL - flagLevel === 1 ? 'خطوة' : 'خطوات'}</strong></div>
-                  <div className="fg-progress" role="progressbar" aria-valuemin={0} aria-valuemax={MAX_LEVEL} aria-valuenow={flagLevel} aria-label="التقدم نحو القمة"><div className="fg-progress-fill" style={{ width: `${progressPercent}%` }} /></div>
+                  <div className="fg-stat-line"><span>{tr('الأسئلة المتبقية','Questions remaining')}</span><strong>{FLAG_STEPS - stepsCompleted}</strong></div>
+                  <div className="fg-progress" role="progressbar" aria-valuemin={0} aria-valuemax={FLAG_STEPS} aria-valuenow={stepsCompleted} aria-label={tr('التقدم نحو القمة','Progress towards summit')}><div className="fg-progress-fill" style={{ width: `${progressPercent}%` }} /></div>
                 </div>
               </div>
 
               <article className="fg-question-card"><div className="fg-quest-stripe"><span/><span/><span/><span/></div>
-                <div className="fg-question-label"><span>؟</span> سؤال الرحلة</div>
-                <h2 className="fg-question-text">{currentQuestion.question}</h2>
+                <div className="fg-question-label"><span>؟</span> {tr('سؤال الرحلة','Journey question')}</div>
+                <h2 className="fg-question-text">{currentText.question}</h2>
               </article>
 
-              <div className="fg-options" role="group" aria-label="خيارات الإجابة">
-                {currentQuestion.options.map((option, index) => {
+              <div className="fg-options" role="group" aria-label={tr('خيارات الإجابة','Answer choices')}>
+                {currentText.options.map((option, index) => {
                   let optionClass = '';
                   if (isAnswered) {
                     if (index === currentQuestion.correct) optionClass = 'correct';
@@ -563,9 +503,9 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
                   }
                   return (
                     <button className={`fg-option ${optionClass}`} key={`${currentQuestion.id}-${index}`} type="button" disabled={isAnswered} onClick={() => handleOptionSelect(index)}>
-                      <span className="fg-option-leading"><span className="fg-option-number">{['أ', 'ب', 'ج', 'د'][index]}</span><span className="fg-option-text">{option}</span></span>
-                      {isAnswered && index === currentQuestion.correct && <span className="fg-result-mark" aria-label="الإجابة الصحيحة"><ResultIcon good/></span>}
-                      {isAnswered && selectedOption === index && index !== currentQuestion.correct && <span className="fg-result-mark" aria-label="إجابة غير صحيحة"><ResultIcon/></span>}
+                      <span className="fg-option-leading"><span className="fg-option-number">{(english?['A','B','C','D']:['أ','ب','ج','د'])[index]}</span><span className="fg-option-text">{option}</span></span>
+                      {isAnswered && index === currentQuestion.correct && <span className="fg-result-mark" aria-label={tr('الإجابة الصحيحة','Correct answer')}><ResultIcon good/></span>}
+                      {isAnswered && selectedOption === index && index !== currentQuestion.correct && <span className="fg-result-mark" aria-label={tr('إجابة غير صحيحة','Incorrect answer')}><ResultIcon/></span>}
                     </button>
                   );
                 })}
@@ -575,39 +515,39 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
                 <div className={`fg-feedback ${lastResult === 'correct' ? 'good' : 'bad'}`} role="status">
                   <div className="fg-feedback-heading">
                     {lastResult === 'correct'
-                      ? (flagLevel === MAX_LEVEL ? 'إجابة صحيحة! وصلت الراية إلى القمة!' : 'أحسنت! ارتفعت الراية درجة نحو القمة.')
-                      : (flagLevel === 0 ? 'إجابة غير صحيحة؛ العلم باقٍ عند نقطة الانطلاق. حاول مجدداً!' : 'ليست الإجابة الصحيحة؛ نزل العلم درجة. لا تستسلم!')}
+                      ? (stepsCompleted === FLAG_STEPS ? tr('إجابة صحيحة! وصلت الراية إلى القمة!','Correct! The flag has reached the summit!') : tr('أحسنت! ارتفعت الراية نحو القمة.','Well done! The flag rises toward the summit.'))
+                      : (flagLevel === 0 ? tr('إجابة غير صحيحة؛ حاول مجدداً!','Not quite. Try again!') : tr('ليست الإجابة الصحيحة؛ حاول مجدداً!','Not quite; try again!'))}
                   </div>
-                  <p className="fg-fact">معلومة مفيدة: {currentQuestion.fact}</p>
-                  <button className="fg-next-btn" type="button" onClick={handleFeedbackAction}>{flagLevel === MAX_LEVEL ? 'عرض النتيجة والاحتفال' : 'السؤال التالي ←'}</button>
+                  <p className="fg-fact">{tr('معلومة مفيدة:','Did you know?')} {currentText.fact}</p>
+                  <button className="fg-next-btn" type="button" onClick={handleFeedbackAction}>{stepsCompleted===FLAG_STEPS?tr('عرض النتيجة والاحتفال','See results'):tr('السؤال التالي','Next question')}</button>
                 </div>
               ) : (
-                <div className="fg-hint"><span className="fg-hint-icon"><ResultIcon good/></span><span>اختر إجابة واحدة. تذكّر: كل إجابة صحيحة تقرّب علم الإمارات من قمة برج خليفة، ويمكنك المحاولة من جديد بعد كل سؤال.</span></div>
+                <div className="fg-hint"><span className="fg-hint-icon"><ResultIcon good/></span><span>{tr('اختر إجابة واحدة عن علم الإمارات، وستصل القمة بعد 10 إجابات صحيحة.','Choose an answer about the UAE flag. Reach the summit after 10 correct answers.')}</span></div>
               )}
             </>
           ) : (
             <div className="fg-victory">
               <div className="fg-win-emblem"><div className="fg-win-emblem-inner"><UaeFlagIcon/></div></div>
-              <div className="fg-victory-kicker">وصلت إلى قمة برج خليفة · 828 متراً</div>
-              <h2 className="fg-victory-title">دام عزك يا إمارات</h2>
-              <p className="fg-victory-name">أحسنت يا {studentName}!</p>
-              <p className="fg-victory-copy">رفعت راية الاتحاد عالياً بعلمك واجتهادك. تستحق أن تحتفل بهذا الإنجاز الوطني الجميل!</p>
+              <div className="fg-victory-kicker">{tr('وصلت إلى قمة برج خليفة · 828 متراً','Burj Khalifa Summit · 828 m')}</div>
+              <h2 className="fg-victory-title">{tr('دام عزك يا إمارات','Long Live the UAE')}</h2>
+              <p className="fg-victory-name">{tr('أحسنت يا','Well done,')} {studentName}!</p>
+              <p className="fg-victory-copy">{tr('رفعت راية الاتحاد عالياً بعلمك واجتهادك.','You raised the UAE flag high with your knowledge!')}</p>
               <div className="fg-reward-card">
-                <div className="fg-reward-label">مكافأة التحدي الوطني</div>
-                <div className="fg-reward-points">{awardStatus === 'saved' ? '+100 نقطة مكتبية' : awardStatus === 'saving' ? 'جارٍ تسجيل المكافأة…' : awardStatus === 'error' ? 'تعذّر تسجيل النقاط' : awardStatus === 'unavailable' ? 'إنجاز وطني يستحق الفخر' : 'إنجاز وطني يستحق الفخر'}</div>
+                <div className="fg-reward-label">{tr('مكافأة التحدي الوطني','National challenge reward')}</div>
+                <div className="fg-reward-points">{awardStatus === 'saved' ? tr('+100 نقطة مكتبية','+100 library points') : awardStatus === 'saving' ? tr('جارٍ تسجيل المكافأة…','Saving your reward…') : awardStatus === 'error' ? tr('تعذّر تسجيل النقاط','Points update failed') : tr('إنجاز وطني يستحق الفخر','A national achievement')}</div>
                 <div className="fg-award-status">
-                  {awardStatus === 'saved' ? 'تمت إضافة 100 نقطة إلى رصيدك في قاعدة بيانات المدرسة.' : awardStatus === 'saving' ? 'يتم التحقق من سجل الطالب وتحديث رصيد النقاط.' : awardStatus === 'error' ? 'تم الوصول إلى القمة، لكن لم نتمكن من تحديث النقاط. يرجى مراجعة مسؤول النظام.' : awardStatus === 'unavailable' ? 'تم إكمال التحدي. تُسجّل النقاط عند اللعب بحساب طالب مرتبط بقاعدة البيانات.' : 'اكتمل التحدي بنجاح.'}
+                  {awardStatus === 'saved' ? tr('تمت إضافة 100 نقطة إلى رصيدك في قاعدة بيانات المدرسة.','100 points were credited to your school account.') : awardStatus === 'saving' ? tr('جارٍ تحديث رصيد النقاط.','Updating your points…') : awardStatus === 'error' ? tr('يرجى مراجعة مسؤول النظام بشأن النقاط.','Please contact the administrator about the points.') : tr('اكتمل التحدي بنجاح.','Challenge completed.')}
                 </div>
-                <div className="fg-medal">وسام «فارس الراية الإماراتية» · {correctAnswersCount} إجابة صحيحة</div>
+                <div className="fg-medal">{tr('وسام فارس الراية الإماراتية','UAE Flag Champion Medal')} · {correctAnswersCount} {tr('إجابة صحيحة','correct answers')}</div>
               </div>
               <div className="fg-victory-actions">
-                <button className="fg-play-again" type="button" onClick={handleRestart}>العب مرة أخرى</button>
-                {onClose && <button className="fg-return-btn" type="button" onClick={onClose}>العودة</button>}
+                <button className="fg-play-again" type="button" onClick={handleRestart}>{tr('العب مرة أخرى','Play again')}</button>
+                {onClose && <button className="fg-return-btn" type="button" onClick={onClose}>{tr('العودة','Back')}</button>}
               </div>
             </div>
           )}
 
-          <footer className="fg-panel-foot"><span>ارفعه عالياً ليبقى شامخاً</span><span>المكتبة الذكية · مدرسة صقر الإمارات الدولية الخاصة</span></footer>
+          <footer className="fg-panel-foot"><span>{tr('ارفعه عالياً ليبقى شامخاً','Raise it high and proud')}</span><span>المكتبة الذكية · {tr('مدرسة صقر الإمارات الدولية الخاصة','Emirates Falcon International Private School')}</span></footer>
         </section>
       </main>
     </div>
