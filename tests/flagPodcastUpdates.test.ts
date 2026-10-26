@@ -18,3 +18,18 @@ assert.ok(podcast.includes("mimeType:'audio/mpeg'"));
 assert.ok(podcast.includes('episodeTitle.trim()'));
 assert.ok(!national.includes('قسم مستقل للكتب والمراجع، وليس من التحديات أو الألعاب.'));
 console.log('PASS bilingual 10-question bank, school labels and single MP3 submission wiring');
+
+const cards=readFileSync('pages/SearchPage.tsx','utf8');
+const mp3=readFileSync('src/utils/podcastMp3.ts','utf8');
+assert.ok(cards.includes('book.shelf === 22'));
+assert.ok(cards.includes('Disney_wordmark.svg'));
+assert.ok(cards.includes('book.shelf === 40'));
+assert.ok(cards.includes('aria-hidden="true"'));
+assert.ok(cards.includes('toggleSaved(readingKey)'));
+assert.ok(!podcast.includes('episodeTitle'));
+assert.ok(!podcast.includes('saqr-podcast-title'));
+assert.ok(podcast.includes('safePodcastFileName(studentName,studentGrade)'));
+assert.ok(podcast.includes("grade:studentGrade.trim()"));
+assert.ok(podcast.includes('setStudentName(user.name_en || user.name_ar'));
+assert.ok(mp3.includes('[name,grade].map'));
+console.log('PASS no podcast title and shelf-specific book-card decorations');
