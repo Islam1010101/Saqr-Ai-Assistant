@@ -14,6 +14,6 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-      - run: npm ci --no-audit --no-fund
+      - run: npm install --no-save --package-lock=false --no-audit --no-fund
       - run: node --experimental-strip-types tests/nationalIdentityBookSection.test.ts
       - run: npm run build
