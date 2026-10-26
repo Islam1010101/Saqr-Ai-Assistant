@@ -8,7 +8,7 @@ const podcastHeaderImg = '/Saqr Podcast.png';
 const translations = {
   ar: {
     pageTitle: "بودكاست صقر",
-    subTitle: "منبرك الصوتي لمشاركة المعرفة والإبداع",
+    subTitle: "من الفكرة إلى الميكروفون: سجّل صوتك، راجع أداءك، وشارك حلقتك مع مكتبتك.",
     arabicLibrary: "المكتبة الرقمية العربية",
     englishLibrary: "المكتبة الرقمية الإنجليزية",
     libraryDesc: "اختر كتابك من هنا قبل البدء بالتسجيل.",
@@ -20,12 +20,12 @@ const translations = {
     inst5: "استخدم مؤثرات الاستديو بعد التسجيل لمعاينة الصوت وتحسينه.",
     inst6: "تأكد من كتابة اسمك الرباعي وصفك الدراسي بشكل صحيح قبل الضغط على إرسال.",
     inst7: "سيخضع التسجيل للمراجعة من قبلنا قبل اعتماده ووضعه مع الكتاب المناسب.",
-    studioTitle: "غرفة التسجيل الذكية",
+    studioTitle: "استديو التسجيل والبودكاست",
     startRecord: "بدء التسجيل",
     stopRecord: "إنهاء وحفظ",
     recording: "جاري التسجيل الآن...",
     previewTitle: "معاينة هندسة الصوت",
-    effectsTitle: "مؤثرات الاستديو (للمعاينة)",
+    effectsTitle: "مؤثرات الاستديو — للمعاينة فقط",
     effEcho: "إضافة صدى",
     effNoise: "عزل الضوضاء",
     effPitch: "تغيير النبرة",
@@ -43,7 +43,7 @@ const translations = {
   },
   en: {
     pageTitle: "Saqr Podcast",
-    subTitle: "Your Vocal Platform to Share Knowledge & Creativity",
+    subTitle: "From story to microphone: record, review and share your voice with the library.",
     arabicLibrary: "Arabic Digital Library",
     englishLibrary: "English Digital Library",
     libraryDesc: "Select your book from here before starting the recording.",
@@ -55,12 +55,12 @@ const translations = {
     inst5: "Use studio effects after recording to preview and enhance the audio.",
     inst6: "Ensure you enter your full name and grade correctly before clicking submit.",
     inst7: "The recording will undergo review before being approved and placed with the appropriate book.",
-    studioTitle: "Smart Recording Room",
+    studioTitle: "Podcast Recording Studio",
     startRecord: "Start Recording",
     stopRecord: "Stop & Save",
     recording: "Recording in progress...",
     previewTitle: "Audio Engineering Preview",
-    effectsTitle: "Studio Effects (Preview)",
+    effectsTitle: "Studio Effects — Preview Only",
     effEcho: "Add Echo",
     effNoise: "Noise Reduction",
     effPitch: "Voice Changer",
@@ -388,6 +388,9 @@ const PodcastPage: React.FC = () => {
       });
       if(!data)throw new Error('Empty MP3 data');
       const fileName=safePodcastFileName(studentName,studentGrade,episodeTitle);
+      // The request is intentionally never retried from this recording session.
+      // The receiving Apps Script should also enforce submissionId deduplication.
+      sentRecordingIds.current.add(attemptId);
       const response=await fetch('https://script.google.com/macros/s/AKfycbzA8P-nF32I4Ponw18GynsgFCuf5LYH6kf16f4k7UjjPgod4mVGxSk12monYmYcCmFW/exec',{
         method:'POST',
         body:JSON.stringify({
@@ -398,14 +401,13 @@ const PodcastPage: React.FC = () => {
         })
       });
       if(!response.ok)throw new Error('Upload endpoint rejected recording');
-      sentRecordingIds.current.add(attemptId);
       setStatusMessage({type:'success',text:t('success')});
       setAudioBlob(null);setAudioUrl(null);setRecordingTime(0);
       setEffects({echo:false,noise:false,pitch:false});
       setEpisodeTitle('');
     }catch(error){
       console.error('Podcast MP3 upload failed',error);
-      setStatusMessage({type:'error',text:t('error')});
+      setStatusMessage({type:'error',text:(isAr?'تعذر تأكيد وصول التسجيل. لمنع أي نسخة مكررة، سجّل حلقة جديدة إذا تأكدت أنها لم تصل.':'Delivery could not be confirmed. To avoid duplicates, start a new recording only after checking the first was not received.')});
     }finally{
       uploadInFlight.current=false;
       setIsSubmitting(false);
@@ -424,7 +426,7 @@ const PodcastPage: React.FC = () => {
          <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-sky-400/20 blur-[100px] rounded-full animate-blob animation-delay-2000"></div>
       </div>
 
-      <div className="max-w-6xl mx-auto space-y-12 animate-fade-in-up relative z-10 pb-20">
+      <div className="max-w-6xl mx-auto space-y-10 animate-fade-in-up relative z-10 pb-20">
         
         {/* الهيدر العلوي */}
         <div className="text-center flex flex-col items-center">
@@ -453,7 +455,7 @@ const PodcastPage: React.FC = () => {
               onError={(e) => e.currentTarget.style.display = 'none'}
             />
           </div>
-          <h1 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tight mb-4 uppercase">{t('pageTitle')}</h1>
+          <h1 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tight mb-4">{t('pageTitle')}</h1>
           <p className="text-lg md:text-2xl text-slate-600 dark:text-slate-400 font-bold leading-relaxed max-w-2xl mx-auto">{t('subTitle')}</p>
           <div className="flex justify-center gap-3 mt-6">
              <div className="h-2 w-16 bg-rose-500 rounded-full"></div>
@@ -461,9 +463,20 @@ const PodcastPage: React.FC = () => {
           </div>
         </div>
 
+        <section className="grid grid-cols-1 sm:grid-cols-3 gap-4" aria-label={isAr?'مراحل إنتاج الحلقة':'Episode steps'}>
+          {[
+            {n:'01',ar:'اختر كتابك',en:'Choose your book',icon:<ListIcon/>},
+            {n:'02',ar:'سجّل وراجع',en:'Record & review',icon:<MicIcon/>},
+            {n:'03',ar:'أرسل حلقة MP3 واحدة',en:'Send one MP3',icon:<HeadphonesIcon/>}
+          ].map(step=><div key={step.n} className="relative overflow-hidden flex items-center gap-4 rounded-2xl border border-emerald-200 dark:border-emerald-900 bg-white dark:bg-slate-950 p-5 shadow-sm">
+            <span className="text-2xl font-black tabular-nums text-emerald-600 dark:text-emerald-400">{step.n}</span>
+            <strong className="text-sm sm:text-base text-slate-800 dark:text-white">{isAr?step.ar:step.en}</strong>
+            <span className="ms-auto text-emerald-700 dark:text-emerald-300 [&_svg]:h-6 [&_svg]:w-6">{step.icon}</span>
+          </div>)}
+        </section>
         {/* أزرار المكتبات */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-          <Link to="/digital-library/arabic" className="group bg-white dark:bg-slate-800 p-8 rounded-[3rem] border-4 border-slate-200 dark:border-slate-700 border-b-8 hover:border-emerald-400 dark:hover:border-emerald-500 hover:-translate-y-2 active:border-b-4 active:translate-y-2 transition-all flex items-center gap-6 shadow-sm">
+          <Link to="/digital-library/arabic" className="group bg-white dark:bg-slate-800 p-8 rounded-[3rem] border-2 border-emerald-200 dark:border-emerald-900 border-b-4 hover:border-emerald-400 dark:hover:border-emerald-500 hover:-translate-y-2 active:border-b-4 active:translate-y-2 transition-all flex items-center gap-6 shadow-sm">
             <div className="w-16 h-16 bg-emerald-50 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center border-4 border-emerald-200 dark:border-emerald-800 group-hover:scale-110 group-hover:rotate-6 transition-transform shrink-0">
                <UAEFlagIcon />
             </div>
@@ -472,7 +485,7 @@ const PodcastPage: React.FC = () => {
               <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-bold">{t('libraryDesc')}</p>
             </div>
           </Link>
-          <Link to="/digital-library/english" className="group bg-white dark:bg-slate-800 p-8 rounded-[3rem] border-4 border-slate-200 dark:border-slate-700 border-b-8 hover:border-sky-400 dark:hover:border-sky-500 hover:-translate-y-2 active:border-b-4 active:translate-y-2 transition-all flex items-center gap-6 shadow-sm">
+          <Link to="/digital-library/english" className="group bg-white dark:bg-slate-800 p-8 rounded-[3rem] border-2 border-emerald-200 dark:border-emerald-900 border-b-4 hover:border-sky-400 dark:hover:border-sky-500 hover:-translate-y-2 active:border-b-4 active:translate-y-2 transition-all flex items-center gap-6 shadow-sm">
             <div className="w-16 h-16 bg-sky-50 dark:bg-sky-900/30 text-sky-500 rounded-2xl flex items-center justify-center border-4 border-sky-200 dark:border-sky-800 group-hover:scale-110 group-hover:-rotate-6 transition-transform shrink-0">
                <GlobeIcon />
             </div>
@@ -484,7 +497,7 @@ const PodcastPage: React.FC = () => {
         </div>
 
         {/* دليل التسجيل */}
-        <div className="bg-amber-50 dark:bg-slate-800 p-8 md:p-12 rounded-[3rem] border-4 border-amber-300 dark:border-slate-700 shadow-sm relative overflow-hidden">
+        <div className="bg-emerald-50/70 dark:bg-slate-950 p-8 md:p-12 rounded-[2rem] border-2 border-emerald-200 dark:border-emerald-900 shadow-sm relative overflow-hidden">
           <ListIcon />
           <h2 className="text-3xl font-black mb-8 text-slate-900 dark:text-white relative z-10 tracking-tight">
              {t('instructionsTitle')}
