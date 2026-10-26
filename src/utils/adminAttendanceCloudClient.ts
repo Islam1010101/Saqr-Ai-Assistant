@@ -1,10 +1,10 @@
 import {createClient} from '@supabase/supabase-js';
-import {supabase} from './supabase';
+import {SUPABASE_URL,SUPABASE_ANON_KEY} from './supabase';
 import type {AttendanceRow,AttendanceMark} from './adminLibraryAttendance';
 
 // A separate Supabase Auth client prevents attendance verification from
 // changing school teacher/student logins or other Supabase session consumers.
-export const attendanceAuth=createClient(supabase.supabaseUrl,supabase.supabaseKey,{
+export const attendanceAuth=createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{
  auth:{storageKey:'efips-library-attendance-admin-session-v1',persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
 });
 export async function attendanceAdminSession(){
@@ -26,9 +26,9 @@ type ApiResult={rows?:Array<Record<string,unknown>>;archived?:boolean;ok?:boolea
 const call=async(body:Record<string,unknown>):Promise<ApiResult>=>{
  const session=await attendanceAdminSession();
  if(!session)throw new Error('Verified attendance-admin session required');
- const url=attendanceAuth.supabaseUrl.replace(/\/$/,'')+'/functions/v1/library-attendance-admin';
+ const url=SUPABASE_URL.replace(/\/$/,'')+'/functions/v1/library-attendance-admin';
  const response=await fetch(url,{method:'POST',headers:{
-  Authorization:'Bearer '+session.access_token,apikey:attendanceAuth.supabaseKey,'Content-Type':'application/json'
+  Authorization:'Bearer '+session.access_token,apikey:SUPABASE_ANON_KEY,'Content-Type':'application/json'
  },body:JSON.stringify(body)});
  const data=await response.json() as ApiResult;
  if(!response.ok)throw new Error(data.error||'Attendance service unavailable');
