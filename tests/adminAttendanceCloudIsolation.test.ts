@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const sql=readFileSync('supabase/attendance-cloud-isolated.sql','utf8');
+assert.match(sql,/create table if not exists public\.library_attendance_records/i);
+assert.match(sql,/create table if not exists public\.library_attendance_archives/i);
+assert.match(sql,/enable row level security/gi);
+assert.match(sql,/revoke all on table public\.library_attendance_records from public, anon, authenticated/i);
+assert.match(sql,/revoke all on table public\.library_attendance_archives from public, anon, authenticated/i);
+assert.doesNotMatch(sql,/(?:alter|update|delete|truncate|drop)\s+(?:table\s+)?(?:public\.)?library_schedule\b/i);
+assert.doesNotMatch(sql,/create\s+(?:policy|trigger)\b/i);
+console.log('PASS isolated and inaccessible attendance schema; no schedule mutation');
