@@ -15,7 +15,7 @@ assert.ok(game.includes('setStepsCompleted(nextStep)'));
 assert.ok(podcast.includes('recordingToMp3(audioBlob)'));
 assert.ok(podcast.includes('uploadInFlight.current=true'));
 assert.ok(podcast.includes("mimeType:'audio/mpeg'"));
-assert.ok(podcast.includes('episodeTitle.trim()'));
+assert.ok(!podcast.includes('episodeTitle'));
 assert.ok(!national.includes('قسم مستقل للكتب والمراجع، وليس من التحديات أو الألعاب.'));
 console.log('PASS bilingual 10-question bank, school labels and single MP3 submission wiring');
 
