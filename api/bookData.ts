@@ -1,3 +1,4 @@
+import {reviewedShelf41Books} from './shelf41ReviewedCatalog.ts';
 import { physicalBookAdditions } from './bookAdditions.ts';
 // 1. تعريف نوع البيانات
 export type Book = {
@@ -13,6 +14,11 @@ export type Book = {
   level?: string;
   language: 'AR' | 'EN';
   summary: string;
+  copies?: number;
+  publisher?: string;
+  year?: number;
+  pages?: number;
+  needsReview?: boolean;
 };
 
 // 2. البيانات الخام
@@ -3625,9 +3631,29 @@ const addedBooks:Book[] = physicalBookAdditions.filter(b=>!existingCatalog.some(
 }));
 // Update the displayed physical location without modifying original IDs or row
 // positions: existing borrowings and reading-passport keys stay valid.
-export const bookData: Book[] = [...existingCatalog,...addedBooks].map(book =>
+const originalBooks:Book[] = [...existingCatalog,...addedBooks].map(book =>
   book.shelf===34 ? {...book,shelf:35} : book
 );
+// Merge the reviewed physical shelf 41 inventory without changing any existing
+// book IDs: borrowing and reading-progress links continue to reference old keys.
+const normalizedShelf41Key=(book:{title:string;row:number}) =>
+  book.row+'|'+book.title.normalize('NFKC').toLocaleLowerCase().replace(/[^\p{L}\p{N}]/gu,'');
+const reviewedMap=new Map(reviewedShelf41Books.map(book=>[normalizedShelf41Key(book),book]));
+const mergedExisting=originalBooks.map(book=>{
+ if(book.shelf!==41)return book;
+ const reviewed=reviewedMap.get(normalizedShelf41Key(book));
+ if(!reviewed)return book;
+ return {...book,author:reviewed.author==='مؤلف غير مسجل'||reviewed.author==='Unknown Author'?book.author:reviewed.author,
+  subject:reviewed.subject,summary:reviewed.summary,copies:reviewed.copies,
+  ...(reviewed.isbn?{isbn:reviewed.isbn,isbnStatus:'candidate' as const}:{}),
+  ...(reviewed.publisher?{publisher:reviewed.publisher}:{}),
+  ...(reviewed.year?{year:reviewed.year}:{}),
+  ...(reviewed.pages?{pages:reviewed.pages}:{}),needsReview:reviewed.needsReview
+ };
+});
+const existing41=new Set(originalBooks.filter(book=>book.shelf===41).map(normalizedShelf41Key));
+const newShelf41Books:Book[]=reviewedShelf41Books.filter(book=>!existing41.has(normalizedShelf41Key(book))).map(book=>({...book}));
+export const bookData:Book[]=[...mergedExisting,...newShelf41Books];
 
 // 5. دالة البحث المخصصة للاستخدام في تطبيق الويب
 export function findInCatalog(q: string): Book[] {
