@@ -13,4 +13,5 @@ jobs:
           node-version: '22'
       - run: npm install --no-audit --no-fund
       - run: node --experimental-strip-types tests/flagPodcastUpdates.test.ts
+      - run: node tests/podcastMp3Encode.test.mjs
       - run: npm run build
