@@ -128,7 +128,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
   const currentDifficulty = stepsCompleted<4?'easy':stepsCompleted<7?'medium':'hard';
   const currentText=currentQuestion[english?'en':'ar'];
   const currentLandmark = UAE_LANDMARKS[flagLevel] ?? UAE_LANDMARKS[0];
-  const flagHeightPercent = 4 + (flagLevel / MAX_LEVEL) * 72;
+  const flagHeightPercent = 4 + (stepsCompleted / FLAG_STEPS) * 72;
   const progressPercent = Math.round((stepsCompleted / FLAG_STEPS) * 100);
 
   const difficultyLabel = useMemo(() => {
@@ -368,7 +368,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
                 <div className="fg-scene-title">{tr('رحلة راية المجد إلى القمة','The Flag of Glory Journey')}</div>
               </div>
             </div>
-            <div className="fg-level-pill">{tr('المستوى','Level')} {flagLevel} / {MAX_LEVEL}</div>
+            <div className="fg-level-pill">{tr('سؤال','Question')} {Math.min(FLAG_STEPS,stepsCompleted+1)} / {FLAG_STEPS}</div>
           </header>
 
           <div className="fg-visual">
