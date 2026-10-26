@@ -25,3 +25,14 @@ assert.ok(found.some(x=>x.shelf===41),'Saqr must find national identity shelf 41
 const sherlock=searchSaqrBookCatalog('شيرلوك هولمز',{physical:bookData,arabic:[],english:[]});
 assert.ok(sherlock.some(x=>x.title.includes('SHERLOCK HOLMES')));
 console.log('PASS relocated books, audience, national identity corner and Saqr search');
+
+import {readFileSync} from 'node:fs';
+const home=readFileSync('pages/NationalIdentityPage.tsx','utf8');
+const app=readFileSync('App.tsx','utf8');
+const standalone=readFileSync('pages/NationalIdentityBooksPage.tsx','utf8');
+assert.ok(home.includes('to="/saqr-national-identity/books"'));
+assert.ok(!home.includes('<NationalIdentityBookCorner'));
+assert.ok(app.includes('path="/saqr-national-identity/books"'));
+assert.ok(standalone.includes('<NationalIdentityBookCorner lang={lang}/>'));
+assert.ok(standalone.includes('to="/saqr-national-identity"'));
+console.log('PASS independent protected National Identity book route');
