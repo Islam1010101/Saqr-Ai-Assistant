@@ -112,6 +112,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
   const english=locale==='en';
   const tr=(ar:string,en:string)=>english?en:ar;
   const [stepsCompleted,setStepsCompleted]=useState(0);
+  const [visualPenalty,setVisualPenalty]=useState(0);
   const [flagLevel, setFlagLevel] = useState(0);
   const [usedQuestionIds, setUsedQuestionIds] = useState<number[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState<FlagQuestionBilingual>(() => chooseFlagQuestion(0, []));
@@ -128,7 +129,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
   const currentDifficulty = stepsCompleted<4?'easy':stepsCompleted<7?'medium':'hard';
   const currentText=currentQuestion[english?'en':'ar'];
   const currentLandmark = UAE_LANDMARKS[flagLevel] ?? UAE_LANDMARKS[0];
-  const flagHeightPercent = 4 + (stepsCompleted / FLAG_STEPS) * 72;
+  const flagHeightPercent = 4 + (Math.max(0,stepsCompleted-visualPenalty) / FLAG_STEPS) * 72;
   const progressPercent = Math.round((stepsCompleted / FLAG_STEPS) * 100);
 
   const difficultyLabel = useMemo(() => {
@@ -227,6 +228,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
       playTone('up');
       const nextStep=Math.min(FLAG_STEPS,stepsCompleted+1);
       setStepsCompleted(nextStep);
+      setVisualPenalty(0);
       const nextLevel = Math.min(MAX_LEVEL, Math.floor(nextStep * MAX_LEVEL / FLAG_STEPS));
       setFlagLevel(nextLevel);
       if (nextStep === FLAG_STEPS) {
@@ -235,6 +237,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
     } else {
       setLastResult('wrong');
       playTone('down');
+      setVisualPenalty(previous=>Math.min(2,previous+1));
       setFlagLevel(previous=>Math.max(0,previous-1));
     }
   };
@@ -266,6 +269,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
     awardStarted.current = false;
     setFlagLevel(0);
     setStepsCompleted(0);
+    setVisualPenalty(0);
     setUsedQuestionIds([]);
     setCurrentQuestion(chooseFlagQuestion(0, []));
     setSelectedOption(null);
