@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {startOfWeek,weekDayISO,generateAttendanceRows,attendanceSummary,teacherAttendanceTotals,markAttendance,parseAttendanceStorage,attendanceStorageKey} from '../src/utils/adminLibraryAttendance.ts';
+import {startOfWeek,weekDayISO,generateAttendanceRows,attendanceSummary,teacherAttendanceTotals,markAttendance,parseAttendanceStorage,attendanceStorageKey,archivePastAttendanceWeek,isWeekArchived,canArchiveWeek} from '../src/utils/adminLibraryAttendance.ts';
 assert.equal(startOfWeek(new Date('2026-10-26T12:00:00')),'2026-10-26');
 assert.equal(weekDayISO('2026-10-26',4),'2026-10-30');
 const slots=[
@@ -20,3 +20,11 @@ assert.equal(parseAttendanceStorage('broken').length,0);
 assert.equal(parseAttendanceStorage(JSON.stringify(reviewed)).length,2);
 assert.ok(attendanceStorageKey('Admin','2026-10-26').includes('2026-10-26'));
 console.log('PASS admin weekly attendance, dates, statuses and snapshots');
+
+const mem=new Map<string,string>();const store={getItem:(k:string)=>mem.get(k)||null,setItem:(k:string,v:string)=>{mem.set(k,v)},removeItem:(k:string)=>{mem.delete(k)}};
+const archiveKey=attendanceStorageKey('admin','2026-10-19');store.setItem(archiveKey,JSON.stringify(reviewed));
+assert.equal(canArchiveWeek('2026-10-19',new Date('2026-10-26T12:00:00')),true);
+assert.equal(canArchiveWeek('2026-10-26',new Date('2026-10-26T12:00:00')),false);
+assert.equal(archivePastAttendanceWeek(store,'admin','2026-10-26',new Date('2026-10-26T12:00:00')),false);
+assert.equal(archivePastAttendanceWeek(store,'admin','2026-10-19',new Date('2026-10-26T12:00:00')),true);
+assert.equal(store.getItem(archiveKey),null);assert.equal(isWeekArchived(store,'admin','2026-10-19'),true);
