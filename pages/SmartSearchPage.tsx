@@ -383,12 +383,12 @@ const SmartSearchPage: React.FC = () => {
     }
 
     // Exact national-identity collection request: show only recorded physical books.
-    if(/ركن\\s+الهوي[ةه]\\s+الوطني[ةه]|national\\s+identity\\s+(?:book\\s+)?corner|(?:كتب|books)\\s+(?:الرف\\s+|on\\s+shelf\\s+)41/i.test(userQuery)){
-      const clean=userQuery.replace(/ركن\\s+الهوي[ةه]\\s+الوطني[ةه]|national\\s+identity\\s+(?:book\\s+)?corner|(?:كتب|books)\\s+(?:الرف\\s+|on\\s+shelf\\s+)41/ig,'').replace(/^(?:كتب|ابحث|عن|في|ابحث عن|show|books|find)\\s*/i,'').trim();
+    if(/ركن\s+الهوي[ةه]\s+الوطني[ةه]|national\s+identity\s+(?:book\s+)?corner|(?:كتب|books)\s+(?:الرف\s+|on\s+shelf\s+)41/i.test(userQuery)){
+      const clean=userQuery.replace(/ركن\s+الهوي[ةه]\s+الوطني[ةه]|national\s+identity\s+(?:book\s+)?corner|(?:كتب|books)\s+(?:الرف\s+|on\s+shelf\s+)41/ig,'').replace(/^(?:كتب|ابحث|عن|في|ابحث عن|show|books|find)\s*/i,'').trim();
       const books=clean?searchNationalIdentityBooks(clean):nationalIdentityBooks;
       const ar=locale==='ar';
-      const info=books.length?books.slice(0,12).map((book,i)=>String(i+1)+'. **'+book.title+'** — '+(ar?'المؤلف':'Author')+': '+book.author+' — '+(ar?'الرف':'Shelf')+' '+book.shelf+' / '+(ar?'الصف':'Row')+' '+book.row).join('\\n\\n'):(ar?'لا توجد نتائج مطابقة في ركن الهوية الوطنية.':'No matching national-identity catalog titles.');
-      setMessages(prev=>[...prev,{role:'assistant',content:(ar?'## كتب ركن الهوية الوطنية\\n\\n':'## National Identity Book Corner\\n\\n')+info+'\\n\\n'+(ar?'[تصفح كل الكتب في صفحة صقر وهوية وطن](/#/saqr-national-identity)':'[Browse all titles in Saqr & National Identity](/#/saqr-national-identity)')}]);
+      const info=books.length?books.slice(0,12).map((book,i)=>String(i+1)+'. **'+book.title+'** — '+(ar?'المؤلف':'Author')+': '+book.author+' — '+(ar?'الرف':'Shelf')+' '+book.shelf+' / '+(ar?'الصف':'Row')+' '+book.row).join('\n\n'):(ar?'لا توجد نتائج مطابقة في ركن الهوية الوطنية.':'No matching national-identity catalog titles.');
+      setMessages(prev=>[...prev,{role:'assistant',content:(ar?'## كتب ركن الهوية الوطنية\n\n':'## National Identity Book Corner\n\n')+info+'\n\n'+(ar?'[تصفح كل الكتب في صفحة صقر وهوية وطن](/#/saqr-national-identity)':'[Browse all titles in Saqr & National Identity](/#/saqr-national-identity)')}]);
       setSaqrState('idle');setIsLoading(false);return;
     }
     // Retrieve verified catalog records across Arabic/English subjects and titles.
