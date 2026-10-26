@@ -18,7 +18,7 @@ const translations = {
     inst3: "يمكنك تسجيل ملخص للكتاب، أو عرض لأهم ما تعلمته منه.",
     inst4: "بإمكانك تسجيل الحوارات واللقاءات الثنائية حول الكتاب.",
     inst5: "استخدم مؤثرات الاستديو بعد التسجيل لمعاينة الصوت وتحسينه.",
-    inst6: "تأكد من كتابة اسمك الرباعي وصفك الدراسي بشكل صحيح قبل الضغط على إرسال.",
+    inst6: "سيظهر اسمك وصفك تلقائيًا من حساب المدرسة؛ راجعهما قبل الإرسال.",
     inst7: "سيخضع التسجيل للمراجعة من قبلنا قبل اعتماده ووضعه مع الكتاب المناسب.",
     studioTitle: "استديو التسجيل والبودكاست",
     startRecord: "بدء التسجيل",
@@ -32,14 +32,12 @@ const translations = {
     speed: "السرعة:",
     studentName: "اسم الطالب الرباعي",
     studentGrade: "الصف الدراسي",
-    episodeTitle: "عنوان حلقة البودكاست",
-    episodePlaceholder: "مثال: رحلتي مع كتاب أحلام على الورق",
-    mp3Info: "يرسل الاستديو ملف MP3 واحدًا باسم الطالب وصفه وعنوان الحلقة للمراجعة.",
+    mp3Info: "يُرسل ملف MP3 واحد تلقائيًا باسم الطالب وصفه المسجلين في حساب المدرسة.",
     submit: "إرسال إلى الاستديو",
     submitting: "جاري الرفع...",
     success: "تم إرسال تسجيلك بنجاح! شكراً لمشاركتك المتميزة.",
     error: "حدث خطأ غير متوقع، يرجى التحقق من الشبكة والمحاولة مرة أخرى.",
-    fillRequired: "يرجى تسجيل الصوت وإدخال عنوان الحلقة والتأكد من الاسم والصف."
+    fillRequired: "سجّل الصوت أولًا وتأكد من ظهور اسمك وصفك تلقائيًا من حساب المدرسة."
   },
   en: {
     pageTitle: "Saqr Podcast",
@@ -53,7 +51,7 @@ const translations = {
     inst3: "You can record a book summary or a presentation of your key learnings.",
     inst4: "You can record dialogues and interviews about the book.",
     inst5: "Use studio effects after recording to preview and enhance the audio.",
-    inst6: "Ensure you enter your full name and grade correctly before clicking submit.",
+    inst6: "Your name and grade appear automatically from your school account; check them before submitting.",
     inst7: "The recording will undergo review before being approved and placed with the appropriate book.",
     studioTitle: "Podcast Recording Studio",
     startRecord: "Start Recording",
@@ -67,14 +65,12 @@ const translations = {
     speed: "Speed:",
     studentName: "Full Student Name",
     studentGrade: "Grade",
-    episodeTitle: "Podcast Episode Title",
-    episodePlaceholder: "Example: What I learned from my favorite book",
-    mp3Info: "One MP3 is submitted for review with your full name, grade, and episode title.",
+    mp3Info: "One MP3 is submitted using your school account name and grade automatically.",
     submit: "Submit to Studio",
     submitting: "Uploading...",
     success: "Your recording was submitted successfully! Thank you for your contribution.",
     error: "An unexpected error occurred. Please check your network and try again.",
-    fillRequired: "Record your audio, add the episode title, and check your name and grade."
+    fillRequired: "Record audio first and confirm your school account name and grade are shown automatically."
   }
 };
 
@@ -183,7 +179,6 @@ const PodcastPage: React.FC = () => {
   // Form States - جلب البيانات تلقائياً من localStorage
   const [studentName, setStudentName] = useState('');
   const [studentGrade, setStudentGrade] = useState('');
-  const [episodeTitle,setEpisodeTitle]=useState('');
   const uploadInFlight=useRef(false);
   const sentRecordingIds=useRef(new Set<string>());
   const recordingId=useRef<string>('');
@@ -211,7 +206,7 @@ const PodcastPage: React.FC = () => {
       if (storedUser) {
         const user = JSON.parse(storedUser);
         setStudentName(user.name_en || user.name_ar || '');
-        setStudentGrade(user.grade || 'Unknown Grade');
+        setStudentGrade(user.grade || '');
       }
     } catch (error) {
       console.error('Failed to parse user data from localStorage', error);
@@ -369,7 +364,7 @@ const PodcastPage: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (!audioBlob || !studentName.trim() || !studentGrade.trim() || !episodeTitle.trim() || uploadInFlight.current) {
+    if (!audioBlob || !studentName.trim() || !studentGrade.trim() || uploadInFlight.current) {
       setStatusMessage({type:'error',text:t('fillRequired')});
       return;
     }
@@ -387,14 +382,14 @@ const PodcastPage: React.FC = () => {
         reader.readAsDataURL(mp3);
       });
       if(!data)throw new Error('Empty MP3 data');
-      const fileName=safePodcastFileName(studentName,studentGrade,episodeTitle);
+      const fileName=safePodcastFileName(studentName,studentGrade);
       // The request is intentionally never retried from this recording session.
       // The receiving Apps Script should also enforce submissionId deduplication.
       sentRecordingIds.current.add(attemptId);
       const response=await fetch('https://script.google.com/macros/s/AKfycbzA8P-nF32I4Ponw18GynsgFCuf5LYH6kf16f4k7UjjPgod4mVGxSk12monYmYcCmFW/exec',{
         method:'POST',
         body:JSON.stringify({
-          name:studentName.trim(),grade:studentGrade.trim(),title:episodeTitle.trim(),
+          name:studentName.trim(),grade:studentGrade.trim(),
           fileName,submissionId:attemptId,mimeType:'audio/mpeg',
           audioData:data,effectsApplied:JSON.stringify({...effects,playbackRate}),
           originalMimeType:audioBlob.type
@@ -404,7 +399,6 @@ const PodcastPage: React.FC = () => {
       setStatusMessage({type:'success',text:t('success')});
       setAudioBlob(null);setAudioUrl(null);setRecordingTime(0);
       setEffects({echo:false,noise:false,pitch:false});
-      setEpisodeTitle('');
     }catch(error){
       console.error('Podcast MP3 upload failed',error);
       setStatusMessage({type:'error',text:(isAr?'تعذر تأكيد وصول التسجيل. لمنع أي نسخة مكررة، سجّل حلقة جديدة إذا تأكدت أنها لم تصل.':'Delivery could not be confirmed. To avoid duplicates, start a new recording only after checking the first was not received.')});
@@ -600,12 +594,7 @@ const PodcastPage: React.FC = () => {
             />
           </div>
 
-          <div className="mb-8 relative z-10 rounded-3xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50/60 dark:bg-emerald-950/20 p-5 sm:p-6">
-            <label htmlFor="saqr-podcast-title" className="mb-3 block font-black text-base text-slate-800 dark:text-slate-100">{t('episodeTitle')}</label>
-            <input id="saqr-podcast-title" type="text" required maxLength={110} value={episodeTitle} onChange={event=>setEpisodeTitle(event.target.value)}
-              placeholder={t('episodePlaceholder')} className="w-full rounded-xl border-2 border-emerald-200 dark:border-emerald-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white px-4 py-3 outline-none focus:border-emerald-500"/>
-            <p className="mt-3 text-sm font-semibold leading-7 text-emerald-900 dark:text-emerald-200">{t('mp3Info')}</p>
-          </div>
+          <p className="mb-7 relative z-10 text-sm font-semibold leading-7 text-emerald-800 dark:text-emerald-200 text-center">{t('mp3Info')}</p>
           {/* رسائل الخطأ والنجاح */}
           {statusMessage.text && (
             <div className={`p-6 rounded-[2rem] mb-10 text-center font-black text-base md:text-lg relative z-10 border-4 ${statusMessage.type === 'error' ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800' : 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'}`}>
@@ -616,8 +605,8 @@ const PodcastPage: React.FC = () => {
           {/* زر الإرسال النهائي */}
           <button 
             onClick={handleSubmit}
-            disabled={isSubmitting || !audioBlob || !episodeTitle.trim()}
-            className={`w-full py-5 md:py-6 rounded-[2rem] font-black text-xl md:text-2xl transition-all flex items-center justify-center gap-4 relative z-10 transform active:scale-95 border-b-8 active:border-b-0 active:translate-y-2 uppercase tracking-widest ${(!audioBlob || isSubmitting) ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 border-slate-300 dark:border-slate-900 cursor-not-allowed' : 'bg-gradient-to-r from-rose-500 to-rose-600 border-rose-700 text-white shadow-lg'}`}
+            disabled={isSubmitting || !audioBlob || !studentName.trim() || !studentGrade.trim()}
+            className={`w-full py-5 md:py-6 rounded-[2rem] font-black text-xl md:text-2xl transition-all flex items-center justify-center gap-4 relative z-10 transform active:scale-95 border-b-8 active:border-b-0 active:translate-y-2 uppercase tracking-widest ${(!audioBlob || isSubmitting || !studentName.trim() || !studentGrade.trim()) ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 border-slate-300 dark:border-slate-900 cursor-not-allowed' : 'bg-gradient-to-r from-rose-500 to-rose-600 border-rose-700 text-white shadow-lg'}`}
           >
             {isSubmitting ? <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin"></div> : <RocketIcon />}
             {isSubmitting ? t('submitting') : t('submit')}
