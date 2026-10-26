@@ -3623,7 +3623,11 @@ const addedBooks:Book[] = physicalBookAdditions.filter(b=>!existingCatalog.some(
   level:'General',summary:/[\u0600-\u06FF]/.test(b.title)?'الوصف التفصيلي لهذا الكتاب غير متاح في الفهرس بعد.':'A verified book description is not yet available.',
   ...(b.isbn?{isbn:b.isbn,isbnStatus:'candidate' as const}: {})
 }));
-export const bookData: Book[] = [...existingCatalog,...addedBooks];
+// Update the displayed physical location without modifying original IDs or row
+// positions: existing borrowings and reading-passport keys stay valid.
+export const bookData: Book[] = [...existingCatalog,...addedBooks].map(book =>
+  book.shelf===34 ? {...book,shelf:35} : book
+);
 
 // 5. دالة البحث المخصصة للاستخدام في تطبيق الويب
 export function findInCatalog(q: string): Book[] {
