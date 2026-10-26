@@ -428,6 +428,24 @@ const BookCard = React.memo(({ book, onClick, t, locale }: { book: Book; onClick
         <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-black/10 pointer-events-none z-10"></div>
         <div className="absolute top-0 left-0 w-full h-1/2 bg-white/10 skew-y-12 pointer-events-none"></div>
 
+        {/* Shelf-specific catalog decoration; no changes to book records or card actions. */}
+        {book.shelf === 22 && (
+          <div className="pointer-events-none absolute end-3 top-14 z-10 h-12 w-[108px] rounded-2xl border border-white/65 bg-white/90 px-3 py-2 shadow-lg backdrop-blur-sm flex items-center justify-center" aria-label="Disney">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Disney_wordmark.svg" alt="Disney" className="block max-w-full max-h-full object-contain" loading="lazy" onError={e=>{e.currentTarget.style.display='none';e.currentTarget.parentElement?.querySelector('span')?.classList.remove('hidden');}} />
+            <span className="hidden font-black text-lg italic tracking-tight text-[#172a47]">Disney</span>
+          </div>
+        )}
+        {book.shelf === 40 && (
+          <div className="pointer-events-none absolute end-3 top-14 z-10 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/70 bg-slate-950/40 text-white shadow-lg backdrop-blur-md" aria-label={locale==='ar'?'مجموعة الكتب الصوتية':'Audio collection'}>
+            <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M3.5 14V11a8.5 8.5 0 0 1 17 0v3"/>
+              <rect x="3" y="12" width="5" height="8" rx="2"/>
+              <rect x="16" y="12" width="5" height="8" rx="2"/>
+              <path d="M19 20a4 4 0 0 1-4 2h-2"/>
+            </svg>
+          </div>
+        )}
+
         <div className="p-5 md:p-6 flex flex-col h-full relative z-20">
           
           <div className="flex justify-between items-start flex-row-reverse mb-auto">
