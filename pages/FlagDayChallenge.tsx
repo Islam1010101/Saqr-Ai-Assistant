@@ -21,6 +21,17 @@ type StoredStudent = Record<string, unknown> & {
 };
 
 const MAX_LEVEL = 7;
+const LANDMARK_EN=[
+ {name:'Al Jahili Fort',city:'Al Ain'},
+ {name:'Sheikh Zayed Grand Mosque',city:'Abu Dhabi'},
+ {name:'Museum of the Future',city:'Dubai'},
+ {name:'Dubai Frame',city:'Dubai'},
+ {name:'Burj Al Arab',city:'Dubai'},
+ {name:'Etihad Towers',city:'Abu Dhabi'},
+ {name:'Emirates Towers',city:'Dubai'},
+ {name:'Burj Khalifa Summit',city:'Dubai'}
+] as const;
+
 
 const UAE_LANDMARKS: LandmarkLevel[] = [
   { level: 0, name: 'قلعة الجاهلي', city: 'العين', heightLabel: 'نقطة الانطلاق', icon: 'fort' },
@@ -224,7 +235,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
     } else {
       setLastResult('wrong');
       playTone('down');
-      // Incorrect answers do not undo completed questions.
+      setFlagLevel(previous=>Math.max(0,previous-1));
     }
   };
 
@@ -361,7 +372,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
           </header>
 
           <div className="fg-visual">
-            <svg className="fg-skyline" viewBox="0 0 620 560" role="img" aria-label="رسم كرتوني لمعالم من دولة الإمارات" preserveAspectRatio="xMidYMax slice">
+            <svg className="fg-skyline" viewBox="0 0 620 560" role="img" aria-label={tr('رسم كرتوني لمعالم من دولة الإمارات','Illustration of UAE landmarks')} preserveAspectRatio="xMidYMax slice">
               <defs>
                 <linearGradient id="fg-burj" x1="0" x2="1"><stop offset="0" stopColor="#8ec6d4"/><stop offset=".46" stopColor="#edf6ed"/><stop offset="1" stopColor="#83b8d1"/></linearGradient>
                 <linearGradient id="fg-building" x1="0" x2="1"><stop offset="0" stopColor="#54859f"/><stop offset=".5" stopColor="#b4d4dc"/><stop offset="1" stopColor="#42677f"/></linearGradient>
@@ -427,12 +438,12 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
               })}
             </div>
 
-            <div className="fg-pole" aria-label={`ارتفاع العلم: المستوى ${flagLevel} من ${MAX_LEVEL}`}>
+            <div className="fg-pole" aria-label={tr(`ارتفاع العلم: المستوى ${flagLevel} من ${MAX_LEVEL}`,`Flag height: level ${flagLevel} of ${MAX_LEVEL}`)}>
               <div className="fg-pole-shaft" />
               <div className="fg-pole-tip" />
               <div className="fg-flag-holder" style={{ bottom: `${flagHeightPercent}%` }}>
                 <div className="fg-flag-ties" aria-hidden="true"><span /><span /></div>
-                <div className="fg-flag" aria-label="علم دولة الإمارات العربية المتحدة">
+                <div className="fg-flag" aria-label={tr('علم دولة الإمارات العربية المتحدة','UAE flag')}>
                   <div className="fg-flag-red" />
                   <div className="fg-flag-stripes"><span className="green" /><span className="white" /><span className="black" /></div>
                 </div>
@@ -441,8 +452,8 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
             <div className="fg-pole-base" aria-hidden="true" />
 
             <div className="fg-loc-tag">
-              <small>{tr('المحطة الحالية','Current landmark')} · {currentLandmark.city}</small>
-              <strong><LandmarkIcon name={currentLandmark.icon}/> {currentLandmark.name}</strong>
+              <small>{tr('المحطة الحالية','Current landmark')} · {english?LANDMARK_EN[flagLevel].city:currentLandmark.city}</small>
+              <strong><LandmarkIcon name={currentLandmark.icon}/> {english?LANDMARK_EN[flagLevel].name:currentLandmark.name}</strong>
             </div>
           </div>
 
