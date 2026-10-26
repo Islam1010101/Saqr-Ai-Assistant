@@ -7,4 +7,4 @@ assert.match(edge,/\.from\('library_schedule'\)\.select/);
 assert.doesNotMatch(edge,/\.from\('library_schedule'\)\.(?:insert|upsert|update|delete)/);
 assert.doesNotMatch(edge,/localStorage|user_type|current_user/);
 assert.match(sql,/revoke all on table public\.library_attendance_records from public, anon, authenticated/);
-console.log('PASS secure admin-only API; zero booking writes');
+assert.match(edge,/user\.email_confirmed_at/);\nassert.match(edge,/islam\.ahmed@falcon-school\.com/);\nconsole.log('PASS verified school admin-only API; zero booking writes');
