@@ -24,6 +24,7 @@ import SchedulePage from './pages/SchedulePage';
 import TutorialPage from './pages/TutorialPage';
 import FlagDayChallenge from './pages/FlagDayChallenge'; // Prepared for future activation; intentionally not routed.
 import NationalIdentityPage from './pages/NationalIdentityPage';
+import NationalIdentityBooksPage from './pages/NationalIdentityBooksPage';
 
 export type Locale = 'en' | 'ar';
 
@@ -530,6 +531,7 @@ const MainLayout: React.FC = () => {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/game" element={<ProtectedRoute><DeweyGame /></ProtectedRoute>} />
           <Route path="/saqr-national-identity" element={<ProtectedRoute><NationalIdentityRoute><NationalIdentityPage /></NationalIdentityRoute></ProtectedRoute>} />
+          <Route path="/saqr-national-identity/books" element={<ProtectedRoute><NationalIdentityRoute><NationalIdentityBooksPage /></NationalIdentityRoute></ProtectedRoute>} />
           <Route path="/schedule" element={<ProtectedRoute><SchedulePage /></ProtectedRoute>} />
         </Routes>
       </main>
