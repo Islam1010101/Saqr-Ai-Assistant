@@ -376,9 +376,9 @@ export default function TutorialPage() {
     },
     {
       id: 'studio', title: label('استديو صقر', 'Saqr Studio'),
-      description: label('شارك بإبداعاتك الصوتية والبودكاست.', 'Create audio work and contribute to podcasts.'),
+      description: label('سجّل بودكاست بعنوانه ثم راجع حلقتك قبل إرسال MP3.', 'Record a titled podcast, review it, and submit one MP3.'),
       color: 'bg-blue-500', border: 'border-blue-700', icon: <StudioIcon />,
-      hint: label('يعرض الاستديو تجربة التسجيل والمحتوى الصوتي. لن يتم تسجيل صوت أو رفع ملف في هذه الجولة.', 'The studio demonstrates audio and podcast tools. This tour will not record audio or upload files.')
+      hint: label('تعرّف على تسجيل الصوت ومعاينة المؤثرات وإرسال حلقة MP3 بعنوانها واسم الطالب وصفه؛ الجولة لا تسجل ولا ترفع ملفات.', 'Explore recording, preview effects, and one MP3 podcast submission with title, student name and grade. No audio is recorded or uploaded during this tour.')
     },
     {
       id: 'schedule', title: label('جدول المكتبة', 'Library Schedule'),
@@ -592,7 +592,7 @@ export default function TutorialPage() {
               </div>
               <div className="flex h-full flex-1 items-center overflow-hidden bg-amber-50 dark:bg-slate-800">
                 <div className="whitespace-nowrap px-4 text-xs font-bold text-slate-800 dark:text-slate-100 md:text-base">
-                  {label('تحدي راية المجد: عشرة أسئلة جديدة عن العلم | جناح الهوية الوطنية: اكتشف الكتب والمؤلفين | قائمة قراءتك الشهرية | سجل صوتك في بودكاست صقر | جديد الكتب بانتظارك!', "What's New: Saqr & National Identity with four heritage activities | Monthly completed-books list | Updated virtual tour | Saqr Studio | New books and editions at the library. See you soon!")}
+                  {label('تحدي راية المجد: عشرة أسئلة جديدة عن العلم | جناح الهوية الوطنية: اكتشف الكتب والمؤلفين | قائمة قراءتك الشهرية | سجل صوتك في بودكاست صقر | جديد الكتب بانتظارك!', "Explore the National Identity Pavilion | Ten UAE flag questions | Track your monthly reading | Record a Saqr Podcast MP3 | Discover the latest books in our library!")}
                 </div>
               </div>
             </div>
