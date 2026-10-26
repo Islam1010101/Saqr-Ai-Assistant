@@ -11,7 +11,7 @@ Deno.serve(async(req)=>{
   const url=Deno.env.get('SUPABASE_URL')!,anon=Deno.env.get('SUPABASE_ANON_KEY')!,secret=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
   const auth=createClient(url,anon,{global:{headers:{Authorization:'Bearer '+bearer}},auth:{persistSession:false}});
   const {data:{user},error}=await auth.auth.getUser(bearer);
-  if(error||!user||user.app_metadata?.efips_library_attendance_admin!==true)return reply(403,{error:'Attendance administrator not authorized'});
+  if(error||!user||!user.email_confirmed_at||user.email?.trim().toLowerCase()!=='islam.ahmed@falcon-school.com'||user.app_metadata?.efips_library_attendance_admin!==true)return reply(403,{error:'Attendance administrator not authorized'});
   const db=createClient(url,secret,{auth:{persistSession:false}});
   const data=await req.json();
   const week=String(data.week||'');
