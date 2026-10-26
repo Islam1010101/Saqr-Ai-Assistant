@@ -323,9 +323,6 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                 </button>
 
                 <div className="p-8 md:p-12 overflow-y-auto scrollbar-thin text-center flex-1">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400 text-xs font-black uppercase tracking-widest mb-6 border-2 border-sky-200 dark:border-sky-800">
-                        <RobotSvg /> Saqr AI Insight
-                    </div>
                     
                     <h2 className="text-3xl md:text-4xl text-slate-900 dark:text-white font-black leading-tight mb-4 tracking-tight" dir="ltr">{book.title}</h2>
                     
