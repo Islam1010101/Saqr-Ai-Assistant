@@ -1,4 +1,4 @@
-import lamejs from 'lamejs';
+import * as lamejs from '@breezystack/lamejs';
 /** Encode the actual recording bytes to MPEG Layer III. Never relabel
  * WebM/MP4 with a .mp3 suffix; decode them first and encode real MP3 frames.
  */
