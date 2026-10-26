@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../App';
+import {recordingToMp3,safePodcastFileName} from '../src/utils/podcastMp3';
 
 const podcastHeaderImg = '/Saqr Podcast.png'; 
 
@@ -31,11 +32,14 @@ const translations = {
     speed: "السرعة:",
     studentName: "اسم الطالب الرباعي",
     studentGrade: "الصف الدراسي",
+    episodeTitle: "عنوان حلقة البودكاست",
+    episodePlaceholder: "مثال: رحلتي مع كتاب أحلام على الورق",
+    mp3Info: "يرسل الاستديو ملف MP3 واحدًا باسم الطالب وصفه وعنوان الحلقة للمراجعة.",
     submit: "إرسال إلى الاستديو",
     submitting: "جاري الرفع...",
     success: "تم إرسال تسجيلك بنجاح! شكراً لمشاركتك المتميزة.",
     error: "حدث خطأ غير متوقع، يرجى التحقق من الشبكة والمحاولة مرة أخرى.",
-    fillRequired: "يرجى تسجيل الصوت أولاً، وتعبئة حقول الاسم والصف بدقة."
+    fillRequired: "يرجى تسجيل الصوت وإدخال عنوان الحلقة والتأكد من الاسم والصف."
   },
   en: {
     pageTitle: "Saqr Podcast",
@@ -63,11 +67,14 @@ const translations = {
     speed: "Speed:",
     studentName: "Full Student Name",
     studentGrade: "Grade",
+    episodeTitle: "Podcast Episode Title",
+    episodePlaceholder: "Example: What I learned from my favorite book",
+    mp3Info: "One MP3 is submitted for review with your full name, grade, and episode title.",
     submit: "Submit to Studio",
     submitting: "Uploading...",
     success: "Your recording was submitted successfully! Thank you for your contribution.",
     error: "An unexpected error occurred. Please check your network and try again.",
-    fillRequired: "Please record audio first, and accurately fill in the name and grade fields."
+    fillRequired: "Record your audio, add the episode title, and check your name and grade."
   }
 };
 
@@ -176,6 +183,10 @@ const PodcastPage: React.FC = () => {
   // Form States - جلب البيانات تلقائياً من localStorage
   const [studentName, setStudentName] = useState('');
   const [studentGrade, setStudentGrade] = useState('');
+  const [episodeTitle,setEpisodeTitle]=useState('');
+  const uploadInFlight=useRef(false);
+  const sentRecordingIds=useRef(new Set<string>());
+  const recordingId=useRef<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{type: 'success' | 'error' | '', text: string}>({type: '', text: ''});
 
@@ -244,6 +255,7 @@ const PodcastPage: React.FC = () => {
       mediaRecorder.start(200); // تقسيم البيانات لضمان عدم ضياعها في سفاري
       setIsRecording(true);
       setRecordingTime(0);
+      recordingId.current=crypto.randomUUID();
       setAudioBlob(null);
       setAudioUrl(null);
       setEffects({ echo: false, noise: false, pitch: false });
@@ -357,47 +369,45 @@ const PodcastPage: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (!audioBlob || !studentName.trim() || !studentGrade.trim() || isSubmitting) {
-      setStatusMessage({ type: 'error', text: t('fillRequired') });
+    if (!audioBlob || !studentName.trim() || !studentGrade.trim() || !episodeTitle.trim() || uploadInFlight.current) {
+      setStatusMessage({type:'error',text:t('fillRequired')});
       return;
     }
-
+    const attemptId=recordingId.current;
+    if(!attemptId || sentRecordingIds.current.has(attemptId))return;
+    uploadInFlight.current=true;
     setIsSubmitting(true);
-    setStatusMessage({type: '', text: ''});
-
-    try {
-      const reader = new FileReader();
-      reader.readAsDataURL(audioBlob);
-      reader.onloadend = async () => {
-        const base64Audio = (reader.result as string).split(',')[1]; 
-
-        const payload = {
-          name: studentName,
-          grade: studentGrade,
-          audioData: base64Audio,
-          mimeType: audioBlob.type,
-          effectsApplied: JSON.stringify({ ...effects, playbackRate })
-        };
-
-        const response = await fetch('https://script.google.com/macros/s/AKfycbzA8P-nF32I4Ponw18GynsgFCuf5LYH6kf16f4k7UjjPgod4mVGxSk12monYmYcCmFW/exec', {
-          method: 'POST',
-          body: JSON.stringify(payload)
-        });
-
-        if (response.ok) {
-          setStatusMessage({ type: 'success', text: t('success') });
-          setAudioBlob(null); // لمنع الإرسال المزدوج
-          setAudioUrl(null);
-          setRecordingTime(0);
-          setEffects({ echo: false, noise: false, pitch: false });
-        } else {
-          throw new Error('Network response was not ok.');
-        }
-      };
-    } catch (error) {
-      console.error(error);
-      setStatusMessage({ type: 'error', text: t('error') });
-    } finally {
+    setStatusMessage({type:'',text:''});
+    try{
+      const mp3=await recordingToMp3(audioBlob);
+      const data=await new Promise<string>((resolve,reject)=>{
+        const reader=new FileReader();
+        reader.onerror=()=>reject(new Error('Failed to encode MP3'));
+        reader.onload=()=>resolve(String(reader.result||'').split(',')[1]||'');
+        reader.readAsDataURL(mp3);
+      });
+      if(!data)throw new Error('Empty MP3 data');
+      const fileName=safePodcastFileName(studentName,studentGrade,episodeTitle);
+      const response=await fetch('https://script.google.com/macros/s/AKfycbzA8P-nF32I4Ponw18GynsgFCuf5LYH6kf16f4k7UjjPgod4mVGxSk12monYmYcCmFW/exec',{
+        method:'POST',
+        body:JSON.stringify({
+          name:studentName.trim(),grade:studentGrade.trim(),title:episodeTitle.trim(),
+          fileName,submissionId:attemptId,mimeType:'audio/mpeg',
+          audioData:data,effectsApplied:JSON.stringify({...effects,playbackRate}),
+          originalMimeType:audioBlob.type
+        })
+      });
+      if(!response.ok)throw new Error('Upload endpoint rejected recording');
+      sentRecordingIds.current.add(attemptId);
+      setStatusMessage({type:'success',text:t('success')});
+      setAudioBlob(null);setAudioUrl(null);setRecordingTime(0);
+      setEffects({echo:false,noise:false,pitch:false});
+      setEpisodeTitle('');
+    }catch(error){
+      console.error('Podcast MP3 upload failed',error);
+      setStatusMessage({type:'error',text:t('error')});
+    }finally{
+      uploadInFlight.current=false;
       setIsSubmitting(false);
     }
   };
@@ -406,7 +416,7 @@ const PodcastPage: React.FC = () => {
   const inputClass = "w-full p-4 md:p-5 rounded-2xl bg-slate-100 dark:bg-slate-800 border-4 border-slate-200 dark:border-slate-700 outline-none font-black text-slate-500 dark:text-slate-400 text-sm md:text-lg cursor-not-allowed shadow-inner text-center";
 
   return (
-    <div dir={dir} className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 py-10 px-4 md:py-16 font-sans antialiased text-slate-800 dark:text-slate-200 relative overflow-x-hidden">
+    <div dir={dir} className="min-h-screen bg-white dark:bg-black py-10 px-4 md:py-16 font-sans antialiased text-slate-800 dark:text-slate-200 relative overflow-x-hidden">
       
       {/* 🌟 تصميم طفولي للخلفية 🌟 */}
       <div className="fixed inset-0 overflow-hidden -z-10 pointer-events-none opacity-50 dark:opacity-20">
@@ -490,7 +500,7 @@ const PodcastPage: React.FC = () => {
         </div>
 
         {/* غرفة التسجيل الذكية */}
-        <div className="bg-white dark:bg-slate-900 p-8 md:p-12 rounded-[4rem] shadow-xl border-4 border-slate-200 dark:border-slate-700 relative overflow-hidden animate-fade-in">
+        <div className="bg-white dark:bg-slate-950 p-8 md:p-12 rounded-[2.25rem] shadow-xl border-2 border-emerald-200 dark:border-emerald-900 relative overflow-hidden animate-fade-in">
           
           <h2 className="text-3xl md:text-4xl font-black mb-12 text-center text-slate-900 dark:text-white tracking-tight relative z-10 uppercase">
              {t('studioTitle')}
@@ -577,6 +587,12 @@ const PodcastPage: React.FC = () => {
             />
           </div>
 
+          <div className="mb-8 relative z-10 rounded-3xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50/60 dark:bg-emerald-950/20 p-5 sm:p-6">
+            <label htmlFor="saqr-podcast-title" className="mb-3 block font-black text-base text-slate-800 dark:text-slate-100">{t('episodeTitle')}</label>
+            <input id="saqr-podcast-title" type="text" required maxLength={110} value={episodeTitle} onChange={event=>setEpisodeTitle(event.target.value)}
+              placeholder={t('episodePlaceholder')} className="w-full rounded-xl border-2 border-emerald-200 dark:border-emerald-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white px-4 py-3 outline-none focus:border-emerald-500"/>
+            <p className="mt-3 text-sm font-semibold leading-7 text-emerald-900 dark:text-emerald-200">{t('mp3Info')}</p>
+          </div>
           {/* رسائل الخطأ والنجاح */}
           {statusMessage.text && (
             <div className={`p-6 rounded-[2rem] mb-10 text-center font-black text-base md:text-lg relative z-10 border-4 ${statusMessage.type === 'error' ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800' : 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'}`}>
@@ -587,7 +603,7 @@ const PodcastPage: React.FC = () => {
           {/* زر الإرسال النهائي */}
           <button 
             onClick={handleSubmit}
-            disabled={isSubmitting || !audioBlob}
+            disabled={isSubmitting || !audioBlob || !episodeTitle.trim()}
             className={`w-full py-5 md:py-6 rounded-[2rem] font-black text-xl md:text-2xl transition-all flex items-center justify-center gap-4 relative z-10 transform active:scale-95 border-b-8 active:border-b-0 active:translate-y-2 uppercase tracking-widest ${(!audioBlob || isSubmitting) ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 border-slate-300 dark:border-slate-900 cursor-not-allowed' : 'bg-gradient-to-r from-rose-500 to-rose-600 border-rose-700 text-white shadow-lg'}`}
           >
             {isSubmitting ? <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin"></div> : <RocketIcon />}
@@ -619,7 +635,7 @@ const PodcastPage: React.FC = () => {
         @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-15px); } }
         .animate-float { animation: float 6s ease-in-out infinite; }
         
-        /* 💥 أنيميشن الانفجار الصوتي 💥 */
+        /* SVG audio animation */
         @keyframes audio-burst {
           0% { transform: translate(0, 0) scale(0) rotate(0deg); opacity: 1; filter: blur(0px); }
           50% { opacity: 1; }
