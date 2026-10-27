@@ -27,7 +27,7 @@ assert.ok(page.includes('setTimeout(() => {'));
 assert.ok(!page.includes('حاول مرة أخرى بعد مراجعة النص.'));
 assert.ok(page.includes('الرف 6، الصف 2'));
 assert.ok(!page.includes('printedDetectiveCases'));
-assert.ok(page.includes('const sourcedCases:Activity[]=verifiedDetective.map'));
+assert.ok(page.includes('verifiedDetective.map(entry=>'));
 assert.ok(!page.includes("handhalDictionary.title} · {handhalDictionary.author}"));
 assert.ok(!page.includes('noorlib.ir'));
 assert.ok(!page.includes('dictionaryMeaning'));
