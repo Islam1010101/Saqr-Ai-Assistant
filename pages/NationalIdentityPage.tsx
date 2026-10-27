@@ -8,7 +8,7 @@ import PassportStampCard from './PassportStampCard';
 import {getGuidedHeritageBook} from '../src/utils/heritageBookGuides';
 import {verifiedPassport} from '../src/utils/verifiedPassportEvidence';
 import {verifiedDetective} from '../src/utils/verifiedDetectiveEvidence';
-import {dictionaryTasks,handhalDictionary} from '../src/utils/heritageSourceFirst';
+import {dictionaryTasks,handhalDictionary,newDictionaryRound} from '../src/utils/heritageSourceFirst';
 
 
 type L = { ar: string; en: string };
@@ -260,6 +260,7 @@ const NationalIdentityPage: React.FC = () => {
   const entries = useMemo(() => {
     const source = activities[currentMode];
     if (currentMode === 'passport') { return source; }
+    if (currentMode === 'language') { const pool=newDictionaryRound();return pool.map(task=>source.find(entry=>entry.id===task.id)!).filter(Boolean); }
     const groups = [1,2,3,4].map(tier => source.filter(item => (item.difficulty||1) === tier));
     // Randomised once per visit and each replay, keeping easy -> expert progression.
     const shuffled = groups.flatMap(group => {const copy=[...group];for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]];}return copy;});
@@ -285,6 +286,7 @@ const NationalIdentityPage: React.FC = () => {
   const go = (next: Mode) => { setMode(next);setIndex(0);setChosen(null);setAdvancedPassport(false);setPassportTier(0);setStage('discover');setSourceOpened(false);setNewlyStamped(null);setRound(n=>n+1); };
   const selectEntry = (nextIndex: number) => {setIndex(nextIndex);setChosen(null);setAdvancedPassport(false);setStage('discover');setSourceOpened(false);setNewlyStamped(null);};
   const submitAnswer = (answer: number) => {
+    if (chosen===questionItem.correct) return;
     setChosen(answer);
     if (answer !== questionItem.correct) return;
     const field = progressField[currentMode];
@@ -300,7 +302,7 @@ const NationalIdentityPage: React.FC = () => {
   };
   const modules = [
     {id:'passport' as const,icon:'stamp' as const,title:l('جواز صقر الثقافي','Saqr Cultural Passport'),desc:l('اكتشف الإمارات السبع، واقرأ حكاية كل إمارة واجمع ختمها.','Explore all seven emirates, read their stories and collect their stamps.'),total:sourcedEmirates.length,count:progress.stamps.length,color:'from-emerald-700 to-teal-600'},
-    {id:'language' as const,icon:'weave' as const,title:l('كنوز لغتنا الإماراتية','Treasures of Emirati Language'),desc:l('تعرّف على مفردات التراث واستعملها في جمل من تأليفك.','Discover heritage terms and use them in your own sentences.'),total:dictionaryActivities.length,count:progress.words.length,color:'from-amber-600 to-orange-600'},
+    {id:'language' as const,icon:'weave' as const,title:l('كنوز لغتنا الإماراتية','Treasures of Emirati Language'),desc:l('تعرّف على مفردات التراث واستعملها في جمل من تأليفك.','Discover heritage terms and use them in your own sentences.'),total:10,count:entries.filter(x=>progress.words.includes(x.id)).length,color:'from-amber-600 to-orange-600'},
     {id:'archive' as const,icon:'document' as const,title:l('محقق ذاكرة الوطن','Heritage Research Detective'),desc:l('حلّل الأدلة واقرأ المصادر وتعلّم كيف تتحقق من المعلومات.','Study evidence, read sources and learn how to verify information.'),total:sourcedCases.length,count:progress.cases.length,color:'from-sky-700 to-indigo-700'}
   ];
   const selectedModule = modules.find(x=>x.id===currentMode) || modules[0];
@@ -333,7 +335,7 @@ const NationalIdentityPage: React.FC = () => {
             <p className="mt-3 max-w-2xl text-sm sm:text-base leading-8 font-semibold text-emerald-50/95">{tr(l('من حكايات الإمارات إلى مفردات التراث وملفات التاريخ، مغامرتك الثقافية تبدأ من مكتبتك.','From the stories of the emirates to heritage vocabulary and historical evidence, your cultural adventure starts in the library.'))}</p>
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <div className="rounded-xl border border-white/25 bg-white/10 px-4 py-3"><span className="block text-[11px] text-emerald-100">{tr(l('الأختام','Stamps'))}</span><strong className="text-xl font-black tabular-nums">{progress.stamps.length}/7</strong></div>
-              <div className="rounded-xl border border-white/25 bg-white/10 px-4 py-3"><span className="block text-[11px] text-emerald-100">{tr(l('كنوز اللغة','Word treasures'))}</span><strong className="text-xl font-black tabular-nums">{progress.words.length}/{dictionaryActivities.length}</strong></div>
+              <div className="rounded-xl border border-white/25 bg-white/10 px-4 py-3"><span className="block text-[11px] text-emerald-100">{tr(l('كنوز اللغة','Word treasures'))}</span><strong className="text-xl font-black tabular-nums">{progress.words.length}</strong></div>
               <div className="rounded-xl border border-white/25 bg-white/10 px-4 py-3"><span className="block text-[11px] text-emerald-100">{tr(l('ملفات البحث','Research files'))}</span><strong className="text-xl font-black tabular-nums">{progress.cases.length}/{sourcedCases.length}</strong></div>
             </div>
           </div>
@@ -344,7 +346,7 @@ const NationalIdentityPage: React.FC = () => {
       {mode === 'home' ? <>
         <div className="mt-9 mb-5 flex flex-wrap items-end justify-between gap-3">
           <div><p className="text-xs font-black text-emerald-700 dark:text-emerald-400">{tr(l('تحديات الهوية الوطنية','NATIONAL IDENTITY CHALLENGES'))}</p><h2 className="text-xl sm:text-2xl font-black mt-1">{tr(l('اختر رحلتك','Choose your journey'))}</h2></div>
-          <div className="rounded-full bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 px-4 py-2 text-xs font-black text-amber-800 dark:text-amber-200">{totalCompleted}/{sourcedEmirates.length+expandedWords.length+sourcedCases.length} {tr(l('مهمة مكتملة','missions completed'))}</div>
+          <div className="rounded-full bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 px-4 py-2 text-xs font-black text-amber-800 dark:text-amber-200">{totalCompleted}/{sourcedEmirates.length+dictionaryActivities.length+sourcedCases.length} {tr(l('مهمة مكتملة','missions completed'))}</div>
         </div>
         <div className="nh-challenges grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5">
           {modules.map(m=><button type="button" key={m.id} onClick={()=>go(m.id)} className="nh-challenge-card group overflow-hidden text-start rounded-[1.8rem] bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 shadow-lg hover:shadow-2xl hover:-translate-y-1 hover:border-emerald-400 dark:hover:border-emerald-700 transition-all focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-500">
@@ -465,8 +467,8 @@ const NationalIdentityPage: React.FC = () => {
                 </div>)}
           </div>}
         </section>}
-        <div className="nh-game-layout grid grid-cols-1 lg:grid-cols-[285px_minmax(0,1fr)] gap-5">
-          <aside className="nh-game-path h-fit rounded-[1.7rem] p-4 bg-[#F8F5EC] dark:bg-[#11150F] border border-amber-200 dark:border-amber-900/60">
+        <div className={'nh-game-layout grid grid-cols-1 gap-5 '+(mode==='language'?'lg:grid-cols-1':'lg:grid-cols-[285px_minmax(0,1fr)]')}>
+          {mode!=='language' && <aside className="nh-game-path h-fit rounded-[1.7rem] p-4 bg-[#F8F5EC] dark:bg-[#11150F] border border-amber-200 dark:border-amber-900/60">
             <h2 className="font-black text-lg mb-3 px-2">{mode==='passport'?tr(l('صفحات الجواز','Passport pages')):mode==='language'?tr(l('مفردات التراث','Heritage vocabulary')):tr(l('ملفات المحقق','Detective files'))}</h2>
             <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
               {entries.map((entry,i)=><button type="button" key={entry.id} aria-current={index===i?'step':undefined}
@@ -477,7 +479,7 @@ const NationalIdentityPage: React.FC = () => {
                 <span className="min-w-0 break-words">{tr(entry.name)}{mode!=='passport' && <small className="nh-level-label">{tr([l('سهل','Easy'),l('متوسط','Intermediate'),l('متقدم','Advanced'),l('خبير','Expert')][Math.min(4,entry.difficulty||1)-1])}</small>}</span>
               </button>)}
             </div>
-          </aside>
+          </aside>}
           <div className="nh-game-content min-w-0 space-y-5">
             <article className="nh-story-card rounded-[1.7rem] border border-emerald-100 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-lg overflow-hidden">
               <div className="border-b border-emerald-100 dark:border-slate-800 bg-gradient-to-r from-emerald-50 via-[#FFF8E9] to-white dark:from-emerald-950/35 dark:via-amber-950/15 dark:to-slate-950 p-5 sm:p-7">
@@ -528,14 +530,13 @@ const NationalIdentityPage: React.FC = () => {
               </div>
               {stage==='discover' ? <div className="nh-discovery"><div className="nh-discovery-art"><HeritageQuestArt kind={mode==='passport'?'passport':mode==='language'?'language':'archive'}/></div><h3 className="font-black text-xl sm:text-2xl">{tr(item.name)}</h3><p className="mt-3 text-sm sm:text-base leading-8">{tr(item.story)}</p><button type="button" onClick={()=>setStage('play')} className="nh-launch">{tr(l('ابدأ التحدي واكشف السر','Start the mission'))}<Icon kind="arrow" className="w-5 h-5"/></button></div> : <><div className="nh-stage-label">{tr(l('مهمة اكتشاف · اختر الدليل الصحيح','Discovery mission · choose the right clue'))}</div><p className="font-bold text-base sm:text-lg leading-8 mb-4">{tr(questionItem.question)}</p>
               {(mode==='passport'||mode==='archive')&&!sourceOpened && <p className="mb-4 text-sm font-bold text-amber-700 dark:text-amber-300">{tr(l('افتح المصدر أولًا لتفعيل الإجابات','Open the source first to enable answering'))}</p>}
-              {(mode==='passport'||mode==='archive')&&!sourceOpened && <p className="mb-4 text-sm font-bold text-amber-700 dark:text-amber-300">{tr(l('افتح المصدر أولًا لتفعيل الإجابات','Open the source first to enable answering'))}</p>}
               {mode==='language' && <div className="mb-5 rounded-2xl border-2 border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20 p-5">
                 <p className="text-xs font-black text-amber-900 dark:text-amber-200">{tr(l('اللفظ المطلوب','YOUR WORD TO LOOK UP'))}</p>
                 <strong className="mt-2 block text-3xl font-black" dir="rtl">{dictionaryTasks.find(task=>task.id===item.id)?.word}</strong>
                 <p className="mt-3 font-bold text-sm">{tr(l('توجّه إلى مكتبة المدرسة: معجم الدكتور فالح حنظل — الرف 6، الصف 2. اقرأ المدخل ثم اختر الإجابة الصحيحة أدناه.','Go to the school library: Dr Faleh Handhal’s printed dictionary — shelf 6, row 2. Read the entry and choose the correct answer below.'))}</p>
               </div>}
               <div className="nh-options grid grid-cols-1 md:grid-cols-3 gap-3">
-                {choicesOrder.map((originalIndex,i)=><button key={originalIndex} type="button" onClick={()=>submitAnswer(originalIndex)} disabled={(mode==='passport'||mode==='archive')&&!sourceOpened}
+                {choicesOrder.map((originalIndex,i)=><button key={originalIndex} type="button" onClick={()=>submitAnswer(originalIndex)} disabled={((mode==='passport'||mode==='archive')&&!sourceOpened)||(mode==='language'&&selectedCorrect)}
                   aria-pressed={chosen===originalIndex} className={'nh-answer min-h-[88px] text-start flex items-center gap-3 rounded-2xl border-2 px-4 py-3 font-bold text-sm leading-6 transition-all hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-400 '+(chosen===originalIndex?(selectedCorrect?'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-950 dark:text-emerald-100':'border-rose-400 bg-rose-50 dark:bg-rose-950/35 text-rose-900 dark:text-rose-100'):'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 hover:border-emerald-400') }>
                     <span className="flex shrink-0 w-8 h-8 rounded-full items-center justify-center border border-current/20 text-xs font-black">{i+1}</span>{tr(questionItem.choices[originalIndex])}
                   </button>)}
@@ -572,8 +573,8 @@ const NationalIdentityPage: React.FC = () => {
                 <button type="button" disabled={index===0} onClick={()=>selectEntry(index-1)}
                   className="rounded-xl px-4 py-2.5 text-xs font-black bg-slate-100 dark:bg-slate-900 disabled:opacity-40 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">{tr(l('السابق','Previous'))}</button>
                 {index<entries.length-1?<button type="button" onClick={()=>selectEntry(index+1)}
-                  className="rounded-xl px-5 py-2.5 text-xs font-black bg-emerald-700 text-white hover:bg-emerald-800 transition-colors">{tr(l('المهمة التالية','Next mission'))}</button>
-                  : <button type="button" onClick={()=>go('home')} className="rounded-xl px-5 py-2.5 text-xs font-black bg-emerald-700 text-white hover:bg-emerald-800 transition-colors">{tr(l('عودة للمغامرات','Back to adventures'))}</button>}
+                  className="rounded-xl px-5 py-2.5 text-xs font-black bg-emerald-700 text-white disabled:opacity-40 hover:bg-emerald-800 transition-colors">{tr(l('المهمة التالية','Next mission'))}</button>
+                  : <button type="button" disabled={mode==='language'&&!selectedCorrect} onClick={()=>go('home')} className="rounded-xl px-5 py-2.5 text-xs font-black bg-emerald-700 text-white hover:bg-emerald-800 transition-colors">{tr(l('عودة للمغامرات','Back to adventures'))}</button>}
               </div>
             </article>
           </div>
