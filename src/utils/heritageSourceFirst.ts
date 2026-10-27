@@ -1,23 +1,47 @@
-/**
- * The only learner-facing reference is Faleh Handhal's printed dictionary:
- * EFIPS Library, shelf 6, row 2. The source viewer was unavailable for direct
- * page inspection, so the Q/A bank is supported by published excerpts citing
- * the dictionary (editorialEvidence). Check the actual school edition before
- * describing its printed page numbers or treating it as fully audited.
- * Do not render editorialEvidence or any URLs to learners.
- */
-export const handhalDictionary = {
+import {handhalEntries} from './handhalScannedEntries.ts';
+/** Only the physical book is linked to the learner's challenge. */
+export const handhalDictionary={
  title:'معجم الألفاظ العامية في دولة الإمارات العربية المتحدة',
  author:'الدكتور فالح حنظل',
- shelf:6,
- row:2
+ shelf:6,row:2
 } as const;
+type Bilingual={ar:string;en:string};
 export type DictionaryMultipleChoice={
  id:string;word:string;difficulty:1|2|3|4;
- question:{ar:string;en:string};
- options:[{ar:string;en:string},{ar:string;en:string},{ar:string;en:string}];
- correct:number;
- explanation:{ar:string;en:string};
- editorialEvidence:{url:string;citedEditionPage:string};
+ question:Bilingual;options:[Bilingual,Bilingual,Bilingual];correct:number;
+ explanation:Bilingual;sourcePdfPage:number
 };
-export const dictionaryTasks:DictionaryMultipleChoice[]=[{"id":"handhal-dictionary-0","word":"جواني","difficulty":1,"question":{"ar":"ما المقصود باللفظ «جواني» كما أورده المعجم؟","en":"What does «جواني» refer to in the dictionary?"},"options":[{"ar":"نوع من النخيل وتموره","en":"A type of palm and its dates"},{"ar":"أداة لصيد الأسماك","en":"A fishing tool"},{"ar":"إناء لحفظ الماء","en":"A water container"}],"correct":0,"explanation":{"ar":"ورد اللفظ اسمًا لنوع من النخيل وتموره.","en":"The term names a type of palm and its dates."},"editorialEvidence":{"url":"https://folkculturebh.org/ar/index.php?id=1137&issue=59&page=article","citedEditionPage":"طبعة 1978، ص 146"}},{"id":"handhal-dictionary-1","word":"الزانة","difficulty":1,"question":{"ar":"ما معنى «الزانة» الوارد في المعجم؟","en":"What does «الزانة» mean?"},"options":[{"ar":"نوع من التوابل","en":"A type of spice"},{"ar":"العتاد والأسلحة","en":"Military equipment and weapons"},{"ar":"نوع من السعف","en":"Palm fronds"}],"correct":1,"explanation":{"ar":"تشير «الزانة» إلى العتاد والأسلحة.","en":"«الزانة» refers to military equipment and weapons."},"editorialEvidence":{"url":"https://www.masaha.org/book/view/4432/page/232","citedEditionPage":"ص 295"}},{"id":"handhal-dictionary-2","word":"قشع","difficulty":1,"question":{"ar":"ما أقرب معنى للفظ «قشع»؟","en":"What is the nearest meaning of «قشع»?"},"options":[{"ar":"أزال أو هدم","en":"To remove or demolish"},{"ar":"جمع التمر","en":"To collect dates"},{"ar":"نسج الخيوط","en":"To weave threads"}],"correct":0,"explanation":{"ar":"«قشع» في الشاهد بمعنى الإزالة والهدم.","en":"«قشع» denotes removing or demolishing."},"editorialEvidence":{"url":"https://www.masaha.org/book/view/4432/page/232","citedEditionPage":"ص 528"}},{"id":"handhal-dictionary-3","word":"دار صيني","difficulty":1,"question":{"ar":"إلى أي نوع من الأشياء يشير لفظ «دار صيني»؟","en":"What category does «دار صيني» describe?"},"options":[{"ar":"نوع من العطور","en":"A kind of perfume"},{"ar":"نوع من التوابل","en":"A type of spice"},{"ar":"أداة للري","en":"An irrigation tool"}],"correct":1,"explanation":{"ar":"استُعمل اللفظ اسمًا لنوع من التوابل.","en":"The term refers to a type of spice."},"editorialEvidence":{"url":"https://arabic-books.amuslim.org/%D8%A7%D9%84%D8%AA%D8%A7%D8%B1%D9%8A%D8%AE/Web/11790/001.htm","citedEditionPage":"إحالة: ص 208"}},{"id":"handhal-dictionary-4","word":"يواني","difficulty":2,"question":{"ar":"بأي مجال ترتبط كلمة «يواني» في المعجم؟","en":"What does the word «يواني» relate to?"},"options":[{"ar":"صناعة السفن","en":"Boatbuilding"},{"ar":"السدو","en":"Al Sadu weaving"},{"ar":"النخيل والتمر","en":"Palm trees and dates"}],"correct":2,"explanation":{"ar":"«يواني» صيغة تُذكر إلى جانب «جواني» للدلالة على نوع من النخيل وتموره.","en":"«يواني» is recorded with «جواني» for a kind of palm and its dates."},"editorialEvidence":{"url":"https://folkculturebh.org/ar/index.php?id=1137&issue=59&page=article","citedEditionPage":"طبعة 1978، ص 146"}},{"id":"handhal-dictionary-5","word":"دكيكة","difficulty":2,"question":{"ar":"ما الكلمة الفصيحة التي يقابلها النطق «دكيكة»؟","en":"Which standard Arabic word corresponds to «دكيكة»?"},"options":[{"ar":"دقيقة","en":"دقيقة"},{"ar":"حقيقة","en":"حقيقة"},{"ar":"وثيقة","en":"وثيقة"}],"correct":0,"explanation":{"ar":"تُذكر «دكيكة» مثالًا لنطق «دقيقة» عند تبدل القاف.","en":"«دكيكة» is cited as a pronunciation of «دقيقة»."},"editorialEvidence":{"url":"https://almolltaqa.com/vb/node/94882","citedEditionPage":"ص 517"}},{"id":"handhal-dictionary-6","word":"جاسم","difficulty":2,"question":{"ar":"ما الاسم الأصلي الذي تقابله صيغة «جاسم» في مبحث نطق القاف؟","en":"What original name corresponds to «جاسم» in the Qaf discussion?"},"options":[{"ar":"هاشم","en":"هاشم"},{"ar":"قاسم","en":"قاسم"},{"ar":"جابر","en":"جابر"}],"correct":1,"explanation":{"ar":"يورد المؤلف «جاسم» مقابل «قاسم» في تحولات النطق.","en":"The discussion contrasts «جاسم» with «قاسم»."},"editorialEvidence":{"url":"https://almolltaqa.com/vb/node/94882","citedEditionPage":"ص 517"}},{"id":"handhal-dictionary-7","word":"الشارجة","difficulty":2,"question":{"ar":"أي اسم مكان تقابله كلمة «الشارجة»؟","en":"Which place name corresponds to «الشارجة»?"},"options":[{"ar":"الشارقة","en":"Sharjah"},{"ar":"عجمان","en":"Ajman"},{"ar":"الفجيرة","en":"Fujairah"}],"correct":0,"explanation":{"ar":"«الشارجة» صيغة صوتية لكلمة «الشارقة».","en":"«الشارجة» is cited as a pronunciation of Sharjah."},"editorialEvidence":{"url":"https://almolltaqa.com/vb/node/94882","citedEditionPage":"ص 517"}},{"id":"handhal-dictionary-8","word":"غبايل","difficulty":3,"question":{"ar":"ما الكلمة التي تمثلها الصيغة «غبايل» في المثال الصوتي؟","en":"Which standard form corresponds to «غبايل»?"},"options":[{"ar":"غابات","en":"Forests"},{"ar":"قبائل","en":"قبائل"},{"ar":"قوارب","en":"Boats"}],"correct":1,"explanation":{"ar":"وردت «غبايل» في مقابل «قبائل» عند إبدال القاف غينًا.","en":"«غبايل» corresponds to «قبائل» when Qaf is pronounced as Ghayn."},"editorialEvidence":{"url":"https://almolltaqa.com/vb/node/94882","citedEditionPage":"ص 517"}},{"id":"handhal-dictionary-9","word":"غصايد","difficulty":3,"question":{"ar":"أي لفظ فصيح يقابله النطق «غصايد»؟","en":"Which standard word corresponds to «غصايد»?"},"options":[{"ar":"قصائد","en":"قصائد"},{"ar":"قواعد","en":"قواعد"},{"ar":"حصائد","en":"حصائد"}],"correct":0,"explanation":{"ar":"يُقابل المثال «غصايد» بكلمة «قصائد».","en":"The example «غصايد» corresponds to «قصائد»."},"editorialEvidence":{"url":"https://almolltaqa.com/vb/node/94882","citedEditionPage":"ص 517"}},{"id":"handhal-dictionary-10","word":"غصر","difficulty":3,"question":{"ar":"ما اللفظ الذي تقابله «غصر» في الشاهد الصوتي؟","en":"Which word is represented by «غصر»?"},"options":[{"ar":"غرس","en":"غرس"},{"ar":"قصر","en":"قصر"},{"ar":"غوص","en":"غوص"}],"correct":1,"explanation":{"ar":"ورد «غصر» في مقابل «قصر».","en":"«غصر» corresponds to «قصر»."},"editorialEvidence":{"url":"https://almolltaqa.com/vb/node/94882","citedEditionPage":"ص 517"}},{"id":"handhal-dictionary-11","word":"جواني","difficulty":3,"question":{"ar":"إذا قرأت «جواني» و«يواني» في المعجم، فأي علاقة بينهما صحيحة؟","en":"What relationship does the dictionary cite for «جواني» and «يواني»?"},"options":[{"ar":"لفظان لمهنة واحدة","en":"Two names for the same trade"},{"ar":"صيغتان لاسم نوع من النخيل","en":"Two forms naming a type of palm"},{"ar":"اسمان لميناء بحري","en":"Two names for a harbour"}],"correct":1,"explanation":{"ar":"يورد المرجع الصيغتين لنوع من النخيل وتموره.","en":"The two forms designate a type of palm and its dates."},"editorialEvidence":{"url":"https://folkculturebh.org/ar/index.php?id=1137&issue=59&page=article","citedEditionPage":"طبعة 1978، ص 146"}},{"id":"handhal-dictionary-12","word":"دكيكة","difficulty":4,"question":{"ar":"أي تبدل صوتي يفسر كلمة «دكيكة» في المثال المذكور؟","en":"Which sound substitution explains «دكيكة»?"},"options":[{"ar":"تحول القاف إلى كاف","en":"Qaf pronounced as Kaf"},{"ar":"تحول القاف إلى غين","en":"Qaf pronounced as Ghayn"},{"ar":"تحول الكاف إلى ميم","en":"Kaf pronounced as Meem"}],"correct":0,"explanation":{"ar":"يناقش النص نطق القاف كافًا في «دكيكة».","en":"The text presents Qaf pronounced as Kaf in «دكيكة»."},"editorialEvidence":{"url":"https://almolltaqa.com/vb/node/94882","citedEditionPage":"ص 517"}},{"id":"handhal-dictionary-13","word":"غبايل","difficulty":4,"question":{"ar":"ما التحول الصوتي الذي يظهر في «غبايل» مقابل «قبائل»؟","en":"Which sound shift appears in «غبايل» versus «قبائل»?"},"options":[{"ar":"تحول الباء إلى ميم","en":"Ba to Meem"},{"ar":"تحول القاف إلى غين","en":"Qaf to Ghayn"},{"ar":"تحول اللام إلى نون","en":"Lam to Noon"}],"correct":1,"explanation":{"ar":"المثال يوضح نطق القاف غينًا.","en":"The example shows Qaf realised as Ghayn."},"editorialEvidence":{"url":"https://almolltaqa.com/vb/node/94882","citedEditionPage":"ص 517"}},{"id":"handhal-dictionary-14","word":"الشارجة","difficulty":4,"question":{"ar":"أي تحول في نطق القاف أدى إلى صيغة «الشارجة»؟","en":"What pronunciation change yields «الشارجة»?"},"options":[{"ar":"نطقها جيمًا","en":"Pronounced as Jeem"},{"ar":"حذفها تمامًا","en":"Removed entirely"},{"ar":"نطقها سينًا","en":"Pronounced as Seen"}],"correct":0,"explanation":{"ar":"يستعمل المثال «الشارجة» بدل «الشارقة» مع قلب القاف جيمًا.","en":"The example changes Qaf to Jeem in «الشارجة»."},"editorialEvidence":{"url":"https://almolltaqa.com/vb/node/94882","citedEditionPage":"ص 517"}}];
+const normalize=(s:string)=>s.normalize('NFKC').replace(/[\u064B-\u065F\u0670]/g,'');
+export const dictionaryTasks:DictionaryMultipleChoice[]=handhalEntries.map((entry,i)=>{
+ const rivals=handhalEntries.filter(e=>e!==entry && e.meaning!==entry.meaning && normalize(e.word)!==normalize(entry.word) && e.category!==entry.category);
+ const first=rivals[(i*7)%rivals.length];
+ const second=rivals[(i*7+9)%rivals.length]===first?rivals[(i*7+10)%rivals.length]:rivals[(i*7+9)%rivals.length];
+ const correct=i%3;
+ const meanings=[first.meaning,second.meaning];meanings.splice(correct,0,entry.meaning);
+ return {
+ id:'handhal-scanned-'+String(i+1).padStart(3,'0'),word:entry.word,
+ difficulty:(i%4+1) as 1|2|3|4,
+ question:{ar:'ما المعنى الذي يذكره المعجم للفظ «'+entry.word+'»؟',en:'What meaning does the printed dictionary give for «'+entry.word+'»?'},
+ options:meanings.map(ar=>({ar,en:ar})) as [Bilingual,Bilingual,Bilingual],
+ correct,
+ explanation:{ar:'معنى اللفظ في المرجع: '+entry.meaning,en:'Dictionary meaning: '+entry.meaning},
+ sourcePdfPage:entry.pdfPage
+ };
+});
+/** A randomized ten-question round; unique words only; easy to advanced. */
+export const newDictionaryRound=(bank:DictionaryMultipleChoice[]=dictionaryTasks):DictionaryMultipleChoice[]=>{
+ const levels:[1,2,3,4]=[1,2,3,4];
+ const quotas=[3,3,2,2];
+ const result:DictionaryMultipleChoice[]=[];
+ for(let i=0;i<levels.length;i++){
+  const list=bank.filter(x=>x.difficulty===levels[i]&&!result.some(y=>y.word===x.word));
+  for(let j=list.length-1;j>0;j--){const k=Math.floor(Math.random()*(j+1));[list[j],list[k]]=[list[k],list[j]];}
+  result.push(...list.slice(0,quotas[i]));
+ }
+ if(result.length<10){
+  const rest=bank.filter(x=>!result.some(y=>y.word===x.word));
+  for(let i=rest.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[rest[i],rest[j]]=[rest[j],rest[i]];}
+  result.push(...rest.slice(0,10-result.length));
+ }
+ return result.slice(0,10).sort((a,b)=>a.difficulty-b.difficulty);
+};
