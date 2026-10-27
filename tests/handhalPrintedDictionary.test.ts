@@ -28,3 +28,14 @@ assert.ok(!page.includes('noorlib.ir'));
 assert.ok(!page.includes('dictionaryMeaning'));
 assert.ok(page.includes('submitAnswer(originalIndex)'));
 console.log('PASS verified photographed word bank, ten randomized progressive prompts, next-question lock and hidden sidebar');
+
+const catalog=readFileSync('pages/SearchPage.tsx','utf8');
+assert.ok(!catalog.includes('>فرز حسب<'));
+assert.ok(!catalog.includes('>يحتاج مراجعة<'));
+assert.ok(!catalog.includes('<option value="review">'));
+assert.ok(!catalog.includes('<option value="teens">'));
+assert.ok(catalog.includes('Grades 4–8'));
+assert.ok(catalog.includes('Disney_wordmark.svg'));
+assert.ok(catalog.includes('top-14 z-10 h-7 w-[70px]'));
+assert.ok(!catalog.includes('bg-white/90 px-3 py-2'));
+console.log('PASS simplified catalog controls and transparent Disney logo positioned above title');
