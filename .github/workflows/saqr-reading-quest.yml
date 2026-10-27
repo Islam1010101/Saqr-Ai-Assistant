@@ -1,0 +1,26 @@
+name: EFIPS Saqr reading challenge validation
+on:
+  push:
+    branches: [feat/saqr-between-the-lines-challenge-20261027]
+  pull_request:
+    paths:
+      - 'pages/SaqrReadingQuestPage.tsx'
+      - 'pages/SaqrChallengesHubPage.tsx'
+      - 'pages/HomePage.tsx'
+      - 'src/utils/saqrReadingQuestBank.ts'
+      - 'tests/saqrReadingQuest.test.ts'
+      - '.github/workflows/saqr-reading-quest.yml'
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.16.0'
+          cache: npm
+      - run: npm ci
+      - run: node --experimental-strip-types tests/saqrReadingQuest.test.ts
+      - run: npm run build
