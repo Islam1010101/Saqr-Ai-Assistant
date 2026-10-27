@@ -9,6 +9,7 @@ import {getGuidedHeritageBook} from '../src/utils/heritageBookGuides';
 import {verifiedPassport} from '../src/utils/verifiedPassportEvidence';
 import {verifiedDetective} from '../src/utils/verifiedDetectiveEvidence';
 import {verifiedHeritageBookQuestions} from '../src/utils/verifiedHeritageBookQuestions';
+import {getPassportBookEvidence} from '../src/utils/passportBookEvidence';
 import {dictionaryTasks,handhalDictionary,newDictionaryRound} from '../src/utils/heritageSourceFirst';
 import {DETECTIVE_ROUND_SIZE,newDetectiveRound} from '../src/utils/detectiveRound';
 
@@ -269,15 +270,15 @@ const NationalIdentityPage: React.FC = () => {
     return newDetectiveRound(source);
   }, [currentMode,round]);
   const item = entries[index] || entries[0];
-  const questionItem = currentMode === 'passport' && advancedPassport
-    ? {...item,...sourcedFollowUps[item.id]?.[Math.max(0,passportTier-1)],story:item.story}
+  const passportBookQuestion=currentMode==='passport'?getPassportBookEvidence(item.id,(passportTier+1) as 1|2|3|4):null;
+  const questionItem = currentMode==='passport'
+    ? {...item,...(advancedPassport?sourcedFollowUps[item.id]?.[Math.max(0,passportTier-1)]:{}),...(passportBookQuestion||{}),story:item.story}
     : item;
   const completedIds = progress[progressField[currentMode]];
   const done = completedIds.includes(item.id);
   const difficulty = mode==='passport'?passportTier+1:(item.difficulty||1);
   const difficultyName = [l('سهل','Easy'),l('متوسط','Intermediate'),l('متقدم','Advanced'),l('خبير','Expert')][Math.min(4,difficulty)-1];
   const suggestedBook=(currentMode==='passport'||currentMode==='archive')?getGuidedHeritageBook(item.id,difficulty,round+index+passportTier):null;
-  const [sourceOpened,setSourceOpened]=useState(false);
   const selectedCorrect = chosen !== null && chosen === questionItem.correct;
   const choicesOrder = useMemo(() => {
     const indexes = [0,1,2];
@@ -285,7 +286,7 @@ const NationalIdentityPage: React.FC = () => {
     return indexes;
   }, [currentMode,index,round,advancedPassport]);
   const totalCompleted = progress.stamps.length + progress.words.length + progress.cases.length;
-  const go = (next: Mode) => { setMode(next);setIndex(0);setChosen(null);setFailed(false);setAdvancedPassport(false);setPassportTier(0);setStage('play');setSourceOpened(false);setNewlyStamped(null);setRound(n=>n+1); };
+  const go = (next: Mode) => { setMode(next);setIndex(0);setChosen(null);setFailed(false);setAdvancedPassport(false);setPassportTier(0);setStage('play');setNewlyStamped(null);setRound(n=>n+1); };
   const selectEntry = (nextIndex: number) => {setIndex(nextIndex);setChosen(null);setFailed(false);setAdvancedPassport(false);setStage('play');setSourceOpened(false);setNewlyStamped(null);};
   const submitAnswer = (answer: number) => {
     if (chosen!==null || failed) return;
@@ -310,7 +311,7 @@ const NationalIdentityPage: React.FC = () => {
       if (currentMode==='passport' && passportTier<3) {
         setPassportTier(previous=>previous+1);
         setAdvancedPassport(true);
-        setChosen(null);setFailed(false);setSourceOpened(false);
+        setChosen(null);setFailed(false);
       } else if (index<entries.length-1) {
         selectEntry(index+1);
       } else {
@@ -489,8 +490,9 @@ const NationalIdentityPage: React.FC = () => {
                   <p className="text-xs font-black text-emerald-700 dark:text-emerald-300">{tr(l('مصدر المهمة','Mission source'))}</p>
                   <strong className="block mt-1 text-base sm:text-lg font-black">{tr(item.name)}</strong>
                 </div>
-                {item.physicalBook && <p className="w-full text-sm font-semibold leading-7">{tr(l('الكتاب الورقي','Printed book'))}: {item.physicalBook.title} · {item.physicalBook.author} · {tr(l('الرف','Shelf'))} {item.physicalBook.shelf} · {tr(l('الصف','Row'))} {item.physicalBook.row}</p>}
-                {questionItem.source ? <a href={questionItem.source} target="_blank" rel="noopener noreferrer" onClick={()=>setSourceOpened(true)} className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-3 text-xs sm:text-sm font-black text-white hover:bg-emerald-800 focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-500">{tr(l('افتح المصدر الأصلي','Open original source'))}<Icon kind="arrow" className="w-4 h-4"/></a> : <span className="text-sm font-semibold">{tr(l('المصدر الورقي غير متاح لهذا السؤال','Physical source not available for this question'))}</span>}
+                {questionItem.physicalBook && <p className="w-full text-sm font-semibold leading-7">{tr(l('الكتاب الورقي','Printed book'))}: {questionItem.physicalBook.title} · {questionItem.physicalBook.author} · {tr(l('الرف','Shelf'))} {questionItem.physicalBook.shelf} · {tr(l('الصف','Row'))} {questionItem.physicalBook.row}</p>}
+                {mode==='passport' && !questionItem.physicalBook && suggestedBook && <p className="w-full text-xs sm:text-sm font-semibold leading-7 text-emerald-950 dark:text-emerald-100"><span className="font-black">{tr(l('قراءة ورقية إضافية من مكتبتنا (ليست مصدر الإجابة لهذا السؤال)','Related printed book (not the evidence for this question)'))}:</span> {suggestedBook.title} · {suggestedBook.author} · {tr(l('الرف','Shelf'))} {suggestedBook.shelf} · {tr(l('الصف','Row'))} {suggestedBook.row}</p>}
+                {questionItem.source ? <a href={questionItem.source} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-3 text-xs sm:text-sm font-black text-white hover:bg-emerald-800 focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-500">{tr(l('افتح المصدر الأصلي','Open original source'))}<Icon kind="arrow" className="w-4 h-4"/></a> : <span className="text-sm font-semibold">{tr(l('المصدر الورقي غير متاح لهذا السؤال','Physical source not available for this question'))}</span>}
               </div>
             </section>}
             <article className="nh-challenge-play rounded-[1.7rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-5 sm:p-7 shadow-lg">
@@ -504,9 +506,8 @@ const NationalIdentityPage: React.FC = () => {
                 <p className="mt-3 text-xs sm:text-sm font-semibold leading-7 text-amber-950 dark:text-amber-100">{tr(l('يرجى الرجوع إلى معجم الألفاظ العامية في دولة الإمارات العربية المتحدة للدكتور فالح حنظل، الرف 6، الصف 2، لمعرفة الإجابة الصحيحة','Please refer to Dr Faleh Handhal’s Dictionary of Colloquial Terms in the United Arab Emirates, shelf 6, row 2, to find the correct answer.'))}</p>
               </section>}
               <p className="font-bold text-base sm:text-lg leading-8 mb-4">{tr(questionItem.question)}</p>
-              {Boolean(questionItem.source)&&!sourceOpened && <p className="mb-4 text-sm font-bold text-amber-700 dark:text-amber-300">{tr(l('افتح المصدر أولًا لتفعيل الإجابات','Open the source first to enable answering'))}</p>}
               <div className="nh-options grid grid-cols-1 md:grid-cols-3 gap-3">
-                {choicesOrder.map((originalIndex,i)=><button key={originalIndex} type="button" onClick={()=>submitAnswer(originalIndex)} disabled={(Boolean(questionItem.source)&&!sourceOpened)||chosen!==null}
+                {choicesOrder.map((originalIndex,i)=><button key={originalIndex} type="button" onClick={()=>submitAnswer(originalIndex)} disabled={chosen!==null}
                   aria-pressed={chosen===originalIndex} className={'nh-answer min-h-[88px] text-start flex items-center gap-3 rounded-2xl border-2 px-4 py-3 font-bold text-sm leading-6 transition-all hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-400 '+(chosen===originalIndex?(selectedCorrect?'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-950 dark:text-emerald-100':'border-rose-400 bg-rose-50 dark:bg-rose-950/35 text-rose-900 dark:text-rose-100'):'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 hover:border-emerald-400') }>
                     <span className="flex shrink-0 w-8 h-8 rounded-full items-center justify-center border border-current/20 text-xs font-black">{i+1}</span>{tr(questionItem.choices[originalIndex])}
                   </button>)}
