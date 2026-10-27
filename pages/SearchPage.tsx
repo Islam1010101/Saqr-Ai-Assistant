@@ -29,11 +29,8 @@ const translations = {
     audienceChildren: "من الصف 4 إلى الصف 8",
     audienceYouth: "للشباب",
     audienceIdentity: "ركن الهوية الوطنية",
-    audienceTeens: "الشباب والمراهقون",
     audienceSpecialist: "للمتخصصين",
-    audienceReview: "يحتاج مراجعة",
     audienceNotice: "تصنيف إرشادي حسب بيانات الكتاب، وليس تقييمًا عمريًا معتمدًا.",
-    sortBy: "فرز حسب",
     alphabetical: "أبجدياً",
     authorName: "المؤلف",
     none: "تلقائي",
@@ -67,11 +64,8 @@ const translations = {
     audienceChildren: "Grades 4–8",
     audienceYouth: "Youth",
     audienceIdentity: "National Identity Corner",
-    audienceTeens: "Youth and teens",
     audienceSpecialist: "Specialists",
-    audienceReview: "Needs review",
     audienceNotice: "Provisional guidance from catalog data, not verified age ratings.",
-    sortBy: "Sort By",
     alphabetical: "Alphabetical",
     authorName: "Author",
     none: "Default",
@@ -427,7 +421,7 @@ const BookCard = React.memo(({ book, onClick, t, locale }: { book: Book; onClick
 
         {/* Shelf-specific catalog decoration; no changes to book records or card actions. */}
         {book.shelf === 22 && (
-          <div className="pointer-events-none absolute end-3 bottom-3 z-30 h-8 w-[82px] flex items-center justify-center opacity-80 group-hover:opacity-100" aria-label="Disney">
+          <div className="pointer-events-none absolute end-3 top-14 z-10 h-7 w-[70px] flex items-center justify-center opacity-80 group-hover:opacity-100" aria-label="Disney">
             <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Disney_wordmark.svg" alt="Disney" className="block max-w-full max-h-full object-contain drop-shadow-md" loading="lazy" onError={e=>{e.currentTarget.style.display='none';e.currentTarget.parentElement?.querySelector('span')?.classList.remove('hidden');}} />
             <span className="hidden font-black text-lg italic tracking-tight text-[#172a47]">Disney</span>
           </div>
@@ -612,7 +606,6 @@ const SearchPage: React.FC = () => {
                                     <option value="children">{t('audienceChildren')}</option>
                                     <option value="youth">{t('audienceYouth')}</option>
                                     <option value="nationalIdentity">{t('audienceIdentity')}</option>
-                                    <option value="teens">{t('audienceTeens')}</option>
                                     <option value="specialist">{t('audienceSpecialist')}</option>
                                 </select>
                                 <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">{t('audienceNotice')}</span>
