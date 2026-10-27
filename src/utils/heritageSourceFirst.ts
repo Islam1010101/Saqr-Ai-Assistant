@@ -1,163 +1,23 @@
 /**
- * EFIPS internal curriculum authoring references ONLY.
- * Learners see the PRINTED Handhal dictionary exclusively.
- * The specified Noorlib viewer was inaccessible at authoring time.
- * Entries below were selected from published textual citations naming Faleh
- * Handhal's dictionary; specific pagination belongs to the CITED editions and
- * is deliberately NOT shown as EFIPS edition pagination.
- * No student-facing hyperlinks, guessed definitions or auto-graded meanings.
+ * The only learner-facing reference is Faleh Handhal's printed dictionary:
+ * EFIPS Library, shelf 6, row 2. The source viewer was unavailable for direct
+ * page inspection, so the Q/A bank is supported by published excerpts citing
+ * the dictionary (editorialEvidence). Check the actual school edition before
+ * describing its printed page numbers or treating it as fully audited.
+ * Do not render editorialEvidence or any URLs to learners.
  */
-export const handhalDictionary={
+export const handhalDictionary = {
  title:'معجم الألفاظ العامية في دولة الإمارات العربية المتحدة',
  author:'الدكتور فالح حنظل',
  shelf:6,
  row:2
 } as const;
-
-export type DictionaryResearchTask={
- word:string;
- difficulty:1|2|3|4;
- topic:string;
- ar:string;
- en:string;
- /** Evidence used by content editors; never rendered or linked to students. */
- source:string;
- sourceNote:string;
+export type DictionaryMultipleChoice={
+ id:string;word:string;difficulty:1|2|3|4;
+ question:{ar:string;en:string};
+ options:[{ar:string;en:string},{ar:string;en:string},{ar:string;en:string}];
+ correct:number;
+ explanation:{ar:string;en:string};
+ editorialEvidence:{url:string;citedEditionPage:string};
 };
-export const dictionaryTasks:DictionaryResearchTask[] = [
-  {
-    "word": "جواني",
-    "difficulty": 1,
-    "topic": "النخيل",
-    "ar": "ابحث عن «جواني» في معجم فالح حنظل، واكتب معنى اللفظ وفق شرح المؤلف.",
-    "en": "Look up «جواني» in Faleh Handhal's printed dictionary and write its meaning.",
-    "source": "https://folkculturebh.org/ar/index.php?id=1137&issue=59&page=article",
-    "sourceNote": "إحالة منشورة: طبعة 1978 ص 146"
-  },
-  {
-    "word": "الزانة",
-    "difficulty": 1,
-    "topic": "الحياة القديمة",
-    "ar": "ارجع إلى مادة «زانة/الزانة»؛ ما المعنى الذي يذكره المؤلف؟",
-    "en": "Find the entry «الزانة» and record the author's definition.",
-    "source": "https://www.masaha.org/book/view/4432/page/232",
-    "sourceNote": "إحالة منشورة: ص 295"
-  },
-  {
-    "word": "قشع",
-    "difficulty": 1,
-    "topic": "الأفعال",
-    "ar": "ابحث عن «قشع» في المعجم، ثم اكتب معناها كما ورد في المرجع.",
-    "en": "Find «قشع» and note its dictionary meaning.",
-    "source": "https://www.masaha.org/book/view/4432/page/232",
-    "sourceNote": "إحالة منشورة: ص 528"
-  },
-  {
-    "word": "دار صيني",
-    "difficulty": 1,
-    "topic": "الأطعمة والتوابل",
-    "ar": "ابحث عن لفظ «دار صيني»، واكتب المعنى أو الشيء الذي يدل عليه في المعجم.",
-    "en": "Find «دار صيني» and identify what it denotes in the dictionary.",
-    "source": "https://arabic-books.amuslim.org/%D8%A7%D9%84%D8%AA%D8%A7%D8%B1%D9%8A%D8%AE/Web/11790/001.htm",
-    "sourceNote": "إحالة منشورة: ص 208"
-  },
-  {
-    "word": "دكيكة",
-    "difficulty": 2,
-    "topic": "اللفظ والنطق",
-    "ar": "ابحث عن «دكيكة» في المادة التي تناقش نطق حرف القاف، وبيّن أصل الكلمة الفصيح الذي ذكره المؤلف.",
-    "en": "Find «دكيكة» in the discussion of Qaf pronunciation. Record its cited standard form.",
-    "source": "https://almolltaqa.com/vb/node/94882",
-    "sourceNote": "إحالة منشورة: ص 517"
-  },
-  {
-    "word": "جاسم",
-    "difficulty": 2,
-    "topic": "الأسماء",
-    "ar": "تتبّع «جاسم» في شرح نطق حرف القاف، ثم اكتب الصورة الأصلية التي قارن بها المؤلف.",
-    "en": "Look for «جاسم» in the Qaf discussion and report the original form compared by the author.",
-    "source": "https://almolltaqa.com/vb/node/94882",
-    "sourceNote": "إحالة منشورة: ص 517"
-  },
-  {
-    "word": "الشارجة",
-    "difficulty": 2,
-    "topic": "أسماء الأماكن",
-    "ar": "ابحث عن «الشارجة» في فقرة نطق القاف، وبيّن الاسم الذي يقابله في الكتاب.",
-    "en": "Find «الشارجة» in the Qaf section and record the corresponding place name.",
-    "source": "https://almolltaqa.com/vb/node/94882",
-    "sourceNote": "إحالة منشورة: ص 517"
-  },
-  {
-    "word": "يواني",
-    "difficulty": 2,
-    "topic": "النخيل",
-    "ar": "ابحث عن «يواني»؛ هل يذكر المعجم لفظًا قريبًا منه؟ دوّن ما وجدته دون تخمين.",
-    "en": "Find «يواني». Does the dictionary give a related form? Record what you see.",
-    "source": "https://folkculturebh.org/ar/index.php?id=1137&issue=59&page=article",
-    "sourceNote": "إحالة منشورة: طبعة 1978 ص 146"
-  },
-  {
-    "word": "غبايل",
-    "difficulty": 3,
-    "topic": "التحوّل الصوتي",
-    "ar": "ابحث عن «غبايل» ضمن مبحث نطق القاف، وفسّر التحوّل الصوتي الذي ورد فيه.",
-    "en": "Locate «غبايل» in the Qaf discussion and explain the sound change described.",
-    "source": "https://almolltaqa.com/vb/node/94882",
-    "sourceNote": "إحالة منشورة: ص 517"
-  },
-  {
-    "word": "غصايد",
-    "difficulty": 3,
-    "topic": "التحوّل الصوتي",
-    "ar": "ابحث عن «غصايد» في المعجم، وقارن نطقها بالصورة الفصيحة المذكورة.",
-    "en": "Find «غصايد» and compare its pronunciation with the recorded standard form.",
-    "source": "https://almolltaqa.com/vb/node/94882",
-    "sourceNote": "إحالة منشورة: ص 517"
-  },
-  {
-    "word": "غصر",
-    "difficulty": 3,
-    "topic": "التحوّل الصوتي",
-    "ar": "ابحث عن «غصر»، ثم وضّح الحرف الذي تغيّر في نطقها كما يناقشه المؤلف.",
-    "en": "Find «غصر» and describe the consonant shift discussed by the author.",
-    "source": "https://almolltaqa.com/vb/node/94882",
-    "sourceNote": "إحالة منشورة: ص 517"
-  },
-  {
-    "word": "جواني",
-    "difficulty": 3,
-    "topic": "النخيل",
-    "ar": "ارجع مرة أخرى إلى «جواني»، وقارنها بلفظ «يواني» إن كانت طبعتك تعرضهما معًا.",
-    "en": "Revisit «جواني» and compare it with «يواني» if both appear in your edition.",
-    "source": "https://folkculturebh.org/ar/index.php?id=1137&issue=59&page=article",
-    "sourceNote": "إحالة منشورة: طبعة 1978 ص 146"
-  },
-  {
-    "word": "قشع",
-    "difficulty": 4,
-    "topic": "السياق والمعنى",
-    "ar": "اعثر على «قشع»، ثم اكتب جملة توضح استعمالها، وافصل بين تعريف المعجم والجملة من تأليفك.",
-    "en": "Look up «قشع», use it in a sentence, and separate the dictionary definition from your own example.",
-    "source": "https://www.masaha.org/book/view/4432/page/232",
-    "sourceNote": "إحالة منشورة: ص 528"
-  },
-  {
-    "word": "الزانة",
-    "difficulty": 4,
-    "topic": "الموروث اللفظي",
-    "ar": "ابحث عن «الزانة» وحلل سياق استعمالها في التراث، مع توضيح ما نقله المعجم وما استنتجته.",
-    "en": "Study «الزانة», distinguish its recorded meaning from your inference about historical use.",
-    "source": "https://www.masaha.org/book/view/4432/page/232",
-    "sourceNote": "إحالة منشورة: ص 295"
-  },
-  {
-    "word": "دكيكة",
-    "difficulty": 4,
-    "topic": "المقارنة الصوتية",
-    "ar": "اقرأ مناقشة «دكيكة» في نطق القاف؛ اشرح الفرق بين طريقة النطق والصورة الفصيحة واذكر دليلك.",
-    "en": "Analyse «دكيكة» in the Qaf discussion: compare dialect pronunciation with the standard form, citing the dictionary.",
-    "source": "https://almolltaqa.com/vb/node/94882",
-    "sourceNote": "إحالة منشورة: ص 517"
-  }
-];
+export const dictionaryTasks:DictionaryMultipleChoice[]=[{"id":"handhal-dictionary-0","word":"جواني","difficulty":1,"question":{"ar":"ما المقصود باللفظ «جواني» كما أورده المعجم؟","en":"What does «جواني» refer to in the dictionary?"},"options":[{"ar":"نوع من النخيل وتموره","en":"A type of palm and its dates"},{"ar":"أداة لصيد الأسماك","en":"A fishing tool"},{"ar":"إناء لحفظ الماء","en":"A water container"}],"correct":0,"explanation":{"ar":"ورد اللفظ اسمًا لنوع من النخيل وتموره.","en":"The term names a type of palm and its dates."},"editorialEvidence":{"url":"https://folkculturebh.org/ar/index.php?id=1137&issue=59&page=article","citedEditionPage":"طبعة 1978، ص 146"}},{"id":"handhal-dictionary-1","word":"الزانة","difficulty":1,"question":{"ar":"ما معنى «الزانة» الوارد في المعجم؟","en":"What does «الزانة» mean?"},"options":[{"ar":"نوع من التوابل","en":"A type of spice"},{"ar":"العتاد والأسلحة","en":"Military equipment and weapons"},{"ar":"نوع من السعف","en":"Palm fronds"}],"correct":1,"explanation":{"ar":"تشير «الزانة» إلى العتاد والأسلحة.","en":"«الزانة» refers to military equipment and weapons."},"editorialEvidence":{"url":"https://www.masaha.org/book/view/4432/page/232","citedEditionPage":"ص 295"}},{"id":"handhal-dictionary-2","word":"قشع","difficulty":1,"question":{"ar":"ما أقرب معنى للفظ «قشع»؟","en":"What is the nearest meaning of «قشع»?"},"options":[{"ar":"أزال أو هدم","en":"To remove or demolish"},{"ar":"جمع التمر","en":"To collect dates"},{"ar":"نسج الخيوط","en":"To weave threads"}],"correct":0,"explanation":{"ar":"«قشع» في الشاهد بمعنى الإزالة والهدم.","en":"«قشع» denotes removing or demolishing."},"editorialEvidence":{"url":"https://www.masaha.org/book/view/4432/page/232","citedEditionPage":"ص 528"}},{"id":"handhal-dictionary-3","word":"دار صيني","difficulty":1,"question":{"ar":"إلى أي نوع من الأشياء يشير لفظ «دار صيني»؟","en":"What category does «دار صيني» describe?"},"options":[{"ar":"نوع من العطور","en":"A kind of perfume"},{"ar":"نوع من التوابل","en":"A type of spice"},{"ar":"أداة للري","en":"An irrigation tool"}],"correct":1,"explanation":{"ar":"استُعمل اللفظ اسمًا لنوع من التوابل.","en":"The term refers to a type of spice."},"editorialEvidence":{"url":"https://arabic-books.amuslim.org/%D8%A7%D9%84%D8%AA%D8%A7%D8%B1%D9%8A%D8%AE/Web/11790/001.htm","citedEditionPage":"إحالة: ص 208"}},{"id":"handhal-dictionary-4","word":"يواني","difficulty":2,"question":{"ar":"بأي مجال ترتبط كلمة «يواني» في المعجم؟","en":"What does the word «يواني» relate to?"},"options":[{"ar":"صناعة السفن","en":"Boatbuilding"},{"ar":"السدو","en":"Al Sadu weaving"},{"ar":"النخيل والتمر","en":"Palm trees and dates"}],"correct":2,"explanation":{"ar":"«يواني» صيغة تُذكر إلى جانب «جواني» للدلالة على نوع من النخيل وتموره.","en":"«يواني» is recorded with «جواني» for a kind of palm and its dates."},"editorialEvidence":{"url":"https://folkculturebh.org/ar/index.php?id=1137&issue=59&page=article","citedEditionPage":"طبعة 1978، ص 146"}},{"id":"handhal-dictionary-5","word":"دكيكة","difficulty":2,"question":{"ar":"ما الكلمة الفصيحة التي يقابلها النطق «دكيكة»؟","en":"Which standard Arabic word corresponds to «دكيكة»?"},"options":[{"ar":"دقيقة","en":"دقيقة"},{"ar":"حقيقة","en":"حقيقة"},{"ar":"وثيقة","en":"وثيقة"}],"correct":0,"explanation":{"ar":"تُذكر «دكيكة» مثالًا لنطق «دقيقة» عند تبدل القاف.","en":"«دكيكة» is cited as a pronunciation of «دقيقة»."},"editorialEvidence":{"url":"https://almolltaqa.com/vb/node/94882","citedEditionPage":"ص 517"}},{"id":"handhal-dictionary-6","word":"جاسم","difficulty":2,"question":{"ar":"ما الاسم الأصلي الذي تقابله صيغة «جاسم» في مبحث نطق القاف؟","en":"What original name corresponds to «جاسم» in the Qaf discussion?"},"options":[{"ar":"هاشم","en":"هاشم"},{"ar":"قاسم","en":"قاسم"},{"ar":"جابر","en":"جابر"}],"correct":1,"explanation":{"ar":"يورد المؤلف «جاسم» مقابل «قاسم» في تحولات النطق.","en":"The discussion contrasts «جاسم» with «قاسم»."},"editorialEvidence":{"url":"https://almolltaqa.com/vb/node/94882","citedEditionPage":"ص 517"}},{"id":"handhal-dictionary-7","word":"الشارجة","difficulty":2,"question":{"ar":"أي اسم مكان تقابله كلمة «الشارجة»؟","en":"Which place name corresponds to «الشارجة»?"},"options":[{"ar":"الشارقة","en":"Sharjah"},{"ar":"عجمان","en":"Ajman"},{"ar":"الفجيرة","en":"Fujairah"}],"correct":0,"explanation":{"ar":"«الشارجة» صيغة صوتية لكلمة «الشارقة».","en":"«الشارجة» is cited as a pronunciation of Sharjah."},"editorialEvidence":{"url":"https://almolltaqa.com/vb/node/94882","citedEditionPage":"ص 517"}},{"id":"handhal-dictionary-8","word":"غبايل","difficulty":3,"question":{"ar":"ما الكلمة التي تمثلها الصيغة «غبايل» في المثال الصوتي؟","en":"Which standard form corresponds to «غبايل»?"},"options":[{"ar":"غابات","en":"Forests"},{"ar":"قبائل","en":"قبائل"},{"ar":"قوارب","en":"Boats"}],"correct":1,"explanation":{"ar":"وردت «غبايل» في مقابل «قبائل» عند إبدال القاف غينًا.","en":"«غبايل» corresponds to «قبائل» when Qaf is pronounced as Ghayn."},"editorialEvidence":{"url":"https://almolltaqa.com/vb/node/94882","citedEditionPage":"ص 517"}},{"id":"handhal-dictionary-9","word":"غصايد","difficulty":3,"question":{"ar":"أي لفظ فصيح يقابله النطق «غصايد»؟","en":"Which standard word corresponds to «غصايد»?"},"options":[{"ar":"قصائد","en":"قصائد"},{"ar":"قواعد","en":"قواعد"},{"ar":"حصائد","en":"حصائد"}],"correct":0,"explanation":{"ar":"يُقابل المثال «غصايد» بكلمة «قصائد».","en":"The example «غصايد» corresponds to «قصائد»."},"editorialEvidence":{"url":"https://almolltaqa.com/vb/node/94882","citedEditionPage":"ص 517"}},{"id":"handhal-dictionary-10","word":"غصر","difficulty":3,"question":{"ar":"ما اللفظ الذي تقابله «غصر» في الشاهد الصوتي؟","en":"Which word is represented by «غصر»?"},"options":[{"ar":"غرس","en":"غرس"},{"ar":"قصر","en":"قصر"},{"ar":"غوص","en":"غوص"}],"correct":1,"explanation":{"ar":"ورد «غصر» في مقابل «قصر».","en":"«غصر» corresponds to «قصر»."},"editorialEvidence":{"url":"https://almolltaqa.com/vb/node/94882","citedEditionPage":"ص 517"}},{"id":"handhal-dictionary-11","word":"جواني","difficulty":3,"question":{"ar":"إذا قرأت «جواني» و«يواني» في المعجم، فأي علاقة بينهما صحيحة؟","en":"What relationship does the dictionary cite for «جواني» and «يواني»?"},"options":[{"ar":"لفظان لمهنة واحدة","en":"Two names for the same trade"},{"ar":"صيغتان لاسم نوع من النخيل","en":"Two forms naming a type of palm"},{"ar":"اسمان لميناء بحري","en":"Two names for a harbour"}],"correct":1,"explanation":{"ar":"يورد المرجع الصيغتين لنوع من النخيل وتموره.","en":"The two forms designate a type of palm and its dates."},"editorialEvidence":{"url":"https://folkculturebh.org/ar/index.php?id=1137&issue=59&page=article","citedEditionPage":"طبعة 1978، ص 146"}},{"id":"handhal-dictionary-12","word":"دكيكة","difficulty":4,"question":{"ar":"أي تبدل صوتي يفسر كلمة «دكيكة» في المثال المذكور؟","en":"Which sound substitution explains «دكيكة»?"},"options":[{"ar":"تحول القاف إلى كاف","en":"Qaf pronounced as Kaf"},{"ar":"تحول القاف إلى غين","en":"Qaf pronounced as Ghayn"},{"ar":"تحول الكاف إلى ميم","en":"Kaf pronounced as Meem"}],"correct":0,"explanation":{"ar":"يناقش النص نطق القاف كافًا في «دكيكة».","en":"The text presents Qaf pronounced as Kaf in «دكيكة»."},"editorialEvidence":{"url":"https://almolltaqa.com/vb/node/94882","citedEditionPage":"ص 517"}},{"id":"handhal-dictionary-13","word":"غبايل","difficulty":4,"question":{"ar":"ما التحول الصوتي الذي يظهر في «غبايل» مقابل «قبائل»؟","en":"Which sound shift appears in «غبايل» versus «قبائل»?"},"options":[{"ar":"تحول الباء إلى ميم","en":"Ba to Meem"},{"ar":"تحول القاف إلى غين","en":"Qaf to Ghayn"},{"ar":"تحول اللام إلى نون","en":"Lam to Noon"}],"correct":1,"explanation":{"ar":"المثال يوضح نطق القاف غينًا.","en":"The example shows Qaf realised as Ghayn."},"editorialEvidence":{"url":"https://almolltaqa.com/vb/node/94882","citedEditionPage":"ص 517"}},{"id":"handhal-dictionary-14","word":"الشارجة","difficulty":4,"question":{"ar":"أي تحول في نطق القاف أدى إلى صيغة «الشارجة»؟","en":"What pronunciation change yields «الشارجة»?"},"options":[{"ar":"نطقها جيمًا","en":"Pronounced as Jeem"},{"ar":"حذفها تمامًا","en":"Removed entirely"},{"ar":"نطقها سينًا","en":"Pronounced as Seen"}],"correct":0,"explanation":{"ar":"يستعمل المثال «الشارجة» بدل «الشارقة» مع قلب القاف جيمًا.","en":"The example changes Qaf to Jeem in «الشارجة»."},"editorialEvidence":{"url":"https://almolltaqa.com/vb/node/94882","citedEditionPage":"ص 517"}}];
