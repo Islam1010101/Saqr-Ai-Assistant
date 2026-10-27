@@ -266,8 +266,7 @@ const NationalIdentityPage: React.FC = () => {
   const difficulty = mode==='passport'?passportTier+1:(item.difficulty||1);
   const difficultyName = [l('سهل','Easy'),l('متوسط','Intermediate'),l('متقدم','Advanced'),l('خبير','Expert')][Math.min(4,difficulty)-1];
   const suggestedBook=(currentMode==='passport'||currentMode==='archive')?getGuidedHeritageBook(item.id,difficulty,round+index+passportTier):null;
-  const [readingPage,setReadingPage]=useState('');
-  const [readingEvidence,setReadingEvidence]=useState('');
+  const [sourceOpened,setSourceOpened]=useState(false);
   const selectedCorrect = chosen === questionItem.correct;
   const choicesOrder = useMemo(() => {
     const indexes = [0,1,2];
@@ -275,8 +274,8 @@ const NationalIdentityPage: React.FC = () => {
     return indexes;
   }, [currentMode,index,round,advancedPassport]);
   const totalCompleted = progress.stamps.length + progress.words.length + progress.cases.length;
-  const go = (next: Mode) => { setMode(next);setIndex(0);setChosen(null);setAdvancedPassport(false);setPassportTier(0);setStage('discover');setNewlyStamped(null);setRound(n=>n+1); };
-  const selectEntry = (nextIndex: number) => {setIndex(nextIndex);setChosen(null);setAdvancedPassport(false);setStage('discover');setNewlyStamped(null);};
+  const go = (next: Mode) => { setMode(next);setIndex(0);setChosen(null);setAdvancedPassport(false);setPassportTier(0);setStage('discover');setSourceOpened(false);setNewlyStamped(null);setRound(n=>n+1); };
+  const selectEntry = (nextIndex: number) => {setIndex(nextIndex);setChosen(null);setAdvancedPassport(false);setStage('discover');setSourceOpened(false);setNewlyStamped(null);};
   const submitAnswer = (answer: number) => {
     setChosen(answer);
     if (answer !== questionItem.correct) return;
@@ -492,43 +491,33 @@ const NationalIdentityPage: React.FC = () => {
                     <h3 className="font-black text-base sm:text-lg">{tr(l('اقرأ واكتشف','Read and discover'))}</h3>
                     <p className="mt-2 text-sm sm:text-base leading-8 text-slate-700 dark:text-slate-300">{tr(item.story)}</p>
                     <p className="mt-3 rounded-xl border-s-4 border-amber-400 bg-amber-50 dark:bg-amber-950/20 p-3 text-xs sm:text-sm font-bold leading-7 text-amber-950 dark:text-amber-100">{tr(item.prompt)}</p>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      <a href={questionItem.source} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 dark:border-emerald-800 px-4 py-2.5 text-xs font-black text-emerald-800 dark:text-emerald-200 hover:bg-emerald-50 dark:hover:bg-emerald-950 transition-colors">
-                        {tr(l('اقرأ المصدر الموثوق','Read the trusted source'))}<Icon kind="arrow" className="w-4 h-4 -rotate-45"/>
-                      </a>
-                      <Link to="/search" className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 px-4 py-2.5 text-xs font-black text-white transition-colors">
-                        <Icon kind="book" className="w-4 h-4"/>{tr(l('ابحث في دليل الكتب','Search the book catalog'))}
-                      </Link>
-                    </div>
+                    {mode==='language' ? <div className="mt-4 rounded-2xl border-2 border-emerald-300 dark:border-emerald-800 p-5 bg-emerald-50 dark:bg-emerald-950/20">
+                      <strong className="block font-black">{tr(l('المرجع الوحيد: معجم الألفاظ العامية في دولة الإمارات العربية المتحدة','Sole reference: Dictionary of UAE Colloquial Terms'))}</strong>
+                      <p className="mt-2">{tr(l('تأليف د. فالح حنظل · النسخة الورقية: الرف 6، الصف 2','Dr Faleh Handhal · Printed copy: shelf 6, row 2'))}</p>
+                      <a className="mt-3 inline-flex rounded-xl bg-emerald-700 text-white px-4 py-3 text-sm font-black" href="https://noorlib.ir/book/view/20858/%D9%85%D8%B9%D8%AC%D9%85-%D8%A7%D9%84%D8%A3%D9%84%D9%81%D8%A7%D8%B8-%D8%A7%D9%84%D8%B9%D8%A7%D9%85%D9%8A%D8%A9-%D9%81%D9%8A-%D8%AF%D9%88%D9%84%D8%A9-%D8%A7%D9%84%D8%A7%D9%85%D8%A7%D8%A7%D8%B1%D8%A7%D8%AA-%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9-%D8%A7%D9%84%D9%85%D8%AA%D8%AD%D8%AF%D8%A9?pageNumber=5&viewType=pdf" target="_blank" rel="noopener noreferrer">{tr(l('افتح النسخة الإلكترونية للمعجم','Read the online dictionary'))}</a>
+                      <p className="mt-3 text-xs leading-7">{tr(l('استخرج معنى المصطلح من المعجم. لا تُنسب إليه تعريفات غير موثقة من صفحاته.','Look up each term in the dictionary. Definitions not independently checked against its pages are not attributed to it.'))}</p>
+                    </div> : <div className="mt-4 rounded-2xl border-2 border-emerald-300 dark:border-emerald-800 p-5 bg-emerald-50 dark:bg-emerald-950/20">
+                      <strong className="font-black">{tr(l('مصدر التحدي: اقرأ قبل الإجابة','Mission source: read before answering'))}</strong>
+                      <a href={questionItem.source} target="_blank" rel="noopener noreferrer" onClick={()=>setSourceOpened(true)} className="mt-3 inline-flex rounded-xl bg-emerald-700 text-white px-4 py-3 text-sm font-black">{tr(l('افتح المصدر الإلكتروني المعتمد','Open the primary online source'))}</a>
+                      {suggestedBook && <div className="mt-3 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-slate-950 p-3 text-sm">
+                         <strong>{tr(l('كتاب ورقي مقترح للقراءة المكملة','Related physical reference'))}</strong>
+                         <p className="font-bold mt-1">{suggestedBook.title}</p><p>{suggestedBook.author} · {tr(l('رف','Shelf'))} {suggestedBook.shelf} · {tr(l('صف','Row'))} {suggestedBook.row}</p>
+                         <p className="mt-2 text-xs">{tr(l('إجابة هذا السؤال مثبتة في المصدر الإلكتروني، ولا نفترض أنها في صفحة بعينها من الكتاب.','The graded answer is anchored to the online source, not an unverified page in the book.'))}</p>
+                       </div>}
+                    </div>}
                   </div>
                 </div>
               </div>
             </article>
-            {suggestedBook && <section aria-label={tr(l('مهمة قراءة من المكتبة','Library book reading mission'))} className="rounded-[1.7rem] border-2 border-emerald-200 dark:border-emerald-800 bg-[#F8FAF4] dark:bg-[#0F1C17] p-5 sm:p-7">
-              <p className="text-xs font-black text-emerald-700 dark:text-emerald-300">{tr(l('اقرأ من مكتبتنا · مهمة اختيارية','READ FROM OUR LIBRARY · OPTIONAL MISSION'))}</p>
-              <h3 className="text-lg sm:text-xl font-black mt-2">{tr(l('اكتشف الدليل في كتاب حقيقي','Find evidence in a real book'))}</h3>
-              <div className="mt-4 rounded-2xl bg-white dark:bg-slate-950 border border-emerald-100 dark:border-emerald-900 p-4 sm:p-5">
-                <strong className="block text-base font-black">{suggestedBook.title}</strong>
-                <p className="text-sm mt-2 text-slate-700 dark:text-slate-300">{tr(l('المؤلف:','Author:'))} {suggestedBook.author}</p>
-                <p className="text-sm font-bold mt-2 text-emerald-700 dark:text-emerald-300">{tr(l('الرف','Shelf'))} {suggestedBook.shelf} · {tr(l('الصف','Row'))} {suggestedBook.row}</p>
-              </div>
-              <p className="mt-4 text-sm leading-8 font-semibold">{tr(suggestedBook.task)}</p>
-              <p className="mt-2 text-xs leading-7 text-slate-600 dark:text-slate-300">{tr(l('ابحث في الفهرس أو العناوين داخل نسختك عن الموضوع المطلوب. لا يوجد رقم صفحة موثّق مسبقًا؛ اكتبه بعد قراءة الكتاب. وقد لا يتناول الكتاب الموضوع بالتفصيل.','Use the contents or index to find this topic in your edition. No page is pre-verified; write the page only after reading. The book may not cover the topic in detail.'))}</p>
-              <Link to="/saqr-national-identity/books" className="inline-flex mt-3 rounded-xl bg-emerald-700 text-white px-4 py-2.5 text-sm font-black hover:bg-emerald-800">{tr(l('افتح جناح الهوية الوطنية','Open National Identity Pavilion'))}</Link>
-              <div className="mt-4 grid gap-3 sm:grid-cols-[120px_1fr]">
-                <label className="text-xs font-bold">{tr(l('رقم الصفحة التي قرأتها','Page you read'))}<input inputMode="numeric" maxLength={5} value={readingPage} onChange={e=>setReadingPage(e.target.value.replace(/[^0-9]/g,''))} className="w-full mt-2 rounded-lg p-2 border border-emerald-300 dark:border-emerald-800 bg-white dark:bg-slate-950"/></label>
-                <label className="text-xs font-bold">{tr(l('الدليل الذي وجدته بنفسك','Evidence from your reading'))}<textarea value={readingEvidence} onChange={e=>setReadingEvidence(e.target.value.slice(0,500))} rows={2} className="w-full mt-2 rounded-lg p-2 border border-emerald-300 dark:border-emerald-800 bg-white dark:bg-slate-950"/></label>
-              </div>
-              <p className="text-xs mt-3 text-slate-600 dark:text-slate-400">{tr(l('هذه نشاط قراءة للتفكير والبحث، وليست إجابة مصححة آليًا ولا تمنح نقاطًا إضافية. لا يتم إرسال ما تكتبه إلى الخادم.','This is an optional research activity, not automatically graded, with no extra points. Your notes are not sent to a server.'))}</p>
-            </section>}
             <article className="nh-challenge-play rounded-[1.7rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-5 sm:p-7 shadow-lg">
               <div className="flex gap-3 items-center mb-4">
                 <div className="flex items-center justify-center bg-[#F4E9D5] text-amber-900 dark:bg-amber-950 dark:text-amber-300 w-11 h-11 rounded-xl"><Icon kind="document" className="w-6 h-6"/></div>
                 <h3 className="font-black text-lg">{tr(mode==='passport'?l('اختم صفحة الجواز','Stamp Your Passport'):mode==='language'?l('افتح كنز الكلمة','Unlock the Word Treasure'):l('حل قضية ذاكرة وطن','Solve the Heritage Mystery'))}</h3>
               </div>
               {stage==='discover' ? <div className="nh-discovery"><div className="nh-discovery-art"><HeritageQuestArt kind={mode==='passport'?'passport':mode==='language'?'language':'archive'}/></div><h3 className="font-black text-xl sm:text-2xl">{tr(item.name)}</h3><p className="mt-3 text-sm sm:text-base leading-8">{tr(item.story)}</p><button type="button" onClick={()=>setStage('play')} className="nh-launch">{tr(l('ابدأ التحدي واكشف السر','Start the mission'))}<Icon kind="arrow" className="w-5 h-5"/></button></div> : <><div className="nh-stage-label">{tr(l('مهمة اكتشاف · اختر الدليل الصحيح','Discovery mission · choose the right clue'))}</div><p className="font-bold text-base sm:text-lg leading-8 mb-4">{tr(questionItem.question)}</p>
+              {(mode==='passport'||mode==='archive')&&!sourceOpened && <p className="mb-4 text-sm font-bold text-amber-700 dark:text-amber-300">{tr(l('افتح المصدر أولًا لتفعيل الإجابات','Open the source first to enable answering'))}</p>}
               <div className="nh-options grid grid-cols-1 md:grid-cols-3 gap-3">
-                {choicesOrder.map((originalIndex,i)=><button key={originalIndex} type="button" onClick={()=>submitAnswer(originalIndex)}
+                {choicesOrder.map((originalIndex,i)=><button key={originalIndex} type="button" onClick={()=>submitAnswer(originalIndex)} disabled={(mode==='passport'||mode==='archive')&&!sourceOpened}
                   aria-pressed={chosen===originalIndex} className={'nh-answer min-h-[76px] text-start flex items-center gap-3 rounded-2xl border-2 px-4 py-3 font-bold text-sm leading-6 transition-all hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-400 '+(chosen===originalIndex?(selectedCorrect?'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-950 dark:text-emerald-100':'border-rose-400 bg-rose-50 dark:bg-rose-950/35 text-rose-900 dark:text-rose-100'):'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 hover:border-emerald-400') }>
                   <span className="flex shrink-0 w-8 h-8 rounded-full items-center justify-center border border-current/20 text-xs font-black">{i+1}</span>{tr(questionItem.choices[originalIndex])}
                 </button>)}
