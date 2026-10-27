@@ -16,7 +16,7 @@ const translations = {
         adminSettings: "إدارة النظام",
         adminSettingsDesc: "التحكم الشامل في المنصة والبيانات",
         newsTitle: "جديدنا",
-        newsContent: "جناح الهوية الوطنية فتح أبوابه: اكتشف كتب الإمارات وابحث عن مؤلفك المفضل! | راية المجد تنتظرك: عشرة أسئلة مشوقة عن علم الإمارات نحو القمة! | تحدي القراءة الشهري: كم كتابًا أنهيت؟ افتح قائمة القراءة واحتفل بإنجازك! | صقر الذكي يساعدك في اكتشاف كتب المكتبة الورقية والرقمية | صوتك يستحق أن يُسمع: سجل حلقتك في بودكاست صقر! | كتب وإصدارات جديدة في مكتبتنا الورقية بانتظار قراءتك!",
+        newsContent: "جديد: بين السطور مع صقر — اختر كتابًا من مكتبتنا وأجب عن أسئلته! | جناح الهوية الوطنية فتح أبوابه: اكتشف كتب الإمارات وابحث عن مؤلفك المفضل! | راية المجد تنتظرك: عشرة أسئلة مشوقة عن علم الإمارات نحو القمة! | تحدي القراءة الشهري: كم كتابًا أنهيت؟ افتح قائمة القراءة واحتفل بإنجازك! | صقر الذكي يساعدك في اكتشاف كتب المكتبة الورقية والرقمية | صوتك يستحق أن يُسمع: سجل حلقتك في بودكاست صقر! | كتب وإصدارات جديدة في مكتبتنا الورقية بانتظار قراءتك!",
         manualSearch: "دليل كتب المكتبة",
         manualDesc: "استكشف وتعرف واستعر الكتب المتوفرة في مكتبة المدرسة",
         smartSearch: "اسأل صقر الذكي",
@@ -27,6 +27,10 @@ const translations = {
         creatorsDesc: "استكشف قصص وابتكارات زملائك المبدعين.",
         scheduleTitle: "جدول المكتبة",
         scheduleDesc: "حجز وتنسيق حصص زيارة المكتبة للمعلمين.",
+        saqrChallengesTitle: "تحديات صقر",
+        saqrChallengesDesc: "بين السطور، رتب المكتبة واستديو صقر.",
+        readingQuestTitle: "بين السطور مع صقر",
+        readingQuestDesc: "اختر عدد الكتب واختبر فهمك.",
         gameTitle: "رتب المكتبة",
         gameDesc: "العب، استمتع، وتعلم كيفية تصنيف الكتب.",
         nationalIdentityTitle: "صقر وهوية وطن",
@@ -77,7 +81,7 @@ const translations = {
         adminSettings: "System Admin",
         adminSettingsDesc: "Full platform and data control",
         newsTitle: "What's New",
-        newsContent: "Explore the National Identity Pavilion: discover UAE books and their authors! | Take the Flag of Glory Challenge: ten exciting UAE flag questions to the summit! | Monthly Reading Challenge: how many books have you finished? Celebrate your progress! | Ask Saqr to discover books across our physical and digital libraries | Your voice belongs here: record a Saqr Podcast episode! | Fresh books are arriving in our school library: your next great read awaits!",
+        newsContent: "New: Between the Lines with Saqr — read EFIPS books and answer source-backed questions! | Explore the National Identity Pavilion: discover UAE books and their authors! | Take the Flag of Glory Challenge: ten exciting UAE flag questions to the summit! | Monthly Reading Challenge: how many books have you finished? Celebrate your progress! | Ask Saqr to discover books across our physical and digital libraries | Your voice belongs here: record a Saqr Podcast episode! | Fresh books are arriving in our school library: your next great read awaits!",
         manualSearch: "Library Book Catalog",
         manualDesc: "Explore,Find and Borrow the school library’s",
         smartSearch: "Ask Saqr (AI)",
@@ -88,6 +92,10 @@ const translations = {
         creatorsDesc: "Explore the stories and innovations of your peers.",
         scheduleTitle: "Library Schedule",
         scheduleDesc: "Book and coordinate library visits for teachers.",
+        saqrChallengesTitle: "Saqr Challenges",
+        saqrChallengesDesc: "Reading quests, library sorting and Saqr Studio.",
+        readingQuestTitle: "Between the Lines with Saqr",
+        readingQuestDesc: "Choose books and test your understanding.",
         gameTitle: "Library Game",
         gameDesc: "Play, enjoy, and learn book classification.",
         nationalIdentityTitle: "Saqr & National Identity",
@@ -856,17 +864,16 @@ const HomePage: React.FC = () => {
                         )}
 
                         {(userType === 'student' || userType === 'admin') && (
-                            <Link to="/saqr-studio" className="group relative bg-blue-500 text-white p-6 rounded-[2.5rem] border-b-8 border-blue-700 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
-                                <div className="absolute top-4 end-4 bg-rose-500 text-white text-[10px] md:text-xs px-3 py-0.5 rounded-full font-black uppercase tracking-wider shadow-md animate-pulse">
-                                    {t('newBadge')}
-                                </div>
-                                <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
-                                    <StudioIcon />
-                                </div>
-                                <div>
-                                    <h3 className="text-xl md:text-2xl font-black mb-1 tracking-tight">{t('saqrStudioBanner')}</h3>
-                                    <p className="text-xs md:text-sm opacity-90 font-normal leading-snug">{t('saqrStudioDesc')}</p>
-                                </div>
+                            <Link to="/saqr-challenges" className="group relative flex items-center gap-5 rounded-[2.5rem] border-b-8 border-emerald-900 bg-emerald-700 p-6 text-white shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl active:translate-y-2 active:border-b-0">
+                                <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/20"><GameIcon /></span>
+                                <span className="min-w-0"><strong className="block text-xl font-black md:text-2xl">{t('saqrChallengesTitle')}</strong><small className="mt-1 block text-xs md:text-sm">{t('saqrChallengesDesc')}</small></span>
+                            </Link>
+                        )}
+
+                        {(userType === 'teacher' || userType === 'admin') && (
+                            <Link to="/saqr-reading-quest" className="group relative flex items-center gap-5 rounded-[2.5rem] border-b-8 border-emerald-900 bg-emerald-700 p-6 text-white shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl active:translate-y-2 active:border-b-0">
+                                <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/20"><BookIcon /></span>
+                                <span className="min-w-0"><strong className="block text-xl font-black md:text-2xl">{t('readingQuestTitle')}</strong><small className="mt-1 block text-xs md:text-sm">{t('readingQuestDesc')}</small></span>
                             </Link>
                         )}
 
