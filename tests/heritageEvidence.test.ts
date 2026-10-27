@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {verifiedPassport} from '../src/utils/verifiedPassportEvidence.ts';
 import {verifiedDetective} from '../src/utils/verifiedDetectiveEvidence.ts';
 assert.equal(verifiedPassport.length,7);
-assert.equal(verifiedDetective.length,15);
+assert.equal(verifiedDetective.length,25);
 const sources=new Set();
 for(const record of verifiedPassport){
  assert.equal(record.questions.length,4);
@@ -32,4 +32,4 @@ assert.ok(page.includes('verifiedPassport.map('));assert.ok(page.includes('verif
 assert.ok(page.includes("storageKey = useMemo"));
 assert.ok(page.includes("setFlagChallengeOpen(true)"));
 assert.ok(page.includes("mode==='language'"));
-console.log('PASS evidence anchored bilingually: 28 passport questions, 15 detective cases; progress/game guards remain');
+console.log('PASS evidence anchored bilingually: 28 passport questions, 25 detective cases; progress/game guards remain');
