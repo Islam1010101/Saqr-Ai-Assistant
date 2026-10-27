@@ -156,12 +156,12 @@ const sourcedFollowUps:Record<string,Array<{question:L;choices:[L,L,L];correct:n
  }))]));
 
 const dictionaryActivities:Activity[]=dictionaryTasks.map((task,i)=>({
- id:'handhal-dictionary-'+i,name:l('حرف '+task.letter,'Letter '+task.letter),
- story:l('ارجع إلى معجم الألفاظ العامية للدكتور فالح حنظل؛ ابحث عن لفظ يبدأ بحرف '+task.letter+' ولا تعتمد على تعريف غير موجود في المرجع.','Consult Dr Faleh Handhal’s UAE colloquial dictionary and select an entry beginning with '+task.letter+'.'),
+ id:'handhal-dictionary-'+i,name:l('اللفظ: '+task.word,'Word: '+task.word),
+ story:l('لفظ المهمة: «'+task.word+'». توجه إلى المكتبة الورقية: الرف 6، الصف 2، وافتح معجم الألفاظ العامية في دولة الإمارات العربية المتحدة للدكتور فالح حنظل، ثم ابحث عن هذا اللفظ.','Mission word: «'+task.word+'». Visit the printed library, shelf 6, row 2, and find the word in Dr Faleh Handhal’s dictionary.'),
  prompt:l(task.ar,task.en),question:l(task.ar,task.en),
  choices:[l('تُكتب الإجابة من قراءة المعجم','Answer comes from reading the dictionary'),l('تُكتب الإجابة من قراءة المعجم','Answer comes from reading the dictionary'),l('تُكتب الإجابة من قراءة المعجم','Answer comes from reading the dictionary')],
  correct:0,explanation:l('يحتاج المعنى لمراجعة نص المعجم.','The meaning must be checked in the dictionary.'),
- source:handhalDictionary.url,difficulty:task.difficulty
+ source:'',difficulty:task.difficulty
 }));
 const activities: Record<Exclude<Mode,'home'>, Activity[]> = {passport: sourcedEmirates,language:dictionaryActivities,archive:sourcedCases};
 const progressField: Record<Exclude<Mode,'home'>, 'stamps'|'words'|'cases'> = {passport:'stamps',language:'words',archive:'cases'};
@@ -276,7 +276,6 @@ const NationalIdentityPage: React.FC = () => {
   const difficultyName = [l('سهل','Easy'),l('متوسط','Intermediate'),l('متقدم','Advanced'),l('خبير','Expert')][Math.min(4,difficulty)-1];
   const suggestedBook=(currentMode==='passport'||currentMode==='archive')?getGuidedHeritageBook(item.id,difficulty,round+index+passportTier):null;
   const [sourceOpened,setSourceOpened]=useState(false);
-  const [dictionaryWord,setDictionaryWord]=useState('');
   const [dictionaryMeaning,setDictionaryMeaning]=useState('');
   const selectedCorrect = chosen === questionItem.correct;
   const choicesOrder = useMemo(() => {
@@ -285,7 +284,7 @@ const NationalIdentityPage: React.FC = () => {
     return indexes;
   }, [currentMode,index,round,advancedPassport]);
   const totalCompleted = progress.stamps.length + progress.words.length + progress.cases.length;
-  const go = (next: Mode) => { setMode(next);setIndex(0);setChosen(null);setAdvancedPassport(false);setPassportTier(0);setStage('discover');setSourceOpened(false);setDictionaryWord('');setDictionaryMeaning('');setNewlyStamped(null);setRound(n=>n+1); };
+  const go = (next: Mode) => { setMode(next);setIndex(0);setChosen(null);setAdvancedPassport(false);setPassportTier(0);setStage('discover');setSourceOpened(false);setDictionaryMeaning('');setNewlyStamped(null);setRound(n=>n+1); };
   const selectEntry = (nextIndex: number) => {setIndex(nextIndex);setChosen(null);setAdvancedPassport(false);setStage('discover');setSourceOpened(false);setNewlyStamped(null);};
   const submitAnswer = (answer: number) => {
     setChosen(answer);
@@ -303,7 +302,7 @@ const NationalIdentityPage: React.FC = () => {
   };
   const modules = [
     {id:'passport' as const,icon:'stamp' as const,title:l('جواز صقر الثقافي','Saqr Cultural Passport'),desc:l('اكتشف الإمارات السبع، واقرأ حكاية كل إمارة واجمع ختمها.','Explore all seven emirates, read their stories and collect their stamps.'),total:sourcedEmirates.length,count:progress.stamps.length,color:'from-emerald-700 to-teal-600'},
-    {id:'language' as const,icon:'weave' as const,title:l('كنوز لغتنا الإماراتية','Treasures of Emirati Language'),desc:l('تعرّف على مفردات التراث واستعملها في جمل من تأليفك.','Discover heritage terms and use them in your own sentences.'),total:expandedWords.length,count:progress.words.length,color:'from-amber-600 to-orange-600'},
+    {id:'language' as const,icon:'weave' as const,title:l('كنوز لغتنا الإماراتية','Treasures of Emirati Language'),desc:l('تعرّف على مفردات التراث واستعملها في جمل من تأليفك.','Discover heritage terms and use them in your own sentences.'),total:dictionaryActivities.length,count:progress.words.length,color:'from-amber-600 to-orange-600'},
     {id:'archive' as const,icon:'document' as const,title:l('محقق ذاكرة الوطن','Heritage Research Detective'),desc:l('حلّل الأدلة واقرأ المصادر وتعلّم كيف تتحقق من المعلومات.','Study evidence, read sources and learn how to verify information.'),total:sourcedCases.length,count:progress.cases.length,color:'from-sky-700 to-indigo-700'}
   ];
   const selectedModule = modules.find(x=>x.id===currentMode) || modules[0];
@@ -336,7 +335,7 @@ const NationalIdentityPage: React.FC = () => {
             <p className="mt-3 max-w-2xl text-sm sm:text-base leading-8 font-semibold text-emerald-50/95">{tr(l('من حكايات الإمارات إلى مفردات التراث وملفات التاريخ، مغامرتك الثقافية تبدأ من مكتبتك.','From the stories of the emirates to heritage vocabulary and historical evidence, your cultural adventure starts in the library.'))}</p>
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <div className="rounded-xl border border-white/25 bg-white/10 px-4 py-3"><span className="block text-[11px] text-emerald-100">{tr(l('الأختام','Stamps'))}</span><strong className="text-xl font-black tabular-nums">{progress.stamps.length}/7</strong></div>
-              <div className="rounded-xl border border-white/25 bg-white/10 px-4 py-3"><span className="block text-[11px] text-emerald-100">{tr(l('كنوز اللغة','Word treasures'))}</span><strong className="text-xl font-black tabular-nums">{progress.words.length}/{expandedWords.length}</strong></div>
+              <div className="rounded-xl border border-white/25 bg-white/10 px-4 py-3"><span className="block text-[11px] text-emerald-100">{tr(l('كنوز اللغة','Word treasures'))}</span><strong className="text-xl font-black tabular-nums">{progress.words.length}/{dictionaryActivities.length}</strong></div>
               <div className="rounded-xl border border-white/25 bg-white/10 px-4 py-3"><span className="block text-[11px] text-emerald-100">{tr(l('ملفات البحث','Research files'))}</span><strong className="text-xl font-black tabular-nums">{progress.cases.length}/{sourcedCases.length}</strong></div>
             </div>
           </div>
@@ -503,10 +502,14 @@ const NationalIdentityPage: React.FC = () => {
                     <p className="mt-2 text-sm sm:text-base leading-8 text-slate-700 dark:text-slate-300">{tr(item.story)}</p>
                     <p className="mt-3 rounded-xl border-s-4 border-amber-400 bg-amber-50 dark:bg-amber-950/20 p-3 text-xs sm:text-sm font-bold leading-7 text-amber-950 dark:text-amber-100">{tr(item.prompt)}</p>
                     {mode==='language' ? <div className="mt-4 rounded-2xl border-2 border-emerald-300 dark:border-emerald-800 p-5 bg-emerald-50 dark:bg-emerald-950/20">
-                      <strong className="block font-black">{tr(l('المرجع الوحيد: معجم الألفاظ العامية في دولة الإمارات العربية المتحدة','Sole reference: Dictionary of UAE Colloquial Terms'))}</strong>
-                      <p className="mt-2">{tr(l('تأليف د. فالح حنظل · النسخة الورقية: الرف 6، الصف 2','Dr Faleh Handhal · Printed copy: shelf 6, row 2'))}</p>
-                      <a className="mt-3 inline-flex rounded-xl bg-emerald-700 text-white px-4 py-3 text-sm font-black" href="https://noorlib.ir/book/view/20858/%D9%85%D8%B9%D8%AC%D9%85-%D8%A7%D9%84%D8%A3%D9%84%D9%81%D8%A7%D8%B8-%D8%A7%D9%84%D8%B9%D8%A7%D9%85%D9%8A%D8%A9-%D9%81%D9%8A-%D8%AF%D9%88%D9%84%D8%A9-%D8%A7%D9%84%D8%A7%D9%85%D8%A7%D8%A7%D8%B1%D8%A7%D8%AA-%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9-%D8%A7%D9%84%D9%85%D8%AA%D8%AD%D8%AF%D8%A9?pageNumber=5&viewType=pdf" target="_blank" rel="noopener noreferrer">{tr(l('افتح النسخة الإلكترونية للمعجم','Read the online dictionary'))}</a>
-                      <p className="mt-3 text-xs leading-7">{tr(l('استخرج معنى المصطلح من المعجم. لا تُنسب إليه تعريفات غير موثقة من صفحاته.','Look up each term in the dictionary. Definitions not independently checked against its pages are not attributed to it.'))}</p>
+                      <p className="text-xs font-black tracking-wide text-emerald-800 dark:text-emerald-200">{tr(l('مرجع التحدي الورقي','PRINTED LIBRARY REFERENCE'))}</p>
+                      <strong className="mt-2 block font-black text-lg">{handhalDictionary.title}</strong>
+                      <p className="mt-2 font-semibold">{tr(l('المؤلف: الدكتور فالح حنظل','Author: Dr Faleh Handhal'))}</p>
+                      <div className="mt-4 flex flex-wrap gap-3">
+                        <span className="rounded-xl bg-emerald-700 px-5 py-3 text-base text-white font-black">{tr(l('الرف 6','Shelf 6'))}</span>
+                        <span className="rounded-xl bg-emerald-700 px-5 py-3 text-base text-white font-black">{tr(l('الصف 2','Row 2'))}</span>
+                      </div>
+                      <p className="mt-4 text-sm leading-7">{tr(l('توجّه للنسخة الورقية في مكتبة المدرسة، وابحث عن اللفظ المحدد في هذه المهمة. سجّل المعنى من المعجم نفسه؛ لا يوجد رابط إلكتروني في التحدي.','Use the physical copy in the school library to look up the exact assigned word and record its meaning.'))}</p>
                     </div> : <div className="mt-4 rounded-2xl border-2 border-emerald-300 dark:border-emerald-800 p-5 bg-emerald-50 dark:bg-emerald-950/20">
                       <strong className="font-black">{tr(l('مصدر التحدي: اقرأ قبل الإجابة','Mission source: read before answering'))}</strong>
                       <a href={questionItem.source} target="_blank" rel="noopener noreferrer" onClick={()=>setSourceOpened(true)} className="mt-3 inline-flex rounded-xl bg-emerald-700 text-white px-4 py-3 text-sm font-black">{tr(l('افتح المصدر الإلكتروني المعتمد','Open the primary online source'))}</a>
@@ -528,15 +531,13 @@ const NationalIdentityPage: React.FC = () => {
               {stage==='discover' ? <div className="nh-discovery"><div className="nh-discovery-art"><HeritageQuestArt kind={mode==='passport'?'passport':mode==='language'?'language':'archive'}/></div><h3 className="font-black text-xl sm:text-2xl">{tr(item.name)}</h3><p className="mt-3 text-sm sm:text-base leading-8">{tr(item.story)}</p><button type="button" onClick={()=>setStage('play')} className="nh-launch">{tr(l('ابدأ التحدي واكشف السر','Start the mission'))}<Icon kind="arrow" className="w-5 h-5"/></button></div> : <><div className="nh-stage-label">{tr(l('مهمة اكتشاف · اختر الدليل الصحيح','Discovery mission · choose the right clue'))}</div><p className="font-bold text-base sm:text-lg leading-8 mb-4">{tr(questionItem.question)}</p>
               {(mode==='passport'||mode==='archive')&&!sourceOpened && <p className="mb-4 text-sm font-bold text-amber-700 dark:text-amber-300">{tr(l('افتح المصدر أولًا لتفعيل الإجابات','Open the source first to enable answering'))}</p>}
               {mode==='language' ? <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800 p-4">
-                <p className="font-black mb-3">{tr(l('مهمة معجمية · اقرأ المدخل ثم أجب','Dictionary research · read the entry then answer'))}</p>
+                <p className="font-black mb-3">{tr(l('ابحث عن اللفظ المحدد في المعجم الورقي','Find the assigned word in the printed dictionary'))}</p>
                 <p className="mb-4 text-sm leading-7">{tr(item.question)}</p>
-                <label className="text-sm font-bold">{tr(l('اللفظ الذي عثرت عليه','Word found'))}
-                  <input value={dictionaryWord} onChange={e=>setDictionaryWord(e.target.value.slice(0,80))} className="mt-2 block w-full rounded-xl border p-3 bg-white dark:bg-slate-950" />
-                </label>
+                <div className="mb-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-4"><p className="text-xs font-black">{tr(l('لفظ المهمة','Assigned word'))}</p><p className="mt-2 text-2xl font-black" dir="rtl">{dictionaryTasks.find(t=>t.word===item.name.ar.replace('اللفظ: ','')&&t.difficulty===item.difficulty)?.word||item.name.ar.replace('اللفظ: ','')}</p></div>
                 <label className="mt-3 block text-sm font-bold">{tr(l('معناه في المعجم + رقم الصفحة إن وجد','Dictionary meaning and printed page, if available'))}
                   <textarea value={dictionaryMeaning} onChange={e=>setDictionaryMeaning(e.target.value.slice(0,450))} rows={3} className="mt-2 w-full rounded-xl border p-3 bg-white dark:bg-slate-950"/>
                 </label>
-                <button type="button" disabled={!dictionaryWord.trim()||!dictionaryMeaning.trim()} onClick={()=>setProgress(prev=>prev.words.includes(item.id)?prev:{...prev,words:[...prev.words,item.id]})} className="mt-4 rounded-xl bg-emerald-700 text-white px-5 py-3 font-bold disabled:opacity-50">{tr(l('حفظ إنجاز القراءة','Mark reading completed'))}</button>
+                <button type="button" disabled={!dictionaryMeaning.trim()} onClick={()=>setProgress(prev=>prev.words.includes(item.id)?prev:{...prev,words:[...prev.words,item.id]})} className="mt-4 rounded-xl bg-emerald-700 text-white px-5 py-3 font-bold disabled:opacity-50">{tr(l('حفظ إنجاز القراءة','Mark reading completed'))}</button>
                 <p className="mt-3 text-xs">{tr(l('إنجاز القراءة يُسجل ذاتيًا ولا يمثل تصحيحًا معجميًا معتمدًا.','Reading completion is self-reported, not a verified definition grade.'))}</p>
               </div> : <div className="nh-options grid grid-cols-1 md:grid-cols-3 gap-3">
                 {choicesOrder.map((originalIndex,i)=><button key={originalIndex} type="button" onClick={()=>submitAnswer(originalIndex)} disabled={(mode==='passport'||mode==='archive')&&!sourceOpened}
