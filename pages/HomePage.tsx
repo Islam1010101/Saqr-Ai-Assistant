@@ -870,7 +870,7 @@ const HomePage: React.FC = () => {
                             </Link>
                         )}
 
-                        {(userType === 'teacher' || userType === 'admin') && (
+                        {userType === 'teacher' && (
                             <Link to="/saqr-reading-quest" className="group relative flex items-center gap-5 rounded-[2.5rem] border-b-8 border-emerald-900 bg-emerald-700 p-6 text-white shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl active:translate-y-2 active:border-b-0">
                                 <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/20"><BookIcon /></span>
                                 <span className="min-w-0"><strong className="block text-xl font-black md:text-2xl">{t('readingQuestTitle')}</strong><small className="mt-1 block text-xs md:text-sm">{t('readingQuestDesc')}</small></span>
@@ -885,21 +885,6 @@ const HomePage: React.FC = () => {
                                 <div>
                                     <h3 className="text-xl md:text-2xl font-black mb-1 tracking-tight">{t('scheduleTitle')}</h3>
                                     <p className="text-xs md:text-sm opacity-90 font-normal leading-snug">{t('scheduleDesc')}</p>
-                                </div>
-                            </Link>
-                        )}
-
-                        {(userType === 'student' || userType === 'admin') && (
-                            <Link to="/game" className="group relative bg-amber-400 text-slate-900 p-6 rounded-[2.5rem] border-b-8 border-amber-600 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
-                                <div className="absolute top-4 end-4 bg-rose-500 text-white text-[10px] md:text-xs px-3 py-0.5 rounded-full font-black uppercase tracking-wider shadow-md animate-pulse">
-                                    {t('newBadge')}
-                                </div>
-                                <div className="p-3.5 bg-slate-900/10 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 text-slate-900">
-                                    <GameIcon />
-                                </div>
-                                <div>
-                                    <h3 className="text-xl md:text-2xl font-black mb-1 tracking-tight">{t('gameTitle')}</h3>
-                                    <p className="text-xs md:text-sm opacity-90 font-normal leading-snug">{t('gameDesc')}</p>
                                 </div>
                             </Link>
                         )}
