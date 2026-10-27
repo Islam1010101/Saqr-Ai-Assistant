@@ -1,8 +1,17 @@
 import assert from 'node:assert/strict';
 import {verifiedPassport} from '../src/utils/verifiedPassportEvidence.ts';
 import {verifiedDetective} from '../src/utils/verifiedDetectiveEvidence.ts';
+import {verifiedHeritageBookQuestions} from '../src/utils/verifiedHeritageBookQuestions.ts';
 assert.equal(verifiedPassport.length,7);
 assert.equal(verifiedDetective.length,25);
+assert.equal(verifiedHeritageBookQuestions.length,11);
+for(const q of verifiedHeritageBookQuestions){
+ assert.equal(q.book.shelf,41);assert.ok(q.book.row>0);
+ assert.equal(q.choices.length,3);assert.ok(q.choices[q.correct].ar);
+ assert.ok(q.source.startsWith('https://'));
+ assert.ok(q.story.ar.includes(q.evidence.ar),'Book evidence missing: '+q.id);
+ assert.ok(q.story.en.toLowerCase().includes(q.evidence.en.toLowerCase()),'English book evidence missing: '+q.id);
+}
 const sources=new Set();
 for(const record of verifiedPassport){
  assert.equal(record.questions.length,4);
