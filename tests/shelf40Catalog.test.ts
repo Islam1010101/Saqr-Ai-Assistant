@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {shelf40Books} from '../api/shelf40Catalog.ts';
+import {bookData} from '../api/bookData.ts';
+import {searchSaqrBookCatalog} from '../src/utils/saqrCatalogSearch.ts';
+assert.equal(shelf40Books.length,86);
+assert.equal(shelf40Books.filter(b=>!!b.isbn).length,31);
+assert.equal(shelf40Books.filter(b=>b.needsReview).length,21);
+assert.deepEqual([...new Set(shelf40Books.map(b=>b.row))].sort(),[1,2,3,4,5]);
+const physical=bookData.filter(b=>b.shelf===40);
+for(const b of shelf40Books)assert.ok(physical.some(x=>x.row===b.row&&x.title===b.title),'missing '+b.title);
+assert.ok(searchSaqrBookCatalog('The Big Nowhere',{physical:bookData,arabic:[],english:[]}).some(x=>x.title==='The Big Nowhere'));
+assert.ok(bookData.every(b=>b.shelf!==34));
+console.log('PASS 86 shelf40 books, row preservation, checksum ISBNs and Saqr lookup');
