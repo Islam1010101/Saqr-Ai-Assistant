@@ -8,6 +8,7 @@ import PassportStampCard from './PassportStampCard';
 import {getGuidedHeritageBook} from '../src/utils/heritageBookGuides';
 import {verifiedPassport} from '../src/utils/verifiedPassportEvidence';
 import {verifiedDetective} from '../src/utils/verifiedDetectiveEvidence';
+import {verifiedHeritageBookQuestions} from '../src/utils/verifiedHeritageBookQuestions';
 import {dictionaryTasks,handhalDictionary,newDictionaryRound} from '../src/utils/heritageSourceFirst';
 
 
@@ -24,6 +25,7 @@ type Activity = {
   explanation: L;
   source: string;
   difficulty?: number;
+  physicalBook?:{title:string;author:string;shelf:number;row:number};
 };
 type Progress = {
   stamps: string[];
@@ -149,7 +151,7 @@ const sourcedEmirates:Activity[]=verifiedPassport.map((entry)=>({
  question:entry.questions[0].question,choices:entry.questions[0].choices,
  correct:entry.questions[0].correct,explanation:entry.questions[0].explanation,difficulty:1
 }));
-const sourcedCases:Activity[]=verifiedDetective.map((entry)=>({...entry}));
+const sourcedCases:Activity[]=[...verifiedDetective.map(entry=>({...entry})),...verifiedHeritageBookQuestions.filter(q=>q.id.includes('fort')).map(q=>({id:q.id,name:q.name,story:q.story,prompt:l('اقرأ ملخص الكتاب المنشور.','Read the published book synopsis.'),question:q.question,choices:q.choices,correct:q.correct,explanation:q.explanation,source:q.source,difficulty:q.difficulty,physicalBook:q.book}))];
 const sourcedFollowUps:Record<string,Array<{question:L;choices:[L,L,L];correct:number;explanation:L;source:string;difficulty:number}>>=
  Object.fromEntries(verifiedPassport.map(entry=>[entry.id,entry.questions.slice(1).map(q=>({
   question:q.question,choices:q.choices,correct:q.correct,explanation:q.explanation,source:q.source,difficulty:q.difficulty
@@ -162,7 +164,8 @@ const dictionaryActivities:Activity[]=dictionaryTasks.map(task=>({
  question:task.question,choices:task.options as [L,L,L],correct:task.correct,
  explanation:task.explanation,source:'',difficulty:task.difficulty
 }));
-const activities: Record<Exclude<Mode,'home'>, Activity[]> = {passport: sourcedEmirates,language:dictionaryActivities,archive:sourcedCases};
+const otherBookCases:Activity[]=verifiedHeritageBookQuestions.filter(q=>!q.id.includes('fort')).map(q=>({id:q.id,name:q.name,story:q.story,prompt:l('اقرأ ملخص الكتاب المنشور.','Read the published book synopsis.'),question:q.question,choices:q.choices,correct:q.correct,explanation:q.explanation,source:q.source,difficulty:q.difficulty,physicalBook:q.book}));
+const activities: Record<Exclude<Mode,'home'>, Activity[]> = {passport: sourcedEmirates,language:dictionaryActivities,archive:[...sourcedCases,...otherBookCases]};
 const progressField: Record<Exclude<Mode,'home'>, 'stamps'|'words'|'cases'> = {passport:'stamps',language:'words',archive:'cases'};
 const readSaved = (key: string): Progress => {
   try {
@@ -321,7 +324,7 @@ const NationalIdentityPage: React.FC = () => {
   const modules = [
     {id:'passport' as const,icon:'stamp' as const,title:l('جواز صقر الثقافي','Saqr Cultural Passport'),desc:l('اكتشف الإمارات السبع، واقرأ حكاية كل إمارة واجمع ختمها.','Explore all seven emirates, read their stories and collect their stamps.'),total:sourcedEmirates.length,count:progress.stamps.length,color:'from-emerald-700 to-teal-600'},
     {id:'language' as const,icon:'weave' as const,title:l('كنوز لغتنا الإماراتية','Treasures of Emirati Language'),desc:l('اختر معنى 10 ألفاظ إماراتية بعد مراجعة المعجم الورقي.','Find the meanings of 10 Emirati words using the printed dictionary.'),total:10,count:entries.filter(x=>progress.words.includes(x.id)).length,color:'from-amber-600 to-orange-600'},
-    {id:'archive' as const,icon:'document' as const,title:l('محقق ذاكرة الوطن','Heritage Research Detective'),desc:l('حلّل الأدلة واقرأ المصادر وتعلّم كيف تتحقق من المعلومات.','Study evidence, read sources and learn how to verify information.'),total:sourcedCases.length,count:progress.cases.length,color:'from-sky-700 to-indigo-700'}
+    {id:'archive' as const,icon:'document' as const,title:l('محقق ذاكرة الوطن','Heritage Research Detective'),desc:l('حلّل الأدلة واقرأ المصادر وتعلّم كيف تتحقق من المعلومات.','Study evidence, read sources and learn how to verify information.'),total:activities.archive.length,count:progress.cases.length,color:'from-sky-700 to-indigo-700'}
   ];
   const selectedModule = modules.find(x=>x.id===currentMode) || modules[0];
   if (!identity) return <Navigate to="/home" replace />;
@@ -488,6 +491,7 @@ const NationalIdentityPage: React.FC = () => {
                   <p className="text-xs font-black text-emerald-700 dark:text-emerald-300">{tr(l('مصدر المهمة','Mission source'))}</p>
                   <strong className="block mt-1 text-base sm:text-lg font-black">{tr(item.name)}</strong>
                 </div>
+                {item.physicalBook && <p className="w-full text-sm font-semibold leading-7">{tr(l('الكتاب الورقي','Printed book'))}: {item.physicalBook.title} · {item.physicalBook.author} · {tr(l('الرف','Shelf'))} {item.physicalBook.shelf} · {tr(l('الصف','Row'))} {item.physicalBook.row}</p>}
                 {questionItem.source ? <a href={questionItem.source} target="_blank" rel="noopener noreferrer" onClick={()=>setSourceOpened(true)} className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-3 text-xs sm:text-sm font-black text-white hover:bg-emerald-800 focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-500">{tr(l('افتح المصدر الأصلي','Open original source'))}<Icon kind="arrow" className="w-4 h-4"/></a> : <span className="text-sm font-semibold">{tr(l('المصدر الورقي غير متاح لهذا السؤال','Physical source not available for this question'))}</span>}
               </div>
             </section>}
