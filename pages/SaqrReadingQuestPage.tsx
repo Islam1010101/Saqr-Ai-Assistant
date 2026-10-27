@@ -17,7 +17,7 @@ export default function SaqrReadingQuestPage(){
  const [count,setCount]=useState(1);
  const [rounds,setRounds]=useState<Round[]|null>(null);
  const [bookIndex,setBookIndex]=useState(0);const [questionIndex,setQuestionIndex]=useState(0);
- if(!['student','teacher'].includes(session.role))return <Navigate to="/home" replace/>;
+ if(!['student','teacher','admin'].includes(session.role))return <Navigate to="/home" replace/>;
  const start=()=>{const selected=shuffleReading(books).slice(0,count);if(!selected.length)return;setRounds(selected.map(book=>({book,questions:shuffleReading(book.questions).slice(0,Math.min(10,Math.max(5,book.questions.length))),answers:{}})));setBookIndex(0);setQuestionIndex(0);};
  const current=rounds?.[bookIndex],question=current?.questions[questionIndex];
  const answered=question?current?.answers[question.id]:undefined;
