@@ -302,7 +302,7 @@ const NationalIdentityPage: React.FC = () => {
   };
   const modules = [
     {id:'passport' as const,icon:'stamp' as const,title:l('جواز صقر الثقافي','Saqr Cultural Passport'),desc:l('اكتشف الإمارات السبع، واقرأ حكاية كل إمارة واجمع ختمها.','Explore all seven emirates, read their stories and collect their stamps.'),total:sourcedEmirates.length,count:progress.stamps.length,color:'from-emerald-700 to-teal-600'},
-    {id:'language' as const,icon:'weave' as const,title:l('كنوز لغتنا الإماراتية','Treasures of Emirati Language'),desc:l('تعرّف على مفردات التراث واستعملها في جمل من تأليفك.','Discover heritage terms and use them in your own sentences.'),total:10,count:entries.filter(x=>progress.words.includes(x.id)).length,color:'from-amber-600 to-orange-600'},
+    {id:'language' as const,icon:'weave' as const,title:l('كنوز لغتنا الإماراتية','Treasures of Emirati Language'),desc:l('اختر معنى 10 ألفاظ إماراتية بعد مراجعة المعجم الورقي.','Find the meanings of 10 Emirati words using the printed dictionary.'),total:10,count:entries.filter(x=>progress.words.includes(x.id)).length,color:'from-amber-600 to-orange-600'},
     {id:'archive' as const,icon:'document' as const,title:l('محقق ذاكرة الوطن','Heritage Research Detective'),desc:l('حلّل الأدلة واقرأ المصادر وتعلّم كيف تتحقق من المعلومات.','Study evidence, read sources and learn how to verify information.'),total:sourcedCases.length,count:progress.cases.length,color:'from-sky-700 to-indigo-700'}
   ];
   const selectedModule = modules.find(x=>x.id===currentMode) || modules[0];
@@ -481,7 +481,7 @@ const NationalIdentityPage: React.FC = () => {
             </div>
           </aside>}
           <div className="nh-game-content min-w-0 space-y-5">
-            <article className="nh-story-card rounded-[1.7rem] border border-emerald-100 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-lg overflow-hidden">
+            {mode!=='language' && <article className="nh-story-card rounded-[1.7rem] border border-emerald-100 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-lg overflow-hidden">
               <div className="border-b border-emerald-100 dark:border-slate-800 bg-gradient-to-r from-emerald-50 via-[#FFF8E9] to-white dark:from-emerald-950/35 dark:via-amber-950/15 dark:to-slate-950 p-5 sm:p-7">
                 <div className="flex justify-between gap-3 items-start">
                   <div className="min-w-0">
@@ -522,18 +522,18 @@ const NationalIdentityPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-            </article>
+            </article>}
             <article className="nh-challenge-play rounded-[1.7rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-5 sm:p-7 shadow-lg">
               <div className="flex gap-3 items-center mb-4">
                 <div className="flex items-center justify-center bg-[#F4E9D5] text-amber-900 dark:bg-amber-950 dark:text-amber-300 w-11 h-11 rounded-xl"><Icon kind="document" className="w-6 h-6"/></div>
-                <h3 className="font-black text-lg">{tr(mode==='passport'?l('اختم صفحة الجواز','Stamp Your Passport'):mode==='language'?l('افتح كنز الكلمة','Unlock the Word Treasure'):l('حل قضية ذاكرة وطن','Solve the Heritage Mystery'))}</h3>
+                <h3 className="font-black text-lg">{tr(mode==='passport'?l('اختم صفحة الجواز','Stamp Your Passport'):mode==='language'?l('اختر المعنى الصحيح','Choose the correct meaning'):l('حل قضية ذاكرة وطن','Solve the Heritage Mystery'))}</h3>
               </div>
-              {stage==='discover' ? <div className="nh-discovery"><div className="nh-discovery-art"><HeritageQuestArt kind={mode==='passport'?'passport':mode==='language'?'language':'archive'}/></div><h3 className="font-black text-xl sm:text-2xl">{tr(item.name)}</h3><p className="mt-3 text-sm sm:text-base leading-8">{tr(item.story)}</p><button type="button" onClick={()=>setStage('play')} className="nh-launch">{tr(l('ابدأ التحدي واكشف السر','Start the mission'))}<Icon kind="arrow" className="w-5 h-5"/></button></div> : <><div className="nh-stage-label">{tr(l('مهمة اكتشاف · اختر الدليل الصحيح','Discovery mission · choose the right clue'))}</div><p className="font-bold text-base sm:text-lg leading-8 mb-4">{tr(questionItem.question)}</p>
+              {stage==='discover' && mode!=='language' ? <div className="nh-discovery"><div className="nh-discovery-art"><HeritageQuestArt kind={mode==='passport'?'passport':mode==='language'?'language':'archive'}/></div><h3 className="font-black text-xl sm:text-2xl">{tr(item.name)}</h3><p className="mt-3 text-sm sm:text-base leading-8">{tr(item.story)}</p><button type="button" onClick={()=>setStage('play')} className="nh-launch">{tr(l('ابدأ التحدي واكشف السر','Start the mission'))}<Icon kind="arrow" className="w-5 h-5"/></button></div> : <><div className="nh-stage-label">{tr(l('مهمة اكتشاف · اختر الدليل الصحيح','Discovery mission · choose the right clue'))}</div><p className="font-bold text-base sm:text-lg leading-8 mb-4">{tr(questionItem.question)}</p>
               {(mode==='passport'||mode==='archive')&&!sourceOpened && <p className="mb-4 text-sm font-bold text-amber-700 dark:text-amber-300">{tr(l('افتح المصدر أولًا لتفعيل الإجابات','Open the source first to enable answering'))}</p>}
               {mode==='language' && <div className="mb-5 rounded-2xl border-2 border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20 p-5">
                 <p className="text-xs font-black text-amber-900 dark:text-amber-200">{tr(l('اللفظ المطلوب','YOUR WORD TO LOOK UP'))}</p>
                 <strong className="mt-2 block text-3xl font-black" dir="rtl">{dictionaryTasks.find(task=>task.id===item.id)?.word}</strong>
-                <p className="mt-3 font-bold text-sm">{tr(l('توجّه إلى مكتبة المدرسة: معجم الدكتور فالح حنظل — الرف 6، الصف 2. اقرأ المدخل ثم اختر الإجابة الصحيحة أدناه.','Go to the school library: Dr Faleh Handhal’s printed dictionary — shelf 6, row 2. Read the entry and choose the correct answer below.'))}</p>
+                <p className="mt-3 font-bold text-sm leading-7">{tr(l('يرجى التوجه لمعرفة الإجابة إلى معجم الألفاظ العامية في دولة الإمارات العربية المتحدة للدكتور فالح حنظل، الرف 6، الصف 2.','Find the answer in Dr Faleh Handhal’s Dictionary of UAE Colloquial Terms, school library, shelf 6, row 2.'))}</p>
               </div>}
               <div className="nh-options grid grid-cols-1 md:grid-cols-3 gap-3">
                 {choicesOrder.map((originalIndex,i)=><button key={originalIndex} type="button" onClick={()=>submitAnswer(originalIndex)} disabled={((mode==='passport'||mode==='archive')&&!sourceOpened)||(mode==='language'&&selectedCorrect)}
@@ -561,14 +561,6 @@ const NationalIdentityPage: React.FC = () => {
               </div>}
               </>}
               {mode==='passport' && stage==='play' && <button type="button" onClick={()=>{setPassportTier(previous=>(previous+1)%4);setAdvancedPassport(passportTier!==3);setChosen(null);}} className="nh-tier mt-4 rounded-xl border-2 border-amber-400 px-4 py-2.5 font-black text-xs sm:text-sm">{tr(passportTier===3?l('العودة للسؤال الأول','Return to first question'):l('السؤال التالي من المقال · مستوى أصعب','Next article question · harder level'))}</button>}
-              {mode==='language' && stage==='play' && <div className="mt-6 pt-5 border-t border-slate-200 dark:border-slate-800">
-                <label htmlFor={'heritage-note-'+item.id} className="block font-black text-sm mb-2">{tr(l('اكتب جملة من تأليفك (اختياري)','Write your own sentence (optional)'))}</label>
-                <textarea id={'heritage-note-'+item.id} maxLength={180} rows={3} value={progress.notes[item.id] || ''}
-                  placeholder={tr(l('استخدم الكلمة في جملة تحكي عن التراث...','Use this word in a sentence about heritage...'))}
-                  onChange={e=>setProgress(prev=>({...prev,notes:{...prev.notes,[item.id]:e.target.value}}))}
-                  className="block w-full resize-y rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3 text-sm leading-7 text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"/>
-                <p className="text-xs mt-2 text-slate-500 dark:text-slate-400">{tr(l('تُحفظ الجملة على جهازك فقط، ولا يتم تقييمها آليًا أو إرسالها للنشر.','Your sentence stays on this device. It is not automatically graded or submitted for publishing.'))}</p>
-              </div>}
               <div className="mt-6 flex flex-wrap gap-3 justify-between">
                 <button type="button" disabled={index===0} onClick={()=>selectEntry(index-1)}
                   className="rounded-xl px-4 py-2.5 text-xs font-black bg-slate-100 dark:bg-slate-900 disabled:opacity-40 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">{tr(l('السابق','Previous'))}</button>
