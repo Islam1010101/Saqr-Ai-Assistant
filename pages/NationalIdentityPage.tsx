@@ -285,7 +285,7 @@ const NationalIdentityPage: React.FC = () => {
   }, [currentMode,index,round,advancedPassport]);
   const totalCompleted = progress.stamps.length + progress.words.length + progress.cases.length;
   const go = (next: Mode) => { setMode(next);setIndex(0);setChosen(null);setAdvancedPassport(false);setPassportTier(0);setStage('discover');setSourceOpened(false);setDictionaryMeaning('');setNewlyStamped(null);setRound(n=>n+1); };
-  const selectEntry = (nextIndex: number) => {setIndex(nextIndex);setChosen(null);setAdvancedPassport(false);setStage('discover');setSourceOpened(false);setNewlyStamped(null);};
+  const selectEntry = (nextIndex: number) => {setIndex(nextIndex);setChosen(null);setAdvancedPassport(false);setStage('discover');setSourceOpened(false);setDictionaryMeaning('');setNewlyStamped(null);};
   const submitAnswer = (answer: number) => {
     setChosen(answer);
     if (answer !== questionItem.correct) return;
@@ -533,7 +533,7 @@ const NationalIdentityPage: React.FC = () => {
               {mode==='language' ? <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800 p-4">
                 <p className="font-black mb-3">{tr(l('ابحث عن اللفظ المحدد في المعجم الورقي','Find the assigned word in the printed dictionary'))}</p>
                 <p className="mb-4 text-sm leading-7">{tr(item.question)}</p>
-                <div className="mb-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-4"><p className="text-xs font-black">{tr(l('لفظ المهمة','Assigned word'))}</p><p className="mt-2 text-2xl font-black" dir="rtl">{dictionaryTasks.find(t=>t.word===item.name.ar.replace('اللفظ: ','')&&t.difficulty===item.difficulty)?.word||item.name.ar.replace('اللفظ: ','')}</p></div>
+                <div className="mb-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-4"><p className="text-xs font-black">{tr(l('لفظ المهمة','Assigned word'))}</p><p className="mt-2 text-2xl font-black" dir="rtl">{item.name.ar.replace('اللفظ: ','')}</p></div>
                 <label className="mt-3 block text-sm font-bold">{tr(l('معناه في المعجم + رقم الصفحة إن وجد','Dictionary meaning and printed page, if available'))}
                   <textarea value={dictionaryMeaning} onChange={e=>setDictionaryMeaning(e.target.value.slice(0,450))} rows={3} className="mt-2 w-full rounded-xl border p-3 bg-white dark:bg-slate-950"/>
                 </label>
