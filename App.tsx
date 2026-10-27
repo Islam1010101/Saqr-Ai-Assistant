@@ -18,6 +18,8 @@ import EnglishLibraryInternalPage from './pages/EnglishLibraryInternalPage';
 import FeedbackPage from './pages/FeedbackPage';
 import CreatorsPortalPage from './pages/CreatorsPortalPage';
 import SaqrStudioPage from './pages/SaqrStudioPage';
+import SaqrReadingQuestPage from './pages/SaqrReadingQuestPage';
+import SaqrChallengesHubPage from './pages/SaqrChallengesHubPage';
 import PodcastPage from './pages/PodcastPage';
 import DeweyGame from './pages/game';
 import SchedulePage from './pages/SchedulePage';
@@ -526,6 +528,8 @@ const MainLayout: React.FC = () => {
           <Route path="/digital-library/english" element={<ProtectedRoute><EnglishLibraryInternalPage /></ProtectedRoute>} />
           <Route path="/creators" element={<ProtectedRoute><CreatorsPortalPage /></ProtectedRoute>} />
           <Route path="/saqr-studio" element={<ProtectedRoute><SaqrStudioPage /></ProtectedRoute>} />
+          <Route path="/saqr-reading-quest" element={<ProtectedRoute><SaqrReadingQuestPage /></ProtectedRoute>} />
+          <Route path="/saqr-challenges" element={<ProtectedRoute><SaqrChallengesHubPage /></ProtectedRoute>} />
           <Route path="/podcast" element={<ProtectedRoute><PodcastPage /></ProtectedRoute>} />
           <Route path="/feedback" element={<ProtectedRoute><FeedbackPage /></ProtectedRoute>} />
           <Route path="/about" element={<AboutPage />} />
