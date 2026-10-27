@@ -8,6 +8,7 @@ import PassportStampCard from './PassportStampCard';
 import {getGuidedHeritageBook} from '../src/utils/heritageBookGuides';
 import {verifiedPassport} from '../src/utils/verifiedPassportEvidence';
 import {verifiedDetective} from '../src/utils/verifiedDetectiveEvidence';
+import {dictionaryTasks,handhalDictionary} from '../src/utils/heritageSourceFirst';
 
 
 type L = { ar: string; en: string };
@@ -154,7 +155,15 @@ const sourcedFollowUps:Record<string,Array<{question:L;choices:[L,L,L];correct:n
   question:q.question,choices:q.choices,correct:q.correct,explanation:q.explanation,source:q.source,difficulty:q.difficulty
  }))]));
 
-const activities: Record<Exclude<Mode,'home'>, Activity[]> = {passport: sourcedEmirates,language:expandedWords,archive:sourcedCases};
+const dictionaryActivities:Activity[]=dictionaryTasks.map((task,i)=>({
+ id:'handhal-dictionary-'+i,name:l('حرف '+task.letter,'Letter '+task.letter),
+ story:l('ارجع إلى معجم الألفاظ العامية للدكتور فالح حنظل؛ ابحث عن لفظ يبدأ بحرف '+task.letter+' ولا تعتمد على تعريف غير موجود في المرجع.','Consult Dr Faleh Handhal’s UAE colloquial dictionary and select an entry beginning with '+task.letter+'.'),
+ prompt:l(task.ar,task.en),question:l(task.ar,task.en),
+ choices:[l('تُكتب الإجابة من قراءة المعجم','Answer comes from reading the dictionary'),l('تُكتب الإجابة من قراءة المعجم','Answer comes from reading the dictionary'),l('تُكتب الإجابة من قراءة المعجم','Answer comes from reading the dictionary')],
+ correct:0,explanation:l('يحتاج المعنى لمراجعة نص المعجم.','The meaning must be checked in the dictionary.'),
+ source:handhalDictionary.url,difficulty:task.difficulty
+}));
+const activities: Record<Exclude<Mode,'home'>, Activity[]> = {passport: sourcedEmirates,language:dictionaryActivities,archive:sourcedCases};
 const progressField: Record<Exclude<Mode,'home'>, 'stamps'|'words'|'cases'> = {passport:'stamps',language:'words',archive:'cases'};
 const readSaved = (key: string): Progress => {
   try {
@@ -164,7 +173,7 @@ const readSaved = (key: string): Progress => {
       Array.from(new Set(arr.filter((item): item is string => typeof item === 'string' && items.some(entry=>entry.id === item)))) : [];
     const notes: Record<string,string> = {};
     if (value.notes && typeof value.notes === 'object') {
-      for (const entry of expandedWords) if (typeof value.notes[entry.id] === 'string') notes[entry.id] = value.notes[entry.id].slice(0,180);
+      for (const entry of dictionaryActivities) if (typeof value.notes[entry.id] === 'string') notes[entry.id] = value.notes[entry.id].slice(0,180);
     }
     const stamps = valid(value.stamps,sourcedEmirates);
     // Only dates recorded at actual completion are displayed. Legacy stamps have no invented dates.
@@ -175,7 +184,7 @@ const readSaved = (key: string): Progress => {
         if (typeof stored === 'string' && !Number.isNaN(Date.parse(stored))) stampDates[id] = stored;
       }
     }
-    return {stamps,words:valid(value.words,expandedWords),cases:valid(value.cases,sourcedCases),notes,stampDates};
+    return {stamps,words:valid(value.words,dictionaryActivities),cases:valid(value.cases,sourcedCases),notes,stampDates};
   } catch { return emptyProgress(); }
 };
 const Icon: React.FC<{kind:'book'|'stamp'|'weave'|'document'|'check'|'arrow'|'lock'; className?:string}> = ({kind,className='w-7 h-7'}) => {
@@ -267,6 +276,8 @@ const NationalIdentityPage: React.FC = () => {
   const difficultyName = [l('سهل','Easy'),l('متوسط','Intermediate'),l('متقدم','Advanced'),l('خبير','Expert')][Math.min(4,difficulty)-1];
   const suggestedBook=(currentMode==='passport'||currentMode==='archive')?getGuidedHeritageBook(item.id,difficulty,round+index+passportTier):null;
   const [sourceOpened,setSourceOpened]=useState(false);
+  const [dictionaryWord,setDictionaryWord]=useState('');
+  const [dictionaryMeaning,setDictionaryMeaning]=useState('');
   const selectedCorrect = chosen === questionItem.correct;
   const choicesOrder = useMemo(() => {
     const indexes = [0,1,2];
@@ -274,7 +285,7 @@ const NationalIdentityPage: React.FC = () => {
     return indexes;
   }, [currentMode,index,round,advancedPassport]);
   const totalCompleted = progress.stamps.length + progress.words.length + progress.cases.length;
-  const go = (next: Mode) => { setMode(next);setIndex(0);setChosen(null);setAdvancedPassport(false);setPassportTier(0);setStage('discover');setSourceOpened(false);setNewlyStamped(null);setRound(n=>n+1); };
+  const go = (next: Mode) => { setMode(next);setIndex(0);setChosen(null);setAdvancedPassport(false);setPassportTier(0);setStage('discover');setSourceOpened(false);setDictionaryWord('');setDictionaryMeaning('');setNewlyStamped(null);setRound(n=>n+1); };
   const selectEntry = (nextIndex: number) => {setIndex(nextIndex);setChosen(null);setAdvancedPassport(false);setStage('discover');setSourceOpened(false);setNewlyStamped(null);};
   const submitAnswer = (answer: number) => {
     setChosen(answer);
@@ -516,12 +527,23 @@ const NationalIdentityPage: React.FC = () => {
               </div>
               {stage==='discover' ? <div className="nh-discovery"><div className="nh-discovery-art"><HeritageQuestArt kind={mode==='passport'?'passport':mode==='language'?'language':'archive'}/></div><h3 className="font-black text-xl sm:text-2xl">{tr(item.name)}</h3><p className="mt-3 text-sm sm:text-base leading-8">{tr(item.story)}</p><button type="button" onClick={()=>setStage('play')} className="nh-launch">{tr(l('ابدأ التحدي واكشف السر','Start the mission'))}<Icon kind="arrow" className="w-5 h-5"/></button></div> : <><div className="nh-stage-label">{tr(l('مهمة اكتشاف · اختر الدليل الصحيح','Discovery mission · choose the right clue'))}</div><p className="font-bold text-base sm:text-lg leading-8 mb-4">{tr(questionItem.question)}</p>
               {(mode==='passport'||mode==='archive')&&!sourceOpened && <p className="mb-4 text-sm font-bold text-amber-700 dark:text-amber-300">{tr(l('افتح المصدر أولًا لتفعيل الإجابات','Open the source first to enable answering'))}</p>}
-              <div className="nh-options grid grid-cols-1 md:grid-cols-3 gap-3">
+              {mode==='language' ? <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800 p-4">
+                <p className="font-black mb-3">{tr(l('مهمة معجمية · اقرأ المدخل ثم أجب','Dictionary research · read the entry then answer'))}</p>
+                <p className="mb-4 text-sm leading-7">{tr(item.question)}</p>
+                <label className="text-sm font-bold">{tr(l('اللفظ الذي عثرت عليه','Word found'))}
+                  <input value={dictionaryWord} onChange={e=>setDictionaryWord(e.target.value.slice(0,80))} className="mt-2 block w-full rounded-xl border p-3 bg-white dark:bg-slate-950" />
+                </label>
+                <label className="mt-3 block text-sm font-bold">{tr(l('معناه في المعجم + رقم الصفحة إن وجد','Dictionary meaning and printed page, if available'))}
+                  <textarea value={dictionaryMeaning} onChange={e=>setDictionaryMeaning(e.target.value.slice(0,450))} rows={3} className="mt-2 w-full rounded-xl border p-3 bg-white dark:bg-slate-950"/>
+                </label>
+                <button type="button" disabled={!dictionaryWord.trim()||!dictionaryMeaning.trim()} onClick={()=>setProgress(prev=>prev.words.includes(item.id)?prev:{...prev,words:[...prev.words,item.id]})} className="mt-4 rounded-xl bg-emerald-700 text-white px-5 py-3 font-bold disabled:opacity-50">{tr(l('حفظ إنجاز القراءة','Mark reading completed'))}</button>
+                <p className="mt-3 text-xs">{tr(l('إنجاز القراءة يُسجل ذاتيًا ولا يمثل تصحيحًا معجميًا معتمدًا.','Reading completion is self-reported, not a verified definition grade.'))}</p>
+              </div> : <div className="nh-options grid grid-cols-1 md:grid-cols-3 gap-3">
                 {choicesOrder.map((originalIndex,i)=><button key={originalIndex} type="button" onClick={()=>submitAnswer(originalIndex)} disabled={(mode==='passport'||mode==='archive')&&!sourceOpened}
                   aria-pressed={chosen===originalIndex} className={'nh-answer min-h-[76px] text-start flex items-center gap-3 rounded-2xl border-2 px-4 py-3 font-bold text-sm leading-6 transition-all hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-400 '+(chosen===originalIndex?(selectedCorrect?'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-950 dark:text-emerald-100':'border-rose-400 bg-rose-50 dark:bg-rose-950/35 text-rose-900 dark:text-rose-100'):'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 hover:border-emerald-400') }>
                   <span className="flex shrink-0 w-8 h-8 rounded-full items-center justify-center border border-current/20 text-xs font-black">{i+1}</span>{tr(questionItem.choices[originalIndex])}
                 </button>)}
-              </div>
+              </div>}
               {chosen !== null && <div role="status" aria-live="polite" className={'mt-5 rounded-xl border p-4 '+(selectedCorrect?'border-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-100':'border-amber-300 bg-amber-50 dark:bg-amber-950/30 text-amber-900 dark:text-amber-100')}>
                 <strong className="font-black">{selectedCorrect?tr(mode==='passport'?l('تم ختم صفحة الجواز!','Passport page stamped!'):mode==='language'?l('تم اكتشاف الكنز اللغوي!','Word treasure unlocked!'):l('تم كشف الدليل وحل القضية!','Evidence revealed, case solved!')):tr(l('حاول مرة أخرى بعد مراجعة النص.','Try again after reviewing the text.'))}</strong>
                 {selectedCorrect && <p className="mt-1 text-sm leading-7">{tr(questionItem.explanation)}</p>}
@@ -542,7 +564,7 @@ const NationalIdentityPage: React.FC = () => {
               </div>}
               </>}
               {mode==='passport' && stage==='play' && <button type="button" onClick={()=>{setPassportTier(previous=>(previous+1)%4);setAdvancedPassport(passportTier!==3);setChosen(null);}} className="nh-tier mt-4 rounded-xl border-2 border-amber-400 px-4 py-2.5 font-black text-xs sm:text-sm">{tr(passportTier===3?l('العودة للسؤال الأول','Return to first question'):l('السؤال التالي من المقال · مستوى أصعب','Next article question · harder level'))}</button>}
-              {mode==='language' && stage==='play' && <div className="mt-6 pt-5 border-t border-slate-200 dark:border-slate-800">
+              {false && mode==='language' && stage==='play' && <div className="mt-6 pt-5 border-t border-slate-200 dark:border-slate-800">
                 <label htmlFor={'heritage-note-'+item.id} className="block font-black text-sm mb-2">{tr(l('اكتب جملة من تأليفك (اختياري)','Write your own sentence (optional)'))}</label>
                 <textarea id={'heritage-note-'+item.id} maxLength={180} rows={3} value={progress.notes[item.id] || ''}
                   placeholder={tr(l('استخدم الكلمة في جملة تحكي عن التراث...','Use this word in a sentence about heritage...'))}
