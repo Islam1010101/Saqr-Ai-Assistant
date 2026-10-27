@@ -229,6 +229,7 @@ const NationalIdentityPage: React.FC = () => {
   const [stage,setStage] = useState<'discover'|'play'>('discover');
   const [chosen,setChosen] = useState<number|null>(null);
   const [advancedPassport,setAdvancedPassport] = useState(false);
+  const [passportTier,setPassportTier]=useState(0);
   const [albumOpen,setAlbumOpen] = useState(false);
   const [newlyStamped,setNewlyStamped] = useState<string|null>(null);
   const passportHolder = useMemo(() => {
@@ -257,11 +258,11 @@ const NationalIdentityPage: React.FC = () => {
   }, [currentMode,round]);
   const item = entries[index] || entries[0];
   const questionItem = currentMode === 'passport' && advancedPassport
-    ? {...item,...sourcedFollowUps[item.id]?.[Math.min(2,Math.max(0,Math.floor(index/2)))],story:item.story}
+    ? {...item,...sourcedFollowUps[item.id]?.[Math.max(0,passportTier-1)],story:item.story}
     : item;
   const completedIds = progress[progressField[currentMode]];
   const done = completedIds.includes(item.id);
-  const difficulty = mode==='passport'?(advancedPassport?Math.min(4,2+Math.floor(index/3)):1):(item.difficulty||1);
+  const difficulty = mode==='passport'?passportTier+1:(item.difficulty||1);
   const difficultyName = [l('سهل','Easy'),l('متوسط','Intermediate'),l('متقدم','Advanced'),l('خبير','Expert')][Math.min(4,difficulty)-1];
   const selectedCorrect = chosen === questionItem.correct;
   const choicesOrder = useMemo(() => {
@@ -270,7 +271,7 @@ const NationalIdentityPage: React.FC = () => {
     return indexes;
   }, [currentMode,index,round,advancedPassport]);
   const totalCompleted = progress.stamps.length + progress.words.length + progress.cases.length;
-  const go = (next: Mode) => { setMode(next);setIndex(0);setChosen(null);setAdvancedPassport(false);setStage('discover');setNewlyStamped(null);setRound(n=>n+1); };
+  const go = (next: Mode) => { setMode(next);setIndex(0);setChosen(null);setAdvancedPassport(false);setPassportTier(0);setStage('discover');setNewlyStamped(null);setRound(n=>n+1); };
   const selectEntry = (nextIndex: number) => {setIndex(nextIndex);setChosen(null);setAdvancedPassport(false);setStage('discover');setNewlyStamped(null);};
   const submitAnswer = (answer: number) => {
     setChosen(answer);
@@ -530,7 +531,7 @@ const NationalIdentityPage: React.FC = () => {
                   beneficiaryName={passportHolder} issuedAt={progress.stampDates[item.id]} compact/>
               </div>}
               </>}
-              {mode==='passport' && stage==='play' && <button type="button" onClick={()=>{setAdvancedPassport(previous=>!previous);setChosen(null);}} className="nh-tier mt-4 rounded-xl border-2 border-amber-400 px-4 py-2.5 font-black text-xs sm:text-sm">{tr(advancedPassport?l('العودة للسؤال الأول','Return to first question'):l('سؤال من المقال بمستوى أصعب','Try a harder question from the article'))}</button>}
+              {mode==='passport' && stage==='play' && <button type="button" onClick={()=>{setPassportTier(previous=>(previous+1)%4);setAdvancedPassport(passportTier!==3);setChosen(null);}} className="nh-tier mt-4 rounded-xl border-2 border-amber-400 px-4 py-2.5 font-black text-xs sm:text-sm">{tr(passportTier===3?l('العودة للسؤال الأول','Return to first question'):l('السؤال التالي من المقال · مستوى أصعب','Next article question · harder level'))}</button>}
               {mode==='language' && stage==='play' && <div className="mt-6 pt-5 border-t border-slate-200 dark:border-slate-800">
                 <label htmlFor={'heritage-note-'+item.id} className="block font-black text-sm mb-2">{tr(l('اكتب جملة من تأليفك (اختياري)','Write your own sentence (optional)'))}</label>
                 <textarea id={'heritage-note-'+item.id} maxLength={180} rows={3} value={progress.notes[item.id] || ''}
