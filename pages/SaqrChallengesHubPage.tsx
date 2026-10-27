@@ -1,0 +1,17 @@
+import React from 'react';
+import {Link,Navigate} from 'react-router-dom';
+import {useLanguage} from '../App';
+const BookSvg=()=> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="h-9 w-9"><path d="M12 6C9 4 5 4 2 5v14c4-1 7 0 10 2 3-2 6-3 10-2V5c-3-1-7-1-10 1Zm0 0v15"/><path d="m16 11 2 2 3-4"/></svg>;
+const LibrarySvg=()=> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true" className="h-9 w-9"><path d="M4 6h16v15H4zM8 3v18m6-18v18M4 10h16"/></svg>;
+const StudioSvg=()=> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true" className="h-9 w-9"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0m-7 7v5m-5 0h10"/></svg>;
+export default function SaqrChallengesHubPage(){
+ const {locale,dir}=useLanguage();const ar=locale==='ar';
+ let role='';try{role=localStorage.getItem('user_type')||'';}catch{}
+ if(role!=='student'&&role!=='admin')return <Navigate to="/home" replace/>;
+ const items=[
+ {to:'/saqr-reading-quest',label:ar?'بين السطور مع صقر':'Between the Lines with Saqr',desc:ar?'اقرأ كتابًا واختبر فهمك':'Read a book and test your understanding',icon:<BookSvg/>,theme:'border-emerald-300 dark:border-emerald-800'},
+ {to:'/game',label:ar?'رتب المكتبة':'Organize the Library',desc:ar?'تحدَّ نفسك في تصنيف الكتب':'Take the book-sorting challenge',icon:<LibrarySvg/>,theme:'border-amber-300 dark:border-amber-800'},
+ {to:'/saqr-studio',label:ar?'استديو صقر':'Saqr Studio',desc:ar?'مساحة الإبداع والصوت':'Create and record your voice',icon:<StudioSvg/>,theme:'border-sky-300 dark:border-sky-800'}
+ ];
+ return <div dir={dir} className="min-h-screen bg-white dark:bg-black px-4 py-8 text-slate-900 dark:text-slate-100"><main className="mx-auto max-w-5xl"><Link to="/home" className="text-sm font-bold text-emerald-700 dark:text-emerald-300">{ar?'الرئيسية':'Home'}</Link><header className="mt-6 flex items-center justify-between gap-4 rounded-[2rem] border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/25 p-5 sm:p-8"><div><h1 className="text-3xl font-black">{ar?'تحديات صقر':'Saqr Challenges'}</h1><p className="mt-2 text-sm font-semibold text-slate-600 dark:text-slate-300">{ar?'ثلاث مغامرات، اختر تحديك.':'Three adventures. Choose your challenge.'}</p></div><img src="/saqr-avatar.png" alt={ar?'صقر':'Saqr'} className="h-24 w-24 object-contain sm:h-32 sm:w-32"/></header><div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">{items.map(item=><Link key={item.to} to={item.to} className={'group flex flex-col gap-4 rounded-[1.75rem] border-2 bg-slate-50 dark:bg-slate-950 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-400 '+item.theme}><span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-700 text-white">{item.icon}</span><div><h2 className="text-xl font-black">{item.label}</h2><p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{item.desc}</p></div></Link>)}</div></main></div>;
+}
