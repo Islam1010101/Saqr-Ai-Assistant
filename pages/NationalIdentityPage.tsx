@@ -8,6 +8,8 @@ import PassportStampCard from './PassportStampCard';
 import {getGuidedHeritageBook} from '../src/utils/heritageBookGuides';
 import {verifiedPassport} from '../src/utils/verifiedPassportEvidence';
 import {verifiedDetective} from '../src/utils/verifiedDetectiveEvidence';
+import {verifiedHeritageBookQuestions} from '../src/utils/verifiedHeritageBookQuestions';
+import {dictionaryTasks,handhalDictionary,newDictionaryRound} from '../src/utils/heritageSourceFirst';
 
 
 type L = { ar: string; en: string };
@@ -23,6 +25,7 @@ type Activity = {
   explanation: L;
   source: string;
   difficulty?: number;
+  physicalBook?:{title:string;author:string;shelf:number;row:number};
 };
 type Progress = {
   stamps: string[];
@@ -148,13 +151,21 @@ const sourcedEmirates:Activity[]=verifiedPassport.map((entry)=>({
  question:entry.questions[0].question,choices:entry.questions[0].choices,
  correct:entry.questions[0].correct,explanation:entry.questions[0].explanation,difficulty:1
 }));
-const sourcedCases:Activity[]=verifiedDetective.map((entry)=>({...entry}));
+const sourcedCases:Activity[]=[...verifiedDetective.map(entry=>({...entry})),...verifiedHeritageBookQuestions.filter(q=>q.id.includes('fort')).map(q=>({id:q.id,name:q.name,story:q.story,prompt:l('اقرأ ملخص الكتاب المنشور.','Read the published book synopsis.'),question:q.question,choices:q.choices,correct:q.correct,explanation:q.explanation,source:q.source,difficulty:q.difficulty,physicalBook:q.book}))];
 const sourcedFollowUps:Record<string,Array<{question:L;choices:[L,L,L];correct:number;explanation:L;source:string;difficulty:number}>>=
  Object.fromEntries(verifiedPassport.map(entry=>[entry.id,entry.questions.slice(1).map(q=>({
   question:q.question,choices:q.choices,correct:q.correct,explanation:q.explanation,source:q.source,difficulty:q.difficulty
  }))]));
 
-const activities: Record<Exclude<Mode,'home'>, Activity[]> = {passport: sourcedEmirates,language:expandedWords,archive:sourcedCases};
+const dictionaryActivities:Activity[]=dictionaryTasks.map(task=>({
+ id:task.id,name:l('اللفظ: '+task.word,'Word: '+task.word),
+ story:l('ابحث عن «'+task.word+'» في المعجم الورقي للدكتور فالح حنظل، في الرف 6، الصف 2، واختر الإجابة التي يؤيدها المرجع.','Find «'+task.word+'» in Dr Faleh Handhal’s printed dictionary, shelf 6, row 2. Select the documented answer.'),
+ prompt:l('اقرأ المدخل في النسخة الورقية قبل اختيار الإجابة.','Read the entry in the physical dictionary before answering.'),
+ question:task.question,choices:task.options as [L,L,L],correct:task.correct,
+ explanation:task.explanation,source:'',difficulty:task.difficulty
+}));
+const otherBookCases:Activity[]=verifiedHeritageBookQuestions.filter(q=>!q.id.includes('fort')).map(q=>({id:q.id,name:q.name,story:q.story,prompt:l('اقرأ ملخص الكتاب المنشور.','Read the published book synopsis.'),question:q.question,choices:q.choices,correct:q.correct,explanation:q.explanation,source:q.source,difficulty:q.difficulty,physicalBook:q.book}));
+const activities: Record<Exclude<Mode,'home'>, Activity[]> = {passport: sourcedEmirates,language:dictionaryActivities,archive:[...sourcedCases,...otherBookCases]};
 const progressField: Record<Exclude<Mode,'home'>, 'stamps'|'words'|'cases'> = {passport:'stamps',language:'words',archive:'cases'};
 const readSaved = (key: string): Progress => {
   try {
@@ -164,7 +175,7 @@ const readSaved = (key: string): Progress => {
       Array.from(new Set(arr.filter((item): item is string => typeof item === 'string' && items.some(entry=>entry.id === item)))) : [];
     const notes: Record<string,string> = {};
     if (value.notes && typeof value.notes === 'object') {
-      for (const entry of expandedWords) if (typeof value.notes[entry.id] === 'string') notes[entry.id] = value.notes[entry.id].slice(0,180);
+      for (const entry of dictionaryActivities) if (typeof value.notes[entry.id] === 'string') notes[entry.id] = value.notes[entry.id].slice(0,180);
     }
     const stamps = valid(value.stamps,sourcedEmirates);
     // Only dates recorded at actual completion are displayed. Legacy stamps have no invented dates.
@@ -175,7 +186,7 @@ const readSaved = (key: string): Progress => {
         if (typeof stored === 'string' && !Number.isNaN(Date.parse(stored))) stampDates[id] = stored;
       }
     }
-    return {stamps,words:valid(value.words,expandedWords),cases:valid(value.cases,sourcedCases),notes,stampDates};
+    return {stamps,words:valid(value.words,dictionaryActivities),cases:valid(value.cases,activities.archive),notes,stampDates};
   } catch { return emptyProgress(); }
 };
 const Icon: React.FC<{kind:'book'|'stamp'|'weave'|'document'|'check'|'arrow'|'lock'; className?:string}> = ({kind,className='w-7 h-7'}) => {
@@ -227,8 +238,9 @@ const NationalIdentityPage: React.FC = () => {
   const [flagChallengeOpen, setFlagChallengeOpen] = useState(false);
   const [index,setIndex] = useState(0);
   const [round,setRound] = useState(0);
-  const [stage,setStage] = useState<'discover'|'play'>('discover');
+  const [stage,setStage] = useState<'discover'|'play'>('play');
   const [chosen,setChosen] = useState<number|null>(null);
+  const [failed,setFailed] = useState(false);
   const [advancedPassport,setAdvancedPassport] = useState(false);
   const [passportTier,setPassportTier]=useState(0);
   const [albumOpen,setAlbumOpen] = useState(false);
@@ -252,6 +264,7 @@ const NationalIdentityPage: React.FC = () => {
   const entries = useMemo(() => {
     const source = activities[currentMode];
     if (currentMode === 'passport') { return source; }
+    if (currentMode === 'language') { const pool=newDictionaryRound();return pool.map(task=>source.find(entry=>entry.id===task.id)!).filter(Boolean); }
     const groups = [1,2,3,4].map(tier => source.filter(item => (item.difficulty||1) === tier));
     // Randomised once per visit and each replay, keeping easy -> expert progression.
     const shuffled = groups.flatMap(group => {const copy=[...group];for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]];}return copy;});
@@ -266,20 +279,20 @@ const NationalIdentityPage: React.FC = () => {
   const difficulty = mode==='passport'?passportTier+1:(item.difficulty||1);
   const difficultyName = [l('سهل','Easy'),l('متوسط','Intermediate'),l('متقدم','Advanced'),l('خبير','Expert')][Math.min(4,difficulty)-1];
   const suggestedBook=(currentMode==='passport'||currentMode==='archive')?getGuidedHeritageBook(item.id,difficulty,round+index+passportTier):null;
-  const [readingPage,setReadingPage]=useState('');
-  const [readingEvidence,setReadingEvidence]=useState('');
-  const selectedCorrect = chosen === questionItem.correct;
+  const [sourceOpened,setSourceOpened]=useState(false);
+  const selectedCorrect = chosen !== null && chosen === questionItem.correct;
   const choicesOrder = useMemo(() => {
     const indexes = [0,1,2];
     for (let i=indexes.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[indexes[i],indexes[j]]=[indexes[j],indexes[i]];}
     return indexes;
   }, [currentMode,index,round,advancedPassport]);
   const totalCompleted = progress.stamps.length + progress.words.length + progress.cases.length;
-  const go = (next: Mode) => { setMode(next);setIndex(0);setChosen(null);setAdvancedPassport(false);setPassportTier(0);setStage('discover');setNewlyStamped(null);setRound(n=>n+1); };
-  const selectEntry = (nextIndex: number) => {setIndex(nextIndex);setChosen(null);setAdvancedPassport(false);setStage('discover');setNewlyStamped(null);};
+  const go = (next: Mode) => { setMode(next);setIndex(0);setChosen(null);setFailed(false);setAdvancedPassport(false);setPassportTier(0);setStage('play');setSourceOpened(false);setNewlyStamped(null);setRound(n=>n+1); };
+  const selectEntry = (nextIndex: number) => {setIndex(nextIndex);setChosen(null);setFailed(false);setAdvancedPassport(false);setStage('play');setSourceOpened(false);setNewlyStamped(null);};
   const submitAnswer = (answer: number) => {
+    if (chosen!==null || failed) return;
     setChosen(answer);
-    if (answer !== questionItem.correct) return;
+    if (answer !== questionItem.correct) {setFailed(true);return;}
     const field = progressField[currentMode];
     const firstCompletion = !progress[field].includes(item.id);
     if (currentMode === 'passport' && firstCompletion) setNewlyStamped(item.id);
@@ -291,10 +304,27 @@ const NationalIdentityPage: React.FC = () => {
       } : {})
     });
   };
+  // Wrong answers consume one question, never award points, and advance automatically.
+  // The timeout is cancelled on navigation so an old question cannot alter a new mode.
+  useEffect(() => {
+    if (!failed || chosen === null) return;
+    const timer=window.setTimeout(() => {
+      if (currentMode==='passport' && passportTier<3) {
+        setPassportTier(previous=>previous+1);
+        setAdvancedPassport(true);
+        setChosen(null);setFailed(false);setSourceOpened(false);
+      } else if (index<entries.length-1) {
+        selectEntry(index+1);
+      } else {
+        go('home');
+      }
+    },1100);
+    return () => window.clearTimeout(timer);
+  },[failed,chosen,currentMode,index,entries.length,passportTier]);
   const modules = [
     {id:'passport' as const,icon:'stamp' as const,title:l('جواز صقر الثقافي','Saqr Cultural Passport'),desc:l('اكتشف الإمارات السبع، واقرأ حكاية كل إمارة واجمع ختمها.','Explore all seven emirates, read their stories and collect their stamps.'),total:sourcedEmirates.length,count:progress.stamps.length,color:'from-emerald-700 to-teal-600'},
-    {id:'language' as const,icon:'weave' as const,title:l('كنوز لغتنا الإماراتية','Treasures of Emirati Language'),desc:l('تعرّف على مفردات التراث واستعملها في جمل من تأليفك.','Discover heritage terms and use them in your own sentences.'),total:expandedWords.length,count:progress.words.length,color:'from-amber-600 to-orange-600'},
-    {id:'archive' as const,icon:'document' as const,title:l('محقق ذاكرة الوطن','Heritage Research Detective'),desc:l('حلّل الأدلة واقرأ المصادر وتعلّم كيف تتحقق من المعلومات.','Study evidence, read sources and learn how to verify information.'),total:sourcedCases.length,count:progress.cases.length,color:'from-sky-700 to-indigo-700'}
+    {id:'language' as const,icon:'weave' as const,title:l('كنوز لغتنا الإماراتية','Treasures of Emirati Language'),desc:l('اختر معنى 10 ألفاظ إماراتية بعد مراجعة المعجم الورقي.','Find the meanings of 10 Emirati words using the printed dictionary.'),total:10,count:entries.filter(x=>progress.words.includes(x.id)).length,color:'from-amber-600 to-orange-600'},
+    {id:'archive' as const,icon:'document' as const,title:l('محقق ذاكرة الوطن','Heritage Research Detective'),desc:l('حلّل الأدلة واقرأ المصادر وتعلّم كيف تتحقق من المعلومات.','Study evidence, read sources and learn how to verify information.'),total:activities.archive.length,count:progress.cases.length,color:'from-sky-700 to-indigo-700'}
   ];
   const selectedModule = modules.find(x=>x.id===currentMode) || modules[0];
   if (!identity) return <Navigate to="/home" replace />;
@@ -326,7 +356,7 @@ const NationalIdentityPage: React.FC = () => {
             <p className="mt-3 max-w-2xl text-sm sm:text-base leading-8 font-semibold text-emerald-50/95">{tr(l('من حكايات الإمارات إلى مفردات التراث وملفات التاريخ، مغامرتك الثقافية تبدأ من مكتبتك.','From the stories of the emirates to heritage vocabulary and historical evidence, your cultural adventure starts in the library.'))}</p>
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <div className="rounded-xl border border-white/25 bg-white/10 px-4 py-3"><span className="block text-[11px] text-emerald-100">{tr(l('الأختام','Stamps'))}</span><strong className="text-xl font-black tabular-nums">{progress.stamps.length}/7</strong></div>
-              <div className="rounded-xl border border-white/25 bg-white/10 px-4 py-3"><span className="block text-[11px] text-emerald-100">{tr(l('كنوز اللغة','Word treasures'))}</span><strong className="text-xl font-black tabular-nums">{progress.words.length}/{expandedWords.length}</strong></div>
+              <div className="rounded-xl border border-white/25 bg-white/10 px-4 py-3"><span className="block text-[11px] text-emerald-100">{tr(l('كنوز اللغة','Word treasures'))}</span><strong className="text-xl font-black tabular-nums">{progress.words.length}</strong></div>
               <div className="rounded-xl border border-white/25 bg-white/10 px-4 py-3"><span className="block text-[11px] text-emerald-100">{tr(l('ملفات البحث','Research files'))}</span><strong className="text-xl font-black tabular-nums">{progress.cases.length}/{sourcedCases.length}</strong></div>
             </div>
           </div>
@@ -337,7 +367,7 @@ const NationalIdentityPage: React.FC = () => {
       {mode === 'home' ? <>
         <div className="mt-9 mb-5 flex flex-wrap items-end justify-between gap-3">
           <div><p className="text-xs font-black text-emerald-700 dark:text-emerald-400">{tr(l('تحديات الهوية الوطنية','NATIONAL IDENTITY CHALLENGES'))}</p><h2 className="text-xl sm:text-2xl font-black mt-1">{tr(l('اختر رحلتك','Choose your journey'))}</h2></div>
-          <div className="rounded-full bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 px-4 py-2 text-xs font-black text-amber-800 dark:text-amber-200">{totalCompleted}/{sourcedEmirates.length+expandedWords.length+sourcedCases.length} {tr(l('مهمة مكتملة','missions completed'))}</div>
+          <div className="rounded-full bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 px-4 py-2 text-xs font-black text-amber-800 dark:text-amber-200">{totalCompleted}/{sourcedEmirates.length+dictionaryActivities.length+sourcedCases.length} {tr(l('مهمة مكتملة','missions completed'))}</div>
         </div>
         <div className="nh-challenges grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5">
           {modules.map(m=><button type="button" key={m.id} onClick={()=>go(m.id)} className="nh-challenge-card group overflow-hidden text-start rounded-[1.8rem] bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 shadow-lg hover:shadow-2xl hover:-translate-y-1 hover:border-emerald-400 dark:hover:border-emerald-700 transition-all focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-500">
@@ -429,15 +459,10 @@ const NationalIdentityPage: React.FC = () => {
           </button>
           <div className="text-sm font-black text-emerald-700 dark:text-emerald-300">{tr(selectedModule.title)} · {selectedModule.count}/{selectedModule.total}</div>
         </div>
-        <div className="nh-mode-hero" role="img" aria-label={tr(selectedModule.title)}>
-          <div className="nh-mode-hero-copy">
-            <span className="nh-mode-kicker">{tr(mode==='passport'?l('جواز التراث الإماراتي','THE EMIRATI HERITAGE PASSPORT'):mode==='language'?l('كنوز من لغتنا وموروثنا','WORDS & CULTURAL TREASURES'):l('ملفات أدلة ومعالم الإمارات','MYSTERY FILES & UAE LANDMARKS'))}</span>
-            <h2>{tr(selectedModule.title)}</h2>
-            <p>{tr(selectedModule.desc)}</p>
-            <div className="nh-mode-counter">{selectedModule.count} / {selectedModule.total} {tr(mode==='passport'?l('أختام مكتشفة','stamps collected'):mode==='language'?l('كنوز مكتشفة','treasures collected'):l('قضايا محلولة','cases solved'))}</div>
-          </div>
-          <HeritageQuestArt kind={mode==='passport'?'passport':mode==='language'?'language':'archive'} className="nh-mode-illustration"/>
-        </div>
+        <header className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50/80 dark:bg-emerald-950/25 px-4 py-3">
+          <h2 className="text-lg sm:text-xl font-black text-emerald-950 dark:text-emerald-100">{tr(selectedModule.title)}</h2>
+          <span className="text-sm font-black tabular-nums text-emerald-800 dark:text-emerald-200">{tr(l('السؤال','Question'))} {index+1} / {entries.length}</span>
+        </header>
         {mode==='passport' && <section className="nh-stamp-album" aria-label={tr(l('سجل أختام جواز صقر','Saqr passport stamp album'))}>
           <button type="button" className="nh-stamp-album-toggle" onClick={()=>setAlbumOpen(open=>!open)} aria-expanded={albumOpen} aria-controls="nh-passport-album">
             <span className="nh-album-icon"><Icon kind="stamp" className="h-7 w-7"/></span>
@@ -458,83 +483,38 @@ const NationalIdentityPage: React.FC = () => {
                 </div>)}
           </div>}
         </section>}
-        <div className="nh-game-layout grid grid-cols-1 lg:grid-cols-[285px_minmax(0,1fr)] gap-5">
-          <aside className="nh-game-path h-fit rounded-[1.7rem] p-4 bg-[#F8F5EC] dark:bg-[#11150F] border border-amber-200 dark:border-amber-900/60">
-            <h2 className="font-black text-lg mb-3 px-2">{mode==='passport'?tr(l('صفحات الجواز','Passport pages')):mode==='language'?tr(l('مفردات التراث','Heritage vocabulary')):tr(l('ملفات المحقق','Detective files'))}</h2>
-            <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
-              {entries.map((entry,i)=><button type="button" key={entry.id} aria-current={index===i?'step':undefined}
-                onClick={()=>selectEntry(i)} className={'shrink-0 min-w-[150px] lg:min-w-0 w-full text-start flex items-center gap-3 rounded-2xl border px-3 py-3 text-xs sm:text-sm font-black transition-all '+(index===i?'bg-emerald-700 text-white border-emerald-700 shadow-md':'bg-white dark:bg-slate-950 dark:text-slate-200 border-amber-200 dark:border-slate-800 hover:border-emerald-400')}>
-                <span className={'h-9 w-9 shrink-0 flex items-center justify-center rounded-xl '+(progress[progressField[currentMode]].includes(entry.id)?'bg-amber-300 text-emerald-950':index===i?'bg-white/20 text-white':'bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-200')}>
-                  {progress[progressField[currentMode]].includes(entry.id)?<Icon kind="check" className="w-5 h-5"/>:<span className="tabular-nums">{i+1}</span>}
-                </span>
-                <span className="min-w-0 break-words">{tr(entry.name)}{mode!=='passport' && <small className="nh-level-label">{tr([l('سهل','Easy'),l('متوسط','Intermediate'),l('متقدم','Advanced'),l('خبير','Expert')][Math.min(4,entry.difficulty||1)-1])}</small>}</span>
-              </button>)}
-            </div>
-          </aside>
+        <div className="nh-game-layout grid grid-cols-1 gap-5">
           <div className="nh-game-content min-w-0 space-y-5">
-            <article className="nh-story-card rounded-[1.7rem] border border-emerald-100 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-lg overflow-hidden">
-              <div className="border-b border-emerald-100 dark:border-slate-800 bg-gradient-to-r from-emerald-50 via-[#FFF8E9] to-white dark:from-emerald-950/35 dark:via-amber-950/15 dark:to-slate-950 p-5 sm:p-7">
-                <div className="flex justify-between gap-3 items-start">
-                  <div className="min-w-0">
-                    <p className="text-xs uppercase tracking-wide text-emerald-700 dark:text-emerald-300 font-black">{mode==='passport'?tr(l('ختم الإمارة','Emirate stamp')):mode==='language'?tr(l('كنز لغوي','Word treasure')):tr(l('بطاقة بحث تعليمية','Educational research file'))} · {index+1}/{entries.length}</p>
-                    <h2 className="mt-2 text-2xl sm:text-3xl font-black text-emerald-950 dark:text-white">{tr(item.name)}</h2><span className="nh-tier">{tr(difficultyName)} · {difficulty}/4</span>
-                  </div>
-                  <div aria-label={done?tr(l('مكتمل','Completed')):tr(l('غير مكتمل','Not completed'))}
-                    className={'shrink-0 flex h-14 w-14 items-center justify-center rounded-2xl border-2 '+(done?'bg-amber-100 text-amber-800 border-amber-400 dark:bg-amber-950/50 dark:text-amber-200':'bg-white text-emerald-700 border-emerald-200 dark:bg-slate-900 dark:text-emerald-300 dark:border-emerald-900')}>
-                    <Icon kind={done?'stamp':selectedModule.icon} className="h-8 w-8"/>
-                  </div>
+            {mode!=='language' && <section aria-label={tr(l('مصدر المهمة','Mission source'))} className="rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/60 dark:bg-emerald-950/20 p-4 sm:p-5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-xs font-black text-emerald-700 dark:text-emerald-300">{tr(l('مصدر المهمة','Mission source'))}</p>
+                  <strong className="block mt-1 text-base sm:text-lg font-black">{tr(item.name)}</strong>
                 </div>
+                {item.physicalBook && <p className="w-full text-sm font-semibold leading-7">{tr(l('الكتاب الورقي','Printed book'))}: {item.physicalBook.title} · {item.physicalBook.author} · {tr(l('الرف','Shelf'))} {item.physicalBook.shelf} · {tr(l('الصف','Row'))} {item.physicalBook.row}</p>}
+                {questionItem.source ? <a href={questionItem.source} target="_blank" rel="noopener noreferrer" onClick={()=>setSourceOpened(true)} className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-3 text-xs sm:text-sm font-black text-white hover:bg-emerald-800 focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-500">{tr(l('افتح المصدر الأصلي','Open original source'))}<Icon kind="arrow" className="w-4 h-4"/></a> : <span className="text-sm font-semibold">{tr(l('المصدر الورقي غير متاح لهذا السؤال','Physical source not available for this question'))}</span>}
               </div>
-              <div className="p-5 sm:p-7">
-                <div className="flex items-start gap-3">
-                  <span className="shrink-0 rounded-xl bg-emerald-100 dark:bg-emerald-950 p-2 text-emerald-700 dark:text-emerald-300"><Icon kind="book" className="w-6 h-6"/></span>
-                  <div className="min-w-0">
-                    <h3 className="font-black text-base sm:text-lg">{tr(l('اقرأ واكتشف','Read and discover'))}</h3>
-                    <p className="mt-2 text-sm sm:text-base leading-8 text-slate-700 dark:text-slate-300">{tr(item.story)}</p>
-                    <p className="mt-3 rounded-xl border-s-4 border-amber-400 bg-amber-50 dark:bg-amber-950/20 p-3 text-xs sm:text-sm font-bold leading-7 text-amber-950 dark:text-amber-100">{tr(item.prompt)}</p>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      <a href={questionItem.source} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 dark:border-emerald-800 px-4 py-2.5 text-xs font-black text-emerald-800 dark:text-emerald-200 hover:bg-emerald-50 dark:hover:bg-emerald-950 transition-colors">
-                        {tr(l('اقرأ المصدر الموثوق','Read the trusted source'))}<Icon kind="arrow" className="w-4 h-4 -rotate-45"/>
-                      </a>
-                      <Link to="/search" className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 px-4 py-2.5 text-xs font-black text-white transition-colors">
-                        <Icon kind="book" className="w-4 h-4"/>{tr(l('ابحث في دليل الكتب','Search the book catalog'))}
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </article>
-            {suggestedBook && <section aria-label={tr(l('مهمة قراءة من المكتبة','Library book reading mission'))} className="rounded-[1.7rem] border-2 border-emerald-200 dark:border-emerald-800 bg-[#F8FAF4] dark:bg-[#0F1C17] p-5 sm:p-7">
-              <p className="text-xs font-black text-emerald-700 dark:text-emerald-300">{tr(l('اقرأ من مكتبتنا · مهمة اختيارية','READ FROM OUR LIBRARY · OPTIONAL MISSION'))}</p>
-              <h3 className="text-lg sm:text-xl font-black mt-2">{tr(l('اكتشف الدليل في كتاب حقيقي','Find evidence in a real book'))}</h3>
-              <div className="mt-4 rounded-2xl bg-white dark:bg-slate-950 border border-emerald-100 dark:border-emerald-900 p-4 sm:p-5">
-                <strong className="block text-base font-black">{suggestedBook.title}</strong>
-                <p className="text-sm mt-2 text-slate-700 dark:text-slate-300">{tr(l('المؤلف:','Author:'))} {suggestedBook.author}</p>
-                <p className="text-sm font-bold mt-2 text-emerald-700 dark:text-emerald-300">{tr(l('الرف','Shelf'))} {suggestedBook.shelf} · {tr(l('الصف','Row'))} {suggestedBook.row}</p>
-              </div>
-              <p className="mt-4 text-sm leading-8 font-semibold">{tr(suggestedBook.task)}</p>
-              <p className="mt-2 text-xs leading-7 text-slate-600 dark:text-slate-300">{tr(l('ابحث في الفهرس أو العناوين داخل نسختك عن الموضوع المطلوب. لا يوجد رقم صفحة موثّق مسبقًا؛ اكتبه بعد قراءة الكتاب. وقد لا يتناول الكتاب الموضوع بالتفصيل.','Use the contents or index to find this topic in your edition. No page is pre-verified; write the page only after reading. The book may not cover the topic in detail.'))}</p>
-              <Link to="/saqr-national-identity/books" className="inline-flex mt-3 rounded-xl bg-emerald-700 text-white px-4 py-2.5 text-sm font-black hover:bg-emerald-800">{tr(l('افتح جناح الهوية الوطنية','Open National Identity Pavilion'))}</Link>
-              <div className="mt-4 grid gap-3 sm:grid-cols-[120px_1fr]">
-                <label className="text-xs font-bold">{tr(l('رقم الصفحة التي قرأتها','Page you read'))}<input inputMode="numeric" maxLength={5} value={readingPage} onChange={e=>setReadingPage(e.target.value.replace(/[^0-9]/g,''))} className="w-full mt-2 rounded-lg p-2 border border-emerald-300 dark:border-emerald-800 bg-white dark:bg-slate-950"/></label>
-                <label className="text-xs font-bold">{tr(l('الدليل الذي وجدته بنفسك','Evidence from your reading'))}<textarea value={readingEvidence} onChange={e=>setReadingEvidence(e.target.value.slice(0,500))} rows={2} className="w-full mt-2 rounded-lg p-2 border border-emerald-300 dark:border-emerald-800 bg-white dark:bg-slate-950"/></label>
-              </div>
-              <p className="text-xs mt-3 text-slate-600 dark:text-slate-400">{tr(l('هذه نشاط قراءة للتفكير والبحث، وليست إجابة مصححة آليًا ولا تمنح نقاطًا إضافية. لا يتم إرسال ما تكتبه إلى الخادم.','This is an optional research activity, not automatically graded, with no extra points. Your notes are not sent to a server.'))}</p>
             </section>}
             <article className="nh-challenge-play rounded-[1.7rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-5 sm:p-7 shadow-lg">
               <div className="flex gap-3 items-center mb-4">
                 <div className="flex items-center justify-center bg-[#F4E9D5] text-amber-900 dark:bg-amber-950 dark:text-amber-300 w-11 h-11 rounded-xl"><Icon kind="document" className="w-6 h-6"/></div>
-                <h3 className="font-black text-lg">{tr(mode==='passport'?l('اختم صفحة الجواز','Stamp Your Passport'):mode==='language'?l('افتح كنز الكلمة','Unlock the Word Treasure'):l('حل قضية ذاكرة وطن','Solve the Heritage Mystery'))}</h3>
+                <h3 className="font-black text-lg">{tr(mode==='passport'?l('اختم صفحة الجواز','Stamp Your Passport'):mode==='language'?l('اختر المعنى الصحيح','Choose the correct meaning'):l('حل قضية ذاكرة وطن','Solve the Heritage Mystery'))}</h3>
               </div>
-              {stage==='discover' ? <div className="nh-discovery"><div className="nh-discovery-art"><HeritageQuestArt kind={mode==='passport'?'passport':mode==='language'?'language':'archive'}/></div><h3 className="font-black text-xl sm:text-2xl">{tr(item.name)}</h3><p className="mt-3 text-sm sm:text-base leading-8">{tr(item.story)}</p><button type="button" onClick={()=>setStage('play')} className="nh-launch">{tr(l('ابدأ التحدي واكشف السر','Start the mission'))}<Icon kind="arrow" className="w-5 h-5"/></button></div> : <><div className="nh-stage-label">{tr(l('مهمة اكتشاف · اختر الدليل الصحيح','Discovery mission · choose the right clue'))}</div><p className="font-bold text-base sm:text-lg leading-8 mb-4">{tr(questionItem.question)}</p>
+              <>
+              {mode==='language' && <section aria-label={tr(l('اللفظ والمرجع','Word and reference'))} className="mb-5 rounded-2xl border border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20 p-4 sm:p-5">
+                <strong className="block text-3xl sm:text-4xl font-black leading-relaxed text-emerald-950 dark:text-emerald-100" dir="rtl">{dictionaryTasks.find(task=>task.id===item.id)?.word}</strong>
+                <p className="mt-3 text-xs sm:text-sm font-semibold leading-7 text-amber-950 dark:text-amber-100">{tr(l('يرجى الرجوع إلى معجم الألفاظ العامية في دولة الإمارات العربية المتحدة للدكتور فالح حنظل، الرف 6، الصف 2، لمعرفة الإجابة الصحيحة','Please refer to Dr Faleh Handhal’s Dictionary of Colloquial Terms in the United Arab Emirates, shelf 6, row 2, to find the correct answer.'))}</p>
+              </section>}
+              <p className="font-bold text-base sm:text-lg leading-8 mb-4">{tr(questionItem.question)}</p>
+              {Boolean(questionItem.source)&&!sourceOpened && <p className="mb-4 text-sm font-bold text-amber-700 dark:text-amber-300">{tr(l('افتح المصدر أولًا لتفعيل الإجابات','Open the source first to enable answering'))}</p>}
               <div className="nh-options grid grid-cols-1 md:grid-cols-3 gap-3">
-                {choicesOrder.map((originalIndex,i)=><button key={originalIndex} type="button" onClick={()=>submitAnswer(originalIndex)}
-                  aria-pressed={chosen===originalIndex} className={'nh-answer min-h-[76px] text-start flex items-center gap-3 rounded-2xl border-2 px-4 py-3 font-bold text-sm leading-6 transition-all hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-400 '+(chosen===originalIndex?(selectedCorrect?'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-950 dark:text-emerald-100':'border-rose-400 bg-rose-50 dark:bg-rose-950/35 text-rose-900 dark:text-rose-100'):'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 hover:border-emerald-400') }>
-                  <span className="flex shrink-0 w-8 h-8 rounded-full items-center justify-center border border-current/20 text-xs font-black">{i+1}</span>{tr(questionItem.choices[originalIndex])}
-                </button>)}
+                {choicesOrder.map((originalIndex,i)=><button key={originalIndex} type="button" onClick={()=>submitAnswer(originalIndex)} disabled={(Boolean(questionItem.source)&&!sourceOpened)||chosen!==null}
+                  aria-pressed={chosen===originalIndex} className={'nh-answer min-h-[88px] text-start flex items-center gap-3 rounded-2xl border-2 px-4 py-3 font-bold text-sm leading-6 transition-all hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-400 '+(chosen===originalIndex?(selectedCorrect?'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-950 dark:text-emerald-100':'border-rose-400 bg-rose-50 dark:bg-rose-950/35 text-rose-900 dark:text-rose-100'):'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 hover:border-emerald-400') }>
+                    <span className="flex shrink-0 w-8 h-8 rounded-full items-center justify-center border border-current/20 text-xs font-black">{i+1}</span>{tr(questionItem.choices[originalIndex])}
+                  </button>)}
               </div>
               {chosen !== null && <div role="status" aria-live="polite" className={'mt-5 rounded-xl border p-4 '+(selectedCorrect?'border-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-100':'border-amber-300 bg-amber-50 dark:bg-amber-950/30 text-amber-900 dark:text-amber-100')}>
-                <strong className="font-black">{selectedCorrect?tr(mode==='passport'?l('تم ختم صفحة الجواز!','Passport page stamped!'):mode==='language'?l('تم اكتشاف الكنز اللغوي!','Word treasure unlocked!'):l('تم كشف الدليل وحل القضية!','Evidence revealed, case solved!')):tr(l('حاول مرة أخرى بعد مراجعة النص.','Try again after reviewing the text.'))}</strong>
+                <strong className="font-black">{selectedCorrect?tr(mode==='passport'?l('تم ختم صفحة الجواز!','Passport page stamped!'):mode==='language'?l('تم اكتشاف الكنز اللغوي!','Word treasure unlocked!'):l('تم كشف الدليل وحل القضية!','Evidence revealed, case solved!')):tr(l('إجابة غير صحيحة. انتقل إلى سؤال جديد.','Incorrect answer. Continue to a new question.'))}</strong>
                 {selectedCorrect && <p className="mt-1 text-sm leading-7">{tr(questionItem.explanation)}</p>}
               </div>}
               {done && chosen === null && <div className="mt-4 text-sm font-black text-emerald-700 dark:text-emerald-300 flex gap-2 items-center"><Icon kind="check" className="w-5 h-5"/>{tr(l('أكملت هذه المهمة سابقًا؛ يمكنك إعادتها.','You have already completed this mission. You can replay it.'))}</div>}
@@ -551,22 +531,14 @@ const NationalIdentityPage: React.FC = () => {
                 <PassportStampCard emirate={item} language={lang}
                   beneficiaryName={passportHolder} issuedAt={progress.stampDates[item.id]} compact/>
               </div>}
-              </>}
-              {mode==='passport' && stage==='play' && <button type="button" onClick={()=>{setPassportTier(previous=>(previous+1)%4);setAdvancedPassport(passportTier!==3);setChosen(null);}} className="nh-tier mt-4 rounded-xl border-2 border-amber-400 px-4 py-2.5 font-black text-xs sm:text-sm">{tr(passportTier===3?l('العودة للسؤال الأول','Return to first question'):l('السؤال التالي من المقال · مستوى أصعب','Next article question · harder level'))}</button>}
-              {mode==='language' && stage==='play' && <div className="mt-6 pt-5 border-t border-slate-200 dark:border-slate-800">
-                <label htmlFor={'heritage-note-'+item.id} className="block font-black text-sm mb-2">{tr(l('اكتب جملة من تأليفك (اختياري)','Write your own sentence (optional)'))}</label>
-                <textarea id={'heritage-note-'+item.id} maxLength={180} rows={3} value={progress.notes[item.id] || ''}
-                  placeholder={tr(l('استخدم الكلمة في جملة تحكي عن التراث...','Use this word in a sentence about heritage...'))}
-                  onChange={e=>setProgress(prev=>({...prev,notes:{...prev.notes,[item.id]:e.target.value}}))}
-                  className="block w-full resize-y rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3 text-sm leading-7 text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"/>
-                <p className="text-xs mt-2 text-slate-500 dark:text-slate-400">{tr(l('تُحفظ الجملة على جهازك فقط، ولا يتم تقييمها آليًا أو إرسالها للنشر.','Your sentence stays on this device. It is not automatically graded or submitted for publishing.'))}</p>
-              </div>}
+              </>
+              {mode==='passport' && stage==='play' && <button type="button" disabled={chosen===null} onClick={()=>{setPassportTier(previous=>(previous+1)%4);setAdvancedPassport(passportTier!==3);setChosen(null);setFailed(false);setSourceOpened(false);}} className="nh-tier mt-4 rounded-xl border-2 border-amber-400 px-4 py-2.5 font-black text-xs sm:text-sm">{tr(passportTier===3?l('العودة للسؤال الأول','Return to first question'):l('السؤال التالي من المقال · مستوى أصعب','Next article question · harder level'))}</button>}
               <div className="mt-6 flex flex-wrap gap-3 justify-between">
                 <button type="button" disabled={index===0} onClick={()=>selectEntry(index-1)}
                   className="rounded-xl px-4 py-2.5 text-xs font-black bg-slate-100 dark:bg-slate-900 disabled:opacity-40 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">{tr(l('السابق','Previous'))}</button>
-                {index<entries.length-1?<button type="button" onClick={()=>selectEntry(index+1)}
-                  className="rounded-xl px-5 py-2.5 text-xs font-black bg-emerald-700 text-white hover:bg-emerald-800 transition-colors">{tr(l('المهمة التالية','Next mission'))}</button>
-                  : <button type="button" onClick={()=>go('home')} className="rounded-xl px-5 py-2.5 text-xs font-black bg-emerald-700 text-white hover:bg-emerald-800 transition-colors">{tr(l('عودة للمغامرات','Back to adventures'))}</button>}
+                {index<entries.length-1?<button type="button" disabled={chosen===null} onClick={()=>selectEntry(index+1)}
+                  className="rounded-xl px-5 py-2.5 text-xs font-black bg-emerald-700 text-white disabled:opacity-40 hover:bg-emerald-800 transition-colors">{tr(l('المهمة التالية','Next mission'))}</button>
+                  : <button type="button" disabled={chosen===null} onClick={()=>go('home')} className="rounded-xl px-5 py-2.5 text-xs font-black bg-emerald-700 text-white hover:bg-emerald-800 transition-colors">{tr(l('عودة للمغامرات','Back to adventures'))}</button>}
               </div>
             </article>
           </div>

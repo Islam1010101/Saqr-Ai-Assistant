@@ -26,14 +26,11 @@ const translations = {
     allAuthors: "المؤلفين",
     allShelves: "الرفوف",
     audience: "الفئة القرائية",
-    audienceChildren: "للأطفال",
+    audienceChildren: "من الصف 4 إلى الصف 8",
     audienceYouth: "للشباب",
     audienceIdentity: "ركن الهوية الوطنية",
-    audienceTeens: "لليافعين (الصفوف 9–12)",
     audienceSpecialist: "للمتخصصين",
-    audienceReview: "يحتاج مراجعة",
     audienceNotice: "تصنيف إرشادي حسب بيانات الكتاب، وليس تقييمًا عمريًا معتمدًا.",
-    sortBy: "فرز حسب",
     alphabetical: "أبجدياً",
     authorName: "المؤلف",
     none: "تلقائي",
@@ -64,14 +61,11 @@ const translations = {
     allAuthors: "Authors",
     allShelves: "Shelves",
     audience: "Reading audience",
-    audienceChildren: "Children",
+    audienceChildren: "Grades 4–8",
     audienceYouth: "Youth",
     audienceIdentity: "National Identity Corner",
-    audienceTeens: "Teens (Grades 9–12)",
     audienceSpecialist: "Specialists",
-    audienceReview: "Needs review",
     audienceNotice: "Provisional guidance from catalog data, not verified age ratings.",
-    sortBy: "Sort By",
     alphabetical: "Alphabetical",
     authorName: "Author",
     none: "Default",
@@ -405,7 +399,7 @@ const BookCard = React.memo(({ book, onClick, t, locale }: { book: Book; onClick
   const isSaved = passport.saved.includes(readingKey);
   const isAi = !book.subject || book.subject === "Unknown";
   const readingAudience = classifyBookAudience(book);
-  const audienceTag = readingAudience === 'children' ? (locale==='ar'?'للصغار':'Younger readers') : readingAudience === 'youth' ? (locale==='ar'?'للشباب':'Youth') : readingAudience === 'nationalIdentity' ? (locale==='ar'?'ركن الهوية الوطنية':'National identity') : readingAudience === 'teens' ? (locale==='ar'?'لليافعين 9–12':'Teens 9–12') : readingAudience === 'specialist' ? (locale==='ar'?'للمتخصصين':'Specialists') : (locale==='ar'?'يحتاج مراجعة':'Needs review');
+  const audienceTag = readingAudience === 'children' ? (locale==='ar'?'من الصف 4 إلى 8':'Grades 4–8') : readingAudience === 'youth' ? (locale==='ar'?'للشباب':'Youth') : readingAudience === 'nationalIdentity' ? (locale==='ar'?'ركن الهوية الوطنية':'National identity') : readingAudience === 'teens' ? (locale==='ar'?'الشباب والمراهقون':'Youth and teens') : readingAudience === 'specialist' ? (locale==='ar'?'للمتخصصين':'Specialists') : (locale==='ar'?'الفئة العامة':'General');
 
   const colors = [
     'from-blue-500 to-sky-500 border-blue-200',
@@ -427,8 +421,8 @@ const BookCard = React.memo(({ book, onClick, t, locale }: { book: Book; onClick
 
         {/* Shelf-specific catalog decoration; no changes to book records or card actions. */}
         {book.shelf === 22 && (
-          <div className="pointer-events-none absolute end-3 top-14 z-10 h-12 w-[108px] rounded-2xl border border-white/65 bg-white/90 px-3 py-2 shadow-lg backdrop-blur-sm flex items-center justify-center" aria-label="Disney">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Disney_wordmark.svg" alt="Disney" className="block max-w-full max-h-full object-contain" loading="lazy" onError={e=>{e.currentTarget.style.display='none';e.currentTarget.parentElement?.querySelector('span')?.classList.remove('hidden');}} />
+          <div className="pointer-events-none absolute end-3 top-14 z-10 h-7 w-[70px] flex items-center justify-center opacity-80 group-hover:opacity-100" aria-label="Disney">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Disney_wordmark.svg" alt="Disney" className="block max-w-full max-h-full object-contain drop-shadow-md" loading="lazy" onError={e=>{e.currentTarget.style.display='none';e.currentTarget.parentElement?.querySelector('span')?.classList.remove('hidden');}} />
             <span className="hidden font-black text-lg italic tracking-tight text-[#172a47]">Disney</span>
           </div>
         )}
@@ -522,7 +516,6 @@ const SearchPage: React.FC = () => {
     const [authorFilter, setAuthorFilter] = useState('all');
     const [shelfFilter, setShelfFilter] = useState('all');
     const [audienceFilter, setAudienceFilter] = useState<BookAudience | 'all'>('all');
-    const [sortBy, setSortBy] = useState('alphabetical'); 
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
     const [visibleCount, setVisibleCount] = useState(12);
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
@@ -562,13 +555,8 @@ const SearchPage: React.FC = () => {
             return matchesTerm && matchesSub && matchesAuth && matchesShelf && matchesAudience;
         });
 
-        if (sortBy === 'alphabetical') {
-            result = [...result].sort((a, b) => a.title.localeCompare(b.title, currentLocale));
-        } else if (sortBy === 'author') {
-            result = [...result].sort((a, b) => a.author.localeCompare(b.author, currentLocale));
-        }
         return result;
-    }, [debouncedSearchTerm, subjectFilter, authorFilter, shelfFilter, audienceFilter, sortBy, currentLocale]);
+    }, [debouncedSearchTerm, subjectFilter, authorFilter, shelfFilter, audienceFilter, currentLocale]);
 
     return (
         <div dir={dir} className="w-full min-h-screen bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300">
@@ -618,15 +606,12 @@ const SearchPage: React.FC = () => {
                                     <option value="children">{t('audienceChildren')}</option>
                                     <option value="youth">{t('audienceYouth')}</option>
                                     <option value="nationalIdentity">{t('audienceIdentity')}</option>
-                                    <option value="teens">{t('audienceTeens')}</option>
                                     <option value="specialist">{t('audienceSpecialist')}</option>
-                                    <option value="review">{t('audienceReview')}</option>
                                 </select>
                                 <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">{t('audienceNotice')}</span>
                             </div>
-                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
                                 {[
-                                    { id: 'sortBy', val: sortBy, set: setSortBy, opts: ['alphabetical', 'author'] },
                                     { id: 'allSubjects', val: subjectFilter, set: setSubjectFilter, opts: filters.subjects },
                                     { id: 'allAuthors', val: authorFilter, set: setAuthorFilter, opts: filters.authors },
                                     { id: 'allShelves', val: shelfFilter, set: setShelfFilter, opts: filters.shelves, pre: 'S: ' }
@@ -637,7 +622,7 @@ const SearchPage: React.FC = () => {
                                             onChange={(e) => filter.set(e.target.value)} 
                                             className="w-full p-3 md:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 font-black text-xs md:text-sm cursor-pointer appearance-none text-center hover:border-amber-400 transition-colors outline-none focus:border-amber-500 text-slate-700 dark:text-slate-200"
                                         >
-                                            <option value={filter.id === 'sortBy' ? 'alphabetical' : 'all'}>{t(filter.id as keyof typeof translations.en)}</option>
+                                            <option value="all">{t(filter.id as keyof typeof translations.en)}</option>
                                             {filter.opts.map(o => <option key={o} value={o}>{filter.pre ? `${filter.pre}${o}` : filter.id === 'allSubjects' ? getLocalizedSubject(o, currentLocale) : o}</option>)}
                                         </select>
                                     </div>
