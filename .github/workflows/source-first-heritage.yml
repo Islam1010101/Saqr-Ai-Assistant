@@ -13,4 +13,5 @@ jobs:
           node-version: '22'
       - run: npm install --no-save --package-lock=false --no-audit --no-fund
       - run: node --experimental-strip-types tests/heritageEvidence.test.ts
+      - run: node --experimental-strip-types tests/handhalPrintedDictionary.test.ts
       - run: npm run build
