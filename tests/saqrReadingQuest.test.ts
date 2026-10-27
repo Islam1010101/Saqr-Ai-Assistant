@@ -43,3 +43,8 @@ assert.ok(!page.includes('books.map(({key,book,questions})'),'Do not spoil all b
 assert.ok(page.includes('setAmount(v=>Math.max(1,v-1))'));
 assert.ok(page.includes('setAmount(v=>Math.min(books.length,v+1))'));
 assert.ok(page.includes('active.book.book.shelf'));
+
+assert.ok(!page.includes('books.map(({key,book,questions})'),'Do not show all book titles before starting');
+assert.ok(page.includes('setAmount(v=>Math.max(1,v-1))'));
+assert.ok(page.includes('setAmount(v=>Math.min(books.length,v+1))'));
+assert.ok(page.includes('active.book.book.shelf'));
