@@ -367,6 +367,12 @@ export default function TutorialPage() {
       hint: label('مساحة لاستعراض الأعمال والمشروعات الإبداعية. محتوى المشاركات الحقيقية مخفي في هذه الجولة.', 'A space for creative work and projects. Real submissions are hidden in this tour.')
     },
     {
+      id:'reading-quest',title:label('بين السطور مع صقر','Between the Lines with Saqr'),
+      description:label('أسئلة موثقة من كتب عربية وإنجليزية تناسب الطلاب والمعلمين.','Source-backed questions from school books, matched to account and language.'),
+      color:'bg-emerald-700',border:'border-emerald-900',icon:<BookIcon/>,
+      hint:label('للمعلم بطاقة على الرئيسية، وللطالب ضمن تحديات صقر. اختر عدد الكتب واقرأ من مكتبة المدرسة ثم أجب عن 5 إلى 10 أسئلة لكل كتاب.','Teachers open the challenge from Home. Students enter through Saqr Challenges. Choose book count, read at your library and answer 5–10 questions per book.')
+    },
+    {
       id: 'national-identity', title: label('صقر وهوية وطن', 'Saqr & National Identity'),
       description: label('رحلات ثقافية إماراتية للطلاب.', 'UAE heritage learning for students and administrators.'),
       color: 'bg-gradient-to-br from-[#075B49] via-[#087555] to-[#116759]', border: 'border-emerald-900',
@@ -592,7 +598,7 @@ export default function TutorialPage() {
               </div>
               <div className="flex h-full flex-1 items-center overflow-hidden bg-amber-50 dark:bg-slate-800">
                 <div className="whitespace-nowrap px-4 text-xs font-bold text-slate-800 dark:text-slate-100 md:text-base">
-                  {label('تحدي راية المجد: عشرة أسئلة جديدة عن العلم | جناح الهوية الوطنية: اكتشف الكتب والمؤلفين | قائمة قراءتك الشهرية | سجل صوتك في بودكاست صقر | جديد الكتب بانتظارك!', "Explore the National Identity Pavilion | Ten UAE flag questions | Track your monthly reading | Record a Saqr Podcast MP3 | Discover the latest books in our library!")}
+                  {label('بين السطور مع صقر: تحدي قراءة الكتب | تحدي راية المجد: عشرة أسئلة جديدة عن العلم | جناح الهوية الوطنية: اكتشف الكتب والمؤلفين | قائمة قراءتك الشهرية | سجل صوتك في بودكاست صقر | جديد الكتب بانتظارك!', "Between the Lines with Saqr: read and answer | Explore the National Identity Pavilion | Ten UAE flag questions | Track your monthly reading | Record a Saqr Podcast MP3 | Discover the latest books in our library!")}
                 </div>
               </div>
             </div>
