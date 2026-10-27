@@ -20,10 +20,10 @@ for(let i=0;i<20;i++){
 }
 const page=readFileSync('pages/NationalIdentityPage.tsx','utf8');
 assert.ok(page.includes('newDictionaryRound()'));
-assert.ok(page.includes("mode!=='language' && <aside"));
-assert.ok(page.includes("mode==='language'&&!selectedCorrect"));
-assert.ok(page.includes("l('الرف 6','Shelf 6')"));
-assert.ok(page.includes("l('الصف 2','Row 2')"));
+assert.ok(!page.includes('nh-game-path'));
+assert.ok(page.includes('disabled={!selectedCorrect} onClick={()=>selectEntry(index+1)}'));
+assert.ok(page.includes('الرف 6، الصف 2'));
+assert.ok(page.includes('printedDetectiveCases'));
 assert.ok(!page.includes('noorlib.ir'));
 assert.ok(!page.includes('dictionaryMeaning'));
 assert.ok(page.includes('submitAnswer(originalIndex)'));
