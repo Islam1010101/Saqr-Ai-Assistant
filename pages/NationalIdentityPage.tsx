@@ -5,6 +5,7 @@ import FlagDayChallenge from './FlagDayChallenge';
 import './nationalHeritageTheme.css';
 import HeritageQuestArt from './HeritageQuestArt';
 import PassportStampCard from './PassportStampCard';
+import {getGuidedHeritageBook} from '../src/utils/heritageBookGuides';
 import {verifiedPassport} from '../src/utils/verifiedPassportEvidence';
 import {verifiedDetective} from '../src/utils/verifiedDetectiveEvidence';
 
@@ -264,6 +265,9 @@ const NationalIdentityPage: React.FC = () => {
   const done = completedIds.includes(item.id);
   const difficulty = mode==='passport'?passportTier+1:(item.difficulty||1);
   const difficultyName = [l('سهل','Easy'),l('متوسط','Intermediate'),l('متقدم','Advanced'),l('خبير','Expert')][Math.min(4,difficulty)-1];
+  const suggestedBook=(currentMode==='passport'||currentMode==='archive')?getGuidedHeritageBook(item.id,difficulty,round+index+passportTier):null;
+  const [readingPage,setReadingPage]=useState('');
+  const [readingEvidence,setReadingEvidence]=useState('');
   const selectedCorrect = chosen === questionItem.correct;
   const choicesOrder = useMemo(() => {
     const indexes = [0,1,2];
@@ -500,6 +504,23 @@ const NationalIdentityPage: React.FC = () => {
                 </div>
               </div>
             </article>
+            {suggestedBook && <section aria-label={tr(l('مهمة قراءة من المكتبة','Library book reading mission'))} className="rounded-[1.7rem] border-2 border-emerald-200 dark:border-emerald-800 bg-[#F8FAF4] dark:bg-[#0F1C17] p-5 sm:p-7">
+              <p className="text-xs font-black text-emerald-700 dark:text-emerald-300">{tr(l('اقرأ من مكتبتنا · مهمة اختيارية','READ FROM OUR LIBRARY · OPTIONAL MISSION'))}</p>
+              <h3 className="text-lg sm:text-xl font-black mt-2">{tr(l('اكتشف الدليل في كتاب حقيقي','Find evidence in a real book'))}</h3>
+              <div className="mt-4 rounded-2xl bg-white dark:bg-slate-950 border border-emerald-100 dark:border-emerald-900 p-4 sm:p-5">
+                <strong className="block text-base font-black">{suggestedBook.title}</strong>
+                <p className="text-sm mt-2 text-slate-700 dark:text-slate-300">{tr(l('المؤلف:','Author:'))} {suggestedBook.author}</p>
+                <p className="text-sm font-bold mt-2 text-emerald-700 dark:text-emerald-300">{tr(l('الرف','Shelf'))} {suggestedBook.shelf} · {tr(l('الصف','Row'))} {suggestedBook.row}</p>
+              </div>
+              <p className="mt-4 text-sm leading-8 font-semibold">{tr(suggestedBook.task)}</p>
+              <p className="mt-2 text-xs leading-7 text-slate-600 dark:text-slate-300">{tr(l('ابحث في الفهرس أو العناوين داخل نسختك عن الموضوع المطلوب. لا يوجد رقم صفحة موثّق مسبقًا؛ اكتبه بعد قراءة الكتاب. وقد لا يتناول الكتاب الموضوع بالتفصيل.','Use the contents or index to find this topic in your edition. No page is pre-verified; write the page only after reading. The book may not cover the topic in detail.'))}</p>
+              <Link to="/saqr-national-identity/books" className="inline-flex mt-3 rounded-xl bg-emerald-700 text-white px-4 py-2.5 text-sm font-black hover:bg-emerald-800">{tr(l('افتح جناح الهوية الوطنية','Open National Identity Pavilion'))}</Link>
+              <div className="mt-4 grid gap-3 sm:grid-cols-[120px_1fr]">
+                <label className="text-xs font-bold">{tr(l('رقم الصفحة التي قرأتها','Page you read'))}<input inputMode="numeric" maxLength={5} value={readingPage} onChange={e=>setReadingPage(e.target.value.replace(/[^0-9]/g,''))} className="w-full mt-2 rounded-lg p-2 border border-emerald-300 dark:border-emerald-800 bg-white dark:bg-slate-950"/></label>
+                <label className="text-xs font-bold">{tr(l('الدليل الذي وجدته بنفسك','Evidence from your reading'))}<textarea value={readingEvidence} onChange={e=>setReadingEvidence(e.target.value.slice(0,500))} rows={2} className="w-full mt-2 rounded-lg p-2 border border-emerald-300 dark:border-emerald-800 bg-white dark:bg-slate-950"/></label>
+              </div>
+              <p className="text-xs mt-3 text-slate-600 dark:text-slate-400">{tr(l('هذه نشاط قراءة للتفكير والبحث، وليست إجابة مصححة آليًا ولا تمنح نقاطًا إضافية. لا يتم إرسال ما تكتبه إلى الخادم.','This is an optional research activity, not automatically graded, with no extra points. Your notes are not sent to a server.'))}</p>
+            </section>}
             <article className="nh-challenge-play rounded-[1.7rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-5 sm:p-7 shadow-lg">
               <div className="flex gap-3 items-center mb-4">
                 <div className="flex items-center justify-center bg-[#F4E9D5] text-amber-900 dark:bg-amber-950 dark:text-amber-300 w-11 h-11 rounded-xl"><Icon kind="document" className="w-6 h-6"/></div>
