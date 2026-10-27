@@ -149,17 +149,7 @@ const sourcedEmirates:Activity[]=verifiedPassport.map((entry)=>({
  question:entry.questions[0].question,choices:entry.questions[0].choices,
  correct:entry.questions[0].correct,explanation:entry.questions[0].explanation,difficulty:1
 }));
-// Verified physical clues use the supplied photographs of the school dictionary.
-const printedDetectiveWords=['تَاوَهْ','دَرْزِينَة','جَلَّاس'];
-const printedDetectiveCases:Activity[]=printedDetectiveWords.map((word,i)=>{
- const task=dictionaryTasks.find(entry=>entry.word===word);
- if(!task) throw new Error('Missing verified printed entry '+word);
- return {id:'printed-handhal-detective-'+String(i+1),name:l('دليل من المعجم: '+word,'Dictionary evidence: '+word),
-  story:l('حقق في معنى اللفظ الإماراتي بالرجوع إلى المعجم الورقي.','Investigate a word in the printed dictionary.'),
-  prompt:l('اقرأ المدخل في النسخة الورقية.','Read the physical dictionary entry.'),
-  question:task.question,choices:task.options,correct:task.correct,explanation:task.explanation,source:'',difficulty:task.difficulty};
-});
-const sourcedCases:Activity[]=[...verifiedDetective.map((entry)=>({...entry})),...printedDetectiveCases];
+const sourcedCases:Activity[]=verifiedDetective.map((entry)=>({...entry}));
 const sourcedFollowUps:Record<string,Array<{question:L;choices:[L,L,L];correct:number;explanation:L;source:string;difficulty:number}>>=
  Object.fromEntries(verifiedPassport.map(entry=>[entry.id,entry.questions.slice(1).map(q=>({
   question:q.question,choices:q.choices,correct:q.correct,explanation:q.explanation,source:q.source,difficulty:q.difficulty
@@ -247,6 +237,7 @@ const NationalIdentityPage: React.FC = () => {
   const [round,setRound] = useState(0);
   const [stage,setStage] = useState<'discover'|'play'>('play');
   const [chosen,setChosen] = useState<number|null>(null);
+  const [failed,setFailed] = useState(false);
   const [advancedPassport,setAdvancedPassport] = useState(false);
   const [passportTier,setPassportTier]=useState(0);
   const [albumOpen,setAlbumOpen] = useState(false);
@@ -286,19 +277,19 @@ const NationalIdentityPage: React.FC = () => {
   const difficultyName = [l('سهل','Easy'),l('متوسط','Intermediate'),l('متقدم','Advanced'),l('خبير','Expert')][Math.min(4,difficulty)-1];
   const suggestedBook=(currentMode==='passport'||currentMode==='archive')?getGuidedHeritageBook(item.id,difficulty,round+index+passportTier):null;
   const [sourceOpened,setSourceOpened]=useState(false);
-  const selectedCorrect = chosen === questionItem.correct;
+  const selectedCorrect = chosen !== null && chosen === questionItem.correct;
   const choicesOrder = useMemo(() => {
     const indexes = [0,1,2];
     for (let i=indexes.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[indexes[i],indexes[j]]=[indexes[j],indexes[i]];}
     return indexes;
   }, [currentMode,index,round,advancedPassport]);
   const totalCompleted = progress.stamps.length + progress.words.length + progress.cases.length;
-  const go = (next: Mode) => { setMode(next);setIndex(0);setChosen(null);setAdvancedPassport(false);setPassportTier(0);setStage('play');setSourceOpened(false);setNewlyStamped(null);setRound(n=>n+1); };
-  const selectEntry = (nextIndex: number) => {setIndex(nextIndex);setChosen(null);setAdvancedPassport(false);setStage('play');setSourceOpened(false);setNewlyStamped(null);};
+  const go = (next: Mode) => { setMode(next);setIndex(0);setChosen(null);setFailed(false);setAdvancedPassport(false);setPassportTier(0);setStage('play');setSourceOpened(false);setNewlyStamped(null);setRound(n=>n+1); };
+  const selectEntry = (nextIndex: number) => {setIndex(nextIndex);setChosen(null);setFailed(false);setAdvancedPassport(false);setStage('play');setSourceOpened(false);setNewlyStamped(null);};
   const submitAnswer = (answer: number) => {
-    if (chosen===questionItem.correct) return;
+    if (chosen!==null || failed) return;
     setChosen(answer);
-    if (answer !== questionItem.correct) return;
+    if (answer !== questionItem.correct) {setFailed(true);return;}
     const field = progressField[currentMode];
     const firstCompletion = !progress[field].includes(item.id);
     if (currentMode === 'passport' && firstCompletion) setNewlyStamped(item.id);
@@ -480,7 +471,7 @@ const NationalIdentityPage: React.FC = () => {
                   <p className="text-xs font-black text-emerald-700 dark:text-emerald-300">{tr(l('مصدر المهمة','Mission source'))}</p>
                   <strong className="block mt-1 text-base sm:text-lg font-black">{tr(item.name)}</strong>
                 </div>
-                {questionItem.source ? <a href={questionItem.source} target="_blank" rel="noopener noreferrer" onClick={()=>setSourceOpened(true)} className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-3 text-xs sm:text-sm font-black text-white hover:bg-emerald-800 focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-500">{tr(l('افتح المصدر الأصلي','Open original source'))}<Icon kind="arrow" className="w-4 h-4"/></a> : <div className="text-xs sm:text-sm font-bold leading-7">{handhalDictionary.title} · {handhalDictionary.author} · {tr(l('الرف 6، الصف 2','Shelf 6, row 2'))}</div>}
+                {questionItem.source ? <a href={questionItem.source} target="_blank" rel="noopener noreferrer" onClick={()=>setSourceOpened(true)} className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-3 text-xs sm:text-sm font-black text-white hover:bg-emerald-800 focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-500">{tr(l('افتح المصدر الأصلي','Open original source'))}<Icon kind="arrow" className="w-4 h-4"/></a> : <span className="text-sm font-semibold">{tr(l('المصدر الورقي غير متاح لهذا السؤال','Physical source not available for this question'))}</span>}
               </div>
             </section>}
             <article className="nh-challenge-play rounded-[1.7rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-5 sm:p-7 shadow-lg">
@@ -496,13 +487,13 @@ const NationalIdentityPage: React.FC = () => {
               <p className="font-bold text-base sm:text-lg leading-8 mb-4">{tr(questionItem.question)}</p>
               {Boolean(questionItem.source)&&!sourceOpened && <p className="mb-4 text-sm font-bold text-amber-700 dark:text-amber-300">{tr(l('افتح المصدر أولًا لتفعيل الإجابات','Open the source first to enable answering'))}</p>}
               <div className="nh-options grid grid-cols-1 md:grid-cols-3 gap-3">
-                {choicesOrder.map((originalIndex,i)=><button key={originalIndex} type="button" onClick={()=>submitAnswer(originalIndex)} disabled={(Boolean(questionItem.source)&&!sourceOpened)||selectedCorrect}
+                {choicesOrder.map((originalIndex,i)=><button key={originalIndex} type="button" onClick={()=>submitAnswer(originalIndex)} disabled={(Boolean(questionItem.source)&&!sourceOpened)||chosen!==null}
                   aria-pressed={chosen===originalIndex} className={'nh-answer min-h-[88px] text-start flex items-center gap-3 rounded-2xl border-2 px-4 py-3 font-bold text-sm leading-6 transition-all hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-400 '+(chosen===originalIndex?(selectedCorrect?'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-950 dark:text-emerald-100':'border-rose-400 bg-rose-50 dark:bg-rose-950/35 text-rose-900 dark:text-rose-100'):'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 hover:border-emerald-400') }>
                     <span className="flex shrink-0 w-8 h-8 rounded-full items-center justify-center border border-current/20 text-xs font-black">{i+1}</span>{tr(questionItem.choices[originalIndex])}
                   </button>)}
               </div>
               {chosen !== null && <div role="status" aria-live="polite" className={'mt-5 rounded-xl border p-4 '+(selectedCorrect?'border-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-100':'border-amber-300 bg-amber-50 dark:bg-amber-950/30 text-amber-900 dark:text-amber-100')}>
-                <strong className="font-black">{selectedCorrect?tr(mode==='passport'?l('تم ختم صفحة الجواز!','Passport page stamped!'):mode==='language'?l('تم اكتشاف الكنز اللغوي!','Word treasure unlocked!'):l('تم كشف الدليل وحل القضية!','Evidence revealed, case solved!')):tr(l('حاول مرة أخرى بعد مراجعة النص.','Try again after reviewing the text.'))}</strong>
+                <strong className="font-black">{selectedCorrect?tr(mode==='passport'?l('تم ختم صفحة الجواز!','Passport page stamped!'):mode==='language'?l('تم اكتشاف الكنز اللغوي!','Word treasure unlocked!'):l('تم كشف الدليل وحل القضية!','Evidence revealed, case solved!')):tr(l('إجابة غير صحيحة. انتقل إلى سؤال جديد.','Incorrect answer. Continue to a new question.'))}</strong>
                 {selectedCorrect && <p className="mt-1 text-sm leading-7">{tr(questionItem.explanation)}</p>}
               </div>}
               {done && chosen === null && <div className="mt-4 text-sm font-black text-emerald-700 dark:text-emerald-300 flex gap-2 items-center"><Icon kind="check" className="w-5 h-5"/>{tr(l('أكملت هذه المهمة سابقًا؛ يمكنك إعادتها.','You have already completed this mission. You can replay it.'))}</div>}
@@ -520,13 +511,13 @@ const NationalIdentityPage: React.FC = () => {
                   beneficiaryName={passportHolder} issuedAt={progress.stampDates[item.id]} compact/>
               </div>}
               </>
-              {mode==='passport' && stage==='play' && <button type="button" disabled={!selectedCorrect} onClick={()=>{setPassportTier(previous=>(previous+1)%4);setAdvancedPassport(passportTier!==3);setChosen(null);}} className="nh-tier mt-4 rounded-xl border-2 border-amber-400 px-4 py-2.5 font-black text-xs sm:text-sm">{tr(passportTier===3?l('العودة للسؤال الأول','Return to first question'):l('السؤال التالي من المقال · مستوى أصعب','Next article question · harder level'))}</button>}
+              {mode==='passport' && stage==='play' && <button type="button" disabled={chosen===null} onClick={()=>{setPassportTier(previous=>(previous+1)%4);setAdvancedPassport(passportTier!==3);setChosen(null);setFailed(false);setSourceOpened(false);}} className="nh-tier mt-4 rounded-xl border-2 border-amber-400 px-4 py-2.5 font-black text-xs sm:text-sm">{tr(passportTier===3?l('العودة للسؤال الأول','Return to first question'):l('السؤال التالي من المقال · مستوى أصعب','Next article question · harder level'))}</button>}
               <div className="mt-6 flex flex-wrap gap-3 justify-between">
                 <button type="button" disabled={index===0} onClick={()=>selectEntry(index-1)}
                   className="rounded-xl px-4 py-2.5 text-xs font-black bg-slate-100 dark:bg-slate-900 disabled:opacity-40 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">{tr(l('السابق','Previous'))}</button>
-                {index<entries.length-1?<button type="button" disabled={!selectedCorrect} onClick={()=>selectEntry(index+1)}
+                {index<entries.length-1?<button type="button" disabled={chosen===null} onClick={()=>selectEntry(index+1)}
                   className="rounded-xl px-5 py-2.5 text-xs font-black bg-emerald-700 text-white disabled:opacity-40 hover:bg-emerald-800 transition-colors">{tr(l('المهمة التالية','Next mission'))}</button>
-                  : <button type="button" disabled={!selectedCorrect} onClick={()=>go('home')} className="rounded-xl px-5 py-2.5 text-xs font-black bg-emerald-700 text-white hover:bg-emerald-800 transition-colors">{tr(l('عودة للمغامرات','Back to adventures'))}</button>}
+                  : <button type="button" disabled={chosen===null} onClick={()=>go('home')} className="rounded-xl px-5 py-2.5 text-xs font-black bg-emerald-700 text-white hover:bg-emerald-800 transition-colors">{tr(l('عودة للمغامرات','Back to adventures'))}</button>}
               </div>
             </article>
           </div>
