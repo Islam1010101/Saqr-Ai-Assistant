@@ -519,7 +519,7 @@ const NationalIdentityPage: React.FC = () => {
                 <PassportStampCard emirate={item} language={lang}
                   beneficiaryName={passportHolder} issuedAt={progress.stampDates[item.id]} compact/>
               </div>}
-              </>}
+              </>
               {mode==='passport' && stage==='play' && <button type="button" disabled={!selectedCorrect} onClick={()=>{setPassportTier(previous=>(previous+1)%4);setAdvancedPassport(passportTier!==3);setChosen(null);}} className="nh-tier mt-4 rounded-xl border-2 border-amber-400 px-4 py-2.5 font-black text-xs sm:text-sm">{tr(passportTier===3?l('العودة للسؤال الأول','Return to first question'):l('السؤال التالي من المقال · مستوى أصعب','Next article question · harder level'))}</button>}
               <div className="mt-6 flex flex-wrap gap-3 justify-between">
                 <button type="button" disabled={index===0} onClick={()=>selectEntry(index-1)}
