@@ -186,7 +186,7 @@ const readSaved = (key: string): Progress => {
         if (typeof stored === 'string' && !Number.isNaN(Date.parse(stored))) stampDates[id] = stored;
       }
     }
-    return {stamps,words:valid(value.words,dictionaryActivities),cases:valid(value.cases,sourcedCases),notes,stampDates};
+    return {stamps,words:valid(value.words,dictionaryActivities),cases:valid(value.cases,activities.archive),notes,stampDates};
   } catch { return emptyProgress(); }
 };
 const Icon: React.FC<{kind:'book'|'stamp'|'weave'|'document'|'check'|'arrow'|'lock'; className?:string}> = ({kind,className='w-7 h-7'}) => {
