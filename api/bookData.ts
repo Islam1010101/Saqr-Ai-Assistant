@@ -1,3 +1,4 @@
+import {shelf40Books} from './shelf40Catalog.ts';
 import {reviewedShelf41Books} from './shelf41ReviewedCatalog.ts';
 import { physicalBookAdditions } from './bookAdditions.ts';
 // 1. تعريف نوع البيانات
@@ -3653,7 +3654,17 @@ const mergedExisting=originalBooks.map(book=>{
 });
 const existing41=new Set(originalBooks.filter(book=>book.shelf===41).map(normalizedShelf41Key));
 const newShelf41Books:Book[]=reviewedShelf41Books.filter(book=>!existing41.has(normalizedShelf41Key(book))).map(book=>({...book}));
-export const bookData:Book[]=[...mergedExisting,...newShelf41Books];
+const currentPhysicalBooks:Book[]=[...mergedExisting,...newShelf41Books];
+const normalizedShelf40=(title:string)=>title.normalize('NFKC').toLocaleLowerCase().replace(/[^\p{L}\p{N}]/gu,'');
+const existingShelf40=new Set(currentPhysicalBooks.filter(b=>b.shelf===40).map(b=>b.row+'|'+normalizedShelf40(b.title)));
+const newShelf40Books:Book[]=shelf40Books.filter(b=>!existingShelf40.has(b.row+'|'+normalizedShelf40(b.title))).map((b,i)=>({
+ id:'shelf40-20261027-'+String(i+1).padStart(3,'0'),title:b.title,author:b.author,
+ shelf:40,row:b.row,language:'EN',subject:inferredSubject(b.title,b.author,'',40),
+ level:'General',summary:'A verified description is not yet available for this physical library book.',
+ ...(b.isbn?{isbn:b.isbn,isbnStatus:'candidate' as const}:{}),
+ needsReview:b.needsReview
+}));
+export const bookData:Book[]=[...currentPhysicalBooks,...newShelf40Books];
 
 // 5. دالة البحث المخصصة للاستخدام في تطبيق الويب
 export function findInCatalog(q: string): Book[] {
