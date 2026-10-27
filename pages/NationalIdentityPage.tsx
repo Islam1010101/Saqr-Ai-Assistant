@@ -301,6 +301,23 @@ const NationalIdentityPage: React.FC = () => {
       } : {})
     });
   };
+  // Wrong answers consume one question, never award points, and advance automatically.
+  // The timeout is cancelled on navigation so an old question cannot alter a new mode.
+  useEffect(() => {
+    if (!failed || chosen === null) return;
+    const timer=window.setTimeout(() => {
+      if (currentMode==='passport' && passportTier<3) {
+        setPassportTier(previous=>previous+1);
+        setAdvancedPassport(true);
+        setChosen(null);setFailed(false);setSourceOpened(false);
+      } else if (index<entries.length-1) {
+        selectEntry(index+1);
+      } else {
+        go('home');
+      }
+    },1100);
+    return () => window.clearTimeout(timer);
+  },[failed,chosen,currentMode,index,entries.length,passportTier]);
   const modules = [
     {id:'passport' as const,icon:'stamp' as const,title:l('جواز صقر الثقافي','Saqr Cultural Passport'),desc:l('اكتشف الإمارات السبع، واقرأ حكاية كل إمارة واجمع ختمها.','Explore all seven emirates, read their stories and collect their stamps.'),total:sourcedEmirates.length,count:progress.stamps.length,color:'from-emerald-700 to-teal-600'},
     {id:'language' as const,icon:'weave' as const,title:l('كنوز لغتنا الإماراتية','Treasures of Emirati Language'),desc:l('اختر معنى 10 ألفاظ إماراتية بعد مراجعة المعجم الورقي.','Find the meanings of 10 Emirati words using the printed dictionary.'),total:10,count:entries.filter(x=>progress.words.includes(x.id)).length,color:'from-amber-600 to-orange-600'},
