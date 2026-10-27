@@ -10,6 +10,7 @@ import {verifiedPassport} from '../src/utils/verifiedPassportEvidence';
 import {verifiedDetective} from '../src/utils/verifiedDetectiveEvidence';
 import {verifiedHeritageBookQuestions} from '../src/utils/verifiedHeritageBookQuestions';
 import {dictionaryTasks,handhalDictionary,newDictionaryRound} from '../src/utils/heritageSourceFirst';
+import {DETECTIVE_ROUND_SIZE,newDetectiveRound} from '../src/utils/detectiveRound';
 
 
 type L = { ar: string; en: string };
@@ -265,10 +266,7 @@ const NationalIdentityPage: React.FC = () => {
     const source = activities[currentMode];
     if (currentMode === 'passport') { return source; }
     if (currentMode === 'language') { const pool=newDictionaryRound();return pool.map(task=>source.find(entry=>entry.id===task.id)!).filter(Boolean); }
-    const groups = [1,2,3,4].map(tier => source.filter(item => (item.difficulty||1) === tier));
-    // Randomised once per visit and each replay, keeping easy -> expert progression.
-    const shuffled = groups.flatMap(group => {const copy=[...group];for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]];}return copy;});
-    return shuffled;
+    return newDetectiveRound(source);
   }, [currentMode,round]);
   const item = entries[index] || entries[0];
   const questionItem = currentMode === 'passport' && advancedPassport
@@ -324,7 +322,7 @@ const NationalIdentityPage: React.FC = () => {
   const modules = [
     {id:'passport' as const,icon:'stamp' as const,title:l('جواز صقر الثقافي','Saqr Cultural Passport'),desc:l('اكتشف الإمارات السبع، واقرأ حكاية كل إمارة واجمع ختمها.','Explore all seven emirates, read their stories and collect their stamps.'),total:sourcedEmirates.length,count:progress.stamps.length,color:'from-emerald-700 to-teal-600'},
     {id:'language' as const,icon:'weave' as const,title:l('كنوز لغتنا الإماراتية','Treasures of Emirati Language'),desc:l('اختر معنى 10 ألفاظ إماراتية بعد مراجعة المعجم الورقي.','Find the meanings of 10 Emirati words using the printed dictionary.'),total:10,count:entries.filter(x=>progress.words.includes(x.id)).length,color:'from-amber-600 to-orange-600'},
-    {id:'archive' as const,icon:'document' as const,title:l('محقق ذاكرة الوطن','Heritage Research Detective'),desc:l('حلّل الأدلة واقرأ المصادر وتعلّم كيف تتحقق من المعلومات.','Study evidence, read sources and learn how to verify information.'),total:activities.archive.length,count:progress.cases.length,color:'from-sky-700 to-indigo-700'}
+    {id:'archive' as const,icon:'document' as const,title:l('محقق ذاكرة الوطن','Heritage Research Detective'),desc:l('10 أسئلة عشوائية من بنك الأدلة والمصادر الموثوقة.','10 randomized questions from the verified evidence bank.'),total:DETECTIVE_ROUND_SIZE,count:currentMode==='archive'?entries.filter(x=>progress.cases.includes(x.id)).length:0,color:'from-sky-700 to-indigo-700'}
   ];
   const selectedModule = modules.find(x=>x.id===currentMode) || modules[0];
   if (!identity) return <Navigate to="/home" replace />;
