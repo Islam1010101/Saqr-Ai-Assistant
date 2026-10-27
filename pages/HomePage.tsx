@@ -804,7 +804,7 @@ const HomePage: React.FC = () => {
                 <RevealSection delay={300}>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         
-                        <Link to="/search" className="group relative bg-sky-400 text-white p-6 rounded-[2.5rem] border-b-8 border-sky-600 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
+                        <Link to="/search" className="group relative bg-sky-600 text-white p-6 rounded-[2.5rem] border-b-8 border-sky-600 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
                             <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
                                 <SearchIcon />
                             </div>
@@ -814,7 +814,7 @@ const HomePage: React.FC = () => {
                             </div>
                         </Link>
 
-                        <Link to="/smart-search" className="group relative bg-emerald-400 text-white p-6 rounded-[2.5rem] border-b-8 border-emerald-600 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
+                        <Link to="/smart-search" className="group relative bg-[#087b69] text-white p-6 rounded-[2.5rem] border-b-8 border-emerald-600 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
                             <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
                                 <SmartIcon />
                             </div>
@@ -824,7 +824,7 @@ const HomePage: React.FC = () => {
                             </div>
                         </Link>
 
-                        <Link to="/digital-library" className="group relative bg-indigo-400 text-white p-6 rounded-[2.5rem] border-b-8 border-indigo-600 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
+                        <Link to="/digital-library" className="group relative bg-indigo-600 text-white p-6 rounded-[2.5rem] border-b-8 border-indigo-600 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
                             <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
                                 <BookIcon />
                             </div>
@@ -834,7 +834,7 @@ const HomePage: React.FC = () => {
                             </div>
                         </Link>
 
-                        <Link to="/creators" className="group relative bg-purple-400 text-white p-6 rounded-[2.5rem] border-b-8 border-purple-600 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
+                        <Link to="/creators" className="group relative bg-fuchsia-600 text-white p-6 rounded-[2.5rem] border-b-8 border-purple-600 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden">
                             <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
                                 <CreatorIcon />
                             </div>
@@ -864,14 +864,14 @@ const HomePage: React.FC = () => {
                         )}
 
                         {(userType === 'student' || userType === 'admin') && (
-                            <Link to="/saqr-challenges" className="group relative flex items-center gap-5 rounded-[2.5rem] border-b-8 border-emerald-900 bg-emerald-700 p-6 text-white shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl active:translate-y-2 active:border-b-0">
+                            <Link to="/saqr-challenges" className="group relative flex items-center gap-5 rounded-[2.5rem] border-b-8 border-amber-700 bg-amber-500 p-6 text-white shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl active:translate-y-2 active:border-b-0">
                                 <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/20"><GameIcon /></span>
                                 <span className="min-w-0"><strong className="block text-xl font-black md:text-2xl">{t('saqrChallengesTitle')}</strong><small className="mt-1 block text-xs md:text-sm">{t('saqrChallengesDesc')}</small></span>
                             </Link>
                         )}
 
                         {userType === 'teacher' && (
-                            <Link to="/saqr-reading-quest" className="group relative flex items-center gap-5 rounded-[2.5rem] border-b-8 border-emerald-900 bg-emerald-700 p-6 text-white shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl active:translate-y-2 active:border-b-0">
+                            <Link to="/saqr-reading-quest" className="group relative flex items-center gap-5 rounded-[2.5rem] border-b-8 border-cyan-900 bg-cyan-700 p-6 text-white shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl active:translate-y-2 active:border-b-0">
                                 <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/20"><BookIcon /></span>
                                 <span className="min-w-0"><strong className="block text-xl font-black md:text-2xl">{t('readingQuestTitle')}</strong><small className="mt-1 block text-xs md:text-sm">{t('readingQuestDesc')}</small></span>
                             </Link>

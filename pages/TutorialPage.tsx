@@ -369,8 +369,8 @@ export default function TutorialPage() {
     {
       id:'reading-quest',title:label('بين السطور مع صقر','Between the Lines with Saqr'),
       description:label('أسئلة موثقة من كتب عربية وإنجليزية تناسب الطلاب والمعلمين.','Source-backed questions from school books, matched to account and language.'),
-      color:'bg-emerald-700',border:'border-emerald-900',icon:<BookIcon/>,
-      hint:label('للمعلم بطاقة على الرئيسية، وللطالب ضمن تحديات صقر. اختر عدد الكتب واقرأ من مكتبة المدرسة ثم أجب عن 5 إلى 10 أسئلة لكل كتاب.','Teachers open the challenge from Home. Students enter through Saqr Challenges. Choose book count, read at your library and answer 5–10 questions per book.')
+      color:'bg-amber-500',border:'border-amber-700',icon:<BookIcon/>,
+      hint:label('تبدأ الجولة بالترحيب باسمك ثم اختيار عدد الكتب فقط، ويعرض صقر كل كتاب ومكانه وأسئلة عن محتواه أثناء اللعب. للمعلمين زر مستقل في الرئيسية، وللطلاب من تحديات صقر مع رتب المكتبة والاستديو.','The journey welcomes you and asks only for a book count. Saqr then presents one book and its shelf alongside content questions. Teachers have a direct shortcut; students use Saqr Challenges with sorting and Studio.')
     },
     {
       id: 'national-identity', title: label('صقر وهوية وطن', 'Saqr & National Identity'),

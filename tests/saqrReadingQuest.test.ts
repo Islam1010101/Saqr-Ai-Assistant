@@ -4,8 +4,8 @@ import {readingChallengeBooks,getRoleReadingBooks,shuffleReading} from '../src/u
 import {bookData} from '../api/bookData.ts';
 const groups=[['student','ar'],['student','en'],['teacher','ar'],['teacher','en']] as const;
 assert.ok(bookData.length>=3000,'The complete EFIPS catalog should be loaded');
-assert.equal(readingChallengeBooks.length,50,'All 50 catalog-matched books must be playable');
-assert.equal(readingChallengeBooks.reduce((n,b)=>n+b.questions.length,0),494);
+assert.equal(readingChallengeBooks.length,56,'All 56 catalog-matched books must be playable');
+assert.equal(readingChallengeBooks.reduce((n,b)=>n+b.questions.length,0),540);
 for(const [role,locale] of groups){
  const books=getRoleReadingBooks(role,locale);
  assert.ok(books.length>=4,`Not enough validated books for ${role}/${locale}`);
@@ -29,12 +29,22 @@ const page=readFileSync('pages/SaqrReadingQuestPage.tsx','utf8');
 const home=readFileSync('pages/HomePage.tsx','utf8');
 const hub=readFileSync('pages/SaqrChallengesHubPage.tsx','utf8');
 assert.ok(page.includes('getRoleReadingBooks(role,ar?'));
-assert.ok(page.includes('Math.min(10,Math.max(5,book.questions.length))'));
-assert.ok(page.includes('firstLast(session.name)'));
+assert.ok(page.includes('Math.min(10,book.questions.length)'));
+assert.ok(page.includes('compactName(ar?session.ar||session.en:session.en||session.ar)'));
 assert.ok(home.includes('to="/saqr-challenges"'));
 assert.ok(home.includes('to="/saqr-reading-quest"'));
 assert.ok(!home.includes('to="/game"'),'Game shortcut must be inside student challenges hub');
 assert.ok(!home.includes('to="/saqr-studio"'),'Studio shortcut must be inside student challenges hub');
 for(const path of ['/saqr-reading-quest','/game','/saqr-studio'])assert.ok(hub.includes(path));
 assert.ok(home.includes("userType === 'teacher' && ("));
-console.log('PASS 50 EFIPS books; 494 questions; bilingual role separation; unique book selection; 5-10 question rounds; student hub and teacher shortcut');
+console.log('PASS 56 EFIPS books; 540 questions; bilingual role separation; unique book selection; 5-10 question rounds; student hub and teacher shortcut');
+
+assert.ok(!page.includes('books.map(({key,book,questions})'),'Do not spoil all books before the journey');
+assert.ok(page.includes('setAmount(v=>Math.max(1,v-1))'));
+assert.ok(page.includes('setAmount(v=>Math.min(books.length,v+1))'));
+assert.ok(page.includes('active.book.book.shelf'));
+
+assert.ok(!page.includes('books.map(({key,book,questions})'),'Do not show all book titles before starting');
+assert.ok(page.includes('setAmount(v=>Math.max(1,v-1))'));
+assert.ok(page.includes('setAmount(v=>Math.min(books.length,v+1))'));
+assert.ok(page.includes('active.book.book.shelf'));
