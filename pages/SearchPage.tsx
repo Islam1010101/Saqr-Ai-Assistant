@@ -46,6 +46,8 @@ const translations = {
     isbnEditions: "أرقام طبعات مرشحة",
     isbnReview: "يُرجى مطابقة رقم الطبعة مع الباركود أو صفحة حقوق النشر للكتاب الفعلي.",
     officialAi: "تحليل صقر الذكي",
+    aiUnavailable: "تعذر التحليل مؤقتًا — المعلومات التالية من فهرس المكتبة فقط",
+    aiRetry: "إعادة محاولة التحليل",
     back: "العودة",
     requestBorrow: "طلب استعارة",
     borrowPending: "جاري الإرسال...",
@@ -81,6 +83,8 @@ const translations = {
     isbnEditions: "Candidate edition ISBNs",
     isbnReview: "Match the edition number with the barcode or copyright page of the physical copy.",
     officialAi: "Saqr AI Analysis",
+    aiUnavailable: "Analysis temporarily unavailable — showing catalog details only",
+    aiRetry: "Retry analysis",
     back: "Back",
     requestBorrow: "Request Borrow",
     borrowPending: "Sending...",
@@ -168,11 +172,40 @@ const RevealOnScroll = ({ children, delay = 0 }: { children: React.ReactNode, de
 };
 
 
+// Book-card analysis adapter only. This does not change the shared Saqr engine.
+const verifiedCatalogDescription = (value: string): boolean => {
+    const text = String(value || '').trim();
+    return text.length > 0 && !/^(?:a verified (?:book )?description is not yet available|a verified description is not yet available for this physical library book|الوصف التفصيلي لهذا الكتاب غير متاح)/i.test(text);
+};
+const parseBookAnalysis = (raw: unknown, genreFallback: string): {summary:string;genre:string} => {
+    if (typeof raw !== 'string' || !raw.trim()) throw new Error('Empty book analysis');
+    const text=raw.trim().replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'').trim();
+    const first=text.indexOf('{'), last=text.lastIndexOf('}');
+    if(first>=0 && last>first) {
+        try {
+            const obj=JSON.parse(text.slice(first,last+1));
+            if(typeof obj?.summary==='string' && obj.summary.trim()){
+                return {summary:obj.summary.trim(),genre:typeof obj.genre==='string'&&obj.genre.trim()?obj.genre.trim():genreFallback};
+            }
+        } catch { /* The shared chat endpoint may return prose instead of JSON. */ }
+    }
+    const plain=text.replace(/^(?:summary|ملخص|الملخص)\s*[:：]\s*/i,'').trim();
+    if(plain.length>=24 && !/^[\[{]/.test(plain) && !/^(?:error|خطأ)\s*[:：]/i.test(plain)){
+        return {summary:plain,genre:genreFallback};
+    }
+    throw new Error('Invalid book analysis format');
+};
+const catalogSummary = (book:Book, locale:string):string => verifiedCatalogDescription(book.summary) ? book.summary :
+    locale==='ar'
+      ? 'لا يتوفر وصف موثّق لمحتوى هذا الكتاب في الفهرس حاليًا. بياناته: «'+book.title+'»'+(book.author?'، المؤلف: '+book.author:'')+'، الرف '+book.shelf+'، الصف '+book.row+'.'
+      : 'No verified description is available in the catalog for this book. Record: “'+book.title+'”'+(book.author?', author: '+book.author:'')+', shelf '+book.shelf+', row '+book.row+'.';
 // --- 3. Component: BookModal ---
 const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
     const { locale, dir } = useLanguage();
     const [aiContent, setAiContent] = useState({ summary: '', genre: '' });
     const [loading, setLoading] = useState(false);
+    const [analysisState, setAnalysisState] = useState<'loading'|'ready'|'unavailable'>('loading');
+    const [analysisAttempt, setAnalysisAttempt] = useState(0);
     const [requestStatus, setRequestStatus] = useState<'idle' | 'loading' | 'success'>('idle');
     const [borrowerEmail, setBorrowerEmail] = useState('');
 
@@ -184,38 +217,50 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
         .toLowerCase();
 
     useEffect(() => {
-        if (!book) {
-            setRequestStatus('idle');
-            return;
-        }
-        
-        const fetchAiDeepDive = async () => {
-            setLoading(true);
+        if (!book) { setRequestStatus('idle'); return; }
+        const controller=new AbortController();
+        const analyze = async () => {
+            setLoading(true); setAnalysisState('loading'); setAiContent({summary:'',genre:''});
             try {
-                const response = await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        messages: [{
-                            role: 'system',
-                            content: `Analyze the book titled "${book.title}" ${book.author ? `by "${book.author}"` : ''}. Provide: 1. A clear 2-sentence summary. 2. A specific Topic (Genre). Language: ${locale === 'ar' ? 'Arabic' : 'English'}. Return JSON ONLY: {"summary": "...", "genre": "..."}`
+                // Pass the selected catalog record explicitly: the shared chat endpoint's
+                // older server-side holdings index does not contain every newer physical book.
+                const record = [
+                    'Title: '+book.title,
+                    'Author: '+(book.author||'Not recorded'),
+                    'Catalog subject: '+(book.subject||'Not recorded'),
+                    'Shelf: '+book.shelf+', Row: '+book.row,
+                    'Recorded description: '+(verifiedCatalogDescription(book.summary)?book.summary:'Not verified in the library catalog')
+                ].join('\n');
+                const response=await fetch('/api/chat',{
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    signal:controller.signal,
+                    body:JSON.stringify({
+                        locale:locale==='ar'?'ar':'en',
+                        messages:[{
+                            role:'user',
+                            content:'Analyze the book from the EFIPS printed library. Catalog record:\n'+record+
+                                '\nProvide a concise overview and a specific topic. Use known reliable information and the record; the book full text has NOT been provided. '+
+                                'If contents are unknown, state that clearly; do not invent plots, characters or chapters. '+
+                                'Answer in '+(locale==='ar'?'Arabic':'English')+'. Return JSON only: {"summary":"...","genre":"..."}'
                         }]
                     })
                 });
-                const data = await response.json();
-                const parsed = JSON.parse(data.reply.replace(/```json|```/g, '').trim());
-                setAiContent(parsed);
-            } catch (err) {
-                setAiContent({ 
-                    summary: book.summary || (locale === 'ar' ? "كتاب متميز يفتح آفاق المعرفة للقارئ." : "An exceptional book that expands the reader's horizons."),
-                    genre: getLocalizedSubject(book.subject, locale)
-                });
-            } finally { setLoading(false); }
+                if(!response.ok)throw new Error('Analysis request HTTP '+response.status);
+                const body=await response.json();
+                const parsed=parseBookAnalysis(body?.reply,getLocalizedSubject(book.subject,locale));
+                if(!controller.signal.aborted){setAiContent(parsed);setAnalysisState('ready');}
+            } catch(err) {
+                if(!controller.signal.aborted){
+                    console.warn('Catalog analysis unavailable',err);
+                    setAiContent({summary:catalogSummary(book,locale),genre:getLocalizedSubject(book.subject,locale)});
+                    setAnalysisState('unavailable');
+                }
+            } finally {if(!controller.signal.aborted)setLoading(false);}
         };
-
-        fetchAiDeepDive();
-    }, [book, locale]);
-
+        void analyze();
+        return () => controller.abort();
+    },[book,locale,analysisAttempt]);
     // إرسال طلب الاستعارة للأدمن كطلب معلق، مع إظهار أي سبب يمنع الحفظ.
     const handleBorrowRequest = async () => {
         if (!book) return;
@@ -354,6 +399,10 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                            <span className={`w-3 h-3 rounded-full ${loading ? 'animate-ping bg-rose-500' : 'bg-emerald-500'}`}></span>
                            <p className="text-xs text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest">{t('officialAi')}</p>
                         </div>
+                        {analysisState==='unavailable' && <div role="status" className="mb-3 flex flex-wrap items-center gap-2 text-xs font-bold text-amber-700 dark:text-amber-300">
+                            <span>{t('aiUnavailable')}</span>
+                            <button type="button" onClick={()=>setAnalysisAttempt(v=>v+1)} className="rounded-lg border border-amber-400 px-3 py-1.5 hover:bg-amber-50 dark:hover:bg-amber-950/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400">{t('aiRetry')}</button>
+                        </div>}
                         <p className="text-slate-800 dark:text-slate-200 text-base md:text-xl font-bold leading-relaxed">
                            {loading ? "..." : `"${aiContent.summary}"`}
                         </p>
