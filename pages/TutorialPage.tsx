@@ -344,15 +344,15 @@ export default function TutorialPage() {
   const featureCards = [
     {
       id: 'manual-search', title: label('البحث اليدوي', 'Manual Search'),
-      description: label('البحث عن كتاب داخل مكتبة المدرسة والوصول إلى مكانه.', 'Search the school library catalogue and locate a book.'),
+      description: label('ابحث عن الكتب الورقية ومنها إضافات الرف 30، مع مكان كل كتاب.', 'Find physical books, including shelf 30 additions, with recorded locations.'),
       color: 'bg-[#ef6266]', border: 'border-[#ba3b43]', icon: <SearchIcon />,
       hint: label('ابحث بعنوان الكتاب أو مؤلفه، ثم افتح البطاقة لمعرفة مكانه. هذه المعاينة لا تتصل بفهرس الكتب الحقيقي.', 'Search by title or author, then open a card to learn its sample location. This tour does not connect to the live catalogue.')
     },
     {
       id: 'smart-search', title: label('اسأل صقر الذكي', 'Ask Saqr (AI)'),
-      description: label('مساعدك الذكي للبحث والاستفسار.', 'Your smart assistant for research and questions.'),
+      description: label('يعرفك بنفسه وبخدمات البوابة، ويساعدك في الكتب والتعلّم.', 'Ask about Saqr or the portal, books and learning.'),
       color: 'bg-[#56c5e6]', border: 'border-[#258bad]', icon: <SmartIcon />,
-      hint: label('اطلب اقتراح كتاب أو اكتب سؤالاً باللغة الطبيعية. في الجولة ستظهر لك تلميحات فقط ولن تُرسل رسالتك إلى أي خدمة.', 'Ask for book recommendations or use natural language. In this tour, prompts only reveal guidance and are not sent to a service.')
+      hint: label('يمكنك سؤال صقر «من أنت؟» أو «ماذا تفعل؟» لمعرفة خدماته، أو «ما هي بوابة المكتبة؟» للتعرّف على وظائف الموقع. كما يساعد في البحث عن الكتب والمناقشة والكتابة وتحضير الدروس بحسب صلاحية الحساب. هذه الجولة لا ترسل أسئلة حقيقية.', 'Ask “Who are you?” or “What can you do?” for Saqr’s capabilities, or “What is the library portal?” for a complete site overview. Saqr also supports book searches, discussion, writing and permitted teacher planning. This tour does not submit actual prompts.')
     },
     {
       id: 'digital-library', title: label('المكتبة الإلكترونية', 'Digital Library'),
@@ -584,15 +584,15 @@ export default function TutorialPage() {
             </section>
           </HintTarget>
 
-          <HintTarget id="news-banner" title={label('شريط الأخبار والتنبيهات', 'News and announcements')} description={label('يعرض الأخبار العامة والتنويهات المهمة من المكتبة. النص هنا توضيحي وليس إعلانًا حيًا.', 'Displays library news and important announcements. This text is illustrative, not a live announcement.')} interactive={false} {...hintState}>
+          <HintTarget id="news-banner" title={label('جديدنا — يظهر فورًا', 'What\'s New — visible immediately')} description={label('يعرض شريط جديدنا آخر إضافات المكتبة منذ ظهور الصفحة، دون انتظار دخول النص من خارج الشاشة. هذه نسخة توضيحية لا تجلب أخبارًا حية.', 'What\'s New shows library updates as soon as the page appears, without waiting for offscreen scrolling text. This is an illustrative preview, not a live feed.')} interactive={false} {...hintState}>
             <div className="relative z-30 mx-auto flex h-14 w-full max-w-5xl items-center overflow-hidden rounded-full border-4 border-amber-300 bg-white shadow-lg dark:border-amber-700 dark:bg-slate-800 md:h-16">
               <div className="relative z-20 flex h-full shrink-0 items-center gap-2 bg-amber-400 px-5 text-xs font-black uppercase text-slate-900 md:px-8 md:text-sm">
                 <span className="h-3 w-3 animate-ping rounded-full bg-white" />
                 {label('جديدنا', "What's New")}
               </div>
               <div className="flex h-full flex-1 items-center overflow-hidden bg-amber-50 dark:bg-slate-800">
-                <div className="whitespace-nowrap px-4 text-xs font-bold text-slate-800 dark:text-slate-100 md:text-base">
-                  {label('بين السطور مع صقر: تحدي قراءة الكتب | تحدي راية المجد: عشرة أسئلة جديدة عن العلم | جناح الهوية الوطنية: اكتشف الكتب والمؤلفين | قائمة قراءتك الشهرية | سجل صوتك في بودكاست صقر | جديد الكتب بانتظارك!', "Between the Lines with Saqr: read and answer | Explore the National Identity Pavilion | Ten UAE flag questions | Track your monthly reading | Record a Saqr Podcast MP3 | Discover the latest books in our library!")}
+                <div className="min-w-0 px-4 text-xs font-bold leading-6 text-slate-800 dark:text-slate-100 md:text-sm">
+                  {label('جديدنا: ألوان مبهجة للبوابة · كتب جديدة في دليل المكتبة · بين السطور حسب نوع الحساب ولغة الواجهة · تحديات صقر للطلاب · راجع استعاراتك وقائمة قراءتك', "What’s New: bright portal colors · new physical books in the catalogue · role- and language-specific reading adventures · student Saqr Challenges · borrowing and reading lists")}
                 </div>
               </div>
             </div>
