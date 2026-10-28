@@ -2,6 +2,7 @@ import React,{useMemo,useState} from 'react';
 import {Link,Navigate} from 'react-router-dom';
 import {useLanguage} from '../App';
 import './saqrQuestVisual.css';
+import SaqrBookQuestArt from './SaqrBookQuestArt';
 import {getRoleReadingBooks,shuffleReading,type ReadingBook,type ReadingQuestion,type ReadingRole} from '../src/utils/saqrReadingQuestBank';
 const Icon=({name}:{name:'book'|'arrow'|'check'|'compass'})=><svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{name==='book'?<path d="M12 5C9 3 5 3 2 5v14c4-1 7 0 10 2 3-2 6-3 10-2V5c-3-2-7-2-10 0Zm0 0v16"/>:name==='check'?<path d="m4 12 5 5L20 6"/>:name==='arrow'?<path d="M4 12h16m-7-7 7 7-7 7"/>:<><circle cx="12" cy="12" r="9"/><path d="m10 10 6-2-2 6-6 2 2-6Z"/></>}</svg>;
 const compactName=(value:string)=>{const p=String(value||'').trim().split(/\s+/).filter(Boolean);return p.length>1?p[0]+' '+p[p.length-1]:p[0]||'';};
@@ -23,14 +24,14 @@ export default function SaqrReadingQuestPage(){
  const correct=rounds?.reduce((n,r)=>n+r.questions.filter(q=>r.answers[q.id]===q.correct).length,0)||0;
  const total=rounds?.reduce((n,r)=>n+r.questions.length,0)||0;
  const greet=ar?(role==='teacher'?'أستاذ':'الطالب'):(role==='teacher'?'Teacher':'Student');
- return <div dir={dir} className="sq-page"><div className="sq-ambient" aria-hidden="true"/><main className="sq-shell" style={{maxWidth:1020}}>
+ return <div dir={dir} className="sq-page sq-reading"><div className="sq-ambient" aria-hidden="true"/><main className="sq-shell" style={{maxWidth:1020}}>
   <nav className="sq-topnav"><Link className="sq-back" to={session.role==='student'?'/saqr-challenges':'/home'}>{ar?'العودة':'Back'}</Link><span className="sq-brand"><span className="sq-brand-mark" aria-hidden="true"/>EFIPS LIBRARY</span></nav>
-  <header className="sq-hero"><span className="sq-streak" aria-hidden="true"/><span className="sq-orbit-icon sq-orbit-one" aria-hidden="true"><Icon name="compass"/></span>
-   <div className="sq-hero-text"><span className="sq-eyebrow"><Icon name="book"/>{ar?'رحلة القراءة':'YOUR READING ADVENTURE'}</span><h1 className="sq-hero-title">{ar?'بين السطور مع صقر':'Between the Lines with Saqr'}</h1><p className="sq-hero-sub">{ar?'رحلة جديدة تبدأ بكتاب.':'Every journey begins with a book.'}</p><div className="sq-name-tag"><span className="sq-name-label">{ar?'مرحبًا':'Welcome'}, {greet}</span><strong className="sq-name">{compactName(ar?session.ar||session.en:session.en||session.ar)|| (ar?'قارئنا المميز':'Reader')}</strong></div></div>
-   <div className="sq-mascot-wrap"><img src="/saqr-full.png" alt={ar?'شخصية صقر':'Saqr'} className="sq-mascot" /></div>
+  <header className="sq-hero sq-reading-hero"><span className="sq-streak" aria-hidden="true"/><span className="sq-orbit-icon sq-orbit-one" aria-hidden="true"><Icon name="compass"/></span>
+   <div className="sq-hero-text"><span className="sq-eyebrow"><Icon name="book"/>{ar?'رحلة القراءة':'YOUR READING ADVENTURE'}</span><h1 className="sq-hero-title">{ar?'بين السطور مع صقر':'Between the Lines with Saqr'}</h1><p className="sq-hero-sub">{ar?'افتح كتابًا، اكتشف أسرار السطور، وأجب عن أسئلة القصة.':'Open a book, explore its lines, and uncover the story.'}</p><div className="sq-name-tag"><span className="sq-name-label">{ar?'مرحبًا':'Welcome'}, {greet}</span><strong className="sq-name">{compactName(ar?session.ar||session.en:session.en||session.ar)|| (ar?'قارئنا المميز':'Reader')}</strong></div></div>
+   <SaqrBookQuestArt/>
   </header>
   {!rounds?<section className="sq-content sq-panel sq-stage text-center"><div className="sq-panel-content">
-    <span className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-[#116c59] text-white shadow-xl sq-stage"><Icon name="book"/></span>
+    <span className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-[#2e526c] text-white shadow-xl sq-stage"><Icon name="book"/></span>
     <h2 className="mt-5 text-xl sm:text-2xl font-black">{ar?'كم كتابًا تريد في رحلتك؟':'How many books would you like?'}</h2>
     <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{ar?'صقر سيختارها لك من كتب مكتبتنا.':'Saqr will select them from our library.'}</p>
     <div className="sq-count">
@@ -49,7 +50,7 @@ export default function SaqrReadingQuestPage(){
       <div className="sq-progress-rail"><div className="sq-progress-fill" style={{width:((questionIndex+1)/active.questions.length*100)+'%'}}/></div>
       <h2 className="mt-4 text-xl sm:text-2xl font-black">{active.book.book.title}</h2><p className="mt-2 text-sm text-emerald-100/85 font-semibold">{active.book.book.author}</p>
       <div className="sq-meta"><span className="sq-meta-chip">{ar?'الرف':'Shelf'} {active.book.book.shelf} · {ar?'الصف':'Row'} {active.book.book.row}</span>
-        {active.book.sourceUrl.includes('efipslibrary.com')?<Link to="/search" className="text-xs font-extrabold text-amber-100 underline underline-offset-4">{ar?'دليل المكتبة':'Library catalog'}</Link>:<a href={active.book.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-extrabold text-emerald-800 dark:text-emerald-300 underline underline-offset-4">{ar?'مصدر المحتوى':'Book source'}</a>}</div></div>
+        {active.book.sourceUrl.includes('efipslibrary.com')?<Link to="/search" className="text-xs font-extrabold text-amber-100 underline underline-offset-4">{ar?'دليل المكتبة':'Library catalog'}</Link>:<a href={active.book.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-extrabold text-amber-100 underline underline-offset-4">{ar?'مصدر المحتوى':'Book source'}</a>}</div></div>
     </section>
     <section className="sq-panel"><div className="sq-panel-content">
       <p className="sq-kicker">{ar?'اختبر فهمك':'Reading challenge'}</p><h3 className="mt-3 text-lg sm:text-xl font-black leading-9">{q.prompt}</h3>
