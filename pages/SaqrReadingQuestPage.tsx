@@ -24,10 +24,10 @@ export default function SaqrReadingQuestPage(){
  const correct=rounds?.reduce((n,r)=>n+r.questions.filter(q=>r.answers[q.id]===q.correct).length,0)||0;
  const total=rounds?.reduce((n,r)=>n+r.questions.length,0)||0;
  const greet=ar?(session.role==='admin'?'مدير النظام':role==='teacher'?'الأستاذ':'الطالب'):(session.role==='admin'?'Administrator':role==='teacher'?'Teacher':'Student');
- return <div dir={dir} className="sq-page sq-reading"><div className="sq-ambient" aria-hidden="true"/><main className="sq-shell" style={{maxWidth:1020}}>
+ return <div dir={dir} className="sq-page sq-reading sq-joyful"><div className="sq-ambient" aria-hidden="true"/><main className="sq-shell" style={{maxWidth:1020}}>
   <nav className="sq-topnav"><Link className="sq-back" to={session.role==='student'?'/saqr-challenges':'/home'}>{ar?'العودة':'Back'}</Link><span className="sq-brand"><span className="sq-brand-mark" aria-hidden="true"/>EFIPS LIBRARY</span></nav>
   <header className="sq-hero sq-reading-hero sq-reading-centered"><span className="sq-streak" aria-hidden="true"/><span className="sq-orbit-icon sq-orbit-one" aria-hidden="true"><Icon name="compass"/></span>
-   <div className="sq-hero-text"><span className="sq-eyebrow"><Icon name="book"/>{ar?'رحلة القراءة':'YOUR READING ADVENTURE'}</span><h1 className="sq-hero-title sq-reading-title">{ar?'بين السطور مع صقر':'Between the Lines with Saqr'}</h1><p className="sq-hero-sub">{ar?'افتح كتابًا، اكتشف أسرار السطور، وأجب عن أسئلة القصة.':'Open a book, explore its lines, and uncover the story.'}</p><div className="sq-name-tag"><span className="sq-name-label">{ar?'مرحبًا':'Welcome'}, {greet}</span><strong className="sq-name">{compactName(ar?session.ar||session.en:session.en||session.ar)|| (ar?'قارئنا المميز':'Reader')}</strong></div></div>
+   <div className="sq-hero-text"><span className="sq-eyebrow"><Icon name="book"/>{ar?'أسرار الكتب تنتظرك':'A BOOK OF ADVENTURES'}</span><h1 className="sq-hero-title sq-reading-title">{ar?'بين السطور مع صقر':'Between the Lines with Saqr'}</h1><p className="sq-hero-sub">{ar?'كل صفحة مغامرة، وكل سؤال اكتشاف!':'Every page is an adventure and every question a discovery!'}</p><div className="sq-name-tag"><span className="sq-name-label">{ar?'مرحبًا':'Welcome'}, {greet}</span><strong className="sq-name">{compactName(ar?session.ar||session.en:session.en||session.ar)|| (ar?'قارئنا المميز':'Reader')}</strong></div></div>
    <SaqrBookQuestArt/>
   </header>
   {!rounds?<section className="sq-content sq-panel sq-stage text-center"><div className="sq-panel-content">
