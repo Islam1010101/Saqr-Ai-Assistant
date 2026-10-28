@@ -2,6 +2,7 @@ import React from 'react';
 import {Link,Navigate} from 'react-router-dom';
 import {useLanguage} from '../App';
 import './saqrQuestVisual.css';
+import SaqrBookQuestArt from './SaqrBookQuestArt';
 
 const SvgIcon=({name,className='h-10 w-10'}:{name:'book'|'shelves'|'mic'|'stars'|'arrow'|'spark'|'compass';className?:string})=><svg viewBox="0 0 48 48" className={className} fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
  {name==='book'?<><path d="M24 11C18 7 12 7 6 9v29c7-2 13-1 18 3 5-4 11-5 18-3V9c-6-2-12-2-18 2Zm0 0v30"/><path d="m31 18 2 4 5 1-4 3 1 5-4-2-4 2 1-5-4-3 5-1 2-4Z"/></>:
@@ -53,14 +54,14 @@ export default function SaqrChallengesHubPage(){
   {to:'/game',type:'amber',icon:'shelves' as const,kicker:ar?'مغامرة التصنيف':'LIBRARY QUEST',label:ar?'رتب المكتبة':'Organize the Library',desc:ar?'رتّب الكتب واكتشف أسرار الرفوف.':'Put books in their place and explore the shelves.',number:'02'},
   {to:'/saqr-studio',type:'indigo',icon:'mic' as const,kicker:ar?'مغامرة الإبداع':'CREATORS STUDIO',label:ar?'استديو صقر':'Saqr Studio',desc:ar?'صوتك يحكي، واستديو صقر يسمع.':'Record your story and let your voice shine.',number:'03'}
  ];
- return <div dir={dir} className="sq-page font-sans">
+ return <div dir={dir} className="sq-page sq-challenges font-sans">
   <div aria-hidden="true" className="sq-ambient"/>
   <main className="sq-shell">
    <nav className="sq-topnav" aria-label={ar?'التنقل':'Navigation'}>
     <Link to="/home" className="sq-back"><SvgIcon name="arrow" className="h-4 w-4" />{ar?'العودة إلى الرئيسية':'Back to Home'}</Link>
     <span className="sq-brand"><span className="sq-brand-mark" aria-hidden="true"/> EFIPS LIBRARY</span>
    </nav>
-   <header className="sq-hero" onPointerMove={moveGlow}>
+   <header className="sq-hero sq-challenges-hero" onPointerMove={moveGlow}>
     <span className="sq-streak" aria-hidden="true"/>
     <span className="sq-orbit-icon sq-orbit-one" aria-hidden="true"><SvgIcon name="stars" className="h-full w-full"/></span>
     <span className="sq-orbit-icon sq-orbit-two" aria-hidden="true"><SvgIcon name="compass" className="h-full w-full"/></span>
@@ -81,7 +82,7 @@ export default function SaqrChallengesHubPage(){
      {items.map(item=><Link
        key={item.to} to={item.to} onPointerMove={tiltCard} onPointerLeave={resetTilt} onPointerCancel={resetTilt}
        className={'sq-card sq-card--'+item.type} aria-label={item.label}>
-       <div className="flex items-center justify-between gap-3"><span className="sq-card-icon"><SvgIcon name={item.icon}/></span><span className="text-lg font-black opacity-35 tabular-nums">{item.number}</span></div>
+       <div className="flex items-center justify-between gap-3"><span className="sq-card-icon">{item.icon==='book'?<svg viewBox="0 0 48 48" className="h-10 w-10" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M4 12q11-5 20 3 9-8 20-3v27q-12-2-20 5-8-7-20-5zM24 15v29M9 23l10 3M9 30l9 3m11-7 10-3m-10 10 10-3"/></svg>:<SvgIcon name={item.icon}/>}</span><span className="text-lg font-black opacity-35 tabular-nums">{item.number}</span></div>
        <div><p className="mt-4 text-[11px] font-black tracking-wide opacity-65">{item.kicker}</p>
         <h3 className="sq-card-title">{item.label}</h3>
         <p className="sq-card-text">{item.desc}</p></div>
