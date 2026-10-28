@@ -1,7 +1,7 @@
 name: EFIPS Saqr reading challenge validation
 on:
   push:
-    branches: [feat/efips-challenges-color-quiz-focus-20261028]
+    branches: [feat/pastel-efips-challenges-account-roles-20261028]
   pull_request:
     paths:
       - 'pages/SaqrReadingQuestPage.tsx'
