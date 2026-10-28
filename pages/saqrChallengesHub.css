@@ -138,3 +138,5 @@
  .sq-hub-v2 .sq-hub-hero *,.sq-hub-v2 .sq-hub-card,.sq-hub-v2 .sq-hub-card-icon{animation:none!important;transition:none!important;transform:none!important;translate:none!important}
  .sq-hub-v2 .sq-hub-card:hover{transform:none!important}
 }
+
+/* Hub visual styles are scoped to .sq-hub-v2 only. */
