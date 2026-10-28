@@ -5,7 +5,7 @@
  */
 export type SaqrIntroductionIntent='assistant'|'portal'|null;
 const normalise=(value:string)=>value.normalize('NFKC').toLocaleLowerCase()
-  .replace(/[\u064b-\u065f\u0670\u0640]/g,'')
+  .replace(/[\u064b-\u065f\u0670\u0640]/g,'').replace(/[أإآ]/g,'ا')
   .replace(/[؟?!.,،؛:]+/g,' ').replace(/\s+/g,' ').trim();
 export const detectSaqrIntroduction=(input:string):SaqrIntroductionIntent=>{
   const q=normalise(input);
