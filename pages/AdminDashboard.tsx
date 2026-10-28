@@ -5,6 +5,9 @@ import { supabase } from '../src/utils/supabase';
 import { printA4Html } from '../src/utils/printA4Html';
 import AdminReadingChallenge from '../src/components/AdminReadingChallenge';
 import AdminLibraryAttendance from '../src/components/AdminLibraryAttendance';
+import { bookData } from '../api/bookData';
+import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
+import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
 
 const translations = {
     ar: {
@@ -608,6 +611,17 @@ const AdminDashboard: React.FC = () => {
         { key: 'teacherLogins', label: t('teacherLogins'), value: stats.teacherLogins, icon: 'activity' as IconName, cardClass: 'bg-amber-50/80 dark:bg-amber-950/25 border-amber-100 dark:border-amber-900/60', valueClass: 'text-amber-700 dark:text-amber-300', iconClass: 'text-amber-600 dark:text-amber-300', trackClass: 'bg-amber-100 dark:bg-amber-900/50', barClass: 'bg-amber-500' }
     ];
 
+    // Derive catalog totals from the exact book lists displayed on the public library pages.
+    const physicalCatalogCount = bookData.length;
+    const arabicDigitalCount = ARABIC_LIBRARY_DATABASE.length;
+    const englishDigitalCount = ENGLISH_LIBRARY_DATABASE.length;
+    const digitalCatalogCount = arabicDigitalCount + englishDigitalCount;
+    const allCatalogCount = physicalCatalogCount + digitalCatalogCount;
+    const physicalShare = allCatalogCount ? (physicalCatalogCount / allCatalogCount) * 100 : 0;
+    const arabicDigitalShare = digitalCatalogCount ? (arabicDigitalCount / digitalCatalogCount) * 100 : 0;
+    const ringLength = 2 * Math.PI * 38;
+    const formatCatalogCount = (count: number) => count.toLocaleString(isAr ? 'ar-EG' : 'en-US');
+
     return (
         <div dir={dir} className="min-h-[100dvh] bg-white dark:bg-black text-slate-800 dark:text-slate-100 font-sans p-4 md:p-8 pb-24 transition-colors duration-300">
             <style>{`@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap'); * { font-family: 'Cairo', sans-serif !important; }`}</style>
@@ -631,6 +645,69 @@ const AdminDashboard: React.FC = () => {
                             <div className={`h-1.5 rounded-full mt-4 overflow-hidden ${card.trackClass}`}><div className={`h-full w-full rounded-full ${card.barClass}`} /></div>
                         </div>)}
                     </div>
+                </section>
+
+
+                {/* Book inventory counters, taken from the same sources as the catalog pages. */}
+                <section className="lg:col-span-4 bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/70 p-5 md:p-7 rounded-3xl shadow-sm" aria-labelledby="library-collection-heading">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+                        <div className="flex items-center gap-3">
+                            <span className="w-11 h-11 rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 flex items-center justify-center"><OutlineIcon name="library" className="h-6 w-6" /></span>
+                            <div><h2 id="library-collection-heading" className="text-lg md:text-xl font-black text-slate-800 dark:text-slate-100">{isAr ? 'مؤشرات مقتنيات المكتبة' : 'Library Collection Overview'}</h2>
+                                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{isAr ? 'عدد الكتب المسجلة في الدليل الورقي والمكتبتين الإلكترونيتين' : 'Catalog entries in the physical and digital libraries'}</p>
+                            </div>
+                        </div>
+                        <div className="self-start sm:self-auto rounded-xl bg-slate-100 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-600 dark:text-slate-300">
+                            {isAr ? 'الإجمالي' : 'Combined'} <strong className="ms-1 text-base tabular-nums text-slate-900 dark:text-white">{formatCatalogCount(allCatalogCount)}</strong>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="rounded-[1.5rem] border border-emerald-200 dark:border-emerald-900/70 bg-emerald-50/70 dark:bg-emerald-950/20 p-5 md:p-6 transition-shadow duration-300 hover:shadow-lg">
+                            <div className="flex items-center justify-between gap-3">
+                                <div className="min-w-0">
+                                    <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300 text-xs font-black"><OutlineIcon name="book-open" className="w-4 h-4" /><span>{isAr ? 'دليل كتب المكتبة' : 'Physical Book Catalog'}</span></div>
+                                    <div className="mt-3 text-4xl md:text-5xl font-black tabular-nums text-emerald-800 dark:text-emerald-200">{formatCatalogCount(physicalCatalogCount)}</div>
+                                    <p className="mt-2 text-xs font-bold text-slate-600 dark:text-slate-300">{isAr ? 'كتاب مسجل في دليل المكتبة' : 'Registered physical catalog entries'}</p>
+                                </div>
+                                <div className="relative w-24 h-24 shrink-0" aria-hidden="true">
+                                    <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+                                        <circle cx="50" cy="50" r="38" strokeWidth="9" stroke="currentColor" fill="none" className="text-emerald-200 dark:text-emerald-950" />
+                                        <circle cx="50" cy="50" r="38" strokeWidth="9" stroke="currentColor" fill="none" strokeLinecap="round" className="text-emerald-500" strokeDasharray={(ringLength * physicalShare / 100) + ' ' + ringLength} />
+                                    </svg>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center text-emerald-800 dark:text-emerald-200">
+                                        <strong className="text-lg tabular-nums">{Math.round(physicalShare)}%</strong>
+                                        <span className="text-[9px] font-bold">{isAr ? 'من الإجمالي' : 'of total'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="mt-5 h-2 rounded-full bg-emerald-100 dark:bg-emerald-950 overflow-hidden" aria-hidden="true"><div className="h-full rounded-full bg-emerald-500 transition-all duration-500" style={{ width: physicalShare + '%' }} /></div>
+                        </div>
+                        <div className="rounded-[1.5rem] border border-sky-200 dark:border-sky-900/70 bg-sky-50/70 dark:bg-sky-950/20 p-5 md:p-6 transition-shadow duration-300 hover:shadow-lg">
+                            <div className="flex items-center justify-between gap-3">
+                                <div className="min-w-0">
+                                    <div className="flex items-center gap-2 text-sky-700 dark:text-sky-300 text-xs font-black"><OutlineIcon name="book-open" className="w-4 h-4" /><span>{isAr ? 'الكتب الإلكترونية' : 'Digital Books'}</span></div>
+                                    <div className="mt-3 text-4xl md:text-5xl font-black tabular-nums text-sky-800 dark:text-sky-200">{formatCatalogCount(digitalCatalogCount)}</div>
+                                    <p className="mt-2 text-xs font-bold text-slate-600 dark:text-slate-300">{isAr ? 'كتاب في المكتبتين الرقميتين' : 'Entries across both digital libraries'}</p>
+                                </div>
+                                <div className="relative w-24 h-24 shrink-0" aria-hidden="true">
+                                    <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+                                        <circle cx="50" cy="50" r="38" strokeWidth="9" stroke="currentColor" fill="none" className="text-slate-300 dark:text-slate-700" />
+                                        <circle cx="50" cy="50" r="38" strokeWidth="9" stroke="currentColor" fill="none" strokeLinecap="round" className="text-sky-500" strokeDasharray={(ringLength * arabicDigitalShare / 100) + ' ' + ringLength} />
+                                    </svg>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center text-sky-800 dark:text-sky-200">
+                                        <strong className="text-lg tabular-nums">{Math.round(arabicDigitalShare)}%</strong>
+                                        <span className="text-[9px] font-bold">{isAr ? 'عربي' : 'Arabic'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="mt-5 flex justify-between gap-3 text-xs font-bold text-slate-600 dark:text-slate-300">
+                                <span>{isAr ? 'العربية' : 'Arabic'} <strong className="tabular-nums text-sky-700 dark:text-sky-300">{formatCatalogCount(arabicDigitalCount)}</strong></span>
+                                <span>{isAr ? 'الإنجليزية' : 'English'} <strong className="tabular-nums text-slate-700 dark:text-slate-100">{formatCatalogCount(englishDigitalCount)}</strong></span>
+                            </div>
+                            <div className="mt-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700 overflow-hidden flex" aria-hidden="true"><div className="bg-sky-500 h-full transition-all duration-500" style={{ width: arabicDigitalShare + '%' }} /><div className="bg-slate-400 dark:bg-slate-500 flex-1" /></div>
+                        </div>
+                    </div>
+                    <p className="mt-4 text-[11px] text-slate-500 dark:text-slate-400">{isAr ? 'يُحتسب كل سجل كتاب مرة واحدة؛ ولا يُضاعف العدد بسبب النسخ المتكررة أو مرات فتح الكتب. تتحدث الإحصائيات تلقائيًا عند نشر تحديثات الفهارس.' : 'Each catalog entry is counted once, regardless of extra physical copies or digital reads. Counts update when catalog changes are published.'}</p>
                 </section>
 
                 <section className="lg:col-span-4 rounded-3xl border border-emerald-200 dark:border-emerald-900/70 bg-gradient-to-r from-emerald-50 via-white to-sky-50 dark:from-emerald-950/30 dark:via-black dark:to-sky-950/20 shadow-sm p-5 md:p-6">
