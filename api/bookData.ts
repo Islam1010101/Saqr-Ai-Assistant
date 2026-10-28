@@ -1,4 +1,5 @@
 import {shelf40Books} from './shelf40Catalog.ts';
+import {shelf30SourceRecords} from './shelf30Catalog.ts';
 import {reviewedShelf41Books} from './shelf41ReviewedCatalog.ts';
 import { physicalBookAdditions } from './bookAdditions.ts';
 // 1. تعريف نوع البيانات
@@ -3664,7 +3665,17 @@ const newShelf40Books:Book[]=shelf40Books.filter(b=>!existingShelf40.has(b.row+'
  ...(b.isbn?{isbn:b.isbn,isbnStatus:'candidate' as const}:{}),
  needsReview:b.needsReview
 }));
-export const bookData:Book[]=[...currentPhysicalBooks,...newShelf40Books];
+// Append genuine shelf 30 catalog records; preserve all pre-existing IDs and borrowing keys.
+const beforeShelf30:Book[]=[...currentPhysicalBooks,...newShelf40Books];
+const shelf30Key=(b:{title:string;row:number})=>b.row+'|'+b.title.normalize('NFKC').toLocaleLowerCase().replace(/[^\\p{L}\\p{N}]/gu,'');
+const existing30Keys=new Set(beforeShelf30.filter(b=>b.shelf===30).map(shelf30Key));
+const newShelf30Books:Book[]=shelf30SourceRecords.filter(b=>!existing30Keys.has(shelf30Key(b))).map((b,i)=>({
+ id:'shelf30-20261028-'+String(i+1).padStart(3,'0'),title:b.title,author:b.author,
+ shelf:30,row:b.row,language:'EN',subject:inferredSubject(b.title,b.author,'',30),
+ level:'General',summary:'A verified description is not yet available for this physical library book.',
+ ...(b.needsReview?{needsReview:true}:{})
+}));
+export const bookData:Book[]=[...beforeShelf30,...newShelf30Books];
 
 // 5. دالة البحث المخصصة للاستخدام في تطبيق الويب
 export function findInCatalog(q: string): Book[] {
