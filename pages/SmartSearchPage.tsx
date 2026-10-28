@@ -741,7 +741,7 @@ When the user asks for books, identify the matching titles exactly as recorded, 
               <span className="saqr-hero-symbol saqr-icon-bulb" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6m-5 3h4M8 15a7 7 0 1 1 8 0c-1 .7-1.5 1.4-1.5 3h-5C9.5 16.4 9 15.7 8 15zM12 2v2"/></svg></span>
               <span className="saqr-hero-symbol saqr-icon-pencil" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m4 17 11-11a2 2 0 0 1 3 0l1 1a2 2 0 0 1 0 3L8 21l-5 1 1-5Zm8-8 4 4"/></svg></span>
               <span className="saqr-hero-symbol saqr-icon-star" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m12 2 2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5L12 2z"/></svg></span>
-              <div className="saqr-portrait-disc"><img className="saqr-portrait-image" src="/saqr-user-portrait.webp" alt={locale === 'ar' ? 'صقر المساعد الذكي' : 'Saqr AI Librarian'} onError={(e) => {e.currentTarget.onerror=null;e.currentTarget.src='/saqr-avatar.png';}} /></div>
+              <div className="saqr-portrait-disc"><img className="saqr-portrait-image" src="/saqr-avatar.png" alt={locale === 'ar' ? 'صقر المساعد الذكي' : 'Saqr AI Librarian'}  /></div>
             </div>
             <p className="saqr-empty-heading">
               {locale === 'ar' ? 'كيف يمكن لصقر مساعدتك اليوم؟' : 'How can Saqr help you today?'}
