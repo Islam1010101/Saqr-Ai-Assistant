@@ -57,5 +57,5 @@ assert.ok(!hub.includes('ثلاث تجارب · عالم واحد من الإب�
 const quest=readFileSync('pages/SaqrReadingQuestPage.tsx','utf8');
 assert.ok(quest.includes("session.role==='student'?'student':'teacher'"),'Admin must see teacher books instead of student books');
 assert.ok(quest.includes("session.role==='admin'?'مدير النظام'"),'Admin needs distinct greeting');
-assert.ok(home.includes('bg-[#b8e8f4]'),'Ask Saqr needs light cyan palette');
-assert.ok(home.includes('efips-nav-tile--soft'),'Home buttons use unified soft palette');
+assert.ok(home.includes('bg-[#56c5e6]'),'Ask Saqr needs vivid cyan palette');
+assert.ok(home.includes('efips-nav-tile--soft'),'Home buttons use unified responsive styles');
