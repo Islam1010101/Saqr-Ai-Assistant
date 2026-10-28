@@ -26,8 +26,8 @@ export default function SaqrReadingQuestPage(){
  const greet=ar?(role==='teacher'?'أستاذ':'الطالب'):(role==='teacher'?'Teacher':'Student');
  return <div dir={dir} className="sq-page sq-reading"><div className="sq-ambient" aria-hidden="true"/><main className="sq-shell" style={{maxWidth:1020}}>
   <nav className="sq-topnav"><Link className="sq-back" to={session.role==='student'?'/saqr-challenges':'/home'}>{ar?'العودة':'Back'}</Link><span className="sq-brand"><span className="sq-brand-mark" aria-hidden="true"/>EFIPS LIBRARY</span></nav>
-  <header className="sq-hero sq-reading-hero"><span className="sq-streak" aria-hidden="true"/><span className="sq-orbit-icon sq-orbit-one" aria-hidden="true"><Icon name="compass"/></span>
-   <div className="sq-hero-text"><span className="sq-eyebrow"><Icon name="book"/>{ar?'رحلة القراءة':'YOUR READING ADVENTURE'}</span><h1 className="sq-hero-title">{ar?'بين السطور مع صقر':'Between the Lines with Saqr'}</h1><p className="sq-hero-sub">{ar?'افتح كتابًا، اكتشف أسرار السطور، وأجب عن أسئلة القصة.':'Open a book, explore its lines, and uncover the story.'}</p><div className="sq-name-tag"><span className="sq-name-label">{ar?'مرحبًا':'Welcome'}, {greet}</span><strong className="sq-name">{compactName(ar?session.ar||session.en:session.en||session.ar)|| (ar?'قارئنا المميز':'Reader')}</strong></div></div>
+  <header className="sq-hero sq-reading-hero sq-reading-centered"><span className="sq-streak" aria-hidden="true"/><span className="sq-orbit-icon sq-orbit-one" aria-hidden="true"><Icon name="compass"/></span>
+   <div className="sq-hero-text"><span className="sq-eyebrow"><Icon name="book"/>{ar?'رحلة القراءة':'YOUR READING ADVENTURE'}</span><h1 className="sq-hero-title sq-reading-title">{ar?'بين السطور مع صقر':'Between the Lines with Saqr'}</h1><p className="sq-hero-sub">{ar?'افتح كتابًا، اكتشف أسرار السطور، وأجب عن أسئلة القصة.':'Open a book, explore its lines, and uncover the story.'}</p><div className="sq-name-tag"><span className="sq-name-label">{ar?'مرحبًا':'Welcome'}, {greet}</span><strong className="sq-name">{compactName(ar?session.ar||session.en:session.en||session.ar)|| (ar?'قارئنا المميز':'Reader')}</strong></div></div>
    <SaqrBookQuestArt/>
   </header>
   {!rounds?<section className="sq-content sq-panel sq-stage text-center"><div className="sq-panel-content">
@@ -45,15 +45,13 @@ export default function SaqrReadingQuestPage(){
     <div className="sq-finish-art"><Icon name="check"/></div><h2 className="mt-5 text-3xl font-black">{ar?'أحسنت! اكتملت الرحلة':'Journey complete!'}</h2><p className="mt-4 text-2xl font-black tabular-nums">{correct} / {total}</p>
     <button type="button" onClick={()=>setRounds(null)} className="sq-primary mt-6">{ar?'رحلة جديدة':'New journey'}</button></div>
   </section>:active&&q?<div className="sq-content space-y-5 sq-stage">
-    <section className="sq-bookplate"><div className="sq-bookplate-inner">
-      <div className="flex items-center justify-between text-sm font-black text-emerald-100"><span>{ar?'الكتاب':'Book'} {bookIndex+1}/{rounds.length}</span><span>{ar?'السؤال':'Question'} {questionIndex+1}/{active.questions.length}</span></div>
+    <section className="sq-quiz-source" key={'book-'+bookIndex}>
+      <div className="sq-quiz-progress"><span>{ar?'الكتاب':'Book'} {bookIndex+1}/{rounds.length}</span><span>{ar?'السؤال':'Question'} {questionIndex+1}/{active.questions.length}</span></div>
       <div className="sq-progress-rail"><div className="sq-progress-fill" style={{width:((questionIndex+1)/active.questions.length*100)+'%'}}/></div>
-      <h2 className="mt-4 text-xl sm:text-2xl font-black">{active.book.book.title}</h2><p className="mt-2 text-sm text-emerald-100/85 font-semibold">{active.book.book.author}</p>
-      <div className="sq-meta"><span className="sq-meta-chip">{ar?'الرف':'Shelf'} {active.book.book.shelf} · {ar?'الصف':'Row'} {active.book.book.row}</span>
-        {active.book.sourceUrl.includes('efipslibrary.com')?<Link to="/search" className="text-xs font-extrabold text-amber-100 underline underline-offset-4">{ar?'دليل المكتبة':'Library catalog'}</Link>:<a href={active.book.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-extrabold text-amber-100 underline underline-offset-4">{ar?'مصدر المحتوى':'Book source'}</a>}</div></div>
+      <div className="sq-quiz-book-meta"><Icon name="book"/><div><strong>{active.book.book.title}</strong><p>{active.book.book.author}</p></div><span className="sq-quiz-location">{ar?'الرف':'Shelf'} {active.book.book.shelf} · {ar?'الصف':'Row'} {active.book.book.row}</span></div>
     </section>
-    <section className="sq-panel"><div className="sq-panel-content">
-      <p className="sq-kicker">{ar?'اختبر فهمك':'Reading challenge'}</p><h3 className="mt-3 text-lg sm:text-xl font-black leading-9">{q.prompt}</h3>
+    <section className="sq-panel sq-question-panel" key={q.id}><div className="sq-panel-content">
+      <p className="sq-kicker">{ar?'اختبر فهمك':'Reading challenge'}</p><h3 className="sq-question-text">{q.prompt}</h3>
       <div className="mt-6 grid gap-3">{optionsFor(q).map((original,i)=>{const isChosen=selected===original;return <button key={i} type="button" disabled={selected!==undefined} onClick={()=>answer(original)} className={'sq-answer '+(isChosen?(selected===q.correct?'sq-answer--correct':'sq-answer--wrong'):'')}><span className="sq-choice-number">{i+1}</span><span>{q.answers[original]}</span></button>})}</div>
       {selected!==undefined&&<div role="status" className="mt-5 border-t border-slate-200 dark:border-slate-800 pt-4"><p className="font-black text-emerald-700 dark:text-emerald-300">{selected===q.correct?(ar?'إجابة صحيحة':'Correct'):(ar?'الإجابة غير صحيحة':'Incorrect')}</p><p className="mt-2 text-xs text-slate-500 dark:text-slate-400">{q.reference}</p><button type="button" onClick={next} className="sq-primary mt-5">{ar?'التالي':'Next'}</button></div>}</div>
     </section></div>:null}
