@@ -53,3 +53,9 @@ assert.ok(!page.includes('مصدر المحتوى'),'No external source label sh
 assert.ok(!page.includes('active.book.sourceUrl'),'Only the physical book is the displayed challenge source');
 assert.ok(page.includes('sq-question-panel'),'Questions must use the new focused visual panel');
 assert.ok(!hub.includes('ثلاث تجارب · عالم واحد من الإبداع'),'Remove the redundant slogan');
+
+const quest=readFileSync('pages/SaqrReadingQuestPage.tsx','utf8');
+assert.ok(quest.includes("session.role==='student'?'student':'teacher'"),'Admin must see teacher books instead of student books');
+assert.ok(quest.includes("session.role==='admin'?'مدير النظام'"),'Admin needs distinct greeting');
+assert.ok(home.includes('bg-[#b8e8f4]'),'Ask Saqr needs light cyan palette');
+assert.ok(home.includes('efips-nav-tile--soft'),'Home buttons use unified soft palette');
