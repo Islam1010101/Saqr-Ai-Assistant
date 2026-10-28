@@ -15,6 +15,7 @@ import {nationalIdentityBooks, searchNationalIdentityBooks} from '../src/utils/n
 import { stripSaqrEmoji } from '../src/utils/saqrText';
 import { isSaqrCatalogLookup, renderSaqrCatalogAnswer } from '../src/utils/saqrCatalogReply';
 import { saqrExtraContext, isNewDiscussion, discussionOpening } from '../src/utils/saqrSafeEnhancements';
+import {detectSaqrIntroduction,saqrIntroductionReply} from '../src/utils/saqrIntroductionReplies';
 
 // --- بروتوكول عقل صقر ---
 const SAQR_ELITE_PROMPT = `
@@ -355,6 +356,16 @@ const SmartSearchPage: React.FC = () => {
     setInput('');
     setIsLoading(true);
     setSaqrState('thinking');
+
+    // Narrow, source-controlled self/portal introductions only. Everything else
+    // follows the existing Saqr flow, prompt and catalogue search unchanged.
+    const introductionIntent=detectSaqrIntroduction(userQuery);
+    if(introductionIntent){
+      setMessages(prev=>[...prev,{role:'assistant',content:saqrIntroductionReply(introductionIntent,locale==='ar'?'ar':'en')}]);
+      setIsLoading(false);
+      setSaqrState('idle');
+      return;
+    }
 
     // تسجيل التحضير في قاعدة بيانات الإدارة إذا استُخدمت الميزة.
     if (isTeacherOrAdmin && (
