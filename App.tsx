@@ -177,50 +177,38 @@ const DraggableSaqrModal: React.FC<{ isOpen: boolean; onClose: () => void; child
       <div className="animate-zoom-in flex items-end md:items-center justify-center pointer-events-none w-full h-full absolute inset-0 md:p-4 pb-0">
         <div
           dir={dir}
-          className="relative w-full max-w-[600px] h-[85vh] md:h-[90vh] bg-white dark:bg-slate-900 md:rounded-[3rem] rounded-t-[3rem] shadow-2xl border-x-4 border-t-4 md:border-b-4 border-slate-200 dark:border-slate-700 flex flex-col pointer-events-auto transition-all duration-300 m-0 p-0 overflow-hidden"
+          className="relative w-full max-w-[600px] h-[92dvh] md:h-[92vh] bg-white dark:bg-slate-900 md:rounded-[3rem] rounded-t-[3rem] shadow-2xl border-x-4 border-t-4 md:border-b-4 border-slate-200 dark:border-slate-700 flex flex-col pointer-events-auto transition-all duration-300 m-0 p-0 overflow-hidden"
           style={{ transform: `translate(${position.x}px, ${position.y}px)`, touchAction: 'none' }}
         >
-          {/* رأس النافذة */}
+          {/* Compact floating window controls; content now uses the former header space. */}
           <div
-            className="w-full flex flex-col items-center justify-center cursor-grab active:cursor-grabbing select-none touch-none z-50 shrink-0 relative pt-8 pb-6 m-0 bg-gradient-to-b from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 border-b-2 border-slate-100 dark:border-slate-800"
+            className="absolute top-2 start-2 z-[60] flex items-center gap-2 pointer-events-auto"
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
             onPointerCancel={handlePointerUp}
           >
             <button
+              type="button"
               onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                onClose();
-              }}
-              className="absolute top-6 right-6 rtl:left-6 rtl:right-auto p-2 bg-slate-100 dark:bg-slate-800 hover:bg-rose-500 hover:text-white dark:hover:bg-rose-600 rounded-full transition-all pointer-events-auto shadow-sm active:scale-95 z-[60]"
+              onClick={(e) => { e.stopPropagation(); onClose(); }}
+              aria-label={dir === 'rtl' ? 'إغلاق مساعد صقر' : 'Close Saqr assistant'}
+              className="w-10 h-10 inline-flex items-center justify-center rounded-full bg-white/95 dark:bg-slate-800/95 text-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 shadow-md hover:bg-rose-500 hover:text-white dark:hover:bg-rose-600 transition-colors"
             >
               <CloseIcon />
             </button>
-
-            <div className="relative">
-              <div className="w-24 h-24 rounded-full overflow-hidden bg-emerald-50 dark:bg-slate-800 border-4 border-emerald-100 dark:border-emerald-900/30 shadow-md flex items-center justify-center mb-3 pointer-events-none z-10 relative">
-                <img
-                  src="/saqr-avatar.png"
-                  alt="Saqr"
-                  className="w-[85%] h-[85%] object-contain"
-                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                />
-              </div>
-              <span className="absolute bottom-4 right-1 w-5 h-5 bg-emerald-400 border-4 border-white dark:border-slate-900 rounded-full z-20"></span>
+            <div
+              role="button"
+              tabIndex={-1}
+              aria-label={dir === 'rtl' ? 'اسحب لتحريك نافذة صقر' : 'Drag to move Saqr window'}
+              className="hidden md:flex h-10 w-12 items-center justify-center rounded-full bg-white/90 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-600 shadow-md cursor-grab active:cursor-grabbing touch-none"
+            >
+              <svg viewBox="0 0 24 24" className="w-5 h-5 text-slate-500 dark:text-slate-300" fill="currentColor" aria-hidden="true"><circle cx="8" cy="6" r="1.5"/><circle cx="16" cy="6" r="1.5"/><circle cx="8" cy="12" r="1.5"/><circle cx="16" cy="12" r="1.5"/><circle cx="8" cy="18" r="1.5"/><circle cx="16" cy="18" r="1.5"/></svg>
             </div>
-            
-            <h3 className="font-black text-2xl text-slate-900 dark:text-white tracking-wide leading-none mb-1 pointer-events-none">
-              صقر الذكي
-            </h3>
-            <p className="text-sm font-bold text-slate-500 dark:text-slate-400 pointer-events-none">
-              {dir === 'rtl' ? 'مساعدك الرقمي الشخصي' : 'Your Digital Assistant'}
-            </p>
           </div>
 
           {/* مساحة المحتوى والشات - تم إلغاء التمرير الزائد من هنا والاعتماد على تمرير الشات نفسه */}
-          <div className="w-full flex-1 relative pointer-events-auto cursor-auto flex flex-col m-0 saqr-modal-override bg-slate-50/50 dark:bg-slate-900/50 overflow-hidden">
+          <div className="w-full flex-1 min-h-0 relative pointer-events-auto cursor-auto flex flex-col m-0 pt-11 md:pt-12 saqr-modal-override bg-slate-50/50 dark:bg-slate-900/50 overflow-hidden">
             {children}
           </div>
         </div>
