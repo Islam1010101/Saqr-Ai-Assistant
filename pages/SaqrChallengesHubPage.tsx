@@ -2,7 +2,6 @@ import React from 'react';
 import {Link,Navigate} from 'react-router-dom';
 import {useLanguage} from '../App';
 import './saqrQuestVisual.css';
-import SaqrBookQuestArt from './SaqrBookQuestArt';
 
 const SvgIcon=({name,className='h-10 w-10'}:{name:'book'|'shelves'|'mic'|'stars'|'arrow'|'spark'|'compass';className?:string})=><svg viewBox="0 0 48 48" className={className} fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
  {name==='book'?<><path d="M24 11C18 7 12 7 6 9v29c7-2 13-1 18 3 5-4 11-5 18-3V9c-6-2-12-2-18 2Zm0 0v30"/><path d="m31 18 2 4 5 1-4 3 1 5-4-2-4 2 1-5-4-3 5-1 2-4Z"/></>:
