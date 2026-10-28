@@ -45,11 +45,11 @@ export default function SaqrReadingQuestPage(){
     <button type="button" onClick={()=>setRounds(null)} className="sq-primary mt-6">{ar?'رحلة جديدة':'New journey'}</button></div>
   </section>:active&&q?<div className="sq-content space-y-5 sq-stage">
     <section className="sq-bookplate"><div className="sq-bookplate-inner">
-      <div className="flex items-center justify-between text-sm font-black text-emerald-800 dark:text-emerald-300"><span>{ar?'الكتاب':'Book'} {bookIndex+1}/{rounds.length}</span><span>{ar?'السؤال':'Question'} {questionIndex+1}/{active.questions.length}</span></div>
+      <div className="flex items-center justify-between text-sm font-black text-emerald-100"><span>{ar?'الكتاب':'Book'} {bookIndex+1}/{rounds.length}</span><span>{ar?'السؤال':'Question'} {questionIndex+1}/{active.questions.length}</span></div>
       <div className="sq-progress-rail"><div className="sq-progress-fill" style={{width:((questionIndex+1)/active.questions.length*100)+'%'}}/></div>
-      <h2 className="mt-4 text-xl sm:text-2xl font-black">{active.book.book.title}</h2><p className="mt-2 text-sm text-slate-500 dark:text-slate-400 font-semibold">{active.book.book.author}</p>
+      <h2 className="mt-4 text-xl sm:text-2xl font-black">{active.book.book.title}</h2><p className="mt-2 text-sm text-emerald-100/85 font-semibold">{active.book.book.author}</p>
       <div className="sq-meta"><span className="sq-meta-chip">{ar?'الرف':'Shelf'} {active.book.book.shelf} · {ar?'الصف':'Row'} {active.book.book.row}</span>
-        {active.book.sourceUrl.includes('efipslibrary.com')?<Link to="/search" className="text-xs font-extrabold text-emerald-800 dark:text-emerald-300 underline underline-offset-4">{ar?'دليل المكتبة':'Library catalog'}</Link>:<a href={active.book.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-extrabold text-emerald-800 dark:text-emerald-300 underline underline-offset-4">{ar?'مصدر المحتوى':'Book source'}</a>}</div></div>
+        {active.book.sourceUrl.includes('efipslibrary.com')?<Link to="/search" className="text-xs font-extrabold text-amber-100 underline underline-offset-4">{ar?'دليل المكتبة':'Library catalog'}</Link>:<a href={active.book.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-extrabold text-emerald-800 dark:text-emerald-300 underline underline-offset-4">{ar?'مصدر المحتوى':'Book source'}</a>}</div></div>
     </section>
     <section className="sq-panel"><div className="sq-panel-content">
       <p className="sq-kicker">{ar?'اختبر فهمك':'Reading challenge'}</p><h3 className="mt-3 text-lg sm:text-xl font-black leading-9">{q.prompt}</h3>
