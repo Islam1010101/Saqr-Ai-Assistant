@@ -804,7 +804,7 @@ const HomePage: React.FC = () => {
                 <RevealSection delay={300}>
                     <div className="efips-nav-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
                         
-                        <Link to="/search" className="group relative text-white p-6 rounded-[2.5rem] border-b-8 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden bg-[#2b6480] border-[#204960] efips-nav-tile">
+                        <Link to="/search" className="group relative text-white p-6 rounded-[2.5rem] shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden efips-nav-tile bg-[#dd5053] border-[#a3343c]">
                             <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
                                 <SearchIcon />
                             </div>
@@ -814,7 +814,7 @@ const HomePage: React.FC = () => {
                             </div>
                         </Link>
 
-                        <Link to="/smart-search" className="group relative text-white p-6 rounded-[2.5rem] border-b-8 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden bg-[#136f65] border-[#0c5149] efips-nav-tile">
+                        <Link to="/smart-search" className="group relative text-white p-6 rounded-[2.5rem] shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden efips-nav-tile bg-[#167f61] border-[#075d45]">
                             <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
                                 <SmartIcon />
                             </div>
@@ -824,7 +824,7 @@ const HomePage: React.FC = () => {
                             </div>
                         </Link>
 
-                        <Link to="/digital-library" className="group relative text-white p-6 rounded-[2.5rem] border-b-8 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden bg-[#515886] border-[#35395e] efips-nav-tile">
+                        <Link to="/digital-library" className="group relative text-white p-6 rounded-[2.5rem] shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden efips-nav-tile bg-[#375ca4] border-[#263d7d]">
                             <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
                                 <BookIcon />
                             </div>
@@ -834,7 +834,7 @@ const HomePage: React.FC = () => {
                             </div>
                         </Link>
 
-                        <Link to="/creators" className="group relative text-white p-6 rounded-[2.5rem] border-b-8 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden bg-[#89577c] border-[#603c58] efips-nav-tile">
+                        <Link to="/creators" className="group relative text-white p-6 rounded-[2.5rem] shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden efips-nav-tile bg-[#c64b89] border-[#933364]">
                             <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
                                 <CreatorIcon />
                             </div>
@@ -864,21 +864,21 @@ const HomePage: React.FC = () => {
                         )}
 
                         {(userType === 'student' || userType === 'admin') && (
-                            <Link to="/saqr-challenges" className="group relative flex items-center gap-5 rounded-[2.5rem] border-b-8 p-6 text-white shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl active:translate-y-2 active:border-b-0 bg-[#bc8640] border-[#916028] efips-nav-tile">
+                            <Link to="/saqr-challenges" className="group relative flex items-center gap-5 rounded-[2.5rem] p-6 text-white shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl active:translate-y-2 active:border-b-0 efips-nav-tile bg-[#e4b43e] border-[#ab7b1d]">
                                 <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/20"><GameIcon /></span>
                                 <span className="min-w-0"><strong className="block text-xl font-black md:text-2xl">{t('saqrChallengesTitle')}</strong><small className="mt-1 block text-xs md:text-sm">{t('saqrChallengesDesc')}</small></span>
                             </Link>
                         )}
 
                         {userType === 'teacher' && (
-                            <Link to="/saqr-reading-quest" className="group relative flex items-center gap-5 rounded-[2.5rem] border-b-8 p-6 text-white shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl active:translate-y-2 active:border-b-0 bg-[#2d6f83] border-[#1f4c61] efips-nav-tile">
+                            <Link to="/saqr-reading-quest" className="group relative flex items-center gap-5 rounded-[2.5rem] p-6 text-white shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl active:translate-y-2 active:border-b-0 efips-nav-tile bg-[#399fc3] border-[#237b98]">
                                 <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/20"><BookIcon /></span>
                                 <span className="min-w-0"><strong className="block text-xl font-black md:text-2xl">{t('readingQuestTitle')}</strong><small className="mt-1 block text-xs md:text-sm">{t('readingQuestDesc')}</small></span>
                             </Link>
                         )}
 
                         {(userType === 'teacher' || userType === 'admin') && (
-                            <Link to="/schedule" className="group relative text-white p-6 rounded-[2.5rem] border-b-8 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden bg-[#497d78] border-[#305a55] efips-nav-tile">
+                            <Link to="/schedule" className="group relative text-white p-6 rounded-[2.5rem] shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden efips-nav-tile bg-[#7c55ad] border-[#53347d]">
                                 <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
                                     <ScheduleIcon />
                                 </div>
@@ -890,7 +890,7 @@ const HomePage: React.FC = () => {
                         )}
 
                         {userType === 'admin' && (
-                            <Link to="/admin-dashboard" className="group relative text-white p-6 rounded-[2.5rem] border-b-8 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 sm:col-span-2 lg:col-span-3 overflow-hidden bg-[#94575e] border-[#66363e] efips-nav-tile">
+                            <Link to="/admin-dashboard" className="group relative text-white p-6 rounded-[2.5rem] shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 sm:col-span-2 lg:col-span-3 overflow-hidden efips-nav-tile bg-[#98653d] border-[#6a4328]">
                                 <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
                                     <AdminIcon />
                                 </div>
