@@ -567,6 +567,9 @@ const SearchPage: React.FC = () => {
     const [audienceFilter, setAudienceFilter] = useState<BookAudience | 'all'>('all');
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
     const [visibleCount, setVisibleCount] = useState(12);
+    // Cabinet 22 has 268 titles: load its results progressively without altering other shelves.
+    const [shelf22VisibleCount, setShelf22VisibleCount] = useState(24);
+    const shelf22LoadMoreRef = useRef<HTMLDivElement>(null);
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
     const [showSearch, setShowSearch] = useState(true);
@@ -606,6 +609,18 @@ const SearchPage: React.FC = () => {
 
         return result;
     }, [debouncedSearchTerm, subjectFilter, authorFilter, shelfFilter, audienceFilter, currentLocale]);
+
+    const displayedCount = shelfFilter === '22' ? shelf22VisibleCount : visibleCount;
+    useEffect(() => {
+        if (shelfFilter !== '22' || shelf22VisibleCount >= filteredBooks.length || typeof IntersectionObserver === 'undefined') return;
+        const sentinel = shelf22LoadMoreRef.current;
+        if (!sentinel) return;
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting) setShelf22VisibleCount(count => count + 24);
+        }, { rootMargin: '300px 0px' });
+        observer.observe(sentinel);
+        return () => observer.disconnect();
+    }, [shelfFilter, shelf22VisibleCount, filteredBooks.length]);
 
     return (
         <div dir={dir} className="w-full min-h-screen bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300">
@@ -682,7 +697,7 @@ const SearchPage: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-10 gap-x-4 md:gap-x-6 px-2 md:px-8">
-                    {filteredBooks.slice(0, visibleCount).map((book, index) => (
+                    {filteredBooks.slice(0, displayedCount).map((book, index) => (
                         <RevealOnScroll key={book.id} delay={(index % 4) * 100}>
                             <BookCard 
                                 book={book} 
@@ -705,10 +720,14 @@ const SearchPage: React.FC = () => {
                     </div>
                 )}
 
-                {filteredBooks.length > visibleCount && (
+                {shelfFilter === '22' && filteredBooks.length > shelf22VisibleCount && (
+                    <div ref={shelf22LoadMoreRef} aria-hidden="true" className="h-px" />
+                )}
+
+                {filteredBooks.length > displayedCount && (
                     <div className="mt-20 text-center">
                         <button 
-                            onClick={() => setVisibleCount(prev => prev + 12)} 
+                            onClick={() => shelfFilter === '22' ? setShelf22VisibleCount(prev => prev + 24) : setVisibleCount(prev => prev + 12)} 
                             className="bg-amber-500 text-white px-10 py-4 rounded-full font-black text-lg md:text-xl border-b-8 border-amber-700 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all shadow-md uppercase tracking-widest w-full max-w-sm"
                         >
                             EXPLORE MORE
