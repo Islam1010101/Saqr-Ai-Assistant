@@ -1,7 +1,7 @@
 name: EFIPS Saqr reading challenge validation
 on:
   push:
-    branches: [feat/saqr-between-the-lines-challenge-20261027]
+    branches: [feat/efips-challenges-color-quiz-focus-20261028]
   pull_request:
     paths:
       - 'pages/SaqrReadingQuestPage.tsx'

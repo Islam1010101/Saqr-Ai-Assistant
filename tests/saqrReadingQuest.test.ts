@@ -4,8 +4,8 @@ import {readingChallengeBooks,getRoleReadingBooks,shuffleReading} from '../src/u
 import {bookData} from '../api/bookData.ts';
 const groups=[['student','ar'],['student','en'],['teacher','ar'],['teacher','en']] as const;
 assert.ok(bookData.length>=3000,'The complete EFIPS catalog should be loaded');
-assert.equal(readingChallengeBooks.length,56,'All 56 catalog-matched books must be playable');
-assert.equal(readingChallengeBooks.reduce((n,b)=>n+b.questions.length,0),540);
+assert.equal(readingChallengeBooks.length,59,'All 59 catalog-matched books must be playable');
+assert.equal(readingChallengeBooks.reduce((n,b)=>n+b.questions.length,0),555);
 for(const [role,locale] of groups){
  const books=getRoleReadingBooks(role,locale);
  assert.ok(books.length>=4,`Not enough validated books for ${role}/${locale}`);
@@ -37,7 +37,7 @@ assert.ok(!home.includes('to="/game"'),'Game shortcut must be inside student cha
 assert.ok(!home.includes('to="/saqr-studio"'),'Studio shortcut must be inside student challenges hub');
 for(const path of ['/saqr-reading-quest','/game','/saqr-studio'])assert.ok(hub.includes(path));
 assert.ok(home.includes("userType === 'teacher' && ("));
-console.log('PASS 56 EFIPS books; 540 questions; bilingual role separation; unique book selection; 5-10 question rounds; student hub and teacher shortcut');
+console.log('PASS 59 EFIPS books; 555 questions; bilingual role separation; unique book selection; 5-10 question rounds; student hub and teacher shortcut');
 
 assert.ok(!page.includes('books.map(({key,book,questions})'),'Do not spoil all books before the journey');
 assert.ok(page.includes('setAmount(v=>Math.max(1,v-1))'));
@@ -48,3 +48,8 @@ assert.ok(!page.includes('books.map(({key,book,questions})'),'Do not show all bo
 assert.ok(page.includes('setAmount(v=>Math.max(1,v-1))'));
 assert.ok(page.includes('setAmount(v=>Math.min(books.length,v+1))'));
 assert.ok(page.includes('active.book.book.shelf'));
+
+assert.ok(!page.includes('مصدر المحتوى'),'No external source label should appear during quiz');
+assert.ok(!page.includes('active.book.sourceUrl'),'Only the physical book is the displayed challenge source');
+assert.ok(page.includes('sq-question-panel'),'Questions must use the new focused visual panel');
+assert.ok(!hub.includes('ثلاث تجارب · عالم واحد من الإبداع'),'Remove the redundant slogan');
