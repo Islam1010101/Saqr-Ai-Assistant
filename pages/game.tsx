@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../App';
 import { supabase } from '../src/utils/supabase';
+import './gameIntroVisual.css';
 
 // -----------------------------------------------------------------------------
 // Library Heroes — playful, responsive Dewey Decimal learning game.
@@ -508,17 +509,46 @@ const DeweyGame: React.FC = () => {
       </div>
 
       {stage === 'intro' && (
-        <main className="game-shell game-panel" style={{ textAlign: 'center' }}>
-          <div className="hero-brand"><div className="hero-logo-wrap"><img src="/Game.png" alt="" onError={e => { e.currentTarget.style.display = 'none'; }} /><span className="fallback-logo" aria-hidden="true">📚</span></div></div>
-          <span className="game-kicker">✨ {dict.badge} ✨</span>
-          <h1 className="game-title">{dict.title}</h1>
-          <p className="game-subtitle">{dict.subtitle}</p>
-          <div className="profile-card">
-            <div className="profile-field"><span className="profile-icon" aria-hidden="true">🦸</span><div><div className="profile-label">{dict.studentName}</div><div className="profile-value">{studentName}</div></div></div>
-            <div className="profile-field"><span className="profile-icon" aria-hidden="true">🎓</span><div><div className="profile-label">{dict.grade}</div><div className="profile-value">{studentGrade || '—'}</div></div></div>
+        <main className="game-shell game-panel game-intro-stage" style={{ textAlign: 'center' }}>
+          <div className="game-intro-ambient" aria-hidden="true" />
+          <div className="game-intro-hero">
+            <div className="game-intro-copy">
+              <span className="game-kicker">✨ {dict.badge} ✨</span>
+              <h1 className="game-title">{dict.title}</h1>
+              <p className="game-subtitle">{dict.subtitle}</p>
+            </div>
+            <div className="game-intro-art">
+              <span className="game-intro-halo" aria-hidden="true" />
+              <span className="game-intro-ring" aria-hidden="true" />
+              <span className="game-intro-ring game-intro-ring--second" aria-hidden="true" />
+              <span className="game-intro-float game-intro-float--book" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M12 6c-3-2-7-2-9-1v14c3-1 7-1 9 1 3-2 7-2 9-1V5c-3-1-7-1-9 1Zm0 0v14"/></svg>
+              </span>
+              <span className="game-intro-float game-intro-float--idea" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6m-5 3h4M8 15a7 7 0 1 1 8 0c-1 .7-1.5 1.4-1.5 3h-5C9.5 16.4 9 15.7 8 15zM12 2v2"/></svg>
+              </span>
+              <span className="game-intro-float game-intro-float--star" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="m12 2 2.6 7.3L22 12l-7.4 2.7L12 22l-2.6-7.3L2 12l7.4-2.7L12 2Z"/></svg>
+              </span>
+              <span className="game-intro-float game-intro-float--shelves" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16v16H4zM10 4v16m4-16v16M4 16h16M6 8h2m9 2 1 4"/></svg>
+              </span>
+              <span className="game-intro-spark game-intro-spark--one" aria-hidden="true" />
+              <span className="game-intro-spark game-intro-spark--two" aria-hidden="true" />
+              <span className="game-intro-character-fallback" aria-hidden="true">
+                <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2"><path d="M24 12C16 7 10 7 4 10v30c8-2 14-2 20 3 6-5 12-5 20-3V10c-7-3-13-3-20 2Zm0 0v31"/></svg>
+              </span>
+              <img className="game-intro-character" src="/Game.png" alt={lang === 'ar' ? 'شخصية صقر بطل المكتبة' : 'Saqr, the Library Hero'} onError={e => { e.currentTarget.style.display = 'none'; }} />
+            </div>
           </div>
-          <button onClick={handleStart} className="primary-action">{dict.start} <span aria-hidden="true">🚀</span></button>
-          <p className="game-subtitle" style={{ marginBottom: 0, marginTop: 15, fontSize: 11 }}>📘 ٣ مهام ممتعة · ⭐ نقاط ومكافآت · 🏆 شهادة إنجاز</p>
+          <div className="game-intro-details">
+            <div className="profile-card">
+              <div className="profile-field"><span className="profile-icon" aria-hidden="true">🦸</span><div><div className="profile-label">{dict.studentName}</div><div className="profile-value">{studentName}</div></div></div>
+              <div className="profile-field"><span className="profile-icon" aria-hidden="true">🎓</span><div><div className="profile-label">{dict.grade}</div><div className="profile-value">{studentGrade || '—'}</div></div></div>
+            </div>
+            <button onClick={handleStart} className="primary-action">{dict.start} <span className="game-intro-button-icon" aria-hidden="true">🚀</span></button>
+            <p className="game-subtitle game-intro-note" style={{ marginBottom: 0, marginTop: 15, fontSize: 11 }}>📘 ٣ مهام ممتعة · ⭐ نقاط ومكافآت · 🏆 شهادة إنجاز</p>
+          </div>
         </main>
       )}
 
