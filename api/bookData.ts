@@ -1,5 +1,6 @@
 import {shelf40Books} from './shelf40Catalog.ts';
 import {shelf30SourceRecords} from './shelf30Catalog.ts';
+import {uploadedLibraryBooks} from './uploadedCatalog20261028.ts';
 import {reviewedShelf41Books} from './shelf41ReviewedCatalog.ts';
 import { physicalBookAdditions } from './bookAdditions.ts';
 // 1. تعريف نوع البيانات
@@ -3675,7 +3676,19 @@ const newShelf30Books:Book[]=shelf30SourceRecords.filter(b=>!existing30Keys.has(
  level:'General',summary:'A verified description is not yet available for this physical library book.',
  ...(b.needsReview?{needsReview:true}:{})
 }));
-export const bookData:Book[]=[...beforeShelf30,...newShelf30Books];
+const beforeUploadedBooks:Book[]=[...beforeShelf30,...newShelf30Books];
+const importedBookKey=(b:{title:string;shelf:number;row:number})=>
+ b.shelf+'|'+b.row+'|'+b.title.normalize('NFKC').toLocaleLowerCase().replace(/[^\p{L}\p{N}]/gu,'');
+const existingImportedKeys=new Set(beforeUploadedBooks.map(importedBookKey));
+const verifiedUploadedBooks:Book[]=uploadedLibraryBooks.filter(b=>!existingImportedKeys.has(importedBookKey(b))).map((b,i)=>({
+ id:'uploaded-20261028-'+String(i+1).padStart(3,'0'),
+ title:b.title,author:b.author,shelf:b.shelf,row:b.row,
+ isbn:b.isbn,isbnStatus:'candidate' as const,
+ subject:inferredSubject(b.title,b.author,'',b.shelf),
+ language:'AR',level:'General',
+ summary:'هذا الكتاب متوفر في مكتبة المدرسة الورقية. لم يُرفق ملخص موثق لمحتواه.'
+}));
+export const bookData:Book[]=[...beforeUploadedBooks,...verifiedUploadedBooks];
 
 // 5. دالة البحث المخصصة للاستخدام في تطبيق الويب
 export function findInCatalog(q: string): Book[] {

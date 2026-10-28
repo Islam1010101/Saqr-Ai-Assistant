@@ -21,6 +21,7 @@ type StoredStudent = Record<string, unknown> & {
 };
 
 const MAX_LEVEL = 7;
+const ANSWER_SECONDS = 5;
 const LANDMARK_EN=[
  {name:'Al Jahili Fort',city:'Al Ain'},
  {name:'Sheikh Zayed Grand Mosque',city:'Abu Dhabi'},
@@ -118,13 +119,17 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
   const [currentQuestion, setCurrentQuestion] = useState<FlagQuestionBilingual>(() => chooseFlagQuestion(0, []));
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
-  const [lastResult, setLastResult] = useState<'correct' | 'wrong' | null>(null);
+  const [lastResult, setLastResult] = useState<'correct' | 'wrong' | 'timeout' | null>(null);
   const [isVictory, setIsVictory] = useState(false);
   const [correctAnswersCount, setCorrectAnswersCount] = useState(0);
   const [studentName, setStudentName] = useState('بطل الراية');
   const [awardStatus, setAwardStatus] = useState<'idle' | 'saving' | 'saved' | 'unavailable' | 'error'>('idle');
   const awardStarted = useRef(false);
   const victoryTimer = useRef<number | null>(null);
+  const [secondsRemaining,setSecondsRemaining]=useState(ANSWER_SECONDS);
+  const [questionTurn,setQuestionTurn]=useState(0);
+  const deadlineRef=useRef(0);
+  const answerLockedRef=useRef(false);
 
   const currentDifficulty = stepsCompleted<4?'easy':stepsCompleted<7?'medium':'hard';
   const currentText=currentQuestion[english?'en':'ar'];
@@ -216,11 +221,14 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
     if (victoryTimer.current !== null) window.clearTimeout(victoryTimer.current);
   }, []);
 
-  const handleOptionSelect = (index: number) => {
-    if (isAnswered || isVictory) return;
-    setSelectedOption(index);
+  const handleOptionSelect = (index: number | null) => {
+    if (answerLockedRef.current || isAnswered || isVictory) return;
+    const finalIndex = index !== null && performance.now() < deadlineRef.current ? index : null;
+    answerLockedRef.current=true;
+    setSecondsRemaining(Math.max(0,Math.ceil((deadlineRef.current-performance.now())/1000)));
+    setSelectedOption(finalIndex);
     setIsAnswered(true);
-    const isCorrect = index === currentQuestion.correct;
+    const isCorrect = finalIndex === currentQuestion.correct;
 
     if (isCorrect) {
       setLastResult('correct');
@@ -235,12 +243,26 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
         victoryTimer.current = window.setTimeout(() => setIsVictory(true), 900);
       }
     } else {
-      setLastResult('wrong');
+      setLastResult(finalIndex===null?'timeout':'wrong');
       playTone('down');
       setVisualPenalty(previous=>Math.min(2,previous+1));
       setFlagLevel(previous=>Math.max(0,previous-1));
     }
   };
+
+  useEffect(() => {
+    if(isAnswered || isVictory)return;
+    answerLockedRef.current=false;
+    setSecondsRemaining(ANSWER_SECONDS);
+    deadlineRef.current=performance.now()+ANSWER_SECONDS*1000;
+    const tick=()=>{
+      const remaining=Math.max(0,Math.ceil((deadlineRef.current-performance.now())/1000));
+      setSecondsRemaining(remaining);
+      if(performance.now()>=deadlineRef.current)handleOptionSelect(null);
+    };
+    const clock=window.setInterval(tick,100);
+    return ()=>window.clearInterval(clock);
+  },[questionTurn,currentQuestion.id,isAnswered,isVictory]);
 
   const handleNextQuestion = () => {
     const nextUsed = usedQuestionIds.includes(currentQuestion.id)
@@ -251,6 +273,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
     setSelectedOption(null);
     setIsAnswered(false);
     setLastResult(null);
+    setQuestionTurn(v=>v+1);
   };
 
   const handleFeedbackAction = () => {
@@ -276,6 +299,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
     setIsAnswered(false);
     setLastResult(null);
     setIsVictory(false);
+    setQuestionTurn(v=>v+1);
     setCorrectAnswersCount(0);
     setAwardStatus('idle');
   };
@@ -302,6 +326,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
         .fg-panel{padding:clamp(19px,3vw,36px);display:flex;flex-direction:column;min-width:0;background:var(--panel);color:var(--ink)}.fg-panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding-bottom:20px;margin-bottom:20px;border-bottom:1px solid var(--line)}.fg-title-wrap{min-width:0}.fg-title{font-size:clamp(22px,2.2vw,32px);font-weight:1000;line-height:1.35;letter-spacing:-.5px;margin:0;background:linear-gradient(95deg,#0b9967,#08734f 53%,#d89f37);-webkit-background-clip:text;background-clip:text;color:transparent}.dark .flag-game .fg-title,html.dark .flag-game .fg-title,body.dark .flag-game .fg-title,[data-theme="dark"] .flag-game .fg-title,.flag-game.dark .fg-title,.flag-game[data-theme="dark"] .fg-title{background-image:linear-gradient(95deg,#5ee8af,#b5f5dc 53%,#ffd77b)}.fg-subtitle{margin:7px 0 0;color:var(--muted);font-size:12px;font-weight:700;line-height:1.9}.fg-head-actions{display:flex;gap:7px;align-items:center;flex-shrink:0}.fg-close-btn{padding:0 11px;height:39px;border:1px solid var(--line);border-radius:12px;background:var(--panel-soft);color:var(--muted);font-size:11px;font-weight:900;cursor:pointer}
         .fg-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}.fg-stat{border:1px solid var(--line);border-radius:16px;padding:12px 14px;background:var(--panel-soft)}.fg-stat-line{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:11px;font-weight:900;color:var(--muted)}.fg-stat strong{color:var(--ink);font-size:13px}.fg-difficulty{padding:5px 9px;border-radius:99px;font-size:10px;font-weight:900;white-space:nowrap}.fg-difficulty.easy{background:#d9fbe8;color:#087147}.fg-difficulty.medium{background:#fff0c5;color:#8c5b00}.fg-difficulty.hard{background:#ffe0e0;color:#a32626}.dark .flag-game .fg-difficulty.easy,html.dark .flag-game .fg-difficulty.easy,body.dark .flag-game .fg-difficulty.easy,[data-theme="dark"] .flag-game .fg-difficulty.easy,.flag-game.dark .fg-difficulty.easy,.flag-game[data-theme="dark"] .fg-difficulty.easy{background:#124632;color:#9af1c2}.dark .flag-game .fg-difficulty.medium,html.dark .flag-game .fg-difficulty.medium,body.dark .flag-game .fg-difficulty.medium,[data-theme="dark"] .flag-game .fg-difficulty.medium,.flag-game.dark .fg-difficulty.medium,.flag-game[data-theme="dark"] .fg-difficulty.medium{background:#4a3713;color:#ffe09a}.dark .flag-game .fg-difficulty.hard,html.dark .flag-game .fg-difficulty.hard,body.dark .flag-game .fg-difficulty.hard,[data-theme="dark"] .flag-game .fg-difficulty.hard,.flag-game.dark .fg-difficulty.hard,.flag-game[data-theme="dark"] .fg-difficulty.hard{background:#4e242a;color:#ffb9c0}.fg-progress{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:10px}.fg-progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#0d9b67,#77d5a7,#f5c45d);transition:width 700ms ease}
         .fg-question-card{position:relative;border:1px solid color-mix(in srgb,var(--accent) 23%,var(--line));background:linear-gradient(140deg,color-mix(in srgb,var(--accent) 7%,var(--panel)),var(--panel-soft));border-radius:23px;padding:20px 19px;margin-bottom:16px;overflow:hidden}.fg-question-card:after{content:"؟";position:absolute;left:13px;bottom:-37px;font-size:110px;line-height:1;color:var(--accent);opacity:.055;font-weight:1000;pointer-events:none}.fg-question-label{display:flex;align-items:center;gap:8px;color:var(--accent);font-size:11px;font-weight:1000;margin-bottom:10px}.fg-question-label span{display:grid;place-items:center;width:29px;height:29px;border-radius:10px;color:white;background:linear-gradient(145deg,#0ba36d,#08734f);box-shadow:0 5px 12px #00865b26}.fg-question-text{position:relative;z-index:1;font-size:clamp(15px,1.55vw,19px);font-weight:950;line-height:2;margin:0;color:var(--ink)}
+        .fg-timer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px;padding:10px 15px;border:2px solid #d9e7ec;border-radius:15px;background:var(--panel-soft);font-weight:900;font-size:13px}.fg-timer strong{font-size:24px;color:var(--accent);font-variant-numeric:tabular-nums}.fg-timer.urgent{border-color:#e15763;background:color-mix(in srgb,#e15763 9%,var(--panel))}.fg-timer.urgent strong{color:#d43c4b}.fg-timer-track{height:6px;flex:1;border-radius:10px;overflow:hidden;background:var(--line)}.fg-timer-track span{display:block;height:100%;background:linear-gradient(90deg,#21a476,#f2c05d);transition:width 100ms linear}.fg-timer.urgent .fg-timer-track span{background:#dc4b59}
         .fg-options{display:grid;gap:10px;margin-bottom:16px}.fg-option{width:100%;min-height:56px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-radius:16px;border:1.5px solid var(--line);background:var(--panel);color:var(--ink);font-family:inherit;text-align:right;font-size:13px;font-weight:850;line-height:1.8;cursor:pointer;transition:transform .18s,border-color .18s,background .18s,box-shadow .18s;touch-action:manipulation;-webkit-tap-highlight-color:transparent}.fg-option:not(:disabled):hover{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 5%,var(--panel));transform:translateY(-1px);box-shadow:0 5px 15px #07182d0b}.fg-option:focus-visible{outline:3px solid #21b98180;outline-offset:2px}.fg-option:disabled{cursor:default}.fg-option-leading{display:flex;align-items:center;gap:11px;min-width:0}.fg-option-number{flex:0 0 30px;width:30px;height:30px;display:grid;place-items:center;border-radius:10px;background:var(--panel-soft);border:1px solid var(--line);color:var(--muted);font-size:11px;font-weight:1000}.fg-option-text{overflow-wrap:anywhere}.fg-option.correct{background:#0f9f68;border-color:#0b8c5b;color:white;box-shadow:0 7px 18px #07955a27}.fg-option.correct .fg-option-number{background:#ffffff26;border-color:#ffffff47;color:#fff}.fg-option.wrong{background:#dc4b59;border-color:#c73547;color:white}.fg-option.wrong .fg-option-number{background:#ffffff23;border-color:#ffffff55;color:white}.fg-option.dimmed{opacity:.48}
         .fg-feedback{border-radius:17px;padding:14px 15px;border:1px solid;margin-bottom:15px;animation:fg-rise .35s ease both}.fg-feedback.good{background:color-mix(in srgb,#16a36b 8%,var(--panel));border-color:color-mix(in srgb,#16a36b 32%,var(--line))}.fg-feedback.bad{background:color-mix(in srgb,#e14754 7%,var(--panel));border-color:color-mix(in srgb,#e14754 31%,var(--line))}.fg-feedback-heading{font-size:12px;font-weight:1000;line-height:1.8;margin-bottom:5px}.fg-feedback.good .fg-feedback-heading{color:#0c9b63}.fg-feedback.bad .fg-feedback-heading{color:#d43d4b}.dark .flag-game .fg-feedback.good .fg-feedback-heading,html.dark .flag-game .fg-feedback.good .fg-feedback-heading,body.dark .flag-game .fg-feedback.good .fg-feedback-heading,[data-theme="dark"] .flag-game .fg-feedback.good .fg-feedback-heading,.flag-game.dark .fg-feedback.good .fg-feedback-heading,.flag-game[data-theme="dark"] .fg-feedback.good .fg-feedback-heading{color:#62e9b1}.dark .flag-game .fg-feedback.bad .fg-feedback-heading,html.dark .flag-game .fg-feedback.bad .fg-feedback-heading,body.dark .flag-game .fg-feedback.bad .fg-feedback-heading,[data-theme="dark"] .flag-game .fg-feedback.bad .fg-feedback-heading,.flag-game.dark .fg-feedback.bad .fg-feedback-heading,.flag-game[data-theme="dark"] .fg-feedback.bad .fg-feedback-heading{color:#ff9ba7}.fg-fact{font-size:11px;line-height:1.9;color:var(--muted);font-weight:700;margin:0 0 11px}.fg-next-btn,.fg-play-again{width:100%;border:0;border-radius:14px;min-height:47px;padding:12px 15px;color:#fff;background:linear-gradient(100deg,#087b53,#0da973);font-size:12px;font-weight:1000;cursor:pointer;box-shadow:0 8px 17px #087e5828;transition:transform .18s,filter .18s}.fg-next-btn:hover,.fg-play-again:hover{transform:translateY(-1px);filter:brightness(1.04)}
         .fg-hint{display:flex;align-items:flex-start;gap:9px;padding:12px 13px;border:1px dashed var(--line);border-radius:15px;color:var(--muted);font-size:11px;line-height:1.9;font-weight:700;margin-top:auto}.fg-hint-icon{font-size:17px;line-height:1.5}.fg-panel-foot{margin-top:22px;padding-top:13px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:10px;font-weight:800;line-height:1.8}
@@ -493,6 +518,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
                 <h2 className="fg-question-text">{currentText.question}</h2>
               </article>
 
+              <div className={`fg-timer ${secondsRemaining<=2?'urgent':''}`} role="timer" aria-label={tr('الوقت المتبقي للإجابة','Time left to answer')}><span>{tr('الوقت المتبقي','Time left')}</span><div className="fg-timer-track"><span style={{width:`${secondsRemaining/ANSWER_SECONDS*100}%`}}/></div><strong>{secondsRemaining}s</strong></div>
               <div className="fg-options" role="group" aria-label={tr('خيارات الإجابة','Answer choices')}>
                 {currentText.options.map((option, index) => {
                   let optionClass = '';
@@ -502,7 +528,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
                     else optionClass = 'dimmed';
                   }
                   return (
-                    <button className={`fg-option ${optionClass}`} key={`${currentQuestion.id}-${index}`} type="button" disabled={isAnswered} onClick={() => handleOptionSelect(index)}>
+                    <button className={`fg-option ${optionClass}`} key={`${currentQuestion.id}-${index}`} type="button" disabled={isAnswered || secondsRemaining===0} onClick={() => handleOptionSelect(index)}>
                       <span className="fg-option-leading"><span className="fg-option-number">{(english?['A','B','C','D']:['أ','ب','ج','د'])[index]}</span><span className="fg-option-text">{option}</span></span>
                       {isAnswered && index === currentQuestion.correct && <span className="fg-result-mark" aria-label={tr('الإجابة الصحيحة','Correct answer')}><ResultIcon good/></span>}
                       {isAnswered && selectedOption === index && index !== currentQuestion.correct && <span className="fg-result-mark" aria-label={tr('إجابة غير صحيحة','Incorrect answer')}><ResultIcon/></span>}
@@ -516,7 +542,7 @@ export default function FlagDayChallenge({ onClose }: FlagDayChallengeProps) {
                   <div className="fg-feedback-heading">
                     {lastResult === 'correct'
                       ? (stepsCompleted === FLAG_STEPS ? tr('إجابة صحيحة! وصلت الراية إلى القمة!','Correct! The flag has reached the summit!') : tr('أحسنت! ارتفعت الراية نحو القمة.','Well done! The flag rises toward the summit.'))
-                      : (flagLevel === 0 ? tr('إجابة غير صحيحة؛ حاول مجدداً!','Not quite. Try again!') : tr('ليست الإجابة الصحيحة؛ حاول مجدداً!','Not quite; try again!'))}
+                      : (lastResult === 'timeout' ? tr('انتهت الخمس ثوانٍ! خسرت السؤال، وانخفض العلم.','Time is up! You lost this question and the flag moves down.') : tr('إجابة غير صحيحة؛ انخفض العلم.','Incorrect answer; the flag moves down.'))}
                   </div>
                   <p className="fg-fact">{tr('معلومة مفيدة:','Did you know?')} {currentText.fact}</p>
                   <button className="fg-next-btn" type="button" onClick={handleFeedbackAction}>{stepsCompleted===FLAG_STEPS?tr('عرض النتيجة والاحتفال','See results'):tr('السؤال التالي','Next question')}</button>
