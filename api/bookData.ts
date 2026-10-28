@@ -3667,7 +3667,7 @@ const newShelf40Books:Book[]=shelf40Books.filter(b=>!existingShelf40.has(b.row+'
 }));
 // Append genuine shelf 30 catalog records; preserve all pre-existing IDs and borrowing keys.
 const beforeShelf30:Book[]=[...currentPhysicalBooks,...newShelf40Books];
-const shelf30Key=(b:{title:string;row:number})=>b.row+'|'+b.title.normalize('NFKC').toLocaleLowerCase().replace(/[^\\p{L}\\p{N}]/gu,'');
+const shelf30Key=(b:{title:string;row:number})=>b.row+'|'+b.title.normalize('NFKC').toLocaleLowerCase().replace(/[^\p{L}\p{N}]/gu,'');
 const existing30Keys=new Set(beforeShelf30.filter(b=>b.shelf===30).map(shelf30Key));
 const newShelf30Books:Book[]=shelf30SourceRecords.filter(b=>!existing30Keys.has(shelf30Key(b))).map((b,i)=>({
  id:'shelf30-20261028-'+String(i+1).padStart(3,'0'),title:b.title,author:b.author,
