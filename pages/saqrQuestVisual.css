@@ -204,3 +204,61 @@
 .sq-page .sq-bookplate{padding:20px}
 }
 @media(prefers-reduced-motion:reduce){.sq-page .sq-ink-line{stroke-dashoffset:0}.sq-page .sq-illustration-book,.sq-page .sq-illustration-mascot,.sq-page .sq-magnifier,.sq-page .sq-illustration-orbit{animation:none}}
+
+/* Specific story-first visual redesign, kept strictly inside challenge pages. */
+.sq-page.sq-challenges .sq-centered-hero{min-height:330px;justify-content:center;text-align:center;background:linear-gradient(117deg,#45355e,#6e477d,#81516e);border-color:#9677a4}
+.sq-page .sq-centered-hero .sq-hero-text{max-width:83%;display:flex;align-items:center;flex-direction:column;margin:auto}
+.sq-page .sq-centered-heading{font-size:clamp(44px,7.6vw,94px);font-weight:900;letter-spacing:-.05em;animation:sq-title-entrance 1.1s both,sq-title-glow 5s ease-in-out 1s infinite}
+.sq-page .sq-centered-hero .sq-hero-sub{font-size:13px;max-width:none}
+.sq-page .sq-centered-hero .sq-name-tag{margin-top:15px;animation:sq-arrive .8s .3s both}
+.sq-page .sq-centered-hero .sq-mascot-wrap{width:clamp(110px,23vw,240px);opacity:.6;inset-inline-end:-17px}
+.sq-page .sq-card--purple{--sq-card-bg:#efe1f9;--sq-border:#d5adea;color:#663487}
+.sq-page .sq-card--green{--sq-card-bg:#e1f3e5;--sq-border:#9fdbad;color:#236b3a}
+.sq-page .sq-card--red{--sq-card-bg:#ffe7e7;--sq-border:#f7b6ba;color:#a02b3b}
+.dark .sq-page .sq-card--purple{--sq-card-bg:#2b1837;--sq-border:#634475;color:#ecc7ff}
+.dark .sq-page .sq-card--green{--sq-card-bg:#142f20;--sq-border:#345d40;color:#b4f1c1}
+.dark .sq-page .sq-card--red{--sq-card-bg:#331a24;--sq-border:#75404b;color:#ffb4bf}
+.sq-page.sq-reading .sq-reading-centered{background:linear-gradient(117deg,#24506b,#327e9d,#55a9c2);border-color:#6ab1d0;min-height:305px;justify-content:center;text-align:center}
+.sq-page .sq-reading-centered .sq-hero-text{max-width:80%;margin:auto;display:flex;align-items:center;flex-direction:column}
+.sq-page .sq-reading-title{font-size:clamp(34px,5.7vw,66px);font-weight:900;letter-spacing:-.045em;animation:sq-title-entrance .9s both,sq-title-glow 5s ease-in-out 1s infinite}
+.sq-page.sq-reading .sq-reading-centered .sq-illustration{opacity:.5;inset-inline-end:-48px;width:clamp(170px,31%,275px)}
+.sq-page.sq-reading .sq-primary{background:linear-gradient(115deg,#268aaf,#386eb0)}
+.sq-page .sq-quiz-source{padding:15px clamp(17px,3vw,27px);border:1px solid #c9dce7;border-radius:23px;background:#eff7fc;box-shadow:0 8px 27px #27648616;animation:sq-page-flip .5s both}
+.dark .sq-page .sq-quiz-source{background:#112432;border-color:#30556a}
+.sq-page .sq-quiz-progress{display:flex;align-items:center;justify-content:space-between;color:#245977;font-size:13px;font-weight:900}
+.dark .sq-page .sq-quiz-progress{color:#c5e5f9}
+.sq-page .sq-quiz-source .sq-progress-rail{background:#c9e3f1;margin-top:12px;height:6px}
+.sq-page .sq-quiz-source .sq-progress-fill{background:linear-gradient(90deg,#379ec3,#8ccbd5)}
+.sq-page .sq-quiz-book-meta{display:flex;align-items:center;gap:13px;margin-top:14px}
+.sq-page .sq-quiz-book-meta>svg{flex-shrink:0;color:#35799c;width:30px;height:30px}
+.sq-page .sq-quiz-book-meta>div{flex:1;min-width:0}
+.sq-page .sq-quiz-book-meta strong{display:block;font-size:clamp(13px,1.8vw,17px);font-weight:900;line-height:1.65}
+.sq-page .sq-quiz-book-meta p{font-size:11px;font-weight:700;color:#628095}
+.dark .sq-page .sq-quiz-book-meta p{color:#adc9d9}
+.sq-page .sq-quiz-location{flex-shrink:0;border-radius:999px;background:#fff;border:1px solid #c9dfed;padding:8px 12px;font-size:12px;font-weight:900;color:#235d7d}
+.dark .sq-page .sq-quiz-location{background:#24394a;color:#d8efff;border-color:#3d5e70}
+.sq-page .sq-question-panel{border-color:#c6dce8;animation:sq-page-flip .65s both;transform-origin:50% 0}
+.sq-page .sq-question-panel .sq-panel-content{padding:clamp(25px,4.5vw,54px)}
+.sq-page .sq-question-text{font-size:clamp(22px,3.4vw,35px);font-weight:900;line-height:1.85;margin-top:17px;letter-spacing:-.025em}
+.sq-page .sq-question-panel .sq-answer{min-height:74px;padding:18px 21px;font-size:clamp(15px,2vw,19px);border-color:#cbddea;background:#f8fbff;color:#264a67;animation:sq-answer-rise .45s both}
+.sq-page .sq-question-panel .sq-answer:nth-child(2){animation-delay:.08s}
+.sq-page .sq-question-panel .sq-answer:nth-child(3){animation-delay:.16s}
+.sq-page .sq-question-panel .sq-answer--correct{background:#e2f9ed;border-color:#219a6f;color:#126346}
+.sq-page .sq-question-panel .sq-answer--wrong{background:#fff0f1;border-color:#d96971;color:#a02c38}
+.dark .sq-page .sq-question-panel .sq-answer{background:#172333;color:#e3f3ff;border-color:#3a5772}
+.dark .sq-page .sq-question-panel .sq-answer--correct{background:#173c30;color:#c1f7db;border-color:#3d9c79}
+.dark .sq-page .sq-question-panel .sq-answer--wrong{background:#391c27;color:#ffc1c1;border-color:#d96971}
+@keyframes sq-title-entrance{from{opacity:0;transform:translateY(-16px) scale(.95);filter:blur(7px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes sq-title-glow{0%,100%{text-shadow:0 10px 32px #12183e50}50%{text-shadow:0 5px 34px #ffedaa88}}
+@keyframes sq-page-flip{from{opacity:0;transform:perspective(900px) rotateX(-9deg) translateY(24px)}to{opacity:1;transform:perspective(900px) rotateX(0) translateY(0)}}
+@keyframes sq-answer-rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@media(max-width:640px){
+.sq-page .sq-centered-hero .sq-hero-text,.sq-page .sq-reading-centered .sq-hero-text{max-width:100%;padding-bottom:114px}
+.sq-page .sq-centered-heading{font-size:clamp(43px,11vw,59px)}
+.sq-page .sq-reading-title{font-size:clamp(32px,8vw,43px)}
+.sq-page .sq-reading-centered .sq-illustration{width:180px;height:143px;inset-inline-end:-30px}
+.sq-page .sq-quiz-book-meta{flex-wrap:wrap}
+.sq-page .sq-quiz-location{margin-inline-start:40px}
+.sq-page .sq-question-panel .sq-answer{min-height:69px}
+}
+@media(prefers-reduced-motion:reduce){.sq-page .sq-centered-heading,.sq-page .sq-reading-title,.sq-page .sq-quiz-source,.sq-page .sq-question-panel,.sq-page .sq-question-panel .sq-answer{animation:none!important;transform:none!important}}
