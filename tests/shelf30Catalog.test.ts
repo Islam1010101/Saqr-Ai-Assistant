@@ -3,7 +3,7 @@ import {bookData} from '../api/bookData.ts';
 import {shelf30SourceRecords} from '../api/shelf30Catalog.ts';
 import {readFileSync} from 'node:fs';
 assert.equal(shelf30SourceRecords.length,50);
-const norm=(v:string)=>v.normalize('NFKC').toLocaleLowerCase().replace(/[^\\p{L}\\p{N}]/gu,'');
+const norm=(v:string)=>v.normalize('NFKC').toLocaleLowerCase().replace(/[^\p{L}\p{N}]/gu,'');
 for(const src of shelf30SourceRecords){
  const found=bookData.find(b=>b.shelf===30&&b.row===src.row&&norm(b.title)===norm(src.title));
  assert.ok(found,'Missing physical catalog record: '+src.title);
