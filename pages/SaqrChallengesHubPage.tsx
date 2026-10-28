@@ -2,6 +2,7 @@ import React from 'react';
 import {Link,Navigate} from 'react-router-dom';
 import {useLanguage} from '../App';
 import './saqrQuestVisual.css';
+import './saqrChallengesHub.css';
 
 const SvgIcon=({name,className='h-10 w-10'}:{name:'book'|'shelves'|'mic'|'stars'|'arrow'|'spark'|'compass';className?:string})=><svg viewBox="0 0 48 48" className={className} fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
  {name==='book'?<><path d="M24 11C18 7 12 7 6 9v29c7-2 13-1 18 3 5-4 11-5 18-3V9c-6-2-12-2-18 2Zm0 0v30"/><path d="m31 18 2 4 5 1-4 3 1 5-4-2-4 2 1-5-4-3 5-1 2-4Z"/></>:
@@ -10,7 +11,7 @@ const SvgIcon=({name,className='h-10 w-10'}:{name:'book'|'shelves'|'mic'|'stars'
  name==='stars'?<><path d="m25 4 5.4 12 13.2 1.2-10 8.7 3 13-11.6-6.9L13.4 39l3-13-10-8.7L19.6 16z"/><path d="m5 6 2 3m31 33 3 2"/></>:
  name==='compass'?<><circle cx="24" cy="24" r="19"/><path d="m19 19 17-7-7 17-17 7 7-17Z"/></>:
  name==='spark'?<><path d="M24 3v9m0 24v9M3 24h9m24 0h9M9 9l6 6m18 18 6 6M39 9l-6 6M9 39l6-6"/><circle cx="24" cy="24" r="6"/></>:
- <><path d="M9 24h30m-12-12 12 12-12 12"/></>}
+ name==='arrow'?<><path d="M9 24h30m-12-12 12 12-12 12"/></>:null}
  </svg>;
 
 const shortName=(value:string)=>{
@@ -34,8 +35,11 @@ const resetTilt=(e:React.PointerEvent<HTMLAnchorElement>)=>{
 const moveGlow=(e:React.PointerEvent<HTMLElement>)=>{
  if(e.pointerType!=='mouse')return;
  const rect=e.currentTarget.getBoundingClientRect();
- e.currentTarget.style.setProperty('--sx',((e.clientX-rect.left)/rect.width*100).toFixed(1)+'%');
- e.currentTarget.style.setProperty('--sy',((e.clientY-rect.top)/rect.height*100).toFixed(1)+'%');
+ const x=(e.clientX-rect.left)/rect.width, y=(e.clientY-rect.top)/rect.height;
+ e.currentTarget.style.setProperty('--sx',(x*100).toFixed(1)+'%');
+ e.currentTarget.style.setProperty('--sy',(y*100).toFixed(1)+'%');
+ e.currentTarget.style.setProperty('--hub-shift-x',((x-.5)*16).toFixed(1)+'px');
+ e.currentTarget.style.setProperty('--hub-shift-y',((y-.5)*12).toFixed(1)+'px');
 };
 
 export default function SaqrChallengesHubPage(){
@@ -53,42 +57,79 @@ export default function SaqrChallengesHubPage(){
   {to:'/game',type:'green',icon:'shelves' as const,kicker:ar?'مغامرة التصنيف':'LIBRARY QUEST',label:ar?'رتب المكتبة':'Organize the Library',desc:ar?'رتّب الكتب واكتشف أسرار الرفوف.':'Put books in their place and explore the shelves.',number:'02'},
   {to:'/saqr-studio',type:'red',icon:'mic' as const,kicker:ar?'مغامرة الإبداع':'CREATORS STUDIO',label:ar?'استديو صقر':'Saqr Studio',desc:ar?'صوتك يحكي، واستديو صقر يسمع.':'Record your story and let your voice shine.',number:'03'}
  ];
- return <div dir={dir} className="sq-page sq-challenges sq-joyful font-sans">
-  <div aria-hidden="true" className="sq-ambient"/>
-  <main className="sq-shell">
-   <nav className="sq-topnav" aria-label={ar?'التنقل':'Navigation'}>
-    <Link to="/home" className="sq-back"><SvgIcon name="arrow" className="h-4 w-4" />{ar?'العودة إلى الرئيسية':'Back to Home'}</Link>
-    <span className="sq-brand"><span className="sq-brand-mark" aria-hidden="true"/> EFIPS LIBRARY</span>
+ return <div dir={dir} className="sq-page sq-challenges sq-joyful sq-hub-v2 font-sans">
+  <div className="sq-ambient" aria-hidden="true"/>
+  <main className="sq-shell sq-hub-shell">
+   <nav className="sq-topnav sq-hub-nav" aria-label={ar?'التنقل':'Navigation'}>
+    <Link to="/home" className="sq-back sq-hub-back">
+     <span className="sq-hub-back-symbol"><SvgIcon name="arrow" className="h-4 w-4"/></span>
+     <span>{ar?'العودة للرئيسية':'Back to home'}</span>
+    </Link>
+    <div className="sq-hub-brand" dir="ltr"><span className="sq-hub-brand-shape" aria-hidden="true"><SvgIcon name="stars" className="h-4 w-4"/></span><span>EFIPS <strong>LIBRARY</strong></span></div>
    </nav>
-   <header className="sq-hero sq-challenges-hero sq-centered-hero" onPointerMove={moveGlow}>
-    <span className="sq-streak" aria-hidden="true"/>
-    <span className="sq-orbit-icon sq-orbit-one" aria-hidden="true"><SvgIcon name="stars" className="h-full w-full"/></span>
-    <span className="sq-orbit-icon sq-orbit-two" aria-hidden="true"><SvgIcon name="compass" className="h-full w-full"/></span>
-    <div className="sq-hero-text">
-      <span className="sq-eyebrow"><SvgIcon name="spark" className="h-4 w-4"/>{ar?'هيا نكتشف ونبدع':'LET’S EXPLORE AND CREATE'}</span>
-      <h1 className="sq-hero-title sq-centered-heading">{ar?'تحديات صقر':'Saqr Challenges'}</h1>
-      <p className="sq-hero-sub">{ar?'اختَر تحديك وانطلق':'Pick your challenge and begin'}</p>
-      {name&&<div className="sq-name-tag"><span className="sq-name-label">{ar?'أهلًا بك يا':'Welcome,'}</span><strong className="sq-name">{name}</strong></div>}
+   <header className="sq-hero sq-hub-hero" onPointerMove={moveGlow}>
+    <div className="sq-hub-hero-grain" aria-hidden="true"/>
+    <span className="sq-hub-hero-glint sq-hub-glint-a" aria-hidden="true"/>
+    <span className="sq-hub-hero-glint sq-hub-glint-b" aria-hidden="true"/>
+    <div className="sq-hero-text sq-hub-hero-copy">
+     <span className="sq-eyebrow sq-hub-eyebrow"><SvgIcon name="spark" className="w-4 h-4"/>{ar?'رحلتك مع صقر تبدأ هنا':'YOUR SAQR ADVENTURE STARTS HERE'}</span>
+     <h1 className="sq-hero-title sq-hub-heading">{ar?'تحديات':'Saqr'} <span>{ar?'صقر':'Challenges'}</span></h1>
+     <p className="sq-hero-sub sq-hub-lead">{ar?'ثلاث مغامرات، عوالم من المعرفة والإبداع. اختر التحدي الذي يعجبك وابدأ رحلتك!':'Three adventures filled with knowledge and creativity. Choose your path and let the fun begin.'}</p>
+     {name&&<div className="sq-hub-greeting"><span className="sq-hub-greeting-spark" aria-hidden="true"><SvgIcon name="stars" className="w-5 h-5"/></span><span>{ar?'أهلًا بك يا':'Welcome,'}</span><strong dir="auto">{name}</strong></div>}
+     <div className="sq-hub-hero-facts" aria-label={ar?'عدد التحديات':'Number of challenges'}>
+      <span className="sq-hub-fact-count">03</span>
+      <span>{ar?'تحديات ممتعة':'CREATIVE CHALLENGES'}</span>
+      <span className="sq-hub-fact-mark" aria-hidden="true"/>
+      <span>{ar?'ابدأ • استكشف • أبدع':'PLAY • EXPLORE • CREATE'}</span>
+     </div>
     </div>
-    <div className="sq-mascot-wrap"><img src="/saqr-full.png" alt={ar?'شخصية صقر':'Saqr mascot'} className="sq-mascot" /></div>
+    <div className="sq-hub-art" aria-hidden="true">
+     <span className="sq-hub-art-halo"/>
+     <span className="sq-hub-art-ring sq-hub-art-ring-one"/>
+     <span className="sq-hub-art-ring sq-hub-art-ring-two"/>
+     <span className="sq-hub-floating-icon sq-hub-float-book"><SvgIcon name="book" className="w-7 h-7"/></span>
+     <span className="sq-hub-floating-icon sq-hub-float-compass"><SvgIcon name="compass" className="w-7 h-7"/></span>
+     <span className="sq-hub-floating-icon sq-hub-float-spark"><SvgIcon name="spark" className="w-6 h-6"/></span>
+     <img className="sq-hub-character" src="/Saqr%20Challenges.png" alt=""/>
+     <span className="sq-hub-character-platform"/>
+    </div>
    </header>
-   <section className="sq-content" aria-labelledby="sq-hub-heading">
-    <div className="sq-section-head">
-     <h2 id="sq-hub-heading">{ar?'اختر مغامرتك':'Choose your adventure'}</h2>
-     
+   <section className="sq-content sq-hub-content" aria-labelledby="sq-hub-heading">
+    <div className="sq-section-head sq-hub-section-title">
+     <div className="sq-hub-heading-wrap">
+      <div className="sq-hub-small-label"><span className="sq-hub-small-dot"/>{ar?'اختر ما تحب':'PICK YOUR PATH'}</div>
+      <h2 id="sq-hub-heading">{ar?'اختر مغامرتك':'Choose your adventure'}</h2>
+      <p>{ar?'كل تحدٍّ له تجربة مختلفة… والمغامرة تبدأ بضغطة واحدة.':'Every challenge opens a different world. Pick one to begin.'}</p>
+     </div>
+     <span className="sq-hub-counter" dir="ltr"><b>03</b><span>{ar?'مغامرات':'ADVENTURES'}</span></span>
     </div>
-    <div className="sq-cards">
-     {items.map(item=><Link
-       key={item.to} to={item.to} onPointerMove={tiltCard} onPointerLeave={resetTilt} onPointerCancel={resetTilt}
-       className={'sq-card sq-card--'+item.type} aria-label={item.label}>
-       <div className="flex items-center justify-between gap-3"><span className="sq-card-icon">{item.icon==='mic'?<svg viewBox="0 0 64 64" className="h-12 w-12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M11 27V24a21 21 0 0 1 42 0v3M11 28h8v20h-8a6 6 0 0 1-6-6v-8a6 6 0 0 1 6-6Zm42 0h-8v20h8a6 6 0 0 0 6-6v-8a6 6 0 0 0-6-6Z"/><rect x="27" y="14" width="10" height="22" rx="5"/><path d="M22 31a10 10 0 0 0 20 0M32 41v10m-8 0h16"/></svg>:item.icon==='book'?<svg viewBox="0 0 48 48" className="h-10 w-10" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M4 12q11-5 20 3 9-8 20-3v27q-12-2-20 5-8-7-20-5zM24 15v29M9 23l10 3M9 30l9 3m11-7 10-3m-10 10 10-3"/></svg>:<SvgIcon name={item.icon}/>}</span><span className="text-lg font-black opacity-35 tabular-nums">{item.number}</span></div>
-       <div><p className="mt-4 text-[11px] font-black tracking-wide opacity-65">{item.kicker}</p>
-        <h3 className="sq-card-title">{item.label}</h3>
-        <p className="sq-card-text">{item.desc}</p></div>
-       <div className="sq-card-arrow"><span>{ar?'ابدأ التحدي':'ENTER CHALLENGE'}</span><SvgIcon name="arrow" className="h-5 w-5"/></div>
+    <div className="sq-cards sq-hub-cards">
+     {items.map((item,index)=><Link
+       key={item.to}
+       to={item.to}
+       onPointerMove={tiltCard}
+       onPointerLeave={resetTilt}
+       onPointerCancel={resetTilt}
+       className={'sq-card sq-hub-card sq-card--'+item.type}
+       aria-label={(ar?'ابدأ تحدي ':'Start challenge: ')+item.label}
+       style={{animationDelay:(index*110)+'ms'}}>
+       <div className="sq-hub-card-decoration" aria-hidden="true"/>
+       <div className="sq-hub-card-head">
+        <span className="sq-card-icon sq-hub-card-icon"><SvgIcon name={item.icon} className="w-10 h-10"/></span>
+        <span className="sq-hub-card-number" dir="ltr">{item.number}</span>
+       </div>
+       <div className="sq-hub-card-body">
+        <span className="sq-hub-card-kicker">{item.kicker}</span>
+        <h3 className="sq-card-title sq-hub-card-title">{item.label}</h3>
+        <p className="sq-card-text sq-hub-card-description">{item.desc}</p>
+       </div>
+       <span className="sq-hub-card-cta">
+        <span>{ar?'ابدأ التحدي':'START CHALLENGE'}</span>
+        <span className="sq-hub-card-arrow"><SvgIcon name="arrow" className="w-5 h-5"/></span>
+       </span>
       </Link>)}
     </div>
-    <p className="mt-6 text-center text-xs font-semibold text-slate-500 dark:text-slate-400">{ar?'مكتبة صقر الإمارات الدولية الخاصة · اكتشف، تعلم، وأبدع':'EFIPS Library · Discover, learn, create'}</p>
+    <div className="sq-hub-bottom" aria-hidden="true"><span className="sq-hub-bottom-line"/><SvgIcon name="stars" className="w-5 h-5"/><span>{ar?'اكتشف · تعلّم · أبدع':'DISCOVER · LEARN · CREATE'}</span><span className="sq-hub-bottom-line"/></div>
    </section>
   </main>
  </div>;
