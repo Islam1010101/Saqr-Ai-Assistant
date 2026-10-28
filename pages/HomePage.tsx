@@ -1019,6 +1019,30 @@ const HomePage: React.FC = () => {
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
                 * { font-family: 'Cairo', sans-serif !important; }
+                .efips-nav-grid { align-items: stretch; grid-auto-rows: minmax(156px, auto); }
+                .efips-nav-grid > a.efips-nav-tile {
+                    min-width: 0; min-height: 156px; height: 100%; display: flex; align-items: center;
+                    gap: 1.1rem; border-radius: 1.75rem; padding: 1.3rem 1.35rem;
+                    border-bottom-width: 6px; position: relative; isolation: isolate;
+                }
+                .efips-nav-grid > a.efips-nav-tile > div,
+                .efips-nav-grid > a.efips-nav-tile > span { min-width: 0; }
+                .efips-nav-grid > a.efips-nav-tile h3,
+                .efips-nav-grid > a.efips-nav-tile strong { font-size: clamp(1rem,1.6vw,1.35rem); line-height: 1.55; letter-spacing: 0; }
+                .efips-nav-grid > a.efips-nav-tile p,
+                .efips-nav-grid > a.efips-nav-tile small { font-size: clamp(.72rem,1vw,.86rem); line-height: 1.65; }
+                .efips-nav-grid > a.efips-nav-tile svg { max-width: 35px; max-height: 35px; flex-shrink: 0; }
+                .efips-nav-grid > a.efips-nav-tile::after {
+                    content: ''; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+                    background: linear-gradient(115deg, #fff1 0%, transparent 60%);
+                }
+                @media (max-width: 640px) {
+                    .efips-nav-grid > a.efips-nav-tile { min-height: 138px; padding: 1.1rem; border-radius: 1.45rem; }
+                }
+                @media (prefers-reduced-motion: reduce) {
+                    .efips-nav-grid > a.efips-nav-tile { transform: none !important; transition-duration: .01ms !important; }
+                }
+
                 
                 @keyframes burst-steady {
                     0% { transform: translate(0, 0) scale(0.5); opacity: 0; }
