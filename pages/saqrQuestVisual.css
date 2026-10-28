@@ -262,3 +262,35 @@
 .sq-page .sq-question-panel .sq-answer{min-height:69px}
 }
 @media(prefers-reduced-motion:reduce){.sq-page .sq-centered-heading,.sq-page .sq-reading-title,.sq-page .sq-quiz-source,.sq-page .sq-question-panel,.sq-page .sq-question-panel .sq-answer{animation:none!important;transform:none!important}}
+
+/* Playful EFIPS school-library mood: cheerful stationery palette, calm accessible motion. */
+.sq-page.sq-joyful .sq-hero{background:linear-gradient(124deg,#5479aa 0%,#6d7cbd 41%,#b77eb3 100%);border-color:#aab7e9}
+.sq-page.sq-joyful .sq-hero:before{background:
+ radial-gradient(circle at var(--sx,34%) var(--sy,40%),#fff8c25e,transparent 54%),
+ repeating-linear-gradient(121deg,transparent 0 43px,#ffffff0c 44px 45px,transparent 46px 89px)}
+.sq-page.sq-joyful .sq-hero-title{color:#fffdfc;text-shadow:0 10px 28px #233b6b65,0 0 28px #ffedab53}
+.sq-page.sq-joyful .sq-hero-sub{color:#fff7fa}
+.sq-page.sq-joyful .sq-eyebrow{color:#fff0be;background:#fff8c528;border-color:#ffe5a789}
+.sq-page.sq-joyful .sq-card{border-width:2px;box-shadow:0 12px 23px #53689721,0 4px 0 var(--sq-border)}
+.sq-page.sq-joyful .sq-card:after{opacity:.16}
+.sq-page.sq-joyful .sq-card--purple{--sq-card-bg:#efe2fd;--sq-border:#c99ee8;color:#653786}
+.sq-page.sq-joyful .sq-card--green{--sq-card-bg:#e4f8dc;--sq-border:#9ecf9c;color:#326d37}
+.sq-page.sq-joyful .sq-card--red{--sq-card-bg:#ffe8e2;--sq-border:#eca6a2;color:#a33c46}
+.dark .sq-page.sq-joyful .sq-card--purple{--sq-card-bg:#34213d;--sq-border:#86609a;color:#edcff8}
+.dark .sq-page.sq-joyful .sq-card--green{--sq-card-bg:#1b3227;--sq-border:#467653;color:#caefcc}
+.dark .sq-page.sq-joyful .sq-card--red{--sq-card-bg:#3e252b;--sq-border:#995460;color:#ffcfcc}
+.sq-page.sq-joyful .sq-card-icon{width:80px;height:80px;transform:rotate(-6deg);border-radius:24px;background:#ffffffb8;box-shadow:0 9px 0 #263d6520;animation:sq-joy-wobble 5.5s ease-in-out infinite}
+.sq-page.sq-joyful .sq-card:nth-child(2) .sq-card-icon{animation-delay:-1.7s}
+.sq-page.sq-joyful .sq-card:nth-child(3) .sq-card-icon{animation-delay:-3.1s}
+.sq-page.sq-joyful .sq-card-title{font-size:clamp(23px,2.5vw,31px)}
+.sq-page.sq-joyful .sq-panel{border:2px solid #e8d7ea;background:linear-gradient(155deg,#fff,#fffbf8)}
+.dark .sq-page.sq-joyful .sq-panel{background:linear-gradient(155deg,#171522,#16191e);border-color:#56425e}
+.sq-page.sq-joyful .sq-reading-centered{background:linear-gradient(115deg,#419bd2,#4ba9cb 45%,#7c95d6)}
+.sq-page.sq-joyful .sq-primary{background:linear-gradient(115deg,#2999c6,#637ac9)}
+.sq-page.sq-joyful .sq-answer{box-shadow:0 4px 0 #afcfe43d}
+.sq-page.sq-joyful .sq-answer:not(:disabled):hover{transform:translateY(-3px);box-shadow:0 10px 0 #99bdd742}
+.sq-page.sq-joyful .sq-question-panel{background:linear-gradient(160deg,#fff,#f8fcff)}
+.dark .sq-page.sq-joyful .sq-question-panel{background:linear-gradient(160deg,#151a28,#1e1c30)}
+@keyframes sq-joy-wobble{0%,100%{transform:rotate(-5deg) translateY(0)}50%{transform:rotate(5deg) translateY(-9px)}}
+@media(max-width:640px){.sq-page.sq-joyful .sq-card-icon{width:65px;height:65px}}
+@media(prefers-reduced-motion:reduce){.sq-page.sq-joyful .sq-card-icon{animation:none;transform:none}.sq-page.sq-joyful .sq-answer:not(:disabled):hover{transform:none}}

@@ -53,7 +53,7 @@ export default function SaqrChallengesHubPage(){
   {to:'/game',type:'green',icon:'shelves' as const,kicker:ar?'مغامرة التصنيف':'LIBRARY QUEST',label:ar?'رتب المكتبة':'Organize the Library',desc:ar?'رتّب الكتب واكتشف أسرار الرفوف.':'Put books in their place and explore the shelves.',number:'02'},
   {to:'/saqr-studio',type:'red',icon:'mic' as const,kicker:ar?'مغامرة الإبداع':'CREATORS STUDIO',label:ar?'استديو صقر':'Saqr Studio',desc:ar?'صوتك يحكي، واستديو صقر يسمع.':'Record your story and let your voice shine.',number:'03'}
  ];
- return <div dir={dir} className="sq-page sq-challenges font-sans">
+ return <div dir={dir} className="sq-page sq-challenges sq-joyful font-sans">
   <div aria-hidden="true" className="sq-ambient"/>
   <main className="sq-shell">
    <nav className="sq-topnav" aria-label={ar?'التنقل':'Navigation'}>
@@ -65,7 +65,7 @@ export default function SaqrChallengesHubPage(){
     <span className="sq-orbit-icon sq-orbit-one" aria-hidden="true"><SvgIcon name="stars" className="h-full w-full"/></span>
     <span className="sq-orbit-icon sq-orbit-two" aria-hidden="true"><SvgIcon name="compass" className="h-full w-full"/></span>
     <div className="sq-hero-text">
-      <span className="sq-eyebrow"><SvgIcon name="spark" className="h-4 w-4"/>{ar?'مساحتك للمغامرة والإبداع':'DISCOVER · PLAY · CREATE'}</span>
+      <span className="sq-eyebrow"><SvgIcon name="spark" className="h-4 w-4"/>{ar?'هيا نكتشف ونبدع':'LET’S EXPLORE AND CREATE'}</span>
       <h1 className="sq-hero-title sq-centered-heading">{ar?'تحديات صقر':'Saqr Challenges'}</h1>
       <p className="sq-hero-sub">{ar?'اختَر تحديك وانطلق':'Pick your challenge and begin'}</p>
       {name&&<div className="sq-name-tag"><span className="sq-name-label">{ar?'أهلًا بك يا':'Welcome,'}</span><strong className="sq-name">{name}</strong></div>}
