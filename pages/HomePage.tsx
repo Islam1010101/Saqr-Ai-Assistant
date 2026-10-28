@@ -814,7 +814,7 @@ const HomePage: React.FC = () => {
                             </div>
                         </Link>
 
-                        <Link to="/smart-search" className="group relative bg-[#087b69] text-white p-6 rounded-[2.5rem] border-b-8 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden bg-[#136f65] border-[#0c5149] efips-nav-tile">
+                        <Link to="/smart-search" className="group relative text-white p-6 rounded-[2.5rem] border-b-8 shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden bg-[#136f65] border-[#0c5149] efips-nav-tile">
                             <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
                                 <SmartIcon />
                             </div>
