@@ -49,9 +49,9 @@ export default function SaqrChallengesHubPage(){
  }catch{/* Existing site session guard handles restricted storage. */}
  if(role!=='student'&&role!=='admin')return <Navigate to="/home" replace/>;
  const items=[
-  {to:'/saqr-reading-quest',type:'teal',icon:'book' as const,kicker:ar?'مغامرة القراءة':'READING ADVENTURE',label:ar?'بين السطور مع صقر':'Between the Lines with Saqr',desc:ar?'كتاب جديد وأسئلة تحكي قصته.':'Discover a book through its characters and story.',number:'01'},
-  {to:'/game',type:'amber',icon:'shelves' as const,kicker:ar?'مغامرة التصنيف':'LIBRARY QUEST',label:ar?'رتب المكتبة':'Organize the Library',desc:ar?'رتّب الكتب واكتشف أسرار الرفوف.':'Put books in their place and explore the shelves.',number:'02'},
-  {to:'/saqr-studio',type:'indigo',icon:'mic' as const,kicker:ar?'مغامرة الإبداع':'CREATORS STUDIO',label:ar?'استديو صقر':'Saqr Studio',desc:ar?'صوتك يحكي، واستديو صقر يسمع.':'Record your story and let your voice shine.',number:'03'}
+  {to:'/saqr-reading-quest',type:'purple',icon:'book' as const,kicker:ar?'مغامرة القراءة':'READING ADVENTURE',label:ar?'بين السطور مع صقر':'Between the Lines with Saqr',desc:ar?'كتاب جديد وأسئلة تحكي قصته.':'Discover a book through its characters and story.',number:'01'},
+  {to:'/game',type:'green',icon:'shelves' as const,kicker:ar?'مغامرة التصنيف':'LIBRARY QUEST',label:ar?'رتب المكتبة':'Organize the Library',desc:ar?'رتّب الكتب واكتشف أسرار الرفوف.':'Put books in their place and explore the shelves.',number:'02'},
+  {to:'/saqr-studio',type:'red',icon:'mic' as const,kicker:ar?'مغامرة الإبداع':'CREATORS STUDIO',label:ar?'استديو صقر':'Saqr Studio',desc:ar?'صوتك يحكي، واستديو صقر يسمع.':'Record your story and let your voice shine.',number:'03'}
  ];
  return <div dir={dir} className="sq-page sq-challenges font-sans">
   <div aria-hidden="true" className="sq-ambient"/>
@@ -60,14 +60,14 @@ export default function SaqrChallengesHubPage(){
     <Link to="/home" className="sq-back"><SvgIcon name="arrow" className="h-4 w-4" />{ar?'العودة إلى الرئيسية':'Back to Home'}</Link>
     <span className="sq-brand"><span className="sq-brand-mark" aria-hidden="true"/> EFIPS LIBRARY</span>
    </nav>
-   <header className="sq-hero sq-challenges-hero" onPointerMove={moveGlow}>
+   <header className="sq-hero sq-challenges-hero sq-centered-hero" onPointerMove={moveGlow}>
     <span className="sq-streak" aria-hidden="true"/>
     <span className="sq-orbit-icon sq-orbit-one" aria-hidden="true"><SvgIcon name="stars" className="h-full w-full"/></span>
     <span className="sq-orbit-icon sq-orbit-two" aria-hidden="true"><SvgIcon name="compass" className="h-full w-full"/></span>
     <div className="sq-hero-text">
       <span className="sq-eyebrow"><SvgIcon name="spark" className="h-4 w-4"/>{ar?'مساحتك للمغامرة والإبداع':'DISCOVER · PLAY · CREATE'}</span>
-      <h1 className="sq-hero-title">{ar?'تحديات صقر':'Saqr Challenges'}</h1>
-      <p className="sq-hero-sub">{ar?'ثلاث مغامرات مختلفة. اختَر عالمك وابدأ اللعب.':'Three unique adventures. Pick your world and start exploring.'}</p>
+      <h1 className="sq-hero-title sq-centered-heading">{ar?'تحديات صقر':'Saqr Challenges'}</h1>
+      <p className="sq-hero-sub">{ar?'اختَر تحديك وانطلق':'Pick your challenge and begin'}</p>
       {name&&<div className="sq-name-tag"><span className="sq-name-label">{ar?'أهلًا بك يا':'Welcome,'}</span><strong className="sq-name">{name}</strong></div>}
     </div>
     <div className="sq-mascot-wrap"><img src="/saqr-full.png" alt={ar?'شخصية صقر':'Saqr mascot'} className="sq-mascot" /></div>
@@ -75,13 +75,13 @@ export default function SaqrChallengesHubPage(){
    <section className="sq-content" aria-labelledby="sq-hub-heading">
     <div className="sq-section-head">
      <h2 id="sq-hub-heading">{ar?'اختر مغامرتك':'Choose your adventure'}</h2>
-     <span className="sq-micro">{ar?'ثلاث تجارب · عالم واحد من الإبداع':'THREE EXPERIENCES · ONE WORLD'}</span>
+     
     </div>
     <div className="sq-cards">
      {items.map(item=><Link
        key={item.to} to={item.to} onPointerMove={tiltCard} onPointerLeave={resetTilt} onPointerCancel={resetTilt}
        className={'sq-card sq-card--'+item.type} aria-label={item.label}>
-       <div className="flex items-center justify-between gap-3"><span className="sq-card-icon">{item.icon==='book'?<svg viewBox="0 0 48 48" className="h-10 w-10" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M4 12q11-5 20 3 9-8 20-3v27q-12-2-20 5-8-7-20-5zM24 15v29M9 23l10 3M9 30l9 3m11-7 10-3m-10 10 10-3"/></svg>:<SvgIcon name={item.icon}/>}</span><span className="text-lg font-black opacity-35 tabular-nums">{item.number}</span></div>
+       <div className="flex items-center justify-between gap-3"><span className="sq-card-icon">{item.icon==='mic'?<svg viewBox="0 0 64 64" className="h-12 w-12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M11 27V24a21 21 0 0 1 42 0v3M11 28h8v20h-8a6 6 0 0 1-6-6v-8a6 6 0 0 1 6-6Zm42 0h-8v20h8a6 6 0 0 0 6-6v-8a6 6 0 0 0-6-6Z"/><rect x="27" y="14" width="10" height="22" rx="5"/><path d="M22 31a10 10 0 0 0 20 0M32 41v10m-8 0h16"/></svg>:item.icon==='book'?<svg viewBox="0 0 48 48" className="h-10 w-10" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M4 12q11-5 20 3 9-8 20-3v27q-12-2-20 5-8-7-20-5zM24 15v29M9 23l10 3M9 30l9 3m11-7 10-3m-10 10 10-3"/></svg>:<SvgIcon name={item.icon}/>}</span><span className="text-lg font-black opacity-35 tabular-nums">{item.number}</span></div>
        <div><p className="mt-4 text-[11px] font-black tracking-wide opacity-65">{item.kicker}</p>
         <h3 className="sq-card-title">{item.label}</h3>
         <p className="sq-card-text">{item.desc}</p></div>
