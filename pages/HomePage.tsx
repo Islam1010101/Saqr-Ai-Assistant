@@ -1020,7 +1020,7 @@ const HomePage: React.FC = () => {
                 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
                 * { font-family: 'Cairo', sans-serif !important; }
                 .efips-nav-grid { align-items: stretch; grid-auto-rows: minmax(156px, auto); }
-                .efips-nav-grid > a.efips-nav-tile--soft { color: #263750; }
+                .efips-nav-grid > a.efips-nav-tile--soft { color: #ffffff; }
                 .efips-nav-grid > a.efips-nav-tile--soft :is(h3,strong,p,small,span,svg) { color: inherit; }
                 .efips-nav-grid > a.efips-nav-tile--soft :is(h3,strong) { font-weight: 900; }
                 .efips-nav-grid > a.efips-nav-tile--soft :is(p,small) { font-weight: 700; opacity: .88; }
