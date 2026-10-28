@@ -1078,8 +1078,8 @@ const HomePage: React.FC = () => {
                 }
                 .animate-flag-float { animation: flag-float 1.8s ease-out forwards; }
 
-                @keyframes marquee-ltr { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
-                @keyframes marquee-rtl { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+                @keyframes marquee-ltr { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+                @keyframes marquee-rtl { 0% { transform: translateX(0); } 100% { transform: translateX(100%); } }
                 .animate-marquee-ltr { animation: marquee-ltr 65s linear infinite; }
                 .animate-marquee-rtl { animation: marquee-rtl 65s linear infinite; }
 
