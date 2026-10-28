@@ -4,7 +4,7 @@ import {bookData} from '../api/bookData.ts';
 
 assert.equal(shelf22SourceRecords.length,268);
 assert.equal(shelf22SourceRecords.reduce((total,book)=>total+book.copies,0),366);
-const normalized=(s:string)=>s.normalize('NFKC').toLocaleLowerCase().replace(/[^\\p{L}\\p{N}]/gu,'');
+const normalized=(s:string)=>s.normalize('NFKC').toLocaleLowerCase().replace(/[^\p{L}\p{N}]/gu,'');
 const shelf22=bookData.filter(book=>book.shelf===22);
 for(const source of shelf22SourceRecords){
   const book=shelf22.find(b=>b.row===source.row&&normalized(b.title)===normalized(source.title));
