@@ -635,6 +635,20 @@ When the user asks for books, identify the matching titles exactly as recorded, 
           ? 'Hello, my friend'
           : 'Welcome to Saqr Library');
 
+
+  // Hero parallax only; independent from Saqr's message and lesson-planning flow.
+  const onHeroPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== 'mouse') return;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const x = (event.clientX - bounds.left - bounds.width / 2) / (bounds.width / 2);
+    const y = (event.clientY - bounds.top - bounds.height / 2) / (bounds.height / 2);
+    event.currentTarget.style.setProperty('--pointer-x', String(Math.max(-1,Math.min(1,x))));
+    event.currentTarget.style.setProperty('--pointer-y', String(Math.max(-1,Math.min(1,y))));
+  };
+  const onHeroPointerLeave = (event: React.PointerEvent<HTMLDivElement>) => {
+    event.currentTarget.style.setProperty('--pointer-x','0');
+    event.currentTarget.style.setProperty('--pointer-y','0');
+  };
   const composer = (
     <footer className="saqr-composer-wrap">
       <div className="saqr-composer-content">
@@ -645,7 +659,7 @@ When the user asks for books, identify the matching titles exactly as recorded, 
               className="saqr-quick-button saqr-quick-button-lesson"
               type="button"
             >
-              <span aria-hidden="true">📑</span>
+              <svg aria-hidden="true" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
               <span>{t('mcgrawLesson')}</span>
             </button>
             <button
@@ -653,7 +667,7 @@ When the user asks for books, identify the matching titles exactly as recorded, 
               className="saqr-quick-button saqr-quick-button-presentation"
               type="button"
             >
-              <span aria-hidden="true">📊</span>
+              <svg aria-hidden="true" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 16v-4m5 4V8m5 8V6"/></svg>
               <span>{t('mcgrawPres')}</span>
             </button>
           </div>
@@ -719,16 +733,15 @@ When the user asks for books, identify the matching titles exactly as recorded, 
               <span className="saqr-hero-kicker-dot" aria-hidden="true" />
               <span>{locale === 'ar' ? 'مساحة للمعرفة والإبداع' : 'A SPACE FOR KNOWLEDGE & CREATIVITY'}</span>
             </div>
-            <div className="saqr-empty-orbit">
-              <span className="saqr-orbit-ring saqr-orbit-ring-one" aria-hidden="true" />
-              <span className="saqr-orbit-ring saqr-orbit-ring-two" aria-hidden="true" />
-              <span className="saqr-orbit-spark saqr-orbit-spark-one" aria-hidden="true">✦</span>
-              <span className="saqr-orbit-spark saqr-orbit-spark-two" aria-hidden="true">✧</span>
-              <img
-                src="/search_still_frame.png"
-                alt=""
-                onError={(event) => { event.currentTarget.style.display = 'none'; }}
-              />
+            <div className="saqr-portrait-scene" onPointerMove={onHeroPointerMove} onPointerLeave={onHeroPointerLeave}>
+              <span className="saqr-portrait-halo" aria-hidden="true" />
+              <span className="saqr-portrait-ring saqr-ring-first" aria-hidden="true" />
+              <span className="saqr-portrait-ring saqr-ring-second" aria-hidden="true" />
+              <span className="saqr-hero-symbol saqr-icon-book" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 6c-3-2-7-2-9-1v14c3-1 7-1 9 1 3-2 7-2 9-1V5c-3-1-7-1-9 1Zm0 0v14"/></svg></span>
+              <span className="saqr-hero-symbol saqr-icon-bulb" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6m-5 3h4M8 15a7 7 0 1 1 8 0c-1 .7-1.5 1.4-1.5 3h-5C9.5 16.4 9 15.7 8 15zM12 2v2"/></svg></span>
+              <span className="saqr-hero-symbol saqr-icon-pencil" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m4 17 11-11a2 2 0 0 1 3 0l1 1a2 2 0 0 1 0 3L8 21l-5 1 1-5Zm8-8 4 4"/></svg></span>
+              <span className="saqr-hero-symbol saqr-icon-star" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m12 2 2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5L12 2z"/></svg></span>
+              <div className="saqr-portrait-disc"><img className="saqr-portrait-image" src="/saqr-user-portrait.webp" alt={locale === 'ar' ? 'صقر المساعد الذكي' : 'Saqr AI Librarian'} onError={(e) => {e.currentTarget.onerror=null;e.currentTarget.src='/saqr-avatar.png';}} /></div>
             </div>
             <p className="saqr-empty-heading">
               {locale === 'ar' ? 'كيف يمكن لصقر مساعدتك اليوم؟' : 'How can Saqr help you today?'}
@@ -755,7 +768,7 @@ When the user asks for books, identify the matching titles exactly as recorded, 
                   <div className={`saqr-message-row ${msg.role === 'user' ? 'saqr-message-row-user' : 'saqr-message-row-assistant'}`}>
                     {msg.role === 'assistant' ? (
                       <div className="saqr-assistant-column">
-                        <div className="saqr-assistant-bubble" lang={locale}>
+                        <div className="saqr-assistant-bubble saqr-answer-enter" lang={locale}>
                           <div className={`saqr-markdown prose prose-slate max-w-none text-start dark:prose-invert ${index > 0 && isLessonPlanRequest(visibleMessages[index - 1]?.content || '') ? 'saqr-lesson-markdown' : ''}`}>
                             <ReactMarkdown>{msg.role === 'assistant' && index > 0 && isLessonPlanRequest(visibleMessages[index - 1]?.content || '') ? formatLessonPlanDisplay(msg.content) : msg.content}</ReactMarkdown>
                           </div>
@@ -1500,6 +1513,76 @@ When the user asks for books, identify the matching titles exactly as recorded, 
           background: #0ea5e9 !important;
           background-image: none !important;
         }
+
+
+        /* Saqr 2026 portrait and dialogue — visual styles only */
+        .saqr-page .saqr-welcome-wrap {padding:clamp(10px,2.5vh,24px) 12px 1px}
+        .saqr-page .saqr-welcome-card {max-width:min(96vw,860px);padding:0 12px!important;border:0!important;animation:saqr-greet-in .7s ease both}
+        .saqr-page .saqr-welcome-card>p {font-size:clamp(15px,2.1vw,22px);font-weight:900;line-height:1.6;color:#334155}
+        .dark .saqr-page .saqr-welcome-card>p {color:#cbd5e1}
+        .saqr-page .saqr-name-text {font-size:clamp(26px,4.5vw,47px)!important;font-weight:900;line-height:1.28;background:linear-gradient(100deg,#0f766e,#0284c7,#10b981)!important;background-clip:text!important;-webkit-background-clip:text!important;color:transparent!important;-webkit-text-fill-color:transparent!important;animation:saqr-greet-in .9s .12s both}
+        .dark .saqr-page .saqr-name-text {background:linear-gradient(100deg,#6ee7b7,#7dd3fc,#34d399)!important;background-clip:text!important;-webkit-background-clip:text!important}
+        .saqr-page .saqr-empty-chat {justify-content:space-between;gap:0}
+        .saqr-page .saqr-empty-guidance {flex:1 1 auto;min-height:0;padding:6px 16px 10px;justify-content:center}
+        .saqr-page .saqr-hero-kicker {margin-bottom:12px;color:#0f766e;border-color:rgba(13,148,136,.25);font-size:clamp(10px,1vw,12px)}
+        .dark .saqr-page .saqr-hero-kicker {color:#5eead4}
+        .saqr-portrait-scene {--pointer-x:0;--pointer-y:0;position:relative;isolation:isolate;display:grid;place-items:center;width:clamp(220px,39vh,350px);aspect-ratio:1;margin:5px auto 15px;flex-shrink:1;touch-action:pan-y}
+        .saqr-portrait-halo {position:absolute;inset:6%;border-radius:50%;background:radial-gradient(circle,rgba(16,185,129,.18),rgba(14,165,233,.09) 56%,transparent 76%);filter:blur(15px);animation:saqr-glow 4.5s ease-in-out infinite}
+        .saqr-portrait-ring {position:absolute;inset:6%;border:1px dashed rgba(16,185,129,.28);border-radius:50%;pointer-events:none;animation:saqr-turn 40s linear infinite}
+        .saqr-ring-second {inset:-3%;border-style:solid;border-color:rgba(14,165,233,.15);border-top-color:rgba(14,165,233,.45);border-bottom-color:rgba(245,158,11,.45);animation-duration:27s;animation-direction:reverse}
+        .saqr-portrait-disc {position:relative;z-index:2;width:74%;height:74%;display:grid;place-items:center;border-radius:50%;overflow:hidden;background:radial-gradient(circle at 42% 29%,#f0fdfa,#cffafe 63%,#e0e7ff);border:2px solid rgba(255,255,255,.82);box-shadow:0 0 0 8px rgba(13,148,136,.07),0 17px 43px rgba(4,120,87,.17);transform:translate3d(calc(var(--pointer-x)*12px),calc(var(--pointer-y)*12px),0);transition:transform .22s ease-out;animation:saqr-bob 5.5s ease-in-out infinite}
+        .dark .saqr-portrait-disc {background:radial-gradient(circle at 42% 29%,#155e75,#0f172a 78%);border-color:rgba(94,234,212,.33);box-shadow:0 0 0 8px rgba(45,212,191,.06),0 17px 43px rgba(0,0,0,.4)}
+        .saqr-portrait-image {width:115%;height:115%;object-fit:contain;object-position:center;transform:translateY(5%);filter:drop-shadow(0 7px 10px rgba(0,0,0,.1))}
+        .saqr-hero-symbol {position:absolute;z-index:4;width:clamp(42px,6.2vh,58px);aspect-ratio:1;display:grid;place-items:center;background:#fff;color:#0d9488;border:1px solid rgba(16,185,129,.18);border-radius:17px;box-shadow:0 12px 26px rgba(15,23,42,.13);pointer-events:none;animation:saqr-icon-float 5s ease-in-out infinite;translate:calc(var(--pointer-x)*-10px) calc(var(--pointer-y)*-10px)}
+        .saqr-hero-symbol svg {width:55%;height:55%}
+        .dark .saqr-hero-symbol {background:#0c1e27;border-color:rgba(94,234,212,.26);color:#5eead4}
+        .saqr-icon-book {top:7%;left:0;animation-delay:-.6s}
+        .saqr-icon-bulb {top:8%;right:0;color:#d97706;animation-delay:-2s}
+        .saqr-icon-pencil {bottom:9%;left:0;color:#0284c7;animation-delay:-3.1s}
+        .saqr-icon-star {bottom:10%;right:0;color:#a855f7;animation-delay:-1.2s}
+        .saqr-page .saqr-empty-heading {font-size:clamp(20px,2.5vw,28px);font-weight:900;color:#0f766e}
+        .dark .saqr-page .saqr-empty-heading {color:#5eead4}
+        .saqr-page .saqr-empty-subheading {font-size:clamp(12px,1.2vw,15px);max-width:540px}
+        .saqr-page .saqr-feature-chips span {font-size:clamp(10px,1.1vw,12px);color:#0f766e;border-color:rgba(13,148,136,.2)}
+        .dark .saqr-page .saqr-feature-chips span {color:#5eead4}
+        .saqr-page .saqr-composer-wrap {padding:clamp(10px,1.8vh,18px) 14px max(14px,env(safe-area-inset-bottom));border-top:0!important;background:transparent!important}
+        .saqr-page .saqr-composer-content {max-width:920px}
+        .saqr-page .saqr-composer {min-height:clamp(56px,7vh,72px);border-radius:24px;border:1.5px solid rgba(13,148,136,.38);box-shadow:0 7px 28px rgba(4,120,87,.11)!important}
+        .saqr-page .saqr-composer:focus-within {border-color:#0d9488;box-shadow:0 0 0 4px rgba(16,185,129,.1),0 11px 28px rgba(13,148,136,.16)!important}
+        .saqr-page .saqr-quick-actions {gap:9px;padding-bottom:11px}
+        .saqr-page .saqr-quick-button {min-height:37px;padding:8px 13px;font-size:clamp(11px,1.2vw,13px);border-radius:14px}
+        .saqr-page .saqr-input {font-size:clamp(14px,1.35vw,17px)}
+        .saqr-page .saqr-send-button {width:clamp(41px,5.8vh,52px);height:clamp(41px,5.8vh,52px);border-radius:16px}
+        .saqr-page .saqr-active-chat .saqr-messages {padding:12px 14px 6px}
+        .saqr-page .saqr-active-chat .saqr-messages-inner {max-width:920px;gap:14px}
+        .saqr-page .saqr-assistant-bubble {background:#f8fcfb!important;border:1px solid rgba(20,184,166,.24);border-radius:22px 22px 22px 7px;box-shadow:0 8px 25px rgba(13,148,136,.07)}
+        .dark .saqr-page .saqr-assistant-bubble {background:#071512!important;border-color:rgba(94,234,212,.24)}
+        .saqr-page .saqr-message-visible .saqr-answer-enter {animation:saqr-answer-in .46s cubic-bezier(.19,.78,.31,1) both}
+        @keyframes saqr-greet-in {from {opacity:0;transform:translateY(12px);filter:blur(4px)}to {opacity:1;transform:translateY(0);filter:blur(0)}}
+        @keyframes saqr-glow {0%,100% {opacity:.7;scale:.96}50% {opacity:1;scale:1.07}}
+        @keyframes saqr-turn {from {rotate:0deg}to {rotate:360deg}}
+        @keyframes saqr-bob {0%,100% {translate:0 0}50% {translate:0 -5px}}
+        @keyframes saqr-icon-float {0%,100% {rotate:-7deg;transform:translateY(0)}50% {rotate:7deg;transform:translateY(-8px)}}
+        @keyframes saqr-answer-in {from {opacity:0;transform:translateY(16px) scale(.985);filter:blur(3px)}to {opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
+        @media (max-width:640px) {
+          .saqr-page .saqr-welcome-wrap {padding-top:12px}
+          .saqr-page .saqr-welcome-card>p {font-size:14px}
+          .saqr-page .saqr-name-text {font-size:clamp(23px,7vw,34px)!important}
+          .saqr-portrait-scene {width:clamp(180px,61vw,285px);margin-block:4px 10px}
+          .saqr-page .saqr-empty-heading {font-size:clamp(18px,4.7vw,23px)}
+          .saqr-page .saqr-empty-guidance {padding-inline:10px}
+          .saqr-page .saqr-composer-wrap {padding-inline:10px}
+          .saqr-page .saqr-active-chat .saqr-messages {padding-inline:8px}
+        }
+        @media (max-height:650px) {
+          .saqr-page .saqr-welcome-wrap {padding-top:4px}
+          .saqr-page .saqr-name-text {font-size:clamp(20px,3vw,30px)!important}
+          .saqr-portrait-scene {width:clamp(154px,30vh,205px);margin:0 auto 4px}
+          .saqr-page .saqr-hero-kicker {margin-bottom:5px}
+          .saqr-page .saqr-feature-chips {margin-top:4px}
+        }
+        @media (max-width:380px) and (max-height:710px) {.saqr-page .saqr-feature-chips {display:none}}
+        @media (prefers-reduced-motion:reduce) {.saqr-page .saqr-portrait-scene *, .saqr-page .saqr-answer-enter,.saqr-page .saqr-name-text {animation:none!important;transition:none!important}}
 
       `}</style>
     </div>
