@@ -1,3 +1,4 @@
+import {shelf22SourceRecords} from './shelf22Catalog.ts';
 import {shelf40Books} from './shelf40Catalog.ts';
 import {shelf30SourceRecords} from './shelf30Catalog.ts';
 import {uploadedLibraryBooks} from './uploadedCatalog20261028.ts';
@@ -3688,7 +3689,19 @@ const verifiedUploadedBooks:Book[]=uploadedLibraryBooks.filter(b=>!existingImpor
  language:'AR',level:'General',
  summary:'هذا الكتاب متوفر في مكتبة المدرسة الورقية. لم يُرفق ملخص موثق لمحتواه.'
 }));
-export const bookData:Book[]=[...beforeUploadedBooks,...verifiedUploadedBooks];
+// Inventory for cabinet 22: identical copies are counted, not repeated as search results.
+// Existing records and IDs remain untouched to preserve borrowing / reading history.
+const beforeShelf22:Book[]=[...beforeUploadedBooks,...verifiedUploadedBooks];
+const shelf22KnownKeys=new Set(beforeShelf22.filter(b=>b.shelf===22).map(importedBookKey));
+const newShelf22Books:Book[]=shelf22SourceRecords.filter(b=>!shelf22KnownKeys.has(importedBookKey(b))).map((b,i)=>({
+  id:'shelf22-20261028-'+String(i+1).padStart(3,'0'),
+  title:b.title,author:b.author||'Unknown Author',shelf:22,row:b.row,copies:b.copies,
+  ...(b.isbn?{isbn:b.isbn,isbnStatus:'candidate' as const}:{}),
+  ...(b.needsReview?{needsReview:true}:{}),
+  language:'EN',subject:inferredSubject(b.title,b.author,'',22),level:'General',
+  summary:'This book is available in the EFIPS physical library. A verified synopsis has not been provided.'
+}));
+export const bookData:Book[]=[...beforeShelf22,...newShelf22Books];
 
 // 5. دالة البحث المخصصة للاستخدام في تطبيق الويب
 export function findInCatalog(q: string): Book[] {
