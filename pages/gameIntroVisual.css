@@ -1,0 +1,142 @@
+/* Saqr Library Game: scoped introduction and learning-stage visual design.
+ * Gameplay, scoring, timers, pointer-based dragging, and certificate are untouched.
+ */
+.dewey-game .game-intro-stage{
+ --intro-emerald:#087765;--intro-sea:#0b86a0;--intro-gold:#f5bc62;
+ width:min(100%,1040px);padding:clamp(20px,3.6vw,48px)!important;
+ border:1px solid #bce8dd;border-radius:clamp(24px,3.5vw,38px);
+ background:linear-gradient(147deg,#fff 0%,#f4fffc 51%,#edf9ff 100%);
+ box-shadow:0 26px 75px rgba(12,75,77,.14),0 5px 0 rgba(20,184,166,.09);
+ text-align:start!important;isolation:isolate;
+ animation:game-intro-enter .72s cubic-bezier(.18,.75,.28,1) both;
+}
+.dewey-game .game-intro-stage::before{
+ top:auto;bottom:-155px;inset-inline-end:-100px;width:400px;height:400px;
+ opacity:.6;background:radial-gradient(circle,rgba(99,213,193,.19),transparent 68%);
+}
+.dewey-game .game-intro-ambient{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;border-radius:inherit}
+.dewey-game .game-intro-ambient:before,.dewey-game .game-intro-ambient:after{
+ content:"";position:absolute;border-radius:50%;pointer-events:none;
+ animation:game-intro-breathe 7s ease-in-out infinite;
+}
+.dewey-game .game-intro-ambient:before{width:500px;height:500px;inset-inline-start:-260px;top:-360px;background:radial-gradient(circle,#13bc9b19,transparent 70%)}
+.dewey-game .game-intro-ambient:after{width:310px;height:310px;inset-inline-end:-120px;bottom:-185px;background:radial-gradient(circle,#60a5fa1f,transparent 70%);animation-delay:-3s}
+.dewey-game .game-intro-hero{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);align-items:center;gap:clamp(16px,3.5vw,38px);min-height:355px;position:relative;z-index:2}
+.dewey-game .game-intro-copy{position:relative;z-index:3;min-width:0}
+.dewey-game .game-intro-stage .game-kicker{display:inline-flex;margin:0 0 20px;padding:8px 15px;font-size:clamp(10px,1.1vw,12px);border:1px solid #9cdacb;border-radius:999px;background:#eafaf3;color:#066d59;box-shadow:0 6px 16px #086e5611;animation:game-intro-up .65s .1s both}
+.dewey-game .game-intro-stage .game-title{font-size:clamp(31px,4.4vw,55px);line-height:1.38;letter-spacing:-.035em;color:#096d63;max-width:490px;text-wrap:balance;animation:game-intro-up .68s .17s both}
+.dewey-game .game-intro-stage .game-subtitle{font-size:clamp(14px,1.6vw,17px);line-height:1.95;max-width:490px;color:#506679;margin:18px 0 0;animation:game-intro-up .68s .26s both}
+.dewey-game .game-intro-art{position:relative;display:grid;place-items:center;height:clamp(315px,31vw,410px);min-width:0;isolation:isolate}
+.dewey-game .game-intro-halo{position:absolute;width:min(100%,365px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 46% 40%,#ffffff 0%,#c5f2e6 53%,#d6e9ff 75%,transparent 76%);box-shadow:0 0 0 18px #0aab9110,0 0 0 37px #42a6d308;animation:game-halo-pulse 5.5s ease-in-out infinite}
+.dewey-game .game-intro-ring{position:absolute;width:min(112%,405px);aspect-ratio:1;border:1px dashed #0e998c55;border-radius:50%;animation:game-orbit-rotate 36s linear infinite}
+.dewey-game .game-intro-ring--second{width:min(86%,317px);border:1px solid #0e998c25;border-top-color:#e8a7408c;border-bottom-color:#0ea5e97d;animation-duration:26s;animation-direction:reverse}
+.dewey-game .game-intro-character{position:relative;z-index:3;display:block;height:100%;width:100%;max-width:430px;object-fit:contain;object-position:50% 50%;filter:drop-shadow(0 17px 18px rgba(18,56,71,.19));animation:game-character-bob 5.4s ease-in-out infinite}
+.dewey-game .game-intro-character-fallback{position:absolute;z-index:1;color:#0b806c;opacity:.2}
+.dewey-game .game-intro-character-fallback svg{width:150px;height:150px}
+.dewey-game .game-intro-float{position:absolute;z-index:4;display:grid;place-items:center;width:clamp(46px,5.5vw,61px);aspect-ratio:1;border:1px solid #ffffffbd;border-radius:18px;background:#fffdf1e8;box-shadow:0 12px 27px #0a45452d;color:#11907a;pointer-events:none;animation:game-float-icon 5s ease-in-out infinite}
+.dewey-game .game-intro-float svg{width:54%;height:54%}
+.dewey-game .game-intro-float--book{top:10%;inset-inline-start:0;color:#0c8f83}
+.dewey-game .game-intro-float--idea{top:12%;inset-inline-end:-1%;color:#db8a27;animation-delay:-1.7s}
+.dewey-game .game-intro-float--star{bottom:10%;inset-inline-start:3%;color:#2085c1;animation-delay:-3s}
+.dewey-game .game-intro-float--shelves{bottom:9%;inset-inline-end:0;color:#8363bc;animation-delay:-2s}
+.dewey-game .game-intro-spark{position:absolute;z-index:4;display:block;width:9px;height:9px;border-radius:3px;background:#eeb95a;transform:rotate(45deg);animation:game-sparkle 3.1s ease-in-out infinite}
+.dewey-game .game-intro-spark--one{top:30%;inset-inline-start:-2%}
+.dewey-game .game-intro-spark--two{bottom:27%;inset-inline-end:-1%;animation-delay:-1.4s;background:#40b9c6}
+.dewey-game .game-intro-details{position:relative;z-index:2;border-top:1px solid #cce8e2;padding-top:22px;animation:game-intro-up .68s .34s both}
+.dewey-game .game-intro-stage .profile-card{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:16px;margin:0 0 18px;padding:17px 20px;border:1px solid #cce7e1;border-radius:22px;background:#ffffffcd;box-shadow:0 6px 17px #0f766e0a}
+.dewey-game .game-intro-stage .profile-field{min-width:0;gap:12px}
+.dewey-game .game-intro-stage .profile-icon{height:44px;width:44px;border-radius:15px;background:#e7f8f3;color:#087b66;display:grid;place-items:center}
+.dewey-game .game-intro-stage .profile-label{color:#64817c;font-size:11px}
+.dewey-game .game-intro-stage .profile-value{font-size:clamp(13px,1.5vw,17px);color:#12483d}
+.dewey-game .game-intro-stage .primary-action{position:relative;overflow:hidden;isolation:isolate;min-height:65px;width:100%;border-radius:20px;border:1px solid #39b894;background:linear-gradient(112deg,#08765a,#159c83 60%,#087b93);color:#fff;font-size:clamp(15px,2vw,19px);box-shadow:0 8px 0 #08715938,0 18px 29px #0696752c;transition:transform .25s ease,box-shadow .25s ease,filter .25s ease}
+.dewey-game .game-intro-stage .primary-action::before{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 25%,#ffffff38 49%,transparent 68%);transform:translateX(-130%);animation:game-start-shine 5.5s ease-in-out infinite;pointer-events:none}
+.dewey-game .game-intro-stage .primary-action:hover{transform:translateY(-4px);box-shadow:0 10px 0 #0871592e,0 21px 32px #06967538;filter:brightness(1.05)}
+.dewey-game .game-intro-stage .primary-action:active{transform:translateY(1px);box-shadow:0 3px 0 #08715938}
+.dewey-game .game-intro-button-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:12px;background:#ffffff24;flex-shrink:0}
+.dewey-game .game-intro-button-icon svg{width:20px;height:20px}
+.dewey-game .game-intro-note{text-align:center;margin:18px 0 0!important;color:#658184;line-height:1.9;font-size:11px!important;font-weight:800}
+.dewey-game .game-intro-note span{display:inline-block}
+.dark .dewey-game .game-intro-stage,.dark .dewey-game .game-intro-stage.game-panel,html.dark .dewey-game .game-intro-stage.game-panel{background:linear-gradient(145deg,#0c191a,#0e1c27 60%,#121b30);border-color:#275e53;box-shadow:0 26px 70px #0009}
+.dark .dewey-game .game-intro-stage .game-kicker{background:#123a31;color:#a9edcf;border-color:#346b5c}
+.dark .dewey-game .game-intro-stage .game-title{color:#76ead1}
+.dark .dewey-game .game-intro-stage .game-subtitle{color:#b6c8d5}
+.dark .dewey-game .game-intro-halo{background:radial-gradient(circle at 47% 35%,#24504a,#153d45 58%,#14293b 76%,transparent 78%);box-shadow:0 0 0 18px #2dd4bf0b,0 0 0 37px #38bdf809}
+.dark .dewey-game .game-intro-float{background:#132b32ec;border-color:#41685d;color:#67e8cb}
+.dark .dewey-game .game-intro-details{border-color:#2b514b}
+.dark .dewey-game .game-intro-stage .profile-card{background:#152930ed;border-color:#285a51}
+.dark .dewey-game .game-intro-stage .profile-icon{background:#1c433a;color:#a5f3d9}
+.dark .dewey-game .game-intro-stage .profile-label{color:#a8c3c3}
+.dark .dewey-game .game-intro-stage .profile-value{color:#f0fdf9}
+.dark .dewey-game .game-intro-note{color:#98b4bc}
+/* A tidy look for the existing instructions, categories, tutorials, and actions. */
+.dewey-game:not(.gameplay-mode) .game-panel:not(.game-intro-stage){border-radius:clamp(24px,3vw,35px);box-shadow:0 19px 55px #12493c16}
+.dewey-game:not(.gameplay-mode) .learn-heading{margin-bottom:22px}
+.dewey-game:not(.gameplay-mode) .learn-footer{padding-top:21px}
+.dewey-game:not(.gameplay-mode) .category-grid{gap:clamp(10px,1.7vw,17px)}
+.dewey-game:not(.gameplay-mode) .category-tile{min-height:70px;border-radius:17px;padding:13px;box-shadow:0 8px 19px #051a3219}
+.dewey-game:not(.gameplay-mode) .tutorial-illustration{border-radius:26px}
+.dewey-game:not(.gameplay-mode) .tutorial-panel .primary-action,.dewey-game:not(.gameplay-mode) .learn-footer .primary-action{border-radius:18px;min-height:58px;box-shadow:0 8px 20px #168a782c}
+/* Tablet: keep the character visually dominant, without cropping. */
+@media(max-width:850px){
+ .dewey-game .game-intro-stage{width:min(100%,780px)}
+ .dewey-game .game-intro-hero{grid-template-columns:1.02fr .98fr;min-height:285px;gap:12px}
+ .dewey-game .game-intro-art{height:300px}
+ .dewey-game .game-intro-stage .game-title{font-size:clamp(29px,4.5vw,40px)}
+ .dewey-game .game-intro-stage .game-subtitle{font-size:13px}
+}
+@media(max-width:620px){
+ .dewey-game .game-intro-stage{padding:20px 17px!important;border-radius:26px}
+ .dewey-game .game-intro-hero{display:flex;flex-direction:column;align-items:stretch;gap:0}
+ .dewey-game .game-intro-copy{text-align:center}
+ .dewey-game .game-intro-stage .game-kicker{margin-bottom:12px;padding:6px 12px}
+ .dewey-game .game-intro-stage .game-title{font-size:clamp(28px,7.7vw,39px);margin:0 auto}
+ .dewey-game .game-intro-stage .game-subtitle{max-width:470px;margin:9px auto 0;line-height:1.7}
+ .dewey-game .game-intro-art{width:100%;height:clamp(200px,53vw,295px);margin:0 auto}
+ .dewey-game .game-intro-halo{width:clamp(185px,60vw,265px)}
+ .dewey-game .game-intro-ring{width:clamp(205px,68vw,290px)}
+ .dewey-game .game-intro-ring--second{width:clamp(170px,53vw,240px)}
+ .dewey-game .game-intro-character{max-width:300px;max-height:100%}
+ .dewey-game .game-intro-float{width:43px;border-radius:13px}
+ .dewey-game .game-intro-float--book{top:13%;inset-inline-start:5%}
+ .dewey-game .game-intro-float--idea{top:16%;inset-inline-end:5%}
+ .dewey-game .game-intro-float--star{bottom:12%;inset-inline-start:8%}
+ .dewey-game .game-intro-float--shelves{bottom:10%;inset-inline-end:8%}
+ .dewey-game .game-intro-details{padding-top:15px}
+ .dewey-game .game-intro-stage .profile-card{margin-bottom:15px;padding:12px;gap:9px}
+ .dewey-game .game-intro-stage .profile-icon{width:36px;height:36px;border-radius:12px}
+ .dewey-game .game-intro-stage .profile-field{gap:7px}
+ .dewey-game .game-intro-stage .profile-value{font-size:12px}
+ .dewey-game .game-intro-stage .profile-label{font-size:10px}
+ .dewey-game .game-intro-stage .primary-action{min-height:58px;font-size:15px}
+ .dewey-game .game-intro-note{font-size:10px!important;margin-top:12px!important}
+}
+@media(max-width:385px){
+ .dewey-game .game-intro-stage{padding:16px 13px!important}
+ .dewey-game .game-intro-art{height:205px}
+ .dewey-game .game-intro-stage .profile-card{grid-template-columns:1fr}
+ .dewey-game .game-intro-stage .profile-field+.profile-field{border-inline-start:0;border-top:1px solid #bcded6;padding-inline-start:0;padding-top:9px}
+ .dark .dewey-game .game-intro-stage .profile-field+.profile-field{border-color:#355f59}
+}
+@media(max-height:650px) and (orientation:landscape){
+ .dewey-game .game-intro-stage{margin-block:15px}
+ .dewey-game .game-intro-hero{min-height:230px}
+ .dewey-game .game-intro-art{height:230px}
+ .dewey-game .game-intro-stage .game-kicker{margin-bottom:7px}
+ .dewey-game .game-intro-stage .game-subtitle{margin-top:5px}
+ .dewey-game .game-intro-details{padding-top:12px}
+}
+@media(hover:none),(pointer:coarse){
+ .dewey-game .game-intro-stage .primary-action:hover{transform:none;box-shadow:0 8px 0 #08715938,0 18px 29px #0696752c}
+}
+@media(prefers-reduced-motion:reduce){
+ .dewey-game .game-intro-stage,.dewey-game .game-intro-stage *, .dewey-game .game-intro-stage *::before,.dewey-game .game-intro-stage *::after{animation:none!important;transition:none!important}
+}
+@keyframes game-intro-enter{from{opacity:0;transform:translateY(17px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes game-intro-up{from{opacity:0;transform:translateY(13px)}to{opacity:1;transform:translateY(0)}}
+@keyframes game-halo-pulse{0%,100%{transform:scale(.96);opacity:.83}50%{transform:scale(1.04);opacity:1}}
+@keyframes game-character-bob{0%,100%{translate:0 0}50%{translate:0 -9px}}
+@keyframes game-orbit-rotate{from{rotate:0deg}to{rotate:360deg}}
+@keyframes game-float-icon{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-9px) rotate(6deg)}}
+@keyframes game-intro-breathe{0%,100%{opacity:.8;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
+@keyframes game-sparkle{0%,100%{opacity:.35;scale:.8}50%{opacity:1;scale:1.3}}
+@keyframes game-start-shine{0%,60%,100%{transform:translateX(-130%)}77%{transform:translateX(130%)}}
