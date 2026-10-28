@@ -345,32 +345,38 @@ export default function TutorialPage() {
     {
       id: 'manual-search', title: label('البحث اليدوي', 'Manual Search'),
       description: label('البحث عن كتاب داخل مكتبة المدرسة والوصول إلى مكانه.', 'Search the school library catalogue and locate a book.'),
-      color: 'bg-sky-400', border: 'border-sky-600', icon: <SearchIcon />,
+      color: 'bg-[#ef6266]', border: 'border-[#ba3b43]', icon: <SearchIcon />,
       hint: label('ابحث بعنوان الكتاب أو مؤلفه، ثم افتح البطاقة لمعرفة مكانه. هذه المعاينة لا تتصل بفهرس الكتب الحقيقي.', 'Search by title or author, then open a card to learn its sample location. This tour does not connect to the live catalogue.')
     },
     {
       id: 'smart-search', title: label('اسأل صقر الذكي', 'Ask Saqr (AI)'),
       description: label('مساعدك الذكي للبحث والاستفسار.', 'Your smart assistant for research and questions.'),
-      color: 'bg-emerald-400', border: 'border-emerald-600', icon: <SmartIcon />,
+      color: 'bg-[#56c5e6]', border: 'border-[#258bad]', icon: <SmartIcon />,
       hint: label('اطلب اقتراح كتاب أو اكتب سؤالاً باللغة الطبيعية. في الجولة ستظهر لك تلميحات فقط ولن تُرسل رسالتك إلى أي خدمة.', 'Ask for book recommendations or use natural language. In this tour, prompts only reveal guidance and are not sent to a service.')
     },
     {
       id: 'digital-library', title: label('المكتبة الإلكترونية', 'Digital Library'),
       description: label('عالم من الكتب والروايات الرقمية.', 'A world of digital books and novels.'),
-      color: 'bg-indigo-400', border: 'border-indigo-600', icon: <BookIcon />,
+      color: 'bg-[#527bd8]', border: 'border-[#3357b2]', icon: <BookIcon />,
       hint: label('تعرّف على أقسام القراءة الرقمية وطريقة استكشاف الموارد المتاحة بحسب صلاحيات حسابك.', 'Explore digital reading sections and resources available to your account.')
     },
     {
       id: 'creators', title: label('ركن المبدعين', 'Creators Corner'),
       description: label('استكشف إبداعات ومشاركات زملائك.', 'Explore creative work shared by students.'),
-      color: 'bg-purple-400', border: 'border-purple-600', icon: <CreatorIcon />,
+      color: 'bg-[#e56aac]', border: 'border-[#ad3c78]', icon: <CreatorIcon />,
       hint: label('مساحة لاستعراض الأعمال والمشروعات الإبداعية. محتوى المشاركات الحقيقية مخفي في هذه الجولة.', 'A space for creative work and projects. Real submissions are hidden in this tour.')
     },
     {
       id:'reading-quest',title:label('بين السطور مع صقر','Between the Lines with Saqr'),
       description:label('أسئلة موثقة من كتب عربية وإنجليزية تناسب الطلاب والمعلمين.','Source-backed questions from school books, matched to account and language.'),
-      color:'bg-amber-500',border:'border-amber-700',icon:<BookIcon/>,
-      hint:label('تبدأ الجولة بالترحيب باسمك ثم اختيار عدد الكتب فقط، ويعرض صقر كل كتاب ومكانه وأسئلة عن محتواه أثناء اللعب. للمعلمين زر مستقل في الرئيسية، وللطلاب من تحديات صقر مع رتب المكتبة والاستديو.','The journey welcomes you and asks only for a book count. Saqr then presents one book and its shelf alongside content questions. Teachers have a direct shortcut; students use Saqr Challenges with sorting and Studio.')
+      color:'bg-[#5ab8e9]',border:'border-[#2889ba]',icon:<BookIcon/>,
+      hint:label('للمعلمين والأدمن تظهر كتب تعليمية مناسبة للعمر، وللطلاب كتبهم المناسبة. تبدأ الجولة بالاسم ثم اختيار عدد الكتب فقط، وبعدها أسئلة عن المحتوى مع عنوان الكتاب والرف والصف. اللغة حسب الواجهة. هذا الزر مستقل للمعلمين، والطلاب يدخلون من تحديات صقر.','Teachers and administrators receive educator/adult reading books; students receive age-appropriate books. Choose only a book count, then answer content questions with title and shelf/row shown. Books and questions follow the interface language. Teachers use this shortcut; students enter through Saqr Challenges.')
+    },
+    {
+      id: 'saqr-challenges', title: label('تحديات صقر', 'Saqr Challenges'),
+      description: label('مغامرات الطلاب: بين السطور، رتب المكتبة، واستديو صقر.', 'For students: reading, library sorting and Saqr Studio.'),
+      color: 'bg-[#f3c54e]', border: 'border-[#c48d23]', icon: <GameIcon />,
+      hint: label('للطلاب بطاقة واحدة على الرئيسية باسم تحديات صقر. بالداخل ثلاث بطاقات مرحة: بين السطور بالبنفسجي، رتب المكتبة بالأخضر، واستديو صقر بالأحمر مع سماعة وميكروفون. أما المعلم فيرى بين السطور مباشرة. اضغط أو المس هنا لعرض هذا الشرح فقط.', 'Students use one Saqr Challenges tile on Home, opening three colorful activities: purple Reading Quest, green Library Sorting and red Saqr Studio with headphones and microphone. Teachers see Between the Lines separately. Tap here for guidance only.')
     },
     {
       id: 'national-identity', title: label('صقر وهوية وطن', 'Saqr & National Identity'),
@@ -381,27 +387,15 @@ export default function TutorialPage() {
         'Explore the Cultural Passport, Language Treasures, Heritage Research Detective, a 10-question UAE Flag Challenge and the separate National Identity Pavilion. Only students receive game points. This tour does not launch games.')
     },
     {
-      id: 'studio', title: label('استديو صقر', 'Saqr Studio'),
-      description: label('سجّل بودكاست بعنوانه ثم راجع حلقتك قبل إرسال MP3.', 'Record a titled podcast, review it, and submit one MP3.'),
-      color: 'bg-blue-500', border: 'border-blue-700', icon: <StudioIcon />,
-      hint: label('تعرّف على تسجيل الصوت ومعاينة المؤثرات وإرسال حلقة MP3 بعنوانها واسم الطالب وصفه؛ الجولة لا تسجل ولا ترفع ملفات.', 'Explore recording, preview effects, and one MP3 podcast submission with title, student name and grade. No audio is recorded or uploaded during this tour.')
-    },
-    {
       id: 'schedule', title: label('جدول المكتبة', 'Library Schedule'),
       description: label('تنظيم وحجز زيارات المكتبة للمعلمين.', 'Organize and book teacher library visits.'),
-      color: 'bg-teal-500', border: 'border-teal-700', icon: <ScheduleIcon />,
+      color: 'bg-[#a77bdc]', border: 'border-[#754aa8]', icon: <ScheduleIcon />,
       hint: label('يمكن للمعلمين الاطلاع على الحصص المتاحة وحجوزاتهم. بيانات الحجوزات والأسماء الفعلية مخفية هنا.', 'Teachers can view available periods and reservations. Real schedules and names are hidden here.')
-    },
-    {
-      id: 'game', title: label('رتب المكتبة', 'Library Game'),
-      description: label('العب وتعلّم تصنيف الكتب.', 'Play and learn how books are classified.'),
-      color: 'bg-amber-400 text-slate-900', border: 'border-amber-600', icon: <GameIcon />,
-      hint: label('تجربة تعليمية تفاعلية تساعد الطلاب على فهم تصنيف ديوي وتنظيم الكتب.', 'An interactive learning activity that helps students understand Dewey Decimal Classification.')
     },
     {
       id: 'admin', title: label('إدارة النظام', 'System Admin'),
       description: label('أدوات إدارة المنصة والبيانات.', 'Platform and data administration tools.'),
-      color: 'bg-rose-500', border: 'border-rose-700', icon: <AdminIcon />,
+      color: 'bg-[#b28355]', border: 'border-[#805531]', icon: <AdminIcon />,
       hint: label('هذه الأدوات مخصصة للإدارة فقط؛ لا يمكن فتح لوحة الإدارة أو عرض بياناتها من صفحة الزائر.', 'Administration tools are restricted. This visitor tour cannot open the admin dashboard or expose its records.')
     }
   ];
@@ -613,28 +607,49 @@ export default function TutorialPage() {
               </div>
               <p className="text-xs font-bold text-slate-500 dark:text-slate-400">{label('المس أي بطاقة لعرض التلميح', 'Tap any card to pin its feature hint')}</p>
             </div>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {featureCards.map((card, index) => (
                 <HintTarget key={card.id} id={card.id} title={card.title} description={card.hint} tooltipBelow {...hintState}>
-                  <div style={{ animation: 'tutorial-fade-up .65s ease-out ' + (index * 65) + 'ms both' }} className={'tutorial-feature-card group relative flex min-h-[140px] cursor-pointer items-center gap-5 overflow-hidden rounded-[2.5rem] border-b-8 p-6 text-white shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl active:translate-y-1 active:border-b-0 ' + card.color + ' ' + card.border}>
+                  <div style={{ animation: 'tutorial-fade-up .65s ease-out ' + (index * 65) + 'ms both' }} className={'tutorial-feature-card group relative flex h-full min-h-[156px] cursor-pointer items-center gap-4 overflow-hidden rounded-[1.75rem] border-b-[6px] p-5 text-white shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl active:translate-y-1 active:border-b-0 ' + card.color + ' ' + card.border}>
                     <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[2.4rem]">
                       <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/10 blur-2xl transition-transform group-hover:scale-125" />
                     </div>
-                    <div className={'relative z-10 shrink-0 rounded-2xl bg-white/20 p-3.5 backdrop-blur-md transition-transform duration-300 group-hover:rotate-6 group-hover:scale-110 ' + (card.id === 'game' ? 'text-slate-900' : '')}>
+                    <div className="relative z-10 shrink-0 rounded-2xl bg-white/20 p-3.5 text-white backdrop-blur-md transition-transform duration-300 group-hover:rotate-6 group-hover:scale-110">
                       {card.icon}
                     </div>
                     <div className="relative z-10 min-w-0">
-                      <h3 className="mb-1 text-xl font-black tracking-tight md:text-2xl">{card.title}</h3>
-                      <p className="text-xs font-normal leading-snug opacity-90 md:text-sm">{card.description}</p>
+                      <h3 className="mb-1 text-lg font-black leading-relaxed tracking-tight md:text-xl">{card.title}</h3>
+                      <p className="text-xs font-bold leading-relaxed text-white/95 md:text-sm">{card.description}</p>
                       <p className="mt-2 text-[10px] font-black opacity-90">{label('مرّر المؤشر أو المس للتفاصيل', 'Hover or tap for details')}</p>
                     </div>
-                    {card.id === 'studio' || card.id === 'game' ? (
-                      <span className="absolute right-4 top-4 rounded-full bg-rose-500 px-3 py-0.5 text-[10px] font-black uppercase tracking-wider text-white shadow-md">{label('جديد', 'NEW')}</span>
+                    {card.id === 'saqr-challenges' ? (
+                      <span className="absolute right-4 top-3 rounded-full bg-slate-800/70 px-3 py-0.5 text-[10px] font-black uppercase tracking-wider text-white shadow-md">{label('جديد', 'NEW')}</span>
                     ) : null}
                   </div>
                 </HintTarget>
               ))}
             </div>
+          </section>
+
+          <section aria-labelledby="saqr-challenges-tour-title" className="rounded-[2rem] border border-sky-200 bg-white/85 p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/85 sm:p-7">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-black text-sky-700 dark:text-sky-300">{label('للطلبة فقط داخل تحديات صقر', 'INSIDE SAQR CHALLENGES FOR STUDENTS')}</p>
+                <h2 id="saqr-challenges-tour-title" className="mt-1 text-xl font-black">{label('ثلاث مغامرات في مكان واحد', 'Three adventures in one place')}</h2>
+              </div>
+              <span className="rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-xs font-black text-sky-800 dark:border-sky-700 dark:bg-sky-950 dark:text-sky-100">{label('المعلمون: بين السطور مباشرة', 'Teachers: Direct reading shortcut')}</span>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              {[
+                {ar:'بين السطور مع صقر',en:'Between the Lines with Saqr',arInfo:'اختر عدد الكتب، ثم أجب عن الأسئلة مع عرض الكتاب ومكانه.',enInfo:'Choose a book count, then answer questions with the book location.',bg:'bg-[#8e67ce]',icon:<BookIcon/>},
+                {ar:'رتب المكتبة',en:'Organize the Library',arInfo:'صنّف الكتب ورتبها في مكانها الصحيح.',enInfo:'Classify books and place them on the right shelves.',bg:'bg-[#4ba76a]',icon:<GameIcon/>},
+                {ar:'استديو صقر',en:'Saqr Studio',arInfo:'سجّل قصتك أو حلقة بودكاست باستخدام الميكروفون.',enInfo:'Record stories and podcasts with your microphone.',bg:'bg-[#de5c65]',icon:<StudioIcon/>}
+              ].map(item=><article key={item.en} className={'group flex min-h-[165px] flex-col justify-between gap-4 rounded-3xl p-5 text-white shadow-lg transition-transform duration-300 hover:-translate-y-1 '+item.bg}>
+                <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20">{item.icon}</span>
+                <div><h3 className="text-lg font-black">{label(item.ar,item.en)}</h3><p className="mt-1 text-xs font-bold leading-6 text-white/95">{label(item.arInfo,item.enInfo)}</p></div>
+              </article>)}
+            </div>
+            <p className="mt-4 text-xs font-bold text-slate-500 dark:text-slate-400">{label('هذه معاينة تفاعلية للتعرّف على الخدمات؛ لا تشغّل التحديات ولا تحفظ نتائج حقيقية.', 'This is an interactive tour only. It does not launch activities or store real results.')}</p>
           </section>
 
           <section aria-labelledby="heritage-tour-title" className="rounded-[2rem] border border-emerald-200/80 dark:border-emerald-900/60 bg-emerald-50/50 dark:bg-emerald-950/15 p-4 sm:p-6">
