@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { useLanguage, useTheme } from '../App';
+import HomePage from './HomePage';
 
 /**
  * Public, visual-only replica of the real EFIPS library home screen.
@@ -289,6 +290,15 @@ export default function TutorialPage() {
   const [bursts, setBursts] = useState<BurstItem[]>([]);
   const [showBubble, setShowBubble] = useState(false);
   const [readingPreviewOpen, setReadingPreviewOpen] = useState(false);
+  const [liveMode, setLiveMode] = useState(false);
+  const hasSignedInSession = React.useMemo(() => {
+    try {
+      const type = localStorage.getItem('user_type');
+      const user = JSON.parse(localStorage.getItem('current_user') || 'null');
+      return Boolean(user && (type === 'student' || type === 'teacher' || type === 'admin'));
+    } catch { return false; }
+  }, []);
+
   const label = (ar: string, en: string) => isAr ? ar : en;
 
   useEffect(() => {
@@ -343,7 +353,7 @@ export default function TutorialPage() {
 
   const featureCards = [
     {
-      id: 'manual-search', title: label('البحث اليدوي', 'Manual Search'),
+      id: 'manual-search', title: label('دليل كتب المكتبة', 'Library Book Catalog'),
       description: label('ابحث عن الكتب الورقية ومنها إضافات الرف 30، مع مكان كل كتاب.', 'Find physical books, including shelf 30 additions, with recorded locations.'),
       color: 'bg-[#ef6266]', border: 'border-[#ba3b43]', icon: <SearchIcon />,
       hint: label('ابحث بعنوان الكتاب أو مؤلفه، ثم افتح البطاقة لمعرفة مكانه. هذه المعاينة لا تتصل بفهرس الكتب الحقيقي.', 'Search by title or author, then open a card to learn its sample location. This tour does not connect to the live catalogue.')
@@ -361,7 +371,7 @@ export default function TutorialPage() {
       hint: label('تعرّف على أقسام القراءة الرقمية وطريقة استكشاف الموارد المتاحة بحسب صلاحيات حسابك.', 'Explore digital reading sections and resources available to your account.')
     },
     {
-      id: 'creators', title: label('ركن المبدعين', 'Creators Corner'),
+      id: 'creators', title: label('بوابة المبدعين', 'Creators Portal'),
       description: label('استكشف إبداعات ومشاركات زملائك.', 'Explore creative work shared by students.'),
       color: 'bg-[#e56aac]', border: 'border-[#ad3c78]', icon: <CreatorIcon />,
       hint: label('مساحة لاستعراض الأعمال والمشروعات الإبداعية. محتوى المشاركات الحقيقية مخفي في هذه الجولة.', 'A space for creative work and projects. Real submissions are hidden in this tour.')
@@ -400,6 +410,15 @@ export default function TutorialPage() {
     }
   ];
 
+  const additionalFeatureCards = [
+    { id:'saqr-studio', title:label('استديو صقر','Saqr Studio'), description:label('تسجيل الحلقات الصوتية والبودكاست','Record and publish podcast episodes'),color:'bg-[#de5c65]',border:'border-[#a73c46]',icon:<StudioIcon/>,hint:label('الدخول لاستديو صقر وخدمة البودكاست. تظهر ضمن تحديات صقر للطلاب.','Open Saqr Studio and the podcast tools. Students reach it inside Saqr Challenges.') },
+    { id:'library-game', title:label('رتّب المكتبة','Organize the Library'),description:label('تعلّم التصنيف بالسحب والإفلات','Learn shelving with drag-and-drop challenges'),color:'bg-[#4ba76a]',border:'border-[#27814b]',icon:<GameIcon/>,hint:label('تحدي ترتيب الكتب وتصنيفها؛ متاح للطلاب من داخل تحديات صقر.','Book shelving and classification game, available within Saqr Challenges for students.') },
+    { id:'my-reading',title:label('مكتبتي الشخصية واقتراحات القراءة','My Library & Reading Suggestions'),description:label('اقتراحات كتب ورقية ورقمية، وقائمة التحدي الشهري','Book recommendations and the monthly challenge reading list'),color:'bg-[#20a99d]',border:'border-[#087e73]',icon:<BookIcon/>,hint:label('الاقتراحات تعتمد على نوع حسابك واهتماماتك. أضف كتبًا إلى قائمة القراءة في التحدي الشهري وحدد تمت القراءة أو لم تتم القراءة.','Recommendations suit your account and interests. Add books to the monthly reading list and select Read or Not read.') },
+    { id:'borrowed',title:label('مكتبتي المستعارة','My Borrowed Books'),description:label('الاستعارات النشطة وتاريخ الإرجاع','Active loans and return dates'),color:'bg-[#e7aa51]',border:'border-[#b47a28]',icon:<BookIcon/>,hint:label('الكتب المستعارة وتاريخ الإرجاع يظهران للحساب المعني فقط. لا تعرض الجولة بيانات خاصة.','Active loans and due dates appear only in the appropriate account. The tour never reveals private data.') },
+    { id:'podcast',title:label('بودكاست صقر','Saqr Podcast'),description:label('تسجيل إبداعاتك الصوتية','Record your creative audio'),color:'bg-[#e16a99]',border:'border-[#a83669]',icon:<StudioIcon/>,hint:label('تسجيل حلقات البودكاست داخل استديو صقر.','Record podcast episodes in Saqr Studio.') },
+    { id:'feedback',title:label('المقترحات','Suggestions & Feedback'),description:label('شارك اقتراحاتك لتطوير المكتبة','Share ideas to improve the library'),color:'bg-[#6a98cb]',border:'border-[#4071a8]',icon:<CreatorIcon/>,hint:label('إرسال المقترحات والملاحظات عبر الخدمة المتاحة في الموقع.','Submit ideas and feedback using the portal service.') }
+  ];
+
   const navItems = [
     { id: 'nav-search', text: label('البحث بالمكتبة', 'Search'), description: label('يفتح فهرس البحث عن الكتب.', 'Opens the book search catalogue.') },
     { id: 'nav-digital', text: label('المكتبة الرقمية', 'Digital'), description: label('ينقلك إلى مصادر المكتبة الرقمية.', 'Takes you to digital library resources.') },
@@ -409,6 +428,16 @@ export default function TutorialPage() {
     { id: 'nav-ideas', text: label('مقترحات', 'Ideas'), description: label('استعراض وإرسال المقترحات في الموقع الحقيقي.', 'View and submit feedback on the live site.') },
     { id: 'nav-admin', text: label('الإدارة', 'Admin'), description: label('قسم محمي لا يظهر محتواه إلا للمخولين.', 'A protected area visible only to authorized staff.') }
   ];
+
+  if (liveMode && hasSignedInSession) {
+    return <div dir={dir} className="tutorial-live-home">
+      <div className="tutorial-live-bar sticky top-0 z-[120] flex flex-wrap items-center justify-between gap-2 border-b border-emerald-200 dark:border-emerald-800 bg-emerald-50/95 dark:bg-emerald-950/95 px-4 py-3 shadow-md backdrop-blur-xl">
+        <span className="text-xs sm:text-sm font-black text-emerald-900 dark:text-emerald-100">{label('عرض البوابة الفعلية — جميع الوظائف كما في الرئيسية','Live portal — identical home functions')}</span>
+        <button type="button" onClick={()=>setLiveMode(false)} className="min-h-10 rounded-xl bg-emerald-700 px-4 py-2 text-xs font-black text-white hover:bg-emerald-800">{label('العودة للشرح','Back to guided tour')}</button>
+      </div>
+      <HomePage />
+    </div>;
+  }
 
   return (
     <div dir={dir} className="tutorial-page min-h-screen w-full overflow-x-hidden bg-[#f8fafc] font-sans text-slate-900 transition-colors duration-500 dark:bg-slate-950 dark:text-white">
@@ -474,6 +503,11 @@ export default function TutorialPage() {
 
       <main className="relative z-10 flex w-full flex-col items-center p-4 pt-28 transition-colors duration-500 md:p-8 md:pt-28">
         <div className="w-full max-w-[1300px] mt-3 flex flex-col gap-8 md:mt-2 md:gap-10">
+          <section className="rounded-[1.75rem] border-2 border-emerald-200 dark:border-emerald-900 bg-white/95 dark:bg-slate-900/95 px-5 py-4 sm:px-7 sm:py-5 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div><p className="text-xs font-black text-emerald-700 dark:text-emerald-300">{label('دليل بوابة المعرفة','KNOWLEDGE PORTAL TOUR')}</p><h2 className="mt-1 text-lg sm:text-xl font-black">{label('نفس خدمات البوابة، مع شرح كل قسم','Explore the complete portal, feature by feature')}</h2><p className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300">{label('اضغط على أي بطاقة لرؤية شرحها. وظائف الحساب الفعلية تظهر بعد تسجيل الدخول.','Tap any service to learn more. Actual account functions are available after sign-in.')}</p></div>
+            {hasSignedInSession && <button type="button" onClick={()=>setLiveMode(true)} className="shrink-0 min-h-11 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white px-5 py-3 font-black text-xs sm:text-sm shadow-md">{label('عرض البوابة الفعلية','Open live home view')}</button>}
+            {!hasSignedInSession && <Link to="/" className="shrink-0 min-h-11 inline-flex items-center rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white px-5 py-3 font-black text-xs sm:text-sm shadow-md">{label('تسجيل الدخول لاستخدام الخدمات','Sign in to use services')}</Link>}
+          </section>
           <HintTarget id="welcome-panel" title={label('منطقة الترحيب', 'Welcome panel')} description={label('يعرض الموقع الحقيقي ترحيبًا مخصصًا حسب الحساب. تم إخفاء اسم المستخدم ونوع الحساب في نسخة الزائر.', 'The live site personalizes this area by account. User names and account roles are hidden in this visitor tour.')} interactive={false} {...hintState}>
             <section className="mx-auto max-w-4xl space-y-3 text-center">
               <div className="inline-block rounded-full border-2 border-slate-200 bg-white/90 px-5 py-2 text-xs font-bold text-slate-700 shadow-md backdrop-blur-md dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-200 md:text-sm">
@@ -495,7 +529,7 @@ export default function TutorialPage() {
           </HintTarget>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-center">
-          <HintTarget id="monthly-reading-goal" title={label('تحدي القراءة الشهري', 'Monthly Reading Challenge')} description={label('اختر هدف القراءة الشهري وسجّل الكتب التي أنهيتها؛ زر «قائمة القراءة» يفتح قائمة منبثقة تضم الكتب المكتملة خلال الشهر نفسه، بنفس عدد العداد. الحسابات الموثقة يمكنها مزامنة التقدم؛ لا توجد بيانات حقيقية في الجولة.', 'Set a monthly reading goal and mark books finished. The Reading list button opens a popup listing this month’s completed books, matching the counter. Verified accounts may sync progress; this tour shows no real data.')} interactive={false} {...hintState}>
+          <HintTarget id="monthly-reading-goal" title={label('تحدي القراءة الشهري', 'Monthly Reading Challenge')} description={label('اختر هدف القراءة الشهري وسجّل الكتب التي أنهيتها؛ زر «قائمة القراءة» يفتح قائمة منبثقة تضم الكتب المختارة، مع تحديد تمت القراءة أو لم تتم القراءة؛ وتُحتسب الإنجازات المكتملة هذا الشهر فقط. الحسابات الموثقة يمكنها مزامنة التقدم؛ لا توجد بيانات حقيقية في الجولة.', 'Set a monthly reading goal and mark books finished. The Reading list button opens a popup listing selected books with Read / Not read statuses; only books completed during the current month count. Verified accounts may sync progress; this tour shows no real data.')} interactive={false} {...hintState}>
             <section className="homepage-alerts w-full overflow-hidden rounded-[1.75rem] border-2 border-amber-300 dark:border-amber-500/50 bg-gradient-to-br from-blue-600 via-emerald-600 to-teal-600 dark:from-blue-800 dark:via-emerald-800 dark:to-teal-900 p-4 sm:p-5 shadow-xl text-white transition-all hover:-translate-y-1 hover:shadow-2xl">
               <div className="flex flex-wrap justify-between items-center gap-4">
                 <div className="flex gap-3 items-center"><div className="rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 p-3 text-white shadow-lg"><BookIcon /></div><div><h2 className="text-base md:text-lg font-black text-white">{label('تحدي القراءة الشهري','Monthly Reading Challenge')}</h2><p className="mt-1 text-xs sm:text-sm text-white/90 font-semibold">{label('جواز القارئ — هدف شخصي','Reading Passport — personal goal')}</p></div></div>
@@ -608,7 +642,7 @@ export default function TutorialPage() {
               <p className="text-xs font-bold text-slate-500 dark:text-slate-400">{label('المس أي بطاقة لعرض التلميح', 'Tap any card to pin its feature hint')}</p>
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {featureCards.map((card, index) => (
+              {[...featureCards,...additionalFeatureCards].map((card, index) => (
                 <HintTarget key={card.id} id={card.id} title={card.title} description={card.hint} tooltipBelow {...hintState}>
                   <div style={{ animation: 'tutorial-fade-up .65s ease-out ' + (index * 65) + 'ms both' }} className={'tutorial-feature-card group relative flex h-full min-h-[156px] cursor-pointer items-center gap-4 overflow-hidden rounded-[1.75rem] border-b-[6px] p-5 text-white shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl active:translate-y-1 active:border-b-0 ' + card.color + ' ' + card.border}>
                     <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[2.4rem]">
@@ -691,7 +725,7 @@ export default function TutorialPage() {
           </section>
 
           <HintTarget id="reading-suggestions" title={label('مكتبتي واقتراحات القراءة','My Books & Reading Suggestions')}
-            description={label('تُعرض أربعة اقتراحات مبدئيًا بناءً على نوع الحساب والمرحلة والاهتمامات؛ يعرض زر المزيد نافذة مستقلة ببقية الخيارات. الكتب ملونة مثل المكتبتين الرقميتين، وقائمة القراءة لاحقًا منفصلة. لا تُعرض بيانات مستفيدين حقيقية هنا.', 'Four starting recommendations based on role, grade and interests. More choices open in a separate dialog. Cards match the digital libraries, with a separate read-later list. This tour displays no private data.')}
+            description={label('تُعرض أربعة اقتراحات مبدئيًا بناءً على نوع الحساب والمرحلة والاهتمامات؛ يعرض زر المزيد نافذة مستقلة ببقية الخيارات. الكتب ملونة مثل المكتبتين الرقميتين، وقائمة القراءة ضمن التحدي الشهري مع حالتي تمت القراءة ولم تتم القراءة. لا تُعرض بيانات مستفيدين حقيقية هنا.', 'Four starting recommendations based on role, grade and interests. More choices open in a separate dialog. Cards match the digital libraries, and a monthly reading list with Read / Not read choices. This tour displays no private data.')}
             interactive={false} {...hintState}>
             <section className="relative w-full rounded-[2.5rem] border border-slate-200/60 dark:border-slate-800/60 bg-transparent p-4 sm:p-6 md:p-8">
               <header className="mb-6 text-center">
@@ -701,7 +735,7 @@ export default function TutorialPage() {
               <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
                 <div className="flex gap-2">
                   <span className="rounded-xl bg-emerald-600 text-white px-4 py-2.5 font-black text-xs">{label('اقتراحات القراءة','Suggestions')}</span>
-                  <span className="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white px-4 py-2.5 font-black text-xs">{label('القراءة لاحقًا','Read later')}</span>
+                  <span className="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white px-4 py-2.5 font-black text-xs">{label('قائمة القراءة في التحدي الشهري','Monthly challenge reading list')}</span>
                 </div>
                 <span className="rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2 text-xs text-slate-600 dark:text-slate-300">{label('نوع الكتاب: الكل','Book type: All')}</span>
               </div>
@@ -818,7 +852,7 @@ export default function TutorialPage() {
             <div className="flex items-start justify-between gap-4 bg-gradient-to-br from-emerald-600 to-teal-700 p-5 text-white">
               <div>
                 <p className="text-xs font-bold text-white/90">{label('تحدي القراءة الشهري', 'Monthly Reading Challenge')}</p>
-                <h2 id="tutorial-read-list-title" className="mt-1 text-xl font-black">{label('قائمة الكتب المكتملة', 'Completed reading list')}</h2>
+                <h2 id="tutorial-read-list-title" className="mt-1 text-xl font-black">{label('قائمة القراءة والتحدي الشهري', 'Reading list & monthly challenge')}</h2>
               </div>
               <button type="button" onClick={() => setReadingPreviewOpen(false)} aria-label={label('إغلاق','Close')}
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/40 bg-white/15 text-white hover:bg-white/25">
@@ -827,8 +861,8 @@ export default function TutorialPage() {
             </div>
             <div className="p-6 text-center">
               <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300"><BookIcon/></div>
-              <p className="font-black text-slate-900 dark:text-white">{label('هنا تظهر الكتب التي أُكملت خلال الشهر الحالي', 'Books completed this month appear here')}</p>
-              <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">{label('يعرض الموقع الحقيقي اسم الكتاب والمؤلف وتاريخ الإتمام، ويطابق عدد الكتب العداد أعلى التحدي. لا تعرض هذه الجولة بيانات أي طالب.', 'The live site shows each title, author and completion date, matching the counter above the challenge. This tour shows no student records.')}</p>
+              <p className="font-black text-slate-900 dark:text-white">{label('هنا تظهر الكتب المختارة وحالة قراءتها', 'Selected books and their reading statuses appear here')}</p>
+              <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">{label('يعرض الموقع الحقيقي الكتب المختارة ويمكن تحديد تمت القراءة أو لم تتم القراءة؛ ويحتسب عداد الشهر الكتب المنجزة خلاله. لا تعرض هذه الجولة بيانات أي طالب.', 'The live site shows each title, author and its Read / Not read status. Books completed this month contribute to the counter. This tour shows no student records.')}</p>
               <span className="mt-4 inline-block rounded-xl bg-amber-50 dark:bg-amber-950/40 px-4 py-2 text-xs font-black text-amber-900 dark:text-amber-200">{label('معاينة آمنة فقط', 'Safe preview only')}</span>
             </div>
           </div>
