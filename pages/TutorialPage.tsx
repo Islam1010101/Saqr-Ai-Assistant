@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { useLanguage, useTheme } from '../App';
-import HomePage from './HomePage';
 
 /**
  * Public, visual-only replica of the real EFIPS library home screen.
@@ -290,7 +289,6 @@ export default function TutorialPage() {
   const [bursts, setBursts] = useState<BurstItem[]>([]);
   const [showBubble, setShowBubble] = useState(false);
   const [readingPreviewOpen, setReadingPreviewOpen] = useState(false);
-  const [liveMode, setLiveMode] = useState(false);
   const hasSignedInSession = React.useMemo(() => {
     try {
       const type = localStorage.getItem('user_type');
@@ -377,30 +375,24 @@ export default function TutorialPage() {
       hint: label('مساحة لاستعراض الأعمال والمشروعات الإبداعية. محتوى المشاركات الحقيقية مخفي في هذه الجولة.', 'A space for creative work and projects. Real submissions are hidden in this tour.')
     },
     {
-      id:'reading-quest',title:label('بين السطور مع صقر','Between the Lines with Saqr'),
-      description:label('أسئلة موثقة من كتب عربية وإنجليزية تناسب الطلاب والمعلمين.','Source-backed questions from school books, matched to account and language.'),
-      color:'bg-[#5ab8e9]',border:'border-[#2889ba]',icon:<BookIcon/>,
-      hint:label('للمعلمين والأدمن تظهر كتب تعليمية مناسبة للعمر، وللطلاب كتبهم المناسبة. تبدأ الجولة بالاسم ثم اختيار عدد الكتب فقط، وبعدها أسئلة عن المحتوى مع عنوان الكتاب والرف والصف. اللغة حسب الواجهة. هذا الزر مستقل للمعلمين، والطلاب يدخلون من تحديات صقر.','Teachers and administrators receive educator/adult reading books; students receive age-appropriate books. Choose only a book count, then answer content questions with title and shelf/row shown. Books and questions follow the interface language. Teachers use this shortcut; students enter through Saqr Challenges.')
-    },
-    {
-      id: 'saqr-challenges', title: label('تحديات صقر', 'Saqr Challenges'),
-      description: label('مغامرات الطلاب: بين السطور، رتب المكتبة، واستديو صقر.', 'For students: reading, library sorting and Saqr Studio.'),
-      color: 'bg-[#f3c54e]', border: 'border-[#c48d23]', icon: <GameIcon />,
-      hint: label('للطلاب بطاقة واحدة على الرئيسية باسم تحديات صقر. بالداخل ثلاث بطاقات مرحة: بين السطور بالبنفسجي، رتب المكتبة بالأخضر، واستديو صقر بالأحمر مع سماعة وميكروفون. أما المعلم فيرى بين السطور مباشرة. اضغط أو المس هنا لعرض هذا الشرح فقط.', 'Students use one Saqr Challenges tile on Home, opening three colorful activities: purple Reading Quest, green Library Sorting and red Saqr Studio with headphones and microphone. Teachers see Between the Lines separately. Tap here for guidance only.')
-    },
-    {
       id: 'national-identity', title: label('صقر وهوية وطن', 'Saqr & National Identity'),
-      description: label('رحلات ثقافية إماراتية للطلاب.', 'UAE heritage learning for students and administrators.'),
+      description: label('رحلات ثقافية إماراتية للطلاب والإدارة.', 'UAE heritage learning for students and administrators.'),
       color: 'bg-gradient-to-br from-[#075B49] via-[#087555] to-[#116759]', border: 'border-emerald-900',
       icon: <svg className="h-9 w-9" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M24 11C18 7 11 7 5 9v29c7-2 14-1 19 3 5-4 12-5 19-3V9c-6-2-13-2-19 2ZM24 11v30"/><path d="m30 19 3-6 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1Z" fill="currentColor" fillOpacity=".24"/></svg>,
       hint: label('جواز صقر الثقافي وكنوز لغتنا ومحقق ذاكرة الوطن وتحدي راية المجد بعشرة أسئلة عن علم الإمارات، بالإضافة إلى جناح مستقل لكتب الهوية الوطنية. نقاط اللعبة حسب صلاحية الحساب. المعاينة لا تشغّل الألعاب.',
         'Explore the Cultural Passport, Language Treasures, Heritage Research Detective, a 10-question UAE Flag Challenge and the separate National Identity Pavilion. Only students receive game points. This tour does not launch games.')
     },
     {
+      id: 'saqr-challenges', title: label('تحديات صقر', 'Saqr Challenges'),
+      description: label('مغامرات الطلاب: بين السطور، رتب المكتبة، واستديو صقر.', 'For students: reading, library sorting and Saqr Studio.'),
+      color: 'bg-[#f3c54e]', border: 'border-[#c48d23]', icon: <GameIcon />,
+      hint: label('للإدارة والطلاب بطاقة واحدة على الرئيسية باسم تحديات صقر. بالداخل ثلاث بطاقات مرحة: بين السطور بالبنفسجي، رتب المكتبة بالأخضر، واستديو صقر بالأحمر مع سماعة وميكروفون. أما المعلم فيرى بين السطور مباشرة. اضغط أو المس هنا لعرض هذا الشرح فقط.', 'Students and administrators see one Saqr Challenges tile on Home, opening three colorful activities: purple Reading Quest, green Library Sorting and red Saqr Studio with headphones and microphone. Teachers see Between the Lines separately. Tap here for guidance only.')
+    },
+    {
       id: 'schedule', title: label('جدول المكتبة', 'Library Schedule'),
       description: label('تنظيم وحجز زيارات المكتبة للمعلمين.', 'Organize and book teacher library visits.'),
       color: 'bg-[#a77bdc]', border: 'border-[#754aa8]', icon: <ScheduleIcon />,
-      hint: label('يمكن للمعلمين الاطلاع على الحصص المتاحة وحجوزاتهم. بيانات الحجوزات والأسماء الفعلية مخفية هنا.', 'Teachers can view available periods and reservations. Real schedules and names are hidden here.')
+      hint: label('يمكن للمعلمين والإدارة الاطلاع على الحصص المتاحة والحجوزات وفق صلاحياتهم. بيانات الحجوزات والأسماء الفعلية مخفية هنا.', 'Teachers and administrators can view the schedule according to account permissions. Real schedules and names are hidden here.')
     },
     {
       id: 'admin', title: label('إدارة النظام', 'System Admin'),
@@ -408,15 +400,6 @@ export default function TutorialPage() {
       color: 'bg-[#b28355]', border: 'border-[#805531]', icon: <AdminIcon />,
       hint: label('هذه الأدوات مخصصة للإدارة فقط؛ لا يمكن فتح لوحة الإدارة أو عرض بياناتها من صفحة الزائر.', 'Administration tools are restricted. This visitor tour cannot open the admin dashboard or expose its records.')
     }
-  ];
-
-  const additionalFeatureCards = [
-    { id:'saqr-studio', title:label('استديو صقر','Saqr Studio'), description:label('تسجيل الحلقات الصوتية والبودكاست','Record and publish podcast episodes'),color:'bg-[#de5c65]',border:'border-[#a73c46]',icon:<StudioIcon/>,hint:label('الدخول لاستديو صقر وخدمة البودكاست. تظهر ضمن تحديات صقر للطلاب.','Open Saqr Studio and the podcast tools. Students reach it inside Saqr Challenges.') },
-    { id:'library-game', title:label('رتّب المكتبة','Organize the Library'),description:label('تعلّم التصنيف بالسحب والإفلات','Learn shelving with drag-and-drop challenges'),color:'bg-[#4ba76a]',border:'border-[#27814b]',icon:<GameIcon/>,hint:label('تحدي ترتيب الكتب وتصنيفها؛ متاح للطلاب من داخل تحديات صقر.','Book shelving and classification game, available within Saqr Challenges for students.') },
-    { id:'my-reading',title:label('مكتبتي الشخصية واقتراحات القراءة','My Library & Reading Suggestions'),description:label('اقتراحات كتب ورقية ورقمية، وقائمة التحدي الشهري','Book recommendations and the monthly challenge reading list'),color:'bg-[#20a99d]',border:'border-[#087e73]',icon:<BookIcon/>,hint:label('الاقتراحات تعتمد على نوع حسابك واهتماماتك. أضف كتبًا إلى قائمة القراءة في التحدي الشهري وحدد تمت القراءة أو لم تتم القراءة.','Recommendations suit your account and interests. Add books to the monthly reading list and select Read or Not read.') },
-    { id:'borrowed',title:label('مكتبتي المستعارة','My Borrowed Books'),description:label('الاستعارات النشطة وتاريخ الإرجاع','Active loans and return dates'),color:'bg-[#e7aa51]',border:'border-[#b47a28]',icon:<BookIcon/>,hint:label('الكتب المستعارة وتاريخ الإرجاع يظهران للحساب المعني فقط. لا تعرض الجولة بيانات خاصة.','Active loans and due dates appear only in the appropriate account. The tour never reveals private data.') },
-    { id:'podcast',title:label('بودكاست صقر','Saqr Podcast'),description:label('تسجيل إبداعاتك الصوتية','Record your creative audio'),color:'bg-[#e16a99]',border:'border-[#a83669]',icon:<StudioIcon/>,hint:label('تسجيل حلقات البودكاست داخل استديو صقر.','Record podcast episodes in Saqr Studio.') },
-    { id:'feedback',title:label('المقترحات','Suggestions & Feedback'),description:label('شارك اقتراحاتك لتطوير المكتبة','Share ideas to improve the library'),color:'bg-[#6a98cb]',border:'border-[#4071a8]',icon:<CreatorIcon/>,hint:label('إرسال المقترحات والملاحظات عبر الخدمة المتاحة في الموقع.','Submit ideas and feedback using the portal service.') }
   ];
 
   const navItems = [
@@ -429,16 +412,9 @@ export default function TutorialPage() {
     { id: 'nav-admin', text: label('الإدارة', 'Admin'), description: label('قسم محمي لا يظهر محتواه إلا للمخولين.', 'A protected area visible only to authorized staff.') }
   ];
 
-  if (liveMode && hasSignedInSession) {
-    return <div dir={dir} className="tutorial-live-home">
-      <div className="tutorial-live-bar sticky top-0 z-[120] flex flex-wrap items-center justify-between gap-2 border-b border-emerald-200 dark:border-emerald-800 bg-emerald-50/95 dark:bg-emerald-950/95 px-4 py-3 shadow-md backdrop-blur-xl">
-        <span className="text-xs sm:text-sm font-black text-emerald-900 dark:text-emerald-100">{label('عرض البوابة الفعلية — جميع الوظائف كما في الرئيسية','Live portal — identical home functions')}</span>
-        <button type="button" onClick={()=>setLiveMode(false)} className="min-h-10 rounded-xl bg-emerald-700 px-4 py-2 text-xs font-black text-white hover:bg-emerald-800">{label('العودة للشرح','Back to guided tour')}</button>
-      </div>
-      <HomePage />
-    </div>;
-  }
 
+  return (
+    <div dir={dir} className="tutorial-page
   return (
     <div dir={dir} className="tutorial-page min-h-screen w-full overflow-x-hidden bg-[#f8fafc] font-sans text-slate-900 transition-colors duration-500 dark:bg-slate-950 dark:text-white">
       {sparkles.map((sparkle) => (
@@ -504,21 +480,21 @@ export default function TutorialPage() {
       <main className="relative z-10 flex w-full flex-col items-center p-4 pt-28 transition-colors duration-500 md:p-8 md:pt-28">
         <div className="w-full max-w-[1300px] mt-3 flex flex-col gap-8 md:mt-2 md:gap-10">
           <section className="rounded-[1.75rem] border-2 border-emerald-200 dark:border-emerald-900 bg-white/95 dark:bg-slate-900/95 px-5 py-4 sm:px-7 sm:py-5 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div><p className="text-xs font-black text-emerald-700 dark:text-emerald-300">{label('دليل بوابة المعرفة','KNOWLEDGE PORTAL TOUR')}</p><h2 className="mt-1 text-lg sm:text-xl font-black">{label('نفس خدمات البوابة، مع شرح كل قسم','Explore the complete portal, feature by feature')}</h2><p className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300">{label('اضغط على أي بطاقة لرؤية شرحها. وظائف الحساب الفعلية تظهر بعد تسجيل الدخول.','Tap any service to learn more. Actual account functions are available after sign-in.')}</p></div>
-            {hasSignedInSession && <button type="button" onClick={()=>setLiveMode(true)} className="shrink-0 min-h-11 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white px-5 py-3 font-black text-xs sm:text-sm shadow-md">{label('عرض البوابة الفعلية','Open live home view')}</button>}
+            <div><p className="text-xs font-black text-emerald-700 dark:text-emerald-300">{label('دليل بوابة المعرفة','KNOWLEDGE PORTAL TOUR')}</p><h2 className="mt-1 text-lg sm:text-xl font-black">{label('خدمات واجهة الأدمن بنفس ترتيب الصفحة الرئيسية','Explore admin services in the original home order')}</h2><p className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300">{label('تظهر كل خدمة مرة واحدة في مكانها. اضغط على البطاقة لمعرفة وظيفتها، أو افتح البوابة الأصلية بالحساب المسجّل.','Every service appears once in its actual position. Tap a tile for details or open the original portal with your account.')}</p></div>
+            {hasSignedInSession && <Link to="/home" className="shrink-0 min-h-11 inline-flex items-center rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white px-5 py-3 font-black text-xs sm:text-sm shadow-md">{label('الدخول للبوابة الأصلية','Open the real home page')}</Link>}
             {!hasSignedInSession && <Link to="/" className="shrink-0 min-h-11 inline-flex items-center rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white px-5 py-3 font-black text-xs sm:text-sm shadow-md">{label('تسجيل الدخول لاستخدام الخدمات','Sign in to use services')}</Link>}
           </section>
           <HintTarget id="welcome-panel" title={label('منطقة الترحيب', 'Welcome panel')} description={label('يعرض الموقع الحقيقي ترحيبًا مخصصًا حسب الحساب. تم إخفاء اسم المستخدم ونوع الحساب في نسخة الزائر.', 'The live site personalizes this area by account. User names and account roles are hidden in this visitor tour.')} interactive={false} {...hintState}>
             <section className="mx-auto max-w-4xl space-y-3 text-center">
               <div className="inline-block rounded-full border-2 border-slate-200 bg-white/90 px-5 py-2 text-xs font-bold text-slate-700 shadow-md backdrop-blur-md dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-200 md:text-sm">
-                {label('وضع الجولة التعريفية', 'Guided preview mode')}
+                {label('معاينة واجهة الأدمن', 'Admin-view guided preview')}
               </div>
               <div className="flex flex-col items-center gap-2 pt-1">
                 <span className="text-base font-normal tracking-wide text-slate-500 dark:text-slate-400 md:text-xl">{label('أهلاً بك', 'Welcome')}</span>
                 <div className="group relative cursor-default overflow-hidden rounded-[2.5rem] border-2 border-white/90 bg-white/80 px-8 py-3.5 shadow-2xl backdrop-blur-2xl dark:border-slate-800 dark:bg-slate-900/80">
                   <div className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-1000 group-hover:translate-x-full dark:via-white/10" />
                   <h1 className="text-2xl font-black tracking-tight text-slate-800 dark:text-white sm:text-4xl md:text-5xl">
-                    <span className="bg-gradient-to-r from-blue-600 to-emerald-500 bg-clip-text text-transparent">{label('زائر المكتبة', 'Library Visitor')}</span>
+                    <span className="bg-gradient-to-r from-blue-600 to-emerald-500 bg-clip-text text-transparent">{label('مدير النظام — عرض توضيحي', 'Admin portal preview')}</span>
                   </h1>
                 </div>
               </div>
@@ -568,57 +544,9 @@ export default function TutorialPage() {
           </div>
 
           {/* Notifications are rendered with deliberately masked sample fields. */}
-          <HintTarget id="notifications" title={label('التنبيهات الشخصية', 'Personal notifications')} description={label('تظهر هنا تذكيرات الاستعارات ومواعيد استخدام المكتبة عندما تكون متاحة لحسابك. القيم الشخصية محجوبة بالكامل.', 'Borrowing reminders and library bookings appear here when available. Personal values are deliberately masked.')} interactive={false} {...hintState}>
-            <section className="homepage-alerts relative mx-auto w-full max-w-5xl overflow-hidden rounded-[2rem] border border-emerald-200 bg-gradient-to-br from-white via-emerald-50/80 to-teal-50/70 p-4 shadow-[0_18px_55px_rgba(15,118,110,0.13)] dark:border-emerald-900/80 dark:from-slate-900 dark:via-slate-900 dark:to-emerald-950/40 sm:p-6 md:rounded-[2.5rem] md:p-8">
-              <div className="pointer-events-none absolute -top-20 -right-16 h-48 w-48 rounded-full bg-emerald-300/20 blur-3xl dark:bg-emerald-400/10" />
-              <div className="pointer-events-none absolute -bottom-24 -left-12 h-48 w-48 rounded-full bg-amber-300/20 blur-3xl dark:bg-teal-400/10" />
-              <div className="relative mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between md:mb-7">
-                <div className="flex min-w-0 items-start gap-3">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-lg shadow-emerald-900/15 sm:h-14 sm:w-14">
-                    <BookIcon />
-                  </div>
-                  <div className="min-w-0">
-                    <h2 className="text-xl font-black tracking-tight text-slate-900 dark:text-white sm:text-2xl md:text-3xl">{label('تنبيهاتك', 'Your Notifications')}</h2>
-                    <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-600 dark:text-slate-300 sm:text-sm">{label('تذكيرات الاستعارات وجدول استخدام المكتبة', 'Borrowing reminders and your library schedule')}</p>
-                  </div>
-                </div>
-                <span className="inline-flex self-start items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-3.5 py-2 text-xs font-black text-emerald-800 shadow-sm dark:border-emerald-800 dark:bg-slate-800/80 dark:text-emerald-300">
-                  <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-500" /> {label('•• تنبيه تجريبي', '•• demo items')}
-                </span>
-              </div>
-              <div className="relative grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2">
-                <div className="flex flex-col gap-3 rounded-2xl border border-amber-200 bg-white/90 p-4 shadow-sm dark:border-amber-800/70 dark:bg-slate-800/90 sm:rounded-3xl sm:p-5">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"><BookIcon /></div>
-                    <div className="min-w-0 flex-1">
-                      <p className="mb-1 text-[11px] font-extrabold text-slate-500 dark:text-slate-400">{label('عنوان الكتاب', 'Book title')}</p>
-                      <p className="font-black text-slate-900 dark:text-white">••••••••••••••</p>
-                    </div>
-                  </div>
-                  <div className="rounded-xl border border-amber-100 bg-amber-50 px-3.5 py-3 dark:border-slate-700 dark:bg-slate-900/70">
-                    <p className="mb-1 text-[11px] font-extrabold text-slate-500 dark:text-slate-400">{label('تاريخ الإرجاع', 'Return date')}</p>
-                    <p className="font-black text-rose-600 dark:text-rose-400">•• / •• / ••••</p>
-                    <p className="mt-1.5 text-xs font-extrabold leading-relaxed text-emerald-700 dark:text-emerald-300">{label('تفاصيل مخفية في الجولة', 'Details hidden in this tour')}</p>
-                  </div>
-                </div>
-                <div className="homepage-alert-card rounded-2xl border border-emerald-200 bg-white/90 p-4 shadow-sm dark:border-emerald-800/70 dark:bg-slate-800/90 sm:rounded-3xl sm:p-5">
-                  <div className="mb-3 flex items-center gap-2.5">
-                    <span className="h-8 w-1.5 rounded-full bg-emerald-600" />
-                    <h3 className="text-base font-black text-slate-800 dark:text-white sm:text-lg">{label('جدول استخدام المكتبة', 'Library Schedule')}</h3>
-                  </div>
-                  <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-900/70">
-                    <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400">{label('اليوم والحصة', 'Day and period')}</p>
-                    <p className="mt-1 font-black text-slate-800 dark:text-white">•••••• ••</p>
-                    <div className="mt-3 h-2 w-2/3 rounded-full bg-slate-200 dark:bg-slate-700" />
-                    <div className="mt-2 h-2 w-1/2 rounded-full bg-slate-200 dark:bg-slate-700" />
-                  </div>
-                </div>
-              </div>
-              <p className="relative mt-4 text-[10px] font-bold text-slate-500 dark:text-slate-400">{label('هذه بطاقات شكلية فقط؛ لا توجد استعارات أو جداول حقيقية في صفحة الجولة.', 'These are visual placeholders only. No live loans or schedules are loaded here.')}</p>
-            </section>
-          </HintTarget>
+          <p className="text-center text-xs font-semibold text-slate-500 dark:text-slate-400">{label('قسم التنبيهات لا يظهر في البوابة الأصلية إلا عند وجود استعارات أو حصص محجوزة للحساب، لذلك لا نعرض بطاقات تنبيه وهمية هنا.', 'Notifications appear on the real home only when the account has active borrowings or booked periods; no fake notifications are shown in this tour.')}</p>
 
-          <HintTarget id="news-banner" title={label('جديدنا — يظهر فورًا', 'What\'s New — visible immediately')} description={label('يعرض شريط جديدنا آخر إضافات المكتبة منذ ظهور الصفحة، دون انتظار دخول النص من خارج الشاشة. هذه نسخة توضيحية لا تجلب أخبارًا حية.', 'What\'s New shows library updates as soon as the page appears, without waiting for offscreen scrolling text. This is an illustrative preview, not a live feed.')} interactive={false} {...hintState}>
+          <HintTarget id="news-banner"          <HintTarget id="news-banner" title={label('جديدنا — يظهر فورًا', 'What\'s New — visible immediately')} description={label('يعرض شريط جديدنا آخر إضافات المكتبة منذ ظهور الصفحة، دون انتظار دخول النص من خارج الشاشة. هذه نسخة توضيحية لا تجلب أخبارًا حية.', 'What\'s New shows library updates as soon as the page appears, without waiting for offscreen scrolling text. This is an illustrative preview, not a live feed.')} interactive={false} {...hintState}>
             <div className="relative z-30 mx-auto flex h-14 w-full max-w-5xl items-center overflow-hidden rounded-full border-4 border-amber-300 bg-white shadow-lg dark:border-amber-700 dark:bg-slate-800 md:h-16">
               <div className="relative z-20 flex h-full shrink-0 items-center gap-2 bg-amber-400 px-5 text-xs font-black uppercase text-slate-900 md:px-8 md:text-sm">
                 <span className="h-3 w-3 animate-ping rounded-full bg-white" />
@@ -642,7 +570,7 @@ export default function TutorialPage() {
               <p className="text-xs font-bold text-slate-500 dark:text-slate-400">{label('المس أي بطاقة لعرض التلميح', 'Tap any card to pin its feature hint')}</p>
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {[...featureCards,...additionalFeatureCards].map((card, index) => (
+              {featureCards.map((card, index) => (
                 <HintTarget key={card.id} id={card.id} title={card.title} description={card.hint} tooltipBelow {...hintState}>
                   <div style={{ animation: 'tutorial-fade-up .65s ease-out ' + (index * 65) + 'ms both' }} className={'tutorial-feature-card group relative flex h-full min-h-[156px] cursor-pointer items-center gap-4 overflow-hidden rounded-[1.75rem] border-b-[6px] p-5 text-white shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl active:translate-y-1 active:border-b-0 ' + card.color + ' ' + card.border}>
                     <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[2.4rem]">
@@ -665,66 +593,11 @@ export default function TutorialPage() {
             </div>
           </section>
 
-          <section aria-labelledby="saqr-challenges-tour-title" className="rounded-[2rem] border border-sky-200 bg-white/85 p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/85 sm:p-7">
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-xs font-black text-sky-700 dark:text-sky-300">{label('للطلبة فقط داخل تحديات صقر', 'INSIDE SAQR CHALLENGES FOR STUDENTS')}</p>
-                <h2 id="saqr-challenges-tour-title" className="mt-1 text-xl font-black">{label('ثلاث مغامرات في مكان واحد', 'Three adventures in one place')}</h2>
-              </div>
-              <span className="rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-xs font-black text-sky-800 dark:border-sky-700 dark:bg-sky-950 dark:text-sky-100">{label('المعلمون: بين السطور مباشرة', 'Teachers: Direct reading shortcut')}</span>
-            </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              {[
-                {ar:'بين السطور مع صقر',en:'Between the Lines with Saqr',arInfo:'اختر عدد الكتب، ثم أجب عن الأسئلة مع عرض الكتاب ومكانه.',enInfo:'Choose a book count, then answer questions with the book location.',bg:'bg-[#8e67ce]',icon:<BookIcon/>},
-                {ar:'رتب المكتبة',en:'Organize the Library',arInfo:'صنّف الكتب ورتبها في مكانها الصحيح.',enInfo:'Classify books and place them on the right shelves.',bg:'bg-[#4ba76a]',icon:<GameIcon/>},
-                {ar:'استديو صقر',en:'Saqr Studio',arInfo:'سجّل قصتك أو حلقة بودكاست باستخدام الميكروفون.',enInfo:'Record stories and podcasts with your microphone.',bg:'bg-[#de5c65]',icon:<StudioIcon/>}
-              ].map(item=><article key={item.en} className={'group flex min-h-[165px] flex-col justify-between gap-4 rounded-3xl p-5 text-white shadow-lg transition-transform duration-300 hover:-translate-y-1 '+item.bg}>
-                <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20">{item.icon}</span>
-                <div><h3 className="text-lg font-black">{label(item.ar,item.en)}</h3><p className="mt-1 text-xs font-bold leading-6 text-white/95">{label(item.arInfo,item.enInfo)}</p></div>
-              </article>)}
-            </div>
-            <p className="mt-4 text-xs font-bold text-slate-500 dark:text-slate-400">{label('هذه معاينة تفاعلية للتعرّف على الخدمات؛ لا تشغّل التحديات ولا تحفظ نتائج حقيقية.', 'This is an interactive tour only. It does not launch activities or store real results.')}</p>
-          </section>
+          <p className="rounded-xl border border-emerald-100 dark:border-emerald-900/60 bg-emerald-50/70 dark:bg-emerald-950/20 px-4 py-3 text-xs sm:text-sm font-bold text-emerald-900 dark:text-emerald-200">
+            {label('تنظيم الخدمات: بين السطور ورتب المكتبة واستديو صقر داخل «تحديات صقر»، وتحديات الهوية داخل «صقر وهوية وطن». اضغط على البطاقة الرئيسية لمعرفة تفاصيل الخدمات الفرعية دون تكرار أزرارها.', 'Services appear where they belong: Reading Quest, Library Sorting and Saqr Studio are inside Saqr Challenges, while heritage activities are inside Saqr & National Identity. Tap the main card for details.')}
+          </p>
 
-          <section aria-labelledby="heritage-tour-title" className="rounded-[2rem] border border-emerald-200/80 dark:border-emerald-900/60 bg-emerald-50/50 dark:bg-emerald-950/15 p-4 sm:p-6">
-            <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <p className="text-xs font-black text-emerald-700 dark:text-emerald-400">{label('داخل قسم صقر وهوية وطن', 'INSIDE SAQR & NATIONAL IDENTITY')}</p>
-                <h2 id="heritage-tour-title" className="mt-1 text-lg sm:text-xl font-black text-slate-900 dark:text-white">{label('تحديات ثقافية وجناح الهوية الوطنية', 'Cultural challenges and the National Identity Pavilion')}</h2>
-              </div>
-              <span className="rounded-full border border-emerald-200 bg-white dark:bg-slate-900 dark:border-emerald-900 px-3 py-2 text-xs font-bold text-emerald-800 dark:text-emerald-200">{label('حسب صلاحية الحساب', 'Role-based access')}</span>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              {[
-                { id:'heritage-passport', ar:'جواز صقر الثقافي', en:'Saqr Cultural Passport', arHint:'جولة قراءة وبحث عبر الإمارات السبع للحصول على الأختام.', enHint:'Explore all seven emirates with reading tasks and collect stamps.', color:'from-emerald-700 to-teal-600', icon:'passport' },
-                { id:'heritage-words', ar:'كنوز لغتنا الإماراتية', en:'Emirati Language Treasures', arHint:'مفردات تراثية وأسئلة وجمل من تأليف الطالب.', enHint:'Heritage vocabulary, comprehension questions and sentences.', color:'from-amber-600 to-orange-600', icon:'weave' },
-                { id:'heritage-detective', ar:'محقق ذاكرة الوطن', en:'Heritage Research Detective', arHint:'ملفات مبنية على المصادر لتدريب الطالب على التحقق من المعلومات.', enHint:'Source-based research files for learning how to verify facts.', color:'from-sky-700 to-indigo-700', icon:'document' },
-                { id:'heritage-flag', ar:'تحدي راية المجد', en:'Flag Day Challenge', arHint:'لعبة رفع العلم عبر معالم الإمارات؛ النقاط حسب صلاحية الحساب، ولا تفتح اللعبة داخل الجولة.', enHint:'Ten progressive, randomized questions about the UAE flag in your selected language. This is a preview only.', color:'from-emerald-700 to-slate-900', icon:'flag' }
-              ].map(activity => (
-                <HintTarget key={activity.id} id={activity.id} title={label(activity.ar,activity.en)} description={label(activity.arHint,activity.enHint)} tooltipBelow {...hintState}>
-                  <div className="overflow-hidden rounded-[1.5rem] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-lg transition-shadow">
-                    <div className={'flex items-center justify-between bg-gradient-to-br '+activity.color+' p-4 text-white'}>
-                      {activity.icon === 'flag'
-                        ? <UaeFlagIcon className="h-9 w-12"/>
-                        : <svg viewBox="0 0 48 48" className="h-10 w-10" stroke="currentColor" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                            {activity.icon==='passport'?<><path d="M24 11C18 7 11 7 5 9v29c7-2 14-1 19 3 5-4 12-5 19-3V9c-6-2-13-2-19 2ZM24 11v30"/><path d="m18 23 4 4 8-9"/></>
-                              :activity.icon==='weave'?<><path d="M6 8h36v32H6zM6 16h36M6 32h36M14 8v32M30 8v32M22 8v32M38 8v32"/><path d="m14 24 8-8 8 8-8 8-8-8Z"/></>
-                              :<><path d="M12 5h17l9 9v29H12zM29 5v10h9M18 23h14M18 29h14M18 35h9"/><circle cx="31" cy="36" r="7"/></>}
-                          </svg>}
-                      <span className="rounded-full bg-white/15 border border-white/25 px-2 py-1 text-[10px] font-bold">{label('اكتشف', 'Discover')}</span>
-                    </div>
-                    <div className="p-4">
-                      <h3 className="min-h-[46px] font-black text-sm leading-6 text-slate-900 dark:text-white">{label(activity.ar,activity.en)}</h3>
-                      <p className="mt-2 text-xs leading-6 text-slate-600 dark:text-slate-300">{label(activity.arHint,activity.enHint)}</p>
-                    </div>
-                  </div>
-                </HintTarget>
-              ))}
-            </div>
-            <p className="mt-3 text-xs font-semibold text-slate-500 dark:text-slate-400">{label('هذه معاينة تعليمية للأنشطة؛ لا يتم تسجيل تقدم أو منح نقاط هنا.', 'This is a visual tour only. No progress or game points are recorded here.')}</p>
-          </section>
-
-          <HintTarget id="reading-suggestions" title={label('مكتبتي واقتراحات القراءة','My Books & Reading Suggestions')}
+          <HintTarget id="reading-suggestions"          <HintTarget id="reading-suggestions" title={label('مكتبتي واقتراحات القراءة','My Books & Reading Suggestions')}
             description={label('تُعرض أربعة اقتراحات مبدئيًا بناءً على نوع الحساب والمرحلة والاهتمامات؛ يعرض زر المزيد نافذة مستقلة ببقية الخيارات. الكتب ملونة مثل المكتبتين الرقميتين، وقائمة القراءة ضمن التحدي الشهري مع حالتي تمت القراءة ولم تتم القراءة. لا تُعرض بيانات مستفيدين حقيقية هنا.', 'Four starting recommendations based on role, grade and interests. More choices open in a separate dialog. Cards match the digital libraries, and a monthly reading list with Read / Not read choices. This tour displays no private data.')}
             interactive={false} {...hintState}>
             <section className="relative w-full rounded-[2.5rem] border border-slate-200/60 dark:border-slate-800/60 bg-transparent p-4 sm:p-6 md:p-8">
@@ -735,7 +608,7 @@ export default function TutorialPage() {
               <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
                 <div className="flex gap-2">
                   <span className="rounded-xl bg-emerald-600 text-white px-4 py-2.5 font-black text-xs">{label('اقتراحات القراءة','Suggestions')}</span>
-                  <span className="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white px-4 py-2.5 font-black text-xs">{label('قائمة القراءة في التحدي الشهري','Monthly challenge reading list')}</span>
+                  
                 </div>
                 <span className="rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2 text-xs text-slate-600 dark:text-slate-300">{label('نوع الكتاب: الكل','Book type: All')}</span>
               </div>
