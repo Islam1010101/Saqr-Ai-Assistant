@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useLanguage } from '../App';
+import LibraryLetterAtmosphere from '../src/components/LibraryLetterAtmosphere';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../src/utils/supabase';
 import { useReadingPassport, digitalBookKey } from '../src/utils/readingPassport';
@@ -464,8 +465,9 @@ const EnglishLibraryInternalPage: React.FC = () => {
     }, [searchTerm, subjectFilter, authorFilter, audioOnly, sortBy, currentLocale]);
 
     return (
-        <div dir={dir} className="w-full min-h-screen bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300">
+        <div dir={dir} className="efips-letter-library efips-letter-en w-full min-h-screen bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300">
             
+            <LibraryLetterAtmosphere alphabet="english" />
             <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-50 dark:opacity-20">
                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-sky-400/20 rounded-full blur-[100px] animate-blob"></div>
                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-amber-400/20 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
@@ -474,13 +476,13 @@ const EnglishLibraryInternalPage: React.FC = () => {
             <div className="max-w-[1400px] mx-auto px-4 md:px-6 pb-20 relative z-10 antialiased overflow-x-hidden">
                 
                 <RevealOnScroll>
-                    <div className="text-center mt-12 mb-12 relative">
-                        <button onClick={() => navigate(-1)} className="absolute start-0 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-800 text-slate-800 dark:text-white px-5 py-2.5 rounded-full font-black text-sm hover:bg-slate-200 hover:-translate-x-1 active:translate-y-1 border-b-4 border-slate-300 dark:border-slate-700 active:border-b-0 transition-all flex items-center gap-2 shadow-sm">
+                    <div className="efips-library-title-wrap text-center mt-12 mb-12 relative">
+                        <div className="efips-library-topbar"><button onClick={() => navigate(-1)} className="efips-library-back start-0 bg-white dark:bg-slate-800 text-slate-800 dark:text-white px-5 py-2.5 rounded-full font-black text-sm hover:bg-slate-200 hover:-translate-x-1 active:translate-y-1 border-b-4 border-slate-300 dark:border-slate-700 active:border-b-0 transition-all flex items-center gap-2 shadow-sm">
                             <span className="text-xl leading-none rtl:rotate-180">←</span> {t('back')}
-                        </button>
+                        </button></div>
                         {/* العناوين الإنجليزية تكون بوزن أسود عريض جداً والخطوط موحدة Cairo */}
-                        <h1 className="text-4xl md:text-6xl font-black text-slate-800 dark:text-white tracking-tight uppercase">{t('pageTitle')}</h1>
-                        <div className="flex justify-center gap-3 mt-6">
+                        <h1 className="efips-library-page-title text-4xl md:text-6xl font-black text-slate-800 dark:text-white tracking-tight uppercase">{t('pageTitle')}</h1>
+                        <div className="efips-library-title-stripes flex justify-center gap-3 mt-6">
                             <div className="w-16 h-2 bg-sky-500 rounded-full" />
                             <div className="w-8 h-2 bg-amber-400 rounded-full" />
                         </div>
@@ -527,7 +529,7 @@ const EnglishLibraryInternalPage: React.FC = () => {
                 </RevealOnScroll>
 
                 {/* عرض البطاقات مع تلاشي لكل بطاقة بشكل منفصل وحصري عند التمرير */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-10 gap-x-4 md:gap-x-6 px-2 md:px-4">
+                <div className="efips-library-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-10 gap-x-4 md:gap-x-6 px-2 md:px-4">
                     {filteredBooks.slice(0, visibleCount).map((book, index) => (
                         <RevealOnScroll key={book.id} delay={(index % 4) * 100}>
                            <BookCard 
@@ -572,7 +574,7 @@ const EnglishLibraryInternalPage: React.FC = () => {
 
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
-                * { font-family: 'Cairo', sans-serif !important; }
+                .efips-letter-library, .efips-letter-library * { font-family: 'Cairo', sans-serif !important; }
                 .scrollbar-thin::-webkit-scrollbar { width: 6px; }
                 .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
                 .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
