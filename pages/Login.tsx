@@ -98,6 +98,31 @@ export default function Login() {
     }
   };
 
+  useEffect(() => {
+    if (!new URLSearchParams(window.location.search).has('efips_student_google')) return;
+    let active = true;
+    const finish = async () => {
+      setLoading(true);
+      try {
+        const student = await completeGoogleStudentSignIn();
+        if (!active || !student) return;
+        localStorage.setItem('user_type', 'student');
+        localStorage.setItem('current_user', JSON.stringify(student));
+        window.history.replaceState(null, '', window.location.pathname + '#/home');
+        window.location.reload();
+      } catch {
+        await supabase.auth.signOut();
+        if (active) {
+          setError(lang === 'ar' ? 'تعذر التحقق من حساب الطالب المدرسي. تأكد من حساب Google المستخدم.' : 'School Google student verification failed.');
+          setLoading(false);
+          window.history.replaceState(null, '', window.location.pathname + '#/');
+        }
+      }
+    };
+    void finish();
+    return () => { active = false; };
+  }, []);
+
   // دالة تسجيل دخول المعلمين والأدمن
   const handleTeacherLogin = async (e: React.FormEvent) => {
     e.preventDefault();
