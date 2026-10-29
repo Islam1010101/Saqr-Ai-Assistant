@@ -377,7 +377,7 @@ export default function TutorialPage() {
     },
     {
       id: 'national-identity', title: label('صقر وهوية وطن', 'Saqr & National Identity'),
-      description: label('رحلات ثقافية إماراتية للطلاب والإدارة.', 'UAE heritage learning for students and administrators.'),
+      description: label('رحلات ثقافية إماراتية للطلاب.', 'UAE heritage learning for students'),
       color: 'bg-gradient-to-br from-[#075B49] via-[#087555] to-[#116759]', border: 'border-emerald-900',
       icon: <svg className="h-9 w-9" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M24 11C18 7 11 7 5 9v29c7-2 14-1 19 3 5-4 12-5 19-3V9c-6-2-13-2-19 2ZM24 11v30"/><path d="m30 19 3-6 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1Z" fill="currentColor" fillOpacity=".24"/></svg>,
       hint: label('جواز صقر الثقافي وكنوز لغتنا ومحقق ذاكرة الوطن وتحدي راية المجد بعشرة أسئلة عن علم الإمارات، بالإضافة إلى جناح مستقل لكتب الهوية الوطنية. نقاط اللعبة حسب صلاحية الحساب. المعاينة لا تشغّل الألعاب.',
@@ -393,7 +393,7 @@ export default function TutorialPage() {
       id: 'schedule', title: label('جدول المكتبة', 'Library Schedule'),
       description: label('تنظيم وحجز زيارات المكتبة للمعلمين.', 'Organize and book teacher library visits.'),
       color: 'bg-[#a77bdc]', border: 'border-[#754aa8]', icon: <ScheduleIcon />,
-      hint: label('يمكن للمعلمين والإدارة الاطلاع على الحصص المتاحة والحجوزات وفق صلاحياتهم. بيانات الحجوزات والأسماء الفعلية مخفية هنا.', 'Teachers and administrators can view the schedule according to account permissions. Real schedules and names are hidden here.')
+      hint: label('يمكن للمعلمين الاطلاع على الحصص المتاحة والحجوزات وفق صلاحياتهم. بيانات الحجوزات والأسماء الفعلية مخفية هنا.', 'Teachers can view the schedule according to account permissions. Real schedules and names are hidden here.')
     },
     {
       id: 'admin', title: label('إدارة النظام', 'System Admin'),
@@ -486,7 +486,7 @@ export default function TutorialPage() {
           <HintTarget id="welcome-panel" title={label('منطقة الترحيب', 'Welcome panel')} description={label('يعرض الموقع الحقيقي ترحيبًا مخصصًا حسب الحساب. تم إخفاء اسم المستخدم ونوع الحساب في نسخة الزائر.', 'The live site personalizes this area by account. User names and account roles are hidden in this visitor tour.')} interactive={false} {...hintState}>
             <section className="mx-auto max-w-4xl space-y-3 text-center">
               <div className="inline-block rounded-full border-2 border-slate-200 bg-white/90 px-5 py-2 text-xs font-bold text-slate-700 shadow-md backdrop-blur-md dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-200 md:text-sm">
-                {label('جولة شاملة من منظور الأدمن', 'Complete admin-perspective tour')}
+                {label('جولة شاملة', 'Complete tour')}
               </div>
               <div className="flex flex-col items-center gap-2 pt-1">
                 <span className="text-lg sm:text-xl md:text-2xl font-black tracking-wide text-emerald-700 dark:text-emerald-300">{label('مرحبًا بك أيها الزائر في بوابة المعرفة', 'Welcome, visitor, to the Knowledge Portal')}</span>
