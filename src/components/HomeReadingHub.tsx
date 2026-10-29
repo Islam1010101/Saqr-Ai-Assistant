@@ -226,7 +226,7 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
   const dateLabel = (date: string) => new Intl.DateTimeFormat(ar ? 'ar-AE' : 'en-US',
     { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(date + 'T12:00:00'));
   const visible = suggestions;
-  const readingList = useMemo(()=>data.saved.map(key=>catalogByKey.get(key)).filter((b):b is ReadingBook=>!!b),[data.saved]);
+  const readingList = useMemo(()=>Array.from(new Set([...data.saved,...monthlyCompleted.map(item=>item.key)])).map(key=>catalogByKey.get(key)).filter((b):b is ReadingBook=>!!b),[data.saved,monthlyCompleted]);
   const pickerBooks = useMemo(()=>catalog.filter(b=>(b.title+' '+b.author).toLocaleLowerCase().includes(pickerQuery.toLocaleLowerCase())).slice(0,50),[pickerQuery]);
   const card=(book:ReadingBook,inModal:boolean)=>{
     const saved=data.saved.includes(book.key), finished=data.completed.includes(book.key);
