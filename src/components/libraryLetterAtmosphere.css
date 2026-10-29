@@ -1,0 +1,52 @@
+/* Independent decoration shared by the Arabic and English digital libraries. */
+.efips-letter-library{isolation:isolate;position:relative}
+.efips-letter-library .efips-library-letters{--letters-x:0px;--letters-y:0px;position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;user-select:none}
+.efips-letter-library .efips-library-letter{position:absolute;display:block;transform:translate3d(var(--letters-x),var(--letters-y),0);transition:transform .45s cubic-bezier(.2,.8,.2,1);will-change:transform}
+.efips-letter-library .efips-library-letter>span{display:block;font-family:'Cairo',ui-sans-serif,system-ui,sans-serif!important;font-weight:900;font-size:clamp(34px,5.5vw,85px);line-height:1;color:var(--letter-color,#32b6c9);opacity:.36;text-shadow:0 0 16px currentColor,0 0 38px currentColor;animation:efips-letter-float var(--letter-time,8s) ease-in-out infinite alternate;animation-delay:var(--letter-delay,0s)}
+.efips-letter-library.efips-letter-ar .efips-library-letter>span{font-size:clamp(40px,6vw,92px)}
+.efips-letter-library .efips-library-letter:nth-child(5n+1){--letter-color:#10b981;--letter-time:9s;--letter-delay:-2s;rotate:-11deg}
+.efips-letter-library .efips-library-letter:nth-child(5n+2){--letter-color:#0ea5e9;--letter-time:10s;--letter-delay:-4s;rotate:14deg}
+.efips-letter-library .efips-library-letter:nth-child(5n+3){--letter-color:#eab54a;--letter-time:7.6s;--letter-delay:-1s;rotate:-8deg}
+.efips-letter-library .efips-library-letter:nth-child(5n+4){--letter-color:#a78bfa;--letter-time:11s;--letter-delay:-6s;rotate:8deg}
+.efips-letter-library .efips-library-letter:nth-child(5n){--letter-color:#f472b6;--letter-time:8.6s;--letter-delay:-3s}
+.efips-letter-library .efips-library-letter-1{top:8%;left:4%}
+.efips-letter-library .efips-library-letter-2{top:12%;right:8%}
+.efips-letter-library .efips-library-letter-3{top:28%;left:14%}
+.efips-letter-library .efips-library-letter-4{top:34%;right:5%}
+.efips-letter-library .efips-library-letter-5{top:49%;left:3%}
+.efips-letter-library .efips-library-letter-6{top:57%;right:17%}
+.efips-letter-library .efips-library-letter-7{top:73%;left:19%}
+.efips-letter-library .efips-library-letter-8{top:82%;right:3%}
+.efips-letter-library .efips-library-letter-9{top:19%;left:43%}
+.efips-letter-library .efips-library-letter-10{top:66%;left:55%}
+.efips-letter-library .efips-library-letter-11{top:92%;left:39%}
+.efips-letter-library .efips-library-letter-12{top:43%;right:33%}
+.efips-letter-library .efips-library-letter-13{top:5%;right:31%}
+.efips-letter-library .efips-library-letter-14{top:90%;right:24%}
+.dark .efips-letter-library .efips-library-letter>span{opacity:.25;text-shadow:0 0 22px currentColor,0 0 44px currentColor}
+.efips-letter-library .efips-library-title-wrap{isolation:isolate;position:relative;margin-top:clamp(20px,3vw,42px);margin-bottom:clamp(26px,4vw,46px);padding:clamp(20px,3.4vw,38px) clamp(12px,2.5vw,28px) 26px;border:1px solid rgba(148,187,194,.34);border-radius:clamp(23px,3vw,36px);background:linear-gradient(120deg,rgba(255,255,255,.88),rgba(239,251,255,.75));box-shadow:0 12px 36px rgba(15,95,112,.08);backdrop-filter:blur(9px)}
+.dark .efips-letter-library .efips-library-title-wrap{background:linear-gradient(120deg,rgba(15,25,39,.89),rgba(20,40,57,.85));border-color:rgba(71,115,124,.55)}
+.efips-letter-library .efips-library-title-wrap:before{content:"";position:absolute;z-index:-1;width:55%;height:100%;top:0;left:22%;pointer-events:none;background:radial-gradient(ellipse at center,rgba(52,211,153,.15),transparent 70%);animation:efips-title-pulse 6s ease-in-out infinite}
+.efips-letter-library.efips-letter-en .efips-library-title-wrap:before{background:radial-gradient(ellipse at center,rgba(14,165,233,.16),transparent 70%)}
+.efips-letter-library .efips-library-page-title{font-size:clamp(29px,5.2vw,66px)!important;line-height:1.3;letter-spacing:-.04em;filter:drop-shadow(0 4px 11px rgba(14,165,233,.16));animation:efips-title-arrive .85s ease-out both}
+.efips-letter-library .efips-library-title-stripes{filter:drop-shadow(0 2px 7px rgba(251,191,36,.22));animation:efips-title-stripes 4s ease-in-out infinite}
+.efips-letter-library .efips-library-back{position:relative!important;top:auto!important;transform:none!important;min-height:41px}
+.efips-letter-library .efips-library-topbar{display:flex;justify-content:flex-start;position:relative;z-index:2;margin-bottom:9px}
+.efips-letter-library .efips-library-search-wrap{position:relative;z-index:2}
+.efips-letter-library .efips-library-card-grid{position:relative;z-index:2}
+@media(max-width:620px){
+ .efips-letter-library .efips-library-letter>span{font-size:clamp(31px,10vw,48px)}
+ .efips-letter-library.efips-letter-ar .efips-library-letter>span{font-size:clamp(35px,10vw,52px)}
+ .efips-letter-library .efips-library-letter-3,.efips-letter-library .efips-library-letter-9,.efips-letter-library .efips-library-letter-12,.efips-letter-library .efips-library-letter-13{display:none}
+ .efips-letter-library .efips-library-title-wrap{padding:16px 13px 21px;margin-top:20px}
+ .efips-letter-library .efips-library-page-title{font-size:clamp(28px,7.4vw,39px)!important;line-height:1.35}
+ .efips-letter-library .efips-library-topbar{margin-bottom:13px}
+ .efips-letter-library .efips-library-back{padding:8px 12px!important;font-size:12px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ .efips-letter-library .efips-library-letter,.efips-letter-library .efips-library-letter>span,.efips-letter-library .efips-library-title-wrap:before,.efips-letter-library .efips-library-page-title,.efips-letter-library .efips-library-title-stripes{animation:none!important;transition:none!important;transform:none!important}
+}
+@keyframes efips-letter-float{0%{translate:0 0;rotate:-3deg;scale:.94}50%{translate:0 -17px;rotate:6deg;scale:1.04}100%{translate:0 9px;rotate:-6deg;scale:.96}}
+@keyframes efips-title-pulse{0%,100%{opacity:.65;scale:.96}50%{opacity:1;scale:1.08}}
+@keyframes efips-title-arrive{from{opacity:0;transform:translateY(14px);filter:blur(5px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
+@keyframes efips-title-stripes{0%,100%{scale:1}50%{scale:1.08}}
