@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useLanguage } from '../App';
 import { useNavigate } from 'react-router-dom';
+import './creatorsPortalVisual.css';
 
 // --- الأيقونات البرمجية SVG ---
 const IconPlay = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>;
@@ -177,15 +178,29 @@ const CreatorsPortalPage: React.FC = () => {
         }
     };
 
+
+    const handleCreativePointerMove = (event: React.PointerEvent<HTMLElement>) => {
+        if (event.pointerType !== 'mouse') return;
+        const rect = event.currentTarget.getBoundingClientRect();
+        const x = Math.max(-1, Math.min(1, (event.clientX - rect.left - rect.width / 2) / (rect.width / 2)));
+        const y = Math.max(-1, Math.min(1, (event.clientY - rect.top - rect.height / 2) / (rect.height / 2)));
+        event.currentTarget.style.setProperty('--creative-pointer-x', (x * 12).toFixed(1) + 'px');
+        event.currentTarget.style.setProperty('--creative-pointer-y', (y * 10).toFixed(1) + 'px');
+    };
+    const resetCreativePointer = (event: React.PointerEvent<HTMLElement>) => {
+        event.currentTarget.style.setProperty('--creative-pointer-x', '0px');
+        event.currentTarget.style.setProperty('--creative-pointer-y', '0px');
+    };
+
     return (
-        <div dir={dir} className="creators-portal w-full min-h-[100dvh] flex flex-col items-center bg-[#F8FAF9] dark:bg-black font-sans relative overflow-x-hidden text-slate-900 dark:text-white transition-colors duration-500 pb-16">
+        <div dir={dir} className="creators-portal creator-gateway-v2 w-full min-h-[100dvh] flex flex-col items-center bg-[#F8FAF9] dark:bg-black font-sans relative overflow-x-hidden text-slate-900 dark:text-white transition-colors duration-500 pb-16">
             
             <div className="absolute inset-0 w-full h-full overflow-hidden z-0 pointer-events-none opacity-60 dark:opacity-30">
                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-400/20 rounded-full blur-[100px] animate-blob"></div>
                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-amber-400/15 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
             </div>
 
-            <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 antialiased">
+            <div className="creator-gateway-shell w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 antialiased">
                 
                 <nav className="mb-5 mt-6 flex flex-wrap items-center justify-between gap-3" aria-label={isAr ? 'التنقل' : 'Navigation'}>
                     <button type="button" onClick={() => navigate(-1)} className="inline-flex min-h-11 items-center gap-2 rounded-2xl border border-emerald-200 dark:border-emerald-900 bg-white/90 dark:bg-slate-950 px-4 py-2.5 text-sm font-black text-emerald-800 dark:text-emerald-200 shadow-sm hover:-translate-y-0.5 hover:border-emerald-400 transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500">
@@ -194,30 +209,39 @@ const CreatorsPortalPage: React.FC = () => {
                     </button>
                     <span className="inline-flex items-center gap-2 text-xs font-black text-slate-500 dark:text-slate-400"><img src="/school-logo.png" alt="EFIPS" className="h-8 w-8 object-contain"/>{isAr ? 'مكتبة صقر الإمارات' : 'EFIPS Library'}</span>
                 </nav>
-                <header className="creator-hero relative isolate mb-10 overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] border border-emerald-900/20 bg-[#075543] px-6 py-8 sm:px-9 sm:py-10 lg:px-12 text-white shadow-[0_28px_70px_rgba(5,79,64,0.18)]">
-                    <div className="absolute inset-x-0 top-0 flex h-1.5" aria-hidden="true"><span className="w-1/4 bg-[#E23D40]"/><span className="w-1/4 bg-[#079457]"/><span className="w-1/4 bg-white"/><span className="w-1/4 bg-[#111C1A]"/></div>
-                    <div className="pointer-events-none absolute -end-16 -top-20 h-72 w-72 rounded-full border-[45px] border-white/5" aria-hidden="true"/>
-                    <svg viewBox="0 0 600 280" preserveAspectRatio="xMidYMid slice" className="pointer-events-none absolute inset-0 h-full w-full opacity-20" fill="none" aria-hidden="true"><path d="M0 240C130 150 250 300 370 215S520 165 600 190M0 260C130 170 250 320 370 235S520 185 600 210" stroke="#E6D3A3" strokeWidth="4"/><path d="M410 45h160M420 65h160M430 85h160" stroke="#E6D3A3" strokeWidth="2" strokeDasharray="8 8"/></svg>
-                    <div className="relative grid grid-cols-1 lg:grid-cols-[1.4fr_.6fr] items-center gap-6">
-                        <div>
-                            <span className="inline-flex gap-2 items-center rounded-full border border-amber-200/40 bg-white/10 px-4 py-2 text-xs font-black text-amber-100">{isAr ? 'من أقلام طلابنا إلى مكتبتنا' : 'WRITTEN BY OUR STUDENTS'}</span>
-                            <h1 className="mt-5 text-3xl sm:text-4xl lg:text-5xl font-black leading-relaxed tracking-tight">{isAr ? 'ركن المبدعين' : 'CREATORS CORNER'}</h1>
-                            <p className="mt-2 max-w-2xl text-sm sm:text-base font-semibold leading-8 text-emerald-50/95">{isAr ? 'مساحة تلتقي فيها القصص والأفكار. اقرأ أعمال طلاب مدرسة صقر الإمارات واستمع إلى ملخصاتهم الصوتية.' : 'A home for stories and ideas. Explore creative writing by EFIPS students, read their works and listen to audio summaries.'}</p>
-                            <div className="mt-6 inline-flex items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-4 py-2.5 text-xs font-black"><IconRead /> {studentWorks.length} {isAr ? 'أعمال إبداعية' : 'Student creations'}</div>
-                        </div>
-                        <div className="hidden lg:flex justify-center">
-                            <div className={'creator-hero-art flex h-44 w-44 items-center justify-center rounded-[2.5rem] border border-white/20 bg-white/10 backdrop-blur-sm shadow-xl transition-opacity ' + (isVisible ? 'opacity-100' : 'opacity-80')}>
-                                <svg viewBox="0 0 140 140" className="h-36 w-36" fill="none" aria-hidden="true"><path d="M20 49c19-9 36-8 50 0 14-8 31-9 50 0v73c-17-6-34-5-50 4-16-9-33-10-50-4V49Z" fill="#FCF7E9" stroke="#E7C483" strokeWidth="3"/><path d="M70 49v77M28 64c12-4 23-2 34 3M28 79c12-4 23-2 34 3M78 66c12-4 24-5 34-3M78 82c12-4 24-5 34-3" stroke="#158163" strokeWidth="4" strokeLinecap="round"/><path d="m70 10 7 13 15 2-11 10 3 15-14-7-14 7 3-15-11-10 15-2 7-13Z" fill="#EAC16F"/></svg>
-                            </div>
+                <header className="creator-hero creator-gateway-hero relative text-white" onPointerMove={handleCreativePointerMove} onPointerLeave={resetCreativePointer}>
+                    <div className="creator-gateway-tricolour" aria-hidden="true"><span className="bg-[#E23D40]"/><span className="bg-[#079457]"/><span className="bg-white"/><span className="bg-[#111C1A]"/></div>
+                    <div className="creator-gateway-copy">
+                        <span className="creator-gateway-eyebrow">
+                            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3v18M3 12h18M5 5l14 14M19 5 5 19"/></svg>
+                            {isAr ? 'من أقلام طلابنا إلى مكتبتنا' : 'WRITTEN BY OUR STUDENTS'}
+                        </span>
+                        <h1 className="creator-gateway-title">{isAr ? 'بوابة المبدعين' : 'CREATORS PORTAL'}</h1>
+                        <p className="creator-gateway-description">{isAr ? 'مساحة تلتقي فيها القصص والأفكار. اقرأ أعمال طلاب مدرسة صقر الإمارات واستمع إلى ملخصاتهم الصوتية.' : 'A home for stories and ideas. Explore creative writing by EFIPS students, read their works and listen to audio summaries.'}</p>
+                        <div className="creator-gateway-stats">
+                            <span className="creator-gateway-stat-icon" aria-hidden="true"><IconRead/></span>
+                            <strong className="creator-gateway-stat-number">{studentWorks.length}</strong>
+                            <span className="creator-gateway-stat-label">{isAr ? 'أعمال إبداعية' : 'Student creations'}</span>
                         </div>
                     </div>
+                    <div className={'creator-gateway-art '+(isVisible?'opacity-100':'opacity-90')}>
+                        <span className="creator-gateway-art-glow" aria-hidden="true"/>
+                        <span className="creator-gateway-art-ring" aria-hidden="true"/>
+                        <span className="creator-gateway-art-ring creator-gateway-art-ring-second" aria-hidden="true"/>
+                        <span className="creator-gateway-symbol creator-gateway-symbol-book" aria-hidden="true"><IconRead/></span>
+                        <span className="creator-gateway-symbol creator-gateway-symbol-pen" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m4 17 11-11a2 2 0 0 1 3 0l1 1a2 2 0 0 1 0 3L8 21l-5 1 1-5Zm8-8 4 4"/></svg></span>
+                        <span className="creator-gateway-symbol creator-gateway-symbol-stars" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m12 2 2.6 7.4L22 12l-7.4 2.6L12 22l-2.6-7.4L2 12l7.4-2.6L12 2Z"/></svg></span>
+                        <span className="creator-gateway-spark creator-gateway-spark-first" aria-hidden="true"/>
+                        <span className="creator-gateway-spark creator-gateway-spark-second" aria-hidden="true"/>
+                        <img src="/Saqr%20Creative.png" alt={isAr ? 'صقر يشجع طلاب المدرسة على الإبداع' : 'Saqr celebrating student creativity'} className="creator-gateway-character" />
+                    </div>
                 </header>
-                <section className="mb-6 flex flex-wrap items-end justify-between gap-3">
-                    <div><p className="text-xs font-black text-emerald-700 dark:text-emerald-400">{isAr ? 'مكتبة الإبداع' : 'CREATIVE COLLECTION'}</p><h2 className="mt-1 text-xl sm:text-2xl font-black text-slate-900 dark:text-white">{isAr ? 'اكتشف إبداعات طلابنا' : 'Explore student creations'}</h2><p className="mt-2 text-sm font-semibold text-slate-600 dark:text-slate-300">{isAr ? 'اقرأ العمل أو استمع إلى ملخصه باستخدام الأزرار أسفل كل كتاب.' : 'Read a work or listen to its summary using the buttons on each book.'}</p></div>
-                    <span className="rounded-full border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/40 px-4 py-2 text-xs font-black text-emerald-800 dark:text-emerald-200">{studentWorks.length} {isAr ? 'أعمال' : 'works'}</span>
+                <section className="creator-collection-heading mb-6 flex flex-wrap items-end justify-between gap-3">
+                    <div><p className="creator-collection-kicker text-xs font-black text-emerald-700 dark:text-emerald-400">{isAr ? 'مكتبة الإبداع' : 'CREATIVE COLLECTION'}</p><h2 className="mt-1 text-xl sm:text-2xl font-black text-slate-900 dark:text-white">{isAr ? 'اكتشف إبداعات طلابنا' : 'Explore student creations'}</h2><p className="mt-2 text-sm font-semibold text-slate-600 dark:text-slate-300">{isAr ? 'اقرأ العمل أو استمع إلى ملخصه باستخدام الأزرار أسفل كل كتاب.' : 'Read a work or listen to its summary using the buttons on each book.'}</p></div>
+                    <span className="creator-collection-count rounded-full border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/40 px-4 py-2 text-xs font-black text-emerald-800 dark:text-emerald-200">{studentWorks.length} {isAr ? 'أعمال' : 'works'}</span>
                 </section>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6 items-stretch">
+                <div className="creator-works-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6 items-stretch">
                     {studentWorks.map((work, index) => (
                         <RevealOnScroll key={work.id} delay={(index % 4) * 100}>
                             <div className="w-full max-w-[420px] h-full mx-auto">
@@ -240,7 +264,7 @@ const CreatorsPortalPage: React.FC = () => {
                 </div>
 
                 <RevealOnScroll delay={300}>
-                    <section className="relative mt-12 sm:mt-16 overflow-hidden rounded-[2rem] border border-amber-200 dark:border-amber-900/60 bg-gradient-to-br from-[#FFF7E7] via-white to-emerald-50 dark:from-[#211B12] dark:via-slate-950 dark:to-emerald-950/20 p-6 sm:p-9 shadow-lg">
+                    <section className="creator-outro relative mt-12 sm:mt-16 overflow-hidden rounded-[2rem] border border-amber-200 dark:border-amber-900/60 bg-gradient-to-br from-[#FFF7E7] via-white to-emerald-50 dark:from-[#211B12] dark:via-slate-950 dark:to-emerald-950/20 p-6 sm:p-9 shadow-lg">
                         <div className="pointer-events-none absolute -end-14 -bottom-14 h-40 w-40 rounded-full border-[25px] border-amber-300/20" aria-hidden="true"/>
                         <div className="relative flex flex-col sm:flex-row items-center gap-5 text-center sm:text-start">
                             <div className="shrink-0 flex h-16 w-16 items-center justify-center rounded-2xl border border-amber-200 dark:border-amber-800 bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-200">
