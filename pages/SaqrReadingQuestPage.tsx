@@ -2,6 +2,7 @@ import React,{useMemo,useState} from 'react';
 import {Link,Navigate} from 'react-router-dom';
 import {useLanguage} from '../App';
 import './saqrQuestVisual.css';
+import './saqrReadingIntro.css';
 import SaqrBookQuestArt from './SaqrBookQuestArt';
 import {getRoleReadingBooks,shuffleReading,type ReadingBook,type ReadingQuestion,type ReadingRole} from '../src/utils/saqrReadingQuestBank';
 const Icon=({name}:{name:'book'|'arrow'|'check'|'compass'})=><svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{name==='book'?<path d="M12 5C9 3 5 3 2 5v14c4-1 7 0 10 2 3-2 6-3 10-2V5c-3-2-7-2-10 0Zm0 0v16"/>:name==='check'?<path d="m4 12 5 5L20 6"/>:name==='arrow'?<path d="M4 12h16m-7-7 7 7-7 7"/>:<><circle cx="12" cy="12" r="9"/><path d="m10 10 6-2-2 6-6 2 2-6Z"/></>}</svg>;
@@ -24,23 +25,72 @@ export default function SaqrReadingQuestPage(){
  const correct=rounds?.reduce((n,r)=>n+r.questions.filter(q=>r.answers[q.id]===q.correct).length,0)||0;
  const total=rounds?.reduce((n,r)=>n+r.questions.length,0)||0;
  const greet=ar?(session.role==='admin'?'مدير النظام':role==='teacher'?'الأستاذ':'الطالب'):(session.role==='admin'?'Administrator':role==='teacher'?'Teacher':'Student');
- return <div dir={dir} className="sq-page sq-reading sq-joyful"><div className="sq-ambient" aria-hidden="true"/><main className="sq-shell" style={{maxWidth:1020}}>
+ const handleIntroPointerMove=(event:React.PointerEvent<HTMLElement>)=>{
+  if(event.pointerType!=='mouse')return;
+  const rect=event.currentTarget.getBoundingClientRect();
+  const x=Math.max(-1,Math.min(1,(event.clientX-rect.left-rect.width/2)/(rect.width/2)));
+  const y=Math.max(-1,Math.min(1,(event.clientY-rect.top-rect.height/2)/(rect.height/2)));
+  event.currentTarget.style.setProperty('--sq-parallax-x',(x*12).toFixed(1)+'px');
+  event.currentTarget.style.setProperty('--sq-parallax-y',(y*9).toFixed(1)+'px');
+ };
+ const handleIntroPointerLeave=(event:React.PointerEvent<HTMLElement>)=>{
+  event.currentTarget.style.setProperty('--sq-parallax-x','0px');
+  event.currentTarget.style.setProperty('--sq-parallax-y','0px');
+ };
+
+ return <div dir={dir} className={"sq-page sq-reading sq-joyful"+(!rounds?" sq-reading-entry-mode":"")}><div className="sq-ambient" aria-hidden="true"/><main className="sq-shell" style={{maxWidth:1020}}>
   <nav className="sq-topnav"><Link className="sq-back" to={session.role==='student'?'/saqr-challenges':'/home'}>{ar?'العودة':'Back'}</Link><span className="sq-brand"><span className="sq-brand-mark" aria-hidden="true"/>EFIPS LIBRARY</span></nav>
-  <header className="sq-hero sq-reading-hero sq-reading-centered"><span className="sq-streak" aria-hidden="true"/><span className="sq-orbit-icon sq-orbit-one" aria-hidden="true"><Icon name="compass"/></span>
-   <div className="sq-hero-text"><span className="sq-eyebrow"><Icon name="book"/>{ar?'أسرار الكتب تنتظرك':'A BOOK OF ADVENTURES'}</span><h1 className="sq-hero-title sq-reading-title">{ar?'بين السطور مع صقر':'Between the Lines with Saqr'}</h1><p className="sq-hero-sub">{ar?'كل صفحة مغامرة، وكل سؤال اكتشاف!':'Every page is an adventure and every question a discovery!'}</p><div className="sq-name-tag"><span className="sq-name-label">{ar?'مرحبًا':'Welcome'}, {greet}</span><strong className="sq-name">{compactName(ar?session.ar||session.en:session.en||session.ar)|| (ar?'قارئنا المميز':'Reader')}</strong></div></div>
-   <SaqrBookQuestArt/>
-  </header>
-  {!rounds?<section className="sq-content sq-panel sq-stage text-center"><div className="sq-panel-content">
-    <span className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-[#2e526c] text-white shadow-xl sq-stage"><Icon name="book"/></span>
-    <h2 className="mt-5 text-xl sm:text-2xl font-black">{ar?'كم كتابًا تريد في رحلتك؟':'How many books would you like?'}</h2>
-    <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{ar?'صقر سيختارها لك من كتب مكتبتنا.':'Saqr will select them from our library.'}</p>
-    <div className="sq-count">
-      <button aria-label={ar?'تقليل عدد الكتب':'Fewer books'} type="button" onClick={()=>setAmount(v=>Math.max(1,v-1))} disabled={amount<=1} className="sq-count-btn">−</button>
-      <output aria-live="polite">{amount}</output>
-      <button aria-label={ar?'زيادة عدد الكتب':'More books'} type="button" onClick={()=>setAmount(v=>Math.min(books.length,v+1))} disabled={amount>=books.length} className="sq-count-btn">+</button>
+  {!rounds ? (
+   <header className="sq-hero sq-reading-entry-hero" onPointerMove={handleIntroPointerMove} onPointerLeave={handleIntroPointerLeave}>
+    <span className="sq-streak" aria-hidden="true"/>
+    <div className="sq-hero-text sq-reading-entry-copy">
+     <span className="sq-eyebrow sq-reading-entry-eyebrow"><Icon name="book"/>{ar?'أسرار الكتب تنتظرك':'A BOOK OF ADVENTURES'}</span>
+     <h1 className="sq-hero-title sq-reading-entry-title">{ar?'بين السطور مع صقر':'Between the Lines with Saqr'}</h1>
+     <p className="sq-hero-sub sq-reading-entry-sub">{ar?'كل صفحة مغامرة، وكل سؤال اكتشاف!':'Every page is an adventure and every question a discovery!'}</p>
+     <div className="sq-reading-entry-greeting">
+      <span className="sq-reading-entry-greeting-icon" aria-hidden="true"><Icon name="check"/></span>
+      <span className="sq-name-label">{ar?'مرحبًا':'Welcome'}, {greet}</span>
+      <strong className="sq-name">{compactName(ar?session.ar||session.en:session.en||session.ar)|| (ar?'قارئنا المميز':'Reader')}</strong>
+     </div>
     </div>
-    <button type="button" disabled={!books.length} onClick={start} className="sq-primary mt-8 w-full sm:w-auto">{ar?'انطلق مع صقر':'Begin with Saqr'}<Icon name="arrow"/></button>
-    {!books.length&&<p role="status" className="mt-3 text-sm text-rose-600">{ar?'لا توجد كتب متاحة لهذه الفئة واللغة الآن.':'No books available for this role and language yet.'}</p>}</div>
+    <div className="sq-reading-entry-art">
+     <span className="sq-reading-entry-glow" aria-hidden="true"/>
+     <span className="sq-reading-entry-orbit" aria-hidden="true"/>
+     <span className="sq-reading-entry-orbit sq-reading-entry-orbit--second" aria-hidden="true"/>
+     <span className="sq-reading-entry-symbol sq-reading-entry-symbol--book" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5c-3-2-7-2-9-1v14c3-1 7-1 9 1 3-2 7-2 9-1V4c-3-1-7-1-9 1Zm0 0v14"/></svg>
+     </span>
+     <span className="sq-reading-entry-symbol sq-reading-entry-symbol--idea" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6m-5 3h4M8 15a7 7 0 1 1 8 0c-1 .7-1.5 1.4-1.5 3h-5C9.5 16.4 9 15.7 8 15zM12 2v2"/></svg>
+     </span>
+     <span className="sq-reading-entry-symbol sq-reading-entry-symbol--spark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="m12 2 2.7 7.3L22 12l-7.3 2.7L12 22l-2.7-7.3L2 12l7.3-2.7L12 2Z"/></svg>
+     </span>
+     <span className="sq-reading-entry-spark sq-reading-entry-spark--one" aria-hidden="true"/>
+     <span className="sq-reading-entry-spark sq-reading-entry-spark--two" aria-hidden="true"/>
+     <img className="sq-reading-entry-character" src="/Saqr%20Reading.png" alt={ar?'شخصية صقر في مغامرة القراءة':'Saqr reading challenge character'}/>
+    </div>
+   </header>
+  ) : (
+   <header className="sq-hero sq-reading-hero sq-reading-centered"><span className="sq-streak" aria-hidden="true"/><span className="sq-orbit-icon sq-orbit-one" aria-hidden="true"><Icon name="compass"/></span>
+    <div className="sq-hero-text"><span className="sq-eyebrow"><Icon name="book"/>{ar?'أسرار الكتب تنتظرك':'A BOOK OF ADVENTURES'}</span><h1 className="sq-hero-title sq-reading-title">{ar?'بين السطور مع صقر':'Between the Lines with Saqr'}</h1><p className="sq-hero-sub">{ar?'كل صفحة مغامرة، وكل سؤال اكتشاف!':'Every page is an adventure and every question a discovery!'}</p><div className="sq-name-tag"><span className="sq-name-label">{ar?'مرحبًا':'Welcome'}, {greet}</span><strong className="sq-name">{compactName(ar?session.ar||session.en:session.en||session.ar)|| (ar?'قارئنا المميز':'Reader')}</strong></div></div>
+    <SaqrBookQuestArt/>
+   </header>
+  )}
+  {!rounds?<section className="sq-content sq-panel sq-stage sq-reading-entry-panel text-center"><div className="sq-panel-content">
+   <div className="sq-reading-entry-panel-inner">
+    <span className="sq-reading-entry-panel-icon"><Icon name="book"/></span>
+    <h2 className="mt-5 text-xl sm:text-2xl font-black">{ar?'كم كتابًا تريد في رحلتك؟':'How many books would you like?'}</h2>
+    <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 sq-reading-entry-panel-description">{ar?'صقر سيختارها لك من كتب مكتبتنا.':'Saqr will select them from our library.'}</p>
+    <div className="sq-count">
+     <button aria-label={ar?'تقليل عدد الكتب':'Fewer books'} type="button" onClick={()=>setAmount(v=>Math.max(1,v-1))} disabled={amount<=1} className="sq-count-btn">−</button>
+     <output aria-live="polite">{amount}</output>
+     <button aria-label={ar?'زيادة عدد الكتب':'More books'} type="button" onClick={()=>setAmount(v=>Math.min(books.length,v+1))} disabled={amount>=books.length} className="sq-count-btn">+</button>
+    </div>
+    <button type="button" disabled={!books.length} onClick={start} className="sq-primary mt-8 w-full sm:w-auto sq-reading-entry-cta">{ar?'انطلق مع صقر':'Begin with Saqr'}<Icon name="arrow"/></button>
+    {!books.length&&<p role="status" className="mt-3 text-sm text-rose-600">{ar?'لا توجد كتب متاحة لهذه الفئة واللغة الآن.':'No books available for this role and language yet.'}</p>}
+   </div>
+  </div>
   </section>:completed?<section className="sq-content sq-panel sq-stage text-center"><div className="sq-panel-content">
     <div className="sq-finish-art"><Icon name="check"/></div><h2 className="mt-5 text-3xl font-black">{ar?'أحسنت! اكتملت الرحلة':'Journey complete!'}</h2><p className="mt-4 text-2xl font-black tabular-nums">{correct} / {total}</p>
     <button type="button" onClick={()=>setRounds(null)} className="sq-primary mt-6">{ar?'رحلة جديدة':'New journey'}</button></div>
