@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../App';
+import './feedbackVisual.css';
 
 const translations = {
     ar: {
@@ -374,7 +375,7 @@ const FeedbackPage: React.FC = () => {
     return (
         <div
             dir={dir}
-            className="feedback-page relative isolate min-h-[100dvh] w-full overflow-x-clip bg-white dark:bg-black text-slate-900 dark:text-white transition-colors duration-300"
+            className="feedback-page efips-feedback-v2 relative isolate min-h-[100dvh] w-full overflow-x-clip bg-white dark:bg-black text-slate-900 dark:text-white transition-colors duration-300"
         >
             {/* خلفية زخرفية: شفافة في اللايت مود وأكثر هدوءاً في الدارك مود */}
             <div
@@ -390,13 +391,14 @@ const FeedbackPage: React.FC = () => {
                 <div className="feedback-grid absolute inset-0 opacity-[0.32] dark:opacity-[0.12]" />
             </div>
 
-            <main className="relative mx-auto flex w-full max-w-[1280px] flex-col gap-10 px-4 pb-12 pt-10 sm:px-6 sm:pt-14 md:gap-14 md:px-8 md:pt-20">
+            <main className="feedback-content relative mx-auto flex w-full max-w-[1280px] flex-col gap-10 px-4 pb-12 pt-10 sm:px-6 sm:pt-14 md:gap-14 md:px-8 md:pt-20">
 
                 {/* رأس الصفحة */}
                 <RevealOnScroll>
-                    <header className="relative mx-auto w-full max-w-4xl text-center">
+                    <header className="feedback-hero relative mx-auto w-full max-w-4xl text-center">
 
-                        <div className="feedback-fade-in mb-7 inline-flex max-w-full items-center gap-2 rounded-full border border-emerald-200/80 bg-emerald-50/90 px-4 py-2.5 text-xs font-black text-emerald-800 shadow-sm shadow-emerald-900/5 dark:border-emerald-500/20 dark:bg-emerald-500/[0.08] dark:text-emerald-300 sm:text-sm">
+                        <div className="feedback-hero-copy">
+                        <div className="feedback-hero-kicker feedback-fade-in mb-7 inline-flex max-w-full items-center gap-2 rounded-full border border-emerald-200/80 bg-emerald-50/90 px-4 py-2.5 text-xs font-black text-emerald-800 shadow-sm shadow-emerald-900/5 dark:border-emerald-500/20 dark:bg-emerald-500/[0.08] dark:text-emerald-300 sm:text-sm">
                             <Icon name="sparkles" className="h-4 w-4 shrink-0" />
                             <span>
                                 {isAr
@@ -405,34 +407,30 @@ const FeedbackPage: React.FC = () => {
                             </span>
                         </div>
 
-                        <h1 className={`feedback-title-gradient text-4xl font-black leading-[1.3] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl ${
+                        <h1 className={`feedback-hero-title feedback-title-gradient text-4xl font-black leading-[1.3] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl ${
                             !isAr ? 'leading-tight' : ''
                         }`}>
                             {t('pageTitle')}
                         </h1>
 
-                        <div className="mx-auto mt-6 flex items-center justify-center gap-2.5">
+                        <div className="feedback-hero-rule mx-auto mt-6 flex items-center justify-center gap-2.5">
                             <span className="h-1.5 w-10 rounded-full bg-emerald-500 sm:w-14" />
                             <span className="h-1.5 w-5 rounded-full bg-amber-400 sm:w-7" />
                             <span className="h-1.5 w-2 rounded-full bg-sky-400" />
                         </div>
 
-                        <p className="mx-auto mt-7 max-w-3xl text-base font-semibold leading-8 text-slate-600 dark:text-slate-400 sm:text-lg md:text-xl md:leading-9">
+                        <p className="feedback-hero-subtitle mx-auto mt-7 max-w-3xl text-base font-semibold leading-8 text-slate-600 dark:text-slate-400 sm:text-lg md:text-xl md:leading-9">
                             {t('subTitle')}
                         </p>
 
-                        <div className="mx-auto mt-8 flex max-w-max items-center justify-center gap-2 rounded-2xl border border-slate-200/80 bg-white/80 px-4 py-3 shadow-sm backdrop-blur-md dark:border-neutral-800 dark:bg-neutral-950/80">
-                            <Icon
-                                name="library"
-                                className="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400"
-                            />
-                            <span className="text-xs font-extrabold tracking-wide text-slate-600 dark:text-slate-300 sm:text-sm">
-                                EFIPS INNOVATION LAB
-                            </span>
-                            <span className="h-1 w-1 rounded-full bg-amber-500" />
-                            <span className="text-xs font-bold tabular-nums text-slate-500 dark:text-slate-400">
-                                2026
-                            </span>
+                        </div>
+                        <div className="feedback-hero-scene" aria-hidden="true">
+                         <span className="feedback-hero-halo"/><span className="feedback-hero-orbit"/><span className="feedback-hero-orbit feedback-hero-orbit--second"/>
+                         <span className="feedback-hero-central"><svg viewBox="0 0 96 96" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round"><rect x="18" y="18" width="59" height="56" rx="8"/><path d="M30 36h31M30 48h20M30 60h13m13-7 7 7 13-18"/></svg></span>
+                         <span className="feedback-hero-symbol feedback-hero-symbol--idea"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M9 18h6m-5 3h4M8 15a7 7 0 1 1 8 0c-1 1-1.5 2-1.5 3h-5c0-1-.5-2-1.5-3z"/></svg></span>
+                         <span className="feedback-hero-symbol feedback-hero-symbol--star"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="m12 2 2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5L12 2Z"/></svg></span>
+                         <span className="feedback-hero-symbol feedback-hero-symbol--book"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 6c-3-2-7-2-9-1v14c3-1 7-1 9 1 3-2 7-2 9-1V5c-3-1-7-1-9 1Zm0 0v14"/></svg></span>
+                         <span className="feedback-hero-spark feedback-hero-spark--a"/><span className="feedback-hero-spark feedback-hero-spark--b"/>
                         </div>
                     </header>
                 </RevealOnScroll>
@@ -487,7 +485,7 @@ const FeedbackPage: React.FC = () => {
                             className="feedback-form relative w-full overflow-hidden rounded-[2rem] border border-slate-200/90 bg-white shadow-[0_25px_100px_-45px_rgba(15,23,42,0.25)] dark:border-neutral-800 dark:bg-neutral-950 dark:shadow-[0_25px_100px_-45px_rgba(0,0,0,0.8)] sm:rounded-[2.5rem] lg:rounded-[3rem]"
                         >
                             {/* الشريط العلوي */}
-                            <div className="relative overflow-hidden border-b border-slate-200/80 bg-gradient-to-l from-emerald-50/80 via-white to-amber-50/50 px-5 py-8 dark:border-neutral-800 dark:from-emerald-500/[0.07] dark:via-neutral-950 dark:to-amber-500/[0.04] sm:px-8 sm:py-10 md:px-12 md:py-12">
+                            <div className="feedback-form-heading relative overflow-hidden border-b border-slate-200/80 bg-gradient-to-l from-emerald-50/80 via-white to-amber-50/50 px-5 py-8 dark:border-neutral-800 dark:from-emerald-500/[0.07] dark:via-neutral-950 dark:to-amber-500/[0.04] sm:px-8 sm:py-10 md:px-12 md:py-12">
                                 <div
                                     aria-hidden="true"
                                     className="pointer-events-none absolute -end-8 -top-16 h-44 w-44 rounded-full border border-emerald-500/10 dark:border-emerald-400/10"
@@ -515,10 +513,10 @@ const FeedbackPage: React.FC = () => {
                                 </div>
                             </div>
 
-                            <div className="space-y-10 p-5 sm:space-y-12 sm:p-8 md:space-y-14 md:p-12 lg:p-14">
+                            <div className="feedback-form-body space-y-10 p-5 sm:space-y-12 sm:p-8 md:space-y-14 md:p-12 lg:p-14">
 
                                 {/* بيانات المستخدم */}
-                                <section aria-labelledby="feedback-identity-heading">
+                                <section className="feedback-step feedback-step--identity" aria-labelledby="feedback-identity-heading">
                                     <div className="mb-6 flex items-start gap-3 sm:mb-8">
                                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-sky-600 dark:bg-sky-400/10 dark:text-sky-400">
                                             <Icon name="user" className="h-5 w-5" />
@@ -612,7 +610,7 @@ const FeedbackPage: React.FC = () => {
                                 <div className="h-px w-full bg-gradient-to-r from-transparent via-slate-200 to-transparent dark:via-neutral-800" />
 
                                 {/* التقييمات */}
-                                <section aria-labelledby="feedback-ratings-heading">
+                                <section className="feedback-step feedback-step--ratings" aria-labelledby="feedback-ratings-heading">
                                     <div className="mb-6 flex items-start gap-3 sm:mb-8">
                                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-400/10 dark:text-amber-400">
                                             <Icon name="star" className="h-5 w-5" />
@@ -744,7 +742,7 @@ const FeedbackPage: React.FC = () => {
                                 <div className="h-px w-full bg-gradient-to-r from-transparent via-slate-200 to-transparent dark:via-neutral-800" />
 
                                 {/* المقترحات */}
-                                <section aria-labelledby="feedback-suggestions-heading">
+                                <section className="feedback-step feedback-step--ideas" aria-labelledby="feedback-suggestions-heading">
                                     <div className="mb-6 flex items-start gap-3 sm:mb-8">
                                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-sky-600 dark:bg-sky-400/10 dark:text-sky-400">
                                             <Icon name="lightbulb" className="h-5 w-5" />
@@ -832,7 +830,7 @@ const FeedbackPage: React.FC = () => {
                                 )}
 
                                 {/* زر الإرسال */}
-                                <div className="border-t border-slate-100 pt-7 dark:border-neutral-800 sm:pt-9">
+                                <div className="feedback-submit-area border-t border-slate-100 pt-7 dark:border-neutral-800 sm:pt-9">
                                     <p className="mb-5 text-center text-xs font-semibold leading-6 text-slate-500 dark:text-slate-400 sm:text-sm">
                                         {t('requiredNote')}
                                     </p>
@@ -840,7 +838,7 @@ const FeedbackPage: React.FC = () => {
                                     <button
                                         type="submit"
                                         disabled={isSubmitting}
-                                        className={`feedback-button group relative mx-auto flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl px-6 py-4 text-base font-black text-white shadow-lg transition-all duration-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-500/30 sm:w-auto sm:min-w-[260px] sm:px-10 sm:py-5 sm:text-lg ${
+                                        className={`feedback-button feedback-submit-button group relative mx-auto flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl px-6 py-4 text-base font-black text-white shadow-lg transition-all duration-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-500/30 sm:w-auto sm:min-w-[260px] sm:px-10 sm:py-5 sm:text-lg ${
                                             isSubmitting
                                                 ? 'cursor-wait bg-emerald-700 opacity-80'
                                                 : 'bg-gradient-to-r from-emerald-600 via-emerald-600 to-teal-600 shadow-emerald-700/20 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-700/25 active:translate-y-0'
@@ -896,14 +894,10 @@ const FeedbackPage: React.FC = () => {
 
                 {/* تذييل الصفحة */}
                 <RevealOnScroll delay={150}>
-                    <footer className="mx-auto w-full max-w-3xl pb-4 pt-1 text-center">
+                    <footer className="feedback-footer mx-auto w-full max-w-3xl pb-4 pt-1 text-center">
                         <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white text-emerald-600 shadow-sm dark:border-neutral-800 dark:bg-neutral-950 dark:text-emerald-400">
                             <Icon name="book" className="h-5 w-5" />
                         </div>
-
-                        <p className="text-xs font-black tracking-[0.18em] text-slate-500 dark:text-slate-400 sm:text-sm">
-                            EFIPS INNOVATION LAB <span className="text-emerald-600 dark:text-emerald-400">•</span> 2026
-                        </p>
 
                         <div className="mx-auto my-4 h-1 w-12 rounded-full bg-gradient-to-r from-emerald-500 to-amber-400" />
 
