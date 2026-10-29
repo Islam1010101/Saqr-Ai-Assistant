@@ -115,6 +115,8 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
   const { data, toggleSaved, toggleCompleted, setGoal } = useReadingPassport();
   const [category, setCategory] = useState<'all'|'physical'|'ar'|'en'>('all');
   const [tab, setTab] = useState<'saved'|'suggested'>('suggested');
+  const [pickerOpen,setPickerOpen] = useState(false);
+  const [pickerQuery,setPickerQuery] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [completedModalOpen, setCompletedModalOpen] = useState(false);
   const completedTriggerRef = useRef<HTMLButtonElement>(null);
@@ -223,7 +225,9 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
     { month: 'long', year: 'numeric' }).format(today);
   const dateLabel = (date: string) => new Intl.DateTimeFormat(ar ? 'ar-AE' : 'en-US',
     { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(date + 'T12:00:00'));
-  const visible = tab==='saved' ? savedBooks.filter(book=>category==='all'||book.format===category) : suggestions;
+  const visible = suggestions;
+  const readingList = useMemo(()=>Array.from(new Set([...data.saved,...monthlyCompleted.map(item=>item.key)])).map(key=>catalogByKey.get(key)).filter((b):b is ReadingBook=>!!b),[data.saved,monthlyCompleted]);
+  const pickerBooks = useMemo(()=>catalog.filter(b=>(b.title+' '+b.author).toLocaleLowerCase().includes(pickerQuery.toLocaleLowerCase())).slice(0,50),[pickerQuery]);
   const card=(book:ReadingBook,inModal:boolean)=>{
     const saved=data.saved.includes(book.key), finished=data.completed.includes(book.key);
     return <article key={book.key} className={'group relative min-w-0 rounded-[1.75rem] border-4 bg-gradient-to-br '+bookGradient(book)+' p-4 sm:p-5 text-white shadow-lg transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl active:scale-[.99] flex flex-col gap-3 min-h-[220px]'}>
@@ -231,12 +235,12 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
       <span className="relative self-start text-[11px] font-black rounded-full bg-white/20 border border-white/30 backdrop-blur-md px-3 py-1">{categoryLabel(book,ar)}</span>
       <div className="relative flex gap-2 items-start justify-between min-w-0">
         <h3 dir="auto" className="text-base sm:text-lg leading-snug font-black text-start break-words flex-1 min-w-0 line-clamp-3">{book.title}</h3>
-        <button type="button" aria-pressed={saved} title={saved?(ar?'إزالة من القراءة لاحقًا':'Remove saved'):(ar?'القراءة لاحقًا':'Save for later')}
+        {variant==='challenge' && <button type="button" aria-pressed={saved} title={saved?(ar?'إزالة من القراءة لاحقًا':'Remove saved'):(ar?'القراءة لاحقًا':'Save for later')}
           aria-label={saved?(ar?'إزالة من القراءة لاحقًا':'Remove saved'):(ar?'القراءة لاحقًا':'Save for later')}
           onClick={()=>toggleSaved(book.key)}
           className={'shrink-0 w-10 h-10 rounded-xl border-2 border-white/70 bg-transparent backdrop-blur-md transition-transform hover:scale-110 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white flex items-center justify-center '+(saved?'bg-white/25':'')}>
           <svg viewBox="0 0 24 24" className="w-5 h-5" fill={saved?'currentColor':'none'} stroke="currentColor" strokeWidth="2" aria-hidden="true"><path strokeLinejoin="round" d="M6 4h12v17l-6-4-6 4V4z"/></svg>
-        </button>
+        </button>}
       </div>
       <p dir="auto" className="relative text-sm font-semibold text-white/90 break-words">{book.author}</p>
       <p dir="auto" className="relative text-xs font-semibold text-white/90 mt-auto break-words">{book.format==='physical'?getLocalizedSubject(book.subject,locale):book.subject}
@@ -245,7 +249,8 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
         {book.format==='physical'
           ? <Link to="/search" className="rounded-xl bg-white/90 hover:bg-white text-slate-900 px-3 py-2 text-xs font-black transition-colors">{ar?'عرض في الدليل':'Open catalog'}</Link>
           : <a href={book.href} target="_blank" rel="noopener noreferrer" className="rounded-xl bg-white/90 hover:bg-white text-slate-900 px-3 py-2 text-xs font-black transition-colors">{ar?'قراءة الكتاب':'Read book'}</a>}
-        {inModal && tab==='saved' && <button type="button" onClick={()=>toggleCompleted(book.key)} className="rounded-xl border border-white/60 bg-white/10 px-3 py-2 text-xs font-bold transition-colors hover:bg-white/25">
+        {variant==='books' && <button type="button" disabled={saved} onClick={()=>{if(!saved)toggleSaved(book.key)}} className="rounded-xl border border-white/60 bg-white/15 px-3 py-2 text-xs font-black hover:bg-white/25 disabled:opacity-70">{saved?(ar?'في قائمة التحدي':'In challenge list'):(ar?'أضف لتحدي القراءة':'Add to reading challenge')}</button>}
+        {variant==='challenge' && inModal && tab==='saved' && <button type="button" onClick={()=>toggleCompleted(book.key)} className="rounded-xl border border-white/60 bg-white/10 px-3 py-2 text-xs font-bold transition-colors hover:bg-white/25">
           {finished?(ar?'إلغاء الإنجاز':'Undo finished'):(ar?'أنهيت قراءته':'Finished reading')}
         </button>}
       </div>
@@ -289,7 +294,7 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
       <div className="flex flex-wrap justify-between items-center gap-3 mb-5">
         <div className="flex flex-wrap gap-2">
           <button type="button" onClick={()=>setTab('suggested')} className={'rounded-xl px-4 py-2.5 text-xs sm:text-sm font-black transition-all '+(tab==='suggested'?'bg-emerald-600 text-white shadow-md':'bg-white dark:bg-slate-900 text-slate-800 dark:text-white border border-slate-200 dark:border-slate-700')}>{ar?'اقتراحات القراءة':'Suggestions'}</button>
-          <button type="button" onClick={()=>setTab('saved')} className={'rounded-xl px-4 py-2.5 text-xs sm:text-sm font-black transition-all '+(tab==='saved'?'bg-emerald-600 text-white shadow-md':'bg-white dark:bg-slate-900 text-slate-800 dark:text-white border border-slate-200 dark:border-slate-700')}>{ar?'القراءة لاحقًا':'Read later'}</button>
+
         </div>
         <label className="text-xs font-bold text-slate-700 dark:text-slate-200">{ar?'نوع الكتاب':'Book type'}
           <select value={category} onChange={e=>setCategory(e.target.value as typeof category)}
@@ -303,17 +308,17 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
       </div>
       {visible.length ? <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {visible.slice(0,4).map(book=>card(book,false))}
-      </div> : <p className="py-8 rounded-2xl text-center font-semibold text-slate-500 dark:text-slate-300">{tab==='saved'?(ar?'قائمة القراءة لاحقًا فارغة':'Your read-later list is empty'):(ar?'لا توجد اقتراحات لهذا الاختيار':'No suggestions in this category')}</p>}
-      {(visible.length>4 || (tab==='saved' && visible.length>0)) && <button type="button" onClick={()=>setModalOpen(true)}
+      </div> : <p className="py-8 rounded-2xl text-center font-semibold text-slate-500 dark:text-slate-300">{(ar?'لا توجد اقتراحات لهذا الاختيار':'No suggestions in this category')}</p>}
+      {(visible.length>4) && <button type="button" onClick={()=>setModalOpen(true)}
         className="block mx-auto mt-6 px-6 py-3 rounded-xl border-2 border-emerald-400 text-emerald-700 dark:text-emerald-300 bg-transparent hover:bg-emerald-50 dark:hover:bg-slate-900 font-black text-sm shadow-sm transition-all hover:-translate-y-0.5 active:scale-95">
-        {tab==='saved' ? (ar?'إدارة قائمة القراءة':'Manage reading list') : (ar?'عرض المزيد':'View more')}
+        {ar?'عرض المزيد':'View more'}
       </button>}
       {modalOpen && <div role="presentation" className="fixed inset-0 z-[5000] bg-slate-950/75 backdrop-blur-md p-2 sm:p-5 flex justify-center items-center" onClick={()=>setModalOpen(false)}>
-        <div role="dialog" aria-modal="true" aria-label={tab==='saved'?(ar?'قائمة القراءة لاحقًا':'Saved reading list'):(ar?'اقتراحات القراءة':'Reading suggestions')}
+        <div role="dialog" aria-modal="true" aria-label={(ar?'اقتراحات القراءة':'Reading suggestions')}
           className="w-full max-w-6xl max-h-[94dvh] overflow-hidden rounded-[1.5rem] sm:rounded-[2rem] bg-white dark:bg-black border-2 border-emerald-200 dark:border-slate-700 shadow-2xl flex flex-col"
           onClick={event=>event.stopPropagation()}>
           <div className="shrink-0 flex justify-between items-center px-4 py-4 sm:px-6 border-b border-slate-200 dark:border-slate-700 gap-3">
-            <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">{tab==='saved'?(ar?'قائمة القراءة لاحقًا':'Read later'):(ar?'اقتراحات قراءة إضافية':'More reading suggestions')}</h3>
+            <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">{(ar?'اقتراحات قراءة إضافية':'More reading suggestions')}</h3>
             <button type="button" onClick={()=>setModalOpen(false)} aria-label={ar?'إغلاق':'Close'} className="shrink-0 rounded-xl bg-rose-500 hover:bg-rose-600 text-white p-2.5 font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-400">
               <svg viewBox="0 0 24 24" className="w-5 h-5" stroke="currentColor" fill="none" strokeWidth="2" aria-hidden="true"><path d="M5 5 19 19M19 5 5 19"/></svg>
             </button>
@@ -336,7 +341,7 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
             <div className="min-w-0">
               <p className="text-xs font-extrabold text-emerald-50/90 mb-1">{ar?'تحدي القراءة الشهري':'Monthly Reading Challenge'} · {monthTitle}</p>
               <h2 id="monthly-completed-title" className="text-xl sm:text-2xl font-black">
-                {ar?'الكتب التي أنهيت قراءتها':'Books you have finished'}
+                {ar?'قائمة القراءة والتحدي الشهري':'Reading list & monthly challenge'}
               </h2>
               <p className="text-sm font-bold mt-2 text-white/90">
                 {ar?'الكتب المقروءة هذا الشهر':'Books completed this month'}: <span className="font-black tabular-nums">{count}</span>
@@ -351,37 +356,32 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
             </button>
           </header>
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 bg-slate-50 dark:bg-slate-950">
-            {monthlyCompleted.length ? <ol className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              {monthlyCompleted.map((entry,index) => <li key={entry.key}
-                className="group rounded-2xl border border-emerald-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 sm:p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-300 dark:hover:border-emerald-700 hover:shadow-md">
-                <div className="flex items-start gap-3">
-                  <span aria-hidden="true" className="shrink-0 flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-200 text-sm font-black tabular-nums">{index+1}</span>
-                  <div className="min-w-0 flex-1">
-                    <h3 dir="auto" className="text-start font-black text-sm sm:text-base leading-6 break-words text-slate-900 dark:text-white">
-                      {entry.book?.title || (ar?'كتاب لم يعد موجودًا في الفهرس':'Book no longer in catalog')}
-                    </h3>
-                    {entry.book ? <>
-                      <p dir="auto" className="text-start text-xs sm:text-sm mt-1 font-semibold text-slate-600 dark:text-slate-300 break-words">{entry.book.author}</p>
-                      <span className="inline-flex mt-3 rounded-lg bg-teal-50 dark:bg-teal-950/50 px-2.5 py-1 text-[11px] font-bold text-teal-800 dark:text-teal-200">
-                        {categoryLabel(entry.book, ar)}
-                      </span>
-                    </> : <p dir="ltr" className="text-start mt-2 break-all text-xs text-slate-500 dark:text-slate-400">{entry.key}</p>}
-                    <p className="mt-3 text-xs font-bold text-slate-500 dark:text-slate-300">
-                      {ar?'تاريخ إتمام القراءة: ':'Completed on: '}{dateLabel(entry.finishedOn)}
-                    </p>
-                  </div>
-                </div>
-              </li>)}
-            </ol> : <div className="mx-auto max-w-md text-center py-12 sm:py-16">
-              <div aria-hidden="true" className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
-                <svg viewBox="0 0 24 24" className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M4 5.5A2.5 2.5 0 016.5 3H20v16H6.5A2.5 2.5 0 014 16.5v-11Z" strokeLinejoin="round"/><path d="M4 16.5A2.5 2.5 0 016.5 14H20" strokeLinecap="round"/></svg>
-              </div>
-              <p className="font-black text-slate-800 dark:text-white">{ar?'لم تُكمل أي كتاب هذا الشهر بعد':'No books completed this month yet'}</p>
-              <p className="text-sm mt-2 leading-6 text-slate-500 dark:text-slate-400">{ar?'عندما تحدد كتابًا كمنتهي القراءة سيظهر هنا ويُحتسب في عداد التحدي.':'Mark a book as finished to see it here and have it count toward your monthly goal.'}</p>
+            <div className="mb-4 flex flex-wrap justify-between items-center gap-3">
+              <strong className="text-sm text-slate-800 dark:text-white">{ar?'كتب قائمة القراءة':'Reading list books'} ({readingList.length})</strong>
+              <button type="button" onClick={()=>setPickerOpen(v=>!v)} className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-4 py-2 text-xs font-black">{pickerOpen?(ar?'إخفاء الاختيارات':'Hide choices'):(ar?'إضافة كتاب للتحدي':'Add book to challenge')}</button>
+            </div>
+            {pickerOpen&&<div className="mb-5 rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-slate-900 p-3">
+              <input type="search" value={pickerQuery} onChange={e=>setPickerQuery(e.target.value)} placeholder={ar?'ابحث عن كتاب أو مؤلف':'Search for a book or author'} className="w-full mb-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-2 text-sm"/>
+              <div className="max-h-60 overflow-y-auto space-y-2">{pickerBooks.map(book=><div key={book.key} className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 dark:bg-slate-800 p-2">
+                <div className="min-w-0"><strong dir="auto" className="block text-start text-xs text-slate-900 dark:text-white break-words">{book.title}</strong><small className="text-slate-600 dark:text-slate-300">{categoryLabel(book,ar)}</small></div>
+                <button type="button" disabled={data.saved.includes(book.key)} onClick={()=>toggleSaved(book.key)} className="shrink-0 bg-emerald-600 disabled:bg-slate-400 text-white rounded-lg px-3 py-2 text-xs font-black">{data.saved.includes(book.key)?(ar?'مضاف':'Added'):(ar?'إضافة':'Add')}</button>
+              </div>)}</div>
             </div>}
+            {readingList.length?<ol className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">{readingList.map((book,index)=>{
+              const finished=data.completed.includes(book.key);
+              return <li key={book.key} className="rounded-2xl border border-emerald-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
+                <div className="flex gap-3"><span className="shrink-0 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 px-3 py-2 font-black">{index+1}</span><div className="min-w-0"><h3 dir="auto" className="font-black text-sm sm:text-base text-slate-900 dark:text-white break-words">{book.title}</h3><p dir="auto" className="text-xs text-slate-600 dark:text-slate-300">{book.author}</p><p className="mt-1 text-[11px] text-teal-700 dark:text-teal-300">{categoryLabel(book,ar)}</p></div></div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button type="button" aria-pressed={finished} onClick={()=>{if(!finished)toggleCompleted(book.key)}} className={'rounded-xl px-3 py-2 text-xs font-black border '+(finished?'bg-emerald-600 border-emerald-600 text-white':'bg-white dark:bg-slate-800 border-emerald-300 text-emerald-700 dark:text-emerald-300')}>{ar?'تمت القراءة':'Read'}</button>
+                  <button type="button" aria-pressed={!finished} onClick={()=>{if(finished)toggleCompleted(book.key)}} className={'rounded-xl px-3 py-2 text-xs font-black border '+(!finished?'bg-amber-400 border-amber-400 text-slate-950':'bg-white dark:bg-slate-800 border-amber-300 text-amber-700 dark:text-amber-300')}>{ar?'لم تتم القراءة':'Not read'}</button>
+                  {data.saved.includes(book.key)&&<button type="button" onClick={()=>toggleSaved(book.key)} className="ms-auto rounded-xl border border-slate-300 dark:border-slate-600 px-3 py-2 text-xs text-slate-700 dark:text-slate-200">{ar?'إزالة':'Remove'}</button>}
+                </div>
+                {finished&&data.completedOn[book.key]&&<p className="mt-2 text-xs text-slate-500 dark:text-slate-400">{ar?'تاريخ الإنجاز':'Completed'}: {dateLabel(data.completedOn[book.key])}</p>}
+              </li>;
+            })}</ol>:<p className="py-12 text-center font-bold text-sm text-slate-500 dark:text-slate-300">{ar?'القائمة فارغة. اختر كتابًا لإضافته.':'Your list is empty. Add a book to get started.'}</p>}
           </div>
           <footer className="shrink-0 flex items-center justify-between gap-3 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-5 py-3 text-xs font-bold text-slate-600 dark:text-slate-300">
-            <span>{ar?'القائمة تعرض إنجازات الشهر الحالي فقط':'Showing completions from this month only'}</span>
+            <span>{ar?'الكتب المكتملة هذا الشهر تُحتسب في الهدف':'Books completed this month count toward the goal'}</span>
             <span className="shrink-0 tabular-nums text-emerald-700 dark:text-emerald-300">{count} {ar?'كتاب':'books'}</span>
           </footer>
         </div>
