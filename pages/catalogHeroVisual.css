@@ -1,0 +1,38 @@
+/* Book guide hero: scoped decorations only. Book cards, search and filters untouched. */
+.efips-catalog-page{isolation:isolate}
+.efips-catalog-page .catalog-hero{--catalog-x:0px;--catalog-y:0px;position:relative;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(260px,.9fr);align-items:center;gap:clamp(12px,3vw,45px);min-height:clamp(360px,36vw,470px);padding:clamp(24px,4vw,55px);margin-bottom:clamp(26px,4vw,48px);isolation:isolate;overflow:hidden;border:1px solid #8ecbc6;border-radius:clamp(27px,3vw,42px);background:linear-gradient(115deg,#07594d,#137b7d 57%,#2c719a);box-shadow:0 22px 64px rgba(7,68,79,.23);color:#fff}
+.efips-catalog-page .catalog-hero:before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(circle at 85% 20%,#ffe8ad36,transparent 46%),radial-gradient(circle at 10% 90%,#8de8dd33,transparent 50%),repeating-linear-gradient(135deg,transparent 0 57px,#ffffff09 58px 59px,transparent 60px 120px)}
+.efips-catalog-page .catalog-hero-copy{position:relative;z-index:4;min-width:0;animation:catalog-reveal .75s ease-out both}
+.efips-catalog-page .catalog-hero-badge{display:inline-flex;align-items:center;gap:9px;border:1px solid #ffdc9d73;background:#ffffff18;color:#ffebc0;padding:8px 14px;border-radius:100px;font-size:clamp(10px,1vw,12px);font-weight:900;letter-spacing:.045em}
+.efips-catalog-page .catalog-hero-title{font-size:clamp(36px,5.3vw,72px);line-height:1.35;font-weight:900;letter-spacing:-.045em;text-wrap:balance;color:white;margin:19px 0 0;text-shadow:0 8px 28px #053c4777}
+.efips-catalog-page .catalog-hero-description{color:#e3fbf4;font-size:clamp(13px,1.5vw,18px);line-height:1.9;font-weight:700;max-width:520px;margin:17px 0 0}
+.efips-catalog-page .catalog-hero-back{display:inline-flex;align-items:center;gap:8px;min-height:44px;margin-top:24px;padding:11px 18px;border:1px solid #ffffff80;border-radius:14px;background:#ffffff20;color:white;font-weight:900;font-size:13px;transition:background .25s,transform .25s}
+.efips-catalog-page .catalog-hero-back:hover{background:#ffffff37;transform:translateY(-3px)}
+.efips-catalog-page .catalog-hero-back:focus-visible{outline:3px solid #ffdb85;outline-offset:3px}
+.efips-catalog-page .catalog-hero-art{position:relative;z-index:3;width:100%;height:clamp(300px,34vw,435px);min-width:0;display:grid;place-items:center;pointer-events:none;isolation:isolate}
+.efips-catalog-page .catalog-hero-halo{position:absolute;width:min(95%,400px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#ffdfab35,#62e8db28 60%,transparent 74%);filter:blur(14px);animation:catalog-glow 5.5s ease-in-out infinite}
+.efips-catalog-page .catalog-hero-ring{position:absolute;width:min(99%,420px);aspect-ratio:1;border:1px dashed #c6ffef9c;border-radius:50%;animation:catalog-orbit 37s linear infinite}
+.efips-catalog-page .catalog-hero-ring-inner{width:min(80%,335px);border:1px solid #ffc77e68;border-top-color:#ffe29acb;border-bottom-color:#90eff0a8;animation-duration:26s;animation-direction:reverse}
+.efips-catalog-page .catalog-hero-image{position:relative;z-index:3;display:block;width:100%;height:100%;max-width:470px;object-fit:contain;object-position:center;filter:drop-shadow(0 19px 24px #02394e73);transform:translate3d(var(--catalog-x),var(--catalog-y),0);transition:transform .2s ease-out;animation:catalog-bob 5.8s ease-in-out infinite}
+.efips-catalog-page .catalog-hero-symbol{position:absolute;z-index:4;width:clamp(43px,5.5vw,59px);aspect-ratio:1;display:grid;place-items:center;background:#f8fffaec;color:#0c9185;border:1px solid #ffffffc7;border-radius:17px;box-shadow:0 11px 29px #063e454d;animation:catalog-float 5.2s ease-in-out infinite}
+.efips-catalog-page .catalog-hero-symbol svg{width:55%;height:55%}
+.efips-catalog-page .catalog-hero-symbol-book{top:9%;inset-inline-start:1%}
+.efips-catalog-page .catalog-hero-symbol-search{top:15%;inset-inline-end:0;color:#c28a32;animation-delay:-1.7s}
+.efips-catalog-page .catalog-hero-symbol-star{bottom:9%;inset-inline-start:8%;color:#756cba;animation-delay:-3.3s}
+.efips-catalog-page .catalog-hero-spark{position:absolute;z-index:5;width:8px;height:8px;border-radius:2px;background:#f8d38d;rotate:45deg;animation:catalog-sparkle 3s ease-in-out infinite}
+.efips-catalog-page .catalog-hero-spark-first{top:6%;inset-inline-start:39%}
+.efips-catalog-page .catalog-hero-spark-second{bottom:18%;inset-inline-end:0;background:#89e4e1;animation-delay:-1.4s}
+.efips-catalog-page .catalog-hero-stripes{display:flex;gap:8px;margin-top:22px}
+.efips-catalog-page .catalog-hero-stripes span{width:33px;height:6px;background:#ffcf77;border-radius:30px}.efips-catalog-page .catalog-hero-stripes span:nth-child(2){width:65px;background:#80e8d9}.efips-catalog-page .catalog-hero-stripes span:nth-child(3){background:#a9d9ff}
+.efips-catalog-page .catalog-search-panel{position:relative;isolation:isolate}
+@media(max-width:960px){.efips-catalog-page .catalog-hero{grid-template-columns:minmax(0,1fr) minmax(230px,.85fr);min-height:360px;padding:30px}.efips-catalog-page .catalog-hero-art{height:320px}.efips-catalog-page .catalog-hero-title{font-size:clamp(33px,5.5vw,54px)}}
+@media(max-width:650px){.efips-catalog-page .catalog-hero{display:flex;flex-direction:column;gap:0;align-items:stretch;min-height:0;padding:23px 19px 0;border-radius:27px;text-align:center}.efips-catalog-page .catalog-hero-copy{text-align:center}.efips-catalog-page .catalog-hero-title{font-size:clamp(29px,8.2vw,46px);margin-top:13px}.efips-catalog-page .catalog-hero-description{font-size:12px;line-height:1.75;margin:10px auto 0}.efips-catalog-page .catalog-hero-back{margin-top:15px}.efips-catalog-page .catalog-hero-stripes{justify-content:center;margin-top:13px}.efips-catalog-page .catalog-hero-art{height:clamp(195px,60vw,300px);margin-top:0}.efips-catalog-page .catalog-hero-image{max-width:340px}.efips-catalog-page .catalog-hero-halo{width:min(74%,275px)}.efips-catalog-page .catalog-hero-ring{width:min(80%,300px)}.efips-catalog-page .catalog-hero-ring-inner{width:min(63%,235px)}.efips-catalog-page .catalog-hero-symbol{width:40px;border-radius:13px}.efips-catalog-page .catalog-hero-symbol-book{inset-inline-start:9%}.efips-catalog-page .catalog-hero-symbol-search{inset-inline-end:8%}.efips-catalog-page .catalog-hero-symbol-star{inset-inline-start:13%}}
+@media(max-width:365px){.efips-catalog-page .catalog-hero{padding:19px 13px 0}.efips-catalog-page .catalog-hero-title{font-size:28px}.efips-catalog-page .catalog-hero-art{height:186px}}
+@media(hover:none),(pointer:coarse){.efips-catalog-page .catalog-hero-back:hover{transform:none}}
+@media(prefers-reduced-motion:reduce){.efips-catalog-page .catalog-hero *,.efips-catalog-page .catalog-hero *:before,.efips-catalog-page .catalog-hero *:after{animation:none!important;transition:none!important}}
+@keyframes catalog-reveal{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
+@keyframes catalog-glow{0%,100%{opacity:.75;scale:.96}50%{opacity:1;scale:1.05}}
+@keyframes catalog-orbit{from{rotate:0deg}to{rotate:360deg}}
+@keyframes catalog-bob{0%,100%{translate:0 0}50%{translate:0 -9px}}
+@keyframes catalog-float{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-9px) rotate(6deg)}}
+@keyframes catalog-sparkle{0%,100%{opacity:.3;scale:.7}50%{opacity:1;scale:1.2}}

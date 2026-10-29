@@ -5,6 +5,7 @@ import { useLanguage } from '../App';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../src/utils/supabase';
 import { classifyBookAudience, type BookAudience } from '../api/bookAudience';
+import './catalogHeroVisual.css';
 
 // --- 1. الـ Hooks المساعدة ---
 const useDebounce = <T,>(value: T, delay: number): T => {
@@ -622,8 +623,21 @@ const SearchPage: React.FC = () => {
         return () => observer.disconnect();
     }, [shelfFilter, shelf22VisibleCount, filteredBooks.length]);
 
+    const handleCatalogHeroPointerMove=(event:React.PointerEvent<HTMLElement>)=>{
+        if(event.pointerType!=='mouse')return;
+        const bounds=event.currentTarget.getBoundingClientRect();
+        const x=Math.max(-1,Math.min(1,(event.clientX-bounds.left-bounds.width/2)/(bounds.width/2)));
+        const y=Math.max(-1,Math.min(1,(event.clientY-bounds.top-bounds.height/2)/(bounds.height/2)));
+        event.currentTarget.style.setProperty('--catalog-x',(x*12).toFixed(1)+'px');
+        event.currentTarget.style.setProperty('--catalog-y',(y*9).toFixed(1)+'px');
+    };
+    const resetCatalogHeroPointer=(event:React.PointerEvent<HTMLElement>)=>{
+        event.currentTarget.style.setProperty('--catalog-x','0px');
+        event.currentTarget.style.setProperty('--catalog-y','0px');
+    };
+
     return (
-        <div dir={dir} className="w-full min-h-screen bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300">
+        <div dir={dir} className="efips-catalog-page w-full min-h-screen bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300">
             
             <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-50 dark:opacity-20">
                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-amber-400/20 rounded-full blur-[100px] animate-blob"></div>
@@ -632,19 +646,31 @@ const SearchPage: React.FC = () => {
 
             <div className="max-w-[1400px] mx-auto px-4 md:px-6 pt-10 pb-40 relative z-10 antialiased">
                 
-                <RevealOnScroll>
-                    <div className="text-center mb-10 md:mb-16 relative">
-                        <button onClick={() => navigate(-1)} className="absolute start-0 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-800 text-slate-800 dark:text-white px-5 py-2.5 rounded-full font-black text-sm hover:bg-slate-200 hover:-translate-x-1 active:translate-y-1 border-b-4 border-slate-300 dark:border-slate-700 active:border-b-0 transition-all flex items-center gap-2 shadow-sm">
-                            <span className="text-xl leading-none rtl:rotate-180">←</span> {t('back')}
+                <header className="catalog-hero" onPointerMove={handleCatalogHeroPointerMove} onPointerLeave={resetCatalogHeroPointer}>
+                    <div className="catalog-hero-copy">
+                        <span className="catalog-hero-badge">
+                            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 6c-3-2-7-2-9-1v14c3-1 7-1 9 1 3-2 7-2 9-1V5c-3-1-7-1-9 1Zm0 0v14"/></svg>
+                            {currentLocale==='ar'?'مغامرتك بين رفوف المعرفة':'DISCOVER YOUR NEXT READ'}
+                        </span>
+                        <h1 className="catalog-hero-title">{t('pageTitle')}</h1>
+                        <p className="catalog-hero-description">{currentLocale==='ar'?'اكتشف الكتب والمؤلفين وموضوعات المعرفة في مكتبتنا، ودع صقر يساعدك في الوصول إلى كتابك القادم.':'Discover books, authors and subjects in our school library. Find your next great read with Saqr.'}</p>
+                        <div className="catalog-hero-stripes" aria-hidden="true"><span/><span/><span/></div>
+                        <button type="button" onClick={() => navigate(-1)} className="catalog-hero-back">
+                            <span aria-hidden="true">←</span> {t('back')}
                         </button>
-                        <h1 className="text-4xl md:text-6xl font-black text-slate-800 dark:text-white mb-6 uppercase tracking-tight">{t('pageTitle')}</h1>
-                        <div className="flex justify-center gap-3">
-                            <div className="w-8 h-2 bg-amber-400 rounded-full" />
-                            <div className="w-16 h-2 bg-sky-500 rounded-full" />
-                            <div className="w-8 h-2 bg-rose-500 rounded-full" />
-                        </div>
                     </div>
-                </RevealOnScroll>
+                    <div className="catalog-hero-art" aria-hidden="true">
+                        <span className="catalog-hero-halo"/>
+                        <span className="catalog-hero-ring"/>
+                        <span className="catalog-hero-ring catalog-hero-ring-inner"/>
+                        <span className="catalog-hero-symbol catalog-hero-symbol-book"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5c-3-2-7-2-9-1v14c3-1 7-1 9 1 3-2 7-2 9-1V4c-3-1-7-1-9 1Zm0 0v14"/></svg></span>
+                        <span className="catalog-hero-symbol catalog-hero-symbol-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg></span>
+                        <span className="catalog-hero-symbol catalog-hero-symbol-star"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="m12 2 2.6 7.4L22 12l-7.4 2.6L12 22l-2.6-7.4L2 12l7.4-2.6L12 2Z"/></svg></span>
+                        <span className="catalog-hero-spark catalog-hero-spark-first"/>
+                        <span className="catalog-hero-spark catalog-hero-spark-second"/>
+                        <img className="catalog-hero-image" src="/Saqr%20Reaching.png" alt="" />
+                    </div>
+                </header>
 
                 <div className={`sticky z-[100] mb-12 transition-all duration-500 ease-in-out ${showSearch ? 'top-4 md:top-6 opacity-100 translate-y-0' : '-top-40 opacity-0 -translate-y-full'}`}>
                     <div className="bg-white dark:bg-slate-800 p-5 md:p-8 rounded-[3rem] border-4 border-amber-300 dark:border-amber-600 shadow-xl max-w-5xl mx-auto">
