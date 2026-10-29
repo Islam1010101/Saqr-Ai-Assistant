@@ -3,6 +3,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { useLanguage } from '../App';
 import FlagDayChallenge from './FlagDayChallenge';
 import './nationalHeritageTheme.css';
+import './nationalIdentityLanding.css';
 import HeritageQuestArt from './HeritageQuestArt';
 import PassportStampCard from './PassportStampCard';
 import {getGuidedHeritageBook} from '../src/utils/heritageBookGuides';
@@ -329,14 +330,14 @@ const NationalIdentityPage: React.FC = () => {
   if (!identity) return <Navigate to="/home" replace />;
   if (flagChallengeOpen) return <FlagDayChallenge onClose={() => setFlagChallengeOpen(false)} />;
   // Navigation guards are below all memo hooks.
-  return <div dir={dir} className="national-heritage relative min-h-[100dvh] overflow-hidden bg-white dark:bg-black text-slate-900 dark:text-slate-100">
+  return <div dir={dir} className={"national-heritage nh-v2"+(mode==="home"?"":" nh-v2-playing")+" relative min-h-[100dvh] overflow-hidden bg-white dark:bg-black text-slate-900 dark:text-slate-100">
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
       <div className="absolute -top-48 -right-48 h-[500px] w-[500px] rounded-full bg-emerald-300/15 dark:bg-emerald-600/10 blur-3xl"/>
       <div className="absolute top-[40%] -left-48 h-[420px] w-[420px] rounded-full bg-amber-300/15 dark:bg-amber-500/5 blur-3xl"/>
     </div>
-    <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-16 pt-5 sm:pt-8">
-      <nav aria-label={tr(l('التنقل','Navigation'))} className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <Link to="/home" className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 dark:border-emerald-900 bg-white/90 dark:bg-slate-950 px-4 py-2.5 text-xs sm:text-sm font-black text-emerald-800 dark:text-emerald-200 shadow-sm hover:shadow-md transition-all">
+    <div className="nh-v2-shell relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-16 pt-5 sm:pt-8">
+      <nav aria-label={tr(l('التنقل','Navigation'))} className="nh-v2-nav mb-6 flex flex-wrap items-center justify-between gap-3">
+        <Link to="/home" className="nh-v2-back inline-flex items-center gap-2 rounded-2xl border border-emerald-200 dark:border-emerald-900 bg-white/90 dark:bg-slate-950 px-4 py-2.5 text-xs sm:text-sm font-black text-emerald-800 dark:text-emerald-200 shadow-sm hover:shadow-md transition-all">
           <Icon kind="arrow" className={'h-4 w-4 '+(lang==='ar'?'rotate-180':'')}/>
           {tr(l('العودة إلى المكتبة','Back to library'))}
         </Link>
@@ -345,30 +346,38 @@ const NationalIdentityPage: React.FC = () => {
           <span>{tr(l('مكتبة مدرسة صقر الإمارات','EFIPS School Library'))}</span>
         </div>
       </nav>
-      <section className="nh-hero relative overflow-hidden rounded-[2rem] sm:rounded-[2.7rem] border-2 border-emerald-700/20 dark:border-emerald-700/40 bg-[#074B3C] px-5 py-7 sm:px-9 sm:py-10 shadow-[0_25px_65px_rgba(6,78,59,.18)] text-white">
+      <section className="nh-hero nh-v2-hero relative overflow-hidden rounded-[2rem] sm:rounded-[2.7rem] border-2 border-emerald-700/20 dark:border-emerald-700/40 bg-[#074B3C] px-5 py-7 sm:px-9 sm:py-10 shadow-[0_25px_65px_rgba(6,78,59,.18)] text-white">
         <div className="absolute inset-x-0 top-0 flex h-2 overflow-hidden" aria-hidden="true"><span className="w-1/4 bg-[#E03137]"/><span className="w-1/4 bg-[#078147]"/><span className="w-1/4 bg-white"/><span className="w-1/4 bg-[#10191A]"/></div>
         <svg viewBox="0 0 460 180" aria-hidden="true" className="pointer-events-none absolute -top-12 -right-14 w-[420px] opacity-[.12]"><path d="M0 15h460M0 60h460M0 105h460M0 150h460" stroke="#F2D29B" strokeWidth="6"/>{Array.from({length:11},(_,i)=><path key={i} d="m0 15 20 18 20-18 20 18 20-18 20 18 20-18 20 18 20-18" transform={'translate('+(i*40)+',25)'} stroke="#F2D29B" strokeWidth="4"/>)}</svg>
-        <div className="relative grid items-center gap-5 md:grid-cols-[1.4fr_.6fr]">
-          <div className="min-w-0">
-            <p className="mb-3 inline-flex rounded-full border border-amber-200/50 bg-white/10 px-4 py-2 text-[11px] sm:text-xs font-black tracking-wide text-amber-100">{tr(l('اقرأ · اكتشف · احفظ تراثك','READ · EXPLORE · PRESERVE'))}</p>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight">{tr(l('صقر وهوية وطن','Saqr & National Identity'))}</h1>
-            <p className="mt-3 max-w-2xl text-sm sm:text-base leading-8 font-semibold text-emerald-50/95">{tr(l('من حكايات الإمارات إلى مفردات التراث وملفات التاريخ، مغامرتك الثقافية تبدأ من مكتبتك.','From the stories of the emirates to heritage vocabulary and historical evidence, your cultural adventure starts in the library.'))}</p>
-            <div className="mt-6 flex flex-wrap items-center gap-3">
+        <div className="nh-v2-hero-grid relative grid items-center gap-5 md:grid-cols-[1.4fr_.6fr]">
+          <div className="nh-v2-hero-copy min-w-0">
+            <p className="nh-v2-hero-kicker mb-3 inline-flex rounded-full border border-amber-200/50 bg-white/10 px-4 py-2 text-[11px] sm:text-xs font-black tracking-wide text-amber-100">{tr(l('اقرأ · اكتشف · احفظ تراثك','READ · EXPLORE · PRESERVE'))}</p>
+            <h1 className="nh-v2-hero-heading text-3xl sm:text-4xl lg:text-5xl font-black leading-tight">{tr(l('صقر وهوية وطن','Saqr & National Identity'))}</h1>
+            <p className="nh-v2-hero-description mt-3 max-w-2xl text-sm sm:text-base leading-8 font-semibold text-emerald-50/95">{tr(l('من حكايات الإمارات إلى مفردات التراث وملفات التاريخ، مغامرتك الثقافية تبدأ من مكتبتك.','From the stories of the emirates to heritage vocabulary and historical evidence, your cultural adventure starts in the library.'))}</p>
+            <div className="nh-v2-stats mt-6 flex flex-wrap items-center gap-3">
               <div className="rounded-xl border border-white/25 bg-white/10 px-4 py-3"><span className="block text-[11px] text-emerald-100">{tr(l('الأختام','Stamps'))}</span><strong className="text-xl font-black tabular-nums">{progress.stamps.length}/7</strong></div>
               <div className="rounded-xl border border-white/25 bg-white/10 px-4 py-3"><span className="block text-[11px] text-emerald-100">{tr(l('كنوز اللغة','Word treasures'))}</span><strong className="text-xl font-black tabular-nums">{progress.words.length}</strong></div>
               <div className="rounded-xl border border-white/25 bg-white/10 px-4 py-3"><span className="block text-[11px] text-emerald-100">{tr(l('ملفات البحث','Research files'))}</span><strong className="text-xl font-black tabular-nums">{progress.cases.length}/{sourcedCases.length}</strong></div>
             </div>
           </div>
-          <div className="nh-hero-art flex justify-center"><HeritageArt/><img className="nh-saqr" src="/saqr-full.png" alt={tr(l('صقر مع مشهد تراثي إماراتي','Saqr with traditional Emirati heritage scenery'))}/></div>
+          <div className="nh-hero-art nh-v2-hero-art flex justify-center" aria-label={tr(l('صقر يحمل علم الإمارات','Saqr holding the UAE flag'))} role="img">
+            <span className="nh-v2-art-glow" aria-hidden="true"/><span className="nh-v2-art-orbit" aria-hidden="true"/><span className="nh-v2-art-orbit nh-v2-art-orbit--inner" aria-hidden="true"/>
+            <span className="nh-v2-heritage-outline" aria-hidden="true"><HeritageArt/></span>
+            <span className="nh-v2-symbol nh-v2-symbol--flag" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M5 22V3m0 2c5-4 9 4 15 0v12c-6 4-10-4-15 0"/></svg></span>
+            <span className="nh-v2-symbol nh-v2-symbol--compass" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="9"/><path d="m9 9 9-3-3 9-9 3 3-9Z"/></svg></span>
+            <span className="nh-v2-symbol nh-v2-symbol--star" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="m12 2 2.6 7.4L22 12l-7.4 2.6L12 22l-2.6-7.4L2 12l7.4-2.6L12 2Z"/></svg></span>
+            <span className="nh-v2-spark nh-v2-spark--one" aria-hidden="true"/><span className="nh-v2-spark nh-v2-spark--two" aria-hidden="true"/>
+            <img className="nh-saqr nh-v2-character" src="/Saqr%20Flag.png" alt=""/>
+          </div>
         </div>
       </section>
 
       {mode === 'home' ? <>
-        <div className="mt-9 mb-5 flex flex-wrap items-end justify-between gap-3">
+        <div className="nh-v2-section-heading mt-9 mb-5 flex flex-wrap items-end justify-between gap-3">
           <div><p className="text-xs font-black text-emerald-700 dark:text-emerald-400">{tr(l('تحديات الهوية الوطنية','NATIONAL IDENTITY CHALLENGES'))}</p><h2 className="text-xl sm:text-2xl font-black mt-1">{tr(l('اختر رحلتك','Choose your journey'))}</h2></div>
           <div className="rounded-full bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 px-4 py-2 text-xs font-black text-amber-800 dark:text-amber-200">{totalCompleted}/{sourcedEmirates.length+dictionaryActivities.length+sourcedCases.length} {tr(l('مهمة مكتملة','missions completed'))}</div>
         </div>
-        <div className="nh-challenges grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5">
+        <div className="nh-challenges nh-v2-grid grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5">
           {modules.map(m=><button type="button" key={m.id} onClick={()=>go(m.id)} className="nh-challenge-card group overflow-hidden text-start rounded-[1.8rem] bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 shadow-lg hover:shadow-2xl hover:-translate-y-1 hover:border-emerald-400 dark:hover:border-emerald-700 transition-all focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-500">
             <div className={'nh-card-top nh-card-top-'+m.id+' relative bg-gradient-to-br '+m.color+' p-6 text-white overflow-hidden'}>
               <div className="absolute -end-5 -top-6 h-36 w-36 border-[17px] rounded-full border-white/10"/>
@@ -417,7 +426,7 @@ const NationalIdentityPage: React.FC = () => {
           {tr(l('أحسنت! جمعت أختام الإمارات السبع وأكملت جواز صقر الثقافي.','Well done! You have collected all seven emirate stamps and completed your cultural passport.'))}
         </div>}
         <section aria-labelledby="nh-identity-library-heading" className="mt-12 sm:mt-14">
-          <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+          <div className="nh-v2-pavilion-heading mb-5 flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-xs font-black tracking-wider text-emerald-700 dark:text-emerald-400">{tr(l('قسم القراءة والمراجع','BOOKS & REFERENCE COLLECTION'))}</p>
               <h2 id="nh-identity-library-heading" className="mt-1 text-xl sm:text-2xl font-black">{tr(l('جناح الهوية الوطنية','National Identity Pavilion'))}</h2>
@@ -425,7 +434,7 @@ const NationalIdentityPage: React.FC = () => {
             </div>
             <span className="inline-flex items-center rounded-full border border-emerald-200 dark:border-emerald-800 px-4 py-2 text-xs font-bold text-emerald-800 dark:text-emerald-200 bg-emerald-50 dark:bg-emerald-950/40">{tr(l('للقراءة والبحث','For reading and research'))}</span>
           </div>
-          <Link to="/saqr-national-identity/books" aria-label={tr(l('افتح دليل كتب الهوية الوطنية','Open National Identity Book Catalog'))} className="group relative block overflow-hidden rounded-[2rem] border-2 border-emerald-800/25 dark:border-emerald-600/40 bg-[#F5F9F4] dark:bg-[#0D1A15] shadow-[0_18px_45px_rgba(4,78,51,.09)] hover:shadow-[0_24px_55px_rgba(4,78,51,.17)] hover:border-emerald-600 dark:hover:border-emerald-400 focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-500 transition-all">
+          <Link to="/saqr-national-identity/books" aria-label={tr(l('افتح دليل كتب الهوية الوطنية','Open National Identity Book Catalog'))} className="nh-v2-pavilion-card group relative block overflow-hidden rounded-[2rem] border-2 border-emerald-800/25 dark:border-emerald-600/40 bg-[#F5F9F4] dark:bg-[#0D1A15] shadow-[0_18px_45px_rgba(4,78,51,.09)] hover:shadow-[0_24px_55px_rgba(4,78,51,.17)] hover:border-emerald-600 dark:hover:border-emerald-400 focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-500 transition-all">
             <div className="absolute inset-x-0 top-0 flex h-2" aria-hidden="true"><span className="w-1/4 bg-[#E03137]"/><span className="w-1/4 bg-[#078147]"/><span className="w-1/4 bg-white"/><span className="w-1/4 bg-[#10191A]"/></div>
             <div className="relative grid items-center gap-5 p-6 pt-8 sm:p-8 sm:pt-10 md:grid-cols-[minmax(0,1fr)_220px] lg:gap-12">
               <div>
@@ -451,7 +460,7 @@ const NationalIdentityPage: React.FC = () => {
             </div>
           </Link>
         </section>
-      </> : <section className={'nh-quest-page nh-quest-'+mode+' mt-7'}>
+      </> : <section className={'nh-quest-page nh-v2-quest-area nh-quest-'+mode+' mt-7'}>
         <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
           <button type="button" onClick={()=>go('home')} className="inline-flex items-center gap-2 rounded-xl bg-slate-100 dark:bg-slate-900 px-4 py-2.5 text-xs sm:text-sm font-black hover:bg-emerald-50 dark:hover:bg-emerald-950/60 transition-colors">
             <Icon kind="arrow" className={'w-4 h-4 '+(lang==='ar'?'rotate-180':'')}/>{tr(l('كل المغامرات','All adventures'))}
