@@ -87,32 +87,13 @@ export default function Login() {
     handleVideoEnd();
   };
 
-  // دالة تسجيل دخول الطلاب
-  const handleStudentLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!studentId.trim()) return;
-
+  const handleStudentGoogleSignIn = async () => {
     setLoading(true);
     setError('');
-
     try {
-      const { data, error } = await supabase
-        .from('students')
-        .select('*')
-        .eq('student_id', studentId.trim())
-        .single();
-
-      if (error || !data) {
-        setError(lang === 'ar' ? 'رقم الطالب غير صحيح، يرجى المحاولة مرة أخرى.' : 'Invalid Student ID.');
-      } else {
-        localStorage.setItem('user_type', 'student');
-        localStorage.setItem('current_user', JSON.stringify(data));
-        window.location.href = '#/home'; 
-        await supabase.from('login_logs').insert([{ user_id: studentId.trim(), user_type: 'student' }]);
-      }
-    } catch (err) {
-      setError(lang === 'ar' ? 'حدث خطأ في الاتصال بقاعدة البيانات.' : 'Database connection error.');
-    } finally {
+      await startGoogleStudentSignIn();
+    } catch {
+      setError(lang === 'ar' ? 'تعذر الاتصال بحساب Google المدرسي.' : 'School Google sign-in could not start.');
       setLoading(false);
     }
   };
