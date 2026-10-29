@@ -330,7 +330,7 @@ const NationalIdentityPage: React.FC = () => {
   if (!identity) return <Navigate to="/home" replace />;
   if (flagChallengeOpen) return <FlagDayChallenge onClose={() => setFlagChallengeOpen(false)} />;
   // Navigation guards are below all memo hooks.
-  return <div dir={dir} className={"national-heritage nh-v2"+(mode==="home"?"":" nh-v2-playing")+" relative min-h-[100dvh] overflow-hidden bg-white dark:bg-black text-slate-900 dark:text-slate-100">
+  return <div dir={dir} className={"national-heritage nh-v2"+(mode==="home"?"":" nh-v2-playing")+" relative min-h-[100dvh] overflow-hidden bg-white dark:bg-black text-slate-900 dark:text-slate-100"}>
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
       <div className="absolute -top-48 -right-48 h-[500px] w-[500px] rounded-full bg-emerald-300/15 dark:bg-emerald-600/10 blur-3xl"/>
       <div className="absolute top-[40%] -left-48 h-[420px] w-[420px] rounded-full bg-amber-300/15 dark:bg-amber-500/5 blur-3xl"/>
