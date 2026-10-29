@@ -862,7 +862,7 @@ export default function TutorialPage() {
             <div className="p-6 text-center">
               <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300"><BookIcon/></div>
               <p className="font-black text-slate-900 dark:text-white">{label('هنا تظهر الكتب المختارة وحالة قراءتها', 'Selected books and their reading statuses appear here')}</p>
-              <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">{label('يعرض الموقع الحقيقي الكتب المختارة ويمكن تحديد تمت القراءة أو لم تتم القراءة؛ ويحتسب عداد الشهر الكتب المنجزة خلاله. لا تعرض هذه الجولة بيانات أي طالب.', 'The live site shows each title, author and its Read / Not read status. This month's completed books contribute to the counter. This tour shows no student records.')}</p>
+              <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">{label('يعرض الموقع الحقيقي الكتب المختارة ويمكن تحديد تمت القراءة أو لم تتم القراءة؛ ويحتسب عداد الشهر الكتب المنجزة خلاله. لا تعرض هذه الجولة بيانات أي طالب.', 'The live site shows each title, author and its Read / Not read status. Books completed this month contribute to the counter. This tour shows no student records.')}</p>
               <span className="mt-4 inline-block rounded-xl bg-amber-50 dark:bg-amber-950/40 px-4 py-2 text-xs font-black text-amber-900 dark:text-amber-200">{label('معاينة آمنة فقط', 'Safe preview only')}</span>
             </div>
           </div>
