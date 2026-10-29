@@ -1,0 +1,64 @@
+/* EFIPS About page only: responsive visual organization; content and actions unchanged. */
+.efips-about-v2{--about-teal:#087a69;--about-gold:#e9b655;isolation:isolate;background:#f8fafc}
+.efips-about-v2 .about-shell{max-width:1240px;gap:clamp(22px,3vw,42px)}
+.efips-about-v2 .about-back-bar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:4px 0}
+.efips-about-v2 .about-back-btn{min-height:45px;border:1px solid #a9d9cc;border-radius:15px;background:#fff;color:#096b59;padding:11px 18px;box-shadow:0 7px 20px #094b4014;transition:transform .25s,background .25s}
+.efips-about-v2 .about-back-btn:hover{transform:translateY(-2px);background:#e9faf4}
+.efips-about-v2 .about-brand{display:flex;align-items:center;gap:9px;color:#157d69;font-weight:900;font-size:12px;letter-spacing:.08em}
+.efips-about-v2 .about-brand:before{content:"";width:10px;height:10px;border-radius:50%;background:#12b89c;box-shadow:0 0 0 5px #12b89c1f}
+.efips-about-v2 .about-hero{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(240px,.8fr);align-items:center;gap:clamp(15px,3.5vw,45px);min-height:365px;border:1px solid #3eab99;border-radius:clamp(26px,3.5vw,42px);padding:clamp(26px,4.2vw,55px);background:linear-gradient(116deg,#0a5149,#127a76 55%,#267c91);box-shadow:0 22px 54px #0e5f5c2b;overflow:hidden}
+.efips-about-v2 .about-hero:before{content:"";position:absolute;inset:0;z-index:0;background:radial-gradient(circle at 80% 25%,#ffdb9830,transparent 52%),radial-gradient(circle at 12% 92%,#92ffcf21,transparent 53%),repeating-linear-gradient(125deg,transparent 0 57px,#ffffff08 58px 59px,transparent 60px 116px);pointer-events:none}
+.efips-about-v2 .about-hero-copy{position:relative;z-index:3;min-width:0;animation:about-v2-rise .7s ease-out both}
+.efips-about-v2 .about-hero .about-hero-eyebrow{display:inline-flex;align-items:center;gap:9px;padding:7px 15px;background:#ffffff1e;border:1px solid #ffffff6b;border-radius:999px;color:#fff5d7;font-weight:900;font-size:12px;letter-spacing:.09em}
+.efips-about-v2 .about-hero .about-hero-eyebrow svg{width:22px;height:22px}
+.efips-about-v2 .about-hero-title{font-size:clamp(30px,4.2vw,57px);line-height:1.3;font-weight:900;color:#fff;margin-top:18px;letter-spacing:-.03em;text-wrap:balance}
+.efips-about-v2 .about-hero-description{font-size:clamp(13px,1.5vw,17px);line-height:2;font-weight:650;color:#e8fff9;margin-top:18px;max-width:680px}
+.efips-about-v2 .about-website-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:53px;margin-top:21px;padding:12px 21px;border:1px solid #f9dc9e;background:#f6cc77;color:#293d37;border-radius:16px;font-size:clamp(12px,1.25vw,15px);font-weight:900;box-shadow:0 10px 26px #032c2d40;transition:transform .25s,box-shadow .25s}
+.efips-about-v2 .about-website-btn:hover{transform:translateY(-3px);box-shadow:0 16px 31px #032c2d50}
+.efips-about-v2 .about-hero-art{position:relative;z-index:2;display:grid;place-items:center;height:clamp(240px,29vw,355px);width:100%;min-width:0;isolation:isolate}
+.efips-about-v2 .about-hero-halo{position:absolute;width:min(93%,330px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#ffffff45,#7cf3d620 63%,transparent 72%);filter:blur(10px);animation:about-v2-pulse 6s ease-in-out infinite}
+.efips-about-v2 .about-hero-ring{position:absolute;width:min(95%,350px);aspect-ratio:1;border:1px dashed #c7ffefaa;border-radius:50%;animation:about-v2-orbit 32s linear infinite}
+.efips-about-v2 .about-hero-ring-2{width:min(77%,265px);border:1px solid #ffdf997a;animation-duration:24s;animation-direction:reverse}
+.efips-about-v2 .about-hero-logo{position:relative;z-index:3;width:min(78%,270px);height:min(80%,275px);object-fit:contain;filter:drop-shadow(0 17px 20px #062d3773);animation:about-v2-float 5.2s ease-in-out infinite}
+.efips-about-v2 .about-heading{text-align:center;max-width:800px;margin:0 auto 25px}
+.efips-about-v2 .about-heading-tag{display:inline-block;background:#dcf6ef;color:#0e876f;border:1px solid #a9decf;border-radius:999px;padding:7px 14px;font-size:11px;font-weight:900;letter-spacing:.05em}
+.efips-about-v2 .about-heading h3{font-size:clamp(24px,3.1vw,38px);margin-top:13px;font-weight:900;color:#153f3b}
+.efips-about-v2 .about-heading p{font-size:clamp(13px,1.35vw,16px);font-weight:650;color:#617882;line-height:1.85;margin-top:10px}
+.efips-about-v2 .about-wing-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(13px,2vw,22px)}
+.efips-about-v2 .about-wing-card{height:100%;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:flex-start;text-align:start;padding:clamp(21px,2.5vw,31px);border:1px solid #ffffff94;border-radius:26px;box-shadow:0 12px 26px #16393316;transition:transform .26s ease,box-shadow .26s ease}
+.efips-about-v2 .about-wing-card:hover{transform:translateY(-5px);box-shadow:0 22px 35px #16393326}
+.efips-about-v2 .about-wing-card .about-wing-icon{display:grid;place-items:center;width:60px;height:60px;margin-bottom:15px;border-radius:19px;background:#ffffff32;color:#fff}
+.efips-about-v2 .about-wing-card h4{font-size:clamp(19px,2.15vw,26px);line-height:1.55;margin-bottom:8px;font-weight:900}
+.efips-about-v2 .about-wing-card p{font-size:clamp(12px,1.2vw,15px);font-weight:700;line-height:1.85}
+.efips-about-v2 .about-identity-wing{position:relative;display:flex;flex-direction:row;align-items:center;gap:clamp(17px,3vw,35px);overflow:hidden;padding:clamp(23px,3.5vw,38px);border-radius:29px;border:1px solid #275d51;background:linear-gradient(115deg,#153d3b,#0b6055 55%,#1d464d);box-shadow:0 16px 34px #12423826}
+.efips-about-v2 .about-identity-wing .about-identity-art{display:grid;place-items:center;width:105px;height:105px;flex:0 0 105px;border-radius:25px;background:#ffffff1b;border:1px solid #ffffff38}
+.efips-about-v2 .about-identity-wing h4{font-size:clamp(20px,2.6vw,30px);font-weight:900;line-height:1.5}
+.efips-about-v2 .about-identity-wing p{font-size:clamp(12px,1.3vw,16px);line-height:1.9;color:#e3f6ec}
+.efips-about-v2 .about-service-panel,.efips-about-v2 .about-hours-panel{border:1px solid #d0e8e0;background:#fff;border-radius:29px;padding:clamp(23px,3vw,37px);box-shadow:0 13px 33px #0d634f12}
+.efips-about-v2 .about-service-panel h3{font-size:clamp(23px,2.7vw,35px);font-weight:900;color:#174d42;margin-bottom:23px}
+.efips-about-v2 .about-service-list{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
+.efips-about-v2 .about-service-item{background:#eaf8f5;color:#137766;border:1px solid #b6e7d9;border-radius:15px;padding:11px 17px;font-size:clamp(12px,1.2vw,14px);font-weight:900;transition:transform .22s ease,background .22s}
+.efips-about-v2 .about-service-item:hover{background:#d5f4e9;transform:translateY(-3px)}
+.efips-about-v2 .about-hours-panel h3{color:#194c43}
+.efips-about-v2 .about-hour-row{border:1px solid #d7ebe4;border-radius:15px;background:#f3fbf7;padding:13px;min-width:0;gap:10px}
+.efips-about-v2 .about-contact-card{display:block;height:100%;border:1px solid #edbbaf;background:linear-gradient(125deg,#dd6471,#c94763);border-radius:29px;padding:clamp(23px,3vw,36px);box-shadow:0 13px 33px #aa344024;transition:transform .25s,box-shadow .25s}
+.efips-about-v2 .about-contact-card:hover{transform:translateY(-5px);box-shadow:0 19px 42px #aa34403a}
+.efips-about-v2 .about-motto{margin:12px auto 15px;max-width:880px;font-size:clamp(20px,2.8vw,35px);line-height:1.7;color:#29826d;text-align:center;font-weight:900}
+.dark .efips-about-v2 .about-back-btn{background:#122732;color:#b8efdc;border-color:#315e53}
+.dark .efips-about-v2 .about-brand{color:#a4e4d5}
+.dark .efips-about-v2 .about-heading-tag{background:#123d34;color:#a2f2d5;border-color:#326e5b}
+.dark .efips-about-v2 .about-heading h3{color:#eefcf9}
+.dark .efips-about-v2 .about-heading p{color:#b6cbd1}
+.dark .efips-about-v2 .about-service-panel,.dark .efips-about-v2 .about-hours-panel{background:#111f2b;border-color:#2b4c50}
+.dark .efips-about-v2 .about-service-panel h3,.dark .efips-about-v2 .about-hours-panel h3{color:#d4f8eb}
+.dark .efips-about-v2 .about-service-item{background:#173c34;color:#c0f4e2;border-color:#335e53}
+.dark .efips-about-v2 .about-hour-row{background:#122b32;border-color:#345b58}
+.dark .efips-about-v2 .about-motto{color:#80cbb8}
+@media(max-width:850px){.efips-about-v2 .about-hero{grid-template-columns:minmax(0,1.1fr) minmax(200px,.9fr);padding:28px;min-height:305px}.efips-about-v2 .about-hero-art{height:260px}.efips-about-v2 .about-hero-title{font-size:clamp(27px,4.5vw,42px)}}
+@media(max-width:650px){.efips-about-v2 .about-shell{gap:24px}.efips-about-v2 .about-back-bar{padding:0}.efips-about-v2 .about-brand{font-size:10px}.efips-about-v2 .about-hero{display:flex;flex-direction:column;align-items:stretch;gap:5px;min-height:0;padding:26px 20px 0;border-radius:27px;text-align:center}.efips-about-v2 .about-hero-copy{text-align:center}.efips-about-v2 .about-hero-title{font-size:clamp(28px,7.5vw,42px);margin-top:12px}.efips-about-v2 .about-hero-description{font-size:13px;line-height:1.8;margin-top:11px}.efips-about-v2 .about-website-btn{margin-top:15px;min-height:47px}.efips-about-v2 .about-hero-art{height:clamp(185px,57vw,270px);width:100%}.efips-about-v2 .about-hero-halo{width:min(70%,245px)}.efips-about-v2 .about-hero-ring{width:min(76%,265px)}.efips-about-v2 .about-hero-ring-2{width:min(61%,215px)}.efips-about-v2 .about-hero-logo{height:85%;width:min(70%,220px)}.efips-about-v2 .about-wing-grid{grid-template-columns:1fr}.efips-about-v2 .about-wing-card{padding:22px}.efips-about-v2 .about-identity-wing{flex-direction:column;text-align:center}.efips-about-v2 .about-identity-wing .about-identity-art{width:85px;height:85px;flex-basis:85px}.efips-about-v2 .about-heading{margin-bottom:17px}}
+@media(hover:none),(pointer:coarse){.efips-about-v2 .about-back-btn:hover,.efips-about-v2 .about-website-btn:hover,.efips-about-v2 .about-contact-card:hover,.efips-about-v2 .about-wing-card:hover{transform:none}}
+@media(prefers-reduced-motion:reduce){.efips-about-v2 *, .efips-about-v2 *:before,.efips-about-v2 *:after{animation:none!important;transition:none!important}}
+@keyframes about-v2-rise{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
+@keyframes about-v2-float{0%,100%{translate:0 0}50%{translate:0 -9px}}
+@keyframes about-v2-orbit{to{rotate:360deg}}
+@keyframes about-v2-pulse{0%,100%{scale:.96;opacity:.7}50%{scale:1.05;opacity:1}}
