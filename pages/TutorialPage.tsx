@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { useLanguage, useTheme } from '../App';
+import TutorialFeatureShowcase from './TutorialFeatureShowcase';
 
 /**
  * Public, visual-only replica of the real EFIPS library home screen.
@@ -478,21 +479,21 @@ export default function TutorialPage() {
       <main className="relative z-10 flex w-full flex-col items-center p-4 pt-28 transition-colors duration-500 md:p-8 md:pt-28">
         <div className="w-full max-w-[1300px] mt-3 flex flex-col gap-8 md:mt-2 md:gap-10">
           <section className="rounded-[1.75rem] border-2 border-emerald-200 dark:border-emerald-900 bg-white/95 dark:bg-slate-900/95 px-5 py-4 sm:px-7 sm:py-5 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div><p className="text-xs font-black text-emerald-700 dark:text-emerald-300">{label('دليل بوابة المعرفة','KNOWLEDGE PORTAL TOUR')}</p><h2 className="mt-1 text-lg sm:text-xl font-black">{label('خدمات واجهة الأدمن بنفس ترتيب الصفحة الرئيسية','Explore admin services in the original home order')}</h2><p className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300">{label('تظهر كل خدمة مرة واحدة في مكانها. اضغط على البطاقة لمعرفة وظيفتها، أو افتح البوابة الأصلية بالحساب المسجّل.','Every service appears once in its actual position. Tap a tile for details or open the original portal with your account.')}</p></div>
+            <div><p className="text-xs font-black text-emerald-700 dark:text-emerald-300">{label('دليل بوابة المعرفة','KNOWLEDGE PORTAL TOUR')}</p><h2 className="mt-1 text-lg sm:text-xl font-black">{label('دليل شامل لخدمات البوابة من منظور الإدارة','Explore all portal features from the admin perspective')}</h2><p className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300">{label('اكتشف وظائف البوابة بالتفصيل، وشاهد أقسام التحديات والهوية الوطنية والخدمات الإدارية. يمكنك فتح البطاقة لمعرفة المزيد، مع الحفاظ على خصوصية الحسابات.','Discover the complete portal, including challenges, heritage learning and administrative services. Tap the main tiles for details; visitor privacy is preserved.')}</p></div>
             {hasSignedInSession && <Link to="/home" className="shrink-0 min-h-11 inline-flex items-center rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white px-5 py-3 font-black text-xs sm:text-sm shadow-md">{label('الدخول للبوابة الأصلية','Open the real home page')}</Link>}
             {!hasSignedInSession && <Link to="/" className="shrink-0 min-h-11 inline-flex items-center rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white px-5 py-3 font-black text-xs sm:text-sm shadow-md">{label('تسجيل الدخول لاستخدام الخدمات','Sign in to use services')}</Link>}
           </section>
           <HintTarget id="welcome-panel" title={label('منطقة الترحيب', 'Welcome panel')} description={label('يعرض الموقع الحقيقي ترحيبًا مخصصًا حسب الحساب. تم إخفاء اسم المستخدم ونوع الحساب في نسخة الزائر.', 'The live site personalizes this area by account. User names and account roles are hidden in this visitor tour.')} interactive={false} {...hintState}>
             <section className="mx-auto max-w-4xl space-y-3 text-center">
               <div className="inline-block rounded-full border-2 border-slate-200 bg-white/90 px-5 py-2 text-xs font-bold text-slate-700 shadow-md backdrop-blur-md dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-200 md:text-sm">
-                {label('معاينة واجهة الأدمن', 'Admin-view guided preview')}
+                {label('جولة شاملة من منظور الأدمن', 'Complete admin-perspective tour')}
               </div>
               <div className="flex flex-col items-center gap-2 pt-1">
-                <span className="text-base font-normal tracking-wide text-slate-500 dark:text-slate-400 md:text-xl">{label('أهلاً بك', 'Welcome')}</span>
+                <span className="text-lg sm:text-xl md:text-2xl font-black tracking-wide text-emerald-700 dark:text-emerald-300">{label('مرحبًا بك أيها الزائر في بوابة المعرفة', 'Welcome, visitor, to the Knowledge Portal')}</span>
                 <div className="group relative cursor-default overflow-hidden rounded-[2.5rem] border-2 border-white/90 bg-white/80 px-8 py-3.5 shadow-2xl backdrop-blur-2xl dark:border-slate-800 dark:bg-slate-900/80">
                   <div className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-1000 group-hover:translate-x-full dark:via-white/10" />
                   <h1 className="text-2xl font-black tracking-tight text-slate-800 dark:text-white sm:text-4xl md:text-5xl">
-                    <span className="bg-gradient-to-r from-blue-600 to-emerald-500 bg-clip-text text-transparent">{label('مدير النظام — عرض توضيحي', 'Admin portal preview')}</span>
+                    <span className="bg-gradient-to-r from-blue-600 to-emerald-500 bg-clip-text text-transparent">{label('استكشف خدمات مكتبة صقر الإمارات', 'Explore the EFIPS Library')}</span>
                   </h1>
                 </div>
               </div>
@@ -542,7 +543,7 @@ export default function TutorialPage() {
           </div>
 
           {/* Notifications are rendered with deliberately masked sample fields. */}
-          <p className="text-center text-xs font-semibold text-slate-500 dark:text-slate-400">{label('قسم التنبيهات لا يظهر في البوابة الأصلية إلا عند وجود استعارات أو حصص محجوزة للحساب، لذلك لا نعرض بطاقات تنبيه وهمية هنا.', 'Notifications appear on the real home only when the account has active borrowings or booked periods; no fake notifications are shown in this tour.')}</p>
+          <p className="text-center text-xs font-semibold text-slate-500 dark:text-slate-400">{label('تنبيهات الاستعارات ومواعيد الحصص تظهر للمستخدم حين توجد سجلات مرتبطة بحسابه، وتظل بياناتها خاصة.', 'Borrowing reminders and class periods appear only when relevant to the signed-in account; personal records stay private.')}</p>
 
           <HintTarget id="news-banner" title={label('جديدنا — يظهر فورًا', 'What\'s New — visible immediately')} description={label('يعرض شريط جديدنا آخر إضافات المكتبة منذ ظهور الصفحة، دون انتظار دخول النص من خارج الشاشة. هذه نسخة توضيحية لا تجلب أخبارًا حية.', 'What\'s New shows library updates as soon as the page appears, without waiting for offscreen scrolling text. This is an illustrative preview, not a live feed.')} interactive={false} {...hintState}>
             <div className="relative z-30 mx-auto flex h-14 w-full max-w-5xl items-center overflow-hidden rounded-full border-4 border-amber-300 bg-white shadow-lg dark:border-amber-700 dark:bg-slate-800 md:h-16">
@@ -591,9 +592,7 @@ export default function TutorialPage() {
             </div>
           </section>
 
-          <p className="rounded-xl border border-emerald-100 dark:border-emerald-900/60 bg-emerald-50/70 dark:bg-emerald-950/20 px-4 py-3 text-xs sm:text-sm font-bold text-emerald-900 dark:text-emerald-200">
-            {label('تنظيم الخدمات: بين السطور ورتب المكتبة واستديو صقر داخل «تحديات صقر»، وتحديات الهوية داخل «صقر وهوية وطن». اضغط على البطاقة الرئيسية لمعرفة تفاصيل الخدمات الفرعية دون تكرار أزرارها.', 'Services appear where they belong: Reading Quest, Library Sorting and Saqr Studio are inside Saqr Challenges, while heritage activities are inside Saqr & National Identity. Tap the main card for details.')}
-          </p>
+          <TutorialFeatureShowcase isAr={isAr} />
 
           <HintTarget id="reading-suggestions" title={label('مكتبتي واقتراحات القراءة','My Books & Reading Suggestions')}
             description={label('تُعرض أربعة اقتراحات مبدئيًا بناءً على نوع الحساب والمرحلة والاهتمامات؛ يعرض زر المزيد نافذة مستقلة ببقية الخيارات. الكتب ملونة مثل المكتبتين الرقميتين، وقائمة القراءة ضمن التحدي الشهري مع حالتي تمت القراءة ولم تتم القراءة. لا تُعرض بيانات مستفيدين حقيقية هنا.', 'Four starting recommendations based on role, grade and interests. More choices open in a separate dialog. Cards match the digital libraries, and a monthly reading list with Read / Not read choices. This tour displays no private data.')}
