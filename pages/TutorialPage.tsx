@@ -544,7 +544,7 @@ export default function TutorialPage() {
           {/* Notifications are rendered with deliberately masked sample fields. */}
           <p className="text-center text-xs font-semibold text-slate-500 dark:text-slate-400">{label('قسم التنبيهات لا يظهر في البوابة الأصلية إلا عند وجود استعارات أو حصص محجوزة للحساب، لذلك لا نعرض بطاقات تنبيه وهمية هنا.', 'Notifications appear on the real home only when the account has active borrowings or booked periods; no fake notifications are shown in this tour.')}</p>
 
-          <HintTarget id="news-banner"          <HintTarget id="news-banner" title={label('جديدنا — يظهر فورًا', 'What\'s New — visible immediately')} description={label('يعرض شريط جديدنا آخر إضافات المكتبة منذ ظهور الصفحة، دون انتظار دخول النص من خارج الشاشة. هذه نسخة توضيحية لا تجلب أخبارًا حية.', 'What\'s New shows library updates as soon as the page appears, without waiting for offscreen scrolling text. This is an illustrative preview, not a live feed.')} interactive={false} {...hintState}>
+          <HintTarget id="news-banner" title={label('جديدنا — يظهر فورًا', 'What\'s New — visible immediately')} description={label('يعرض شريط جديدنا آخر إضافات المكتبة منذ ظهور الصفحة، دون انتظار دخول النص من خارج الشاشة. هذه نسخة توضيحية لا تجلب أخبارًا حية.', 'What\'s New shows library updates as soon as the page appears, without waiting for offscreen scrolling text. This is an illustrative preview, not a live feed.')} interactive={false} {...hintState}>
             <div className="relative z-30 mx-auto flex h-14 w-full max-w-5xl items-center overflow-hidden rounded-full border-4 border-amber-300 bg-white shadow-lg dark:border-amber-700 dark:bg-slate-800 md:h-16">
               <div className="relative z-20 flex h-full shrink-0 items-center gap-2 bg-amber-400 px-5 text-xs font-black uppercase text-slate-900 md:px-8 md:text-sm">
                 <span className="h-3 w-3 animate-ping rounded-full bg-white" />
@@ -595,7 +595,7 @@ export default function TutorialPage() {
             {label('تنظيم الخدمات: بين السطور ورتب المكتبة واستديو صقر داخل «تحديات صقر»، وتحديات الهوية داخل «صقر وهوية وطن». اضغط على البطاقة الرئيسية لمعرفة تفاصيل الخدمات الفرعية دون تكرار أزرارها.', 'Services appear where they belong: Reading Quest, Library Sorting and Saqr Studio are inside Saqr Challenges, while heritage activities are inside Saqr & National Identity. Tap the main card for details.')}
           </p>
 
-          <HintTarget id="reading-suggestions"          <HintTarget id="reading-suggestions" title={label('مكتبتي واقتراحات القراءة','My Books & Reading Suggestions')}
+          <HintTarget id="reading-suggestions" title={label('مكتبتي واقتراحات القراءة','My Books & Reading Suggestions')}
             description={label('تُعرض أربعة اقتراحات مبدئيًا بناءً على نوع الحساب والمرحلة والاهتمامات؛ يعرض زر المزيد نافذة مستقلة ببقية الخيارات. الكتب ملونة مثل المكتبتين الرقميتين، وقائمة القراءة ضمن التحدي الشهري مع حالتي تمت القراءة ولم تتم القراءة. لا تُعرض بيانات مستفيدين حقيقية هنا.', 'Four starting recommendations based on role, grade and interests. More choices open in a separate dialog. Cards match the digital libraries, and a monthly reading list with Read / Not read choices. This tour displays no private data.')}
             interactive={false} {...hintState}>
             <section className="relative w-full rounded-[2.5rem] border border-slate-200/60 dark:border-slate-800/60 bg-transparent p-4 sm:p-6 md:p-8">
