@@ -374,7 +374,7 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
                 <div className="mt-4 flex flex-wrap gap-2">
                   <button type="button" aria-pressed={finished} onClick={()=>{if(!finished)toggleCompleted(book.key)}} className={'rounded-xl px-3 py-2 text-xs font-black border '+(finished?'bg-emerald-600 border-emerald-600 text-white':'bg-white dark:bg-slate-800 border-emerald-300 text-emerald-700 dark:text-emerald-300')}>{ar?'تمت القراءة':'Read'}</button>
                   <button type="button" aria-pressed={!finished} onClick={()=>{if(finished)toggleCompleted(book.key)}} className={'rounded-xl px-3 py-2 text-xs font-black border '+(!finished?'bg-amber-400 border-amber-400 text-slate-950':'bg-white dark:bg-slate-800 border-amber-300 text-amber-700 dark:text-amber-300')}>{ar?'لم تتم القراءة':'Not read'}</button>
-                  <button type="button" onClick={()=>toggleSaved(book.key)} className="ms-auto rounded-xl border border-slate-300 dark:border-slate-600 px-3 py-2 text-xs text-slate-700 dark:text-slate-200">{ar?'إزالة':'Remove'}</button>
+                  {data.saved.includes(book.key)&&<button type="button" onClick={()=>toggleSaved(book.key)} className="ms-auto rounded-xl border border-slate-300 dark:border-slate-600 px-3 py-2 text-xs text-slate-700 dark:text-slate-200">{ar?'إزالة':'Remove'}</button>}
                 </div>
                 {finished&&data.completedOn[book.key]&&<p className="mt-2 text-xs text-slate-500 dark:text-slate-400">{ar?'تاريخ الإنجاز':'Completed'}: {dateLabel(data.completedOn[book.key])}</p>}
               </li>;
