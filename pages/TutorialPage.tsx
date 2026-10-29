@@ -414,8 +414,6 @@ export default function TutorialPage() {
 
 
   return (
-    <div dir={dir} className="tutorial-page
-  return (
     <div dir={dir} className="tutorial-page min-h-screen w-full overflow-x-hidden bg-[#f8fafc] font-sans text-slate-900 transition-colors duration-500 dark:bg-slate-950 dark:text-white">
       {sparkles.map((sparkle) => (
         <div key={sparkle.id} className="pointer-events-none fixed z-[9998] animate-fade-out" style={{ left: sparkle.x, top: sparkle.y }}>
