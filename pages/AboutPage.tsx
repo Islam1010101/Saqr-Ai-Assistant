@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../App';
+import './aboutVisual.css';
 
 const translations = {
     ar: {
@@ -164,7 +165,7 @@ const AboutPage: React.FC = () => {
     const navigate = useNavigate();
 
     return (
-        <div dir={dir} className="w-full min-h-[100dvh] flex flex-col bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300 py-4 md:py-8 px-3 md:px-6">
+        <div dir={dir} className="efips-about-v2 w-full min-h-[100dvh] flex flex-col bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300 py-4 md:py-8 px-3 md:px-6">
             
             {/* 🌟 خلفية بصرية نابضة */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-50 dark:opacity-20">
@@ -172,30 +173,30 @@ const AboutPage: React.FC = () => {
                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-sky-400/20 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
             </div>
 
-            <div className="w-full max-w-[1200px] mx-auto flex flex-col gap-6 md:gap-10 relative z-10">
+            <div className="about-shell w-full max-w-[1200px] mx-auto flex flex-col gap-6 md:gap-10 relative z-10">
                 
                 {/* زر العودة */}
-                <div className="relative">
-                    <button onClick={() => navigate('/')} className="bg-white dark:bg-slate-800 text-slate-800 dark:text-white px-4 py-2 rounded-full font-black text-xs md:text-sm hover:bg-slate-200 hover:-translate-x-1 active:translate-y-1 border-b-4 border-slate-300 dark:border-slate-700 active:border-b-0 transition-all flex items-center gap-2 shadow-sm w-fit">
+                <div className="about-back-bar relative">
+                    <button onClick={() => navigate('/')} className="about-back-btn bg-white dark:bg-slate-800 text-slate-800 dark:text-white px-4 py-2 rounded-full font-black text-xs md:text-sm hover:bg-slate-200 hover:-translate-x-1 active:translate-y-1 border-b-4 border-slate-300 dark:border-slate-700 active:border-b-0 transition-all flex items-center gap-2 shadow-sm w-fit">
                         <span className="text-lg leading-none rtl:rotate-180">←</span> {isAr ? 'العودة لصفحة التسجيل' : 'Back to Login'}
                     </button>
                 </div>
 
                 {/* --- 1. قسم عن المدرسة --- */}
                 <RevealOnScroll>
-                    <section className="bg-white dark:bg-slate-800 p-6 sm:p-8 md:p-12 rounded-[2.5rem] border-4 border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row items-center gap-6 md:gap-10 relative overflow-hidden group hover:border-amber-300 dark:hover:border-amber-700 transition-colors duration-500">
+                    <section className="about-hero group relative">
                         
                         <div className="absolute top-0 start-0 w-3 h-full bg-amber-400 rounded-s-[2rem]"></div>
                         
-                        <div className="flex-1 space-y-4 relative z-10 text-center md:text-start ps-2">
-                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 font-black text-[11px] md:text-xs uppercase tracking-widest border-2 border-amber-200 dark:border-amber-800">
+                        <div className="about-hero-copy flex-1 space-y-4 relative z-10 text-center md:text-start ps-2">
+                            <div className="about-hero-eyebrow">
                                 <BuildingIcon />
                                 EFIPS
                             </div>
-                            <h2 className={`text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 dark:text-white leading-tight ${!isAr && 'tracking-tight'}`}>
+                            <h2 className={`about-hero-title ${!isAr && 'tracking-tight'}`}>
                                 {t('schoolHistory')}
                             </h2>
-                            <p className="text-xs sm:text-sm md:text-base text-slate-600 dark:text-slate-400 leading-relaxed font-bold">
+                            <p className="about-hero-description">
                                 {t('historyText')}
                             </p>
                             <div className="pt-2 flex justify-center md:justify-start">
@@ -203,7 +204,7 @@ const AboutPage: React.FC = () => {
                                     href="https://www.falcon-school.com" 
                                     target="_blank" 
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-3 bg-amber-400 text-slate-900 px-6 py-3 md:px-8 md:py-3.5 rounded-full font-black text-sm md:text-base border-b-6 border-amber-600 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all shadow-md group"
+                                    className="about-website-btn group"
                                 >
                                     <span>{t('visitWebsite')}</span>
                                     <svg className="w-5 h-5 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
@@ -211,11 +212,14 @@ const AboutPage: React.FC = () => {
                             </div>
                         </div>
                         
-                        <div className="w-36 h-36 sm:w-48 sm:h-48 md:w-60 md:h-60 shrink-0 relative flex justify-center items-center">
+                        <div className="about-hero-art">
+                            <span className="about-hero-halo" aria-hidden="true"/>
+                            <span className="about-hero-ring" aria-hidden="true"/>
+                            <span className="about-hero-ring about-hero-ring-2" aria-hidden="true"/>
                             <img 
                                 src="/school-logo.png" 
                                 alt="EFIPS Logo" 
-                                className="w-full h-full object-contain relative z-10 animate-float drop-shadow-xl dark:brightness-0 dark:invert rotate-6 group-hover:scale-105 transition-transform duration-500" 
+                                className="about-hero-logo" 
                             />
                         </div>
                     </section>
@@ -224,8 +228,8 @@ const AboutPage: React.FC = () => {
                 {/* --- 2. قسم عن المكتبة والأجنحة --- */}
                 <RevealOnScroll delay={100}>
                     <section className="relative z-10">
-                        <div className="text-center mb-8 md:mb-10">
-                            <span className="inline-block px-3 py-1.5 rounded-full bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400 font-black text-[10px] md:text-xs uppercase tracking-widest mb-3 border-2 border-sky-200 dark:border-sky-800">
+                        <div className="about-heading text-center mb-8 md:mb-10">
+                            <span className="about-heading-tag">
                                 Library Overview
                             </span>
                             <h3 className={`text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 dark:text-white mb-3 ${!isAr && 'tracking-tight'}`}>
@@ -236,7 +240,7 @@ const AboutPage: React.FC = () => {
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                        <div className="about-wing-grid grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                             {[
                                 { title: t('wing1'), desc: t('wing1Desc'), color: "bg-slate-700", border: "border-slate-900", icon: <Wing1Icon /> },
                                 { title: t('wing2'), desc: t('wing2Desc'), color: "bg-emerald-500", border: "border-emerald-700", icon: <Wing2Icon /> },
@@ -244,8 +248,8 @@ const AboutPage: React.FC = () => {
                                 { title: t('wing4'), desc: t('wing4Desc'), color: "bg-blue-500", border: "border-blue-700", icon: <Wing4Icon /> }
                             ].map((w, i) => (
                                 <RevealOnScroll key={i} delay={i * 40}>
-                                    <div className={`${w.color} ${w.border} text-white p-6 sm:p-8 rounded-[2rem] border-b-6 hover:-translate-y-1.5 transition-all duration-300 flex flex-col items-center md:items-start text-center md:text-start shadow-sm h-full`}>
-                                        <div className="text-white/90 drop-shadow-sm">{w.icon}</div>
+                                    <div className={`about-wing-card ${w.color} ${w.border} text-white p-6 sm:p-8 rounded-[2rem] border-b-6 hover:-translate-y-1.5 transition-all duration-300 flex flex-col items-center md:items-start text-center md:text-start shadow-sm h-full`}>
+                                        <div className="about-wing-icon text-white/90 drop-shadow-sm">{w.icon}</div>
                                         <h4 className="text-xl sm:text-2xl font-black mb-2">{w.title}</h4>
                                         <p className="text-xs sm:text-sm md:text-base font-bold opacity-90 leading-relaxed">{w.desc}</p>
                                     </div>
@@ -255,11 +259,11 @@ const AboutPage: React.FC = () => {
                             {/* الجناح الخامس - الهوية الوطنية */}
                             <div className="md:col-span-2 relative mt-1">
                                 <RevealOnScroll delay={200}>
-                                    <div className="p-6 sm:p-8 md:p-10 rounded-[2.5rem] bg-slate-900 text-white border-b-6 border-slate-950 flex flex-col md:flex-row items-center gap-6 shadow-sm hover:-translate-y-1.5 transition-transform overflow-hidden relative">
+                                    <div className="about-identity-wing text-white">
                                         <div className="absolute top-[-20%] right-[-10%] w-48 h-48 bg-red-600/30 rounded-full blur-[60px]"></div>
                                         <div className="absolute bottom-[-20%] left-[-10%] w-48 h-48 bg-green-600/30 rounded-full blur-[60px]"></div>
                                         
-                                        <div className="relative z-10 w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-full flex items-center justify-center shrink-0 border-4 border-slate-700">
+                                        <div className="about-identity-art relative z-10 bg-white rounded-full flex items-center justify-center shrink-0 border-4 border-slate-700">
                                            <svg viewBox="0 0 640 480" className="w-12 h-12 sm:w-16 sm:h-16 rounded shadow-sm overflow-hidden" preserveAspectRatio="none">
                                               <path fill="#00732f" d="M0 0h640v160H0z"/>
                                               <path fill="#fff" d="M0 160h640v160H0z"/>
@@ -289,14 +293,14 @@ const AboutPage: React.FC = () => {
                 {/* --- 3. خدمات المكتبة --- */}
                 <RevealOnScroll delay={120}>
                     <section className="relative z-10">
-                        <div className="bg-white dark:bg-slate-800 p-6 sm:p-8 md:p-10 rounded-[2.5rem] border-4 border-slate-200 dark:border-slate-700 shadow-sm text-center relative">
+                        <div className="about-service-panel text-center relative">
                             <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 dark:text-white mb-6">
                                 {t('libServices')}
                             </h3>
                             
-                            <div className="flex flex-wrap justify-center gap-2.5 md:gap-3">
+                            <div className="about-service-list flex flex-wrap justify-center gap-2.5 md:gap-3">
                                 {t('servicesList').split(' • ').map((service, index) => (
-                                    <div key={index} className="px-4 py-2 md:px-5 md:py-2.5 bg-sky-100 dark:bg-slate-900 text-sky-700 dark:text-sky-400 rounded-full text-xs sm:text-sm font-black border-2 border-sky-200 dark:border-slate-700 hover:bg-sky-500 hover:text-white hover:border-sky-600 cursor-default transition-colors">
+                                    <div key={index} className="about-service-item">
                                         {service}
                                     </div>
                                 ))}
@@ -311,7 +315,7 @@ const AboutPage: React.FC = () => {
                         
                         {/* مواعيد العمل */}
                         <div className="lg:col-span-7">
-                            <div className="h-full bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-[2.5rem] border-4 border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden flex flex-col justify-between">
+                            <div className="about-hours-panel h-full relative overflow-hidden flex flex-col justify-between">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-500 rounded-full flex items-center justify-center border-2 border-emerald-200 dark:border-emerald-800">
                                        <ClockIcon />
@@ -340,7 +344,7 @@ const AboutPage: React.FC = () => {
                         <div className="lg:col-span-5 h-full">
                             <a 
                                 href="mailto:islam.ahmed@falcon-school.com"
-                                className="block h-full bg-rose-500 border-b-6 border-rose-700 p-6 sm:p-8 rounded-[2.5rem] text-center group hover:-translate-y-1.5 active:border-b-0 active:translate-y-2 transition-all shadow-sm"
+                                className="about-contact-card block h-full bg-rose-500 border-b-6 border-rose-700 p-6 sm:p-8 rounded-[2.5rem] text-center group hover:-translate-y-1.5 active:border-b-0 active:translate-y-2 transition-all shadow-sm"
                             >
                                 <div className="h-full flex flex-col justify-center items-center">
                                     <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300 border-2 border-white/30">
@@ -357,7 +361,7 @@ const AboutPage: React.FC = () => {
                 {/* --- الخاتمة --- */}
                 <RevealOnScroll delay={200}>
                     <div className="mt-6 md:mt-8 text-center relative z-10">
-                        <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-black text-slate-400 dark:text-slate-500 leading-relaxed italic px-4">
+                        <p className="about-motto italic px-4">
                             "{t('motto')}"
                         </p>
                         <div className="flex justify-center gap-2.5 mt-6">
