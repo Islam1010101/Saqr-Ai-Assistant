@@ -5,6 +5,7 @@ import { supabase } from '../src/utils/supabase';
 import { printA4Html } from '../src/utils/printA4Html';
 import AdminReadingChallenge from '../src/components/AdminReadingChallenge';
 import AdminLibraryAttendance from '../src/components/AdminLibraryAttendance';
+import AdminInsightsPanels from '../src/components/AdminInsightsPanels';
 import { bookData } from '../api/bookData';
 import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
@@ -158,6 +159,8 @@ const AdminDashboard: React.FC = () => {
     const [processingRowId, setProcessingRowId] = useState<string | number | null>(null);
     const [stats, setStats] = useState({ students: 0, teachers: 0, studentLogins: 0, teacherLogins: 0 });
     const [loginActivity, setLoginActivity] = useState<any[]>([]);
+    const [scheduleSlots, setScheduleSlots] = useState<any[]>([]);
+    const [allBorrowingRecords, setAllBorrowingRecords] = useState<any[]>([]);
     const [digitalBookReadStats, setDigitalBookReadStats] = useState<any[]>([]);
     const [digitalBookReadStatsAvailable, setDigitalBookReadStatsAvailable] = useState<boolean | null>(null);
     const [studentsList, setStudentsList] = useState<any[]>([]);
@@ -272,6 +275,7 @@ const AdminDashboard: React.FC = () => {
                 if (!merged.has(key)) merged.set(key, row);
             });
             const rows = Array.from(merged.values());
+            setAllBorrowingRecords(rows);
 
             if (directError && rows.length === 0 && fallbackError) throw new Error(`${directError.message} | ${fallbackError.message}`);
             if (directError && rows.length === 0) throw directError;
@@ -300,7 +304,7 @@ const AdminDashboard: React.FC = () => {
             const [studentCountResult, teacherCountResult, loginResult, reportResult] = await Promise.all([
                 supabase.from('students').select('*', { count: 'exact', head: true }),
                 supabase.from('teachers').select('*', { count: 'exact', head: true }),
-                supabase.from('login_logs').select('user_id, user_type'),
+                supabase.from('login_logs').select('user_id, user_type, login_time'),
                 supabase.from('lesson_reports').select('*').order('created_at', { ascending: false })
             ]);
             if (loginResult.error) console.warn('Could not read login logs:', loginResult.error);
@@ -331,6 +335,8 @@ const AdminDashboard: React.FC = () => {
             setStudentsList(allStudents);
             setTeachersList(allTeachers);
             setLessonReportsList(reportResult.data || []);
+            const { data: scheduleRows, error: scheduleError } = await supabase.from('library_schedule').select('id,teacher,subject,grade,user_id');
+            if (!scheduleError) setScheduleSlots(scheduleRows || []);
             const studentLogins = new Set(safeLoginLogs.filter((l: any) => String(l.user_type || '').toLowerCase() === 'student').map((l: any) => l.user_id)).size;
             const teacherLogins = new Set(safeLoginLogs.filter((l: any) => ['teacher', 'admin'].includes(String(l.user_type || '').toLowerCase())).map((l: any) => l.user_id)).size;
             setStats({ students: studentCountResult.count ?? allStudents.length, teachers: teacherCountResult.count ?? allTeachers.length, studentLogins, teacherLogins });
@@ -391,7 +397,7 @@ const AdminDashboard: React.FC = () => {
         if (isAdmin !== true) return;
         const channel = supabase.channel('login-activity-realtime-admin')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'login_logs' }, async () => {
-                const { data, error } = await supabase.from('login_logs').select('user_id, user_type');
+                const { data, error } = await supabase.from('login_logs').select('user_id, user_type, login_time');
                 if (error) { console.error('Unable to refresh login activity:', error); return; }
                 const logs = data || [];
                 setLoginActivity(logs);
@@ -652,6 +658,12 @@ const AdminDashboard: React.FC = () => {
                     { id:'library-collection-heading', label:isAr?'مقتنيات المكتبة':'Library collection',icon:'library' as IconName },
                     { id:'admin-attendance', label:isAr?'الإشغال والحضور':'Attendance',icon:'calendar' as IconName },
                     { id:'admin-analytics', label:isAr?'الرسوم والتحليلات':'Analytics',icon:'chart' as IconName },
+                    { id:'admin-access-report', label:isAr?'الدخول':'Logins',icon:'activity' as IconName },
+                    { id:'admin-schedule-report', label:isAr?'الجدول':'Timetable',icon:'calendar' as IconName },
+                    { id:'admin-borrow-report', label:isAr?'الاستعارة':'Borrowings',icon:'book-open' as IconName },
+                    { id:'admin-reading-report', label:isAr?'تحدي القراءة':'Reading',icon:'trophy' as IconName },
+                    { id:'admin-books-report', label:isAr?'الكتب':'Books',icon:'library' as IconName },
+                    { id:'admin-users-report', label:isAr?'المستخدمون':'Users',icon:'users' as IconName },
                     { id:'admin-management', label:isAr?'الإدارة والسجلات':'Management',icon:'clipboard-list' as IconName }
                 ].map(item=><a key={item.id} href={'#'+item.id} className="shrink-0 inline-flex items-center gap-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200 shadow-sm hover:border-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-500 transition-colors"><OutlineIcon name={item.icon} className="h-4 w-4"/>{item.label}</a>)}
             </nav>
@@ -742,7 +754,7 @@ const AdminDashboard: React.FC = () => {
                         </button>
                     </div>
                 </section>
-                {showReadingReport && <AdminReadingChallenge isAr={isAr} />}
+                {showReadingReport && <div id="admin-existing-reading" className="lg:col-span-4"><AdminReadingChallenge isAr={isAr} /></div>}
 
                 <section className="efips-panel lg:col-span-4 rounded-3xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/70 p-5 md:p-6 shadow-sm">
                     <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
@@ -767,6 +779,16 @@ const AdminDashboard: React.FC = () => {
                     <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">{isAr ? 'البيانات تعكس السجلات المتاحة حاليًا؛ وعدد فتح الكتب الرقمية لا يعني بالضرورة إكمال قراءتها.' : 'Figures reflect currently available records; a digital book open does not necessarily mean the book was read.'}</p>
                 </section>
 
+                <AdminInsightsPanels
+                    isAr={isAr} locale={locale} students={studentsList} teachers={teachersList}
+                    logs={loginActivity} schedule={scheduleSlots} lessons={lessonReportsList}
+                    activeLoans={borrowingsList} pendingLoans={pendingRequestsList} allLoans={allBorrowingRecords}
+                    digitalReads={digitalBookReadStats} digitalAvailable={digitalBookReadStatsAvailable}
+                    physicalTotal={physicalCatalogCount} arabicTotal={arabicDigitalCount} englishTotal={englishDigitalCount}
+                    topBooks={topBooksStats}
+                    onOpenTab={tab => { setActiveTab(tab);setSearchQuery('');document.getElementById('admin-management')?.scrollIntoView({behavior:'smooth'}); }}
+                    onShowReading={() => { setShowReadingReport(true);document.getElementById('admin-existing-reading')?.scrollIntoView({behavior:'smooth'}); }}
+                />
                 <AdminLibraryAttendance locale={locale} adminId={adminName || 'efips-admin'} />
 
                 <section id="admin-analytics" className="lg:col-span-4 grid grid-cols-1 xl:grid-cols-5 gap-5 items-start scroll-mt-24">
@@ -816,11 +838,11 @@ const AdminDashboard: React.FC = () => {
 
                 <section className="lg:col-span-4 bg-white dark:bg-slate-900/90 backdrop-blur-md p-4 md:p-5 rounded-[2rem] border border-slate-200 dark:border-slate-700/50 shadow-md"><div className="relative group"><input type="text" placeholder={t('searchPlaceholder')} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full p-4 ps-14 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white border-2 border-slate-200 dark:border-slate-700 focus:border-amber-400 rounded-2xl outline-none font-bold text-sm md:text-base shadow-inner transition-colors" /><div className="absolute start-4 top-1/2 -translate-y-1/2"><SearchSvg /></div></div></section>
 
-                <section className="efips-panel lg:col-span-4 bg-white dark:bg-slate-900/90 backdrop-blur-md border border-slate-200 dark:border-slate-700/50 p-4 sm:p-6 rounded-[2rem] shadow-xl overflow-hidden min-w-0"><div className="overflow-x-auto max-h-[600px] scrollbar-thin"><table className="w-full text-left rtl:text-right border-collapse min-w-[600px]"><thead className="sticky top-0 bg-slate-100 dark:bg-slate-800 z-10"><tr className="text-slate-600 dark:text-slate-300 text-xs md:text-sm border-b border-slate-200 dark:border-slate-700"><th className="p-3.5 font-black">{t('colId')}</th>{activeTab !== 'borrowings' && activeTab !== 'pending' && <th className="p-3.5 font-black">{t('colName')}</th>}{activeTab === 'students' && <th className="p-3.5 font-black">{t('colGrade')}</th>}{activeTab === 'students' && <th className="p-3.5 font-black text-center">{t('colPoints')}</th>}{(activeTab === 'borrowings' || activeTab === 'pending') && <th className="p-3.5 font-black">{t('colBook')}</th>}{(activeTab === 'borrowings' || activeTab === 'pending') && <th className="p-3.5 font-black">{t('colEmail')}</th>}{activeTab === 'borrowings' && <th className="p-3.5 font-black">{t('colDate')}</th>}{activeTab === 'pending' && <th className="p-3.5 font-black">{t('colReqDate')}</th>}{activeTab === 'reports' && <th className="p-3.5 font-black">{t('colTopic')}</th>}{activeTab === 'reports' && <th className="p-3.5 font-black text-center">{t('colType')}</th>}{activeTab === 'reports' && <th className="p-3.5 font-black">{t('colReportDate')}</th>}{activeTab !== 'reports' && <th className="p-3.5 font-black text-center">{t('colActions')}</th>}</tr></thead>
+                <section className="efips-panel lg:col-span-4 bg-white dark:bg-slate-900/90 backdrop-blur-md border border-slate-200 dark:border-slate-700/50 p-4 sm:p-6 rounded-[2rem] shadow-xl overflow-hidden min-w-0"><div className="overflow-x-auto max-h-[600px] scrollbar-thin"><table className="w-full text-left rtl:text-right border-collapse min-w-[600px]"><thead className="sticky top-0 bg-slate-100 dark:bg-slate-800 z-10"><tr className="text-slate-600 dark:text-slate-300 text-xs md:text-sm border-b border-slate-200 dark:border-slate-700"><th className="p-3.5 font-black">{t('colId')}</th>{activeTab !== 'borrowings' && activeTab !== 'pending' && <th className="p-3.5 font-black">{t('colName')}</th>}{(activeTab === 'students' || activeTab === 'teachers') && <th className="p-3.5 font-black">{t('colEmail')}</th>}{activeTab === 'students' && <th className="p-3.5 font-black">{t('colGrade')}</th>}{activeTab === 'students' && <th className="p-3.5 font-black text-center">{t('colPoints')}</th>}{(activeTab === 'borrowings' || activeTab === 'pending') && <th className="p-3.5 font-black">{t('colBook')}</th>}{(activeTab === 'borrowings' || activeTab === 'pending') && <th className="p-3.5 font-black">{t('colEmail')}</th>}{activeTab === 'borrowings' && <th className="p-3.5 font-black">{t('colDate')}</th>}{activeTab === 'pending' && <th className="p-3.5 font-black">{t('colReqDate')}</th>}{activeTab === 'reports' && <th className="p-3.5 font-black">{t('colTopic')}</th>}{activeTab === 'reports' && <th className="p-3.5 font-black text-center">{t('colType')}</th>}{activeTab === 'reports' && <th className="p-3.5 font-black">{t('colReportDate')}</th>}{activeTab !== 'reports' && <th className="p-3.5 font-black text-center">{t('colActions')}</th>}</tr></thead>
                     <tbody>{filteredList.length ? filteredList.map((item: any) => <tr key={`${activeTab}-${item.id}`} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                         <td className="p-3.5 font-mono font-bold text-xs md:text-sm text-blue-600 dark:text-blue-400">{activeTab === 'students' ? item.student_id : activeTab === 'teachers' ? item.teacher_id : (item.user_id || item.teacher_id)}{(activeTab === 'pending' || activeTab === 'borrowings') && <div className="mt-1 font-sans text-xs text-slate-600 dark:text-slate-300">{item.user_name || (item.user_type === 'student' ? (isAr ? 'طالب' : 'Student') : item.user_type === 'teacher' ? (isAr ? 'معلم' : 'Teacher') : (isAr ? 'مستخدم' : 'User'))}{item.user_grade ? ` · ${item.user_grade}` : ''}</div>}</td>
                         {activeTab !== 'borrowings' && activeTab !== 'pending' && <td className="p-3.5 font-bold text-xs md:text-sm">{activeTab === 'reports' ? item.teacher_name : (isAr ? (item.name_ar || item.name_en) : (item.name_en || item.name_ar))}</td>}
-                        {activeTab === 'students' && <td className="p-3.5 text-xs md:text-sm text-slate-500 dark:text-slate-400">{item.grade}</td>}{activeTab === 'students' && <td className="p-3.5 text-center font-black text-emerald-600 dark:text-emerald-400">{item.points || 0}</td>}
+                        {(activeTab === 'students' || activeTab === 'teachers') && <td dir="ltr" className="p-3.5 font-mono text-xs md:text-sm text-slate-500 dark:text-slate-400">{activeTab === 'students' ? (item.student_id ? String(item.student_id).trim() + '@falcon-school.com' : '') : (item.email || item.user_email || '')}</td>}{activeTab === 'students' && <td className="p-3.5 text-xs md:text-sm text-slate-500 dark:text-slate-400">{item.grade}</td>}{activeTab === 'students' && <td className="p-3.5 text-center font-black text-emerald-600 dark:text-emerald-400">{item.points || 0}</td>}
                         {(activeTab === 'borrowings' || activeTab === 'pending') && <td className="p-3.5 font-bold text-xs md:text-sm text-rose-500">{item.book_name || '-'}</td>}
                         {(activeTab === 'borrowings' || activeTab === 'pending') && <td className="p-3.5 font-mono text-xs md:text-sm text-slate-600 dark:text-slate-300">{item.user_email || <span className="text-slate-400 italic">--</span>}</td>}
                         {activeTab === 'borrowings' && <td className="p-3.5 text-xs md:text-sm font-bold text-amber-600 dark:text-amber-400">{item.return_date || '-'}</td>}
