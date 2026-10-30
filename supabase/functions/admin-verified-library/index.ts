@@ -56,7 +56,7 @@ Deno.serve(async(req:Request)=>{
    target=String(loan.user_id)+"@falcon-school.com";
    const {data:student}=await admin.from("students").select("student_id").eq("student_id",loan.user_id).maybeSingle();
    if(!student)return res(404,{error:"Student not found"});
-  } else if(["teacher","admin"].includes(String(loan.user_type))){
+  }else if(["teacher","admin"].includes(String(loan.user_type))){
    const {data:row}=await admin.from("efips_google_staff_accounts").select("email").eq("teacher_id",String(loan.user_id)).maybeSingle();
    if(!row?.email)return res(404,{error:"Staff email unavailable"});target=row.email;
   }else return res(400,{error:"Unrecognized borrower"});
@@ -66,7 +66,24 @@ Deno.serve(async(req:Request)=>{
     .update({status:"active",user_email:target,borrow_date:today,return_date:due,approval_email_status:"pending"})
     .eq("id",id).eq("status","pending").select("id").maybeSingle();
   if(updateError||!updated)return res(409,{error:"Could not approve borrowing"});
-  return res(200,{ok:true,email:target,borrow_date:today,return_date:due,borrowing_id:id});
+  const resend=Deno.env.get("RESEND_API_KEY");
+  if(!resend)return res(200,{ok:true,emailSent:false,notice:"Email service not configured",email:target,return_date:due});
+  const safe=(v:unknown)=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"} as Record<string,string>)[c]);
+  const book=safe(loan.book_name),person=safe(loan.user_name||loan.user_id);
+  const html=`<div style="font-family:Tahoma,Arial,sans-serif;max-width:680px;margin:auto;padding:24px;color:#183044"><h2 style="color:#076b5e">EFIPS Library | مكتبة صقر الإمارات</h2><div dir="rtl"><h3>تأكيد استعارة كتاب</h3><p>مرحباً ${person}، تمت الموافقة على استعارة الكتاب <strong>${book}</strong>.</p><p>تاريخ الاستعارة: ${today}</p><p>تاريخ الإرجاع: ${due}</p></div><hr/><h3>Borrowing Approved</h3><p>Dear ${person}, your request to borrow <strong>${book}</strong> has been approved.</p><p>Borrowed: ${today} | Return by: ${due}</p></div>`;
+  // Only the verified server-side address is used. No client-supplied "to".
+  const {data:claimed}=await admin.from("borrowings").update({approval_email_status:"sending",approval_email_attempted_at:new Date().toISOString()}).eq("id",id).eq("approval_email_status","pending").select("id").maybeSingle();
+  if(!claimed)return res(200,{ok:true,emailSent:false,notice:"Email already in progress",email:target,return_date:due});
+  try{
+   const result=await fetch("https://api.resend.com/emails",{method:"POST",headers:{"Authorization":`Bearer ${resend}`,"Content-Type":"application/json"},body:JSON.stringify({from:"EFIPS Library <library@efipslibrary.com>",to:[target],subject:"EFIPS Library | Borrowing Confirmation",html})});
+   const receipt=await result.json().catch(()=>({}));
+   if(!result.ok||!receipt?.id)throw new Error("Delivery rejected");
+   await admin.from("borrowings").update({approval_email_status:"sent",approval_email_sent_at:new Date().toISOString(),approval_email_error:null}).eq("id",id).eq("approval_email_status","sending");
+   return res(200,{ok:true,emailSent:true,email:target,return_date:due});
+  }catch{
+   await admin.from("borrowings").update({approval_email_status:"failed",approval_email_error:"Automated email delivery failed"}).eq("id",id).eq("approval_email_status","sending");
+   return res(200,{ok:true,emailSent:false,notice:"Email delivery failed",email:target,return_date:due});
+  }
  }
  return res(400,{error:"Unsupported action"});
 });
