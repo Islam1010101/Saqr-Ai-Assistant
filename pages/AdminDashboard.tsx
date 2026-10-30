@@ -617,19 +617,17 @@ const AdminDashboard: React.FC = () => {
                 const { error } = await supabase.from('teachers').update({ teacher_id: formData.teacher_id.trim().toUpperCase(), name_ar: formData.name_ar, name_en: formData.name_en || formData.name_ar }).eq('id', selectedItem.id);
                 if (error) throw error;
             } else if (modalMode === 'addBorrow') {
-                const todayStr = new Date().toISOString().split('T')[0];
-                const targetReturnDate = formData.return_date || getDefaultReturnDate(15);
-                const cleanEmail = formData.user_email.trim();
-                const { data: insertedBorrowing, error: insertErr } = await supabase.from('borrowings').insert([{ user_id: formData.user_id.trim(), user_type: formData.user_type, user_email: cleanEmail, book_name: formData.book_name.trim(), borrow_date: todayStr, return_date: targetReturnDate, status: 'active', approval_email_status: 'pending' }]).select('id').single();
-                if (insertErr) throw insertErr;
-                try {
-                    await sendBilingualConfirmationEmail(insertedBorrowing.id);
-                    const durationDays = calculateDurationDays(todayStr, targetReturnDate);
-                    setBorrowingsNotice(isAr ? `تم تسجيل الإعارة وإرسال بريد التأكيد إلى ${cleanEmail} (${durationDays} يوماً).` : `Borrowing registered and confirmation email sent to ${cleanEmail}.`);
-                } catch (emailErr) {
-                    console.error('Email send warning:', emailErr);
-                    setBorrowingsNotice(isAr ? 'تم تسجيل الإعارة في النظام، ولكن تعذّر إرسال البريد الآلي.' : 'Borrowing saved, but email delivery failed.');
-                }
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session?.access_token) throw new Error(isAr ? 'يرجى تسجيل الدخول بحساب Google الإداري.' : 'Admin Google sign-in required.');
+                const { data, error } = await supabase.functions.invoke('admin-verified-library', {
+                    body: { action: 'direct', user_id: formData.user_id.trim(), user_type: formData.user_type,
+                        book_name: formData.book_name.trim(), return_date: formData.return_date },
+                    headers: { Authorization: 'Bearer ' + session.access_token }
+                });
+                if (error || !data?.ok) throw new Error(data?.error || 'Could not register direct borrowing.');
+                setBorrowingsNotice(data.emailSent
+                    ? (isAr ? `تم تسجيل الإعارة وإرسال البريد إلى ${data.email}.` : `Borrowing registered and email sent to ${data.email}.`)
+                    : (isAr ? 'تم تسجيل الإعارة، لكن البريد الإلكتروني لم يتأكد إرساله.' : 'Borrowing registered but email delivery is not confirmed.'));
             }
             setModalMode(null); setSelectedItem(null);
             await fetchRealDashboardData(false);
@@ -917,7 +915,7 @@ const AdminDashboard: React.FC = () => {
                     {(modalMode === 'addTeacher' || modalMode === 'editTeacher') && <><div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">{t('colId')} (مثال: PASS123)</label><input type="text" value={formData.teacher_id} onChange={e => setFormData({ ...formData, teacher_id: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-mono uppercase" required /></div><div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">الاسم بالعربي</label><input type="text" value={formData.name_ar} onChange={e => setFormData({ ...formData, name_ar: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm" required /></div><div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">الاسم بالإنجليزية</label><input type="text" value={formData.name_en} onChange={e => setFormData({ ...formData, name_en: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm" /></div></>}
                     {modalMode === 'addBorrow' && <><div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">نوع المستعير</label><select value={formData.user_type} onChange={e => { const type = e.target.value; setFormData({ ...formData, user_type: type, user_email: type === 'student' && formData.user_id ? `${formData.user_id.trim()}@falcon-school.com` : '' }); }} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold"><option value="student">طالب</option><option value="teacher">معلم</option></select></div>
                         <div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">الرقم التعريفي (ID)</label><input type="text" value={formData.user_id} onChange={e => { const id = e.target.value; setFormData({ ...formData, user_id: id, user_email: formData.user_type === 'student' ? (id ? `${id.trim()}@falcon-school.com` : '') : formData.user_email }); }} className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-mono bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white" required /></div>
-                        <div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">البريد الإلكتروني للمستعير</label><input type="email" value={formData.user_email} onChange={e => setFormData({ ...formData, user_email: e.target.value })} readOnly={formData.user_type === 'student'} className={`w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm ${formData.user_type === 'student' ? 'bg-slate-100 dark:bg-slate-800/50 text-slate-500 cursor-not-allowed' : 'bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white'}`} required /></div>
+                        <div className="text-xs font-bold leading-6 text-emerald-700 dark:text-emerald-300">{isAr ? 'سيُستخدم بريد Google المدرسي المسجّل للمستعير تلقائيًا دون إدخال عنوان يدوي.' : 'The borrower’s approved school Google email will be used automatically.'}</div>
                         <div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">عنوان الكتاب</label><input type="text" value={formData.book_name} onChange={e => setFormData({ ...formData, book_name: e.target.value })} className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white" required /></div>
                         <div><label className="block text-sm font-black text-amber-600 dark:text-amber-400 mb-1">تاريخ الإرجاع الإلزامي (مدة الاستعارة: {previewDurationDays} يوماً)</label><input type="date" value={formData.return_date} min={previewBorrowDate} onChange={e => setFormData({ ...formData, return_date: e.target.value })} className="w-full px-4 py-3 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border-4 border-amber-300 dark:border-amber-600 focus:border-amber-500 rounded-2xl font-black outline-none transition-colors" required /></div>
                     </>}
