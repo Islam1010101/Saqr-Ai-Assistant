@@ -402,10 +402,34 @@ const SchedulePage: React.FC = () => {
                 </div>
             </div>
 
+
+            <style>{`
+                .schedule-saqr-layout{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:10px;min-width:0}
+                .schedule-saqr-portrait{position:relative;isolation:isolate;width:min(100%,265px);height:230px;display:grid;place-items:center;pointer-events:none}
+                .schedule-saqr-image{position:relative;z-index:3;width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 15px 22px rgba(3,68,64,.32));animation:schedule-saqr-float 5.2s ease-in-out infinite}
+                .schedule-saqr-halo{position:absolute;z-index:0;width:82%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(52,211,153,.3),rgba(20,184,166,.09) 60%,transparent 73%);filter:blur(8px);animation:schedule-saqr-pulse 6s ease-in-out infinite}
+                .schedule-saqr-ring{position:absolute;z-index:1;width:77%;aspect-ratio:1;border:1px dashed rgba(13,148,136,.45);border-radius:50%;animation:schedule-saqr-spin 30s linear infinite}
+                .schedule-saqr-ring-second{width:60%;border-color:rgba(217,159,67,.55);animation-direction:reverse;animation-duration:23s}
+                .schedule-saqr-glow,.schedule-saqr-spark{position:absolute;pointer-events:none}
+                .schedule-saqr-decoration{overflow:hidden}
+                .schedule-saqr-glow{inset-inline-end:8%;top:2%;width:280px;height:230px;background:radial-gradient(circle,rgba(16,185,129,.09),transparent 73%)}
+                .schedule-saqr-spark{z-index:4;width:10px;height:10px;transform:rotate(45deg);background:#e6b86c;border-radius:2px;animation:schedule-saqr-twinkle 3.4s ease-in-out infinite}
+                .schedule-saqr-spark-a{top:15%;inset-inline-start:6%}.schedule-saqr-spark-b{bottom:25%;inset-inline-end:8%;background:#14b8a6;animation-delay:-1.5s}
+                @media(min-width:1280px){.schedule-saqr-layout{flex-direction:row;gap:20px}.schedule-saqr-portrait{width:240px;height:235px;flex-shrink:0}}
+                @media(max-width:640px){.schedule-saqr-portrait{width:210px;height:175px}.schedule-saqr-layout{width:100%}.schedule-saqr-layout>div:last-child{width:100%}}
+                @media(prefers-reduced-motion:reduce){.schedule-saqr-image,.schedule-saqr-halo,.schedule-saqr-ring,.schedule-saqr-spark{animation:none!important}}
+                @keyframes schedule-saqr-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+                @keyframes schedule-saqr-pulse{0%,100%{opacity:.65;transform:scale(.96)}50%{opacity:1;transform:scale(1.06)}}
+                @keyframes schedule-saqr-spin{to{transform:rotate(360deg)}}
+                @keyframes schedule-saqr-twinkle{0%,100%{opacity:.3}50%{opacity:1}}
+            `}</style>
             <main className="max-w-[1500px] mx-auto print:hidden relative z-10">
                 {/* Page heading and actions */}
                 <section className="mb-5 sm:mb-7 rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl p-4 sm:p-6 lg:p-7 shadow-[0_12px_35px_rgba(15,23,42,0.06)] dark:shadow-black/20">
-                    <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-5">
+                    <div className="relative flex flex-col xl:flex-row xl:items-center xl:justify-between gap-5">
+                        <div className="schedule-saqr-decoration pointer-events-none absolute inset-0" aria-hidden="true">
+                            <span className="schedule-saqr-glow"/><span className="schedule-saqr-ring"/><span className="schedule-saqr-ring schedule-saqr-ring-second"/>
+                        </div>
                         <div className="min-w-0 text-center xl:text-start">
                             <div className="inline-flex max-w-full items-center justify-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 font-extrabold text-xs border border-emerald-200 dark:border-emerald-900 mb-3">
                                 <span className="inline-block w-2 h-2 rounded-full bg-emerald-500" aria-hidden="true" />
@@ -416,7 +440,14 @@ const SchedulePage: React.FC = () => {
                             </h1>
                             <p className="text-sm sm:text-base font-semibold leading-relaxed text-slate-500 dark:text-slate-400 mt-2 max-w-3xl mx-auto xl:mx-0">{t('subtitle')}</p>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full xl:w-auto xl:min-w-[390px]">
+                        <div className="schedule-saqr-layout">
+                            <div className="schedule-saqr-portrait" role="img" aria-label={isAr ? 'شخصية صقر الخاصة بجدول المكتبة' : 'Saqr library schedule character'}>
+                                <span className="schedule-saqr-halo" aria-hidden="true"/>
+                                <span className="schedule-saqr-spark schedule-saqr-spark-a" aria-hidden="true"/>
+                                <span className="schedule-saqr-spark schedule-saqr-spark-b" aria-hidden="true"/>
+                                <img src="/Saqr%20Schedule.png" alt="" className="schedule-saqr-image" loading="eager" decoding="async" />
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full xl:min-w-[390px]">
                             <button
                                 type="button"
                                 onClick={handleDownloadMySchedule}
@@ -431,6 +462,7 @@ const SchedulePage: React.FC = () => {
                             >
                                 <span aria-hidden="true">▤</span><span>{t('printBtn')}</span>
                             </button>
+                        </div>
                         </div>
                     </div>
                 </section>
