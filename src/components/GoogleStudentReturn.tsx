@@ -30,9 +30,11 @@ export default function GoogleStudentReturn() {
  useEffect(() => {
   if (running.current) return;
   running.current = true;
-  let cancelled = false;
   const finish = async () => {
    try {
+    // Do not let a prior local EFIPS ID session grant access on a failed OAuth attempt.
+    localStorage.removeItem('user_type');
+    localStorage.removeItem('current_user');
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     if (sessionError || !session?.access_token) throw new Error('AUTH');
     const { data, error } = await supabase.functions.invoke('google-student-pilot', {
@@ -54,21 +56,20 @@ export default function GoogleStudentReturn() {
       }
       throw new Error('FAILED');
     }
-    if (cancelled) return;
     localStorage.setItem('user_type', 'student');
     localStorage.setItem('current_user', JSON.stringify(data.profile));
     // Only an approved roster mapping is ever stored as current_user.
     window.location.replace(window.location.origin + '/#/home');
    } catch (error) {
     await supabase.auth.signOut().catch(() => {});
-    if (cancelled) return;
     const reason = error instanceof Error ? error.message : '';
     setState(reason === 'APPROVAL' ? 'approval' : reason === 'SCHOOL' ? 'school' : 'failed');
+    // The callback marker is removed only after final verification fails.
     window.history.replaceState(null, '', window.location.origin + '/#/');
    }
   };
   void finish();
-  return () => { cancelled = true; };
+  // Single navigation effect: do not cancel the callback under React StrictMode.
  }, []);
 
  return <main dir={lang === 'ar' ? 'rtl' : 'ltr'} className="min-h-[100dvh] bg-white dark:bg-black flex items-center justify-center p-5 font-sans">
