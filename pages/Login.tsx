@@ -87,6 +87,28 @@ export default function Login() {
     handleVideoEnd();
   };
 
+  // Student-only pilot. Existing school ID and teacher/admin logins are unchanged.
+  const handleGoogleStudentLogin = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      // Ensure the user explicitly selects a school account on each attempt.
+      await supabase.auth.signOut();
+      const { error: googleError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + '/?efips_google_student=1',
+          scopes: 'openid email profile',
+          queryParams: { prompt: 'select_account' }
+        }
+      });
+      if (googleError) throw googleError;
+    } catch {
+      setError(lang === 'ar' ? 'تعذر بدء تسجيل الدخول بحساب Google المدرسي.' : 'Unable to start school Google sign-in.');
+      setLoading(false);
+    }
+  };
+
   // دالة تسجيل دخول الطلاب
   const handleStudentLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -319,6 +341,22 @@ export default function Login() {
                 {loading ? (lang === 'ar' ? 'جاري التحقق...' : 'Verifying...') : (lang === 'ar' ? 'دخول للمكتبة' : 'Enter Library')}
               </button>
 
+              <div className="flex items-center gap-3 pt-1" aria-hidden="true">
+                <span className="h-px flex-1 bg-slate-200"/><span className="text-xs font-black text-slate-500">{lang === 'ar' ? 'أو' : 'OR'}</span><span className="h-px flex-1 bg-slate-200"/>
+              </div>
+              <button type="button" onClick={() => void handleGoogleStudentLogin()} disabled={loading}
+                className="w-full min-h-14 flex items-center justify-center gap-3 border-2 border-slate-200 hover:border-emerald-300 bg-white hover:bg-slate-50 rounded-[1.5rem] px-4 py-3 text-slate-800 text-sm sm:text-base font-black shadow-sm transition-all disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600">
+                <svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true" className="shrink-0">
+                  <path fill="#EA4335" d="M24 9.5c3.5 0 6.7 1.2 9.2 3.6l6.8-6.8C35.9 2.3 30.2 0 24 0 14.6 0 6.5 5.4 2.6 13.3l7.9 6.1C12.3 13.8 17.7 9.5 24 9.5z"/>
+                  <path fill="#4285F4" d="M46.1 24.5c0-1.6-.2-3.2-.5-4.7H24v8.9h12.4c-.5 2.9-2.1 5.4-4.5 7.1l7.3 5.7c4.3-4 6.9-9.8 6.9-17z"/>
+                  <path fill="#FBBC05" d="M10.5 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.1C.9 16.6 0 20.2 0 24s.9 7.4 2.6 10.7l7.9-6.1z"/>
+                  <path fill="#34A853" d="M24 48c6.5 0 12-2.1 16-6l-7.3-5.7c-2 1.4-4.7 2.2-8.7 2.2-6.3 0-11.7-4.3-13.5-10.2l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/>
+                </svg>
+                {lang === 'ar' ? 'الدخول بحساب Google المدرسي' : 'Sign in with school Google'}
+              </button>
+              <p className="text-center text-xs font-semibold text-slate-500 leading-relaxed">
+                {lang === 'ar' ? 'تجربة للطلاب فقط، بعد اعتماد ربط الحساب المدرسي. يظل الدخول برقم الطالب متاحًا.' : 'Student pilot only, after administrator-approved linking. Student ID login remains available.'}
+              </p>
               {/* الرابط المطلوب إضافته تحت زر الدخول للمكتبة */}
               <div className="text-center pt-2">
                 <Link to="/about" className="text-xs md:text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline transition-all">
