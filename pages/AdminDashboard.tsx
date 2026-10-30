@@ -695,7 +695,7 @@ const AdminDashboard: React.FC = () => {
                 </div>
             </header>
 
-            <nav aria-label={isAr ? 'أقسام لوحة الإدارة' : 'Dashboard sections'} className="max-w-7xl mx-auto mb-5 flex gap-2 overflow-x-auto scrollbar-thin py-2 px-1">
+            <nav aria-label={isAr ? 'أقسام لوحة الإدارة' : 'Dashboard sections'} className="sticky top-2 z-40 max-w-7xl mx-auto mb-5 flex gap-2 overflow-x-auto scrollbar-thin py-3 px-3 rounded-2xl bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl shadow-lg">
                 {[
                     { id:'admin-overview', label:isAr?'نظرة عامة':'Overview',icon:'grid' as IconName },
                     { id:'library-collection-heading', label:isAr?'مقتنيات المكتبة':'Library collection',icon:'library' as IconName },
@@ -708,9 +708,10 @@ const AdminDashboard: React.FC = () => {
                     { id:'admin-books-report', label:isAr?'الكتب':'Books',icon:'library' as IconName },
                     { id:'admin-users-report', label:isAr?'المستخدمون':'Users',icon:'users' as IconName },
                     { id:'admin-management', label:isAr?'الإدارة والسجلات':'Management',icon:'clipboard-list' as IconName }
-                ].map(item=><a key={item.id} href={'#'+item.id} className="shrink-0 inline-flex items-center gap-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200 shadow-sm hover:border-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-500 transition-colors"><OutlineIcon name={item.icon} className="h-4 w-4"/>{item.label}</a>)}
+                ].map(item=><button type="button" key={item.id} onClick={() => document.getElementById(item.id)?.scrollIntoView({behavior:'smooth',block:'start'})} className="shrink-0 inline-flex items-center gap-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200 shadow-sm hover:border-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-500 transition-colors"><OutlineIcon name={item.icon} className="h-4 w-4"/>{item.label}</button>)}
             </nav>
 
+            <div className="max-w-7xl mx-auto mb-5 grid grid-cols-2 sm:grid-cols-4 gap-2">{[{tab:'students' as const,label:isAr?'الطلاب':'Students'},{tab:'teachers' as const,label:isAr?'المعلمون':'Teachers'},{tab:'pending' as const,label:isAr?'طلبات الاستعارة':'Requests'},{tab:'borrowings' as const,label:isAr?'الإعارات':'Loans'}].map(x=><button type="button" key={x.tab} onClick={()=>{setActiveTab(x.tab);setSearchQuery('');document.getElementById('admin-management')?.scrollIntoView({behavior:'smooth',block:'start'});}} className="px-4 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-700 to-teal-600 text-white text-xs sm:text-sm font-black shadow-md hover:shadow-xl transition-shadow">{x.label}</button>)}</div>
             <main className="relative max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
                 <section id="admin-overview" className="efips-panel lg:col-span-4 bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/70 p-5 md:p-7 rounded-3xl shadow-sm scroll-mt-24">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5"><h2 className="text-lg md:text-xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-3"><span className="w-10 h-10 rounded-2xl bg-rose-50 dark:bg-rose-900/30 text-rose-600 flex items-center justify-center"><OutlineIcon name="grid" className="h-5 w-5" /></span>{t('statsTitle')}</h2><span className="text-xs font-bold text-slate-500 dark:text-slate-400">{isAr ? 'ملخص حسابات المستخدمين المسجلة' : 'Registered user account overview'}</span></div>
