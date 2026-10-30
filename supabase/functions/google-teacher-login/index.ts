@@ -24,8 +24,10 @@ Deno.serve(async(req:Request)=>{
  if(lookupError)return reply(503,{code:"ROSTER_UNAVAILABLE"});
  if(!entry)return reply(403,{code:"EMAIL_NOT_AUTHORIZED"});
  const {data:teacher,error:teacherError}=await admin.from("teachers").select("id,teacher_id,name_ar,name_en,created_at").eq("teacher_id",entry.teacher_id).maybeSingle();
+ const {data:official,error:officialError}=await admin.from("efips_google_staff_source").select("name_ar,name_en").eq("email",email).maybeSingle();
+ if(officialError||!official)return reply(403,{code:"EMAIL_NOT_AUTHORIZED"});
  if(teacherError||!teacher)return reply(403,{code:"STAFF_NOT_FOUND"});
  const role=entry.role==="admin" && entry.teacher_id==="HR785" ? "admin" : "teacher";
  const audit=await admin.from("login_logs").insert([{user_id:teacher.teacher_id,user_type:role}]);if(audit.error)console.error("Teacher login audit unavailable");
- return reply(200,{profile:teacher,role});
+ return reply(200,{profile:{...teacher,name_ar:official.name_ar,name_en:official.name_en},role});
 });
