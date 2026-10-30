@@ -19,6 +19,29 @@ Deno.serve(async(req:Request)=>{
  if(staff?.teacher_id!=="HR785"||staff.role!=="admin")return res(403,{error:"Admin required"});
  let body:any;try{body=await req.json()}catch{return res(400,{error:"Invalid request"})}
  const action=String(body.action||"");
+ if(action==="request"){
+  const book=String(body.book_name||"").trim().slice(0,240);
+  if(!book)return res(400,{error:"Book title required"});
+  let borrowerId="",borrowerRole="",name="",grade="";
+  const studentMatch=/^([0-9]{6,7})@falcon-school\.com$/.exec(email);
+  if(studentMatch){
+    const {data:st}=await admin.from("students").select("student_id,name_ar,name_en,grade").eq("student_id",studentMatch[1]).maybeSingle();
+    if(!st)return res(403,{error:"Student is not enrolled"});
+    borrowerId=st.student_id;borrowerRole="student";name=st.name_ar||st.name_en||"";grade=st.grade||"";
+  }else{
+    const {data:staff}=await admin.from("efips_google_staff_accounts").select("teacher_id,role").eq("email",email).maybeSingle();
+    if(!staff)return res(403,{error:"Staff email is not approved"});
+    const {data:teacher}=await admin.from("efips_google_staff_source").select("name_ar,name_en").eq("email",email).maybeSingle();
+    borrowerId=staff.teacher_id;borrowerRole=staff.role==="admin"?"admin":"teacher";name=teacher?.name_ar||teacher?.name_en||"";
+  }
+  const {data:existing}=await admin.from("borrowings").select("id").eq("user_id",borrowerId).eq("book_name",book).in("status",["pending","active"]).limit(1);
+  if(existing?.length)return res(409,{error:"Borrowing request already exists"});
+  const {error:insertError}=await admin.from("borrowings").insert([{user_id:borrowerId,user_type:borrowerRole,user_email:email,user_name:name,user_grade:grade,book_name:book,
+    book_shelf:String(body.book_shelf||"").slice(0,40),book_row:String(body.book_row||"").slice(0,40),status:"pending"}]);
+  if(insertError)return res(503,{error:"Could not create borrowing request"});
+  return res(200,{ok:true});
+ }
+
  if(action==="directory"){
   const {data:staffList,error:staffErr}=await admin.from("efips_google_staff_accounts").select("email,teacher_id,role");
   if(staffErr)return res(503,{error:"Staff directory unavailable"});
