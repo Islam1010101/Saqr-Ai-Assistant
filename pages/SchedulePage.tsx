@@ -404,6 +404,62 @@ const SchedulePage: React.FC = () => {
 
 
             <style>{`
+                /* Identity-aligned hero: presentation only. Booking, table, export and printing stay intact. */
+                .schedule-efips-hero{position:relative;isolation:isolate;overflow:hidden;min-height:345px;
+                    border:1px solid rgba(115,218,184,.55);border-radius:clamp(27px,3.5vw,42px);
+                    background:linear-gradient(117deg,#064535 0%,#07674d 55%,#175b58 100%);
+                    box-shadow:0 24px 60px rgba(5,90,70,.22),inset 0 1px 0 rgba(255,255,255,.2);
+                    padding:clamp(22px,3vw,42px);color:#fff;}
+                .schedule-efips-hero:before{content:"";position:absolute;inset:0;pointer-events:none;
+                    background:radial-gradient(circle at 80% 28%,rgba(255,222,163,.19),transparent 43%),
+                    radial-gradient(circle at 9% 88%,rgba(89,236,210,.14),transparent 49%),
+                    repeating-linear-gradient(135deg,transparent 0 58px,rgba(255,255,255,.035) 59px 60px,transparent 61px 120px);}
+                .schedule-efips-hero:after{content:"";position:absolute;inset-inline:0;top:0;height:6px;pointer-events:none;
+                    background:linear-gradient(90deg,#e4313c 0% 25%,#0e9461 25% 50%,#fff 50% 75%,#152327 75% 100%);}
+                .schedule-efips-hero-layout{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1fr) minmax(305px,.83fr);
+                    align-items:center;gap:clamp(20px,3vw,42px);min-width:0;}
+                .schedule-efips-hero-copy{position:relative;z-index:3;}
+                .schedule-efips-kicker{padding:9px 15px;border:1px solid rgba(255,222,165,.5);
+                    border-radius:999px;background:rgba(255,255,255,.12);color:#ffedc9;font-size:12px;
+                    font-weight:900;box-shadow:0 8px 22px rgba(0,33,25,.14);backdrop-filter:blur(8px);}
+                .schedule-efips-kicker>span:first-child{background:#f1bd69;}
+                .schedule-efips-heading{font-size:clamp(32px,4vw,58px);color:#fff!important;
+                    -webkit-text-fill-color:#fff;text-shadow:0 7px 25px rgba(0,33,29,.27);text-wrap:balance;}
+                .schedule-efips-description{color:rgba(239,255,247,.94);font-size:clamp(13px,1.25vw,17px);line-height:1.9;}
+                .schedule-efips-art-area{display:flex;flex-direction:column;gap:15px;align-items:center;justify-content:center;min-width:0;}
+                .schedule-efips-portrait{width:min(100%,370px);height:clamp(250px,26vw,360px);max-width:100%;}
+                .schedule-efips-hero .schedule-saqr-image{filter:drop-shadow(0 21px 24px rgba(0,25,23,.54));}
+                .schedule-efips-hero .schedule-saqr-halo{background:radial-gradient(circle,rgba(247,213,151,.25),rgba(88,246,210,.16) 52%,transparent 72%);}
+                .schedule-efips-hero .schedule-saqr-ring{border-color:rgba(228,249,233,.59);}
+                .schedule-efips-hero .schedule-saqr-ring-second{border-color:rgba(249,211,142,.6);}
+                .schedule-efips-actions{position:relative;z-index:5;max-width:440px;min-width:0;}
+                .schedule-efips-action{border:1px solid rgba(255,255,255,.28);box-shadow:0 10px 22px rgba(0,24,23,.19);transition:transform .2s,background-color .2s,box-shadow .2s;}
+                .schedule-efips-action:hover{transform:translateY(-3px);box-shadow:0 14px 27px rgba(0,24,23,.29);}
+                .schedule-efips-action-primary{background:#fff;color:#075b49;}
+                .schedule-efips-action-primary:hover{background:#e9fff4;}
+                .schedule-efips-action-secondary{background:rgba(8,48,42,.64);color:#fff;border-color:rgba(255,255,255,.4);}
+                .schedule-efips-action-secondary:hover{background:#063e34;}
+                .schedule-efips-hero .schedule-saqr-decoration{z-index:0;}
+                .schedule-efips-hero .schedule-saqr-decoration .schedule-saqr-ring{display:none;}
+                @media(max-width:1090px){.schedule-efips-hero-layout{grid-template-columns:minmax(0,1fr) minmax(235px,.75fr);}
+                    .schedule-efips-portrait{height:260px;width:min(100%,285px)}.schedule-efips-actions{grid-template-columns:1fr;max-width:290px;}}
+                @media(max-width:730px){.schedule-efips-hero{padding:24px 17px 20px;min-height:0;border-radius:28px;}
+                    .schedule-efips-hero-layout{grid-template-columns:1fr;gap:10px;}
+                    .schedule-efips-hero-copy{text-align:center;}
+                    .schedule-efips-heading{font-size:clamp(29px,7vw,42px);}
+                    .schedule-efips-description{font-size:13px;max-width:490px;}
+                    .schedule-efips-art-area{gap:9px;}
+                    .schedule-efips-portrait{height:clamp(215px,58vw,290px);width:min(100%,290px);}
+                    .schedule-efips-actions{grid-template-columns:repeat(2,minmax(0,1fr));max-width:100%;width:100%;}
+                    .schedule-efips-action{min-height:51px;font-size:12px;padding:10px 8px;line-height:1.5;}
+                }
+                @media(max-width:400px){.schedule-efips-hero{padding-inline:13px;}
+                    .schedule-efips-portrait{height:205px;width:225px;}
+                    .schedule-efips-actions{grid-template-columns:1fr;}
+                }
+                @media(hover:none){.schedule-efips-action:hover{transform:none;}}
+                @media(prefers-reduced-motion:reduce){.schedule-efips-hero *{animation:none!important;transition:none!important;}}
+
                 .schedule-saqr-layout{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:10px;min-width:0}
                 .schedule-saqr-portrait{position:relative;isolation:isolate;width:min(100%,265px);height:230px;display:grid;place-items:center;pointer-events:none}
                 .schedule-saqr-image{position:relative;z-index:3;width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 15px 22px rgba(3,68,64,.32));animation:schedule-saqr-float 5.2s ease-in-out infinite}
@@ -425,40 +481,40 @@ const SchedulePage: React.FC = () => {
             `}</style>
             <main className="max-w-[1500px] mx-auto print:hidden relative z-10">
                 {/* Page heading and actions */}
-                <section className="mb-5 sm:mb-7 rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl p-4 sm:p-6 lg:p-7 shadow-[0_12px_35px_rgba(15,23,42,0.06)] dark:shadow-black/20">
-                    <div className="relative flex flex-col xl:flex-row xl:items-center xl:justify-between gap-5">
+                <section className="schedule-efips-hero mb-5 sm:mb-7">
+                    <div className="schedule-efips-hero-layout">
                         <div className="schedule-saqr-decoration pointer-events-none absolute inset-0" aria-hidden="true">
                             <span className="schedule-saqr-glow"/><span className="schedule-saqr-ring"/><span className="schedule-saqr-ring schedule-saqr-ring-second"/>
                         </div>
-                        <div className="min-w-0 text-center xl:text-start">
-                            <div className="inline-flex max-w-full items-center justify-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 font-extrabold text-xs border border-emerald-200 dark:border-emerald-900 mb-3">
+                        <div className="schedule-efips-hero-copy min-w-0 text-center xl:text-start">
+                            <div className="schedule-efips-kicker inline-flex max-w-full items-center justify-center gap-2 mb-3">
                                 <span className="inline-block w-2 h-2 rounded-full bg-emerald-500" aria-hidden="true" />
                                 <span className="truncate">{userType === 'admin' ? (isAr ? 'نمط المسؤول النشط' : 'Administrator mode') : getDisplayName()}</span>
                             </div>
-                            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-600 bg-clip-text text-transparent tracking-tight leading-tight py-1">
+                            <h1 className="schedule-efips-heading font-black tracking-tight leading-tight py-1">
                                 {t('pageTitle')}
                             </h1>
-                            <p className="text-sm sm:text-base font-semibold leading-relaxed text-slate-500 dark:text-slate-400 mt-2 max-w-3xl mx-auto xl:mx-0">{t('subtitle')}</p>
+                            <p className="schedule-efips-description text-sm sm:text-base font-semibold leading-relaxed mt-2 max-w-3xl mx-auto xl:mx-0">{t('subtitle')}</p>
                         </div>
-                        <div className="schedule-saqr-layout">
-                            <div className="schedule-saqr-portrait" role="img" aria-label={isAr ? 'شخصية صقر الخاصة بجدول المكتبة' : 'Saqr library schedule character'}>
+                        <div className="schedule-saqr-layout schedule-efips-art-area">
+                            <div className="schedule-saqr-portrait schedule-efips-portrait" role="img" aria-label={isAr ? 'شخصية صقر الخاصة بجدول المكتبة' : 'Saqr library schedule character'}>
                                 <span className="schedule-saqr-halo" aria-hidden="true"/>
                                 <span className="schedule-saqr-spark schedule-saqr-spark-a" aria-hidden="true"/>
                                 <span className="schedule-saqr-spark schedule-saqr-spark-b" aria-hidden="true"/>
                                 <img src="/Saqr%20Schedule.png" alt="" className="schedule-saqr-image" loading="eager" decoding="async" />
                             </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full xl:min-w-[390px]">
+                            <div className="schedule-efips-actions grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
                             <button
                                 type="button"
                                 onClick={handleDownloadMySchedule}
-                                className="min-h-12 w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-4 sm:px-5 py-3 rounded-2xl font-black text-sm border-b-4 border-emerald-800 active:border-b-0 active:translate-y-1 transition-all shadow-lg hover:shadow-emerald-500/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500"
+                                className="schedule-efips-action schedule-efips-action-primary min-h-12 w-full inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-3 rounded-2xl font-black text-sm active:translate-y-1 transition-all shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500"
                             >
                                 <span aria-hidden="true">↓</span><span>{t('myScheduleBtn')}</span>
                             </button>
                             <button
                                 type="button"
                                 onClick={() => window.print()}
-                                className="min-h-12 w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-white dark:to-slate-200 text-white dark:text-slate-900 px-4 sm:px-5 py-3 rounded-2xl font-black text-sm border-b-4 border-slate-950 dark:border-slate-300 active:border-b-0 active:translate-y-1 transition-all shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500"
+                                className="schedule-efips-action schedule-efips-action-secondary min-h-12 w-full inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-3 rounded-2xl font-black text-sm active:translate-y-1 transition-all shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500"
                             >
                                 <span aria-hidden="true">▤</span><span>{t('printBtn')}</span>
                             </button>
