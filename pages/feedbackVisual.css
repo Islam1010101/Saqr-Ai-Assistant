@@ -168,3 +168,36 @@
 @keyframes feedback-v2-halo{0%,100%{scale:.96;opacity:.68}50%{scale:1.05;opacity:1}}
 @keyframes feedback-v2-symbol{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-9px) rotate(6deg)}}
 @keyframes feedback-v2-spark{0%,100%{opacity:.36;scale:.7}50%{opacity:1;scale:1.2}}
+
+
+/* Saqr Teacher — prominent original asset, visual-only enhancement. */
+.efips-feedback-v2 .feedback-hero-central.feedback-saqr-stage{
+ width:min(95%,385px);height:100%;max-height:390px;aspect-ratio:auto;
+ border:0;border-radius:0;background:transparent;box-shadow:none;
+ display:flex;align-items:flex-end;justify-content:center;overflow:visible;
+ animation:none;transform:none;
+}
+.efips-feedback-v2 .feedback-hero-central.feedback-saqr-stage:before,
+.efips-feedback-v2 .feedback-hero-central.feedback-saqr-stage:after{display:none}
+.efips-feedback-v2 .feedback-saqr-teacher{
+ position:relative;z-index:4;width:100%;height:100%;max-height:390px;
+ object-fit:contain;object-position:center bottom;
+ filter:drop-shadow(0 20px 25px rgba(0,38,34,.42));
+ animation:feedback-saqr-float 5.2s ease-in-out infinite;
+}
+.efips-feedback-v2 .feedback-hero-scene{overflow:visible}
+.efips-feedback-v2 .feedback-hero-halo{opacity:.88}
+@keyframes feedback-saqr-float{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(0,-11px,0)}}
+@media(max-width:860px){
+ .efips-feedback-v2 .feedback-hero-central.feedback-saqr-stage{width:min(96%,290px);max-height:260px}
+ .efips-feedback-v2 .feedback-saqr-teacher{max-height:260px}
+}
+@media(max-width:640px){
+ .efips-feedback-v2 .feedback-hero-central.feedback-saqr-stage{width:min(90%,245px);max-height:245px}
+ .efips-feedback-v2 .feedback-saqr-teacher{max-height:245px}
+}
+@media(max-width:370px){
+ .efips-feedback-v2 .feedback-hero-central.feedback-saqr-stage{max-height:160px}
+ .efips-feedback-v2 .feedback-saqr-teacher{max-height:160px}
+}
+@media(prefers-reduced-motion:reduce){.efips-feedback-v2 .feedback-saqr-teacher{animation:none!important}}
