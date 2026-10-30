@@ -404,62 +404,73 @@ const SchedulePage: React.FC = () => {
 
 
             <style>{`
-                /* Identity-aligned hero: presentation only. Booking, table, export and printing stay intact. */
-                .schedule-efips-hero{position:relative;isolation:isolate;overflow:hidden;min-height:345px;
-                    border:1px solid rgba(115,218,184,.55);border-radius:clamp(27px,3.5vw,42px);
-                    background:linear-gradient(117deg,#064535 0%,#07674d 55%,#175b58 100%);
-                    box-shadow:0 24px 60px rgba(5,90,70,.22),inset 0 1px 0 rgba(255,255,255,.2);
-                    padding:clamp(22px,3vw,42px);color:#fff;}
-                .schedule-efips-hero:before{content:"";position:absolute;inset:0;pointer-events:none;
-                    background:radial-gradient(circle at 80% 28%,rgba(255,222,163,.19),transparent 43%),
-                    radial-gradient(circle at 9% 88%,rgba(89,236,210,.14),transparent 49%),
-                    repeating-linear-gradient(135deg,transparent 0 58px,rgba(255,255,255,.035) 59px 60px,transparent 61px 120px);}
-                .schedule-efips-hero:after{content:"";position:absolute;inset-inline:0;top:0;height:6px;pointer-events:none;
-                    background:linear-gradient(90deg,#e4313c 0% 25%,#0e9461 25% 50%,#fff 50% 75%,#152327 75% 100%);}
-                .schedule-efips-hero-layout{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1fr) minmax(305px,.83fr);
-                    align-items:center;gap:clamp(20px,3vw,42px);min-width:0;}
-                .schedule-efips-hero-copy{position:relative;z-index:3;}
-                .schedule-efips-kicker{padding:9px 15px;border:1px solid rgba(255,222,165,.5);
-                    border-radius:999px;background:rgba(255,255,255,.12);color:#ffedc9;font-size:12px;
-                    font-weight:900;box-shadow:0 8px 22px rgba(0,33,25,.14);backdrop-filter:blur(8px);}
-                .schedule-efips-kicker>span:first-child{background:#f1bd69;}
-                .schedule-efips-heading{font-size:clamp(32px,4vw,58px);color:#fff!important;
-                    -webkit-text-fill-color:#fff;text-shadow:0 7px 25px rgba(0,33,29,.27);text-wrap:balance;}
-                .schedule-efips-description{color:rgba(239,255,247,.94);font-size:clamp(13px,1.25vw,17px);line-height:1.9;}
-                .schedule-efips-art-area{display:flex;flex-direction:column;gap:15px;align-items:center;justify-content:center;min-width:0;}
-                .schedule-efips-portrait{width:min(100%,370px);height:clamp(250px,26vw,360px);max-width:100%;}
-                .schedule-efips-hero .schedule-saqr-image{filter:drop-shadow(0 21px 24px rgba(0,25,23,.54));}
-                .schedule-efips-hero .schedule-saqr-halo{background:radial-gradient(circle,rgba(247,213,151,.25),rgba(88,246,210,.16) 52%,transparent 72%);}
-                .schedule-efips-hero .schedule-saqr-ring{border-color:rgba(228,249,233,.59);}
-                .schedule-efips-hero .schedule-saqr-ring-second{border-color:rgba(249,211,142,.6);}
-                .schedule-efips-actions{position:relative;z-index:5;max-width:440px;min-width:0;}
-                .schedule-efips-action{border:1px solid rgba(255,255,255,.28);box-shadow:0 10px 22px rgba(0,24,23,.19);transition:transform .2s,background-color .2s,box-shadow .2s;}
-                .schedule-efips-action:hover{transform:translateY(-3px);box-shadow:0 14px 27px rgba(0,24,23,.29);}
-                .schedule-efips-action-primary{background:#fff;color:#075b49;}
+                /* Feedback-page visual language; scoped to header only. */
+                @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
+                .schedule-efips-hero,.schedule-efips-hero *{font-family:'Cairo',sans-serif}
+                .schedule-efips-hero{position:relative;isolation:isolate;overflow:hidden;min-height:445px;width:100%;
+                    border:1px solid rgba(108,212,180,.58);border-radius:clamp(26px,4vw,40px);
+                    background:linear-gradient(115deg,#0b574b 0%,#11786d 52%,#176985 100%);
+                    box-shadow:0 23px 65px rgba(12,91,76,.23);padding:clamp(23px,3.6vw,48px);color:#fff;}
+                .schedule-efips-hero:before{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+                    background:radial-gradient(circle at 83% 24%,rgba(255,215,155,.22),transparent 48%),
+                    radial-gradient(circle at 5% 92%,rgba(112,236,220,.18),transparent 47%),
+                    repeating-linear-gradient(130deg,transparent 0 52px,rgba(255,255,255,.035) 53px 54px,transparent 55px 108px);}
+                .schedule-efips-hero:after{content:"";position:absolute;inset:0 0 auto;height:5px;pointer-events:none;
+                    background:linear-gradient(90deg,#0fa989,#79d9d2,#f2c87a);}
+                .schedule-efips-hero-layout{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(300px,.9fr);align-items:center;gap:clamp(14px,3vw,42px);}
+                .schedule-efips-hero-copy{min-width:0;position:relative;z-index:3;animation:schedule-header-enter .72s ease-out both;}
+                .schedule-efips-kicker{display:inline-flex;gap:8px;align-items:center;padding:9px 15px;border:1px solid rgba(255,222,172,.47);border-radius:999px;background:rgba(255,255,255,.12);color:#ffe7bd;font-size:clamp(10px,1.15vw,13px);font-weight:900;}
+                .schedule-efips-heading{font-size:clamp(34px,5vw,65px);line-height:1.35;font-weight:900;letter-spacing:-.035em;color:#fff!important;-webkit-text-fill-color:#fff!important;text-shadow:0 9px 28px rgba(2,42,40,.43);margin-top:clamp(14px,2vw,24px);}
+                .schedule-efips-description{max-width:570px;margin-top:17px;font-size:clamp(13px,1.4vw,17px);line-height:2;font-weight:700;color:#e4fcf3;}
+                .schedule-header-rule{display:flex;gap:7px;margin-top:18px;align-items:center;}
+                .schedule-header-rule span{height:5px;border-radius:20px;box-shadow:0 2px 9px rgba(255,255,255,.12);}
+                .schedule-header-rule span:nth-child(1){width:57px;background:#d4f8e8;}
+                .schedule-header-rule span:nth-child(2){width:32px;background:#f1c878;}
+                .schedule-header-rule span:nth-child(3){width:17px;background:#83dbee;}
+                .schedule-efips-art-area{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;min-width:0;}
+                .schedule-efips-portrait{width:100%;max-width:450px;height:clamp(300px,31vw,420px);min-height:0;position:relative;isolation:isolate;display:grid;place-items:center;}
+                .schedule-efips-hero .schedule-saqr-image{width:100%;height:100%;position:relative;z-index:3;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 22px 26px rgba(0,28,29,.58));animation:schedule-header-saqr-float 5.5s ease-in-out infinite;}
+                .schedule-efips-hero .schedule-saqr-halo{width:min(94%,360px);background:radial-gradient(circle,rgba(255,252,225,.25) 0%,rgba(89,228,209,.24) 56%,transparent 77%);filter:blur(11px);animation:schedule-header-halo 5.4s ease-in-out infinite;}
+                .schedule-efips-hero .schedule-saqr-ring{width:min(95%,388px);border:1px dashed rgba(226,255,238,.51);animation:schedule-saqr-spin 36s linear infinite;}
+                .schedule-efips-hero .schedule-saqr-ring-second{width:min(75%,305px);border:1px solid rgba(255,219,147,.42);border-top-color:rgba(255,220,157,.87);border-bottom-color:rgba(141,236,233,.83);animation-direction:reverse;animation-duration:28s;}
+                .schedule-saqr-symbol{position:absolute;z-index:4;display:grid;place-items:center;width:clamp(44px,5vw,60px);aspect-ratio:1;border-radius:18px;background:rgba(249,255,249,.94);border:1px solid rgba(255,255,255,.8);box-shadow:0 10px 26px rgba(0,45,46,.25);color:#0b8973;animation:schedule-header-symbol 5s ease-in-out infinite;}
+                .schedule-saqr-symbol svg{width:55%;height:55%;}
+                .schedule-saqr-symbol--calendar{top:9%;inset-inline-start:4%;}
+                .schedule-saqr-symbol--clock{top:21%;inset-inline-end:2%;color:#cc8b34;animation-delay:-1.5s;}
+                .schedule-saqr-symbol--book{bottom:14%;inset-inline-start:5%;color:#1d94ae;animation-delay:-3.1s;}
+                .schedule-saqr-platform{position:absolute;z-index:1;bottom:4%;width:70%;height:22px;border-radius:50%;background:#002c3070;filter:blur(17px);}
+                .schedule-efips-actions{position:relative;z-index:5;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;width:100%;max-width:490px;margin-top:12px;}
+                .schedule-efips-action{min-height:49px;border:1px solid #ffffff71;box-shadow:0 7px 20px #063e3e55;font-size:12px;transition:transform .24s,box-shadow .24s;}
+                .schedule-efips-action:hover{transform:translateY(-3px);box-shadow:0 12px 26px #063e3e70;}
+                .schedule-efips-action-primary{color:#075b49;background:#fff;}
                 .schedule-efips-action-primary:hover{background:#e9fff4;}
-                .schedule-efips-action-secondary{background:rgba(8,48,42,.64);color:#fff;border-color:rgba(255,255,255,.4);}
-                .schedule-efips-action-secondary:hover{background:#063e34;}
-                .schedule-efips-hero .schedule-saqr-decoration{z-index:0;}
-                .schedule-efips-hero .schedule-saqr-decoration .schedule-saqr-ring{display:none;}
-                @media(max-width:1090px){.schedule-efips-hero-layout{grid-template-columns:minmax(0,1fr) minmax(235px,.75fr);}
-                    .schedule-efips-portrait{height:260px;width:min(100%,285px)}.schedule-efips-actions{grid-template-columns:1fr;max-width:290px;}}
-                @media(max-width:730px){.schedule-efips-hero{padding:24px 17px 20px;min-height:0;border-radius:28px;}
+                .schedule-efips-action-secondary{color:#fff;background:#083f42bb;}
+                .schedule-efips-action-secondary:hover{background:#063d38;}
+                .schedule-efips-hero .schedule-saqr-decoration{z-index:0;display:none;}
+                @media(max-width:1100px){.schedule-efips-hero-layout{grid-template-columns:minmax(0,1fr) minmax(240px,.85fr);gap:12px;}
+                    .schedule-efips-heading{font-size:clamp(32px,4.5vw,53px);}
+                    .schedule-efips-portrait{height:300px;}
+                    .schedule-efips-actions{grid-template-columns:1fr;max-width:285px;}
+                }
+                @media(max-width:730px){.schedule-efips-hero{padding:26px 19px 21px;min-height:0;}
                     .schedule-efips-hero-layout{grid-template-columns:1fr;gap:10px;}
                     .schedule-efips-hero-copy{text-align:center;}
-                    .schedule-efips-heading{font-size:clamp(29px,7vw,42px);}
-                    .schedule-efips-description{font-size:13px;max-width:490px;}
-                    .schedule-efips-art-area{gap:9px;}
-                    .schedule-efips-portrait{height:clamp(215px,58vw,290px);width:min(100%,290px);}
-                    .schedule-efips-actions{grid-template-columns:repeat(2,minmax(0,1fr));max-width:100%;width:100%;}
-                    .schedule-efips-action{min-height:51px;font-size:12px;padding:10px 8px;line-height:1.5;}
+                    .schedule-efips-kicker{font-size:11px;}
+                    .schedule-efips-heading{font-size:clamp(32px,8vw,46px);margin-top:13px;}
+                    .schedule-header-rule{justify-content:center;}
+                    .schedule-efips-description{margin:16px auto 0;font-size:13px;line-height:1.85;}
+                    .schedule-efips-portrait{height:clamp(250px,65vw,335px);max-width:340px;}
+                    .schedule-efips-actions{grid-template-columns:repeat(2,minmax(0,1fr));max-width:100%;margin-top:2px;}
+                    .schedule-efips-action{font-size:11px;padding:10px;line-height:1.5;}
                 }
-                @media(max-width:400px){.schedule-efips-hero{padding-inline:13px;}
-                    .schedule-efips-portrait{height:205px;width:225px;}
-                    .schedule-efips-actions{grid-template-columns:1fr;}
-                }
+                @media(max-width:380px){.schedule-efips-hero{padding-inline:13px;}.schedule-efips-portrait{height:230px;}
+                    .schedule-efips-actions{grid-template-columns:1fr;}}
                 @media(hover:none){.schedule-efips-action:hover{transform:none;}}
                 @media(prefers-reduced-motion:reduce){.schedule-efips-hero *{animation:none!important;transition:none!important;}}
-
+                @keyframes schedule-header-enter{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+                @keyframes schedule-header-saqr-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-13px)}}
+                @keyframes schedule-header-halo{0%,100%{opacity:.6;transform:scale(.94)}50%{opacity:1;transform:scale(1.05)}}
+                @keyframes schedule-header-symbol{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-9px) rotate(5deg)}}
                 .schedule-saqr-layout{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:10px;min-width:0}
                 .schedule-saqr-portrait{position:relative;isolation:isolate;width:min(100%,265px);height:230px;display:grid;place-items:center;pointer-events:none}
                 .schedule-saqr-image{position:relative;z-index:3;width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 15px 22px rgba(3,68,64,.32));animation:schedule-saqr-float 5.2s ease-in-out infinite}
@@ -495,12 +506,19 @@ const SchedulePage: React.FC = () => {
                                 {t('pageTitle')}
                             </h1>
                             <p className="schedule-efips-description text-sm sm:text-base font-semibold leading-relaxed mt-2 max-w-3xl mx-auto xl:mx-0">{t('subtitle')}</p>
+                            <div className="schedule-header-rule" aria-hidden="true"><span/><span/><span/></div>
                         </div>
                         <div className="schedule-saqr-layout schedule-efips-art-area">
                             <div className="schedule-saqr-portrait schedule-efips-portrait" role="img" aria-label={isAr ? 'شخصية صقر الخاصة بجدول المكتبة' : 'Saqr library schedule character'}>
                                 <span className="schedule-saqr-halo" aria-hidden="true"/>
                                 <span className="schedule-saqr-spark schedule-saqr-spark-a" aria-hidden="true"/>
                                 <span className="schedule-saqr-spark schedule-saqr-spark-b" aria-hidden="true"/>
+                                <span className="schedule-saqr-platform" aria-hidden="true"/>
+                                <span className="schedule-saqr-ring schedule-saqr-ring-second" aria-hidden="true"/>
+                                <span className="schedule-saqr-ring" aria-hidden="true"/>
+                                <span className="schedule-saqr-symbol schedule-saqr-symbol--calendar" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 2v5M16 2v5M3 10h18M8 15h8"/></svg></span>
+                                <span className="schedule-saqr-symbol schedule-saqr-symbol--clock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/></svg></span>
+                                <span className="schedule-saqr-symbol schedule-saqr-symbol--book" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 5C8 3 5 3 2 5v14c4-2 7-1 10 1 3-2 6-3 10-1V5c-3-2-6-2-10 0zm0 0v15"/></svg></span>
                                 <img src="/Saqr%20Schedule.png" alt="" className="schedule-saqr-image" loading="eager" decoding="async" />
                             </div>
                             <div className="schedule-efips-actions grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
