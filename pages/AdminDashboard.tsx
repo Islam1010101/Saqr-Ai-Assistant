@@ -165,6 +165,9 @@ const AdminDashboard: React.FC = () => {
     const [digitalBookReadStatsAvailable, setDigitalBookReadStatsAvailable] = useState<boolean | null>(null);
     const [studentsList, setStudentsList] = useState<any[]>([]);
     const [staffEmailDirectory, setStaffEmailDirectory] = useState<Record<string,string>>({});
+    const [staffRoleDirectory, setStaffRoleDirectory] = useState<Record<string,string>>({});
+    const [accountDisabled, setAccountDisabled] = useState<Record<string,boolean>>({});
+    const [accessBusy, setAccessBusy] = useState('');
     const [teachersList, setTeachersList] = useState<any[]>([]);
     const [borrowingsList, setBorrowingsList] = useState<any[]>([]);
     const [pendingRequestsList, setPendingRequestsList] = useState<any[]>([]);
@@ -345,6 +348,8 @@ const AdminDashboard: React.FC = () => {
                 if (directory?.ok && Array.isArray(directory.staff)) {
                     const mapping = Object.fromEntries(directory.staff.map((item: any) => [String(item.teacher_id).toLowerCase(), String(item.email)]));
                     setStaffEmailDirectory(mapping);
+                    setStaffRoleDirectory(Object.fromEntries(directory.staff.map((item: any) => [String(item.email).toLowerCase(), String(item.role)])));
+                    setAccountDisabled(Object.fromEntries((directory.controls || []).map((item: any) => [String(item.email).toLowerCase(), Boolean(item.disabled_at)])));
                     allTeachers = allTeachers.map(t => ({ ...t, email: mapping[String(t.teacher_id).toLowerCase()] || '' }));
                 }
             }
@@ -427,6 +432,35 @@ const AdminDashboard: React.FC = () => {
 
     // Never approve a borrowing or select the recipient from client-side user data.
     // A verified admin Google session is required by the server.
+    // Soft account removal keeps lending history, points and Saqr context intact.
+    const handleAccountAccess = async (item: any, change: 'disable' | 'enable' | 'role', role?: 'teacher' | 'admin') => {
+        const email = String(activeTab === 'students'
+            ? (item.student_id ? item.student_id + '@falcon-school.com' : '')
+            : (item.email || '')).trim().toLowerCase();
+        if (!email) { setBorrowingsError(isAr ? 'لا يوجد بريد مدرسي معتمد لهذا المستخدم.' : 'No approved school email for this user.'); return; }
+        const label = String(isAr ? (item.name_ar || item.name_en) : (item.name_en || item.name_ar));
+        const message = change === 'disable'
+            ? (isAr ? `إيقاف دخول ${label}؟ سيتم الاحتفاظ بسجلاته واستعاراته.` : `Disable access for ${label}? Their borrowing history will remain.`)
+            : change === 'role' ? (isAr ? `تغيير صلاحية ${label} إلى ${role === 'admin' ? 'مدير النظام' : 'معلم'}؟` : `Change ${label}'s access to ${role}?`)
+            : (isAr ? `إعادة تفعيل دخول ${label}؟` : `Restore access for ${label}?`);
+        if (!window.confirm(message)) return;
+        setAccessBusy(email); setBorrowingsError(''); setBorrowingsNotice('');
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.access_token) throw new Error(isAr ? 'يرجى إعادة تسجيل الدخول بحساب الأدمن.' : 'Admin Google sign-in required.');
+            const { data, error } = await supabase.functions.invoke('admin-verified-library', {
+                body: { action: 'access', email, change, role },
+                headers: { Authorization: 'Bearer ' + session.access_token }
+            });
+            if (error || !data?.ok) throw new Error(data?.error || (isAr ? 'تعذر تعديل الصلاحية.' : 'Could not update access.'));
+            if (change === 'role') setStaffRoleDirectory(prev => ({ ...prev, [email]: String(role) }));
+            else setAccountDisabled(prev => ({ ...prev, [email]: change === 'disable' }));
+            setBorrowingsNotice(isAr ? 'تم تحديث صلاحيات الدخول دون حذف بيانات المستخدم.' : 'Account access updated without deleting user history.');
+        } catch (error) {
+            setBorrowingsError(error instanceof Error ? error.message : String(error));
+        } finally { setAccessBusy(''); }
+    };
+
     const handleInstantApprove = async (item: any) => {
         setProcessingRowId(item.id);
         setBorrowingsError('');
@@ -849,7 +883,29 @@ const AdminDashboard: React.FC = () => {
                         {activeTab === 'borrowings' && <td className="p-3.5 text-xs md:text-sm font-bold text-amber-600 dark:text-amber-400">{item.return_date || '-'}</td>}
                         {activeTab === 'pending' && <td className="p-3.5 text-xs md:text-sm text-slate-500">{item.borrow_date ? String(item.borrow_date).slice(0, 10) : (item.created_at ? new Date(item.created_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US') : '-')}</td>}
                         {activeTab === 'reports' && <td className="p-3.5 font-bold text-xs md:text-sm text-slate-800 dark:text-slate-100">{item.lesson_topic}</td>}{activeTab === 'reports' && <td className="p-3.5 text-center font-black text-xs md:text-sm text-indigo-600 dark:text-indigo-400">{item.plan_type}</td>}{activeTab === 'reports' && <td className="p-3.5 text-xs md:text-sm text-slate-500">{item.created_at ? new Date(item.created_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US') : '-'}</td>}
-                        {activeTab !== 'reports' && <td className="p-3.5"><div className="flex flex-wrap items-center justify-center gap-2">{activeTab === 'borrowings' ? <button type="button" disabled={processingRowId === item.id} onClick={() => void handleReturnBook(item.id)} className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white rounded-xl font-bold text-xs shadow-sm transition-all flex items-center gap-1"><OutlineIcon name="return" className="h-3.5 w-3.5" />{isAr ? 'إرجاع الكتاب' : 'Return Book'}</button> : activeTab === 'pending' ? <><button type="button" disabled={processingRowId === item.id} onClick={() => void handleInstantApprove(item)} className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white rounded-xl font-bold text-xs shadow-sm transition-all flex items-center gap-1"><OutlineIcon name="check" className="h-3.5 w-3.5" />{processingRowId === item.id ? (isAr ? 'جاري التأكيد...' : 'Approving...') : t('approveBtn')}</button><button type="button" disabled={processingRowId === item.id} onClick={() => void handleRejectRequest(item.id)} className="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 disabled:opacity-50 text-white rounded-xl font-bold text-xs shadow-sm transition-all flex items-center gap-1"><OutlineIcon name="x" className="h-3.5 w-3.5" />{t('rejectBtn')}</button></> : <button type="button" onClick={() => { setSelectedItem(item); setFormData({ ...emptyForm(), student_id: item.student_id || '', teacher_id: item.teacher_id || '', name_ar: item.name_ar || '', name_en: item.name_en || '', grade: item.grade || '', points: item.points || 0 }); setModalMode(activeTab === 'students' ? 'editStudent' : 'editTeacher'); }} className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs shadow-sm transition-all">{t('editIdBtn')}</button>}</div></td>}
+                        {activeTab !== 'reports' && <td className="p-3.5"><div className="flex flex-wrap items-center justify-center gap-2">{activeTab === 'borrowings' ? <button type="button" disabled={processingRowId === item.id} onClick={() => void handleReturnBook(item.id)} className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white rounded-xl font-bold text-xs shadow-sm transition-all flex items-center gap-1"><OutlineIcon name="return" className="h-3.5 w-3.5" />{isAr ? 'إرجاع الكتاب' : 'Return Book'}</button> : activeTab === 'pending' ? <><button type="button" disabled={processingRowId === item.id} onClick={() => void handleInstantApprove(item)} className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white rounded-xl font-bold text-xs shadow-sm transition-all flex items-center gap-1"><OutlineIcon name="check" className="h-3.5 w-3.5" />{processingRowId === item.id ? (isAr ? 'جاري التأكيد...' : 'Approving...') : t('approveBtn')}</button><button type="button" disabled={processingRowId === item.id} onClick={() => void handleRejectRequest(item.id)} className="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 disabled:opacity-50 text-white rounded-xl font-bold text-xs shadow-sm transition-all flex items-center gap-1"><OutlineIcon name="x" className="h-3.5 w-3.5" />{t('rejectBtn')}</button></> : <>
+                          <button type="button" onClick={() => { setSelectedItem(item); setFormData({ ...emptyForm(), student_id: item.student_id || '', teacher_id: item.teacher_id || '', name_ar: item.name_ar || '', name_en: item.name_en || '', grade: item.grade || '', points: item.points || 0 }); setModalMode(activeTab === 'students' ? 'editStudent' : 'editTeacher'); }} className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs shadow-sm transition-all">{t('editIdBtn')}</button>
+                          {(() => {
+                              const email = activeTab === 'students'
+                                  ? (item.student_id ? String(item.student_id) + '@falcon-school.com' : '')
+                                  : String(item.email || '');
+                              const disabled = Boolean(accountDisabled[email.toLowerCase()]);
+                              const busy = accessBusy === email.toLowerCase();
+                              return <div className="flex flex-wrap gap-1.5 justify-center items-center">
+                                  {activeTab === 'teachers' && email && <select aria-label={isAr ? 'صلاحية الحساب' : 'Account role'} disabled={busy || email.toLowerCase() === 'islam.ahmed@falcon-school.com'}
+                                      value={staffRoleDirectory[email.toLowerCase()] || 'teacher'}
+                                      onChange={event => void handleAccountAccess(item, 'role', event.target.value as 'teacher' | 'admin')}
+                                      className="rounded-lg text-xs font-bold border border-slate-300 bg-white dark:bg-slate-800 dark:text-white p-1.5">
+                                      <option value="teacher">{isAr ? 'معلم' : 'Teacher'}</option>
+                                      <option value="admin">{isAr ? 'مدير النظام' : 'Admin'}</option>
+                                  </select>}
+                                  {email && <button type="button" disabled={busy || email.toLowerCase() === 'islam.ahmed@falcon-school.com'} onClick={() => void handleAccountAccess(item, disabled ? 'enable' : 'disable')}
+                                      className={`rounded-lg text-xs font-bold text-white px-2.5 py-1.5 disabled:opacity-50 ${disabled ? 'bg-emerald-600' : 'bg-rose-600'}`}>
+                                      {disabled ? (isAr ? 'استعادة الحساب' : 'Restore') : (isAr ? 'تعطيل / حذف الدخول' : 'Disable account')}
+                                  </button>}
+                              </div>;
+                          })()}
+                        </>}</div></td>}
                     </tr>) : <tr><td colSpan={7} className="p-8 text-center text-slate-400 font-bold text-sm">{t('noResults')}{(activeTab === 'pending' && borrowingsError) ? <div className="mt-2 text-xs font-normal">{isAr ? 'راجع رسالة الخطأ أعلاه أو تحقق من صلاحيات قراءة جدول borrowings والدالة send-borrow-email.' : 'Check the error above and verify read access to borrowings and send-borrow-email.'}</div> : null}</td></tr>}</tbody>
                 </table></div></section>
             </main>
