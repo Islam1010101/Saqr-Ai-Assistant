@@ -307,6 +307,7 @@ const AdminDashboard: React.FC = () => {
     const fetchRealDashboardData = useCallback(async (showLoading = true) => {
         if (showLoading) setIsLoading(true);
         try {
+            // Independent optional metrics must never hide the student/teacher directory.
             const [studentCountResult, teacherCountResult, loginResult, reportResult] = await Promise.all([
                 supabase.from('students').select('*', { count: 'exact', head: true }),
                 supabase.from('teachers').select('*', { count: 'exact', head: true }),
@@ -316,6 +317,7 @@ const AdminDashboard: React.FC = () => {
             if (loginResult.error) console.warn('Could not read login logs:', loginResult.error);
             const safeLoginLogs = loginResult.data || [];
             setLoginActivity(safeLoginLogs);
+            setLessonReportsList(reportResult.data || []);
 
             let allStudents: any[] = [];
             let start = 0;
@@ -339,12 +341,14 @@ const AdminDashboard: React.FC = () => {
                 start += pageSize;
             }
             setStudentsList(allStudents);
+            setTeachersList(allTeachers);
             const { data: { session } } = await supabase.auth.getSession();
             if (session?.access_token) {
-                const { data: directory } = await supabase.functions.invoke('admin-verified-library', {
+                const { data: directory, error: directoryError } = await supabase.functions.invoke('admin-verified-library', {
                     body: { action: 'directory' },
                     headers: { Authorization: 'Bearer ' + session.access_token }
                 });
+                if (directoryError) console.warn('School staff email directory unavailable:', directoryError);
                 if (directory?.ok && Array.isArray(directory.staff)) {
                     const mapping = Object.fromEntries(directory.staff.map((item: any) => [String(item.teacher_id).toLowerCase(), String(item.email)]));
                     setStaffEmailDirectory(mapping);
@@ -360,8 +364,8 @@ const AdminDashboard: React.FC = () => {
             const studentLogins = new Set(safeLoginLogs.filter((l: any) => String(l.user_type || '').toLowerCase() === 'student').map((l: any) => l.user_id)).size;
             const teacherLogins = new Set(safeLoginLogs.filter((l: any) => ['teacher', 'admin'].includes(String(l.user_type || '').toLowerCase())).map((l: any) => l.user_id)).size;
             setStats({ students: studentCountResult.count ?? allStudents.length, teachers: teacherCountResult.count ?? allTeachers.length, studentLogins, teacherLogins });
-            await fetchDigitalBookReadStats();
-            await refreshBorrowingsOnly(allStudents, allTeachers, true, true);
+            void fetchDigitalBookReadStats();
+            void refreshBorrowingsOnly(allStudents, allTeachers, true, true);
         } catch (err) {
             console.error('Error fetching admin dashboard data:', err);
             const message = err instanceof Error ? err.message : String(err);
