@@ -164,6 +164,7 @@ const AdminDashboard: React.FC = () => {
     const [digitalBookReadStats, setDigitalBookReadStats] = useState<any[]>([]);
     const [digitalBookReadStatsAvailable, setDigitalBookReadStatsAvailable] = useState<boolean | null>(null);
     const [studentsList, setStudentsList] = useState<any[]>([]);
+    const [staffEmailDirectory, setStaffEmailDirectory] = useState<Record<string,string>>({});
     const [teachersList, setTeachersList] = useState<any[]>([]);
     const [borrowingsList, setBorrowingsList] = useState<any[]>([]);
     const [pendingRequestsList, setPendingRequestsList] = useState<any[]>([]);
@@ -189,10 +190,12 @@ const AdminDashboard: React.FC = () => {
             const tc = teacherMap.get(uid);
             const resolvedName = rec.user_name || (st ? (st.name_ar || st.name_en) : tc ? (tc.name_ar || tc.name_en) : '');
             const resolvedGrade = rec.user_grade || (st ? st.grade : (tc ? (isAr ? 'معلم' : 'Teacher') : ''));
-            const resolvedEmail = rec.user_email || (rec.user_type === 'student' && rec.user_id ? `${String(rec.user_id).trim()}@falcon-school.com` : '');
+            const resolvedEmail = rec.user_type === 'student' && /^[0-9]{6,7}$/.test(String(rec.user_id ?? ''))
+                ? `${String(rec.user_id).trim()}@falcon-school.com`
+                : staffEmailDirectory[uid] || rec.user_email || '';
             return { ...rec, user_name: resolvedName, user_grade: resolvedGrade, user_email: resolvedEmail };
         });
-    }, [isAr]);
+    }, [isAr, staffEmailDirectory]);
 
     const fetchDigitalBookReadStats = useCallback(async () => {
         try {
@@ -333,6 +336,18 @@ const AdminDashboard: React.FC = () => {
                 start += pageSize;
             }
             setStudentsList(allStudents);
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.access_token) {
+                const { data: directory } = await supabase.functions.invoke('admin-verified-library', {
+                    body: { action: 'directory' },
+                    headers: { Authorization: 'Bearer ' + session.access_token }
+                });
+                if (directory?.ok && Array.isArray(directory.staff)) {
+                    const mapping = Object.fromEntries(directory.staff.map((item: any) => [String(item.teacher_id).toLowerCase(), String(item.email)]));
+                    setStaffEmailDirectory(mapping);
+                    allTeachers = allTeachers.map(t => ({ ...t, email: mapping[String(t.teacher_id).toLowerCase()] || '' }));
+                }
+            }
             setTeachersList(allTeachers);
             setLessonReportsList(reportResult.data || []);
             const { data: scheduleRows, error: scheduleError } = await supabase.from('library_schedule').select('id,teacher,subject,grade,user_id');
@@ -410,44 +425,30 @@ const AdminDashboard: React.FC = () => {
         return () => { supabase.removeChannel(channel); };
     }, [isAdmin]);
 
-    const sendBilingualConfirmationEmail = async (borrowingId: string | number) => {
-        const { data, error } = await supabase.functions.invoke('send-borrow-email', {
-            body: { action: 'notify-approved', borrowing_id: borrowingId }
-        });
-        if (error) throw error;
-        if (!data || data.ok !== true || data.emailSent !== true) {
-            throw new Error(data?.error || data?.message || 'Email was not confirmed by Resend');
-        }
-        return data;
-    };
-
+    // Never approve a borrowing or select the recipient from client-side user data.
+    // A verified admin Google session is required by the server.
     const handleInstantApprove = async (item: any) => {
         setProcessingRowId(item.id);
         setBorrowingsError('');
         setBorrowingsNotice('');
         try {
-            const todayStr = new Date().toISOString().split('T')[0];
-            const targetReturnDate = getDefaultReturnDate(15);
-            const cleanEmail = String(item.user_email || (item.user_type === 'student' && item.user_id ? `${String(item.user_id).trim()}@falcon-school.com` : '')).trim();
-            const { error: updateErr } = await supabase.from('borrowings').update({ status: 'active', user_email: cleanEmail, borrow_date: todayStr, return_date: targetReturnDate, approval_email_status: 'pending' }).eq('id', item.id);
-            if (updateErr) throw updateErr;
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.access_token) throw new Error(isAr ? 'يرجى تسجيل دخول الأدمن باستخدام Google مرة أخرى.' : 'Please sign in with the admin Google account again.');
+            const { data, error } = await supabase.functions.invoke('admin-verified-library', {
+                body: { action: 'approve', borrowing_id: item.id },
+                headers: { Authorization: 'Bearer ' + session.access_token }
+            });
+            if (error || !data?.ok) throw new Error(data?.error || (isAr ? 'تعذر اعتماد الاستعارة.' : 'Borrowing approval failed.'));
             setPendingRequestsList(prev => prev.filter(p => String(p.id) !== String(item.id)));
-            setBorrowingsList(prev => [{ ...item, status: 'active', user_email: cleanEmail, borrow_date: todayStr, return_date: targetReturnDate }, ...prev.filter(p => String(p.id) !== String(item.id))]);
-            if (cleanEmail) {
-                try {
-                    await sendBilingualConfirmationEmail(item.id);
-                    const durationDays = calculateDurationDays(todayStr, targetReturnDate);
-                    setBorrowingsNotice(isAr ? `تمت الموافقة على «${item.book_name}» وإرسال البريد الإلكتروني إلى ${cleanEmail} (المدة: ${durationDays} يوماً، والإرجاع: ${targetReturnDate}).` : `Approved “${item.book_name}” and sent email to ${cleanEmail}.`);
-                } catch (emailErr) {
-                    console.error('Email send warning:', emailErr);
-                    setBorrowingsNotice(isAr ? `تمت الموافقة وتفعيل الإعارة حتى ${targetReturnDate}، لكن تعذّر إرسال البريد الآلي.` : `Request approved until ${targetReturnDate}, but email sending failed.`);
-                }
-            } else setBorrowingsNotice(isAr ? `تمت الموافقة على استعارة «${item.book_name}» حتى ${targetReturnDate}. لم يُحدد بريد إلكتروني للإرسال.` : `Approved “${item.book_name}” until ${targetReturnDate}. No email address was available.`);
+            setBorrowingsNotice(data.emailSent
+                ? (isAr ? `تم اعتماد الاستعارة وإرسال التأكيد إلى ${data.email}.` : `Borrowing approved and confirmation sent to ${data.email}.`)
+                : (isAr ? 'تم اعتماد الاستعارة، لكن لم يتم تأكيد إرسال البريد؛ راجع حالة الإرسال.' : 'Borrowing approved, but email delivery was not confirmed.'));
             await refreshBorrowingsOnly(undefined, undefined, true, true);
         } catch (err) {
-            const message = err instanceof Error ? err.message : String(err);
-            setBorrowingsError(message);
-        } finally { setProcessingRowId(null); }
+            setBorrowingsError(err instanceof Error ? err.message : String(err));
+        } finally {
+            setProcessingRowId(null);
+        }
     };
 
     const handleRejectRequest = async (id: string | number) => {
@@ -559,8 +560,8 @@ const AdminDashboard: React.FC = () => {
     const filteredList = useMemo(() => {
         const term = searchQuery.toLowerCase().trim();
         const includesTerm = (value: any) => String(value ?? '').toLowerCase().includes(term);
-        if (activeTab === 'students') return !term ? studentsList : studentsList.filter(st => includesTerm(st.name_ar) || includesTerm(st.name_en) || includesTerm(st.student_id));
-        if (activeTab === 'teachers') return !term ? teachersList : teachersList.filter(tc => includesTerm(tc.name_ar) || includesTerm(tc.name_en) || includesTerm(tc.teacher_id));
+        if (activeTab === 'students') return !term ? studentsList : studentsList.filter(st => includesTerm(st.name_ar) || includesTerm(st.name_en) || includesTerm(st.student_id) || includesTerm(String(st.student_id || '') + '@falcon-school.com'));
+        if (activeTab === 'teachers') return !term ? teachersList : teachersList.filter(tc => includesTerm(tc.name_ar) || includesTerm(tc.name_en) || includesTerm(tc.teacher_id) || includesTerm(tc.email));
         if (activeTab === 'borrowings') return !term ? borrowingsList : borrowingsList.filter(b => includesTerm(b.user_id) || includesTerm(b.book_name) || includesTerm(b.user_email) || includesTerm(b.user_name));
         if (activeTab === 'pending') return !term ? pendingRequestsList : pendingRequestsList.filter(p => includesTerm(p.user_id) || includesTerm(p.book_name) || includesTerm(p.user_email) || includesTerm(p.user_name));
         return !term ? lessonReportsList : lessonReportsList.filter(r => includesTerm(r.teacher_name) || includesTerm(r.lesson_topic) || includesTerm(r.teacher_id));
