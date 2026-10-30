@@ -13,7 +13,6 @@ export default function Login() {
   // Use the shared website language so public pages follow the login choice.
   const { locale: lang, setLocale: setLang } = useLanguage();
   const [loginType, setLoginType] = useState<'student' | 'teacher'>('student');
-  const [studentId, setStudentId] = useState('');
   const [teacherId, setTeacherId] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -87,32 +86,24 @@ export default function Login() {
     handleVideoEnd();
   };
 
-  // دالة تسجيل دخول الطلاب
-  const handleStudentLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!studentId.trim()) return;
-
-    setLoading(true);
+  // Student-only pilot. Existing school ID and teacher/admin logins are unchanged.
+  const handleGoogleStudentLogin = async () => {
     setError('');
-
+    setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('students')
-        .select('*')
-        .eq('student_id', studentId.trim())
-        .single();
-
-      if (error || !data) {
-        setError(lang === 'ar' ? 'رقم الطالب غير صحيح، يرجى المحاولة مرة أخرى.' : 'Invalid Student ID.');
-      } else {
-        localStorage.setItem('user_type', 'student');
-        localStorage.setItem('current_user', JSON.stringify(data));
-        window.location.href = '#/home'; 
-        await supabase.from('login_logs').insert([{ user_id: studentId.trim(), user_type: 'student' }]);
-      }
-    } catch (err) {
-      setError(lang === 'ar' ? 'حدث خطأ في الاتصال بقاعدة البيانات.' : 'Database connection error.');
-    } finally {
+      // Ensure the user explicitly selects a school account on each attempt.
+      await supabase.auth.signOut();
+      const { error: googleError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + '/?efips_google_student=1',
+          scopes: 'openid email profile',
+          queryParams: { prompt: 'select_account' }
+        }
+      });
+      if (googleError) throw googleError;
+    } catch {
+      setError(lang === 'ar' ? 'تعذر بدء تسجيل الدخول بحساب Google المدرسي.' : 'Unable to start school Google sign-in.');
       setLoading(false);
     }
   };
@@ -267,7 +258,7 @@ export default function Login() {
           {/* أزرار التبديل */}
           <div className="flex bg-slate-100 p-1.5 rounded-[1.5rem] mb-8 border border-slate-200">
             <button
-              onClick={() => { setLoginType('student'); setError(''); setStudentId(''); }}
+              onClick={() => { setLoginType('student'); setError(''); }}
               className={`flex-1 py-3 px-2 text-xs sm:text-sm font-black rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 md:gap-2 ${
                 loginType === 'student' 
                 ? 'bg-white text-blue-600 shadow-md border border-slate-200' 
@@ -290,42 +281,37 @@ export default function Login() {
 
           {/* فورم الطلاب */}
           {loginType === 'student' ? (
-            <form onSubmit={handleStudentLogin} className="space-y-5 animate-fade-in">
-              <div className="space-y-2 text-start">
-                <label className="block text-xs md:text-sm font-black text-slate-600 px-1">
-                  {lang === 'ar' ? 'رقم الطالب (Student ID)' : 'Student ID'}
-                </label>
-                <input
-                  type="text"
-                  value={studentId}
-                  onChange={(e) => setStudentId(e.target.value)}
-                  placeholder={lang === 'ar' ? 'أدخل رقمك المكون من 6 أو 7 أرقام' : 'Enter 6 or 7 digits ID'}
-                  className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-200 rounded-[1.5rem] focus:outline-none focus:border-blue-500 focus:bg-white transition-all text-slate-800 placeholder-slate-400 font-mono text-base md:text-lg tracking-widest text-center shadow-inner"
-                  required
-                />
-              </div>
-
+            <div className="space-y-5 animate-fade-in">
               {error && (
-                <div className="bg-rose-50 border-2 border-rose-200 text-rose-600 p-3 rounded-2xl text-xs md:text-sm font-bold text-center animate-shake">
+                <div role="alert" className="bg-rose-50 border-2 border-rose-200 text-rose-600 p-3 rounded-2xl text-xs md:text-sm font-bold text-center animate-shake">
                   {error}
                 </div>
               )}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-4 bg-gradient-to-r from-blue-500 to-sky-500 hover:from-blue-600 hover:to-sky-600 text-white font-black rounded-[1.5rem] transition-all duration-300 shadow-md hover:shadow-blue-500/25 active:scale-[0.98] disabled:opacity-70 text-sm md:text-base border-b-4 border-blue-700 active:border-b-0"
-              >
-                {loading ? (lang === 'ar' ? 'جاري التحقق...' : 'Verifying...') : (lang === 'ar' ? 'دخول للمكتبة' : 'Enter Library')}
+              <p className="text-center text-sm font-bold text-slate-600 leading-relaxed">
+                {lang === 'ar'
+                  ? 'تسجيل دخول الطلاب باستخدام حساب Google المدرسي فقط (@falcon-school.com).'
+                  : 'Students sign in exclusively with their school Google account (@falcon-school.com).'}
+              </p>
+              <button type="button" onClick={() => void handleGoogleStudentLogin()} disabled={loading}
+                className="w-full min-h-14 flex items-center justify-center gap-3 border-2 border-slate-200 hover:border-emerald-300 bg-white hover:bg-slate-50 rounded-[1.5rem] px-4 py-3 text-slate-800 text-sm sm:text-base font-black shadow-sm transition-all disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600">
+                <svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true" className="shrink-0">
+                  <path fill="#EA4335" d="M24 9.5c3.5 0 6.7 1.2 9.2 3.6l6.8-6.8C35.9 2.3 30.2 0 24 0 14.6 0 6.5 5.4 2.6 13.3l7.9 6.1C12.3 13.8 17.7 9.5 24 9.5z"/>
+                  <path fill="#4285F4" d="M46.1 24.5c0-1.6-.2-3.2-.5-4.7H24v8.9h12.4c-.5 2.9-2.1 5.4-4.5 7.1l7.3 5.7c4.3-4 6.9-9.8 6.9-17z"/>
+                  <path fill="#FBBC05" d="M10.5 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.1C.9 16.6 0 20.2 0 24s.9 7.4 2.6 10.7l7.9-6.1z"/>
+                  <path fill="#34A853" d="M24 48c6.5 0 12-2.1 16-6l-7.3-5.7c-2 1.4-4.7 2.2-8.7 2.2-6.3 0-11.7-4.3-13.5-10.2l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/>
+                </svg>
+                {lang === 'ar' ? 'الدخول بحساب Google المدرسي' : 'Sign in with school Google'}
               </button>
-
+              <p className="text-center text-xs font-semibold text-slate-500 leading-relaxed">
+                {lang === 'ar' ? 'سيتم استخدام رقمك المدرسي الموجود في بريد Google للتعرف على سجلك دون تغيير بياناتك.' : 'Your verified school Google email links to your existing student record.'}
+              </p>
               {/* الرابط المطلوب إضافته تحت زر الدخول للمكتبة */}
               <div className="text-center pt-2">
                 <Link to="/about" className="text-xs md:text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline transition-all">
                   {lang === 'ar' ? 'عن مدرسة صقر الإمارات الدولية الخاصة' : 'More About EFIPS'}
                 </Link>
               </div>
-            </form>
+            </div>
           ) : (
             /* فورم المعلمين */
             <form onSubmit={handleTeacherLogin} className="space-y-5 animate-fade-in">
