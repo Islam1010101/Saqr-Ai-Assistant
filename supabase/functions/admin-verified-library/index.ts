@@ -16,7 +16,7 @@ Deno.serve(async(req:Request)=>{
  if(!user.identities?.some(i=>i.provider==="google"&&String(i.identity_data?.email||"").toLowerCase()===email&&i.identity_data?.email_verified===true))return res(403,{error:"Verified Google account required"});
  const admin=createClient(url,secret,{auth:{persistSession:false,autoRefreshToken:false}});
  let body:any;try{body=await req.json()}catch{return res(400,{error:"Invalid request"})}
- const action=String(body.action||"");
+ let action=String(body.action||"");
  const {data:selfControl}=await admin.from("efips_account_access_controls").select("disabled_at").eq("email",email).maybeSingle();
  if(selfControl?.disabled_at)return res(403,{error:"Account disabled"});
  if(action==="request"){
@@ -82,6 +82,26 @@ Deno.serve(async(req:Request)=>{
   }
   return res(400,{error:"Invalid access operation"});
  }
+ if(action==="direct"){
+  const type=String(body.user_type||"");
+  const id=String(body.user_id||"").trim();
+  const book=String(body.book_name||"").trim().slice(0,240);
+  if(!book||!id||!["student","teacher"].includes(type))return res(400,{error:"Invalid direct borrowing"});
+  if(type==="student"){
+    if(!/^[0-9]{6,7}$/.test(id))return res(400,{error:"Invalid student ID"});
+    const {data:st}=await admin.from("students").select("student_id").eq("student_id",id).maybeSingle();
+    if(!st)return res(404,{error:"Student not in roster"});
+  }else{
+    const {data:tc}=await admin.from("efips_google_staff_accounts").select("teacher_id").eq("teacher_id",id).maybeSingle();
+    if(!tc)return res(404,{error:"Teacher has no approved school email"});
+  }
+  const {data:created,error:createError}=await admin.from("borrowings").insert([{
+   user_id:id,user_type:type,book_name:book,status:"pending",approval_email_status:"not_applicable"
+  }]).select("id").single();
+  if(createError||!created)return res(503,{error:"Could not save direct loan"});
+  body.borrowing_id=created.id;
+  action="approve";
+ }
  if(action==="approve"){
   const id=Number(body.borrowing_id);if(!Number.isSafeInteger(id)||id<=0)return res(400,{error:"Invalid borrowing"});
   const {data:loan,error:loanErr}=await admin.from("borrowings").select("*").eq("id",id).maybeSingle();
@@ -96,7 +116,10 @@ Deno.serve(async(req:Request)=>{
    if(!row?.email)return res(404,{error:"Staff email unavailable"});target=row.email;
   }else return res(400,{error:"Unrecognized borrower"});
   const today=new Date().toISOString().slice(0,10);
-  const due=new Date(Date.now()+15*86400000).toISOString().slice(0,10);
+  const requested=String(body.return_date||"").slice(0,10);
+  const candidate=/^\d{4}-\d{2}-\d{2}$/.test(requested)?new Date(requested+"T00:00:00Z"):null;
+  const due=candidate&&Number.isFinite(candidate.getTime())&&candidate.getTime()>Date.now()&&candidate.getTime()<Date.now()+100*86400000
+   ? requested:new Date(Date.now()+15*86400000).toISOString().slice(0,10);
   const {data:updated,error:updateError}=await admin.from("borrowings")
     .update({status:"active",user_email:target,borrow_date:today,return_date:due,approval_email_status:"pending"})
     .eq("id",id).eq("status","pending").select("id").maybeSingle();
