@@ -74,7 +74,7 @@ export default function GoogleStudentReturn() {
 
  return <main dir={lang === 'ar' ? 'rtl' : 'ltr'} className="min-h-[100dvh] bg-white dark:bg-black flex items-center justify-center p-5 font-sans">
    <section role={state === 'checking' ? 'status' : 'alert'} className="w-full max-w-lg rounded-3xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-slate-900 p-7 sm:p-10 text-center shadow-xl">
-    <img src="/school-logo.png" alt="EFIPS" className="h-20 w-20 object-contain mx-auto mb-6"/>
+    <img src="/saqr-full.png" alt={lang === 'ar' ? 'صقر المساعد الذكي' : 'Saqr, the library assistant'} className="h-32 sm:h-40 w-auto max-w-full object-contain mx-auto mb-6 drop-shadow-lg"/>
     <h1 className="font-black text-xl sm:text-2xl text-emerald-800 dark:text-emerald-200">{t.title}</h1>
     <p className="font-semibold text-sm sm:text-base text-slate-700 dark:text-slate-200 leading-8 my-6">{t[state]}</p>
     {state !== 'checking' && <a href="/#/" className="inline-flex min-h-12 justify-center items-center rounded-2xl bg-emerald-700 px-6 py-3 text-white text-sm font-black hover:bg-emerald-800">{t.back}</a>}

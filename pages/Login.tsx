@@ -267,11 +267,11 @@ export default function Login() {
               )}
               <p className="text-center text-sm font-bold text-slate-600 leading-relaxed">
                 {lang === 'ar'
-                  ? 'تسجيل دخول الطلاب باستخدام حساب Google المدرسي فقط (@falcon-school.com).'
-                  : 'Students sign in exclusively with their school Google account (@falcon-school.com).'}
+                  ? 'تسجيل دخول الطلاب باستخدام حساب Google المدرسي فقط.'
+                  : 'Students sign in exclusively with their school Google account.'}
               </p>
               <button type="button" onClick={() => void handleGoogleStudentLogin()} disabled={loading}
-                className="w-full min-h-14 flex items-center justify-center gap-3 border-2 border-slate-200 hover:border-emerald-300 bg-white hover:bg-slate-50 rounded-[1.5rem] px-4 py-3 text-slate-800 text-sm sm:text-base font-black shadow-sm transition-all disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600">
+                className="w-full min-h-14 flex items-center justify-center gap-3 rounded-[1.5rem] bg-gradient-to-r from-indigo-600 to-emerald-600 hover:from-indigo-700 hover:to-emerald-700 px-4 py-4 text-white text-sm md:text-base font-black shadow-lg transition-all disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600">
                 <svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true" className="shrink-0">
                   <path fill="#EA4335" d="M24 9.5c3.5 0 6.7 1.2 9.2 3.6l6.8-6.8C35.9 2.3 30.2 0 24 0 14.6 0 6.5 5.4 2.6 13.3l7.9 6.1C12.3 13.8 17.7 9.5 24 9.5z"/>
                   <path fill="#4285F4" d="M46.1 24.5c0-1.6-.2-3.2-.5-4.7H24v8.9h12.4c-.5 2.9-2.1 5.4-4.5 7.1l7.3 5.7c4.3-4 6.9-9.8 6.9-17z"/>
@@ -280,9 +280,6 @@ export default function Login() {
                 </svg>
                 {lang === 'ar' ? 'الدخول بحساب Google المدرسي' : 'Sign in with school Google'}
               </button>
-              <p className="text-center text-xs font-semibold text-slate-500 leading-relaxed">
-                {lang === 'ar' ? 'سيتم استخدام رقمك المدرسي الموجود في بريد Google للتعرف على سجلك دون تغيير بياناتك.' : 'Your verified school Google email links to your existing student record.'}
-              </p>
               {/* الرابط المطلوب إضافته تحت زر الدخول للمكتبة */}
               <div className="text-center pt-2">
                 <Link to="/about" className="text-xs md:text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline transition-all">
@@ -299,7 +296,6 @@ export default function Login() {
                 className="w-full min-h-14 px-4 py-4 rounded-[1.5rem] bg-gradient-to-r from-indigo-600 to-emerald-600 hover:from-indigo-700 hover:to-emerald-700 text-white font-black text-sm md:text-base shadow-lg disabled:opacity-60">
                 {lang === 'ar' ? 'الدخول بحساب Google المدرسي للمعلمين' : 'Sign in with School Google — Staff'}
               </button>
-              <p className="text-center text-xs font-semibold text-slate-500">{lang === 'ar' ? 'الحسابات التي ليس لها بريد مدرسي معتمد لا يمكنها الدخول.' : 'Accounts without an approved school email cannot sign in.'}</p>
               <div className="text-center pt-2"><Link to="/about" className="text-xs font-bold text-indigo-600 hover:underline">{lang === 'ar' ? 'عن المدرسة' : 'More About EFIPS'}</Link></div>
             </div>
           )}
