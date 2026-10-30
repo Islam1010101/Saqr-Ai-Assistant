@@ -15,10 +15,10 @@ Deno.serve(async(req:Request)=>{
  const email=user.email.toLowerCase().trim();
  if(!user.identities?.some(i=>i.provider==="google"&&String(i.identity_data?.email||"").toLowerCase()===email&&i.identity_data?.email_verified===true))return res(403,{error:"Verified Google account required"});
  const admin=createClient(url,secret,{auth:{persistSession:false,autoRefreshToken:false}});
- const {data:staff}=await admin.from("efips_google_staff_accounts").select("teacher_id,role").eq("email",email).maybeSingle();
- if(staff?.teacher_id!=="HR785"||staff.role!=="admin")return res(403,{error:"Admin required"});
  let body:any;try{body=await req.json()}catch{return res(400,{error:"Invalid request"})}
  const action=String(body.action||"");
+ const {data:selfControl}=await admin.from("efips_account_access_controls").select("disabled_at").eq("email",email).maybeSingle();
+ if(selfControl?.disabled_at)return res(403,{error:"Account disabled"});
  if(action==="request"){
   const book=String(body.book_name||"").trim().slice(0,240);
   if(!book)return res(400,{error:"Book title required"});
@@ -42,10 +42,45 @@ Deno.serve(async(req:Request)=>{
   return res(200,{ok:true});
  }
 
+ const {data:staff}=await admin.from("efips_google_staff_accounts").select("teacher_id,role").eq("email",email).maybeSingle();
+ if(staff?.role!=="admin")return res(403,{error:"Admin required"});
  if(action==="directory"){
   const {data:staffList,error:staffErr}=await admin.from("efips_google_staff_accounts").select("email,teacher_id,role");
   if(staffErr)return res(503,{error:"Staff directory unavailable"});
-  return res(200,{ok:true,staff:staffList});
+  const {data:controls,error:controlsError}=await admin.from("efips_account_access_controls").select("email,disabled_at,login_role");
+  if(controlsError)return res(503,{error:"Account controls unavailable"});
+  return res(200,{ok:true,staff:staffList,controls});
+ }
+ if(action==="access"){
+  const target=String(body.email||"").trim().toLowerCase();
+  if(!/^[^@\s]+@falcon-school\.com$/.test(target))return res(400,{error:"School email required"});
+  if(target===email)return res(403,{error:"Cannot change your own admin access"});
+  const desired=String(body.role||"");
+  const change=String(body.change||"");
+  const {data:targetStaff}=await admin.from("efips_google_staff_accounts").select("email,teacher_id,role").eq("email",target).maybeSingle();
+  const studentId=/^([0-9]{6,7})@falcon-school\.com$/.exec(target)?.[1];
+  let isValidStudent=false;
+  if(studentId){const {data:st}=await admin.from("students").select("student_id").eq("student_id",studentId).maybeSingle();isValidStudent=!!st;}
+  if(!targetStaff&&!isValidStudent)return res(404,{error:"School account not found"});
+  if(change==="role"){
+    // A role change must be backed by a real profile in the target role.
+    // Do not fabricate teacher IDs or student IDs or overwrite existing records.
+    if(targetStaff && (desired==="teacher"||desired==="admin")){
+      const {error:changeError}=await admin.from("efips_google_staff_accounts").update({role:desired}).eq("email",target);
+      if(changeError)return res(503,{error:"Could not change staff role"});
+      return res(200,{ok:true,role:desired});
+    }
+    if(isValidStudent&&desired==="student")return res(200,{ok:true,role:"student"});
+    return res(409,{error:"Target role requires a matching school roster profile; no record was changed"});
+  }
+  if(change==="disable"||change==="enable"){
+    const disabled=change==="disable";
+    const {error:accessError}=await admin.from("efips_account_access_controls")
+      .upsert({email:target,disabled_at:disabled?new Date().toISOString():null,updated_at:new Date().toISOString(),updated_by:email},{onConflict:"email"});
+    if(accessError)return res(503,{error:"Could not update account access"});
+    return res(200,{ok:true,disabled});
+  }
+  return res(400,{error:"Invalid access operation"});
  }
  if(action==="approve"){
   const id=Number(body.borrowing_id);if(!Number.isSafeInteger(id)||id<=0)return res(400,{error:"Invalid borrowing"});
