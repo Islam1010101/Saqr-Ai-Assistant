@@ -164,6 +164,10 @@ const AdminDashboard: React.FC = () => {
     const [digitalBookReadStats, setDigitalBookReadStats] = useState<any[]>([]);
     const [digitalBookReadStatsAvailable, setDigitalBookReadStatsAvailable] = useState<boolean | null>(null);
     const [studentsList, setStudentsList] = useState<any[]>([]);
+    const [staffEmailDirectory, setStaffEmailDirectory] = useState<Record<string,string>>({});
+    const [staffRoleDirectory, setStaffRoleDirectory] = useState<Record<string,string>>({});
+    const [accountDisabled, setAccountDisabled] = useState<Record<string,boolean>>({});
+    const [accessBusy, setAccessBusy] = useState('');
     const [teachersList, setTeachersList] = useState<any[]>([]);
     const [borrowingsList, setBorrowingsList] = useState<any[]>([]);
     const [pendingRequestsList, setPendingRequestsList] = useState<any[]>([]);
@@ -189,10 +193,12 @@ const AdminDashboard: React.FC = () => {
             const tc = teacherMap.get(uid);
             const resolvedName = rec.user_name || (st ? (st.name_ar || st.name_en) : tc ? (tc.name_ar || tc.name_en) : '');
             const resolvedGrade = rec.user_grade || (st ? st.grade : (tc ? (isAr ? 'معلم' : 'Teacher') : ''));
-            const resolvedEmail = rec.user_email || (rec.user_type === 'student' && rec.user_id ? `${String(rec.user_id).trim()}@falcon-school.com` : '');
+            const resolvedEmail = rec.user_type === 'student' && /^[0-9]{6,7}$/.test(String(rec.user_id ?? ''))
+                ? `${String(rec.user_id).trim()}@falcon-school.com`
+                : staffEmailDirectory[uid] || rec.user_email || '';
             return { ...rec, user_name: resolvedName, user_grade: resolvedGrade, user_email: resolvedEmail };
         });
-    }, [isAr]);
+    }, [isAr, staffEmailDirectory]);
 
     const fetchDigitalBookReadStats = useCallback(async () => {
         try {
@@ -333,6 +339,20 @@ const AdminDashboard: React.FC = () => {
                 start += pageSize;
             }
             setStudentsList(allStudents);
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.access_token) {
+                const { data: directory } = await supabase.functions.invoke('admin-verified-library', {
+                    body: { action: 'directory' },
+                    headers: { Authorization: 'Bearer ' + session.access_token }
+                });
+                if (directory?.ok && Array.isArray(directory.staff)) {
+                    const mapping = Object.fromEntries(directory.staff.map((item: any) => [String(item.teacher_id).toLowerCase(), String(item.email)]));
+                    setStaffEmailDirectory(mapping);
+                    setStaffRoleDirectory(Object.fromEntries(directory.staff.map((item: any) => [String(item.email).toLowerCase(), String(item.role)])));
+                    setAccountDisabled(Object.fromEntries((directory.controls || []).map((item: any) => [String(item.email).toLowerCase(), Boolean(item.disabled_at)])));
+                    allTeachers = allTeachers.map(t => ({ ...t, email: mapping[String(t.teacher_id).toLowerCase()] || '' }));
+                }
+            }
             setTeachersList(allTeachers);
             setLessonReportsList(reportResult.data || []);
             const { data: scheduleRows, error: scheduleError } = await supabase.from('library_schedule').select('id,teacher,subject,grade,user_id');
@@ -410,15 +430,35 @@ const AdminDashboard: React.FC = () => {
         return () => { supabase.removeChannel(channel); };
     }, [isAdmin]);
 
-    const sendBilingualConfirmationEmail = async (borrowingId: string | number) => {
-        const { data, error } = await supabase.functions.invoke('send-borrow-email', {
-            body: { action: 'notify-approved', borrowing_id: borrowingId }
-        });
-        if (error) throw error;
-        if (!data || data.ok !== true || data.emailSent !== true) {
-            throw new Error(data?.error || data?.message || 'Email was not confirmed by Resend');
-        }
-        return data;
+    // Never approve a borrowing or select the recipient from client-side user data.
+    // A verified admin Google session is required by the server.
+    // Soft account removal keeps lending history, points and Saqr context intact.
+    const handleAccountAccess = async (item: any, change: 'disable' | 'enable' | 'role', role?: 'teacher' | 'admin') => {
+        const email = String(activeTab === 'students'
+            ? (item.student_id ? item.student_id + '@falcon-school.com' : '')
+            : (item.email || '')).trim().toLowerCase();
+        if (!email) { setBorrowingsError(isAr ? 'لا يوجد بريد مدرسي معتمد لهذا المستخدم.' : 'No approved school email for this user.'); return; }
+        const label = String(isAr ? (item.name_ar || item.name_en) : (item.name_en || item.name_ar));
+        const message = change === 'disable'
+            ? (isAr ? `إيقاف دخول ${label}؟ سيتم الاحتفاظ بسجلاته واستعاراته.` : `Disable access for ${label}? Their borrowing history will remain.`)
+            : change === 'role' ? (isAr ? `تغيير صلاحية ${label} إلى ${role === 'admin' ? 'مدير النظام' : 'معلم'}؟` : `Change ${label}'s access to ${role}?`)
+            : (isAr ? `إعادة تفعيل دخول ${label}؟` : `Restore access for ${label}?`);
+        if (!window.confirm(message)) return;
+        setAccessBusy(email); setBorrowingsError(''); setBorrowingsNotice('');
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.access_token) throw new Error(isAr ? 'يرجى إعادة تسجيل الدخول بحساب الأدمن.' : 'Admin Google sign-in required.');
+            const { data, error } = await supabase.functions.invoke('admin-verified-library', {
+                body: { action: 'access', email, change, role },
+                headers: { Authorization: 'Bearer ' + session.access_token }
+            });
+            if (error || !data?.ok) throw new Error(data?.error || (isAr ? 'تعذر تعديل الصلاحية.' : 'Could not update access.'));
+            if (change === 'role') setStaffRoleDirectory(prev => ({ ...prev, [email]: String(role) }));
+            else setAccountDisabled(prev => ({ ...prev, [email]: change === 'disable' }));
+            setBorrowingsNotice(isAr ? 'تم تحديث صلاحيات الدخول دون حذف بيانات المستخدم.' : 'Account access updated without deleting user history.');
+        } catch (error) {
+            setBorrowingsError(error instanceof Error ? error.message : String(error));
+        } finally { setAccessBusy(''); }
     };
 
     const handleInstantApprove = async (item: any) => {
@@ -426,28 +466,23 @@ const AdminDashboard: React.FC = () => {
         setBorrowingsError('');
         setBorrowingsNotice('');
         try {
-            const todayStr = new Date().toISOString().split('T')[0];
-            const targetReturnDate = getDefaultReturnDate(15);
-            const cleanEmail = String(item.user_email || (item.user_type === 'student' && item.user_id ? `${String(item.user_id).trim()}@falcon-school.com` : '')).trim();
-            const { error: updateErr } = await supabase.from('borrowings').update({ status: 'active', user_email: cleanEmail, borrow_date: todayStr, return_date: targetReturnDate, approval_email_status: 'pending' }).eq('id', item.id);
-            if (updateErr) throw updateErr;
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.access_token) throw new Error(isAr ? 'يرجى تسجيل دخول الأدمن باستخدام Google مرة أخرى.' : 'Please sign in with the admin Google account again.');
+            const { data, error } = await supabase.functions.invoke('admin-verified-library', {
+                body: { action: 'approve', borrowing_id: item.id },
+                headers: { Authorization: 'Bearer ' + session.access_token }
+            });
+            if (error || !data?.ok) throw new Error(data?.error || (isAr ? 'تعذر اعتماد الاستعارة.' : 'Borrowing approval failed.'));
             setPendingRequestsList(prev => prev.filter(p => String(p.id) !== String(item.id)));
-            setBorrowingsList(prev => [{ ...item, status: 'active', user_email: cleanEmail, borrow_date: todayStr, return_date: targetReturnDate }, ...prev.filter(p => String(p.id) !== String(item.id))]);
-            if (cleanEmail) {
-                try {
-                    await sendBilingualConfirmationEmail(item.id);
-                    const durationDays = calculateDurationDays(todayStr, targetReturnDate);
-                    setBorrowingsNotice(isAr ? `تمت الموافقة على «${item.book_name}» وإرسال البريد الإلكتروني إلى ${cleanEmail} (المدة: ${durationDays} يوماً، والإرجاع: ${targetReturnDate}).` : `Approved “${item.book_name}” and sent email to ${cleanEmail}.`);
-                } catch (emailErr) {
-                    console.error('Email send warning:', emailErr);
-                    setBorrowingsNotice(isAr ? `تمت الموافقة وتفعيل الإعارة حتى ${targetReturnDate}، لكن تعذّر إرسال البريد الآلي.` : `Request approved until ${targetReturnDate}, but email sending failed.`);
-                }
-            } else setBorrowingsNotice(isAr ? `تمت الموافقة على استعارة «${item.book_name}» حتى ${targetReturnDate}. لم يُحدد بريد إلكتروني للإرسال.` : `Approved “${item.book_name}” until ${targetReturnDate}. No email address was available.`);
+            setBorrowingsNotice(data.emailSent
+                ? (isAr ? `تم اعتماد الاستعارة وإرسال التأكيد إلى ${data.email}.` : `Borrowing approved and confirmation sent to ${data.email}.`)
+                : (isAr ? 'تم اعتماد الاستعارة، لكن لم يتم تأكيد إرسال البريد؛ راجع حالة الإرسال.' : 'Borrowing approved, but email delivery was not confirmed.'));
             await refreshBorrowingsOnly(undefined, undefined, true, true);
         } catch (err) {
-            const message = err instanceof Error ? err.message : String(err);
-            setBorrowingsError(message);
-        } finally { setProcessingRowId(null); }
+            setBorrowingsError(err instanceof Error ? err.message : String(err));
+        } finally {
+            setProcessingRowId(null);
+        }
     };
 
     const handleRejectRequest = async (id: string | number) => {
@@ -559,22 +594,32 @@ const AdminDashboard: React.FC = () => {
     const filteredList = useMemo(() => {
         const term = searchQuery.toLowerCase().trim();
         const includesTerm = (value: any) => String(value ?? '').toLowerCase().includes(term);
-        if (activeTab === 'students') return !term ? studentsList : studentsList.filter(st => includesTerm(st.name_ar) || includesTerm(st.name_en) || includesTerm(st.student_id));
-        if (activeTab === 'teachers') return !term ? teachersList : teachersList.filter(tc => includesTerm(tc.name_ar) || includesTerm(tc.name_en) || includesTerm(tc.teacher_id));
+        if (activeTab === 'students') return !term ? studentsList : studentsList.filter(st => includesTerm(st.name_ar) || includesTerm(st.name_en) || includesTerm(st.student_id) || includesTerm(String(st.student_id || '') + '@falcon-school.com'));
+        if (activeTab === 'teachers') return !term ? teachersList : teachersList.filter(tc => includesTerm(tc.name_ar) || includesTerm(tc.name_en) || includesTerm(tc.teacher_id) || includesTerm(tc.email));
         if (activeTab === 'borrowings') return !term ? borrowingsList : borrowingsList.filter(b => includesTerm(b.user_id) || includesTerm(b.book_name) || includesTerm(b.user_email) || includesTerm(b.user_name));
         if (activeTab === 'pending') return !term ? pendingRequestsList : pendingRequestsList.filter(p => includesTerm(p.user_id) || includesTerm(p.book_name) || includesTerm(p.user_email) || includesTerm(p.user_name));
         return !term ? lessonReportsList : lessonReportsList.filter(r => includesTerm(r.teacher_name) || includesTerm(r.lesson_topic) || includesTerm(r.teacher_id));
     }, [studentsList, teachersList, borrowingsList, pendingRequestsList, lessonReportsList, searchQuery, activeTab]);
 
+    const [newUserEmail, setNewUserEmail] = useState('');
+
     const handleSubmitForm = async (e: React.FormEvent) => {
         e.preventDefault(); setIsSubmitting(true); setBorrowingsError(''); setBorrowingsNotice('');
         try {
-            if (modalMode === 'addStudent') {
-                const { error } = await supabase.from('students').insert([{ student_id: formData.student_id.trim(), name_ar: formData.name_ar, name_en: formData.name_en || formData.name_ar, grade: formData.grade, points: Number(formData.points) || 0 }]);
-                if (error) throw error;
-            } else if (modalMode === 'addTeacher') {
-                const { error } = await supabase.from('teachers').insert([{ teacher_id: formData.teacher_id.trim().toUpperCase(), name_ar: formData.name_ar, name_en: formData.name_en || formData.name_ar }]);
-                if (error) throw error;
+            if (modalMode === 'addStudent' || modalMode === 'addTeacher') {
+                const type = modalMode === 'addStudent' ? 'student' : 'teacher';
+                const requestedEmail = type === 'student'
+                    ? String(formData.student_id).trim() + '@falcon-school.com'
+                    : newUserEmail.trim().toLowerCase();
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session?.access_token) throw new Error(isAr ? 'سجّل الدخول بحساب أدمن Google.' : 'Admin Google sign-in required.');
+                const { data, error } = await supabase.functions.invoke('admin-verified-library', {
+                    body: { action: 'create-user', user_type: type, email: requestedEmail,
+                        name_ar: formData.name_ar, name_en: formData.name_en || formData.name_ar, grade: formData.grade },
+                    headers: { Authorization: 'Bearer ' + session.access_token }
+                });
+                if (error || !data?.ok) throw new Error(data?.error || 'Unable to create account');
+                setBorrowingsNotice(isAr ? `تم إضافة حساب ${requestedEmail}، ويحتاج إلى حساب Google مدرسي فعّال للدخول.` : `Account ${requestedEmail} added. A provisioned school Google account is required for sign-in.`);
             } else if (modalMode === 'editStudent') {
                 const { error } = await supabase.from('students').update({ student_id: formData.student_id.trim(), name_ar: formData.name_ar, name_en: formData.name_en || formData.name_ar, grade: formData.grade }).eq('id', selectedItem.id);
                 if (error) throw error;
@@ -582,19 +627,17 @@ const AdminDashboard: React.FC = () => {
                 const { error } = await supabase.from('teachers').update({ teacher_id: formData.teacher_id.trim().toUpperCase(), name_ar: formData.name_ar, name_en: formData.name_en || formData.name_ar }).eq('id', selectedItem.id);
                 if (error) throw error;
             } else if (modalMode === 'addBorrow') {
-                const todayStr = new Date().toISOString().split('T')[0];
-                const targetReturnDate = formData.return_date || getDefaultReturnDate(15);
-                const cleanEmail = formData.user_email.trim();
-                const { data: insertedBorrowing, error: insertErr } = await supabase.from('borrowings').insert([{ user_id: formData.user_id.trim(), user_type: formData.user_type, user_email: cleanEmail, book_name: formData.book_name.trim(), borrow_date: todayStr, return_date: targetReturnDate, status: 'active', approval_email_status: 'pending' }]).select('id').single();
-                if (insertErr) throw insertErr;
-                try {
-                    await sendBilingualConfirmationEmail(insertedBorrowing.id);
-                    const durationDays = calculateDurationDays(todayStr, targetReturnDate);
-                    setBorrowingsNotice(isAr ? `تم تسجيل الإعارة وإرسال بريد التأكيد إلى ${cleanEmail} (${durationDays} يوماً).` : `Borrowing registered and confirmation email sent to ${cleanEmail}.`);
-                } catch (emailErr) {
-                    console.error('Email send warning:', emailErr);
-                    setBorrowingsNotice(isAr ? 'تم تسجيل الإعارة في النظام، ولكن تعذّر إرسال البريد الآلي.' : 'Borrowing saved, but email delivery failed.');
-                }
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session?.access_token) throw new Error(isAr ? 'يرجى تسجيل الدخول بحساب Google الإداري.' : 'Admin Google sign-in required.');
+                const { data, error } = await supabase.functions.invoke('admin-verified-library', {
+                    body: { action: 'direct', user_id: formData.user_id.trim(), user_type: formData.user_type,
+                        book_name: formData.book_name.trim(), return_date: formData.return_date },
+                    headers: { Authorization: 'Bearer ' + session.access_token }
+                });
+                if (error || !data?.ok) throw new Error(data?.error || 'Could not register direct borrowing.');
+                setBorrowingsNotice(data.emailSent
+                    ? (isAr ? `تم تسجيل الإعارة وإرسال البريد إلى ${data.email}.` : `Borrowing registered and email sent to ${data.email}.`)
+                    : (isAr ? 'تم تسجيل الإعارة، لكن البريد الإلكتروني لم يتأكد إرساله.' : 'Borrowing registered but email delivery is not confirmed.'));
             }
             setModalMode(null); setSelectedItem(null);
             await fetchRealDashboardData(false);
@@ -828,8 +871,8 @@ const AdminDashboard: React.FC = () => {
                     </div>
                     <div className="w-full xl:w-auto flex flex-wrap items-center gap-2 justify-end xl:shrink-0">
                         {(activeTab === 'pending' || activeTab === 'borrowings') && <button type="button" disabled={isRefreshingBorrowings} onClick={() => void refreshBorrowingsOnly(undefined, undefined, false, true)} className="px-5 py-3 bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all flex items-center gap-2"><OutlineIcon name="refresh" className="h-4 w-4" />{isRefreshingBorrowings ? (isAr ? 'جاري التحديث...' : 'Refreshing...') : (isAr ? 'تحديث الطلبات' : 'Refresh Requests')}</button>}
-                        {activeTab === 'students' && <button type="button" onClick={() => { setFormData(emptyForm()); setModalMode('addStudent'); }} className="w-full md:w-auto px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all text-center">{t('addStudentBtn')}</button>}
-                        {activeTab === 'teachers' && <button type="button" onClick={() => { setFormData({ ...emptyForm(), grade: '' }); setModalMode('addTeacher'); }} className="w-full md:w-auto px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all text-center">{t('addTeacherBtn')}</button>}
+                        {activeTab === 'students' && <button type="button" onClick={() => { setNewUserEmail(''); setFormData(emptyForm()); setModalMode('addStudent'); }} className="w-full md:w-auto px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all text-center">{t('addStudentBtn')}</button>}
+                        {activeTab === 'teachers' && <button type="button" onClick={() => { setNewUserEmail(''); setFormData({ ...emptyForm(), grade: '' }); setModalMode('addTeacher'); }} className="w-full md:w-auto px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all text-center">{t('addTeacherBtn')}</button>}
                         {activeTab === 'borrowings' && <button type="button" onClick={() => { setFormData({ ...emptyForm(), grade: '' }); setModalMode('addBorrow'); }} className="w-full md:w-auto px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all text-center">{t('addBorrowBtn')}</button>}
                     </div>
                 </section>
@@ -838,17 +881,39 @@ const AdminDashboard: React.FC = () => {
 
                 <section className="lg:col-span-4 bg-white dark:bg-slate-900/90 backdrop-blur-md p-4 md:p-5 rounded-[2rem] border border-slate-200 dark:border-slate-700/50 shadow-md"><div className="relative group"><input type="text" placeholder={t('searchPlaceholder')} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full p-4 ps-14 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white border-2 border-slate-200 dark:border-slate-700 focus:border-amber-400 rounded-2xl outline-none font-bold text-sm md:text-base shadow-inner transition-colors" /><div className="absolute start-4 top-1/2 -translate-y-1/2"><SearchSvg /></div></div></section>
 
-                <section className="efips-panel lg:col-span-4 bg-white dark:bg-slate-900/90 backdrop-blur-md border border-slate-200 dark:border-slate-700/50 p-4 sm:p-6 rounded-[2rem] shadow-xl overflow-hidden min-w-0"><div className="overflow-x-auto max-h-[600px] scrollbar-thin"><table className="w-full text-left rtl:text-right border-collapse min-w-[600px]"><thead className="sticky top-0 bg-slate-100 dark:bg-slate-800 z-10"><tr className="text-slate-600 dark:text-slate-300 text-xs md:text-sm border-b border-slate-200 dark:border-slate-700"><th className="p-3.5 font-black">{t('colId')}</th>{activeTab !== 'borrowings' && activeTab !== 'pending' && <th className="p-3.5 font-black">{t('colName')}</th>}{(activeTab === 'students' || activeTab === 'teachers') && <th className="p-3.5 font-black">{t('colEmail')}</th>}{activeTab === 'students' && <th className="p-3.5 font-black">{t('colGrade')}</th>}{activeTab === 'students' && <th className="p-3.5 font-black text-center">{t('colPoints')}</th>}{(activeTab === 'borrowings' || activeTab === 'pending') && <th className="p-3.5 font-black">{t('colBook')}</th>}{(activeTab === 'borrowings' || activeTab === 'pending') && <th className="p-3.5 font-black">{t('colEmail')}</th>}{activeTab === 'borrowings' && <th className="p-3.5 font-black">{t('colDate')}</th>}{activeTab === 'pending' && <th className="p-3.5 font-black">{t('colReqDate')}</th>}{activeTab === 'reports' && <th className="p-3.5 font-black">{t('colTopic')}</th>}{activeTab === 'reports' && <th className="p-3.5 font-black text-center">{t('colType')}</th>}{activeTab === 'reports' && <th className="p-3.5 font-black">{t('colReportDate')}</th>}{activeTab !== 'reports' && <th className="p-3.5 font-black text-center">{t('colActions')}</th>}</tr></thead>
+                <section className="efips-panel lg:col-span-4 bg-white dark:bg-slate-900/90 backdrop-blur-md border border-slate-200 dark:border-slate-700/50 p-4 sm:p-6 rounded-[2rem] shadow-xl overflow-hidden min-w-0"><div className="overflow-x-auto max-h-[600px] scrollbar-thin"><table className="w-full text-left rtl:text-right border-collapse min-w-[600px]"><thead className="sticky top-0 bg-slate-100 dark:bg-slate-800 z-10"><tr className="text-slate-600 dark:text-slate-300 text-xs md:text-sm border-b border-slate-200 dark:border-slate-700"><th className="p-3.5 font-black">{(activeTab === 'students' || activeTab === 'teachers') ? t('colEmail') : t('colId')}</th>{activeTab !== 'borrowings' && activeTab !== 'pending' && <th className="p-3.5 font-black">{t('colName')}</th>}{(activeTab === 'students' || activeTab === 'teachers') && <th className="p-3.5 font-black">{isAr ? 'المعرف الداخلي' : 'Internal ID'}</th>}{activeTab === 'students' && <th className="p-3.5 font-black">{t('colGrade')}</th>}{activeTab === 'students' && <th className="p-3.5 font-black text-center">{t('colPoints')}</th>}{(activeTab === 'borrowings' || activeTab === 'pending') && <th className="p-3.5 font-black">{t('colBook')}</th>}{(activeTab === 'borrowings' || activeTab === 'pending') && <th className="p-3.5 font-black">{t('colEmail')}</th>}{activeTab === 'borrowings' && <th className="p-3.5 font-black">{t('colDate')}</th>}{activeTab === 'pending' && <th className="p-3.5 font-black">{t('colReqDate')}</th>}{activeTab === 'reports' && <th className="p-3.5 font-black">{t('colTopic')}</th>}{activeTab === 'reports' && <th className="p-3.5 font-black text-center">{t('colType')}</th>}{activeTab === 'reports' && <th className="p-3.5 font-black">{t('colReportDate')}</th>}{activeTab !== 'reports' && <th className="p-3.5 font-black text-center">{t('colActions')}</th>}</tr></thead>
                     <tbody>{filteredList.length ? filteredList.map((item: any) => <tr key={`${activeTab}-${item.id}`} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                        <td className="p-3.5 font-mono font-bold text-xs md:text-sm text-blue-600 dark:text-blue-400">{activeTab === 'students' ? item.student_id : activeTab === 'teachers' ? item.teacher_id : (item.user_id || item.teacher_id)}{(activeTab === 'pending' || activeTab === 'borrowings') && <div className="mt-1 font-sans text-xs text-slate-600 dark:text-slate-300">{item.user_name || (item.user_type === 'student' ? (isAr ? 'طالب' : 'Student') : item.user_type === 'teacher' ? (isAr ? 'معلم' : 'Teacher') : (isAr ? 'مستخدم' : 'User'))}{item.user_grade ? ` · ${item.user_grade}` : ''}</div>}</td>
+                        <td className="p-3.5 font-mono font-bold text-xs md:text-sm text-blue-600 dark:text-blue-400">{activeTab === 'students' ? (item.student_id ? String(item.student_id) + '@falcon-school.com' : '') : activeTab === 'teachers' ? (item.email || (isAr ? 'بدون بريد معتمد' : 'No approved email')) : (item.user_id || item.teacher_id)}{(activeTab === 'pending' || activeTab === 'borrowings') && <div className="mt-1 font-sans text-xs text-slate-600 dark:text-slate-300">{item.user_name || (item.user_type === 'student' ? (isAr ? 'طالب' : 'Student') : item.user_type === 'teacher' ? (isAr ? 'معلم' : 'Teacher') : (isAr ? 'مستخدم' : 'User'))}{item.user_grade ? ` · ${item.user_grade}` : ''}</div>}</td>
                         {activeTab !== 'borrowings' && activeTab !== 'pending' && <td className="p-3.5 font-bold text-xs md:text-sm">{activeTab === 'reports' ? item.teacher_name : (isAr ? (item.name_ar || item.name_en) : (item.name_en || item.name_ar))}</td>}
-                        {(activeTab === 'students' || activeTab === 'teachers') && <td dir="ltr" className="p-3.5 font-mono text-xs md:text-sm text-slate-500 dark:text-slate-400">{activeTab === 'students' ? (item.student_id ? String(item.student_id).trim() + '@falcon-school.com' : '') : (item.email || item.user_email || '')}</td>}{activeTab === 'students' && <td className="p-3.5 text-xs md:text-sm text-slate-500 dark:text-slate-400">{item.grade}</td>}{activeTab === 'students' && <td className="p-3.5 text-center font-black text-emerald-600 dark:text-emerald-400">{item.points || 0}</td>}
+                        {(activeTab === 'students' || activeTab === 'teachers') && <td dir="ltr" className="p-3.5 font-mono text-xs md:text-sm text-slate-500 dark:text-slate-400">{activeTab === 'students' ? item.student_id : item.teacher_id}</td>}{activeTab === 'students' && <td className="p-3.5 text-xs md:text-sm text-slate-500 dark:text-slate-400">{item.grade}</td>}{activeTab === 'students' && <td className="p-3.5 text-center font-black text-emerald-600 dark:text-emerald-400">{item.points || 0}</td>}
                         {(activeTab === 'borrowings' || activeTab === 'pending') && <td className="p-3.5 font-bold text-xs md:text-sm text-rose-500">{item.book_name || '-'}</td>}
                         {(activeTab === 'borrowings' || activeTab === 'pending') && <td className="p-3.5 font-mono text-xs md:text-sm text-slate-600 dark:text-slate-300">{item.user_email || <span className="text-slate-400 italic">--</span>}</td>}
                         {activeTab === 'borrowings' && <td className="p-3.5 text-xs md:text-sm font-bold text-amber-600 dark:text-amber-400">{item.return_date || '-'}</td>}
                         {activeTab === 'pending' && <td className="p-3.5 text-xs md:text-sm text-slate-500">{item.borrow_date ? String(item.borrow_date).slice(0, 10) : (item.created_at ? new Date(item.created_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US') : '-')}</td>}
                         {activeTab === 'reports' && <td className="p-3.5 font-bold text-xs md:text-sm text-slate-800 dark:text-slate-100">{item.lesson_topic}</td>}{activeTab === 'reports' && <td className="p-3.5 text-center font-black text-xs md:text-sm text-indigo-600 dark:text-indigo-400">{item.plan_type}</td>}{activeTab === 'reports' && <td className="p-3.5 text-xs md:text-sm text-slate-500">{item.created_at ? new Date(item.created_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US') : '-'}</td>}
-                        {activeTab !== 'reports' && <td className="p-3.5"><div className="flex flex-wrap items-center justify-center gap-2">{activeTab === 'borrowings' ? <button type="button" disabled={processingRowId === item.id} onClick={() => void handleReturnBook(item.id)} className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white rounded-xl font-bold text-xs shadow-sm transition-all flex items-center gap-1"><OutlineIcon name="return" className="h-3.5 w-3.5" />{isAr ? 'إرجاع الكتاب' : 'Return Book'}</button> : activeTab === 'pending' ? <><button type="button" disabled={processingRowId === item.id} onClick={() => void handleInstantApprove(item)} className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white rounded-xl font-bold text-xs shadow-sm transition-all flex items-center gap-1"><OutlineIcon name="check" className="h-3.5 w-3.5" />{processingRowId === item.id ? (isAr ? 'جاري التأكيد...' : 'Approving...') : t('approveBtn')}</button><button type="button" disabled={processingRowId === item.id} onClick={() => void handleRejectRequest(item.id)} className="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 disabled:opacity-50 text-white rounded-xl font-bold text-xs shadow-sm transition-all flex items-center gap-1"><OutlineIcon name="x" className="h-3.5 w-3.5" />{t('rejectBtn')}</button></> : <button type="button" onClick={() => { setSelectedItem(item); setFormData({ ...emptyForm(), student_id: item.student_id || '', teacher_id: item.teacher_id || '', name_ar: item.name_ar || '', name_en: item.name_en || '', grade: item.grade || '', points: item.points || 0 }); setModalMode(activeTab === 'students' ? 'editStudent' : 'editTeacher'); }} className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs shadow-sm transition-all">{t('editIdBtn')}</button>}</div></td>}
+                        {activeTab !== 'reports' && <td className="p-3.5"><div className="flex flex-wrap items-center justify-center gap-2">{activeTab === 'borrowings' ? <button type="button" disabled={processingRowId === item.id} onClick={() => void handleReturnBook(item.id)} className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white rounded-xl font-bold text-xs shadow-sm transition-all flex items-center gap-1"><OutlineIcon name="return" className="h-3.5 w-3.5" />{isAr ? 'إرجاع الكتاب' : 'Return Book'}</button> : activeTab === 'pending' ? <><button type="button" disabled={processingRowId === item.id} onClick={() => void handleInstantApprove(item)} className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white rounded-xl font-bold text-xs shadow-sm transition-all flex items-center gap-1"><OutlineIcon name="check" className="h-3.5 w-3.5" />{processingRowId === item.id ? (isAr ? 'جاري التأكيد...' : 'Approving...') : t('approveBtn')}</button><button type="button" disabled={processingRowId === item.id} onClick={() => void handleRejectRequest(item.id)} className="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 disabled:opacity-50 text-white rounded-xl font-bold text-xs shadow-sm transition-all flex items-center gap-1"><OutlineIcon name="x" className="h-3.5 w-3.5" />{t('rejectBtn')}</button></> : <>
+                          <button type="button" onClick={() => { setSelectedItem(item); setFormData({ ...emptyForm(), student_id: item.student_id || '', teacher_id: item.teacher_id || '', name_ar: item.name_ar || '', name_en: item.name_en || '', grade: item.grade || '', points: item.points || 0 }); setModalMode(activeTab === 'students' ? 'editStudent' : 'editTeacher'); }} className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs shadow-sm transition-all">{t('editIdBtn')}</button>
+                          {(() => {
+                              const email = activeTab === 'students'
+                                  ? (item.student_id ? String(item.student_id) + '@falcon-school.com' : '')
+                                  : String(item.email || '');
+                              const disabled = Boolean(accountDisabled[email.toLowerCase()]);
+                              const busy = accessBusy === email.toLowerCase();
+                              return <div className="flex flex-wrap gap-1.5 justify-center items-center">
+                                  {activeTab === 'teachers' && email && <select aria-label={isAr ? 'صلاحية الحساب' : 'Account role'} disabled={busy || email.toLowerCase() === 'islam.ahmed@falcon-school.com'}
+                                      value={staffRoleDirectory[email.toLowerCase()] || 'teacher'}
+                                      onChange={event => void handleAccountAccess(item, 'role', event.target.value as 'teacher' | 'admin')}
+                                      className="rounded-lg text-xs font-bold border border-slate-300 bg-white dark:bg-slate-800 dark:text-white p-1.5">
+                                      <option value="teacher">{isAr ? 'معلم' : 'Teacher'}</option>
+                                      <option value="admin">{isAr ? 'مدير النظام' : 'Admin'}</option>
+                                  </select>}
+                                  {email && <button type="button" disabled={busy || email.toLowerCase() === 'islam.ahmed@falcon-school.com'} onClick={() => void handleAccountAccess(item, disabled ? 'enable' : 'disable')}
+                                      className={`rounded-lg text-xs font-bold text-white px-2.5 py-1.5 disabled:opacity-50 ${disabled ? 'bg-emerald-600' : 'bg-rose-600'}`}>
+                                      {disabled ? (isAr ? 'استعادة الحساب' : 'Restore') : (isAr ? 'تعطيل / حذف الدخول' : 'Disable account')}
+                                  </button>}
+                              </div>;
+                          })()}
+                        </>}</div></td>}
                     </tr>) : <tr><td colSpan={7} className="p-8 text-center text-slate-400 font-bold text-sm">{t('noResults')}{(activeTab === 'pending' && borrowingsError) ? <div className="mt-2 text-xs font-normal">{isAr ? 'راجع رسالة الخطأ أعلاه أو تحقق من صلاحيات قراءة جدول borrowings والدالة send-borrow-email.' : 'Check the error above and verify read access to borrowings and send-borrow-email.'}</div> : null}</td></tr>}</tbody>
                 </table></div></section>
             </main>
@@ -857,10 +922,11 @@ const AdminDashboard: React.FC = () => {
                 <h3 className="text-lg md:text-xl font-black mb-6 text-slate-900 dark:text-white">{modalMode === 'addStudent' ? t('modalAddStudent') : modalMode === 'addTeacher' ? t('modalAddTeacher') : modalMode === 'editStudent' ? t('modalEditStudent') : modalMode === 'editTeacher' ? t('modalEditTeacher') : t('modalAddBorrow')}</h3>
                 <form onSubmit={handleSubmitForm} className="space-y-4">
                     {(modalMode === 'addStudent' || modalMode === 'editStudent') && <><div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">{t('colId')}</label><input type="text" value={formData.student_id} onChange={e => setFormData({ ...formData, student_id: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-mono" required /></div><div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">الاسم بالعربي</label><input type="text" value={formData.name_ar} onChange={e => setFormData({ ...formData, name_ar: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm" required /></div><div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">الاسم بالإنجليزية</label><input type="text" value={formData.name_en} onChange={e => setFormData({ ...formData, name_en: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm" /></div><div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">{t('colGrade')}</label><input type="text" value={formData.grade} onChange={e => setFormData({ ...formData, grade: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm" /></div></>}
-                    {(modalMode === 'addTeacher' || modalMode === 'editTeacher') && <><div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">{t('colId')} (مثال: PASS123)</label><input type="text" value={formData.teacher_id} onChange={e => setFormData({ ...formData, teacher_id: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-mono uppercase" required /></div><div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">الاسم بالعربي</label><input type="text" value={formData.name_ar} onChange={e => setFormData({ ...formData, name_ar: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm" required /></div><div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">الاسم بالإنجليزية</label><input type="text" value={formData.name_en} onChange={e => setFormData({ ...formData, name_en: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm" /></div></>}
+                    {modalMode === 'addTeacher' && <div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">{isAr ? 'البريد الإلكتروني المدرسي' : 'School Google email'}</label><input type="email" required value={newUserEmail} onChange={e => setNewUserEmail(e.target.value)} placeholder="teacher@falcon-school.com" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm" /></div>}
+                    {(modalMode === 'addTeacher' || modalMode === 'editTeacher') && <><div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">{t('colId')} (مثال: PASS123)</label><input type="text" value={modalMode === 'addTeacher' ? (isAr ? 'يُنشأ تلقائيًا' : 'Generated automatically') : formData.teacher_id} disabled={modalMode === 'addTeacher'} onChange={e => setFormData({ ...formData, teacher_id: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-mono uppercase" required /></div><div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">الاسم بالعربي</label><input type="text" value={formData.name_ar} onChange={e => setFormData({ ...formData, name_ar: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm" required /></div><div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">الاسم بالإنجليزية</label><input type="text" value={formData.name_en} onChange={e => setFormData({ ...formData, name_en: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm" /></div></>}
                     {modalMode === 'addBorrow' && <><div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">نوع المستعير</label><select value={formData.user_type} onChange={e => { const type = e.target.value; setFormData({ ...formData, user_type: type, user_email: type === 'student' && formData.user_id ? `${formData.user_id.trim()}@falcon-school.com` : '' }); }} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold"><option value="student">طالب</option><option value="teacher">معلم</option></select></div>
                         <div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">الرقم التعريفي (ID)</label><input type="text" value={formData.user_id} onChange={e => { const id = e.target.value; setFormData({ ...formData, user_id: id, user_email: formData.user_type === 'student' ? (id ? `${id.trim()}@falcon-school.com` : '') : formData.user_email }); }} className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-mono bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white" required /></div>
-                        <div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">البريد الإلكتروني للمستعير</label><input type="email" value={formData.user_email} onChange={e => setFormData({ ...formData, user_email: e.target.value })} readOnly={formData.user_type === 'student'} className={`w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm ${formData.user_type === 'student' ? 'bg-slate-100 dark:bg-slate-800/50 text-slate-500 cursor-not-allowed' : 'bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white'}`} required /></div>
+                        <div className="text-xs font-bold leading-6 text-emerald-700 dark:text-emerald-300">{isAr ? 'سيُستخدم بريد Google المدرسي المسجّل للمستعير تلقائيًا دون إدخال عنوان يدوي.' : 'The borrower’s approved school Google email will be used automatically.'}</div>
                         <div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">عنوان الكتاب</label><input type="text" value={formData.book_name} onChange={e => setFormData({ ...formData, book_name: e.target.value })} className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white" required /></div>
                         <div><label className="block text-sm font-black text-amber-600 dark:text-amber-400 mb-1">تاريخ الإرجاع الإلزامي (مدة الاستعارة: {previewDurationDays} يوماً)</label><input type="date" value={formData.return_date} min={previewBorrowDate} onChange={e => setFormData({ ...formData, return_date: e.target.value })} className="w-full px-4 py-3 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border-4 border-amber-300 dark:border-amber-600 focus:border-amber-500 rounded-2xl font-black outline-none transition-colors" required /></div>
                     </>}

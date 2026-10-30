@@ -208,7 +208,6 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
     const [analysisState, setAnalysisState] = useState<'loading'|'ready'|'unavailable'>('loading');
     const [analysisAttempt, setAnalysisAttempt] = useState(0);
     const [requestStatus, setRequestStatus] = useState<'idle' | 'loading' | 'success'>('idle');
-    const [borrowerEmail, setBorrowerEmail] = useState('');
 
     const currentUser = JSON.parse(localStorage.getItem('current_user') || 'null');
     // توحيد قيمة نوع المستخدم لأن بعض أنظمة تسجيل الدخول تحفظها بحروف كبيرة أو بعلامات اقتباس.
@@ -281,21 +280,13 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
         }
 
         const userId = userType === 'student' ? currentUser.student_id : currentUser.teacher_id;
-        const userEmail = userType === 'student'
-            ? `${String(userId || '').trim()}@falcon-school.com`
-            : borrowerEmail.trim();
+        // The Google-authenticated email is the only source for the borrower's address.
+        // Never request a manually typed teacher email.
 
         if (!String(userId || '').trim()) {
             alert(locale === 'ar'
                 ? 'لم يتم العثور على رقم الطالب أو المعلم في بيانات الحساب. سجّل الدخول مرة أخرى.'
                 : 'The student/teacher ID is missing from the account. Please sign in again.');
-            return;
-        }
-
-        if (userType === 'teacher' && !userEmail) {
-            alert(locale === 'ar'
-                ? 'يرجى إدخال البريد الإلكتروني للمعلم.'
-                : 'Please enter the teacher email address.');
             return;
         }
 
@@ -318,20 +309,14 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                 return;
             }
 
-            const { error: insertError } = await supabase.from('borrowings').insert([{
-                user_id: String(userId).trim(),
-                user_type: userType,
-                user_email: userEmail,
-                user_name: currentUser.name_ar || currentUser.name_en || currentUser.name || '',
-                user_grade: currentUser.grade || '',
-                book_name: book.title,
-                book_shelf: String(book.shelf ?? ''),
-                book_row: String(book.row ?? ''),
-                borrow_date: null,
-                return_date: null,
-                status: 'pending'
-            }]);
-
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.access_token) throw new Error(locale === 'ar' ? 'يرجى تسجيل الدخول باستخدام Google.' : 'Google sign-in required.');
+            const { data: inserted, error: insertError } = await supabase.functions.invoke('admin-verified-library', {
+                body: { action: 'request', book_name: book.title,
+                    book_shelf: String(book.shelf ?? ''), book_row: String(book.row ?? '') },
+                headers: { Authorization: 'Bearer ' + session.access_token }
+            });
+            if (!insertError && !inserted?.ok) throw new Error(inserted?.error || 'Request not accepted');
             if (insertError) throw insertError;
 
             setRequestStatus('success');
@@ -408,13 +393,6 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                            {loading ? "..." : `"${aiContent.summary}"`}
                         </p>
                     </div>
-
-                    {currentUser && userType === 'teacher' && requestStatus !== 'success' && (
-                        <div className="mb-4 text-start">
-                            <label className="block text-sm font-black text-slate-700 dark:text-slate-200 mb-2">{locale === 'ar' ? 'البريد الإلكتروني للمعلم' : 'Teacher email address'}</label>
-                            <input type="email" value={borrowerEmail} onChange={(e) => setBorrowerEmail(e.target.value)} required placeholder="name@school.com" className="w-full p-4 rounded-2xl border-2 border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:border-amber-400" />
-                        </div>
-                    )}
 
                     {requestStatus === 'success' ? (
                         <div className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 p-4 rounded-2xl font-black animate-in fade-in zoom-in mb-4 border-2 border-emerald-300 dark:border-emerald-700/50">

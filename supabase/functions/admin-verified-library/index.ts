@@ -1,0 +1,181 @@
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from "npm:@supabase/supabase-js@2.58.0";
+const permitted=(o:string|null)=>!!o&&(o==="https://www.efipslibrary.com"||o==="https://efipslibrary.com"||/^https:\/\/[a-z0-9-]+\.vercel\.app$/.test(o));
+Deno.serve(async(req:Request)=>{
+ const origin=req.headers.get("origin");const h:Record<string,string>={"Access-Control-Allow-Headers":"authorization,apikey,content-type,x-client-info","Access-Control-Allow-Methods":"OPTIONS,POST","Vary":"Origin","Content-Type":"application/json"};
+ if(permitted(origin))h["Access-Control-Allow-Origin"]=origin!;
+ const res=(status:number,data:object)=>new Response(JSON.stringify(data),{status,headers:{...h,"Cache-Control":"no-store"}});
+ if(req.method==="OPTIONS")return new Response(null,{status:permitted(origin)?204:403,headers:h});
+ if(req.method!=="POST"||!permitted(origin))return res(403,{error:"Forbidden"});
+ const url=Deno.env.get("SUPABASE_URL"),anon=Deno.env.get("SUPABASE_ANON_KEY"),secret=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+ if(!url||!anon||!secret)return res(503,{error:"Service unavailable"});
+ const jwt=req.headers.get("authorization")?.match(/^Bearer\s+(.+)$/i)?.[1];if(!jwt)return res(401,{error:"Sign in required"});
+ const client=createClient(url,anon,{auth:{persistSession:false,autoRefreshToken:false}});
+ const {data:{user},error}=await client.auth.getUser(jwt);if(error||!user?.email_confirmed_at||!user.email)return res(401,{error:"Invalid session"});
+ const email=user.email.toLowerCase().trim();
+ if(!user.identities?.some(i=>i.provider==="google"&&String(i.identity_data?.email||"").toLowerCase()===email&&i.identity_data?.email_verified===true))return res(403,{error:"Verified Google account required"});
+ const admin=createClient(url,secret,{auth:{persistSession:false,autoRefreshToken:false}});
+ let body:any;try{body=await req.json()}catch{return res(400,{error:"Invalid request"})}
+ let action=String(body.action||"");
+ const {data:selfControl}=await admin.from("efips_account_access_controls").select("disabled_at").eq("email",email).maybeSingle();
+ if(selfControl?.disabled_at)return res(403,{error:"Account disabled"});
+ if(action==="request"){
+  const book=String(body.book_name||"").trim().slice(0,240);
+  if(!book)return res(400,{error:"Book title required"});
+  let borrowerId="",borrowerRole="",name="",grade="";
+  const studentMatch=/^([0-9]{6,7})@falcon-school\.com$/.exec(email);
+  if(studentMatch){
+    const {data:st}=await admin.from("students").select("student_id,name_ar,name_en,grade").eq("student_id",studentMatch[1]).maybeSingle();
+    if(!st)return res(403,{error:"Student is not enrolled"});
+    borrowerId=st.student_id;borrowerRole="student";name=st.name_ar||st.name_en||"";grade=st.grade||"";
+  }else{
+    const {data:staff}=await admin.from("efips_google_staff_accounts").select("teacher_id,role").eq("email",email).maybeSingle();
+    if(!staff)return res(403,{error:"Staff email is not approved"});
+    const {data:teacher}=await admin.from("efips_google_staff_source").select("name_ar,name_en").eq("email",email).maybeSingle();
+    borrowerId=staff.teacher_id;borrowerRole=staff.role==="admin"?"admin":"teacher";name=teacher?.name_ar||teacher?.name_en||"";
+  }
+  const {data:existing}=await admin.from("borrowings").select("id").eq("user_id",borrowerId).eq("book_name",book).in("status",["pending","active"]).limit(1);
+  if(existing?.length)return res(409,{error:"Borrowing request already exists"});
+  const {error:insertError}=await admin.from("borrowings").insert([{user_id:borrowerId,user_type:borrowerRole,user_email:email,user_name:name,user_grade:grade,book_name:book,
+    book_shelf:String(body.book_shelf||"").slice(0,40),book_row:String(body.book_row||"").slice(0,40),status:"pending"}]);
+  if(insertError)return res(503,{error:"Could not create borrowing request"});
+  return res(200,{ok:true});
+ }
+
+ const {data:staff}=await admin.from("efips_google_staff_accounts").select("teacher_id,role").eq("email",email).maybeSingle();
+ if(staff?.role!=="admin")return res(403,{error:"Admin required"});
+ if(action==="directory"){
+  const {data:staffList,error:staffErr}=await admin.from("efips_google_staff_accounts").select("email,teacher_id,role");
+  if(staffErr)return res(503,{error:"Staff directory unavailable"});
+  const {data:controls,error:controlsError}=await admin.from("efips_account_access_controls").select("email,disabled_at,login_role");
+  if(controlsError)return res(503,{error:"Account controls unavailable"});
+  return res(200,{ok:true,staff:staffList,controls});
+ }
+ if(action==="create-user"){
+  const type=String(body.user_type||"");
+  const nameAr=String(body.name_ar||"").trim().slice(0,160);
+  const nameEn=String(body.name_en||"").trim().slice(0,160)||nameAr;
+  const requestedEmail=String(body.email||"").trim().toLowerCase();
+  if(!nameAr||!nameEn||!["student","teacher"].includes(type))return res(400,{error:"Valid names and user type are required"});
+  if(type==="student"){
+   const match=/^([0-9]{6,7})@falcon-school\.com$/.exec(requestedEmail);
+   if(!match)return res(400,{error:"Student email must use numeric school ID"});
+   const studentId=match[1];
+   const {data:existing,error:checkError}=await admin.from("students").select("student_id").eq("student_id",studentId).maybeSingle();
+   if(checkError)return res(503,{error:"Could not check student roster"});
+   if(existing)return res(409,{error:"Student already exists"});
+   const {error:createError}=await admin.from("students").insert([{student_id:studentId,name_ar:nameAr,name_en:nameEn,grade:String(body.grade||"").slice(0,80),points:0}]);
+   if(createError)return res(503,{error:"Could not create student"});
+   return res(200,{ok:true,email:requestedEmail,user_id:studentId,user_type:"student",note:"Student may sign in when school Google account is provisioned"});
+  }
+  if(!/^[^@\s]+@falcon-school\.com$/.test(requestedEmail))return res(400,{error:"Approved school email required"});
+  const {data:existingStaff,error:staffError}=await admin.from("efips_google_staff_accounts").select("email").eq("email",requestedEmail).maybeSingle();
+  if(staffError)return res(503,{error:"Could not check staff directory"});
+  if(existingStaff)return res(409,{error:"Staff email already registered"});
+  const teacherId="GE"+crypto.randomUUID().replace(/-/g,"").slice(0,12).toUpperCase();
+  const {error:teacherError}=await admin.from("teachers").insert([{teacher_id:teacherId,name_ar:nameAr,name_en:nameEn}]);
+  if(teacherError)return res(503,{error:"Could not create teacher"});
+  const {error:sourceError}=await admin.from("efips_google_staff_source").insert([{email:requestedEmail,name_ar:nameAr,name_en:nameEn,matched_teacher_id:teacherId,match_status:"verified"}]);
+  if(sourceError){await admin.from("teachers").delete().eq("teacher_id",teacherId);return res(503,{error:"Could not register school staff source"});}
+  const {error:allowError}=await admin.from("efips_google_staff_accounts").insert([{email:requestedEmail,teacher_id:teacherId,role:"teacher"}]);
+  if(allowError){
+   await admin.from("efips_google_staff_source").delete().eq("email",requestedEmail);
+   await admin.from("teachers").delete().eq("teacher_id",teacherId);
+   return res(503,{error:"Could not authorize school staff account"});
+  }
+  return res(200,{ok:true,email:requestedEmail,user_id:teacherId,user_type:"teacher",note:"Staff may sign in when school Google account is provisioned"});
+ }
+ if(action==="access"){
+  const target=String(body.email||"").trim().toLowerCase();
+  if(!/^[^@\s]+@falcon-school\.com$/.test(target))return res(400,{error:"School email required"});
+  if(target===email)return res(403,{error:"Cannot change your own admin access"});
+  const desired=String(body.role||"");
+  const change=String(body.change||"");
+  const {data:targetStaff}=await admin.from("efips_google_staff_accounts").select("email,teacher_id,role").eq("email",target).maybeSingle();
+  const studentId=/^([0-9]{6,7})@falcon-school\.com$/.exec(target)?.[1];
+  let isValidStudent=false;
+  if(studentId){const {data:st}=await admin.from("students").select("student_id").eq("student_id",studentId).maybeSingle();isValidStudent=!!st;}
+  if(!targetStaff&&!isValidStudent)return res(404,{error:"School account not found"});
+  if(change==="role"){
+    // A role change must be backed by a real profile in the target role.
+    // Do not fabricate teacher IDs or student IDs or overwrite existing records.
+    if(targetStaff && (desired==="teacher"||desired==="admin")){
+      const {error:changeError}=await admin.from("efips_google_staff_accounts").update({role:desired}).eq("email",target);
+      if(changeError)return res(503,{error:"Could not change staff role"});
+      return res(200,{ok:true,role:desired});
+    }
+    if(isValidStudent&&desired==="student")return res(200,{ok:true,role:"student"});
+    return res(409,{error:"Target role requires a matching school roster profile; no record was changed"});
+  }
+  if(change==="disable"||change==="enable"){
+    const disabled=change==="disable";
+    const {error:accessError}=await admin.from("efips_account_access_controls")
+      .upsert({email:target,disabled_at:disabled?new Date().toISOString():null,updated_at:new Date().toISOString(),updated_by:email},{onConflict:"email"});
+    if(accessError)return res(503,{error:"Could not update account access"});
+    return res(200,{ok:true,disabled});
+  }
+  return res(400,{error:"Invalid access operation"});
+ }
+ if(action==="direct"){
+  const type=String(body.user_type||"");
+  const id=String(body.user_id||"").trim();
+  const book=String(body.book_name||"").trim().slice(0,240);
+  if(!book||!id||!["student","teacher"].includes(type))return res(400,{error:"Invalid direct borrowing"});
+  if(type==="student"){
+    if(!/^[0-9]{6,7}$/.test(id))return res(400,{error:"Invalid student ID"});
+    const {data:st}=await admin.from("students").select("student_id").eq("student_id",id).maybeSingle();
+    if(!st)return res(404,{error:"Student not in roster"});
+  }else{
+    const {data:tc}=await admin.from("efips_google_staff_accounts").select("teacher_id").eq("teacher_id",id).maybeSingle();
+    if(!tc)return res(404,{error:"Teacher has no approved school email"});
+  }
+  const {data:created,error:createError}=await admin.from("borrowings").insert([{
+   user_id:id,user_type:type,book_name:book,status:"pending",approval_email_status:"not_applicable"
+  }]).select("id").single();
+  if(createError||!created)return res(503,{error:"Could not save direct loan"});
+  body.borrowing_id=created.id;
+  action="approve";
+ }
+ if(action==="approve"){
+  const id=Number(body.borrowing_id);if(!Number.isSafeInteger(id)||id<=0)return res(400,{error:"Invalid borrowing"});
+  const {data:loan,error:loanErr}=await admin.from("borrowings").select("*").eq("id",id).maybeSingle();
+  if(loanErr||!loan||loan.status!=="pending")return res(409,{error:"Borrowing is not pending"});
+  let target="";
+  if(loan.user_type==="student"&&/^[0-9]{6,7}$/.test(String(loan.user_id||""))){
+   target=String(loan.user_id)+"@falcon-school.com";
+   const {data:student}=await admin.from("students").select("student_id").eq("student_id",loan.user_id).maybeSingle();
+   if(!student)return res(404,{error:"Student not found"});
+  }else if(["teacher","admin"].includes(String(loan.user_type))){
+   const {data:row}=await admin.from("efips_google_staff_accounts").select("email").eq("teacher_id",String(loan.user_id)).maybeSingle();
+   if(!row?.email)return res(404,{error:"Staff email unavailable"});target=row.email;
+  }else return res(400,{error:"Unrecognized borrower"});
+  const today=new Date().toISOString().slice(0,10);
+  const requested=String(body.return_date||"").slice(0,10);
+  const candidate=/^\d{4}-\d{2}-\d{2}$/.test(requested)?new Date(requested+"T00:00:00Z"):null;
+  const due=candidate&&Number.isFinite(candidate.getTime())&&candidate.getTime()>Date.now()&&candidate.getTime()<Date.now()+100*86400000
+   ? requested:new Date(Date.now()+15*86400000).toISOString().slice(0,10);
+  const {data:updated,error:updateError}=await admin.from("borrowings")
+    .update({status:"active",user_email:target,borrow_date:today,return_date:due,approval_email_status:"pending"})
+    .eq("id",id).eq("status","pending").select("id").maybeSingle();
+  if(updateError||!updated)return res(409,{error:"Could not approve borrowing"});
+  const resend=Deno.env.get("RESEND_API_KEY");
+  if(!resend)return res(200,{ok:true,emailSent:false,notice:"Email service not configured",email:target,return_date:due});
+  const safe=(v:unknown)=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"} as Record<string,string>)[c]);
+  const book=safe(loan.book_name),person=safe(loan.user_name||loan.user_id);
+  const html=`<div style="font-family:Tahoma,Arial,sans-serif;max-width:680px;margin:auto;padding:24px;color:#183044"><h2 style="color:#076b5e">EFIPS Library | مكتبة صقر الإمارات</h2><div dir="rtl"><h3>تأكيد استعارة كتاب</h3><p>مرحباً ${person}، تمت الموافقة على استعارة الكتاب <strong>${book}</strong>.</p><p>تاريخ الاستعارة: ${today}</p><p>تاريخ الإرجاع: ${due}</p></div><hr/><h3>Borrowing Approved</h3><p>Dear ${person}, your request to borrow <strong>${book}</strong> has been approved.</p><p>Borrowed: ${today} | Return by: ${due}</p></div>`;
+  // Only the verified server-side address is used. No client-supplied "to".
+  const {data:claimed}=await admin.from("borrowings").update({approval_email_status:"sending",approval_email_attempted_at:new Date().toISOString()}).eq("id",id).eq("approval_email_status","pending").select("id").maybeSingle();
+  if(!claimed)return res(200,{ok:true,emailSent:false,notice:"Email already in progress",email:target,return_date:due});
+  try{
+   const result=await fetch("https://api.resend.com/emails",{method:"POST",headers:{"Authorization":`Bearer ${resend}`,"Content-Type":"application/json"},body:JSON.stringify({from:"EFIPS Library <library@efipslibrary.com>",to:[target],subject:"EFIPS Library | Borrowing Confirmation",html})});
+   const receipt=await result.json().catch(()=>({}));
+   if(!result.ok||!receipt?.id)throw new Error("Delivery rejected");
+   await admin.from("borrowings").update({approval_email_status:"sent",approval_email_sent_at:new Date().toISOString(),approval_email_error:null}).eq("id",id).eq("approval_email_status","sending");
+   return res(200,{ok:true,emailSent:true,email:target,return_date:due});
+  }catch{
+   await admin.from("borrowings").update({approval_email_status:"failed",approval_email_error:"Automated email delivery failed"}).eq("id",id).eq("approval_email_status","sending");
+   return res(200,{ok:true,emailSent:false,notice:"Email delivery failed",email:target,return_date:due});
+  }
+ }
+ return res(400,{error:"Unsupported action"});
+});

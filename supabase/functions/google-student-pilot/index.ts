@@ -58,6 +58,13 @@ Deno.serve(async (req: Request) => {
   if (!hasGoogleIdentity) return json(403, { code: "SCHOOL_GOOGLE_REQUIRED" });
 
   const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { data: access, error: accessError } = await admin
+    .from("efips_account_access_controls").select("disabled_at,login_role")
+    .eq("email", email).maybeSingle();
+  if (accessError) return json(503, { code: "ACCESS_CHECK_FAILED" });
+  if (access?.disabled_at || (access?.login_role && access.login_role !== "student"))
+    return json(403, { code: "ACCOUNT_DISABLED_OR_ROLE_CHANGED" });
+
   // School-managed verified Google account naming convention. The student ID
   // comes exclusively from the provider-verified email, never request content.
   const studentId = emailMatch[1];
@@ -104,5 +111,5 @@ Deno.serve(async (req: Request) => {
     .insert([{ user_id: student.student_id, user_type: "student" }]);
   if (logError) console.error("School OAuth audit insert failed");
 
-  return json(200, { profile: student });
+  return json(200, { profile: { ...student, email } });
 });
