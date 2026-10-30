@@ -489,6 +489,56 @@ const SchedulePage: React.FC = () => {
                 @keyframes schedule-saqr-pulse{0%,100%{opacity:.65;transform:scale(.96)}50%{opacity:1;transform:scale(1.06)}}
                 @keyframes schedule-saqr-spin{to{transform:rotate(360deg)}}
                 @keyframes schedule-saqr-twinkle{0%,100%{opacity:.3}50%{opacity:1}}
+
+                /* Direction-aware placement: art on the physical right in Arabic, left in English. */
+                .schedule-efips-hero .schedule-efips-hero-layout{
+                    direction:ltr;grid-template-columns:minmax(0,.9fr) minmax(420px,1.1fr);
+                    grid-template-areas:"copy art";gap:clamp(12px,2.8vw,42px);align-items:center;
+                }
+                [dir="rtl"] .schedule-efips-hero .schedule-efips-hero-layout{grid-template-areas:"copy art";}
+                [dir="ltr"] .schedule-efips-hero .schedule-efips-hero-layout{grid-template-areas:"art copy";}
+                .schedule-efips-hero .schedule-efips-hero-copy{grid-area:copy;direction:ltr;text-align:start;}
+                [dir="rtl"] .schedule-efips-hero .schedule-efips-hero-copy{direction:rtl;}
+                .schedule-efips-hero .schedule-efips-art-area{
+                    grid-area:art;direction:ltr;display:flex;flex-direction:column;justify-content:center;
+                    align-items:stretch;gap:4px;min-width:0;width:100%;max-width:560px;
+                    justify-self:stretch;
+                }
+                .schedule-efips-hero .schedule-saqr-layout{flex-direction:column;gap:4px;}
+                .schedule-efips-hero .schedule-efips-portrait{
+                    box-sizing:border-box;width:100%;max-width:none;height:clamp(380px,36vw,500px);
+                    margin:0;flex-shrink:0;
+                }
+                .schedule-efips-hero .schedule-saqr-image{
+                    width:100%;height:100%;object-fit:contain;object-position:center bottom;
+                }
+                .schedule-efips-hero .schedule-efips-actions{
+                    width:100%;max-width:520px;margin:0 auto;display:grid;
+                    grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;direction:rtl;
+                }
+                [dir="ltr"] .schedule-efips-hero .schedule-efips-actions{direction:ltr;}
+                .schedule-efips-hero .schedule-efips-action{min-width:0;}
+                @media(min-width:1151px){
+                    .schedule-efips-hero{padding-inline:clamp(26px,3vw,52px);}
+                    .schedule-efips-hero .schedule-efips-hero-layout{grid-template-columns:minmax(0,.88fr) minmax(460px,1.12fr);}
+                    .schedule-efips-hero .schedule-efips-portrait{height:clamp(415px,36vw,525px);}
+                }
+                @media(min-width:731px) and (max-width:1150px){
+                    .schedule-efips-hero .schedule-efips-hero-layout{grid-template-columns:minmax(0,1fr) minmax(315px,1fr);gap:12px;}
+                    .schedule-efips-hero .schedule-efips-portrait{height:clamp(305px,36vw,430px);}
+                    .schedule-efips-hero .schedule-efips-actions{grid-template-columns:1fr;max-width:340px;}
+                }
+                @media(max-width:730px){
+                    .schedule-efips-hero .schedule-efips-hero-layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"copy" "art";gap:10px;}
+                    .schedule-efips-hero .schedule-efips-hero-copy{text-align:center;}
+                    .schedule-efips-hero .schedule-efips-art-area{max-width:100%;width:100%;justify-self:center;}
+                    .schedule-efips-hero .schedule-efips-portrait{height:clamp(280px,78vw,405px);width:100%;max-width:405px;margin:auto;}
+                    .schedule-efips-hero .schedule-efips-actions{grid-template-columns:repeat(2,minmax(0,1fr));max-width:100%;}
+                }
+                @media(max-width:380px){
+                    .schedule-efips-hero .schedule-efips-portrait{height:clamp(250px,75vw,300px);}
+                    .schedule-efips-hero .schedule-efips-actions{grid-template-columns:1fr;}
+                }
             `}</style>
             <main className="max-w-[1500px] mx-auto print:hidden relative z-10">
                 {/* Page heading and actions */}
