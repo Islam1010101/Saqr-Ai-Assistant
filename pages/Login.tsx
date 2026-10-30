@@ -13,7 +13,6 @@ export default function Login() {
   // Use the shared website language so public pages follow the login choice.
   const { locale: lang, setLocale: setLang } = useLanguage();
   const [loginType, setLoginType] = useState<'student' | 'teacher'>('student');
-  const [teacherId, setTeacherId] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showFlag, setShowFlag] = useState(false); // حالة إظهار علم الإمارات عند الضغط على صقر
@@ -108,39 +107,18 @@ export default function Login() {
     }
   };
 
-  // دالة تسجيل دخول المعلمين والأدمن
-  const handleTeacherLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!teacherId.trim()) return;
-
-    setLoading(true);
-    setError('');
-
+  const handleGoogleTeacherLogin = async () => {
+    setError(''); setLoading(true);
     try {
-      const tId = teacherId.trim().toUpperCase();
-
-      const { data, error } = await supabase
-        .from('teachers')
-        .select('*')
-        .eq('teacher_id', tId)
-        .single();
-
-      if (error || !data) {
-        setError(lang === 'ar' ? 'الرقم الوظيفي غير صحيح.' : 'Invalid Teacher ID.');
-        setLoading(false);
-        return;
-      }
-
-      const isAdmin = data.teacher_id === 'HR785';
-
-      localStorage.setItem('user_type', isAdmin ? 'admin' : 'teacher'); 
-      localStorage.setItem('current_user', JSON.stringify(data));
-      window.location.href = '#/home';
-      await supabase.from('login_logs').insert([{ user_id: tId, user_type: isAdmin ? 'admin' : 'teacher' }]);
-      
-    } catch (err) {
-      setError(lang === 'ar' ? 'حدث خطأ في الاتصال بقاعدة البيانات.' : 'Database connection error.');
-    } finally {
+      await supabase.auth.signOut();
+      const { error: googleError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin + '/?efips_google_teacher=1',
+          scopes: 'openid email profile', queryParams: { prompt: 'select_account' } }
+      });
+      if (googleError) throw googleError;
+    } catch {
+      setError(lang === 'ar' ? 'تعذر بدء دخول Google للمعلمين.' : 'Could not start teacher Google sign-in.');
       setLoading(false);
     }
   };
@@ -268,7 +246,7 @@ export default function Login() {
               <StudentIcon /> {lang === 'ar' ? 'بوابة الطلاب' : 'Students'}
             </button>
             <button
-              onClick={() => { setLoginType('teacher'); setError(''); setTeacherId(''); }}
+              onClick={() => { setLoginType('teacher'); setError(''); }}
               className={`flex-1 py-3 px-2 text-xs sm:text-sm font-black rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 md:gap-2 ${
                 loginType === 'teacher' 
                 ? 'bg-white text-indigo-600 shadow-md border border-slate-200' 
@@ -314,43 +292,16 @@ export default function Login() {
             </div>
           ) : (
             /* فورم المعلمين */
-            <form onSubmit={handleTeacherLogin} className="space-y-5 animate-fade-in">
-              <div className="space-y-2 text-start">
-                <label className="block text-xs md:text-sm font-black text-slate-600 px-1">
-                  {lang === 'ar' ? 'الرقم الوظيفي للمعلم (EFIPS ID)' : 'Teacher EFIPS ID'}
-                </label>
-
-                <input
-                  type="text"
-                  value={teacherId}
-                  onChange={(e) => setTeacherId(e.target.value)}
-                  placeholder="HRXXXXX"
-                  className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-200 rounded-[1.5rem] focus:outline-none focus:border-indigo-500 focus:bg-white transition-all text-slate-800 placeholder-slate-400 font-mono text-base md:text-lg tracking-widest text-center uppercase shadow-inner"
-                  required
-                />
-              </div>
-
-              {error && (
-                <div className="bg-rose-50 border-2 border-rose-200 text-rose-600 p-3 rounded-2xl text-xs md:text-sm font-bold text-center animate-shake">
-                  {error}
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-4 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-black rounded-[1.5rem] transition-all duration-300 shadow-md hover:shadow-indigo-500/25 active:scale-[0.98] disabled:opacity-70 text-sm md:text-base border-b-4 border-indigo-700 active:border-b-0"
-              >
-                {loading ? (lang === 'ar' ? 'جاري التحقق...' : 'Verifying...') : (lang === 'ar' ? 'دخول المعلم' : 'Teacher Login')}
+            <div className="space-y-5 animate-fade-in">
+              <p className="text-center text-sm font-bold text-slate-600 leading-relaxed">{lang === 'ar' ? 'دخول المعلمين والإدارة عبر حساب Google المدرسي المعتمد فقط.' : 'Teachers and administrators sign in using approved school Google accounts only.'}</p>
+              {error && <div role="alert" className="bg-rose-50 border-2 border-rose-200 text-rose-600 p-3 rounded-2xl text-xs md:text-sm font-bold text-center">{error}</div>}
+              <button type="button" onClick={() => void handleGoogleTeacherLogin()} disabled={loading}
+                className="w-full min-h-14 px-4 py-4 rounded-[1.5rem] bg-gradient-to-r from-indigo-600 to-emerald-600 hover:from-indigo-700 hover:to-emerald-700 text-white font-black text-sm md:text-base shadow-lg disabled:opacity-60">
+                {lang === 'ar' ? 'الدخول بحساب Google المدرسي للمعلمين' : 'Sign in with School Google — Staff'}
               </button>
-
-              {/* الرابط المطلوب إضافته تحت زر الدخول للمكتبة */}
-              <div className="text-center pt-2">
-                <Link to="/about" className="text-xs md:text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:underline transition-all">
-                  {lang === 'ar' ? 'عن مدرسة صقر الإمارات الدولية الخاصة' : 'More About EFIPS'}
-                </Link>
-              </div>
-            </form>
+              <p className="text-center text-xs font-semibold text-slate-500">{lang === 'ar' ? 'الحسابات التي ليس لها بريد مدرسي معتمد لا يمكنها الدخول.' : 'Accounts without an approved school email cannot sign in.'}</p>
+              <div className="text-center pt-2"><Link to="/about" className="text-xs font-bold text-indigo-600 hover:underline">{lang === 'ar' ? 'عن المدرسة' : 'More About EFIPS'}</Link></div>
+            </div>
           )}
 
           <div className="mt-6 text-center">
