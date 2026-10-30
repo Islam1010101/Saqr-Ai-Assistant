@@ -8,7 +8,7 @@ const translations = {
   approval:'تم التحقق من Google، لكن تعذر ربط الحساب بالسجل المدرسي. تواصل مع إدارة المكتبة دون تعديل بياناتك.',
   school:'هذا ليس حساب Google مدرسيًا معتمدًا. يجب استخدام حساب @falcon-school.com.',
   failed:'تعذر إكمال التحقق الآمن. لم يتم تسجيل الدخول أو تغيير بيانات الطالب.',
-  back:'العودة إلى الدخول برقم الطالب',
+  back:'العودة إلى تسجيل الدخول',
   title:'التحقق من هوية الطالب'
  },
  en: {
@@ -16,7 +16,7 @@ const translations = {
   approval:'Google sign-in succeeded but the school roster link could not be confirmed. Please contact the library administrator; no records were changed.',
   school:'This is not a verified school Google account. Use your @falcon-school.com account.',
   failed:'Secure verification could not be completed. No student session was created or records changed.',
-  back:'Back to Student ID sign-in',
+  back:'Back to sign-in',
   title:'Student account verification'
  }
 } as const;
@@ -72,9 +72,11 @@ export default function GoogleStudentReturn() {
   // Single navigation effect: do not cancel the callback under React StrictMode.
  }, []);
 
- return <main dir={lang === 'ar' ? 'rtl' : 'ltr'} className="min-h-[100dvh] bg-white dark:bg-black flex items-center justify-center p-5 font-sans">
-   <section role={state === 'checking' ? 'status' : 'alert'} className="w-full max-w-lg rounded-3xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-slate-900 p-7 sm:p-10 text-center shadow-xl">
-    <img src="/saqr-full.png" alt={lang === 'ar' ? 'صقر المساعد الذكي' : 'Saqr, the library assistant'} className="h-32 sm:h-40 w-auto max-w-full object-contain mx-auto mb-6 drop-shadow-lg"/>
+ return <main dir={lang === 'ar' ? 'rtl' : 'ltr'} className="relative isolate min-h-[100dvh] overflow-hidden bg-white dark:bg-black flex items-center justify-center p-5 font-sans">
+   <div aria-hidden="true" className="pointer-events-none absolute -top-24 -right-20 w-80 h-80 rounded-full bg-teal-400/20 dark:bg-teal-600/10 blur-3xl animate-pulse" />
+   <div aria-hidden="true" className="pointer-events-none absolute -bottom-28 -left-24 w-96 h-96 rounded-full bg-sky-400/20 dark:bg-indigo-500/10 blur-3xl animate-pulse" />
+   <section role={state === 'checking' ? 'status' : 'alert'} className="relative z-10 w-full max-w-lg rounded-[2.5rem] border border-emerald-200/70 dark:border-emerald-900 bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl p-7 sm:p-10 text-center shadow-2xl transition-all duration-500 hover:-translate-y-1 hover:shadow-emerald-500/15">
+    <img src="/saqr-full.png" alt={lang === 'ar' ? 'صقر المساعد الذكي' : 'Saqr, the library assistant'} className="h-40 sm:h-52 w-auto max-w-full object-contain mx-auto mb-6 drop-shadow-xl animate-float"/>
     <h1 className="font-black text-xl sm:text-2xl text-emerald-800 dark:text-emerald-200">{t.title}</h1>
     <p className="font-semibold text-sm sm:text-base text-slate-700 dark:text-slate-200 leading-8 my-6">{t[state]}</p>
     {state !== 'checking' && <a href="/#/" className="inline-flex min-h-12 justify-center items-center rounded-2xl bg-emerald-700 px-6 py-3 text-white text-sm font-black hover:bg-emerald-800">{t.back}</a>}
