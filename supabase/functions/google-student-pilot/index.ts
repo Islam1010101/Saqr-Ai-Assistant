@@ -3,9 +3,10 @@ import { createClient } from "npm:@supabase/supabase-js@2.58.0";
 
 /**
  * EFIPS Google student pilot.
- * A Google account is authenticated by Supabase, but is NOT authorized as a
- * student until a school administrator has linked its auth UUID manually in
- * public.efips_verified_school_readers (RLS protected).
+ * The school confirms the official Google email rule is:
+ *   verified Google <6-or-7-digit student ID>@falcon-school.com
+ * Identity is validated with Google provider identity, then matched to the
+ * existing student roster, and persisted to the RLS-protected mapping table.
  *
  * No client-supplied student ID or email is trusted. Never expose service role.
  */
@@ -45,8 +46,8 @@ Deno.serve(async (req: Request) => {
     return json(401, { code: "INVALID_GOOGLE_SESSION" });
 
   const email = user.email.trim().toLowerCase();
-  if (!/^[^@\s]+@falcon-school\.com$/.test(email))
-    return json(403, { code: "SCHOOL_GOOGLE_REQUIRED" });
+  const emailMatch = /^([0-9]{6,7})@falcon-school\.com$/.exec(email);
+  if (!emailMatch) return json(403, { code: "SCHOOL_GOOGLE_REQUIRED" });
 
   // Check the actual Google identity, not editable user_metadata or email hints.
   const hasGoogleIdentity = (user.identities || []).some((i) =>
@@ -57,22 +58,46 @@ Deno.serve(async (req: Request) => {
   if (!hasGoogleIdentity) return json(403, { code: "SCHOOL_GOOGLE_REQUIRED" });
 
   const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
-  const { data: link, error: mappingError } = await admin
-    .from("efips_verified_school_readers")
-    .select("school_user_id")
-    .eq("auth_user_id", user.id)
-    .eq("user_type", "student")
-    .maybeSingle();
-  if (mappingError) return json(503, { code: "VERIFICATION_UNAVAILABLE" });
-  if (!link?.school_user_id) return json(403, { code: "SCHOOL_APPROVAL_REQUIRED" });
-
+  // School-managed verified Google account naming convention. The student ID
+  // comes exclusively from the provider-verified email, never request content.
+  const studentId = emailMatch[1];
   const { data: student, error: studentError } = await admin
     .from("students")
     .select("id,student_id,name_ar,name_en,grade,points,created_at")
-    .eq("student_id", link.school_user_id)
+    .eq("student_id", studentId)
     .maybeSingle();
   if (studentError) return json(503, { code: "ROSTER_UNAVAILABLE" });
   if (!student) return json(403, { code: "STUDENT_NOT_FOUND" });
+
+  const { data: existing, error: mappingError } = await admin
+    .from("efips_verified_school_readers")
+    .select("school_user_id,user_type")
+    .eq("auth_user_id", user.id)
+    .maybeSingle();
+  if (mappingError) return json(503, { code: "VERIFICATION_UNAVAILABLE" });
+  if (existing && (existing.user_type !== "student" || existing.school_user_id !== studentId))
+    return json(403, { code: "ACCOUNT_LINK_CONFLICT" });
+
+  if (!existing) {
+    // Persist the provider-verified mapping for the reading challenge and other
+    // features that already require this protected table. Never overwrite a
+    // conflicting school-admin-approved mapping.
+    const { error: insertError } = await admin.from("efips_verified_school_readers")
+      .insert([{ auth_user_id: user.id, user_type: "student", school_user_id: studentId,
+        verified_by: "verified_google_school_email" }]);
+    if (insertError && insertError.code !== "23505")
+      return json(503, { code: "VERIFICATION_UNAVAILABLE" });
+    if (insertError) {
+      // Another request may have created the mapping concurrently.
+      const { data: current, error: checkError } = await admin
+        .from("efips_verified_school_readers")
+        .select("school_user_id,user_type")
+        .eq("auth_user_id", user.id)
+        .maybeSingle();
+      if (checkError || current?.user_type !== "student" || current?.school_user_id !== studentId)
+        return json(403, { code: "ACCOUNT_LINK_CONFLICT" });
+    }
+  }
 
   // Audit the successful pilot session; logging issues must not block a verified reader.
   const { error: logError } = await admin.from("login_logs")
