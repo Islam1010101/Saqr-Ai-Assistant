@@ -426,7 +426,7 @@ const FeedbackPage: React.FC = () => {
                         </div>
                         <div className="feedback-hero-scene" aria-hidden="true">
                          <span className="feedback-hero-halo"/><span className="feedback-hero-orbit"/><span className="feedback-hero-orbit feedback-hero-orbit--second"/>
-                         <span className="feedback-hero-central"><svg viewBox="0 0 96 96" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round"><rect x="18" y="18" width="59" height="56" rx="8"/><path d="M30 36h31M30 48h20M30 60h13m13-7 7 7 13-18"/></svg></span>
+                         <span className="feedback-hero-central feedback-saqr-stage"><img className="feedback-saqr-teacher" src="/Saqr%20Teacher.png" alt="" loading="eager" decoding="async" /></span>
                          <span className="feedback-hero-symbol feedback-hero-symbol--idea"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M9 18h6m-5 3h4M8 15a7 7 0 1 1 8 0c-1 1-1.5 2-1.5 3h-5c0-1-.5-2-1.5-3z"/></svg></span>
                          <span className="feedback-hero-symbol feedback-hero-symbol--star"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="m12 2 2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5L12 2Z"/></svg></span>
                          <span className="feedback-hero-symbol feedback-hero-symbol--book"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 6c-3-2-7-2-9-1v14c3-1 7-1 9 1 3-2 7-2 9-1V5c-3-1-7-1-9 1Zm0 0v14"/></svg></span>
