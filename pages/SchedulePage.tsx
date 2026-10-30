@@ -465,6 +465,78 @@ const SchedulePage: React.FC = () => {
                 }
                 @media(max-width:380px){.schedule-efips-hero{padding-inline:13px;}.schedule-efips-portrait{height:230px;}
                     .schedule-efips-actions{grid-template-columns:1fr;}}
+                /* Mobile-only redesign: Feedback-style centered hierarchy, compact Saqr scene,
+                   no horizontal overflow. Booking controls and all handlers remain untouched. */
+                @media(max-width:730px){
+                    .schedule-efips-hero{
+                        box-sizing:border-box;width:100%;max-width:100%;min-width:0;
+                        overflow:hidden;padding:20px 15px 19px;border-radius:26px;
+                        box-shadow:0 14px 40px rgba(12,91,76,.16);
+                    }
+                    .schedule-efips-hero .schedule-efips-hero-layout{
+                        display:flex;flex-direction:column;align-items:center;gap:4px;
+                        width:100%;min-width:0;
+                    }
+                    .schedule-efips-hero .schedule-efips-hero-copy{
+                        width:100%;max-width:100%;min-width:0;text-align:center;
+                    }
+                    .schedule-efips-hero .schedule-efips-kicker{
+                        box-sizing:border-box;display:inline-flex;max-width:100%;min-width:0;
+                        padding:7px 12px;border-radius:999px;line-height:1.4;
+                        font-size:clamp(10px,2.9vw,12px);white-space:normal;
+                        overflow-wrap:anywhere;
+                    }
+                    .schedule-efips-hero .schedule-user-name{
+                        display:inline;min-width:0;overflow-wrap:anywhere;
+                    }
+                    .schedule-efips-hero .schedule-efips-heading{
+                        font-size:clamp(24px,6.5vw,35px);line-height:1.4;
+                        margin:9px auto 0;padding:0 3px;max-width:100%;
+                        overflow-wrap:break-word;letter-spacing:-.025em;
+                    }
+                    .schedule-efips-hero .schedule-efips-description{
+                        max-width:34ch;margin:8px auto 0;
+                        font-size:clamp(11px,3vw,13px);line-height:1.7;
+                        overflow-wrap:anywhere;
+                    }
+                    .schedule-efips-hero .schedule-header-rule{
+                        justify-content:center;margin-top:11px;
+                    }
+                    .schedule-efips-hero .schedule-efips-art-area{
+                        width:100%;max-width:100%;min-width:0;
+                        margin:0 auto;gap:1px;
+                    }
+                    .schedule-efips-hero .schedule-saqr-layout{
+                        width:100%;max-width:100%;gap:0;
+                    }
+                    .schedule-efips-hero .schedule-efips-portrait{
+                        width:min(100%,222px);max-width:222px;
+                        height:177px;margin:1px auto 0;
+                    }
+                    .schedule-efips-hero .schedule-saqr-symbol{
+                        width:clamp(32px,9vw,42px);border-radius:13px;
+                    }
+                    .schedule-efips-hero .schedule-efips-actions{
+                        width:100%;max-width:100%;
+                        grid-template-columns:repeat(2,minmax(0,1fr));
+                        gap:8px;margin:5px auto 0;
+                    }
+                    .schedule-efips-hero .schedule-efips-action{
+                        min-width:0;min-height:46px;padding:9px 7px;
+                        font-size:clamp(10px,2.7vw,12px);line-height:1.5;
+                        white-space:normal;overflow-wrap:anywhere;
+                    }
+                }
+                @media(max-width:420px){
+                    .schedule-efips-hero{padding:18px 12px 16px;border-radius:22px;}
+                    .schedule-efips-hero .schedule-efips-portrait{width:190px;height:157px;}
+                    .schedule-efips-hero .schedule-efips-actions{
+                        grid-template-columns:minmax(0,1fr);max-width:300px;
+                    }
+                    .schedule-efips-hero .schedule-efips-action{
+                        min-height:43px;padding:9px 13px;font-size:12px;
+                    }
+                }
                 @media(hover:none){.schedule-efips-action:hover{transform:none;}}
                 @media(prefers-reduced-motion:reduce){.schedule-efips-hero *{animation:none!important;transition:none!important;}}
                 @keyframes schedule-header-enter{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
