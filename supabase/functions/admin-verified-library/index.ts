@@ -51,6 +51,40 @@ Deno.serve(async(req:Request)=>{
   if(controlsError)return res(503,{error:"Account controls unavailable"});
   return res(200,{ok:true,staff:staffList,controls});
  }
+ if(action==="create-user"){
+  const type=String(body.user_type||"");
+  const nameAr=String(body.name_ar||"").trim().slice(0,160);
+  const nameEn=String(body.name_en||"").trim().slice(0,160)||nameAr;
+  const requestedEmail=String(body.email||"").trim().toLowerCase();
+  if(!nameAr||!nameEn||!["student","teacher"].includes(type))return res(400,{error:"Valid names and user type are required"});
+  if(type==="student"){
+   const match=/^([0-9]{6,7})@falcon-school\.com$/.exec(requestedEmail);
+   if(!match)return res(400,{error:"Student email must use numeric school ID"});
+   const studentId=match[1];
+   const {data:existing,error:checkError}=await admin.from("students").select("student_id").eq("student_id",studentId).maybeSingle();
+   if(checkError)return res(503,{error:"Could not check student roster"});
+   if(existing)return res(409,{error:"Student already exists"});
+   const {error:createError}=await admin.from("students").insert([{student_id:studentId,name_ar:nameAr,name_en:nameEn,grade:String(body.grade||"").slice(0,80),points:0}]);
+   if(createError)return res(503,{error:"Could not create student"});
+   return res(200,{ok:true,email:requestedEmail,user_id:studentId,user_type:"student",note:"Student may sign in when school Google account is provisioned"});
+  }
+  if(!/^[^@\s]+@falcon-school\.com$/.test(requestedEmail))return res(400,{error:"Approved school email required"});
+  const {data:existingStaff,error:staffError}=await admin.from("efips_google_staff_accounts").select("email").eq("email",requestedEmail).maybeSingle();
+  if(staffError)return res(503,{error:"Could not check staff directory"});
+  if(existingStaff)return res(409,{error:"Staff email already registered"});
+  const teacherId="GE"+crypto.randomUUID().replace(/-/g,"").slice(0,12).toUpperCase();
+  const {error:teacherError}=await admin.from("teachers").insert([{teacher_id:teacherId,name_ar:nameAr,name_en:nameEn}]);
+  if(teacherError)return res(503,{error:"Could not create teacher"});
+  const {error:sourceError}=await admin.from("efips_google_staff_source").insert([{email:requestedEmail,name_ar:nameAr,name_en:nameEn,matched_teacher_id:teacherId,match_status:"verified"}]);
+  if(sourceError){await admin.from("teachers").delete().eq("teacher_id",teacherId);return res(503,{error:"Could not register school staff source"});}
+  const {error:allowError}=await admin.from("efips_google_staff_accounts").insert([{email:requestedEmail,teacher_id:teacherId,role:"teacher"}]);
+  if(allowError){
+   await admin.from("efips_google_staff_source").delete().eq("email",requestedEmail);
+   await admin.from("teachers").delete().eq("teacher_id",teacherId);
+   return res(503,{error:"Could not authorize school staff account"});
+  }
+  return res(200,{ok:true,email:requestedEmail,user_id:teacherId,user_type:"teacher",note:"Staff may sign in when school Google account is provisioned"});
+ }
  if(action==="access"){
   const target=String(body.email||"").trim().toLowerCase();
   if(!/^[^@\s]+@falcon-school\.com$/.test(target))return res(400,{error:"School email required"});
