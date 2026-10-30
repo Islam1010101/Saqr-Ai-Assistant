@@ -296,7 +296,11 @@ export default function Login() {
                 className="w-full min-h-14 px-4 py-4 rounded-[1.5rem] bg-gradient-to-r from-indigo-600 to-emerald-600 hover:from-indigo-700 hover:to-emerald-700 text-white font-black text-sm md:text-base shadow-lg disabled:opacity-60">
                 {lang === 'ar' ? 'الدخول بحساب Google المدرسي للمعلمين' : 'Sign in with School Google — Staff'}
               </button>
-              <div className="text-center pt-2"><Link to="/about" className="text-xs font-bold text-indigo-600 hover:underline">{lang === 'ar' ? 'عن المدرسة' : 'More About EFIPS'}</Link></div>
+              <div className="text-center pt-2">
+                <Link to="/about" className="text-xs md:text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline transition-all">
+                  {lang === 'ar' ? 'عن مدرسة صقر الإمارات الدولية الخاصة' : 'More About EFIPS'}
+                </Link>
+              </div>
             </div>
           )}
 
