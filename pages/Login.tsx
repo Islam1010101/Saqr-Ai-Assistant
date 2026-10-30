@@ -13,7 +13,6 @@ export default function Login() {
   // Use the shared website language so public pages follow the login choice.
   const { locale: lang, setLocale: setLang } = useLanguage();
   const [loginType, setLoginType] = useState<'student' | 'teacher'>('student');
-  const [studentId, setStudentId] = useState('');
   const [teacherId, setTeacherId] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -105,36 +104,6 @@ export default function Login() {
       if (googleError) throw googleError;
     } catch {
       setError(lang === 'ar' ? 'تعذر بدء تسجيل الدخول بحساب Google المدرسي.' : 'Unable to start school Google sign-in.');
-      setLoading(false);
-    }
-  };
-
-  // دالة تسجيل دخول الطلاب
-  const handleStudentLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!studentId.trim()) return;
-
-    setLoading(true);
-    setError('');
-
-    try {
-      const { data, error } = await supabase
-        .from('students')
-        .select('*')
-        .eq('student_id', studentId.trim())
-        .single();
-
-      if (error || !data) {
-        setError(lang === 'ar' ? 'رقم الطالب غير صحيح، يرجى المحاولة مرة أخرى.' : 'Invalid Student ID.');
-      } else {
-        localStorage.setItem('user_type', 'student');
-        localStorage.setItem('current_user', JSON.stringify(data));
-        window.location.href = '#/home'; 
-        await supabase.from('login_logs').insert([{ user_id: studentId.trim(), user_type: 'student' }]);
-      }
-    } catch (err) {
-      setError(lang === 'ar' ? 'حدث خطأ في الاتصال بقاعدة البيانات.' : 'Database connection error.');
-    } finally {
       setLoading(false);
     }
   };
@@ -289,7 +258,7 @@ export default function Login() {
           {/* أزرار التبديل */}
           <div className="flex bg-slate-100 p-1.5 rounded-[1.5rem] mb-8 border border-slate-200">
             <button
-              onClick={() => { setLoginType('student'); setError(''); setStudentId(''); }}
+              onClick={() => { setLoginType('student'); setError(''); }}
               className={`flex-1 py-3 px-2 text-xs sm:text-sm font-black rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 md:gap-2 ${
                 loginType === 'student' 
                 ? 'bg-white text-blue-600 shadow-md border border-slate-200' 
@@ -312,38 +281,17 @@ export default function Login() {
 
           {/* فورم الطلاب */}
           {loginType === 'student' ? (
-            <form onSubmit={handleStudentLogin} className="space-y-5 animate-fade-in">
-              <div className="space-y-2 text-start">
-                <label className="block text-xs md:text-sm font-black text-slate-600 px-1">
-                  {lang === 'ar' ? 'رقم الطالب (Student ID)' : 'Student ID'}
-                </label>
-                <input
-                  type="text"
-                  value={studentId}
-                  onChange={(e) => setStudentId(e.target.value)}
-                  placeholder={lang === 'ar' ? 'أدخل رقمك المكون من 6 أو 7 أرقام' : 'Enter 6 or 7 digits ID'}
-                  className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-200 rounded-[1.5rem] focus:outline-none focus:border-blue-500 focus:bg-white transition-all text-slate-800 placeholder-slate-400 font-mono text-base md:text-lg tracking-widest text-center shadow-inner"
-                  required
-                />
-              </div>
-
+            <div className="space-y-5 animate-fade-in">
               {error && (
-                <div className="bg-rose-50 border-2 border-rose-200 text-rose-600 p-3 rounded-2xl text-xs md:text-sm font-bold text-center animate-shake">
+                <div role="alert" className="bg-rose-50 border-2 border-rose-200 text-rose-600 p-3 rounded-2xl text-xs md:text-sm font-bold text-center animate-shake">
                   {error}
                 </div>
               )}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-4 bg-gradient-to-r from-blue-500 to-sky-500 hover:from-blue-600 hover:to-sky-600 text-white font-black rounded-[1.5rem] transition-all duration-300 shadow-md hover:shadow-blue-500/25 active:scale-[0.98] disabled:opacity-70 text-sm md:text-base border-b-4 border-blue-700 active:border-b-0"
-              >
-                {loading ? (lang === 'ar' ? 'جاري التحقق...' : 'Verifying...') : (lang === 'ar' ? 'دخول للمكتبة' : 'Enter Library')}
-              </button>
-
-              <div className="flex items-center gap-3 pt-1" aria-hidden="true">
-                <span className="h-px flex-1 bg-slate-200"/><span className="text-xs font-black text-slate-500">{lang === 'ar' ? 'أو' : 'OR'}</span><span className="h-px flex-1 bg-slate-200"/>
-              </div>
+              <p className="text-center text-sm font-bold text-slate-600 leading-relaxed">
+                {lang === 'ar'
+                  ? 'تسجيل دخول الطلاب باستخدام حساب Google المدرسي فقط (@falcon-school.com).'
+                  : 'Students sign in exclusively with their school Google account (@falcon-school.com).'}
+              </p>
               <button type="button" onClick={() => void handleGoogleStudentLogin()} disabled={loading}
                 className="w-full min-h-14 flex items-center justify-center gap-3 border-2 border-slate-200 hover:border-emerald-300 bg-white hover:bg-slate-50 rounded-[1.5rem] px-4 py-3 text-slate-800 text-sm sm:text-base font-black shadow-sm transition-all disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600">
                 <svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true" className="shrink-0">
@@ -355,7 +303,7 @@ export default function Login() {
                 {lang === 'ar' ? 'الدخول بحساب Google المدرسي' : 'Sign in with school Google'}
               </button>
               <p className="text-center text-xs font-semibold text-slate-500 leading-relaxed">
-                {lang === 'ar' ? 'تجربة للطلاب فقط، بعد اعتماد ربط الحساب المدرسي. يظل الدخول برقم الطالب متاحًا.' : 'Student pilot only, after administrator-approved linking. Student ID login remains available.'}
+                {lang === 'ar' ? 'سيتم استخدام رقمك المدرسي الموجود في بريد Google للتعرف على سجلك دون تغيير بياناتك.' : 'Your verified school Google email links to your existing student record.'}
               </p>
               {/* الرابط المطلوب إضافته تحت زر الدخول للمكتبة */}
               <div className="text-center pt-2">
@@ -363,7 +311,7 @@ export default function Login() {
                   {lang === 'ar' ? 'عن مدرسة صقر الإمارات الدولية الخاصة' : 'More About EFIPS'}
                 </Link>
               </div>
-            </form>
+            </div>
           ) : (
             /* فورم المعلمين */
             <form onSubmit={handleTeacherLogin} className="space-y-5 animate-fade-in">
