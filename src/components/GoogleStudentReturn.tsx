@@ -5,7 +5,7 @@ type State = 'checking' | 'approval' | 'school' | 'failed';
 const translations = {
  ar: {
   checking:'جارٍ التحقق من حساب Google المدرسي وربطه بسجلك المعتمد...',
-  approval:'حساب Google المدرسي صحيح، لكن لم يتم اعتماد ربطه برقم الطالب بعد. اطلب من مسؤول المكتبة اعتماد الربط. لم يتم تغيير بياناتك.',
+  approval:'تم التحقق من Google، لكن تعذر ربط الحساب بالسجل المدرسي. تواصل مع إدارة المكتبة دون تعديل بياناتك.',
   school:'هذا ليس حساب Google مدرسيًا معتمدًا. يجب استخدام حساب @falcon-school.com.',
   failed:'تعذر إكمال التحقق الآمن. لم يتم تسجيل الدخول أو تغيير بيانات الطالب.',
   back:'العودة إلى الدخول برقم الطالب',
@@ -13,7 +13,7 @@ const translations = {
  },
  en: {
   checking:'Verifying your school Google account and approved student record...',
-  approval:'Your school Google account is verified but has not been approved for linking to your student record. Ask the library administrator to approve it. Your records were not changed.',
+  approval:'Google sign-in succeeded but the school roster link could not be confirmed. Please contact the library administrator; no records were changed.',
   school:'This is not a verified school Google account. Use your @falcon-school.com account.',
   failed:'Secure verification could not be completed. No student session was created or records changed.',
   back:'Back to Student ID sign-in',
@@ -42,13 +42,13 @@ export default function GoogleStudentReturn() {
       headers: { Authorization: 'Bearer ' + session.access_token }
     });
     if (error || !data?.profile?.student_id) {
-      if (data?.code === 'SCHOOL_APPROVAL_REQUIRED') throw new Error('APPROVAL');
+      if (data?.code === 'SCHOOL_APPROVAL_REQUIRED' || data?.code === 'ACCOUNT_LINK_CONFLICT' || data?.code === 'STUDENT_NOT_FOUND') throw new Error('APPROVAL');
       if (data?.code === 'SCHOOL_GOOGLE_REQUIRED') throw new Error('SCHOOL');
       // Supabase FunctionsHttpError may contain a structured JSON response.
       if (error && 'context' in error && error.context && 'json' in error.context) {
        try {
         const body = await (error.context as Response).json();
-        if (body?.code === 'SCHOOL_APPROVAL_REQUIRED') throw new Error('APPROVAL');
+        if (['SCHOOL_APPROVAL_REQUIRED','ACCOUNT_LINK_CONFLICT','STUDENT_NOT_FOUND'].includes(body?.code)) throw new Error('APPROVAL');
         if (body?.code === 'SCHOOL_GOOGLE_REQUIRED') throw new Error('SCHOOL');
        } catch (parsed) {
         if (parsed instanceof Error && ['APPROVAL','SCHOOL'].includes(parsed.message)) throw parsed;
