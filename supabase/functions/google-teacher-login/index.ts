@@ -20,6 +20,9 @@ Deno.serve(async(req:Request)=>{
  if(!/^[^@\s]+@falcon-school\.com$/.test(email))return reply(403,{code:"SCHOOL_EMAIL_REQUIRED"});
  if(!(user.identities||[]).some(i=>i.provider==="google" && String(i.identity_data?.email||"").trim().toLowerCase()===email && i.identity_data?.email_verified===true))return reply(403,{code:"GOOGLE_REQUIRED"});
  const admin=createClient(url,secret,{auth:{persistSession:false,autoRefreshToken:false}});
+ const {data:access,error:accessError}=await admin.from("efips_account_access_controls").select("disabled_at,login_role").eq("email",email).maybeSingle();
+ if(accessError)return reply(503,{code:"ACCESS_CHECK_FAILED"});
+ if(access?.disabled_at || (access?.login_role && access.login_role==="student"))return reply(403,{code:"ACCOUNT_DISABLED_OR_ROLE_CHANGED"});
  const {data:entry,error:lookupError}=await admin.from("efips_google_staff_accounts").select("teacher_id,role").eq("email",email).maybeSingle();
  if(lookupError)return reply(503,{code:"ROSTER_UNAVAILABLE"});
  if(!entry)return reply(403,{code:"EMAIL_NOT_AUTHORIZED"});
@@ -27,7 +30,7 @@ Deno.serve(async(req:Request)=>{
  const {data:official,error:officialError}=await admin.from("efips_google_staff_source").select("name_ar,name_en").eq("email",email).maybeSingle();
  if(officialError||!official)return reply(403,{code:"EMAIL_NOT_AUTHORIZED"});
  if(teacherError||!teacher)return reply(403,{code:"STAFF_NOT_FOUND"});
- const role=entry.role==="admin" && entry.teacher_id==="HR785" ? "admin" : "teacher";
+ const role=entry.role==="admin" ? "admin" : "teacher";
  const audit=await admin.from("login_logs").insert([{user_id:teacher.teacher_id,user_type:role}]);if(audit.error)console.error("Teacher login audit unavailable");
- return reply(200,{profile:{...teacher,name_ar:official.name_ar,name_en:official.name_en},role});
+ return reply(200,{profile:{...teacher,name_ar:official.name_ar,name_en:official.name_en,email},role});
 });
