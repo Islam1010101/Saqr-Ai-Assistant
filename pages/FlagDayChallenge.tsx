@@ -1,3 +1,4 @@
+import './challengesMobileResponsive.css';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { supabase } from '../src/utils/supabase';

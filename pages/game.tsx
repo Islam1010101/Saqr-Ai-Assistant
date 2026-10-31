@@ -1,3 +1,4 @@
+import './challengesMobileResponsive.css';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../App';
