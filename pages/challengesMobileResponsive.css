@@ -1,0 +1,34 @@
+/* Mobile-only presentation improvements. No gameplay rules or values are changed. */
+@media (max-width: 640px) {
+  .nh-v2-shell { width: 100%; max-width: 100%; padding-inline: 12px; }
+  .nh-v2-nav { gap: 8px; }
+  .nh-v2-hero { border-radius: 22px; }
+  .nh-v2-hero-grid { grid-template-columns: minmax(0,1fr); }
+  .nh-v2-hero-copy, .nh-v2-hero-heading, .nh-v2-hero-description { min-width: 0; overflow-wrap: anywhere; }
+  .nh-v2-hero-heading { font-size: clamp(1.45rem, 6vw, 2rem); line-height: 1.35; }
+  .nh-v2-stats { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+  .nh-v2-stats > * { min-width: 0; }
+  .nh-v2-grid { grid-template-columns: minmax(0,1fr); gap: 12px; }
+  .nh-challenge-card { min-width: 0; border-radius: 20px; }
+  .nh-v2-shell button, .nh-v2-shell a { touch-action: manipulation; }
+  .nh-v2-shell button { min-height: 44px; }
+  .dewey-game { max-width: 100%; overflow-x: clip; }
+  .dewey-game .game-shell, .dewey-game .game-panel, .dewey-game .challenge-board { width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; }
+  .dewey-game .challenge-topbar, .dewey-game .challenge-meta, .dewey-game .stat-row { flex-wrap: wrap; gap: 8px; }
+  .dewey-game .stat-card { min-width: 0; flex: 1 1 80px; }
+  .dewey-game .category-grid, .dewey-game .shelf-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
+  .dewey-game .category-tile, .dewey-game .shelf-grid > *, .dewey-game .realistic-book { min-width: 0; overflow-wrap: anywhere; }
+  .dewey-game .planet-row, .dewey-game .rocket-controls { flex-wrap: wrap; }
+  .dewey-game button, .dewey-game .primary-action { min-height: 44px; touch-action: manipulation; }
+  .dewey-game .cert-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+  .flag-game .fg-shell { max-width: 100%; min-width: 0; }
+  .flag-game .fg-panel, .flag-game .fg-scene { min-width: 0; max-width: 100%; }
+  .flag-game .fg-panel-head, .flag-game .fg-head-actions, .flag-game .fg-stats { flex-wrap: wrap; }
+  .flag-game .fg-question-text, .flag-game .fg-option-text { overflow-wrap: anywhere; }
+  .flag-game .fg-options { grid-template-columns: minmax(0,1fr); }
+  .flag-game button { min-height: 44px; touch-action: manipulation; }
+}
+@media (max-width: 380px) {
+  .nh-v2-shell { padding-inline: 9px; }
+  .dewey-game .category-grid, .dewey-game .shelf-grid { gap: 6px; }
+}
