@@ -227,7 +227,8 @@ const Header: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
+  const lastScrollYRef = useRef(0);
+  const scrollFrameRef = useRef<number | null>(null);
   const [userRole, setUserRole] = useState<'student' | 'teacher' | 'admin' | null>(null);
 
   useEffect(() => {
@@ -236,25 +237,38 @@ const Header: React.FC = () => {
   }, [location.pathname]);
 
   useEffect(() => {
-    if (location.pathname === '/' || location.pathname === '/admin-dashboard' || location.pathname === '/about' || location.pathname === '/tutorial') {
-      return;
-    }
+    // Avoid triggering a React render (and reattaching the listener) for
+    // every Safari scroll event. Only the *visibility change* needs a render.
+    const isPublicOrFullScreen = ['/', '/admin-dashboard', '/about', '/tutorial']
+      .includes(location.pathname);
+    if (isPublicOrFullScreen) return;
 
-    const controlNavbar = () => {
-      const currentScrollY = window.scrollY;
+    lastScrollYRef.current = Math.max(0, window.scrollY);
+    setIsVisible(true);
 
-      if (currentScrollY > lastScrollY && currentScrollY > 60) {
-        setIsVisible(false);
-      } else {
-        setIsVisible(true);
-      }
-
-      setLastScrollY(currentScrollY);
+    const update = () => {
+      scrollFrameRef.current = null;
+      const currentY = Math.max(0, window.scrollY);
+      const previousY = lastScrollYRef.current;
+      if (Math.abs(currentY - previousY) < 3) return;
+      const shouldShow = currentY <= 60 || currentY < previousY;
+      setIsVisible(visible => visible === shouldShow ? visible : shouldShow);
+      lastScrollYRef.current = currentY;
     };
-
-    window.addEventListener('scroll', controlNavbar);
-    return () => window.removeEventListener('scroll', controlNavbar);
-  }, [lastScrollY, location.pathname]);
+    const onScroll = () => {
+      if (scrollFrameRef.current === null) {
+        scrollFrameRef.current = window.requestAnimationFrame(update);
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (scrollFrameRef.current !== null) {
+        window.cancelAnimationFrame(scrollFrameRef.current);
+        scrollFrameRef.current = null;
+      }
+    };
+  }, [location.pathname]);
 
   if (location.pathname === '/' || location.pathname === '/admin-dashboard' || location.pathname === '/about' || location.pathname === '/tutorial') return null;
 
@@ -272,11 +286,11 @@ const Header: React.FC = () => {
 
   return (
     <header
-      className={`fixed top-4 left-0 right-0 z-[60] px-2 flex justify-center transition-all duration-500 ease-in-out ${
+      className={`fixed top-4 left-0 right-0 z-[60] px-2 flex justify-center transition-transform duration-300 ease-in-out ${
         isVisible ? 'translate-y-0 opacity-100' : '-translate-y-[150%] opacity-0 pointer-events-none'
       }`}
     >
-      <div className="w-full max-w-[98%] md:w-fit px-4 py-2.5 rounded-[2rem] border-4 border-white/70 dark:border-slate-700/40 flex items-center justify-between md:justify-center gap-4 shadow-2xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-2xl">
+      <div className="efips-navbar-surface w-full max-w-[98%] md:w-fit px-4 py-2.5 rounded-[2rem] border-4 border-white/70 dark:border-slate-700/40 flex items-center justify-between md:justify-center gap-4 shadow-2xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-2xl">
         
         <Link to="/home" className="flex items-center gap-2 group flex-shrink-0 me-3 animate-fade-in-up" style={{ animationDelay: '0ms' }}>
           <img
@@ -548,6 +562,19 @@ const MainLayout: React.FC = () => {
           <SmartSearchPage />
         </div>
       </DraggableSaqrModal>
+
+      {/* Mobile Safari: removing the expensive live blur only for the fixed
+          navigation surface avoids repeated full-width backdrop compositing. */}
+      <style>{`
+        @media (hover: none) and (pointer: coarse) {
+          .efips-navbar-surface {
+            -webkit-backdrop-filter: none !important;
+            backdrop-filter: none !important;
+            background-color: rgba(255,255,255,.96) !important;
+          }
+          .dark .efips-navbar-surface { background-color: rgba(15,23,42,.96) !important; }
+        }
+      `}</style>
 
       {/* الستايلات الخاصة بتنسيق الرسائل وتكبيرها داخل النافذة وتأثيرات التلاشي */}
       <style>{`
