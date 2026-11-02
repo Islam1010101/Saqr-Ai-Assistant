@@ -6,7 +6,7 @@ import { HashRouter, Routes, Route, Link, useLocation, Navigate } from 'react-ro
 // استيراد جميع صفحات المنظومة
 // ==========================================
 import Login from './pages/Login';
-import GoogleStudentReturn from './src/components/GoogleStudentReturn';
+import GoogleSchoolReturn from './src/components/GoogleSchoolReturn';
 import GoogleTeacherReturn from './src/components/GoogleTeacherReturn';
 import HomePage from './pages/HomePage';
 import AdminDashboard from './pages/AdminDashboard';
@@ -606,7 +606,7 @@ const App: React.FC = () => {
     <ApplicationErrorBoundary>
       <ThemeProvider>
         <LanguageProvider>
-          {new URLSearchParams(window.location.search).get('efips_google_teacher') === '1' ? <GoogleTeacherReturn /> : new URLSearchParams(window.location.search).get('efips_google_student') === '1' ? <GoogleStudentReturn /> : <HashRouter><MainLayout /></HashRouter>}
+          {new URLSearchParams(window.location.search).get('efips_google_teacher') === '1' ? <GoogleTeacherReturn /> : new URLSearchParams(window.location.search).get('efips_google_student') === '1' ? <GoogleSchoolReturn /> : <HashRouter><MainLayout /></HashRouter>}
         </LanguageProvider>
       </ThemeProvider>
     </ApplicationErrorBoundary>
