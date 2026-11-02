@@ -269,12 +269,7 @@ export default function Login() {
             <div className="efips-login-uae-enter relative flex w-full min-w-0 flex-col items-center gap-2">
               <div aria-hidden="true" className="flex items-center justify-center gap-3">
                 <span className="h-0.5 w-10 rounded-full bg-gradient-to-r from-transparent to-[#00843D]" />
-                <svg className="efips-login-uae-flag h-8 w-12 shrink-0 overflow-visible" viewBox="0 0 48 30" role="presentation">
-                  <rect x="1" y="1" width="46" height="28" rx="3" fill="#ffffff" stroke="#d8e5dc" strokeWidth="1.5" />
-                  <path d="M14 2H44A2 2 0 0 1 46 4V10H14Z" fill="#00843D" />
-                  <path d="M14 20H46V26A2 2 0 0 1 44 28H14Z" fill="#141414" />
-                  <path d="M4 2H15V28H4A2 2 0 0 1 2 26V4A2 2 0 0 1 4 2Z" fill="#CE1126" />
-                </svg>
+                <img src="/school-logo.png" alt="" className="efips-login-uae-flag h-8 w-12 shrink-0 object-contain" />
                 <span className="h-0.5 w-10 rounded-full bg-gradient-to-l from-transparent to-[#CE1126]" />
               </div>
               <h2 className="efips-login-title relative block w-full min-w-0 whitespace-nowrap px-1 py-2 text-center font-black">
