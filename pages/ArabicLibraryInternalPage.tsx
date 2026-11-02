@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../src/utils/supabase';
 import { useReadingPassport, digitalBookKey } from '../src/utils/readingPassport';
 import DigitalBookRating from '../src/components/DigitalBookRating';
+import type { DigitalLibraryBook } from '../api/digitalBookData';
 
 // --- 1. قاعدة البيانات ---
 export const ARABIC_LIBRARY_DATABASE = [
@@ -74,6 +75,9 @@ const translations = {
         readLater: "Read later",
         readLaterRemove: "Saved ✓",
         pageTitle: "Arabic Library",
+        publisherLabel: "Publisher",
+        byAuthor: "By Author",
+        bySubject: "By Subject",
         searchPlaceholder: "Search title or author...",
         allSubjects: "Subjects",
         allAuthors: "Authors",
@@ -98,6 +102,9 @@ const translations = {
         readLater: "القراءة لاحقًا",
         readLaterRemove: "محفوظ ✓",
         pageTitle: "المكتبة العربية",
+        publisherLabel: "الناشر",
+        byAuthor: "حسب المؤلف",
+        bySubject: "حسب الموضوع",
         searchPlaceholder: "ابحث عن عنوان أو مؤلف...",
         allSubjects: "المواضيع",
         allAuthors: "المؤلفين",
@@ -212,12 +219,12 @@ const SaqrAudioPlayer: React.FC<{ audioSrc: string; t: any }> = ({ audioSrc, t }
 };
 
 // --- 3. Component: BookModal ---
-const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
+const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any; showAgeClassification?: boolean }> = ({ book, onClose, t, showAgeClassification = true }) => {
     const [ageGroup, setAgeGroup] = useState('');
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (!book) return;
+        if (!book || !showAgeClassification) { setAgeGroup(''); setLoading(false); return; }
         setLoading(true);
         const fetchAgeGroup = async () => {
             try {
@@ -242,7 +249,7 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
             } finally { setLoading(false); }
         };
         fetchAgeGroup();
-    }, [book]);
+    }, [book, showAgeClassification]);
 
     if (!book) return null;
 
@@ -262,13 +269,14 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
                     <div className="relative group/author inline-flex max-w-full flex-wrap items-center gap-2 mb-4 md:mb-8 bg-sky-50 dark:bg-slate-700 w-fit px-4 py-2 rounded-full border-2 border-sky-200 dark:border-slate-600 cursor-help">
                         <UserIcon/>
                         <p className="text-sm sm:text-base text-sky-600 dark:text-sky-400 font-bold break-words">{book.author}</p>
-                        <div className="absolute top-full mt-2 start-0 w-[min(16rem,calc(100vw-4rem))] p-4 bg-slate-900 text-white text-xs rounded-2xl opacity-0 invisible group-hover/author:opacity-100 group-hover/author:visible transition-all shadow-xl z-50 font-medium leading-relaxed">
+                        {book.bio && <div className="absolute top-full mt-2 start-0 w-[min(16rem,calc(100vw-4rem))] p-4 bg-slate-900 text-white text-xs rounded-2xl opacity-0 invisible group-hover/author:opacity-100 group-hover/author:visible transition-all shadow-xl z-50 font-medium leading-relaxed">
                             <strong className="block mb-2 text-sky-400 font-black uppercase">{t('bioLabel')}</strong>
                             {book.bio}
-                        </div>
+                        </div>}
                     </div>
                     
-                    <div className="bg-slate-50 dark:bg-slate-900 p-4 sm:p-5 md:p-8 rounded-[2rem] border-4 border-slate-200 dark:border-slate-700 shadow-inner text-start flex-grow">
+                    {!book.summary && book.publisher && <p className="text-sm font-bold text-slate-600 dark:text-slate-300 mb-5">{t('publisherLabel')}: {book.publisher}</p>}
+                    {book.summary && <div className="bg-slate-50 dark:bg-slate-900 p-4 sm:p-5 md:p-8 rounded-[2rem] border-4 border-slate-200 dark:border-slate-700 shadow-inner text-start flex-grow">
                         <div className="flex items-center gap-2 mb-4">
                            <span className="w-3 h-3 rounded-full bg-amber-500"></span>
                            <p className="text-xs text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest">{t('summaryLabel')}</p>
@@ -276,7 +284,7 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
                         <p className="text-slate-700 dark:text-slate-200 text-base md:text-lg font-bold leading-relaxed">
                            {book.summary}
                         </p>
-                    </div>
+                    </div>}
 
                     {book.audioId && <SaqrAudioPlayer audioSrc={book.audioId} t={t}/>}
                 </div>
@@ -288,10 +296,10 @@ const BookModal: React.FC<{ book: any | null; onClose: () => void; t: any }> = (
                             <p className="text-base md:text-xl font-black text-slate-900 dark:text-white break-words">{book.subject}</p>
                         </div>
                         
-                        <div className="bg-rose-50 dark:bg-slate-800 p-3 md:p-5 rounded-xl md:rounded-[2rem] border-4 border-rose-200 dark:border-slate-600 shadow-sm">
+                        {showAgeClassification && <div className="bg-rose-50 dark:bg-slate-800 p-3 md:p-5 rounded-xl md:rounded-[2rem] border-4 border-rose-200 dark:border-slate-600 shadow-sm">
                             <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest mb-2">{t('ageClassification')}</p>
                             <p className="text-lg md:text-2xl font-black text-rose-600 break-words">{loading ? '...' : (ageGroup || 'عام')}</p>
-                        </div>
+                        </div>}
 
                         <DigitalBookRating bookId={digitalBookKey('ar', book)} compact={false} />
 
@@ -424,7 +432,12 @@ const BookCard = React.memo(({ book, onClick, t }: { book: any; onClick: () => v
 });
 
 // --- 5. Main Component: ArabicLibraryInternalPage ---
-const ArabicLibraryInternalPage: React.FC = () => {
+type ArabicLibraryPageProps = {
+    books?: DigitalLibraryBook[];
+    pageTitle?: { ar: string; en: string };
+};
+
+const ArabicLibraryInternalPage: React.FC<ArabicLibraryPageProps> = ({ books = ARABIC_LIBRARY_DATABASE, pageTitle }) => {
     // تعيين الإنجليزية كلغة افتراضية عند فتح الصفحة مباشرة
     const { locale, dir } = useLanguage();
     const [currentLocale, setCurrentLocale] = useState(locale || 'en');
@@ -436,6 +449,7 @@ const ArabicLibraryInternalPage: React.FC = () => {
 
     const t = (key: keyof typeof translations.en) => translations[currentLocale as 'ar' | 'en']?.[key] as string;
     const isAr = currentLocale === 'ar';
+    const hasAudio = useMemo(() => books.some(book => !!book.audioId), [books]);
     
     const [searchTerm, setSearchTerm] = useState('');
     const [subjectFilter, setSubjectFilter] = useState('all');
@@ -446,13 +460,13 @@ const ArabicLibraryInternalPage: React.FC = () => {
     const [visibleCount, setVisibleCount] = useState(12); // تغيير ليكون العدد متوافق مع الموبايل
 
     const filters = useMemo(() => ({
-        subjects: [...new Set(ARABIC_LIBRARY_DATABASE.map(b => b.subject))].filter(s => s !== "Unknown").sort(),
-        authors: [...new Set(ARABIC_LIBRARY_DATABASE.map(b => b.author))].filter(a => a !== 'Unknown Author').sort(),
-    }), []);
+        subjects: [...new Set(books.map(b => b.subject))].filter(s => s !== "Unknown").sort(),
+        authors: [...new Set(books.map(b => b.author))].filter(a => a !== 'Unknown Author').sort(),
+    }), [books]);
 
     const filteredBooks = useMemo(() => {
         const term = searchTerm.toLowerCase().trim();
-        let result = ARABIC_LIBRARY_DATABASE.filter(b => {
+        let result = books.filter(b => {
             const matchesSearch = b.title.toLowerCase().includes(term) || b.author.toLowerCase().includes(term);
             const matchesSubject = subjectFilter === 'all' || b.subject === subjectFilter;
             const matchesAuthor = authorFilter === 'all' || b.author === authorFilter;
@@ -465,7 +479,7 @@ const ArabicLibraryInternalPage: React.FC = () => {
         else if (sortBy === 'audio') result = [...result].sort((a, b) => (b.audioId ? 1 : 0) - (a.audioId ? 1 : 0));
         else result = [...result].sort((a, b) => a.title.localeCompare(b.title, currentLocale));
         return result;
-    }, [searchTerm, subjectFilter, authorFilter, audioOnly, sortBy, currentLocale]);
+    }, [books, searchTerm, subjectFilter, authorFilter, audioOnly, sortBy, currentLocale]);
 
     return (
         <div dir={dir} className="efips-letter-library efips-letter-ar w-full min-h-screen bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300">
@@ -483,7 +497,7 @@ const ArabicLibraryInternalPage: React.FC = () => {
                         <span className="text-xl leading-none rtl:rotate-180">←</span> {t('back')}
                     </button></div>
                     {/* العناوين الإنجليزية تكون بوزن أسود عريض جداً والخطوط موحدة Cairo */}
-                    <h1 className="efips-library-page-title text-4xl md:text-6xl font-black text-slate-800 dark:text-white tracking-tight uppercase">{t('pageTitle')}</h1>
+                    <h1 className="efips-library-page-title text-4xl md:text-6xl font-black text-slate-800 dark:text-white tracking-tight uppercase">{pageTitle ? pageTitle[isAr ? 'ar' : 'en'] : t('pageTitle')}</h1>
                     <div className="efips-library-title-stripes flex justify-center gap-3 mt-6">
                         <div className="w-16 h-2 bg-emerald-500 rounded-full" />
                         <div className="w-8 h-2 bg-amber-400 rounded-full" />
@@ -507,7 +521,7 @@ const ArabicLibraryInternalPage: React.FC = () => {
                                 </div>
                             </div>
                             
-                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                            <div className={`grid grid-cols-2 ${hasAudio ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-3 md:gap-4`}>
                                 <select value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)} className="w-full p-3 md:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 font-black text-xs md:text-sm cursor-pointer appearance-none text-center hover:border-emerald-400 transition-colors outline-none focus:border-emerald-500 text-slate-700 dark:text-slate-200">
                                     <option value="all">{t('allAuthors')}</option>
                                     {filters.authors.map(a => <option key={a} value={a}>{a}</option>)}
@@ -518,11 +532,11 @@ const ArabicLibraryInternalPage: React.FC = () => {
                                 </select>
                                 <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="w-full p-3 md:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 font-black text-xs md:text-sm cursor-pointer appearance-none text-center hover:border-emerald-400 transition-colors outline-none focus:border-emerald-500 text-slate-700 dark:text-slate-200">
                                     <option value="alphabetical">{t('alphabetical')}</option>
-                                    <option value="audio">{t('audioSort')}</option>
+                                    {hasAudio ? <option value="audio">{t('audioSort')}</option> : <><option value="author">{t('byAuthor')}</option><option value="subject">{t('bySubject')}</option></>}
                                 </select>
-                                <button onClick={() => setAudioOnly(!audioOnly)} className={`w-full p-3 md:p-4 rounded-2xl font-black text-xs md:text-sm transition-all border-b-4 active:border-b-0 active:translate-y-1 flex items-center justify-center gap-2 ${audioOnly ? 'bg-rose-500 text-white border-rose-700 animate-pulse' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 border-2'}`}>
+                                {hasAudio && <button onClick={() => setAudioOnly(!audioOnly)} className={`w-full p-3 md:p-4 rounded-2xl font-black text-xs md:text-sm transition-all border-b-4 active:border-b-0 active:translate-y-1 flex items-center justify-center gap-2 ${audioOnly ? 'bg-rose-500 text-white border-rose-700 animate-pulse' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 border-2'}`}>
                                     <HeadphonesIcon/> {t('audioOnly')}
-                                </button>
+                                </button>}
                             </div>
                         </div>
                     </div>
@@ -568,7 +582,7 @@ const ArabicLibraryInternalPage: React.FC = () => {
                     </div>
                 )}
 
-                <BookModal book={selectedBook} onClose={() => setSelectedBook(null)} t={t} />
+                <BookModal book={selectedBook} onClose={() => setSelectedBook(null)} t={t} showAgeClassification={!pageTitle} />
 
             </div>
 

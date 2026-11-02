@@ -6,9 +6,14 @@ import { ARABIC_LIBRARY_DATABASE } from '../../pages/ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from '../../pages/EnglishLibraryInternalPage';
 import { digitalBookKey, physicalReadingCatalog, type ReadingBook, useReadingPassport } from '../utils/readingPassport';
 import { bookData, getLocalizedSubject } from '../../api/bookData';
+import { NATIONAL_IDENTITY_DIGITAL_BOOKS } from '../../api/nationalIdentityDigitalBooks';
 
 const digitalCatalog: ReadingBook[] = [
   ...ARABIC_LIBRARY_DATABASE.map(book => ({
+    key: digitalBookKey('ar', book), title: book.title, author: book.author,
+    subject: book.subject, format: 'ar' as const, href: book.driveLink
+  })),
+  ...NATIONAL_IDENTITY_DIGITAL_BOOKS.map(book => ({
     key: digitalBookKey('ar', book), title: book.title, author: book.author,
     subject: book.subject, format: 'ar' as const, href: book.driveLink
   })),

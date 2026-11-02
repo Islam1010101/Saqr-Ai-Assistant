@@ -20,6 +20,14 @@ const GlobeIcon = () => (
     </svg>
 );
 
+const HeritageBookIcon = () => (
+    <svg className="w-8 h-8 md:w-12 md:h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M5 4h12a2 2 0 0 1 2 2v14H7a3 3 0 0 0-3 2V6a2 2 0 0 1 1-2Z" />
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H19" />
+        <path d="M8 7v7m0-7h8m-8 3h8m-8 4h8" />
+    </svg>
+);
+
 const StarIcon = ({ className }: { className?: string }) => (
     <svg className={className} fill="currentColor" viewBox="0 0 24 24">
         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
@@ -65,6 +73,8 @@ const translations = {
         desc: "المكتبة في كفّ يدك.. تبني اليومَ فِكْرَ غدِك بأسلوب عصري فريد.",
         arabicLib: "المكتبة العربية",
         englishLib: "المكتبة الإنجليزية",
+        heritageLib: "كتب الهوية الوطنية",
+        heritageDesc: "كتب التراث الإماراتي والشعر المحلي.",
         arabicDesc: "روائع الأدب العربي، التراث، وتطوير الذات.",
         englishDesc: "أحدث الروايات العالمية، القصص، والألغاز.",
         bubble: "اضغط للإلهام!"
@@ -74,6 +84,8 @@ const translations = {
         desc: "The library in your hand, building a mind so grand and modern.",
         arabicLib: "Arabic Library",
         englishLib: "English Library",
+        heritageLib: "National Identity Books",
+        heritageDesc: "Emirati heritage and poetry e-books.",
         arabicDesc: "Arabic literature, heritage, and self-development.",
         englishDesc: "Global novels, stories, and exciting puzzles.",
         bubble: "Touch for Magic!"
@@ -223,6 +235,21 @@ const DigitalLibraryPage: React.FC = () => {
                                 <div className="flex-1 space-y-1.5">
                                     <h3 className="text-2xl md:text-3xl lg:text-4xl font-black text-slate-800 dark:text-white tracking-tight">{t('englishLib')}</h3>
                                     <p className="text-xs sm:text-sm md:text-base text-slate-500 dark:text-slate-400 font-bold leading-relaxed">{t('englishDesc')}</p>
+                                </div>
+                            </Link>
+                        </RevealOnScroll>
+
+                        <RevealOnScroll delay={150}>
+                            <Link
+                                to="/digital-library/national-identity"
+                                className="group bg-white dark:bg-slate-800 p-6 md:p-8 rounded-[2.5rem] border-4 border-slate-200 dark:border-slate-700 border-b-6 hover:border-rose-400 dark:hover:border-rose-500 hover:-translate-y-1.5 active:border-b-2 active:translate-y-1 transition-all duration-300 flex flex-col md:flex-row items-center gap-5 text-center md:text-start shadow-sm"
+                            >
+                                <div className="w-20 h-20 md:w-24 md:h-24 bg-rose-100 dark:bg-rose-900/30 text-rose-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shrink-0 border-4 border-rose-200 dark:border-rose-800">
+                                    <HeritageBookIcon />
+                                </div>
+                                <div className="flex-1 space-y-1.5">
+                                    <h3 className="text-2xl md:text-3xl lg:text-4xl font-black text-slate-800 dark:text-white tracking-tight">{t('heritageLib')}</h3>
+                                    <p className="text-xs sm:text-sm md:text-base text-slate-500 dark:text-slate-400 font-bold leading-relaxed">{t('heritageDesc')}</p>
                                 </div>
                             </Link>
                         </RevealOnScroll>

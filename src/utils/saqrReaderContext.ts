@@ -1,10 +1,12 @@
 import {physicalReadingCatalog, type ReadingBook} from './readingPassport';
 import {ARABIC_LIBRARY_DATABASE,ENGLISH_LIBRARY_DATABASE} from '../../api/digitalBookData';
 import {bookData} from '../../api/bookData';
+import {NATIONAL_IDENTITY_DIGITAL_BOOKS} from '../../api/nationalIdentityDigitalBooks';
 
 const catalogs:ReadingBook[]=[
  ...physicalReadingCatalog,
  ...ARABIC_LIBRARY_DATABASE.map(b=>({key:'digital:ar:'+b.id,title:b.title,author:b.author,subject:b.subject,format:'ar' as const,href:b.driveLink})),
+ ...NATIONAL_IDENTITY_DIGITAL_BOOKS.map(b=>({key:'digital:ar:'+b.id,title:b.title,author:b.author,subject:b.subject,format:'ar' as const,href:b.driveLink})),
  ...ENGLISH_LIBRARY_DATABASE.map(b=>({key:'digital:en:'+b.id,title:b.title,author:b.author,subject:b.subject,format:'en' as const,href:b.driveLink}))
 ];
 const byKey=new Map(catalogs.map(x=>[x.key,x]));
@@ -41,6 +43,6 @@ export const catalogBookSynopsis=(title:string):string|null=>{
  const normalize=(value:string)=>String(value??'').normalize('NFKC').toLowerCase().trim();
  const needle=normalize(title);
  if(!needle)return null;
- const found=[...bookData,...ARABIC_LIBRARY_DATABASE,...ENGLISH_LIBRARY_DATABASE].find(b=>normalize(b.title)===needle);
+ const found=[...bookData,...ARABIC_LIBRARY_DATABASE,...NATIONAL_IDENTITY_DIGITAL_BOOKS,...ENGLISH_LIBRARY_DATABASE].find(b=>normalize(b.title)===needle);
  return found?.summary?.trim()||null;
 };

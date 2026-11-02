@@ -9,6 +9,7 @@ import AdminInsightsPanels from '../src/components/AdminInsightsPanels';
 import { bookData } from '../api/bookData';
 import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
+import { NATIONAL_IDENTITY_DIGITAL_BOOKS } from '../api/nationalIdentityDigitalBooks';
 
 const translations = {
     ar: {
@@ -666,7 +667,7 @@ const AdminDashboard: React.FC = () => {
 
     // Derive catalog totals from the exact book lists displayed on the public library pages.
     const physicalCatalogCount = bookData.length;
-    const arabicDigitalCount = ARABIC_LIBRARY_DATABASE.length;
+    const arabicDigitalCount = ARABIC_LIBRARY_DATABASE.length + NATIONAL_IDENTITY_DIGITAL_BOOKS.length;
     const englishDigitalCount = ENGLISH_LIBRARY_DATABASE.length;
     const digitalCatalogCount = arabicDigitalCount + englishDigitalCount;
     const allCatalogCount = physicalCatalogCount + digitalCatalogCount;

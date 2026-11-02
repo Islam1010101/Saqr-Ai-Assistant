@@ -29,6 +29,7 @@ import TutorialPage from './pages/TutorialPage';
 import FlagDayChallenge from './pages/FlagDayChallenge'; // Prepared for future activation; intentionally not routed.
 import NationalIdentityPage from './pages/NationalIdentityPage';
 import NationalIdentityBooksPage from './pages/NationalIdentityBooksPage';
+import NationalIdentityDigitalBooksPage from './pages/NationalIdentityDigitalBooksPage';
 
 export type Locale = 'en' | 'ar';
 
@@ -516,6 +517,7 @@ const MainLayout: React.FC = () => {
           <Route path="/digital-library" element={<ProtectedRoute><DigitalLibraryPage /></ProtectedRoute>} />
           <Route path="/digital-library/arabic" element={<ProtectedRoute><ArabicLibraryInternalPage /></ProtectedRoute>} />
           <Route path="/digital-library/english" element={<ProtectedRoute><EnglishLibraryInternalPage /></ProtectedRoute>} />
+          <Route path="/digital-library/national-identity" element={<ProtectedRoute><NationalIdentityDigitalBooksPage /></ProtectedRoute>} />
           <Route path="/creators" element={<ProtectedRoute><CreatorsPortalPage /></ProtectedRoute>} />
           <Route path="/saqr-studio" element={<ProtectedRoute><SaqrStudioPage /></ProtectedRoute>} />
           <Route path="/saqr-reading-quest" element={<ProtectedRoute><SaqrReadingQuestPage /></ProtectedRoute>} />

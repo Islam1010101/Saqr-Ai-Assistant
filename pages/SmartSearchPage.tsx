@@ -10,6 +10,7 @@ import { bookData } from '../api/bookData';
 import { searchSaqrBookCatalog } from '../src/utils/saqrCatalogSearch';
 import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
+import { NATIONAL_IDENTITY_DIGITAL_BOOKS } from '../api/nationalIdentityDigitalBooks';
 import { supabase } from '../src/utils/supabase';
 import {nationalIdentityBooks, searchNationalIdentityBooks} from '../src/utils/nationalIdentityCatalog';
 import { stripSaqrEmoji } from '../src/utils/saqrText';
@@ -406,7 +407,7 @@ const SmartSearchPage: React.FC = () => {
     // This changes only the book context; Saqr's system prompt and chat flow stay intact.
     const foundBooks = searchSaqrBookCatalog(userQuery, {
       physical: bookData,
-      arabic: ARABIC_LIBRARY_DATABASE,
+      arabic: [...ARABIC_LIBRARY_DATABASE, ...NATIONAL_IDENTITY_DIGITAL_BOOKS],
       english: ENGLISH_LIBRARY_DATABASE
     });
 
