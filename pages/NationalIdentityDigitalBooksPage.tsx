@@ -7,6 +7,7 @@ const NationalIdentityDigitalBooksPage: React.FC = () => (
   <ArabicLibraryInternalPage
     books={NATIONAL_IDENTITY_DIGITAL_BOOKS}
     pageTitle={{ ar: 'كتب الهوية الوطنية', en: 'National Identity Books' }}
+    atmosphere="heritage"
   />
 );
 
