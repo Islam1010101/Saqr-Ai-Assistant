@@ -2,6 +2,7 @@ import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../App';
 import { supabase } from '../src/utils/supabase';
+import { getTeacherLibrarySlots, type TeacherLibrarySlot } from '../src/utils/teacherLibrarySchedule';
 import HomeReadingHub from '../src/components/HomeReadingHub';
 
 const translations = {
@@ -51,7 +52,7 @@ const translations = {
         myLibraryHubDesc: "قائمة القراءة وجواز القارئ والكتب المقترحة.",
         borrowReturn: "تاريخ الإرجاع:",
         notificationsTitle: "تنبيهاتك",
-        notificationsSubtitle: "تذكيرات الاستعارات وجدول استخدام المكتبة",
+        notificationsSubtitle: "تذكيرات الكتب المستعارة ومواعيد إرجاعها",
         teacherScheduleTitle: "جدول استخدام المكتبة الخاص بك",
         teacherScheduleSubtitle: "حصصك المحجوزة لهذا الأسبوع",
         periodLabel: "الحصة",
@@ -116,7 +117,7 @@ const translations = {
         myLibraryHubDesc: "Reading list, reading passport and book suggestions.",
         borrowReturn: "Return Date:",
         notificationsTitle: "Your Notifications",
-        notificationsSubtitle: "Borrowing reminders and your library schedule",
+        notificationsSubtitle: "Book borrowing and return reminders",
         teacherScheduleTitle: "Your Library Schedule",
         teacherScheduleSubtitle: "Your booked library periods this week",
         periodLabel: "Period",
@@ -236,7 +237,7 @@ const HomePage: React.FC = () => {
     const [flyingFlags, setFlyingFlags] = useState<FlagFlyItem[]>([]);
     
     const [borrowedBooks, setBorrowedBooks] = useState<any[]>([]);
-    const [teacherSchedule, setTeacherSchedule] = useState<any[]>([]);
+    const [teacherSchedule, setTeacherSchedule] = useState<TeacherLibrarySlot[]>([]);
     const [borrowCountdownNow, setBorrowCountdownNow] = useState(Date.now());
 
     useEffect(() => {
@@ -371,64 +372,60 @@ const HomePage: React.FC = () => {
         };
     }, [userData, userType]);
 
-    // إظهار حصص المكتبة الخاصة بالمعلم الحالي فقط، باستخدام نفس جدول الحجز المستخدم في صفحة الجدول.
+    // Keep the teacher's own saved bookings in sync with the actual timetable.
+    // A missing or cleared schedule produces no homepage section at all.
     useEffect(() => {
         let mounted = true;
+        let latestRequest = 0;
+        const teacherId = String(userData?.teacher_id ?? '').trim();
+
+        if (userType !== 'teacher' || !teacherId) {
+            setTeacherSchedule([]);
+            return () => { mounted = false; };
+        }
 
         const fetchTeacherSchedule = async () => {
-            if (userType !== 'teacher' || !userData?.teacher_id) {
-                if (mounted) setTeacherSchedule([]);
-                return;
-            }
-
+            const request = ++latestRequest;
             try {
-                const { data, error } = await supabase
-                    .from('library_schedule')
-                    .select('id, teacher, subject, grade, user_id');
-
+                // The booking page writes library_schedule.user_id = teacher_id.
+                // Query only this teacher; names alone may belong to different staff.
+                const { data, error } = await supabase.from('library_schedule')
+                    .select('id, teacher, subject, grade, user_id')
+                    .eq('user_id', teacherId);
                 if (error) throw error;
-
-                const teacherNames = [userData.name_ar, userData.name_en]
-                    .filter((name: unknown): name is string => typeof name === 'string' && name.trim().length > 0);
-                const mine = (data || []).filter((slot: any) =>
-                    String(slot.user_id ?? '') === String(userData.teacher_id) ||
-                    (typeof slot.teacher === 'string' && teacherNames.includes(slot.teacher))
-                );
-
-                const dayOrder: Record<string, number> = {
-                    'الأحد': 0, Sunday: 0,
-                    'الإثنين': 1, Monday: 1,
-                    'الثلاثاء': 2, Tuesday: 2,
-                    'الأربعاء': 3, Wednesday: 3,
-                    'الخميس': 4, Thursday: 4,
-                    'الجمعة': 5, Friday: 5,
-                    'السبت': 6, Saturday: 6,
-                };
-                mine.sort((a: any, b: any) => {
-                    const parseSlot = (slot: any) => {
-                        const id = String(slot.id ?? '');
-                        const separator = id.lastIndexOf('_');
-                        const day = separator >= 0 ? id.slice(0, separator) : id;
-                        const period = separator >= 0 ? Number(id.slice(separator + 1)) : 0;
-                        return (dayOrder[day] ?? 99) * 100 + (Number.isFinite(period) ? period : 0);
-                    };
-                    return parseSlot(a) - parseSlot(b);
-                });
-
-                if (mounted) setTeacherSchedule(mine);
+                if (mounted && request === latestRequest) {
+                    setTeacherSchedule(getTeacherLibrarySlots((data ?? []) as TeacherLibrarySlot[], teacherId));
+                }
             } catch (error) {
-                console.error('Error fetching the teacher library schedule:', error);
-                if (mounted) setTeacherSchedule([]);
+                console.error('Unable to refresh teacher library bookings:', error);
+                if (mounted && request === latestRequest) setTeacherSchedule([]);
             }
         };
 
-        fetchTeacherSchedule();
-        const refresh = window.setInterval(fetchTeacherSchedule, 60000);
+        void fetchTeacherSchedule();
+        const onFocus = () => { void fetchTeacherSchedule(); };
+        const onVisibility = () => {
+            if (document.visibilityState === 'visible') void fetchTeacherSchedule();
+        };
+        window.addEventListener('focus', onFocus);
+        document.addEventListener('visibilitychange', onVisibility);
+        // Realtime accelerates updates after booking/cancellation. The refresh and
+        // focus listener remain a fallback if the table is not in the publication.
+        const channel = supabase.channel('homepage-teacher-schedule')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'library_schedule' },
+                () => { void fetchTeacherSchedule(); })
+            .subscribe();
+        const refresh = window.setInterval(() => { void fetchTeacherSchedule(); }, 60000);
+
         return () => {
             mounted = false;
+            latestRequest++;
             window.clearInterval(refresh);
+            window.removeEventListener('focus', onFocus);
+            document.removeEventListener('visibilitychange', onVisibility);
+            void supabase.removeChannel(channel);
         };
-    }, [userData, userType]);
+    }, [userData?.teacher_id, userType]);
 
     const getScheduleDayLabel = (day: string) => {
         const dayLabels: Record<string, { ar: string; en: string }> = {
@@ -654,7 +651,62 @@ const HomePage: React.FC = () => {
 
                 </div>
 
-                {(borrowedBooks.length > 0 || teacherSchedule.length > 0) && (
+                {/* This section exists only for teachers with saved library periods. */}
+                {userType === 'teacher' && teacherSchedule.length > 0 && (
+                    <RevealSection delay={150}>
+                        <section
+                            aria-labelledby="homepage-teacher-schedule-title"
+                            className="w-full max-w-5xl mx-auto relative overflow-hidden rounded-[2rem] md:rounded-[2.5rem] border border-emerald-200 dark:border-emerald-900/80 bg-gradient-to-br from-white via-emerald-50/80 to-teal-50/70 dark:from-slate-900 dark:via-slate-900 dark:to-emerald-950/40 shadow-[0_18px_55px_rgba(15,118,110,0.13)] p-4 sm:p-6 md:p-8"
+                        >
+                            <div aria-hidden="true" className="pointer-events-none absolute -top-20 -end-12 h-44 w-44 rounded-full bg-teal-300/20 dark:bg-emerald-400/10 blur-3xl" />
+                            <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+                                <div className="flex items-center gap-3 min-w-0">
+                                    <span className="shrink-0 h-12 w-12 flex items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-lg" aria-hidden="true"><ScheduleIcon /></span>
+                                    <div className="min-w-0">
+                                        <h2 id="homepage-teacher-schedule-title" className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 dark:text-white">{t('teacherScheduleTitle')}</h2>
+                                        <p className="mt-1 text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300">{t('teacherScheduleSubtitle')}</p>
+                                    </div>
+                                </div>
+                                <Link
+                                    to="/schedule"
+                                    className="self-start sm:self-auto min-h-11 inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-emerald-200 dark:border-emerald-800 bg-white/90 dark:bg-slate-800/90 px-4 py-2.5 text-xs sm:text-sm font-black text-emerald-800 dark:text-emerald-200 transition-transform hover:-translate-y-0.5 active:translate-y-0 shadow-sm"
+                                >
+                                    <ScheduleIcon />
+                                    {isAr ? 'عرض جدول المكتبة' : 'View library schedule'}
+                                </Link>
+                            </div>
+                            <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                {teacherSchedule.map((slot) => {
+                                    const slotId = String(slot.id ?? '');
+                                    const separator = slotId.lastIndexOf('_');
+                                    const day = separator >= 0 ? slotId.slice(0, separator) : slotId;
+                                    const period = separator >= 0 ? slotId.slice(separator + 1) : '';
+                                    return (
+                                        <article key={slot.id} className="homepage-alert-card group relative bg-white/90 dark:bg-slate-800/90 border border-emerald-200 dark:border-emerald-800/70 rounded-2xl sm:rounded-3xl p-4 shadow-sm hover:shadow-xl touch-manipulation active:scale-[0.99]">
+                                            <div className="flex items-start justify-between gap-3 mb-3">
+                                                <div className="min-w-0">
+                                                    <p className="text-xs sm:text-sm font-extrabold text-emerald-700 dark:text-emerald-300 mb-1">{isAr ? 'يوم الحصة' : 'Class day'}</p>
+                                                    <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white break-words">{getScheduleDayLabel(day)}</h3>
+                                                </div>
+                                                <span className="shrink-0 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-200 px-3 py-2 text-xs font-black">
+                                                    {t('periodLabel')} {period}
+                                                </span>
+                                            </div>
+                                            <div className="space-y-2 border-t border-slate-100 dark:border-slate-700 pt-3">
+                                                <p className="text-sm font-black text-slate-800 dark:text-white break-words">
+                                                    <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">{t('subjectLabel')}: </span>{slot.subject || '—'}
+                                                </p>
+                                                <p className="text-xs font-bold text-slate-600 dark:text-slate-300 break-words">{t('gradeLabel')}: {slot.grade || '—'}</p>
+                                            </div>
+                                        </article>
+                                    );
+                                })}
+                            </div>
+                        </section>
+                    </RevealSection>
+                )}
+
+                {borrowedBooks.length > 0 && (
                     <RevealSection delay={150}>
                         <section
                             aria-labelledby="homepage-notifications-title"
@@ -666,7 +718,7 @@ const HomePage: React.FC = () => {
                             <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 md:mb-7">
                                 <div className="flex items-start gap-3 min-w-0">
                                     <div className="shrink-0 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-lg shadow-emerald-900/15 text-2xl" aria-hidden="true">
-                                        {borrowedBooks.length > 0 ? <BookIcon /> : <ScheduleIcon />}
+                                        <BookIcon />
                                     </div>
                                     <div className="min-w-0">
                                         <h2 id="homepage-notifications-title" className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
@@ -679,7 +731,7 @@ const HomePage: React.FC = () => {
                                 </div>
                                 <div className="self-start sm:self-auto inline-flex items-center gap-2 rounded-full border border-emerald-200 dark:border-emerald-800 bg-white/80 dark:bg-slate-800/80 px-3.5 py-2 text-xs font-black text-emerald-800 dark:text-emerald-300 shadow-sm">
                                     <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                                    {borrowedBooks.length + teacherSchedule.length} {isAr ? 'تنبيه' : 'items'}
+                                    {borrowedBooks.length} {isAr ? 'تنبيه' : 'items'}
                                 </div>
                             </div>
 
@@ -740,47 +792,7 @@ const HomePage: React.FC = () => {
                                 </div>
                             )}
 
-                            {teacherSchedule.length > 0 && (
-                                <div className="relative">
-                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-                                        <div className="flex items-center gap-2.5">
-                                            <span className="h-8 w-1.5 rounded-full bg-emerald-600" />
-                                            <h3 className="text-base sm:text-lg font-black text-slate-800 dark:text-white">{t('teacherScheduleTitle')}</h3>
-                                            <span className="rounded-full bg-emerald-100 dark:bg-emerald-900/50 px-2.5 py-1 text-xs sm:text-sm font-black text-emerald-800 dark:text-emerald-300">{teacherSchedule.length}</span>
-                                        </div>
-                                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">{t('teacherScheduleSubtitle')}</p>
-                                    </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                        {teacherSchedule.map((slot) => {
-                                            const slotId = String(slot.id ?? '');
-                                            const separator = slotId.lastIndexOf('_');
-                                            const day = separator >= 0 ? slotId.slice(0, separator) : slotId;
-                                            const period = separator >= 0 ? slotId.slice(separator + 1) : '';
-                                            return (
-                                                <article key={slot.id} className="homepage-alert-card group relative bg-white/90 dark:bg-slate-800/90 border border-emerald-200 dark:border-emerald-800/70 rounded-2xl sm:rounded-3xl p-4 shadow-sm hover:shadow-xl touch-manipulation active:scale-[0.99]">
-                                                    <div className="flex items-start justify-between gap-3 mb-3">
-                                                        <div className="min-w-0">
-                                                            <p className="text-xs sm:text-sm font-extrabold text-emerald-700 dark:text-emerald-300 mb-1">{isAr ? 'يوم الحصة' : 'Class day'}</p>
-                                                            <h4 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white break-words">{getScheduleDayLabel(day)}</h4>
-                                                        </div>
-                                                        <span className="shrink-0 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-200 px-3 py-2 text-xs font-black">
-                                                            {t('periodLabel')} {period}
-                                                        </span>
-                                                    </div>
-                                                    <div className="space-y-2 border-t border-slate-100 dark:border-slate-700 pt-3">
-                                                        <p className="text-sm font-black text-slate-800 dark:text-white break-words">
-                                                            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">{t('subjectLabel')}: </span>{slot.subject || '—'}
-                                                        </p>
-                                                        <p className="text-xs font-bold text-slate-600 dark:text-slate-300 break-words">
-                                                            {t('gradeLabel')}: {slot.grade || '—'}
-                                                        </p>
-                                                    </div>
-                                                </article>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            )}
+
                         </section>
                     </RevealSection>
                 )}
