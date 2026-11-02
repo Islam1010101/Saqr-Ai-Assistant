@@ -258,13 +258,22 @@ const RevealSection: React.FC<{ children: React.ReactNode; delay?: number }> = (
   const sectionRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!sectionRef.current || typeof IntersectionObserver === 'undefined') return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsVisible(entry.isIntersecting),
-      { threshold: 0.1, rootMargin: '-50px 0px -50px 0px' }
-    );
-    observer.observe(sectionRef.current);
-    return () => observer.disconnect();
+      const element = sectionRef.current;
+      if (!element || typeof IntersectionObserver === 'undefined') return;
+      // Reveal just once, ahead of the viewport. Repeated hide/show while
+      // scrolling caused re-paints and apparent delayed content on Safari.
+      let entered = false;
+      const observer = new IntersectionObserver(([entry]) => {
+          if (entry.isIntersecting) {
+              entered = true;
+              setIsVisible(true);
+              observer.disconnect();
+          } else if (!entered) {
+              setIsVisible(false);
+          }
+      }, { threshold: 0, rootMargin: '160px 0px 160px 0px' });
+      observer.observe(element);
+      return () => observer.disconnect();
   }, []);
 
   return (
