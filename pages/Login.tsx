@@ -94,7 +94,7 @@ export default function Login() {
     }
     setLoading(true);
     try {
-      sessionStorage.setItem('efips_oauth_school_email', email);
+      try { sessionStorage.setItem('efips_oauth_school_email', email); } catch { /* Google itself still verifies identity. */ }
       // Reuse the existing approved student redirect URL so no Supabase
       // Auth redirect allowlist changes are needed for this release.
       await supabase.auth.signOut();
