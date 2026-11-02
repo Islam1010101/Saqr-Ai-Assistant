@@ -2,6 +2,7 @@ import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../App';
 import { supabase } from '../src/utils/supabase';
+import SaqrLearningEntry from '../src/components/SaqrLearningEntry';
 import { getTeacherLibrarySlots, type TeacherLibrarySlot } from '../src/utils/teacherLibrarySchedule';
 import HomeReadingHub from '../src/components/HomeReadingHub';
 
@@ -875,6 +876,8 @@ const HomePage: React.FC = () => {
                                 <p className="text-xs md:text-sm opacity-90 font-normal leading-snug">{t('creatorsDesc')}</p>
                             </div>
                         </Link>
+
+                        {userType === 'student' && <SaqrLearningEntry isAr={isAr} />}
 
                         {(userType === 'student' || userType === 'admin') && (
                             <Link to="/saqr-national-identity"
