@@ -3,16 +3,12 @@ import { Link } from 'react-router-dom';
 import { supabase } from '../src/utils/supabase';
 import { useLanguage } from '../App';
 
-// أيقونات مبسطة وخفيفة للـ Light Mode
-const StudentIcon = () => <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 14v7" /></svg>;
-const TeacherIcon = () => <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>;
-
 const BACKGROUND_VIDEOS = ['/1.mp4', '/2.mp4', '/3.mp4'];
 
 export default function Login() {
   // Use the shared website language so public pages follow the login choice.
   const { locale: lang, setLocale: setLang } = useLanguage();
-  const [loginType, setLoginType] = useState<'student' | 'teacher'>('student');
+  const [schoolEmail, setSchoolEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showFlag, setShowFlag] = useState(false); // حالة إظهار علم الإمارات عند الضغط على صقر
@@ -85,40 +81,37 @@ export default function Login() {
     handleVideoEnd();
   };
 
-  // Student-only pilot. Existing school ID and teacher/admin logins are unchanged.
-  const handleGoogleStudentLogin = async () => {
+  // One Google login for students, teachers and administrators. The email is
+  // used solely as a Google login hint; authorization happens after OAuth.
+  const handleSchoolGoogleLogin = async () => {
     setError('');
+    const email = schoolEmail.trim().toLowerCase();
+    if (!/^[^@\\s]+@falcon-school\\.com$/.test(email)) {
+      setError(lang === 'ar'
+        ? 'أدخل البريد المدرسي الصحيح المنتهي بـ @falcon-school.com.'
+        : 'Enter your approved @falcon-school.com email address.');
+      return;
+    }
     setLoading(true);
     try {
-      // Ensure the user explicitly selects a school account on each attempt.
+      sessionStorage.setItem('efips_oauth_school_email', email);
+      // Reuse the existing approved student redirect URL so no Supabase
+      // Auth redirect allowlist changes are needed for this release.
       await supabase.auth.signOut();
       const { error: googleError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: window.location.origin + '/?efips_google_student=1',
           scopes: 'openid email profile',
-          queryParams: { prompt: 'select_account' }
-        }
+          queryParams: { prompt: 'select_account', login_hint: email },
+        },
       });
       if (googleError) throw googleError;
     } catch {
-      setError(lang === 'ar' ? 'تعذر بدء تسجيل الدخول بحساب Google المدرسي.' : 'Unable to start school Google sign-in.');
-      setLoading(false);
-    }
-  };
-
-  const handleGoogleTeacherLogin = async () => {
-    setError(''); setLoading(true);
-    try {
-      await supabase.auth.signOut();
-      const { error: googleError } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: window.location.origin + '/?efips_google_teacher=1',
-          scopes: 'openid email profile', queryParams: { prompt: 'select_account' } }
-      });
-      if (googleError) throw googleError;
-    } catch {
-      setError(lang === 'ar' ? 'تعذر بدء دخول Google للمعلمين.' : 'Could not start teacher Google sign-in.');
+      try { sessionStorage.removeItem('efips_oauth_school_email'); } catch { /* restricted storage */ }
+      setError(lang === 'ar'
+        ? 'تعذر بدء الدخول عبر Google المدرسي. حاول مرة أخرى.'
+        : 'Could not start school Google sign-in. Please retry.');
       setLoading(false);
     }
   };
@@ -229,80 +222,65 @@ export default function Login() {
               {lang === 'ar' ? 'تسجيل الدخول' : 'Sign In'}
             </h2>
             <p className="text-slate-500 text-xs md:text-sm font-bold">
-              {lang === 'ar' ? 'مرحباً بعودتك! يرجى اختيار نوع الحساب.' : 'Welcome back! Please choose account type.'}
+              {lang === 'ar' ? 'نقطة دخول واحدة للطلاب والمعلمين والإدارة. سيتم تحديد حسابك تلقائيًا بعد التحقق.' : 'One sign-in for students, staff and administrators. Your approved role is identified automatically.'}
             </p>
           </div>
 
-          {/* أزرار التبديل */}
-          <div className="flex bg-slate-100 p-1.5 rounded-[1.5rem] mb-8 border border-slate-200">
-            <button
-              onClick={() => { setLoginType('student'); setError(''); }}
-              className={`flex-1 py-3 px-2 text-xs sm:text-sm font-black rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 md:gap-2 ${
-                loginType === 'student' 
-                ? 'bg-white text-blue-600 shadow-md border border-slate-200' 
-                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50 border border-transparent'
-              }`}
-            >
-              <StudentIcon /> {lang === 'ar' ? 'بوابة الطلاب' : 'Students'}
-            </button>
-            <button
-              onClick={() => { setLoginType('teacher'); setError(''); }}
-              className={`flex-1 py-3 px-2 text-xs sm:text-sm font-black rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 md:gap-2 ${
-                loginType === 'teacher' 
-                ? 'bg-white text-indigo-600 shadow-md border border-slate-200' 
-                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50 border border-transparent'
-              }`}
-            >
-              <TeacherIcon /> {lang === 'ar' ? 'بوابة المعلمين' : 'Teachers'}
-            </button>
-          </div>
-
-          {/* فورم الطلاب */}
-          {loginType === 'student' ? (
-            <div className="space-y-5 animate-fade-in">
-              {error && (
-                <div role="alert" className="bg-rose-50 border-2 border-rose-200 text-rose-600 p-3 rounded-2xl text-xs md:text-sm font-bold text-center animate-shake">
-                  {error}
-                </div>
-              )}
-              <p className="text-center text-sm font-bold text-slate-600 leading-relaxed">
-                {lang === 'ar'
-                  ? 'تسجيل دخول الطلاب باستخدام حساب Google المدرسي فقط.'
-                  : 'Students sign in exclusively with their school Google account.'}
-              </p>
-              <button type="button" onClick={() => void handleGoogleStudentLogin()} disabled={loading}
-                className="w-full min-h-14 flex items-center justify-center gap-3 rounded-[1.5rem] bg-gradient-to-r from-indigo-600 to-emerald-600 hover:from-indigo-700 hover:to-emerald-700 px-4 py-4 text-white text-sm md:text-base font-black shadow-lg transition-all disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600">
-                <svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true" className="shrink-0">
-                  <path fill="#EA4335" d="M24 9.5c3.5 0 6.7 1.2 9.2 3.6l6.8-6.8C35.9 2.3 30.2 0 24 0 14.6 0 6.5 5.4 2.6 13.3l7.9 6.1C12.3 13.8 17.7 9.5 24 9.5z"/>
-                  <path fill="#4285F4" d="M46.1 24.5c0-1.6-.2-3.2-.5-4.7H24v8.9h12.4c-.5 2.9-2.1 5.4-4.5 7.1l7.3 5.7c4.3-4 6.9-9.8 6.9-17z"/>
-                  <path fill="#FBBC05" d="M10.5 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.1C.9 16.6 0 20.2 0 24s.9 7.4 2.6 10.7l7.9-6.1z"/>
-                  <path fill="#34A853" d="M24 48c6.5 0 12-2.1 16-6l-7.3-5.7c-2 1.4-4.7 2.2-8.7 2.2-6.3 0-11.7-4.3-13.5-10.2l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/>
-                </svg>
-                {lang === 'ar' ? 'الدخول بحساب Google المدرسي' : 'Sign in with school Google'}
-              </button>
-              {/* الرابط المطلوب إضافته تحت زر الدخول للمكتبة */}
-              <div className="text-center pt-2">
-                <Link to="/about" className="text-xs md:text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline transition-all">
-                  {lang === 'ar' ? 'عن مدرسة صقر الإمارات الدولية الخاصة' : 'More About EFIPS'}
-                </Link>
-              </div>
+          {/* Unified Google-only school login. No role switch or unverified email lookup. */}
+          <form className="space-y-5 animate-fade-in" onSubmit={e => { e.preventDefault(); void handleSchoolGoogleLogin(); }}>
+            <p className="text-center text-sm font-bold text-slate-600 leading-relaxed">
+              {lang === 'ar'
+                ? 'اكتب بريدك المدرسي، ثم أثبت ملكيته عبر Google. ستظهر بياناتك وصلاحياتك المسجلة تلقائيًا.'
+                : 'Enter your school email and verify it with Google. Your registered name and permissions are loaded automatically.'}
+            </p>
+            <div>
+              <label htmlFor="efips-school-email" className="block mb-2 text-sm font-black text-slate-700">
+                {lang === 'ar' ? 'البريد الإلكتروني المدرسي' : 'School email address'}
+              </label>
+              <input
+                id="efips-school-email"
+                type="email"
+                name="school-email"
+                dir="ltr"
+                autoComplete="email"
+                autoCapitalize="none"
+                spellCheck={false}
+                inputMode="email"
+                placeholder="name@falcon-school.com"
+                value={schoolEmail}
+                onChange={event => { setSchoolEmail(event.target.value); if (error) setError(''); }}
+                required
+                disabled={loading}
+                className="w-full min-h-14 px-4 rounded-2xl border-2 border-slate-200 bg-slate-50 text-slate-800 text-base font-bold text-left outline-none transition-colors focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 disabled:opacity-60"
+              />
             </div>
-          ) : (
-            /* فورم المعلمين */
-            <div className="space-y-5 animate-fade-in">
-              <p className="text-center text-sm font-bold text-slate-600 leading-relaxed">{lang === 'ar' ? 'دخول المعلمين والإدارة عبر حساب Google المدرسي المعتمد فقط.' : 'Teachers and administrators sign in using approved school Google accounts only.'}</p>
-              {error && <div role="alert" className="bg-rose-50 border-2 border-rose-200 text-rose-600 p-3 rounded-2xl text-xs md:text-sm font-bold text-center">{error}</div>}
-              <button type="button" onClick={() => void handleGoogleTeacherLogin()} disabled={loading}
-                className="w-full min-h-14 px-4 py-4 rounded-[1.5rem] bg-gradient-to-r from-indigo-600 to-emerald-600 hover:from-indigo-700 hover:to-emerald-700 text-white font-black text-sm md:text-base shadow-lg disabled:opacity-60">
-                {lang === 'ar' ? 'الدخول بحساب Google المدرسي للمعلمين' : 'Sign in with School Google — Staff'}
-              </button>
-              <div className="text-center pt-2">
-                <Link to="/about" className="text-xs md:text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline transition-all">
-                  {lang === 'ar' ? 'عن مدرسة صقر الإمارات الدولية الخاصة' : 'More About EFIPS'}
-                </Link>
-              </div>
+            {error && <div role="alert" className="bg-rose-50 border-2 border-rose-200 text-rose-700 p-3 rounded-2xl text-xs md:text-sm font-bold text-center">{error}</div>}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full min-h-14 flex items-center justify-center gap-3 rounded-[1.5rem] bg-gradient-to-r from-indigo-600 to-emerald-600 hover:from-indigo-700 hover:to-emerald-700 px-4 py-4 text-white text-sm md:text-base font-black shadow-lg transition-all disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600"
+            >
+              <svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true" className="shrink-0">
+                <path fill="#EA4335" d="M24 9.5c3.5 0 6.7 1.2 9.2 3.6l6.8-6.8C35.9 2.3 30.2 0 24 0 14.6 0 6.5 5.4 2.6 13.3l7.9 6.1C12.3 13.8 17.7 9.5 24 9.5z"/>
+                <path fill="#4285F4" d="M46.1 24.5c0-1.6-.2-3.2-.5-4.7H24v8.9h12.4c-.5 2.9-2.1 5.4-4.5 7.1l7.3 5.7c4.3-4 6.9-9.8 6.9-17z"/>
+                <path fill="#FBBC05" d="M10.5 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.1C.9 16.6 0 20.2 0 24s.9 7.4 2.6 10.7l7.9-6.1z"/>
+                <path fill="#34A853" d="M24 48c6.5 0 12-2.1 16-6l-7.3-5.7c-2 1.4-4.7 2.2-8.7 2.2-6.3 0-11.7-4.3-13.5-10.2l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/>
+              </svg>
+              {loading
+                ? (lang === 'ar' ? 'جارٍ الانتقال إلى Google...' : 'Connecting to Google...')
+                : (lang === 'ar' ? 'متابعة الدخول بحساب Google' : 'Continue with Google')}
+            </button>
+            <p className="text-center text-xs font-semibold text-slate-500 leading-relaxed">
+              {lang === 'ar'
+                ? 'يُحدد النظام هل أنت طالب أو معلم أو مدير من السجل المدرسي، وليس من البريد المكتوب وحده.'
+                : 'Your role is verified against the school records, not assigned from the typed address.'}
+            </p>
+            <div className="text-center pt-2">
+              <Link to="/about" className="text-xs md:text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline transition-all">
+                {lang === 'ar' ? 'عن مدرسة صقر الإمارات الدولية الخاصة' : 'More About EFIPS'}
+              </Link>
             </div>
-          )}
+          </form>
 
           <div className="mt-6 text-center">
             <Link
