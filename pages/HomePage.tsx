@@ -179,24 +179,22 @@ const RevealSection: React.FC<{ children: React.ReactNode, delay?: number }> = (
     const sectionRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (entry.isIntersecting) {
-                    setIsVisible(true);
-                } else {
-                    setIsVisible(false);
-                }
-            },
-            {
-                threshold: 0.1,
-                rootMargin: "-50px 0px -50px 0px"
+        const element = sectionRef.current;
+        if (!element || typeof IntersectionObserver === 'undefined') return;
+        // Reveal just once, ahead of the viewport. Repeated hide/show while
+        // scrolling caused re-paints and apparent delayed content on Safari.
+        let entered = false;
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting) {
+                entered = true;
+                setIsVisible(true);
+                observer.disconnect();
+            } else if (!entered) {
+                setIsVisible(false);
             }
-        );
-
-        if (sectionRef.current) observer.observe(sectionRef.current);
-        return () => {
-            if (sectionRef.current) observer.unobserve(sectionRef.current);
-        };
+        }, { threshold: 0, rootMargin: '160px 0px 160px 0px' });
+        observer.observe(element);
+        return () => observer.disconnect();
     }, []);
 
     return (
@@ -210,6 +208,64 @@ const RevealSection: React.FC<{ children: React.ReactNode, delay?: number }> = (
             {children}
         </div>
     );
+};
+
+// Keep the seconds-level timer inside the few visible borrowing cards.
+// The previous timer lived in HomePage and reconciled the entire dashboard
+// every second, including off-screen tiles, even with zero active borrowings.
+const BorrowingReturnStatus: React.FC<{ returnDate: string; isAr: boolean; returnLabel: string }> = ({ returnDate, isAr, returnLabel }) => {
+    const [now, setNow] = useState(() => Date.now());
+
+    useEffect(() => {
+        const tick = () => { if (!document.hidden) setNow(Date.now()); };
+        const interval = window.setInterval(tick, 1000);
+        document.addEventListener('visibilitychange', tick);
+        return () => {
+            window.clearInterval(interval);
+            document.removeEventListener('visibilitychange', tick);
+        };
+    }, []);
+
+    const due = returnDate ? new Date(`${returnDate}T23:59:59`).getTime() : NaN;
+    const valid = Number.isFinite(due);
+    const remaining = due - now;
+    const overdue = valid && remaining <= 0;
+    const days = valid ? Math.floor(Math.max(remaining, 0) / 86400000) : 0;
+    const hours = valid ? Math.floor((Math.max(remaining, 0) % 86400000) / 3600000) : 0;
+    const minutes = valid ? Math.floor((Math.max(remaining, 0) % 3600000) / 60000) : 0;
+    const seconds = valid ? Math.floor((Math.max(remaining, 0) % 60000) / 1000) : 0;
+    const daysToReturn = valid ? Math.ceil(remaining / 86400000) : null;
+    const dueSoon = daysToReturn !== null && daysToReturn > 0 && daysToReturn <= 3;
+
+    const countdown = !returnDate
+        ? (isAr ? 'لم يحدد تاريخ الإرجاع' : 'Return date not set')
+        : !valid
+            ? (isAr ? 'تاريخ الإرجاع غير صالح' : 'Invalid return date')
+            : overdue
+                ? (isAr ? 'انتهت مدة الاستعارة، يرجى إرجاع الكتاب' : 'Overdue: please return this book')
+                : isAr
+                    ? `متبقي ${days} يوم و${hours} ساعة و${minutes} دقيقة و${seconds} ثانية`
+                    : `${days}d ${hours}h ${minutes}m ${seconds}s remaining`;
+
+    return <>
+        <div className="rounded-xl bg-amber-50 dark:bg-slate-900/70 border border-amber-100 dark:border-slate-700 px-3.5 py-3">
+            <p className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 mb-1">{returnLabel}</p>
+            <p className="font-black text-rose-600 dark:text-rose-400 text-sm sm:text-base">
+                {returnDate && valid
+                    ? new Date(`${returnDate}T12:00:00`).toLocaleDateString(isAr ? 'ar-AE' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+                    : (isAr ? 'لم يحدد تاريخ الإرجاع' : 'Return date not set')}
+            </p>
+            <p className={`mt-1.5 text-sm sm:text-base font-extrabold leading-relaxed flex items-center gap-1.5 ${overdue ? 'text-rose-700 dark:text-rose-300' : 'text-emerald-700 dark:text-emerald-300'}`}>
+            <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 7v5l3 2" /></svg>
+                {countdown}
+            </p>
+        </div>
+        {(dueSoon || overdue) && (
+            <p role="status" className={`text-xs sm:text-sm rounded-xl border px-3 py-2 font-black ${overdue ? 'border-rose-300 bg-rose-100 dark:bg-rose-950/50 text-rose-800 dark:text-rose-200' : 'border-amber-300 bg-amber-100 dark:bg-amber-950/50 text-amber-900 dark:text-amber-200'}`}>
+                {overdue ? (isAr ? 'تنبيه: تجاوز الكتاب موعد الإرجاع.' : 'Reminder: this book is overdue.') : (isAr ? `تذكير تلقائي: موعد إرجاع الكتاب خلال ${daysToReturn} يوم.` : `Automatic reminder: return due in ${daysToReturn} day(s).`)}
+            </p>
+        )}
+    </>;
 };
 
 const HomePage: React.FC = () => {
@@ -238,26 +294,6 @@ const HomePage: React.FC = () => {
     
     const [borrowedBooks, setBorrowedBooks] = useState<any[]>([]);
     const [teacherSchedule, setTeacherSchedule] = useState<TeacherLibrarySlot[]>([]);
-    const [borrowCountdownNow, setBorrowCountdownNow] = useState(Date.now());
-
-    useEffect(() => {
-        const timer = window.setInterval(() => setBorrowCountdownNow(Date.now()), 1000);
-        return () => window.clearInterval(timer);
-    }, []);
-
-    const getBorrowCountdown = (returnDate: string) => {
-        if (!returnDate) return isAr ? 'لم يحدد تاريخ الإرجاع' : 'Return date not set';
-        const due = new Date(`${returnDate}T23:59:59`).getTime();
-        if (!Number.isFinite(due)) return isAr ? 'تاريخ الإرجاع غير صالح' : 'Invalid return date';
-        const remaining = due - borrowCountdownNow;
-        if (remaining <= 0) return isAr ? 'انتهت مدة الاستعارة، يرجى إرجاع الكتاب' : 'Overdue: please return this book';
-        const days = Math.floor(remaining / 86400000);
-        const hours = Math.floor((remaining % 86400000) / 3600000);
-        const minutes = Math.floor((remaining % 3600000) / 60000);
-        const seconds = Math.floor((remaining % 60000) / 1000);
-        return isAr ? `متبقي ${days} يوم و${hours} ساعة و${minutes} دقيقة و${seconds} ثانية` : `${days}d ${hours}h ${minutes}m ${seconds}s remaining`;
-    };
-
     useEffect(() => {
         if (!userData || !userType) {
             window.location.href = '#/';
@@ -747,9 +783,6 @@ const HomePage: React.FC = () => {
                                             const bookTitle = book.book_name || book.book_title || book.title || book.name;
                                             const returnDate = book.return_date || book.due_date || book.expected_return_date;
                                             const validReturnDate = Boolean(returnDate && Number.isFinite(new Date(`${returnDate}T12:00:00`).getTime()));
-                                            const isOverdue = Boolean(returnDate && Number.isFinite(new Date(`${returnDate}T23:59:59`).getTime()) && new Date(`${returnDate}T23:59:59`).getTime() <= borrowCountdownNow);
-                                            const daysToReturn = validReturnDate ? Math.ceil((new Date(`${returnDate}T23:59:59`).getTime() - borrowCountdownNow) / 86400000) : null;
-                                            const dueSoon = daysToReturn !== null && daysToReturn > 0 && daysToReturn <= 3;
 
                                             return (
                                             <article key={book.id ?? `${bookTitle}-${returnDate}`} className="homepage-alert-card group relative bg-white/90 dark:bg-slate-800/90 p-4 sm:p-5 border border-amber-200 dark:border-amber-800/70 rounded-2xl sm:rounded-3xl flex flex-col gap-3 shadow-sm hover:shadow-xl touch-manipulation active:scale-[0.99]">
@@ -760,20 +793,7 @@ const HomePage: React.FC = () => {
                                                         <h4 className="font-black text-slate-900 dark:text-white text-base sm:text-lg leading-snug break-words">{bookTitle || (isAr ? 'كتاب بدون عنوان' : 'Untitled book')}</h4>
                                                     </div>
                                                 </div>
-                                                <div className="rounded-xl bg-amber-50 dark:bg-slate-900/70 border border-amber-100 dark:border-slate-700 px-3.5 py-3">
-                                                    <p className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 mb-1">{t('borrowReturn')}</p>
-                                                    <p className="font-black text-rose-600 dark:text-rose-400 text-sm sm:text-base">
-                                                        {validReturnDate
-                                                            ? new Date(`${returnDate}T12:00:00`).toLocaleDateString(isAr ? 'ar-AE' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-                                                            : (isAr ? 'لم يحدد تاريخ الإرجاع' : 'Return date not set')}
-                                                    </p>
-                                                    <p className={`mt-1.5 text-sm sm:text-base font-extrabold leading-relaxed flex items-center gap-1.5 ${isOverdue ? 'text-rose-700 dark:text-rose-300' : 'text-emerald-700 dark:text-emerald-300'}`}><svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 7v5l3 2" /></svg>{getBorrowCountdown(returnDate)}</p>
-                                                </div>
-                                                {(dueSoon || isOverdue) && (
-                                                    <p role="status" className={`text-xs sm:text-sm rounded-xl border px-3 py-2 font-black ${isOverdue ? 'border-rose-300 bg-rose-100 dark:bg-rose-950/50 text-rose-800 dark:text-rose-200' : 'border-amber-300 bg-amber-100 dark:bg-amber-950/50 text-amber-900 dark:text-amber-200'}`}>
-                                                        {isOverdue ? (isAr ? 'تنبيه: تجاوز الكتاب موعد الإرجاع.' : 'Reminder: this book is overdue.') : (isAr ? `تذكير تلقائي: موعد إرجاع الكتاب خلال ${daysToReturn} يوم.` : `Automatic reminder: return due in ${daysToReturn} day(s).`)}
-                                                    </p>
-                                                )}
+                                                <BorrowingReturnStatus returnDate={returnDate} isAr={isAr} returnLabel={t('borrowReturn')} />
                                                 {validReturnDate && (
                                                     <a
                                                         href={createGoogleCalendarLink(bookTitle || (isAr ? 'كتاب مستعار' : 'Borrowed book'), returnDate)}

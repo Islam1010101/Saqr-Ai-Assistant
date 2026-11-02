@@ -106,29 +106,22 @@ const RevealOnScroll = ({ children, delay = 0 }: { children: React.ReactNode, de
     const elementRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (entry.isIntersecting) {
-                    setIsVisible(true);
-                } else {
-                    setIsVisible(false);
-                }
-            },
-            {
-                threshold: 0.15,
-                rootMargin: "-30px 0px -30px 0px"
+        const element = elementRef.current;
+        if (!element || typeof IntersectionObserver === 'undefined') return;
+        // Reveal just once, ahead of the viewport. Repeated hide/show while
+        // scrolling caused re-paints and apparent delayed content on Safari.
+        let entered = false;
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting) {
+                entered = true;
+                setIsVisible(true);
+                observer.disconnect();
+            } else if (!entered) {
+                setIsVisible(false);
             }
-        );
-
-        if (elementRef.current) {
-            observer.observe(elementRef.current);
-        }
-
-        return () => {
-            if (elementRef.current) {
-                observer.unobserve(elementRef.current);
-            }
-        };
+        }, { threshold: 0, rootMargin: '160px 0px 160px 0px' });
+        observer.observe(element);
+        return () => observer.disconnect();
     }, []);
 
     return (
@@ -180,7 +173,7 @@ const DigitalLibraryPage: React.FC = () => {
         <div dir={dir} className="w-full min-h-[100dvh] flex flex-col bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300 py-6 md:py-12 px-4 md:px-6">
             
             {/* الخلفية الديناميكية الموحدة */}
-            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-50 dark:opacity-20">
+            <div className="efips-digital-ambient fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-50 dark:opacity-20">
                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-400/20 rounded-full blur-[100px] animate-blob"></div>
                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-sky-400/20 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
             </div>
@@ -302,6 +295,11 @@ const DigitalLibraryPage: React.FC = () => {
                   100% { transform: translate(0px, 0px) scale(1); }
                 }
                 .animate-blob { animation: blob 7s infinite alternate ease-in-out; }
+                /* Safari/iPadOS touch scrolling: keep the same ambient colors
+                   without continuously moving two screen-sized blurred layers. */
+                @media (hover: none) and (pointer: coarse) {
+                  .efips-digital-ambient .animate-blob { animation: none !important; }
+                }
                 
                 @keyframes burst-steady {
                   0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
