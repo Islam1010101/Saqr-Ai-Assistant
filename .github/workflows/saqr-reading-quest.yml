@@ -10,6 +10,7 @@ on:
       - 'src/utils/saqrReadingQuestBank.ts'
       - 'src/utils/saqrReadingQuestDigitalBank.ts'
       - 'src/utils/saqrReadingQuestHeritageSources.ts'
+      - 'src/utils/saqrReadingQuestDriveTextSources.ts'
       - 'src/utils/saqrReadingQuestArabicDigitalSources.ts'
       - 'src/utils/saqrReadingQuestEnglishDigitalSources.ts'
       - 'api/digitalBookData.ts'

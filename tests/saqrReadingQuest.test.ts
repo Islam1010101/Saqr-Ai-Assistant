@@ -5,15 +5,28 @@ import {bookData} from '../api/bookData.ts';
 import {digitalReadingChallengeBooks} from '../src/utils/saqrReadingQuestDigitalBank.ts';
 import {ARABIC_LIBRARY_DATABASE,ENGLISH_LIBRARY_DATABASE} from '../api/digitalBookData.ts';
 import {NATIONAL_IDENTITY_DIGITAL_BOOKS} from '../api/nationalIdentityDigitalBooks.ts';
+import {heritageReadingQuestDefinitions} from '../src/utils/saqrReadingQuestHeritageSources.ts';
+import {heritageDriveTextQuestions} from '../src/utils/saqrReadingQuestDriveTextSources.ts';
 const groups=[['student','ar'],['student','en'],['teacher','ar'],['teacher','en']] as const;
 assert.ok(bookData.length>=3000,'The complete EFIPS catalog should be loaded');
 assert.equal(readingChallengeBooks.length,59,'All 59 catalog-matched books must be playable');
 assert.equal(readingChallengeBooks.reduce((n,b)=>n+b.questions.length,0),555);
-assert.equal(digitalReadingChallengeBooks.length,31,'Reviewed digital quiz records should remain stable');
-assert.equal(digitalReadingChallengeBooks.reduce((n,b)=>n+b.questions.length,0),155);
+assert.equal(digitalReadingChallengeBooks.length,34,'Three text-reviewed digital titles are added without removing 31 current records');
+assert.equal(digitalReadingChallengeBooks.reduce((n,b)=>n+b.questions.length,0),200,'Original 155 + 30 heritage page-grounded + 15 new title questions');
 const digitalCatalog = [...ARABIC_LIBRARY_DATABASE,...ENGLISH_LIBRARY_DATABASE,...NATIONAL_IDENTITY_DIGITAL_BOOKS];
 assert.equal(new Set(digitalReadingChallengeBooks.map(b=>b.key)).size,digitalReadingChallengeBooks.length);
 assert.equal(digitalReadingChallengeBooks.filter(b=>b.key.includes(':NI_')).length,6,'All six National Identity e-books must be playable');
+for (const def of heritageReadingQuestDefinitions) {
+ const actual=digitalReadingChallengeBooks.find(b=>b.key==='digital:ar:'+def.id);
+ assert.ok(actual,`Missing existing heritage book: ${def.id}`);
+ assert.equal(actual.questions.length,def.qs.length+heritageDriveTextQuestions[def.id].length);
+ for(let i=0;i<def.qs.length;i++){
+   assert.equal(actual.questions[i].prompt,def.qs[i][0],'The original heritage questions must remain in the same order');
+   assert.equal(actual.questions[i].id,actual.key+'-'+(i+1),'Previous question IDs must not change');
+ }
+ for (const q of actual.questions.slice(def.qs.length)) assert.match(q.reference,/PDF|ملف|صورة/);
+}
+for(const id of ['digital:ar:AR_50','digital:en:28','digital:en:32'])assert.ok(digitalReadingChallengeBooks.some(b=>b.key===id));
 for(const record of digitalReadingChallengeBooks){
   const match=digitalCatalog.find(book=>String(book.id)===record.book.id);
   assert.ok(match,`Digital book missing from actual EFIPS catalog: ${record.key}`);

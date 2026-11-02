@@ -5,6 +5,7 @@ import type { ReadingBook, ReadingQuestion, ReadingRole } from './saqrReadingQue
 import { heritageReadingQuestDefinitions } from './saqrReadingQuestHeritageSources.ts';
 import { arabicDigitalReadingQuestDefinitions } from './saqrReadingQuestArabicDigitalSources.ts';
 import { englishDigitalReadingQuestDefinitions } from './saqrReadingQuestEnglishDigitalSources.ts';
+import { heritageDriveTextQuestions, newlyVerifiedDigitalReadingBooks } from './saqrReadingQuestDriveTextSources.ts';
 
 /**
  * Additive source-reviewed digital challenge bank.
@@ -16,6 +17,7 @@ const definitions = [
   ...heritageReadingQuestDefinitions,
   ...arabicDigitalReadingQuestDefinitions,
   ...englishDigitalReadingQuestDefinitions,
+  ...newlyVerifiedDigitalReadingBooks,
 ] as const;
 const catalog = [
   ...ARABIC_LIBRARY_DATABASE,
@@ -46,12 +48,14 @@ export const digitalReadingChallengeBooks: ReadingBook[] = definitions.flatMap(d
     language: locale === 'ar' ? 'AR' : 'EN',
     driveLink: digital.driveLink,
   };
-  const questions: ReadingQuestion[] = def.qs.map((q,index) => ({
+  const supplemental = (heritageDriveTextQuestions as Record<string,readonly (readonly string[])[]>)[String(def.id)] || [];
+  const allQuestions = [...def.qs, ...supplemental];
+  const questions: ReadingQuestion[] = allQuestions.map((q,index) => ({
     id: key + '-' + String(index+1),
     prompt: q[0],
     answers: [q[1], q[2], q[3]] as [string, string, string],
     correct: 0,
-    reference: q[4] + ' — ' + def.sourceLabel,
+    reference: index < def.qs.length ? q[4] + ' — ' + def.sourceLabel : q[4],
   }));
   return [{
     key,
