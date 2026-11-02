@@ -86,7 +86,7 @@ export default function Login() {
   const handleSchoolGoogleLogin = async () => {
     setError('');
     const email = schoolEmail.trim().toLowerCase();
-    if (!/^[^@\\s]+@falcon-school\\.com$/.test(email)) {
+    if (!/^[^@\s]+@falcon-school\.com$/.test(email)) {
       setError(lang === 'ar'
         ? 'أدخل البريد المدرسي الصحيح المنتهي بـ @falcon-school.com.'
         : 'Enter your approved @falcon-school.com email address.');
