@@ -11,6 +11,9 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showFlag, setShowFlag] = useState(false); // حالة إظهار علم الإمارات عند الضغط على صقر
+  const subtitleContainerRef = useRef<HTMLDivElement>(null);
+  const subtitleTextRef = useRef<HTMLSpanElement>(null);
+  const [subtitleScale, setSubtitleScale] = useState(1);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const failedVideosRef = useRef<Set<number>>(new Set());
@@ -107,6 +110,34 @@ export default function Login() {
     }
   };
 
+  // Preserve the full sentence on exactly one line at every breakpoint.
+  // Fit the rendered text to its own available width rather than hiding words
+  // or depending on a font-size estimate that fails with Arabic glyphs.
+  useEffect(() => {
+    let active = true;
+    const measure = () => {
+      const container = subtitleContainerRef.current;
+      const text = subtitleTextRef.current;
+      if (!active || !container || !text || !container.clientWidth) return;
+      const naturalWidth = text.scrollWidth;
+      setSubtitleScale(naturalWidth > 0
+        ? Math.min(1, (container.clientWidth - 2) / naturalWidth)
+        : 1);
+    };
+    const resizeObserver = typeof ResizeObserver !== 'undefined'
+      ? new ResizeObserver(measure) : null;
+    if (subtitleContainerRef.current) resizeObserver?.observe(subtitleContainerRef.current);
+    window.addEventListener('resize', measure);
+    const frame = window.requestAnimationFrame(measure);
+    void document.fonts?.ready.then(measure);
+    return () => {
+      active = false;
+      resizeObserver?.disconnect();
+      window.removeEventListener('resize', measure);
+      window.cancelAnimationFrame(frame);
+    };
+  }, [lang]);
+
   const handleSaqrClick = () => {
     setShowFlag(true);
     setTimeout(() => setShowFlag(false), 3000);
@@ -128,7 +159,7 @@ export default function Login() {
       <div className="max-w-5xl w-full bg-white/90 backdrop-blur-xl border border-slate-200 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col lg:flex-row z-10">
         
         {/* ================= القسم الأول: الهوية البصرية وصقر (مع خلفية الفيديو العشوائية) ================= */}
-        <div className="lg:w-1/2 p-8 lg:p-12 flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br from-blue-50/50 to-slate-100/50 border-b lg:border-b-0 lg:border-l border-slate-200">
+        <div className="lg:w-1/2 min-w-0 px-4 py-8 sm:px-8 lg:px-8 xl:px-10 lg:py-12 flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br from-blue-50/50 to-slate-100/50 border-b lg:border-b-0 lg:border-l border-slate-200">
           
           {/* Muted inline playback with Safari resume and a static background fallback. */}
           <div className="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden bg-gradient-to-br from-blue-100 to-slate-200">
@@ -166,25 +197,48 @@ export default function Login() {
               />
             </div>
             <div className="w-full min-w-0 space-y-1">
-              <h2 dir="rtl" className="whitespace-nowrap text-[clamp(10px,2.3vw,14px)] font-black leading-tight tracking-tight text-slate-800 drop-shadow-sm">
+              <h2 dir="rtl" className="whitespace-nowrap text-[clamp(10px,2.3vw,14px)] font-black leading-[1.85] text-slate-800 drop-shadow-sm">
                 مدرسة صقر الإمارات الدولية الخاصة
               </h2>
-              <h2 dir="ltr" className="whitespace-nowrap text-[clamp(9px,2.1vw,14px)] font-black leading-tight tracking-tight text-slate-800 drop-shadow-sm">
+              <h2 dir="ltr" className="whitespace-nowrap text-[clamp(9px,2.1vw,14px)] font-black leading-[1.65] text-slate-800 drop-shadow-sm">
                 Emirates Falcon Int'l Private School
               </h2>
             </div>
           </div>
 
-          <div className="text-center relative z-10 mb-6">
-            {/* تم تكبير عنوان مكتبة صقر الإمارات بشكل أكبر وأكثر بروزاً */}
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 mb-3 drop-shadow-sm tracking-tight">
-              {lang === 'ar' ? 'مكتبة صقر الإمارات' : 'EFIPS Library'}
+          <div className="text-center relative z-10 mb-6 w-full min-w-0">
+            {/* Explicit two-line bilingual brand. Comfortable Arabic line boxes
+                keep all dots and letter ascenders outside clipped edges. */}
+            <h1
+              dir={lang === 'ar' ? 'rtl' : 'ltr'}
+              className="efips-brand-heading mx-auto mb-3 flex w-full min-w-0 flex-col items-center justify-center font-black text-sky-800"
+            >
+              {lang === 'ar' ? (
+                <>
+                  <span className="efips-brand-heading-line">المكتبة الرقمية</span>
+                  <span className="efips-brand-heading-line">لصقر الإمارات</span>
+                </>
+              ) : (
+                <>
+                  <span className="efips-brand-heading-line">EFIPS</span>
+                  <span className="efips-brand-heading-line">DIGITAL LIBRARY</span>
+                </>
+              )}
             </h1>
-            <p className="text-slate-700 text-xs sm:text-sm max-w-sm mx-auto font-bold leading-relaxed drop-shadow-sm">
-              {lang === 'ar' 
-                ? 'اكتشف عالماً من المعرفة، العب، وتعلم مع مساعدك الذكي "صقر"' 
-                : 'Discover a world of knowledge, play, and learn with Saqr!'}
-            </p>
+            <div ref={subtitleContainerRef} className="efips-brand-subtitle-container mx-auto flex w-full min-w-0 items-center justify-center" aria-label={lang === 'ar'
+              ? 'اكتشف عالماً من المعرفة، العب، وتعلم مع مساعدك الذكي "صقر"'
+              : 'Discover a world of knowledge, play, and learn with Saqr!'}>
+              <span
+                ref={subtitleTextRef}
+                dir={lang === 'ar' ? 'rtl' : 'ltr'}
+                className="efips-brand-subtitle inline-block whitespace-nowrap font-bold text-slate-700"
+                style={{ transform: `scaleX(${subtitleScale})`, transformOrigin: 'center center' }}
+              >
+                {lang === 'ar'
+                  ? 'اكتشف عالماً من المعرفة، العب، وتعلم مع مساعدك الذكي "صقر"'
+                  : 'Discover a world of knowledge, play, and learn with Saqr!'}
+              </span>
+            </div>
           </div>
 
           {/* شخصية صقر التفاعلية مع ظهور علم الإمارات عند الضغط */}
@@ -207,11 +261,11 @@ export default function Login() {
         </div>
 
         {/* ================= القسم الثاني: نموذج تسجيل الدخول ================= */}
-        <div className="lg:w-1/2 p-6 sm:p-10 lg:p-12 flex flex-col justify-center bg-white relative z-10">
+        <div className="lg:w-1/2 min-w-0 px-5 py-8 sm:px-8 sm:py-10 lg:px-8 xl:px-12 flex flex-col justify-center bg-white relative z-10">
           {/* Central title with subtle school-colored motion and SVG accents. */}
-          <div className="relative mb-9 flex flex-col items-center justify-center text-center">
+          <div className="relative mb-9 flex w-full min-w-0 flex-col items-center justify-center text-center">
             <div aria-hidden="true" className="pointer-events-none absolute -inset-x-5 -top-10 bottom-0 rounded-full bg-gradient-to-r from-blue-200/0 via-emerald-200/45 to-indigo-200/0 blur-3xl efips-login-glow" />
-            <div className="relative inline-flex flex-col items-center gap-3 efips-login-title-enter">
+            <div className="relative flex w-full min-w-0 flex-col items-center gap-3 efips-login-title-enter">
               <div aria-hidden="true" className="flex items-center gap-3 text-emerald-600">
                 <span className="h-px w-10 bg-gradient-to-r from-transparent to-emerald-500" />
                 <svg className="h-7 w-7 efips-login-spark" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
@@ -220,7 +274,7 @@ export default function Login() {
                 </svg>
                 <span className="h-px w-10 bg-gradient-to-l from-transparent to-emerald-500" />
               </div>
-              <h2 className="efips-login-title relative text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-tight">
+              <h2 className="efips-login-title relative block w-full min-w-0 whitespace-nowrap px-1 py-2 text-center font-black">
                 {lang === 'ar' ? 'تسجيل الدخول' : 'Sign In'}
               </h2>
               <span aria-hidden="true" className="efips-login-accent h-1.5 w-24 rounded-full bg-gradient-to-r from-blue-500 via-emerald-500 to-indigo-500" />
@@ -300,10 +354,57 @@ export default function Login() {
         .animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
         .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
         .animate-shake { animation: shake 0.4s ease-in-out; }
+        /* Responsive bilingual typography. The large line box prevents Arabic
+           dots from touching an overflow edge, while labels never break. */
+        .efips-brand-heading {
+          font-size:clamp(26px,3.2vw,45px);
+          line-height:1.67;
+          letter-spacing:normal;
+          text-shadow:0 3px 12px rgba(2,71,94,.12);
+          overflow:visible;
+        }
+        .efips-brand-heading-line {
+          display:block;
+          width:100%;
+          padding-block:.06em;
+          white-space:nowrap;
+          overflow:visible;
+        }
+        .efips-brand-subtitle-container {
+          min-height:33px;
+          overflow:visible;
+          white-space:nowrap;
+        }
+        .efips-brand-subtitle {
+          font-size:13px;
+          line-height:2;
+          letter-spacing:normal;
+          white-space:nowrap;
+          max-width:none;
+          flex-shrink:0;
+          will-change:transform;
+        }
+        .efips-login-title {
+          font-size:clamp(30px,3.8vw,48px);
+          line-height:1.8;
+          letter-spacing:normal;
+          overflow:visible;
+          color:#075985;
+          -webkit-text-fill-color:#075985;
+          background:none;
+          filter:none;
+          text-shadow:0 3px 16px rgba(6,95,120,.12);
+        }
+        @media(max-width:420px) {
+          .efips-brand-heading { font-size:clamp(23px,7.1vw,28px);line-height:1.85; }
+          .efips-brand-subtitle { font-size:11.5px; }
+          .efips-login-title { font-size:clamp(29px,8.2vw,35px);line-height:1.9; }
+        }
+
         /* Decorative only: respects motion preferences and leaves OAuth unchanged. */
         @keyframes efips-login-enter {
-          from { opacity: 0; transform: translateY(20px) scale(.96); filter: blur(5px); }
-          to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+          from { opacity: 0; transform: translateY(15px) scale(.98); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
         }
         @keyframes efips-login-glow-keyframes {
           0%, 100% { opacity: .45; transform: scale(.95); }
@@ -318,11 +419,6 @@ export default function Login() {
           50% { transform: scaleX(1.06); opacity: 1; }
         }
         .efips-login-title-enter { animation: efips-login-enter .8s cubic-bezier(.16,1,.3,1) both; }
-        .efips-login-title {
-          background: linear-gradient(110deg,#1d4ed8 5%,#047857 50%,#4338ca 96%);
-          -webkit-background-clip: text; background-clip: text; color: transparent;
-          filter: drop-shadow(0 5px 15px rgba(16,185,129,.15));
-        }
         .efips-login-glow { animation: efips-login-glow-keyframes 6s ease-in-out infinite; }
         .efips-login-spark { animation: efips-login-spark-keyframes 4s ease-in-out infinite; }
         .efips-login-accent { animation: efips-login-accent-keyframes 4s ease-in-out infinite; }
