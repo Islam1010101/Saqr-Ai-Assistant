@@ -389,11 +389,10 @@ export default function Login() {
           line-height:1.8;
           letter-spacing:normal;
           overflow:visible;
-          color:#075985!important;
-          background:none!important;
-          -webkit-text-fill-color:#075985!important;
-          background-clip:initial!important;
-          filter:none!important;
+          color:#075985;
+          -webkit-text-fill-color:#075985;
+          background:none;
+          filter:none;
           text-shadow:0 3px 16px rgba(6,95,120,.12);
         }
         @media(max-width:420px) {
@@ -404,8 +403,8 @@ export default function Login() {
 
         /* Decorative only: respects motion preferences and leaves OAuth unchanged. */
         @keyframes efips-login-enter {
-          from { opacity: 0; transform: translateY(20px) scale(.96); filter: blur(5px); }
-          to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+          from { opacity: 0; transform: translateY(15px) scale(.98); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
         }
         @keyframes efips-login-glow-keyframes {
           0%, 100% { opacity: .45; transform: scale(.95); }
@@ -420,11 +419,6 @@ export default function Login() {
           50% { transform: scaleX(1.06); opacity: 1; }
         }
         .efips-login-title-enter { animation: efips-login-enter .8s cubic-bezier(.16,1,.3,1) both; }
-        .efips-login-title {
-          background: linear-gradient(110deg,#1d4ed8 5%,#047857 50%,#4338ca 96%);
-          -webkit-background-clip: text; background-clip: text; color: transparent;
-          filter: drop-shadow(0 5px 15px rgba(16,185,129,.15));
-        }
         .efips-login-glow { animation: efips-login-glow-keyframes 6s ease-in-out infinite; }
         .efips-login-spark { animation: efips-login-spark-keyframes 4s ease-in-out infinite; }
         .efips-login-accent { animation: efips-login-accent-keyframes 4s ease-in-out infinite; }
