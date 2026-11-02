@@ -262,27 +262,37 @@ export default function Login() {
 
         {/* ================= القسم الثاني: نموذج تسجيل الدخول ================= */}
         <div className="lg:w-1/2 min-w-0 px-5 py-8 sm:px-8 sm:py-10 lg:px-8 xl:px-12 flex flex-col justify-center bg-white relative z-10">
-          {/* Central title with subtle school-colored motion and SVG accents. */}
+          {/* UAE national-identity title: high-contrast lettering, true flag colors,
+              and SVG-only motion without clipping Arabic dots or English glyphs. */}
           <div className="relative mb-9 flex w-full min-w-0 flex-col items-center justify-center text-center">
-            <div aria-hidden="true" className="pointer-events-none absolute -inset-x-5 -top-10 bottom-0 rounded-full bg-gradient-to-r from-blue-200/0 via-emerald-200/45 to-indigo-200/0 blur-3xl efips-login-glow" />
-            <div className="relative flex w-full min-w-0 flex-col items-center gap-3 efips-login-title-enter">
-              <div aria-hidden="true" className="flex items-center gap-3 text-emerald-600">
-                <span className="h-px w-10 bg-gradient-to-r from-transparent to-emerald-500" />
-                <svg className="h-7 w-7 efips-login-spark" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M16 3v5m0 16v5M3 16h5m16 0h5M7 7l3.5 3.5m11 11L25 25M25 7l-3.5 3.5m-11 11L7 25" />
-                  <path d="M16 9l2.5 4.5L23 16l-4.5 2.5L16 23l-2.5-4.5L9 16l4.5-2.5L16 9Z" />
+            <div aria-hidden="true" className="efips-login-uae-halo pointer-events-none absolute -inset-x-5 -top-9 -bottom-5 rounded-full" />
+            <div className="efips-login-uae-enter relative flex w-full min-w-0 flex-col items-center gap-2">
+              <div aria-hidden="true" className="flex items-center justify-center gap-3">
+                <span className="h-0.5 w-10 rounded-full bg-gradient-to-r from-transparent to-[#00843D]" />
+                <svg className="efips-login-uae-flag h-8 w-12 shrink-0 overflow-visible" viewBox="0 0 48 30" role="presentation">
+                  <rect x="1" y="1" width="46" height="28" rx="3" fill="#ffffff" stroke="#d8e5dc" strokeWidth="1.5" />
+                  <path d="M14 2H44A2 2 0 0 1 46 4V10H14Z" fill="#00843D" />
+                  <path d="M14 20H46V26A2 2 0 0 1 44 28H14Z" fill="#141414" />
+                  <path d="M4 2H15V28H4A2 2 0 0 1 2 26V4A2 2 0 0 1 4 2Z" fill="#CE1126" />
                 </svg>
-                <span className="h-px w-10 bg-gradient-to-l from-transparent to-emerald-500" />
+                <span className="h-0.5 w-10 rounded-full bg-gradient-to-l from-transparent to-[#CE1126]" />
               </div>
               <h2 className="efips-login-title relative block w-full min-w-0 whitespace-nowrap px-1 py-2 text-center font-black">
                 {lang === 'ar' ? 'تسجيل الدخول' : 'Sign In'}
               </h2>
-              <span aria-hidden="true" className="efips-login-accent h-1.5 w-24 rounded-full bg-gradient-to-r from-blue-500 via-emerald-500 to-indigo-500" />
+              <span aria-hidden="true" className="efips-login-uae-accent block h-1.5 w-36 max-w-full rounded-full" />
             </div>
           </div>
 
-          {/* Google-only entry: no typed email, account-type selector, or instructions. */}
+          {/* Google-only entry: the notice is informational and never accepts typed email. */}
           <div className="space-y-5 animate-fade-in">
+            <p className="efips-school-email-notice mx-auto flex w-full items-center justify-center gap-2.5 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-3 text-center text-sm sm:text-base font-black leading-[1.9] text-emerald-900 shadow-sm">
+              <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0 text-[#00843D]" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="4" y="11" width="16" height="10" rx="2" />
+                <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+              </svg>
+              <span>{lang === 'ar' ? 'الدخول باستخدام البريد الإلكتروني الخاص بالمدرسة فقط' : 'Sign in using your school email account only'}</span>
+            </p>
             {error && <div role="alert" className="bg-rose-50 border-2 border-rose-200 text-rose-700 p-3 rounded-2xl text-xs md:text-sm font-bold text-center">{error}</div>}
             <div className="relative group">
               <div aria-hidden="true" className="efips-login-button-glow pointer-events-none absolute -inset-1 rounded-[1.8rem] bg-gradient-to-r from-emerald-400/40 via-blue-400/40 to-indigo-400/40 blur-lg opacity-50 transition-opacity duration-500 group-hover:opacity-90" />
@@ -389,11 +399,11 @@ export default function Login() {
           line-height:1.8;
           letter-spacing:normal;
           overflow:visible;
-          color:#075985;
-          -webkit-text-fill-color:#075985;
+          color:#065c38;
+          -webkit-text-fill-color:#065c38;
           background:none;
           filter:none;
-          text-shadow:0 3px 16px rgba(6,95,120,.12);
+          text-shadow:0 2px 0 rgba(255,255,255,.85),0 9px 20px rgba(0,132,61,.18);
         }
         @media(max-width:420px) {
           .efips-brand-heading { font-size:clamp(23px,7.1vw,28px);line-height:1.85; }
@@ -402,34 +412,41 @@ export default function Login() {
         }
 
         /* Decorative only: respects motion preferences and leaves OAuth unchanged. */
-        @keyframes efips-login-enter {
-          from { opacity: 0; transform: translateY(15px) scale(.98); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
+        @keyframes efips-uae-title-enter {
+          from { opacity:0; transform:translateY(12px) scale(.98); }
+          to { opacity:1; transform:translateY(0) scale(1); }
         }
-        @keyframes efips-login-glow-keyframes {
-          0%, 100% { opacity: .45; transform: scale(.95); }
-          50% { opacity: .8; transform: scale(1.07); }
+        @keyframes efips-uae-halo-pulse {
+          0%,100% { opacity:.45; transform:scale(.95); }
+          50% { opacity:.8; transform:scale(1.035); }
         }
-        @keyframes efips-login-spark-keyframes {
-          0%,100% { transform: rotate(-9deg) scale(.94); opacity: .75; }
-          50% { transform: rotate(9deg) scale(1.12); opacity: 1; }
+        @keyframes efips-uae-flag-float {
+          0%,100% { transform:translateY(0) rotate(-2deg); }
+          50% { transform:translateY(-3px) rotate(2deg); }
         }
-        @keyframes efips-login-accent-keyframes {
-          0%,100% { transform: scaleX(.78); opacity: .75; }
-          50% { transform: scaleX(1.06); opacity: 1; }
+        @keyframes efips-uae-accent-pulse {
+          0%,100% { transform:scaleX(.88); opacity:.82; }
+          50% { transform:scaleX(1); opacity:1; }
         }
-        .efips-login-title-enter { animation: efips-login-enter .8s cubic-bezier(.16,1,.3,1) both; }
-        .efips-login-glow { animation: efips-login-glow-keyframes 6s ease-in-out infinite; }
-        .efips-login-spark { animation: efips-login-spark-keyframes 4s ease-in-out infinite; }
-        .efips-login-accent { animation: efips-login-accent-keyframes 4s ease-in-out infinite; }
+        .efips-login-uae-enter { animation:efips-uae-title-enter .8s cubic-bezier(.16,1,.3,1) both; }
+        .efips-login-uae-halo {
+          background:radial-gradient(ellipse at center,rgba(0,132,61,.16) 0%,rgba(206,17,38,.07) 48%,transparent 74%);
+          filter:blur(19px);animation:efips-uae-halo-pulse 6s ease-in-out infinite;
+        }
+        .efips-login-uae-flag { animation:efips-uae-flag-float 4.5s ease-in-out infinite; }
+        .efips-login-uae-accent {
+          background:linear-gradient(90deg,#CE1126 0% 19%,#00843D 19% 58%,#FFF 58% 76%,#181818 76% 100%);
+          box-shadow:0 0 0 1px rgba(19,55,39,.2),0 5px 12px rgba(0,132,61,.13);
+          animation:efips-uae-accent-pulse 4.5s ease-in-out infinite;
+        }
         .efips-login-button-shine {
           background: linear-gradient(115deg,transparent 15%,rgba(255,255,255,.20) 50%,transparent 85%);
         }
         @media(prefers-reduced-motion:reduce) {
-          .efips-login-title-enter,.efips-login-glow,.efips-login-spark,.efips-login-accent {
+          .efips-login-uae-enter,.efips-login-uae-halo,.efips-login-uae-flag,.efips-login-uae-accent {
             animation:none!important;
           }
-          .efips-login-title-enter { opacity:1!important; transform:none!important; filter:none!important; }
+          .efips-login-uae-enter { opacity:1!important; transform:none!important; filter:none!important; }
           .efips-login-button-glow,.efips-login-button-shine { transition:none!important; }
         }
 
