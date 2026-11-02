@@ -172,29 +172,22 @@ const RevealOnScroll = ({ children, delay = 0 }: { children: React.ReactNode, de
     const elementRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (entry.isIntersecting) {
-                    setIsVisible(true);
-                } else {
-                    setIsVisible(false);
-                }
-            },
-            {
-                threshold: 0.15,
-                rootMargin: "-20px 0px -20px 0px"
+        const element = elementRef.current;
+        if (!element || typeof IntersectionObserver === 'undefined') return;
+        // Reveal just once, ahead of the viewport. Repeated hide/show while
+        // scrolling caused re-paints and apparent delayed content on Safari.
+        let entered = false;
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting) {
+                entered = true;
+                setIsVisible(true);
+                observer.disconnect();
+            } else if (!entered) {
+                setIsVisible(false);
             }
-        );
-
-        if (elementRef.current) {
-            observer.observe(elementRef.current);
-        }
-
-        return () => {
-            if (elementRef.current) {
-                observer.unobserve(elementRef.current);
-            }
-        };
+        }, { threshold: 0, rootMargin: '160px 0px 160px 0px' });
+        observer.observe(element);
+        return () => observer.disconnect();
     }, []);
 
     return (
