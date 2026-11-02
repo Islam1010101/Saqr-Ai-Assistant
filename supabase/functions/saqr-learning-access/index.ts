@@ -1,0 +1,38 @@
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from "npm:@supabase/supabase-js@2.58.0";
+const origins = new Set(["https://www.efipslibrary.com","https://efipslibrary.com"]);
+const features=["read_together","picture_guidance","focus_steps","calm_display"] as const;
+Deno.serve(async(req:Request)=>{
+ const origin=req.headers.get("origin")||"";
+ const allowed=origins.has(origin)||/^https:\/\/[a-z0-9-]+\.vercel\.app$/.test(origin);
+ const h:Record<string,string>={"Content-Type":"application/json","Cache-Control":"no-store","Vary":"Origin","Access-Control-Allow-Headers":"authorization, apikey, x-client-info, content-type","Access-Control-Allow-Methods":"POST,OPTIONS"};
+ if(allowed) h["Access-Control-Allow-Origin"]=origin;
+ const out=(status:number,body:object)=>new Response(JSON.stringify(body),{status,headers:h});
+ if(req.method==="OPTIONS")return new Response(null,{status:allowed?204:403,headers:h});
+ if(req.method!=="POST"||!allowed)return out(403,{error:"FORBIDDEN"});
+ const jwt=req.headers.get("authorization")?.match(/^Bearer\s+(.+)$/i)?.[1];
+ if(!jwt)return out(401,{error:"AUTH_REQUIRED"});
+ const url=Deno.env.get("SUPABASE_URL"),anon=Deno.env.get("SUPABASE_ANON_KEY"),key=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+ if(!url||!anon||!key)return out(503,{error:"UNAVAILABLE"});
+ const auth=createClient(url,anon,{auth:{persistSession:false,autoRefreshToken:false}});
+ const {data:{user},error}=await auth.auth.getUser(jwt);
+ if(error||!user?.email||!user.email_confirmed_at)return out(401,{error:"INVALID_SESSION"});
+ const email=user.email.trim().toLowerCase();
+ if(!/^\d{6,7}@falcon-school\.com$/.test(email))return out(403,{error:"STUDENT_ONLY"});
+ const google=user.identities?.some(i=>i.provider==="google"&&i.identity_data?.email_verified===true&&String(i.identity_data.email||"").toLowerCase()===email);
+ if(!google)return out(403,{error:"GOOGLE_REQUIRED"});
+ const db=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
+ const {data:blocked,error:blockedError}=await db.from("efips_account_access_controls").select("disabled_at,login_role").eq("email",email).maybeSingle();
+ if(blockedError||blocked?.disabled_at||blocked?.login_role&&blocked.login_role!=="student"&&blocked.login_role!=="both")return out(403,{error:"ACCESS_DENIED"});
+ const studentId=email.split("@")[0];
+ const {data:student,error:studentError}=await db.from("students").select("student_id").eq("student_id",studentId).maybeSingle();
+ if(studentError||!student)return out(403,{error:"STUDENT_NOT_FOUND"});
+ const {data:existing,error:linkError}=await db.from("efips_verified_school_readers").select("school_user_id,user_type").eq("auth_user_id",user.id).maybeSingle();
+ if(linkError||existing&&(existing.school_user_id!==studentId||existing.user_type!=="student"))return out(403,{error:"IDENTITY_MISMATCH"});
+ const {data:entitlement,error:lookupError}=await db.from("saqr_learning_access").select("enabled,read_together,picture_guidance,focus_steps,calm_display").eq("student_id",studentId).maybeSingle();
+ if(lookupError)return out(503,{error:"LOOKUP_FAILED"});
+ if(!entitlement?.enabled)return out(200,{allowed:false});
+ let input:any={};try{input=await req.json()}catch{return out(400,{error:"INVALID_BODY"})}
+ if(input?.action==="my-access")return out(200,{allowed:true,features:Object.fromEntries(features.map(k=>[k,entitlement[k]===true]))});
+ return out(400,{error:"UNSUPPORTED_ACTION"});
+});

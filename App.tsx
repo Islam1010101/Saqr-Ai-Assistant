@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import GoogleSchoolReturn from './src/components/GoogleSchoolReturn';
 import GoogleTeacherReturn from './src/components/GoogleTeacherReturn';
 import HomePage from './pages/HomePage';
+import SaqrLearningPage from './pages/SaqrLearningPage';
 import AdminDashboard from './pages/AdminDashboard';
 
 import SearchPage from './pages/SearchPage';
@@ -524,6 +525,7 @@ const MainLayout: React.FC = () => {
           
           {/* باقي الصفحات محمية تتطلب تسجيل الدخول */}
           <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+          <Route path="/saqr-learning" element={<ProtectedRoute><SaqrLearningPage /></ProtectedRoute>} />
           <Route path="/my-library" element={<ProtectedRoute><Navigate to="/home" replace /></ProtectedRoute>} />
           <Route path="/admin-dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
           <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
