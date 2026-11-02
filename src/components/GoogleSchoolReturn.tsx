@@ -58,8 +58,11 @@ export default function GoogleSchoolReturn() {
 
         // Input is a Google sign-in hint ONLY; the server independently verifies
         // the real Google identity and determines the role from the school roster.
-        const expected = sessionStorage.getItem('efips_oauth_school_email');
-        sessionStorage.removeItem('efips_oauth_school_email');
+        let expected: string | null = null;
+        try {
+          expected = sessionStorage.getItem('efips_oauth_school_email');
+          sessionStorage.removeItem('efips_oauth_school_email');
+        } catch { /* Fallback to Google-verified identity when storage is blocked. */ }
         if (expected && user.email.trim().toLowerCase() !== expected) throw Error('WRONG_ACCOUNT');
 
         const {data,error} = await supabase.functions.invoke('google-school-login', {
