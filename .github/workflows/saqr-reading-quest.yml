@@ -8,6 +8,12 @@ on:
       - 'pages/SaqrChallengesHubPage.tsx'
       - 'pages/HomePage.tsx'
       - 'src/utils/saqrReadingQuestBank.ts'
+      - 'src/utils/saqrReadingQuestDigitalBank.ts'
+      - 'src/utils/saqrReadingQuestHeritageSources.ts'
+      - 'src/utils/saqrReadingQuestArabicDigitalSources.ts'
+      - 'src/utils/saqrReadingQuestEnglishDigitalSources.ts'
+      - 'api/digitalBookData.ts'
+      - 'api/nationalIdentityDigitalBooks.ts'
       - 'tests/saqrReadingQuest.test.ts'
       - '.github/workflows/saqr-reading-quest.yml'
 permissions:
