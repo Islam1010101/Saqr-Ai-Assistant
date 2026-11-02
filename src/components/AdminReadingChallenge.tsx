@@ -5,6 +5,7 @@ import { bookData } from '../../api/bookData';
 import { ARABIC_LIBRARY_DATABASE } from '../../pages/ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from '../../pages/EnglishLibraryInternalPage';
 import { digitalBookKey, physicalBookKey } from '../utils/readingPassport';
+import { NATIONAL_IDENTITY_DIGITAL_BOOKS } from '../../api/nationalIdentityDigitalBooks';
 
 type Completed = { book_key:string; completed_on:string };
 type Member = { user_type:'student'|'teacher';school_user_id:string;name_ar:string;name_en:string;grade:string;goal:number|null;completed_count:number;books:Completed[] };
@@ -12,6 +13,7 @@ type Report = { month:string;members:Member[];pending?: (Member & {review_status
 const titles = new Map<string,string>([
   ...bookData.map(book=>[physicalBookKey(book),book.title] as [string,string]),
   ...ARABIC_LIBRARY_DATABASE.map(book=>[digitalBookKey('ar',book),book.title] as [string,string]),
+  ...NATIONAL_IDENTITY_DIGITAL_BOOKS.map(book=>[digitalBookKey('ar',book),book.title] as [string,string]),
   ...ENGLISH_LIBRARY_DATABASE.map(book=>[digitalBookKey('en',book),book.title] as [string,string])
 ]);
 const htmlSafe=(value:unknown)=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]||char));
