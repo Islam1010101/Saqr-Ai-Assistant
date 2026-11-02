@@ -36,12 +36,6 @@ export default function TutorialFeatureShowcase({ isAr }: { isAr:boolean }) {
     {id:'flag',icon:'flag',tone:'flag',marker:'04',title:l('تحدي راية المجد','Flag of Glory Challenge'),description:l('أجب عن أسئلة يوم العلم، وساعد العلم الإماراتي على الارتفاع.','Answer UAE Flag Day questions to raise the national flag.'),detail:l('تحدٍّ متدرج بالمعلومات والمعالم الإماراتية ومؤثرات احتفالية.','Progressive UAE facts and landmarks with celebratory effects.')},
     {id:'pavilion',icon:'pavilion',tone:'forest',marker:'05',title:l('جناح كتب الهوية الوطنية','National Identity Book Pavilion'),description:l('تصفح كتب المكتبة المتعلقة بالتاريخ والتراث والهوية الوطنية.','Browse library books on UAE history, heritage and national identity.'),detail:l('دليل مستقل للكتب المرتبطة بالهوية الوطنية، خارج ألعاب التحديات.','A separate catalog for national identity books, distinct from the games.')}
   ];
-  const adminItems:Entry[]=[
-    {id:'members',icon:'students',tone:'sky',marker:'A',title:l('الطلاب والمعلمون','Students and Teachers'),description:l('متابعة حسابات الطلاب والمعلمين وسجلاتهم وبياناتهم.','Manage student and teacher accounts and records.'),detail:l('يتطلب تسجيل الدخول بصلاحية الإدارة. لا تعرض الجولة بيانات مستخدمين حقيقيين.','Administrator sign-in is required. This public tour never exposes private records.')},
-    {id:'loans',icon:'borrowing',tone:'coral',marker:'B',title:l('الاستعارات وطلبات الكتب','Borrowing and Requests'),description:l('مراجعة الطلبات والموافقة أو الرفض وتسجيل الإرجاع.','Review requests, approve or reject loans, and record returns.'),detail:l('تعرض الصفحة الرئيسية تنبيهات الاستعارات النشطة عند وجودها.','The home page displays active borrowing reminders when applicable.')},
-    {id:'attendance',icon:'calendar',tone:'emerald',marker:'C',title:l('الحجز والحضور','Schedule and Attendance'),description:l('متابعة حجوزات المعلمين وحضور حصص المكتبة.','Review teacher bookings and library class attendance.'),detail:l('عرض الحصص ومتابعتها من أدوات الإدارة وجدول المكتبة.','Schedule and attendance tools are available through the admin and timetable sections.')},
-    {id:'reports',icon:'report',tone:'violet',marker:'D',title:l('الإحصائيات والتقارير','Analytics and Reports'),description:l('عرض مؤشرات المكتبة وكتب الفهرس الرقمي والورقي وتقارير الاستخدام.','View library indicators, physical/digital catalog statistics and usage reports.'),detail:l('يمكن عرض تقارير الاستعارات وحركة الدخول والتقارير التعليمية بحسب الأدوات المتاحة.','Review borrowing, login activity and educational reports using the existing admin tools.')}
-  ];
 
   const card=(item:Entry,index:number)=><article key={item.id} className={'tutorial-showcase-card tutorial-showcase-card--'+item.tone} style={{animationDelay:index*85+'ms'}}>
     <div className="tutorial-showcase-card-top">
@@ -84,15 +78,5 @@ export default function TutorialFeatureShowcase({ isAr }: { isAr:boolean }) {
       <div className="tutorial-showcase-grid tutorial-showcase-heritage-grid">{heritageItems.map(card)}</div>
     </section>
 
-    <section className="tutorial-showcase-section tutorial-showcase-admin" aria-labelledby="tutorial-admin-title" id="tutorial-admin-details">
-      <header className="tutorial-showcase-head tutorial-showcase-admin-head">
-        <div className="tutorial-showcase-head-copy">
-          <span className="tutorial-showcase-eyebrow">{l('من منظور مدير النظام','ADMINISTRATOR VIEW')}</span>
-          <h2 id="tutorial-admin-title">{l('أدوات الإدارة وتشغيل المكتبة','Library administration and operations')}</h2>
-          <p>{l('تظهر جميع الخدمات الإدارية الرئيسية هنا للشرح. تظل الوظائف والبيانات الفعلية داخل حساب المدير فقط.','The main administrative tools are explained here. Actual controls and records remain available only to signed-in administrators.')}</p>
-        </div>
-      </header>
-      <div className="tutorial-showcase-grid tutorial-showcase-admin-grid">{adminItems.map(card)}</div>
-    </section>
   </div>;
 }
