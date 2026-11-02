@@ -215,7 +215,7 @@ const RevealSection: React.FC<{ children: React.ReactNode, delay?: number }> = (
 // Keep the seconds-level timer inside the few visible borrowing cards.
 // The previous timer lived in HomePage and reconciled the entire dashboard
 // every second, including off-screen tiles, even with zero active borrowings.
-const BorrowingReturnStatus: React.FC<{ returnDate: string; isAr: boolean }> = ({ returnDate, isAr }) => {
+const BorrowingReturnStatus: React.FC<{ returnDate: string; isAr: boolean; returnLabel: string }> = ({ returnDate, isAr, returnLabel }) => {
     const [now, setNow] = useState(() => Date.now());
 
     useEffect(() => {
@@ -250,10 +250,18 @@ const BorrowingReturnStatus: React.FC<{ returnDate: string; isAr: boolean }> = (
                     : `${days}d ${hours}h ${minutes}m ${seconds}s remaining`;
 
     return <>
-        <p className={`mt-1.5 text-sm sm:text-base font-extrabold leading-relaxed flex items-center gap-1.5 ${overdue ? 'text-rose-700 dark:text-rose-300' : 'text-emerald-700 dark:text-emerald-300'}`}>
+        <div className="rounded-xl bg-amber-50 dark:bg-slate-900/70 border border-amber-100 dark:border-slate-700 px-3.5 py-3">
+            <p className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 mb-1">{returnLabel}</p>
+            <p className="font-black text-rose-600 dark:text-rose-400 text-sm sm:text-base">
+                {returnDate && valid
+                    ? new Date(`${returnDate}T12:00:00`).toLocaleDateString(isAr ? 'ar-AE' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+                    : (isAr ? 'لم يحدد تاريخ الإرجاع' : 'Return date not set')}
+            </p>
+            <p className={`mt-1.5 text-sm sm:text-base font-extrabold leading-relaxed flex items-center gap-1.5 ${overdue ? 'text-rose-700 dark:text-rose-300' : 'text-emerald-700 dark:text-emerald-300'}`}>
             <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 7v5l3 2" /></svg>
-            {countdown}
-        </p>
+                {countdown}
+            </p>
+        </div>
         {(dueSoon || overdue) && (
             <p role="status" className={`text-xs sm:text-sm rounded-xl border px-3 py-2 font-black ${overdue ? 'border-rose-300 bg-rose-100 dark:bg-rose-950/50 text-rose-800 dark:text-rose-200' : 'border-amber-300 bg-amber-100 dark:bg-amber-950/50 text-amber-900 dark:text-amber-200'}`}>
                 {overdue ? (isAr ? 'تنبيه: تجاوز الكتاب موعد الإرجاع.' : 'Reminder: this book is overdue.') : (isAr ? `تذكير تلقائي: موعد إرجاع الكتاب خلال ${daysToReturn} يوم.` : `Automatic reminder: return due in ${daysToReturn} day(s).`)}
@@ -787,15 +795,7 @@ const HomePage: React.FC = () => {
                                                         <h4 className="font-black text-slate-900 dark:text-white text-base sm:text-lg leading-snug break-words">{bookTitle || (isAr ? 'كتاب بدون عنوان' : 'Untitled book')}</h4>
                                                     </div>
                                                 </div>
-                                                <div className="rounded-xl bg-amber-50 dark:bg-slate-900/70 border border-amber-100 dark:border-slate-700 px-3.5 py-3">
-                                                    <p className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 mb-1">{t('borrowReturn')}</p>
-                                                    <p className="font-black text-rose-600 dark:text-rose-400 text-sm sm:text-base">
-                                                        {validReturnDate
-                                                            ? new Date(`${returnDate}T12:00:00`).toLocaleDateString(isAr ? 'ar-AE' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-                                                            : (isAr ? 'لم يحدد تاريخ الإرجاع' : 'Return date not set')}
-                                                    </p>
-                                                </div>
-                                                <BorrowingReturnStatus returnDate={returnDate} isAr={isAr} />
+                                                <BorrowingReturnStatus returnDate={returnDate} isAr={isAr} returnLabel={t('borrowReturn')} />
                                                 {validReturnDate && (
                                                     <a
                                                         href={createGoogleCalendarLink(bookTitle || (isAr ? 'كتاب مستعار' : 'Borrowed book'), returnDate)}
