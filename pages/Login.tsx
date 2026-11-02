@@ -8,7 +8,6 @@ const BACKGROUND_VIDEOS = ['/1.mp4', '/2.mp4', '/3.mp4'];
 export default function Login() {
   // Use the shared website language so public pages follow the login choice.
   const { locale: lang, setLocale: setLang } = useLanguage();
-  const [schoolEmail, setSchoolEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showFlag, setShowFlag] = useState(false); // حالة إظهار علم الإمارات عند الضغط على صقر
@@ -81,34 +80,26 @@ export default function Login() {
     handleVideoEnd();
   };
 
-  // One Google login for students, teachers and administrators. The email is
-  // used solely as a Google login hint; authorization happens after OAuth.
+  // A single Google account picker handles students, staff and admins.
+  // The approved role and name are resolved after OAuth by the school directory.
   const handleSchoolGoogleLogin = async () => {
     setError('');
-    const email = schoolEmail.trim().toLowerCase();
-    if (!/^[^@\s]+@falcon-school\.com$/.test(email)) {
-      setError(lang === 'ar'
-        ? 'أدخل البريد المدرسي الصحيح المنتهي بـ @falcon-school.com.'
-        : 'Enter your approved @falcon-school.com email address.');
-      return;
-    }
     setLoading(true);
     try {
-      try { sessionStorage.setItem('efips_oauth_school_email', email); } catch { /* Google itself still verifies identity. */ }
-      // Reuse the existing approved student redirect URL so no Supabase
-      // Auth redirect allowlist changes are needed for this release.
+      // Clear any old manually-entered-email hint from a previous login attempt.
+      // Google is the ONLY source of email; Supabase validates its identity.
+      try { sessionStorage.removeItem('efips_oauth_school_email'); } catch { /* restricted storage */ }
       await supabase.auth.signOut();
       const { error: googleError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: window.location.origin + '/?efips_google_student=1',
           scopes: 'openid email profile',
-          queryParams: { prompt: 'select_account', login_hint: email },
+          queryParams: { prompt: 'select_account' },
         },
       });
       if (googleError) throw googleError;
     } catch {
-      try { sessionStorage.removeItem('efips_oauth_school_email'); } catch { /* restricted storage */ }
       setError(lang === 'ar'
         ? 'تعذر بدء الدخول عبر Google المدرسي. حاول مرة أخرى.'
         : 'Could not start school Google sign-in. Please retry.');
@@ -217,70 +208,56 @@ export default function Login() {
 
         {/* ================= القسم الثاني: نموذج تسجيل الدخول ================= */}
         <div className="lg:w-1/2 p-6 sm:p-10 lg:p-12 flex flex-col justify-center bg-white relative z-10">
-          <div className="mb-6 text-center lg:text-start">
-            <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-2">
-              {lang === 'ar' ? 'تسجيل الدخول' : 'Sign In'}
-            </h2>
-            <p className="text-slate-500 text-xs md:text-sm font-bold">
-              {lang === 'ar' ? 'نقطة دخول واحدة للطلاب والمعلمين والإدارة. سيتم تحديد حسابك تلقائيًا بعد التحقق.' : 'One sign-in for students, staff and administrators. Your approved role is identified automatically.'}
-            </p>
+          {/* Central title with subtle school-colored motion and SVG accents. */}
+          <div className="relative mb-9 flex flex-col items-center justify-center text-center">
+            <div aria-hidden="true" className="pointer-events-none absolute -inset-x-5 -top-10 bottom-0 rounded-full bg-gradient-to-r from-blue-200/0 via-emerald-200/45 to-indigo-200/0 blur-3xl efips-login-glow" />
+            <div className="relative inline-flex flex-col items-center gap-3 efips-login-title-enter">
+              <div aria-hidden="true" className="flex items-center gap-3 text-emerald-600">
+                <span className="h-px w-10 bg-gradient-to-r from-transparent to-emerald-500" />
+                <svg className="h-7 w-7 efips-login-spark" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M16 3v5m0 16v5M3 16h5m16 0h5M7 7l3.5 3.5m11 11L25 25M25 7l-3.5 3.5m-11 11L7 25" />
+                  <path d="M16 9l2.5 4.5L23 16l-4.5 2.5L16 23l-2.5-4.5L9 16l4.5-2.5L16 9Z" />
+                </svg>
+                <span className="h-px w-10 bg-gradient-to-l from-transparent to-emerald-500" />
+              </div>
+              <h2 className="efips-login-title relative text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-tight">
+                {lang === 'ar' ? 'تسجيل الدخول' : 'Sign In'}
+              </h2>
+              <span aria-hidden="true" className="efips-login-accent h-1.5 w-24 rounded-full bg-gradient-to-r from-blue-500 via-emerald-500 to-indigo-500" />
+            </div>
           </div>
 
-          {/* Unified Google-only school login. No role switch or unverified email lookup. */}
-          <form className="space-y-5 animate-fade-in" onSubmit={e => { e.preventDefault(); void handleSchoolGoogleLogin(); }}>
-            <p className="text-center text-sm font-bold text-slate-600 leading-relaxed">
-              {lang === 'ar'
-                ? 'اكتب بريدك المدرسي، ثم أثبت ملكيته عبر Google. ستظهر بياناتك وصلاحياتك المسجلة تلقائيًا.'
-                : 'Enter your school email and verify it with Google. Your registered name and permissions are loaded automatically.'}
-            </p>
-            <div>
-              <label htmlFor="efips-school-email" className="block mb-2 text-sm font-black text-slate-700">
-                {lang === 'ar' ? 'البريد الإلكتروني المدرسي' : 'School email address'}
-              </label>
-              <input
-                id="efips-school-email"
-                type="email"
-                name="school-email"
-                dir="ltr"
-                autoComplete="email"
-                autoCapitalize="none"
-                spellCheck={false}
-                inputMode="email"
-                placeholder="name@falcon-school.com"
-                value={schoolEmail}
-                onChange={event => { setSchoolEmail(event.target.value); if (error) setError(''); }}
-                required
-                disabled={loading}
-                className="w-full min-h-14 px-4 rounded-2xl border-2 border-slate-200 bg-slate-50 text-slate-800 text-base font-bold text-left outline-none transition-colors focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 disabled:opacity-60"
-              />
-            </div>
+          {/* Google-only entry: no typed email, account-type selector, or instructions. */}
+          <div className="space-y-5 animate-fade-in">
             {error && <div role="alert" className="bg-rose-50 border-2 border-rose-200 text-rose-700 p-3 rounded-2xl text-xs md:text-sm font-bold text-center">{error}</div>}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full min-h-14 flex items-center justify-center gap-3 rounded-[1.5rem] bg-gradient-to-r from-indigo-600 to-emerald-600 hover:from-indigo-700 hover:to-emerald-700 px-4 py-4 text-white text-sm md:text-base font-black shadow-lg transition-all disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600"
-            >
-              <svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true" className="shrink-0">
-                <path fill="#EA4335" d="M24 9.5c3.5 0 6.7 1.2 9.2 3.6l6.8-6.8C35.9 2.3 30.2 0 24 0 14.6 0 6.5 5.4 2.6 13.3l7.9 6.1C12.3 13.8 17.7 9.5 24 9.5z"/>
-                <path fill="#4285F4" d="M46.1 24.5c0-1.6-.2-3.2-.5-4.7H24v8.9h12.4c-.5 2.9-2.1 5.4-4.5 7.1l7.3 5.7c4.3-4 6.9-9.8 6.9-17z"/>
-                <path fill="#FBBC05" d="M10.5 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.1C.9 16.6 0 20.2 0 24s.9 7.4 2.6 10.7l7.9-6.1z"/>
-                <path fill="#34A853" d="M24 48c6.5 0 12-2.1 16-6l-7.3-5.7c-2 1.4-4.7 2.2-8.7 2.2-6.3 0-11.7-4.3-13.5-10.2l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/>
-              </svg>
-              {loading
-                ? (lang === 'ar' ? 'جارٍ الانتقال إلى Google...' : 'Connecting to Google...')
-                : (lang === 'ar' ? 'متابعة الدخول بحساب Google' : 'Continue with Google')}
-            </button>
-            <p className="text-center text-xs font-semibold text-slate-500 leading-relaxed">
-              {lang === 'ar'
-                ? 'يُحدد النظام هل أنت طالب أو معلم أو مدير من السجل المدرسي، وليس من البريد المكتوب وحده.'
-                : 'Your role is verified against the school records, not assigned from the typed address.'}
-            </p>
-            <div className="text-center pt-2">
+            <div className="relative group">
+              <div aria-hidden="true" className="efips-login-button-glow pointer-events-none absolute -inset-1 rounded-[1.8rem] bg-gradient-to-r from-emerald-400/40 via-blue-400/40 to-indigo-400/40 blur-lg opacity-50 transition-opacity duration-500 group-hover:opacity-90" />
+              <button
+                type="button"
+                onClick={() => void handleSchoolGoogleLogin()}
+                disabled={loading}
+                className="relative w-full min-h-16 flex items-center justify-center gap-3 overflow-hidden rounded-[1.5rem] border border-white/30 bg-gradient-to-r from-indigo-600 via-blue-600 to-emerald-600 hover:from-indigo-700 hover:via-blue-700 hover:to-emerald-700 px-4 py-4 text-white text-base md:text-lg font-black shadow-lg shadow-indigo-500/20 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl active:translate-y-0 active:scale-[.99] disabled:cursor-wait disabled:opacity-70 disabled:transform-none focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-400"
+              >
+                <span aria-hidden="true" className="efips-login-button-shine pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <svg width="26" height="26" viewBox="0 0 48 48" aria-hidden="true" className="relative z-10 shrink-0 rounded-full bg-white p-1">
+                  <path fill="#EA4335" d="M24 9.5c3.5 0 6.7 1.2 9.2 3.6l6.8-6.8C35.9 2.3 30.2 0 24 0 14.6 0 6.5 5.4 2.6 13.3l7.9 6.1C12.3 13.8 17.7 9.5 24 9.5z"/>
+                  <path fill="#4285F4" d="M46.1 24.5c0-1.6-.2-3.2-.5-4.7H24v8.9h12.4c-.5 2.9-2.1 5.4-4.5 7.1l7.3 5.7c4.3-4 6.9-9.8 6.9-17z"/>
+                  <path fill="#FBBC05" d="M10.5 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.1C.9 16.6 0 20.2 0 24s.9 7.4 2.6 10.7l7.9-6.1z"/>
+                  <path fill="#34A853" d="M24 48c6.5 0 12-2.1 16-6l-7.3-5.7c-2 1.4-4.7 2.2-8.7 2.2-6.3 0-11.7-4.3-13.5-10.2l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/>
+                </svg>
+                <span className="relative z-10">
+                  {loading
+                    ? (lang === 'ar' ? 'جارٍ الانتقال إلى Google...' : 'Connecting to Google...')
+                    : (lang === 'ar' ? 'الدخول باستخدام Google' : 'Sign in with Google')}
+                </span>
+              </button>
+            </div>
+            <div className="text-center pt-3">
               <Link to="/about" className="text-xs md:text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline transition-all">
                 {lang === 'ar' ? 'عن مدرسة صقر الإمارات الدولية الخاصة' : 'More About EFIPS'}
               </Link>
             </div>
-          </form>
+          </div>
 
           <div className="mt-6 text-center">
             <Link
@@ -323,6 +300,43 @@ export default function Login() {
         .animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
         .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
         .animate-shake { animation: shake 0.4s ease-in-out; }
+        /* Decorative only: respects motion preferences and leaves OAuth unchanged. */
+        @keyframes efips-login-enter {
+          from { opacity: 0; transform: translateY(20px) scale(.96); filter: blur(5px); }
+          to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+        }
+        @keyframes efips-login-glow-keyframes {
+          0%, 100% { opacity: .45; transform: scale(.95); }
+          50% { opacity: .8; transform: scale(1.07); }
+        }
+        @keyframes efips-login-spark-keyframes {
+          0%,100% { transform: rotate(-9deg) scale(.94); opacity: .75; }
+          50% { transform: rotate(9deg) scale(1.12); opacity: 1; }
+        }
+        @keyframes efips-login-accent-keyframes {
+          0%,100% { transform: scaleX(.78); opacity: .75; }
+          50% { transform: scaleX(1.06); opacity: 1; }
+        }
+        .efips-login-title-enter { animation: efips-login-enter .8s cubic-bezier(.16,1,.3,1) both; }
+        .efips-login-title {
+          background: linear-gradient(110deg,#1d4ed8 5%,#047857 50%,#4338ca 96%);
+          -webkit-background-clip: text; background-clip: text; color: transparent;
+          filter: drop-shadow(0 5px 15px rgba(16,185,129,.15));
+        }
+        .efips-login-glow { animation: efips-login-glow-keyframes 6s ease-in-out infinite; }
+        .efips-login-spark { animation: efips-login-spark-keyframes 4s ease-in-out infinite; }
+        .efips-login-accent { animation: efips-login-accent-keyframes 4s ease-in-out infinite; }
+        .efips-login-button-shine {
+          background: linear-gradient(115deg,transparent 15%,rgba(255,255,255,.20) 50%,transparent 85%);
+        }
+        @media(prefers-reduced-motion:reduce) {
+          .efips-login-title-enter,.efips-login-glow,.efips-login-spark,.efips-login-accent {
+            animation:none!important;
+          }
+          .efips-login-title-enter { opacity:1!important; transform:none!important; filter:none!important; }
+          .efips-login-button-glow,.efips-login-button-shine { transition:none!important; }
+        }
+
       `}} />
     </div>
   );

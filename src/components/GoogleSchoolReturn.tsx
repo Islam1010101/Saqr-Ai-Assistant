@@ -1,13 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { supabase } from '../utils/supabase';
 
-type Step = 'checking' | 'unregistered' | 'wrong_account' | 'school' | 'blocked' | 'failed';
+type Step = 'checking' | 'unregistered' | 'school' | 'blocked' | 'failed';
 const copy = {
   ar: {
     title: 'التحقق من حساب المكتبة',
     checking: 'جاري التحقق من بريد Google المدرسي وتحديد بياناتك وصلاحياتك تلقائيًا...',
     unregistered: 'لم نتمكن من مطابقة هذا الحساب بسجل طلاب أو معلمين معتمد. يرجى مراجعة إدارة المكتبة.',
-    wrong_account: 'البريد المختار في Google لا يطابق البريد المدخل. يرجى تسجيل الدخول بالحساب المدرسي نفسه.',
     school: 'يرجى استخدام بريد Google المدرسي المعتمد @falcon-school.com.',
     blocked: 'هذا الحساب غير متاح للدخول حاليًا. يرجى مراجعة إدارة المكتبة.',
     failed: 'تعذر إكمال التحقق الآن. يرجى إعادة المحاولة أو التواصل مع إدارة المكتبة.',
@@ -17,7 +16,6 @@ const copy = {
     title: 'Verifying your school library account',
     checking: 'Verifying your school Google address and identifying your approved role and name...',
     unregistered: 'We could not match this account to an approved student or staff record. Please contact the library administrator.',
-    wrong_account: 'The selected Google address does not match the address you entered. Please choose the same school account.',
     school: 'Please use your approved @falcon-school.com Google account.',
     blocked: 'This account is currently not permitted to sign in. Please contact the library administrator.',
     failed: 'Verification could not be completed. Please try again or contact the library administrator.',
@@ -56,14 +54,10 @@ export default function GoogleSchoolReturn() {
         const {data:{user},error:identityError} = await supabase.auth.getUser(session.access_token);
         if (identityError || !user?.email) throw Error('FAILED');
 
-        // Input is a Google sign-in hint ONLY; the server independently verifies
-        // the real Google identity and determines the role from the school roster.
-        let expected: string | null = null;
-        try {
-          expected = sessionStorage.getItem('efips_oauth_school_email');
-          sessionStorage.removeItem('efips_oauth_school_email');
-        } catch { /* Fallback to Google-verified identity when storage is blocked. */ }
-        if (expected && user.email.trim().toLowerCase() !== expected) throw Error('WRONG_ACCOUNT');
+        // This entry point uses only the Google-selected email. Remove an old
+        // manually entered hint, if one survived a login started before release.
+        // Verified Google identity and school roles are checked server-side.
+        try { sessionStorage.removeItem('efips_oauth_school_email'); } catch { /* restricted storage */ }
 
         const {data,error} = await supabase.functions.invoke('google-school-login', {
           body: {},
@@ -89,8 +83,7 @@ export default function GoogleSchoolReturn() {
         try { sessionStorage.removeItem('efips_oauth_school_email'); } catch { /* sessionStorage restricted */ }
         await supabase.auth.signOut().catch(() => {});
         const reason = caught instanceof Error ? caught.message : '';
-        setStep(reason === 'WRONG_ACCOUNT' ? 'wrong_account'
-          : reason === 'SCHOOL' ? 'school'
+        setStep(reason === 'SCHOOL' ? 'school'
           : reason === 'BLOCKED' ? 'blocked'
           : reason === 'UNREGISTERED' ? 'unregistered' : 'failed');
         window.history.replaceState(null,'',window.location.origin + '/#/');
