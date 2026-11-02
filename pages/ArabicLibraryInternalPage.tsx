@@ -435,9 +435,10 @@ const BookCard = React.memo(({ book, onClick, t }: { book: any; onClick: () => v
 type ArabicLibraryPageProps = {
     books?: DigitalLibraryBook[];
     pageTitle?: { ar: string; en: string };
+    atmosphere?: 'arabic' | 'heritage';
 };
 
-const ArabicLibraryInternalPage: React.FC<ArabicLibraryPageProps> = ({ books = ARABIC_LIBRARY_DATABASE, pageTitle }) => {
+const ArabicLibraryInternalPage: React.FC<ArabicLibraryPageProps> = ({ books = ARABIC_LIBRARY_DATABASE, pageTitle, atmosphere = 'arabic' }) => {
     // تعيين الإنجليزية كلغة افتراضية عند فتح الصفحة مباشرة
     const { locale, dir } = useLanguage();
     const [currentLocale, setCurrentLocale] = useState(locale || 'en');
@@ -484,7 +485,7 @@ const ArabicLibraryInternalPage: React.FC<ArabicLibraryPageProps> = ({ books = A
     return (
         <div dir={dir} className="efips-letter-library efips-letter-ar w-full min-h-screen bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300">
             
-            <LibraryLetterAtmosphere alphabet="arabic" />
+            <LibraryLetterAtmosphere alphabet={atmosphere} />
             <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-50 dark:opacity-20">
                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-400/20 rounded-full blur-[100px] animate-blob"></div>
                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-amber-400/20 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>

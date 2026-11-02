@@ -1,7 +1,14 @@
 import React, { useEffect, useRef } from 'react';
 import './libraryLetterAtmosphere.css';
+import EmiratiHeritageIcon, { type EmiratiHeritageMotif } from './EmiratiHeritageIcon';
 
-type LibraryLettersProps = { alphabet: 'arabic' | 'english' };
+type LibraryLettersProps = { alphabet: 'arabic' | 'english' | 'heritage' };
+
+// Fourteen motifs preserve the original decorative positions and animation cadence.
+const HERITAGE_MOTIFS: EmiratiHeritageMotif[] = [
+  'dallah', 'palm', 'dhow', 'fort', 'mabkhara', 'falcon', 'sadu',
+  'ayala', 'lantern', 'jar', 'dallah', 'palm', 'dhow', 'fort',
+];
 
 /** Decorative-only layer. Does not intercept any catalog or reader interactions. */
 export default function LibraryLetterAtmosphere({ alphabet }: LibraryLettersProps) {
@@ -35,9 +42,10 @@ export default function LibraryLetterAtmosphere({ alphabet }: LibraryLettersProp
     ? ['أ', 'ب', 'ج', 'د', 'ر', 'س', 'ع', 'ف', 'ق', 'ك', 'م', 'ن', 'و', 'ي']
     : ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'L', 'M', 'R', 'S', 'W', 'Z'];
 
-  return <div ref={layerRef} aria-hidden="true" className="efips-library-letters">
-    {letters.map((letter, index) => <span key={index} className={'efips-library-letter efips-library-letter-'+(index+1)}>
-      <span>{letter}</span>
+  const items = alphabet === 'heritage' ? HERITAGE_MOTIFS : letters;
+  return <div ref={layerRef} aria-hidden="true" className={'efips-library-letters' + (alphabet === 'heritage' ? ' efips-library-heritage' : '')}>
+    {items.map((item, index) => <span key={index} className={'efips-library-letter efips-library-letter-'+(index+1)}>
+      <span>{alphabet === 'heritage' ? <EmiratiHeritageIcon name={item as EmiratiHeritageMotif} /> : item}</span>
     </span>)}
   </div>;
 }
