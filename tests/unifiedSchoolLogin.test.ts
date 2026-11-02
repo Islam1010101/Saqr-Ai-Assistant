@@ -31,7 +31,7 @@ assert.ok(!login.includes('schoolEmail'));
 assert.ok(login.includes("queryParams: { prompt: 'select_account' }"));
 assert.ok(login.includes('onClick={() => void handleSchoolGoogleLogin()}'));
 assert.ok(login.includes("lang === 'ar' ? 'الدخول باستخدام Google' : 'Sign in with Google'"));
-assert.ok(login.includes('efips-login-title-enter'));
+assert.ok(login.includes('efips-login-uae-enter'), 'UAE heading entrance animation is present');
 assert.ok(login.includes('efips-login-title'));
 assert.ok(login.includes('prefers-reduced-motion:reduce'));
 assert.ok(!login.includes('نقطة دخول واحدة للطلاب والمعلمين والإدارة'));
