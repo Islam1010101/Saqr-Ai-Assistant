@@ -98,7 +98,9 @@ export default function SaqrReadingQuestPage(){
     <section className="sq-quiz-source" key={'book-'+bookIndex}>
       <div className="sq-quiz-progress"><span>{ar?'الكتاب':'Book'} {bookIndex+1}/{rounds.length}</span><span>{ar?'السؤال':'Question'} {questionIndex+1}/{active.questions.length}</span></div>
       <div className="sq-progress-rail"><div className="sq-progress-fill" style={{width:((questionIndex+1)/active.questions.length*100)+'%'}}/></div>
-      <div className="sq-quiz-book-meta"><Icon name="book"/><div><strong>{active.book.book.title}</strong><p>{active.book.book.author}</p></div><span className="sq-quiz-location">{ar?'الرف':'Shelf'} {active.book.book.shelf} · {ar?'الصف':'Row'} {active.book.book.row}</span></div>
+      <div className="sq-quiz-book-meta"><Icon name="book"/><div><strong>{active.book.book.title}</strong><p>{active.book.book.author}</p></div>{active.book.book.driveLink
+        ? <a className="sq-quiz-location" href={active.book.book.driveLink} target="_blank" rel="noopener noreferrer" aria-label={ar?'افتح الكتاب الرقمي للقراءة في نافذة جديدة':'Open the digital book in a new tab'}>{ar?'اقرأ الكتاب الرقمي':'Read digital book'} <span aria-hidden="true">↗</span></a>
+        : <span className="sq-quiz-location">{ar?'الرف':'Shelf'} {active.book.book.shelf} · {ar?'الصف':'Row'} {active.book.book.row}</span>}</div>
     </section>
     <section className="sq-panel sq-question-panel" key={q.id}><div className="sq-panel-content">
       <p className="sq-kicker">{ar?'اختبر فهمك':'Reading challenge'}</p><h3 className="sq-question-text">{q.prompt}</h3>
