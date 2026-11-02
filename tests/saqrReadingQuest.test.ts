@@ -2,17 +2,36 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {readingChallengeBooks,getRoleReadingBooks,shuffleReading} from '../src/utils/saqrReadingQuestBank.ts';
 import {bookData} from '../api/bookData.ts';
+import {digitalReadingChallengeBooks} from '../src/utils/saqrReadingQuestDigitalBank.ts';
+import {ARABIC_LIBRARY_DATABASE,ENGLISH_LIBRARY_DATABASE} from '../api/digitalBookData.ts';
+import {NATIONAL_IDENTITY_DIGITAL_BOOKS} from '../api/nationalIdentityDigitalBooks.ts';
 const groups=[['student','ar'],['student','en'],['teacher','ar'],['teacher','en']] as const;
 assert.ok(bookData.length>=3000,'The complete EFIPS catalog should be loaded');
 assert.equal(readingChallengeBooks.length,59,'All 59 catalog-matched books must be playable');
 assert.equal(readingChallengeBooks.reduce((n,b)=>n+b.questions.length,0),555);
+assert.equal(digitalReadingChallengeBooks.length,31,'Reviewed digital quiz records should remain stable');
+assert.equal(digitalReadingChallengeBooks.reduce((n,b)=>n+b.questions.length,0),155);
+const digitalCatalog = [...ARABIC_LIBRARY_DATABASE,...ENGLISH_LIBRARY_DATABASE,...NATIONAL_IDENTITY_DIGITAL_BOOKS];
+assert.equal(new Set(digitalReadingChallengeBooks.map(b=>b.key)).size,digitalReadingChallengeBooks.length);
+assert.equal(digitalReadingChallengeBooks.filter(b=>b.key.includes(':NI_')).length,6,'All six National Identity e-books must be playable');
+for(const record of digitalReadingChallengeBooks){
+  const match=digitalCatalog.find(book=>String(book.id)===record.book.id);
+  assert.ok(match,`Digital book missing from actual EFIPS catalog: ${record.key}`);
+  assert.equal(record.book.driveLink,match.driveLink,'Reader link must come directly from catalog');
+  assert.equal(record.book.shelf,0,'Digital books must not claim a physical shelf');
+  assert.ok(record.sourceUrl.startsWith('https://'));
+  assert.ok(record.questions.every(q=>q.reference.trim()));
+}
+
 for(const [role,locale] of groups){
  const books=getRoleReadingBooks(role,locale);
  assert.ok(books.length>=4,`Not enough validated books for ${role}/${locale}`);
+ assert.ok(books.length>readingChallengeBooks.filter(b=>b.role===role&&b.locale===locale).length,`New digital books must extend ${role}/${locale}`);
  for(const entry of books){
   assert.equal(entry.role,role);assert.equal(entry.locale,locale);
   assert.equal(entry.book.language.toLowerCase(),locale);
-  assert.ok(entry.book.shelf>0&&entry.book.row>0);
+  if(entry.book.driveLink){assert.equal(entry.book.shelf,0);assert.equal(entry.book.row,0);}
+  else assert.ok(entry.book.shelf>0&&entry.book.row>0);
   assert.ok(entry.questions.length>=5&&entry.questions.length<=30);
   assert.equal(new Set(entry.questions.map(q=>q.id)).size,entry.questions.length);
   for(const q of entry.questions){
@@ -37,17 +56,19 @@ assert.ok(!home.includes('to="/game"'),'Game shortcut must be inside student cha
 assert.ok(!home.includes('to="/saqr-studio"'),'Studio shortcut must be inside student challenges hub');
 for(const path of ['/saqr-reading-quest','/game','/saqr-studio'])assert.ok(hub.includes(path));
 assert.ok(home.includes("userType === 'teacher' && ("));
-console.log('PASS 59 EFIPS books; 555 questions; bilingual role separation; unique book selection; 5-10 question rounds; student hub and teacher shortcut');
+console.log('PASS 59 unchanged physical books + 32 reviewed digital books (including Gatsby); 555 unchanged physical questions + digital questions; role and language separation');
 
 assert.ok(!page.includes('books.map(({key,book,questions})'),'Do not spoil all books before the journey');
 assert.ok(page.includes('setAmount(v=>Math.max(1,v-1))'));
 assert.ok(page.includes('setAmount(v=>Math.min(books.length,v+1))'));
 assert.ok(page.includes('active.book.book.shelf'));
+assert.ok(page.includes('active.book.book.driveLink'),'Digital books need reading link instead of fictitious shelf');
 
 assert.ok(!page.includes('books.map(({key,book,questions})'),'Do not show all book titles before starting');
 assert.ok(page.includes('setAmount(v=>Math.max(1,v-1))'));
 assert.ok(page.includes('setAmount(v=>Math.min(books.length,v+1))'));
 assert.ok(page.includes('active.book.book.shelf'));
+assert.ok(page.includes('active.book.book.driveLink'),'Digital books need reading link instead of fictitious shelf');
 
 assert.ok(!page.includes('مصدر المحتوى'),'No external source label should appear during quiz');
 assert.ok(!page.includes('active.book.sourceUrl'),'Only the physical book is the displayed challenge source');
