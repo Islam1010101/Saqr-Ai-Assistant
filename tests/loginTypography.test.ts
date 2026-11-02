@@ -19,7 +19,21 @@ line('overflow:visible;');
 line('.efips-login-title {');
 line('line-height:1.8;');
 line('line-height:1.9;');
-line('color:#075985;');
+line('color:#065c38;');
+line('-webkit-text-fill-color:#065c38;');
+line('efips-login-uae-enter');
+line('efips-login-uae-halo');
+line('efips-login-uae-flag');
+line('efips-login-uae-accent');
+line('#CE1126');
+line('#00843D');
+line('prefers-reduced-motion:reduce');
+line("الدخول باستخدام البريد الإلكتروني الخاص بالمدرسة فقط");
+line('Sign in using your school email account only');
+line('efips-school-email-notice');
+assert.ok(login.indexOf('efips-school-email-notice') < login.indexOf('onClick={() => void handleSchoolGoogleLogin()}'),
+  'School-only email notice must be displayed above the Google button');
+assert.ok(!login.includes('efips-login-title-enter'), 'Old title effect should be replaced');
 line('text-center font-black');
 line("lang === 'ar' ? 'تسجيل الدخول' : 'Sign In'");
 // A measurement-based fit keeps the complete original promotional sentence in
