@@ -78,6 +78,5 @@ export default function TutorialFeatureShowcase({ isAr }: { isAr:boolean }) {
       <div className="tutorial-showcase-grid tutorial-showcase-heritage-grid">{heritageItems.map(card)}</div>
     </section>
 
-
   </div>;
 }
