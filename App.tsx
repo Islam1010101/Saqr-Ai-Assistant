@@ -286,7 +286,7 @@ const Header: React.FC = () => {
 
   return (
     <header
-      className={`fixed top-4 left-0 right-0 z-[60] px-2 flex justify-center transition-transform duration-300 ease-in-out ${
+      className={`fixed top-4 left-0 right-0 z-[60] px-2 flex justify-center transition-[transform,opacity] duration-300 ease-in-out ${
         isVisible ? 'translate-y-0 opacity-100' : '-translate-y-[150%] opacity-0 pointer-events-none'
       }`}
     >
