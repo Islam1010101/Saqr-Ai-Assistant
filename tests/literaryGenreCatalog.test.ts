@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {bookData,getLocalizedSubject} from '../api/bookData.ts';
-import {classifyLiteraryGenre,literaryGenreLabels,literaryGenreSubjectNames} from '../api/literaryGenreCatalog.ts';
+import {classifyLiteraryGenre,literaryGenreLabels,literaryGenreSubjectNames} from '../src/utils/literaryGenreCatalog.ts';
 import {physicalBookAdditions} from '../api/bookAdditions.ts';
 import {shelf22SourceRecords} from '../api/shelf22Catalog.ts';
 import {shelf30SourceRecords} from '../api/shelf30Catalog.ts';
