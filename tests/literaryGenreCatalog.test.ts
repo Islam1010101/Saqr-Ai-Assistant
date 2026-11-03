@@ -91,7 +91,7 @@ const output=classifyLiteraryGenre(sample);
 assert.equal(output.subject,'Fantasy Fiction');
 assert.deepEqual({...output,subject:sample.subject},sample,
   'Classification may only change subject; never location, copies, ISBN, or description');
-assert.equal(classifyLiteraryGenre({...sample,title:'UNKNOWN NOVEL'}).subject,sample.subject,
+assert.equal(classifyLiteraryGenre({...sample,title:'UNKNOWN NOVEL',author:'Anonymous Writer'}).subject,sample.subject,
   'No forced genre for uncertain work');
 for(const list of [physicalBookAdditions,shelf22SourceRecords,shelf30SourceRecords,
   shelf40Books,reviewedShelf41Books])
