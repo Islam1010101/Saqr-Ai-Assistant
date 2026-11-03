@@ -147,7 +147,7 @@ export default function Login() {
 
   return (
     <div 
-      className="min-h-[100dvh] bg-[#f0f4f8] bg-[url('/bg-pattern-light.svg')] flex items-start justify-center px-3 pb-6 pt-20 sm:px-6 sm:pb-8 sm:pt-24 lg:pt-14 font-sans selection:bg-emerald-500 selection:text-white transition-colors duration-500 relative" 
+      className="min-h-[100dvh] bg-[#f0f4f8] bg-[url('/bg-pattern-light.svg')] flex items-start justify-center px-3 pb-6 pt-20 sm:px-6 sm:pb-8 sm:pt-24 lg:pt-20 font-sans selection:bg-emerald-500 selection:text-white transition-colors duration-500 relative" 
       dir={lang === 'ar' ? 'rtl' : 'ltr'}
     >
       {/* 🌐 أزرار تغيير اللغة في أعلى الشاشة */}
