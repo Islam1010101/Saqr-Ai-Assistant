@@ -172,6 +172,14 @@ assert.equal(findOneId('18-5-2409').author,'Christopher De Vinck');
 assert.equal(findOneId('17-4-3196').author,'R. L. Gordon');
 assert.equal(findOneId('17-3-3181').title,'Mrs. Pollifax Unveiled');
 assert.equal(findOneId('17-3-3181').author,'Dorothy Gilman');
+assert.equal(findOneId('19-2-1564').author,'Lynda Trent');
+assert.equal(findOneId('16-2-2655').subject,'Biography & Memoirs');
+assert.equal(findOneId('17-2-3160').title,'A Difficulty with Dwarves');
+assert.equal(findOneId('16-5-2737').author,'Page Cooper (editor)');
+assert.equal(findOneId('addition-20261026-35').subject,'Literary & Psychological Fiction');
+assert.equal(findOneId('addition-20261026-62').subject,'Realistic & Family Fiction');
+assert.equal(findOneId('shelf40-20261027-018').subject,'Short Stories & Anthologies');
+
 for(const [id,genre] of [
  ['shelf30-20261028-012','Animals & Nature'],
  ['shelf30-20261028-036','Children’s Stories'],
@@ -201,7 +209,7 @@ const anomalies={
      /\b(novel|fiction|mystery|short stories|stories|adventures|tales|haunted|detective|romance|fantasy|thriller|poems|diary of|sherlock|narnia|harry potter|wonderland|goosebumps|murder|killed|pirates|frankenstein|sherlock holmes|book thief|gothic|dystopi)\b/i.test(b.title)
   ).map(b=>({id:b.id,title:b.title,author:b.author,subject:b.subject})),
   exactDuplicateIds:bookData.filter((b,i)=>bookData.findIndex(x=>x.id===b.id)!==i).map(b=>b.id),
-  malformedISBN:bookData.filter(b=>b.isbn&&!/^\d{13}$/.test(b.isbn)).map(b=>({id:b.id,title:b.title,isbn:b.isbn,isbnStatus:b.isbnStatus})),
+  malformedISBN:bookData.filter(b=>b.isbn&&!(/^\\d{9}[\\dX]$/i.test(b.isbn)||/^\\d{13}$/.test(b.isbn))).map(b=>({id:b.id,title:b.title,isbn:b.isbnStatus})),
   flagNeedsReview:bookData.filter(b=>b.needsReview).map(b=>({id:b.id,title:b.title,author:b.author,subject:b.subject}))
 };
 console.log('EFIPS_AUDIT_DISTRIBUTION '+JSON.stringify(categoryCounts));
