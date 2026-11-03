@@ -84,11 +84,11 @@ for(const title of badExamples){
   for(const b of books)assert.ok(!genreSet.has(b.subject),
     'Unrelated work wrongly given a fiction genre: '+b.title);
 }
-const sample={id:'X',title:'Oliver Twist',author:'Charles Dickens',
+const sample={id:'X',title:'The Hobbit',author:'J. R. R. Tolkien',
   subject:'Literature & Fiction',shelf:18,row:5,isbn:'9780000000001',
   copies:2,summary:'unchanged'};
 const output=classifyLiteraryGenre(sample);
-assert.equal(output.subject,'Dramatic Fiction');
+assert.equal(output.subject,'Fantasy Fiction');
 assert.deepEqual({...output,subject:sample.subject},sample,
   'Classification may only change subject; never location, copies, ISBN, or description');
 assert.equal(classifyLiteraryGenre({...sample,title:'UNKNOWN NOVEL'}).subject,sample.subject,
