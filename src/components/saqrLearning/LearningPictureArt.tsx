@@ -2,13 +2,13 @@ import React from 'react';
 
 export type LearningPicture = 'book' | 'sun' | 'tree' | 'apple' | 'house' | 'desk' | 'ball' | 'pencil';
 
-type Props = { kind: LearningPicture; className?: string };
+type Props = { kind: LearningPicture; className?: string; label?: string };
 
-export default function LearningPictureArt({ kind, className = 'w-full h-full' }: Props) {
+export default function LearningPictureArt({ kind, className = 'w-full h-full', label }: Props) {
   const sky = <><rect width="160" height="130" rx="20" fill="#E6F5FF" /><path d="M0 101 Q40 90 79 104 T160 100 V130 H0Z" fill="#D3F2DB" /></>;
 
   return <svg viewBox="0 0 160 130" className={className} role="img"
-    aria-label={kind} xmlns="http://www.w3.org/2000/svg">
+    aria-label={label || kind} xmlns="http://www.w3.org/2000/svg">
     {sky}
     {kind === 'sun' && <>
       <circle cx="80" cy="60" r="25" fill="#F7BF37" stroke="#D9910B" strokeWidth="3" />
