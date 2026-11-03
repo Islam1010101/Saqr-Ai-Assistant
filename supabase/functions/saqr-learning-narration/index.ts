@@ -88,6 +88,17 @@ Deno.serve(async (req: Request) => {
     typeof rate !== "number" || !allowedRates.includes(rate as typeof allowedRates[number]))
     return respond(400, { error: "INVALID_STORY_REQUEST" });
 
+  // Basic per-account rolling limit helps contain Azure cost. Only auth UUID and time are retained.
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const { count, error: usageError } = await db.from("saqr_learning_voice_usage")
+    .select("id", { count: "exact", head: true })
+    .eq("auth_user_id", user.id).gte("requested_at", since);
+  if (usageError) return respond(503, { error: "VOICE_QUOTA_UNAVAILABLE" });
+  if ((count || 0) >= 180) return respond(429, { error: "VOICE_DAILY_LIMIT" });
+  const { error: claimError } = await db.from("saqr_learning_voice_usage")
+    .insert({ auth_user_id: user.id });
+  if (claimError) return respond(503, { error: "VOICE_QUOTA_UNAVAILABLE" });
+
   const spokenText = locale === "ar" ? story.ar[lineIndex as number] : story.en[lineIndex as number];
   const voice = locale === "ar" ? "ar-AE-HamdanNeural" : "en-US-GuyNeural";
   const lang = locale === "ar" ? "ar-AE" : "en-US";
