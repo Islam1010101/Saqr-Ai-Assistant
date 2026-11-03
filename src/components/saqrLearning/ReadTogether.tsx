@@ -193,8 +193,8 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
       {!available && <p role="alert" className="font-bold text-amber-800 dark:text-amber-200">{isAr ? 'المتصفح لا يوفر القراءة الصوتية. يمكنك قراءة النص أو تجربة متصفح يدعم الأصوات.' : 'Speech is not available in this browser. The text remains readable.'}</p>}
       {error && <p role="alert" className="font-bold text-rose-700 dark:text-rose-300">{error}</p>}
       <p className="text-xs leading-6 text-slate-600 dark:text-slate-300">
-        {isAr ? 'يستخدم الصوت المثبّت على الجهاز، وقد تختلف طبيعته وجودته حسب المتصفح. تظليل الجملة يتزامن مع القراءة؛ لا تُرسل القصة إلى خدمة صوت خارجية.' :
-          'Uses voices available on this device. Voice quality varies by browser. Each spoken sentence is highlighted; the story is not sent to an external voice service.'}
+        {isAr ? 'تستخدم القراءة أصوات المتصفح أو الجهاز. تختلف جودة الصوت، وقد يعتمد بعض الأصوات على خدمات النظام. تتظلل الجملة أثناء نطقها.' :
+          'Uses the browser or device voices. Quality varies, and some voices may rely on the device's online services. Each spoken sentence is highlighted.'}
       </p>
     </div>
   </div>;
