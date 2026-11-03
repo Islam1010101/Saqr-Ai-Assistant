@@ -16,6 +16,7 @@ export default function ReadTogether({ isAr, large, quiet, isAdmin = false }: Re
   const [finished, setFinished] = useState(false);
   const [answeredCount, setAnsweredCount] = useState(0);
   const answeredRef = useRef(new Set<string>());
+  const questionRef = useRef<HTMLElement | null>(null);
   const [fullStory, setFullStory] = useState(false);
   const [rate, setRate] = useState(0.9);
   const [voiceURI, setVoiceURI] = useState('');
@@ -126,6 +127,15 @@ export default function ReadTogether({ isAr, large, quiet, isAdmin = false }: Re
     if (audioRef.current) { audioRef.current.pause(); audioRef.current.removeAttribute('src'); }
     if (audioUrlRef.current) URL.revokeObjectURL(audioUrlRef.current);
   }, []);
+
+  useEffect(() => {
+    if (!questionId || typeof window === 'undefined') return;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches || quiet;
+    const node = questionRef.current;
+    if (!node) return;
+    node.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+    node.focus({ preventScroll: true });
+  }, [questionId, quiet]);
 
   const resetProgress = () => {
     stop();
@@ -478,7 +488,7 @@ export default function ReadTogether({ isAr, large, quiet, isAdmin = false }: Re
       </article>
     </section>
 
-    {question && <section aria-labelledby="saqr-reading-question" className="rounded-[1.9rem] border-[3px] border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-slate-900 p-4 sm:p-7 space-y-5 shadow-md">
+    {question && <section ref={questionRef} tabIndex={-1} aria-labelledby="saqr-reading-question" className="scroll-mt-24 rounded-[1.9rem] border-[3px] border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-slate-900 p-4 sm:p-7 space-y-5 shadow-md">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="rounded-full bg-amber-200 dark:bg-amber-800/50 px-4 py-2 text-amber-950 dark:text-amber-100 font-black text-sm">
           {isAr ? 'صقر عنده سؤال ليك!' : 'Saqr has a question!'}
