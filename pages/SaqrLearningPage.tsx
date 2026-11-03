@@ -1,75 +1,250 @@
-import React,{useEffect,useState} from 'react';
-import {Link} from 'react-router-dom';
-import {useLanguage} from '../App';
-import {supabase} from '../src/utils/supabase';
-import {getSaqrLearningAccess,type LearningFeatures} from '../src/utils/saqrLearningAccess';
-const ReadingIcon=()=> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-7 h-7" aria-hidden="true"><path d="M12 6c-3-2-6-2-9-1v14c3-1 6-1 9 1 3-2 6-2 9-1V5c-3-1-6-1-9 1zm0 0v14"/></svg>;
-const features:({key:keyof LearningFeatures;ar:string;en:string;hintAr:string;hintEn:string})[]=[
-{key:'read_together',ar:'اقرأ معي',en:'Read with me',hintAr:'قراءة قصيرة بخط واضح وأزرار كبيرة',hintEn:'Short reading in a clear layout'},
-{key:'picture_guidance',ar:'تعلم بالصور',en:'Learn with pictures',hintAr:'تعليمات مصورة وخطوات سهلة',hintEn:'Visual instructions and simple steps'},
-{key:'focus_steps',ar:'مهمة خطوة بخطوة',en:'Step by step',hintAr:'نشاط قصير في كل مرة',hintEn:'One short activity at a time'},
-{key:'calm_display',ar:'عرض هادئ',en:'Calm view',hintAr:'واجهة بسيطة بدون مؤثرات مزعجة',hintEn:'A quiet distraction-free view'}];
-export default function SaqrLearningPage(){
- const {locale,dir}=useLanguage();const ar=locale==='ar';
- const [status,setStatus]=useState<'loading'|'allowed'|'denied'|'error'>('loading');
- const [settings,setSettings]=useState<LearningFeatures|null>(null);
- const [viewer,setViewer]=useState<'admin'|'student'|null>(null);
- const [active,setActive]=useState<keyof LearningFeatures|null>(null);
- const [large,setLarge]=useState(false);
- useEffect(()=>{let mounted=true;getSaqrLearningAccess().then(v=>{if(!mounted)return;setSettings(v.features);setViewer(v.viewer);setStatus(v.allowed?'allowed':'denied')}).catch(()=>{if(mounted)setStatus('error')});return()=>{mounted=false}},[]);
- const current=features.find(x=>x.key===active);
- return <div dir={dir} className="min-h-[80dvh] bg-white dark:bg-black text-slate-900 dark:text-slate-100 px-4 py-8 md:py-12">
- <main className="mx-auto max-w-4xl space-y-6">
- <header className="saqr-learning-hero relative isolate overflow-hidden rounded-[2.3rem] border border-emerald-200 dark:border-emerald-900 bg-gradient-to-br from-emerald-50 via-white to-sky-50 dark:from-slate-900 dark:via-slate-950 dark:to-emerald-950/50 p-5 sm:p-9 shadow-[0_18px_45px_rgba(15,118,110,0.12)]">
- <div aria-hidden="true" className="saqr-learning-orb absolute top-4 end-6 h-28 w-28 sm:h-40 sm:w-40 rounded-full bg-emerald-300/25 blur-3xl pointer-events-none" />
- <div aria-hidden="true" className="saqr-learning-orb saqr-learning-orb-delayed absolute bottom-0 start-[30%] h-28 w-28 rounded-full bg-sky-300/25 blur-3xl pointer-events-none" />
- <div className="relative z-10 flex flex-col-reverse sm:flex-row items-center gap-3 sm:gap-8">
- <div className="flex-1 min-w-0 text-center sm:text-start space-y-2">
- <p className="text-xs sm:text-sm font-black tracking-wide text-emerald-700 dark:text-emerald-300">EFIPS Library</p>
- <h1 className="text-3xl sm:text-4xl md:text-5xl leading-[1.5] font-black text-emerald-900 dark:text-emerald-100">{ar?'صقر يساعدني':'Saqr Helps Me'}</h1>
- <p className="font-bold leading-8 text-slate-600 dark:text-slate-300 text-base sm:text-lg">{ar?'مساحة مريحة للتعلم والاكتشاف بطريقتك':'Your welcoming space to learn and explore'}</p>
- {status==='allowed'&&viewer==='admin'&&<p className="inline-flex items-center rounded-full border border-emerald-200 dark:border-emerald-800 bg-white/85 dark:bg-slate-800/85 px-4 py-2 text-xs font-black text-emerald-800 dark:text-emerald-200">{ar?'وضع معاينة الأدمن':'Admin preview mode'}</p>}
- </div>
- <div className="relative w-full max-w-[220px] sm:w-[38%] sm:max-w-[290px] shrink-0">
- <div aria-hidden="true" className="saqr-learning-aura absolute inset-[14%] rounded-full bg-gradient-to-br from-emerald-300/30 via-sky-300/20 to-amber-300/20 blur-2xl" />
- <span aria-hidden="true" className="saqr-learning-sparkle absolute start-[12%] top-[17%] h-3 w-3 rounded-full bg-amber-400/70" />
- <span aria-hidden="true" className="saqr-learning-sparkle saqr-learning-sparkle-late absolute end-[8%] top-[37%] h-2.5 w-2.5 rounded-full bg-emerald-500/70" />
- <img src="/Saqr%20Hellping.png" alt={ar?'شخصية صقر ترحب بالطلاب وتساعدهم':'Saqr welcomes and helps students'} className="saqr-learning-mascot relative z-10 mx-auto w-full h-auto max-h-[245px] sm:max-h-[310px] object-contain drop-shadow-[0_14px_16px_rgba(13,96,70,0.18)]" decoding="async" />
- </div>
- </div>
- </header>
- {status==='loading'&&<p role="status" className="text-center font-bold py-12">{ar?'جارٍ التحقق من صلاحية حسابك...':'Checking your school access...'}</p>}
- {status==='error'&&<p role="alert" className="text-center font-bold py-12">{ar?'تعذر التحقق الآن. جرّب لاحقًا.':'Verification unavailable. Please try again later.'}</p>}
- {status==='denied'&&<div className="text-center font-bold py-12"><p>{ar?'هذه المساحة غير متاحة لهذا الحساب.':'This space is not available for this account.'}</p><Link className="inline-block mt-5 text-emerald-700 dark:text-emerald-300 underline" to="/home">{ar?'العودة للرئيسية':'Back to home'}</Link></div>}
- {status==='allowed'&&settings&&<>
- <div className="flex flex-wrap gap-3 items-center justify-between">
- <p className="font-black">{ar?'اختر نشاطك':'Choose an activity'}</p>
- <button type="button" aria-pressed={large} onClick={()=>setLarge(v=>!v)} className="rounded-xl px-4 py-3 border-2 border-emerald-400 font-black focus-visible:outline-4 focus-visible:outline-sky-400">{ar?'تكبير النص':'Larger text'}</button>
- </div>
- <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 saqr-learning-activity-grid">
- {features.filter(x=>settings[x.key]).map(x=><button key={x.key} type="button" onClick={()=>setActive(x.key)} aria-pressed={active===x.key}
- className={`flex items-center gap-4 text-start border-2 rounded-[1.5rem] bg-emerald-50 dark:bg-slate-900 p-5 min-h-28 focus-visible:outline-4 focus-visible:outline-sky-400 ${active===x.key?'border-emerald-600 shadow-lg':'border-emerald-200 dark:border-slate-700'}`}><span className="p-3 rounded-xl bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-300"><ReadingIcon/></span><span><strong className="block text-lg sm:text-xl">{ar?x.ar:x.en}</strong><small className="block mt-1 text-slate-600 dark:text-slate-300">{ar?x.hintAr:x.hintEn}</small></span></button>)}
- </div>
- {current&&<section aria-live="polite" className="rounded-[1.5rem] border-2 border-emerald-200 dark:border-emerald-800 bg-slate-50 dark:bg-slate-900 p-5 sm:p-8 space-y-5">
- <h2 className="text-xl font-black">{ar?current.ar:current.en}</h2>
- {active==='read_together'?<><p className={`${large?'text-3xl':'text-xl'} leading-[2.2] font-bold`}>{ar?'في صباح جميل، فتح صقر كتابًا جديدًا. قرأ الصفحة الأولى، ثم اكتشف قصة رائعة.':'On a beautiful morning, Saqr opened a new book and discovered a wonderful story.'}</p><p className="text-sm text-slate-600 dark:text-slate-300">{ar?'القراءة الصوتية الطبيعية ستُضاف بعد اختبار الصوت والموافقة على الخدمة.':'Natural voice narration will be added after voice testing and approval.'}</p></>:
- active==='picture_guidance'?<div className="flex gap-3 flex-wrap">{[ar?'أنظر':'Look',ar?'أقرأ':'Read',ar?'أفهم':'Understand'].map((step,i)=><div key={i} className="border rounded-2xl p-5 bg-white dark:bg-slate-800 font-black text-lg">{i+1}. {step}</div>)}</div>:
- active==='focus_steps'?<div className="space-y-4"><p className={large?'text-2xl':'text-lg'}>{ar?'اختر كتابًا يعجبك، ثم اقرأ جملة واحدة.':'Choose a book you like, then read one sentence.'}</p><button type="button" className="rounded-xl bg-emerald-700 text-white px-6 py-3 font-black" onClick={e=>e.currentTarget.textContent=ar?'أحسنت!':'Well done!'}>{ar?'انتهيت':'Done'}</button></div>:
- <div className="rounded-xl border bg-white dark:bg-black p-6 text-center font-black">{ar?'يمكنك التعلم على راحتك دون مؤقت.':'Learn at your own pace, with no timer.'}</div>}
- </section>}
- </>}
- </main>
- <style>{`
- @keyframes saqr-learning-float {0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
- @keyframes saqr-learning-glow {0%,100%{opacity:.55;transform:scale(.97)}50%{opacity:.95;transform:scale(1.04)}}
- @keyframes saqr-learning-twinkle {0%,100%{opacity:.35;transform:scale(.8)}50%{opacity:1;transform:scale(1.25)}}
- .saqr-learning-mascot{animation:saqr-learning-float 5.5s ease-in-out infinite}
- .saqr-learning-aura,.saqr-learning-orb{animation:saqr-learning-glow 7s ease-in-out infinite}
- .saqr-learning-orb-delayed{animation-delay:-3s}
- .saqr-learning-sparkle{animation:saqr-learning-twinkle 3.5s ease-in-out infinite}
- .saqr-learning-sparkle-late{animation-delay:-1.7s}
- @media (prefers-reduced-motion:reduce){.saqr-learning-hero *{animation:none!important;transition:none!important}}
- @media (hover:none) and (pointer:coarse){.saqr-learning-orb{animation:none!important}}
- `}</style>
- </div>
+import React, { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useLanguage } from '../App';
+import { getSaqrLearningAccess, type LearningFeatures } from '../src/utils/saqrLearningAccess';
+import ReadTogether from '../src/components/saqrLearning/ReadTogether';
+import PictureLearning from '../src/components/saqrLearning/PictureLearning';
+import StepByStep from '../src/components/saqrLearning/StepByStep';
+import CalmDisplay from '../src/components/saqrLearning/CalmDisplay';
+
+type FeatureName = keyof LearningFeatures;
+type Feature = {
+  key: FeatureName;
+  ar: string;
+  en: string;
+  hintAr: string;
+  hintEn: string;
+  color: string;
+  baseColor: string;
+  border: string;
+};
+
+const features: Feature[] = [
+  {
+    key: 'read_together', ar: 'اقرأ معي', en: 'Read with me',
+    hintAr: 'استمع إلى قصص مع تظليل الجملة', hintEn: 'Listen to stories with highlighted sentences',
+    color: 'from-[#1489CF] to-[#45B7E8]', baseColor: 'bg-sky-50 dark:bg-sky-950/30', border: 'border-[#176C9B]'
+  },
+  {
+    key: 'picture_guidance', ar: 'تعلم بالصور', en: 'Learn with pictures',
+    hintAr: 'اكتشف الصور وأجب عن الأسئلة', hintEn: 'Explore illustrated picture questions',
+    color: 'from-[#8755C9] to-[#B47CE6]', baseColor: 'bg-violet-50 dark:bg-violet-950/30', border: 'border-[#6A389D]'
+  },
+  {
+    key: 'focus_steps', ar: 'مهمة خطوة بخطوة', en: 'Step by step',
+    hintAr: 'أنجز مهام صغيرة على راحتك', hintEn: 'Complete small tasks at your own pace',
+    color: 'from-[#D88B21] to-[#F4BC4A]', baseColor: 'bg-amber-50 dark:bg-amber-950/30', border: 'border-[#AE6613]'
+  },
+  {
+    key: 'calm_display', ar: 'عرض هادئ', en: 'Calm view',
+    hintAr: 'تحكم في الحركة وحجم النص', hintEn: 'Control motion and text size',
+    color: 'from-[#08775A] to-[#32B38C]', baseColor: 'bg-emerald-50 dark:bg-emerald-950/30', border: 'border-[#06563F]'
+  }
+];
+
+function ActivityIcon({ kind, className = 'w-10 h-10' }: { kind: FeatureName; className?: string }) {
+  const shared = { className, viewBox: '0 0 48 48', fill: 'none', stroke: 'currentColor', strokeWidth: 2.8, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
+  if (kind === 'read_together') return <svg {...shared} aria-hidden="true">
+    <path d="M24 10C17 5 10 6 4 8v29c7-2 15-1 20 4 5-5 13-6 20-4V8c-6-2-13-3-20 2Z" />
+    <path d="M24 10v31M11 17h8M11 24h8M29 17h8M29 24h8" />
+    <path d="M35 31c3-2 5-1 5 2s-2 4-5 4" />
+  </svg>;
+  if (kind === 'picture_guidance') return <svg {...shared} aria-hidden="true">
+    <rect x="5" y="7" width="38" height="34" rx="6" /><circle cx="17" cy="18" r="4" />
+    <path d="m10 34 10-11 7 7 6-8 8 12" /><path d="M10 45h28" />
+  </svg>;
+  if (kind === 'focus_steps') return <svg {...shared} aria-hidden="true">
+    <rect x="9" y="6" width="30" height="37" rx="5" />
+    <path d="m15 17 3 3 6-7M28 18h5M15 30l3 3 6-7M28 31h5" />
+  </svg>;
+  return <svg {...shared} aria-hidden="true">
+    <path d="M33 8a17 17 0 1 0 7 24A16 16 0 0 1 33 8Z" />
+    <path d="M34 17h10M39 12v10M7 12h6M10 9v6" />
+  </svg>;
+}
+
+export default function SaqrLearningPage() {
+  const { locale, dir } = useLanguage();
+  const isAr = locale === 'ar';
+  const [status, setStatus] = useState<'loading' | 'allowed' | 'denied' | 'error'>('loading');
+  const [settings, setSettings] = useState<LearningFeatures | null>(null);
+  const [viewer, setViewer] = useState<'admin' | 'student' | null>(null);
+  const [active, setActive] = useState<FeatureName | null>(null);
+  const [large, setLarge] = useState(false);
+  const [quiet, setQuiet] = useState(false);
+  const activityRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    getSaqrLearningAccess().then(value => {
+      if (!mounted) return;
+      setSettings(value.features);
+      setViewer(value.viewer);
+      setStatus(value.allowed ? 'allowed' : 'denied');
+    }).catch(() => { if (mounted) setStatus('error'); });
+    return () => { mounted = false; };
+  }, []);
+
+  const selectActivity = (key: FeatureName) => {
+    if (!settings?.[key]) return;
+    setActive(key);
+    if (key === 'calm_display') setQuiet(true);
+    window.requestAnimationFrame(() => {
+      const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches || quiet ? 'auto' : 'smooth';
+      activityRef.current?.scrollIntoView({ behavior, block: 'start' });
+    });
+  };
+  const current = features.find(item => item.key === active);
+
+  return <div dir={dir} className={'saqr-learning-page min-h-[85dvh] overflow-x-hidden bg-white dark:bg-black text-slate-900 dark:text-slate-100 font-sans px-3 sm:px-5 py-6 md:py-10 ' +
+    (quiet ? 'saqr-learning-page--calm' : '')}>
+    <main className="relative mx-auto max-w-[1220px] space-y-6 md:space-y-9">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+        <Link to="/home" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-emerald-200 dark:border-emerald-900 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm font-black text-emerald-800 dark:text-emerald-200 shadow-sm hover:border-emerald-400 transition-colors">
+          <svg aria-hidden="true" viewBox="0 0 24 24" className={'w-5 h-5 ' + (isAr ? 'rotate-180' : '')} fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M19 12H5m7-7-7 7 7 7" /></svg>
+          {isAr ? 'العودة للرئيسية' : 'Back to home'}
+        </Link>
+        <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-black text-slate-500 dark:text-slate-300">
+          <img src="/school-logo.png" alt="" className="h-9 w-9 object-contain" />
+          {isAr ? 'مكتبة صقر الإمارات' : 'EFIPS Library'}
+        </div>
+      </div>
+
+      {status === 'loading' && <div role="status" className="py-20 text-center font-black text-emerald-800 dark:text-emerald-200">
+        {isAr ? 'جارٍ التحقق من حسابك المدرسي...' : 'Checking school access...'}
+      </div>}
+      {status === 'error' && <div role="alert" className="rounded-2xl border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-slate-900 p-8 text-center font-bold text-amber-900 dark:text-amber-200">
+        {isAr ? 'تعذر التحقق الآن. أعد المحاولة أو ارجع للرئيسية.' : 'Access verification is temporarily unavailable.'}
+      </div>}
+      {status === 'denied' && <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-8 text-center font-bold">
+        {isAr ? 'هذه المساحة غير متاحة لهذا الحساب.' : 'This learning space is not available for this account.'}
+      </div>}
+
+      {status === 'allowed' && settings && <>
+        <header className="saqr-learning-hero relative isolate overflow-hidden rounded-[2rem] sm:rounded-[2.8rem] border-2 border-emerald-800/30 bg-[#07543E] p-5 sm:p-9 md:p-11 text-white shadow-[0_20px_55px_rgba(4,78,57,.2)]">
+          <div aria-hidden="true" className="saqr-learning-decoration pointer-events-none absolute inset-0">
+            <div className="absolute -top-24 -start-14 h-64 w-64 rounded-full bg-teal-400/15 blur-3xl" />
+            <div className="absolute bottom-[-130px] end-[12%] h-72 w-72 rounded-full bg-sky-400/15 blur-3xl" />
+            <div className="absolute top-0 end-0 flex h-2 w-44 overflow-hidden rounded-bl-xl">
+              <span className="w-1/4 bg-[#CE1126]" /><span className="w-1/4 bg-[#00843D]" /><span className="w-1/4 bg-white" /><span className="w-1/4 bg-black" />
+            </div>
+            <svg viewBox="0 0 170 170" className="saqr-learning-orbit absolute top-0 start-[44%] h-32 w-32 opacity-25" fill="none" stroke="#B0EEE0" strokeWidth="2" aria-hidden="true"><circle cx="85" cy="85" r="62" strokeDasharray="5 9" /><circle cx="85" cy="85" r="42" /></svg>
+          </div>
+          <div className="relative grid gap-5 sm:grid-cols-[1.2fr_.8fr] items-center">
+            <div className="relative z-20 space-y-3 text-center sm:text-start">
+              <p className="inline-flex rounded-full border border-amber-200/50 bg-white/10 px-4 py-2 text-xs font-black tracking-wide text-amber-100">
+                {isAr ? 'كل يوم خطوة جديدة مع صقر' : 'GROW AND DISCOVER WITH SAQR'}
+              </p>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black leading-[1.5]">{isAr ? 'صقر يساعدني' : 'Saqr Helps Me'}</h1>
+              <p className="max-w-xl text-sm sm:text-base lg:text-lg leading-8 font-semibold text-emerald-50/95">
+                {isAr ? 'اقرأ، واكتشف الصور، وأنجز مهامك الصغيرة بطريقة ممتعة تناسبك.' :
+                  'Read stories, explore pictures, and complete little missions your way.'}
+              </p>
+              <div className="flex flex-wrap justify-center sm:justify-start gap-2 pt-2">
+                <span className="rounded-xl bg-white/10 border border-white/25 px-3 py-2 text-xs sm:text-sm font-black">{isAr ? 'أنشطة تفاعلية' : 'Interactive activities'}</span>
+                <span className="rounded-xl bg-white/10 border border-white/25 px-3 py-2 text-xs sm:text-sm font-black">{isAr ? 'بدون مؤقت' : 'No time limits'}</span>
+                <span className="rounded-xl bg-white/10 border border-white/25 px-3 py-2 text-xs sm:text-sm font-black">{isAr ? 'عربي وإنجليزي' : 'Arabic & English'}</span>
+              </div>
+              {viewer === 'admin' && <p className="inline-flex items-center rounded-xl border border-amber-200/60 bg-amber-100/15 px-4 py-2 text-xs font-black text-amber-100">
+                {isAr ? 'وضع معاينة الأدمن' : 'Admin preview mode'}
+              </p>}
+            </div>
+            <div className="relative mx-auto w-full max-w-[310px] sm:max-w-[390px] h-[220px] sm:h-[320px] lg:h-[370px] flex items-end justify-center">
+              <span aria-hidden="true" className="saqr-learning-decoration saqr-learning-aura absolute bottom-4 h-[75%] w-[78%] rounded-full bg-gradient-to-br from-emerald-300/35 via-sky-300/20 to-amber-300/20 blur-[45px]" />
+              <span aria-hidden="true" className="saqr-learning-decoration saqr-learning-floating-symbol absolute top-[12%] start-[6%] grid place-items-center h-14 w-14 rounded-2xl bg-white/15 border border-white/25 text-amber-200 shadow-xl rotate-[-12deg]"><ActivityIcon kind="read_together" className="h-8 w-8" /></span>
+              <span aria-hidden="true" className="saqr-learning-decoration saqr-learning-floating-symbol saqr-learning-symbol-late absolute top-[30%] end-[3%] grid place-items-center h-12 w-12 rounded-xl bg-white/15 border border-white/25 text-sky-200 shadow-xl rotate-[12deg]"><ActivityIcon kind="picture_guidance" className="h-7 w-7" /></span>
+              <img src="/Saqr%20Hellping.png" alt={isAr ? 'شخصية صقر تساعد الطلاب' : 'Saqr helping students'}
+                className="saqr-learning-mascot relative z-10 h-full w-full object-contain object-bottom drop-shadow-[0_16px_22px_rgba(0,0,0,.25)]"
+                decoding="async" />
+            </div>
+          </div>
+        </header>
+
+        <section aria-labelledby="saqr-learning-tools" className="space-y-5">
+          <div className="flex flex-wrap gap-3 items-end justify-between px-1">
+            <div>
+              <p className="text-xs font-black tracking-wide text-emerald-700 dark:text-emerald-400">{isAr ? 'رحلتك مع صقر' : 'YOUR LEARNING JOURNEY'}</p>
+              <h2 id="saqr-learning-tools" className="mt-1 text-2xl sm:text-3xl font-black">{isAr ? 'ماذا تريد أن تفعل اليوم؟' : 'What will you try today?'}</h2>
+              <p className="mt-1 text-sm leading-7 text-slate-600 dark:text-slate-300 font-semibold">{isAr ? 'اختر نشاطًا ثم ابدأ باللعب أو القراءة.' : 'Choose an activity and start reading or playing.'}</p>
+            </div>
+            {settings.calm_display && <button type="button" onClick={() => setQuiet(v => !v)} aria-pressed={quiet}
+              className={'min-h-11 rounded-full border-2 px-4 py-2.5 text-sm font-black transition-colors focus-visible:outline-4 focus-visible:outline-sky-400 ' +
+                (quiet ? 'border-emerald-700 bg-emerald-700 text-white' : 'border-emerald-200 bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-300')}>
+              {quiet ? (isAr ? 'إيقاف العرض الهادئ' : 'Exit calm view') : (isAr ? 'تشغيل العرض الهادئ' : 'Turn on calm view')}
+            </button>}
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            {features.filter(x => settings[x.key]).map((item, index) => <button key={item.key} type="button"
+              onClick={() => selectActivity(item.key)} aria-pressed={active === item.key}
+              className={'saqr-learning-option group relative isolate flex flex-col items-start min-h-[210px] sm:min-h-[240px] overflow-hidden rounded-[1.8rem] border-b-[7px] p-5 sm:p-6 text-start shadow-lg transition-[transform,box-shadow] duration-300 focus-visible:outline-4 focus-visible:outline-sky-400 bg-gradient-to-br ' +
+                item.color + ' ' + item.border + (active === item.key ? ' ring-4 ring-amber-300 dark:ring-amber-600' : '')}>
+              <span aria-hidden="true" className="saqr-learning-decoration absolute -end-8 -top-8 h-36 w-36 rounded-full border-[22px] border-white/10" />
+              <span className="relative grid place-items-center h-16 w-16 rounded-2xl bg-white/20 border border-white/30 text-white shadow-sm group-hover:rotate-3 transition-transform">
+                <ActivityIcon kind={item.key} />
+              </span>
+              <span className="relative mt-auto pt-6 block font-black text-white text-xl sm:text-2xl leading-snug">{isAr ? item.ar : item.en}</span>
+              <span className="relative mt-2 text-sm font-semibold text-white/95 leading-6">{isAr ? item.hintAr : item.hintEn}</span>
+              <span aria-hidden="true" className="absolute end-4 bottom-3 text-white/80 text-lg">{String(index + 1).padStart(2, '0')}</span>
+            </button>)}
+          </div>
+        </section>
+
+        {current && settings[current.key] && <section ref={activityRef} aria-labelledby="saqr-learning-current"
+          className={'saqr-learning-detail scroll-mt-24 rounded-[2rem] border-2 border-emerald-200 dark:border-emerald-900 bg-slate-50 dark:bg-slate-950 p-4 sm:p-6 md:p-9 shadow-lg ' + (quiet ? 'shadow-none' : '')}>
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-emerald-200 dark:border-emerald-800 pb-4">
+            <div className="flex items-center gap-3">
+              <span className="grid place-items-center rounded-xl bg-emerald-700 text-white p-2.5"><ActivityIcon kind={current.key} className="h-7 w-7" /></span>
+              <div>
+                <p className="text-xs font-bold text-emerald-700 dark:text-emerald-300">{isAr ? 'نشاطي الآن' : 'MY ACTIVITY'}</p>
+                <h2 id="saqr-learning-current" className="text-xl sm:text-2xl font-black">{isAr ? current.ar : current.en}</h2>
+              </div>
+            </div>
+            <button type="button" onClick={() => setActive(null)}
+              className="rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 min-h-11 font-black text-sm hover:border-emerald-400 focus-visible:outline-4 focus-visible:outline-sky-400">
+              {isAr ? 'إغلاق النشاط' : 'Close activity'}
+            </button>
+          </div>
+          {current.key === 'read_together' && <ReadTogether isAr={isAr} large={large} quiet={quiet} />}
+          {current.key === 'picture_guidance' && <PictureLearning isAr={isAr} large={large} />}
+          {current.key === 'focus_steps' && <StepByStep isAr={isAr} large={large} />}
+          {current.key === 'calm_display' && <CalmDisplay isAr={isAr} quiet={quiet} onQuietChange={setQuiet} large={large} onLargeChange={setLarge} />}
+        </section>}
+
+        <div className="rounded-[1.6rem] border border-emerald-200 dark:border-emerald-900 bg-emerald-50/70 dark:bg-emerald-950/20 p-5 sm:p-6 flex flex-wrap justify-between items-center gap-3">
+          <p className="font-bold text-sm leading-7 text-slate-700 dark:text-slate-200">
+            {isAr ? 'صقر معك خطوة بخطوة، ويمكنك تكرار الأنشطة كما تحب.' :
+              'Saqr is with you, one step at a time. Repeat activities whenever you like.'}
+          </p>
+          <Link to="/home" className="rounded-xl bg-emerald-700 text-white px-5 py-3 font-black text-sm hover:bg-emerald-800">{isAr ? 'العودة للمكتبة' : 'Back to library'}</Link>
+        </div>
+      </>}
+    </main>
+    <style>{String.raw`
+      @keyframes saqr-learning-float { 0%,100% { transform:translateY(0) } 50% { transform:translateY(-11px) } }
+      @keyframes saqr-learning-glow { 0%,100% { opacity:.65;transform:scale(.96) } 50% { opacity:.95;transform:scale(1.05) } }
+      @keyframes saqr-learning-orbit { to { transform:rotate(360deg) } }
+      .saqr-learning-mascot { animation:saqr-learning-float 5.5s ease-in-out infinite }
+      .saqr-learning-aura { animation:saqr-learning-glow 7s ease-in-out infinite }
+      .saqr-learning-orbit { animation:saqr-learning-orbit 36s linear infinite }
+      .saqr-learning-floating-symbol { animation:saqr-learning-float 4.5s ease-in-out infinite }
+      .saqr-learning-symbol-late { animation-delay:-2.2s }
+      @media (hover:hover) and (pointer:fine) {
+        .saqr-learning-option:hover { transform:translateY(-8px) scale(1.012);box-shadow:0 21px 32px rgba(8,69,62,.23) }
+      }
+      @media (hover:none) and (pointer:coarse) {
+        .saqr-learning-floating-symbol,.saqr-learning-orbit { animation:none }
+      }
+      .saqr-learning-page--calm .saqr-learning-decoration { display:none!important }
+      .saqr-learning-page--calm .saqr-learning-mascot,.saqr-learning-page--calm .saqr-learning-option { animation:none!important;transition:none!important;transform:none!important;box-shadow:none!important }
+      .saqr-learning-page--calm .saqr-learning-hero { background:#07543E }
+      .saqr-learning-page--calm .saqr-learning-option { background-image:none!important;background-color:#0D7456 }
+      .saqr-learning-page--calm .saqr-learning-option:nth-child(2) { background-color:#46558B }
+      .saqr-learning-page--calm .saqr-learning-option:nth-child(3) { background-color:#9D6B19 }
+      .saqr-learning-page--calm .saqr-learning-option:nth-child(4) { background-color:#08644B }
+      @media (prefers-reduced-motion:reduce) {
+        .saqr-learning-page *, .saqr-learning-page *::before, .saqr-learning-page *::after { animation:none!important;transition:none!important;scroll-behavior:auto!important }
+        .saqr-learning-option:hover { transform:none!important }
+      }
+    `}</style>
+  </div>;
 }
