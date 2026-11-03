@@ -181,6 +181,27 @@ assert.equal(findOneId('addition-20261026-62').subject,'Realistic & Family Ficti
 assert.equal(findOneId('shelf40-20261027-018').subject,'Short Stories & Anthologies');
 assertSubject('Anna Dillon : Another Time, Another Season','Historical Fiction');
 assertSubject('Dark Winds','Horror & Gothic Fiction');
+for(const [id,subject] of [
+ ['21-1-2446','Sociology & Society'],
+ ['21-1-2470','Crime & Thriller Fiction'],
+ ['21-3-2503','Biography & Memoirs'],
+ ['21-4-2538','History & Civilizations'],
+ ['21-5-2560','Environment & Sustainability'],
+ ['21-6-2595','Law & Government'],
+ ['18-3-2354','Crafts & Hobbies'],
+ ['addition-20261026-37','Children’s Stories'],
+ ['addition-20261026-45','Astronomy & Space'],
+ ['addition-20261026-50','Biography & Memoirs'],
+ ['addition-20261026-54','UAE Heritage & Culture'],
+ ['shelf40-20261027-006','Humorous Fiction'],
+ ['shelf40-20261027-032','Catalog Review Required'],
+ ['shelf40-20261027-083','Catalog Review Required'],
+ ['shelf30-20261028-045','Children’s Stories'],
+ ['uploaded-20261028-001','Children’s Stories']
+] as const)assert.equal(findOneId(id).subject,subject,'Whole-inventory correction: '+id);
+assert.ok(bookData.filter(b=>b.subject==='General Knowledge').length<30,
+  'Clearly identified catalog works should not remain in an unspecific general subject');
+
 
 for(const [id,genre] of [
  ['shelf30-20261028-012','Animals & Nature'],
