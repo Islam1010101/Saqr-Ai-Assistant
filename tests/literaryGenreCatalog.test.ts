@@ -179,6 +179,8 @@ assert.equal(findOneId('16-5-2737').author,'Page Cooper (editor)');
 assert.equal(findOneId('addition-20261026-35').subject,'Literary & Psychological Fiction');
 assert.equal(findOneId('addition-20261026-62').subject,'Realistic & Family Fiction');
 assert.equal(findOneId('shelf40-20261027-018').subject,'Short Stories & Anthologies');
+assertSubject('Anna Dillon : Another Time, Another Season','Historical Fiction');
+assertSubject('Dark Winds','Horror & Gothic Fiction');
 
 for(const [id,genre] of [
  ['shelf30-20261028-012','Animals & Nature'],
@@ -209,7 +211,7 @@ const anomalies={
      /\b(novel|fiction|mystery|short stories|stories|adventures|tales|haunted|detective|romance|fantasy|thriller|poems|diary of|sherlock|narnia|harry potter|wonderland|goosebumps|murder|killed|pirates|frankenstein|sherlock holmes|book thief|gothic|dystopi)\b/i.test(b.title)
   ).map(b=>({id:b.id,title:b.title,author:b.author,subject:b.subject})),
   exactDuplicateIds:bookData.filter((b,i)=>bookData.findIndex(x=>x.id===b.id)!==i).map(b=>b.id),
-  malformedISBN:bookData.filter(b=>b.isbn&&!(/^\\d{9}[\\dX]$/i.test(b.isbn)||/^\\d{13}$/.test(b.isbn))).map(b=>({id:b.id,title:b.title,isbn:b.isbnStatus})),
+  malformedISBN:bookData.filter(b=>b.isbn&&!(/^\d{9}[\dX]$/i.test(b.isbn)||/^\d{13}$/.test(b.isbn))).map(b=>({id:b.id,title:b.title,isbn:b.isbn})),
   flagNeedsReview:bookData.filter(b=>b.needsReview).map(b=>({id:b.id,title:b.title,author:b.author,subject:b.subject}))
 };
 console.log('EFIPS_AUDIT_DISTRIBUTION '+JSON.stringify(categoryCounts));
