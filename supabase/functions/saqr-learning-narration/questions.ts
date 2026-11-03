@@ -1,6 +1,6 @@
 // Approved, fictional classroom questions only. No pupil details or diagnoses.
 // The same bank is used for visual activities and server-side narration.
-import type { LearningPicture } from "../../../src/components/saqrLearning/LearningPictureArt";
+export type LearningPicture = 'book' | 'sun' | 'tree' | 'apple' | 'house' | 'desk' | 'ball' | 'pencil';
 export type StoryQuizOption = { ar: string; en: string; picture?: LearningPicture };
 export type StoryQuizQuestion = {
   id: string; storyId: string; afterLine: number; level: 1|2;
