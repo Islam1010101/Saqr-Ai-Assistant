@@ -171,6 +171,14 @@ assert.equal(findOneId('5-3-1249').author,'Sherry S. Cooper');
 assert.equal(findOneId('18-5-2409').author,'Christopher De Vinck');
 assert.equal(findOneId('17-4-3196').author,'R. L. Gordon');
 assert.equal(findOneId('17-3-3181').title,'Mrs. Pollifax Unveiled');
+assert.equal(findOneId('uploaded-20261028-002').title,'الاسم الحركي نبضة');
+assert.equal(findOneId('uploaded-20261028-002').subject,'Children’s Stories');
+assert.equal(findOneId('addition-20261026-57').subject,'Biography & Memoirs');
+assert.equal(findOneId('addition-20261026-64').subject,'Children’s Stories');
+assert.equal(findOneId('shelf40-20261027-010').subject,'Education & Teaching');
+assert.equal(findOneId('21-1-2451').author,'Victor Malarek');
+assert.equal(findOneId('12-1-1653').subject,'Catalog Review Required');
+
 assert.equal(findOneId('17-3-3181').author,'Dorothy Gilman');
 assert.equal(findOneId('19-2-1564').author,'Lynda Trent');
 assert.equal(findOneId('16-2-2655').subject,'Biography & Memoirs');
@@ -199,7 +207,7 @@ for(const [id,subject] of [
  ['shelf30-20261028-045','Children’s Stories'],
  ['uploaded-20261028-001','Children’s Stories']
 ] as const)assert.equal(findOneId(id).subject,subject,'Whole-inventory correction: '+id);
-assert.ok(bookData.filter(b=>b.subject==='General Knowledge').length<30,
+assert.equal(bookData.filter(b=>b.subject==='General Knowledge').length,0,
   'Clearly identified catalog works should not remain in an unspecific general subject');
 
 
@@ -250,5 +258,6 @@ const validIsbn=(isbn:string)=>{
   return false;
 };
 const invalidIsbnRecords=bookData.filter(b=>b.isbn&&!validIsbn(b.isbn));
+assert.equal(invalidIsbnRecords.length,0,'All candidate ISBN-10/ISBN-13 entries must pass check digit validation');
 console.log('EFIPS_AUDIT_ISBN_BAD_CHECKSUM '+JSON.stringify(invalidIsbnRecords.map(b=>({id:b.id,title:b.title,isbn:b.isbn}))));
 console.log('EFIPS_AUDIT_GENERAL_KNOWLEDGE_RECORDS '+JSON.stringify(bookData.filter(b=>b.subject==='General Knowledge').map(b=>({id:b.id,title:b.title,author:b.author,shelf:b.shelf}))));
