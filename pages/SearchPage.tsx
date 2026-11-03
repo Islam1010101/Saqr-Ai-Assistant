@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { bookData, getLocalizedSubject, type Book } from '../api/bookData';
+import { literaryGenreSubjectNames } from '../src/utils/literaryGenreCatalog';
 import { useReadingPassport, physicalBookKey } from '../src/utils/readingPassport'; 
 import { useLanguage } from '../App';
 import { useNavigate } from 'react-router-dom';
@@ -691,7 +692,20 @@ const SearchPage: React.FC = () => {
                                             className="w-full p-3 md:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 font-black text-xs md:text-sm cursor-pointer appearance-none text-center hover:border-amber-400 transition-colors outline-none focus:border-amber-500 text-slate-700 dark:text-slate-200"
                                         >
                                             <option value="all">{t(filter.id as keyof typeof translations.en)}</option>
-                                            {filter.opts.map(o => <option key={o} value={o}>{filter.pre ? `${filter.pre}${o}` : filter.id === 'allSubjects' ? getLocalizedSubject(o, currentLocale) : o}</option>)}
+                                            {filter.id === 'allSubjects' ? (
+                                                <>
+                                                    <optgroup label={currentLocale === 'ar' ? 'الأدب وأنواعه' : 'Literature & Genres'}>
+                                                        {filter.opts.filter(subject => literaryGenreSubjectNames.has(subject)).map(subject =>
+                                                            <option key={subject} value={subject}>{getLocalizedSubject(subject, currentLocale)}</option>)}
+                                                    </optgroup>
+                                                    <optgroup label={currentLocale === 'ar' ? 'الموضوعات الأخرى' : 'Other Subjects'}>
+                                                        {filter.opts.filter(subject => !literaryGenreSubjectNames.has(subject)).map(subject =>
+                                                            <option key={subject} value={subject}>{getLocalizedSubject(subject, currentLocale)}</option>)}
+                                                    </optgroup>
+                                                </>
+                                            ) : (
+                                                filter.opts.map(o => <option key={o} value={o}>{filter.pre ? `${filter.pre}${o}` : o}</option>)
+                                            )}
                                         </select>
                                     </div>
                                 ))}
