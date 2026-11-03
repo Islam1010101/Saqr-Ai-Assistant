@@ -4,7 +4,7 @@ on:
     paths:
       - 'api/bookData.ts'
       - 'tests/dramaCatalogClassification.test.ts'
-      - 'api/literaryGenreCatalog.ts'
+      - 'src/utils/literaryGenreCatalog.ts'
       - 'pages/SearchPage.tsx'
       - 'tests/literaryGenreCatalog.test.ts'
       - '.github/workflows/catalog-drama-classification.yml'
