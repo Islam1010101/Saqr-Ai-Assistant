@@ -5,6 +5,7 @@ on:
       - 'App.tsx'
       - 'pages/HomePage.tsx'
       - 'pages/SaqrLearningPage.tsx'
+      - 'src/components/saqrLearning/**'
       - 'src/components/SaqrLearningEntry.tsx'
       - 'src/utils/saqrLearningAccess.ts'
       - 'supabase/functions/saqr-learning-access/index.ts'
