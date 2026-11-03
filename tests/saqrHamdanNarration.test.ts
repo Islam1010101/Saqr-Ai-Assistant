@@ -32,3 +32,9 @@ assert.ok(page.includes('voiceSource === \'device\''), 'Device speech fallback s
 assert.ok(page.includes('setCurrentLine(index)'), 'Highlights spoken story sentence');
 assert.ok(!page.includes('Ocp-Apim-Subscription-Key'), 'Never expose the Azure subscription key in the browser');
 console.log('PASS: six long bilingual stories, expanded missions and verified secure Azure voice pathway');
+
+assert.ok(edge.includes('"Content-Type": "application/octet-stream"'), 'Supabase binary parser requires octet-stream');
+assert.ok(edge.includes('"X-Saqr-Audio-Type": "audio/mpeg"'), 'Keep accurate MP3 media type metadata');
+assert.ok(page.includes("new Blob([response.data], { type: 'audio/mpeg' })"), 'Browser audio Blob has an explicit MP3 type');
+assert.ok(page.includes("URL.createObjectURL(mp3)"), 'MP3 blob is passed to the player without text conversion');
+assert.ok(!edge.includes('"Content-Type": "audio/mpeg", "X-Saqr-Voice"'), 'Do not regress to text parsing of MP3 binary');
