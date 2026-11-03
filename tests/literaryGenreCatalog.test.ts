@@ -139,6 +139,56 @@ console.log('GENRE_AUDIT_COUNTS',JSON.stringify(counts));
 console.log('PASS: full physical catalog scanned, genres verified and other records preserved');
 
 
+
+const findOneId=(id:string)=>{const b=bookData.find(x=>x.id===id);assert.ok(b,'Missing library book ID '+id);return b!;};
+for(const [id,subject] of [
+ ['5-2-1228','Business & Management'],
+ ['5-3-1249','Economics & Finance'],
+ ['5-4-1278','General Nonfiction'],
+ ['5-4-1284','Biography & Memoirs'],
+ ['19-1-1525','Sports Fiction'],
+ ['19-1-1536','Mystery & Detective Fiction'],
+ ['19-4-1593','Mystery & Detective Fiction'],
+ ['19-6-1635','Literary & Psychological Fiction'],
+ ['14-3-1803','Historical Fiction'],
+ ['14-3-1805','Children’s Stories'],
+ ['14-6-1880','Historical Fiction'],
+ ['20-5-2118','Short Stories & Anthologies'],
+ ['18-2-2311','Realistic & Family Fiction'],
+ ['18-3-2362','Crime & Thriller Fiction'],
+ ['18-5-2409','Biography & Memoirs'],
+ ['16-3-2670','Mystery & Detective Fiction'],
+ ['16-5-2727','Crime & Thriller Fiction'],
+ ['17-2-3154','Literary & Psychological Fiction'],
+ ['17-3-3181','Mystery & Detective Fiction'],
+ ['17-4-3196','Literary & Psychological Fiction'],
+ ['19-4-1599','Romance Fiction'],
+ ['18-4-2368','Romance Fiction'],
+ ['18-3-2342','Mystery & Detective Fiction'],
+ ['12-6-1719','Short Stories & Anthologies']
+] as const) assert.equal(findOneId(id).subject,subject,'Verified genre: '+id);
+assert.equal(findOneId('5-3-1249').author,'Sherry S. Cooper');
+assert.equal(findOneId('18-5-2409').author,'Christopher De Vinck');
+assert.equal(findOneId('17-4-3196').author,'R. L. Gordon');
+assert.equal(findOneId('17-3-3181').title,'Mrs. Pollifax Unveiled');
+assert.equal(findOneId('17-3-3181').author,'Dorothy Gilman');
+for(const [id,genre] of [
+ ['shelf30-20261028-012','Animals & Nature'],
+ ['shelf30-20261028-036','Children’s Stories'],
+ ['shelf30-20261028-027','Dictionaries & Encyclopedias'],
+ ['shelf40-20261027-016','Biography & Memoirs'],
+ ['shelf40-20261027-077','Fantasy Fiction'],
+ ['shelf40-20261027-081','Fantasy Fiction']
+] as const) assert.equal(findOneId(id).subject,genre,'Correct shelf 30/40: '+id);
+const id22Books=bookData.filter(b=>b.id.startsWith('shelf22-20261028-'));
+assert.ok(id22Books.length>=200,'Whole Disney shelf must be scanned');
+assert.ok(id22Books.every(b=>b.subject!=='General Knowledge'&&b.subject!=='General Nonfiction'),
+ 'No shelf-22 storybooks may remain under broad general knowledge');
+assert.ok(bookData.filter(b=>b.subject==='Catalog Review Required').length<110,
+ 'The remaining bibliography review queue must decrease');
+console.log('EFIPS_AUDIT_VALIDATED_SOURCE_SHELF22',id22Books.length);
+console.log('EFIPS_AUDIT_REVIEW_QUEUE_FINAL',bookData.filter(b=>b.subject==='Catalog Review Required').length);
+
 const categoryCounts=Object.fromEntries([...new Set(bookData.map(b=>b.subject))].sort().map(k=>[k,bookData.filter(b=>b.subject===k).length]));
 const anomalies={
   review:bookData.filter(b=>b.subject==='Catalog Review Required').map(b=>({id:b.id,title:b.title,author:b.author,shelf:b.shelf,row:b.row})),
