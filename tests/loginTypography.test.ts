@@ -17,7 +17,7 @@ line('line-height:1.67;');
 line('line-height:1.85;');
 line('overflow:visible;');
 line('.efips-login-title {');
-line('line-height:1.8;');
+line('line-height:1.85;');
 line('line-height:1.9;');
 line('color:#065c38;');
 line('-webkit-text-fill-color:#065c38;');
@@ -40,7 +40,7 @@ assert.ok(!login.includes('Sign in using your school email account only'),
 assert.ok(!login.includes('efips-school-email-notice'),
   'Remove the entire obsolete notice card without changing school-only OAuth');
 assert.ok(!login.includes('efips-login-title-enter'), 'Old title effect should be replaced');
-line('text-center font-black');
+line('text-center text-3xl font-black');
 line("lang === 'ar' ? 'تسجيل الدخول' : 'Sign In'");
 // A measurement-based fit keeps the complete original promotional sentence in
 // precisely one visible row across languages, font changes and device widths.
