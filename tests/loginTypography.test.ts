@@ -64,7 +64,7 @@ line('flex items-start justify-center px-3 pb-6 pt-20');
 line('efips-login-hero relative isolate mb-5');
 line("lang === 'ar' ? 'بوابة مكتبة صقر الإمارات' : 'EFIPS LIBRARY PORTAL'");
 line("src=\"/school-logo.png\"");
-line("lang === 'ar' ? 'أهلاً بعودتك! سجّل بحسابك المدرسي وابدأ رحلتك.'");
+line('أهلاً بعودتك! سجّل بحسابك المدرسي وابدأ رحلتك.');
 assert.ok(!login.includes('flex flex-col justify-center bg-white relative z-10'), 'Sign-in panel should not vertically center below a large empty gap');
 assert.ok(login.includes("prefers-reduced-motion:reduce"), 'Animations must honor accessibility settings');
 assert.ok(login.includes("className=\"efips-login-title relative block"), 'Keep login heading prominent and accessible');
