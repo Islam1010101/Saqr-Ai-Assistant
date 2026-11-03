@@ -3402,8 +3402,9 @@ const subjectFallbacks: Record<string, [string, string]> = {
   'General Reference': ['General Reference', 'مراجع عامة'],
   'General Nonfiction': ['General Nonfiction', 'كتب معرفية عامة'],
   'General Knowledge': ['General Knowledge', 'المعرفة العامة'],
-  'Drama & Plays': ['Drama & Plays', 'الدراما والمسرحيات'],
-  'Theatre & Drama Studies': ['Theatre & Drama Studies', 'الدراسات المسرحية والدراما']
+  'Dramatic Fiction': ['Dramatic Fiction', 'الدراما الروائية والاجتماعية'],
+  'Theatre & Plays': ['Theatre & Plays', 'المسرح والمسرحيات'],
+  'Theatre Studies': ['Theatre Studies', 'الدراسات المسرحية']
 };
 const subjectArabic = new Map<string, string>([
   ...subjectRules.map(rule => [rule.en, rule.ar] as [string,string]),
@@ -3707,25 +3708,42 @@ const newShelf22Books:Book[]=shelf22SourceRecords.filter(b=>!shelf22KnownKeys.ha
 // Strict title matches: "Child's Play", "POWER PLAY", movies and ordinary fiction must
 // not become drama simply because a word or author's name sounds theatrical.
 // Keep every existing ID, author, shelf, row, ISBN and other fields unchanged.
-const dramaPlayTitles = new Set([
-  'MACBETH',
-  "A Midsummer Night's Dream",
-  'As You Like It',
-  'Hamlet',
-  'Measure for Measure',
-  'Fifteen American One-Act (Plays)'
-].map(title => title.normalize('NFKC').trim().toLocaleLowerCase()));
+// Catalogued dramatic prose is not a stage play: keep it separate from plays and
+// studies of theatre. Exact title allow-lists prevent accidental changes to all
+// works by a prolific author or books whose names contain the word "play".
+// Classification is a primary browsing subject only, not a claim that novels
+// are theatrical scripts. It never changes inventory identifiers or locations.
+const normalizedDramaTitle = (title: string): string =>
+  title.normalize('NFKC').toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
+
+const dramaticFictionTitles = new Set([
+  // Charles Dickens: seven inventoried physical copies across four novels.
+  'Oliver Twist', 'David Copperfield', 'Great Expectations', 'A Tale of Two Cities',
+  // Curated social, psychological, historical and family dramatic novels.
+  'Little Women', 'Silas Marner', 'The Great Gatsby', 'The Pearl',
+  'The Old Man and the Sea', 'The Scarlet Letter', 'The Red Badge of Courage',
+  'A Separate Peace', 'The Idiot', 'War and Peace', 'Bridge to Terabithia',
+  'Jacob Have I Loved', 'Sounder', 'The Great Gilly Hopkins',
+  'The Planet of Junior Brown', 'The Summer of the Swans',
+  'The Notebook', 'The Bridges of Madison County'
+].map(normalizedDramaTitle));
+
+const theatrePlayTitles = new Set([
+  'Macbeth', "A Midsummer Night's Dream", 'As You Like It', 'Hamlet',
+  'Measure for Measure', 'Fifteen American One-Act (Plays)',
+  'The Ecstasy of Rita Joe'
+].map(normalizedDramaTitle));
 
 const theatreStudyTitles = new Set([
-  'Julius Caesar Note',
-  'النص والعرض المسرحي في الإمارات',
+  'Julius Caesar Note', 'النص والعرض المسرحي في الإمارات',
   'المسرح، العدد 38 (نوفمبر 2022)'
-].map(title => title.normalize('NFKC').trim().toLocaleLowerCase()));
+].map(normalizedDramaTitle));
 
 const classifyDramaAndTheatre = (book: Book): Book => {
-  const title = book.title.normalize('NFKC').trim().toLocaleLowerCase();
-  if (dramaPlayTitles.has(title)) return { ...book, subject: 'Drama & Plays' };
-  if (theatreStudyTitles.has(title)) return { ...book, subject: 'Theatre & Drama Studies' };
+  const title = normalizedDramaTitle(book.title);
+  if (theatrePlayTitles.has(title)) return { ...book, subject: 'Theatre & Plays' };
+  if (theatreStudyTitles.has(title)) return { ...book, subject: 'Theatre Studies' };
+  if (dramaticFictionTitles.has(title)) return { ...book, subject: 'Dramatic Fiction' };
   return book;
 };
 
