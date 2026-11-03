@@ -127,8 +127,11 @@ export default function ReadTogether({ isAr, large, quiet, isAdmin = false }: Re
         });
         if (sessionRef.current !== id) return;
         if (response.error || !(response.data instanceof Blob) || !response.data.size) throw new Error('SPEECH_ERROR');
+        // The Edge Function sends MP3 bytes as octet-stream so functions.invoke returns a Blob.
+        // Set the actual MP3 MIME type explicitly for Safari and other browser decoders.
+        const mp3 = new Blob([response.data], { type: 'audio/mpeg' });
         if (audioUrlRef.current) URL.revokeObjectURL(audioUrlRef.current);
-        audioUrlRef.current = URL.createObjectURL(response.data);
+        audioUrlRef.current = URL.createObjectURL(mp3);
         audio.src = audioUrlRef.current;
         audio.onended = () => { if (sessionRef.current === id) void readLine(index + 1); };
         audio.onerror = () => {
