@@ -194,7 +194,7 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
       {error && <p role="alert" className="font-bold text-rose-700 dark:text-rose-300">{error}</p>}
       <p className="text-xs leading-6 text-slate-600 dark:text-slate-300">
         {isAr ? 'تستخدم القراءة أصوات المتصفح أو الجهاز. تختلف جودة الصوت، وقد يعتمد بعض الأصوات على خدمات النظام. تتظلل الجملة أثناء نطقها.' :
-          'Uses the browser or device voices. Quality varies, and some voices may rely on the device's online services. Each spoken sentence is highlighted.'}
+          'Uses the browser or device voices. Quality varies, and some voices may rely on online device services. Each spoken sentence is highlighted.'}
       </p>
     </div>
   </div>;
