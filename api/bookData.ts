@@ -3401,7 +3401,9 @@ const subjectFallbacks: Record<string, [string, string]> = {
   'History & Culture': ['History & Culture', 'التاريخ والثقافة'],
   'General Reference': ['General Reference', 'مراجع عامة'],
   'General Nonfiction': ['General Nonfiction', 'كتب معرفية عامة'],
-  'General Knowledge': ['General Knowledge', 'المعرفة العامة']
+  'General Knowledge': ['General Knowledge', 'المعرفة العامة'],
+  'Drama & Plays': ['Drama & Plays', 'الدراما والمسرحيات'],
+  'Theatre & Drama Studies': ['Theatre & Drama Studies', 'الدراسات المسرحية والدراما']
 };
 const subjectArabic = new Map<string, string>([
   ...subjectRules.map(rule => [rule.en, rule.ar] as [string,string]),
@@ -3701,7 +3703,33 @@ const newShelf22Books:Book[]=shelf22SourceRecords.filter(b=>!shelf22KnownKeys.ha
   language:'EN',subject:inferredSubject(b.title,b.author,'',22),level:'General',
   summary:'This book is available in the EFIPS physical library. A verified synopsis has not been provided.'
 }));
-export const bookData:Book[]=[...beforeShelf22,...newShelf22Books];
+// Separate verified dramatic texts and theatre research from general literature.
+// Strict title matches: "Child's Play", "POWER PLAY", movies and ordinary fiction must
+// not become drama simply because a word or author's name sounds theatrical.
+// Keep every existing ID, author, shelf, row, ISBN and other fields unchanged.
+const dramaPlayTitles = new Set([
+  'MACBETH',
+  "A Midsummer Night's Dream",
+  'As You Like It',
+  'Hamlet',
+  'Measure for Measure',
+  'Fifteen American One-Act (Plays)'
+].map(title => title.normalize('NFKC').trim().toLocaleLowerCase()));
+
+const theatreStudyTitles = new Set([
+  'Julius Caesar Note',
+  'النص والعرض المسرحي في الإمارات',
+  'المسرح، العدد 38 (نوفمبر 2022)'
+].map(title => title.normalize('NFKC').trim().toLocaleLowerCase()));
+
+const classifyDramaAndTheatre = (book: Book): Book => {
+  const title = book.title.normalize('NFKC').trim().toLocaleLowerCase();
+  if (dramaPlayTitles.has(title)) return { ...book, subject: 'Drama & Plays' };
+  if (theatreStudyTitles.has(title)) return { ...book, subject: 'Theatre & Drama Studies' };
+  return book;
+};
+
+export const bookData:Book[]=[...beforeShelf22,...newShelf22Books].map(classifyDramaAndTheatre);
 
 // 5. دالة البحث المخصصة للاستخدام في تطبيق الويب
 export function findInCatalog(q: string): Book[] {
