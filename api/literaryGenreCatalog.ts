@@ -518,8 +518,6 @@ const verifiedNonfictionSubjects: Record<string,string> = {
   'CONVERSATIONS: READINGS FOR WRITING':'Language & Linguistics',
   'Writing Research Papers: A COMPLETE GUIDE':'Education & Teaching',
   'The Poet\'s Handbook':'Literary Studies & Criticism',
-  'THE OLD PATAGONIAN EXPRESS':'Geography & Travel',
-  'The Great Fire':'History & Civilizations',
   'THE PACIFIC':'Geography & Travel',
   'The Canadian Style':'Language & Linguistics',
   'CONFUCIUS THE ANALECTS':'Philosophy & Thought',
