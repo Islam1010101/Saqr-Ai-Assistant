@@ -7,21 +7,20 @@ type Step = {
   choices: LearningPicture[]; answer: LearningPicture;
 };
 const steps: Step[] = [
-  {
-    titleAr: 'نستعد للقراءة', titleEn: 'Get ready to read',
-    promptAr: 'اختر الشيء الذي نحتاجه لقراءة قصة.', promptEn: 'Choose what we need to read a story.',
-    choices: ['ball', 'book', 'apple'], answer: 'book'
-  },
-  {
-    titleAr: 'نختار المكان', titleEn: 'Find a reading spot',
-    promptAr: 'اختر مكانًا هادئًا مناسبًا للقراءة.', promptEn: 'Choose a quiet place for reading.',
-    choices: ['desk', 'ball', 'sun'], answer: 'desk'
-  },
-  {
-    titleAr: 'نفهم ما قرأنا', titleEn: 'Understand the story',
-    promptAr: 'صقر قرأ كتابًا. اختر الصورة التي وردت في الجملة.', promptEn: 'Saqr read a book. Which picture matches the sentence?',
-    choices: ['house', 'tree', 'book'], answer: 'book'
-  }
+  { titleAr:'جهّز كتابك', titleEn:'Get your book ready', promptAr:'اختر ما نستخدمه لقراءة قصة ممتعة.', promptEn:'Choose what we use to read a story.', choices:['ball','book','apple'], answer:'book' },
+  { titleAr:'اختر مكان القراءة', titleEn:'Find a reading spot', promptAr:'أين يمكنك الجلوس لقراءة كتاب بهدوء؟', promptEn:'Where can you sit and read quietly?', choices:['desk','ball','sun'], answer:'desk' },
+  { titleAr:'جهّز أدواتك', titleEn:'Get your supplies', promptAr:'اختر الأداة التي يمكنك الكتابة بها.', promptEn:'Choose something you can write with.', choices:['pencil','apple','ball'], answer:'pencil' },
+  { titleAr:'لاحظ الطبيعة', titleEn:'Notice nature', promptAr:'ما الشيء الذي يضيء السماء في النهار؟', promptEn:'What makes the sky bright during the day?', choices:['house','sun','book'], answer:'sun' },
+  { titleAr:'انظر إلى الصورة', titleEn:'Look at the picture', promptAr:'اختر صورة الشجرة الخضراء.', promptEn:'Find the picture of the green tree.', choices:['tree','pencil','ball'], answer:'tree' },
+  { titleAr:'اختر طعامًا صحيًا', titleEn:'Choose a healthy snack', promptAr:'أي صورة تُظهر فاكهة يمكن تناولها؟', promptEn:'Which picture shows a piece of fruit?', choices:['desk','apple','house'], answer:'apple' },
+  { titleAr:'وقت اللعب', titleEn:'Time to play', promptAr:'ما الشيء الذي نستخدمه في لعبة كرة القدم؟', promptEn:'What do we use to play football?', choices:['tree','book','ball'], answer:'ball' },
+  { titleAr:'أين نعيش؟', titleEn:'Where do we live?', promptAr:'اختر صورة المنزل.', promptEn:'Choose the picture of a home.', choices:['house','sun','apple'], answer:'house' },
+  { titleAr:'نعود إلى القصة', titleEn:'Back to the story', promptAr:'نريد أن نقرأ عن صقر. ماذا نفتح؟', promptEn:'We want to read about Saqr. What do we open?', choices:['ball','pencil','book'], answer:'book' },
+  { titleAr:'نرتب المكان', titleEn:'Keep things tidy', promptAr:'أين نضع كتابنا عندما نجلس للقراءة؟', promptEn:'Where can we place our book while reading?', choices:['sun','desk','tree'], answer:'desk' },
+  { titleAr:'نكتب فكرة', titleEn:'Write down an idea', promptAr:'نريد كتابة جملة قصيرة. ماذا نحتاج؟', promptEn:'We want to write one sentence. What do we need?', choices:['pencil','ball','house'], answer:'pencil' },
+  { titleAr:'نعتني بالحديقة', titleEn:'Care for the garden', promptAr:'أي شيء يحتاج إلى الماء كي ينمو؟', promptEn:'Which thing needs water to grow?', choices:['book','tree','ball'], answer:'tree' },
+  { titleAr:'نتذكر التفاصيل', titleEn:'Remember the details', promptAr:'في القصة، زرعت ليلى بذرة فكبرت شجرة. ماذا كبر؟', promptEn:'Layla planted a seed, and something grew. What was it?', choices:['tree','house','sun'], answer:'tree' },
+  { titleAr:'مهمتنا الأخيرة', titleEn:'Our final mission', promptAr:'أحسنت! اختر صورة الكتاب لننهي مهمة القراءة.', promptEn:'Well done! Choose the book to complete your reading mission.', choices:['apple','ball','book'], answer:'book' }
 ];
 const names: Record<LearningPicture, [string,string]> = {
   book:['كتاب','Book'], sun:['شمس','Sun'], tree:['شجرة','Tree'], apple:['تفاحة','Apple'],
@@ -46,7 +45,7 @@ export default function StepByStep({ isAr, large }: { isAr: boolean; large: bool
   if (finished) return <div className="text-center space-y-5 rounded-[1.7rem] border-2 border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/20 p-6">
     <div className="mx-auto w-36 h-32"><LearningPictureArt kind="book" /></div>
     <h3 className="font-black text-2xl">{isAr ? 'أحسنت! أنجزت مهمتك' : 'Great work! Mission complete'}</h3>
-    <p className="font-semibold text-slate-600 dark:text-slate-300">{isAr ? 'ثلاث خطوات صغيرة صنعت إنجازًا كبيرًا.' : 'Three little steps make one big achievement.'}</p>
+    <p className="font-semibold text-slate-600 dark:text-slate-300">{isAr ? 'خطوات صغيرة صنعت إنجازًا كبيرًا. يمكنك تكرار المهمة في أي وقت.' : 'Little steps make one big achievement. You can try the mission again.'}</p>
     <button type="button" onClick={restart} className="rounded-xl bg-emerald-700 text-white font-black px-6 py-3 min-h-12">{isAr ? 'ابدأ من جديد' : 'Start again'}</button>
   </div>;
 
@@ -58,15 +57,18 @@ export default function StepByStep({ isAr, large }: { isAr: boolean; large: bool
         {breakTime ? (isAr ? 'أكمل المهمة' : 'Continue') : (isAr ? 'أحتاج استراحة' : 'Take a break')}
       </button>
     </div>
-    <div className="grid grid-cols-3 gap-2" aria-label={isAr ? 'تقدم المهمة' : 'Mission progress'}>
-      {steps.map((_, index) => <div key={index}
-        className={'rounded-xl border-2 p-2.5 text-center font-black text-xs sm:text-sm ' +
-          (index < step ? 'bg-emerald-700 border-emerald-700 text-white' :
-            index === step ? 'bg-amber-100 border-amber-400 text-amber-950 dark:bg-amber-950/40 dark:text-amber-200' :
-              'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700')}>
-        {isAr ? 'خطوة ' : 'Step '}{index + 1}
-        {index < step && <svg aria-hidden="true" className="inline h-4 w-4 ms-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="m5 12 5 5L20 7" /></svg>}
-      </div>)}
+    <div aria-label={isAr ? 'تقدم المهمة' : 'Mission progress'} className="space-y-3">
+      <div className="flex items-center justify-between text-sm font-black text-slate-700 dark:text-slate-200">
+        <span>{isAr ? 'خطوة صغيرة في كل مرة' : 'One step at a time'}</span>
+        <span className="rounded-full bg-amber-100 dark:bg-amber-950/40 px-4 py-2 text-amber-900 dark:text-amber-100">
+          {step + 1} / {steps.length}
+        </span>
+      </div>
+      <div role="progressbar" aria-valuemin={0} aria-valuemax={steps.length} aria-valuenow={step + 1}
+        className="h-3 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+        <div className="h-full bg-emerald-600 rounded-full transition-[width] duration-300"
+          style={{ width: ((step + 1) / steps.length * 100) + '%' }} />
+      </div>
     </div>
     {breakTime ? <section className="rounded-2xl border-2 border-sky-200 dark:border-sky-800 bg-sky-50 dark:bg-slate-900 p-6 text-center space-y-3">
       <div className="mx-auto h-28 w-32"><LearningPictureArt kind="sun" /></div>

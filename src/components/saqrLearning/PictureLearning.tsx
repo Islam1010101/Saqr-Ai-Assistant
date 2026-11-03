@@ -10,7 +10,11 @@ const rounds: Round[] = [
   { questionAr: 'أين الشجرة؟', questionEn: 'Which picture shows a tree?', choices: ['sun', 'tree', 'book'], answer: 'tree' },
   { questionAr: 'ما الذي نقرأ منه قصة؟', questionEn: 'What do we use to read a story?', choices: ['ball', 'book', 'apple'], answer: 'book' },
   { questionAr: 'أين التفاحة؟', questionEn: 'Which picture shows an apple?', choices: ['house', 'apple', 'pencil'], answer: 'apple' },
-  { questionAr: 'أين نجلس بهدوء لنقرأ؟', questionEn: 'Where can we sit quietly and read?', choices: ['ball', 'house', 'desk'], answer: 'desk' }
+  { questionAr: 'أين نجلس بهدوء لنقرأ؟', questionEn: 'Where can we sit quietly and read?', choices: ['ball', 'house', 'desk'], answer: 'desk' },
+  { questionAr: 'أين القلم؟', questionEn: 'Which picture shows a pencil?', choices: ['pencil', 'sun', 'tree'], answer: 'pencil' },
+  { questionAr: 'ماذا نستخدم لنلعب كرة القدم؟', questionEn: 'What do we use to play football?', choices: ['house', 'ball', 'book'], answer: 'ball' },
+  { questionAr: 'أين المنزل؟', questionEn: 'Which picture shows a home?', choices: ['apple', 'sun', 'house'], answer: 'house' },
+  { questionAr: 'أي صورة تُظهر الشمس؟', questionEn: 'Which picture shows the sun?', choices: ['sun', 'book', 'pencil'], answer: 'sun' }
 ];
 const names: Record<LearningPicture, [string, string]> = {
   book: ['كتاب', 'Book'],
