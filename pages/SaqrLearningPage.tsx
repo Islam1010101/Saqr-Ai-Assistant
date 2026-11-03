@@ -204,7 +204,7 @@ export default function SaqrLearningPage() {
               {isAr ? 'إغلاق النشاط' : 'Close activity'}
             </button>
           </div>
-          {current.key === 'read_together' && <ReadTogether isAr={isAr} large={large} quiet={quiet} />}
+          {current.key === 'read_together' && <ReadTogether isAr={isAr} large={large} quiet={quiet} isAdmin={viewer === 'admin'} />}
           {current.key === 'picture_guidance' && <PictureLearning isAr={isAr} large={large} />}
           {current.key === 'focus_steps' && <StepByStep isAr={isAr} large={large} />}
           {current.key === 'calm_display' && <CalmDisplay isAr={isAr} quiet={quiet} onQuietChange={setQuiet} large={large} onLargeChange={setLarge} />}
