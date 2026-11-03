@@ -11,6 +11,9 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showFlag, setShowFlag] = useState(false); // حالة إظهار علم الإمارات عند الضغط على صقر
+  const [entryWelcomeVisible, setEntryWelcomeVisible] = useState(false);
+  const [entryWelcomeSequence, setEntryWelcomeSequence] = useState(0);
+  const entryWelcomeTimeoutRef = useRef<number | null>(null);
   const subtitleContainerRef = useRef<HTMLDivElement>(null);
   const subtitleTextRef = useRef<HTMLSpanElement>(null);
   const [subtitleScale, setSubtitleScale] = useState(1);
@@ -145,6 +148,27 @@ export default function Login() {
     audio.volume = 0.05; audio.play().catch(() => {});
   };
 
+  // Only the right-panel SAQR ENTER greeting is affected. Leave the
+  // original Saqr/video interactions and school Google OAuth untouched.
+  useEffect(() => () => {
+    if (entryWelcomeTimeoutRef.current !== null) {
+      window.clearTimeout(entryWelcomeTimeoutRef.current);
+    }
+  }, []);
+
+  const handleEntrySaqrClick = () => {
+    if (entryWelcomeTimeoutRef.current !== null) {
+      window.clearTimeout(entryWelcomeTimeoutRef.current);
+    }
+    // Increment the key so repeated clicks restart the short entrance/fade.
+    setEntryWelcomeSequence(sequence => sequence + 1);
+    setEntryWelcomeVisible(true);
+    entryWelcomeTimeoutRef.current = window.setTimeout(() => {
+      setEntryWelcomeVisible(false);
+      entryWelcomeTimeoutRef.current = null;
+    }, 3300);
+  };
+
   return (
     <div 
       className="min-h-[100dvh] bg-[#f0f4f8] bg-[url('/bg-pattern-light.svg')] flex items-start justify-center px-3 pb-6 pt-20 sm:px-6 sm:pb-8 sm:pt-24 lg:pt-20 font-sans selection:bg-emerald-500 selection:text-white transition-colors duration-500 relative" 
@@ -262,48 +286,60 @@ export default function Login() {
 
         {/* ================= القسم الثاني: نموذج تسجيل الدخول ================= */}
         <div className="lg:w-1/2 min-w-0 px-5 pt-7 pb-8 sm:px-8 sm:pt-8 sm:pb-9 lg:px-8 lg:pt-8 xl:px-12 flex flex-col justify-start bg-white relative z-10">
-          {/* Compact sign-in identity header: aligned to the top of its panel.
-              Decorative elements remain behind the real school crest and are motion-safe. */}
-          <header className="efips-login-hero relative isolate mb-5 w-full min-w-0 overflow-hidden rounded-[1.9rem] border border-emerald-200/80 bg-gradient-to-br from-[#F1FAF6] via-white to-[#EEF7FF] px-4 pb-6 pt-7 text-center shadow-[0_12px_30px_rgba(12,87,64,.075)] sm:px-6 sm:pb-7 sm:pt-8">
-            <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 z-10 flex h-1.5">
-              <span className="w-[22%] bg-[#CE1126]" />
-              <span className="w-[39%] bg-[#00843D]" />
-              <span className="w-[19%] bg-white" />
-              <span className="flex-1 bg-[#191919]" />
-            </div>
-            <div aria-hidden="true" className="efips-login-hero-art pointer-events-none absolute inset-0 overflow-hidden">
-              <svg viewBox="0 0 440 260" preserveAspectRatio="xMidYMid slice" className="absolute h-full w-full" fill="none" aria-hidden="true">
-                <circle cx="424" cy="6" r="94" stroke="#00843D" strokeOpacity=".10" strokeWidth="1.6" />
-                <circle cx="424" cy="6" r="66" stroke="#00843D" strokeOpacity=".08" strokeWidth="1.6" />
-                <circle cx="19" cy="245" r="84" stroke="#0B98BA" strokeOpacity=".11" strokeWidth="1.6" />
-                <path d="M36 35h40M56 15v40M372 207h24M384 195v24" stroke="#0B98BA" strokeOpacity=".22" strokeWidth="2" strokeLinecap="round" />
-                <path d="m352 42 5 9 9 5-9 5-5 9-5-9-9-5 9-5z" fill="#D3AD5C" fillOpacity=".25" />
-              </svg>
-            </div>
+          {/* The sign-in header intentionally contains only the original Saqr
+              entrance artwork and the localized title. Heritage appears on click. */}
+          <header className="efips-login-hero relative mb-5 flex w-full min-w-0 flex-col items-center justify-center text-center">
+            <div className="relative mx-auto flex w-full max-w-[350px] items-center justify-center">
+              <button
+                type="button"
+                onClick={handleEntrySaqrClick}
+                aria-label={lang === 'ar'
+                  ? 'اضغط على صقر لعرض ترحيب من التراث الإماراتي'
+                  : 'Tap Saqr for an Emirati heritage welcome'}
+                className="efips-entry-saqr relative z-10 flex h-52 w-48 items-center justify-center rounded-3xl bg-transparent p-0 outline-offset-4 focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-500 sm:h-64 sm:w-60 lg:h-72 lg:w-64"
+              >
+                <img
+                  src="/SAQR%20ENTER.png"
+                  alt={lang === 'ar' ? 'شخصية صقر ترحب بزوار المكتبة' : 'Saqr welcomes library visitors'}
+                  className="block h-full w-full object-contain drop-shadow-[0_12px_15px_rgba(0,80,62,0.13)] transition-transform duration-300 hover:scale-[1.025]"
+                />
+              </button>
 
-            <div className="efips-login-hero-content relative z-10 flex flex-col items-center justify-center gap-2">
-              <div className="efips-login-crest group relative mb-1 flex h-[86px] w-[86px] items-center justify-center rounded-[1.55rem] border-2 border-white bg-white/95 shadow-[0_10px_25px_rgba(0,89,61,.15)] sm:h-24 sm:w-24">
-                <span aria-hidden="true" className="pointer-events-none absolute -inset-1.5 rounded-[1.85rem] border border-emerald-300/60" />
-                <img src="/school-logo.png" alt={lang === 'ar' ? 'شعار مدرسة صقر الإمارات' : 'Emirates Falcon School logo'}
-                  className="relative h-[68px] w-[68px] object-contain transition-transform duration-500 group-hover:scale-[1.04] sm:h-[76px] sm:w-[76px]" />
-              </div>
-              <p className="text-[11px] sm:text-xs font-black tracking-[.08em] text-[#05744E]">
-                {lang === 'ar' ? 'بوابة مكتبة صقر الإمارات' : 'EFIPS LIBRARY PORTAL'}
-              </p>
-              <h2 className="efips-login-title relative block w-full min-w-0 px-1 text-center font-black">
-                {lang === 'ar' ? 'تسجيل الدخول' : 'Sign In'}
-              </h2>
-              <p className="mx-auto max-w-sm text-sm sm:text-[15px] font-bold leading-7 text-slate-600">
-                {lang === 'ar'
-                  ? 'أهلاً بعودتك! سجّل بحسابك المدرسي وابدأ رحلتك.'
-                  : 'Welcome back! Sign in with your school account to begin.'}
-              </p>
-              <div aria-hidden="true" className="mt-1 flex items-center gap-2">
-                <span className="h-1 w-6 rounded-full bg-[#CE1126]/80" />
-                <span className="h-1 w-12 rounded-full bg-[#00843D]/80" />
-                <span className="h-1 w-6 rounded-full bg-[#2298BA]/70" />
-              </div>
+              {entryWelcomeVisible && (
+                <div
+                  key={entryWelcomeSequence}
+                  className="efips-heritage-burst pointer-events-none absolute inset-0 z-20"
+                >
+                  {/* Palm tree — date palms are part of the UAE's living heritage. */}
+                  <svg aria-hidden="true" viewBox="0 0 64 64" fill="none" stroke="#00843D" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="absolute left-0 top-[9%] h-11 w-11 sm:h-14 sm:w-14">
+                    <path d="M30 26c1 9 1 18-1 30M35 27c-1 10-1 20 1 29M23 57h21" />
+                    <path d="M32 21c-7-11-18-11-23-5 9-1 15 3 20 11M32 20c-1-13-10-18-19-17 8 5 12 11 16 22M33 20c5-12 16-16 24-12-10 2-16 8-21 18M34 21c12-8 21-6 25 1-10-3-17-1-23 6M32 19c-1-8 1-13 6-17-1 8-1 13-4 20" />
+                  </svg>
+
+                  {/* Traditional dhow under sail. */}
+                  <svg aria-hidden="true" viewBox="0 0 64 64" fill="none" stroke="#0A83A1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="absolute right-0 top-[9%] h-11 w-11 sm:h-14 sm:w-14">
+                    <path d="M34 8v32M34 11 12 38h22V11ZM38 17l12 21H38M10 44h45l-7 10H19L10 44ZM6 60c5-3 9-3 14 0s9 3 14 0 9-3 14 0 9 3 13 0" />
+                  </svg>
+
+                  {/* Desert fort with crenellations. */}
+                  <svg aria-hidden="true" viewBox="0 0 64 64" fill="none" stroke="#B58A45" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="absolute bottom-[20%] left-[2%] h-11 w-11 sm:h-14 sm:w-14">
+                    <path d="M8 55V21h9v-7h7v7h15v-7h7v7h10v34M6 55h52M8 30h48M26 55V43a6 6 0 0 1 12 0v12M15 37h5v5h-5zM44 37h5v5h-5z" />
+                  </svg>
+
+                  {/* Dallah — traditional Emirati Arabic-coffee hospitality. */}
+                  <svg aria-hidden="true" viewBox="0 0 64 64" fill="none" stroke="#CE1126" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="absolute bottom-[20%] right-[2%] h-11 w-11 sm:h-14 sm:w-14">
+                    <path d="M28 15h15M35 7v8M26 20c-5 6-6 12-6 23 0 8 5 13 15 13 9 0 15-5 15-13 0-11-2-17-7-23H26ZM19 31c-12-1-14-10-11-16 2 7 7 9 13 8M50 28c9-1 13-6 12-13-5 5-8 6-14 6M29 34h14M28 49h15" />
+                  </svg>
+
+                  <p role="status" dir="rtl" className="efips-heritage-greeting absolute bottom-0 left-1/2 z-30 w-max max-w-[95%] -translate-x-1/2 rounded-2xl border border-emerald-200 bg-white/95 px-3 py-2 text-center text-base font-black leading-relaxed text-emerald-900 shadow-lg sm:px-5 sm:text-xl">
+                    حياك الله في صقر
+                  </p>
+                </div>
+              )}
             </div>
+            <h2 className="efips-login-title mt-4 w-full text-center text-3xl font-black leading-[1.85] text-[#065c38] sm:text-4xl">
+              {lang === 'ar' ? 'تسجيل الدخول' : 'Sign In'}
+            </h2>
           </header>
 
           {/* Google-only entry; school eligibility remains enforced by OAuth and backend. */}
@@ -409,43 +445,36 @@ export default function Login() {
           flex-shrink:0;
           will-change:transform;
         }
-        /* Professional EFIPS sign-in header: no pulsating halo or empty top space. */
+        /* Only the sign-in header is simplified; other Login styling is intact. */
         .efips-login-title {
-          font-size:clamp(30px,3.8vw,43px);
-          line-height:1.8;
-          letter-spacing:normal;
-          overflow:visible;
+          font-size:clamp(28px,4.2vw,40px);
+          line-height:1.85;
           color:#065c38;
           -webkit-text-fill-color:#065c38;
-          text-shadow:none;
         }
         @media(max-width:420px) {
           .efips-brand-heading { font-size:clamp(23px,7.1vw,28px);line-height:1.85; }
           .efips-brand-subtitle { font-size:11.5px; }
-          .efips-login-title { font-size:clamp(29px,8.2vw,35px);line-height:1.9; }
+          .efips-login-title { font-size:clamp(28px,8vw,34px);line-height:1.9; }
         }
-
-        @keyframes efips-login-hero-reveal {
-          from { opacity:0; transform:translateY(8px); }
-          to { opacity:1; transform:translateY(0); }
+        @keyframes efips-heritage-welcome-fade {
+          0% { opacity:0; }
+          12%,66% { opacity:1; }
+          100% { opacity:0; }
         }
-        @keyframes efips-login-art-shift {
-          from { transform:translate3d(0,0,0); }
-          to { transform:translate3d(0,-5px,0); }
+        @keyframes efips-heritage-icon-reveal {
+          0% { opacity:0; transform:translateY(8px) scale(.84); }
+          100% { opacity:1; transform:translateY(0) scale(1); }
         }
-        .efips-login-hero-content { animation:efips-login-hero-reveal .65s ease-out both; }
-        .efips-login-hero-art { animation:efips-login-art-shift 11s ease-in-out infinite alternate; }
-        .efips-login-crest { transition:box-shadow .35s ease,transform .35s ease; }
-        .efips-login-crest:hover { box-shadow:0 12px 26px rgba(0,113,75,.19); }
+        .efips-heritage-burst { animation:efips-heritage-welcome-fade 3.3s ease-in-out both; }
+        .efips-heritage-burst > svg { animation:efips-heritage-icon-reveal .65s ease-out both; }
+        .efips-entry-saqr:focus-visible { border-radius:1rem; }
         .efips-login-button-shine {
           background: linear-gradient(115deg,transparent 15%,rgba(255,255,255,.20) 50%,transparent 85%);
         }
         @media(prefers-reduced-motion:reduce) {
-          .efips-login-hero-content,.efips-login-hero-art { animation:none!important; }
-          .efips-login-hero-content { opacity:1!important; transform:none!important; }
-          .efips-login-crest,.efips-login-crest img,.efips-login-button-glow,.efips-login-button-shine {
-            transition:none!important;
-          }
+          .efips-heritage-burst,.efips-heritage-burst > svg { animation:none!important; opacity:1!important; transform:none!important; }
+          .efips-entry-saqr img,.efips-login-button-glow,.efips-login-button-shine { transition:none!important; }
         }
 
       `}} />

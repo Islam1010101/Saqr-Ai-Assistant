@@ -17,16 +17,17 @@ line('line-height:1.67;');
 line('line-height:1.85;');
 line('overflow:visible;');
 line('.efips-login-title {');
-line('line-height:1.8;');
+line('line-height:1.85;');
 line('line-height:1.9;');
 line('color:#065c38;');
 line('-webkit-text-fill-color:#065c38;');
 line('efips-login-hero');
-line('efips-login-hero-content');
-line('efips-login-hero-art');
-line('efips-login-crest');
-line('efips-login-hero-reveal');
-line('efips-login-art-shift');
+line('efips-entry-saqr');
+line('handleEntrySaqrClick');
+line('efips-heritage-burst');
+line('efips-heritage-welcome-fade');
+line('efips-heritage-icon-reveal');
+line('entryWelcomeTimeoutRef');
 assert.ok(!login.includes('efips-login-uae-halo'), 'Outdated animated header halo must be removed');
 assert.ok(!login.includes('efips-login-uae-flag'), 'Outdated floating logo effect must be removed');
 line('#CE1126');
@@ -39,7 +40,7 @@ assert.ok(!login.includes('Sign in using your school email account only'),
 assert.ok(!login.includes('efips-school-email-notice'),
   'Remove the entire obsolete notice card without changing school-only OAuth');
 assert.ok(!login.includes('efips-login-title-enter'), 'Old title effect should be replaced');
-line('text-center font-black');
+line('text-center text-3xl font-black');
 line("lang === 'ar' ? 'تسجيل الدخول' : 'Sign In'");
 // A measurement-based fit keeps the complete original promotional sentence in
 // precisely one visible row across languages, font changes and device widths.
@@ -62,11 +63,23 @@ assert.ok(!login.includes('name="school-email"'));
 assert.ok(auth.includes("supabase.functions.invoke('google-school-login'"));
 line('flex flex-col justify-start bg-white relative z-10');
 line('flex items-start justify-center px-3 pb-6 pt-20');
-line('efips-login-hero relative isolate mb-5');
-line("lang === 'ar' ? 'بوابة مكتبة صقر الإمارات' : 'EFIPS LIBRARY PORTAL'");
-line("src=\"/school-logo.png\"");
-line('أهلاً بعودتك! سجّل بحسابك المدرسي وابدأ رحلتك.');
+line('efips-login-hero relative mb-5');
+line('src="/SAQR%20ENTER.png"');
+line('حياك الله في صقر');
+line('role="status"');
+line('aria-label={lang ===');
+line('focus-visible:outline-emerald-500');
 assert.ok(!login.includes('flex flex-col justify-center bg-white relative z-10'), 'Sign-in panel should not vertically center below a large empty gap');
 assert.ok(login.includes("prefers-reduced-motion:reduce"), 'Animations must honor accessibility settings');
-assert.ok(login.includes("className=\"efips-login-title relative block"), 'Keep login heading prominent and accessible');
-console.log('PASS: compact EFIPS school crest login header, no excessive top whitespace, safe motion, bilingual branding and unchanged Google OAuth');
+assert.ok(login.includes("className=\"efips-login-title mt-4"), 'Keep centered responsive login title immediately under Saqr');
+const hero = login.slice(login.indexOf('          {/* The sign-in header'), login.indexOf('          {/* Google-only entry'));
+assert.ok(hero.includes('src="/SAQR%20ENTER.png"'), 'The requested Saqr Enter PNG must be used');
+assert.ok(!hero.includes('/school-logo.png') && !hero.includes('بوابة مكتبة صقر الإمارات') &&
+  !hero.includes('أهلاً بعودتك!') && !hero.includes('EFIPS LIBRARY PORTAL'),
+  'Remove the old sign-in heading, school crest and extra marketing copy ONLY from the right-hand header');
+assert.equal((hero.match(/<svg /g) || []).length, 4, 'Four Emirati heritage SVG icons appear on tap');
+assert.ok(hero.includes('onClick={handleEntrySaqrClick}'), 'Saqr image is keyboard/click accessible');
+assert.ok(login.includes('window.clearTimeout(entryWelcomeTimeoutRef.current)') &&
+  login.includes('setEntryWelcomeVisible(false)'), 'Welcome automatically disappears and timers clean up');
+assert.ok(!hero.includes('onClick={() => void handleSchoolGoogleLogin()}'), 'Separate interactive mascot from Google authorization');
+console.log('PASS: centered Saqr Enter art, interactive Emirati heritage welcome and unchanged school OAuth');
