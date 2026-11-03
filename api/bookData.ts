@@ -4,7 +4,7 @@ import {shelf30SourceRecords} from './shelf30Catalog.ts';
 import {uploadedLibraryBooks} from './uploadedCatalog20261028.ts';
 import {reviewedShelf41Books} from './shelf41ReviewedCatalog.ts';
 import { physicalBookAdditions } from './bookAdditions.ts';
-import { classifyLiteraryGenre, literaryGenreLabels } from './literaryGenreCatalog.ts';
+import { classifyLiteraryGenre, literaryGenreLabels } from '../src/utils/literaryGenreCatalog.ts';
 // 1. تعريف نوع البيانات
 export type Book = {
   id: string;
