@@ -877,7 +877,7 @@ const HomePage: React.FC = () => {
                             </div>
                         </Link>
 
-                        {userType === 'student' && <SaqrLearningEntry isAr={isAr} />}
+                        {(userType === 'student' || userType === 'admin') && <SaqrLearningEntry isAr={isAr} />}
 
                         {(userType === 'student' || userType === 'admin') && (
                             <Link to="/saqr-national-identity"
