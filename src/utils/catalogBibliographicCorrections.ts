@@ -53,6 +53,8 @@ const fixedRecords:Record<string,SubjectFix>={
   "16-2-2655": {title: "Men For The Mountains", subject: "Biography & Memoirs", author: "Sid Marty", source: "https://openlibrary.org/books/OL4474502M/Men_for_the_mountains"},
   "17-2-3160": {title: "Difficulty with Dwarves", subject: "Fantasy Fiction", author: "Craig Shaw Gardner", correctTitle: "A Difficulty with Dwarves", source: "https://books.google.com/books/about/A_Difficulty_with_Dwarves.html?id=54Cy5jVKM9oC"},
   "16-5-2737": {title: "THE BOUDOIR COMPANION", subject: "General Nonfiction", author: "Page Cooper (editor)", source: "https://www.abaa.org/book/866276948"},
+  "uploaded-20261028-002": {title: "الاسم الحركي نبضه", subject: "Children’s Stories", correctTitle: "الاسم الحركي نبضة", source: "https://www.thebookhome.com/product/index/77168/الاسم-الحركي-نبضة"},
+  "21-1-2451": {title: "HAVEN'S GATE", subject: "Sociology & Society", author: "Victor Malarek", source: "https://www.goodreads.com/book/show/1013908.Haven_s_Gate"},
   "shelf40-20261027-018": {title: "FAMILIES Are Like That", subject: "Short Stories & Anthologies", author: "Child Study Association / Wel-Met (editors)", source: "https://www.kirkusreviews.com/book-reviews/a/child-study-associationwel-met-eds/families-are-like-that-stories-to-read-to-yours/"},
 };
 const legacyOutlierRecords: Record<string,readonly [string,string]>={
@@ -62,6 +64,10 @@ const legacyOutlierRecords: Record<string,readonly [string,string]>={
   "12-6-1719": ["Great Golf Stories", "Short Stories & Anthologies"],
 };
 const otherInventorySubjects: Record<string,readonly [title:string,subject:string]>={
+  "12-1-1653": ["Official STAR PILOT", "Catalog Review Required"],
+  "addition-20261026-57": ["وتلك الأيام", "Biography & Memoirs"],
+  "addition-20261026-64": ["الآن سيصدقون", "Children’s Stories"],
+  "shelf40-20261027-010": ["Forces", "Education & Teaching"],
   "18-3-2354": ["The Great Waldo Search", "Crafts & Hobbies"],
   "21-1-2441": ["Tutankhamun: THE UNTOLD STORY", "History & Civilizations"],
   "21-1-2443": ["THE BETRAYAL OF CANADA", "Politics & International Relations"],
