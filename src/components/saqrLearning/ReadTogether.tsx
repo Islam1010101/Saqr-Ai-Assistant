@@ -92,6 +92,12 @@ export default function ReadTogether({ isAr, large, quiet, isAdmin = false }: Re
     setVoiceURI('');
   }, [isAr, stop]);
 
+  useEffect(() => () => {
+    requestRef.current?.abort();
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current.removeAttribute('src'); }
+    if (audioUrlRef.current) URL.revokeObjectURL(audioUrlRef.current);
+  }, []);
+
   const playAzure = async (startAt = 0) => {
     stop();
     setError('');
