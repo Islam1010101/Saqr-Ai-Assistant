@@ -107,7 +107,8 @@ const reviewedGroups: Record<string,string[]> = {
     "The Wind in the Willows",
     "WITCH QUEEN",
     "Tuck Everlasting",
-    "The Last of the Magic"
+    "The Last of the Magic",
+    "Wendy's Adventure in Never Land"
   ],
   "Science Fiction": [
     "The Time Machine",
@@ -206,7 +207,15 @@ const reviewedGroups: Record<string,string[]> = {
     "MRS. POLLIFAX AND THE LION KILLER",
     "The Sins of the Wolf",
     "Fletch, Too",
-    "Come to Grief"
+    "Come to Grief",
+    "ELLERY QUEEN'S MYSTERY MAGAZINE (AUGUST 2001)",
+    "DEATH DOWN UNDER",
+    "سليم: سرقة في قطار الشرق السريع",
+    "DISNRY ENCANTO : MYSTERY IN THE RAINFOREST",
+    "The Days Sisters' Mystery",
+    "Disney's The Laugh-Along Mystery",
+    "Pluto the Detective",
+    "The Mystery Box"
   ],
   "Crime & Thriller Fiction": [
     "The Da Vinci Code",
@@ -291,7 +300,17 @@ const reviewedGroups: Record<string,string[]> = {
     "LOST TREASURE OF THE EMERALD EYE",
     "ADVENTURES OF HUCKLEBERRY FINN",
     "THE PRINCE (and the) PAUPER",
-    "CAPTAINS COURAGEOUS"
+    "CAPTAINS COURAGEOUS",
+    "THE ADVENTURES OF PADDY THE BEAVER",
+    "The Adventures of Stuart Little",
+    "Soup (and Me) / Soup's Treasure Island",
+    "مغامرات السنونو والأمازون",
+    "سارة: اقتفاء أثر الكنز",
+    "الفارس الحالم: مغامرة الجرو الأحمر",
+    "PIRATES OF THE CARIBBEAN : Dead Man's Chest",
+    "Super Adventures of Wishbone: #1",
+    "Nemo's 3-D Adventure",
+    "101 Dalmatians II: Patch's London Adventure"
   ],
   "Historical Fiction": [
     "A Tale of Two Cities",
@@ -523,7 +542,15 @@ const verifiedNonfictionSubjects: Record<string,string> = {
   'CONFUCIUS THE ANALECTS':'Philosophy & Thought',
   'Fossils in Colour':'Biology & Life Sciences',
   'The Miracles of Live Juices and Raw Foods':'Nutrition & Diet',
-  'The Best of Dear Abby':'General Nonfiction'
+  'The Best of Dear Abby':'General Nonfiction',
+  'Three Adventures: Galapagos-Titicaca-The Blue Holes':'Geography & Travel',
+  'Official STAR PILOT':'General Knowledge',
+  'MURDER & WALKING SPIRITS':'Literature & Fiction',
+  'THE DARK CHRONICLES':'Literature & Fiction',
+  'في بلاد التنين':'Literature & Fiction',
+  'Pojo\'s Total Unofficial Dragonball Z':'General Reference',
+  'Look and Find: Pirates of the Caribbean: Dead Man\'s Chest':'General Knowledge',
+  'Adventures in Colors and Shapes':'Education & Teaching'
 };
 const nonfictionWork = new Map(Object.entries(verifiedNonfictionSubjects)
   .map(([title,subject])=>[norm(title),subject]));
