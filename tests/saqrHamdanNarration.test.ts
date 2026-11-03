@@ -23,7 +23,7 @@ assert.ok(edge.includes('AZURE_SPEECH_KEY') && edge.includes('AZURE_SPEECH_REGIO
 assert.ok(edge.includes('auth.auth.getUser(jwt)') && edge.includes('saqr_learning_access'), 'Preserve protected learning access');
 assert.ok(edge.includes('staff?.role !== "admin"'), 'Admin preview is checked server-side');
 assert.ok(edge.includes('const spokenText = locale === "ar" ? story.ar'), 'Narration content only comes from approved educational bank');
-assert.ok(edge.includes('story.id === body.storyId') && edge.includes('lineIndex'), 'Accept bounded story and sentence IDs');
+assert.ok(edge.includes('item.id === body.storyId') && edge.includes('lineIndex'), 'Accept bounded story and sentence IDs');
 assert.ok(!edge.includes('body.text') && !edge.includes('body.ssml'), 'No arbitrary user text is sent to external TTS');
 assert.ok(page.includes("supabase.functions.invoke('saqr-learning-narration'"), 'Browser invokes protected narration');
 assert.ok(page.includes('data instanceof Blob'), 'Browser plays returned MP3 instead of synthesizing a false Hamdan voice');
