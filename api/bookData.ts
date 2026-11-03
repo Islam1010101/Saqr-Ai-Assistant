@@ -5,6 +5,7 @@ import {uploadedLibraryBooks} from './uploadedCatalog20261028.ts';
 import {reviewedShelf41Books} from './shelf41ReviewedCatalog.ts';
 import { physicalBookAdditions } from './bookAdditions.ts';
 import { classifyLiteraryGenre, literaryGenreLabels } from '../src/utils/literaryGenreCatalog.ts';
+import { refineLegacyLiterature } from '../src/utils/legacyLiteratureClassification.ts';
 // 1. تعريف نوع البيانات
 export type Book = {
   id: string;
@@ -3405,7 +3406,8 @@ const subjectFallbacks: Record<string, [string, string]> = {
   'General Knowledge': ['General Knowledge', 'المعرفة العامة'],
   'Dramatic Fiction': ['Dramatic Fiction', 'الدراما الروائية والاجتماعية'],
   'Theatre & Plays': ['Theatre & Plays', 'المسرح والمسرحيات'],
-  'Theatre Studies': ['Theatre Studies', 'الدراسات المسرحية']
+  'Theatre Studies': ['Theatre Studies', 'الدراسات المسرحية'],
+  'Catalog Review Required': ['Catalog Review Required', 'سجلات تحتاج مراجعة فهرسية']
 };
 const subjectArabic = new Map<string, string>([
   ...subjectRules.map(rule => [rule.en, rule.ar] as [string,string]),
@@ -3751,7 +3753,8 @@ const classifyDramaAndTheatre = (book: Book): Book => {
 
 export const bookData:Book[]=[...beforeShelf22,...newShelf22Books]
   .map(classifyDramaAndTheatre)
-  .map(classifyLiteraryGenre);
+  .map(classifyLiteraryGenre)
+  .map(refineLegacyLiterature);
 
 // 5. دالة البحث المخصصة للاستخدام في تطبيق الويب
 export function findInCatalog(q: string): Book[] {

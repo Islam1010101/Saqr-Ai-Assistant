@@ -31,7 +31,8 @@ export const literaryGenreLabels: Record<string,string> = {
   'Dystopian & Satirical Fiction': 'الأدب الديستوبي والساخر',
   'Comics & Graphic Stories': 'القصص المصورة والكوميكس',
   'Sports Fiction': 'الروايات الرياضية',
-  'Western Fiction': 'روايات الغرب الأمريكي'
+  'Western Fiction': 'روايات الغرب الأمريكي',
+  'Literary & Psychological Fiction': 'الروايات الأدبية والنفسية'
 };
 
 export const literaryGenreSubjectNames = new Set<string>([

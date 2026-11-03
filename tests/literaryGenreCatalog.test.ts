@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {bookData,getLocalizedSubject} from '../api/bookData.ts';
 import {classifyLiteraryGenre,literaryGenreLabels,literaryGenreSubjectNames} from '../src/utils/literaryGenreCatalog.ts';
+import {legacyLiteratureAuditedRecords,legacyLiteratureReviewNeeded,refineLegacyLiterature} from '../src/utils/legacyLiteratureClassification.ts';
 import {physicalBookAdditions} from '../api/bookAdditions.ts';
 import {shelf22SourceRecords} from '../api/shelf22Catalog.ts';
 import {shelf30SourceRecords} from '../api/shelf30Catalog.ts';
@@ -94,7 +95,7 @@ for(const [title,subject] of [
   ['The Great Fire','History & Civilizations'],
   ["Pojo's Total Unofficial Dragonball Z",'General Reference'],
   ['Adventures in Colors and Shapes','Education & Teaching'],
-  ['MURDER & WALKING SPIRITS','Literature & Fiction']
+  ['MURDER & WALKING SPIRITS','Literary & Psychological Fiction']
 ] as const)assertSubject(title,subject);
 const sample={id:'X',title:'The Hobbit',author:'J. R. R. Tolkien',
   subject:'Literature & Fiction',shelf:18,row:5,isbn:'9780000000001',
@@ -115,8 +116,21 @@ const counts=Object.fromEntries([...genreSet,'Dramatic Fiction','Theatre & Plays
   'Literature & Fiction','Children’s Stories','Mystery & Crime Fiction',
   'Fantasy & Science Fiction','Adventure Stories'].map(genre=>[genre,bookData.filter(b=>b.subject===genre).length]));
 const unresolvedLiterary=bookData.filter(b=>b.subject==='Literature & Fiction');
-// Unverified ambiguous fiction remains general rather than being guessed.
-assert.ok(unresolvedLiterary.length>0,'Keep an explicit conservative review queue');
+assert.equal(unresolvedLiterary.length,0,'No broad literature category remains in the physical catalog');
+const reviewQueue=bookData.filter(b=>b.subject==='Catalog Review Required');
+assert.ok(reviewQueue.length>0&&reviewQueue.length<=legacyLiteratureReviewNeeded,
+  'Ambiguous titles must have an explicit bounded review queue, not guessed genres');
+assert.equal(legacyLiteratureAuditedRecords,484,'Review each originally generic raw-inventory record');
+assert.ok(legacyLiteratureReviewNeeded<120,'Bibliographic verification must reduce ambiguous records');
+assert.equal(refineLegacyLiterature({...sample,id:'not-in-catalog',title:'Indeterminate book'}).subject,
+  'Catalog Review Required','Unknown editions must not be assigned speculative fiction genres');
+assertSubject('THE SAMSON OP(TION)','Politics & International Relations');
+assertSubject('THE EHRLICHMAN CHINA CARD','Historical Fiction');
+assertSubject('WIRED','Biography & Memoirs');
+assertSubject("In a Child's Name",'General Nonfiction');
+assertSubject('Rose Cottage','Romance Fiction');
+assertSubject('Welcome to the Great Mysterious','Realistic & Family Fiction');
+
 const oldGenres=new Set(['Mystery & Crime Fiction','Fantasy & Science Fiction','Adventure Stories']);
 assert.equal(bookData.filter(b=>oldGenres.has(b.subject)).length,0,
   'All legacy combined fiction genres have been separated or restored to correct nonfiction');
