@@ -101,6 +101,8 @@ for(const list of [physicalBookAdditions,shelf22SourceRecords,shelf30SourceRecor
   }
 const counts=Object.fromEntries([...genreSet,'Dramatic Fiction','Theatre & Plays','Theatre Studies',
   'Literature & Fiction','Children’s Stories'].map(genre=>[genre,bookData.filter(b=>b.subject===genre).length]));
+const unresolvedLiterary=bookData.filter(b=>b.subject==='Literature & Fiction');
+console.log('GENRE_AUDIT_REVIEW_QUEUE',JSON.stringify(unresolvedLiterary.map(b=>[b.title,b.author,b.shelf])));
 console.log('GENRE_AUDIT_TOTAL',bookData.length);
 console.log('GENRE_AUDIT_COUNTS',JSON.stringify(counts));
 console.log('PASS: full physical catalog scanned, genres verified and other records preserved');
