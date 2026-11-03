@@ -9,6 +9,7 @@ on:
       - 'src/components/SaqrLearningEntry.tsx'
       - 'src/utils/saqrLearningAccess.ts'
       - 'supabase/functions/saqr-learning-access/index.ts'
+      - 'supabase/functions/saqr-learning-narration/**'
       - 'tests/saqrLearningAccess.test.ts'
       - '.github/workflows/saqr-learning-pilot.yml'
 permissions:
