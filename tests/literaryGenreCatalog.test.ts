@@ -137,3 +137,25 @@ assert.equal(bookData.filter(b=>oldGenres.has(b.subject)).length,0,
 console.log('GENRE_AUDIT_TOTAL',bookData.length);
 console.log('GENRE_AUDIT_COUNTS',JSON.stringify(counts));
 console.log('PASS: full physical catalog scanned, genres verified and other records preserved');
+
+
+const categoryCounts=Object.fromEntries([...new Set(bookData.map(b=>b.subject))].sort().map(k=>[k,bookData.filter(b=>b.subject===k).length]));
+const anomalies={
+  review:bookData.filter(b=>b.subject==='Catalog Review Required').map(b=>({id:b.id,title:b.title,author:b.author,shelf:b.shelf,row:b.row})),
+  unknownAuthor:bookData.filter(b=>/^(unknown author|مؤلف غير معروف|غير محدد|unknown)$/i.test(b.author)).map(b=>({id:b.id,title:b.title,subject:b.subject,shelf:b.shelf})),
+  mismatchedLanguage:bookData.filter(b=>b.language==='EN'&&/[\u0600-\u06ff]/.test(b.title)).map(b=>({id:b.id,title:b.title,language:b.language})),
+  placeholderTitles:bookData.filter(b=>/(author name only|^unknown$|^untitled$|^\?+$|^[. ]+$|^gree\.{3}|^robin cook$)/i.test(b.title)).map(b=>({id:b.id,title:b.title,subject:b.subject})),
+  authorGenreMismatch:bookData.filter(b=>/\b(?:grisham|dickens|tolkien|stephen king|asimov|jane austen|shakespeare|nora roberts|james patterson|clive cussler)\b/i.test(b.author)&&!/fiction|stories|theatre|plays|poetry|mystery|adventure|fantasy|science fiction|romance|crime|thriller|western|historical|humorous|dystopian|comics|sports|review/i.test(b.subject)).map(b=>({id:b.id,title:b.title,author:b.author,subject:b.subject})),
+  highRiskMisclassification:bookData.filter(b=>
+     /^(Medicine & Healthcare|Mathematics & Statistics|Law & Government|Politics & International Relations|History & Civilizations|Sports & Games|Animals & Nature|Music & Performing Arts|Geography & Travel|Parenting & Family|General Knowledge|General Nonfiction|General Reference|Education & Teaching|UAE Heritage & Culture)$/.test(b.subject) &&
+     /\b(novel|fiction|mystery|short stories|stories|adventures|tales|haunted|detective|romance|fantasy|thriller|poems|diary of|sherlock|narnia|harry potter|wonderland|goosebumps|murder|killed|pirates|frankenstein|sherlock holmes|book thief|gothic|dystopi)\b/i.test(b.title)
+  ).map(b=>({id:b.id,title:b.title,author:b.author,subject:b.subject})),
+  exactDuplicateIds:bookData.filter((b,i)=>bookData.findIndex(x=>x.id===b.id)!==i).map(b=>b.id),
+  malformedISBN:bookData.filter(b=>b.isbn&&!/^\d{13}$/.test(b.isbn)).map(b=>({id:b.id,title:b.title,isbn:b.isbn,isbnStatus:b.isbnStatus})),
+  flagNeedsReview:bookData.filter(b=>b.needsReview).map(b=>({id:b.id,title:b.title,author:b.author,subject:b.subject}))
+};
+console.log('EFIPS_AUDIT_DISTRIBUTION '+JSON.stringify(categoryCounts));
+for (const [key,arr] of Object.entries(anomalies)){
+  console.log('EFIPS_AUDIT_'+key.toUpperCase()+'_COUNT '+arr.length);
+  console.log('EFIPS_AUDIT_'+key.toUpperCase()+'_SAMPLE '+JSON.stringify(arr.slice(0,key==='review'?125:key==='highRiskMisclassification'?140:50)));
+}
