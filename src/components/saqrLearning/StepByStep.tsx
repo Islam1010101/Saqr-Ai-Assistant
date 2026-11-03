@@ -65,7 +65,7 @@ export default function StepByStep({ isAr, large }: { isAr: boolean; large: bool
             index === step ? 'bg-amber-100 border-amber-400 text-amber-950 dark:bg-amber-950/40 dark:text-amber-200' :
               'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700')}>
         {isAr ? 'خطوة ' : 'Step '}{index + 1}
-        {index < step && <span aria-hidden="true"> ✓</span>}
+        {index < step && <svg aria-hidden="true" className="inline h-4 w-4 ms-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="m5 12 5 5L20 7" /></svg>}
       </div>)}
     </div>
     {breakTime ? <section className="rounded-2xl border-2 border-sky-200 dark:border-sky-800 bg-sky-50 dark:bg-slate-900 p-6 text-center space-y-3">
