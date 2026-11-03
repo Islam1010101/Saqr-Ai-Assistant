@@ -84,6 +84,15 @@ for(const title of badExamples){
   for(const b of books)assert.ok(!genreSet.has(b.subject),
     'Unrelated work wrongly given a fiction genre: '+b.title);
 }
+for(const [title,subject] of [
+  ['Guide to Novell NetWare 5.0/5.11 Network Administration','Computers & Programming'],
+  ['THE ARMCHAIR DETECTIVE BOOK OF LISTS','Literary Studies & Criticism'],
+  ['HOW TO WRITE A BOOK REPORT','Education & Teaching'],
+  ['E.M. FORSTER: A LIFE','Biography & Memoirs'],
+  ['FATAL VISION','General Nonfiction'],
+  ['THE OLD PATAGONIAN EXPRESS','Geography & Travel'],
+  ['The Great Fire','History & Civilizations']
+] as const)assertSubject(title,subject);
 const sample={id:'X',title:'The Hobbit',author:'J. R. R. Tolkien',
   subject:'Literature & Fiction',shelf:18,row:5,isbn:'9780000000001',
   copies:2,summary:'unchanged'};
@@ -100,9 +109,11 @@ for(const list of [physicalBookAdditions,shelf22SourceRecords,shelf30SourceRecor
       'Book source must remain indexed: '+item.title);
   }
 const counts=Object.fromEntries([...genreSet,'Dramatic Fiction','Theatre & Plays','Theatre Studies',
-  'Literature & Fiction','Children’s Stories'].map(genre=>[genre,bookData.filter(b=>b.subject===genre).length]));
+  'Literature & Fiction','Children’s Stories','Mystery & Crime Fiction',
+  'Fantasy & Science Fiction','Adventure Stories'].map(genre=>[genre,bookData.filter(b=>b.subject===genre).length]));
 const unresolvedLiterary=bookData.filter(b=>b.subject==='Literature & Fiction');
-console.log('GENRE_AUDIT_REVIEW_QUEUE',JSON.stringify(unresolvedLiterary.map(b=>[b.title,b.author,b.shelf])));
+// Unverified ambiguous fiction remains general rather than being guessed.
+assert.ok(unresolvedLiterary.length>0,'Keep an explicit conservative review queue');
 console.log('GENRE_AUDIT_TOTAL',bookData.length);
 console.log('GENRE_AUDIT_COUNTS',JSON.stringify(counts));
 console.log('PASS: full physical catalog scanned, genres verified and other records preserved');
