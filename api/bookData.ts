@@ -6,6 +6,7 @@ import {reviewedShelf41Books} from './shelf41ReviewedCatalog.ts';
 import { physicalBookAdditions } from './bookAdditions.ts';
 import { classifyLiteraryGenre, literaryGenreLabels } from '../src/utils/literaryGenreCatalog.ts';
 import { refineLegacyLiterature } from '../src/utils/legacyLiteratureClassification.ts';
+import { applyPhysicalCatalogAudit } from '../src/utils/catalogBibliographicCorrections.ts';
 // 1. تعريف نوع البيانات
 export type Book = {
   id: string;
@@ -3754,7 +3755,8 @@ const classifyDramaAndTheatre = (book: Book): Book => {
 export const bookData:Book[]=[...beforeShelf22,...newShelf22Books]
   .map(classifyDramaAndTheatre)
   .map(classifyLiteraryGenre)
-  .map(refineLegacyLiterature);
+  .map(refineLegacyLiterature)
+  .map(applyPhysicalCatalogAudit);
 
 // 5. دالة البحث المخصصة للاستخدام في تطبيق الويب
 export function findInCatalog(q: string): Book[] {
