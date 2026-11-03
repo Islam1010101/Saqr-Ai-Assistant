@@ -1,12 +1,22 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { supabase } from '../../utils/supabase';
 import { learningStories } from '../../../supabase/functions/saqr-learning-narration/stories';
+import { learningQuestions, type StoryQuizQuestion } from '../../../supabase/functions/saqr-learning-narration/questions';
+import LearningPictureArt, { type LearningPicture } from './LearningPictureArt';
 
 type ReadTogetherProps = { isAr: boolean; large: boolean; quiet: boolean; isAdmin?: boolean };
 const stories = learningStories;
 
 export default function ReadTogether({ isAr, large, quiet, isAdmin = false }: ReadTogetherProps) {
   const [story, setStory] = useState(0);
+  const [difficulty, setDifficulty] = useState<'gentle' | 'explorer'>('gentle');
+  const [questionId, setQuestionId] = useState<string | null>(null);
+  const [choice, setChoice] = useState<number | null>(null);
+  const [nextIndex, setNextIndex] = useState(0);
+  const [finished, setFinished] = useState(false);
+  const [answeredCount, setAnsweredCount] = useState(0);
+  const answeredRef = useRef(new Set<string>());
+  const [fullStory, setFullStory] = useState(false);
   const [rate, setRate] = useState(0.9);
   const [voiceURI, setVoiceURI] = useState('');
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
@@ -23,6 +33,19 @@ export default function ReadTogether({ isAr, large, quiet, isAdmin = false }: Re
   const locale = isAr ? 'ar-AE' : 'en-US';
   const lines = isAr ? stories[story].ar : stories[story].en;
   const matchedVoices = voices.filter(v => v.lang.toLowerCase().startsWith(isAr ? 'ar' : 'en'));
+  const storyQuestions = learningQuestions.filter(q => q.storyId === stories[story].id &&
+    (difficulty === 'explorer' || q.level === 1));
+  const question = storyQuestions.find(q => q.id === questionId);
+  const choiceOrder = useMemo(() => {
+    if (!question) return [] as number[];
+    const other = question.options.map((_, i) => i).filter(i => i !== question.correctIndex);
+    const allowed = difficulty === 'gentle' ? [question.correctIndex, other[0]] :
+      question.options.map((_, i) => i);
+    return allowed.sort(() => Math.random() - 0.5);
+  }, [questionId, difficulty, question?.correctIndex]);
+  const correct = !!question && choice === question.correctIndex;
+  const coverPictures: LearningPicture[] = ['book', 'tree', 'desk', 'ball', 'sun', 'pencil'];
+  const cover = coverPictures[story] || 'book';
 
   useEffect(() => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) {
@@ -98,6 +121,109 @@ export default function ReadTogether({ isAr, large, quiet, isAdmin = false }: Re
     if (audioUrlRef.current) URL.revokeObjectURL(audioUrlRef.current);
   }, []);
 
+  const resetProgress = () => {
+    stop();
+    answeredRef.current.clear();
+    setAnsweredCount(0);
+    setQuestionId(null);
+    setChoice(null);
+    setNextIndex(0);
+    setFinished(false);
+    setFullStory(false);
+    setError('');
+  };
+
+  const speakQuestion = async (item: StoryQuizQuestion, id: number) => {
+    const prompt = isAr ? item.promptAr : item.promptEn;
+    setState('playing');
+    if (voiceSource === 'azure' && azureReady === 'ready') {
+      const controller = new AbortController();
+      requestRef.current = controller;
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token || sessionRef.current !== id) return;
+        const response = await supabase.functions.invoke('saqr-learning-narration', {
+          headers: { Authorization: 'Bearer ' + session.access_token },
+          body: { action: 'speak-question', storyId: stories[story].id, questionId: item.id,
+            locale: isAr ? 'ar' : 'en', rate },
+          signal: controller.signal
+        });
+        if (sessionRef.current !== id) return;
+        if (response.error || !(response.data instanceof Blob) || !response.data.size) throw new Error('QUESTION_AUDIO');
+        const mp3 = new Blob([response.data], { type: 'audio/mpeg' });
+        const audio = audioRef.current || new Audio();
+        audioRef.current = audio;
+        if (audioUrlRef.current) URL.revokeObjectURL(audioUrlRef.current);
+        audioUrlRef.current = URL.createObjectURL(mp3);
+        audio.src = audioUrlRef.current;
+        audio.onended = () => { if (sessionRef.current === id) setState('idle'); };
+        audio.onerror = () => { if (sessionRef.current === id) setState('idle'); };
+        await audio.play();
+      } catch {
+        if (sessionRef.current === id) {
+          setState('idle');
+          setError(isAr ? 'يمكنك قراءة السؤال على الشاشة أو الضغط على «اسمع السؤال».' :
+            'You can read the question or tap Listen to question.');
+        }
+      } finally {
+        if (requestRef.current === controller) requestRef.current = null;
+      }
+      return;
+    }
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      setState('idle');
+      return;
+    }
+    const utterance = new SpeechSynthesisUtterance(prompt);
+    utterance.lang = locale;
+    utterance.rate = rate;
+    const preferred = matchedVoices.find(v => v.voiceURI === voiceURI) || matchedVoices[0];
+    if (preferred) utterance.voice = preferred;
+    utterance.onend = () => { if (sessionRef.current === id) setState('idle'); };
+    utterance.onerror = () => { if (sessionRef.current === id) setState('idle'); };
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const afterLine = (index: number, id: number, continueReading: (next: number) => void) => {
+    if (sessionRef.current !== id) return;
+    setNextIndex(index + 1);
+    const checkpoint = storyQuestions.find(q => q.afterLine === index && !answeredRef.current.has(q.id));
+    if (checkpoint) {
+      setQuestionId(checkpoint.id);
+      setChoice(null);
+      setError('');
+      void speakQuestion(checkpoint, id);
+      return;
+    }
+    continueReading(index + 1);
+  };
+
+  const replayQuestion = () => {
+    if (!question) return;
+    stop();
+    const id = ++sessionRef.current;
+    setError('');
+    void speakQuestion(question, id);
+  };
+
+  const chooseAnswer = (index: number) => {
+    if (!question || correct) return;
+    setChoice(index);
+    if (index === question.correctIndex) {
+      if (!answeredRef.current.has(question.id)) {
+        answeredRef.current.add(question.id);
+        setAnsweredCount(answeredRef.current.size);
+      }
+      stop();
+      setError('');
+    }
+  };
+
+  const changeDifficulty = (next: 'gentle' | 'explorer') => {
+    resetProgress();
+    setDifficulty(next);
+  };
+
   const playAzure = async (startAt = 0) => {
     stop();
     setError('');
@@ -108,9 +234,12 @@ export default function ReadTogether({ isAr, large, quiet, isAdmin = false }: Re
       if (sessionRef.current !== id) return;
       if (index >= lines.length) {
         stop();
+        setFinished(true);
+        setNextIndex(lines.length);
         return;
       }
       setCurrentLine(index);
+      setNextIndex(index);
       setState('playing');
       const controller = new AbortController();
       requestRef.current = controller;
@@ -133,7 +262,7 @@ export default function ReadTogether({ isAr, large, quiet, isAdmin = false }: Re
         if (audioUrlRef.current) URL.revokeObjectURL(audioUrlRef.current);
         audioUrlRef.current = URL.createObjectURL(mp3);
         audio.src = audioUrlRef.current;
-        audio.onended = () => { if (sessionRef.current === id) void readLine(index + 1); };
+        audio.onended = () => { if (sessionRef.current === id) afterLine(index, id, next => { void readLine(next); }); };
         audio.onerror = () => {
           if (sessionRef.current !== id) return;
           setState('idle');
@@ -179,16 +308,19 @@ export default function ReadTogether({ isAr, large, quiet, isAdmin = false }: Re
       if (index >= lines.length) {
         setState('idle');
         setCurrentLine(-1);
+        setNextIndex(lines.length);
+        setFinished(true);
         return;
       }
       setCurrentLine(index);
+      setNextIndex(index);
       const item = new SpeechSynthesisUtterance(lines[index]);
       item.lang = locale;
       item.rate = rate;
       item.pitch = 1;
       if (preferred) item.voice = preferred;
       item.onstart = () => { if (sessionRef.current === id) setState('playing'); };
-      item.onend = () => speakLine(index + 1);
+      item.onend = () => afterLine(index, id, speakLine);
       item.onerror = event => {
         if (sessionRef.current !== id || event.error === 'canceled' || event.error === 'interrupted') return;
         setError(isAr ? 'تعذّر تشغيل الصوت. تأكد من تفعيل أصوات اللغة في إعدادات جهازك.' : 'Speech is unavailable. Check the voices installed on your device.');
@@ -224,7 +356,7 @@ export default function ReadTogether({ isAr, large, quiet, isAdmin = false }: Re
     }
   };
 
-  const changeStory = (next: number) => { stop(); setStory(next); setError(''); };
+  const changeStory = (next: number) => { resetProgress(); setStory(next); };
   const changeVoiceSource = (next: 'azure' | 'device') => {
     stop();
     setVoiceSource(next);
