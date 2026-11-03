@@ -83,7 +83,7 @@ Deno.serve(async (req: Request) => {
   const lineIndex = body.lineIndex;
   const locale = body.locale;
   const rate = body.rate;
-  if (!story || !Number.isInteger(lineIndex) || (lineIndex as number) < 0 ||
+  if (!story || typeof lineIndex !== "number" || !Number.isInteger(lineIndex) || lineIndex < 0 ||
     (lineIndex as number) >= story.ar.length || (locale !== "ar" && locale !== "en") ||
     typeof rate !== "number" || !allowedRates.includes(rate as typeof allowedRates[number]))
     return respond(400, { error: "INVALID_STORY_REQUEST" });
