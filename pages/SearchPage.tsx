@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { bookData, getLocalizedSubject, type Book } from '../api/bookData';
-import { literaryGenreSubjectNames } from '../api/literaryGenreCatalog';
+import { literaryGenreSubjectNames } from '../src/utils/literaryGenreCatalog';
 import { useReadingPassport, physicalBookKey } from '../src/utils/readingPassport'; 
 import { useLanguage } from '../App';
 import { useNavigate } from 'react-router-dom';
