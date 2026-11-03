@@ -49,6 +49,10 @@ const fixedRecords:Record<string,SubjectFix>={
   "17-6-3234": {title: "Gree...", subject: "Catalog Review Required"},
   "addition-20261026-35": {title: "THE ALCHEMIST", subject: "Literary & Psychological Fiction", source: "https://www.harpercollins.com/products/the-alchemist-paulo-coelho"},
   "addition-20261026-62": {title: "رواية الاعتراف", subject: "Realistic & Family Fiction", source: "https://library.ecssr.ae/cgi-bin/koha/opac-detail.pl?biblionumber=284951"},
+  "19-2-1564": {title: "REFLECTIONS OF BECCA", subject: "Romance Fiction", author: "Lynda Trent", source: "https://booksrun.com/9780373705368-reflections-of-becca-harlequin-superromance-no-536"},
+  "16-2-2655": {title: "Men For The Mountains", subject: "Biography & Memoirs", author: "Sid Marty", source: "https://openlibrary.org/books/OL4474502M/Men_for_the_mountains"},
+  "17-2-3160": {title: "Difficulty with Dwarves", subject: "Fantasy Fiction", author: "Craig Shaw Gardner", correctTitle: "A Difficulty with Dwarves", source: "https://books.google.com/books/about/A_Difficulty_with_Dwarves.html?id=54Cy5jVKM9oC"},
+  "16-5-2737": {title: "THE BOUDOIR COMPANION", subject: "General Nonfiction", author: "Page Cooper (editor)", source: "https://www.abaa.org/book/866276948"},
   "shelf40-20261027-018": {title: "FAMILIES Are Like That", subject: "Short Stories & Anthologies", author: "Child Study Association / Wel-Met (editors)", source: "https://www.kirkusreviews.com/book-reviews/a/child-study-associationwel-met-eds/families-are-like-that-stories-to-read-to-yours/"},
 };
 const legacyOutlierRecords: Record<string,readonly [string,string]>={
