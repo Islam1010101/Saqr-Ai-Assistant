@@ -114,6 +114,8 @@ const counts=Object.fromEntries([...genreSet,'Dramatic Fiction','Theatre & Plays
 const unresolvedLiterary=bookData.filter(b=>b.subject==='Literature & Fiction');
 // Unverified ambiguous fiction remains general rather than being guessed.
 assert.ok(unresolvedLiterary.length>0,'Keep an explicit conservative review queue');
+const oldGenres=new Set(['Mystery & Crime Fiction','Fantasy & Science Fiction','Adventure Stories']);
+console.log('GENRE_LEGACY_REVIEW',JSON.stringify(bookData.filter(b=>oldGenres.has(b.subject)).map(b=>[b.title,b.author,b.subject,b.shelf])));
 console.log('GENRE_AUDIT_TOTAL',bookData.length);
 console.log('GENRE_AUDIT_COUNTS',JSON.stringify(counts));
 console.log('PASS: full physical catalog scanned, genres verified and other records preserved');
