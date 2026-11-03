@@ -113,6 +113,12 @@ export default function ReadTogether({ isAr, large, quiet, isAdmin = false }: Re
   useEffect(() => {
     stop();
     setVoiceURI('');
+    answeredRef.current.clear();
+    setQuestionId(null);
+    setChoice(null);
+    setAnsweredCount(0);
+    setNextIndex(0);
+    setFinished(false);
   }, [isAr, stop]);
 
   useEffect(() => () => {
@@ -227,6 +233,7 @@ export default function ReadTogether({ isAr, large, quiet, isAdmin = false }: Re
   const playAzure = async (startAt = 0) => {
     stop();
     setError('');
+    setFinished(false);
     const id = ++sessionRef.current;
     const audio = new Audio();
     audioRef.current = audio;
@@ -296,6 +303,7 @@ export default function ReadTogether({ isAr, large, quiet, isAdmin = false }: Re
     if (!available) return;
     stop();
     setError('');
+    setFinished(false);
     const synth = window.speechSynthesis;
     const id = ++sessionRef.current;
     const matching = matchedVoices;
@@ -369,6 +377,7 @@ export default function ReadTogether({ isAr, large, quiet, isAdmin = false }: Re
 
   const advanceWithoutVoice = () => {
     stop();
+    setError('');
     const index = nextIndex;
     if (index >= lines.length) { setFinished(true); return; }
     setCurrentLine(index);
@@ -524,10 +533,18 @@ export default function ReadTogether({ isAr, large, quiet, isAdmin = false }: Re
     </section>}
     <div className="rounded-2xl bg-emerald-50 dark:bg-slate-900 p-4 sm:p-5 border border-emerald-100 dark:border-emerald-800 space-y-3">
       <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-        <button type="button" disabled={voiceSource === 'azure' ? azureReady !== 'ready' : !available} onClick={() => play()}
-          className="min-h-12 rounded-xl bg-emerald-700 hover:bg-emerald-800 px-5 py-3 text-white font-black disabled:opacity-50 focus-visible:outline-4 focus-visible:outline-sky-400">
-          {voiceSource === 'azure' && azureReady === 'ready' ? (isAr ? 'استمع بصوت حمدان' : 'Listen with Azure voice') : (isAr ? 'استمع بصوت الجهاز' : 'Read aloud with device voice')}
-        </button>
+        {!question && !finished && <>
+          <button type="button" disabled={voiceSource === 'azure' ? azureReady !== 'ready' : !available} onClick={() => play(nextIndex)}
+            className="min-h-14 flex-1 sm:flex-none rounded-2xl bg-emerald-700 hover:bg-emerald-800 px-6 py-4 text-white text-base sm:text-lg font-black disabled:opacity-50 focus-visible:outline-4 focus-visible:outline-sky-400">
+            {voiceSource === 'azure' && azureReady === 'ready'
+              ? (isAr ? 'اسمع حكاية صقر بصوت حمدان' : 'Listen with Azure voice')
+              : (isAr ? 'استمع للحكاية بصوت الجهاز' : 'Listen with device voice')}
+          </button>
+          <button type="button" onClick={advanceWithoutVoice}
+            className="min-h-14 rounded-2xl border-2 border-sky-300 dark:border-sky-700 bg-white dark:bg-slate-800 px-5 py-3 text-base font-black text-sky-900 dark:text-sky-200 focus-visible:outline-4 focus-visible:outline-sky-400">
+            {isAr ? 'اقرأ جملة بنفسي' : 'Read one sentence myself'}
+          </button>
+        </>}
         {state !== 'idle' && <>
           <button type="button" onClick={togglePause} className="min-h-12 rounded-xl border-2 border-emerald-400 px-4 py-3 font-black text-emerald-900 dark:text-emerald-100">
             {state === 'paused' ? (isAr ? 'متابعة' : 'Resume') : (isAr ? 'إيقاف مؤقت' : 'Pause')}
