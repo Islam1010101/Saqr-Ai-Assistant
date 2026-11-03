@@ -91,7 +91,10 @@ for(const [title,subject] of [
   ['E.M. FORSTER: A LIFE','Biography & Memoirs'],
   ['FATAL VISION','General Nonfiction'],
   ['THE OLD PATAGONIAN EXPRESS','Geography & Travel'],
-  ['The Great Fire','History & Civilizations']
+  ['The Great Fire','History & Civilizations'],
+  ["Pojo's Total Unofficial Dragonball Z",'General Reference'],
+  ['Adventures in Colors and Shapes','Education & Teaching'],
+  ['MURDER & WALKING SPIRITS','Literature & Fiction']
 ] as const)assertSubject(title,subject);
 const sample={id:'X',title:'The Hobbit',author:'J. R. R. Tolkien',
   subject:'Literature & Fiction',shelf:18,row:5,isbn:'9780000000001',
@@ -115,7 +118,8 @@ const unresolvedLiterary=bookData.filter(b=>b.subject==='Literature & Fiction');
 // Unverified ambiguous fiction remains general rather than being guessed.
 assert.ok(unresolvedLiterary.length>0,'Keep an explicit conservative review queue');
 const oldGenres=new Set(['Mystery & Crime Fiction','Fantasy & Science Fiction','Adventure Stories']);
-console.log('GENRE_LEGACY_REVIEW',JSON.stringify(bookData.filter(b=>oldGenres.has(b.subject)).map(b=>[b.title,b.author,b.subject,b.shelf])));
+assert.equal(bookData.filter(b=>oldGenres.has(b.subject)).length,0,
+  'All legacy combined fiction genres have been separated or restored to correct nonfiction');
 console.log('GENRE_AUDIT_TOTAL',bookData.length);
 console.log('GENRE_AUDIT_COUNTS',JSON.stringify(counts));
 console.log('PASS: full physical catalog scanned, genres verified and other records preserved');
