@@ -87,12 +87,15 @@ const reviewedGroups: Record<string,string[]> = {
     "The Dragon's Child",
     "The Seventh Princess",
     "Ogre, Ogre",
-    "The Dark Chronicles",
     "Freedom's Gate",
     "Squire",
     "Beowulf",
     "The Chronicles of Narnia",
-    "The Locket"
+    "Charlotte's Web",
+    "Mary Poppins",
+    "Peter Pan",
+    "The Story of Peter Pan",
+    "The Hundred and One Dalmatians"
   ],
   "Science Fiction": [
     "The Time Machine",
@@ -156,7 +159,22 @@ const reviewedGroups: Record<string,string[]> = {
     "The Case of the Tapping Heels",
     "The Secret of the Old Clock",
     "Cam Jansen and the Mystery of the Stolen Corn Popper",
-    "The Murder at Hockey Camp"
+    "The Murder at Hockey Camp",
+    "SHERLOCK HOLMES : A STUDY IN SCARLET",
+    "SHERLOCK HOLMES :THE VEILED LODGER",
+    "SHERLOCK HOLMES :THE SPECKLED BAND",
+    "SHERLOCK HOLMES :THE BLUE CARBUNCLE",
+    "SHERLOCK HOLMES :THE NAVAL TREATY",
+    "SHERLOCK HOLMES : THE SUSSEX VAMPIRE",
+    "SHERLOCK HOLMES :THE RED-HEADED LEAGUE",
+    "SHERLOCK HOLMES :THE REIGATE SQUIRES",
+    "SHERLOCK HOLMES :THE THREE STUDENTS",
+    "SHERLOCK HOLMES :THE SIGN OF THE FOUR",
+    "ADVENTURES ON TRAIN : DAGER AT DEAD MAN'S PASS",
+    "ADVENTURES ON TRAIN : MURDER ON THE SAFARI STAR",
+    "ADVENTURES ON TRAIN : KIDNAP ON THE CALFORNIA COMET",
+    "ADVENTURES ON TRAIN : THE HIGHLAND FALCON THIEF",
+    "شيرلوك سام وخدعة الكتب المصورة"
   ],
   "Crime & Thriller Fiction": [
     "The Da Vinci Code",
@@ -183,7 +201,11 @@ const reviewedGroups: Record<string,string[]> = {
     "Black Notice",
     "Dead Watch",
     "Third Degree",
-    "Dead Sleep"
+    "Dead Sleep",
+    "Dragonfire",
+    "The Bourne Supremacy",
+    "The Bourne Ultimatum",
+    "ROBERT LUDLUM'S THE BOURNE DECEPTION"
   ],
   "Adventure Fiction": [
     "Twenty Thousand Leagues Under the Sea",
@@ -206,9 +228,7 @@ const reviewedGroups: Record<string,string[]> = {
     "Island Book One: Shipwreck",
     "Island Book Three: The Danger",
     "Dive",
-    "Peter Pan",
     "The Adventures of Pinocchio",
-    "The Story of Peter Pan",
     "The Famous Five",
     "The Young Black Stallion",
     "The Black Stallion"
@@ -223,7 +243,6 @@ const reviewedGroups: Record<string,string[]> = {
     "Gabi's Dresser",
     "Lara's War",
     "The Scarlet Letter",
-    "The Golden Road",
     "Rivals for the Crown",
     "The Patriot",
     "The Heretic's Daughter",
@@ -231,7 +250,6 @@ const reviewedGroups: Record<string,string[]> = {
     "The Book Thief",
     "The Count of Monte Cristo",
     "The Three Musketeers",
-    "The Story Girl Earns Her Name",
     "The Immigrants"
   ],
   "Humorous Fiction": [
@@ -257,7 +275,19 @@ const reviewedGroups: Record<string,string[]> = {
     "The Cat in the Hat",
     "Soupy Saturdays with the Pain & the Great One",
     "The Great Pet Hoax",
-    "Class Clown"
+    "Class Clown",
+    "DIARY OF A WIMPY KID : THE DEEP END",
+    "DIARY OF A WIMPY KID : THE LAST STRAW",
+    "DIARY OF A WIMPY KID : THE LONG HAUL",
+    "DIARY OF A WIMPY KID :DOG DAYS",
+    "DIARY OF A WIMPY KID :HARD LUCK",
+    "DIARY OF A WIMPY KID :DIPER OVERLOAD",
+    "DIARY OF A WIMPY KID :WRECKING BALL",
+    "DIARY OF A WIMPY KID :DOUBLE DOWN",
+    "DIARY OF A WIMPY KID :THE GETAWAY",
+    "DIARY OF A WIMPY KID :THE MELTDOWN",
+    "JUDY MOODY : GOES TO COLLEGE",
+    "MIDDLE SCHOOL :SAVE RAFE!"
   ],
   "Realistic & Family Fiction": [
     "Little Women",
@@ -284,7 +314,6 @@ const reviewedGroups: Record<string,string[]> = {
     "Little Bear's Friend",
     "Searching for David's Heart",
     "Bud, Not Buddy",
-    "The Hundred and One Dalmatians",
     "The Loner"
   ],
   "Short Stories & Anthologies": [
@@ -299,8 +328,7 @@ const reviewedGroups: Record<string,string[]> = {
     "Best from the Panchatantra (Book 2)",
     "The Book of Short Stories",
     "The Best of Analog",
-    "The Best of (Analog)",
-    "An Episode of Sparrows / The House by the River"
+    "The Best of (Analog)"
   ],
   "Dystopian & Satirical Fiction": [
     "Animal Farm",
@@ -326,7 +354,8 @@ const reviewedGroups: Record<string,string[]> = {
     "Two Under Par",
     "Stone Fox",
     "The Fastest Turtle in the West",
-    "Sporting Stories"
+    "Sporting Stories",
+    "Bleachers"
   ],
   "Western Fiction": [
     "Valley of the Sun",
@@ -371,7 +400,8 @@ const knownSeries: GenreRule[]=[
   {genre:'Science Fiction',test:/\b(?:animorphs|star trek|star wars|stargate|space brat|i was a sixth grade alien|aliens ate my homework)\b/i},
   {genre:'Mystery & Detective Fiction',test:/\b(?:nancy drew|hardy boys|cam jansen|the boxcar children|secret seven|famous five)\b/i},
   {genre:'Realistic & Family Fiction',test:/\b(?:baby.sitters (?:club|little sister)|amber brown|american girl)\b/i},
-  {genre:'Humorous Fiction',test:/\b(?:ramona|fudge.a.mania|superfudge|flat stanley|wayside school)\b/i}
+  {genre:'Humorous Fiction',test:/\b(?:ramona|fudge.a.mania|superfudge|flat stanley|wayside school|diary of a wimpy kid|judy moody)\b/i},
+  {genre:'Mystery & Detective Fiction',test:/\b(?:sherlock holmes|adventures on train|شيرلوك سام)\b/i}
 ];
 
 // Broad-author defaults apply ONLY to already fictional catalog subjects,
@@ -403,11 +433,13 @@ export function classifyLiteraryGenre<T extends LiteraryBook>(book:T):T {
   // Curated work-level decisions may correct a broad/incorrect earlier subject.
   const verified=knownWork.get(titleKey);
   if (verified) return book.subject===verified?book:{...book,subject:verified};
-  if (!eligibleExistingGenres.has(book.subject)) return book;
-  const combined=book.title+' '+book.author;
+  // Unambiguous named fiction series can be recognized even when older imports
+  // carried the generic 'General Knowledge' shelf fallback. Match the TITLE,
+  // never an author or free-form summary, to avoid genre labels on guidebooks.
   for(const rule of knownSeries)
-    if(rule.test.test(combined))
+    if(rule.test.test(book.title))
       return book.subject===rule.genre?book:{...book,subject:rule.genre};
+  if (!eligibleExistingGenres.has(book.subject)) return book;
   for(const rule of authorGenres)
     if(rule.test.test(book.author))
       return book.subject===rule.genre?book:{...book,subject:rule.genre};
