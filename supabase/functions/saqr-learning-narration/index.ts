@@ -126,7 +126,9 @@ Deno.serve(async (req: Request) => {
     if (!audio.byteLength || audio.byteLength > 500000) return respond(502, { error: "INVALID_SPEECH_AUDIO" });
     return new Response(audio, {
       status: 200,
-      headers: { ...headers, "Content-Type": "audio/mpeg", "X-Saqr-Voice": voice }
+      headers: { ...headers, // Supabase functions-js parses application/octet-stream as Blob; audio/mpeg as UTF-8 text.
+      // Preserve the MP3 encoding, and mark the original media type for clarity.
+      "Content-Type": "application/octet-stream", "X-Saqr-Audio-Type": "audio/mpeg", "X-Saqr-Voice": voice }
     });
   } catch {
     return respond(503, { error: "SPEECH_REQUEST_FAILED" });
