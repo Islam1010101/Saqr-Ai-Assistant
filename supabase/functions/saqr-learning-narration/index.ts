@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.58.0";
 import { learningStories } from "./stories.ts";
+import { learningQuestions } from "./questions.ts";
 
 // Azure Speech runs on the server only; never send a subscription key to the browser.
 // The child-facing API accepts only our published classroom story/line identifiers.
@@ -76,15 +77,20 @@ Deno.serve(async (req: Request) => {
   if (body.action === "status") return respond(200, {
     configured, arabicVoice: "ar-AE-HamdanNeural", englishVoice: "en-US-GuyNeural"
   });
-  if (body.action !== "speak") return respond(400, { error: "UNSUPPORTED_ACTION" });
+  if (body.action !== "speak" && body.action !== "speak-question") return respond(400, { error: "UNSUPPORTED_ACTION" });
   if (!configured) return respond(503, { error: "AZURE_NOT_CONFIGURED" });
 
   const story = learningStories.find(item => item.id === body.storyId);
   const lineIndex = body.lineIndex;
   const locale = body.locale;
   const rate = body.rate;
-  if (!story || typeof lineIndex !== "number" || !Number.isInteger(lineIndex) || lineIndex < 0 ||
-    (lineIndex as number) >= story.ar.length || (locale !== "ar" && locale !== "en") ||
+  const question = body.action === "speak-question"
+    ? learningQuestions.find(item => item.storyId === body.storyId && item.id === body.questionId)
+    : undefined;
+  const validLine = body.action === "speak" && typeof lineIndex === "number" &&
+    Number.isInteger(lineIndex) && lineIndex >= 0 && !!story && lineIndex < story.ar.length;
+  const validQuestion = body.action === "speak-question" && !!story && !!question;
+  if ((!validLine && !validQuestion) || (locale !== "ar" && locale !== "en") ||
     typeof rate !== "number" || !allowedRates.includes(rate as typeof allowedRates[number]))
     return respond(400, { error: "INVALID_STORY_REQUEST" });
 
@@ -99,14 +105,18 @@ Deno.serve(async (req: Request) => {
     .insert({ auth_user_id: user.id });
   if (claimError) return respond(503, { error: "VOICE_QUOTA_UNAVAILABLE" });
 
-  const spokenText = locale === "ar" ? story.ar[lineIndex as number] : story.en[lineIndex as number];
+  // Only text from the approved fictional stories/questions may be spoken.
+  const spokenText = question
+    ? (locale === "ar" ? question.promptAr : question.promptEn)
+    : (locale === "ar" ? story!.ar[lineIndex as number] : story!.en[lineIndex as number]);
   const voice = locale === "ar" ? "ar-AE-HamdanNeural" : "en-US-GuyNeural";
   const lang = locale === "ar" ? "ar-AE" : "en-US";
   const percent = Math.round((rate - 1) * 100);
   const rateString = percent > 0 ? "+" + percent + "%" : percent + "%";
+  const pause = question ? '<break time="220ms"/>' : '';
   const ssml = '<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="' + lang +
     '"><voice name="' + voice + '" xml:lang="' + lang + '"><prosody rate="' + rateString + '">' +
-    escaped(spokenText) + '</prosody></voice></speak>';
+    pause + escaped(spokenText) + '</prosody></voice></speak>';
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 12000);

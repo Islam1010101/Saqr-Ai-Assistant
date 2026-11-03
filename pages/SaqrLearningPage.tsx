@@ -22,7 +22,7 @@ type Feature = {
 const features: Feature[] = [
   {
     key: 'read_together', ar: 'اقرأ معي', en: 'Read with me',
-    hintAr: 'استمع إلى قصص مع تظليل الجملة', hintEn: 'Listen to stories with highlighted sentences',
+    hintAr: 'اسمع حمدان وجاوب على أسئلة القصة', hintEn: 'Listen and answer little story questions',
     color: 'from-[#1489CF] to-[#45B7E8]', baseColor: 'bg-sky-50 dark:bg-sky-950/30', border: 'border-[#176C9B]'
   },
   {
@@ -136,9 +136,9 @@ export default function SaqrLearningPage() {
                 {isAr ? 'كل يوم خطوة جديدة مع صقر' : 'GROW AND DISCOVER WITH SAQR'}
               </p>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black leading-[1.5]">{isAr ? 'صقر يساعدني' : 'Saqr Helps Me'}</h1>
-              <p className="max-w-xl text-sm sm:text-base lg:text-lg leading-8 font-semibold text-emerald-50/95">
-                {isAr ? 'اقرأ، واكتشف الصور، وأنجز مهامك الصغيرة بطريقة ممتعة تناسبك.' :
-                  'Read stories, explore pictures, and complete little missions your way.'}
+              <p className="max-w-xl text-base sm:text-lg lg:text-xl leading-[1.9] font-semibold text-emerald-50/95">
+                {isAr ? 'أهلًا بك في عالم صقر! اسمع القصص، اختار الصور، وخد وقتك في كل مغامرة.' :
+                  'Welcome to Saqr’s world! Listen to stories, choose pictures, and enjoy every little adventure.'}
               </p>
               <div className="flex flex-wrap justify-center sm:justify-start gap-2 pt-2">
                 <span className="rounded-xl bg-white/10 border border-white/25 px-3 py-2 text-xs sm:text-sm font-black">{isAr ? 'أنشطة تفاعلية' : 'Interactive activities'}</span>
@@ -160,6 +160,13 @@ export default function SaqrLearningPage() {
           </div>
         </header>
 
+        <div aria-label={isAr ? 'خطوات رحلتك' : 'Your journey steps'} className="grid grid-cols-3 gap-2 sm:gap-3">
+          {[isAr ? '1. اختار' : '1. Choose', isAr ? '2. اسمع' : '2. Listen', isAr ? '3. جاوب' : '3. Answer'].map((label, index) =>
+            <div key={index} className="min-h-14 sm:min-h-16 rounded-2xl border-2 border-emerald-100 dark:border-emerald-900 bg-emerald-50 dark:bg-slate-900 flex items-center justify-center px-2 py-3 text-center text-base sm:text-lg font-black text-emerald-900 dark:text-emerald-100">
+              {label}
+            </div>)}
+        </div>
+
         <section aria-labelledby="saqr-learning-tools" className="space-y-5">
           <div className="flex flex-wrap gap-3 items-end justify-between px-1">
             <div>
@@ -167,23 +174,30 @@ export default function SaqrLearningPage() {
               <h2 id="saqr-learning-tools" className="mt-1 text-2xl sm:text-3xl font-black">{isAr ? 'ماذا تريد أن تفعل اليوم؟' : 'What will you try today?'}</h2>
               <p className="mt-1 text-sm leading-7 text-slate-600 dark:text-slate-300 font-semibold">{isAr ? 'اختر نشاطًا ثم ابدأ باللعب أو القراءة.' : 'Choose an activity and start reading or playing.'}</p>
             </div>
-            {settings.calm_display && <button type="button" onClick={() => setQuiet(v => !v)} aria-pressed={quiet}
-              className={'min-h-11 rounded-full border-2 px-4 py-2.5 text-sm font-black transition-colors focus-visible:outline-4 focus-visible:outline-sky-400 ' +
+            <div className="flex flex-wrap gap-2">
+              <button type="button" onClick={() => setLarge(v => !v)} aria-pressed={large}
+                className={'min-h-12 rounded-full border-2 px-4 py-3 text-sm sm:text-base font-black transition-colors focus-visible:outline-4 focus-visible:outline-sky-400 ' +
+                  (large ? 'border-sky-700 bg-sky-700 text-white' : 'border-sky-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sky-800 dark:text-sky-200')}>
+                {large ? (isAr ? 'الخط كبير' : 'Large text on') : (isAr ? 'كبر الخط' : 'Larger text')}
+              </button>
+              {settings.calm_display && <button type="button" onClick={() => setQuiet(v => !v)} aria-pressed={quiet}
+              className={'min-h-12 rounded-full border-2 px-4 py-3 text-sm sm:text-base font-black transition-colors focus-visible:outline-4 focus-visible:outline-sky-400 ' +
                 (quiet ? 'border-emerald-700 bg-emerald-700 text-white' : 'border-emerald-200 bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-300')}>
-              {quiet ? (isAr ? 'إيقاف العرض الهادئ' : 'Exit calm view') : (isAr ? 'تشغيل العرض الهادئ' : 'Turn on calm view')}
-            </button>}
+              {quiet ? (isAr ? 'إيقاف العرض الهادئ' : 'Exit calm view') : (isAr ? 'عرض هادئ' : 'Calm view')}
+              </button>}
+            </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {features.filter(x => settings[x.key]).map((item, index) => <button key={item.key} type="button"
               onClick={() => selectActivity(item.key)} aria-pressed={active === item.key}
-              className={'saqr-learning-option group relative isolate flex flex-col items-start min-h-[210px] sm:min-h-[240px] overflow-hidden rounded-[1.8rem] border-b-[7px] p-5 sm:p-6 text-start shadow-lg transition-[transform,box-shadow] duration-300 focus-visible:outline-4 focus-visible:outline-sky-400 bg-gradient-to-br ' +
+              className={'saqr-learning-option group relative isolate flex flex-col items-start min-h-[200px] sm:min-h-[240px] overflow-hidden rounded-[1.8rem] border-b-[7px] p-5 sm:p-6 text-start shadow-lg transition-[transform,box-shadow] duration-300 focus-visible:outline-4 focus-visible:outline-sky-400 bg-gradient-to-br ' +
                 item.color + ' ' + item.border + (active === item.key ? ' ring-4 ring-amber-300 dark:ring-amber-600' : '')}>
               <span aria-hidden="true" className="saqr-learning-decoration absolute -end-8 -top-8 h-36 w-36 rounded-full border-[22px] border-white/10" />
               <span className="relative grid place-items-center h-16 w-16 rounded-2xl bg-white/20 border border-white/30 text-white shadow-sm group-hover:rotate-3 transition-transform">
                 <ActivityIcon kind={item.key} />
               </span>
               <span className="relative mt-auto pt-6 block font-black text-white text-xl sm:text-2xl leading-snug">{isAr ? item.ar : item.en}</span>
-              <span className="relative mt-2 text-sm font-semibold text-white/95 leading-6">{isAr ? item.hintAr : item.hintEn}</span>
+              <span className="relative mt-2 text-sm sm:text-base font-semibold text-white/95 leading-7">{isAr ? item.hintAr : item.hintEn}</span>
               <span aria-hidden="true" className="absolute end-4 bottom-3 text-white/80 text-lg">{String(index + 1).padStart(2, '0')}</span>
             </button>)}
           </div>

@@ -47,7 +47,7 @@ assert.ok(readTogether.includes('synth.pause()') && readTogether.includes('synth
 assert.ok(readTogether.includes("locale = isAr ? 'ar-AE' : 'en-US'"), 'Bilingual speech locale');
 assert.ok(readTogether.includes('currentLine === index'), 'Highlight spoken sentence');
 assert.ok(readTogether.includes('synth.getVoices()'), 'Allow choosing device voices');
-assert.ok(readTogether.includes('item.onend = () => speakLine(index + 1)'), 'Automatically read subsequent sentences');
+assert.ok(readTogether.includes('item.onend = () => afterLine(index, id, speakLine)'), 'Continue narration or pause at the next comprehension checkpoint');
 assert.ok(readTogether.includes("!available &&"), 'Show unavailable speech warning instead of dead button');
 assert.ok(pictures.includes('<LearningPictureArt kind={kind}'), 'Picture game renders actual illustrations');
 assert.ok(pictures.includes('rounds.length') && pictures.includes('setPicked(kind)') && pictures.includes('setRound(v => v + 1)'),
