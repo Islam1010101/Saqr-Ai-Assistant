@@ -47,6 +47,9 @@ const fixedRecords:Record<string,SubjectFix>={
   "19-5-1621": {title: "Ginger snaps", subject: "Catalog Review Required"},
   "16-5-2719": {title: "ROBIN COOK", subject: "Catalog Review Required"},
   "17-6-3234": {title: "Gree...", subject: "Catalog Review Required"},
+  "addition-20261026-35": {title: "THE ALCHEMIST", subject: "Literary & Psychological Fiction", source: "https://www.harpercollins.com/products/the-alchemist-paulo-coelho"},
+  "addition-20261026-62": {title: "رواية الاعتراف", subject: "Realistic & Family Fiction", source: "https://library.ecssr.ae/cgi-bin/koha/opac-detail.pl?biblionumber=284951"},
+  "shelf40-20261027-018": {title: "FAMILIES Are Like That", subject: "Short Stories & Anthologies", author: "Child Study Association / Wel-Met (editors)", source: "https://www.kirkusreviews.com/book-reviews/a/child-study-associationwel-met-eds/families-are-like-that-stories-to-read-to-yours/"},
 };
 const legacyOutlierRecords: Record<string,readonly [string,string]>={
   "19-4-1599": ["Dance Upon (the Air)", "Romance Fiction"],
@@ -103,13 +106,13 @@ const shelf40Reclassifications:Record<string,string>={
   "The Further Adventures of Sherlock Holmes": "Mystery & Detective Fiction",
   "A Thousand Days in Venice: An Unexpected Romance": "Biography & Memoirs",
   "Georgiana: Duchess of Devonshire": "Biography & Memoirs",
-  "FAMILIES Are Like That": "Parenting & Family",
+  "FAMILIES Are Like That": "Short Stories & Anthologies",
   "SpongeBob SquarePants: Belly Laughs from Bikini Bottom": "Humorous Fiction",
   "The Thoughts of Leonardo da Vinci": "Philosophy & Thought",
   "The Traveller": "Science Fiction",
   "King of the Wind": "Historical Fiction",
   "Telefon": "Crime & Thriller Fiction",
-  "Dark Winds": "Crime & Thriller Fiction",
+  "Dark Winds": "Horror & Gothic Fiction",
   "Gotham Diaries": "Realistic & Family Fiction",
   "Molly Moon's Incredible Book of Hypnotism": "Fantasy Fiction",
   "Indiana Jones and the Temple of Doom": "Adventure Fiction",
@@ -130,7 +133,7 @@ const shelf40Reclassifications:Record<string,string>={
   "CHARLES DARWIN : AND A SELECTION OF OTHERS NATURALLY": "Biography & Memoirs",
   "Julius Caesar Note": "Theatre Studies",
   "Bleachers": "Sports Fiction",
-  "Anna Dillon : Another Time, Another Season": "Biography & Memoirs",
+  "Anna Dillon : Another Time, Another Season": "Historical Fiction",
   "THE BABY SITTERS CLUB : KRISTY AND THE WALKING DISASTER": "Realistic & Family Fiction",
 };
 const reindex=(data:Record<string,string>):Map<string,string>=>
