@@ -367,27 +367,161 @@ export default function ReadTogether({ isAr, large, quiet, isAdmin = false }: Re
     setRate(next);
   };
 
-  return <div className="space-y-5">
-    <div className="flex flex-wrap gap-2">
-      {stories.map((s, index) => <button key={index} type="button" onClick={() => changeStory(index)}
-        aria-pressed={index === story}
-        className={'min-h-12 rounded-xl border-2 px-4 py-2.5 font-black transition-colors focus-visible:outline-4 focus-visible:outline-sky-400 ' +
-          (index === story ? 'bg-emerald-700 text-white border-emerald-700' : 'bg-white dark:bg-slate-800 border-emerald-200 dark:border-slate-600 text-slate-800 dark:text-white')}>
-        {isAr ? s.titleAr : s.titleEn}
-      </button>)}
-    </div>
-    <div className={'rounded-[1.7rem] border-2 border-emerald-200 dark:border-emerald-800 bg-white dark:bg-slate-950 p-5 sm:p-8 shadow-inner ' +
-      (quiet ? 'space-y-4' : 'space-y-5')}>
-      <p className="text-xs font-black tracking-wide text-emerald-700 dark:text-emerald-300">{isAr ? 'حكاية اليوم' : "Today's story"}</p>
-      <h3 className="text-xl sm:text-2xl font-black">{isAr ? stories[story].titleAr : stories[story].titleEn}</h3>
-      <div className="space-y-3" aria-label={isAr ? 'نص القصة' : 'Story text'}>
-        {lines.map((line, index) => <p key={index} className={'rounded-xl px-3 py-2 font-bold transition-colors ' +
-          (large ? 'text-2xl sm:text-3xl leading-[2.15] ' : 'text-lg sm:text-xl leading-[2] ') +
-          (currentLine === index ? 'bg-amber-200 text-slate-950 dark:bg-amber-300' : 'text-slate-800 dark:text-slate-100')}>
-          {line}
-        </p>)}
+  const advanceWithoutVoice = () => {
+    stop();
+    const index = nextIndex;
+    if (index >= lines.length) { setFinished(true); return; }
+    setCurrentLine(index);
+    const id = ++sessionRef.current;
+    afterLine(index, id, next => {
+      if (next >= lines.length) setFinished(true);
+      else setNextIndex(next);
+    });
+  };
+
+  return <div className="space-y-6">
+    <section className="rounded-[1.7rem] border border-emerald-200 dark:border-emerald-900 bg-emerald-50/80 dark:bg-emerald-950/20 p-4 sm:p-5 space-y-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">{isAr ? 'اختار حكايتك يا بطل' : 'Choose your story'}</h3>
+          <p className="mt-1 text-sm leading-7 font-semibold text-slate-600 dark:text-slate-300">
+            {isAr ? 'اسمع مع صقر، وبعد كل جزء جاوب عن سؤال صغير.' : 'Listen with Saqr, then answer a little question at each stop.'}
+          </p>
+        </div>
+        <span className="rounded-full bg-white dark:bg-slate-900 border border-emerald-200 dark:border-emerald-800 px-4 py-2 text-xs font-black text-emerald-800 dark:text-emerald-200">
+          {isAr ? 'بدون مؤقت' : 'No timers'}
+        </span>
       </div>
-    </div>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        {stories.map((item, index) => <button key={item.id} type="button" onClick={() => changeStory(index)}
+          aria-pressed={index === story}
+          className={'group min-h-[162px] rounded-[1.4rem] border-[3px] p-3 text-center font-black transition-[transform,border-color,box-shadow] duration-200 focus-visible:outline-4 focus-visible:outline-sky-400 ' +
+            (index === story ? 'border-emerald-600 bg-white dark:bg-slate-900 shadow-lg' :
+              'border-white dark:border-slate-800 bg-white/80 dark:bg-slate-900/70 hover:border-sky-300 hover:-translate-y-1')}>
+          <span className="block h-20 sm:h-24 max-w-36 mx-auto overflow-hidden rounded-2xl">
+            <LearningPictureArt kind={coverPictures[index] || 'book'} label={isAr ? item.titleAr : item.titleEn} />
+          </span>
+          <span className="mt-2 block text-sm sm:text-base leading-relaxed text-slate-900 dark:text-white">{isAr ? item.titleAr : item.titleEn}</span>
+        </button>)}
+      </div>
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-emerald-200 dark:border-emerald-900">
+        <p className="text-sm font-black text-emerald-900 dark:text-emerald-200">{isAr ? 'مستوى الأسئلة' : 'Question level'}</p>
+        <div className="inline-flex flex-wrap gap-2">
+          <button type="button" onClick={() => changeDifficulty('gentle')} aria-pressed={difficulty === 'gentle'}
+            className={'min-h-12 rounded-xl px-4 py-3 border-2 font-black text-sm focus-visible:outline-4 focus-visible:outline-sky-400 ' +
+              (difficulty === 'gentle' ? 'bg-emerald-700 text-white border-emerald-700' : 'border-emerald-300 bg-white dark:bg-slate-800 text-slate-800 dark:text-white')}>
+            {isAr ? 'بسيط · اختيارين' : 'Gentle · 2 choices'}
+          </button>
+          <button type="button" onClick={() => changeDifficulty('explorer')} aria-pressed={difficulty === 'explorer'}
+            className={'min-h-12 rounded-xl px-4 py-3 border-2 font-black text-sm focus-visible:outline-4 focus-visible:outline-sky-400 ' +
+              (difficulty === 'explorer' ? 'bg-sky-700 text-white border-sky-700' : 'border-sky-300 bg-white dark:bg-slate-800 text-slate-800 dark:text-white')}>
+            {isAr ? 'مستكشف · 3 اختيارات' : 'Explorer · 3 choices'}
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section aria-label={isAr ? 'رحلة القراءة' : 'Reading journey'} className="space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+        <h3 className="text-xl sm:text-2xl font-black">{isAr ? stories[story].titleAr : stories[story].titleEn}</h3>
+        <span className="rounded-full bg-amber-100 dark:bg-amber-950/40 text-amber-950 dark:text-amber-200 px-4 py-2 font-black text-sm">
+          {isAr ? 'سؤال ' : 'Question '}{answeredCount} / {storyQuestions.length}
+        </span>
+      </div>
+      <div role="progressbar" aria-valuenow={Math.min(nextIndex, lines.length)}
+        aria-valuemin={0} aria-valuemax={lines.length} aria-label={isAr ? 'تقدم القصة' : 'Story progress'}
+        className="h-3 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+        <div className="h-full rounded-full bg-gradient-to-r from-emerald-600 to-sky-500 transition-[width] duration-300"
+          style={{ width: (Math.min(nextIndex, lines.length) / lines.length * 100) + '%' }} />
+      </div>
+      <article className="rounded-[1.9rem] border-2 border-sky-200 dark:border-sky-800 bg-white dark:bg-slate-950 p-5 sm:p-7 space-y-4">
+        <div className="flex items-center gap-4">
+          <span className="h-24 w-28 sm:h-28 sm:w-36 shrink-0 overflow-hidden rounded-2xl border border-sky-100 dark:border-sky-900">
+            <LearningPictureArt kind={cover} label={isAr ? stories[story].titleAr : stories[story].titleEn} />
+          </span>
+          <div className="min-w-0">
+            <p className="text-xs font-black tracking-wide text-emerald-700 dark:text-emerald-300">
+              {isAr ? 'حكاية مع صقر' : 'STORY WITH SAQR'}
+            </p>
+            <p className="mt-2 text-base sm:text-lg font-black leading-relaxed">{isAr ? stories[story].titleAr : stories[story].titleEn}</p>
+            <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+              {isAr ? 'جملة واحدة في كل مرة' : 'One sentence at a time'}
+            </p>
+          </div>
+        </div>
+        {!finished && <div aria-live="polite" className="rounded-[1.4rem] border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/20 p-5 sm:p-6 min-h-32 flex items-center">
+          <p className={'font-black text-slate-900 dark:text-slate-100 ' +
+            (large ? 'text-2xl sm:text-3xl leading-[2]' : 'text-xl sm:text-2xl leading-[1.9]')}>
+            {lines[Math.max(0, Math.min(currentLine >= 0 ? currentLine : nextIndex, lines.length - 1))]}
+          </p>
+        </div>}
+        <button type="button" onClick={() => setFullStory(value => !value)} aria-expanded={fullStory}
+          className="min-h-11 rounded-xl border-2 border-slate-200 dark:border-slate-700 px-4 py-2.5 font-black text-sm text-emerald-800 dark:text-emerald-200 focus-visible:outline-4 focus-visible:outline-sky-400">
+          {fullStory ? (isAr ? 'إخفاء النص الكامل' : 'Hide full story') : (isAr ? 'عرض القصة كاملة' : 'Read the whole story')}
+        </button>
+        {fullStory && <div className="space-y-3 border-t border-slate-200 dark:border-slate-800 pt-4" aria-label={isAr ? 'نص القصة الكامل' : 'Complete story'}>
+          {lines.map((line, index) => <p key={index} className={'rounded-xl px-3 py-2 font-semibold ' +
+            (large ? 'text-xl leading-[2]' : 'text-base sm:text-lg leading-[1.9]') +
+            (currentLine === index ? ' bg-amber-200 text-slate-950 dark:bg-amber-300' : ' text-slate-700 dark:text-slate-200')}>
+            {line}
+          </p>)}
+        </div>}
+      </article>
+    </section>
+
+    {question && <section aria-labelledby="saqr-reading-question" className="rounded-[1.9rem] border-[3px] border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-slate-900 p-4 sm:p-7 space-y-5 shadow-md">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="rounded-full bg-amber-200 dark:bg-amber-800/50 px-4 py-2 text-amber-950 dark:text-amber-100 font-black text-sm">
+          {isAr ? 'صقر عنده سؤال ليك!' : 'Saqr has a question!'}
+        </p>
+        <button type="button" onClick={replayQuestion} className="min-h-12 rounded-xl border-2 border-emerald-300 bg-white dark:bg-slate-800 px-4 py-3 font-black text-emerald-800 dark:text-emerald-200 focus-visible:outline-4 focus-visible:outline-sky-400">
+          {isAr ? 'اسمع السؤال مرة تانية' : 'Listen to the question again'}
+        </button>
+      </div>
+      <h3 id="saqr-reading-question" className={'font-black text-center leading-[1.8] text-slate-900 dark:text-white ' + (large ? 'text-3xl' : 'text-2xl')}>
+        {isAr ? question.promptAr : question.promptEn}
+      </h3>
+      <div className={'grid grid-cols-1 gap-3 ' + (choiceOrder.length === 2 ? 'sm:grid-cols-2' : 'sm:grid-cols-3')}>
+        {choiceOrder.map(optionIndex => {
+          const item = question.options[optionIndex];
+          const selected = choice === optionIndex;
+          return <button key={optionIndex} type="button" disabled={correct}
+            aria-pressed={selected} onClick={() => chooseAnswer(optionIndex)}
+            className={'min-h-[105px] rounded-[1.4rem] border-[3px] p-4 bg-white dark:bg-slate-950 flex items-center justify-center gap-3 sm:flex-col font-black leading-relaxed text-lg sm:text-xl transition-[transform,border-color] focus-visible:outline-4 focus-visible:outline-sky-400 ' +
+              (selected ? (correct ? 'border-emerald-600 ring-2 ring-emerald-200' : 'border-amber-500') :
+                'border-slate-200 dark:border-slate-700 hover:border-sky-400 hover:-translate-y-0.5')}>
+            {item.picture && <span className="h-20 w-24 sm:h-24 sm:w-32 shrink-0">
+              <LearningPictureArt kind={item.picture} label={isAr ? item.ar : item.en} />
+            </span>}
+            <span className="text-center text-slate-900 dark:text-white">{isAr ? item.ar : item.en}</span>
+          </button>;
+        })}
+      </div>
+      <div aria-live="polite" className="min-h-14">
+        {choice !== null && <p className={'rounded-xl p-4 text-center font-black text-base sm:text-lg ' +
+          (correct ? 'bg-emerald-100 text-emerald-950 dark:bg-emerald-950/60 dark:text-emerald-200' :
+            'bg-white dark:bg-slate-800 text-amber-900 dark:text-amber-200')}>
+          {correct ? (isAr ? 'أحسنت! إجابة رائعة. صقر فخور بمحاولتك.' : 'Well done! Great thinking. Saqr is proud of your effort.') :
+            (isAr ? 'محاولة جميلة! اقرأ السؤال واختار مرة تانية.' : 'Nice try! Read the question and choose again.')}
+        </p>}
+      </div>
+      {correct && <button type="button" onClick={() => { setQuestionId(null); setChoice(null); play(nextIndex); }}
+        className="w-full min-h-14 rounded-2xl bg-emerald-700 hover:bg-emerald-800 px-6 py-4 font-black text-white text-lg focus-visible:outline-4 focus-visible:outline-sky-400">
+        {isAr ? (nextIndex >= lines.length ? 'شوف إنجازك' : 'كمّل الحكاية مع صقر') :
+          (nextIndex >= lines.length ? 'See your achievement' : 'Continue the story with Saqr')}
+      </button>}
+    </section>}
+
+    {finished && <section aria-live="polite" className="rounded-[1.9rem] border-2 border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/20 p-6 sm:p-9 text-center space-y-4">
+      <div className="mx-auto h-32 w-40"><LearningPictureArt kind={cover} label={isAr ? 'انتهت القصة' : 'Story complete'} /></div>
+      <h3 className="text-2xl sm:text-3xl font-black">{isAr ? 'برافو! خلصت مغامرتك مع صقر' : 'Hooray! You finished your Saqr adventure'}</h3>
+      <p className="font-bold text-lg text-emerald-800 dark:text-emerald-200">
+        {isAr ? 'جاوبت على ' : 'You answered '}{answeredCount}{isAr ? ' أسئلة من ' : ' of '}{storyQuestions.length}{isAr ? ' أسئلة.' : ' questions.'}
+      </p>
+      <button type="button" onClick={resetProgress} className="min-h-14 rounded-2xl bg-emerald-700 text-white px-7 py-4 font-black text-lg">
+        {isAr ? 'أعيد المغامرة' : 'Play the story again'}
+      </button>
+    </section>}
     <div className="rounded-2xl bg-emerald-50 dark:bg-slate-900 p-4 sm:p-5 border border-emerald-100 dark:border-emerald-800 space-y-3">
       <div className="flex flex-wrap items-center gap-2 sm:gap-3">
         <button type="button" disabled={voiceSource === 'azure' ? azureReady !== 'ready' : !available} onClick={() => play()}
