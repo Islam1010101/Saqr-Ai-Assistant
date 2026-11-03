@@ -219,3 +219,15 @@ for (const [key,arr] of Object.entries(anomalies)){
   console.log('EFIPS_AUDIT_'+key.toUpperCase()+'_COUNT '+arr.length);
   console.log('EFIPS_AUDIT_'+key.toUpperCase()+'_SAMPLE '+JSON.stringify(arr.slice(0,key==='review'?125:key==='highRiskMisclassification'?140:50)));
 }
+
+
+// Final whole-catalog data quality: ISBN-10 and ISBN-13 checksums are both legitimate.
+const validIsbn=(isbn:string)=>{
+  const compact=isbn.replace(/[\s-]/g,'').toUpperCase();
+  if(/^\d{13}$/.test(compact))return [...compact].reduce((sum,d,i)=>sum+Number(d)*(i%2===0?1:3),0)%10===0;
+  if(/^\d{9}[\dX]$/.test(compact))return [...compact].reduce((sum,d,i)=>sum+(10-i)*(d==='X'?10:Number(d)),0)%11===0;
+  return false;
+};
+const invalidIsbnRecords=bookData.filter(b=>b.isbn&&!validIsbn(b.isbn));
+console.log('EFIPS_AUDIT_ISBN_BAD_CHECKSUM '+JSON.stringify(invalidIsbnRecords.map(b=>({id:b.id,title:b.title,isbn:b.isbn}))));
+console.log('EFIPS_AUDIT_GENERAL_KNOWLEDGE_RECORDS '+JSON.stringify(bookData.filter(b=>b.subject==='General Knowledge').map(b=>({id:b.id,title:b.title,author:b.author,shelf:b.shelf}))));
