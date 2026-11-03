@@ -137,3 +137,127 @@ assert.equal(bookData.filter(b=>oldGenres.has(b.subject)).length,0,
 console.log('GENRE_AUDIT_TOTAL',bookData.length);
 console.log('GENRE_AUDIT_COUNTS',JSON.stringify(counts));
 console.log('PASS: full physical catalog scanned, genres verified and other records preserved');
+
+
+
+const findOneId=(id:string)=>{const b=bookData.find(x=>x.id===id);assert.ok(b,'Missing library book ID '+id);return b!;};
+for(const [id,subject] of [
+ ['5-2-1228','Business & Management'],
+ ['5-3-1249','Economics & Finance'],
+ ['5-4-1278','General Nonfiction'],
+ ['5-4-1284','Biography & Memoirs'],
+ ['19-1-1525','Sports Fiction'],
+ ['19-1-1536','Mystery & Detective Fiction'],
+ ['19-4-1593','Mystery & Detective Fiction'],
+ ['19-6-1635','Literary & Psychological Fiction'],
+ ['14-3-1803','Historical Fiction'],
+ ['14-3-1805','Children’s Stories'],
+ ['14-6-1880','Historical Fiction'],
+ ['20-5-2118','Short Stories & Anthologies'],
+ ['18-2-2311','Realistic & Family Fiction'],
+ ['18-3-2362','Crime & Thriller Fiction'],
+ ['18-5-2409','Biography & Memoirs'],
+ ['16-3-2670','Mystery & Detective Fiction'],
+ ['16-5-2727','Crime & Thriller Fiction'],
+ ['17-2-3154','Literary & Psychological Fiction'],
+ ['17-3-3181','Mystery & Detective Fiction'],
+ ['17-4-3196','Literary & Psychological Fiction'],
+ ['19-4-1599','Romance Fiction'],
+ ['18-4-2368','Romance Fiction'],
+ ['18-3-2342','Mystery & Detective Fiction'],
+ ['12-6-1719','Short Stories & Anthologies']
+] as const) assert.equal(findOneId(id).subject,subject,'Verified genre: '+id);
+assert.equal(findOneId('5-3-1249').author,'Sherry S. Cooper');
+assert.equal(findOneId('18-5-2409').author,'Christopher De Vinck');
+assert.equal(findOneId('17-4-3196').author,'R. L. Gordon');
+assert.equal(findOneId('17-3-3181').title,'Mrs. Pollifax Unveiled');
+assert.equal(findOneId('uploaded-20261028-002').title,'الاسم الحركي نبضة');
+assert.equal(findOneId('uploaded-20261028-002').subject,'Children’s Stories');
+assert.equal(findOneId('addition-20261026-57').subject,'Biography & Memoirs');
+assert.equal(findOneId('addition-20261026-64').subject,'Children’s Stories');
+assert.equal(findOneId('shelf40-20261027-010').subject,'Education & Teaching');
+assert.equal(findOneId('21-1-2451').author,'Victor Malarek');
+assert.equal(findOneId('12-1-1653').subject,'Catalog Review Required');
+
+assert.equal(findOneId('17-3-3181').author,'Dorothy Gilman');
+assert.equal(findOneId('19-2-1564').author,'Lynda Trent');
+assert.equal(findOneId('16-2-2655').subject,'Biography & Memoirs');
+assert.equal(findOneId('17-2-3160').title,'A Difficulty with Dwarves');
+assert.equal(findOneId('16-5-2737').author,'Page Cooper (editor)');
+assert.equal(findOneId('addition-20261026-35').subject,'Literary & Psychological Fiction');
+assert.equal(findOneId('addition-20261026-62').subject,'Realistic & Family Fiction');
+assert.equal(findOneId('shelf40-20261027-018').subject,'Short Stories & Anthologies');
+assertSubject('Anna Dillon : Another Time, Another Season','Historical Fiction');
+assertSubject('Dark Winds','Horror & Gothic Fiction');
+for(const [id,subject] of [
+ ['21-1-2446','Sociology & Society'],
+ ['21-1-2470','Crime & Thriller Fiction'],
+ ['21-3-2503','Biography & Memoirs'],
+ ['21-4-2538','History & Civilizations'],
+ ['21-5-2560','Environment & Sustainability'],
+ ['21-6-2595','Law & Government'],
+ ['18-3-2354','Crafts & Hobbies'],
+ ['addition-20261026-37','Children’s Stories'],
+ ['addition-20261026-45','Astronomy & Space'],
+ ['addition-20261026-50','Biography & Memoirs'],
+ ['addition-20261026-54','UAE Heritage & Culture'],
+ ['shelf40-20261027-006','Humorous Fiction'],
+ ['shelf40-20261027-032','Catalog Review Required'],
+ ['shelf40-20261027-083','Catalog Review Required'],
+ ['shelf30-20261028-045','Children’s Stories'],
+ ['uploaded-20261028-001','Children’s Stories']
+] as const)assert.equal(findOneId(id).subject,subject,'Whole-inventory correction: '+id);
+assert.equal(bookData.filter(b=>b.subject==='General Knowledge').length,0,
+  'Clearly identified catalog works should not remain in an unspecific general subject');
+
+
+for(const [id,genre] of [
+ ['shelf30-20261028-012','Animals & Nature'],
+ ['shelf30-20261028-036','Children’s Stories'],
+ ['shelf30-20261028-027','Dictionaries & Encyclopedias'],
+ ['shelf40-20261027-016','Biography & Memoirs'],
+ ['shelf40-20261027-077','Fantasy Fiction'],
+ ['shelf40-20261027-081','Fantasy Fiction']
+] as const) assert.equal(findOneId(id).subject,genre,'Correct shelf 30/40: '+id);
+const id22Books=bookData.filter(b=>b.id.startsWith('shelf22-20261028-'));
+assert.ok(id22Books.length>=200,'Whole Disney shelf must be scanned');
+assert.ok(id22Books.every(b=>b.subject!=='General Knowledge'&&b.subject!=='General Nonfiction'),
+ 'No shelf-22 storybooks may remain under broad general knowledge');
+assert.ok(bookData.filter(b=>b.subject==='Catalog Review Required').length<110,
+ 'The remaining bibliography review queue must decrease');
+console.log('EFIPS_AUDIT_VALIDATED_SOURCE_SHELF22',id22Books.length);
+console.log('EFIPS_AUDIT_REVIEW_QUEUE_FINAL',bookData.filter(b=>b.subject==='Catalog Review Required').length);
+
+const categoryCounts=Object.fromEntries([...new Set(bookData.map(b=>b.subject))].sort().map(k=>[k,bookData.filter(b=>b.subject===k).length]));
+const anomalies={
+  review:bookData.filter(b=>b.subject==='Catalog Review Required').map(b=>({id:b.id,title:b.title,author:b.author,shelf:b.shelf,row:b.row})),
+  unknownAuthor:bookData.filter(b=>/^(unknown author|مؤلف غير معروف|غير محدد|unknown)$/i.test(b.author)).map(b=>({id:b.id,title:b.title,subject:b.subject,shelf:b.shelf})),
+  mismatchedLanguage:bookData.filter(b=>b.language==='EN'&&/[\u0600-\u06ff]/.test(b.title)).map(b=>({id:b.id,title:b.title,language:b.language})),
+  placeholderTitles:bookData.filter(b=>/(author name only|^unknown$|^untitled$|^\?+$|^[. ]+$|^gree\.{3}|^robin cook$)/i.test(b.title)).map(b=>({id:b.id,title:b.title,subject:b.subject})),
+  authorGenreMismatch:bookData.filter(b=>/\b(?:grisham|dickens|tolkien|stephen king|asimov|jane austen|shakespeare|nora roberts|james patterson|clive cussler)\b/i.test(b.author)&&!/fiction|stories|theatre|plays|poetry|mystery|adventure|fantasy|science fiction|romance|crime|thriller|western|historical|humorous|dystopian|comics|sports|review/i.test(b.subject)).map(b=>({id:b.id,title:b.title,author:b.author,subject:b.subject})),
+  highRiskMisclassification:bookData.filter(b=>
+     /^(Medicine & Healthcare|Mathematics & Statistics|Law & Government|Politics & International Relations|History & Civilizations|Sports & Games|Animals & Nature|Music & Performing Arts|Geography & Travel|Parenting & Family|General Knowledge|General Nonfiction|General Reference|Education & Teaching|UAE Heritage & Culture)$/.test(b.subject) &&
+     /\b(novel|fiction|mystery|short stories|stories|adventures|tales|haunted|detective|romance|fantasy|thriller|poems|diary of|sherlock|narnia|harry potter|wonderland|goosebumps|murder|killed|pirates|frankenstein|sherlock holmes|book thief|gothic|dystopi)\b/i.test(b.title)
+  ).map(b=>({id:b.id,title:b.title,author:b.author,subject:b.subject})),
+  exactDuplicateIds:bookData.filter((b,i)=>bookData.findIndex(x=>x.id===b.id)!==i).map(b=>b.id),
+  malformedISBN:bookData.filter(b=>b.isbn&&!(/^\d{9}[\dX]$/i.test(b.isbn)||/^\d{13}$/.test(b.isbn))).map(b=>({id:b.id,title:b.title,isbn:b.isbn})),
+  flagNeedsReview:bookData.filter(b=>b.needsReview).map(b=>({id:b.id,title:b.title,author:b.author,subject:b.subject}))
+};
+console.log('EFIPS_AUDIT_DISTRIBUTION '+JSON.stringify(categoryCounts));
+for (const [key,arr] of Object.entries(anomalies)){
+  console.log('EFIPS_AUDIT_'+key.toUpperCase()+'_COUNT '+arr.length);
+  console.log('EFIPS_AUDIT_'+key.toUpperCase()+'_SAMPLE '+JSON.stringify(arr.slice(0,key==='review'?125:key==='highRiskMisclassification'?140:50)));
+}
+
+
+// Final whole-catalog data quality: ISBN-10 and ISBN-13 checksums are both legitimate.
+const validIsbn=(isbn:string)=>{
+  const compact=isbn.replace(/[\s-]/g,'').toUpperCase();
+  if(/^\d{13}$/.test(compact))return [...compact].reduce((sum,d,i)=>sum+Number(d)*(i%2===0?1:3),0)%10===0;
+  if(/^\d{9}[\dX]$/.test(compact))return [...compact].reduce((sum,d,i)=>sum+(10-i)*(d==='X'?10:Number(d)),0)%11===0;
+  return false;
+};
+const invalidIsbnRecords=bookData.filter(b=>b.isbn&&!validIsbn(b.isbn));
+assert.equal(invalidIsbnRecords.length,0,'All candidate ISBN-10/ISBN-13 entries must pass check digit validation');
+console.log('EFIPS_AUDIT_ISBN_BAD_CHECKSUM '+JSON.stringify(invalidIsbnRecords.map(b=>({id:b.id,title:b.title,isbn:b.isbn}))));
+console.log('EFIPS_AUDIT_GENERAL_KNOWLEDGE_RECORDS '+JSON.stringify(bookData.filter(b=>b.subject==='General Knowledge').map(b=>({id:b.id,title:b.title,author:b.author,shelf:b.shelf}))));
