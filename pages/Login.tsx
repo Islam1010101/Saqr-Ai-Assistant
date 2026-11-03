@@ -306,15 +306,8 @@ export default function Login() {
             </div>
           </header>
 
-          {/* Google-only entry: the notice is informational and never accepts typed email. */}
+          {/* Google-only entry; school eligibility remains enforced by OAuth and backend. */}
           <div className="space-y-5 animate-fade-in">
-            <p className="efips-school-email-notice mx-auto flex w-full items-center justify-center gap-2.5 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-3 text-center text-sm sm:text-base font-black leading-[1.9] text-emerald-900 shadow-sm">
-              <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0 text-[#00843D]" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <rect x="4" y="11" width="16" height="10" rx="2" />
-                <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-              </svg>
-              <span>{lang === 'ar' ? 'الدخول باستخدام البريد الإلكتروني الخاص بالمدرسة فقط' : 'Sign in using your school email account only'}</span>
-            </p>
             {error && <div role="alert" className="bg-rose-50 border-2 border-rose-200 text-rose-700 p-3 rounded-2xl text-xs md:text-sm font-bold text-center">{error}</div>}
             <div className="relative group">
               <div aria-hidden="true" className="efips-login-button-glow pointer-events-none absolute -inset-1 rounded-[1.8rem] bg-gradient-to-r from-emerald-400/25 via-teal-400/25 to-sky-400/20 blur-md opacity-20 transition-opacity duration-500 group-hover:opacity-60" />
