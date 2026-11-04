@@ -74,12 +74,24 @@ assert.ok(login.includes("prefers-reduced-motion:reduce"), 'Animations must hono
 assert.ok(login.includes("className=\"efips-login-title mt-4"), 'Keep centered responsive login title immediately under Saqr');
 const hero = login.slice(login.indexOf('          {/* The sign-in header'), login.indexOf('          {/* Google-only entry'));
 assert.ok(hero.includes('src="/SAQR%20ENTER.png"'), 'The requested Saqr Enter PNG must be used');
-assert.ok(!hero.includes('/school-logo.png') && !hero.includes('بوابة مكتبة صقر الإمارات') &&
+assert.ok(hero.includes('src="/school-logo.png"') && hero.includes('efips-entry-school-watermark') &&
+  hero.includes('opacity-[0.15]'), 'Use only the existing school crest as a subtle watermark behind Saqr');
+assert.ok(!hero.includes('بوابة مكتبة صقر الإمارات') &&
   !hero.includes('أهلاً بعودتك!') && !hero.includes('EFIPS LIBRARY PORTAL'),
-  'Remove the old sign-in heading, school crest and extra marketing copy ONLY from the right-hand header');
+  'Do not reintroduce old marketing headers into the right-hand hero');
 assert.equal((hero.match(/<svg /g) || []).length, 4, 'Four Emirati heritage SVG icons appear on tap');
 assert.ok(hero.includes('onClick={handleEntrySaqrClick}'), 'Saqr image is keyboard/click accessible');
 assert.ok(login.includes('window.clearTimeout(entryWelcomeTimeoutRef.current)') &&
   login.includes('setEntryWelcomeVisible(false)'), 'Welcome automatically disappears and timers clean up');
 assert.ok(!hero.includes('onClick={() => void handleSchoolGoogleLogin()}'), 'Separate interactive mascot from Google authorization');
+
+const partnerBlock = login.slice(login.indexOf('efips-login-partners mt-5'), login.indexOf('</nav>', login.indexOf('efips-login-partners mt-5')));
+const orderedLinks = [...partnerBlock.matchAll(/href="([^"]+)"/g)].map(match => match[1]);
+assert.deepEqual(orderedLinks,['https://www.moe.gov.ae/','https://www.cognia.org/','https://www.adek.gov.ae/'],
+  'Partner logos must retain Ministry (right), Cognia (center), ADEK (left) with a fixed RTL grid');
+assert.ok(partnerBlock.includes('dir="rtl"') && (partnerBlock.match(/<img /g) || []).length === 3,
+  'All three partner links must display a logo and fixed right-to-left ordering');
+assert.ok(login.includes('from-white/65 via-white/55 to-sky-50/60') &&
+  !login.includes('via-emerald-50/85 to-white/80 backdrop-blur-[1px]'),
+  'Video must be more visible through a neutral, unblurred overlay');
 console.log('PASS: centered Saqr Enter art, interactive Emirati heritage welcome and unchanged school OAuth');
