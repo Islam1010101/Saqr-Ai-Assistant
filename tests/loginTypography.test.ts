@@ -60,7 +60,9 @@ assert.ok(!login.includes('text-transparent bg-clip-text bg-gradient-to-r from-b
 // logos within the visible viewport; mobile layouts keep natural scrolling.
 line('@media (min-width:1024px) and (min-height:600px)');
 line('height:min(790px, calc(100dvh - 28px))!important;');
-line('.efips-login-partner img {height:clamp(36px,6dvh,56px)!important;}');
+line('.efips-login-partner img {height:clamp(56px,9dvh,86px)!important;}');
+line('justify-content:space-evenly!important;');
+line('height:min(790px, calc(100dvh - 28px))!important;');
 assert.ok(app.includes("['/', '/saqr-learning'].includes(location.pathname) ? 'lg:hidden'"),
   'The shared footer must not add desktop scroll to login or Saqr learning');
 
