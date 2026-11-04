@@ -171,19 +171,19 @@ export default function Login() {
 
   return (
     <div 
-      className="min-h-[100dvh] bg-[#f0f4f8] bg-[url('/bg-pattern-light.svg')] flex items-start justify-center px-3 pb-6 pt-20 sm:px-6 sm:pb-8 sm:pt-24 lg:pt-20 font-sans selection:bg-emerald-500 selection:text-white transition-colors duration-500 relative" 
+      className="efips-login-page min-h-[100dvh] bg-[#f0f4f8] bg-[url('/bg-pattern-light.svg')] flex items-start justify-center px-3 pb-6 pt-20 sm:px-6 sm:pb-8 sm:pt-24 lg:pt-20 font-sans selection:bg-emerald-500 selection:text-white transition-colors duration-500 relative" 
       dir={lang === 'ar' ? 'rtl' : 'ltr'}
     >
       {/* 🌐 أزرار تغيير اللغة في أعلى الشاشة */}
-      <div className={`absolute top-6 ${lang === 'ar' ? 'left-6' : 'right-6'} flex items-center gap-2 z-50`}>
+      <div className={`efips-login-language absolute top-6 ${lang === 'ar' ? 'left-6' : 'right-6'} flex items-center gap-2 z-50`}>
           <button onClick={() => setLang('ar')} className={`px-4 py-1.5 rounded-full font-bold text-xs md:text-sm border-2 transition-all ${lang === 'ar' ? 'bg-blue-600 border-blue-600 text-white shadow-md' : 'bg-white border-slate-300 text-slate-600 hover:border-blue-400'}`}>العربية</button>
           <button onClick={() => setLang('en')} className={`px-4 py-1.5 rounded-full font-bold text-xs md:text-sm border-2 transition-all ${lang === 'en' ? 'bg-indigo-600 border-indigo-600 text-white shadow-md' : 'bg-white border-slate-300 text-slate-600 hover:border-indigo-400'}`}>English</button>
       </div>
 
-      <div className="max-w-5xl w-full bg-white/90 backdrop-blur-xl border border-slate-200 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col lg:flex-row z-10">
+      <div className="efips-login-frame max-w-[1180px] w-full bg-white/95 backdrop-blur-xl border border-emerald-100 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col lg:flex-row z-10">
         
         {/* ================= القسم الأول: الهوية البصرية وصقر (مع خلفية الفيديو العشوائية) ================= */}
-        <div className="lg:w-1/2 min-w-0 px-4 py-6 sm:px-8 sm:py-8 lg:px-8 xl:px-10 lg:py-9 flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br from-blue-50/50 to-slate-100/50 border-b lg:border-b-0 lg:border-l border-slate-200">
+        <div className="efips-login-brand-panel lg:w-1/2 min-w-0 px-4 py-6 sm:px-8 sm:py-8 lg:px-8 xl:px-10 lg:py-9 flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br from-emerald-50/80 to-sky-50/70 border-b lg:border-b-0 lg:border-l border-emerald-100">
           
           {/* Muted inline playback with Safari resume and a static background fallback. */}
           <div className="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden bg-gradient-to-br from-blue-100 to-slate-200">
@@ -203,7 +203,7 @@ export default function Login() {
               />
             )}
             {/* طبقة تفتيح خفيفة لضمان وضوح الشعار والنصوص وشخصية صقر فوق الفيديو */}
-            <div className="absolute inset-0 bg-gradient-to-br from-white/75 via-white/65 to-blue-50/75 backdrop-blur-[1px]"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-white/88 via-emerald-50/85 to-white/80 backdrop-blur-[1px]"></div>
           </div>
 
           <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
@@ -211,7 +211,7 @@ export default function Login() {
             <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-indigo-400/10 rounded-full blur-[80px] animate-pulse-slow"></div>
           </div>
 
-          <div className="relative z-10 mb-5 flex w-full flex-col items-center justify-center gap-2 text-center">
+          <div className="efips-login-school relative z-10 mb-5 flex w-full flex-col items-center justify-center gap-2 text-center">
             <div className="relative group shrink-0">
               <div className="absolute inset-0 -z-10 rounded-full bg-blue-100 blur-xl transition-all duration-500 group-hover:bg-blue-200"></div>
               <img
@@ -266,7 +266,7 @@ export default function Login() {
           </div>
 
           {/* شخصية صقر التفاعلية مع ظهور علم الإمارات عند الضغط */}
-          <div onClick={handleSaqrClick} className="relative z-10 mt-1 mb-2 lg:mb-0 w-36 h-36 sm:w-48 sm:h-48 md:w-56 md:h-56 flex items-center justify-center cursor-pointer group">
+          <div onClick={handleSaqrClick} className="efips-login-brand-mascot relative z-10 mt-1 mb-2 lg:mb-0 w-32 h-32 sm:w-44 sm:h-44 md:w-52 md:h-52 flex items-center justify-center cursor-pointer group">
             <div className="absolute bottom-0 w-3/4 h-6 bg-slate-300/40 rounded-[100%] blur-md"></div>
             
             {showFlag && (
@@ -285,7 +285,7 @@ export default function Login() {
         </div>
 
         {/* ================= القسم الثاني: نموذج تسجيل الدخول ================= */}
-        <div className="lg:w-1/2 min-w-0 px-5 pt-7 pb-8 sm:px-8 sm:pt-8 sm:pb-9 lg:px-8 lg:pt-8 xl:px-12 flex flex-col justify-start bg-white relative z-10">
+        <div className="efips-login-signin lg:w-1/2 min-w-0 px-5 pt-7 pb-8 sm:px-8 sm:pt-8 sm:pb-9 lg:px-8 lg:pt-8 xl:px-12 flex flex-col justify-start bg-white relative z-10">
           {/* The sign-in header intentionally contains only the original Saqr
               entrance artwork and the localized title. Heritage appears on click. */}
           <header className="efips-login-hero relative mb-5 flex w-full min-w-0 flex-col items-center justify-center text-center">
@@ -351,7 +351,7 @@ export default function Login() {
                 type="button"
                 onClick={() => void handleSchoolGoogleLogin()}
                 disabled={loading}
-                className="relative w-full min-h-16 flex items-center justify-center gap-3 overflow-hidden rounded-[1.5rem] border border-white/30 bg-gradient-to-r from-[#08795E] via-[#087D77] to-[#197AA1] hover:from-[#066348] hover:via-[#076A64] hover:to-[#12698D] px-4 py-4 text-white text-base md:text-lg font-black shadow-lg shadow-emerald-600/15 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl active:translate-y-0 active:scale-[.99] disabled:cursor-wait disabled:opacity-70 disabled:transform-none focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-400"
+                className="efips-login-google-button relative w-full min-h-16 flex items-center justify-center gap-3 overflow-hidden rounded-[1.5rem] border border-white/30 bg-gradient-to-r from-[#08795E] via-[#087D77] to-[#197AA1] hover:from-[#066348] hover:via-[#076A64] hover:to-[#12698D] px-4 py-4 text-white text-base md:text-lg font-black shadow-lg shadow-emerald-600/15 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl active:translate-y-0 active:scale-[.99] disabled:cursor-wait disabled:opacity-70 disabled:transform-none focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-400"
               >
                 <span aria-hidden="true" className="efips-login-button-shine pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 <svg width="26" height="26" viewBox="0 0 48 48" aria-hidden="true" className="relative z-10 shrink-0 rounded-full bg-white p-1">
@@ -471,6 +471,81 @@ export default function Login() {
         .efips-entry-saqr:focus-visible { border-radius:1rem; }
         .efips-login-button-shine {
           background: linear-gradient(115deg,transparent 15%,rgba(255,255,255,.20) 50%,transparent 85%);
+        }
+        /* Refined split-screen identity on desktop and an efficient, readable
+           stacked flow on phones. All interactive artwork and school OAuth remain active. */
+        .efips-login-page,.efips-login-page * { font-family:'Cairo',sans-serif!important; }
+        .efips-login-page {
+          isolation:isolate;
+          background:
+            radial-gradient(circle at 13% 18%,rgba(16,185,129,.16),transparent 32%),
+            radial-gradient(circle at 88% 82%,rgba(14,165,233,.11),transparent 35%),
+            linear-gradient(140deg,#f0f9f5,#eef5f6 55%,#f8fafc);
+          padding-top:74px!important;
+        }
+        .efips-login-frame {
+          position:relative;
+          box-shadow:0 28px 85px rgba(4,65,52,.14);
+          border-color:rgba(14,121,92,.14);
+        }
+        .efips-login-brand-panel {
+          isolation:isolate;
+          border-color:rgba(14,121,92,.12);
+        }
+        .efips-login-brand-panel::after {
+          content:'';position:absolute;z-index:20;inset:0 0 auto;
+          height:5px;pointer-events:none;
+          background:linear-gradient(90deg,#ce1126 0 22%,#00843d 22% 57%,#f8fafc 57% 79%,#0f172a 79%);
+        }
+        .efips-login-school {gap:10px;}
+        .efips-login-signin {background:#fff;align-items:center;}
+        .efips-login-signin > * {width:100%;max-width:450px;}
+        .efips-login-title {text-shadow:none;}
+        .efips-login-google-button {box-shadow:0 14px 28px rgba(8,115,86,.16);}
+        .efips-login-language {border:1px solid #d6ebe2;background:rgba(255,255,255,.9);border-radius:999px;padding:4px;box-shadow:0 6px 20px rgba(5,75,61,.07);}
+        .efips-login-language button {min-height:37px;}
+        .efips-login-brand-panel .efips-brand-heading {color:#075f4c;}
+        .efips-login-brand-panel .efips-brand-subtitle {color:#355d57;}
+        @media (min-width:1024px) {
+          .efips-login-page {align-items:center;padding-block:60px 34px!important;padding-inline:26px!important;}
+          .efips-login-frame {min-height:min(760px,calc(100dvh - 100px));}
+          .efips-login-brand-panel {width:54%!important;padding:42px 42px 34px!important;}
+          .efips-login-signin {width:46%!important;justify-content:center!important;padding:45px 44px!important;}
+          .efips-login-brand-mascot {width:210px;height:210px;}
+          .efips-login-hero {margin-bottom:24px;}
+        }
+        @media (min-width:640px) and (max-width:1023px) {
+          .efips-login-frame {max-width:730px;}
+          .efips-login-brand-panel {padding-block:25px 14px!important;}
+          .efips-login-brand-mascot {width:145px!important;height:140px!important;}
+          .efips-login-signin {padding:25px 55px 35px!important;}
+          .efips-entry-saqr {width:200px!important;height:205px!important;}
+        }
+        @media (max-width:639px) {
+          .efips-login-page {padding:62px 10px 15px!important;align-items:flex-start!important;}
+          .efips-login-language {top:10px!important;left:auto;right:12px;gap:2px;}
+          .efips-login-language button {padding:6px 12px;min-height:34px;font-size:12px;}
+          .efips-login-frame {border-radius:25px!important;box-shadow:0 16px 45px rgba(4,65,52,.13);}
+          .efips-login-brand-panel {padding:17px 17px 10px!important;}
+          .efips-login-school {flex-direction:row!important;gap:12px!important;text-align:start!important;margin-bottom:10px!important;}
+          .efips-login-school img {width:54px!important;height:54px!important;}
+          .efips-login-school h2 {font-size:11px!important;white-space:normal!important;line-height:1.5!important;text-align:start!important;}
+          .efips-brand-heading {font-size:clamp(21px,5.8vw,28px)!important;line-height:1.4!important;margin-bottom:4px!important;}
+          .efips-brand-heading-line {padding-block:0;}
+          .efips-brand-subtitle-container {min-height:0!important;white-space:normal!important;max-width:360px;}
+          .efips-brand-subtitle {font-size:12.5px!important;line-height:1.7!important;white-space:normal!important;
+            width:100%;max-width:100%;flex-shrink:1;text-wrap:balance;transform:none!important;}
+          .efips-login-brand-mascot {width:92px!important;height:85px!important;margin:3px auto 0!important;}
+          .efips-login-signin {padding:13px 20px 23px!important;}
+          .efips-login-hero {margin-bottom:13px!important;}
+          .efips-entry-saqr {width:125px!important;height:127px!important;}
+          .efips-login-title {margin-top:1px!important;font-size:26px!important;line-height:1.85!important;}
+          .efips-login-google-button {min-height:59px!important;font-size:15px!important;border-radius:19px!important;}
+        }
+        @media (max-width:375px) {
+          .efips-login-brand-panel {padding-inline:12px!important;}
+          .efips-login-signin {padding-inline:14px!important;}
+          .efips-login-school h2 {font-size:10px!important;}
         }
         @media(prefers-reduced-motion:reduce) {
           .efips-heritage-burst,.efips-heritage-burst > svg { animation:none!important; opacity:1!important; transform:none!important; }
