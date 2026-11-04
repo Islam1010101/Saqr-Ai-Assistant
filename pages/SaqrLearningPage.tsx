@@ -22,7 +22,7 @@ type Feature = {
 const features: Feature[] = [
   {
     key: 'read_together', ar: 'اقرأ معي', en: 'Read with me',
-    hintAr: 'اسمع حمدان وجاوب على أسئلة القصة', hintEn: 'Listen and answer little story questions',
+    hintAr: 'اسمع صقر وجاوب على أسئلة القصة', hintEn: 'Listen and answer little story questions',
     color: 'from-[#1489CF] to-[#45B7E8]', baseColor: 'bg-sky-50 dark:bg-sky-950/30', border: 'border-[#176C9B]'
   },
   {
