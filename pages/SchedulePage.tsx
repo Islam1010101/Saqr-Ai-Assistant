@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useLanguage } from '../App';
 // 🚀 استيراد الاتصال من الملف المركزي بدلاً من كتابته هنا
 import { supabase } from '../src/utils/supabase';
@@ -15,7 +16,7 @@ const translations = {
         grade: "الصف / الفصل",
         saveBtn: "حجز / تعديل الحصة",
         deleteBtn: "حذف الحصة",
-        printBtn: "طباعة الجدول المعتمد ",
+        printBtn: "طباعة الجدول",
         myScheduleBtn: " تحميل جدولي الشخصي ",
         modalTitle: "تحديث جدول الحصة",
         close: "إلغاء",
@@ -30,7 +31,7 @@ const translations = {
         loading: "جاري تحميل جدول الحصص...",
         schoolNameAr: "مدرسة صقر الإمارات الدولية الخاصة",
         schoolNameEn: "Emirates Falcon International Private School",
-        printHeader: "الجدول الزمني المعتمد لزيارات المكتبة المدرسية",
+        printHeader: "جدول زيارات المكتبة المدرسية",
         librarianSign: "اعتماد أمين المكتبة",
         managementSign: "توقيع الإدارة المدرسية",
         accessDenied: "عذراً، هذه الصفحة مخصصة للمعلمين وإدارة المدرسة فقط."
@@ -61,7 +62,7 @@ const translations = {
         loading: "Loading schedule...",
         schoolNameAr: "مدرسة صقر الإمارات الدولية الخاصة",
         schoolNameEn: "Emirates Falcon International Private School",
-        printHeader: "Certified Library Visit Timetable",
+        printHeader: "Library Visit Timetable",
         librarianSign: "Librarian Approval",
         managementSign: "Management Signature",
         accessDenied: "Sorry, this page is for teachers and school administration only."
@@ -346,62 +347,51 @@ const SchedulePage: React.FC = () => {
             <div className="absolute top-10 left-0 sm:left-10 w-56 sm:w-72 h-56 sm:h-72 bg-teal-400/10 dark:bg-teal-400/5 rounded-full blur-3xl pointer-events-none print:hidden" aria-hidden="true" />
             <div className="absolute bottom-10 right-0 sm:right-10 w-64 sm:w-96 h-64 sm:h-96 bg-purple-400/10 dark:bg-purple-400/5 rounded-full blur-3xl pointer-events-none print:hidden" aria-hidden="true" />
 
-            {/* Printable schedule remains separate so print output is not affected by screen layout. */}
-            <div id="printable-schedule" className="hidden print:flex flex-col bg-white text-black w-full h-[210mm] max-h-[210mm] mx-auto box-border overflow-hidden">
-                <div className="flex justify-between items-center border-b-2 border-black pb-2 mb-2 gap-3">
-                    <div className="flex items-center gap-2 min-w-0">
-                        <img src="/school-logo.png" alt="EFIPS Logo" className="w-12 h-12 object-contain shrink-0" crossOrigin="anonymous" />
-                        <div className="min-w-0">
-                            <h2 className="text-sm font-black text-black m-0 p-0 leading-tight">{isAr ? t('schoolNameAr') : t('schoolNameEn')}</h2>
+            {/* Render the paper-only timetable outside the app root so print never
+                includes navigation bars, site decorations, or extra pages. */}
+            {createPortal(
+                <section id="printable-schedule" className="efips-schedule-print" dir={dir} aria-label={t('printHeader')}>
+                    <header className="schedule-print-heading">
+                        <div className="schedule-print-school">
+                            <strong>{t('schoolNameAr')}</strong>
+                            <span dir="ltr">{t('schoolNameEn')}</span>
                         </div>
-                    </div>
-                    <div className="text-center min-w-0">
-                        <h1 className="text-base font-black uppercase text-black border-2 border-black py-1 px-4 rounded-lg m-0">{t('printHeader')}</h1>
-                    </div>
-                    <div className="text-left shrink-0">
-                        <p className="text-[10px] font-bold text-black m-0">{new Date().toLocaleDateString()}</p>
-                    </div>
-                </div>
-                <div className="flex-1 overflow-hidden">
-                    <table className="w-full border-collapse border-2 border-black text-[10px] table-fixed h-full">
-                        <thead>
-                            <tr className="bg-gray-200 border-b-2 border-black">
-                                <th className="p-1 border-r border-black text-center font-black w-16">{t('periodLabel')}</th>
-                                {days.map((day, idx) => <th key={idx} className="p-1 border-r border-black text-center font-black">{day}</th>)}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {allPeriods.map((period) => (
-                                <tr key={period} className="border-b border-black h-[11%]">
-                                    <td className="p-1 border-r border-black text-center font-black bg-gray-100 whitespace-nowrap">{t('periodLabel')} {period}</td>
-                                    {days.map((day, dIdx) => {
-                                        const key = `${day}_${period}`;
-                                        const slot = scheduleData[key];
-                                        const isFriday = day === 'الجمعة' || day === 'Friday';
-                                        if (isFriday && period > 4) return <td key={dIdx} className="p-1 border-r border-black text-center align-middle bg-gray-50">-</td>;
-                                        return (
-                                            <td key={dIdx} className="p-1 border-r border-black text-center align-middle overflow-hidden">
-                                                {slot?.teacher ? (
-                                                    <div className="flex flex-col items-center justify-center leading-tight">
-                                                        <div className="font-black text-black truncate max-w-full">{slot.teacher}</div>
-                                                        <div className="font-bold text-gray-800 truncate max-w-full">{slot.subject}</div>
-                                                        <div className="font-bold text-gray-600 truncate max-w-full">{slot.grade}</div>
-                                                    </div>
-                                                ) : <span className="text-gray-300">-</span>}
-                                            </td>
-                                        );
-                                    })}
+                        <h1>{t('printHeader')}</h1>
+                        <time>{new Date().toLocaleDateString(isAr ? 'ar-AE' : 'en-GB')}</time>
+                    </header>
+                    <div className="schedule-print-grid">
+                        <table className="schedule-print-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col" className="schedule-print-period">{t('periodLabel')}</th>
+                                    {days.map((day) => <th scope="col" key={day}>{day}</th>)}
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-                <div className="flex justify-between items-end mt-2 pt-2 border-t-2 border-gray-400 shrink-0">
-                    <div className="text-center w-1/3"><p className="font-black text-[10px] mb-4 m-0">{t('librarianSign')}</p><div className="w-3/4 mx-auto border-b border-black" /></div>
-                    <div className="text-center w-1/3"><p className="font-black text-[10px] mb-4 m-0">{t('managementSign')}</p><div className="w-3/4 mx-auto border-b border-black" /></div>
-                </div>
-            </div>
-
+                            </thead>
+                            <tbody>
+                                {allPeriods.map((period) => (
+                                    <tr key={period}>
+                                        <th scope="row" className="schedule-print-period">{t('periodLabel')} {period}</th>
+                                        {days.map((day) => {
+                                            const slot = scheduleData[`${day}_${period}`];
+                                            const isFriday = day === 'الجمعة' || day === 'Friday';
+                                            return <td key={day}>
+                                                {isFriday && period > 4 ? '—' : slot?.teacher
+                                                    ? <div className="schedule-print-slot">
+                                                        <strong>{slot.teacher}</strong>
+                                                        <span>{slot.subject}</span>
+                                                        <span>{slot.grade}</span>
+                                                      </div>
+                                                    : '—'}
+                                            </td>;
+                                        })}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>,
+                document.body
+            )}
 
             <style>{`
                 /* Feedback-page visual language; scoped to header only. */
@@ -937,11 +927,46 @@ const SchedulePage: React.FC = () => {
                     .schedule-compact-view { display: none; }
                     .schedule-desktop-view { display: block; }
                 }
+                /* A separate body-level print portal guarantees one clean A4 landscape sheet. */
+                .efips-schedule-print { display:none; }
                 @media print {
-                    @page { size: A4 landscape; margin: 5mm; }
-                    body { background: white !important; color: black !important; margin: 0 !important; padding: 0 !important; height: 100vh !important; }
-                    .print\\:hidden { display: none !important; }
-                    .print\\:flex { display: flex !important; }
+                    @page { size:A4 landscape; margin:5mm; }
+                    html,body { margin:0!important; padding:0!important; width:auto!important; height:auto!important;
+                        overflow:visible!important; background:#fff!important; color:#111!important; }
+                    body > :not(#printable-schedule) { display:none!important; }
+                    body > #printable-schedule {
+                        display:flex!important; flex-direction:column; position:relative!important;
+                        box-sizing:border-box!important; width:285mm!important; height:197mm!important;
+                        max-width:none!important; max-height:none!important; overflow:hidden!important;
+                        padding:0!important; margin:0!important; background:white!important; color:#111!important;
+                        font-family:'Cairo',Arial,sans-serif!important;
+                        page-break-before:avoid!important;page-break-after:avoid!important;
+                        page-break-inside:avoid!important;break-inside:avoid!important;
+                        -webkit-print-color-adjust:exact; print-color-adjust:exact;
+                    }
+                    .schedule-print-heading {
+                        display:grid; grid-template-columns:1fr 1.12fr auto; align-items:center;
+                        gap:4mm; min-height:17mm; padding:1mm 1mm 3mm; border-bottom:1.5px solid #1e293b;
+                        margin-bottom:3mm; box-sizing:border-box;
+                    }
+                    .schedule-print-school {display:flex;flex-direction:column;gap:.6mm;min-width:0;line-height:1.3;font-size:9pt;}
+                    .schedule-print-school strong {font-size:10pt;}
+                    .schedule-print-heading h1 {margin:0;text-align:center;font-size:15pt;font-weight:900;line-height:1.5;}
+                    .schedule-print-heading time {font-size:9pt;white-space:nowrap;direction:ltr;}
+                    .schedule-print-grid {flex:1 1 auto; min-height:0;}
+                    .schedule-print-table {border-collapse:collapse;table-layout:fixed;width:100%;height:100%;font-size:9.5pt;}
+                    .schedule-print-table th,.schedule-print-table td {
+                        box-sizing:border-box; border:1px solid #475569; padding:1mm 1.5mm;
+                        text-align:center; vertical-align:middle; overflow-wrap:anywhere; white-space:normal!important;
+                        text-overflow:clip!important; color:#111; line-height:1.3;
+                    }
+                    .schedule-print-table thead {display:table-header-group;}
+                    .schedule-print-table thead th {background:#eaf0ee!important;font-weight:900;height:11mm;font-size:10.5pt;}
+                    .schedule-print-table .schedule-print-period {width:25mm;font-weight:900;background:#f3f5f4!important;}
+                    .schedule-print-table tbody tr {height:12.5%;break-inside:avoid;page-break-inside:avoid;}
+                    .schedule-print-slot {display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.7mm;max-width:100%;}
+                    .schedule-print-slot strong {display:block;font-weight:900;font-size:10pt;line-height:1.35;}
+                    .schedule-print-slot span {display:block;font-weight:600;font-size:9pt;line-height:1.3;}
                 }
                 @keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
                 .animate-fade-in { animation: fade-in 0.2s ease-out; }
