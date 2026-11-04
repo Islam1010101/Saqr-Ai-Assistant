@@ -203,7 +203,7 @@ export default function Login() {
               />
             )}
             {/* طبقة تفتيح خفيفة لضمان وضوح الشعار والنصوص وشخصية صقر فوق الفيديو */}
-            <div className="absolute inset-0 bg-gradient-to-br from-white/88 via-emerald-50/85 to-white/80 backdrop-blur-[1px]"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-white/65 via-white/55 to-sky-50/60"></div>
           </div>
 
           <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
@@ -290,6 +290,7 @@ export default function Login() {
               entrance artwork and the localized title. Heritage appears on click. */}
           <header className="efips-login-hero relative mb-5 flex w-full min-w-0 flex-col items-center justify-center text-center">
             <div className="relative mx-auto flex w-full max-w-[350px] items-center justify-center">
+              <img src="/school-logo.png" alt="" aria-hidden="true" className="efips-entry-school-watermark pointer-events-none absolute z-0 h-[86%] w-[85%] object-contain opacity-[0.15] select-none" />
               <button
                 type="button"
                 onClick={handleEntrySaqrClick}
@@ -386,6 +387,32 @@ export default function Login() {
               {lang === 'ar' ? 'جولة افتراضية للبوابة' : 'Website Virtual tour'}
             </Link>
           </div>
+          {/* Official institutions — fixed visual order, right to left on every locale. */}
+          <nav className="efips-login-partners mt-5 grid grid-cols-3 gap-2 sm:gap-3" dir="rtl"
+            aria-label={lang === 'ar' ? 'روابط الجهات التعليمية' : 'Education organizations'}>
+            <a href="https://www.moe.gov.ae/" target="_blank" rel="noopener noreferrer"
+              title={lang === 'ar' ? 'وزارة التربية والتعليم الإماراتية' : 'UAE Ministry of Education'}
+              aria-label={lang === 'ar' ? 'زيارة موقع وزارة التربية والتعليم الإماراتية' : 'Visit UAE Ministry of Education website'}
+              className="efips-login-partner flex min-w-0 items-center justify-center rounded-2xl border border-emerald-100 bg-white px-2 py-3 transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600">
+              <img src="https://cdn.localized.world/organizations/271/6ff55175-e234-4fde-8566-132254b2d191.png"
+                alt={lang === 'ar' ? 'شعار وزارة التربية والتعليم' : 'UAE Ministry of Education logo'}
+                className="h-14 w-full object-contain sm:h-[76px]" loading="lazy" decoding="async" />
+            </a>
+            <a href="https://www.cognia.org/" target="_blank" rel="noopener noreferrer"
+              title="Cognia" aria-label="Visit Cognia website"
+              className="efips-login-partner flex min-w-0 items-center justify-center rounded-2xl border border-emerald-100 bg-white px-2 py-3 transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600">
+              <img src="https://masarschool.com/wp-content/uploads/2024/07/cognia.png"
+                alt="Cognia logo" className="h-14 w-full object-contain sm:h-[76px]" loading="lazy" decoding="async" />
+            </a>
+            <a href="https://www.adek.gov.ae/" target="_blank" rel="noopener noreferrer"
+              title={lang === 'ar' ? 'دائرة التعليم والمعرفة أبوظبي' : 'Abu Dhabi Department of Education and Knowledge'}
+              aria-label={lang === 'ar' ? 'زيارة موقع دائرة التعليم والمعرفة' : 'Visit Abu Dhabi Department of Education and Knowledge website'}
+              className="efips-login-partner flex min-w-0 items-center justify-center rounded-2xl border border-emerald-100 bg-white px-2 py-3 transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600">
+              <img src="https://houbarafund.gov.ae/gallery/6DkkgYXTbm1G6H1c8IayktoDEbLNudBPSWa8ki3x.png"
+                alt={lang === 'ar' ? 'شعار دائرة التعليم والمعرفة' : 'ADEK logo'}
+                className="h-14 w-full object-contain sm:h-[76px]" loading="lazy" decoding="async" />
+            </a>
+          </nav>
         </div>
       </div>
 
