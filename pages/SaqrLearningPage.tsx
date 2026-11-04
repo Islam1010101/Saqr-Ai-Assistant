@@ -342,6 +342,15 @@ export default function SaqrLearningPage() {
           padding:8px 13px!important;font-size:15px!important;
         }
       }
+      /* In compact laptop heights the duplicate explanatory footnote (and its
+         duplicate Back link) is shown after choosing an activity, not on the overview. */
+      @media (min-width:1024px) and (min-height:690px) and (max-height:800px) {
+        .saqr-learning-page--overview .saqr-learning-footnote {display:none!important}
+        .saqr-learning-page--overview .saqr-learning-hero {padding-block:9px!important}
+        .saqr-learning-page--overview .saqr-learning-art {height:clamp(142px,19dvh,175px)!important}
+        .saqr-learning-page--overview .saqr-learning-option {min-height:140px!important}
+        .saqr-learning-page--overview .saqr-learning-tools > * + * {margin-top:6px!important}
+      }
       /* Short and zoomed viewports scroll naturally so content is never hidden. */
       @media (hover:hover) and (pointer:fine) {
         .saqr-learning-option:hover { transform:translateY(-8px) scale(1.012);box-shadow:0 21px 32px rgba(8,69,62,.23) }
