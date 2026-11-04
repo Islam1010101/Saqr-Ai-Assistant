@@ -587,40 +587,45 @@ export default function Login() {
           }
           .efips-login-brand-panel {
             padding:clamp(14px,2.3dvh,26px) 30px!important;
-            justify-content:center!important;
+            justify-content:space-evenly!important;
           }
-          .efips-login-school { margin-bottom:clamp(8px,1.4dvh,15px)!important; gap:5px!important; }
-          .efips-login-school img { width:clamp(58px,9dvh,82px)!important; height:clamp(58px,9dvh,82px)!important; }
-          .efips-login-school h2 {line-height:1.5!important;}
+          .efips-login-school { margin-bottom:clamp(5px,1dvh,10px)!important; gap:8px!important; }
+          .efips-login-school img { width:clamp(72px,12dvh,106px)!important; height:clamp(72px,12dvh,106px)!important; }
+          .efips-login-school h2 {font-size:clamp(12px,1.8dvh,15px)!important;line-height:1.5!important;}
           .efips-login-brand-panel .efips-brand-heading {
-            font-size:clamp(25px,3.6dvh,38px)!important; line-height:1.4!important; margin-bottom:6px!important;
+            font-size:clamp(32px,4.9dvh,46px)!important; line-height:1.4!important; margin-bottom:6px!important;
           }
           .efips-brand-heading-line {padding-block:.03em!important;}
-          .efips-brand-subtitle-container {min-height:24px!important;}
+          .efips-brand-subtitle-container {min-height:29px!important;}
+          .efips-brand-subtitle {font-size:clamp(14px,2dvh,17px)!important;line-height:1.9!important;}
           .efips-login-brand-mascot {
-            width:clamp(120px,19dvh,190px)!important; height:clamp(120px,19dvh,190px)!important;
+            width:clamp(170px,31dvh,280px)!important; height:clamp(170px,31dvh,280px)!important;
             margin-block:5px 0!important;
           }
           .efips-login-signin {
-            justify-content:center!important; padding:clamp(12px,2.1dvh,24px) 34px!important;
+            justify-content:space-evenly!important; padding:clamp(12px,2.1dvh,24px) 34px!important;
           }
-          .efips-login-hero {margin-bottom:clamp(6px,1.2dvh,12px)!important;}
+          .efips-login-hero {margin-bottom:clamp(5px,1dvh,9px)!important;}
           .efips-entry-saqr {
-            width:clamp(125px,22dvh,200px)!important; height:clamp(125px,22dvh,200px)!important;
+            width:clamp(170px,31dvh,280px)!important; height:clamp(170px,31dvh,280px)!important;
           }
           .efips-login-title {
-            font-size:clamp(27px,3.8dvh,36px)!important;
+            font-size:clamp(32px,4.8dvh,44px)!important;
             line-height:1.5!important; margin-top:3px!important;
           }
-          .efips-login-signin > .animate-fade-in > * + * {margin-top:8px!important;}
+          .efips-login-signin > .animate-fade-in > * + * {margin-top:clamp(8px,1.5dvh,14px)!important;}
           .efips-login-google-button {
-            min-height:52px!important; padding:9px 14px!important; font-size:16px!important;
+            min-height:clamp(54px,7.5dvh,68px)!important; padding:10px 14px!important; font-size:clamp(17px,2.2dvh,20px)!important;
           }
+          .efips-login-google-button svg {width:30px!important;height:30px!important;}
           .efips-login-signin .text-center.pt-3 {padding-top:0!important;}
-          .efips-login-signin > .mt-6 {margin-top:10px!important;}
-          .efips-login-signin > .efips-login-partners {margin-top:10px!important;gap:8px!important;}
-          .efips-login-partner {padding:5px 8px!important; min-height:52px; border-radius:14px!important;}
-          .efips-login-partner img {height:clamp(36px,6dvh,56px)!important;}
+          .efips-login-signin .animate-fade-in > .text-center a {font-size:clamp(14px,1.9dvh,17px)!important;}
+          .efips-login-signin > .mt-6 {margin-top:0!important;}
+          .efips-login-signin > .mt-6 a {font-size:clamp(14px,2dvh,18px)!important;padding:10px 16px!important;}
+          .efips-login-signin > .mt-6 svg {width:24px!important;height:24px!important;}
+          .efips-login-signin > .efips-login-partners {margin-top:0!important;gap:8px!important;}
+          .efips-login-partner {padding:7px 10px!important; min-height:clamp(66px,10dvh,96px)!important; border-radius:14px!important;}
+          .efips-login-partner img {height:clamp(56px,9dvh,86px)!important;}
         }
         @media(prefers-reduced-motion:reduce) {
           .efips-heritage-burst,.efips-heritage-burst > svg { animation:none!important; opacity:1!important; transform:none!important; }
