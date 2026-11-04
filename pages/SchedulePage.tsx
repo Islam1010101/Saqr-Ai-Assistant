@@ -936,7 +936,7 @@ const SchedulePage: React.FC = () => {
                     body > :not(#printable-schedule) { display:none!important; }
                     body > #printable-schedule {
                         display:flex!important; flex-direction:column; position:relative!important;
-                        box-sizing:border-box!important; width:285mm!important; height:197mm!important;
+                        box-sizing:border-box!important; width:285mm!important; height:198mm!important;
                         max-width:none!important; max-height:none!important; overflow:hidden!important;
                         padding:0!important; margin:0!important; background:white!important; color:#111!important;
                         font-family:'Cairo',Arial,sans-serif!important;
