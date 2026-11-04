@@ -230,7 +230,7 @@ export default function Login() {
             </div>
           </div>
 
-          <div className="text-center relative z-10 mb-4 w-full min-w-0">
+          <div className="efips-login-brand-copy text-center relative z-10 mb-4 w-full min-w-0">
             {/* Explicit two-line bilingual brand. Comfortable Arabic line boxes
                 keep all dots and letter ascenders outside clipped edges. */}
             <h1
@@ -548,31 +548,78 @@ export default function Login() {
           .efips-login-signin {padding:25px 55px 35px!important;}
           .efips-entry-saqr {width:200px!important;height:205px!important;}
         }
+        /* Mobile: one cohesive frame, with the video identity panel and sign-in
+           panel sharing the same inner spacing and visually balanced artwork. */
         @media (max-width:639px) {
           .efips-login-page {padding:62px 10px 15px!important;align-items:flex-start!important;}
           .efips-login-language {top:10px!important;left:auto;right:12px;gap:2px;}
           .efips-login-language button {padding:6px 12px;min-height:34px;font-size:12px;}
           .efips-login-frame {border-radius:25px!important;box-shadow:0 16px 45px rgba(4,65,52,.13);}
-          .efips-login-brand-panel {padding:17px 17px 10px!important;}
-          .efips-login-school {flex-direction:row!important;gap:12px!important;text-align:start!important;margin-bottom:10px!important;}
-          .efips-login-school img {width:54px!important;height:54px!important;}
-          .efips-login-school h2 {font-size:11px!important;white-space:normal!important;line-height:1.5!important;text-align:start!important;}
-          .efips-brand-heading {font-size:clamp(21px,5.8vw,28px)!important;line-height:1.4!important;margin-bottom:4px!important;}
-          .efips-brand-heading-line {padding-block:0;}
-          .efips-brand-subtitle-container {min-height:0!important;white-space:normal!important;max-width:360px;}
-          .efips-brand-subtitle {font-size:12.5px!important;line-height:1.7!important;white-space:normal!important;
-            width:100%;max-width:100%;flex-shrink:1;text-wrap:balance;transform:none!important;}
-          .efips-login-brand-mascot {width:92px!important;height:85px!important;margin:3px auto 0!important;}
-          .efips-login-signin {padding:13px 20px 23px!important;}
+          .efips-login-brand-panel {
+            display:grid!important;
+            grid-template-columns:minmax(0,1.55fr) minmax(100px,1fr);
+            column-gap:12px;row-gap:12px;
+            align-items:center;justify-items:center;
+            padding:20px 20px 22px!important;
+            border-bottom:1px solid rgba(14,121,92,.16)!important;
+          }
+          .efips-login-school {
+            grid-column:1 / -1;grid-row:1;
+            flex-direction:row!important;justify-content:center!important;
+            gap:12px!important;margin-bottom:0!important;
+            max-width:100%;text-align:start!important;
+          }
+          .efips-login-school img {width:62px!important;height:62px!important;}
+          .efips-login-school h2 {
+            font-size:clamp(10px,2.9vw,12px)!important;white-space:normal!important;
+            line-height:1.55!important;text-align:start!important;
+          }
+          .efips-login-brand-copy {
+            grid-column:1;grid-row:2;
+            align-self:center;width:100%;margin:0!important;min-width:0;
+          }
+          .efips-brand-heading {
+            font-size:clamp(18px,5vw,23px)!important;
+            line-height:1.4!important;margin-bottom:9px!important;
+          }
+          .efips-brand-heading-line {padding-block:0!important;}
+          .efips-brand-subtitle-container {
+            min-height:0!important;white-space:normal!important;max-width:100%!important;
+          }
+          .efips-brand-subtitle {
+            font-size:clamp(12px,3.2vw,13.5px)!important;
+            line-height:1.7!important;white-space:normal!important;
+            width:100%!important;max-width:100%!important;
+            flex-shrink:1!important;text-wrap:balance;
+            transform:none!important;
+          }
+          .efips-login-brand-mascot {
+            grid-column:2;grid-row:2;align-self:end;justify-self:center;
+            width:clamp(106px,31vw,145px)!important;
+            height:clamp(118px,35vw,160px)!important;
+            margin:0!important;
+          }
+          .efips-login-signin {padding:19px 20px 25px!important;}
           .efips-login-hero {margin-bottom:13px!important;}
-          .efips-entry-saqr {width:125px!important;height:127px!important;}
-          .efips-login-title {margin-top:1px!important;font-size:26px!important;line-height:1.85!important;}
+          .efips-entry-saqr {width:135px!important;height:140px!important;}
+          .efips-login-title {margin-top:1px!important;font-size:28px!important;line-height:1.65!important;}
           .efips-login-google-button {min-height:59px!important;font-size:15px!important;border-radius:19px!important;}
         }
         @media (max-width:375px) {
-          .efips-login-brand-panel {padding-inline:12px!important;}
+          .efips-login-brand-panel {padding-inline:14px!important;}
           .efips-login-signin {padding-inline:14px!important;}
           .efips-login-school h2 {font-size:10px!important;}
+        }
+        @media (max-width:359px) {
+          /* Extra-narrow phones: stack the identity copy to avoid clipping Arabic. */
+          .efips-login-brand-panel {grid-template-columns:minmax(0,1fr);row-gap:7px;}
+          .efips-login-school {grid-column:1;}
+          .efips-login-brand-copy {grid-column:1;grid-row:2;}
+          .efips-brand-heading {font-size:23px!important;}
+          .efips-login-brand-mascot {
+            grid-column:1;grid-row:3;align-self:center;
+            height:112px!important;width:112px!important;
+          }
         }
         /* Desktop entry is a complete one-viewport composition.
            On unusually short windows allow natural scrolling rather than clipping links. */
@@ -593,11 +640,15 @@ export default function Login() {
           .efips-login-school img { width:clamp(72px,12dvh,106px)!important; height:clamp(72px,12dvh,106px)!important; }
           .efips-login-school h2 {font-size:clamp(12px,1.8dvh,15px)!important;line-height:1.5!important;}
           .efips-login-brand-panel .efips-brand-heading {
-            font-size:clamp(32px,4.9dvh,46px)!important; line-height:1.4!important; margin-bottom:6px!important;
+            font-size:clamp(38px,5.7dvh,54px)!important; line-height:1.22!important; margin-bottom:8px!important;
           }
-          .efips-brand-heading-line {padding-block:.03em!important;}
-          .efips-brand-subtitle-container {min-height:29px!important;}
-          .efips-brand-subtitle {font-size:clamp(14px,2dvh,17px)!important;line-height:1.9!important;}
+          .efips-brand-heading-line {padding-block:.02em!important;}
+          .efips-brand-subtitle-container {min-height:0!important;white-space:normal!important;max-width:540px!important;}
+          .efips-brand-subtitle {
+            font-size:clamp(17px,2.5dvh,21px)!important;line-height:1.6!important;
+            width:100%!important;max-width:100%!important;white-space:normal!important;
+            flex-shrink:1!important;text-wrap:balance;transform:none!important;
+          }
           .efips-login-brand-mascot {
             width:clamp(170px,31dvh,280px)!important; height:clamp(170px,31dvh,280px)!important;
             margin-block:5px 0!important;
