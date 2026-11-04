@@ -548,78 +548,137 @@ export default function Login() {
           .efips-login-signin {padding:25px 55px 35px!important;}
           .efips-entry-saqr {width:200px!important;height:205px!important;}
         }
-        /* Mobile: one cohesive frame, with the video identity panel and sign-in
-           panel sharing the same inner spacing and visually balanced artwork. */
+        /* Phone layout: two equally tall, vertically stacked sections.
+           Use available viewport height and allow natural scroll on short phones,
+           never clipping the Google controls or school information. */
         @media (max-width:639px) {
-          .efips-login-page {padding:62px 10px 15px!important;align-items:flex-start!important;}
+          .efips-login-page {
+            padding:60px 10px 14px!important;
+            align-items:flex-start!important;
+          }
           .efips-login-language {top:10px!important;left:auto;right:12px;gap:2px;}
           .efips-login-language button {padding:6px 12px;min-height:34px;font-size:12px;}
-          .efips-login-frame {border-radius:25px!important;box-shadow:0 16px 45px rgba(4,65,52,.13);}
-          .efips-login-brand-panel {
+          .efips-login-frame {
             display:grid!important;
-            grid-template-columns:minmax(0,1.55fr) minmax(100px,1fr);
-            column-gap:12px;row-gap:12px;
-            align-items:center;justify-items:center;
-            padding:20px 20px 22px!important;
+            grid-template-columns:minmax(0,1fr)!important;
+            grid-template-rows:repeat(2,minmax(0,1fr))!important;
+            height:max(690px,calc(100dvh - 74px))!important;
+            min-height:690px!important;
+            border-radius:25px!important;
+            box-shadow:0 16px 45px rgba(4,65,52,.13);
+          }
+          .efips-login-brand-panel {
+            display:flex!important;
+            flex-direction:column!important;
+            justify-content:space-evenly!important;
+            align-items:center!important;
+            gap:4px!important;
+            width:100%!important;
+            min-width:0;min-height:0;
+            padding:10px 18px 12px!important;
             border-bottom:1px solid rgba(14,121,92,.16)!important;
           }
           .efips-login-school {
-            grid-column:1 / -1;grid-row:1;
-            flex-direction:row!important;justify-content:center!important;
-            gap:12px!important;margin-bottom:0!important;
-            max-width:100%;text-align:start!important;
+            display:flex!important;
+            flex-direction:column!important;
+            align-items:center!important;
+            justify-content:center!important;
+            gap:4px!important;
+            width:100%!important;
+            max-width:100%!important;
+            margin:0!important;
+            text-align:center!important;
           }
-          .efips-login-school img {width:62px!important;height:62px!important;}
+          .efips-login-school img {
+            width:clamp(42px,7dvh,55px)!important;
+            height:clamp(42px,7dvh,55px)!important;
+          }
           .efips-login-school h2 {
-            font-size:clamp(10px,2.9vw,12px)!important;white-space:normal!important;
-            line-height:1.55!important;text-align:start!important;
+            font-size:clamp(10px,2.8vw,12px)!important;
+            white-space:normal!important;
+            line-height:1.35!important;
+            text-align:center!important;
           }
+          .efips-login-school .space-y-1 > * + * {margin-top:1px!important;}
           .efips-login-brand-copy {
-            grid-column:1;grid-row:2;
-            align-self:center;width:100%;margin:0!important;min-width:0;
+            width:100%!important;
+            max-width:100%!important;
+            margin:0!important;
+            text-align:center!important;
           }
           .efips-brand-heading {
-            font-size:clamp(18px,5vw,23px)!important;
-            line-height:1.4!important;margin-bottom:9px!important;
+            font-size:clamp(23px,6vw,29px)!important;
+            line-height:1.28!important;
+            margin-bottom:4px!important;
           }
           .efips-brand-heading-line {padding-block:0!important;}
           .efips-brand-subtitle-container {
-            min-height:0!important;white-space:normal!important;max-width:100%!important;
+            min-height:0!important;
+            white-space:normal!important;
+            max-width:100%!important;
           }
           .efips-brand-subtitle {
-            font-size:clamp(12px,3.2vw,13.5px)!important;
-            line-height:1.7!important;white-space:normal!important;
-            width:100%!important;max-width:100%!important;
-            flex-shrink:1!important;text-wrap:balance;
+            font-size:clamp(12px,3.2vw,14px)!important;
+            line-height:1.6!important;
+            white-space:normal!important;
+            width:100%!important;
+            max-width:100%!important;
+            flex-shrink:1!important;
+            text-wrap:balance;
             transform:none!important;
           }
           .efips-login-brand-mascot {
-            grid-column:2;grid-row:2;align-self:end;justify-self:center;
-            width:clamp(106px,31vw,145px)!important;
-            height:clamp(118px,35vw,160px)!important;
+            width:clamp(96px,15dvh,128px)!important;
+            height:clamp(100px,16dvh,136px)!important;
+            flex-shrink:1;
             margin:0!important;
           }
-          .efips-login-signin {padding:19px 20px 25px!important;}
-          .efips-login-hero {margin-bottom:13px!important;}
-          .efips-entry-saqr {width:135px!important;height:140px!important;}
-          .efips-login-title {margin-top:1px!important;font-size:28px!important;line-height:1.65!important;}
-          .efips-login-google-button {min-height:59px!important;font-size:15px!important;border-radius:19px!important;}
+          .efips-login-signin {
+            display:flex!important;
+            flex-direction:column!important;
+            justify-content:space-evenly!important;
+            width:100%!important;
+            min-width:0;min-height:0;
+            padding:8px 18px 13px!important;
+          }
+          .efips-login-hero {margin-bottom:2px!important;}
+          .efips-entry-saqr {
+            width:clamp(92px,13dvh,118px)!important;
+            height:clamp(96px,14dvh,122px)!important;
+          }
+          .efips-login-title {
+            margin-top:0!important;
+            font-size:clamp(24px,6vw,29px)!important;
+            line-height:1.35!important;
+          }
+          .efips-login-signin .animate-fade-in > * + * {margin-top:4px!important;}
+          .efips-login-signin .text-center.pt-3 {padding-top:1px!important;}
+          .efips-login-google-button {
+            min-height:52px!important;
+            padding:9px 12px!important;
+            font-size:clamp(14px,3.9vw,16px)!important;
+            border-radius:17px!important;
+          }
+          .efips-login-signin > .mt-6 {margin-top:4px!important;}
+          .efips-login-signin > .mt-6 a {padding:7px 12px!important;font-size:13px!important;}
+          .efips-login-signin > .efips-login-partners {margin-top:5px!important;gap:6px!important;}
+          .efips-login-partner {
+            padding:5px 6px!important;
+            min-height:48px!important;
+            border-radius:12px!important;
+          }
+          .efips-login-partner img {height:40px!important;}
         }
         @media (max-width:375px) {
-          .efips-login-brand-panel {padding-inline:14px!important;}
-          .efips-login-signin {padding-inline:14px!important;}
+          .efips-login-brand-panel {padding-inline:13px!important;}
+          .efips-login-signin {padding-inline:13px!important;}
           .efips-login-school h2 {font-size:10px!important;}
         }
         @media (max-width:359px) {
-          /* Extra-narrow phones: stack the identity copy to avoid clipping Arabic. */
-          .efips-login-brand-panel {grid-template-columns:minmax(0,1fr);row-gap:7px;}
-          .efips-login-school {grid-column:1;}
-          .efips-login-brand-copy {grid-column:1;grid-row:2;}
           .efips-brand-heading {font-size:23px!important;}
-          .efips-login-brand-mascot {
-            grid-column:1;grid-row:3;align-self:center;
-            height:112px!important;width:112px!important;
-          }
+          .efips-brand-subtitle {font-size:12px!important;}
+          .efips-login-brand-mascot {height:96px!important;width:96px!important;}
+          .efips-entry-saqr {height:94px!important;width:94px!important;}
         }
         /* Desktop entry is a complete one-viewport composition.
            On unusually short windows allow natural scrolling rather than clipping links. */

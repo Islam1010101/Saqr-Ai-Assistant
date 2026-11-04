@@ -63,18 +63,25 @@ line('height:min(790px, calc(100dvh - 28px))!important;');
 line('.efips-login-partner img {height:clamp(56px,9dvh,86px)!important;}');
 line('justify-content:space-evenly!important;');
 line('height:min(790px, calc(100dvh - 28px))!important;');
-assert.ok(app.includes("['/', '/saqr-learning'].includes(location.pathname) ? 'lg:hidden'"),
-  'The shared footer must not add desktop scroll to login or Saqr learning');
+assert.ok(app.includes("location.pathname === '/' ? 'hidden' : location.pathname === '/saqr-learning' ? 'lg:hidden'"),
+  'Hide the login footer across breakpoints and preserve the Saqr overview desktop rule');
 
-// A balanced mobile video hero shares horizontal rhythm with the white sign-in
-// panel; narrow phones stack instead of clipping bilingual headings.
-line('efips-login-brand-copy');
-line('grid-template-columns:minmax(0,1.55fr) minmax(100px,1fr);');
-line('grid-column:1;grid-row:2;');
-line('grid-column:2;grid-row:2;align-self:end;justify-self:center;');
-line('.efips-login-signin {padding:19px 20px 25px!important;}');
+// Two phone panels must match in height, and video-side content must stack
+// vertically, while controls remain accessible on short screens.
+line('grid-template-rows:repeat(2,minmax(0,1fr))!important;');
+line('height:max(690px,calc(100dvh - 74px))!important;');
+line('flex-direction:column!important;');
+line('.efips-login-school {');
+line('.efips-login-brand-copy {');
+line('.efips-login-brand-mascot {');
+line('.efips-login-signin {');
 line('@media (max-width:359px)');
-line('.efips-login-brand-panel {grid-template-columns:minmax(0,1fr);row-gap:7px;}');
+assert.ok(login.includes('.efips-login-brand-panel {\n            display:flex!important;') &&
+  login.includes('.efips-login-school {\n            display:flex!important;') &&
+  !login.includes('grid-template-columns:minmax(0,1.55fr)'),
+  'The brand panel and school header must be vertically ordered on every phone');
+assert.ok(app.includes("location.pathname === '/' ? 'hidden'"),
+  'Hide redundant shared footer on the phone login screen to minimize scrolling');
 // Desktop brand text is deliberately larger while the single-viewport card
 // and interactive sign-in elements retain their existing sizing and placement.
 line('font-size:clamp(38px,5.7dvh,54px)!important;');
