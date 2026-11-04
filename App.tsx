@@ -549,7 +549,7 @@ const MainLayout: React.FC = () => {
       </main>
 
       {!hideFooter && (
-        <footer className="relative z-10 py-8 text-center border-t-4 border-slate-200 dark:border-slate-800 mx-4 md:mx-20 mt-10">
+        <footer className={`relative z-10 py-8 text-center border-t-4 border-slate-200 dark:border-slate-800 mx-4 md:mx-20 mt-10 ${['/', '/saqr-learning'].includes(location.pathname) ? 'lg:hidden' : ''}`}>
           <p className="font-black text-xs text-slate-500 dark:text-slate-400" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
             {locale === 'ar' ? "© 2026 جميع الحقوق محفوظة لمدرسة صقر الإمارات الدولية الخاصة." : "© 2026 EFIPS. All rights reserved."}
           </p>

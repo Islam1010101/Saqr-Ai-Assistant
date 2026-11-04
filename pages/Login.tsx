@@ -574,6 +574,54 @@ export default function Login() {
           .efips-login-signin {padding-inline:14px!important;}
           .efips-login-school h2 {font-size:10px!important;}
         }
+        /* Desktop entry is a complete one-viewport composition.
+           On unusually short windows allow natural scrolling rather than clipping links. */
+        @media (min-width:1024px) and (min-height:600px) {
+          .efips-login-page {
+            box-sizing:border-box; height:100dvh!important; min-height:100dvh!important;
+            padding:14px 24px!important; align-items:center!important; overflow:visible;
+          }
+          .efips-login-frame {
+            height:min(790px, calc(100dvh - 28px))!important;
+            min-height:0!important; max-height:calc(100dvh - 28px)!important;
+          }
+          .efips-login-brand-panel {
+            padding:clamp(14px,2.3dvh,26px) 30px!important;
+            justify-content:center!important;
+          }
+          .efips-login-school { margin-bottom:clamp(8px,1.4dvh,15px)!important; gap:5px!important; }
+          .efips-login-school img { width:clamp(58px,9dvh,82px)!important; height:clamp(58px,9dvh,82px)!important; }
+          .efips-login-school h2 {line-height:1.5!important;}
+          .efips-login-brand-panel .efips-brand-heading {
+            font-size:clamp(25px,3.6dvh,38px)!important; line-height:1.4!important; margin-bottom:6px!important;
+          }
+          .efips-brand-heading-line {padding-block:.03em!important;}
+          .efips-brand-subtitle-container {min-height:24px!important;}
+          .efips-login-brand-mascot {
+            width:clamp(120px,19dvh,190px)!important; height:clamp(120px,19dvh,190px)!important;
+            margin-block:5px 0!important;
+          }
+          .efips-login-signin {
+            justify-content:center!important; padding:clamp(12px,2.1dvh,24px) 34px!important;
+          }
+          .efips-login-hero {margin-bottom:clamp(6px,1.2dvh,12px)!important;}
+          .efips-entry-saqr {
+            width:clamp(125px,22dvh,200px)!important; height:clamp(125px,22dvh,200px)!important;
+          }
+          .efips-login-title {
+            font-size:clamp(27px,3.8dvh,36px)!important;
+            line-height:1.5!important; margin-top:3px!important;
+          }
+          .efips-login-signin > .animate-fade-in > * + * {margin-top:8px!important;}
+          .efips-login-google-button {
+            min-height:52px!important; padding:9px 14px!important; font-size:16px!important;
+          }
+          .efips-login-signin .text-center.pt-3 {padding-top:0!important;}
+          .efips-login-signin > .mt-6 {margin-top:10px!important;}
+          .efips-login-signin > .efips-login-partners {margin-top:10px!important;gap:8px!important;}
+          .efips-login-partner {padding:5px 8px!important; min-height:52px; border-radius:14px!important;}
+          .efips-login-partner img {height:clamp(36px,6dvh,56px)!important;}
+        }
         @media(prefers-reduced-motion:reduce) {
           .efips-heritage-burst,.efips-heritage-burst > svg { animation:none!important; opacity:1!important; transform:none!important; }
           .efips-entry-saqr img,.efips-login-button-glow,.efips-login-button-shine { transition:none!important; }

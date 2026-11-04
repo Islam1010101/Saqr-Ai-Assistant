@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 
 const login = readFileSync('pages/Login.tsx','utf8');
 const auth = readFileSync('src/components/GoogleSchoolReturn.tsx','utf8');
+const app = readFileSync('App.tsx','utf8');
 const line = (value: string) => assert.ok(login.includes(value), 'Missing responsive typography: '+value);
 
 // Exact two lines, with Arabic and English text separated into explicit spans.
@@ -55,6 +56,14 @@ line('container.clientWidth');
 line('scaleX(');
 assert.ok(!login.includes("'مكتبة صقر الإمارات' : 'EFIPS Library'"));
 assert.ok(!login.includes('text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 mb-3'));
+// The desktop landing view must keep its entire login panel, tour, and partner
+// logos within the visible viewport; mobile layouts keep natural scrolling.
+line('@media (min-width:1024px) and (min-height:600px)');
+line('height:min(790px, calc(100dvh - 28px))!important;');
+line('.efips-login-partner img {height:clamp(36px,6dvh,56px)!important;}');
+assert.ok(app.includes("['/', '/saqr-learning'].includes(location.pathname) ? 'lg:hidden'"),
+  'The shared footer must not add desktop scroll to login or Saqr learning');
+
 // Visual edits must not change Google-only auth or redirect.
 line("provider: 'google'");
 line("queryParams: { prompt: 'select_account' }");

@@ -23,22 +23,22 @@ const features: Feature[] = [
   {
     key: 'read_together', ar: 'اقرأ معي', en: 'Read with me',
     hintAr: 'اسمع صقر وجاوب على أسئلة القصة', hintEn: 'Listen and answer little story questions',
-    color: 'from-[#1489CF] to-[#45B7E8]', baseColor: 'bg-sky-50 dark:bg-sky-950/30', border: 'border-[#176C9B]'
+    color: 'from-[#0E5D88] to-[#126E98]', baseColor: 'bg-sky-50 dark:bg-sky-950/30', border: 'border-[#176C9B]'
   },
   {
     key: 'picture_guidance', ar: 'تعلم بالصور', en: 'Learn with pictures',
     hintAr: 'اكتشف الصور وأجب عن الأسئلة', hintEn: 'Explore illustrated picture questions',
-    color: 'from-[#8755C9] to-[#B47CE6]', baseColor: 'bg-violet-50 dark:bg-violet-950/30', border: 'border-[#6A389D]'
+    color: 'from-[#56318A] to-[#7441A5]', baseColor: 'bg-violet-50 dark:bg-violet-950/30', border: 'border-[#6A389D]'
   },
   {
     key: 'focus_steps', ar: 'مهمة خطوة بخطوة', en: 'Step by step',
     hintAr: 'أنجز مهام صغيرة على راحتك', hintEn: 'Complete small tasks at your own pace',
-    color: 'from-[#D88B21] to-[#F4BC4A]', baseColor: 'bg-amber-50 dark:bg-amber-950/30', border: 'border-[#AE6613]'
+    color: 'from-[#7A4600] to-[#965C07]', baseColor: 'bg-amber-50 dark:bg-amber-950/30', border: 'border-[#AE6613]'
   },
   {
     key: 'calm_display', ar: 'عرض هادئ', en: 'Calm view',
     hintAr: 'تحكم في الحركة وحجم النص', hintEn: 'Control motion and text size',
-    color: 'from-[#08775A] to-[#32B38C]', baseColor: 'bg-emerald-50 dark:bg-emerald-950/30', border: 'border-[#06563F]'
+    color: 'from-[#075A42] to-[#0B7058]', baseColor: 'bg-emerald-50 dark:bg-emerald-950/30', border: 'border-[#06563F]'
   }
 ];
 
@@ -83,7 +83,6 @@ export default function SaqrLearningPage() {
   const [settings, setSettings] = useState<LearningFeatures | null>(null);
   const [viewer, setViewer] = useState<'admin' | 'student' | null>(null);
   const [active, setActive] = useState<FeatureName | null>(null);
-  const [large, setLarge] = useState(false);
   const [quiet, setQuiet] = useState(false);
   const activityRef = useRef<HTMLElement>(null);
 
@@ -110,10 +109,11 @@ export default function SaqrLearningPage() {
   const current = features.find(item => item.key === active);
 
   return <div dir={dir} className={'saqr-learning-page min-h-[85dvh] overflow-x-hidden bg-white dark:bg-black text-slate-900 dark:text-slate-100 font-sans px-3 sm:px-5 py-6 md:py-10 ' +
-    (quiet ? 'saqr-learning-page--calm' : '')}>
-    <main className="relative mx-auto max-w-[1220px] space-y-6 md:space-y-9">
-      <div className="flex flex-wrap items-center justify-between gap-3 px-1">
-        <Link to="/home" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-emerald-200 dark:border-emerald-900 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm font-black text-emerald-800 dark:text-emerald-200 shadow-sm hover:border-emerald-400 transition-colors">
+    (quiet ? 'saqr-learning-page--calm ' : '') +
+    (status === 'allowed' && !active ? 'saqr-learning-page--overview' : '')}>
+    <main className="saqr-learning-main relative mx-auto max-w-[1220px] space-y-6 md:space-y-9">
+      <div className="saqr-learning-topbar flex flex-wrap items-center justify-between gap-3 px-1">
+        <Link to="/home" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-emerald-200 dark:border-emerald-900 bg-white dark:bg-slate-900 px-4 py-2.5 text-base font-black text-emerald-800 dark:text-emerald-200 shadow-sm hover:border-emerald-400 transition-colors">
           <svg aria-hidden="true" viewBox="0 0 24 24" className={'w-5 h-5 ' + (isAr ? 'rotate-180' : '')} fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M19 12H5m7-7-7 7 7 7" /></svg>
           {isAr ? 'العودة للرئيسية' : 'Back to home'}
         </Link>
@@ -163,7 +163,7 @@ export default function SaqrLearningPage() {
                 {isAr ? 'وضع معاينة الأدمن' : 'Admin preview mode'}
               </p>}
             </div>
-            <div className="relative mx-auto w-full max-w-[310px] sm:max-w-[390px] h-[220px] sm:h-[320px] lg:h-[370px] flex items-end justify-center">
+            <div className="saqr-learning-art relative mx-auto w-full max-w-[310px] sm:max-w-[390px] h-[220px] sm:h-[320px] lg:h-[370px] flex items-end justify-center">
               <span aria-hidden="true" className="saqr-learning-decoration saqr-learning-aura absolute bottom-4 h-[75%] w-[78%] rounded-full bg-gradient-to-br from-emerald-300/35 via-sky-300/20 to-amber-300/20 blur-[45px]" />
               <span aria-hidden="true" className="saqr-learning-decoration saqr-learning-floating-symbol absolute top-[12%] start-[6%] grid place-items-center h-14 w-14 rounded-2xl bg-white/15 border border-white/25 text-amber-200 shadow-xl rotate-[-12deg]"><ActivityIcon kind="read_together" className="h-8 w-8" /></span>
               <span aria-hidden="true" className="saqr-learning-decoration saqr-learning-floating-symbol saqr-learning-symbol-late absolute top-[30%] end-[3%] grid place-items-center h-12 w-12 rounded-xl bg-white/15 border border-white/25 text-sky-200 shadow-xl rotate-[12deg]"><ActivityIcon kind="picture_guidance" className="h-7 w-7" /></span>
@@ -174,26 +174,21 @@ export default function SaqrLearningPage() {
           </div>
         </header>
 
-        <div aria-label={isAr ? 'خطوات رحلتك' : 'Your journey steps'} className="grid grid-cols-3 gap-2 sm:gap-3">
+        <div aria-label={isAr ? 'خطوات رحلتك' : 'Your journey steps'} className="saqr-learning-steps grid grid-cols-3 gap-2 sm:gap-3">
           {[isAr ? '1. اختار' : '1. Choose', isAr ? '2. اسمع' : '2. Listen', isAr ? '3. جاوب' : '3. Answer'].map((label, index) =>
-            <div key={index} className="min-h-14 sm:min-h-16 rounded-2xl border-2 border-emerald-100 dark:border-emerald-900 bg-emerald-50 dark:bg-slate-900 flex items-center justify-center px-2 py-3 text-center text-base sm:text-lg font-black text-emerald-900 dark:text-emerald-100">
+            <div key={index} className="min-h-14 sm:min-h-16 rounded-2xl border-2 border-emerald-100 dark:border-emerald-900 bg-emerald-50 dark:bg-slate-900 flex items-center justify-center px-2 py-3 text-center text-lg sm:text-xl font-black text-emerald-900 dark:text-emerald-100">
               {label}
             </div>)}
         </div>
 
-        <section aria-labelledby="saqr-learning-tools" className="space-y-5">
-          <div className="flex flex-wrap gap-3 items-end justify-between px-1">
+        <section aria-labelledby="saqr-learning-tools" className="saqr-learning-tools space-y-5">
+          <div className="saqr-learning-tools-header flex flex-wrap gap-3 items-end justify-between px-1">
             <div>
-              <p className="text-xs font-black tracking-wide text-emerald-700 dark:text-emerald-400">{isAr ? 'رحلتك مع صقر' : 'YOUR LEARNING JOURNEY'}</p>
+              <p className="text-sm font-black tracking-wide text-emerald-700 dark:text-emerald-400">{isAr ? 'رحلتك مع صقر' : 'YOUR LEARNING JOURNEY'}</p>
               <h2 id="saqr-learning-tools" className="mt-1 text-2xl sm:text-3xl font-black">{isAr ? 'ماذا تريد أن تفعل اليوم؟' : 'What will you try today?'}</h2>
-              <p className="mt-1 text-sm leading-7 text-slate-600 dark:text-slate-300 font-semibold">{isAr ? 'اختر نشاطًا ثم ابدأ باللعب أو القراءة.' : 'Choose an activity and start reading or playing.'}</p>
+              <p className="mt-1 text-base leading-7 text-slate-700 dark:text-slate-200 font-semibold">{isAr ? 'اختر نشاطًا ثم ابدأ باللعب أو القراءة.' : 'Choose an activity and start reading or playing.'}</p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={() => setLarge(v => !v)} aria-pressed={large}
-                className={'min-h-12 rounded-full border-2 px-4 py-3 text-sm sm:text-base font-black transition-colors focus-visible:outline-4 focus-visible:outline-sky-400 ' +
-                  (large ? 'border-sky-700 bg-sky-700 text-white' : 'border-sky-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sky-800 dark:text-sky-200')}>
-                {large ? (isAr ? 'الخط كبير' : 'Large text on') : (isAr ? 'كبر الخط' : 'Larger text')}
-              </button>
               {settings.calm_display && <button type="button" onClick={() => setQuiet(v => !v)} aria-pressed={quiet}
               className={'min-h-12 rounded-full border-2 px-4 py-3 text-sm sm:text-base font-black transition-colors focus-visible:outline-4 focus-visible:outline-sky-400 ' +
                 (quiet ? 'border-emerald-700 bg-emerald-700 text-white' : 'border-emerald-200 bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-300')}>
@@ -201,7 +196,7 @@ export default function SaqrLearningPage() {
               </button>}
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="saqr-learning-tools-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {features.filter(x => settings[x.key]).map((item, index) => <button key={item.key} type="button"
               onClick={() => selectActivity(item.key)} aria-pressed={active === item.key}
               className={'saqr-learning-option group relative isolate flex flex-col items-start min-h-[200px] sm:min-h-[240px] overflow-hidden rounded-[1.8rem] border-b-[7px] p-5 sm:p-6 text-start shadow-lg transition-[transform,box-shadow] duration-300 focus-visible:outline-4 focus-visible:outline-sky-400 bg-gradient-to-br ' +
@@ -210,8 +205,8 @@ export default function SaqrLearningPage() {
               <span className="relative grid place-items-center h-16 w-16 rounded-2xl bg-white/20 border border-white/30 text-white shadow-sm group-hover:rotate-3 transition-transform">
                 <ActivityIcon kind={item.key} />
               </span>
-              <span className="relative mt-auto pt-6 block font-black text-white text-xl sm:text-2xl leading-snug">{isAr ? item.ar : item.en}</span>
-              <span className="relative mt-2 text-sm sm:text-base font-semibold text-white/95 leading-7">{isAr ? item.hintAr : item.hintEn}</span>
+              <span className="relative mt-auto pt-6 block font-black text-white text-2xl leading-snug">{isAr ? item.ar : item.en}</span>
+              <span className="relative mt-2 text-base sm:text-lg font-semibold text-white leading-7">{isAr ? item.hintAr : item.hintEn}</span>
               <span aria-hidden="true" className="absolute end-4 bottom-3 text-white/80 text-lg">{String(index + 1).padStart(2, '0')}</span>
             </button>)}
           </div>
@@ -232,18 +227,18 @@ export default function SaqrLearningPage() {
               {isAr ? 'إغلاق النشاط' : 'Close activity'}
             </button>
           </div>
-          {current.key === 'read_together' && <ReadTogether isAr={isAr} large={large} quiet={quiet} isAdmin={viewer === 'admin'} />}
-          {current.key === 'picture_guidance' && <PictureLearning isAr={isAr} large={large} />}
-          {current.key === 'focus_steps' && <StepByStep isAr={isAr} large={large} />}
-          {current.key === 'calm_display' && <CalmDisplay isAr={isAr} quiet={quiet} onQuietChange={setQuiet} large={large} onLargeChange={setLarge} />}
+          {current.key === 'read_together' && <ReadTogether isAr={isAr} large={true} quiet={quiet} isAdmin={viewer === 'admin'} />}
+          {current.key === 'picture_guidance' && <PictureLearning isAr={isAr} large={true} />}
+          {current.key === 'focus_steps' && <StepByStep isAr={isAr} large={true} />}
+          {current.key === 'calm_display' && <CalmDisplay isAr={isAr} quiet={quiet} onQuietChange={setQuiet} />}
         </section>}
 
-        <div className="rounded-[1.6rem] border border-emerald-200 dark:border-emerald-900 bg-emerald-50/70 dark:bg-emerald-950/20 p-5 sm:p-6 flex flex-wrap justify-between items-center gap-3">
-          <p className="font-bold text-sm leading-7 text-slate-700 dark:text-slate-200">
+        <div className="saqr-learning-footnote rounded-[1.6rem] border border-emerald-200 dark:border-emerald-900 bg-emerald-50/70 dark:bg-emerald-950/20 p-5 sm:p-6 flex flex-wrap justify-between items-center gap-3">
+          <p className="font-bold text-base leading-7 text-slate-800 dark:text-slate-100">
             {isAr ? 'صقر معك خطوة بخطوة، ويمكنك تكرار الأنشطة كما تحب.' :
               'Saqr is with you, one step at a time. Repeat activities whenever you like.'}
           </p>
-          <Link to="/home" className="rounded-xl bg-emerald-700 text-white px-5 py-3 font-black text-sm hover:bg-emerald-800">{isAr ? 'العودة للمكتبة' : 'Back to library'}</Link>
+          <Link to="/home" className="rounded-xl bg-emerald-800 text-white px-5 py-3 font-black text-base hover:bg-emerald-900">{isAr ? 'العودة للمكتبة' : 'Back to library'}</Link>
         </div>
       </>}
     </main>
@@ -261,6 +256,102 @@ export default function SaqrLearningPage() {
       .saqr-learning-orbit { animation:saqr-learning-orbit 36s linear infinite }
       .saqr-learning-floating-symbol { animation:saqr-learning-float 4.5s ease-in-out infinite }
       .saqr-learning-symbol-late { animation-delay:-2.2s }
+      /* Larger, consistently high-contrast controls across both desktop and mobile. */
+      .saqr-learning-option:focus-visible {outline:4px solid #0EA5E9;outline-offset:3px}
+      .saqr-learning-option [class*="text-white"] {text-shadow:0 1px 1px rgba(0,0,0,.15)}
+      .saqr-learning-hero .saqr-learning-greeting {color:#FEF3C7}
+      @media (min-width:1024px) and (min-height:690px) {
+        /* Only the activity overview is fitted to one desktop screen.
+           Selected educational activities retain natural document scrolling. */
+        .saqr-learning-page--overview {
+          box-sizing:border-box;
+          height:calc(100dvh - 96px)!important;
+          min-height:0!important;
+          padding:8px 20px 10px!important;
+        }
+        .saqr-learning-page--overview .saqr-learning-main {
+          height:100%;max-width:1280px;display:flex;flex-direction:column;
+          justify-content:space-between;gap:7px;
+        }
+        .saqr-learning-page--overview .saqr-learning-main > * + * {margin-top:0!important}
+        .saqr-learning-page--overview .saqr-learning-topbar {flex:0 0 auto;min-height:40px}
+        .saqr-learning-page--overview .saqr-learning-hero {
+          flex:0 0 auto;min-height:0!important;padding:12px 22px!important;
+          border-radius:25px!important;
+        }
+        .saqr-learning-page--overview .saqr-learning-hero > .relative.grid {gap:10px}
+        .saqr-learning-page--overview .saqr-learning-hero .space-y-3 > * + * {margin-top:5px!important}
+        .saqr-learning-page--overview .saqr-learning-hero .saqr-learning-greeting {
+          font-size:clamp(24px,2.3vw,30px)!important;line-height:1.3!important;
+        }
+        .saqr-learning-page--overview .saqr-learning-hero h1 {
+          font-size:clamp(30px,3vw,38px)!important;line-height:1.25!important;
+        }
+        .saqr-learning-page--overview .saqr-learning-hero p.max-w-xl {
+          font-size:16px!important;line-height:1.5!important;
+        }
+        .saqr-learning-page--overview .saqr-learning-hero .flex.flex-wrap span {
+          font-size:13px!important;padding:5px 9px!important;
+        }
+        .saqr-learning-page--overview .saqr-learning-art {
+          height:clamp(155px,20dvh,218px)!important;
+          max-width:260px!important;
+        }
+        .saqr-learning-page--overview .saqr-learning-steps {flex:0 0 auto}
+        .saqr-learning-page--overview .saqr-learning-steps > div {
+          min-height:43px!important;padding:5px 8px!important;border-radius:13px!important;
+          font-size:18px!important;
+        }
+        .saqr-learning-page--overview .saqr-learning-tools {
+          flex:0 0 auto;margin:0!important;
+        }
+        .saqr-learning-page--overview .saqr-learning-tools > * + * {margin-top:8px!important}
+        .saqr-learning-page--overview .saqr-learning-tools-header h2 {
+          font-size:clamp(23px,2.1vw,28px)!important;line-height:1.35!important;
+        }
+        .saqr-learning-page--overview .saqr-learning-tools-header p {
+          margin-top:2px!important;line-height:1.35!important;
+        }
+        .saqr-learning-page--overview .saqr-learning-tools-grid {
+          grid-template-columns:repeat(4,minmax(0,1fr));gap:9px!important;
+        }
+        .saqr-learning-page--overview .saqr-learning-option {
+          min-height:146px!important;padding:10px 15px!important;border-bottom-width:5px!important;
+          border-radius:19px!important;
+        }
+        .saqr-learning-page--overview .saqr-learning-option .relative.grid {
+          width:43px!important;height:43px!important;border-radius:12px!important;
+        }
+        .saqr-learning-page--overview .saqr-learning-option .relative.grid svg {
+          width:29px!important;height:29px!important;
+        }
+        .saqr-learning-page--overview .saqr-learning-option span.font-black {
+          font-size:clamp(20px,1.8vw,24px)!important;line-height:1.25!important;
+          padding-top:7px!important;
+        }
+        .saqr-learning-page--overview .saqr-learning-option span.font-semibold {
+          font-size:16px!important;line-height:1.35!important;margin-top:3px!important;
+        }
+        .saqr-learning-page--overview .saqr-learning-footnote {
+          flex:0 0 auto;padding:7px 14px!important;border-radius:15px!important;gap:8px!important;
+        }
+        .saqr-learning-page--overview .saqr-learning-footnote p {
+          font-size:15px!important;line-height:1.45!important;
+        }
+        .saqr-learning-page--overview .saqr-learning-footnote a {
+          padding:8px 13px!important;font-size:15px!important;
+        }
+      }
+      /* In compact laptop heights the duplicate explanatory footnote (and its
+         duplicate Back link) is shown after choosing an activity, not on the overview. */
+      @media (min-width:1024px) and (min-height:690px) and (max-height:800px) {
+        .saqr-learning-page--overview .saqr-learning-footnote {display:none!important}
+        .saqr-learning-page--overview .saqr-learning-hero {padding-block:9px!important}
+        .saqr-learning-page--overview .saqr-learning-art {height:clamp(142px,19dvh,175px)!important}
+        .saqr-learning-page--overview .saqr-learning-option {min-height:140px!important}
+        .saqr-learning-page--overview .saqr-learning-tools > * + * {margin-top:6px!important}
+      }
+      /* Short and zoomed viewports scroll naturally so content is never hidden. */
       @media (hover:hover) and (pointer:fine) {
         .saqr-learning-option:hover { transform:translateY(-8px) scale(1.012);box-shadow:0 21px 32px rgba(8,69,62,.23) }
       }

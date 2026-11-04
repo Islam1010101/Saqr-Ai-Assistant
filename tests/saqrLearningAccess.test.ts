@@ -56,7 +56,19 @@ assert.ok(art.includes("kind === 'tree'") && art.includes("kind === 'book'") && 
   'Required illustrated assets must exist');
 assert.ok(steps.includes('<LearningPictureArt kind={kind}'), 'Step tasks use images');
 assert.ok(steps.includes('setBreakTime(v => !v)') && steps.includes('setStep(s => s + 1)'), 'Breaks and task progression work');
-assert.ok(calm.includes('onQuietChange(!quiet)') && calm.includes('onLargeChange(!large)'), 'Calm mode controls update page');
+assert.ok(calm.includes('onQuietChange(!quiet)'), 'Calm mode remains fully interactive');
+assert.ok(!calm.includes('onLargeChange') && !page.includes('setLarge('),
+  'No student font-size toggle; larger reading text is the automatic default');
+assert.ok(page.includes('<ReadTogether isAr={isAr} large={true}') &&
+  page.includes('<PictureLearning isAr={isAr} large={true}') &&
+  page.includes('<StepByStep isAr={isAr} large={true}'),
+  'Every reading and picture activity defaults to larger readable text');
+assert.ok(page.includes('saqr-learning-page--overview') &&
+  page.includes('height:calc(100dvh - 96px)') && page.includes('saqr-learning-tools-grid'),
+  'Desktop activity overview is compact, while active content retains scrolling');
+assert.ok(page.includes('from-[#0E5D88]') && page.includes('from-[#56318A]') &&
+  page.includes('from-[#7A4600]') && page.includes('from-[#075A42]'),
+  'Activity card palettes use dark, high-contrast backgrounds');
 assert.ok(page.includes('saqr-learning-page--calm .saqr-learning-decoration'), 'Calm mode actually removes animated decorations');
 assert.ok(page.includes('saqr-learning-page--calm .saqr-learning-option'), 'Calm mode simplifies activity cards');
 assert.ok(!readTogether.includes('القراءة الصوتية الطبيعية ستُضاف') && !page.includes('القراءة الصوتية الطبيعية ستُضاف'),
