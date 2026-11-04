@@ -66,6 +66,22 @@ line('height:min(790px, calc(100dvh - 28px))!important;');
 assert.ok(app.includes("['/', '/saqr-learning'].includes(location.pathname) ? 'lg:hidden'"),
   'The shared footer must not add desktop scroll to login or Saqr learning');
 
+// A balanced mobile video hero shares horizontal rhythm with the white sign-in
+// panel; narrow phones stack instead of clipping bilingual headings.
+line('efips-login-brand-copy');
+line('grid-template-columns:minmax(0,1.55fr) minmax(100px,1fr);');
+line('grid-column:1;grid-row:2;');
+line('grid-column:2;grid-row:2;align-self:end;justify-self:center;');
+line('.efips-login-signin {padding:19px 20px 25px!important;}');
+line('@media (max-width:359px)');
+line('.efips-login-brand-panel {grid-template-columns:minmax(0,1fr);row-gap:7px;}');
+// Desktop brand text is deliberately larger while the single-viewport card
+// and interactive sign-in elements retain their existing sizing and placement.
+line('font-size:clamp(38px,5.7dvh,54px)!important;');
+line('font-size:clamp(17px,2.5dvh,21px)!important;');
+line('max-width:540px!important;');
+line('text-wrap:balance;transform:none!important;');
+
 // Visual edits must not change Google-only auth or redirect.
 line("provider: 'google'");
 line("queryParams: { prompt: 'select_account' }");
