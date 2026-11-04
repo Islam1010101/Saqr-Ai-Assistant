@@ -66,6 +66,19 @@ function ActivityIcon({ kind, className = 'w-10 h-10' }: { kind: FeatureName; cl
 export default function SaqrLearningPage() {
   const { locale, dir } = useLanguage();
   const isAr = locale === 'ar';
+  const userName = (() => {
+    try {
+      const account = JSON.parse(localStorage.getItem('current_user') || '{}');
+      const fullName = String(
+        (isAr ? account?.name_ar : account?.name_en) ||
+        account?.name_ar || account?.name_en || account?.name || account?.full_name || ''
+      ).trim();
+      const parts = fullName.split(/\s+/).filter(Boolean);
+      return parts.length > 1 ? `${parts[0]} ${parts[parts.length - 1]}` : parts[0] || '';
+    } catch {
+      return '';
+    }
+  })();
   const [status, setStatus] = useState<'loading' | 'allowed' | 'denied' | 'error'>('loading');
   const [settings, setSettings] = useState<LearningFeatures | null>(null);
   const [viewer, setViewer] = useState<'admin' | 'student' | null>(null);
@@ -132,8 +145,9 @@ export default function SaqrLearningPage() {
           </div>
           <div className="relative grid gap-5 sm:grid-cols-[1.2fr_.8fr] items-center">
             <div className="relative z-20 space-y-3 text-center sm:text-start">
-              <p className="inline-flex rounded-full border border-amber-200/50 bg-white/10 px-4 py-2 text-xs font-black tracking-wide text-amber-100">
-                {isAr ? 'كل يوم خطوة جديدة مع صقر' : 'GROW AND DISCOVER WITH SAQR'}
+              <p className="saqr-learning-greeting block text-2xl sm:text-3xl lg:text-4xl font-black leading-[1.4] text-amber-100 break-words">
+                {isAr ? (userName ? 'أهلًا بك يا ' : 'أهلًا بك!') : (userName ? 'Welcome, ' : 'Welcome!')}
+                {userName && <span dir="auto" className="text-white">{userName}</span>}
               </p>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black leading-[1.5]">{isAr ? 'صقر يساعدني' : 'Saqr Helps Me'}</h1>
               <p className="max-w-xl text-base sm:text-lg lg:text-xl leading-[1.9] font-semibold text-emerald-50/95">
@@ -237,6 +251,11 @@ export default function SaqrLearningPage() {
       @keyframes saqr-learning-float { 0%,100% { transform:translateY(0) } 50% { transform:translateY(-11px) } }
       @keyframes saqr-learning-glow { 0%,100% { opacity:.65;transform:scale(.96) } 50% { opacity:.95;transform:scale(1.05) } }
       @keyframes saqr-learning-orbit { to { transform:rotate(360deg) } }
+      @keyframes saqr-learning-greeting-appear {
+        from { opacity:0;transform:translateY(14px) }
+        to { opacity:1;transform:translateY(0) }
+      }
+      .saqr-learning-greeting { animation:saqr-learning-greeting-appear .9s ease-out both }
       .saqr-learning-mascot { animation:saqr-learning-float 5.5s ease-in-out infinite }
       .saqr-learning-aura { animation:saqr-learning-glow 7s ease-in-out infinite }
       .saqr-learning-orbit { animation:saqr-learning-orbit 36s linear infinite }
@@ -249,6 +268,7 @@ export default function SaqrLearningPage() {
         .saqr-learning-floating-symbol,.saqr-learning-orbit { animation:none }
       }
       .saqr-learning-page--calm .saqr-learning-decoration { display:none!important }
+      .saqr-learning-page--calm .saqr-learning-greeting { animation:none!important }
       .saqr-learning-page--calm .saqr-learning-mascot,.saqr-learning-page--calm .saqr-learning-option { animation:none!important;transition:none!important;transform:none!important;box-shadow:none!important }
       .saqr-learning-page--calm .saqr-learning-hero { background:#07543E }
       .saqr-learning-page--calm .saqr-learning-option { background-image:none!important;background-color:#0D7456 }
