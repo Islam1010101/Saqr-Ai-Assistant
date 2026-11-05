@@ -29,17 +29,33 @@ assert.ok(edge.includes('blocked?.disabled_at'), 'Disabled admin and students mu
 assert.ok(page.includes('/Saqr%20Hellping.png'), 'Use requested exact public school artwork');
 assert.ok(page.includes('saqr-learning-mascot'), 'Hero applies scoped character motion');
 assert.ok(page.includes('prefers-reduced-motion:reduce'), 'Motion is optional for accessibility');
-assert.ok(page.includes('وضع معاينة الأدمن'), 'Authorized admin sees preview indicator');
+assert.ok(!page.includes('وضع معاينة الأدمن') && !page.includes('Admin preview mode'), 'Admin preview label is removed');
 assert.ok(!page.includes('/saqr-full.png'), 'Old mascot asset is replaced');
 
 const readTogether=read('src/components/saqrLearning/ReadTogether.tsx');
 const pictures=read('src/components/saqrLearning/PictureLearning.tsx');
 const art=read('src/components/saqrLearning/LearningPictureArt.tsx');
 const steps=read('src/components/saqrLearning/StepByStep.tsx');
-const calm=read('src/components/saqrLearning/CalmDisplay.tsx');
+const toolbar=read('src/components/saqrLearning/SaqrAccessibilityToolbar.tsx');
 
-assert.ok(page.includes('<ReadTogether') && page.includes('<PictureLearning') && page.includes('<StepByStep') && page.includes('<CalmDisplay'),
-  'Each learning card must mount its functional activity');
+assert.ok(page.includes('<ReadTogether') && page.includes('<PictureLearning') && page.includes('<StepByStep') &&
+  !page.includes('<CalmDisplay'), 'Three supported learning activities remain; calm mode is not a separate card');
+assert.ok(page.includes('<SaqrAccessibilityToolbar isAr={isAr} quiet={quiet} onQuietChange={setQuiet} />'), 'Accessible toolbar replaces the calm activity');
+assert.ok(page.includes("status === 'allowed' && settings &&") && edge.includes("if(!entitlement?.enabled)"),
+  'Toolbar mounts only within the server-verified private learning space');
+for(const label of ['أنشطة تفاعلية','Interactive activities','بدون مؤقت','No time limits',
+ 'عربي وإنجليزي','Arabic & English','وضع معاينة الأدمن','Admin preview mode']){
+  assert.ok(!page.includes(label), 'Removed hero label must not appear: '+label);
+}
+assert.ok(!read('src/components/saqrLearning/ReadTogether.tsx').includes('بدون مؤقت'), 'No-timer badge also removed inside the reader');
+assert.ok(toolbar.includes('aria-expanded={expanded}') && toolbar.includes('setExpanded'), 'Toolbar opens and closes accessibly');
+assert.ok(toolbar.includes("setZoom") && toolbar.includes('baselinePx.current * zoom / 100'),
+  'Zoom scales the actual page typography');
+assert.ok(toolbar.includes("efips-learning-color-safe") && toolbar.includes("efips-learning-grayscale"),
+  'Color-friendly contrast and full-site grayscale are real visual modes');
+assert.ok(toolbar.includes("onQuietChange(!quiet)"), 'Reduced motion remains accessible inside toolbar');
+assert.ok(toolbar.includes("root.style.fontSize = originalSize.current"), 'Zoom settings restore on page exit');
+assert.ok(toolbar.includes("root.classList.remove("), 'Presentation modes do not leak into a later school account');
 assert.ok(readTogether.includes("'/audio/saqr-reading/'"), 'Read Together uses approved local MP3 assets');
 assert.ok(readTogether.includes('new Audio(url)'), 'Reading uses HTMLAudioElement, not browser synthesis');
 assert.ok(readTogether.includes('audio.play()') && readTogether.includes('audio.pause()') &&
@@ -60,9 +76,8 @@ assert.ok(art.includes("kind === 'tree'") && art.includes("kind === 'book'") && 
   'Required illustrated assets must exist');
 assert.ok(steps.includes('<LearningPictureArt kind={kind}'), 'Step tasks use images');
 assert.ok(steps.includes('setBreakTime(v => !v)') && steps.includes('setStep(s => s + 1)'), 'Breaks and task progression work');
-assert.ok(calm.includes('onQuietChange(!quiet)'), 'Calm mode remains fully interactive');
-assert.ok(!calm.includes('onLargeChange') && !page.includes('setLarge('),
-  'No student font-size toggle; larger reading text is the automatic default');
+assert.ok(!page.includes('setLarge('), 'Page does not expose a duplicate text control');
+assert.ok(!page.includes("settings.calm_display && <button"), 'Old standalone calm-view button is removed');
 assert.ok(page.includes('<ReadTogether isAr={isAr} large={true}') &&
   page.includes('<PictureLearning isAr={isAr} large={true}') &&
   page.includes('<StepByStep isAr={isAr} large={true}'),
@@ -71,8 +86,8 @@ assert.ok(page.includes('saqr-learning-page--overview') &&
   page.includes('height:calc(100dvh - 96px)') && page.includes('saqr-learning-tools-grid'),
   'Desktop activity overview is compact, while active content retains scrolling');
 assert.ok(page.includes('from-[#0E5D88]') && page.includes('from-[#56318A]') &&
-  page.includes('from-[#7A4600]') && page.includes('from-[#075A42]'),
-  'Activity card palettes use dark, high-contrast backgrounds');
+  page.includes('from-[#7A4600]') && !page.includes('from-[#075A42]'),
+  'Three distinct high-contrast learning cards remain without a separate calm mode');
 assert.ok(page.includes('saqr-learning-page--calm .saqr-learning-decoration'), 'Calm mode actually removes animated decorations');
 assert.ok(page.includes('saqr-learning-page--calm .saqr-learning-option'), 'Calm mode simplifies activity cards');
 assert.ok(!readTogether.includes('القراءة الصوتية الطبيعية ستُضاف') && !page.includes('القراءة الصوتية الطبيعية ستُضاف'),
@@ -80,4 +95,4 @@ assert.ok(!readTogether.includes('القراءة الصوتية الطبيعية
 assert.ok(!pictures.includes('أنظر') && !pictures.includes('أفهم') , 'No placeholder text-only picture cards');
 assert.ok(readTogether.includes('audio.play()') && pictures.includes('rounds: Round[]') && steps.includes('steps: Step[]'),
   'All three educational workflows are implemented');
-console.log('PASS: spoken reading, visual learning, guided tasks, and calm display are interactive');
+console.log('PASS: progressive recorded reading, learning activities, private accessibility toolbar and display modes are interactive');

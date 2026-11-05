@@ -189,8 +189,10 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const lines = isAr ? stories[story].ar : stories[story].en;
   const language = isAr ? 'ar' : 'en';
+  // Both routes start with recall and end with reasoning. Gentle uses three spaced
+  // checkpoints; Explorer includes all five in their original story order.
   const storyQuestions = learningQuestions.filter(q => q.storyId === stories[story].id &&
-    (difficulty === 'explorer' || q.level === 1));
+    (difficulty === 'explorer' || q.afterLine === 1 || q.afterLine === 5 || q.afterLine === 9));
   const question = storyQuestions.find(q => q.id === questionId);
   const choiceOrder = useMemo(() => {
     if (!question) return [] as number[];
@@ -426,9 +428,6 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
             {isAr ? 'اسمع مع صقر، وبعد كل جزء جاوب عن سؤال صغير.' : 'Listen with Saqr, then answer a little question at each stop.'}
           </p>
         </div>
-        <span className="rounded-full bg-white dark:bg-slate-900 border border-emerald-200 dark:border-emerald-800 px-4 py-2 text-xs font-black text-emerald-800 dark:text-emerald-200">
-          {isAr ? 'بدون مؤقت' : 'No timers'}
-        </span>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         {stories.map((item, index) => <button key={item.id} type="button" onClick={() => changeStory(index)}
@@ -448,12 +447,12 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
           <button type="button" onClick={() => changeDifficulty('gentle')} aria-pressed={difficulty === 'gentle'}
             className={'min-h-12 rounded-xl px-4 py-3 border-2 font-black text-sm focus-visible:outline-4 focus-visible:outline-sky-400 ' +
               (difficulty === 'gentle' ? 'bg-emerald-700 text-white border-emerald-700' : 'border-emerald-300 bg-white dark:bg-slate-800 text-slate-800 dark:text-white')}>
-            {isAr ? 'بسيط · اختيارين' : 'Gentle · 2 choices'}
+            {isAr ? 'متدرّج · 3 أسئلة بخيارين' : 'Guided · 3 questions, 2 choices'}
           </button>
           <button type="button" onClick={() => changeDifficulty('explorer')} aria-pressed={difficulty === 'explorer'}
             className={'min-h-12 rounded-xl px-4 py-3 border-2 font-black text-sm focus-visible:outline-4 focus-visible:outline-sky-400 ' +
               (difficulty === 'explorer' ? 'bg-sky-700 text-white border-sky-700' : 'border-sky-300 bg-white dark:bg-slate-800 text-slate-800 dark:text-white')}>
-            {isAr ? 'مستكشف · 3 اختيارات' : 'Explorer · 3 choices'}
+            {isAr ? 'مستكشف · 5 أسئلة بثلاثة خيارات' : 'Explorer · 5 questions, 3 choices'}
           </button>
         </div>
       </div>
@@ -512,7 +511,13 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
         <p className="rounded-full bg-amber-200 dark:bg-amber-800/50 px-4 py-2 text-amber-950 dark:text-amber-100 font-black text-sm">
           {isAr ? 'صقر عنده سؤال ليك!' : 'Saqr has a question!'}
         </p>
-
+        <p className="rounded-full border-2 border-sky-400 dark:border-sky-600 bg-white dark:bg-slate-800 px-4 py-2 text-sky-900 dark:text-sky-100 font-black text-sm">
+          {question.level === 1
+            ? (isAr ? 'سهل · أتذكّر' : 'Easy · Remember')
+            : question.level === 2
+              ? (isAr ? 'متوسط · أفهم' : 'Medium · Understand')
+              : (isAr ? 'متقدّم · أفكّر' : 'Challenge · Think')}
+        </p>
       </div>
       <h3 id="saqr-reading-question" className={'font-black text-center leading-[1.8] text-slate-900 dark:text-white ' + (large ? 'text-3xl' : 'text-2xl')}>
         {isAr ? question.promptAr : question.promptEn}
