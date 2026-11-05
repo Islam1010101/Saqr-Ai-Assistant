@@ -86,8 +86,8 @@ assert.ok(page.includes('saqr-learning-page--overview') &&
   page.includes('height:calc(100dvh - 96px)') && page.includes('saqr-learning-tools-grid'),
   'Desktop activity overview is compact, while active content retains scrolling');
 assert.ok(page.includes('from-[#0E5D88]') && page.includes('from-[#56318A]') &&
-  page.includes('from-[#7A4600]') && page.includes('from-[#075A42]'),
-  'Activity card palettes use dark, high-contrast backgrounds');
+  page.includes('from-[#7A4600]') && !page.includes('from-[#075A42]'),
+  'Three distinct high-contrast learning cards remain without a separate calm mode');
 assert.ok(page.includes('saqr-learning-page--calm .saqr-learning-decoration'), 'Calm mode actually removes animated decorations');
 assert.ok(page.includes('saqr-learning-page--calm .saqr-learning-option'), 'Calm mode simplifies activity cards');
 assert.ok(!readTogether.includes('القراءة الصوتية الطبيعية ستُضاف') && !page.includes('القراءة الصوتية الطبيعية ستُضاف'),
