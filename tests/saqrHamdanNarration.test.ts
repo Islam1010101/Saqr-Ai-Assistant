@@ -1,69 +1,67 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { learningStories } from '../supabase/functions/saqr-learning-narration/stories.ts';
 import { learningQuestions } from '../supabase/functions/saqr-learning-narration/questions.ts';
 
-const read = (name: string) => readFileSync(name,'utf8');
-const edge = read('supabase/functions/saqr-learning-narration/index.ts');
+const read = (name: string) => readFileSync(name, 'utf8');
 const page = read('src/components/saqrLearning/ReadTogether.tsx');
-const mission = read('src/components/saqrLearning/StepByStep.tsx');
+const missions = read('src/components/saqrLearning/StepByStep.tsx');
 const pictures = read('src/components/saqrLearning/PictureLearning.tsx');
 
-assert.ok(learningStories.length >= 6, 'Expand the number of selectable stories');
-assert.equal(new Set(learningStories.map(story=>story.id)).size, learningStories.length);
-for(const story of learningStories) {
-  assert.ok(story.ar.length>=10 && story.en.length>=10, 'Each story has extended Arabic and English narration');
-  assert.equal(story.ar.length,story.en.length,'Bilingual sentences align');
-  assert.ok(story.ar.every(line=>line.length>24) && story.en.every(line=>line.length>24),'Lines contain real story prose');
-}
-assert.ok((mission.match(/titleAr:/g)||[]).length >= 14,'Extend guided learning missions');
-assert.ok((pictures.match(/questionAr:/g)||[]).length >= 8,'Extend picture learning rounds');
-assert.ok(edge.includes('ar-AE-HamdanNeural'), 'Use the actual verified UAE Hamdan neural voice');
-assert.ok(edge.includes('en-US-GuyNeural'), 'English narration retains an English voice');
-assert.ok(edge.includes('AZURE_SPEECH_KEY') && edge.includes('AZURE_SPEECH_REGION'), 'Azure keys remain server-side');
-assert.ok(edge.includes('auth.auth.getUser(jwt)') && edge.includes('saqr_learning_access'), 'Preserve protected learning access');
-assert.ok(edge.includes('staff?.role !== "admin"'), 'Admin preview is checked server-side');
-assert.ok(edge.includes('const spokenText = question'), 'Narration is constrained to approved classroom text');
-assert.ok(edge.includes('item.id === body.storyId') && edge.includes('lineIndex'), 'Accept bounded story and sentence IDs');
-assert.ok(!edge.includes('body.text') && !edge.includes('body.ssml'), 'No arbitrary user text is sent to external TTS');
-assert.ok(page.includes("supabase.functions.invoke('saqr-learning-narration'"), 'Browser invokes protected narration');
-assert.ok(page.includes('data instanceof Blob'), 'Browser plays returned MP3 instead of synthesizing a false Hamdan voice');
-assert.ok(page.includes("setAzureReady(ready ? 'ready' : 'not-configured')"), 'Azure availability is explicit');
-assert.ok(page.includes('voiceSource === \'device\''), 'Device speech fallback stays available when Azure is unconfigured');
-assert.ok(page.includes('setCurrentLine(index)'), 'Highlights spoken story sentence');
-assert.ok(!page.includes('Ocp-Apim-Subscription-Key'), 'Never expose the Azure subscription key in the browser');
-console.log('PASS: six long bilingual stories, expanded missions and verified secure Azure voice pathway');
+assert.equal(learningStories.length, 6, 'Exactly six approved stories');
+assert.equal(new Set(learningStories.map(s => s.id)).size, 6, 'No duplicate story IDs');
+assert.ok(missions.includes('titleAr:') && pictures.includes('questionAr:'), 'Other learning activities remain intact');
+assert.ok(!page.includes('SpeechSynthesisUtterance') && !page.includes('speechSynthesis'), 'No browser TTS');
+assert.ok(!page.includes('saqr-learning-narration') && !page.includes('AZURE_SPEECH_KEY'), 'No generated Azure narration');
+assert.ok(page.includes('recordedAudioUrl') && page.includes('new Audio(url)'), 'Play actual recordings from /public');
+assert.ok(page.includes('const canReuse') && page.includes('audio.readyState >= 1'), 'Reuse audio across sentences to avoid lag');
+assert.ok(page.includes('setCurrentLine(startAt)') && page.includes('currentLine === index'), 'Highlight current recorded sentence');
+assert.ok(page.includes('afterLine(startAt, id,') && page.includes('setQuestionId(checkpoint.id)'), 'Pause for comprehension questions');
+assert.ok(page.includes("difficulty === 'gentle'") && page.includes('answeredRef.current.add(question.id)'),
+  'Quiz levels and unique scoring are preserved');
+assert.ok(page.includes('prefers-reduced-motion: reduce'), 'Accessibility remains intact');
+assert.ok(!page.includes('replayQuestion'), 'Do not synthesize old spoken questions');
+assert.ok(page.includes('اقرأ جملة بنفسي'), 'Visual-only reading fallback');
 
-assert.ok(edge.includes('"Content-Type": "application/octet-stream"'), 'Supabase binary parser requires octet-stream');
-assert.ok(edge.includes('"X-Saqr-Audio-Type": "audio/mpeg"'), 'Keep accurate MP3 media type metadata');
-assert.ok(page.includes("new Blob([response.data], { type: 'audio/mpeg' })"), 'Browser audio Blob has an explicit MP3 type');
-assert.ok(page.includes("URL.createObjectURL(mp3)"), 'MP3 blob is passed to the player without text conversion');
-assert.ok(!edge.includes('"Content-Type": "audio/mpeg", "X-Saqr-Voice"'), 'Do not regress to text parsing of MP3 binary');
+const match = page.match(/const recordedCuts: Record<string, \{ ar: number\[\]; en: number\[\] \}> = ([\s\S]*?);\s*const recordedAudioUrl/);
+assert.ok(match, 'Sentence timing manifest is present');
+const cuts = JSON.parse(match[1]) as Record<string, Record<'ar'|'en',number[]>>;
+const ids = new Set(learningStories.map(s => s.id));
+assert.deepEqual(Object.keys(cuts).sort(), [...ids].sort(), 'All stories have timing data');
+assert.equal(learningQuestions.length, 30, 'Six stories have five bilingual comprehension questions each');
 
-assert.equal(learningQuestions.length, 30, 'Six stories have five bilingual reading checkpoints each');
-const storyIds = new Set(learningStories.map(s=>s.id));
-for(const story of learningStories) {
-  const quiz = learningQuestions.filter(q=>q.storyId===story.id);
-  assert.equal(quiz.length,5,'Every story has 5 questions');
-  assert.equal(quiz.filter(q=>q.level===1).length,3,'Every story has a shorter three-question gentle mode');
-  assert.deepEqual(quiz.map(q=>q.afterLine),[1,3,5,7,9],'Questions stop after selected lines');
-  for(const question of quiz){
-    assert.ok(storyIds.has(question.storyId));
-    assert.ok(question.correctIndex>=0 && question.correctIndex<question.options.length);
-    assert.ok(question.options.length>=3);
-    assert.ok(question.promptAr.length>9 && question.promptEn.length>9);
-    assert.ok(question.options.every(o=>o.ar&&o.en));
+for (const story of learningStories) {
+  assert.equal(story.ar.length, 10, 'Ten Arabic sentences per story');
+  assert.equal(story.en.length, 10, 'Ten English sentences per story');
+  assert.ok(story.ar.every(line => line.length > 24) && story.en.every(line => line.length > 24));
+
+  for (const lang of ['ar','en'] as const) {
+    const path = 'public/audio/saqr-reading/' + story.id + '/' + lang + '.mp3';
+    assert.ok(existsSync(path), 'Missing approved recording: ' + path);
+    const bytes = readFileSync(path);
+    assert.ok(bytes.length > 100000, 'Suspiciously small audio recording: ' + path);
+    assert.ok(bytes.subarray(0, 3).toString() === 'ID3' ||
+      (bytes[0] === 0xff && (bytes[1] & 0xe0) === 0xe0), 'Invalid MP3 header: ' + path);
+    assert.equal(cuts[story.id][lang].length, 10, 'A cut for each spoken sentence');
+    assert.ok(cuts[story.id][lang].every((t,i,a) => Number.isFinite(t) && t >= 0 && (i===0 || t > a[i-1])),
+      'Sentence starts must be ordered and finite');
+  }
+
+  const questions = learningQuestions.filter(q => q.storyId === story.id);
+  assert.equal(questions.length,5,'Five comprehension questions per story');
+  assert.equal(questions.filter(q => q.level === 1).length,3,'Gentle mode has three questions');
+  assert.deepEqual(questions.map(q => q.afterLine),[1,3,5,7,9],'Checkpoints follow the same lines');
+  for (const q of questions) {
+    assert.ok(ids.has(q.storyId));
+    assert.ok(q.correctIndex >= 0 && q.correctIndex < q.options.length);
+    assert.ok(q.options.length >= 3 && q.options.every(o=>o.ar && o.en));
+    assert.ok(q.promptAr.length > 9 && q.promptEn.length > 9);
   }
 }
-assert.ok(edge.includes('speak-question')&&edge.includes('learningQuestions.find'), 'Azure can narrate only approved questions');
-assert.ok(edge.includes('item.storyId === body.storyId && item.id === body.questionId'), 'Question ID must match story ID');
-assert.ok(!edge.includes('body.prompt')&&!edge.includes('body.questionText'), 'No freeform student audio text input');
-assert.ok(page.includes("action: 'speak-question'"), 'Browser requests approved spoken questions');
-assert.ok(page.includes('afterLine(index, id,'), 'Narration pauses at question checkpoints');
-assert.ok(page.includes('setQuestionId(checkpoint.id)'), 'Question UI opens after speech');
-assert.ok(page.includes('replayQuestion'), 'A child can repeat each spoken question');
-assert.ok(page.includes("difficulty === 'gentle'"), 'Simpler questions and fewer choices are available');
-assert.ok(page.includes('answeredRef.current.add(question.id)'), 'Correct answers count once');
-assert.ok(page.includes('read one sentence')||page.includes('اقرأ جملة بنفسي'), 'Manual visual-only reading fallback');
-assert.ok(page.includes('prefers-reduced-motion: reduce'), 'Respect reduced-motion for question scrolling');
-console.log('PASS: 30 bilingual comprehension questions with protected Hamdan narration and accessible child controls');
+assert.equal(learningStories[4].titleEn, 'Saqr and the Secret of the Sun', 'Fifth story is the approved replacement');
+assert.equal(learningStories[5].titleEn, 'Saqr and the Treasure of the Sea', 'Sixth story is the approved replacement');
+assert.ok(learningQuestions.some(q => q.storyId === learningStories[4].id && q.promptEn.includes('rotation')),
+ 'New science comprehension questions are in place');
+assert.ok(learningQuestions.some(q => q.storyId === learningStories[5].id && q.promptEn.includes('sea')),
+ 'New UAE sea heritage comprehension questions are in place');
+console.log('PASS: 12 approved MP3 files, 60 bilingual sentences, 30 bilingual questions and synchronized highlighting');
