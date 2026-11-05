@@ -5,9 +5,14 @@ import { learningQuestions } from '../supabase/functions/saqr-learning-narration
 
 const read = (name: string) => readFileSync(name, 'utf8');
 const page = read('src/components/saqrLearning/ReadTogether.tsx');
+const retiredEndpoint = read('supabase/functions/saqr-learning-narration/index.ts');
 const missions = read('src/components/saqrLearning/StepByStep.tsx');
 const pictures = read('src/components/saqrLearning/PictureLearning.tsx');
 
+assert.ok(retiredEndpoint.includes('RECORDED_AUDIO_ONLY') && retiredEndpoint.includes('410'),
+  'The obsolete generated narration endpoint must be retired');
+assert.ok(!retiredEndpoint.includes('AZURE_SPEECH_KEY') && !retiredEndpoint.includes('cognitiveservices'),
+  'The backend must not synthesize new audio');
 assert.equal(learningStories.length, 6, 'Exactly six approved stories');
 assert.equal(new Set(learningStories.map(s => s.id)).size, 6, 'No duplicate story IDs');
 assert.ok(missions.includes('titleAr:') && pictures.includes('questionAr:'), 'Other learning activities remain intact');
