@@ -266,6 +266,7 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
       setQuestionId(checkpoint.id);
       setChoice(null);
       setError('');
+      setCurrentLine(-1);
       setState('idle');
       return;
     }
@@ -280,7 +281,9 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
         answeredRef.current.add(question.id);
         setAnsweredCount(answeredRef.current.size);
       }
-      stop();
+      // The recording is paused at the checkpoint; retain its decoded buffer.
+      setState('idle');
+      setCurrentLine(-1);
       setError('');
     }
   };
@@ -292,11 +295,24 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
       setFinished(true);
       return;
     }
-    stop();
+    const url = recordedAudioUrl(stories[story].id, language);
+    // Reuse the same decoded recording as we advance through its ten sentences.
+    // Recreating Audio for each sentence causes repeated loads and audible gaps.
+    const canReuse = audioRef.current?.getAttribute('src') === url;
+    if (!canReuse) stop();
+    else {
+      const current = audioRef.current!;
+      sessionRef.current += 1;
+      current.pause();
+      current.ontimeupdate = null;
+      current.onended = null;
+      current.onerror = null;
+      current.onloadedmetadata = null;
+    }
     setError('');
     setFinished(false);
     const id = ++sessionRef.current;
-    const audio = new Audio(recordedAudioUrl(stories[story].id, language));
+    const audio = canReuse ? audioRef.current! : new Audio(url);
     audio.preload = 'auto';
     audio.playbackRate = rate;
     audioRef.current = audio;
@@ -323,8 +339,9 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
       });
     };
 
-    audio.onloadedmetadata = () => {
+    const startSegment = () => {
       if (sessionRef.current !== id) return;
+      audio.onloadedmetadata = null;
       audio.currentTime = Math.min(Math.max(0, begin), Math.max(0, audio.duration - 0.1));
       audio.ontimeupdate = () => {
         if (finish !== undefined && audio.currentTime >= finish - 0.07) finishSentence();
@@ -347,6 +364,9 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
           }
         });
     };
+    // Metadata is already in memory when continuing to another sentence.
+    if (audio.readyState >= 1) startSegment();
+    else audio.onloadedmetadata = startSegment;
     audio.onerror = () => {
       if (sessionRef.current === id) {
         setState('idle');
@@ -355,7 +375,7 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
           'The recording could not load. You can still read the sentences yourself.');
       }
     };
-    audio.load();
+    if (!canReuse) audio.load();
   };
 
   const togglePause = () => {
