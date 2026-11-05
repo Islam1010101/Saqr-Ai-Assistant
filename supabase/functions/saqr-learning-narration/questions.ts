@@ -3,10 +3,10 @@
 export type LearningPicture = 'book' | 'sun' | 'tree' | 'apple' | 'house' | 'desk' | 'ball' | 'pencil';
 export type StoryQuizOption = { ar: string; en: string; picture?: LearningPicture };
 export type StoryQuizQuestion = {
-  id: string; storyId: string; afterLine: number; level: 1|2;
+  id: string; storyId: string; afterLine: number; level: 1|2|3;
   promptAr: string; promptEn: string; options: StoryQuizOption[]; correctIndex: number;
 };
-export const learningQuestions: StoryQuizQuestion[] = [
+export const learningQuestions: StoryQuizQuestion[] [
   {
     "id": "saqr-library-1",
     "storyId": "saqr-library",
@@ -61,20 +61,20 @@ export const learningQuestions: StoryQuizQuestion[] = [
     "storyId": "saqr-library",
     "afterLine": 5,
     "level": 2,
-    "promptAr": "أين جلس صقر ليقرأ؟",
-    "promptEn": "Where did Saqr sit to read?",
+    "promptAr": "لماذا كان صقر يقرأ الكتاب بهدوء؟",
+    "promptEn": "Why did Saqr read the book slowly?",
     "options": [
       {
-        "ar": "قرب النافذة",
-        "en": "Near the window"
+        "ar": "ليفهم الجمل جيدًا",
+        "en": "To understand every sentence"
       },
       {
-        "ar": "وسط الملعب",
-        "en": "In the playground"
+        "ar": "لينهي الكتاب بسرعة",
+        "en": "To finish as fast as possible"
       },
       {
-        "ar": "تحت المطر",
-        "en": "In the rain"
+        "ar": "ليمنع الآخرين من القراءة",
+        "en": "To stop others from reading"
       }
     ],
     "correctIndex": 0
@@ -83,21 +83,21 @@ export const learningQuestions: StoryQuizQuestion[] = [
     "id": "saqr-library-4",
     "storyId": "saqr-library",
     "afterLine": 7,
-    "level": 1,
-    "promptAr": "ماذا فعل الطفل في القصة؟",
-    "promptEn": "What did the child in the story do?",
+    "level": 2,
+    "promptAr": "لماذا كان موقف الطفل في القصة جميلًا؟",
+    "promptEn": "Why was the child's action in the story kind?",
     "options": [
       {
-        "ar": "ساعد صديقه",
-        "en": "Helped a friend"
+        "ar": "لأنه ساعد صديقه في العثور على الحقيبة",
+        "en": "He helped a friend find a lost bag"
       },
       {
-        "ar": "أخفى الحقيبة",
-        "en": "Hid the bag"
+        "ar": "لأنه أخفى حقيبة صديقه",
+        "en": "He hid a friend's bag"
       },
       {
-        "ar": "ترك صديقه وحده",
-        "en": "Left a friend alone"
+        "ar": "لأنه رفض مساعدة صديقه",
+        "en": "He refused to help a friend"
       }
     ],
     "correctIndex": 0
@@ -106,7 +106,7 @@ export const learningQuestions: StoryQuizQuestion[] = [
     "id": "saqr-library-5",
     "storyId": "saqr-library",
     "afterLine": 9,
-    "level": 2,
+    "level": 3,
     "promptAr": "ماذا نتعلم من قصة صقر؟",
     "promptEn": "What can we learn from Saqr's story?",
     "options": [
@@ -179,23 +179,20 @@ export const learningQuestions: StoryQuizQuestion[] = [
     "storyId": "little-tree",
     "afterLine": 5,
     "level": 2,
-    "promptAr": "ماذا ظهر فوق التراب؟",
-    "promptEn": "What appeared above the soil?",
+    "promptAr": "كيف عرفت ليلى أن البذرة بدأت تنمو؟",
+    "promptEn": "How did Layla know the seed was beginning to grow?",
     "options": [
       {
-        "ar": "ورقة خضراء",
-        "en": "A green leaf",
-        "picture": "tree"
+        "ar": "ظهرت ورقة خضراء صغيرة",
+        "en": "A small green leaf appeared"
       },
       {
-        "ar": "قلم",
-        "en": "A pencil",
-        "picture": "pencil"
+        "ar": "اختفت الحديقة",
+        "en": "The garden disappeared"
       },
       {
-        "ar": "كرة",
-        "en": "A ball",
-        "picture": "ball"
+        "ar": "تحولت البذرة إلى كرة",
+        "en": "The seed turned into a ball"
       }
     ],
     "correctIndex": 0
@@ -204,7 +201,7 @@ export const learningQuestions: StoryQuizQuestion[] = [
     "id": "little-tree-4",
     "storyId": "little-tree",
     "afterLine": 7,
-    "level": 1,
+    "level": 2,
     "promptAr": "لماذا استمرت ليلى في العناية بالنبتة؟",
     "promptEn": "Why did Layla keep caring for the plant?",
     "options": [
@@ -227,21 +224,21 @@ export const learningQuestions: StoryQuizQuestion[] = [
     "id": "little-tree-5",
     "storyId": "little-tree",
     "afterLine": 9,
-    "level": 2,
-    "promptAr": "ماذا حدث عندما كبرت الشجرة؟",
-    "promptEn": "What happened when the tree grew?",
+    "level": 3,
+    "promptAr": "لماذا كان صبر ليلى وعنايتها بالشجرة مهمين؟",
+    "promptEn": "Why were Layla's patience and care important?",
     "options": [
       {
-        "ar": "وقف طائر على غصن",
-        "en": "A bird rested on a branch"
+        "ar": "لأنهما ساعدا الشجرة على النمو وأصبحت مأوى لطائر",
+        "en": "They helped the tree grow and shelter a bird"
       },
       {
-        "ar": "أصبحت كرة",
-        "en": "It became a ball"
+        "ar": "لأن الشجرة تنمو دون ماء أو رعاية",
+        "en": "Because trees need no water or care"
       },
       {
-        "ar": "تحولت إلى كتاب",
-        "en": "It became a book"
+        "ar": "لأن الطائر زرع الشجرة بدلًا منها",
+        "en": "Because the bird planted the tree for her"
       }
     ],
     "correctIndex": 0
@@ -300,20 +297,20 @@ export const learningQuestions: StoryQuizQuestion[] = [
     "storyId": "school-morning",
     "afterLine": 5,
     "level": 2,
-    "promptAr": "ماذا فعل عندما وصل إلى الفصل؟",
-    "promptEn": "What did Salem do when he arrived in class?",
+    "promptAr": "أي تصرف أظهر أن سالم مستعد للتعلم؟",
+    "promptEn": "Which action showed Salem was ready to learn?",
     "options": [
       {
-        "ar": "رتّب أدواته",
-        "en": "Organized his supplies"
+        "ar": "رتب أدواته على الطاولة",
+        "en": "He organized his school supplies"
       },
       {
-        "ar": "ركض بين المقاعد",
-        "en": "Ran between desks"
+        "ar": "ترك أدواته في الممر",
+        "en": "He left his supplies in the hallway"
       },
       {
-        "ar": "أخفى كتابه",
-        "en": "Hid his book"
+        "ar": "بدأ الركض في الفصل",
+        "en": "He ran around the classroom"
       }
     ],
     "correctIndex": 0
@@ -322,21 +319,21 @@ export const learningQuestions: StoryQuizQuestion[] = [
     "id": "school-morning-4",
     "storyId": "school-morning",
     "afterLine": 7,
-    "level": 1,
-    "promptAr": "كيف طلب سالم المساعدة؟",
-    "promptEn": "How did Salem ask for help?",
+    "level": 2,
+    "promptAr": "لماذا رفع سالم يده أثناء المهمة؟",
+    "promptEn": "Why did Salem raise his hand during the task?",
     "options": [
       {
-        "ar": "رفع يده وسأل المعلمة",
-        "en": "Raised his hand and asked"
+        "ar": "ليطلب مساعدة المعلمة بهدوء",
+        "en": "To ask his teacher for help calmly"
       },
       {
-        "ar": "صرخ على أصدقائه",
-        "en": "Shouted at friends"
+        "ar": "ليتجنب إكمال المهمة",
+        "en": "To avoid finishing his task"
       },
       {
-        "ar": "ترك المهمة",
-        "en": "Abandoned the task"
+        "ar": "ليشتت زملاءه",
+        "en": "To distract his classmates"
       }
     ],
     "correctIndex": 0
@@ -345,21 +342,21 @@ export const learningQuestions: StoryQuizQuestion[] = [
     "id": "school-morning-5",
     "storyId": "school-morning",
     "afterLine": 9,
-    "level": 2,
-    "promptAr": "بماذا شعر سالم في النهاية؟",
-    "promptEn": "How did Salem feel at the end?",
+    "level": 3,
+    "promptAr": "لماذا شعر سالم بالفخر والسعادة في نهاية اليوم؟",
+    "promptEn": "Why did Salem feel proud and happy at the end of the day?",
     "options": [
       {
-        "ar": "بالفخر والسعادة",
-        "en": "Proud and happy"
+        "ar": "لأنه نظم وقته وأكمل مهامه بهدوء",
+        "en": "He managed his time and completed tasks calmly"
       },
       {
-        "ar": "بالغضب",
-        "en": "Angry"
+        "ar": "لأنه ترك أعماله دون إكمال",
+        "en": "He left his work unfinished"
       },
       {
-        "ar": "بالخوف",
-        "en": "Afraid"
+        "ar": "لأنه نسي أدواته المدرسية",
+        "en": "He forgot his school supplies"
       }
     ],
     "correctIndex": 0
@@ -418,20 +415,20 @@ export const learningQuestions: StoryQuizQuestion[] = [
     "storyId": "friendly-ball",
     "afterLine": 5,
     "level": 2,
-    "promptAr": "ماذا قال راشد للطالب الجديد؟",
-    "promptEn": "What did Rashid say to the new student?",
+    "promptAr": "لماذا ابتسم الطالب الجديد عندما اقترب منه راشد؟",
+    "promptEn": "Why did the new student smile when Rashid approached?",
     "options": [
       {
-        "ar": "هل تحب اللعب معنا؟",
-        "en": "Would you like to play?"
+        "ar": "لأن راشد دعاه للعب مع المجموعة",
+        "en": "Rashid invited him to join the game"
       },
       {
-        "ar": "ابتعد من هنا",
-        "en": "Go away"
+        "ar": "لأن راشد طلب منه المغادرة",
+        "en": "Rashid asked him to leave"
       },
       {
-        "ar": "لا يوجد مكان لك",
-        "en": "There is no room for you"
+        "ar": "لأن اللعب انتهى فورًا",
+        "en": "Playtime ended immediately"
       }
     ],
     "correctIndex": 0
@@ -440,21 +437,21 @@ export const learningQuestions: StoryQuizQuestion[] = [
     "id": "friendly-ball-4",
     "storyId": "friendly-ball",
     "afterLine": 7,
-    "level": 1,
-    "promptAr": "كيف شارك الجميع في اللعب؟",
-    "promptEn": "How did everyone get a turn?",
+    "level": 2,
+    "promptAr": "لماذا اتفق الأصدقاء على اللعب بالتناوب؟",
+    "promptEn": "Why did the friends agree to take turns?",
     "options": [
       {
-        "ar": "لعبوا بالتناوب",
-        "en": "They took turns"
+        "ar": "حتى يحصل كل طفل على فرصة للمشاركة",
+        "en": "So every child could take part"
       },
       {
-        "ar": "لعب راشد وحده",
-        "en": "Only Rashid played"
+        "ar": "حتى يحتفظ راشد بالكرة دائمًا",
+        "en": "So Rashid could keep the ball"
       },
       {
-        "ar": "تركوا الكرة",
-        "en": "They left the ball"
+        "ar": "حتى لا يلعب الطالب الجديد",
+        "en": "So the new student would not play"
       }
     ],
     "correctIndex": 0
@@ -463,7 +460,7 @@ export const learningQuestions: StoryQuizQuestion[] = [
     "id": "friendly-ball-5",
     "storyId": "friendly-ball",
     "afterLine": 9,
-    "level": 2,
+    "level": 3,
     "promptAr": "ماذا تعلم راشد؟",
     "promptEn": "What did Rashid learn?",
     "options": [
@@ -555,21 +552,21 @@ export const learningQuestions: StoryQuizQuestion[] = [
     "id": "rainy-day-4",
     "storyId": "rainy-day",
     "afterLine": 7,
-    "level": 1,
-    "promptAr": "كيف شارك صقر ما تعلمه مع أصدقائه؟",
-    "promptEn": "How did Saqr share what he learned?",
+    "level": 2,
+    "promptAr": "كيف ساعد رسم صقر أصدقاءه على التعلم؟",
+    "promptEn": "How did Saqr's drawing help his friends learn?",
     "options": [
       {
-        "ar": "رسم الشمس والأرض وشرح فكرته",
-        "en": "He drew the Sun and Earth and explained"
+        "ar": "وضّح فكرة الشمس والأرض وشرحها لهم",
+        "en": "It showed the Sun and Earth and he explained the idea"
       },
       {
-        "ar": "أخفى الكتاب",
-        "en": "He hid the book"
+        "ar": "أخفى الكتاب عن أصدقائه",
+        "en": "He hid the book from his friends"
       },
       {
-        "ar": "ترك أصدقاءه دون شرح",
-        "en": "He gave no explanation"
+        "ar": "منعهم من طرح الأسئلة",
+        "en": "It stopped them from asking questions"
       }
     ],
     "correctIndex": 0
@@ -578,21 +575,21 @@ export const learningQuestions: StoryQuizQuestion[] = [
     "id": "rainy-day-5",
     "storyId": "rainy-day",
     "afterLine": 9,
-    "level": 2,
-    "promptAr": "ماذا قرر صقر وأصدقاؤه في النهاية؟",
-    "promptEn": "What did Saqr and his friends decide?",
+    "level": 3,
+    "promptAr": "لماذا كان صقر وأصدقاؤه متحمسين للبحث عن أسرار أخرى في الكون؟",
+    "promptEn": "Why were Saqr and his friends excited to explore more of the universe?",
     "options": [
       {
-        "ar": "البحث عن أسرار أخرى في الكون",
-        "en": "Explore more mysteries of the universe"
+        "ar": "لأن فضولهم شجعهم على طرح أسئلة جديدة والتعلم",
+        "en": "Their curiosity inspired more questions and learning"
       },
       {
-        "ar": "ترك الأسئلة دون إجابة",
-        "en": "Stop asking questions"
+        "ar": "لأنهم قرروا التوقف عن القراءة",
+        "en": "They decided to stop reading"
       },
       {
-        "ar": "نسيان ما تعلموه",
-        "en": "Forget what they learned"
+        "ar": "لأنهم ظنوا أنه لا توجد أشياء جديدة ليتعلموها",
+        "en": "They thought nothing new could be learned"
       }
     ],
     "correctIndex": 0
@@ -670,21 +667,21 @@ export const learningQuestions: StoryQuizQuestion[] = [
     "id": "my-small-project-4",
     "storyId": "my-small-project",
     "afterLine": 7,
-    "level": 1,
-    "promptAr": "ماذا كتب صقر تحت رسم السفينة؟",
-    "promptEn": "What did Saqr write under his boat drawing?",
+    "level": 2,
+    "promptAr": "ماذا أراد صقر أن يوضح بالكلمات المكتوبة تحت رسم السفينة؟",
+    "promptEn": "What did Saqr want to show with the words under his boat drawing?",
     "options": [
       {
-        "ar": "شجاعة وتعاون وعزيمة",
-        "en": "Courage, teamwork, and determination"
+        "ar": "قيم الغواصين مثل الشجاعة والتعاون والعزيمة",
+        "en": "The divers' values: courage, teamwork, determination"
       },
       {
-        "ar": "سماء ومطر ورياح",
-        "en": "Sky, rain, and wind"
+        "ar": "أسماء زملائه في الفصل",
+        "en": "The names of his classmates"
       },
       {
-        "ar": "كرة وقلم وكتاب",
-        "en": "Ball, pencil, and book"
+        "ar": "ألوان الأمواج في البحر",
+        "en": "The colors of the sea waves"
       }
     ],
     "correctIndex": 0
@@ -693,21 +690,21 @@ export const learningQuestions: StoryQuizQuestion[] = [
     "id": "my-small-project-5",
     "storyId": "my-small-project",
     "afterLine": 9,
-    "level": 2,
-    "promptAr": "لماذا شجع صقر أصدقاءه على قراءة التراث؟",
-    "promptEn": "Why did Saqr encourage learning about heritage?",
+    "level": 3,
+    "promptAr": "لماذا تساعدنا قراءة قصص الغوص واللؤلؤ على فهم وطننا؟",
+    "promptEn": "Why can reading stories of pearl diving help us understand our country?",
     "options": [
       {
-        "ar": "لفهم الوطن وتاريخه بشكل أفضل",
-        "en": "To understand their country and its past better"
+        "ar": "لأنها تعرفنا بعمل أهل الإمارات وقيمهم في الماضي",
+        "en": "They teach us about UAE history, work, and values"
       },
       {
-        "ar": "لنسيان الماضي",
-        "en": "To forget the past"
+        "ar": "لأنها تجعلنا ننسى تاريخنا",
+        "en": "They help us forget our history"
       },
       {
-        "ar": "لعدم زيارة المكتبة",
-        "en": "To avoid the library"
+        "ar": "لأنها تؤكد أن التعاون غير مهم",
+        "en": "They show teamwork was unimportant"
       }
     ],
     "correctIndex": 0
