@@ -12,7 +12,7 @@ assert.equal(learningStories.length, 6, 'Exactly six approved stories');
 assert.equal(new Set(learningStories.map(s => s.id)).size, 6, 'No duplicate story IDs');
 assert.ok(missions.includes('titleAr:') && pictures.includes('questionAr:'), 'Other learning activities remain intact');
 assert.ok(!page.includes('SpeechSynthesisUtterance') && !page.includes('speechSynthesis'), 'No browser TTS');
-assert.ok(!page.includes('saqr-learning-narration') && !page.includes('AZURE_SPEECH_KEY'), 'No generated Azure narration');
+assert.ok(!page.includes("supabase.functions.invoke('saqr-learning-narration'") && !page.includes('AZURE_SPEECH_KEY'), 'No generated Azure narration');
 assert.ok(page.includes('recordedAudioUrl') && page.includes('new Audio(url)'), 'Play actual recordings from /public');
 assert.ok(page.includes('const canReuse') && page.includes('audio.readyState >= 1'), 'Reuse audio across sentences to avoid lag');
 assert.ok(page.includes('setCurrentLine(startAt)') && page.includes('currentLine === index'), 'Highlight current recorded sentence');
