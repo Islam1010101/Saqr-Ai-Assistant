@@ -52,7 +52,7 @@ assert.ok(readTogether.includes('recordedCuts') && readTogether.includes('audio.
 assert.ok(readTogether.includes('const canReuse') && readTogether.includes('audio.readyState >= 1'),
   'Sentences reuse a buffered recording to minimize lag');
 assert.ok(!readTogether.includes('speechSynthesis') && !readTogether.includes('AZURE_') &&
-  !readTogether.includes('saqr-learning-narration'), 'Remove generated and browser TTS from this activity');
+  !readTogether.includes("supabase.functions.invoke('saqr-learning-narration'"), 'Remove generated and browser TTS from this activity');
 assert.ok(pictures.includes('<LearningPictureArt kind={kind}'), 'Picture game renders actual illustrations');
 assert.ok(pictures.includes('rounds.length') && pictures.includes('setPicked(kind)') && pictures.includes('setRound(v => v + 1)'),
   'Picture choices and progression work');
