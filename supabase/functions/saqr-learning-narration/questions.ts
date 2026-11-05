@@ -54,7 +54,7 @@ export const learningQuestions: StoryQuizQuestion[] = [
         "en": "A sea trip"
       }
     ],
-    "correctIndex": 1
+    "correctIndex": 0
   },
   {
     "id": "saqr-library-3",
@@ -100,7 +100,7 @@ export const learningQuestions: StoryQuizQuestion[] = [
         "en": "Left a friend alone"
       }
     ],
-    "correctIndex": 1
+    "correctIndex": 0
   },
   {
     "id": "saqr-library-5",
@@ -487,20 +487,20 @@ export const learningQuestions: StoryQuizQuestion[] = [
     "storyId": "rainy-day",
     "afterLine": 1,
     "level": 1,
-    "promptAr": "ماذا سمعت مريم عند الاستيقاظ؟",
-    "promptEn": "What did Maryam hear when she woke up?",
+    "promptAr": "ماذا رأى صقر يدخل من نافذته؟",
+    "promptEn": "What did Saqr see coming through his window?",
     "options": [
       {
-        "ar": "صوت المطر",
-        "en": "The rain"
+        "ar": "أشعة الشمس",
+        "en": "Sunlight"
       },
       {
-        "ar": "صوت كرة",
-        "en": "A ball"
+        "ar": "قطرات المطر",
+        "en": "Raindrops"
       },
       {
-        "ar": "صوت قلم",
-        "en": "A pencil"
+        "ar": "أوراق الشجر",
+        "en": "Tree leaves"
       }
     ],
     "correctIndex": 0
@@ -510,20 +510,20 @@ export const learningQuestions: StoryQuizQuestion[] = [
     "storyId": "rainy-day",
     "afterLine": 3,
     "level": 1,
-    "promptAr": "ماذا أخذت مريم عندما خرجت؟",
-    "promptEn": "What did Maryam take outside?",
+    "promptAr": "أين بحث صقر عن إجابة لسؤاله؟",
+    "promptEn": "Where did Saqr search for an answer?",
     "options": [
       {
-        "ar": "مظلة",
-        "en": "An umbrella"
+        "ar": "مكتبة المدرسة",
+        "en": "The school library"
       },
       {
-        "ar": "كتابًا مفتوحًا",
-        "en": "An open book"
+        "ar": "الملعب",
+        "en": "The playground"
       },
       {
-        "ar": "لعبة كبيرة",
-        "en": "A big toy"
+        "ar": "غرفة الرياضة",
+        "en": "The gym"
       }
     ],
     "correctIndex": 0
@@ -533,23 +533,20 @@ export const learningQuestions: StoryQuizQuestion[] = [
     "storyId": "rainy-day",
     "afterLine": 5,
     "level": 2,
-    "promptAr": "أين رأت مريم العصفور؟",
-    "promptEn": "Where did Maryam see the bird?",
+    "promptAr": "ماذا يسبب دوران الأرض حول نفسها؟",
+    "promptEn": "What does Earth's rotation cause?",
     "options": [
       {
-        "ar": "بين أغصان شجرة",
-        "en": "In a tree",
-        "picture": "tree"
+        "ar": "تعاقب الليل والنهار",
+        "en": "Day and night"
       },
       {
-        "ar": "في كتاب",
-        "en": "In a book",
-        "picture": "book"
+        "ar": "توقف الشمس",
+        "en": "The Sun to stop"
       },
       {
-        "ar": "على كرة",
-        "en": "On a ball",
-        "picture": "ball"
+        "ar": "اختفاء الكواكب",
+        "en": "Planets to disappear"
       }
     ],
     "correctIndex": 0
@@ -559,20 +556,20 @@ export const learningQuestions: StoryQuizQuestion[] = [
     "storyId": "rainy-day",
     "afterLine": 7,
     "level": 1,
-    "promptAr": "ماذا فعلت مريم بعد العودة للبيت؟",
-    "promptEn": "What did Maryam do after returning home?",
+    "promptAr": "كيف شارك صقر ما تعلمه مع أصدقائه؟",
+    "promptEn": "How did Saqr share what he learned?",
     "options": [
       {
-        "ar": "قرأت كتابًا عن الفصول",
-        "en": "Read about the seasons"
+        "ar": "رسم الشمس والأرض وشرح فكرته",
+        "en": "He drew the Sun and Earth and explained"
       },
       {
-        "ar": "رمت المظلة",
-        "en": "Threw away the umbrella"
+        "ar": "أخفى الكتاب",
+        "en": "He hid the book"
       },
       {
-        "ar": "ركضت في المطر",
-        "en": "Ran outside again"
+        "ar": "ترك أصدقاءه دون شرح",
+        "en": "He gave no explanation"
       }
     ],
     "correctIndex": 0
@@ -582,20 +579,20 @@ export const learningQuestions: StoryQuizQuestion[] = [
     "storyId": "rainy-day",
     "afterLine": 9,
     "level": 2,
-    "promptAr": "كيف يساعد المطر الطبيعة؟",
-    "promptEn": "How does rain help nature?",
+    "promptAr": "ماذا قرر صقر وأصدقاؤه في النهاية؟",
+    "promptEn": "What did Saqr and his friends decide?",
     "options": [
       {
-        "ar": "يساعد النباتات على النمو",
-        "en": "It helps plants grow"
+        "ar": "البحث عن أسرار أخرى في الكون",
+        "en": "Explore more mysteries of the universe"
       },
       {
-        "ar": "يجفف الأشجار",
-        "en": "It dries trees"
+        "ar": "ترك الأسئلة دون إجابة",
+        "en": "Stop asking questions"
       },
       {
-        "ar": "يوقف نمو الأزهار",
-        "en": "It stops flowers growing"
+        "ar": "نسيان ما تعلموه",
+        "en": "Forget what they learned"
       }
     ],
     "correctIndex": 0
@@ -605,23 +602,20 @@ export const learningQuestions: StoryQuizQuestion[] = [
     "storyId": "my-small-project",
     "afterLine": 1,
     "level": 1,
-    "promptAr": "ماذا طلبت المعلمة؟",
-    "promptEn": "What did the teacher ask students to make?",
+    "promptAr": "أين شاهد صقر صورة السفينة الخشبية؟",
+    "promptEn": "Where did Saqr see the picture of a wooden boat?",
     "options": [
       {
-        "ar": "بطاقة عن كتاب مفضل",
-        "en": "A favorite book card",
-        "picture": "book"
+        "ar": "في جناح التراث بالمكتبة",
+        "en": "In the library heritage corner"
       },
       {
-        "ar": "كرة",
-        "en": "A ball",
-        "picture": "ball"
+        "ar": "في الملعب",
+        "en": "On the playground"
       },
       {
-        "ar": "منزلًا",
-        "en": "A house",
-        "picture": "house"
+        "ar": "في حافلة المدرسة",
+        "en": "On the school bus"
       }
     ],
     "correctIndex": 0
@@ -631,20 +625,20 @@ export const learningQuestions: StoryQuizQuestion[] = [
     "storyId": "my-small-project",
     "afterLine": 3,
     "level": 1,
-    "promptAr": "ما الأدوات التي حضرتها دانة؟",
-    "promptEn": "What supplies did Dana prepare?",
+    "promptAr": "لماذا كان بعض أهل الإمارات يذهبون إلى البحر؟",
+    "promptEn": "Why did some people in the UAE go to sea?",
     "options": [
       {
-        "ar": "ورقة وأقلامًا ملونة",
-        "en": "Paper and colored pencils"
+        "ar": "للصيد والبحث عن اللؤلؤ",
+        "en": "To fish and search for pearls"
       },
       {
-        "ar": "حذاء رياضيًا",
-        "en": "Sports shoes"
+        "ar": "لجمع الكتب",
+        "en": "To collect books"
       },
       {
-        "ar": "مظلة",
-        "en": "An umbrella"
+        "ar": "للعب بالكرة",
+        "en": "To play football"
       }
     ],
     "correctIndex": 0
@@ -654,23 +648,20 @@ export const learningQuestions: StoryQuizQuestion[] = [
     "storyId": "my-small-project",
     "afterLine": 5,
     "level": 2,
-    "promptAr": "ماذا رسمت دانة على بطاقتها؟",
-    "promptEn": "What did Dana draw on her card?",
+    "promptAr": "ما القيم التي تعلمها صقر عن الغواصين؟",
+    "promptEn": "What did Saqr learn about the divers?",
     "options": [
       {
-        "ar": "شجرة وكتابًا",
-        "en": "A tree and a book",
-        "picture": "tree"
+        "ar": "الشجاعة والتعاون",
+        "en": "Courage and teamwork"
       },
       {
-        "ar": "كرة كبيرة",
-        "en": "A big ball",
-        "picture": "ball"
+        "ar": "الكسل والخوف",
+        "en": "Laziness and fear"
       },
       {
-        "ar": "منزلًا فقط",
-        "en": "Only a house",
-        "picture": "house"
+        "ar": "نسيان الأصدقاء",
+        "en": "Forgetting friends"
       }
     ],
     "correctIndex": 0
@@ -680,20 +671,20 @@ export const learningQuestions: StoryQuizQuestion[] = [
     "storyId": "my-small-project",
     "afterLine": 7,
     "level": 1,
-    "promptAr": "ماذا فعلت دانة عندما لاحظت خطأ؟",
-    "promptEn": "What did Dana do after finding a mistake?",
+    "promptAr": "ماذا كتب صقر تحت رسم السفينة؟",
+    "promptEn": "What did Saqr write under his boat drawing?",
     "options": [
       {
-        "ar": "صححت الحرف",
-        "en": "Corrected the letter"
+        "ar": "شجاعة وتعاون وعزيمة",
+        "en": "Courage, teamwork, and determination"
       },
       {
-        "ar": "مزقت البطاقة",
-        "en": "Tore up the card"
+        "ar": "سماء ومطر ورياح",
+        "en": "Sky, rain, and wind"
       },
       {
-        "ar": "تركت الكتاب",
-        "en": "Put the book away"
+        "ar": "كرة وقلم وكتاب",
+        "en": "Ball, pencil, and book"
       }
     ],
     "correctIndex": 0
@@ -703,20 +694,20 @@ export const learningQuestions: StoryQuizQuestion[] = [
     "storyId": "my-small-project",
     "afterLine": 9,
     "level": 2,
-    "promptAr": "بماذا شعرت دانة بعد عرض مشروعها؟",
-    "promptEn": "How did Dana feel after presenting her project?",
+    "promptAr": "لماذا شجع صقر أصدقاءه على قراءة التراث؟",
+    "promptEn": "Why did Saqr encourage learning about heritage?",
     "options": [
       {
-        "ar": "بالسعادة والفخر",
-        "en": "Happy and proud"
+        "ar": "لفهم الوطن وتاريخه بشكل أفضل",
+        "en": "To understand their country and its past better"
       },
       {
-        "ar": "بالحزن الشديد",
-        "en": "Very sad"
+        "ar": "لنسيان الماضي",
+        "en": "To forget the past"
       },
       {
-        "ar": "بالغضب",
-        "en": "Angry"
+        "ar": "لعدم زيارة المكتبة",
+        "en": "To avoid the library"
       }
     ],
     "correctIndex": 0

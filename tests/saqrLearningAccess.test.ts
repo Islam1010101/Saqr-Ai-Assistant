@@ -40,15 +40,19 @@ const calm=read('src/components/saqrLearning/CalmDisplay.tsx');
 
 assert.ok(page.includes('<ReadTogether') && page.includes('<PictureLearning') && page.includes('<StepByStep') && page.includes('<CalmDisplay'),
   'Each learning card must mount its functional activity');
-assert.ok(readTogether.includes('new SpeechSynthesisUtterance('), 'Reading creates genuine spoken utterances');
-assert.ok(readTogether.includes('synth.speak(item)'), 'Reading actually plays audio');
-assert.ok(readTogether.includes('synth.pause()') && readTogether.includes('synth.resume()') && readTogether.includes('synth.cancel()'),
-  'Speech player supports pause, resume, and stop');
-assert.ok(readTogether.includes("locale = isAr ? 'ar-AE' : 'en-US'"), 'Bilingual speech locale');
-assert.ok(readTogether.includes('currentLine === index'), 'Highlight spoken sentence');
-assert.ok(readTogether.includes('synth.getVoices()'), 'Allow choosing device voices');
-assert.ok(readTogether.includes('item.onend = () => afterLine(index, id, speakLine)'), 'Continue narration or pause at the next comprehension checkpoint');
-assert.ok(readTogether.includes("!available &&"), 'Show unavailable speech warning instead of dead button');
+assert.ok(readTogether.includes("'/audio/saqr-reading/'"), 'Read Together uses approved local MP3 assets');
+assert.ok(readTogether.includes('new Audio(url)'), 'Reading uses HTMLAudioElement, not browser synthesis');
+assert.ok(readTogether.includes('audio.play()') && readTogether.includes('audio.pause()') &&
+  readTogether.includes('audio.currentTime ='), 'Playback supports play, pause and precise sentence seeking');
+assert.ok(readTogether.includes("const language = isAr ? 'ar' : 'en'"), 'Each language has its own approved recording');
+assert.ok(readTogether.includes('currentLine === index') && readTogether.includes('setCurrentLine(startAt)'),
+  'The currently heard sentence is highlighted');
+assert.ok(readTogether.includes('recordedCuts') && readTogether.includes('audio.ontimeupdate'),
+  'Highlight and quiz checkpoints follow actual recording time');
+assert.ok(readTogether.includes('const canReuse') && readTogether.includes('audio.readyState >= 1'),
+  'Sentences reuse a buffered recording to minimize lag');
+assert.ok(!readTogether.includes('speechSynthesis') && !readTogether.includes('AZURE_') &&
+  !readTogether.includes("supabase.functions.invoke('saqr-learning-narration'"), 'Remove generated and browser TTS from this activity');
 assert.ok(pictures.includes('<LearningPictureArt kind={kind}'), 'Picture game renders actual illustrations');
 assert.ok(pictures.includes('rounds.length') && pictures.includes('setPicked(kind)') && pictures.includes('setRound(v => v + 1)'),
   'Picture choices and progression work');
@@ -74,6 +78,6 @@ assert.ok(page.includes('saqr-learning-page--calm .saqr-learning-option'), 'Calm
 assert.ok(!readTogether.includes('القراءة الصوتية الطبيعية ستُضاف') && !page.includes('القراءة الصوتية الطبيعية ستُضاف'),
   'No placeholder audio narration is presented as a working activity');
 assert.ok(!pictures.includes('أنظر') && !pictures.includes('أفهم') , 'No placeholder text-only picture cards');
-assert.ok(readTogether.includes('synth.speak(item)') && pictures.includes('rounds: Round[]') && steps.includes('steps: Step[]'),
+assert.ok(readTogether.includes('audio.play()') && pictures.includes('rounds: Round[]') && steps.includes('steps: Step[]'),
   'All three educational workflows are implemented');
 console.log('PASS: spoken reading, visual learning, guided tasks, and calm display are interactive');
