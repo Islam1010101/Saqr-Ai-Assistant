@@ -5,9 +5,9 @@ import { getSaqrLearningAccess, type LearningFeatures } from '../src/utils/saqrL
 import ReadTogether from '../src/components/saqrLearning/ReadTogether';
 import PictureLearning from '../src/components/saqrLearning/PictureLearning';
 import StepByStep from '../src/components/saqrLearning/StepByStep';
-import CalmDisplay from '../src/components/saqrLearning/CalmDisplay';
+import SaqrAccessibilityToolbar from '../src/components/saqrLearning/SaqrAccessibilityToolbar';
 
-type FeatureName = keyof LearningFeatures;
+type FeatureName = Exclude<keyof LearningFeatures, 'calm_display'>;
 type Feature = {
   key: FeatureName;
   ar: string;
@@ -34,11 +34,6 @@ const features: Feature[] = [
     key: 'focus_steps', ar: 'مهمة خطوة بخطوة', en: 'Step by step',
     hintAr: 'أنجز مهام صغيرة على راحتك', hintEn: 'Complete small tasks at your own pace',
     color: 'from-[#7A4600] to-[#965C07]', baseColor: 'bg-amber-50 dark:bg-amber-950/30', border: 'border-[#AE6613]'
-  },
-  {
-    key: 'calm_display', ar: 'عرض هادئ', en: 'Calm view',
-    hintAr: 'تحكم في الحركة وحجم النص', hintEn: 'Control motion and text size',
-    color: 'from-[#075A42] to-[#0B7058]', baseColor: 'bg-emerald-50 dark:bg-emerald-950/30', border: 'border-[#06563F]'
   }
 ];
 
@@ -57,10 +52,7 @@ function ActivityIcon({ kind, className = 'w-10 h-10' }: { kind: FeatureName; cl
     <rect x="9" y="6" width="30" height="37" rx="5" />
     <path d="m15 17 3 3 6-7M28 18h5M15 30l3 3 6-7M28 31h5" />
   </svg>;
-  return <svg {...shared} aria-hidden="true">
-    <path d="M33 8a17 17 0 1 0 7 24A16 16 0 0 1 33 8Z" />
-    <path d="M34 17h10M39 12v10M7 12h6M10 9v6" />
-  </svg>;
+  return null;
 }
 
 export default function SaqrLearningPage() {
@@ -100,7 +92,6 @@ export default function SaqrLearningPage() {
   const selectActivity = (key: FeatureName) => {
     if (!settings?.[key]) return;
     setActive(key);
-    if (key === 'calm_display') setQuiet(true);
     window.requestAnimationFrame(() => {
       const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches || quiet ? 'auto' : 'smooth';
       activityRef.current?.scrollIntoView({ behavior, block: 'start' });
@@ -154,14 +145,6 @@ export default function SaqrLearningPage() {
                 {isAr ? 'أهلًا بك في عالم صقر! اسمع القصص، اختار الصور، وخد وقتك في كل مغامرة.' :
                   'Welcome to Saqr’s world! Listen to stories, choose pictures, and enjoy every little adventure.'}
               </p>
-              <div className="flex flex-wrap justify-center sm:justify-start gap-2 pt-2">
-                <span className="rounded-xl bg-white/10 border border-white/25 px-3 py-2 text-xs sm:text-sm font-black">{isAr ? 'أنشطة تفاعلية' : 'Interactive activities'}</span>
-                <span className="rounded-xl bg-white/10 border border-white/25 px-3 py-2 text-xs sm:text-sm font-black">{isAr ? 'بدون مؤقت' : 'No time limits'}</span>
-                <span className="rounded-xl bg-white/10 border border-white/25 px-3 py-2 text-xs sm:text-sm font-black">{isAr ? 'عربي وإنجليزي' : 'Arabic & English'}</span>
-              </div>
-              {viewer === 'admin' && <p className="inline-flex items-center rounded-xl border border-amber-200/60 bg-amber-100/15 px-4 py-2 text-xs font-black text-amber-100">
-                {isAr ? 'وضع معاينة الأدمن' : 'Admin preview mode'}
-              </p>}
             </div>
             <div className="saqr-learning-art relative mx-auto w-full max-w-[310px] sm:max-w-[390px] h-[220px] sm:h-[320px] lg:h-[370px] flex items-end justify-center">
               <span aria-hidden="true" className="saqr-learning-decoration saqr-learning-aura absolute bottom-4 h-[75%] w-[78%] rounded-full bg-gradient-to-br from-emerald-300/35 via-sky-300/20 to-amber-300/20 blur-[45px]" />
@@ -188,15 +171,8 @@ export default function SaqrLearningPage() {
               <h2 id="saqr-learning-tools" className="mt-1 text-2xl sm:text-3xl font-black">{isAr ? 'ماذا تريد أن تفعل اليوم؟' : 'What will you try today?'}</h2>
               <p className="mt-1 text-base leading-7 text-slate-700 dark:text-slate-200 font-semibold">{isAr ? 'اختر نشاطًا ثم ابدأ باللعب أو القراءة.' : 'Choose an activity and start reading or playing.'}</p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {settings.calm_display && <button type="button" onClick={() => setQuiet(v => !v)} aria-pressed={quiet}
-              className={'min-h-12 rounded-full border-2 px-4 py-3 text-sm sm:text-base font-black transition-colors focus-visible:outline-4 focus-visible:outline-sky-400 ' +
-                (quiet ? 'border-emerald-700 bg-emerald-700 text-white' : 'border-emerald-200 bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-300')}>
-              {quiet ? (isAr ? 'إيقاف العرض الهادئ' : 'Exit calm view') : (isAr ? 'عرض هادئ' : 'Calm view')}
-              </button>}
-            </div>
           </div>
-          <div className="saqr-learning-tools-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="saqr-learning-tools-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {features.filter(x => settings[x.key]).map((item, index) => <button key={item.key} type="button"
               onClick={() => selectActivity(item.key)} aria-pressed={active === item.key}
               className={'saqr-learning-option group relative isolate flex flex-col items-start min-h-[200px] sm:min-h-[240px] overflow-hidden rounded-[1.8rem] border-b-[7px] p-5 sm:p-6 text-start shadow-lg transition-[transform,box-shadow] duration-300 focus-visible:outline-4 focus-visible:outline-sky-400 bg-gradient-to-br ' +
@@ -230,7 +206,6 @@ export default function SaqrLearningPage() {
           {current.key === 'read_together' && <ReadTogether isAr={isAr} large={true} quiet={quiet} isAdmin={viewer === 'admin'} />}
           {current.key === 'picture_guidance' && <PictureLearning isAr={isAr} large={true} />}
           {current.key === 'focus_steps' && <StepByStep isAr={isAr} large={true} />}
-          {current.key === 'calm_display' && <CalmDisplay isAr={isAr} quiet={quiet} onQuietChange={setQuiet} />}
         </section>}
 
         <div className="saqr-learning-footnote rounded-[1.6rem] border border-emerald-200 dark:border-emerald-900 bg-emerald-50/70 dark:bg-emerald-950/20 p-5 sm:p-6 flex flex-wrap justify-between items-center gap-3">
@@ -240,6 +215,8 @@ export default function SaqrLearningPage() {
           </p>
           <Link to="/home" className="rounded-xl bg-emerald-800 text-white px-5 py-3 font-black text-base hover:bg-emerald-900">{isAr ? 'العودة للمكتبة' : 'Back to library'}</Link>
         </div>
+        {/* The authenticated learning gate controls this toolbar; it never relies on a local role flag. */}
+        <SaqrAccessibilityToolbar isAr={isAr} quiet={quiet} onQuietChange={setQuiet} />
       </>}
     </main>
     <style>{String.raw`
@@ -313,7 +290,7 @@ export default function SaqrLearningPage() {
           margin-top:2px!important;line-height:1.35!important;
         }
         .saqr-learning-page--overview .saqr-learning-tools-grid {
-          grid-template-columns:repeat(4,minmax(0,1fr));gap:9px!important;
+          grid-template-columns:repeat(3,minmax(0,1fr));gap:9px!important;
         }
         .saqr-learning-page--overview .saqr-learning-option {
           min-height:146px!important;padding:10px 15px!important;border-bottom-width:5px!important;
@@ -365,7 +342,6 @@ export default function SaqrLearningPage() {
       .saqr-learning-page--calm .saqr-learning-option { background-image:none!important;background-color:#0D7456 }
       .saqr-learning-page--calm .saqr-learning-option:nth-child(2) { background-color:#46558B }
       .saqr-learning-page--calm .saqr-learning-option:nth-child(3) { background-color:#9D6B19 }
-      .saqr-learning-page--calm .saqr-learning-option:nth-child(4) { background-color:#08644B }
       @media (prefers-reduced-motion:reduce) {
         .saqr-learning-page *, .saqr-learning-page *::before, .saqr-learning-page *::after { animation:none!important;transition:none!important;scroll-behavior:auto!important }
         .saqr-learning-option:hover { transform:none!important }
