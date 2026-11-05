@@ -24,6 +24,11 @@ assert.ok(page.includes('setCurrentLine(startAt)') && page.includes('currentLine
 assert.ok(page.includes('afterLine(startAt, id,') && page.includes('setQuestionId(checkpoint.id)'), 'Pause for comprehension questions');
 assert.ok(page.includes("difficulty === 'gentle'") && page.includes('answeredRef.current.add(question.id)'),
   'Quiz levels and unique scoring are preserved');
+assert.ok(page.includes('q.afterLine === 1 || q.afterLine === 5 || q.afterLine === 9'),
+  'The gentle three-question path starts easy, reaches medium and ends hard');
+assert.ok(page.includes("question.level === 1") && page.includes("question.level === 2"),
+  'The active question visibly indicates its difficulty');
+assert.ok(!page.includes('بدون مؤقت'), 'Remove the redundant no-timer label');
 assert.ok(page.includes('prefers-reduced-motion: reduce'), 'Accessibility remains intact');
 assert.ok(!page.includes('replayQuestion'), 'Do not synthesize old spoken questions');
 assert.ok(page.includes('اقرأ جملة بنفسي'), 'Visual-only reading fallback');
@@ -54,7 +59,8 @@ for (const story of learningStories) {
 
   const questions = learningQuestions.filter(q => q.storyId === story.id);
   assert.equal(questions.length,5,'Five comprehension questions per story');
-  assert.equal(questions.filter(q => q.level === 1).length,3,'Gentle mode has three questions');
+  assert.deepEqual(questions.map(q => q.level),[1,1,2,2,3],
+    'Difficulty climbs from two easy prompts through medium to harder reasoning');
   assert.deepEqual(questions.map(q => q.afterLine),[1,3,5,7,9],'Checkpoints follow the same lines');
   for (const q of questions) {
     assert.ok(ids.has(q.storyId));
@@ -69,4 +75,10 @@ assert.ok(learningQuestions.some(q => q.storyId === learningStories[4].id && q.p
  'New science comprehension questions are in place');
 assert.ok(learningQuestions.some(q => q.storyId === learningStories[5].id && q.promptEn.includes('sea')),
  'New UAE sea heritage comprehension questions are in place');
+assert.ok(learningQuestions.find(q => q.id === 'little-tree-5')?.promptEn.includes('patience'),
+ 'The tree story closes with an inference question');
+assert.ok(learningQuestions.find(q => q.id === 'school-morning-5')?.promptEn.includes('Why'),
+ 'The morning story closes by interpreting its lesson');
+assert.ok(learningQuestions.find(q => q.id === 'my-small-project-5')?.promptEn.includes('Why'),
+ 'Heritage questions progress to deeper reflection');
 console.log('PASS: 12 approved MP3 files, 60 bilingual sentences, 30 bilingual questions and synchronized highlighting');
