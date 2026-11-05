@@ -6,7 +6,7 @@ export type StoryQuizQuestion = {
   id: string; storyId: string; afterLine: number; level: 1|2|3;
   promptAr: string; promptEn: string; options: StoryQuizOption[]; correctIndex: number;
 };
-export const learningQuestions: StoryQuizQuestion[] [
+export const learningQuestions: StoryQuizQuestion[] = [
   {
     "id": "saqr-library-1",
     "storyId": "saqr-library",
