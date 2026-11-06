@@ -1,11 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useLanguage } from '../App';
+import { useLanguage, useSaqrAccessibilityDisplay } from '../App';
 import { getSaqrLearningAccess, type LearningFeatures } from '../src/utils/saqrLearningAccess';
 import ReadTogether from '../src/components/saqrLearning/ReadTogether';
 import PictureLearning from '../src/components/saqrLearning/PictureLearning';
 import StepByStep from '../src/components/saqrLearning/StepByStep';
-import SaqrAccessibilityToolbar from '../src/components/saqrLearning/SaqrAccessibilityToolbar';
 
 type FeatureName = Exclude<keyof LearningFeatures, 'calm_display'>;
 type Feature = {
@@ -75,7 +74,7 @@ export default function SaqrLearningPage() {
   const [settings, setSettings] = useState<LearningFeatures | null>(null);
   const [viewer, setViewer] = useState<'admin' | 'student' | null>(null);
   const [active, setActive] = useState<FeatureName | null>(null);
-  const [quiet, setQuiet] = useState(false);
+  const { quiet } = useSaqrAccessibilityDisplay();
   const activityRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -157,13 +156,6 @@ export default function SaqrLearningPage() {
           </div>
         </header>
 
-        <div aria-label={isAr ? 'خطوات رحلتك' : 'Your journey steps'} className="saqr-learning-steps grid grid-cols-3 gap-2 sm:gap-3">
-          {[isAr ? '1. اختار' : '1. Choose', isAr ? '2. اسمع' : '2. Listen', isAr ? '3. جاوب' : '3. Answer'].map((label, index) =>
-            <div key={index} className="min-h-14 sm:min-h-16 rounded-2xl border-2 border-emerald-100 dark:border-emerald-900 bg-emerald-50 dark:bg-slate-900 flex items-center justify-center px-2 py-3 text-center text-lg sm:text-xl font-black text-emerald-900 dark:text-emerald-100">
-              {label}
-            </div>)}
-        </div>
-
         <section aria-labelledby="saqr-learning-tools" className="saqr-learning-tools space-y-5">
           <div className="saqr-learning-tools-header flex flex-wrap gap-3 items-end justify-between px-1">
             <div>
@@ -209,14 +201,8 @@ export default function SaqrLearningPage() {
         </section>}
 
         <div className="saqr-learning-footnote rounded-[1.6rem] border border-emerald-200 dark:border-emerald-900 bg-emerald-50/70 dark:bg-emerald-950/20 p-5 sm:p-6 flex flex-wrap justify-between items-center gap-3">
-          <p className="font-bold text-base leading-7 text-slate-800 dark:text-slate-100">
-            {isAr ? 'صقر معك خطوة بخطوة، ويمكنك تكرار الأنشطة كما تحب.' :
-              'Saqr is with you, one step at a time. Repeat activities whenever you like.'}
-          </p>
           <Link to="/home" className="rounded-xl bg-emerald-800 text-white px-5 py-3 font-black text-base hover:bg-emerald-900">{isAr ? 'العودة للمكتبة' : 'Back to library'}</Link>
         </div>
-        {/* The authenticated learning gate controls this toolbar; it never relies on a local role flag. */}
-        <SaqrAccessibilityToolbar isAr={isAr} quiet={quiet} onQuietChange={setQuiet} />
       </>}
     </main>
     <style>{String.raw`
@@ -273,11 +259,6 @@ export default function SaqrLearningPage() {
         .saqr-learning-page--overview .saqr-learning-art {
           height:clamp(155px,20dvh,218px)!important;
           max-width:260px!important;
-        }
-        .saqr-learning-page--overview .saqr-learning-steps {flex:0 0 auto}
-        .saqr-learning-page--overview .saqr-learning-steps > div {
-          min-height:43px!important;padding:5px 8px!important;border-radius:13px!important;
-          font-size:18px!important;
         }
         .saqr-learning-page--overview .saqr-learning-tools {
           flex:0 0 auto;margin:0!important;
