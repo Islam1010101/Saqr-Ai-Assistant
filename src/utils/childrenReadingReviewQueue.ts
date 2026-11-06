@@ -8,6 +8,7 @@
 import type { Book } from '../../api/bookData.ts';
 import { classifyBookAudience } from '../../api/bookAudience.ts';
 import { getChildReadingReference, type ChildReadingTier } from './childrenReadingReferences.ts';
+import { getChildrenBibliographyAlert } from './childrenBibliographyAlerts.ts';
 
 export type ChildrenReadingReviewEntry = {
   id: string;
@@ -23,6 +24,9 @@ export type ChildrenReadingReviewEntry = {
   sourceUrl: string;
   suggestedChecks: string;
   sourceAvailable: boolean;
+  bibliographicAlertAr: string;
+  bibliographicAlertEn: string;
+  bibliographySourceUrl: string;
   sourceEditionMatched: false;
   approvedTier: null;
   status: 'awaiting_physical_review';
@@ -35,6 +39,7 @@ export const CHILDREN_REVIEW_SHELVES = [22, 30, 35, 37] as const;
 export function buildChildrenReadingReviewQueue(books: readonly Book[]): ChildrenReadingReviewEntry[] {
   const entries = books.flatMap((book): ChildrenReadingReviewEntry[] => {
     const reference = getChildReadingReference(book);
+    const bibliographyAlert = getChildrenBibliographyAlert(book);
     const isMixedReviewShelf = CHILDREN_REVIEW_SHELVES.some(shelf => shelf === book.shelf);
     if (!reference && classifyBookAudience(book) !== 'children' && !isMixedReviewShelf) return [];
     const suggestedChecks = reference
@@ -58,13 +63,19 @@ export function buildChildrenReadingReviewQueue(books: readonly Book[]): Childre
       sourceUrl: reference?.sourceUrl ?? '',
       suggestedChecks,
       sourceAvailable: Boolean(reference),
+      bibliographicAlertAr: bibliographyAlert?.issueAr ?? '',
+      bibliographicAlertEn: bibliographyAlert?.issueEn ?? '',
+      bibliographySourceUrl: bibliographyAlert?.evidenceUrl ?? '',
       sourceEditionMatched: false,
       approvedTier: null,
       status: 'awaiting_physical_review' as const
     }];
   });
-  // References first for quick edition checking, then uncited candidates.
-  return entries.sort((a,b) => Number(b.sourceAvailable)-Number(a.sourceAvailable) ||
+  // Bibliographic inconsistencies first, then source-backed titles for edition
+  // checks, then all unreferenced candidates ordered by real shelf and row.
+  return entries.sort((a,b) =>
+    Number(Boolean(b.bibliographicAlertEn))-Number(Boolean(a.bibliographicAlertEn)) ||
+    Number(b.sourceAvailable)-Number(a.sourceAvailable) ||
     a.shelf-b.shelf || a.row-b.row || a.title.localeCompare(b.title));
 }
 
@@ -78,7 +89,8 @@ export function childrenReviewCsv(entries: readonly ChildrenReadingReviewEntry[]
     'Text sample checked? (Yes/No)','Vocabulary and sentence complexity notes',
     'Illustration support and accessibility notes','Age/content suitability checked? (Yes/No)',
     'Local copy matches source? (Yes/No)','Final approved tier (Beginner/Intermediate/Advanced or blank)',
-    'Reviewer name','Review date','Review outcome (Approve/Review further)','Corrective actions / notes'
+    'Reviewer name','Review date','Review outcome (Approve/Review further)','Corrective actions / notes',
+    'Bibliographic warning (EN)','Bibliographic warning (AR)','Bibliography evidence link'
   ];
   const escapeCell = (input:unknown):string => {
     let text = String(input ?? '').replace(/\r\n?/g, '\n');
@@ -89,7 +101,8 @@ export function childrenReviewCsv(entries: readonly ChildrenReadingReviewEntry[]
     entry.id,entry.title,entry.author,entry.shelf,entry.row,
     entry.catalogIsbn,entry.catalogIsbnStatus,
     entry.candidateTier ?? '',entry.sourceLevel,entry.sourceName,entry.sourceUrl,
-    '','','','','','','','','','','','',''
+    '','','','','','','','','','','','',
+    entry.bibliographicAlertEn, entry.bibliographicAlertAr, entry.bibliographySourceUrl
   ]);
   return '\uFEFF' + [header, ...rows].map(row=>row.map(escapeCell).join(',')).join('\r\n');
 }

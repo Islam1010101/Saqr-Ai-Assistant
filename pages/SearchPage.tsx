@@ -7,7 +7,7 @@ import { matchesCatalogQuery } from '../src/utils/catalogTextSearch';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../src/utils/supabase';
 import { classifyBookAudience, type BookAudience } from '../api/bookAudience';
-import { getChildReadingReference, readingTierLabel, type ChildReadingTier } from '../src/utils/childrenReadingReferences';
+import { getChildReadingReference, type ChildReadingTier } from '../src/utils/childrenReadingReferences';
 import './catalogHeroVisual.css';
 
 // --- 1. الـ Hooks المساعدة ---
@@ -35,9 +35,6 @@ const translations = {
     readingTierBeginner: "مبتدئ · استرشادي",
     readingTierIntermediate: "متوسط · استرشادي",
     readingTierAdvanced: "متقدم · استرشادي",
-    readingReference: "مستوى قراءة استرشادي",
-    readingReferenceDisclaimer: "التصنيف مأخوذ من مرجع للعنوان والمؤلف، ولم تُطابق طبعة نسخة مكتبة المدرسة بعد. ليس تقييمًا لمستوى الطالب.",
-    readingReferenceEvidence: "المصدر المرجعي",
     audienceYouth: "للشباب",
     audienceIdentity: "ركن الهوية الوطنية",
     audienceSpecialist: "للمتخصصين",
@@ -79,9 +76,6 @@ const translations = {
     readingTierBeginner: "Beginner · provisional",
     readingTierIntermediate: "Intermediate · provisional",
     readingTierAdvanced: "Advanced · provisional",
-    readingReference: "Reference-based reading level",
-    readingReferenceDisclaimer: "Matched to a source by title and author; the exact EFIPS physical edition has not yet been checked. This is not an assessment of a student.",
-    readingReferenceEvidence: "Reference source",
     audienceYouth: "Youth",
     audienceIdentity: "National Identity Corner",
     audienceSpecialist: "Specialists",
@@ -355,8 +349,6 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
     };
 
     if (!book) return null;
-    const readingReference = getChildReadingReference(book);
-
     return (
         <div dir={dir} className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300" onClick={onClose}>
             <div className="relative w-full max-w-2xl bg-white dark:bg-slate-800 rounded-[3rem] border-8 border-sky-400 dark:border-slate-700 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300" onClick={(e) => e.stopPropagation()}>
@@ -372,21 +364,6 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                     <div className="flex items-center justify-center gap-2 text-lg text-emerald-600 dark:text-emerald-400 font-bold mb-8 bg-emerald-50 dark:bg-emerald-900/20 w-fit mx-auto px-6 py-2 rounded-full">
                         <UserIcon /> {book.author}
                     </div>
-                    {readingReference && (
-                        <aside className="mb-7 rounded-2xl border-2 border-sky-300 dark:border-sky-700 bg-sky-50 dark:bg-slate-900 px-5 py-4 text-start space-y-2">
-                            <p className="text-lg font-black text-sky-950 dark:text-sky-100">
-                                {t('readingReference')}: {readingTierLabel(readingReference.tier, locale === 'ar' ? 'ar' : 'en')}
-                            </p>
-                            <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                                {locale === 'ar' ? readingReference.noteAr : readingReference.noteEn}
-                            </p>
-                            <p className="text-xs font-bold text-amber-900 dark:text-amber-200">{t('readingReferenceDisclaimer')}</p>
-                            <a href={readingReference.sourceUrl} target="_blank" rel="noopener noreferrer"
-                                className="inline-flex min-h-11 items-center rounded-lg border border-sky-400 px-3 py-2 text-sm font-black text-sky-900 dark:text-sky-200 underline underline-offset-2 focus-visible:outline-4 focus-visible:outline-sky-500">
-                                {t('readingReferenceEvidence')}: {readingReference.sourceName}
-                            </a>
-                        </aside>
-                    )}
                     
                     {book.isbn && (
                         <div className="mb-6 rounded-2xl border border-emerald-200 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-900/20 px-4 py-3 text-start">
@@ -460,7 +437,6 @@ const BookCard = React.memo(({ book, onClick, t, locale }: { book: Book; onClick
   const isSaved = passport.saved.includes(readingKey);
   const isAi = !book.subject || book.subject === "Unknown";
   const readingAudience = classifyBookAudience(book);
-  const readingReference = getChildReadingReference(book);
   const audienceTag = readingAudience === 'children' ? (locale==='ar'?'من الصف 4 إلى 8':'Grades 4–8') : readingAudience === 'youth' ? (locale==='ar'?'للشباب':'Youth') : readingAudience === 'nationalIdentity' ? (locale==='ar'?'ركن الهوية الوطنية':'National identity') : readingAudience === 'teens' ? (locale==='ar'?'الشباب والمراهقون':'Youth and teens') : readingAudience === 'specialist' ? (locale==='ar'?'للمتخصصين':'Specialists') : (locale==='ar'?'الفئة العامة':'General');
 
   const colors = [
@@ -510,9 +486,6 @@ const BookCard = React.memo(({ book, onClick, t, locale }: { book: Book; onClick
           </div>
           
           <div className="flex-1 flex flex-col justify-end text-right mt-4">
-            {readingReference && <span className="mb-2 w-fit max-w-full rounded-lg border border-white/60 bg-slate-950/35 px-3 py-1.5 text-start text-xs font-black text-white">
-              {t('readingReference')}: {readingTierLabel(readingReference.tier, locale === 'ar' ? 'ar' : 'en')}
-            </span>}
             <div className="flex items-start gap-2 mb-3 min-w-0" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
                 <h3 className="flex-1 min-w-0 font-black text-lg md:text-xl text-white leading-tight drop-shadow-md line-clamp-3 break-words text-start" dir="auto">{book.title}</h3>
                 <button type="button" aria-pressed={isSaved}

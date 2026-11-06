@@ -9,8 +9,8 @@ import {
  readingTierLabel
 } from '../src/utils/childrenReadingReferences.ts';
 
-assert.equal(childReadingReferenceCount,10,'The pilot contains exactly ten evidence-matched titles');
-assert.equal(new Set(childReadingReferenceEntries.map(r=>r.shelf+'|'+r.title.toLowerCase()+'|'+r.author.toLowerCase())).size,10,
+assert.equal(childReadingReferenceCount,13,'The reviewer has thirteen source-backed title candidates, not local-copy approvals');
+assert.equal(new Set(childReadingReferenceEntries.map(r=>r.shelf+'|'+r.title.toLowerCase()+'|'+r.author.toLowerCase())).size,13,
  'The review cannot create duplicate title/author/shelf entries');
 const byTier={beginner:0,intermediate:0,advanced:0};
 for(const evidence of childReadingReferenceEntries){
@@ -29,7 +29,7 @@ for(const evidence of childReadingReferenceEntries){
  assert.ok(readingTierLabel(evidence.tier,'en').length>4 && readingTierLabel(evidence.tier,'ar').length>3);
  byTier[evidence.tier]++;
 }
-assert.deepEqual(byTier,{beginner:3,intermediate:5,advanced:2});
+assert.deepEqual(byTier,{beginner:4,intermediate:7,advanced:2});
 assert.equal(getChildReadingReference({title:'Lincoln',author:'Another writer',shelf:30}),undefined,
  'Do not match a common title with the wrong author');
 assert.equal(getChildReadingReference({title:'Lincoln',author:'Russell Freedman',shelf:29}),undefined,
@@ -42,10 +42,14 @@ const source=readFileSync('pages/SearchPage.tsx','utf8');
 assert.ok(source.includes('getChildReadingReference(b)?.tier === readingTierFilter') &&
  source.includes('value={readingTierFilter}') &&
  source.includes('onChange={e=>{setReadingTierFilter('),'The filter selects only evidence-matched tiers');
-assert.ok(source.includes("readingReferenceDisclaimer") &&
- source.includes('edition has not yet been checked') &&
- source.includes("readingReference.sourceUrl"),
- 'The detail view must warn about unverified editions and link to source');
-assert.ok(source.includes('readingTierLabel(readingReference.tier'),
- 'Book cards and detail view show only a reference-based band');
-console.log('PASS: 10 provisional reading references, 3/5/2 tier pilot, source links, precise title matching and review warnings');
+assert.ok(!source.includes('readingReferenceDisclaimer') &&
+ !source.includes("readingReference.sourceUrl") &&
+ !source.includes('readingTierLabel(readingReference.tier') &&
+ !source.includes('readingReferenceEvidence'),
+ 'Book cards and detail popups no longer display any provisional reading-level copy');
+const adminSource=readFileSync('src/components/AdminChildrenReadingReview.tsx','utf8');
+assert.ok(adminSource.includes('entry.sourceUrl') &&
+ adminSource.includes('entry.sourceLevel') &&
+ adminSource.includes('sourceAvailable'),
+ 'Only admin review retains provisional sources and proof of edition uncertainty');
+console.log('PASS: 13 provisional title references, 4/7/2 source tiers, preserved filter and admin-only review evidence');
