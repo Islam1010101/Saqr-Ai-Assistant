@@ -6,23 +6,31 @@ import {
 } from '../utils/childrenReadingReviewQueue';
 import { readingTierLabel } from '../utils/childrenReadingReferences';
 
-type Filter = 'all' | 'sourced' | 'unsourced';
+type Filter = 'all' | 'sourced' | 'unsourced' | 'issues';
 const PAGE_SIZE = 24;
 
 /** Admin-only librarian review tools; no student information and no auto-approval. */
 export default function AdminChildrenReadingReview({ isAr }: { isAr: boolean }) {
   const queue = useMemo(() => buildChildrenReadingReviewQueue(bookData), []);
   const [filter, setFilter] = useState<Filter>('all');
+  const [shelf, setShelf] = useState<string>('all');
   const [query, setQuery] = useState('');
   const [limit, setLimit] = useState(PAGE_SIZE);
   const sourcedCount = queue.filter(entry => entry.sourceAvailable).length;
+  const issueCount = queue.filter(entry => Boolean(entry.bibliographicAlertEn)).length;
+  const shelfCounts = useMemo(() => [...new Set(queue.map(entry => entry.shelf))]
+    .sort((a,b) => a-b).map(number => ({
+      number, count: queue.filter(entry => entry.shelf === number).length
+    })), [queue]);
   const matches = useMemo(() => queue.filter(entry => {
+    if (shelf !== 'all' && entry.shelf !== Number(shelf)) return false;
+    if (filter === 'issues' && !entry.bibliographicAlertEn) return false;
     if (filter === 'sourced' && !entry.sourceAvailable) return false;
     if (filter === 'unsourced' && entry.sourceAvailable) return false;
     const normalized = query.trim().toLocaleLowerCase();
     return !normalized || [entry.title,entry.author,String(entry.shelf),entry.catalogIsbn]
       .some(field => field.toLocaleLowerCase().includes(normalized));
-  }), [queue,filter,query]);
+  }), [queue,filter,query,shelf]);
 
   const exportReview = () => {
     const content = childrenReviewCsv(matches);
@@ -70,6 +78,22 @@ export default function AdminChildrenReadingReview({ isAr }: { isAr: boolean }) 
         <p className="text-sm font-bold text-slate-600 dark:text-slate-300">{isAr ? 'تحتاج توثيق مستوى من المصدر' : 'Need level source and copy review'}</p>
       </div>
     </div>
+    <div className="mt-4 flex flex-wrap items-center gap-2">
+      <label htmlFor="children-reading-review-shelf" className="text-sm font-black text-slate-700 dark:text-slate-200">
+        {isAr ? 'راجع رفًا محددًا:' : 'Review one shelf:'}
+      </label>
+      <select id="children-reading-review-shelf" value={shelf}
+        onChange={event => {setShelf(event.target.value);setLimit(PAGE_SIZE);}}
+        className="min-h-11 rounded-xl border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 text-sm font-bold text-slate-900 dark:text-white">
+        <option value="all">{isAr ? 'كل الأرفف' : 'All shelves'} ({queue.length})</option>
+        {shelfCounts.map(item => <option key={item.number} value={String(item.number)}>
+          {isAr ? 'رف' : 'Shelf'} {item.number} ({item.count})
+        </option>)}
+      </select>
+      <span className="text-sm font-semibold text-amber-800 dark:text-amber-200">
+        {isAr ? 'سجلات تحتاج مراجعة بياناتها: ' : 'Bibliographic checks flagged: '}{issueCount}
+      </span>
+    </div>
     <div className="mt-5 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3 items-center">
       <label className="sr-only" htmlFor="children-reading-review-search">
         {isAr ? 'ابحث في قائمة مراجعة كتب الأطفال' : 'Search the children reading review queue'}
@@ -82,7 +106,8 @@ export default function AdminChildrenReadingReview({ isAr }: { isAr: boolean }) 
         {([
           ['all',isAr?'الكل':'All'],
           ['sourced',isAr?'بمرجع':'With source'],
-          ['unsourced',isAr?'دون مرجع':'No source']
+          ['unsourced',isAr?'دون مرجع':'No source'],
+          ['issues',isAr?'بيانات تحتاج تدقيق':'Metadata checks']
         ] as [Filter,string][]).map(([value,label]) => <button key={value} type="button"
           aria-pressed={filter === value} onClick={() => changeFilter(value)}
           className={'min-h-11 rounded-xl border-2 px-3 text-sm font-black focus-visible:outline-4 focus-visible:outline-sky-500 '+
@@ -129,6 +154,14 @@ export default function AdminChildrenReadingReview({ isAr }: { isAr: boolean }) 
               </p>}
             </td>
             <td className="p-3 max-w-[280px] text-xs leading-6 text-slate-700 dark:text-slate-300">
+              {entry.bibliographicAlertEn && <div className="mb-3 rounded-xl border-2 border-amber-400 bg-amber-50 dark:bg-amber-950/30 p-3 text-amber-950 dark:text-amber-100">
+                <p className="font-black">{isAr ? 'راجع بيانات هذا الكتاب' : 'Check bibliographic metadata'}</p>
+                <p className="mt-1">{isAr ? entry.bibliographicAlertAr : entry.bibliographicAlertEn}</p>
+                <a href={entry.bibliographySourceUrl} target="_blank" rel="noopener noreferrer"
+                  className="inline-block mt-2 font-bold underline underline-offset-2 focus-visible:outline-2">
+                  {isAr ? 'المصدر المقارن' : 'Comparison source'}
+                </a>
+              </div>}
               {isAr
                 ? entry.sourceAvailable
                   ? 'تأكد أولًا من ملاءمة الكتاب للأطفال؛ طابق رقم ISBN والطبعة والصفحات والنص مع المرجع، ثم راجع المفردات والمحتوى.'
