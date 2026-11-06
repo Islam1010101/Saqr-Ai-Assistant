@@ -46,8 +46,8 @@ export default function AdminChildrenReadingReview({ isAr }: { isAr: boolean }) 
         </h2>
         <p className="text-sm font-semibold leading-7 text-slate-700 dark:text-slate-300">
           {isAr
-            ? 'هذه قائمة عمل لأمين المكتبة، وليست مستويات معتمدة. تُراجع نسخة الكتاب الفعلية ومحتواه ورقم الطبعة قبل اعتماد أي مستوى. المراجع الخارجية للعنوان وحده لا تثبت مطابقة نسخة المدرسة.'
-            : 'This is a librarian review queue, not a list of approved levels. Inspect the actual school edition, text and ISBN before approving a reading tier. A title-level external source is not proof that the school copy matches.'}
+            ? 'هذه قائمة فحص لأمين المكتبة تشمل أرفف أطفال محتملة وأرفف مختلطة، وليست قائمة بكتب أطفال مؤكدة أو مستويات معتمدة. تأكد أولًا من ملاءمة الكتاب للأطفال، ثم راجع النسخة الفعلية ونصها وطبعتها قبل اعتماد أي مستوى.'
+            : 'This is a librarian inspection queue covering possible children’s books and mixed shelves, not a confirmed children’s list or approved reading levels. First verify suitability for young readers, then inspect the actual school copy, text and edition before approving any tier.'}
         </p>
       </div>
       <button type="button" onClick={exportReview}
@@ -131,8 +131,8 @@ export default function AdminChildrenReadingReview({ isAr }: { isAr: boolean }) 
             <td className="p-3 max-w-[280px] text-xs leading-6 text-slate-700 dark:text-slate-300">
               {isAr
                 ? entry.sourceAvailable
-                  ? 'طابق رقم ISBN والطبعة والصفحات ونص الكتاب مع المرجع. راجع المفردات وملاءمة المحتوى.'
-                  : 'افحص الطبعة والنص والرسوم والمفردات، ثم ابحث عن مرجع موثوق للمستوى.'
+                  ? 'تأكد أولًا من ملاءمة الكتاب للأطفال؛ طابق رقم ISBN والطبعة والصفحات والنص مع المرجع، ثم راجع المفردات والمحتوى.'
+                  : 'تأكد أولًا من ملاءمة الكتاب للأطفال، فهو قد يكون من رف مختلط. افحص الطبعة والنص والرسوم والمفردات، ثم ابحث عن مرجع موثوق.'
                 : entry.suggestedChecks}
               {entry.title==='Lincoln' && <p className="mt-1 font-black text-amber-800 dark:text-amber-200">
                 {isAr?'تأكد أنها سيرة Lincoln: A Photobiography.':'Confirm this is Lincoln: A Photobiography.'}
