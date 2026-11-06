@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { bookData } from '../api/bookData.ts';
 import {
-  buildChildrenReadingReviewQueue, childrenReviewCsv
+  buildChildrenReadingReviewQueue, childrenReviewCsv, CHILDREN_REVIEW_SHELVES
 } from '../src/utils/childrenReadingReviewQueue.ts';
 import {
   childReadingReferenceCount, childReadingReferenceEntries,
@@ -10,6 +10,16 @@ import {
 } from '../src/utils/childrenReadingReferences.ts';
 
 const queue = buildChildrenReadingReviewQueue(bookData);
+const mixedShelfCopies = bookData.filter(book =>
+  CHILDREN_REVIEW_SHELVES.some(shelf => shelf === book.shelf));
+for (const book of mixedShelfCopies) {
+  assert.ok(queue.some(entry => entry.id === book.id),
+    'Mixed child-book shelf must appear in the review queue even without an external level source: ' + book.id);
+}
+assert.ok(queue.length >= mixedShelfCopies.length,
+  'Queue must cover all physical records on suspected or mixed child-book shelves');
+assert.ok(queue.some(entry => entry.shelf === 35 && !entry.candidateTier),
+  'Unreferenced Arabic/mixed-shelf books must be surfaced for human inspection, without assigned tiers');
 assert.ok(queue.length >= childReadingReferenceCount,
   'Review queue should include all referenced copies and additional children candidates');
 assert.equal(childReadingReferenceCount, 10,
@@ -72,5 +82,5 @@ assert.ok(!panel.includes('supabase.from(') &&
 assert.ok(catalog.includes('readingReferenceDisclaimer') &&
   catalog.includes("readingTierFilter"),
   'Existing transparent provisional reading-level filter and caveat remain unchanged');
-console.log('PASS: '+queue.length+' candidate child books; '+matchedSourceTitles.size+
-  ' source-matched titles; zero falsely approved levels; bilingual review template');
+console.log('PASS: '+queue.length+' candidate physical-copy inspections across mixed shelves; '+
+  matchedSourceTitles.size+' source-matched titles; zero falsely approved levels; bilingual review template');
