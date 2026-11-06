@@ -7,7 +7,7 @@ import { matchesCatalogQuery } from '../src/utils/catalogTextSearch';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../src/utils/supabase';
 import { classifyBookAudience, type BookAudience } from '../api/bookAudience';
-import { getChildReadingReference, readingTierLabel, type Children'sReadingTier } from '../api/childrenReadingReferences';
+import { getChildReadingReference, readingTierLabel, type ChildReadingTier } from '../api/childrenReadingReferences';
 import './catalogHeroVisual.css';
 
 // --- 1. الـ Hooks المساعدة ---
@@ -581,7 +581,7 @@ const SearchPage: React.FC = () => {
     const [authorFilter, setAuthorFilter] = useState('all');
     const [shelfFilter, setShelfFilter] = useState('all');
     const [audienceFilter, setAudienceFilter] = useState<BookAudience | 'all'>('all');
-    const [readingTierFilter, setReadingTierFilter] = useState<Children'sReadingTier | 'all'>('all');
+    const [readingTierFilter, setReadingTierFilter] = useState<ChildReadingTier | 'all'>('all');
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
     const [visibleCount, setVisibleCount] = useState(12);
     // Cabinet 22 has 268 titles: load its results progressively without altering other shelves.
@@ -750,7 +750,7 @@ const SearchPage: React.FC = () => {
                                 <div className="relative">
                                     <select id="efips-reading-tier" aria-label={t('readingTierFilter')}
                                         value={readingTierFilter}
-                                        onChange={e=>{setReadingTierFilter(e.target.value as Children'sReadingTier|'all');setVisibleCount(12);setShelf22VisibleCount(24);}}
+                                        onChange={e=>{setReadingTierFilter(e.target.value as ChildReadingTier|'all');setVisibleCount(12);setShelf22VisibleCount(24);}}
                                         className="w-full min-h-12 p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 font-black text-xs md:text-sm cursor-pointer text-center hover:border-sky-400 focus-visible:outline-2 focus-visible:outline-sky-500 text-slate-700 dark:text-slate-200">
                                         <option value="all">{t('readingTierFilter')}</option>
                                         <option value="beginner">{t('readingTierBeginner')}</option>
