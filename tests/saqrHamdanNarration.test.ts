@@ -3,6 +3,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { learningStories } from '../supabase/functions/saqr-learning-narration/stories.ts';
 import { learningQuestions } from '../supabase/functions/saqr-learning-narration/questions.ts';
 import { questionSupport } from '../src/components/saqrLearning/readingQuestionSupport.ts';
+import { questionClipTimes, feedbackClipTimes, questionRecordingUrl, feedbackRecordingUrl } from '../src/components/saqrLearning/recordedQuestionClips.ts';
 
 const read = (name: string) => readFileSync(name, 'utf8');
 const page = read('src/components/saqrLearning/ReadTogether.tsx');
@@ -38,12 +39,33 @@ const match = page.match(/const recordedCuts: Record<string, \{ ar: number\[\]; 
 assert.ok(match, 'Sentence timing manifest is present');
 const cuts = JSON.parse(match[1]) as Record<string, Record<'ar'|'en',number[]>>;
 const ids = new Set(learningStories.map(s => s.id));
+assert.deepEqual(Object.keys(questionClipTimes).sort(), [...ids].sort(),
+  'Twelve question MP3 recordings are aligned to the six story IDs');
+for (const language of ['ar', 'en'] as const) {
+  const feedbackPath = 'public' + feedbackRecordingUrl(language);
+  assert.ok(existsSync(feedbackPath), 'Missing recorded feedback: '+feedbackPath);
+  const feedbackBytes = readFileSync(feedbackPath);
+  assert.ok(feedbackBytes.length > 50000, 'Unexpectedly small feedback MP3');
+  const feedback = feedbackClipTimes[language];
+  assert.ok(feedback.correct[0] >= 0 && feedback.correct[1] <= feedback.retry[0] &&
+    feedback.retry[0] < feedback.retry[1], 'Feedback clips must not overlap');
+}
 assert.deepEqual(Object.keys(cuts).sort(), [...ids].sort(), 'All stories have timing data');
 assert.equal(learningQuestions.length, 30, 'Six stories have five bilingual comprehension questions each');
 assert.deepEqual(Object.keys(questionSupport).sort(), learningQuestions.map(q => q.id).sort(),
   'All thirty existing questions have specific bilingual educational hints and explanations');
 assert.ok(page.includes('replayStoryClue') && page.includes('new Audio(recordedAudioUrl('),
   'Reading assistance replays the approved story MP3 rather than synthesizing questions');
+assert.ok(page.includes('playRecordedQuiz') && page.includes('questionClipTimes[storyId]?.[language]'),
+  'Recorded questions and individual answer choices play from the approved MP3 bank');
+assert.ok(page.includes('playRecordedFeedback') && page.includes("kind: 'correct' | 'retry'"),
+  'Approved encouragement plays for correct answers and another try');
+assert.ok(page.includes("playRecordedQuiz([0, ...choiceOrder.map(optionIndex => optionIndex + 1)])"),
+  'Question autoplay and replay use the on-screen randomized choices, not hidden options');
+assert.ok(page.includes("playRecordedQuiz([optionIndex + 1])"),
+  'Every visible answer offers an independent listening control');
+assert.ok(!page.includes('SpeechSynthesisUtterance') && !page.includes('speechSynthesis'),
+  'Question and feedback recordings never fall back to synthesized speech');
 assert.ok(page.includes('stopClue()') && page.includes('audio.onended = clear'),
   'Clue playback stops cleanly before subsequent story audio or navigation');
 assert.ok(page.includes('support.hintAr') && page.includes('support.hintEn') &&
@@ -60,6 +82,17 @@ for (const story of learningStories) {
   assert.ok(story.ar.every(line => line.length > 24) && story.en.every(line => line.length > 24));
 
   for (const lang of ['ar','en'] as const) {
+    const spokenQuestionsPath = 'public' + questionRecordingUrl(story.id,lang);
+    assert.ok(existsSync(spokenQuestionsPath), 'Missing user-recorded question MP3: '+spokenQuestionsPath);
+    const spokenBytes = readFileSync(spokenQuestionsPath);
+    assert.ok(spokenBytes.length > 500000, 'Question recording seems incomplete: '+spokenQuestionsPath);
+    assert.ok(spokenBytes.subarray(0, 3).toString() === 'ID3' ||
+      (spokenBytes[0] === 0xff && (spokenBytes[1] & 0xe0) === 0xe0),
+      'Question recording must be a valid MP3');
+    const segments = questionClipTimes[story.id][lang];
+    assert.equal(segments.length,20, 'Five recorded questions and fifteen choices for each language');
+    assert.ok(segments.every((clip,i) => clip[0] >= 0 && clip[1] > clip[0] &&
+      (i === 0 || clip[0] > segments[i-1][1])), 'Question clips must be ordered and nonoverlapping');
     const path = 'public/audio/saqr-reading/' + story.id + '/' + lang + '.mp3';
     assert.ok(existsSync(path), 'Missing approved recording: ' + path);
     const bytes = readFileSync(path);
