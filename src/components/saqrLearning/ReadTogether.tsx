@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { learningStories } from '../../../supabase/functions/saqr-learning-narration/stories';
 import { learningQuestions, type StoryQuizQuestion } from '../../../supabase/functions/saqr-learning-narration/questions';
 import LearningPictureArt, { type LearningPicture } from './LearningPictureArt';
+import { questionSupport } from './readingQuestionSupport';
 
 type ReadTogetherProps = { isAr: boolean; large: boolean; quiet: boolean; isAdmin?: boolean };
 const stories = learningStories;
@@ -187,6 +188,8 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
   const [error, setError] = useState('');
   const sessionRef = useRef(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const clueAudioRef = useRef<HTMLAudioElement | null>(null);
+  const [clueError, setClueError] = useState('');
   const lines = isAr ? stories[story].ar : stories[story].en;
   const language = isAr ? 'ar' : 'en';
   // Both routes start with recall and end with reasoning. Gentle uses three spaced
@@ -194,6 +197,7 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
   const storyQuestions = learningQuestions.filter(q => q.storyId === stories[story].id &&
     (difficulty === 'explorer' || q.afterLine === 1 || q.afterLine === 5 || q.afterLine === 9));
   const question = storyQuestions.find(q => q.id === questionId);
+  const support = question ? questionSupport[question.id] : undefined;
   const choiceOrder = useMemo(() => {
     if (!question) return [] as number[];
     const other = question.options.map((_, i) => i).filter(i => i !== question.correctIndex);
@@ -205,7 +209,21 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
   const coverPictures: LearningPicture[] = ['book', 'tree', 'desk', 'ball', 'sun', 'book'];
   const cover = coverPictures[story] || 'book';
 
+  const stopClue = useCallback(() => {
+    const audio = clueAudioRef.current;
+    if (!audio) return;
+    clueAudioRef.current = null;
+    audio.pause();
+    audio.onloadedmetadata = null;
+    audio.ontimeupdate = null;
+    audio.onended = null;
+    audio.onerror = null;
+    audio.removeAttribute('src');
+    audio.load();
+  }, []);
+
   const stop = useCallback(() => {
+    stopClue();
     sessionRef.current += 1;
     if (audioRef.current) {
       audioRef.current.pause();
@@ -219,7 +237,7 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
     }
     setState('idle');
     setCurrentLine(-1);
-  }, []);
+  }, [stopClue]);
 
   useEffect(() => {
     stop();
@@ -229,15 +247,17 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
     setAnsweredCount(0);
     setNextIndex(0);
     setFinished(false);
+    setClueError('');
   }, [isAr, stop]);
 
   useEffect(() => () => {
+    stopClue();
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.removeAttribute('src');
       audioRef.current = null;
     }
-  }, []);
+  }, [stopClue]);
 
   useEffect(() => {
     if (!questionId || typeof window === 'undefined') return;
@@ -258,6 +278,7 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
     setFinished(false);
     setFullStory(false);
     setError('');
+    setClueError('');
   };
 
   const afterLine = (index: number, id: number, continueReading: (next: number) => void) => {
@@ -267,6 +288,7 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
     if (checkpoint) {
       setQuestionId(checkpoint.id);
       setChoice(null);
+      setClueError('');
       setError('');
       setCurrentLine(-1);
       setState('idle');
@@ -279,6 +301,7 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
     if (!question || correct) return;
     setChoice(index);
     if (index === question.correctIndex) {
+      stopClue();
       if (!answeredRef.current.has(question.id)) {
         answeredRef.current.add(question.id);
         setAnsweredCount(answeredRef.current.size);
@@ -290,7 +313,46 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
     }
   };
 
+  // Replay a relevant sentence from the approved story MP3. The questions
+  // remain written until separately approved question/choice audio is provided.
+  const replayStoryClue = () => {
+    if (!question || !support) return;
+    stopClue();
+    setClueError('');
+    const cuts = recordedCuts[stories[story].id][language];
+    const line = Math.max(0, Math.min(support.evidenceLine, cuts.length - 1));
+    const audio = new Audio(recordedAudioUrl(stories[story].id, language));
+    clueAudioRef.current = audio;
+    audio.preload = 'auto';
+    audio.playbackRate = rate;
+    const clear = () => {
+      if (clueAudioRef.current !== audio) return;
+      stopClue();
+    };
+    audio.onloadedmetadata = () => {
+      if (clueAudioRef.current !== audio) return;
+      audio.currentTime = Math.min(cuts[line], Math.max(0, audio.duration - 0.1));
+      const finish = cuts[line + 1];
+      audio.ontimeupdate = () => {
+        if (finish !== undefined && audio.currentTime >= finish - 0.07) clear();
+      };
+      audio.onended = clear;
+      void audio.play().catch(() => {
+        clear();
+        setClueError(isAr ? 'تعذر تشغيل الجملة. يمكنك قراءتها في النص.' :
+          'Could not play the sentence. You can read it in the text.');
+      });
+    };
+    audio.onerror = () => {
+      clear();
+      setClueError(isAr ? 'تعذر تحميل التسجيل. يمكنك قراءة الجملة في النص.' :
+        'Could not load the recording. You can read the sentence in the text.');
+    };
+    audio.load();
+  };
+
   const play = (startAt = 0) => {
+    stopClue();
     if (startAt >= lines.length) {
       stop();
       setNextIndex(lines.length);
@@ -404,6 +466,7 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
   const changeDifficulty = (next: 'gentle' | 'explorer') => {
     resetProgress();
     setDifficulty(next);
+    setClueError('');
   };
 
   const advanceWithoutVoice = () => {
@@ -522,6 +585,11 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
       <h3 id="saqr-reading-question" className={'font-black text-center leading-[1.8] text-slate-900 dark:text-white ' + (large ? 'text-3xl' : 'text-2xl')}>
         {isAr ? question.promptAr : question.promptEn}
       </h3>
+      {support && <button type="button" onClick={replayStoryClue}
+        className="min-h-12 w-full sm:w-auto rounded-xl border-2 border-sky-500 dark:border-sky-400 bg-white dark:bg-slate-800 px-5 py-3 text-base font-black text-sky-900 dark:text-sky-100 focus-visible:outline-4 focus-visible:outline-amber-500">
+        {isAr ? 'استمع مرة أخرى للجملة من القصة' : 'Replay a clue from the recorded story'}
+      </button>}
+      {clueError && <p role="alert" className="font-semibold text-amber-900 dark:text-amber-200">{clueError}</p>}
       <div className={'grid grid-cols-1 gap-3 ' + (choiceOrder.length === 2 ? 'sm:grid-cols-2' : 'sm:grid-cols-3')}>
         {choiceOrder.map(optionIndex => {
           const item = question.options[optionIndex];
@@ -538,13 +606,22 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
           </button>;
         })}
       </div>
-      <div aria-live="polite" className="min-h-14">
-        {choice !== null && <p className={'rounded-xl p-4 text-center font-black text-base sm:text-lg ' +
-          (correct ? 'bg-emerald-100 text-emerald-950 dark:bg-emerald-950/60 dark:text-emerald-200' :
+      <div aria-live="polite" aria-atomic="true" className="min-h-14">
+        {choice !== null && <div className={'rounded-xl p-4 text-start space-y-2 font-semibold text-base sm:text-lg ' +
+          (correct ? 'bg-emerald-100 text-emerald-950 dark:bg-emerald-950/60 dark:text-emerald-100' :
             'bg-white dark:bg-slate-800 text-amber-900 dark:text-amber-200')}>
-          {correct ? (isAr ? 'أحسنت! إجابة رائعة. صقر فخور بمحاولتك.' : 'Well done! Great thinking. Saqr is proud of your effort.') :
-            (isAr ? 'محاولة جميلة! اقرأ السؤال واختار مرة تانية.' : 'Nice try! Read the question and choose again.')}
-        </p>}
+          {correct ? <>
+            <p className="font-black">{isAr ? 'أحسنت! لماذا هذه الإجابة صحيحة؟' : 'Well done! Why is this answer right?'}</p>
+            <p>{isAr ? support?.explanationAr : support?.explanationEn}</p>
+            {support && <blockquote className="border-s-4 border-emerald-600 dark:border-emerald-400 ps-3 leading-relaxed">
+              <p className="text-xs sm:text-sm font-black mb-1">{isAr ? 'الدليل من القصة:' : 'Evidence from the story:'}</p>
+              <p>{lines[support.evidenceLine]}</p>
+            </blockquote>}
+          </> : <>
+            <p className="font-black">{isAr ? 'محاولة جيدة. جرّب مرة أخرى.' : 'Good try. Have another go.'}</p>
+            {support && <p><strong>{isAr ? 'تلميح: ' : 'Hint: '}</strong>{isAr ? support.hintAr : support.hintEn}</p>}
+          </>}
+        </div>}
       </div>
       {correct && <button type="button" onClick={() => { setQuestionId(null); setChoice(null); play(nextIndex); }}
         className="w-full min-h-14 rounded-2xl bg-emerald-700 hover:bg-emerald-800 px-6 py-4 font-black text-white text-lg focus-visible:outline-4 focus-visible:outline-sky-400">

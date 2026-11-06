@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import { learningStories } from '../supabase/functions/saqr-learning-narration/stories.ts';
 import { learningQuestions } from '../supabase/functions/saqr-learning-narration/questions.ts';
+import { questionSupport } from '../src/components/saqrLearning/readingQuestionSupport.ts';
 
 const read = (name: string) => readFileSync(name, 'utf8');
 const page = read('src/components/saqrLearning/ReadTogether.tsx');
@@ -39,6 +40,19 @@ const cuts = JSON.parse(match[1]) as Record<string, Record<'ar'|'en',number[]>>;
 const ids = new Set(learningStories.map(s => s.id));
 assert.deepEqual(Object.keys(cuts).sort(), [...ids].sort(), 'All stories have timing data');
 assert.equal(learningQuestions.length, 30, 'Six stories have five bilingual comprehension questions each');
+assert.deepEqual(Object.keys(questionSupport).sort(), learningQuestions.map(q => q.id).sort(),
+  'All thirty existing questions have specific bilingual educational hints and explanations');
+assert.ok(page.includes('replayStoryClue') && page.includes('new Audio(recordedAudioUrl('),
+  'Reading assistance replays the approved story MP3 rather than synthesizing questions');
+assert.ok(page.includes('stopClue()') && page.includes('audio.onended = clear'),
+  'Clue playback stops cleanly before subsequent story audio or navigation');
+assert.ok(page.includes('support.hintAr') && page.includes('support.hintEn') &&
+  page.includes('support?.explanationAr') && page.includes('support?.explanationEn'),
+  'Questions provide bilingual hints after errors and explanations after correct answers');
+assert.ok(page.includes('lines[support.evidenceLine]'),
+  'The explanation shows direct evidence from the approved story text');
+assert.ok(!page.includes('SpeechSynthesisUtterance') && !page.includes('speechSynthesis'),
+  'Approved narration is not replaced by browser speech synthesis');
 
 for (const story of learningStories) {
   assert.equal(story.ar.length, 10, 'Ten Arabic sentences per story');
@@ -63,6 +77,17 @@ for (const story of learningStories) {
     'Difficulty climbs from two easy prompts through medium to harder reasoning');
   assert.deepEqual(questions.map(q => q.afterLine),[1,3,5,7,9],'Checkpoints follow the same lines');
   for (const q of questions) {
+    const support = questionSupport[q.id];
+    assert.ok(support, 'Question-specific support is required for '+q.id);
+    assert.ok(Number.isInteger(support.evidenceLine) && support.evidenceLine >= 0 &&
+      support.evidenceLine < story.ar.length, 'Referenced story evidence must exist');
+    assert.ok(support.hintAr.length >= 20 && support.hintEn.length >= 20,
+      'Hints must contain helpful educational guidance in both languages');
+    assert.ok(support.explanationAr.length >= 27 && support.explanationEn.length >= 27,
+      'Specific explanations must be meaningful in both languages');
+    assert.ok(!support.hintAr.includes(q.options[q.correctIndex].ar) &&
+      !support.hintEn.includes(q.options[q.correctIndex].en),
+      'Hints must invite thinking, not simply display the correct answer');
     assert.ok(ids.has(q.storyId));
     assert.ok(q.correctIndex >= 0 && q.correctIndex < q.options.length);
     assert.ok(q.options.length >= 3 && q.options.every(o=>o.ar && o.en));
