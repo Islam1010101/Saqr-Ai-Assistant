@@ -40,9 +40,29 @@ const toolbar=read('src/components/saqrLearning/SaqrAccessibilityToolbar.tsx');
 
 assert.ok(page.includes('<ReadTogether') && page.includes('<PictureLearning') && page.includes('<StepByStep') &&
   !page.includes('<CalmDisplay'), 'Three supported learning activities remain; calm mode is not a separate card');
-assert.ok(page.includes('<SaqrAccessibilityToolbar isAr={isAr} quiet={quiet} onQuietChange={setQuiet} />'), 'Accessible toolbar replaces the calm activity');
-assert.ok(page.includes("status === 'allowed' && settings &&") && edge.includes("if(!entitlement?.enabled)"),
-  'Toolbar mounts only within the server-verified private learning space');
+assert.ok(!page.includes('<SaqrAccessibilityToolbar') &&
+  app.includes('<AuthorizedAccessibilityToolbar />') && app.includes('SaqrAccessibilityContext.Provider'),
+  'One shared accessibility toolbar is mounted at the site layout rather than within the learning page');
+assert.ok(app.includes('getSaqrLearningAccess().then(result =>') &&
+  app.includes("result.viewer === 'admin' || result.features?.calm_display === true") &&
+  edge.includes('if(!entitlement?.enabled)'),
+  'Server-verified admin or individually permitted student access is required across site pages');
+assert.ok(app.includes("location.pathname === '/'") && app.includes('setPermitted(false)'),
+  'Public sign-in screen never retains the private toolbar');
+assert.ok(app.includes("window.addEventListener('focus', verify)") &&
+  app.includes("window.addEventListener('storage', verify)"),
+  'Toolbar permission is rechecked when users return or account storage changes');
+assert.ok(page.includes('useSaqrAccessibilityDisplay()') && app.includes('onQuietChange: setQuiet'),
+  'Calm display setting stays in sync with the learning page and persists on navigation');
+assert.ok(!page.includes('saqr-learning-steps') &&
+  !page.includes('1. اختار') && !page.includes('2. اسمع') && !page.includes('3. جاوب') &&
+  !page.includes('1. Choose') && !page.includes('2. Listen') && !page.includes('3. Answer'),
+  'The three redundant bilingual step indicators are removed');
+assert.ok(!page.includes('صقر معك خطوة بخطوة، ويمكنك تكرار الأنشطة كما تحب.') &&
+  !page.includes('Saqr is with you, one step at a time. Repeat activities whenever you like.'),
+  'The specified explanatory sentence is removed in both languages');
+assert.ok(page.includes('العودة للمكتبة') && page.includes('Back to library'),
+  'Original return-to-library navigation remains intact');
 for(const label of ['أنشطة تفاعلية','Interactive activities','بدون مؤقت','No time limits',
  'عربي وإنجليزي','Arabic & English','وضع معاينة الأدمن','Admin preview mode']){
   assert.ok(!page.includes(label), 'Removed hero label must not appear: '+label);
@@ -51,8 +71,14 @@ assert.ok(!read('src/components/saqrLearning/ReadTogether.tsx').includes('بدو
 assert.ok(toolbar.includes('aria-expanded={expanded}') && toolbar.includes('setExpanded'), 'Toolbar opens and closes accessibly');
 assert.ok(toolbar.includes("setZoom") && toolbar.includes('baselinePx.current * zoom / 100'),
   'Zoom scales the actual page typography');
-assert.ok(toolbar.includes("efips-learning-color-safe") && toolbar.includes("efips-learning-grayscale"),
-  'Color-friendly contrast and full-site grayscale are real visual modes');
+assert.ok(toolbar.includes("html.efips-learning-color-safe { filter:contrast") &&
+  toolbar.includes("html.efips-learning-grayscale { filter:grayscale"),
+  'Color-friendly contrast and grayscale now apply across the whole authorized school site');
+assert.ok(toolbar.includes('efips-learning-reduced-motion'),
+  'Reduced-motion display setting now applies site-wide for authorized users');
+assert.ok(toolbar.includes("insetInlineStart: '12px'") && toolbar.includes('z-[900]') &&
+  app.includes("dir === 'rtl' ? 'left-6' : 'right-6'"),
+  'Toolbar sits opposite floating Saqr in each reading direction and above normal page layers');
 assert.ok(toolbar.includes("onQuietChange(!quiet)"), 'Reduced motion remains accessible inside toolbar');
 assert.ok(toolbar.includes("root.style.fontSize = originalSize.current"), 'Zoom settings restore on page exit');
 assert.ok(toolbar.includes("root.classList.remove("), 'Presentation modes do not leak into a later school account');
