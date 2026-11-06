@@ -10,6 +10,8 @@ import GoogleSchoolReturn from './src/components/GoogleSchoolReturn';
 import GoogleTeacherReturn from './src/components/GoogleTeacherReturn';
 import HomePage from './pages/HomePage';
 import SaqrLearningPage from './pages/SaqrLearningPage';
+import SaqrAccessibilityToolbar from './src/components/saqrLearning/SaqrAccessibilityToolbar';
+import { getSaqrLearningAccess } from './src/utils/saqrLearningAccess';
 import AdminDashboard from './pages/AdminDashboard';
 
 import SearchPage from './pages/SearchPage';
@@ -488,9 +490,63 @@ class ApplicationErrorBoundary extends React.Component<
   }
 }
 
+// The accessibility display state stays mounted while an authorized user
+// navigates between school pages. Access is always verified on the server.
+const SaqrAccessibilityContext = createContext<{
+  quiet: boolean;
+  onQuietChange: (enabled: boolean) => void;
+}>({ quiet: false, onQuietChange: () => {} });
+
+export const useSaqrAccessibilityDisplay = () => useContext(SaqrAccessibilityContext);
+
+const AuthorizedAccessibilityToolbar: React.FC = () => {
+  const location = useLocation();
+  const { locale } = useLanguage();
+  const { quiet, onQuietChange } = useSaqrAccessibilityDisplay();
+  const [permitted, setPermitted] = useState(false);
+
+  useEffect(() => {
+    let live = true;
+    const verify = () => {
+      if (location.pathname === '/') {
+        setPermitted(false);
+        onQuietChange(false);
+        return;
+      }
+      // Not a localStorage role check: the protected Edge Function validates
+      // school Google identity, admin role or the individual student grant.
+      getSaqrLearningAccess().then(result => {
+        if (!live) return;
+        const authorized = result.allowed &&
+          (result.viewer === 'admin' || result.features?.calm_display === true);
+        setPermitted(authorized);
+        if (!authorized) onQuietChange(false);
+      }).catch(() => {
+        if (live) {
+          setPermitted(false);
+          onQuietChange(false);
+        }
+      });
+    };
+    verify();
+    window.addEventListener('focus', verify);
+    window.addEventListener('storage', verify);
+    return () => {
+      live = false;
+      window.removeEventListener('focus', verify);
+      window.removeEventListener('storage', verify);
+    };
+  }, [location.pathname, onQuietChange]);
+
+  if (location.pathname === '/' || !permitted) return null;
+  return <SaqrAccessibilityToolbar
+    isAr={locale === 'ar'} quiet={quiet} onQuietChange={onQuietChange} />;
+};
+
 // -------- 4. المكون الرئيسي --------
 const MainLayout: React.FC = () => {
   const [isSaqrModalOpen, setIsSaqrModalOpen] = useState(false);
+  const [quiet, setQuiet] = useState(false);
   const location = useLocation();
   const { locale } = useLanguage();
 
@@ -498,6 +554,7 @@ const MainLayout: React.FC = () => {
   const hideFooter = location.pathname === '/tutorial';
 
   return (
+    <SaqrAccessibilityContext.Provider value={{ quiet, onQuietChange: setQuiet }}>
     <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 font-sans transition-colors duration-300 flex flex-col relative">
       <button
         type="button"
@@ -508,6 +565,7 @@ const MainLayout: React.FC = () => {
       </button>
       <Header />
       <FloatingSaqr onOpenModal={() => setIsSaqrModalOpen(true)} />
+      <AuthorizedAccessibilityToolbar />
 
       <main
         id="main-content"
@@ -627,6 +685,7 @@ const MainLayout: React.FC = () => {
 
       `}</style>
     </div>
+    </SaqrAccessibilityContext.Provider>
   );
 };
 
