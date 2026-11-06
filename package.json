@@ -9,21 +9,21 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@breezystack/lamejs": "1.2.7",
     "@supabase/supabase-js": "^2.39.3",
-    "react-pageflip": "latest",
-    "pdfjs-dist": "latest",
     "@vercel/node": "^3.0.0",
     "groq-sdk": "^0.7.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.1",
+    "pdfjs-dist": "6.5.438",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-markdown": "^9.0.1",
+    "react-pageflip": "latest",
     "react-router-dom": "^6.22.3",
     "recharts": "^2.12.3",
     "three": "^0.160.0",
-    "vanta": "^0.5.24",
-    "@breezystack/lamejs": "1.2.7"
+    "vanta": "^0.5.24"
   },
   "devDependencies": {
     "@types/node": "^20.11.24",
