@@ -23,11 +23,55 @@ const allowedDownload = (url: URL) => url.protocol === 'https:' && !url.port && 
   url.hostname === 'drive.google.com' || url.hostname === 'drive.usercontent.google.com' || url.hostname.endsWith('.googleusercontent.com')
 );
 
+function noticeAttribute(tag: string, name: string): string | undefined {
+  for (const match of tag.matchAll(/(?:^|\s)([\w-]+)\s*=\s*(["'])(.*?)\2/g))
+    if (match[1].toLowerCase() === name) return match[3].replace(/&amp;/g, '&');
+  return undefined;
+}
+
+/** Follow only Google's ordinary large-file confirmation for this same public book. */
+export function publicDownloadConfirmation(html: string, fileId: string): URL | null {
+  if (!/Virus scan warning/i.test(html) || !/too large for Google to scan for viruses/i.test(html) ||
+      /virus has been detected|file (?:is|was) infected|identified as malicious/i.test(html)) return null;
+  const form = [...html.matchAll(/<form\b[^>]*>[\s\S]*?<\/form>/gi)]
+    .map(match => match[0]).find(block => noticeAttribute(block.slice(0, block.indexOf('>') + 1), 'id') === 'download-form');
+  if (!form) return null;
+  try {
+    const action = new URL(noticeAttribute(form.slice(0, form.indexOf('>') + 1), 'action') || '');
+    if (action.origin !== 'https://drive.usercontent.google.com' || action.pathname !== '/download' ||
+        action.username || action.password || action.hash) return null;
+    const fields: Record<string, string> = {};
+    for (const match of form.matchAll(/<input\b[^>]*>/gi)) {
+      const name = noticeAttribute(match[0], 'name'), value = noticeAttribute(match[0], 'value');
+      if (name && value && ['id', 'export', 'confirm', 'uuid'].includes(name)) fields[name] = value;
+    }
+    if (fields.id !== fileId || fields.export !== 'download' || fields.confirm !== 't' ||
+        !/^[a-zA-Z0-9_-]{3,180}$/.test(fields.uuid || '')) return null;
+    const url = new URL('https://drive.usercontent.google.com/download');
+    for (const [name, value] of Object.entries(fields)) url.searchParams.set(name, value);
+    return url;
+  } catch { return null; }
+}
+
+async function readDownloadNotice(response: Response): Promise<string> {
+  const reader = response.body!.getReader(), decoder = new TextDecoder();
+  let remaining = 65536, text = '';
+  try {
+    while (remaining > 0) {
+      const { value, done } = await reader.read(); if (done) break;
+      const part = value.subarray(0, remaining); remaining -= part.length;
+      text += decoder.decode(part, { stream: true });
+    }
+    return text + decoder.decode();
+  } finally { await reader.cancel(); }
+}
+
 /** Public download only: no Google credentials, cookies, private-file access or arbitrary URLs. */
 export async function readPublicPdfRange(fileId: string, start: number, end: number, fetcher: typeof fetch = fetch) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 20000);
   let response: Response;
+  let confirmed = false;
   try {
     let url = new URL(`https://drive.google.com/uc?export=download&id=${fileId}`);
     for (let redirects = 0; ; redirects++) {
@@ -39,17 +83,19 @@ export async function readPublicPdfRange(fileId: string, start: number, end: num
         if (!next) throw new PdfSourceError('SOURCE_UNAVAILABLE', 502);
         url = new URL(next, url); continue;
       }
+      if (!response.ok || !response.body) throw new PdfSourceError('SOURCE_UNAVAILABLE', 502);
+      if ((response.headers.get('content-type') || '').includes('text/html')) {
+        const message = await readDownloadNotice(response);
+        if (/owner hasn.t given you permission to download|Only the owner and editors can download/i.test(message))
+          throw new PdfSourceError('SOURCE_DOWNLOAD_DISABLED', 403);
+        const next = !confirmed ? publicDownloadConfirmation(message, fileId) : null;
+        if (!next) throw new PdfSourceError('SOURCE_UNAVAILABLE', 502);
+        confirmed = true; url = next; continue;
+      }
       break;
     }
     if (!response.ok || !response.body) throw new PdfSourceError('SOURCE_UNAVAILABLE', 502);
     const reader = response.body.getReader();
-    const contentType = response.headers.get('content-type') || '';
-    if (contentType.includes('text/html')) {
-      const { value } = await reader.read(); await reader.cancel();
-      const message = new TextDecoder().decode(value?.subarray(0, 20000));
-      if (/owner hasn.t given you permission to download|Only the owner and editors can download/i.test(message)) throw new PdfSourceError('SOURCE_DOWNLOAD_DISABLED', 403);
-      throw new PdfSourceError('SOURCE_UNAVAILABLE', 502);
-    }
     const range = /^bytes (\d+)-(\d+)\/(\d+)$/.exec(response.headers.get('content-range') || '');
     const length = range ? Number(range[3]) : Number(response.headers.get('content-length'));
     if (!Number.isSafeInteger(length) || length <= 0 || length > 300 * 1024 * 1024) { await reader.cancel(); throw new PdfSourceError('SOURCE_UNAVAILABLE', 502); }

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readerByteRange, readerFileId, readPublicPdfRange, PdfSourceError } from '../src/server/digitalBookPdf.ts';
+import { readerByteRange, readerFileId, readPublicPdfRange, PdfSourceError, publicDownloadConfirmation } from '../src/server/digitalBookPdf.ts';
 import { clampPdfPage, parsePdfPage, pdfReadingStorageKey, readPdfState, writePdfState } from '../src/utils/pdfReadingState.ts';
 import { fetchPdfByteRange, PDF_BYTE_CHUNK } from '../src/utils/pdfRangeTransport.ts';
 
@@ -25,6 +25,26 @@ const noRange=(async()=>new Response(bytes,{headers:{'Content-Type':'application
 assert.deepEqual((await readPublicPdfRange('test',5,10,noRange)).data,bytes.slice(5,11));
 const truncated=(async()=>new Response(bytes.slice(0,5),{status:206,headers:{'Content-Type':'application/pdf','Content-Range':`bytes 0-9/${bytes.length}`}})) as typeof fetch;
 await assert.rejects(readPublicPdfRange('test',0,9,truncated),PdfSourceError);
+
+const warning='<title>Google Drive - Virus scan warning</title>is too large for Google to scan for viruses.'+
+ '<form id="download-form" action="https://drive.usercontent.google.com/download">'+
+ '<input type="hidden" name="id" value="test"><input type="hidden" name="export" value="download">'+
+ '<input type="hidden" name="confirm" value="t"><input type="hidden" name="uuid" value="public-test-nonce"></form>';
+assert.equal(publicDownloadConfirmation(warning,'test')?.searchParams.get('id'),'test');
+assert.equal(publicDownloadConfirmation(warning,'another-book'),null);
+assert.equal(publicDownloadConfirmation(warning.replace('https://drive.usercontent.google.com/download','https://example.com/download'),'test'),null);
+assert.equal(publicDownloadConfirmation(warning.replace('Virus scan warning','File is infected'),'test'),null);
+let confirmationRequests=0;
+const confirmationFetcher=(async(input: URL|string|Request)=>{
+ confirmationRequests++;
+ if(confirmationRequests===1)return new Response(warning,{headers:{'Content-Type':'text/html'}});
+ const url=new URL(String(input));
+ assert.equal(url.origin,'https://drive.usercontent.google.com');assert.equal(url.searchParams.get('uuid'),'public-test-nonce');
+ return new Response(bytes.slice(0,10),{status:206,headers:{'Content-Type':'application/pdf','Content-Range':'bytes 0-9/150000000'}});
+}) as typeof fetch;
+assert.equal((await readPublicPdfRange('test',0,9,confirmationFetcher)).length,150000000);
+assert.equal(confirmationRequests,2);
+console.log('PASS: large-file confirmation stays on the same allowed public book and rejects unsafe forms');
 
 const large = Uint8Array.from({length:3*PDF_BYTE_CHUNK+19},(_,index)=>(index*31)%256);
 let requests=0;
