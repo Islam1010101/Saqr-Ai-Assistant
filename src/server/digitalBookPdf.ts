@@ -1,5 +1,5 @@
-import { ARABIC_LIBRARY_DATABASE, ENGLISH_LIBRARY_DATABASE } from '../../api/digitalBookData.ts';
-import { NATIONAL_IDENTITY_DIGITAL_BOOKS } from '../../api/nationalIdentityDigitalBooks.ts';
+import { ARABIC_LIBRARY_DATABASE, ENGLISH_LIBRARY_DATABASE } from '../../api/digitalBookData.js';
+import { NATIONAL_IDENTITY_DIGITAL_BOOKS } from '../../api/nationalIdentityDigitalBooks.js';
 
 export class PdfSourceError extends Error {
   code: string;

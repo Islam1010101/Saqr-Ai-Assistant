@@ -40,3 +40,11 @@ Object.defineProperty(globalThis,'localStorage',{configurable:true,get(){throw E
 assert.equal(writePdfState(key,{page:3,bookmarks:[],zoom:1}),false);
 assert.equal(readPdfState(key).page,1);
 console.log('PASS: catalogue allowlist, bounded PDF ranges, download restrictions, redirect safety, resume, bookmark validation and account separation');
+
+const { default: api } = await import('../api/digital-book.ts');
+let status = 0;
+let responseBody: unknown;
+const response = { setHeader() {}, status(code: number) { status = code; return this; }, json(body: unknown) { responseBody = body; return this; } };
+await api({ method: 'GET', query: { book: 'not-a-catalogue-book' } } as any, response as any);
+assert.equal(status, 404); assert.deepEqual(responseBody, { code: 'BOOK_NOT_FOUND' });
+console.log('PASS: emitted API module loads under Node ESM and handles requests');
