@@ -461,14 +461,13 @@ const ArabicLibraryInternalPage: React.FC<ArabicLibraryPageProps> = ({ books = A
                     </div>
                 </div>
 
-                <div className="efips-digital-results-bar text-slate-700 dark:text-slate-200 text-sm font-bold">
-                    <p role="status" aria-live="polite">{currentLocale === 'ar' ? `عرض ${Math.min(visibleCount, filteredBooks.length)} من ${filteredBooks.length} كتابًا` : `Showing ${Math.min(visibleCount, filteredBooks.length)} of ${filteredBooks.length} books`}</p>
-                    {(searchTerm || subjectFilter !== 'all' || authorFilter !== 'all' || audioOnly) && <button type="button"
+                {(searchTerm || subjectFilter !== 'all' || authorFilter !== 'all' || audioOnly) && <div className="efips-digital-results-bar text-slate-700 dark:text-slate-200 text-sm font-bold">
+                    <button type="button"
                         onClick={() => { setSearchTerm(''); setSubjectFilter('all'); setAuthorFilter('all'); setAudioOnly(false); }}
                         className="bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-200">
                         {currentLocale === 'ar' ? 'مسح الفلاتر' : 'Clear filters'}
-                    </button>}
-                </div>
+                    </button>
+                </div>}
 
                 {/* عرض البطاقات مع تلاشي لكل بطاقة بشكل منفصل وحصري عند التمرير */}
                 <div className="efips-library-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-10 gap-x-4 md:gap-x-6 px-2 md:px-4">
