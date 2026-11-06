@@ -4,9 +4,9 @@
  * A title + author + shelf exact match is required to avoid homonyms.
  */
 import { normalizeCatalogText } from '../src/utils/catalogTextSearch.ts';
-export type Children'sReadingTier = 'beginner'|'intermediate'|'advanced';
+export type ChildReadingTier = 'beginner'|'intermediate'|'advanced';
 export type ReadingReference = {
- title:string; author:string; shelf:number; tier:Children'sReadingTier;
+ title:string; author:string; shelf:number; tier:ChildReadingTier;
  publisherLevel:string; sourceName:string; sourceUrl:string; noteAr:string; noteEn:string;
  status:'reference_only'; editionMatched:false;
 };
@@ -148,7 +148,7 @@ export function getChildReadingReference(book:{title:string;author:string;shelf:
  const title=normalizeCatalogText(book.title); const author=normalizeCatalogText(book.author);
  return curated.find(item=>item.shelf===book.shelf && normalizeCatalogText(item.title)===title && normalizeCatalogText(item.author)===author);
 }
-export function readingTierLabel(tier:Children'sReadingTier,locale:'ar'|'en'):string {
+export function readingTierLabel(tier:ChildReadingTier,locale:'ar'|'en'):string {
  const labels={beginner:{ar:'مبتدئ',en:'Beginner'},intermediate:{ar:'متوسط',en:'Intermediate'},advanced:{ar:'متقدم',en:'Advanced'}};
  return labels[tier][locale];
 }
