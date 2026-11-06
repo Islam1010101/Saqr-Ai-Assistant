@@ -1,0 +1,21 @@
+.efips-digital-dialog-reader { display: block; max-width: 88rem; height: calc(100vh - 2rem); height: calc(100dvh - 2rem); overflow: hidden; }
+.efips-book-reader { display: flex; flex-direction: column; min-width: 0; width: 100%; height: 100%; background: #f8fafc; color: #0f172a; }
+.efips-book-reader header { flex-shrink: 0; max-height: 55%; overflow: auto; padding: 1rem; background: #ecfdf5; border-bottom: 1px solid #6ee7b7; }
+.efips-reader-brand { color: #047857; font-weight: 900; font-size: .875rem; }
+.efips-book-reader h2 { font-size: clamp(1.15rem, 3vw, 1.75rem); font-weight: 900; margin-block: .5rem .875rem; overflow-wrap: anywhere; }
+.efips-book-reader nav { display: flex; flex-wrap: wrap; gap: .5rem; }
+.efips-book-reader nav > * { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: .65rem .9rem; border-radius: .85rem; background: #047857; color: white; font-weight: 700; text-align: center; font-size: .875rem; }
+.efips-book-reader nav > :last-child { background: #334155; }
+.efips-book-reader nav > *:focus-visible { outline: 3px solid #0ea5e9; outline-offset: 3px; }
+.efips-reader-note { flex-shrink: 0; max-height: 25%; overflow: auto; padding: .75rem 1rem; font-size: .875rem; line-height: 1.8; }
+.efips-book-reader iframe { display: block; flex: 1; min-height: 0; width: 100%; border: 0; background: #e2e8f0; }
+.efips-reader-unavailable { padding: 2rem 1rem; }
+.dark .efips-book-reader { background: #0f172a; color: #f1f5f9; }
+.dark .efips-book-reader header { background: #064e3b; border-color: #10b981; }
+.dark .efips-reader-brand { color: #6ee7b7; }
+@media (max-width: 480px) {
+  .efips-book-reader header { padding: .75rem; }
+  .efips-book-reader nav > * { flex: 1 1 auto; }
+  .efips-book-reader nav > a { flex-basis: 100%; order: 3; }
+  .efips-reader-note { font-size: .75rem; padding: .5rem .75rem; }
+}

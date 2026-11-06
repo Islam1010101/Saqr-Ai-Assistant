@@ -7,6 +7,8 @@ import { supabase } from '../src/utils/supabase';
 import { useReadingPassport, digitalBookKey } from '../src/utils/readingPassport';
 import DigitalBookRating from '../src/components/DigitalBookRating';
 import DigitalLibraryDialog from '../src/components/DigitalLibraryDialog';
+import DigitalBookReader from '../src/components/DigitalBookReader';
+import { digitalReaderSource } from '../src/utils/digitalReaderSource';
 
 // Shared with Saqr catalog search; preserve book IDs and source links.
 import { ENGLISH_LIBRARY_DATABASE, type DigitalLibraryBook } from '../api/digitalBookData';
@@ -194,12 +196,16 @@ const SaqrAudioPlayer: React.FC<{ audioSrc: string; t: any }> = ({ audioSrc, t }
 // --- 3. Component: BookModal ---
 const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
     const { locale } = useLanguage();
+    const [readerOpen, setReaderOpen] = useState(false);
+    useEffect(() => { setReaderOpen(false); }, [book?.id]);
     const ageLabels = locale === 'ar'
         ? { children: 'أطفال', teens: 'يافعون', adults: 'كبار' }
         : { children: 'Children', teens: 'Teens', adults: 'Adults' };
     const ageGroup = book?.reviewedAgeGroup ? ageLabels[book.reviewedAgeGroup as keyof typeof ageLabels] : '';
 
     if (!book) return null;
+    if (readerOpen) return <DigitalBookReader title={book.title} source={book.driveLink} locale={locale}
+        onBack={() => setReaderOpen(false)} onClose={onClose} />;
 
     return (
         <DigitalLibraryDialog title={book.title} onClose={onClose}>
@@ -246,9 +252,11 @@ const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void
                         <DigitalBookRating bookId={digitalBookKey('en', book)} compact={false} />
 
                         <div className="pt-2 md:pt-6">
-                            <a href={book.driveLink} target="_blank" rel="noreferrer" className="w-full block bg-sky-500 text-white font-black py-4 rounded-[2rem] hover:-translate-y-1 active:translate-y-2 border-b-8 border-sky-700 active:border-b-0 transition-all text-center uppercase tracking-widest text-base shadow-md">
+                            {digitalReaderSource(book.driveLink) ? (<button type="button" onClick={() => setReaderOpen(true)} className="w-full block bg-sky-500 text-white font-black py-4 rounded-[2rem] hover:-translate-y-1 active:translate-y-2 border-b-8 border-sky-700 active:border-b-0 transition-all text-center uppercase tracking-widest text-base shadow-md">
                                 {t('read')}
-                            </a>
+                            </button>) : (<a href={book.driveLink} target="_blank" rel="noreferrer" className="w-full block bg-sky-500 text-white font-black py-4 rounded-[2rem] hover:-translate-y-1 active:translate-y-2 border-b-8 border-sky-700 active:border-b-0 transition-all text-center uppercase tracking-widest text-base shadow-md">
+                                {t('read')}
+                            </a>)}
                         </div>
                     </div>
                 </div>

@@ -32,6 +32,7 @@
   overflow: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
   border: 2px solid #34d399; border-radius: 1.5rem; box-shadow: 0 24px 70px rgb(0 0 0 / .3);
 }
+.efips-dialog-focus-guard { position: fixed; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
 .efips-digital-dialog-close {
   position: sticky; top: .5rem; grid-column: 1 / -1; justify-self: end;
   margin: .5rem .75rem 0; z-index: 50; width: 44px; height: 44px; padding: .75rem;
