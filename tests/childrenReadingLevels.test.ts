@@ -7,7 +7,7 @@ import {
  childReadingReferenceCount,
  getChildReadingReference,
  readingTierLabel
-} from '../api/childrenReadingReferences.ts';
+} from '../src/utils/childrenReadingReferences.ts';
 
 assert.equal(childReadingReferenceCount,10,'The pilot contains exactly ten evidence-matched titles');
 assert.equal(new Set(childReadingReferenceEntries.map(r=>r.shelf+'|'+r.title.toLowerCase()+'|'+r.author.toLowerCase())).size,10,
