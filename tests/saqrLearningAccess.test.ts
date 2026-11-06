@@ -71,6 +71,11 @@ assert.ok(!read('src/components/saqrLearning/ReadTogether.tsx').includes('بدو
 assert.ok(toolbar.includes('aria-expanded={expanded}') && toolbar.includes('setExpanded'), 'Toolbar opens and closes accessibly');
 assert.ok(toolbar.includes("setZoom") && toolbar.includes('baselinePx.current * zoom / 100'),
   'Zoom scales the actual page typography');
+assert.ok(toolbar.includes('const MAX_ZOOM = 200;') &&
+  toolbar.includes("event.key !== 'Escape'") &&
+  toolbar.includes('toggleRef.current?.focus()') &&
+  toolbar.includes('overflow-x-hidden overflow-y-auto break-words'),
+  '200 percent zoom remains keyboard-accessible and avoids clipped controls on small screens');
 assert.ok(toolbar.includes("html.efips-learning-color-safe { filter:contrast") &&
   toolbar.includes("html.efips-learning-grayscale { filter:grayscale"),
   'Color-friendly contrast and grayscale now apply across the whole authorized school site');

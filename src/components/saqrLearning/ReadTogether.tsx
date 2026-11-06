@@ -180,6 +180,10 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
   const [nextIndex, setNextIndex] = useState(0);
   const [finished, setFinished] = useState(false);
   const [answeredCount, setAnsweredCount] = useState(0);
+  // Session-only measures; do not store a student's identity or ability label.
+  const [firstTryCount, setFirstTryCount] = useState(0);
+  const [hintedCount, setHintedCount] = useState(0);
+  const wrongFirstRef = useRef(new Set<string>());
   const answeredRef = useRef(new Set<string>());
   const questionRef = useRef<HTMLElement | null>(null);
   const [fullStory, setFullStory] = useState(false);
@@ -273,6 +277,9 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
   useEffect(() => {
     stop();
     answeredRef.current.clear();
+    wrongFirstRef.current.clear();
+    setFirstTryCount(0);
+    setHintedCount(0);
     setQuestionId(null);
     setChoice(null);
     setAnsweredCount(0);
@@ -305,6 +312,9 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
   const resetProgress = () => {
     stop();
     answeredRef.current.clear();
+    wrongFirstRef.current.clear();
+    setFirstTryCount(0);
+    setHintedCount(0);
     setAnsweredCount(0);
     setQuestionId(null);
     setChoice(null);
@@ -420,6 +430,7 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
     playRecordedFeedback(index === question.correctIndex ? 'correct' : 'retry');
     if (index === question.correctIndex) {
       if (!answeredRef.current.has(question.id)) {
+        if (!wrongFirstRef.current.has(question.id)) setFirstTryCount(value => value + 1);
         answeredRef.current.add(question.id);
         setAnsweredCount(answeredRef.current.size);
       }
@@ -427,6 +438,9 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
       setState('idle');
       setCurrentLine(-1);
       setError('');
+    } else if (!wrongFirstRef.current.has(question.id)) {
+      wrongFirstRef.current.add(question.id);
+      setHintedCount(value => value + 1);
     }
   };
 
@@ -785,6 +799,19 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
       <h3 className="text-2xl sm:text-3xl font-black">{isAr ? 'برافو! خلصت مغامرتك مع صقر' : 'Hooray! You finished your Saqr adventure'}</h3>
       <p className="font-bold text-lg text-emerald-800 dark:text-emerald-200">
         {isAr ? 'جاوبت على ' : 'You answered '}{answeredCount}{isAr ? ' أسئلة من ' : ' of '}{storyQuestions.length}{isAr ? ' أسئلة.' : ' questions.'}
+      </p>
+      <div role="group" aria-label={isAr ? 'ملخص المحاولة الحالية' : 'Current attempt summary'}
+        className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-start">
+        <p className="rounded-xl border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-slate-900 p-4 font-black text-emerald-900 dark:text-emerald-200">
+          {isAr ? 'صحيحة من أول محاولة: ' : 'Correct on the first try: '}{firstTryCount} / {storyQuestions.length}
+        </p>
+        <p className="rounded-xl border border-sky-200 dark:border-sky-800 bg-white dark:bg-slate-900 p-4 font-black text-sky-900 dark:text-sky-200">
+          {isAr ? 'أسئلة احتجت أن تحاولها مجددًا: ' : 'Questions needing another try: '}{hintedCount}
+        </p>
+      </div>
+      <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">
+        {isAr ? 'هذا ملخص لهذه المحاولة فقط؛ لا يقيس مستوى القراءة أو الاحتياجات التعليمية.' :
+          'This summarizes this attempt only. It does not assess reading level or educational needs.'}
       </p>
       <button type="button" onClick={resetProgress} className="min-h-14 rounded-2xl bg-emerald-700 text-white px-7 py-4 font-black text-lg">
         {isAr ? 'أعيد المغامرة' : 'Play the story again'}

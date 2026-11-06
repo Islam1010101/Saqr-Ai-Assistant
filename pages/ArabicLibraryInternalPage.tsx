@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useLanguage } from '../App';
+import { matchesCatalogQuery } from '../src/utils/catalogTextSearch';
 import LibraryLetterAtmosphere from '../src/components/LibraryLetterAtmosphere';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../src/utils/supabase';
@@ -459,9 +460,9 @@ const ArabicLibraryInternalPage: React.FC<ArabicLibraryPageProps> = ({ books = A
     }), [books]);
 
     const filteredBooks = useMemo(() => {
-        const term = searchTerm.toLowerCase().trim();
+        const term = searchTerm.trim();
         let result = books.filter(b => {
-            const matchesSearch = b.title.toLowerCase().includes(term) || b.author.toLowerCase().includes(term);
+            const matchesSearch = matchesCatalogQuery(term, b.title, b.author, b.subject, b.summary);
             const matchesSubject = subjectFilter === 'all' || b.subject === subjectFilter;
             const matchesAuthor = authorFilter === 'all' || b.author === authorFilter;
             const matchesAudio = audioOnly ? !!b.audioId : true;

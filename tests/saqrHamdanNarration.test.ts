@@ -52,6 +52,17 @@ for (const language of ['ar', 'en'] as const) {
 }
 assert.deepEqual(Object.keys(cuts).sort(), [...ids].sort(), 'All stories have timing data');
 assert.equal(learningQuestions.length, 30, 'Six stories have five bilingual comprehension questions each');
+assert.ok(page.includes("wrongFirstRef.current.add(question.id)") &&
+  page.includes("setFirstTryCount(value => value + 1)") &&
+  page.includes("setHintedCount(value => value + 1)"),
+  'Session measures distinguish first-try correct answers from prompts needing another attempt');
+assert.ok(page.includes("wrongFirstRef.current.clear()") &&
+  page.includes("setFirstTryCount(0)") &&
+  page.includes("setHintedCount(0)"),
+  'Session measures reset on restart, story and language changes');
+assert.ok(page.includes('Current attempt summary') &&
+  page.includes('does not assess reading level or educational needs'),
+  'The completion screen explains the limits of its educational summary');
 assert.deepEqual(Object.keys(questionSupport).sort(), learningQuestions.map(q => q.id).sort(),
   'All thirty existing questions have specific bilingual educational hints and explanations');
 assert.ok(page.includes('replayStoryClue') && page.includes('new Audio(recordedAudioUrl('),

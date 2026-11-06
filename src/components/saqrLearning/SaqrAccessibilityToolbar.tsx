@@ -14,13 +14,14 @@ type Props = {
 
 type ColorMode = 'normal' | 'color-safe' | 'grayscale';
 const MIN_ZOOM = 90;
-const MAX_ZOOM = 140;
+const MAX_ZOOM = 200;
 
 export default function SaqrAccessibilityToolbar({ isAr, quiet, onQuietChange }: Props) {
   const [expanded, setExpanded] = useState(false);
   const [zoom, setZoom] = useState(100);
   const [colorMode, setColorMode] = useState<ColorMode>('normal');
   const regionId = useId();
+  const toggleRef = useRef<HTMLButtonElement | null>(null);
   const originalSize = useRef<string | null>(null);
   const baselinePx = useRef(16);
 
@@ -43,6 +44,17 @@ export default function SaqrAccessibilityToolbar({ isAr, quiet, onQuietChange }:
     root.style.fontSize = zoom === 100 ? (originalSize.current ?? '') : `${baselinePx.current * zoom / 100}px`;
   }, [colorMode, zoom, quiet]);
 
+  useEffect(() => {
+    if (!expanded) return;
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      setExpanded(false);
+      toggleRef.current?.focus();
+    };
+    window.addEventListener('keydown', onEscape);
+    return () => window.removeEventListener('keydown', onEscape);
+  }, [expanded]);
+
   const reset = () => {
     setZoom(100);
     setColorMode('normal');
@@ -58,8 +70,8 @@ export default function SaqrAccessibilityToolbar({ isAr, quiet, onQuietChange }:
     >
       {expanded && <div id={regionId} role="region"
         aria-label={isAr ? 'شريط إعدادات العرض' : 'Display accessibility settings'}
-        className="w-[min(410px,calc(100vw-24px))] max-h-[min(60dvh,440px)] overflow-y-auto rounded-[1.5rem] border-2 border-sky-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-4 shadow-[0_16px_45px_rgba(4,47,70,.25)] space-y-4 text-slate-900 dark:text-white">
-        <div className="flex items-center justify-between gap-3">
+        className="w-[min(410px,calc(100vw-24px))] max-h-[min(60dvh,440px)] overflow-x-hidden overflow-y-auto break-words rounded-[1.5rem] border-2 border-sky-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-4 shadow-[0_16px_45px_rgba(4,47,70,.25)] space-y-4 text-slate-900 dark:text-white">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-black">{isAr ? 'شريط تسهيل الوصول' : 'Accessibility toolbar'}</h2>
           <button type="button" onClick={() => setExpanded(false)}
             className="min-h-11 rounded-xl border border-slate-300 dark:border-slate-700 px-4 font-bold focus-visible:outline-4 focus-visible:outline-sky-500">
@@ -71,13 +83,13 @@ export default function SaqrAccessibilityToolbar({ isAr, quiet, onQuietChange }:
           <div className="flex items-center justify-between gap-2">
             <button type="button" aria-label={isAr ? 'تصغير النص' : 'Decrease text size'}
               disabled={zoom <= MIN_ZOOM} onClick={() => setZoom(v => Math.max(MIN_ZOOM, v - 10))}
-              className="min-h-12 min-w-14 rounded-xl border-2 border-sky-400 bg-sky-50 dark:bg-slate-800 font-black text-xl disabled:opacity-40 focus-visible:outline-4 focus-visible:outline-amber-500">
+              className="min-h-12 min-w-11 shrink-0 rounded-xl border-2 border-sky-400 bg-sky-50 dark:bg-slate-800 font-black text-xl disabled:opacity-40 focus-visible:outline-4 focus-visible:outline-amber-500">
               A−
             </button>
-            <output aria-live="polite" className="font-black text-lg tabular-nums">{zoom}%</output>
+            <output aria-live="polite" className="min-w-0 font-black text-base sm:text-lg tabular-nums">{zoom}%</output>
             <button type="button" aria-label={isAr ? 'تكبير النص' : 'Increase text size'}
               disabled={zoom >= MAX_ZOOM} onClick={() => setZoom(v => Math.min(MAX_ZOOM, v + 10))}
-              className="min-h-12 min-w-14 rounded-xl border-2 border-sky-400 bg-sky-50 dark:bg-slate-800 font-black text-xl disabled:opacity-40 focus-visible:outline-4 focus-visible:outline-amber-500">
+              className="min-h-12 min-w-11 shrink-0 rounded-xl border-2 border-sky-400 bg-sky-50 dark:bg-slate-800 font-black text-xl disabled:opacity-40 focus-visible:outline-4 focus-visible:outline-amber-500">
               A+
             </button>
           </div>
@@ -113,7 +125,7 @@ export default function SaqrAccessibilityToolbar({ isAr, quiet, onQuietChange }:
           {isAr ? 'استعادة العرض الأصلي' : 'Reset display preferences'}
         </button>
       </div>}
-      <button type="button" aria-controls={regionId} aria-expanded={expanded}
+      <button ref={toggleRef} type="button" aria-controls={regionId} aria-expanded={expanded}
         onClick={() => setExpanded(v => !v)}
         className="min-h-14 flex items-center gap-3 rounded-full border-2 border-white/50 bg-[#064B6A] px-5 py-3 font-black text-white shadow-[0_10px_30px_rgba(5,54,79,.35)] hover:bg-[#073F5C] focus-visible:outline-4 focus-visible:outline-amber-400">
         <svg aria-hidden="true" className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
@@ -149,6 +161,10 @@ export default function SaqrAccessibilityToolbar({ isAr, quiet, onQuietChange }:
         box-shadow:inset 0 0 0 2px #FFCA55!important;
       }
       html.efips-learning-zoomed .saqr-learning-page--overview { height:auto!important;min-height:calc(100dvh - 96px)!important; }
+      /* At 200% text size, let learning panels wrap instead of clipping long words. */
+      html.efips-learning-zoomed .saqr-learning-page :is(h1,h2,h3,p,button,a) {
+        overflow-wrap:anywhere;
+      }
       html.efips-learning-zoomed .saqr-learning-page--overview .saqr-learning-main { height:auto!important; }
     `}</style>
   </>;
