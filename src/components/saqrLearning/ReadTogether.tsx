@@ -3,6 +3,7 @@ import { learningStories } from '../../../supabase/functions/saqr-learning-narra
 import { learningQuestions, type StoryQuizQuestion } from '../../../supabase/functions/saqr-learning-narration/questions';
 import LearningPictureArt, { type LearningPicture } from './LearningPictureArt';
 import { questionSupport } from './readingQuestionSupport';
+import { questionClipTimes, questionRecordingUrl, feedbackClipTimes, feedbackRecordingUrl } from './recordedQuestionClips';
 
 type ReadTogetherProps = { isAr: boolean; large: boolean; quiet: boolean; isAdmin?: boolean };
 const stories = learningStories;
@@ -189,7 +190,10 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
   const sessionRef = useRef(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const clueAudioRef = useRef<HTMLAudioElement | null>(null);
+  const quizAudioRef = useRef<HTMLAudioElement | null>(null);
+  const feedbackAudioRef = useRef<HTMLAudioElement | null>(null);
   const [clueError, setClueError] = useState('');
+  const [quizAudioError, setQuizAudioError] = useState('');
   const lines = isAr ? stories[story].ar : stories[story].en;
   const language = isAr ? 'ar' : 'en';
   // Both routes start with recall and end with reasoning. Gentle uses three spaced
@@ -222,7 +226,34 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
     audio.load();
   }, []);
 
+  const stopQuizAudio = useCallback(() => {
+    const audio = quizAudioRef.current;
+    if (!audio) return;
+    quizAudioRef.current = null;
+    audio.pause();
+    audio.onloadedmetadata = null;
+    audio.ontimeupdate = null;
+    audio.onended = null;
+    audio.onerror = null;
+    audio.removeAttribute('src');
+    audio.load();
+  }, []);
+  const stopFeedbackAudio = useCallback(() => {
+    const audio = feedbackAudioRef.current;
+    if (!audio) return;
+    feedbackAudioRef.current = null;
+    audio.pause();
+    audio.onloadedmetadata = null;
+    audio.ontimeupdate = null;
+    audio.onended = null;
+    audio.onerror = null;
+    audio.removeAttribute('src');
+    audio.load();
+  }, []);
+
   const stop = useCallback(() => {
+    stopQuizAudio();
+    stopFeedbackAudio();
     stopClue();
     sessionRef.current += 1;
     if (audioRef.current) {
@@ -237,7 +268,7 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
     }
     setState('idle');
     setCurrentLine(-1);
-  }, [stopClue]);
+  }, [stopClue, stopQuizAudio, stopFeedbackAudio]);
 
   useEffect(() => {
     stop();
@@ -248,16 +279,19 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
     setNextIndex(0);
     setFinished(false);
     setClueError('');
+    setQuizAudioError('');
   }, [isAr, stop]);
 
   useEffect(() => () => {
+    stopQuizAudio();
+    stopFeedbackAudio();
     stopClue();
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.removeAttribute('src');
       audioRef.current = null;
     }
-  }, [stopClue]);
+  }, [stopClue, stopQuizAudio, stopFeedbackAudio]);
 
   useEffect(() => {
     if (!questionId || typeof window === 'undefined') return;
@@ -279,6 +313,86 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
     setFullStory(false);
     setError('');
     setClueError('');
+    setQuizAudioError('');
+  };
+
+  // These files contain the question followed by three choices for each
+  // checkpoint. Only play the on-screen choices, in their randomized UI order.
+  const playRecordedQuiz = (indices: number[]) => {
+    if (!question || indices.length === 0) return;
+    const storyId = stories[story].id;
+    const cuts = questionClipTimes[storyId]?.[language];
+    const base = Math.floor((question.afterLine - 1) / 2) * 4;
+    const clips = indices.map(index => cuts?.[base + index]).filter(
+      (clip): clip is [number, number] => Array.isArray(clip) && clip.length === 2
+    );
+    if (clips.length !== indices.length) return;
+    stopQuizAudio();
+    stopFeedbackAudio();
+    stopClue();
+    setQuizAudioError('');
+    const audio = new Audio(questionRecordingUrl(storyId, language));
+    quizAudioRef.current = audio;
+    audio.preload = 'auto';
+    audio.playbackRate = 1;
+    let cursor = 0;
+    const beginClip = () => {
+      if (quizAudioRef.current !== audio) return;
+      const [begin, end] = clips[cursor];
+      audio.currentTime = Math.min(begin, Math.max(0, audio.duration - 0.08));
+      audio.ontimeupdate = () => {
+        if (audio.currentTime >= end - 0.06) {
+          audio.pause();
+          cursor += 1;
+          if (cursor === clips.length) stopQuizAudio();
+          else beginClip();
+        }
+      };
+      audio.onended = () => {
+        cursor += 1;
+        if (cursor === clips.length) stopQuizAudio();
+        else beginClip();
+      };
+      void audio.play().catch(() => {
+        if (quizAudioRef.current !== audio) return;
+        stopQuizAudio();
+        setQuizAudioError(isAr ?
+          'اضغط زر الاستماع لتشغيل السؤال والاختيارات على جهازك.' :
+          'Tap the listen button to play the question and choices on your device.');
+      });
+    };
+    if (audio.readyState >= 1) beginClip();
+    else audio.onloadedmetadata = beginClip;
+    audio.onerror = () => {
+      if (quizAudioRef.current !== audio) return;
+      stopQuizAudio();
+      setQuizAudioError(isAr ?
+        'تعذر تحميل تسجيل السؤال، ويمكنك متابعة الإجابة المكتوبة.' :
+        'Question audio could not load; you can still read and answer.');
+    };
+    audio.load();
+  };
+
+  const playRecordedFeedback = (kind: 'correct' | 'retry') => {
+    stopFeedbackAudio();
+    const clip = feedbackClipTimes[language][kind];
+    const audio = new Audio(feedbackRecordingUrl(language));
+    feedbackAudioRef.current = audio;
+    audio.preload = 'auto';
+    audio.playbackRate = 1;
+    const beginClip = () => {
+      if (feedbackAudioRef.current !== audio) return;
+      audio.currentTime = Math.min(clip[0], Math.max(0, audio.duration - 0.08));
+      audio.ontimeupdate = () => {
+        if (audio.currentTime >= clip[1] - 0.06) stopFeedbackAudio();
+      };
+      audio.onended = stopFeedbackAudio;
+      void audio.play().catch(() => stopFeedbackAudio());
+    };
+    if (audio.readyState >= 1) beginClip();
+    else audio.onloadedmetadata = beginClip;
+    audio.onerror = stopFeedbackAudio;
+    audio.load();
   };
 
   const afterLine = (index: number, id: number, continueReading: (next: number) => void) => {
@@ -288,6 +402,7 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
     if (checkpoint) {
       setQuestionId(checkpoint.id);
       setChoice(null);
+      setQuizAudioError('');
       setClueError('');
       setError('');
       setCurrentLine(-1);
@@ -300,8 +415,10 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
   const chooseAnswer = (index: number) => {
     if (!question || correct) return;
     setChoice(index);
+    stopQuizAudio();
+    stopClue();
+    playRecordedFeedback(index === question.correctIndex ? 'correct' : 'retry');
     if (index === question.correctIndex) {
-      stopClue();
       if (!answeredRef.current.has(question.id)) {
         answeredRef.current.add(question.id);
         setAnsweredCount(answeredRef.current.size);
@@ -313,10 +430,11 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
     }
   };
 
-  // Replay a relevant sentence from the approved story MP3. The questions
-  // remain written until separately approved question/choice audio is provided.
+  // Replay the supporting sentence from the original approved story narration.
   const replayStoryClue = () => {
     if (!question || !support) return;
+    stopQuizAudio();
+    stopFeedbackAudio();
     stopClue();
     setClueError('');
     const cuts = recordedCuts[stories[story].id][language];
@@ -352,6 +470,8 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
   };
 
   const play = (startAt = 0) => {
+    stopQuizAudio();
+    stopFeedbackAudio();
     stopClue();
     if (startAt >= lines.length) {
       stop();
@@ -442,6 +562,16 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
     if (!canReuse) audio.load();
   };
 
+  // Attempt autoplay when a checkpoint appears; explicit listening controls
+  // remain available for browsers that restrict media without a user gesture.
+  useEffect(() => {
+    if (!questionId || !question) return;
+    playRecordedQuiz([0, ...choiceOrder.map(optionIndex => optionIndex + 1)]);
+    // Re-run only for a newly displayed question or a new language/story.
+    // Choice order is stable for each checkpoint, and never re-shuffled here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questionId, story, language]);
+
   const togglePause = () => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -467,6 +597,7 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
     resetProgress();
     setDifficulty(next);
     setClueError('');
+    setQuizAudioError('');
   };
 
   const advanceWithoutVoice = () => {
@@ -585,6 +716,18 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
       <h3 id="saqr-reading-question" className={'font-black text-center leading-[1.8] text-slate-900 dark:text-white ' + (large ? 'text-3xl' : 'text-2xl')}>
         {isAr ? question.promptAr : question.promptEn}
       </h3>
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        <button type="button"
+          onClick={() => playRecordedQuiz([0, ...choiceOrder.map(optionIndex => optionIndex + 1)])}
+          className="min-h-12 rounded-xl border-2 border-emerald-700 bg-emerald-800 px-5 py-3 text-white text-base font-black focus-visible:outline-4 focus-visible:outline-amber-500">
+          {isAr ? 'استمع للسؤال والاختيارات' : 'Listen to the question and choices'}
+        </button>
+        <button type="button" onClick={() => playRecordedQuiz([0])}
+          className="min-h-12 rounded-xl border-2 border-sky-500 bg-white dark:bg-slate-800 px-4 py-3 text-sky-900 dark:text-sky-100 font-black focus-visible:outline-4 focus-visible:outline-amber-500">
+          {isAr ? 'إعادة سماع السؤال' : 'Replay question'}
+        </button>
+      </div>
+      {quizAudioError && <p role="alert" className="text-center font-semibold text-amber-900 dark:text-amber-200">{quizAudioError}</p>}
       {support && <button type="button" onClick={replayStoryClue}
         className="min-h-12 w-full sm:w-auto rounded-xl border-2 border-sky-500 dark:border-sky-400 bg-white dark:bg-slate-800 px-5 py-3 text-base font-black text-sky-900 dark:text-sky-100 focus-visible:outline-4 focus-visible:outline-amber-500">
         {isAr ? 'استمع مرة أخرى للجملة من القصة' : 'Replay a clue from the recorded story'}
@@ -594,16 +737,23 @@ export default function ReadTogether({ isAr, large, quiet }: ReadTogetherProps) 
         {choiceOrder.map(optionIndex => {
           const item = question.options[optionIndex];
           const selected = choice === optionIndex;
-          return <button key={optionIndex} type="button" disabled={correct}
-            aria-pressed={selected} onClick={() => chooseAnswer(optionIndex)}
-            className={'min-h-[105px] rounded-[1.4rem] border-[3px] p-4 bg-white dark:bg-slate-950 flex items-center justify-center gap-3 sm:flex-col font-black leading-relaxed text-lg sm:text-xl transition-[transform,border-color] focus-visible:outline-4 focus-visible:outline-sky-400 ' +
-              (selected ? (correct ? 'border-emerald-600 ring-2 ring-emerald-200' : 'border-amber-500') :
-                'border-slate-200 dark:border-slate-700 hover:border-sky-400 hover:-translate-y-0.5')}>
-            {item.picture && <span className="h-20 w-24 sm:h-24 sm:w-32 shrink-0">
-              <LearningPictureArt kind={item.picture} label={isAr ? item.ar : item.en} />
-            </span>}
-            <span className="text-center text-slate-900 dark:text-white">{isAr ? item.ar : item.en}</span>
-          </button>;
+          return <div key={optionIndex} className="flex flex-col gap-2">
+            <button type="button" disabled={correct}
+              aria-pressed={selected} onClick={() => chooseAnswer(optionIndex)}
+              className={'w-full flex-1 min-h-[105px] rounded-[1.4rem] border-[3px] p-4 bg-white dark:bg-slate-950 flex items-center justify-center gap-3 sm:flex-col font-black leading-relaxed text-lg sm:text-xl transition-[transform,border-color] focus-visible:outline-4 focus-visible:outline-sky-400 ' +
+                (selected ? (correct ? 'border-emerald-600 ring-2 ring-emerald-200' : 'border-amber-500') :
+                  'border-slate-200 dark:border-slate-700 hover:border-sky-400 hover:-translate-y-0.5')}>
+              {item.picture && <span className="h-20 w-24 sm:h-24 sm:w-32 shrink-0">
+                <LearningPictureArt kind={item.picture} label={isAr ? item.ar : item.en} />
+              </span>}
+              <span className="text-center text-slate-900 dark:text-white">{isAr ? item.ar : item.en}</span>
+            </button>
+            <button type="button" onClick={() => playRecordedQuiz([optionIndex + 1])}
+              aria-label={isAr ? 'استمع إلى هذا الاختيار' : 'Listen to this answer choice'}
+              className="min-h-11 rounded-xl border-2 border-sky-300 dark:border-sky-700 bg-sky-50 dark:bg-slate-800 px-4 py-2 text-sm font-black text-sky-900 dark:text-sky-100 focus-visible:outline-4 focus-visible:outline-amber-500">
+              {isAr ? 'استمع للاختيار' : 'Listen to choice'}
+            </button>
+          </div>;
         })}
       </div>
       <div aria-live="polite" aria-atomic="true" className="min-h-14">
