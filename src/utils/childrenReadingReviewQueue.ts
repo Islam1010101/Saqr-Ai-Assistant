@@ -28,15 +28,22 @@ export type ChildrenReadingReviewEntry = {
   status: 'awaiting_physical_review';
 };
 
+// Inventory sections containing likely children's materials, including mixed
+// shelves with older-reader titles. Inclusion here is a request to inspect,
+// NEVER a claim that the book is appropriate for children.
+export const CHILDREN_REVIEW_SHELVES = [22, 30, 35, 37] as const;
 export function buildChildrenReadingReviewQueue(books: readonly Book[]): ChildrenReadingReviewEntry[] {
   const entries = books.flatMap((book): ChildrenReadingReviewEntry[] => {
     const reference = getChildReadingReference(book);
-    if (!reference && classifyBookAudience(book) !== 'children') return [];
+    const isMixedReviewShelf = CHILDREN_REVIEW_SHELVES.some(shelf => shelf === book.shelf);
+    if (!reference && classifyBookAudience(book) !== 'children' && !isMixedReviewShelf) return [];
     const suggestedChecks = reference
       ? (book.title === 'Lincoln'
         ? 'Confirm that this is Lincoln: A Photobiography, not a different book called Lincoln.'
         : 'Compare the ISBN, edition, actual pages and text to the linked reference.')
-      : 'Inspect the printed edition, text sample, illustrations, vocabulary and page count; locate a reliable level source.';
+      : isMixedReviewShelf
+        ? 'Mixed shelf: FIRST confirm this title is appropriate for children. Then inspect the edition, text, illustrations and vocabulary and locate a reliable level source.'
+        : 'Confirm the book is suitable for children; inspect the printed edition, text, illustrations, vocabulary and page count and locate a reliable level source.';
     return [{
       id: book.id,
       title: book.title,
