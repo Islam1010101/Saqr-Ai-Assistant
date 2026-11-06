@@ -22,8 +22,8 @@ assert.ok(queue.some(entry => entry.shelf === 35 && !entry.candidateTier),
   'Unreferenced Arabic/mixed-shelf books must be surfaced for human inspection, without assigned tiers');
 assert.ok(queue.length >= childReadingReferenceCount,
   'Review queue should include all referenced copies and additional children candidates');
-assert.equal(childReadingReferenceCount, 10,
-  'The existing school pilot has ten source-backed titles');
+assert.equal(childReadingReferenceCount, 13,
+  'Ten original references plus three independently sourced shelf 30 titles');
 const matchedSourceTitles = new Set(queue.filter(book=>book.sourceAvailable).map(book=>book.title));
 for (const item of childReadingReferenceEntries) {
   assert.ok(matchedSourceTitles.has(item.title),
@@ -60,8 +60,8 @@ assert.ok(exportCsv.includes('Copy ISBN observed (fill in)') &&
   exportCsv.includes('Reviewer name'),
   'Template must require edition matching and human librarian sign-off');
 const firstHeader = exportCsv.split('\r\n')[0];
-assert.equal((firstHeader.match(/","/g)||[]).length+1,24,
-  'Review sheet must maintain twenty-four columns');
+assert.equal((firstHeader.match(/","/g)||[]).length+1,27,
+  'Review sheet adds three bibliographic research fields to original review columns');
 const malicious = childrenReviewCsv([{...queue[0],title:'=HYPERLINK("bad")'}]);
 assert.ok(malicious.includes("'=HYPERLINK("),
   'CSV must escape spreadsheet formulas in user-controlled bibliographic fields');
@@ -79,8 +79,24 @@ assert.ok(!panel.includes('supabase.from(') &&
   !panel.includes('approvedTier:') &&
   !dashboard.includes('setApprovedReadingTier'),
   'Review-only UI cannot silently mutate source catalog or grant official tiers');
-assert.ok(catalog.includes('readingReferenceDisclaimer') &&
+assert.ok(!catalog.includes('readingReferenceDisclaimer') &&
+  !catalog.includes("t('readingReference')") &&
+  !catalog.includes('readingTierLabel(') &&
+  !catalog.includes('readingReferenceEvidence') &&
   catalog.includes("readingTierFilter"),
-  'Existing transparent provisional reading-level filter and caveat remain unchanged');
+  'Catalog cards and detail popups fully remove provisional tier, descriptive copy and disclaimer, while preserving existing optional filter');
+assert.ok(panel.includes("children-reading-review-shelf") &&
+  panel.includes("bibliographicAlertEn") &&
+  panel.includes("filter === 'issues'"),
+  'Remaining books can be reviewed in per-shelf batches, including flagged metadata inconsistencies');
+const flagged = queue.filter(entry=>Boolean(entry.bibliographicAlertEn));
+assert.equal(flagged.length,2, 'Two researched catalogue inconsistencies are flagged for librarian validation');
+assert.ok(flagged.some(entry=>entry.title.startsWith('M is for Mitten') && entry.bibliographySourceUrl) &&
+  flagged.some(entry=>entry.title.startsWith('Give Me a Kiss') && entry.bibliographySourceUrl),
+  'Mismatched author and suspicious title are documented with research evidence, not silently corrected');
+assert.ok(exportCsv.includes('Bibliographic warning (EN)') &&
+  exportCsv.includes('Bibliography evidence link'),
+  'Full review export also includes actionable book-specific research flags');
 console.log('PASS: '+queue.length+' candidate physical-copy inspections across mixed shelves; '+
-  matchedSourceTitles.size+' source-matched titles; zero falsely approved levels; bilingual review template');
+  matchedSourceTitles.size+' source-matched titles; '+queue.filter(e=>e.bibliographicAlertEn).length+
+  ' flagged metadata checks; zero falsely approved levels; bilingual review template');
