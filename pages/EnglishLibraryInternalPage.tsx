@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../src/utils/supabase';
 import { useReadingPassport, digitalBookKey } from '../src/utils/readingPassport';
 import DigitalBookRating from '../src/components/DigitalBookRating';
+import DigitalLibraryDialog from '../src/components/DigitalLibraryDialog';
 
 // Shared with Saqr catalog search; preserve book IDs and source links.
 import { ENGLISH_LIBRARY_DATABASE, type DigitalLibraryBook } from '../api/digitalBookData';
@@ -174,7 +175,7 @@ const SaqrAudioPlayer: React.FC<{ audioSrc: string; t: any }> = ({ audioSrc, t }
             <h4 className="text-xs font-black text-sky-500 uppercase tracking-widest mb-3 flex items-center justify-center gap-2">
                 <HeadphonesIcon/> {t('listen')}
             </h4>
-            <div className="p-4 md:p-5 rounded-[2rem] bg-sky-50 dark:bg-slate-800 border-4 border-sky-200 dark:border-sky-900/50 shadow-sm flex items-center gap-4">
+            <div className="p-4 md:p-5 rounded-[2rem] bg-sky-50 dark:bg-slate-800 border-4 border-sky-200 dark:border-sky-900/50 shadow-sm flex items-center gap-4 efips-digital-audio-controls">
                 <audio ref={audioRef} src={audioSrc} onTimeUpdate={() => setProgress((audioRef.current!.currentTime / audioRef.current!.duration) * 100)} onEnded={() => setIsPlaying(false)} />
                 <button onClick={togglePlay} className="w-12 h-12 shrink-0 rounded-full bg-sky-500 text-white flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-transform">
                     {isPlaying ? <PauseIcon/> : <PlayIcon/>}
@@ -201,26 +202,21 @@ const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void
     if (!book) return null;
 
     return (
-        <div className="fixed inset-0 z-[2000] flex items-center justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300" onClick={onClose}>
-            <div 
-                className="relative w-full max-w-3xl mx-auto bg-white dark:bg-slate-800 rounded-2xl sm:rounded-[3rem] border-2 sm:border-4 border-sky-400 dark:border-slate-700 shadow-2xl overflow-y-auto md:overflow-hidden flex flex-col md:flex-row max-h-[96dvh] md:max-h-[90vh] animate-in zoom-in-95 duration-300 cursor-default"
-                onClick={(e) => e.stopPropagation()}
-            >
-                <button onClick={onClose} className="sticky top-2 self-end me-2 md:absolute md:top-4 md:end-4 z-50 p-2 bg-rose-500 text-white rounded-full hover:bg-rose-600 transition-transform shadow-lg active:scale-90 active:translate-y-1">
+        <DigitalLibraryDialog title={book.title} onClose={onClose}>
+                <button onClick={onClose} data-book-close aria-label={t('close')} className="efips-digital-dialog-close bg-rose-500 text-white rounded-full hover:bg-rose-600 shadow-lg">
                     <CloseSvg/>
                 </button>
 
-                <div className="flex-1 min-w-0 p-4 sm:p-6 md:p-8 md:overflow-y-auto scrollbar-thin text-start flex flex-col mt-0 md:mt-0">
+                <div className="efips-digital-dialog-content text-start flex flex-col">
                     <h2 className="text-xl sm:text-2xl md:text-4xl text-slate-900 dark:text-white font-black leading-snug break-words mb-3 md:mb-4">{book.title}</h2>
                     
-                    <div className="relative group/author inline-flex max-w-full flex-wrap items-center gap-2 mb-4 md:mb-8 bg-sky-50 dark:bg-slate-700 w-fit px-4 py-2 rounded-full border-2 border-sky-200 dark:border-slate-600 cursor-help">
-                        <UserIcon/>
-                        <p className="text-sm sm:text-base text-sky-600 dark:text-sky-400 font-bold break-words">{book.author}</p>
-                        <div className="absolute top-full mt-2 start-0 w-[min(16rem,calc(100vw-4rem))] p-4 bg-slate-900 text-white text-xs rounded-2xl opacity-0 invisible group-hover/author:opacity-100 group-hover/author:visible transition-all shadow-xl z-50 font-medium leading-relaxed">
-                            <strong className="block mb-2 text-sky-400 font-black uppercase">{t('bioLabel')}</strong>
-                            {book.bio}
-                        </div>
-                    </div>
+                    <details className="efips-digital-author text-sky-700 dark:text-sky-300">
+                        <summary className="bg-sky-50 dark:bg-slate-700 font-bold">
+                            <span dir="auto">{book.author}</span>
+                            <span className="block text-xs mt-1">{t('bioLabel')}</span>
+                        </summary>
+                        <p dir="auto">{book.bio}</p>
+                    </details>
                     
                     <div className="bg-slate-50 dark:bg-slate-900 p-4 sm:p-5 md:p-8 rounded-[2rem] border-4 border-slate-200 dark:border-slate-700 shadow-inner text-start flex-grow">
                         <div className="flex items-center gap-2 mb-4">
@@ -235,7 +231,7 @@ const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void
                     {book.audioId && <SaqrAudioPlayer audioSrc={book.audioId} t={t}/>}
                 </div>
 
-                <div className="w-full md:w-[280px] bg-slate-100 dark:bg-slate-900/50 p-4 sm:p-5 md:p-8 flex flex-col justify-center items-center border-t-4 md:border-t-0 md:border-s-4 border-slate-200 dark:border-slate-700 shrink-0">
+                <div className="efips-digital-dialog-sidebar bg-slate-100 dark:bg-slate-900/50">
                     <div className="w-full text-center space-y-3 md:space-y-6">
                         <div className="bg-white dark:bg-slate-800 p-3 md:p-5 rounded-xl md:rounded-[2rem] border-4 border-slate-200 dark:border-slate-600 shadow-sm">
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{t('subjectLabel')}</p>
@@ -256,8 +252,7 @@ const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
+        </DigitalLibraryDialog>
     );
 };
 
@@ -280,7 +275,7 @@ const BookCard = React.memo(({ book, onClick, t }: { book: DigitalLibraryBook; o
   const colorClass = colors[book.title.length % colors.length];
 
   return (
-    <div onClick={onClick} className="relative group cursor-pointer w-full max-w-sm mx-auto min-h-[290px] h-auto md:min-h-[300px] flex items-stretch justify-center p-1.5 sm:p-2">
+    <div onClick={onClick} className="efips-digital-book-card relative group cursor-pointer w-full max-w-sm mx-auto min-h-[290px] h-auto md:min-h-[300px] flex items-stretch justify-center p-1.5 sm:p-2">
       {/* هالة مضيئة خلف الكتاب في حالة وجود صوت */}
       {hasAudio && (
         <div className="absolute inset-0 bg-sky-400/20 blur-2xl rounded-[2rem] scale-95 group-hover:scale-105 opacity-60 animate-pulse transition-all duration-500 pointer-events-none -z-10"></div>
@@ -294,6 +289,7 @@ const BookCard = React.memo(({ book, onClick, t }: { book: DigitalLibraryBook; o
         <div className="absolute top-0 left-0 w-full h-1/2 bg-white/10 skew-y-12 pointer-events-none"></div>
 
         <div className="p-3.5 sm:p-4 md:p-5 flex flex-col min-h-[290px] md:min-h-[300px] h-full relative z-10 gap-2.5">
+
           <div className="flex items-start justify-between gap-2 flex-row-reverse">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/25 border border-white/20 px-2.5 py-1 text-white backdrop-blur-sm shadow-sm text-[10px] font-black max-w-[75%]">
               {isAi && <RobotSvg/>}
@@ -305,12 +301,12 @@ const BookCard = React.memo(({ book, onClick, t }: { book: DigitalLibraryBook; o
               </div>
             )}
           </div>
-          <div className="flex flex-row items-start gap-2 mt-auto min-w-0" dir={book.title && /[\u0600-\u06FF]/.test(book.title) ? 'rtl' : 'ltr'}>
-            <h3 className="flex-1 min-w-0 font-black text-lg md:text-xl text-white leading-snug drop-shadow-md break-words line-clamp-3 text-start" dir="auto">{book.title}</h3>
+          <div className="efips-digital-card-heading flex flex-row items-start gap-2 mt-auto min-w-0" dir={book.title && /[\u0600-\u06FF]/.test(book.title) ? 'rtl' : 'ltr'}>
+            <h3 className="flex-1 min-w-0 font-black text-lg md:text-xl text-white leading-snug drop-shadow-md break-words text-start" dir="auto"><button type="button" onClick={event => { event.stopPropagation(); onClick(); }} className="efips-digital-card-title text-start">{book.title}</button></h3>
             <button type="button" aria-pressed={isSaved} aria-label={isSaved ? t('readLaterRemove') : t('readLater')}
               title={isSaved ? t('readLaterRemove') : t('readLater')}
               onClick={(event) => { event.stopPropagation(); toggleSaved(readingKey); }}
-              className={`shrink-0 inline-flex items-center justify-center w-10 h-10 rounded-xl border-2 border-white/70 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white/20 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white ${isSaved ? 'bg-white/25 shadow-md' : 'bg-transparent'}`}>
+              className={`efips-digital-card-action shrink-0 inline-flex items-center justify-center w-10 h-10 rounded-xl border-2 border-white/70 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white/20 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white ${isSaved ? 'bg-white/25 shadow-md' : 'bg-transparent'}`}>
               <svg aria-hidden="true" viewBox="0 0 24 24" fill={isSaved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path strokeLinejoin="round" strokeLinecap="round" d="M6 4h12v17l-6-4-6 4V4z" /></svg>
             </button>
           </div>
@@ -407,13 +403,14 @@ const EnglishLibraryInternalPage: React.FC = () => {
                 </RevealOnScroll>
 
                 <RevealOnScroll delay={100}>
-                    <div className="mb-16">
-                        <div className="bg-white dark:bg-slate-800 p-5 md:p-8 rounded-[3rem] border-4 border-sky-300 dark:border-sky-600 shadow-xl max-w-5xl mx-auto">
+                    <div className="mb-6 md:mb-10">
+                        <div className="efips-digital-search-panel bg-white dark:bg-slate-800 p-5 md:p-8 rounded-[3rem] border-4 border-sky-300 dark:border-sky-600 shadow-xl max-w-5xl mx-auto">
                             <div className="flex flex-col gap-5">
                                 <div className="relative group">
                                     <input 
                                       type="text" 
-                                      placeholder={t('searchPlaceholder')} 
+                                      placeholder={t('searchPlaceholder')}
+                                      aria-label={t('searchPlaceholder')} 
                                       className="w-full p-4 md:p-5 ps-14 md:ps-16 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white border-4 border-slate-200 dark:border-slate-700 focus:border-sky-400 rounded-[2rem] outline-none transition-colors text-base md:text-lg font-black shadow-inner" 
                                       value={searchTerm}
                                       onChange={(e) => setSearchTerm(e.target.value)} 
@@ -423,16 +420,16 @@ const EnglishLibraryInternalPage: React.FC = () => {
                                     </div>
                                 </div>
                                 
-                                <div className={`grid grid-cols-2 ${hasAudio ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-3 md:gap-4`}>
-                                    <select value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)} className="w-full p-3 md:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 font-black text-xs md:text-sm cursor-pointer appearance-none text-center hover:border-sky-400 transition-colors outline-none focus:border-sky-500 text-slate-700 dark:text-slate-200">
+                                <div className={`efips-digital-filters grid grid-cols-2 ${hasAudio ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-3 md:gap-4`}>
+                                    <select aria-label={t('allAuthors')} value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)} className="w-full p-3 md:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 font-black text-xs md:text-sm cursor-pointer appearance-none text-center hover:border-sky-400 transition-colors outline-none focus:border-sky-500 text-slate-700 dark:text-slate-200">
                                         <option value="all">{t('allAuthors')}</option>
                                         {filters.authors.map(a => <option key={a} value={a}>{a}</option>)}
                                     </select>
-                                    <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="w-full p-3 md:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 font-black text-xs md:text-sm cursor-pointer appearance-none text-center hover:border-sky-400 transition-colors outline-none focus:border-sky-500 text-slate-700 dark:text-slate-200">
+                                    <select aria-label={t('allSubjects')} value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="w-full p-3 md:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 font-black text-xs md:text-sm cursor-pointer appearance-none text-center hover:border-sky-400 transition-colors outline-none focus:border-sky-500 text-slate-700 dark:text-slate-200">
                                         <option value="all">{t('allSubjects')}</option>
                                         {filters.subjects.map(s => <option key={s} value={s}>{s}</option>)}
                                     </select>
-                                    <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="w-full p-3 md:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 font-black text-xs md:text-sm cursor-pointer appearance-none text-center hover:border-sky-400 transition-colors outline-none focus:border-sky-500 text-slate-700 dark:text-slate-200">
+                                    <select aria-label={t('sortBy')} value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="w-full p-3 md:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 font-black text-xs md:text-sm cursor-pointer appearance-none text-center hover:border-sky-400 transition-colors outline-none focus:border-sky-500 text-slate-700 dark:text-slate-200">
                                         <option value="alphabetical">{t('alphabetical')}</option>
                                         {hasAudio && <option value="audio">{t('audioSort')}</option>}
                                     </select>
@@ -444,6 +441,15 @@ const EnglishLibraryInternalPage: React.FC = () => {
                         </div>
                     </div>
                 </RevealOnScroll>
+
+                <div className="efips-digital-results-bar text-slate-700 dark:text-slate-200 text-sm font-bold">
+                    <p role="status" aria-live="polite">{currentLocale === 'ar' ? `عرض ${Math.min(visibleCount, filteredBooks.length)} من ${filteredBooks.length} كتابًا` : `Showing ${Math.min(visibleCount, filteredBooks.length)} of ${filteredBooks.length} books`}</p>
+                    {(searchTerm || subjectFilter !== 'all' || authorFilter !== 'all' || audioOnly) && <button type="button"
+                        onClick={() => { setSearchTerm(''); setSubjectFilter('all'); setAuthorFilter('all'); setAudioOnly(false); }}
+                        className="bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-200">
+                        {currentLocale === 'ar' ? 'مسح الفلاتر' : 'Clear filters'}
+                    </button>}
+                </div>
 
                 {/* عرض البطاقات مع تلاشي لكل بطاقة بشكل منفصل وحصري عند التمرير */}
                 <div className="efips-library-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-10 gap-x-4 md:gap-x-6 px-2 md:px-4">

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLanguage } from '../../App';
 import { supabase } from '../utils/supabase';
 import { useCloudReader } from '../utils/efipsCloud';
+import './digitalLibraryResponsive.css';
 
 const EVENT = 'efips-digital-ratings-change';
 const accountPrefix = () => {
@@ -106,7 +107,7 @@ const DigitalBookRating: React.FC<{ bookId: string; compact?: boolean }> = ({ bo
       role="group" aria-label={ar ? 'قيّم هذا الكتاب من نجمة إلى خمس نجوم' : 'Rate this book from one to five stars'}>
       <div className={'flex flex-wrap items-center justify-center gap-2 ' + (compact ? 'text-white' : 'text-slate-800 dark:text-white')}>
         {!compact && <span className="text-[11px] font-black">{ar ? 'تقييمي' : 'My rating'}</span>}
-        <div dir="ltr" className="flex items-center gap-0.5" onMouseLeave={()=>setHovered(0)}>
+        <div dir="ltr" className="efips-digital-rating-stars items-center gap-0.5" onMouseLeave={()=>setHovered(0)}>
           {[1,2,3,4,5].map(value=><button
             key={value} type="button"
             aria-label={ar ? 'تقييم ' + value + ' من 5 نجوم' : 'Rate ' + value + ' of 5 stars'}
@@ -131,3 +132,4 @@ const DigitalBookRating: React.FC<{ bookId: string; compact?: boolean }> = ({ bo
   );
 };
 export default DigitalBookRating;
+

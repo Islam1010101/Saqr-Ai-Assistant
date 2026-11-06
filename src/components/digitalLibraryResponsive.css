@@ -1,0 +1,76 @@
+/* Shared by Arabic, English and the national identity digital book catalogue. */
+.efips-letter-library .efips-library-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+  align-items: stretch;
+  gap: clamp(1rem, 2vw, 1.5rem);
+  padding-inline: 0;
+}
+.efips-library-card-grid > div { min-width: 0; height: 100%; }
+.efips-letter-library .efips-digital-book-card { max-width: none; height: 100%; min-width: 0; }
+.efips-digital-card-title { min-height: 44px; overflow-wrap: anywhere; }
+.efips-digital-card-title:focus-visible { outline: 3px solid white; outline-offset: 4px; border-radius: .25rem; }
+.efips-digital-card-action { position: relative; z-index: 30; min-width: 44px; min-height: 44px; }
+.efips-letter-library .efips-digital-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: .75rem;
+}
+.efips-digital-filters > *, .efips-letter-library input { min-width: 0; min-height: 48px; }
+.efips-digital-search-panel { border-radius: clamp(1.25rem, 3vw, 3rem); padding: clamp(.875rem, 3vw, 2rem); }
+.efips-digital-results-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem; margin-block: 1.25rem; }
+.efips-digital-results-bar button { min-height: 44px; padding: .5rem 1rem; border-radius: 999px; }
+.efips-digital-dialog-backdrop {
+  position: fixed; inset: 0; z-index: 5000; display: flex; align-items: center; justify-content: center;
+  padding: max(.5rem, env(safe-area-inset-top)) max(.5rem, env(safe-area-inset-right)) max(.5rem, env(safe-area-inset-bottom)) max(.5rem, env(safe-area-inset-left));
+  background: rgb(15 23 42 / .7); backdrop-filter: blur(5px);
+}
+.efips-digital-dialog-panel {
+  display: grid; grid-template-columns: minmax(0, 1fr) 17rem; align-content: start;
+  position: relative; width: 100%; max-width: 56rem; min-width: 0;
+  max-height: calc(100vh - 2rem); max-height: calc(100dvh - 2rem);
+  overflow: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+  border: 2px solid #34d399; border-radius: 1.5rem; box-shadow: 0 24px 70px rgb(0 0 0 / .3);
+}
+.efips-digital-dialog-close {
+  position: sticky; top: .5rem; grid-column: 1 / -1; justify-self: end;
+  margin: .5rem .75rem 0; z-index: 50; width: 44px; height: 44px; padding: .75rem;
+}
+.efips-digital-dialog-content { min-width: 0; overflow: visible !important; padding: 1rem 1.5rem 1.5rem; }
+.efips-digital-dialog-sidebar {
+  min-width: 0; width: auto !important; padding: 1rem 1.25rem 1.5rem;
+  border-inline-start: 1px solid rgb(148 163 184 / .3); border-top: 0;
+}
+.efips-digital-dialog-panel p, .efips-digital-dialog-panel h2, .efips-digital-dialog-panel a { overflow-wrap: anywhere; }
+.efips-digital-dialog-panel button, .efips-digital-dialog-panel a, .efips-digital-author summary { touch-action: manipulation; }
+.efips-digital-author { margin-block-end: 1rem; }
+.efips-digital-author summary { cursor: pointer; min-height: 44px; padding: .75rem 1rem; border-radius: 1rem; }
+.efips-digital-author summary:focus-visible { outline: 3px solid #10b981; outline-offset: 3px; }
+.efips-digital-author p { margin-block-start: .75rem; padding-inline: 1rem; font-size: .875rem; line-height: 1.9; }
+.efips-digital-audio-controls { flex-wrap: wrap; gap: .75rem !important; }
+.efips-digital-audio-controls > div { min-width: 5rem; }
+.efips-digital-audio-controls > button { min-width: 44px; min-height: 44px; }
+.efips-digital-rating-stars { display: flex; flex-wrap: wrap; justify-content: center; }
+.efips-digital-rating-stars button { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+@media (max-width: 850px) {
+  .efips-digital-dialog-panel { grid-template-columns: minmax(0, 1fr); }
+  .efips-digital-dialog-content, .efips-digital-dialog-sidebar { padding: 1rem; }
+  .efips-digital-dialog-sidebar { border-inline-start: 0; border-top: 1px solid rgb(148 163 184 / .3); }
+}
+@media (max-width: 480px) {
+  .efips-letter-library .efips-library-page-title { overflow-wrap: anywhere; }
+  .efips-digital-card-heading { flex-direction: column-reverse; align-items: stretch; }
+  .efips-digital-card-heading > button { align-self: flex-end; }
+  .efips-digital-card-heading h3 { width: 100%; }
+  .efips-digital-book-card > div > div.relative { padding: 14px; }
+  .efips-letter-library .efips-digital-search-panel input { padding-block: .875rem; font-size: 1rem; }
+  .efips-digital-dialog-panel { border-radius: 1.25rem; }
+}
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .efips-letter-library .efips-digital-book-card * { animation: none !important; }
+  .efips-letter-library .efips-digital-book-card .group-hover\:-translate-y-3 { transform: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .efips-letter-library .animate-blob { animation: none !important; }
+  .efips-letter-library .efips-digital-book-card * { transition: none !important; }
+}
