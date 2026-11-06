@@ -12,6 +12,11 @@ on:
       - 'supabase/functions/saqr-learning-narration/**'
       - 'tests/saqrLearningAccess.test.ts'
       - 'tests/saqrHamdanNarration.test.ts'
+      - 'tests/catalogAccessibleSearch.test.ts'
+      - 'src/utils/catalogTextSearch.ts'
+      - 'pages/SearchPage.tsx'
+      - 'pages/ArabicLibraryInternalPage.tsx'
+      - 'pages/EnglishLibraryInternalPage.tsx'
       - '.github/workflows/saqr-learning-pilot.yml'
 permissions:
   contents: read
@@ -26,5 +31,6 @@ jobs:
           cache: npm
       - run: node --experimental-strip-types tests/saqrLearningAccess.test.ts
       - run: node --experimental-strip-types tests/saqrHamdanNarration.test.ts
+      - run: node --experimental-strip-types tests/catalogAccessibleSearch.test.ts
       - run: npm install --no-package-lock --no-audit --no-fund
       - run: npm run build
