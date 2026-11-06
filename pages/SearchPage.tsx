@@ -7,7 +7,7 @@ import { matchesCatalogQuery } from '../src/utils/catalogTextSearch';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../src/utils/supabase';
 import { classifyBookAudience, type BookAudience } from '../api/bookAudience';
-import { getChildReadingReference, readingTierLabel, type ChildReadingTier } from '../api/childrenReadingReferences';
+import { getChildReadingReference, readingTierLabel, type ChildReadingTier } from '../src/utils/childrenReadingReferences';
 import './catalogHeroVisual.css';
 
 // --- 1. الـ Hooks المساعدة ---
