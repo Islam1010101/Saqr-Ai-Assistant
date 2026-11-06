@@ -1,7 +1,7 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
 
 /**
- * Available only inside the server-authorized Saqr Helps Me learning space.
+ * Mounted site-wide only after the server verifies the admin or an individual student's accessibility grant.
  * Display preferences are intentionally temporary and never identify a pupil.
  * The color-friendly preset uses distinct, high-contrast palettes; it does not
  * simulate a color-vision deficiency or pretend to correct medical vision.
@@ -29,7 +29,7 @@ export default function SaqrAccessibilityToolbar({ isAr, quiet, onQuietChange }:
     originalSize.current = root.style.fontSize;
     baselinePx.current = Number.parseFloat(window.getComputedStyle(root).fontSize) || 16;
     return () => {
-      root.classList.remove('efips-learning-grayscale', 'efips-learning-color-safe', 'efips-learning-zoomed');
+      root.classList.remove('efips-learning-grayscale', 'efips-learning-color-safe', 'efips-learning-zoomed', 'efips-learning-reduced-motion');
       root.style.fontSize = originalSize.current ?? '';
     };
   }, []);
@@ -39,8 +39,9 @@ export default function SaqrAccessibilityToolbar({ isAr, quiet, onQuietChange }:
     root.classList.toggle('efips-learning-grayscale', colorMode === 'grayscale');
     root.classList.toggle('efips-learning-color-safe', colorMode === 'color-safe');
     root.classList.toggle('efips-learning-zoomed', zoom !== 100);
+    root.classList.toggle('efips-learning-reduced-motion', quiet);
     root.style.fontSize = zoom === 100 ? (originalSize.current ?? '') : `${baselinePx.current * zoom / 100}px`;
-  }, [colorMode, zoom]);
+  }, [colorMode, zoom, quiet]);
 
   const reset = () => {
     setZoom(100);
@@ -51,13 +52,13 @@ export default function SaqrAccessibilityToolbar({ isAr, quiet, onQuietChange }:
   return <>
     <aside
       dir={isAr ? 'rtl' : 'ltr'}
-      className="fixed bottom-3 sm:bottom-5 z-[80] flex max-w-[calc(100vw-24px)] flex-col items-end gap-2"
-      style={{ insetInlineEnd: '12px' }}
+      className="fixed bottom-24 sm:bottom-24 z-[900] flex max-w-[calc(100vw-24px)] flex-col items-start gap-2"
+      style={{ insetInlineStart: '12px' }}
       aria-label={isAr ? 'أدوات تسهيل الوصول' : 'Accessibility tools'}
     >
       {expanded && <div id={regionId} role="region"
         aria-label={isAr ? 'شريط إعدادات العرض' : 'Display accessibility settings'}
-        className="w-[min(410px,calc(100vw-24px))] max-h-[min(70dvh,510px)] overflow-y-auto rounded-[1.5rem] border-2 border-sky-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-4 shadow-[0_16px_45px_rgba(4,47,70,.25)] space-y-4 text-slate-900 dark:text-white">
+        className="w-[min(410px,calc(100vw-24px))] max-h-[min(60dvh,440px)] overflow-y-auto rounded-[1.5rem] border-2 border-sky-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-4 shadow-[0_16px_45px_rgba(4,47,70,.25)] space-y-4 text-slate-900 dark:text-white">
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-lg font-black">{isAr ? 'شريط تسهيل الوصول' : 'Accessibility toolbar'}</h2>
           <button type="button" onClick={() => setExpanded(false)}
@@ -125,7 +126,17 @@ export default function SaqrAccessibilityToolbar({ isAr, quiet, onQuietChange }:
       </button>
     </aside>
     <style>{`
+      /* Display presets apply across the authorized user's entire school site. */
       html.efips-learning-grayscale { filter:grayscale(1) !important; }
+      html.efips-learning-color-safe { filter:contrast(1.16) saturate(.82) !important; }
+      html.efips-learning-color-safe :is(a,button,[role="button"],input,select,textarea):focus-visible {
+        outline:4px solid #FFC857!important; outline-offset:3px!important;
+      }
+      html.efips-learning-reduced-motion *, html.efips-learning-reduced-motion *::before,
+      html.efips-learning-reduced-motion *::after {
+        animation-duration:0.01ms!important; animation-iteration-count:1!important;
+        transition-duration:0.01ms!important; scroll-behavior:auto!important;
+      }
       html.efips-learning-color-safe .saqr-learning-hero { background:#123C60!important; }
       html.efips-learning-color-safe .saqr-learning-option { background-image:none!important; border-color:#FFCA55!important; }
       html.efips-learning-color-safe .saqr-learning-option:nth-child(1) { background-color:#145582!important; }
