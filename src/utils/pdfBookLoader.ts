@@ -1,4 +1,5 @@
 import type { PDFDocumentLoadingTask } from 'pdfjs-dist';
+import { fetchPdfByteRange, PDF_BYTE_CHUNK } from './pdfRangeTransport';
 
 export class PdfReaderError extends Error {
   code: string;
@@ -20,23 +21,16 @@ export async function createPdfBookTask(bookKey: string, signal: AbortSignal, on
   let task: PDFDocumentLoadingTask;
   class BookRange extends pdf.PDFDataRangeTransport {
     requestDataRange(begin: number, end: number) {
-      void (async () => {
-        for (let start = begin; start < end; start += 262144) {
-          const finish = Math.min(start + 262144, end) - 1;
-          const r = await fetch(`${endpoint}&start=${start}&end=${finish}`, { signal: rangeController.signal });
-          if (r.status !== 206) throw new PdfReaderError('SOURCE_UNAVAILABLE');
-          const bytes = new Uint8Array(await r.arrayBuffer());
-          if (bytes.length !== finish - start + 1) throw new PdfReaderError('SOURCE_UNAVAILABLE');
-          this.onDataRange(start, bytes);
-        }
-      })().catch(error => {
+      void fetchPdfByteRange(endpoint, begin, end, rangeController.signal).then(bytes => {
+        if (!rangeController.signal.aborted && !signal.aborted) this.onDataRange(begin, bytes);
+      }).catch(error => {
         if (!rangeController.signal.aborted && !signal.aborted) { onError(error); void task?.destroy(); }
       });
     }
     abort() { rangeController.abort(); }
   }
   const transport = new BookRange(info.length, new Uint8Array());
-  task = pdf.getDocument({ range: transport, rangeChunkSize: 262144,
+  task = pdf.getDocument({ range: transport, rangeChunkSize: PDF_BYTE_CHUNK,
     disableStream: true, disableAutoFetch: true,
     cMapUrl: '/pdfjs/cmaps/', cMapPacked: true,
     standardFontDataUrl: '/pdfjs/standard_fonts/', wasmUrl: '/pdfjs/wasm/',
