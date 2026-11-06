@@ -12,6 +12,45 @@ export type ReadingReference = {
 };
 const curated: ReadonlyArray<ReadingReference> = [
   {
+    "title": "Mother Rabbit's Son Tom",
+    "author": "Dick Gackenbach",
+    "shelf": 30,
+    "tier": "beginner",
+    "publisherLevel": "Early I Can Read · reading grade 2.4 in a published teaching guide",
+    "sourceName": "ERIC / Beginning Reading: Making It Work (pp. 76–77)",
+    "sourceUrl": "https://files.eric.ed.gov/fulltext/ED266404.pdf",
+    "noteEn": "Listed as an Early I Can Read title (grade 2.4). Verify the edition and reading demands before approval.",
+    "noteAr": "مذكور ضمن سلسلة القراءة المبكرة بمستوى 2.4 في مرجع تربوي؛ يجب مطابقة الطبعة ونصها قبل الاعتماد.",
+    "status": "reference_only",
+    "editionMatched": false
+  },
+  {
+    "title": "Dinosaur Cousins?",
+    "author": "Bernard Most",
+    "shelf": 30,
+    "tier": "intermediate",
+    "publisherLevel": "Scholastic school list: 810L · ATOS 3.6 · GRL M · 1,013 words",
+    "sourceName": "James A. Garfield Local Schools / Scholastic book list",
+    "sourceUrl": "https://core-docs.s3.amazonaws.com/documents/asset/uploaded_file/64650/800-900.pdf",
+    "noteEn": "Illustrated dinosaur comparisons; ATOS 3.6 and GRL M in a school list. Confirm printed text, illustrations and edition.",
+    "noteAr": "كتاب مصور لمقارنة الديناصورات؛ يرد في قائمة مدرسية بمستوى ATOS 3.6 وGRL M. يلزم فحص النسخة.",
+    "status": "reference_only",
+    "editionMatched": false
+  },
+  {
+    "title": "Where Horses Run Free",
+    "author": "Joy Cowley",
+    "shelf": 30,
+    "tier": "intermediate",
+    "publisherLevel": "Accelerated Reader school list: 3.9 reading level (title shown with subtitle)",
+    "sourceName": "EGUSD / Accelerated Reader book list",
+    "sourceUrl": "https://kirchgater.egusd.net/documents/Programs/Other-Programs/Accelerated-Reader-Program/ARTL_01.pdf",
+    "noteEn": "Reading level 3.9 is cited for the same author and a longer form of the title. Compare full title, book ISBN and edition.",
+    "noteAr": "قائمة مدرسية تذكر مستوى 3.9 مع المؤلفة نفسها وعنوان أطول؛ يجب مطابقة العنوان الكامل ورقم ISBN والطبعة.",
+    "status": "reference_only",
+    "editionMatched": false
+  },
+  {
     "title": "Little Bear's Friend",
     "author": "Else Holmelund Minarik",
     "shelf": 30,
