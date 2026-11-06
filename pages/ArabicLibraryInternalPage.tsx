@@ -173,7 +173,7 @@ const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void
     const ageGroup = book?.reviewedAgeGroup ? ageLabels[book.reviewedAgeGroup as keyof typeof ageLabels] : '';
 
     if (!book) return null;
-    if (readerOpen) return <DigitalBookReader title={book.title} source={book.driveLink} locale={locale}
+    if (readerOpen) return <DigitalBookReader title={book.title} source={book.driveLink} bookKey={digitalBookKey('ar', book)} locale={locale}
         onBack={() => setReaderOpen(false)} onClose={onClose} />;
 
     return (
