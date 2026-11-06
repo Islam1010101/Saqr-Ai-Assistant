@@ -1,0 +1,31 @@
+name: Import approved EFIPS question MP3 blobs (one-time)
+on:
+  push:
+    branches:
+      - feat/recorded-questions-choices-feedback-20261106
+    paths:
+      - .github/workflows/import-approved-questions-one-time.yml
+permissions:
+  contents: write
+jobs:
+  add-recordings:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Attach already uploaded original MP3 Git objects to the feature branch
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branch = 'feat/recorded-questions-choices-feedback-20261106';
+            const entries = [{"path":"public/audio/saqr-reading/questions/saqr-library/en.mp3","mode":"100644","type":"blob","sha":"a06124ee24afe4b7982838f9528a0522817c50af"},{"path":"public/audio/saqr-reading/questions/saqr-library/ar.mp3","mode":"100644","type":"blob","sha":"b164de7abb7bc28dfcb742387c642ae9ab411b6d"},{"path":"public/audio/saqr-reading/questions/little-tree/en.mp3","mode":"100644","type":"blob","sha":"ad6bfc5aeef9307c62c082abb59e7811f6b21bda"},{"path":"public/audio/saqr-reading/questions/little-tree/ar.mp3","mode":"100644","type":"blob","sha":"d05c36b5b20d0a5cb9ddf562dd933e1a0c992216"},{"path":"public/audio/saqr-reading/questions/school-morning/en.mp3","mode":"100644","type":"blob","sha":"eacae894a5da809d6f7ada9abf2aef8ea92ae9a6"},{"path":"public/audio/saqr-reading/questions/school-morning/ar.mp3","mode":"100644","type":"blob","sha":"c14671851798d3813c03f3c286097045b4f35329"},{"path":"public/audio/saqr-reading/questions/friendly-ball/en.mp3","mode":"100644","type":"blob","sha":"86626e38d15387c58ffca3d3e40a3597b6d4d03a"},{"path":"public/audio/saqr-reading/questions/friendly-ball/ar.mp3","mode":"100644","type":"blob","sha":"99f268c10e339b91a77c235844e707a5ce1630e9"},{"path":"public/audio/saqr-reading/questions/rainy-day/en.mp3","mode":"100644","type":"blob","sha":"a5d5cd90251e65e6e1a43477a7514d6ccb9ee982"},{"path":"public/audio/saqr-reading/questions/rainy-day/ar.mp3","mode":"100644","type":"blob","sha":"3e42d928fd8265aef1156fe2609c8aa3c15d8f2d"},{"path":"public/audio/saqr-reading/questions/my-small-project/en.mp3","mode":"100644","type":"blob","sha":"6f72923d14abfce25be0e97acc7d6e45f195abc8"},{"path":"public/audio/saqr-reading/questions/my-small-project/ar.mp3","mode":"100644","type":"blob","sha":"d09ef2545a1498afbedfca0fd38c1a0d08fdf1b4"},{"path":"public/audio/saqr-reading/feedback/en.mp3","mode":"100644","type":"blob","sha":"98b6a878df6ca5ec0f58cdb7d9ac380a7ee5e0d7"},{"path":"public/audio/saqr-reading/feedback/ar.mp3","mode":"100644","type":"blob","sha":"c3ffda66eb4b20489b51843de1ae48fd755b7491"}];
+            const {owner, repo} = context.repo;
+            const ref = await github.rest.git.getRef({owner, repo, ref: 'heads/' + branch});
+            const base = ref.data.object.sha;
+            const original = await github.rest.git.getCommit({owner, repo, commit_sha: base});
+            const tree = await github.rest.git.createTree({owner, repo, base_tree: original.data.tree.sha, tree: entries});
+            const commit = await github.rest.git.createCommit({
+              owner,repo,
+              message:'asset(learning): add 12 recorded bilingual question files and 2 feedback files',
+              tree:tree.data.sha,parents:[base]
+            });
+            await github.rest.git.updateRef({owner,repo,ref:'heads/'+branch,sha:commit.data.sha,force:false});
+            core.info('Added '+entries.length+' original MP3 files; commit '+commit.data.sha);
