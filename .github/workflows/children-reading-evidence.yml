@@ -3,7 +3,7 @@ on:
   pull_request:
     paths:
       - 'api/bookAudience.ts'
-      - 'api/childrenReadingReferences.ts'
+      - 'src/utils/childrenReadingReferences.ts'
       - 'pages/SearchPage.tsx'
       - 'tests/childrenReadingLevels.test.ts'
       - 'docs/children-reading-evidence-pilot-20261106.md'
