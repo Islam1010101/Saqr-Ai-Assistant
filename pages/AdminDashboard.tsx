@@ -6,6 +6,7 @@ import { printA4Html } from '../src/utils/printA4Html';
 import AdminReadingChallenge from '../src/components/AdminReadingChallenge';
 import AdminLibraryAttendance from '../src/components/AdminLibraryAttendance';
 import AdminInsightsPanels from '../src/components/AdminInsightsPanels';
+import AdminChildrenReadingReview from '../src/components/AdminChildrenReadingReview';
 import { bookData } from '../api/bookData';
 import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
@@ -704,6 +705,7 @@ const AdminDashboard: React.FC = () => {
                 {[
                     { id:'admin-overview', label:isAr?'نظرة عامة':'Overview',icon:'grid' as IconName },
                     { id:'library-collection-heading', label:isAr?'مقتنيات المكتبة':'Library collection',icon:'library' as IconName },
+                    { id:'admin-children-reading-review', label:isAr?'مستويات قراءة الأطفال':'Children reading levels',icon:'book-open' as IconName },
                     { id:'admin-attendance', label:isAr?'الإشغال والحضور':'Attendance',icon:'calendar' as IconName },
                     { id:'admin-analytics', label:isAr?'الرسوم والتحليلات':'Analytics',icon:'chart' as IconName },
                     { id:'admin-access-report', label:isAr?'الدخول':'Logins',icon:'activity' as IconName },
@@ -789,6 +791,8 @@ const AdminDashboard: React.FC = () => {
                         </div>
                     </div>
                 </section>
+
+                <AdminChildrenReadingReview isAr={isAr} />
 
                 <section className="lg:col-span-4 rounded-3xl border border-emerald-200 dark:border-emerald-900/70 bg-gradient-to-r from-emerald-50 via-white to-sky-50 dark:from-emerald-950/30 dark:via-black dark:to-sky-950/20 shadow-sm p-5 md:p-6">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
