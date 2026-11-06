@@ -1,11 +1,16 @@
 import {audienceByShelf} from './shelfAudience.ts';
+import {getChildReadingReference} from '../src/utils/childrenReadingReferences.ts';
 // Reader-audience discovery labels are provisional, based on catalog metadata only.
 // No inference about a student's identity and no claim of verified publisher age ratings.
 export type BookAudience = 'children' | 'youth' | 'teens' | 'specialist' | 'nationalIdentity' | 'review';
-type AudienceBook = { title: string; subject: string; shelf: number; level?: string };
+type AudienceBook = { title: string; author?: string; subject: string; shelf: number; level?: string };
 const normalize = (s: string) => (s || '').toLowerCase().replace(/[إأآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه');
 const matches = (text:string, expression:RegExp) => expression.test(text);
 export function classifyBookAudience(book: AudienceBook): BookAudience {
+  // The named, externally referenced early-reader titles in the mixed 22/30
+  // shelves belong in the children's browsing group. Their reading *tier*
+  // still remains reference-only until the physical edition is inspected.
+  if(book.author && getChildReadingReference({title:book.title,author:book.author,shelf:book.shelf})) return 'children';
   const shelfCategory=audienceByShelf(book.shelf);
   if(shelfCategory==='specialist')return 'specialist';
   if(shelfCategory==='children')return 'children';
