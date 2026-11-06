@@ -3,6 +3,7 @@ import { bookData, getLocalizedSubject, type Book } from '../api/bookData';
 import { literaryGenreSubjectNames } from '../src/utils/literaryGenreCatalog';
 import { useReadingPassport, physicalBookKey } from '../src/utils/readingPassport'; 
 import { useLanguage } from '../App';
+import { matchesCatalogQuery } from '../src/utils/catalogTextSearch';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../src/utils/supabase';
 import { classifyBookAudience, type BookAudience } from '../api/bookAudience';
@@ -577,9 +578,10 @@ const SearchPage: React.FC = () => {
     }), [currentLocale]);
 
     const filteredBooks = useMemo(() => {
-        const term = debouncedSearchTerm.toLowerCase().trim();
+        const term = debouncedSearchTerm.trim();
         let result = bookData.filter(b => {
-            const matchesTerm = !term || b.title.toLowerCase().includes(term) || b.author.toLowerCase().includes(term) || b.subject.toLowerCase().includes(term) || getLocalizedSubject(b.subject, 'ar').toLowerCase().includes(term);
+            const matchesTerm = matchesCatalogQuery(term, b.title, b.author, b.subject,
+                getLocalizedSubject(b.subject, 'ar'), getLocalizedSubject(b.subject, 'en'), b.isbn ?? '');
             const matchesSub = subjectFilter === 'all' || b.subject === subjectFilter;
             const matchesAuth = authorFilter === 'all' || b.author === authorFilter;
             const matchesShelf = shelfFilter === 'all' || b.shelf.toString() === shelfFilter;
