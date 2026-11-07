@@ -1,7 +1,7 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
 import type { PDFDocumentProxy, RenderTask, PDFDocumentLoadingTask } from 'pdfjs-dist';
 import { createPdfBookTask } from '../utils/pdfBookLoader';
-import { clampPdfPage, parsePdfPage, readPdfState, writePdfState } from '../utils/pdfReadingState';
+import { clampPdfPage, parsePdfPage, pdfProgressPercent, readPdfState, writePdfState } from '../utils/pdfReadingState';
 
 export default function PdfBookPages({ bookKey, storageKey, ar, onError }: {
   bookKey: string; storageKey: string | null; ar: boolean; onError: (error: Error) => void;
@@ -11,6 +11,7 @@ export default function PdfBookPages({ bookKey, storageKey, ar, onError }: {
   const [page, setPage] = useState(initial.page);
   const [pageInput, setPageInput] = useState(String(initial.page));
   const [zoom, setZoom] = useState(initial.zoom);
+  const furthestPage = useRef(initial.furthestPage || initial.page);
   const [bookmarks, setBookmarks] = useState(initial.bookmarks);
   const [renderedPage, setRenderedPage] = useState(0);
   const [busy, setBusy] = useState(true);
@@ -75,8 +76,11 @@ export default function PdfBookPages({ bookKey, storageKey, ar, onError }: {
     return () => { disposed = true; task?.cancel(); };
   }, [pdf, page, width, zoom, ar]);
   useEffect(() => {
-    if (pdf && renderedPage === page && !busy && !pageError)
-      setSaved(writePdfState(storageKey, { page, bookmarks, zoom }));
+    if (pdf && renderedPage === page && !busy && !pageError) {
+      furthestPage.current = Math.max(furthestPage.current, page);
+      setSaved(writePdfState(storageKey, { page, bookmarks, zoom, furthestPage: furthestPage.current,
+        totalPages: pdf.numPages, lastReadAt: Date.now() }));
+    }
   }, [storageKey, pdf, renderedPage, page, busy, pageError, bookmarks, zoom]);
 
   const go = (next: number) => {
@@ -85,6 +89,8 @@ export default function PdfBookPages({ bookKey, storageKey, ar, onError }: {
     setPage(valid); setPageInput(String(valid));
   };
   const marked = bookmarks.includes(page);
+  const progress = pdf ? pdfProgressPercent({page: renderedPage || page, bookmarks, zoom,
+    furthestPage: furthestPage.current, totalPages: pdf.numPages}) : null;
   return <div className="efips-pdf-pages" onKeyDown={event => {
     if (event.target instanceof HTMLElement && ['INPUT', 'SELECT', 'TEXTAREA', 'BUTTON', 'A'].includes(event.target.tagName)) return;
     if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
@@ -125,7 +131,7 @@ export default function PdfBookPages({ bookKey, storageKey, ar, onError }: {
       {!pdf ? (ar ? 'جاري فتح ملف الكتاب…' : 'Opening book…')
         : busy ? (ar ? 'جاري عرض الصفحة…' : 'Rendering page…')
         : pageError ? (ar ? 'تعذر عرض الصفحة. جرّب صفحة أخرى أو افتح المصدر.' : 'Unable to render this page. Try another page or open the source.')
-        : <>{ar ? `الصفحة ${renderedPage} من ${pdf.numPages}` : `Page ${renderedPage} of ${pdf.numPages}`} · {saved === true
+        : <>{ar ? `الصفحة ${renderedPage} من ${pdf.numPages}` : `Page ${renderedPage} of ${pdf.numPages}`} · {progress === null ? '' : `${progress}% · `}{saved === true
           ? (ar ? 'موضعك وعلاماتك محفوظة على هذا الجهاز.' : 'Your position and bookmarks are saved on this device.')
           : saved === false ? (ar ? 'تعذر حفظ الموضع على هذا الجهاز.' : 'Unable to save your position on this device.') : ''}
           {initial.page > 1 && <button type="button" onClick={() => go(1)}>{ar ? 'البدء من أول الكتاب' : 'Start from the beginning'}</button>}</>}
