@@ -7,11 +7,18 @@ export class PdfReaderError extends Error {
 }
 export async function createPdfBookTask(bookKey: string, signal: AbortSignal, onError: (error: Error) => void): Promise<PDFDocumentLoadingTask> {
   const endpoint = `/api/digital-book?book=${encodeURIComponent(bookKey)}`;
-  const response = await fetch(`${endpoint}&info=1`, { signal });
-  const info = await response.json();
-  if (!response.ok) throw new PdfReaderError(info.code || 'SOURCE_UNAVAILABLE');
-  if (!Number.isSafeInteger(info.length) || info.length < 5 || info.length > 300 * 1024 * 1024) throw new PdfReaderError('SOURCE_NOT_PDF');
-  const [pdf, worker] = await Promise.all([
+  // Network metadata and the PDF.js viewer/worker download happen concurrently.
+  // Previously the mobile browser waited for Google Drive before even fetching PDF.js.
+  const metadata = (async () => {
+    const response = await fetch(`${endpoint}&info=1`, { signal });
+    const info = await response.json().catch(() => ({}));
+    if (!response.ok) throw new PdfReaderError(info.code || 'SOURCE_UNAVAILABLE');
+    if (!Number.isSafeInteger(info.length) || info.length < 5 || info.length > 300 * 1024 * 1024)
+      throw new PdfReaderError('SOURCE_NOT_PDF');
+    return info as { length: number };
+  })();
+  const [info, pdf, worker] = await Promise.all([
+    metadata,
     import('pdfjs-dist/legacy/build/pdf.mjs'),
     import('pdfjs-dist/legacy/build/pdf.worker.min.mjs?url'),
   ]);
