@@ -1,7 +1,29 @@
 import assert from 'node:assert/strict';
+import { ARABIC_LIBRARY_DATABASE, ENGLISH_LIBRARY_DATABASE } from '../api/digitalBookData.ts';
+import { DIGITAL_SERIES_VOLUMES } from '../api/digitalSeriesVolumes.ts';
+
 import { readerByteRange, readerFileId, readPublicPdfRange, PdfSourceError, publicDownloadConfirmation } from '../src/server/digitalBookPdf.ts';
 import { clampPdfPage, parsePdfPage, pdfReadingStorageKey, readPdfState, writePdfState } from '../src/utils/pdfReadingState.ts';
 import { fetchPdfByteRange, PDF_BYTE_CHUNK } from '../src/utils/pdfRangeTransport.ts';
+
+// Regression: a folder link must not masquerade as a PDF; all series volumes are direct files.
+const allDigitalBooks = [...ARABIC_LIBRARY_DATABASE,...ENGLISH_LIBRARY_DATABASE];
+assert.equal(Object.keys(DIGITAL_SERIES_VOLUMES).length,10);
+assert.equal(Object.values(DIGITAL_SERIES_VOLUMES).reduce((sum,books)=>sum+books.length,0),412);
+assert.equal(ARABIC_LIBRARY_DATABASE.length,451);
+assert.equal(ENGLISH_LIBRARY_DATABASE.length,54);
+assert.equal(allDigitalBooks.length,505); // six heritage e-books are managed in their own list
+assert.ok(allDigitalBooks.every(b=>b.driveLink.includes('/file/d/')), 'No digital library card may point to a Drive folder');
+assert.equal(ARABIC_LIBRARY_DATABASE.filter(b=>Boolean(b.audioId)).length,23,'Keep all original audio summaries');
+assert.ok(allDigitalBooks.every(b=>Boolean(b.readingAudience)),'Every digital volume needs a suggested reading group');
+const greenVolume = ARABIC_LIBRARY_DATABASE.find(b=>b.series==='المكتبة الخضراء للأطفال');
+assert.ok(greenVolume);
+assert.equal(greenVolume.readingAudience,'children');
+assert.equal(readerFileId('digital:ar:'+greenVolume.id), greenVolume.driveLink.match(/\/file\/d\/([^/]+)/)?.[1]);
+const wimpy = ENGLISH_LIBRARY_DATABASE.find(b=>b.series==='Diary Of A Wimpy');
+assert.ok(wimpy);
+assert.equal(wimpy.readingAudience,'children');
+console.log('PASS: 412 per-volume PDFs, 505 digital library cards, suggested audiences, audio integrity and server allowlisting');
 
 assert.equal(readerFileId('https://example.com/private.pdf'), null);
 assert.equal(readerFileId('digital:ar:AR_1'), null); // collection, not a single PDF
