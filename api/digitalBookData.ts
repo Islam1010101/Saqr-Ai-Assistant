@@ -1,4 +1,4 @@
-import { DIGITAL_SERIES_VOLUMES } from '../src/data/digitalSeriesVolumes.ts';
+import { DIGITAL_SERIES_VOLUMES } from '../src/data/digitalSeriesVolumes.js';
 
 /** Shared single source for both digital libraries and Saqr catalog search.
  * Keep book metadata, IDs, links and existing display behavior unchanged.

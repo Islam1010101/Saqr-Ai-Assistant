@@ -3,8 +3,8 @@ import type { PDFDocumentProxy, RenderTask, PDFDocumentLoadingTask } from 'pdfjs
 import { createPdfBookTask } from '../utils/pdfBookLoader';
 import { clampPdfPage, parsePdfPage, pdfProgressPercent, readPdfState, writePdfState } from '../utils/pdfReadingState';
 
-export default function PdfBookPages({ bookKey, storageKey, ar, onError }: {
-  bookKey: string; storageKey: string | null; ar: boolean; onError: (error: Error) => void;
+export default function PdfBookPages({ bookKey, storageKey, ar, onError, onReady }: {
+  bookKey: string; storageKey: string | null; ar: boolean; onError: (error: Error) => void; onReady?: () => void;
 }) {
   const [initial] = useState(() => readPdfState(storageKey));
   const [pdf, setPdf] = useState<PDFDocumentProxy | null>(null);
@@ -24,7 +24,9 @@ export default function PdfBookPages({ bookKey, storageKey, ar, onError }: {
   const surface = useRef<HTMLDivElement>(null);
   const renderedContent = useRef<HTMLDivElement>(null);
   const errorCallback = useRef(onError);
+  const readyCallback = useRef(onReady);
   useEffect(() => { errorCallback.current = onError; }, [onError]);
+  useEffect(() => { readyCallback.current = onReady; }, [onReady]);
   useEffect(() => {
     const node = surface.current;
     if (!node) return;
@@ -66,7 +68,7 @@ export default function PdfBookPages({ bookKey, storageKey, ar, onError }: {
       await task.promise;
       if (disposed) return;
       if (surface.current) { surface.current.scrollTop = 0; surface.current.scrollLeft = 0; }
-      setRenderedPage(page); setBusy(false);
+      setRenderedPage(page); setBusy(false); readyCallback.current?.();
       void documentPage.getTextContent().then(content => {
         if (!disposed) setPageText(content.items.map(item => 'str' in item ? item.str + (item.hasEOL ? '\n' : ' ') : '').join(''));
       }).catch(() => {});

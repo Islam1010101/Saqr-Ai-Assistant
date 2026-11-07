@@ -2,8 +2,9 @@
  * Source folders stay unchanged in Drive. Each volume has its own stable reading key.
  * Titles come from PDF filenames; age groups, levels and page counts are not inferred.
  */
-export type DigitalSeriesVolume = { fileId: string; title: string; order: number | null };
-export const DIGITAL_SERIES_VOLUMES: Record<string, DigitalSeriesVolume[]> = {
+/** @typedef {{fileId: string, title: string, order: number | null}} DigitalSeriesVolume */
+/** @type {Record<string, DigitalSeriesVolume[]>} */
+export const DIGITAL_SERIES_VOLUMES = {
   "38": [
     {
       "fileId": "16LGHNPV2Ckoc0NUr9a4VinDy7dhOPY6C",

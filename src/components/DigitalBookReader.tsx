@@ -11,13 +11,30 @@ export default function DigitalBookReader({ title, source, bookKey, locale, onBa
 }) {
   const ar = locale === 'ar';
   const preview = digitalReaderSource(source);
+  const [deviceAccount] = useState(() => readerDeviceAccount());
   const { user, loading } = useCloudReader();
-  const storageKey = pdfReadingStorageKey(user?.id || readerDeviceAccount(), bookKey, preview || source);
+  // Start immediately for the already authenticated site user. Do not block on a second
+  // Supabase getUser() round trip: it can be slow on mobile data.
+  const waitingForIdentity = !deviceAccount && loading;
+  const storageKey = pdfReadingStorageKey(deviceAccount || user?.id || null, bookKey, preview || source);
   const [error, setError] = useState<Error | null>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [slow, setSlow] = useState(false);
+  const [ready, setReady] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  useEffect(() => {
+    if (ready || error || waitingForIdentity) return;
+    setSlow(false);
+    const timer = window.setTimeout(() => setSlow(true), 6500);
+    return () => window.clearTimeout(timer);
+  }, [bookKey, attempt, ready, error, waitingForIdentity]);
+  const retry = () => { setShowPreview(false); setError(null); setReady(false); setSlow(false); setAttempt(v => v + 1); };
   const back = useRef<HTMLButtonElement>(null);
   useEffect(() => { back.current?.focus(); }, []);
-  const downloadDisabled = (error as Error & { code?: string })?.code === 'SOURCE_DOWNLOAD_DISABLED';
+  const errorCode = (error as Error & { code?: string })?.code || error?.message;
+  const downloadDisabled = errorCode === 'SOURCE_DOWNLOAD_DISABLED';
+  const sourceRangeUnsupported = errorCode === 'SOURCE_RANGE_UNSUPPORTED';
+  const sourceNotPdf = errorCode === 'SOURCE_NOT_PDF';
   return <DigitalLibraryDialog title={title} onClose={onClose} variant="reader">
     <section className="efips-book-reader" dir={ar ? 'rtl' : 'ltr'}>
       <header>
@@ -29,17 +46,29 @@ export default function DigitalBookReader({ title, source, bookKey, locale, onBa
           <button type="button" data-book-close onClick={onClose}>{ar ? 'إغلاق القارئ' : 'Close reader'}</button>
         </nav>
       </header>
-      {loading ? <p className="efips-reader-note" role="status">{ar ? 'جاري فتح القارئ…' : 'Opening reader…'}</p>
-        : error ? <>
+      {waitingForIdentity ? <p className="efips-reader-note" role="status">{ar ? 'جاري التحقق من حساب القارئ…' : 'Checking reader account…'}</p>
+        : error || showPreview ? <>
           <div className="efips-reader-fallback">
-            <p role="alert">{downloadDisabled
+            <p role="alert">{!error
+              ? (ar ? 'عرض معاينة Drive أثناء انتظار القارئ الداخلي.' : 'Showing Drive preview while the on-site reader loads.')
+              : downloadDisabled
               ? (ar ? 'إعدادات هذا الملف في Google Drive تمنع تنزيله، لذلك لا يمكن تشغيل أدوات الصفحات وحفظ الموضع عليه داخل الموقع.' : 'This file’s Google Drive settings disable downloads, so page controls and saved reading position cannot be used inside the site.')
-              : (ar ? 'تعذر تحميل ملف الكتاب داخل القارئ. يمكنك استخدام معاينة Drive أو فتح المصدر.' : 'The book could not be loaded in the reader. Use the Drive preview or open the source.')}</p>
-            {preview && !showPreview && <button type="button" onClick={() => setShowPreview(true)}>{ar ? 'عرض معاينة Drive' : 'Show Drive preview'}</button>}
-            {showPreview && <p>{ar ? 'معاينة Drive لا تحفظ موضع القراءة في الموقع.' : 'Drive preview does not save your reading position on this site.'}</p>}
+              : sourceRangeUnsupported
+              ? (ar ? 'المصدر لا يدعم تحميل صفحات PDF بشكل جزئي. يمكنك قراءة الكتاب من معاينة Drive مباشرة.' : 'The source does not support PDF byte ranges. Read the book using Drive preview instead.')
+              : sourceNotPdf
+              ? (ar ? 'المصدر لا يرجع ملف PDF صالحًا للقارئ. تظهر معاينة Drive إن كانت متاحة.' : 'The source did not return a valid PDF. Drive preview is shown when available.')
+              : (ar ? 'تعذر تشغيل الصفحات داخل القارئ حاليًا. سنعرض الكتاب من معاينة Drive إن كانت متاحة.' : 'The PDF page reader is unavailable for this file. Drive preview is shown when available.')}</p>
+            {preview && <p>{ar ? 'في معاينة Drive لا تتوفر علامات الصفحات وحفظ موضع القراءة داخل الموقع.' : 'In Drive preview, page bookmarks and on-site reading progress are unavailable.'}</p>}
+            <button type="button" onClick={retry}>{ar ? 'إعادة محاولة فتح القارئ' : 'Retry page reader'}</button>
           </div>
-          {showPreview && preview && <iframe src={preview} title={ar ? `معاينة: ${title}` : `Preview: ${title}`} referrerPolicy="no-referrer" allow="fullscreen" allowFullScreen />}
-        </> : <PdfBookPages key={storageKey || bookKey} bookKey={bookKey} storageKey={storageKey} ar={ar} onError={setError} />}
+          {preview && <iframe src={preview} title={ar ? `معاينة: ${title}` : `Preview: ${title}`} referrerPolicy="no-referrer" allow="fullscreen" allowFullScreen />}
+        </> : <>
+          {!ready && slow && preview && <div className="efips-reader-slow" role="status">
+            <span>{ar ? 'تحميل صفحات الكتاب يستغرق وقتًا أطول من المعتاد.' : 'Loading the book pages is taking longer than usual.'}</span>
+            <button type="button" onClick={() => setShowPreview(true)}>{ar ? 'اقرأ عبر معاينة Drive الآن' : 'Read with Drive preview now'}</button>
+          </div>}
+          <PdfBookPages key={`${storageKey || bookKey}:${attempt}`} bookKey={bookKey} storageKey={storageKey} ar={ar} onReady={() => setReady(true)} onError={setError} />
+        </>}
     </section>
   </DigitalLibraryDialog>;
 }

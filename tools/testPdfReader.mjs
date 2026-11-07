@@ -12,6 +12,7 @@ try {
   const compile = spawnSync(process.execPath, [require.resolve('typescript/lib/tsc.js'),
     'tests/pdfReader.test.ts', '--rootDir', '.', '--outDir', directory,
     '--module', 'ESNext', '--moduleResolution', 'Bundler', '--target', 'ES2022',
+    '--allowJs', 'true',
     '--skipLibCheck', '--rewriteRelativeImportExtensions', 'true', '--allowImportingTsExtensions', 'true',
   ], { stdio: 'inherit' });
   if (compile.status !== 0) process.exitCode = compile.status || 1;

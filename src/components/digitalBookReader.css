@@ -46,3 +46,17 @@
   .efips-book-reader nav > a { flex-basis: 100%; order: 3; }
   .efips-reader-note { font-size: .75rem; padding: .5rem .75rem; }
 }
+
+/* Non-blocking fallback while an unusually slow Google Drive PDF initializes. */
+.efips-reader-slow {
+  flex-shrink: 0; display: flex; flex-wrap: wrap; align-items: center;
+  gap: .6rem; padding: .55rem .85rem; background: #ecfdf5;
+  color: #065f46; border-bottom: 1px solid #6ee7b7;
+  font-size: .875rem; font-weight: 700;
+}
+.efips-reader-slow button {
+  min-height: 44px; padding: .55rem .8rem; border-radius: .65rem;
+  background: #047857; color: #fff; font-weight: 700;
+}
+.efips-reader-slow button:focus-visible { outline: 3px solid #0ea5e9; outline-offset: 2px; }
+.dark .efips-reader-slow { background: #064e3b; color: #d1fae5; border-color: #059669; }
