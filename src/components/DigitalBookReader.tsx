@@ -49,7 +49,9 @@ export default function DigitalBookReader({ title, source, bookKey, locale, onBa
       {waitingForIdentity ? <p className="efips-reader-note" role="status">{ar ? 'جاري التحقق من حساب القارئ…' : 'Checking reader account…'}</p>
         : error || showPreview ? <>
           <div className="efips-reader-fallback">
-            <p role="alert">{downloadDisabled
+            <p role="alert">{!error
+              ? (ar ? 'عرض معاينة Drive أثناء انتظار القارئ الداخلي.' : 'Showing Drive preview while the on-site reader loads.')
+              : downloadDisabled
               ? (ar ? 'إعدادات هذا الملف في Google Drive تمنع تنزيله، لذلك لا يمكن تشغيل أدوات الصفحات وحفظ الموضع عليه داخل الموقع.' : 'This file’s Google Drive settings disable downloads, so page controls and saved reading position cannot be used inside the site.')
               : sourceRangeUnsupported
               ? (ar ? 'المصدر لا يدعم تحميل صفحات PDF بشكل جزئي. يمكنك قراءة الكتاب من معاينة Drive مباشرة.' : 'The source does not support PDF byte ranges. Read the book using Drive preview instead.')
