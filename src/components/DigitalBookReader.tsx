@@ -12,25 +12,19 @@ export default function DigitalBookReader({ title, source, bookKey, locale, onBa
   const ar = locale === 'ar';
   const preview = digitalReaderSource(source);
   const [deviceAccount] = useState(() => readerDeviceAccount());
-  const { user, loading } = useCloudReader();
-  // Start immediately for the already authenticated site user. Do not block on a second
-  // Supabase getUser() round trip: it can be slow on mobile data.
-  const waitingForIdentity = !deviceAccount && loading;
+  const { user } = useCloudReader();
+  // Rendering the Drive book must never wait for an additional auth call.
   const storageKey = pdfReadingStorageKey(deviceAccount || user?.id || null, bookKey, preview || source);
   const [error, setError] = useState<Error | null>(null);
-  const [showPreview, setShowPreview] = useState(false);
+  // Open the known book preview on the very first render, no 3-second fallback.
+  const [showPreview, setShowPreview] = useState(() => Boolean(preview));
   const [ready, setReady] = useState(false);
   const [attempt, setAttempt] = useState(0);
-  // Drive preview becomes readable automatically if the first PDF page is slow.
-  // Continue preparing the internal reader invisibly so bookmarks/resume still work.
+  // Keep the on-site PDF reader mounted in the background so that page
+  // bookmarks and saved position remain available as soon as it is ready.
   useEffect(() => {
-    if (ready || error || waitingForIdentity || showPreview || !preview) return;
-    const timer = window.setTimeout(() => setShowPreview(true), 3000);
-    return () => window.clearTimeout(timer);
-  }, [bookKey, attempt, ready, error, waitingForIdentity, showPreview, preview]);
-  useEffect(() => {
-    setError(null); setShowPreview(false); setReady(false); setAttempt(0);
-  }, [bookKey, source]);
+    setError(null); setShowPreview(Boolean(preview)); setReady(false); setAttempt(0);
+  }, [bookKey, source, preview]);
   const retry = () => { setError(null); setReady(false); setAttempt(v => v + 1); };
   const reportReaderError = (failure: Error) => { setError(failure); setShowPreview(true); };
   const back = useRef<HTMLButtonElement>(null);
@@ -50,8 +44,7 @@ export default function DigitalBookReader({ title, source, bookKey, locale, onBa
           <button type="button" data-book-close onClick={onClose}>{ar ? 'إغلاق القارئ' : 'Close reader'}</button>
         </nav>
       </header>
-      {waitingForIdentity ? <p className="efips-reader-note" role="status">{ar ? 'جاري التحقق من حساب القارئ…' : 'Checking reader account…'}</p>
-        : <div className="efips-reader-stage">
+      <div className="efips-reader-stage">
           {!error && <div className="efips-reader-native" aria-hidden={showPreview}>
             <PdfBookPages key={`${storageKey || bookKey}:${attempt}`} bookKey={bookKey}
               storageKey={storageKey} ar={ar} onReady={() => setReady(true)}
@@ -69,7 +62,7 @@ export default function DigitalBookReader({ title, source, bookKey, locale, onBa
                     : (ar ? 'تعذر فتح القارئ الداخلي؛ يمكنك قراءة الكتاب من معاينة Drive.' : 'The internal reader could not open this book. Read with Drive preview.')}</span>
                 : ready
                   ? <span>{ar ? 'القارئ الداخلي وأدوات حفظ الصفحات جاهزة.' : 'The page reader and reading bookmarks are ready.'}</span>
-                  : <span>{ar ? 'يمكنك قراءة الكتاب الآن عبر Drive، بينما نجهز أدوات الصفحات والحفظ.' : 'Read now with Drive while page and bookmark tools finish loading.'}</span>}
+                  : <span>{ar ? 'معاينة الكتاب مفتوحة، وجاري تجهيز أدوات الصفحات والحفظ.' : 'Book preview opened. Page and bookmark tools are loading.'}</span>}
               {ready && !error
                 ? <button type="button" onClick={() => setShowPreview(false)}>{ar ? 'استخدام القارئ وحفظ موضع القراءة' : 'Use page reader and save progress'}</button>
                 : error
@@ -83,7 +76,7 @@ export default function DigitalBookReader({ title, source, bookKey, locale, onBa
             {ar ? 'تعذر فتح هذا الملف داخل القارئ. افتح المصدر في نافذة جديدة.' : 'Could not open this file in the reader. Open the source in a new tab.'}
             <button type="button" onClick={retry}>{ar ? 'إعادة المحاولة' : 'Try again'}</button>
           </div>}
-        </div>}
+        </div>
     </section>
   </DigitalLibraryDialog>;
 }
