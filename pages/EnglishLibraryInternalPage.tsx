@@ -9,6 +9,8 @@ import DigitalBookRating from '../src/components/DigitalBookRating';
 import DigitalLibraryDialog from '../src/components/DigitalLibraryDialog';
 import DigitalBookReader from '../src/components/DigitalBookReader';
 import { digitalReaderSource } from '../src/utils/digitalReaderSource';
+import { useDigitalReadingProgress } from '../src/utils/useDigitalReadingProgress';
+import { pdfProgressPercent, type PdfReadingState } from '../src/utils/pdfReadingState';
 
 // Shared with Saqr catalog search; preserve book IDs and source links.
 import { ENGLISH_LIBRARY_DATABASE, type DigitalLibraryBook } from '../api/digitalBookData';
@@ -194,14 +196,15 @@ const SaqrAudioPlayer: React.FC<{ audioSrc: string; t: any }> = ({ audioSrc, t }
 };
 
 // --- 3. Component: BookModal ---
-const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
+const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void; t: any; progress?: PdfReadingState }> = ({ book, onClose, t, progress }) => {
     const { locale } = useLanguage();
     const [readerOpen, setReaderOpen] = useState(false);
     useEffect(() => { setReaderOpen(false); }, [book?.id]);
     const ageLabels = locale === 'ar'
         ? { children: 'أطفال', teens: 'يافعون', adults: 'كبار' }
         : { children: 'Children', teens: 'Teens', adults: 'Adults' };
-    const ageGroup = book?.reviewedAgeGroup ? ageLabels[book.reviewedAgeGroup as keyof typeof ageLabels] : '';
+    const ageGroup = book?.reviewedAgeGroup || book?.readingAudience ? ageLabels[(book.reviewedAgeGroup || book.readingAudience)!] : '';
+    const ageStatus = book?.reviewedAgeGroup ? '' : (locale==='ar'?' (مقترح)':' (suggested)');
 
     if (!book) return null;
     if (readerOpen) return <DigitalBookReader title={book.title} source={book.driveLink} bookKey={digitalBookKey('en', book)} locale={locale}
@@ -215,6 +218,7 @@ const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void
 
                 <div className="efips-digital-dialog-content text-start flex flex-col">
                     <h2 className="text-xl sm:text-2xl md:text-4xl text-slate-900 dark:text-white font-black leading-snug break-words mb-3 md:mb-4">{book.title}</h2>
+                    {book.series && <p className="mb-3 text-sm font-black text-sky-700 dark:text-sky-300" dir="auto">{locale==='ar'?'السلسلة: ':'Series: '}{book.series}{book.seriesOrder?' · '+(locale==='ar'?'الجزء ':'Volume ')+book.seriesOrder:''}</p>}
                     
                     <details className="efips-digital-author text-sky-700 dark:text-sky-300">
                         <summary className="bg-sky-50 dark:bg-slate-700 font-bold">
@@ -246,14 +250,14 @@ const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void
                         
                         <div className="bg-sky-50 dark:bg-slate-800 p-3 md:p-5 rounded-xl md:rounded-[2rem] border-4 border-sky-200 dark:border-slate-600 shadow-sm">
                             <p className="text-[10px] font-black text-sky-400 uppercase tracking-widest mb-2">{t('ageClassification')}</p>
-                            <p className="text-lg md:text-2xl font-black text-sky-600 break-words">{ageGroup || (locale === 'ar' ? 'لم يُحدد بعد' : 'Not yet classified')}</p>
+                            <p className="text-lg md:text-2xl font-black text-sky-600 break-words">{ageGroup ? ageGroup + ageStatus : (locale === 'ar' ? 'لم يُحدد بعد' : 'Not yet classified')}</p>
                         </div>
 
                         <DigitalBookRating bookId={digitalBookKey('en', book)} compact={false} />
 
                         <div className="pt-2 md:pt-6">
                             {digitalReaderSource(book.driveLink) ? (<button type="button" onClick={() => setReaderOpen(true)} className="w-full block bg-sky-500 text-white font-black py-4 rounded-[2rem] hover:-translate-y-1 active:translate-y-2 border-b-8 border-sky-700 active:border-b-0 transition-all text-center uppercase tracking-widest text-base shadow-md">
-                                {t('read')}
+                                {progress && progress.page>1 ? (locale==='ar'?'أكمل القراءة':'Continue reading') : t('read')}
                             </button>) : (<a href={book.driveLink} target="_blank" rel="noreferrer" className="w-full block bg-sky-500 text-white font-black py-4 rounded-[2rem] hover:-translate-y-1 active:translate-y-2 border-b-8 border-sky-700 active:border-b-0 transition-all text-center uppercase tracking-widest text-base shadow-md">
                                 {t('read')}
                             </a>)}
@@ -265,12 +269,13 @@ const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void
 };
 
 // --- 4. Component: BookCard (2D Flat Design) ---
-const BookCard = React.memo(({ book, onClick, t }: { book: DigitalLibraryBook; onClick: () => void; t: any }) => {
+const BookCard = React.memo(({ book, onClick, t, progress }: { book: DigitalLibraryBook; onClick: () => void; t: any; progress?: PdfReadingState }) => {
   const { data: passport, toggleSaved } = useReadingPassport();
   const readingKey = digitalBookKey('en', book);
   const isSaved = passport.saved.includes(readingKey);
   const isAi = !book.subject || book.subject === "Unknown";
   const hasAudio = !!book.audioId;
+  const percent = progress ? pdfProgressPercent(progress) : null;
 
   // ألوان متدرجة مسطحة وأنيقة (بدون 3D)
   const colors = [
@@ -324,6 +329,9 @@ const BookCard = React.memo(({ book, onClick, t }: { book: DigitalLibraryBook; o
             </span>
             {book.publisher && <span className="min-w-0 max-w-full truncate border-s border-white/40 ps-2 text-white/85">{book.publisher}</span>}
           </div>
+          {book.series && <p className="text-white/95 text-xs font-black" dir="auto">{book.series}{book.seriesOrder?' · #'+book.seriesOrder:''}</p>}
+          {book.readingAudience && <p className="text-white/95 text-xs font-bold">{({children:'Children',teens:'Teens',adults:'Adults'} as const)[book.readingAudience]} · Suggested group</p>}
+          {progress && <div className="text-white font-black text-xs">{'Continue from page '+progress.page}{percent!==null?' · '+percent+'%':''}<div className="h-1.5 w-full mt-1 bg-white/30 rounded-full overflow-hidden"><div className="h-full bg-white" style={{width:(percent??0)+'%'}} /></div></div>}
           <div className="flex flex-wrap items-center justify-between gap-2 mt-1">
             <span className="text-white/95 text-xs font-black max-w-[55%] truncate" dir="auto">{isAi ? t('aiSubject') : book.subject}</span>
             <div className="shrink-0 relative z-30" onClick={(event)=>event.stopPropagation()}>
@@ -353,37 +361,44 @@ const EnglishLibraryInternalPage: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [subjectFilter, setSubjectFilter] = useState('all');
     const [authorFilter, setAuthorFilter] = useState('all');
+    const [seriesFilter, setSeriesFilter] = useState('all');
+    const [audienceFilter, setAudienceFilter] = useState('all');
     const [sortBy, setSortBy] = useState('alphabetical'); 
     const [audioOnly, setAudioOnly] = useState(false);
     const hasAudio = ENGLISH_LIBRARY_DATABASE.some(book => !!book.audioId);
     const [selectedBook, setSelectedBook] = useState<DigitalLibraryBook | null>(null);
+    const readingProgress = useDigitalReadingProgress(ENGLISH_LIBRARY_DATABASE,'en');
+    const booksInProgress = useMemo(()=>ENGLISH_LIBRARY_DATABASE.filter(b=>readingProgress.has(digitalBookKey('en',b))).sort((a,b)=>(readingProgress.get(digitalBookKey('en',b))?.lastReadAt||0)-(readingProgress.get(digitalBookKey('en',a))?.lastReadAt||0)).slice(0,8),[readingProgress]);
     const [visibleCount, setVisibleCount] = useState(12); // تغيير ليكون العدد متوافق مع الموبايل
 
     const filters = useMemo(() => ({
         subjects: [...new Set(ENGLISH_LIBRARY_DATABASE.map(b => b.subject))].filter(s => s !== "Unknown").sort(),
         authors: [...new Set(ENGLISH_LIBRARY_DATABASE.map(b => b.author))].filter(a => a !== 'Unknown Author').sort(),
+        series: [...new Set(ENGLISH_LIBRARY_DATABASE.map(b=>b.series).filter((x):x is string=>!!x))].sort(),
     }), []);
 
     useEffect(() => {
         setVisibleCount(12);
-    }, [searchTerm, subjectFilter, authorFilter, audioOnly]);
+    }, [searchTerm, subjectFilter, authorFilter, seriesFilter, audienceFilter, audioOnly]);
 
     const filteredBooks = useMemo(() => {
         const term = searchTerm.trim();
         let result = ENGLISH_LIBRARY_DATABASE.filter(b => {
-            const matchesSearch = matchesCatalogQuery(term, b.title, b.author, b.subject, b.summary, ...(b.keywords || []));
+            const matchesSearch = matchesCatalogQuery(term, b.title, b.author, b.subject, b.summary, b.series || '', ...(b.keywords || []));
             const matchesSubject = subjectFilter === 'all' || b.subject === subjectFilter;
             const matchesAuthor = authorFilter === 'all' || b.author === authorFilter;
+            const matchesSeries = seriesFilter === 'all' || b.series === seriesFilter;
+            const matchesAudience = audienceFilter === 'all' || (b.reviewedAgeGroup || b.readingAudience) === audienceFilter;
             const matchesAudio = audioOnly ? !!b.audioId : true;
-            return matchesSearch && matchesSubject && matchesAuthor && matchesAudio;
+            return matchesSearch && matchesSubject && matchesAuthor && matchesSeries && matchesAudience && matchesAudio;
         });
 
         if (sortBy === 'author') result = [...result].sort((a, b) => a.author.localeCompare(b.author, currentLocale));
         else if (sortBy === 'subject') result = [...result].sort((a, b) => a.subject.localeCompare(b.subject, currentLocale));
         else if (sortBy === 'audio') result = [...result].sort((a, b) => (b.audioId ? 1 : 0) - (a.audioId ? 1 : 0));
-        else result = [...result].sort((a, b) => a.title.localeCompare(b.title, currentLocale));
+        else result = [...result].sort((a,b)=>a.series&&a.series===b.series?(a.seriesOrder??9999)-(b.seriesOrder??9999)||a.title.localeCompare(b.title,currentLocale):a.title.localeCompare(b.title,currentLocale));
         return result;
-    }, [searchTerm, subjectFilter, authorFilter, audioOnly, sortBy, currentLocale]);
+    }, [searchTerm, subjectFilter, authorFilter, seriesFilter, audienceFilter, audioOnly, sortBy, currentLocale]);
 
     return (
         <div dir={dir} className="efips-letter-library efips-letter-en w-full min-h-screen bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300">
@@ -428,12 +443,14 @@ const EnglishLibraryInternalPage: React.FC = () => {
                                     </div>
                                 </div>
                                 
-                                <div className={`efips-digital-filters grid grid-cols-2 ${hasAudio ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-3 md:gap-4`}>
+                                <div className="efips-digital-filters grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                                     <select aria-label={t('allAuthors')} value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)} className="w-full p-3 md:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 font-black text-xs md:text-sm cursor-pointer appearance-none text-center hover:border-sky-400 transition-colors outline-none focus:border-sky-500 text-slate-700 dark:text-slate-200">
                                         <option value="all">{t('allAuthors')}</option>
                                         {filters.authors.map(a => <option key={a} value={a}>{a}</option>)}
                                     </select>
-                                    <select aria-label={t('allSubjects')} value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="w-full p-3 md:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 font-black text-xs md:text-sm cursor-pointer appearance-none text-center hover:border-sky-400 transition-colors outline-none focus:border-sky-500 text-slate-700 dark:text-slate-200">
+                                    {filters.series.length>0 && <select aria-label="Series" value={seriesFilter} onChange={e=>setSeriesFilter(e.target.value)} className="w-full p-3 md:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200 border-2 border-slate-200 dark:border-slate-700 font-black text-xs md:text-sm"><option value="all">{currentLocale==='ar'?'كل السلاسل':'All series'}</option>{filters.series.map(n=><option key={n} value={n}>{n}</option>)}</select>}
+                                <select aria-label="Reading group" value={audienceFilter} onChange={e=>setAudienceFilter(e.target.value)} className="w-full p-3 md:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200 border-2 border-slate-200 dark:border-slate-700 font-black text-xs md:text-sm"><option value="all">{currentLocale==='ar'?'كل الفئات':'All reading groups'}</option><option value="children">{currentLocale==='ar'?'أطفال':'Children'}</option><option value="teens">{currentLocale==='ar'?'يافعون':'Teens'}</option><option value="adults">{currentLocale==='ar'?'كبار':'Adults'}</option></select>
+                                <select aria-label={t('allSubjects')} value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="w-full p-3 md:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 font-black text-xs md:text-sm cursor-pointer appearance-none text-center hover:border-sky-400 transition-colors outline-none focus:border-sky-500 text-slate-700 dark:text-slate-200">
                                         <option value="all">{t('allSubjects')}</option>
                                         {filters.subjects.map(s => <option key={s} value={s}>{s}</option>)}
                                     </select>
@@ -450,21 +467,23 @@ const EnglishLibraryInternalPage: React.FC = () => {
                     </div>
                 </RevealOnScroll>
 
-                {(searchTerm || subjectFilter !== 'all' || authorFilter !== 'all' || audioOnly) && <div className="efips-digital-results-bar text-slate-700 dark:text-slate-200 text-sm font-bold">
+                {(searchTerm || subjectFilter !== 'all' || authorFilter !== 'all' || seriesFilter !== 'all' || audienceFilter !== 'all' || audioOnly) && <div className="efips-digital-results-bar text-slate-700 dark:text-slate-200 text-sm font-bold">
                     <button type="button"
-                        onClick={() => { setSearchTerm(''); setSubjectFilter('all'); setAuthorFilter('all'); setAudioOnly(false); }}
+                        onClick={() => { setSearchTerm(''); setSubjectFilter('all'); setAuthorFilter('all'); setSeriesFilter('all'); setAudienceFilter('all'); setAudioOnly(false); }}
                         className="bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-200">
                         {currentLocale === 'ar' ? 'مسح الفلاتر' : 'Clear filters'}
                     </button>
                 </div>}
 
                 {/* عرض البطاقات مع تلاشي لكل بطاقة بشكل منفصل وحصري عند التمرير */}
+                {booksInProgress.length>0 && <section aria-label="Continue reading" className="mb-8 rounded-3xl bg-sky-50 dark:bg-slate-900 border border-sky-200 dark:border-sky-800 p-4 sm:p-6"><h2 className="font-black text-lg text-sky-900 dark:text-sky-200 mb-3">{currentLocale==='ar'?'أكمل قراءتك':'Continue reading'}</h2><div className="flex gap-2 overflow-x-auto pb-2">{booksInProgress.map(book=>{const state=readingProgress.get(digitalBookKey('en',book))!;return <button type="button" key={book.id} onClick={()=>setSelectedBook(book)} className="shrink-0 max-w-64 p-3 text-start rounded-2xl bg-white dark:bg-slate-800 border border-sky-300 dark:border-sky-700 text-slate-900 dark:text-white font-bold text-sm"><span className="block truncate" dir="auto">{book.title}</span><span className="text-xs">{currentLocale==='ar'?'صفحة ':'Page '}{state.page}</span></button>})}</div></section>}
                 <div className="efips-library-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-10 gap-x-4 md:gap-x-6 px-2 md:px-4">
                     {filteredBooks.slice(0, visibleCount).map((book, index) => (
                         <RevealOnScroll key={book.id} delay={(index % 4) * 100}>
                            <BookCard 
                                book={book} 
-                               t={t} 
+                               t={t}
+                               progress={readingProgress.get(digitalBookKey('en',book))}
                                onClick={async () => {
                                    setSelectedBook(book); 
                                    try {
@@ -498,7 +517,7 @@ const EnglishLibraryInternalPage: React.FC = () => {
                     </div>
                 )}
 
-                <BookModal book={selectedBook} onClose={() => setSelectedBook(null)} t={t} />
+                <BookModal book={selectedBook} onClose={() => setSelectedBook(null)} t={t} progress={selectedBook?readingProgress.get(digitalBookKey('en',selectedBook)):undefined} />
 
             </div>
 
