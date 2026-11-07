@@ -150,7 +150,7 @@ function suggestedAudience(lang: 'ar'|'en', book: DigitalLibraryBook): 'children
 
 /** Expand collection cards to one card per real PDF, retaining all standalone books. */
 function expandDigitalSeries(books: DigitalLibraryBook[], lang: 'ar'|'en'): DigitalLibraryBook[] {
-  return books.flatMap(book => {
+  return books.flatMap<DigitalLibraryBook>(book => {
     const readingAudience = book.reviewedAgeGroup || suggestedAudience(lang, book);
     const volumes = DIGITAL_SERIES_VOLUMES[String(book.id)];
     if (!volumes?.length) return [{ ...book, readingAudience }];
