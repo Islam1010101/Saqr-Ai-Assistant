@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { ARABIC_LIBRARY_DATABASE, ENGLISH_LIBRARY_DATABASE } from '../api/digitalBookData.ts';
-import { DIGITAL_SERIES_VOLUMES } from '../api/digitalSeriesVolumes.ts';
+import { DIGITAL_SERIES_VOLUMES } from '../src/data/digitalSeriesVolumes.ts';
 
 import { readerByteRange, readerFileId, readPublicPdfRange, PdfSourceError, publicDownloadConfirmation } from '../src/server/digitalBookPdf.ts';
 import { clampPdfPage, parsePdfPage, pdfReadingStorageKey, readPdfState, writePdfState } from '../src/utils/pdfReadingState.ts';
