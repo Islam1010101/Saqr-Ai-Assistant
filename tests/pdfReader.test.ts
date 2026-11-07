@@ -11,8 +11,8 @@ const allDigitalBooks = [...ARABIC_LIBRARY_DATABASE,...ENGLISH_LIBRARY_DATABASE]
 assert.equal(Object.keys(DIGITAL_SERIES_VOLUMES).length,10);
 assert.equal(Object.values(DIGITAL_SERIES_VOLUMES).reduce((sum,books)=>sum+books.length,0),412);
 assert.equal(ARABIC_LIBRARY_DATABASE.length,452);
-assert.equal(ENGLISH_LIBRARY_DATABASE.length,53);
-assert.equal(allDigitalBooks.length,505); // six heritage e-books are managed in their own list
+assert.equal(ENGLISH_LIBRARY_DATABASE.length,54);
+assert.equal(allDigitalBooks.length,506); // six heritage e-books are managed in their own list
 assert.ok(allDigitalBooks.every(b=>b.driveLink.includes('/file/d/')), 'No digital library card may point to a Drive folder');
 assert.equal(ARABIC_LIBRARY_DATABASE.filter(b=>Boolean(b.audioId)).length,23,'Keep all original audio summaries');
 assert.ok(allDigitalBooks.every(b=>Boolean(b.readingAudience)),'Every digital volume needs a suggested reading group');
@@ -23,7 +23,7 @@ assert.equal(readerFileId('digital:ar:'+greenVolume.id), greenVolume.driveLink.m
 const wimpy = ENGLISH_LIBRARY_DATABASE.find(b=>b.series==='Diary Of A Wimpy');
 assert.ok(wimpy);
 assert.equal(wimpy.readingAudience,'children');
-console.log('PASS: 412 per-volume PDFs, 505 digital library cards, suggested audiences, audio integrity and server allowlisting');
+console.log('PASS: 412 per-volume PDFs, 506 digital library cards, suggested audiences, audio integrity and server allowlisting');
 
 assert.equal(readerFileId('https://example.com/private.pdf'), null);
 assert.equal(readerFileId('digital:ar:AR_1'), null); // collection, not a single PDF
