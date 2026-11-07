@@ -35,10 +35,13 @@ export default function DigitalBookReader({ title, source, bookKey, locale, onBa
   const sourceNotPdf = errorCode === 'SOURCE_NOT_PDF';
   return <DigitalLibraryDialog title={title} onClose={onClose} variant="reader">
     <section className="efips-book-reader" dir={ar ? 'rtl' : 'ltr'}>
-      <header>
-        <div className="efips-reader-brand">EFIPS Library</div>
+      <header className="efips-reader-header">
+        <div className="efips-reader-brand">
+          <img src="/school-logo.png" width={64} height={64} loading="eager"
+            alt={ar ? 'شعار مدرسة صقر الإمارات الدولية الخاصة' : 'Emirates Falcon International Private School logo'} />
+        </div>
         <h2 dir="auto">{title}</h2>
-        <nav aria-label={ar ? 'أدوات القراءة' : 'Reading controls'}>
+        <nav className="efips-reader-nav" aria-label={ar ? 'أدوات القراءة' : 'Reading controls'}>
           <button ref={back} type="button" onClick={onBack}>{ar ? 'تفاصيل الكتاب' : 'Book details'}</button>
           <a href={source} target="_blank" rel="noopener noreferrer">{ar ? 'فتح المصدر في نافذة جديدة' : 'Open source in new tab'}</a>
           <button type="button" data-book-close onClick={onClose}>{ar ? 'إغلاق القارئ' : 'Close reader'}</button>

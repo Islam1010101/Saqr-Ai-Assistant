@@ -204,7 +204,6 @@ const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void
         ? { children: 'أطفال', teens: 'يافعون', adults: 'كبار' }
         : { children: 'Children', teens: 'Teens', adults: 'Adults' };
     const ageGroup = book?.reviewedAgeGroup || book?.readingAudience ? ageLabels[(book.reviewedAgeGroup || book.readingAudience)!] : '';
-    const ageStatus = book?.reviewedAgeGroup ? '' : (locale==='ar'?' (مقترح)':' (suggested)');
 
     if (!book) return null;
     if (readerOpen) return <DigitalBookReader title={book.title} source={book.driveLink} bookKey={digitalBookKey('en', book)} locale={locale}
@@ -250,7 +249,7 @@ const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void
                         
                         <div className="bg-sky-50 dark:bg-slate-800 p-3 md:p-5 rounded-xl md:rounded-[2rem] border-4 border-sky-200 dark:border-slate-600 shadow-sm">
                             <p className="text-[10px] font-black text-sky-400 uppercase tracking-widest mb-2">{t('ageClassification')}</p>
-                            <p className="text-lg md:text-2xl font-black text-sky-600 break-words">{ageGroup ? ageGroup + ageStatus : (locale === 'ar' ? 'لم يُحدد بعد' : 'Not yet classified')}</p>
+                            <p className="text-lg md:text-2xl font-black text-sky-600 break-words">{ageGroup || (locale === 'ar' ? 'لم يُحدد بعد' : 'Not yet classified')}</p>
                         </div>
 
                         <DigitalBookRating bookId={digitalBookKey('en', book)} compact={false} />
@@ -330,7 +329,7 @@ const BookCard = React.memo(({ book, onClick, t, progress }: { book: DigitalLibr
             {book.publisher && <span className="min-w-0 max-w-full truncate border-s border-white/40 ps-2 text-white/85">{book.publisher}</span>}
           </div>
           {book.series && <p className="text-white/95 text-xs font-black" dir="auto">{book.series}{book.seriesOrder?' · #'+book.seriesOrder:''}</p>}
-          {book.readingAudience && <p className="text-white/95 text-xs font-bold">{({children:'Children',teens:'Teens',adults:'Adults'} as const)[book.readingAudience]} · Suggested group</p>}
+          {book.readingAudience && <p className="text-white/95 text-xs font-bold">{({children:'Children',teens:'Teens',adults:'Adults'} as const)[book.readingAudience]}</p>}
           {progress && <div className="text-white font-black text-xs">{'Continue from page '+progress.page}{percent!==null?' · '+percent+'%':''}<div className="h-1.5 w-full mt-1 bg-white/30 rounded-full overflow-hidden"><div className="h-full bg-white" style={{width:(percent??0)+'%'}} /></div></div>}
           <div className="flex flex-wrap items-center justify-between gap-2 mt-1">
             <span className="text-white/95 text-xs font-black max-w-[55%] truncate" dir="auto">{isAi ? t('aiSubject') : book.subject}</span>

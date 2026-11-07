@@ -115,6 +115,28 @@ assert.ok(readerSource.includes('onReady={() => setReady(true)}'));
 assert.ok(readerSource.includes('استخدام القارئ وحفظ موضع القراءة'));
 console.log('PASS: single-request PDF bootstrap, verified bytes, immediate preview without timers or auth gates, and preserved background reader');
 
+const arabicDigitalUi=readFileSync('pages/ArabicLibraryInternalPage.tsx','utf8');
+const englishDigitalUi=readFileSync('pages/EnglishLibraryInternalPage.tsx','utf8');
+const readerStyles=readFileSync('src/components/digitalBookReader.css','utf8');
+const catalogStyles=readFileSync('src/components/digitalLibraryResponsive.css','utf8');
+assert.ok(readerSource.includes('src="/school-logo.png"'), 'Use the existing official school emblem');
+assert.ok(!readerSource.includes('>EFIPS Library</div>'), 'No text branding above book title');
+assert.ok(readerSource.includes('<h2 dir="auto">{title}</h2>'), 'Keep the original book title');
+assert.match(readerStyles,/\.efips-book-reader h2[^}]*text-align:\s*center/);
+assert.match(readerStyles,/@media \(max-width: 700px\)/);
+assert.match(readerStyles,/@media \(max-height: 520px\) and \(orientation: landscape\)/);
+assert.match(catalogStyles,/@media \(min-width: 601px\) and \(max-width: 1024px\)/);
+assert.match(catalogStyles,/@media \(max-width: 600px\)/);
+for (const ui of [arabicDigitalUi,englishDigitalUi]) {
+  assert.doesNotMatch(ui,/تصنيف مقترح|Suggested group|\(مقترح\)|\(suggested\)/,
+    'Hide the provisional label without altering the book metadata');
+  assert.match(ui,/book\.readingAudience/, 'Preserve the existing reading-group classification');
+  assert.match(ui,/audienceFilter/, 'Preserve classification filters');
+  assert.match(ui,/digitalBookKey/, 'Preserve individual book reading keys');
+}
+console.log('PASS: official school branding, centered reader heading, responsive screen sizes and unchanged classification logic');
+
+
 const large = Uint8Array.from({length:3*PDF_BYTE_CHUNK+19},(_,index)=>(index*31)%256);
 let requests=0;
 const rangeFetcher=(async(input: string | URL | Request)=>{

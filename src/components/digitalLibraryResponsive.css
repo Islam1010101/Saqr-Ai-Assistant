@@ -75,3 +75,39 @@
   .efips-letter-library .animate-blob { animation: none !important; }
   .efips-letter-library .efips-digital-book-card * { transition: none !important; }
 }
+
+/* Catalog-only responsive refinements; filters, cards and book actions unchanged. */
+.efips-letter-library .efips-digital-filters select {
+  width: 100%; max-width: 100%; text-overflow: ellipsis;
+}
+.efips-letter-library .efips-library-card-grid,
+.efips-letter-library .efips-digital-search-panel { min-width: 0; }
+@media (min-width: 601px) and (max-width: 1024px) {
+  .efips-letter-library .efips-digital-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .efips-letter-library .efips-library-card-grid {
+    gap: 1rem;
+  }
+  .efips-digital-dialog-panel:not(.efips-digital-dialog-reader) {
+    width: min(100%, 50rem);
+  }
+}
+@media (max-width: 600px) {
+  .efips-letter-library .efips-digital-filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .efips-letter-library .efips-library-card-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem; padding-inline: 0;
+  }
+  .efips-letter-library .efips-digital-search-panel {
+    border-radius: 1.25rem;
+    padding: 1rem;
+  }
+}
+@media (max-width: 480px) {
+  .efips-digital-dialog-panel:not(.efips-digital-dialog-reader) {
+    max-height: calc(100dvh - 1rem);
+  }
+}
