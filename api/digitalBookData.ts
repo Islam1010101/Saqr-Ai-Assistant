@@ -1,3 +1,5 @@
+import { DIGITAL_SERIES_VOLUMES } from './digitalSeriesVolumes.js';
+
 /** Shared single source for both digital libraries and Saqr catalog search.
  * Keep book metadata, IDs, links and existing display behavior unchanged.
  */
@@ -17,10 +19,13 @@ export type DigitalLibraryBook = {
   pageCount?: number;
   edition?: string;
   keywords?: string[];
+  /** A volume appears as an individual book while retaining its series grouping. */
+  series?: string;
+  seriesOrder?: number;
   reviewStatus?: 'pending' | 'approved' | 'needs-changes';
   reviewedOn?: string;
 };
-export const ARABIC_LIBRARY_DATABASE: DigitalLibraryBook[] = [
+const ARABIC_LIBRARY_SEED: DigitalLibraryBook[] = [
     { id: "AR_1", title: "مجموعة روايات أجاثا كريستي", author: "أجاثا كريستي", subject: "قصص بوليسية", publisher: "ناشرون متعددون", driveLink: "https://drive.google.com/drive/folders/1PZk0vPQrKXIgE0WmUXlEMcSzt_d94Q6u", bio: "ملكة الجريمة عالمياً، صاحبة الشخصيات الخالدة مثل هيركيول بوارو.", summary: "أضخم مجموعة لروايات التحقيق والغموض التي تتميز بحبكة عبقرية ونهايات صادمة." },
     { id: "AR_2", title: "أرض الإله", author: "أحمد مراد", subject: "أدب تاريخي", publisher: "دار الشروق", driveLink: "https://drive.google.com/file/d/1Q-dT9-g292nqv1N_PvlB2TnZMBdQGpio/view", bio: "كاتب ومصور مصري معاصر، تميز برواياته التي تمزج بين التاريخ والغموض.", summary: "رحلة تاريخية مثيرة في زمن الفراعنة تكشف أسراراً مخفية حول خروج بني إسرائيل.", audioId: "/audio/أرض الإله.mp3" },
     { id: "AR_3", title: "أرض النفاق", author: "يوسف السباعي", subject: "أدب خيالي", publisher: "مكتبة مصر", driveLink: "https://drive.google.com/file/d/14KCqI_ffiUg8if8uqs_vQ-oJIXBEsKD3/view", bio: "فارس الرومانسية المصرية، وزير ثقافة سابق، اشتهر بأسلوبه الساخر.", summary: "رواية رمزية ساخرة تنتقد الأخلاق الاجتماعية عبر فكرة بيع الأخلاق في دكاكين متخصصة.", audioId: "/audio/أرض النفاق.mp3" },
@@ -81,7 +86,7 @@ export const ARABIC_LIBRARY_DATABASE: DigitalLibraryBook[] = [
     { id: "AR_59", title: "همس الجنون", author: "نجيب محفوظ", subject: "أدب عالمي", publisher: "هنداوي", driveLink: "https://drive.google.com/file/d/1RQYTtBhOwni78bg5IwqW0UVQfp4546hD/view?usp=drive_link", bio: "رائدُ الرواية العربية، والحائزُ على أعلى جائزةٍ أدبية في العالَم ، وُلِد في ١١ ديسمبر ١٩١١م في حي الجمالية بالقاهرة، لعائلةٍ من الطبقة المتوسطة، وكان والده موظفًا حكوميًّا، وقد اختار له اسمَ الطبيب الذي أشرَف على وِلادته، وهو الدكتور نجيب محفوظ باشا، ليصبح اسمُه مُركَّبًا نجيب محفوظ.", summary: "يُبدِع «نجيب محفوظ»، عميد الرواية العربية وفارس القصة القصيرة، في هذه المجموعة القصصية التي كانت أُولى تَجارِبه القصصية والتي ضمَّت ثمانيًا وعشرين قصة، في السرد عن الجنون بلغةٍ سلسة مُحكَمة وحكمةٍ مُتوارية في همساته؛ جنون الحب، جنون العظمة، جنون الجوع، جنون المال، الجنون المحض" },
     {"id":"AR_60","title":"الأعمال الكاملة للشاعر صلاح جاهين","author":"صلاح جاهين","subject":"أدب عربي","publisher":"دار الصفوة","driveLink":"https://drive.google.com/file/d/1Nr4GIjwLKwfJFYkWzPgOaZMB5_6veZph/view?usp=sharing","bio":"صلاح جاهين هو شاعر عامية ورسام كاريكاتير ومؤلف مصري بارز، يُعد أحد أهم قامات الفن والثقافة في مصر بفضل رباعياته الشعرية الشهيرة وإسهاماته الخالدة في الأغنية الوطنية والمسرح.","summary":"يجمع كتاب الأعمال الكاملة لصلاح جاهين نتاجه الإبداعي الشامل؛ حيث يضم رباعياته الشهيرة كاملة، ودواوينه الشعرية العامية، بالإضافة إلى نصوص أعماله الغنائية والمسرحية الخالدة وعلى رأسها أوبريت الليلة الكبيرة."}
 ];
-export const ENGLISH_LIBRARY_DATABASE: DigitalLibraryBook[] = [
+const ENGLISH_LIBRARY_SEED: DigitalLibraryBook[] = [
     { id: 1, title: "Me Before You", author: "Jojo Moyes", subject: "Drama", driveLink: "https://drive.google.com/file/d/1eDq03Myjh56IRtLx1LIRJHa39PLnMvgf/view", bio: "British author famous for her emotionally resonant romantic stories.", summary: "A heart-wrenching story of a young woman who becomes a caregiver for a wealthy man." },
     { id: 2, title: "The Great Gatsby", author: "Scott Fitzgerald", subject: "Drama", driveLink: "https://drive.google.com/file/d/1NjrAuiFno2Aa-z6WYkRI17oD2Hxkvs-M/view", bio: "A master of the Jazz Age, famous for his critiques of the American Dream.", summary: " Jay Gatsby's obsessive pursuit of wealth and the woman he loves in the 1920s." },
     { id: 3, title: "The Kite Runner", author: "KHALED HOSSEINI", subject: "Drama", driveLink: "https://drive.google.com/file/d/1O_WhsHwUQIEMVB8x7tNOI-GHNExJcQLT/view", bio: "Afghan-American novelist whose works deal with identity and redemption.", summary: "A deeply moving story of betrayal and redemption set in war-torn Afghanistan." },
@@ -129,3 +134,32 @@ export const ENGLISH_LIBRARY_DATABASE: DigitalLibraryBook[] = [
     { id: 45, title: "The Sand Witch", author: "Jon Jensen", subject: "Fantasy", driveLink: "https://drive.google.com/file/d/1hm7f4MZ952FHzkSpYgsz81yu15wbbwoT/view?usp=drive_link", bio: "A creative author and illustrator recognized for his ability to weave clever wordplay and imaginative scenarios into charming children's stories that celebrate creativity and the outdoors.", summary: "A young girl's day at the beach turns into a whimsical, pun-filled adventure after she decides to build a witch out of sand instead of a traditional sandcastle." }
 ];
 
+
+/** Expand collection cards to one card per real PDF, retaining all standalone books. */
+function expandDigitalSeries(books: DigitalLibraryBook[]): DigitalLibraryBook[] {
+  return books.flatMap(book => {
+    const volumes = DIGITAL_SERIES_VOLUMES[String(book.id)];
+    if (!volumes?.length) return [book];
+    return volumes.map(volume => ({
+      ...book,
+      id: String(book.id) + '-' + volume.fileId,
+      title: volume.title,
+      driveLink: 'https://drive.google.com/file/d/' + volume.fileId + '/view',
+      series: book.title,
+      seriesOrder: volume.order ?? undefined,
+      summary: String(book.id).startsWith('AR_')
+        ? 'كتاب مستقل ضمن سلسلة «' + book.title + '».'
+        : 'An individual book in the ' + book.title + ' series.',
+      audioId: undefined,
+      reviewedAgeGroup: undefined,
+      readingLevel: undefined,
+      pageCount: undefined,
+      edition: undefined,
+      reviewStatus: undefined,
+      reviewedOn: undefined,
+    }));
+  });
+}
+
+export const ARABIC_LIBRARY_DATABASE: DigitalLibraryBook[] = expandDigitalSeries(ARABIC_LIBRARY_SEED);
+export const ENGLISH_LIBRARY_DATABASE: DigitalLibraryBook[] = expandDigitalSeries(ENGLISH_LIBRARY_SEED);
