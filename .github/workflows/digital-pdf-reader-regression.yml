@@ -11,6 +11,9 @@ on:
       - 'src/components/DigitalBookReader.tsx'
       - 'src/components/digitalBookReader.css'
       - 'src/utils/pdfBookLoader.ts'
+      - 'src/utils/saqrCatalogSearch.ts'
+      - 'src/utils/saqrCatalogReply.ts'
+      - 'tests/saqrDigitalReferrals.test.ts'
       - 'tests/pdfReader.test.ts'
       - 'tools/testPdfReader.mjs'
       - '.github/workflows/digital-pdf-reader-regression.yml'
@@ -23,6 +26,9 @@ on:
       - 'src/server/digitalBookPdf.ts'
       - 'src/utils/pdfReadingState.ts'
       - 'src/components/PdfBookPages.tsx'
+      - 'src/utils/saqrCatalogSearch.ts'
+      - 'src/utils/saqrCatalogReply.ts'
+      - 'tests/saqrDigitalReferrals.test.ts'
       - 'tests/pdfReader.test.ts'
       - 'tools/testPdfReader.mjs'
       - '.github/workflows/digital-pdf-reader-regression.yml'
@@ -37,4 +43,5 @@ jobs:
           cache: npm
       - run: npm install --no-package-lock --no-audit --no-fund
       - run: npm run test:pdf-reader
+      - run: node --experimental-strip-types tests/saqrDigitalReferrals.test.ts
       - run: npm run build

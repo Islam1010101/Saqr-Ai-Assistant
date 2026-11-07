@@ -12,6 +12,9 @@ type BookRecord = {
   shelf?: number;
   row?: number;
   driveLink?: string;
+  /** Reference metadata for independently catalogued digital-series volumes. */
+  series?: string;
+  seriesOrder?: number;
 };
 type Catalogs = {
   physical: BookRecord[];
@@ -26,6 +29,10 @@ export type SaqrBookMatch = {
   shelf?: number;
   row?: number;
   driveLink?: string;
+  /** Actual digital book reference, not a series folder. */
+  bookKey?: string;
+  series?: string;
+  seriesOrder?: number;
   matchBasis: string;
   summary?: string;
 };
@@ -179,6 +186,7 @@ export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=
       const titleText=normalize(title);
       const authorText=normalize(author);
       const subjectText=normalize(subject);
+      const seriesText=origin.source==='physical' ? '' : normalize(book.series);
       const descriptionText=normalize(book.summary);
       // Do not recommend unrelated Arabic heritage or general histories for UAE.
       if(needsUaeEvidence){
@@ -201,9 +209,15 @@ export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=
       if(normalizedQuery.length>=4 && (titleText.includes(normalizedQuery) || authorText.includes(normalizedQuery))) {
         score+=180;titleMatch=true;
       }
+      // Each new volume has its own title and direct PDF link. Searching the
+      // recorded parent series should also find its individual catalogued books.
+      if(seriesText && normalizedQuery.length>=4 && seriesText.includes(normalizedQuery)){
+        score+=140;titleMatch=true;
+      }
       for(const word of tokens.slice(0,8)){
         if(titleText.split(' ').some(v=>v===word || (word.length>=5 && v.startsWith(word)))) {score+=32;titleMatch=true;}
         if(authorText.split(' ').some(v=>v===word || (word.length>=5 && v.startsWith(word)))) score+=15;
+        if(seriesText.split(' ').some(v=>v===word || (word.length>=5 && v.startsWith(word)))) {score+=28;titleMatch=true;}
         if(subjectText.split(' ').some(v=>v===word || (word.length>=5 && v.startsWith(word)))) {score+=23;subjectMatch=true;}
         if(descriptionText.split(' ').some(v=>v===word || (word.length>=5 && v.startsWith(word)))) score+=3;
       }
@@ -223,7 +237,14 @@ export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=
       const value:SaqrBookMatch={
         title,author,subject,pageLocation:origin.label,
         ...(book.summary ? {summary:String(book.summary).slice(0,500)} : {}),
-        ...(origin.source==='physical' ? {shelf:book.shelf,row:book.row} : {driveLink:book.driveLink}),
+        ...(origin.source==='physical' ? {shelf:book.shelf,row:book.row} : {
+          driveLink:book.driveLink,
+          ...(book.series ? {
+            series:book.series,
+            ...(Number.isSafeInteger(book.seriesOrder) ? {seriesOrder:book.seriesOrder} : {}),
+            ...(book.id!==undefined ? {bookKey:'digital:'+(origin.source==='arabic'?'ar':'en')+':'+String(book.id)} : {})
+          } : {})
+        }),
         matchBasis: subjectMatch ? 'Catalog subject/topic' : titleMatch ? 'Book title' : 'Description/author'
       };
       candidates.push({score,origin:origin.source,value});
@@ -237,7 +258,7 @@ export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=
   const counts:{[key:string]:number}={physical:0,arabic:0,english:0};
   const caps:{[key:string]:number}={physical:7,arabic:4,english:4};
   const add=(entry:Candidate)=>{
-    const key=entry.origin+'|'+normalize(entry.value.title);
+    const key=entry.origin+'|'+(entry.value.bookKey || normalize(entry.value.title));
     if(seen.has(key)) return;
     chosen.push(entry);seen.add(key);counts[entry.origin]++;
   };

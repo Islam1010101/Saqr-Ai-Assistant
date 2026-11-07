@@ -54,7 +54,13 @@ export function renderSaqrCatalogAnswer(question:string,matches:SaqrBookMatch[],
           ? '['+(ar?'فتح الكتاب الرقمي':'Open digital book')+']('+digitalLink(book.driveLink)+')'
           : (ar?'الرابط غير مسجل في الفهرس':'No catalog link recorded');
       const reason=escapeMd(book.subject || (ar?'دون تصنيف مفصل':'No detailed subject'));
-      output.push((i+1)+'. **'+title+'**  \n   '+(ar?'المؤلف':'Author')+': '+author+'  \n   '+(kind==='physical'?(ar?'المكان':'Location'):(ar?'الرابط':'Link'))+': '+source+'  \n   '+(ar?'الموضوع المسجل':'Catalog subject')+': '+reason);
+      // Show the actual volume and its parent series only for the new
+      // individual-series records; standalone and physical results are unchanged.
+      const seriesInfo=kind!=='physical' && book.series
+        ? '  \n   '+(ar?'السلسلة':'Series')+': '+escapeMd(book.series)
+          +(book.seriesOrder!==undefined?' — '+(ar?'الجزء':'Volume')+': '+book.seriesOrder:'')
+        : '';
+      output.push((i+1)+'. **'+title+'**  \n   '+(ar?'المؤلف':'Author')+': '+author+'  \n   '+(kind==='physical'?(ar?'المكان':'Location'):(ar?'الرابط':'Link'))+': '+source+'  \n   '+(ar?'الموضوع المسجل':'Catalog subject')+': '+reason+seriesInfo);
     }
   }
   output.push(ar?'المعلومات مأخوذة من فهارس المكتبة؛ ولا تعني تأكيد توافر النسخة للاستعارة الآن.':'These details come from EFIPS catalog records, not live borrowing availability.');
