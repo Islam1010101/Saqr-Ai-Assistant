@@ -14,6 +14,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const { data, length } = await readPublicPdfRange(fileId, range[0], range[1]);
     if (info) return res.status(200).json({ length });
+    // These are already public, allow-listed Drive PDFs. Cache each verified
+    // byte chunk privately in the reader's browser for faster page revisits.
+    // Do not cache errors, denied files, or the legacy metadata response.
+    res.setHeader('Cache-Control', 'private, max-age=600');
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Range', `bytes ${range[0]}-${range[0] + data.length - 1}/${length}`);
     res.setHeader('Content-Length', String(data.length));

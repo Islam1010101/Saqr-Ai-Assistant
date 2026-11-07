@@ -60,3 +60,36 @@
 }
 .efips-reader-slow button:focus-visible { outline: 3px solid #0ea5e9; outline-offset: 2px; }
 .dark .efips-reader-slow { background: #064e3b; color: #d1fae5; border-color: #059669; }
+
+/* Keep the PDF reader mounted (and rendering at full width) underneath the
+   preview. Visibility, unlike display:none, preserves PDF canvas measurements. */
+.efips-reader-stage { flex: 1; min-height: 0; position: relative; width: 100%; }
+.efips-reader-native, .efips-reader-preview-host {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  min-width: 0; min-height: 0;
+}
+.efips-reader-native[aria-hidden="true"] { visibility: hidden; pointer-events: none; }
+.efips-reader-preview-host { z-index: 2; background: #f8fafc; }
+.efips-reader-preview-controls {
+  flex-shrink: 0; display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: .5rem; padding: .65rem .85rem;
+  background: #ecfdf5; color: #065f46;
+  border-bottom: 1px solid #6ee7b7;
+  line-height: 1.5; font-size: .875rem; font-weight: 700;
+}
+.efips-reader-preview-controls button {
+  min-height: 44px; padding: .5rem .75rem; border-radius: .7rem;
+  color: white; background: #047857; font-weight: 700;
+}
+.efips-reader-preview-controls button:focus-visible {
+  outline: 3px solid #0ea5e9; outline-offset: 2px;
+}
+.efips-reader-preview-host iframe { width: 100%; flex: 1; min-height: 0; border: 0; }
+.dark .efips-reader-preview-host { background: #020617; }
+.dark .efips-reader-preview-controls {
+  background: #064e3b; color: #d1fae5; border-color: #10b981;
+}
+@media (max-width: 480px) {
+  .efips-reader-preview-controls { padding: .5rem .65rem; font-size: .8rem; }
+  .efips-reader-preview-controls button { width: 100%; }
+}

@@ -5,7 +5,7 @@ import { DIGITAL_SERIES_VOLUMES } from '../src/data/digitalSeriesVolumes.js';
 
 import { readerByteRange, readerFileId, readPublicPdfRange, PdfSourceError, publicDownloadConfirmation } from '../src/server/digitalBookPdf.ts';
 import { clampPdfPage, parsePdfPage, pdfReadingStorageKey, readPdfState, writePdfState } from '../src/utils/pdfReadingState.ts';
-import { fetchPdfByteRange, PDF_BYTE_CHUNK } from '../src/utils/pdfRangeTransport.ts';
+import { fetchPdfBootstrap, fetchPdfByteRange, PDF_BYTE_CHUNK } from '../src/utils/pdfRangeTransport.ts';
 
 // Vercel's production Node ESM runtime does not rewrite literal .ts import paths.
 // The previous deployment failed with ERR_MODULE_NOT_FOUND for digitalSeriesVolumes.ts.
@@ -74,6 +74,41 @@ const confirmationFetcher=(async(input: URL|string|Request)=>{
 assert.equal((await readPublicPdfRange('test',0,9,confirmationFetcher)).length,150000000);
 assert.equal(confirmationRequests,2);
 console.log('PASS: large-file confirmation stays on the same allowed public book and rejects unsafe forms');
+
+// One request must return the first real bytes AND total length. Never wait
+// for a separate Drive metadata request, then download the first chunk again.
+const bootstrapBytes=new TextEncoder().encode('%PDF-1.7\nnew single-request bootstrap');
+let bootstrapRequests=0;
+const bootstrapFetcher=(async (input: string | URL | Request) => {
+  bootstrapRequests++;
+  const url=new URL(String(input),'https://example.invalid');
+  assert.equal(url.searchParams.get('info'),null);
+  assert.equal(url.searchParams.get('start'),'0');
+  assert.equal(url.searchParams.get('end'),String(PDF_BYTE_CHUNK-1));
+  return new Response(bootstrapBytes,{status:206,headers:{
+    'Content-Type':'application/pdf','Content-Range':`bytes 0-${bootstrapBytes.length-1}/${bootstrapBytes.length}`
+  }});
+}) as typeof fetch;
+const bootstrap=await fetchPdfBootstrap('/api/digital-book?book=example',new AbortController().signal,bootstrapFetcher);
+assert.equal(bootstrapRequests,1);
+assert.equal(bootstrap.length,bootstrapBytes.length);
+assert.deepEqual(bootstrap.initialData,bootstrapBytes);
+const bootstrapFailure=(async()=>new Response(JSON.stringify({code:'SOURCE_RANGE_UNSUPPORTED'}),{
+  status:422,headers:{'Content-Type':'application/json'}
+})) as typeof fetch;
+await assert.rejects(fetchPdfBootstrap('/api/digital-book?book=example',new AbortController().signal,bootstrapFailure),
+  e=>e instanceof Error&&e.message==='SOURCE_RANGE_UNSUPPORTED');
+const brokenBootstrap=(async()=>new Response(bootstrapBytes.subarray(0,5),{status:206,headers:{
+  'Content-Range':`bytes 0-${bootstrapBytes.length-1}/${bootstrapBytes.length}`
+}})) as typeof fetch;
+await assert.rejects(fetchPdfBootstrap('/api/digital-book?book=example',new AbortController().signal,brokenBootstrap),
+  e=>e instanceof Error&&e.message==='SOURCE_NOT_PDF');
+const readerSource=readFileSync('src/components/DigitalBookReader.tsx','utf8');
+assert.ok(readerSource.includes('setTimeout(() => setShowPreview(true), 3000)'));
+assert.ok(readerSource.includes('className="efips-reader-native" aria-hidden={showPreview}'));
+assert.ok(readerSource.includes('onReady={() => setReady(true)}'));
+assert.ok(readerSource.includes('استخدام القارئ وحفظ موضع القراءة'));
+console.log('PASS: single-request PDF bootstrap, verified bytes, fast automatic preview and preserved background reader');
 
 const large = Uint8Array.from({length:3*PDF_BYTE_CHUNK+19},(_,index)=>(index*31)%256);
 let requests=0;
