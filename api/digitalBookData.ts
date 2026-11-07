@@ -22,6 +22,8 @@ export type DigitalLibraryBook = {
   /** A volume appears as an individual book while retaining its series grouping. */
   series?: string;
   seriesOrder?: number;
+  /** School-facing reading audience suggestion, distinct from edition-approved age metadata. */
+  readingAudience?: 'children' | 'teens' | 'adults';
   reviewStatus?: 'pending' | 'approved' | 'needs-changes';
   reviewedOn?: string;
 };
@@ -135,11 +137,23 @@ const ENGLISH_LIBRARY_SEED: DigitalLibraryBook[] = [
 ];
 
 
+
+/** Editorial reading-group suggestions pending edition-level library approval.
+ * No reviewedAgeGroup is inferred from the filename or series alone.
+ */
+const CHILDREN_AUDIENCE_IDS = new Set(["ar:AR_7","ar:AR_24","ar:AR_25","ar:AR_42","ar:AR_43","ar:AR_44","ar:AR_51","ar:AR_55","ar:AR_57","ar:AR_58","en:26","en:35","en:38","en:39","en:40","en:41","en:42","en:43","en:44","en:45"]);
+const TEENS_AUDIENCE_IDS = new Set(["ar:AR_1","ar:AR_3","ar:AR_8","ar:AR_9","ar:AR_10","ar:AR_11","ar:AR_12","ar:AR_13","ar:AR_14","ar:AR_15","ar:AR_16","ar:AR_17","ar:AR_18","ar:AR_19","ar:AR_20","ar:AR_38","ar:AR_41","ar:AR_45","ar:AR_46","ar:AR_47","ar:AR_48","ar:AR_50","en:2","en:4","en:5","en:6","en:9","en:10","en:11","en:12","en:13","en:14","en:15","en:16","en:17","en:18","en:19","en:20","en:21","en:22","en:23","en:24","en:25","en:36","en:37"]);
+function suggestedAudience(lang: 'ar'|'en', book: DigitalLibraryBook): 'children'|'teens'|'adults' {
+  const key = lang + ':' + String(book.id);
+  return CHILDREN_AUDIENCE_IDS.has(key) ? 'children' : TEENS_AUDIENCE_IDS.has(key) ? 'teens' : 'adults';
+}
+
 /** Expand collection cards to one card per real PDF, retaining all standalone books. */
-function expandDigitalSeries(books: DigitalLibraryBook[]): DigitalLibraryBook[] {
+function expandDigitalSeries(books: DigitalLibraryBook[], lang: 'ar'|'en'): DigitalLibraryBook[] {
   return books.flatMap(book => {
+    const readingAudience = book.reviewedAgeGroup || suggestedAudience(lang, book);
     const volumes = DIGITAL_SERIES_VOLUMES[String(book.id)];
-    if (!volumes?.length) return [book];
+    if (!volumes?.length) return [{ ...book, readingAudience }];
     return volumes.map(volume => ({
       ...book,
       id: String(book.id) + '-' + volume.fileId,
@@ -147,10 +161,14 @@ function expandDigitalSeries(books: DigitalLibraryBook[]): DigitalLibraryBook[] 
       driveLink: 'https://drive.google.com/file/d/' + volume.fileId + '/view',
       series: book.title,
       seriesOrder: volume.order ?? undefined,
+      readingAudience,
+      // Never mislabel each volume with its parent collection's unverified publisher.
+      publisher: volume.fileId === '1RLqKQ0FGSQBo2PlRk4rCU4FEiUsByGQN' ? 'مكتبة النافذة'
+        : String(book.id) === 'AR_7' ? 'دار المعارف' : undefined,
       summary: String(book.id).startsWith('AR_')
         ? 'كتاب مستقل ضمن سلسلة «' + book.title + '».'
         : 'An individual book in the ' + book.title + ' series.',
-      audioId: undefined,
+      // Existing standalone-book audioId values stay untouched; do not assign one series clip to every volume.
       reviewedAgeGroup: undefined,
       readingLevel: undefined,
       pageCount: undefined,
@@ -161,5 +179,5 @@ function expandDigitalSeries(books: DigitalLibraryBook[]): DigitalLibraryBook[] 
   });
 }
 
-export const ARABIC_LIBRARY_DATABASE: DigitalLibraryBook[] = expandDigitalSeries(ARABIC_LIBRARY_SEED);
-export const ENGLISH_LIBRARY_DATABASE: DigitalLibraryBook[] = expandDigitalSeries(ENGLISH_LIBRARY_SEED);
+export const ARABIC_LIBRARY_DATABASE: DigitalLibraryBook[] = expandDigitalSeries(ARABIC_LIBRARY_SEED, 'ar');
+export const ENGLISH_LIBRARY_DATABASE: DigitalLibraryBook[] = expandDigitalSeries(ENGLISH_LIBRARY_SEED, 'en');
