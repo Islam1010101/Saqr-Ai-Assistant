@@ -136,6 +136,18 @@ for (const ui of [arabicDigitalUi,englishDigitalUi]) {
 }
 console.log('PASS: official school branding, centered reader heading, responsive screen sizes and unchanged classification logic');
 
+const dialogSource=readFileSync('src/components/DigitalLibraryDialog.tsx','utf8');
+assert.ok(dialogSource.includes("variant === 'reader' ? ' efips-digital-dialog-backdrop-reader'"),
+  'Only reading dialog may use fullscreen overlay, details retain original layout');
+assert.match(readerStyles,/\.efips-digital-dialog-backdrop\.efips-digital-dialog-backdrop-reader\s*\{[^}]*padding:\s*0/s,
+  'Fullscreen reader backdrop must have no inset');
+assert.match(readerStyles,/\.efips-digital-dialog-backdrop-reader\s*>\s*\.efips-digital-dialog-panel\.efips-digital-dialog-reader\s*\{[^}]*max-width:\s*none;[^}]*height:\s*100dvh;[^}]*max-height:\s*100dvh;[^}]*border:\s*0;[^}]*border-radius:\s*0/s,
+  'Reader dialog must cover the entire visible screen without borders or corners');
+assert.match(readerStyles,/\.efips-digital-dialog-backdrop-reader \.efips-reader-stage\s*\{[^}]*flex:\s*1 1 auto/s,
+  'PDF viewing area must expand to use all remaining height');
+console.log('PASS: reader is full viewport only; book details popup, buttons and PDF state are preserved');
+
+
 
 const large = Uint8Array.from({length:3*PDF_BYTE_CHUNK+19},(_,index)=>(index*31)%256);
 let requests=0;

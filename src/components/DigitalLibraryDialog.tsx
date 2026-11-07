@@ -45,7 +45,7 @@ export default function DigitalLibraryDialog({ title, onClose, children, variant
     }
   };
 
-  return <div className="efips-digital-dialog-backdrop" onClick={event => {
+  return <div className={`efips-digital-dialog-backdrop${variant === 'reader' ? ' efips-digital-dialog-backdrop-reader' : ''}`} onClick={event => {
     if (event.target === event.currentTarget) close.current();
   }}>
     <div ref={panel} role="dialog" aria-modal="true" aria-labelledby={titleId}
