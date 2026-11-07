@@ -104,11 +104,16 @@ const brokenBootstrap=(async()=>new Response(bootstrapBytes.subarray(0,5),{statu
 await assert.rejects(fetchPdfBootstrap('/api/digital-book?book=example',new AbortController().signal,brokenBootstrap),
   e=>e instanceof Error&&e.message==='SOURCE_NOT_PDF');
 const readerSource=readFileSync('src/components/DigitalBookReader.tsx','utf8');
-assert.ok(readerSource.includes('setTimeout(() => setShowPreview(true), 3000)'));
+assert.ok(readerSource.includes('useState(() => Boolean(preview))'),
+  'Drive preview must render immediately, not after a timer');
+assert.ok(!readerSource.includes('setTimeout(() => setShowPreview(true)'),
+  'Never delay the book preview behind a loading timer');
+assert.ok(!readerSource.includes('waitingForIdentity'),
+  'The book preview must not wait for a second Supabase identity request');
 assert.ok(readerSource.includes('className="efips-reader-native" aria-hidden={showPreview}'));
 assert.ok(readerSource.includes('onReady={() => setReady(true)}'));
 assert.ok(readerSource.includes('استخدام القارئ وحفظ موضع القراءة'));
-console.log('PASS: single-request PDF bootstrap, verified bytes, fast automatic preview and preserved background reader');
+console.log('PASS: single-request PDF bootstrap, verified bytes, immediate preview without timers or auth gates, and preserved background reader');
 
 const large = Uint8Array.from({length:3*PDF_BYTE_CHUNK+19},(_,index)=>(index*31)%256);
 let requests=0;
