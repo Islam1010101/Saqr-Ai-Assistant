@@ -1,10 +1,17 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { ARABIC_LIBRARY_DATABASE, ENGLISH_LIBRARY_DATABASE } from '../api/digitalBookData.ts';
 import { DIGITAL_SERIES_VOLUMES } from '../src/data/digitalSeriesVolumes.ts';
 
 import { readerByteRange, readerFileId, readPublicPdfRange, PdfSourceError, publicDownloadConfirmation } from '../src/server/digitalBookPdf.ts';
 import { clampPdfPage, parsePdfPage, pdfReadingStorageKey, readPdfState, writePdfState } from '../src/utils/pdfReadingState.ts';
 import { fetchPdfByteRange, PDF_BYTE_CHUNK } from '../src/utils/pdfRangeTransport.ts';
+
+// Vercel's production Node ESM runtime does not rewrite literal .ts import paths.
+// The previous deployment failed with ERR_MODULE_NOT_FOUND for digitalSeriesVolumes.ts.
+assert.doesNotMatch(readFileSync('api/digitalBookData.ts','utf8'),
+  /from\\s*['"][^'"]+\\.ts['"]/, 'Runtime imports must resolve to compiled .js files');
+console.log('PASS: Vercel server import paths reference emitted JavaScript, not missing TypeScript sources');
 
 // Regression: a folder link must not masquerade as a PDF; all series volumes are direct files.
 const allDigitalBooks = [...ARABIC_LIBRARY_DATABASE,...ENGLISH_LIBRARY_DATABASE];
