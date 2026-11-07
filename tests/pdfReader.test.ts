@@ -10,8 +10,8 @@ import { fetchPdfByteRange, PDF_BYTE_CHUNK } from '../src/utils/pdfRangeTranspor
 const allDigitalBooks = [...ARABIC_LIBRARY_DATABASE,...ENGLISH_LIBRARY_DATABASE];
 assert.equal(Object.keys(DIGITAL_SERIES_VOLUMES).length,10);
 assert.equal(Object.values(DIGITAL_SERIES_VOLUMES).reduce((sum,books)=>sum+books.length,0),412);
-assert.equal(ARABIC_LIBRARY_DATABASE.length,451);
-assert.equal(ENGLISH_LIBRARY_DATABASE.length,54);
+assert.equal(ARABIC_LIBRARY_DATABASE.length,452);
+assert.equal(ENGLISH_LIBRARY_DATABASE.length,53);
 assert.equal(allDigitalBooks.length,505); // six heritage e-books are managed in their own list
 assert.ok(allDigitalBooks.every(b=>b.driveLink.includes('/file/d/')), 'No digital library card may point to a Drive folder');
 assert.equal(ARABIC_LIBRARY_DATABASE.filter(b=>Boolean(b.audioId)).length,23,'Keep all original audio summaries');
