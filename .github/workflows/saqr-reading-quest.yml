@@ -16,6 +16,7 @@ on:
       - 'api/digitalBookData.ts'
       - 'api/nationalIdentityDigitalBooks.ts'
       - 'tests/saqrReadingQuest.test.ts'
+      - 'tests/flagTimerAndBooks.test.ts'
       - '.github/workflows/saqr-reading-quest.yml'
 permissions:
   contents: read
