@@ -19,16 +19,20 @@ export default function DigitalBookReader({ title, source, bookKey, locale, onBa
   const storageKey = pdfReadingStorageKey(deviceAccount || user?.id || null, bookKey, preview || source);
   const [error, setError] = useState<Error | null>(null);
   const [showPreview, setShowPreview] = useState(false);
-  const [slow, setSlow] = useState(false);
   const [ready, setReady] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  // Drive preview becomes readable automatically if the first PDF page is slow.
+  // Continue preparing the internal reader invisibly so bookmarks/resume still work.
   useEffect(() => {
-    if (ready || error || waitingForIdentity) return;
-    setSlow(false);
-    const timer = window.setTimeout(() => setSlow(true), 6500);
+    if (ready || error || waitingForIdentity || showPreview || !preview) return;
+    const timer = window.setTimeout(() => setShowPreview(true), 3000);
     return () => window.clearTimeout(timer);
-  }, [bookKey, attempt, ready, error, waitingForIdentity]);
-  const retry = () => { setShowPreview(false); setError(null); setReady(false); setSlow(false); setAttempt(v => v + 1); };
+  }, [bookKey, attempt, ready, error, waitingForIdentity, showPreview, preview]);
+  useEffect(() => {
+    setError(null); setShowPreview(false); setReady(false); setAttempt(0);
+  }, [bookKey, source]);
+  const retry = () => { setError(null); setReady(false); setAttempt(v => v + 1); };
+  const reportReaderError = (failure: Error) => { setError(failure); setShowPreview(true); };
   const back = useRef<HTMLButtonElement>(null);
   useEffect(() => { back.current?.focus(); }, []);
   const errorCode = (error as Error & { code?: string })?.code || error?.message;
@@ -47,28 +51,39 @@ export default function DigitalBookReader({ title, source, bookKey, locale, onBa
         </nav>
       </header>
       {waitingForIdentity ? <p className="efips-reader-note" role="status">{ar ? 'جاري التحقق من حساب القارئ…' : 'Checking reader account…'}</p>
-        : error || showPreview ? <>
-          <div className="efips-reader-fallback">
-            <p role="alert">{!error
-              ? (ar ? 'عرض معاينة Drive أثناء انتظار القارئ الداخلي.' : 'Showing Drive preview while the on-site reader loads.')
-              : downloadDisabled
-              ? (ar ? 'إعدادات هذا الملف في Google Drive تمنع تنزيله، لذلك لا يمكن تشغيل أدوات الصفحات وحفظ الموضع عليه داخل الموقع.' : 'This file’s Google Drive settings disable downloads, so page controls and saved reading position cannot be used inside the site.')
-              : sourceRangeUnsupported
-              ? (ar ? 'المصدر لا يدعم تحميل صفحات PDF بشكل جزئي. يمكنك قراءة الكتاب من معاينة Drive مباشرة.' : 'The source does not support PDF byte ranges. Read the book using Drive preview instead.')
-              : sourceNotPdf
-              ? (ar ? 'المصدر لا يرجع ملف PDF صالحًا للقارئ. تظهر معاينة Drive إن كانت متاحة.' : 'The source did not return a valid PDF. Drive preview is shown when available.')
-              : (ar ? 'تعذر تشغيل الصفحات داخل القارئ حاليًا. سنعرض الكتاب من معاينة Drive إن كانت متاحة.' : 'The PDF page reader is unavailable for this file. Drive preview is shown when available.')}</p>
-            {preview && <p>{ar ? 'في معاينة Drive لا تتوفر علامات الصفحات وحفظ موضع القراءة داخل الموقع.' : 'In Drive preview, page bookmarks and on-site reading progress are unavailable.'}</p>}
-            <button type="button" onClick={retry}>{ar ? 'إعادة محاولة فتح القارئ' : 'Retry page reader'}</button>
-          </div>
-          {preview && <iframe src={preview} title={ar ? `معاينة: ${title}` : `Preview: ${title}`} referrerPolicy="no-referrer" allow="fullscreen" allowFullScreen />}
-        </> : <>
-          {!ready && slow && preview && <div className="efips-reader-slow" role="status">
-            <span>{ar ? 'تحميل صفحات الكتاب يستغرق وقتًا أطول من المعتاد.' : 'Loading the book pages is taking longer than usual.'}</span>
-            <button type="button" onClick={() => setShowPreview(true)}>{ar ? 'اقرأ عبر معاينة Drive الآن' : 'Read with Drive preview now'}</button>
+        : <div className="efips-reader-stage">
+          {!error && <div className="efips-reader-native" aria-hidden={showPreview}>
+            <PdfBookPages key={`${storageKey || bookKey}:${attempt}`} bookKey={bookKey}
+              storageKey={storageKey} ar={ar} onReady={() => setReady(true)}
+              onError={reportReaderError} />
           </div>}
-          <PdfBookPages key={`${storageKey || bookKey}:${attempt}`} bookKey={bookKey} storageKey={storageKey} ar={ar} onReady={() => setReady(true)} onError={setError} />
-        </>}
+          {showPreview && preview && <div className="efips-reader-preview-host">
+            <div className="efips-reader-preview-controls" role="status" aria-live="polite">
+              {error
+                ? <span>{downloadDisabled
+                    ? (ar ? 'إعدادات Google Drive تمنع تحميل هذا الكتاب داخل القارئ؛ اقرأه عبر المعاينة.' : 'Drive settings block direct PDF loading. Read with the preview.')
+                    : sourceRangeUnsupported
+                    ? (ar ? 'هذا المصدر لا يدعم تحميل الصفحات؛ معاينة Drive متاحة للقراءة.' : 'This source does not support page ranges. Use Drive preview.')
+                    : sourceNotPdf
+                    ? (ar ? 'المصدر لا يرسل ملف PDF صالحًا للقارئ الداخلي.' : 'The source does not return a valid PDF for the internal reader.')
+                    : (ar ? 'تعذر فتح القارئ الداخلي؛ يمكنك قراءة الكتاب من معاينة Drive.' : 'The internal reader could not open this book. Read with Drive preview.')}</span>
+                : ready
+                  ? <span>{ar ? 'القارئ الداخلي وأدوات حفظ الصفحات جاهزة.' : 'The page reader and reading bookmarks are ready.'}</span>
+                  : <span>{ar ? 'يمكنك قراءة الكتاب الآن عبر Drive، بينما نجهز أدوات الصفحات والحفظ.' : 'Read now with Drive while page and bookmark tools finish loading.'}</span>}
+              {ready && !error
+                ? <button type="button" onClick={() => setShowPreview(false)}>{ar ? 'استخدام القارئ وحفظ موضع القراءة' : 'Use page reader and save progress'}</button>
+                : error
+                ? <button type="button" onClick={retry}>{ar ? 'إعادة محاولة القارئ الداخلي' : 'Retry internal reader'}</button>
+                : null}
+            </div>
+            <iframe src={preview} loading="eager" title={ar ? `معاينة: ${title}` : `Preview: ${title}`}
+              referrerPolicy="no-referrer" allow="fullscreen" allowFullScreen />
+          </div>}
+          {error && !preview && <div className="efips-reader-fallback" role="alert">
+            {ar ? 'تعذر فتح هذا الملف داخل القارئ. افتح المصدر في نافذة جديدة.' : 'Could not open this file in the reader. Open the source in a new tab.'}
+            <button type="button" onClick={retry}>{ar ? 'إعادة المحاولة' : 'Try again'}</button>
+          </div>}
+        </div>}
     </section>
   </DigitalLibraryDialog>;
 }
