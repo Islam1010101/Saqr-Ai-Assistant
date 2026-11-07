@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { readFileSync } from 'node:fs';
 import { ARABIC_LIBRARY_DATABASE, ENGLISH_LIBRARY_DATABASE } from '../api/digitalBookData.ts';
 import { DIGITAL_SERIES_VOLUMES } from '../src/data/digitalSeriesVolumes.js';
 
