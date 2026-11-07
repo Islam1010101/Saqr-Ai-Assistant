@@ -1,0 +1,36 @@
+name: EFIPS digital PDF reader and series integrity
+on:
+  pull_request:
+    paths:
+      - 'api/digitalBookData.ts'
+      - 'api/nationalIdentityDigitalBooks.ts'
+      - 'src/data/digitalSeriesVolumes.ts'
+      - 'src/server/digitalBookPdf.ts'
+      - 'src/utils/pdfReadingState.ts'
+      - 'src/components/PdfBookPages.tsx'
+      - 'tests/pdfReader.test.ts'
+      - 'tools/testPdfReader.mjs'
+      - '.github/workflows/digital-pdf-reader-regression.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'api/digitalBookData.ts'
+      - 'api/nationalIdentityDigitalBooks.ts'
+      - 'src/data/digitalSeriesVolumes.ts'
+      - 'src/server/digitalBookPdf.ts'
+      - 'src/utils/pdfReadingState.ts'
+      - 'src/components/PdfBookPages.tsx'
+      - 'tests/pdfReader.test.ts'
+      - 'tools/testPdfReader.mjs'
+      - '.github/workflows/digital-pdf-reader-regression.yml'
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+          cache: npm
+      - run: npm install --no-package-lock --no-audit --no-fund
+      - run: npm run test:pdf-reader
