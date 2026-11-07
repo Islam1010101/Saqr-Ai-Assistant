@@ -153,3 +153,100 @@
   min-height: 0;
   flex: 1 1 auto;
 }
+
+/* Digital reader only: site chrome is absent while the book is open.
+   It returns automatically when the reader dialog unmounts. */
+body.efips-reader-open .efips-navbar-surface {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+.efips-digital-dialog-backdrop.efips-digital-dialog-backdrop-reader {
+  z-index: 2000001; /* Above floating assistant and fixed global navigation. */
+}
+
+/* The established EFIPS emerald/teal identity, with lightweight CSS-only
+   accents limited to the reader chrome (never over the book pages). */
+.efips-digital-dialog-backdrop-reader .efips-book-reader .efips-reader-header {
+  position: relative;
+  isolation: isolate;
+  background: linear-gradient(125deg, #e6faf3 0%, #f0fdfa 45%, #e7f4ff 100%);
+  border-bottom: 2px solid #34d399;
+  box-shadow: 0 5px 18px rgb(4 120 87 / .08);
+}
+.efips-digital-dialog-backdrop-reader .efips-reader-header::before,
+.efips-digital-dialog-backdrop-reader .efips-reader-header::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: .52;
+  filter: blur(7px);
+}
+.efips-digital-dialog-backdrop-reader .efips-reader-header::before {
+  width: clamp(5rem, 18vw, 13rem);
+  height: clamp(5rem, 18vw, 13rem);
+  inset-block-start: -6rem;
+  inset-inline-start: 4%;
+  background: radial-gradient(circle, rgb(16 185 129 / .28), transparent 72%);
+}
+.efips-digital-dialog-backdrop-reader .efips-reader-header::after {
+  width: clamp(5rem, 16vw, 11rem);
+  height: clamp(5rem, 16vw, 11rem);
+  inset-block-end: -5rem;
+  inset-inline-end: 8%;
+  background: radial-gradient(circle, rgb(14 165 233 / .23), transparent 72%);
+}
+.efips-digital-dialog-backdrop-reader .efips-reader-header > * {
+  position: relative;
+  z-index: 1;
+}
+.efips-digital-dialog-backdrop-reader .efips-reader-brand img {
+  filter: drop-shadow(0 3px 9px rgb(4 120 87 / .16));
+  animation: efips-reader-logo-float 5s ease-in-out infinite;
+}
+.efips-digital-dialog-backdrop-reader .efips-book-reader h2 {
+  color: #064e3b;
+  text-shadow: 0 1px 0 rgb(255 255 255 / .65);
+}
+.efips-digital-dialog-backdrop-reader .efips-book-reader nav > * {
+  background: linear-gradient(130deg, #059669, #0d9488);
+  border: 1px solid rgb(255 255 255 / .4);
+  box-shadow: 0 3px 9px rgb(4 120 87 / .15);
+  transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+.efips-digital-dialog-backdrop-reader .efips-book-reader nav > :last-child {
+  background: linear-gradient(130deg, #334155, #475569);
+}
+@media (hover: hover) {
+  .efips-digital-dialog-backdrop-reader .efips-book-reader nav > *:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgb(4 120 87 / .22);
+  }
+}
+.efips-digital-dialog-backdrop-reader .efips-book-reader nav > *:active {
+  transform: translateY(0);
+}
+.efips-digital-dialog-backdrop-reader .efips-reader-preview-controls {
+  background: linear-gradient(100deg, #ecfdf5, #f0fdfa);
+}
+.dark .efips-digital-dialog-backdrop-reader .efips-book-reader .efips-reader-header {
+  background: linear-gradient(125deg, #042f2e 0%, #064e3b 55%, #0f334d 100%);
+  border-color: #10b981;
+  box-shadow: 0 4px 18px rgb(0 0 0 / .18);
+}
+.dark .efips-digital-dialog-backdrop-reader .efips-book-reader h2 {
+  color: #ecfdf5;
+  text-shadow: none;
+}
+.dark .efips-digital-dialog-backdrop-reader .efips-reader-preview-controls {
+  background: linear-gradient(110deg, #064e3b, #134e4a);
+}
+@keyframes efips-reader-logo-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .efips-digital-dialog-backdrop-reader .efips-reader-brand img { animation: none; }
+  .efips-digital-dialog-backdrop-reader .efips-book-reader nav > * { transition: none; }
+}

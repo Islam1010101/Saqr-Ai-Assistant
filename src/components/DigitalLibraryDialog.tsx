@@ -1,4 +1,5 @@
 import React, { useEffect, useId, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import './digitalLibraryResponsive.css';
 
 /** One scroll surface keeps every book action reachable on short/touch screens. */
@@ -11,6 +12,12 @@ export default function DigitalLibraryDialog({ title, onClose, children, variant
   const panel = useRef<HTMLDivElement>(null);
   const close = useRef(onClose);
   const titleId = useId();
+  // Hide the site's persistent navigation only while the digital reader is open.
+  useEffect(() => {
+    if (variant !== 'reader') return;
+    document.body.classList.add('efips-reader-open');
+    return () => { document.body.classList.remove('efips-reader-open'); };
+  }, [variant]);
   useEffect(() => { close.current = onClose; }, [onClose]);
   useEffect(() => {
     const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -45,7 +52,7 @@ export default function DigitalLibraryDialog({ title, onClose, children, variant
     }
   };
 
-  return <div className={`efips-digital-dialog-backdrop${variant === 'reader' ? ' efips-digital-dialog-backdrop-reader' : ''}`} onClick={event => {
+  const dialog = <div className={`efips-digital-dialog-backdrop${variant === 'reader' ? ' efips-digital-dialog-backdrop-reader' : ''}`} onClick={event => {
     if (event.target === event.currentTarget) close.current();
   }}>
     <div ref={panel} role="dialog" aria-modal="true" aria-labelledby={titleId}
@@ -62,4 +69,7 @@ export default function DigitalLibraryDialog({ title, onClose, children, variant
       }} />
     </div>
   </div>;
+
+  // Full-screen readers escape page stacking contexts; details popups stay untouched.
+  return variant === 'reader' ? createPortal(dialog, document.body) : dialog;
 }

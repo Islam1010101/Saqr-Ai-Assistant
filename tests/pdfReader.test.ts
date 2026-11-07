@@ -147,6 +147,24 @@ assert.match(readerStyles,/\.efips-digital-dialog-backdrop-reader \.efips-reader
   'PDF viewing area must expand to use all remaining height');
 console.log('PASS: reader is full viewport only; book details popup, buttons and PDF state are preserved');
 
+assert.ok(dialogSource.includes("return variant === 'reader' ? createPortal(dialog, document.body) : dialog;"),
+  'Only the reader should portal to document.body, above the app main stacking context');
+assert.ok(dialogSource.includes("document.body.classList.add('efips-reader-open')"));
+assert.ok(dialogSource.includes("document.body.classList.remove('efips-reader-open')"),
+  'Closing the book must restore global site navigation');
+assert.match(readerStyles,/body\.efips-reader-open \.efips-navbar-surface\s*\{[^}]*visibility:\s*hidden\s*!important;/s,
+  'The floating site navbar must be hidden while reading');
+assert.match(readerStyles,/\.efips-digital-dialog-backdrop\.efips-digital-dialog-backdrop-reader\s*\{[^}]*z-index:\s*2000001/s,
+  'The portal must appear above other fixed site overlays');
+assert.match(readerStyles,/\.efips-digital-dialog-backdrop-reader \.efips-book-reader \.efips-reader-header\s*\{[^}]*linear-gradient/s,
+  'Reader chrome must use the EFIPS emerald/teal design');
+assert.match(readerStyles,/@media \(prefers-reduced-motion: reduce\)/,
+  'Reader-only animation must honor reduced motion preferences');
+assert.ok(readerSource.includes('className="efips-reader-nav"'), 'Keep the original reader navigation buttons');
+assert.ok(readerSource.includes('loading="eager"'), 'Do not alter instant book preview');
+console.log('PASS: book reading hides global navbar, restores it on close, and preserves book controls with branded effects');
+
+
 
 
 const large = Uint8Array.from({length:3*PDF_BYTE_CHUNK+19},(_,index)=>(index*31)%256);
