@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Groq from 'groq-sdk';
+import { findBookReference } from '../src/utils/saqrOpenLibrary.js';
 
 // ==========================================
 // 1. البيانات المحلية
@@ -3346,6 +3347,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
+  // Optional bibliographic lookup shares the existing Chat function so the
+  // Vercel Hobby deployment stays under 12 serverless functions. Ordinary
+  // chat POST requests continue through the original code unchanged below.
+  if (req.method === 'GET' && req.query?.reference === 'book') {
+    const title = typeof req.query.title === 'string' ? req.query.title.trim() : '';
+    if (title.length < 2 || title.length > 140 || /https?:|[\r\n]/i.test(title))
+      return res.status(400).json({ status: 'invalid_title' });
+    res.setHeader('Cache-Control', 'public, max-age=600, s-maxage=3600');
+    try {
+      const book = await findBookReference(title);
+      return res.status(200).json(book ? { status: 'verified', book } : { status: 'not_found' });
+    } catch {
+      return res.status(200).json({ status: 'unavailable' });
+    }
+  }
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const apiKey = process.env.GROQ_API_KEY;
