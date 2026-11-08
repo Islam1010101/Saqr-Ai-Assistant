@@ -43,7 +43,15 @@ const normalize = (value: unknown): string => String(value ?? '')
   .replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه')
   .replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
 
-const wordsOf = (text: string): string[] => normalize(text).split(/\s+/).filter(Boolean);
+// Filter stop words BEFORE folding Arabic letter variants. Otherwise the
+// preposition "على" becomes "علي" and falsely matches authors named Ali.
+const wordsOf = (text: string): string[] => String(text ?? '')
+  .normalize('NFKC').toLowerCase()
+  .replace(/[\u064b-\u065f\u0670\u0640]/g, '')
+  .split(/[^\p{L}\p{N}]+/gu)
+  .filter(word=>Boolean(word) && !STOP_WORDS.has(word))
+  .map(normalize)
+  .filter(Boolean);
 
 const STOP_WORDS = new Set([
   'a','an','the','and','or','of','to','in','at','is','are','i','me','my','we','you',
@@ -175,7 +183,7 @@ export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=
     {records:catalogs.arabic,source:'arabic',label:'المكتبة الرقمية العربية (Arabic Digital Library)'},
     {records:catalogs.english,source:'english',label:'المكتبة الرقمية الإنجليزية (English Digital Library)'}
   ];
-  type Candidate={score:number;origin:string;value:SaqrBookMatch};
+  type Candidate={score:number;origin:string;value:SaqrBookMatch;aliasTitleMatch:boolean};
   const candidates:Candidate[]=[];
   for (const origin of origins) {
     for (const book of origin.records ?? []) {
@@ -199,10 +207,13 @@ export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=
       let score=0;
       let subjectMatch=false;
       let titleMatch=false;
-      // Match transliterated titles against real metadata; do not infer holdings.
+      // A named bilingual title must be evidenced by a recorded title or
+      // series. Generic authors, summaries and subjects cannot be holdings.
+      let aliasTitleMatch=false;
       for(const pair of aliasHints){
-        if(pair.arabic.test(titleText)||pair.english.test(titleText)){
-          score+=320;titleMatch=true;
+        if(pair.arabic.test(titleText)||pair.english.test(titleText)
+          ||pair.arabic.test(seriesText)||pair.english.test(seriesText)){
+          score+=320;titleMatch=true;aliasTitleMatch=true;
         }
       }
       // Exact phrases and proper book titles are the strongest evidence.
@@ -247,10 +258,15 @@ export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=
         }),
         matchBasis: subjectMatch ? 'Catalog subject/topic' : titleMatch ? 'Book title' : 'Description/author'
       };
-      candidates.push({score,origin:origin.source,value});
+      candidates.push({score,origin:origin.source,value,aliasTitleMatch});
     }
   }
-  candidates.sort((a,b)=>b.score-a.score || a.value.title.localeCompare(b.value.title));
+  // Exact named-work requests never include irrelevant fuzzy matches merely
+  // to fill the physical/Arabic/English group quotas.
+  const ranked=aliasHints.length
+    ? candidates.filter(entry=>entry.aliasTitleMatch)
+    : candidates;
+  ranked.sort((a,b)=>b.score-a.score || a.value.title.localeCompare(b.value.title));
   // Keep the best matches, then make room for genuinely matching digital and
   // print items; the former first-ten-physical ordering hid bilingual results.
   const chosen:Candidate[]=[];
@@ -264,17 +280,17 @@ export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=
   };
   // Reserve genuine results for each catalog before filling by relevance.
   for(const source of ['physical','arabic','english']){
-    for(const entry of candidates.filter(item=>item.origin===source).slice(0,2)){
+    for(const entry of ranked.filter(item=>item.origin===source).slice(0,2)){
       if(chosen.length>=limit)break;
       add(entry);
     }
   }
-  for(const entry of candidates){
+  for(const entry of ranked){
     if(chosen.length>=limit)break;
     if(counts[entry.origin]>=caps[entry.origin])continue;
     add(entry);
   }
-  for(const entry of candidates){
+  for(const entry of ranked){
     if(chosen.length>=limit)break;
     add(entry);
   }
