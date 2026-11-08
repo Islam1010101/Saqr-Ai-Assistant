@@ -694,6 +694,14 @@ const AdminDashboard: React.FC = () => {
         window.scrollTo({top:0,behavior:'smooth'});
     };
     const currentSection = dashboardSections.find(item=>item.id===activeSection)!;
+    const overviewShortcuts: Array<{label:string;count:number;caption:string;icon:IconName;section:AdminSection;tab?:'students'|'teachers'|'borrowings'|'pending'|'reports'}> = [
+        {label:isAr?'الطلبات المعلقة':'Pending requests',count:pendingRequestsList.length,caption:isAr?'مراجعة واعتماد':'Review & approve',icon:'clock',section:'management',tab:'pending'},
+        {label:isAr?'الإعارات الحالية':'Current loans',count:borrowingsList.length,caption:isAr?'المتابعة والإرجاع':'Manage returns',icon:'book-open',section:'management',tab:'borrowings'},
+        {label:isAr?'إدارة الطلاب':'Students',count:stats.students,caption:isAr?'الحسابات والصلاحيات':'Accounts & access',icon:'graduation-cap',section:'management',tab:'students'},
+        {label:isAr?'إدارة المعلمين':'Teachers',count:stats.teachers,caption:isAr?'البريد والصلاحيات':'Emails & roles',icon:'users',section:'management',tab:'teachers'},
+        {label:isAr?'فهرس المكتبة':'Library catalog',count:allCatalogCount,caption:isAr?'الورقي والرقمي':'Print & digital',icon:'library',section:'library'},
+        {label:isAr?'تحضيرات المعلمين':'Lesson reports',count:lessonReportsList.length,caption:isAr?'سجلات التحضير':'Teaching activity',icon:'clipboard-list',section:'management',tab:'reports'}
+    ];
 
     return (
         <div dir={dir} className="efips-admin min-h-[100dvh] bg-white dark:bg-black text-slate-800 dark:text-slate-100 font-sans p-3 sm:p-5 lg:p-8 pb-24 transition-colors duration-300 relative isolate">
@@ -749,7 +757,20 @@ const AdminDashboard: React.FC = () => {
                     </div>
                 </section>
 
-
+                <section className="lg:col-span-4 rounded-[1.75rem] border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-900 p-4 sm:p-6 shadow-sm" aria-labelledby="admin-shortcuts-title">
+                    <div className="flex items-center justify-between gap-3 mb-4">
+                        <div><h3 id="admin-shortcuts-title" className="text-base sm:text-lg font-black text-slate-900 dark:text-white">{isAr?'اختصارات المهام اليومية':'Daily shortcuts'}</h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{isAr?'ادخل مباشرة للقسم المطلوب بدل تصفح كل التقارير':'Jump straight to the task you need'}</p></div>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+                        {overviewShortcuts.map((item)=><button key={item.label} type="button" onClick={()=>switchAdminSection(item.section,item.tab)}
+                            className="group min-w-0 text-start rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/50 px-3 py-4 sm:p-4 hover:border-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-500 transition-colors">
+                            <div className="flex items-center justify-between mb-3"><span className="w-9 h-9 inline-flex items-center justify-center rounded-xl bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-300"><OutlineIcon name={item.icon} className="h-5 w-5"/></span><span className="text-xl font-black text-slate-900 dark:text-white tabular-nums">{formatCatalogCount(item.count)}</span></div>
+                            <div className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-100">{item.label}</div>
+                            <div className="text-[11px] mt-1 text-slate-500 dark:text-slate-400">{item.caption}</div>
+                        </button>)}
+                    </div>
+                </section>
                 </>}
                 {activeSection === 'library' && <>
                 {/* Book inventory counters, taken from the same sources as the catalog pages. */}
@@ -857,6 +878,34 @@ const AdminDashboard: React.FC = () => {
                     <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">{isAr ? 'البيانات تعكس السجلات المتاحة حاليًا؛ وعدد فتح الكتب الرقمية لا يعني بالضرورة إكمال قراءتها.' : 'Figures reflect currently available records; a digital book open does not necessarily mean the book was read.'}</p>
                 </section>
 
+                <section className="lg:col-span-4 grid grid-cols-1 xl:grid-cols-2 gap-4" aria-label={isAr?'ملخصات بصرية لنشاط المكتبة':'Library activity visual summaries'}>
+                    <div className="rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-5 sm:p-6 shadow-sm">
+                        <h3 className="text-base font-black text-slate-900 dark:text-white">{isAr?'حركة الاستعارات':'Borrowing activity'}</h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-5">{isAr?'مقارنة مباشرة من بيانات الاستعارات الحالية':'Current loan records, compared visually'}</p>
+                        {[
+                            {label:isAr?'إعارات نشطة':'Active loans',value:libraryImpact.active,bar:'bg-emerald-500'},
+                            {label:isAr?'طلبات معلقة':'Pending requests',value:libraryImpact.pending,bar:'bg-amber-500'},
+                            {label:isAr?'إعارات متأخرة':'Overdue loans',value:libraryImpact.overdue,bar:'bg-rose-500'}
+                        ].map(item=>{const max=Math.max(libraryImpact.active,libraryImpact.pending,libraryImpact.overdue,1);return <div key={item.label} className="mb-4 last:mb-0">
+                            <div className="flex items-center justify-between gap-3 text-xs sm:text-sm font-bold mb-2"><span>{item.label}</span><strong className="tabular-nums">{formatCatalogCount(item.value)}</strong></div>
+                            <div className="h-2.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden" role="img" aria-label={item.label+': '+item.value}><div className={`h-full rounded-full transition-all duration-500 ${item.bar}`} style={{width:item.value>0 ? Math.max(3,(item.value/max)*100)+'%' : '0%'}}/></div>
+                        </div>})}
+                    </div>
+                    <div className="rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-5 sm:p-6 shadow-sm">
+                        <div className="flex justify-between items-start gap-2">
+                            <div><h3 className="text-base font-black text-slate-900 dark:text-white">{isAr?'الأكثر نشاطًا':'Most active readers'}</h3>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-5">{isAr?'حسب سجلات الدخول المتاحة':'Based on recorded sign-in events'}</p></div>
+                            <button type="button" onClick={()=>switchAdminSection('analytics')} className="text-xs font-black text-emerald-700 dark:text-emerald-300 hover:underline">{isAr?'عرض التقرير':'View chart'}</button>
+                        </div>
+                        {topUsersStats.length?topUsersStats.slice(0,4).map((user,index)=>{
+                            const max=Math.max(topUsersStats[0]?.count||1,1);
+                            return <div key={user.user_type+':'+user.user_id} className="mb-4 last:mb-0">
+                                <div className="flex gap-2 justify-between items-center mb-2 text-xs sm:text-sm"><span className="min-w-0 truncate font-bold text-slate-700 dark:text-slate-200">{index+1}. {user.name || user.user_id}</span><span className="font-black text-emerald-700 dark:text-emerald-300 tabular-nums">{user.count}</span></div>
+                                <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden"><div className="h-full bg-teal-500 rounded-full" style={{width:Math.max(3,(user.count/max)*100)+'%'}}/></div>
+                            </div>;
+                        }):<p className="text-xs font-bold text-slate-400 py-8 text-center">{isAr?'لا توجد سجلات دخول بعد':'No sign-in activity recorded yet'}</p>}
+                    </div>
+                </section>
                 </>}
                 {activeSection === 'analytics' && <>
                 <AdminInsightsPanels
