@@ -3364,8 +3364,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) return res.status(500).json({ error: 'API Key Missing' });
+  const apiKey = process.env.GROQ_API_KEY?.trim();
 
   try {
     const { messages = [], locale = 'en' } = req.body || {};
@@ -3398,26 +3397,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         ...messages
     ];
 
-    // Cloudflare is preview-only. Production remains on Groq, unchanged.
-    // Use the exact same instructions and book context for both providers.
-    const cloudflarePreviewEnabled =
-      process.env.VERCEL_ENV === 'preview' &&
-      Boolean(process.env.CLOUDFLARE_AI_API_TOKEN && process.env.CLOUDFLARE_ACCOUNT_ID);
+    // Alternate successive requests from the same browser between both providers.
+    // The cookie stores only the next provider, never chat content or credentials.
+    const cfAccountId = process.env.CLOUDFLARE_ACCOUNT_ID?.trim() || '';
+    const cfToken = process.env.CLOUDFLARE_AI_API_TOKEN?.trim() || '';
+    const cloudflareReady = /^[a-f0-9]{32}$/i.test(cfAccountId) && Boolean(cfToken);
+    const groqReady = Boolean(apiKey);
+    if (!cloudflareReady && !groqReady) {
+      return res.status(503).json({ error: 'AI providers not configured' });
+    }
 
-    if (cloudflarePreviewEnabled) {
+    type Provider = 'groq' | 'cloudflare';
+    const cookie = String(req.headers.cookie || '');
+    const requestedNext = cookie.match(/(?:^|;\\s*)saqr_ai_next=(groq|cloudflare)(?:;|$)/)?.[1] as Provider | undefined;
+    const preferred: Provider = groqReady && cloudflareReady
+      ? (requestedNext || (Math.random() < 0.5 ? 'groq' : 'cloudflare'))
+      : (groqReady ? 'groq' : 'cloudflare');
+    const providers: Provider[] = [preferred];
+    if (groqReady && cloudflareReady) {
+      providers.push(preferred === 'groq' ? 'cloudflare' : 'groq');
+    }
+
+    res.setHeader('Cache-Control', 'no-store');
+    for (const provider of providers) {
       try {
-        const accountId = process.env.CLOUDFLARE_ACCOUNT_ID!.trim();
-        // Use the documented Workers AI per-model REST endpoint in preview,
-        // rather than the unified AI Gateway route. Never log credentials.
-        if (!/^[a-f0-9]{32}$/i.test(accountId)) {
-          console.warn('Cloudflare preview account ID has an invalid format; using Groq fallback.');
-        } else {
+        let reply = '';
+        if (provider === 'cloudflare') {
           const cfResponse = await fetch(
-            `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/@cf/zai-org/glm-4.7-flash`,
+            `https://api.cloudflare.com/client/v4/accounts/${cfAccountId}/ai/run/@cf/zai-org/glm-4.7-flash`,
             {
               method: 'POST',
               headers: {
-                Authorization: `Bearer ${process.env.CLOUDFLARE_AI_API_TOKEN!.trim()}`,
+                Authorization: `Bearer ${cfToken}`,
                 'Content-Type': 'application/json'
               },
               body: JSON.stringify({
@@ -3426,48 +3437,55 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 chat_template_kwargs: { enable_thinking: false },
                 max_completion_tokens: 500
               }),
-              signal: AbortSignal.timeout(20000)
+              signal: AbortSignal.timeout(18000)
             }
           );
-          const cfPayload: any = await cfResponse.json().catch(() => null);
-          if (cfResponse.ok && cfPayload?.success !== false) {
-            const result = cfPayload?.result || cfPayload;
-            const cfReply = result?.response || result?.choices?.[0]?.message?.content;
-            if (typeof cfReply === 'string' && cfReply.trim()) {
-              res.setHeader('X-Saqr-AI-Provider', 'cloudflare');
-              return res.status(200).json({ reply: cfReply, provider: 'cloudflare' });
-            }
-            console.warn('Cloudflare preview returned no usable text; using Groq fallback.');
-          } else {
-            const cfCodes = Array.isArray(cfPayload?.errors)
-              ? cfPayload.errors.map((e: any) => Number(e?.code)).filter(Number.isFinite).slice(0, 3)
+          const data: any = await cfResponse.json().catch(() => null);
+          if (!cfResponse.ok || data?.success === false) {
+            const codes = Array.isArray(data?.errors)
+              ? data.errors.map((e: any) => Number(e?.code)).filter(Number.isFinite).slice(0, 3)
               : [];
-            console.warn('Cloudflare preview failed; using Groq fallback.', {
-              status: cfResponse.status,
-              errorCodes: cfCodes
-            });
+            console.warn('Saqr Cloudflare provider failure', { status: cfResponse.status, codes });
+            continue;
           }
+          const result = data?.result || data;
+          const content = result?.response || result?.choices?.[0]?.message?.content;
+          reply = typeof content === 'string' ? content.trim() : '';
+        } else {
+          const groq = new Groq({ apiKey: apiKey!, timeout: 18000, maxRetries: 0 });
+          const completion = await groq.chat.completions.create({
+            model: 'openai/gpt-oss-120b',
+            messages: saqrMessages,
+            temperature: 0.7,
+            max_tokens: 500
+          });
+          reply = (completion.choices[0]?.message?.content || '').trim();
         }
+
+        if (!reply) {
+          console.warn('Saqr AI provider returned empty response', provider);
+          continue;
+        }
+        if (groqReady && cloudflareReady) {
+          const next: Provider = preferred === 'groq' ? 'cloudflare' : 'groq';
+          res.setHeader(
+            'Set-Cookie',
+            `saqr_ai_next=${next}; Path=/api/chat; Max-Age=2592000; HttpOnly; Secure; SameSite=Lax`
+          );
+        }
+        res.setHeader('X-Saqr-AI-Provider', provider);
+        res.setHeader('X-Saqr-AI-Fallback', provider === preferred ? 'no' : 'yes');
+        return res.status(200).json({ reply, provider });
       } catch (error: any) {
-        console.warn('Cloudflare preview unavailable; using Groq fallback.', error?.name || 'RequestError');
+        // Don't leak prompts, tokens, or provider response bodies to logs.
+        console.warn('Saqr AI provider unavailable', { provider, reason: error?.name || 'RequestError' });
       }
     }
 
-    const groq = new Groq({ apiKey: apiKey.trim() });
-    
-    const completion = await groq.chat.completions.create({
-      model: 'openai/gpt-oss-120b', // استخدام نموذج مجاني سريع ومستقر بشكل دائم
-      messages: saqrMessages,
-      temperature: 0.7,
-      max_tokens: 500
-    });
-
-    res.setHeader('X-Saqr-AI-Provider', cloudflarePreviewEnabled ? 'groq-fallback' : 'groq');
-    const reply = completion.choices[0]?.message?.content || 'No reply.';
-    return res.status(200).json({ reply });
+    return res.status(503).json({ error: 'AI services temporarily unavailable' });
 
   } catch (error: any) {
-    console.error('Groq Error:', error);
+    console.error('Saqr chat error:', error?.name || 'RequestError');
     return res.status(500).json({ error: error.message || 'Error executing request' });
   }
 }
