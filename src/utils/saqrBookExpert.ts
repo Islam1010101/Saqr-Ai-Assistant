@@ -11,8 +11,8 @@ const normalize = (text: string): string => String(text || '')
   .replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه')
   .replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
 
-const stopTitle = /^(?:عن|حول|في|ل|لل|بال|عن\s+موضوع|للأطفال|للاطفال|للمعلمين|للطلبة|من|علم|حول\s+موضوع|about|on|for|in|to|some|any|a|an|the|books|more|recommended)\s/i;
-const generalRequests = /(?:رشح|اقترح|توصيات|أقترح|recommend|suggest|best books|books about|novels about|كتب عن|روايات عن|كتاب عن|كتاب في موضوع|كتاب لتعلم|كتاب لتعليم|book about|a book about|books for|كتاب مناسب|كتب مناسبة|كتب للاطفال)/i;
+const stopTitle = /^(?:عن|حول|في|ل|لل|بال|عن\s+موضوع|للأطفال|للاطفال|للمعلمين|للطلبة|من|علم|حول\s+موضوع|about|on|for|in|to|some|any|books|more|recommended)\s/i;
+const generalRequests = /(?:رشح|اقترح|توصيات|أقترح|أفضل\s+كتاب|احسن\s+كتاب|recommend|suggest|best\s+books?|books about|novels about|كتب عن|روايات عن|كتاب عن|كتاب في موضوع|كتاب لتعلم|كتاب لتعليم|book about|a book about|books for|كتاب مناسب|كتب مناسبة|كتب للاطفال|لخص|تلخيص|ملخص|summari[sz]e|summary|ناقشني|نتناقش|discuss|discussion)/i;
 const suffixes = /(?:[,،؛]\s*|\s+)(?:هل\s+(?:هو\s+)?(?:موجود|متوفر)|(?:موجود|متوفر)\s+(?:عندكم|في\s+المكتبة)|هل\s+عندكم|is\s+(?:it|this)\s+available|do\s+you\s+have\s+(?:it|this))[\s\S]*$/i;
 
 export function extractSaqrSpecificBookTitle(question: string): string | null {
@@ -32,6 +32,7 @@ export function extractSaqrSpecificBookTitle(question: string): string | null {
   const captured = quoted?.[1] || patterns.map(p => p.exec(text)?.[1] || '').find(Boolean) || '';
   const title = captured
     .replace(suffixes, '')
+    .replace(/\s+(?:في\s+(?:المكتبة|مكتبتنا)|عندكم|في\s+(?:الرقمية|المكتبة\s+الرقمية)|in\s+(?:your|the|our)\s+library)[\s\S]*$/i, '')
     .replace(/\s+(?:للكاتب|للمؤلف|للمؤلفة|للكاتبة|by\s+(?:the\s+author\s+)?)[^،,.؟?]+$/i, '')
     .replace(/^(?:اسمه|اسمها|بعنوان|اسم\s+الكتاب)\s*/i, '')
     .replace(/[؟?!.،,؛;:\s]+$/g, '').trim();
