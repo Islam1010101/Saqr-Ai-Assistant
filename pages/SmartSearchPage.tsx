@@ -425,7 +425,7 @@ const SmartSearchPage: React.FC = () => {
     // A named book should receive the knowledge of an experienced librarian
     // EVEN if EFIPS does not catalogue it. Broad topic/catalog searches retain
     // their exact existing fast path and all school data remains authoritative.
-    const namedBookTitle=preIntent==='none' && isSaqrCatalogLookup(userQuery)
+    const namedBookTitle=preIntent==='none'
       ? extractSaqrSpecificBookTitle(userQuery) : null;
     const namedBookHoldings=namedBookTitle
       ? findSaqrBookTitleHoldings(namedBookTitle,foundBooks) : [];
@@ -563,7 +563,7 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [
-            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}${expertContext ? '\n\n'+expertContext : ''}${safeEnhancement.context ? '\n\n'+safeEnhancement.context : ''}${learningContext ? '\n\n'+learningContext : ''}${isStoryBeginning(userQuery) ? '\n\nIf the user requests a NEW Little Author story without a specific theme, begin with exactly one short story sentence inspired by this rotating Emirati idea: '+storyIdeaAt(messages.filter(m=>m.role==='user').length,locale==='ar'?'ar':'en')+'. Preserve all established Little Author spelling correction, one-sentence response, ending and certificate instructions.' : ''}` },
+            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}${safeEnhancement.context ? '\n\n'+safeEnhancement.context : ''}${learningContext ? '\n\n'+learningContext : ''}${expertContext ? '\n\n'+expertContext : ''}${isStoryBeginning(userQuery) ? '\n\nIf the user requests a NEW Little Author story without a specific theme, begin with exactly one short story sentence inspired by this rotating Emirati idea: '+storyIdeaAt(messages.filter(m=>m.role==='user').length,locale==='ar'?'ar':'en')+'. Preserve all established Little Author spelling correction, one-sentence response, ending and certificate instructions.' : ''}` },
             ...messages,
             { role: 'user', content: userQuery }
           ],
