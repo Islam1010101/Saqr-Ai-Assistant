@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Groq from 'groq-sdk';
+import { createHmac, randomUUID } from 'node:crypto';
 import { findBookReference } from '../src/utils/saqrOpenLibrary.js';
 
 // ==========================================
@@ -3340,6 +3341,47 @@ function findBooks(q: string) {
 // ==========================================
 // 2. كود المعالجة والذكاء الاصطناعي
 // ==========================================
+
+// Write one signed, privacy-preserving event per chat request. This is
+// intentionally best-effort; telemetry cannot interrupt student chat.
+type SaqrProviderName = 'groq' | 'cloudflare';
+async function recordSaqrProviderUsage(value:{
+  id:string;requestMs:number;preferred:SaqrProviderName;served:SaqrProviderName|null;
+  groqAttempted:boolean;groqSuccess:boolean;cloudflareAttempted:boolean;
+  cloudflareSuccess:boolean;outcome:'success'|'failure';durationMs:number;
+}):Promise<void>{
+  const url=process.env.SAQR_METRICS_SUPABASE_URL?.trim();
+  const apiKey=process.env.SAQR_METRICS_API_KEY?.trim();
+  const secret=process.env.SAQR_METRICS_SIGNING_SECRET?.trim();
+  if(!url || !apiKey || !/^[a-f0-9]{64}$/.test(secret||''))return;
+  const flag=(v:boolean)=>v?'1':'0';
+  const canonical=[
+    value.id,String(value.requestMs),value.preferred,value.served||'-',
+    flag(value.groqAttempted),flag(value.groqSuccess),
+    flag(value.cloudflareAttempted),flag(value.cloudflareSuccess),
+    value.outcome,String(value.durationMs)
+  ].join('|');
+  const signature=createHmac('sha256',secret!).update(canonical).digest('hex');
+  const record={
+    id:value.id,request_ms:value.requestMs,preferred_provider:value.preferred,
+    served_by:value.served,groq_attempted:value.groqAttempted,groq_success:value.groqSuccess,
+    cloudflare_attempted:value.cloudflareAttempted,cloudflare_success:value.cloudflareSuccess,
+    outcome:value.outcome,duration_ms:value.durationMs,signature
+  };
+  try{
+    const endpoint=new URL('/rest/v1/saqr_ai_provider_usage',url);
+    const response=await fetch(endpoint,{
+      method:'POST',
+      headers:{apikey:apiKey,'Content-Type':'application/json',Prefer:'return=minimal'},
+      body:JSON.stringify(record),
+      signal:AbortSignal.timeout(1800)
+    });
+    if(!response.ok)console.warn('Saqr provider telemetry unavailable',response.status);
+  }catch(error:any){
+    console.warn('Saqr provider telemetry unavailable',error?.name||'RequestError');
+  }
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // إعدادات السماح (CORS)
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -3419,7 +3461,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     res.setHeader('Cache-Control', 'no-store');
+    const requestMs=Date.now();
+    const metricId=randomUUID();
+    const attempts={groqAttempted:false,groqSuccess:false,cloudflareAttempted:false,cloudflareSuccess:false};
     for (const provider of providers) {
+      if(provider==='groq')attempts.groqAttempted=true;
+      else attempts.cloudflareAttempted=true;
       try {
         let reply = '';
         if (provider === 'cloudflare') {
@@ -3466,6 +3513,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           console.warn('Saqr AI provider returned empty response', provider);
           continue;
         }
+        if(provider==='groq')attempts.groqSuccess=true;
+        else attempts.cloudflareSuccess=true;
+        await recordSaqrProviderUsage({
+          id:metricId,requestMs,preferred,served:provider,...attempts,
+          outcome:'success',durationMs:Math.min(120000,Date.now()-requestMs)
+        });
         if (groqReady && cloudflareReady) {
           const next: Provider = preferred === 'groq' ? 'cloudflare' : 'groq';
           res.setHeader(
@@ -3482,6 +3535,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
+    await recordSaqrProviderUsage({
+      id:metricId,requestMs,preferred,served:null,...attempts,
+      outcome:'failure',durationMs:Math.min(120000,Date.now()-requestMs)
+    });
     return res.status(503).json({ error: 'AI services temporarily unavailable' });
 
   } catch (error: any) {
