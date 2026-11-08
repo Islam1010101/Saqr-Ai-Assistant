@@ -148,6 +148,8 @@ const buildBilingualBorrowEmail = (userName: string, bookName: string, borrowDat
 
 const SearchSvg = () => <OutlineIcon name="search" className="h-5 w-5 text-amber-500" />;
 
+type AdminSection = 'overview' | 'library' | 'analytics' | 'attendance' | 'reading' | 'children' | 'management';
+
 const AdminDashboard: React.FC = () => {
     const { locale, dir } = useLanguage();
     const { theme, toggleTheme } = useTheme();
@@ -175,6 +177,7 @@ const AdminDashboard: React.FC = () => {
     const [pendingRequestsList, setPendingRequestsList] = useState<any[]>([]);
     const [lessonReportsList, setLessonReportsList] = useState<any[]>([]);
     const [activeTab, setActiveTab] = useState<'students' | 'teachers' | 'borrowings' | 'pending' | 'reports'>('pending');
+    const [activeSection, setActiveSection] = useState<AdminSection>('overview');
     const [showReadingReport, setShowReadingReport] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [borrowingsError, setBorrowingsError] = useState('');
@@ -676,6 +679,21 @@ const AdminDashboard: React.FC = () => {
     const arabicDigitalShare = digitalCatalogCount ? (arabicDigitalCount / digitalCatalogCount) * 100 : 0;
     const ringLength = 2 * Math.PI * 38;
     const formatCatalogCount = (count: number) => count.toLocaleString(isAr ? 'ar-EG' : 'en-US');
+    const dashboardSections: Array<{id:AdminSection;label:string;description:string;icon:IconName}> = [
+        {id:'overview',label:isAr?'الرئيسية':'Overview',description:isAr?'المؤشرات والاختصارات':'Key metrics & shortcuts',icon:'grid'},
+        {id:'library',label:isAr?'المقتنيات والكتب':'Books & catalog',description:isAr?'الكتب الورقية والرقمية':'Physical & digital books',icon:'library'},
+        {id:'analytics',label:isAr?'التقارير والتحليلات':'Analytics',description:isAr?'رسوم بيانية وتقارير النشاط':'Charts & activity',icon:'chart'},
+        {id:'attendance',label:isAr?'الإشغال والحضور':'Attendance',description:isAr?'جدول استخدام المكتبة':'Library utilization',icon:'calendar'},
+        {id:'reading',label:isAr?'تحديات القراءة':'Reading challenge',description:isAr?'تقارير إنجاز القراءة':'Reading progress',icon:'trophy'},
+        {id:'children',label:isAr?'مستويات الأطفال':'Children levels',description:isAr?'مراجعة تصنيف القراءة':'Reading level reviews',icon:'book-open'},
+        {id:'management',label:isAr?'الإدارة والسجلات':'Management',description:isAr?'المستخدمون والطلبات والاستعارات':'Users, requests & loans',icon:'users'}
+    ];
+    const switchAdminSection = (section: AdminSection, tab?: 'students' | 'teachers' | 'borrowings' | 'pending' | 'reports') => {
+        if (tab) { setActiveTab(tab); setSearchQuery(''); }
+        setActiveSection(section);
+        window.scrollTo({top:0,behavior:'smooth'});
+    };
+    const currentSection = dashboardSections.find(item=>item.id===activeSection)!;
 
     return (
         <div dir={dir} className="efips-admin min-h-[100dvh] bg-white dark:bg-black text-slate-800 dark:text-slate-100 font-sans p-3 sm:p-5 lg:p-8 pb-24 transition-colors duration-300 relative isolate">
@@ -701,25 +719,25 @@ const AdminDashboard: React.FC = () => {
                 </div>
             </header>
 
-            <nav aria-label={isAr ? 'أقسام لوحة الإدارة' : 'Dashboard sections'} className="sticky top-2 z-40 max-w-7xl mx-auto mb-5 flex gap-2 overflow-x-auto scrollbar-thin py-3 px-3 rounded-2xl bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl shadow-lg">
-                {[
-                    { id:'admin-overview', label:isAr?'نظرة عامة':'Overview',icon:'grid' as IconName },
-                    { id:'library-collection-heading', label:isAr?'مقتنيات المكتبة':'Library collection',icon:'library' as IconName },
-                    { id:'admin-children-reading-review', label:isAr?'مستويات قراءة الأطفال':'Children reading levels',icon:'book-open' as IconName },
-                    { id:'admin-attendance', label:isAr?'الإشغال والحضور':'Attendance',icon:'calendar' as IconName },
-                    { id:'admin-analytics', label:isAr?'الرسوم والتحليلات':'Analytics',icon:'chart' as IconName },
-                    { id:'admin-access-report', label:isAr?'الدخول':'Logins',icon:'activity' as IconName },
-                    { id:'admin-schedule-report', label:isAr?'الجدول':'Timetable',icon:'calendar' as IconName },
-                    { id:'admin-borrow-report', label:isAr?'الاستعارة':'Borrowings',icon:'book-open' as IconName },
-                    { id:'admin-reading-report', label:isAr?'تحدي القراءة':'Reading',icon:'trophy' as IconName },
-                    { id:'admin-books-report', label:isAr?'الكتب':'Books',icon:'library' as IconName },
-                    { id:'admin-users-report', label:isAr?'المستخدمون':'Users',icon:'users' as IconName },
-                    { id:'admin-management', label:isAr?'الإدارة والسجلات':'Management',icon:'clipboard-list' as IconName }
-                ].map(item=><button type="button" key={item.id} onClick={() => document.getElementById(item.id)?.scrollIntoView({behavior:'smooth',block:'start'})} className="shrink-0 inline-flex items-center gap-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200 shadow-sm hover:border-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-500 transition-colors"><OutlineIcon name={item.icon} className="h-4 w-4"/>{item.label}</button>)}
-            </nav>
-
-            <div className="max-w-7xl mx-auto mb-5 grid grid-cols-2 sm:grid-cols-4 gap-2">{[{tab:'students' as const,label:isAr?'الطلاب':'Students'},{tab:'teachers' as const,label:isAr?'المعلمون':'Teachers'},{tab:'pending' as const,label:isAr?'طلبات الاستعارة':'Requests'},{tab:'borrowings' as const,label:isAr?'الإعارات':'Loans'}].map(x=><button type="button" key={x.tab} onClick={()=>{setActiveTab(x.tab);setSearchQuery('');document.getElementById('admin-management')?.scrollIntoView({behavior:'smooth',block:'start'});}} className="px-4 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-700 to-teal-600 text-white text-xs sm:text-sm font-black shadow-md hover:shadow-xl transition-shadow">{x.label}</button>)}</div>
+             <nav aria-label={isAr ? 'أقسام لوحة الإدارة' : 'Dashboard sections'} className="sticky top-2 z-40 max-w-7xl mx-auto mb-5 rounded-[1.75rem] border border-emerald-100 dark:border-slate-700 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl shadow-lg px-3 py-3 sm:px-5 sm:py-4">
+                 <div className="flex flex-wrap items-center justify-between gap-2 mb-3 px-1">
+                     <span className="font-black text-sm text-slate-800 dark:text-slate-100">{isAr ? 'مركز التحكم' : 'Command Center'}</span>
+                     <span className="text-[11px] sm:text-xs font-bold text-slate-500 dark:text-slate-400">{isAr ? 'اختر القسم الذي تريد العمل عليه' : 'Open only the section you need'}</span>
+                 </div>
+                 <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-7 gap-2">
+                     {dashboardSections.map(item=><button type="button" key={item.id} aria-pressed={activeSection===item.id}
+                         onClick={()=>switchAdminSection(item.id)}
+                         className={`min-w-0 rounded-2xl border px-2 py-3 sm:py-3.5 flex flex-col sm:flex-row xl:flex-col items-center justify-center gap-1.5 sm:gap-2 text-center transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-500 ${activeSection===item.id ? 'bg-emerald-700 text-white border-emerald-700 shadow-md shadow-emerald-700/15' : 'bg-slate-50 dark:bg-slate-800/70 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:border-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30'}`}>
+                         <OutlineIcon name={item.icon} className="h-5 w-5 shrink-0"/><span className="text-[11px] sm:text-xs font-black leading-5">{item.label}</span>
+                     </button>)}
+                 </div>
+             </nav>
             <main className="relative max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
+                 <div className="lg:col-span-4 flex flex-wrap items-start justify-between gap-3 px-1" aria-live="polite">
+                     <div><h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">{currentSection.label}</h2>
+                         <p className="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 mt-1">{currentSection.description}</p></div>
+                     {activeSection!=='overview' && <button type="button" onClick={()=>switchAdminSection('overview')} className="rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2.5 bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-300 text-xs font-black hover:border-emerald-400 transition-colors">{isAr?'العودة للرئيسية':'Back to overview'}</button>}
+                 </div>
                 <section id="admin-overview" className="efips-panel lg:col-span-4 bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/70 p-5 md:p-7 rounded-3xl shadow-sm scroll-mt-24">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5"><h2 className="text-lg md:text-xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-3"><span className="w-10 h-10 rounded-2xl bg-rose-50 dark:bg-rose-900/30 text-rose-600 flex items-center justify-center"><OutlineIcon name="grid" className="h-5 w-5" /></span>{t('statsTitle')}</h2><span className="text-xs font-bold text-slate-500 dark:text-slate-400">{isAr ? 'ملخص حسابات المستخدمين المسجلة' : 'Registered user account overview'}</span></div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
