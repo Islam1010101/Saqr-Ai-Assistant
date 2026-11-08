@@ -3364,8 +3364,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) return res.status(500).json({ error: 'API Key Missing' });
+  const apiKey = process.env.GROQ_API_KEY?.trim();
 
   try {
     const { messages = [], locale = 'en' } = req.body || {};
@@ -3379,11 +3378,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ? found.map(b => `- "${b.title}" by ${b.author} is located at (Shelf ${b.shelf}, Row ${b.row})`).join('\n') 
       : 'No specific location found in the local database.';
 
-    const groq = new Groq({ apiKey: apiKey.trim() });
-    
-    const completion = await groq.chat.completions.create({
-      model: 'openai/gpt-oss-120b', // استخدام نموذج مجاني سريع ومستقر بشكل دائم
-      messages: [
+    const saqrMessages = [
         {
           role: 'system',
           content: `You are Saqr, a smart school librarian.
@@ -3400,16 +3395,97 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           Provide the response in ${locale === 'ar' ? 'Arabic' : 'English'}.`
         },
         ...messages
-      ],
-      temperature: 0.7,
-      max_tokens: 500
-    });
+    ];
 
-    const reply = completion.choices[0]?.message?.content || 'No reply.';
-    return res.status(200).json({ reply });
+    // Alternate successive requests from the same browser between both providers.
+    // The cookie stores only the next provider, never chat content or credentials.
+    const cfAccountId = process.env.CLOUDFLARE_ACCOUNT_ID?.trim() || '';
+    const cfToken = process.env.CLOUDFLARE_AI_API_TOKEN?.trim() || '';
+    const cloudflareReady = /^[a-f0-9]{32}$/i.test(cfAccountId) && Boolean(cfToken);
+    const groqReady = Boolean(apiKey);
+    if (!cloudflareReady && !groqReady) {
+      return res.status(503).json({ error: 'AI providers not configured' });
+    }
+
+    type Provider = 'groq' | 'cloudflare';
+    const cookie = String(req.headers.cookie || '');
+    const requestedNext = cookie.match(/(?:^|;\\s*)saqr_ai_next=(groq|cloudflare)(?:;|$)/)?.[1] as Provider | undefined;
+    const preferred: Provider = groqReady && cloudflareReady
+      ? (requestedNext || (Math.random() < 0.5 ? 'groq' : 'cloudflare'))
+      : (groqReady ? 'groq' : 'cloudflare');
+    const providers: Provider[] = [preferred];
+    if (groqReady && cloudflareReady) {
+      providers.push(preferred === 'groq' ? 'cloudflare' : 'groq');
+    }
+
+    res.setHeader('Cache-Control', 'no-store');
+    for (const provider of providers) {
+      try {
+        let reply = '';
+        if (provider === 'cloudflare') {
+          const cfResponse = await fetch(
+            `https://api.cloudflare.com/client/v4/accounts/${cfAccountId}/ai/run/@cf/zai-org/glm-4.7-flash`,
+            {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${cfToken}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                messages: saqrMessages,
+                temperature: 0.7,
+                chat_template_kwargs: { enable_thinking: false },
+                max_completion_tokens: 500
+              }),
+              signal: AbortSignal.timeout(18000)
+            }
+          );
+          const data: any = await cfResponse.json().catch(() => null);
+          if (!cfResponse.ok || data?.success === false) {
+            const codes = Array.isArray(data?.errors)
+              ? data.errors.map((e: any) => Number(e?.code)).filter(Number.isFinite).slice(0, 3)
+              : [];
+            console.warn('Saqr Cloudflare provider failure', { status: cfResponse.status, codes });
+            continue;
+          }
+          const result = data?.result || data;
+          const content = result?.response || result?.choices?.[0]?.message?.content;
+          reply = typeof content === 'string' ? content.trim() : '';
+        } else {
+          const groq = new Groq({ apiKey: apiKey!, timeout: 18000, maxRetries: 0 });
+          const completion = await groq.chat.completions.create({
+            model: 'openai/gpt-oss-120b',
+            messages: saqrMessages,
+            temperature: 0.7,
+            max_tokens: 500
+          });
+          reply = (completion.choices[0]?.message?.content || '').trim();
+        }
+
+        if (!reply) {
+          console.warn('Saqr AI provider returned empty response', provider);
+          continue;
+        }
+        if (groqReady && cloudflareReady) {
+          const next: Provider = preferred === 'groq' ? 'cloudflare' : 'groq';
+          res.setHeader(
+            'Set-Cookie',
+            `saqr_ai_next=${next}; Path=/api/chat; Max-Age=2592000; HttpOnly; Secure; SameSite=Lax`
+          );
+        }
+        res.setHeader('X-Saqr-AI-Provider', provider);
+        res.setHeader('X-Saqr-AI-Fallback', provider === preferred ? 'no' : 'yes');
+        return res.status(200).json({ reply, provider });
+      } catch (error: any) {
+        // Don't leak prompts, tokens, or provider response bodies to logs.
+        console.warn('Saqr AI provider unavailable', { provider, reason: error?.name || 'RequestError' });
+      }
+    }
+
+    return res.status(503).json({ error: 'AI services temporarily unavailable' });
 
   } catch (error: any) {
-    console.error('Groq Error:', error);
+    console.error('Saqr chat error:', error?.name || 'RequestError');
     return res.status(500).json({ error: error.message || 'Error executing request' });
   }
 }
