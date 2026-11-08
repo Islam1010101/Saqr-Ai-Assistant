@@ -3404,13 +3404,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json({ status: 'unavailable' });
     }
   }
-  // Temporary Preview-only server test; removed before release.
-  if(process.env.VERCEL_ENV === 'preview' && req.method==='GET' && req.query?.reference==='saqr-provider-telemetry-check'){
-    const prefer=req.query?.prefer==='groq'?'groq':'cloudflare';
-    req.method='POST';
-    req.headers.cookie='saqr_ai_next='+prefer;
-    req.body={locale:'ar',messages:[{role:'user',content:'اذكر نوعين من مصادر الطاقة المتجددة في جملة واحدة.'}]};
-  }
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const apiKey = process.env.GROQ_API_KEY?.trim();
