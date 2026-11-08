@@ -8,7 +8,7 @@ import { isStoryBeginning } from './saqrLearning.ts';
  */
 export type SaqrFollowUpKind =
   'auto' | 'introduction' | 'catalog' | 'named-book' | 'identity' |
-  'schedule' | 'reading-list' | 'research' | 'tutoring' | 'lesson' | 'discussion';
+  'schedule' | 'reading-list' | 'research' | 'tutoring' | 'lesson' | 'discussion' | 'error';
 
 export type SaqrFollowUpOptions = {
   locale: 'ar' | 'en';
@@ -43,7 +43,8 @@ const arQuestions: Record<Exclude<SaqrFollowUpKind, 'auto'>, string> = {
   research: 'ما الفكرة التي ترغب في التعمق فيها من هذا البحث؟',
   tutoring: 'ما الخطوة التي تريد أن نتأكد من فهمها معًا؟',
   lesson: 'هل ترغب في تخصيص الأنشطة لتناسب المستوى الدراسي لطلابك؟',
-  discussion: 'ما رأيك في هذه الفكرة، ولماذا؟'
+  discussion: 'ما رأيك في هذه الفكرة، ولماذا؟',
+  error: 'هل ترغب في إعادة المحاولة؟'
 };
 const enQuestions: Record<Exclude<SaqrFollowUpKind, 'auto'>, string> = {
   introduction: 'What would you like me to help you with first?',
@@ -55,7 +56,8 @@ const enQuestions: Record<Exclude<SaqrFollowUpKind, 'auto'>, string> = {
   research: 'Which idea from this research would you like to explore further?',
   tutoring: 'Which step would you like us to check together?',
   lesson: 'Would you like to tailor the activities to your students’ grade level?',
-  discussion: 'What do you think about this idea, and why?'
+  discussion: 'What do you think about this idea, and why?',
+  error: 'Would you like to try again?'
 };
 
 function relevantKind(question: string): Exclude<SaqrFollowUpKind, 'auto'> | null {
