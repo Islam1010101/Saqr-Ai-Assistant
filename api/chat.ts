@@ -3362,17 +3362,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json({ status: 'unavailable' });
     }
   }
-  // Temporary Preview-only integration check. Remove before production release.
-  if (process.env.VERCEL_ENV === 'preview' && req.method === 'GET' &&
-      req.query?.reference === 'saqr-rotation-integration-check') {
-    const prefer = req.query?.prefer === 'groq' ? 'groq' : 'cloudflare';
-    req.method = 'POST';
-    req.headers.cookie = `saqr_ai_next=${prefer}`;
-    req.body = {
-      locale: 'ar',
-      messages: [{ role: 'user', content: 'اقترح عنوانين عامين لموضوعات القراءة في الصف السابع في جملة واحدة.' }]
-    };
-  }
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const apiKey = process.env.GROQ_API_KEY?.trim();
