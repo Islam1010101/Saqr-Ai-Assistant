@@ -15,6 +15,7 @@ import { supabase } from '../src/utils/supabase';
 import {nationalIdentityBooks, searchNationalIdentityBooks} from '../src/utils/nationalIdentityCatalog';
 import { stripSaqrEmoji } from '../src/utils/saqrText';
 import { isSaqrCatalogLookup, renderSaqrCatalogAnswer } from '../src/utils/saqrCatalogReply';
+import { extractSaqrSpecificBookTitle, findSaqrBookTitleHoldings, saqrBookExpertContext, renderSaqrBookHoldingStatus, type SaqrExternalBookReference } from '../src/utils/saqrBookExpert';
 import { saqrExtraContext, isNewDiscussion, discussionOpening } from '../src/utils/saqrSafeEnhancements';
 import {detectSaqrIntroduction,saqrIntroductionReply} from '../src/utils/saqrIntroductionReplies';
 
@@ -421,7 +422,14 @@ const SmartSearchPage: React.FC = () => {
     // educational/story functions on their existing chat path.
     const initialRole=localStorage.getItem('user_type')||'guest';
     const preIntent=detectLearningIntent(userQuery,initialRole as 'student'|'teacher'|'admin'|'guest',messages);
-    if(preIntent==='none' && isSaqrCatalogLookup(userQuery)){
+    // A named book should receive the knowledge of an experienced librarian
+    // EVEN if EFIPS does not catalogue it. Broad topic/catalog searches retain
+    // their exact existing fast path and all school data remains authoritative.
+    const namedBookTitle=preIntent==='none' && isSaqrCatalogLookup(userQuery)
+      ? extractSaqrSpecificBookTitle(userQuery) : null;
+    const namedBookHoldings=namedBookTitle
+      ? findSaqrBookTitleHoldings(namedBookTitle,foundBooks) : [];
+    if(preIntent==='none' && isSaqrCatalogLookup(userQuery) && !namedBookTitle){
       const answer=renderSaqrCatalogAnswer(userQuery,foundBooks,locale==='ar'?'ar':'en');
       setMessages(prev=>[...prev,{role:'assistant',content:answer}]);
       setSaqrState('idle');
@@ -444,7 +452,7 @@ const SmartSearchPage: React.FC = () => {
     })();
     const safeEnhancement = saqrExtraContext({
       question:userQuery,history:messages,role:safeReader.role,
-      grade:safeReader.grade,locale:locale==='ar'?'ar':'en',matches:foundBooks
+      grade:safeReader.grade,locale:locale==='ar'?'ar':'en',matches:namedBookTitle?namedBookHoldings:foundBooks
     });
 
     if (isNewDiscussion(userQuery,messages)) {
@@ -507,7 +515,30 @@ const SmartSearchPage: React.FC = () => {
     }
     const learningContext=saqrLearningInstructions(learningIntent,safeReader.role,safeReader.grade,locale==='ar'?'ar':'en');
 
-    const searchContext = foundBooks.length > 0
+    // Optional real-world bibliography, strictly separate from EFIPS holdings.
+    // Source delays/failures never block the original chat model indefinitely.
+    let externalBookReference:SaqrExternalBookReference|null=null;
+    if(namedBookTitle && learningIntent==='none'){
+      try {
+        const lookup=await fetch('/api/book-reference?title='+encodeURIComponent(namedBookTitle),{
+          signal:AbortSignal.timeout(3800)
+        });
+        if(lookup.ok){
+          const data=await lookup.json();
+          if(data?.status==='verified' && data.book?.title && Array.isArray(data.book.authors)
+            && /^https:\/\/openlibrary\.org\/works\/OL\d+W$/.test(String(data.book.url))){
+            externalBookReference=data.book as SaqrExternalBookReference;
+          }
+        }
+      }catch{ /* Keep native model knowledge; disclose missing external verification. */ }
+    }
+    const expertContext=namedBookTitle && learningIntent==='none'
+      ? saqrBookExpertContext(namedBookTitle,namedBookHoldings,externalBookReference) : '';
+
+    const searchContext = expertContext
+      ? 'EFIPS LIBRARY RECORDS FOUND: EXACT TITLE-MATCHED HOLDINGS ONLY: '
+        +JSON.stringify(namedBookHoldings)+'. Other fuzzy topic matches are NOT evidence that the named book is owned by the school.'
+      : foundBooks.length > 0
       ? `EFIPS LIBRARY RECORDS FOUND (relevance-ranked, bilingual topic matching): ${JSON.stringify(foundBooks)}.
 When the user asks for books, identify the matching titles exactly as recorded, grouped clearly by physical, Arabic digital and English digital library. For physical books provide the actual shelf (shelf) and row (row); for digital books provide their existing driveLink. Answer in the user's requested language. Do not invent titles, shelves, rows, summaries or links. Some physical-book subject tags are inferred from titles and may be approximate.`
       : 'EFIPS LIBRARY RECORDS FOUND: No verified matching records supplied. Do not invent a library title, shelf, row or digital link.';
@@ -532,7 +563,7 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [
-            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}${safeEnhancement.context ? '\n\n'+safeEnhancement.context : ''}${learningContext ? '\n\n'+learningContext : ''}${isStoryBeginning(userQuery) ? '\n\nIf the user requests a NEW Little Author story without a specific theme, begin with exactly one short story sentence inspired by this rotating Emirati idea: '+storyIdeaAt(messages.filter(m=>m.role==='user').length,locale==='ar'?'ar':'en')+'. Preserve all established Little Author spelling correction, one-sentence response, ending and certificate instructions.' : ''}` },
+            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}${expertContext ? '\n\n'+expertContext : ''}${safeEnhancement.context ? '\n\n'+safeEnhancement.context : ''}${learningContext ? '\n\n'+learningContext : ''}${isStoryBeginning(userQuery) ? '\n\nIf the user requests a NEW Little Author story without a specific theme, begin with exactly one short story sentence inspired by this rotating Emirati idea: '+storyIdeaAt(messages.filter(m=>m.role==='user').length,locale==='ar'?'ar':'en')+'. Preserve all established Little Author spelling correction, one-sentence response, ending and certificate instructions.' : ''}` },
             ...messages,
             { role: 'user', content: userQuery }
           ],
@@ -580,6 +611,11 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         setResearchAnswer(reply);
         setResearchReady(true);
         // PDF is offered as a separate download button, leaving the learning question at the end.
+      }
+      // One deterministic school holdings verdict after the model's broader
+      // book explanation; an LLM must never invent an EFIPS shelf or PDF link.
+      if(expertContext && namedBookTitle){
+        reply=reply.trim()+'\n\n'+renderSaqrBookHoldingStatus(namedBookTitle,namedBookHoldings,locale==='ar'?'ar':'en');
       }
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
     } catch (error) {
