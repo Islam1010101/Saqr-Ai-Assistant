@@ -18,6 +18,16 @@ const suffixes = /(?:[,،؛]\s*|\s+)(?:هل\s+(?:هو\s+)?(?:موجود|متوف
 export function extractSaqrSpecificBookTitle(question: string): string | null {
   const text = String(question || '').trim();
   if (!text || text.length > 350 || /https?:\/\//i.test(text) || generalRequests.test(text)) return null;
+  // Requests to learn about a recognizable work are explanations, not
+  // requests to list whatever matched loosely in the three catalogs.
+  // Require a known bilingual title when the reader omits the word "book";
+  // generic topics still retain their existing educational/chat behavior.
+  const detailMatch=/(?:اعرف|أعرف|معرفه|معرفة|معلومات|تفاصيل|نبذه|نبذة|احكيلي|عرفني|خبرني|اخبرني|أخبرني|tell me|learn|know|information)[\s\S]{0,90}?(?:عن|حول|about)\s+(.+)$/i.exec(text);
+  const detailTitle=detailMatch?.[1]?.replace(/[؟?!.،,؛;:\s]+$/g,'').trim() || '';
+  if(detailTitle && knownBilingualTitles.some(([ar,en])=>
+    normalize(detailTitle)===normalize(ar)||normalize(detailTitle)===normalize(en))){
+    return detailTitle;
+  }
   const hasBookWord = /(?:كتاب|الكتاب|رواي[ةه]|الرواي[ةه]|قص[ةه]|القصة|\bbook\b|\bnovel\b|\bstory\b)/i.test(text);
   if (!hasBookWord) return null;
   const quoted = /["“”«]([^"“”«»]{2,140})["“”»]/u.exec(text);
