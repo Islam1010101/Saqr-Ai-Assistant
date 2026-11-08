@@ -3407,33 +3407,45 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (cloudflarePreviewEnabled) {
       try {
         const accountId = process.env.CLOUDFLARE_ACCOUNT_ID!.trim();
-        const cfResponse = await fetch(
-          `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/v1/chat/completions`,
-          {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${process.env.CLOUDFLARE_AI_API_TOKEN!.trim()}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              model: '@cf/zai-org/glm-4.7-flash',
-              messages: saqrMessages,
-              temperature: 0.7,
-              max_completion_tokens: 500
-            })
-          }
-        );
-
-        if (cfResponse.ok) {
-          const cfCompletion = await cfResponse.json();
-          const cfReply = cfCompletion?.choices?.[0]?.message?.content;
-          if (typeof cfReply === 'string' && cfReply.trim()) {
-            res.setHeader('X-Saqr-AI-Provider', 'cloudflare');
-            return res.status(200).json({ reply: cfReply, provider: 'cloudflare' });
-          }
-          console.warn('Cloudflare preview returned an empty response; using Groq fallback.');
+        // Use the documented Workers AI per-model REST endpoint in preview,
+        // rather than the unified AI Gateway route. Never log credentials.
+        if (!/^[a-f0-9]{32}$/i.test(accountId)) {
+          console.warn('Cloudflare preview account ID has an invalid format; using Groq fallback.');
         } else {
-          console.warn('Cloudflare preview request failed; using Groq fallback. Status:', cfResponse.status);
+          const cfResponse = await fetch(
+            `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/@cf/zai-org/glm-4.7-flash`,
+            {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${process.env.CLOUDFLARE_AI_API_TOKEN!.trim()}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                messages: saqrMessages,
+                temperature: 0.7,
+                max_completion_tokens: 500
+              }),
+              signal: AbortSignal.timeout(20000)
+            }
+          );
+          const cfPayload: any = await cfResponse.json().catch(() => null);
+          if (cfResponse.ok && cfPayload?.success !== false) {
+            const result = cfPayload?.result || cfPayload;
+            const cfReply = result?.response || result?.choices?.[0]?.message?.content;
+            if (typeof cfReply === 'string' && cfReply.trim()) {
+              res.setHeader('X-Saqr-AI-Provider', 'cloudflare');
+              return res.status(200).json({ reply: cfReply, provider: 'cloudflare' });
+            }
+            console.warn('Cloudflare preview returned no usable text; using Groq fallback.');
+          } else {
+            const cfCodes = Array.isArray(cfPayload?.errors)
+              ? cfPayload.errors.map((e: any) => Number(e?.code)).filter(Number.isFinite).slice(0, 3)
+              : [];
+            console.warn('Cloudflare preview failed; using Groq fallback.', {
+              status: cfResponse.status,
+              errorCodes: cfCodes
+            });
+          }
         }
       } catch (error: any) {
         console.warn('Cloudflare preview unavailable; using Groq fallback.', error?.name || 'RequestError');
