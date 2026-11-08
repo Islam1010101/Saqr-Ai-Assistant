@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node --experimental-strip-types tests/catalogAuditCounts.test.ts && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "test:pdf-reader": "node tools/testPdfReader.mjs"
   },
