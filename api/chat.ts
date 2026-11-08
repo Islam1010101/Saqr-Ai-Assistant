@@ -3379,11 +3379,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ? found.map(b => `- "${b.title}" by ${b.author} is located at (Shelf ${b.shelf}, Row ${b.row})`).join('\n') 
       : 'No specific location found in the local database.';
 
-    const groq = new Groq({ apiKey: apiKey.trim() });
-    
-    const completion = await groq.chat.completions.create({
-      model: 'openai/gpt-oss-120b', // استخدام نموذج مجاني سريع ومستقر بشكل دائم
-      messages: [
+    const saqrMessages = [
         {
           role: 'system',
           content: `You are Saqr, a smart school librarian.
@@ -3400,11 +3396,60 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           Provide the response in ${locale === 'ar' ? 'Arabic' : 'English'}.`
         },
         ...messages
-      ],
+    ];
+
+    // Cloudflare is preview-only. Production remains on Groq, unchanged.
+    // Use the exact same instructions and book context for both providers.
+    const cloudflarePreviewEnabled =
+      process.env.VERCEL_ENV === 'preview' &&
+      Boolean(process.env.CLOUDFLARE_AI_API_TOKEN && process.env.CLOUDFLARE_ACCOUNT_ID);
+
+    if (cloudflarePreviewEnabled) {
+      try {
+        const accountId = process.env.CLOUDFLARE_ACCOUNT_ID!.trim();
+        const cfResponse = await fetch(
+          `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/v1/chat/completions`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${process.env.CLOUDFLARE_AI_API_TOKEN!.trim()}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              model: '@cf/zai-org/glm-4.7-flash',
+              messages: saqrMessages,
+              temperature: 0.7,
+              max_completion_tokens: 500
+            })
+          }
+        );
+
+        if (cfResponse.ok) {
+          const cfCompletion = await cfResponse.json();
+          const cfReply = cfCompletion?.choices?.[0]?.message?.content;
+          if (typeof cfReply === 'string' && cfReply.trim()) {
+            res.setHeader('X-Saqr-AI-Provider', 'cloudflare');
+            return res.status(200).json({ reply: cfReply, provider: 'cloudflare' });
+          }
+          console.warn('Cloudflare preview returned an empty response; using Groq fallback.');
+        } else {
+          console.warn('Cloudflare preview request failed; using Groq fallback. Status:', cfResponse.status);
+        }
+      } catch (error: any) {
+        console.warn('Cloudflare preview unavailable; using Groq fallback.', error?.name || 'RequestError');
+      }
+    }
+
+    const groq = new Groq({ apiKey: apiKey.trim() });
+    
+    const completion = await groq.chat.completions.create({
+      model: 'openai/gpt-oss-120b', // استخدام نموذج مجاني سريع ومستقر بشكل دائم
+      messages: saqrMessages,
       temperature: 0.7,
       max_tokens: 500
     });
 
+    res.setHeader('X-Saqr-AI-Provider', cloudflarePreviewEnabled ? 'groq-fallback' : 'groq');
     const reply = completion.choices[0]?.message?.content || 'No reply.';
     return res.status(200).json({ reply });
 
