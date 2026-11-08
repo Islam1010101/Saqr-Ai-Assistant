@@ -4,7 +4,7 @@ import {
   extractSaqrSpecificBookTitle,findSaqrBookTitleHoldings,
   renderSaqrBookHoldingStatus,saqrBookExpertContext
 } from '../src/utils/saqrBookExpert.ts';
-import {findBookReference,pickVerifiedBook} from '../api/book-reference.ts';
+import {findBookReference,pickVerifiedBook} from '../src/utils/saqrOpenLibrary.js';
 import type {SaqrBookMatch} from '../src/utils/saqrCatalogSearch.ts';
 
 for(const [question,title] of [
@@ -85,11 +85,22 @@ console.log('PASS: external bibliographic metadata is optionally verified via an
 const page=readFileSync('pages/SmartSearchPage.tsx','utf8');
 assert.ok(page.includes("if(preIntent==='none' && isSaqrCatalogLookup(userQuery) && !namedBookTitle)"),
   'Broad catalog searches keep their old immediate response');
-assert.ok(page.includes("fetch('/api/book-reference?title='+encodeURIComponent(namedBookTitle)"),
+assert.ok(page.includes("fetch('/api/chat?reference=book&title='+encodeURIComponent(namedBookTitle)"),
   'Only named books trigger external reference lookup');
 assert.ok(page.includes('renderSaqrBookHoldingStatus(namedBookTitle,namedBookHoldings'),
   'School holding status is deterministic, even if external metadata is unavailable');
 assert.ok(page.includes('saqrBookExpertContext(namedBookTitle,namedBookHoldings,externalBookReference)'));
+const chatSource=readFileSync('api/chat.ts','utf8');
+assert.ok(chatSource.includes("if (req.method === 'GET' && req.query?.reference === 'book')"),
+  'Bibliographic lookup uses the existing Chat serverless function');
+assert.ok(chatSource.includes("if (req.method !== 'POST') return res.status(405)"),
+  'Unrecognized HTTP methods keep existing behavior');
+assert.ok(chatSource.includes("const apiKey = process.env.GROQ_API_KEY;"),
+  'Original Groq chat path remains intact');
+assert.ok(chatSource.includes("const completion = await groq.chat.completions.create({"),
+  'Existing chat generation is unchanged');
+assert.ok(!page.includes('/api/book-reference'),
+  'No extra serverless endpoint may be requested on the Hobby plan');
 assert.ok(page.includes('isNewDiscussion(userQuery,messages)'));
 assert.ok(page.includes('isStoryBeginning(userQuery)'));
 assert.ok(page.includes('const SAQR_ELITE_PROMPT ='));
