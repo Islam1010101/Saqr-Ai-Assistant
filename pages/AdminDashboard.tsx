@@ -7,6 +7,8 @@ import AdminReadingChallenge from '../src/components/AdminReadingChallenge';
 import AdminLibraryAttendance from '../src/components/AdminLibraryAttendance';
 import AdminInsightsPanels from '../src/components/AdminInsightsPanels';
 import AdminChildrenReadingReview from '../src/components/AdminChildrenReadingReview';
+import AdminSaqrProviderMetrics from '../src/components/AdminSaqrProviderMetrics';
+import {nationalIdentityBooks} from '../src/utils/nationalIdentityCatalog';
 import { bookData } from '../api/bookData';
 import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
@@ -671,7 +673,11 @@ const AdminDashboard: React.FC = () => {
 
     // Derive catalog totals from the exact book lists displayed on the public library pages.
     const physicalCatalogCount = bookData.length;
-    const arabicDigitalCount = ARABIC_LIBRARY_DATABASE.length + NATIONAL_IDENTITY_DIGITAL_BOOKS.length;
+    const physicalNationalCount = nationalIdentityBooks.length;
+    const physicalShelf41Count = bookData.filter(book=>book.shelf===41).length;
+    const arabicDigitalCoreCount = ARABIC_LIBRARY_DATABASE.length;
+    const nationalDigitalCount = NATIONAL_IDENTITY_DIGITAL_BOOKS.length;
+    const arabicDigitalCount = arabicDigitalCoreCount + nationalDigitalCount;
     const englishDigitalCount = ENGLISH_LIBRARY_DATABASE.length;
     const digitalCatalogCount = arabicDigitalCount + englishDigitalCount;
     const allCatalogCount = physicalCatalogCount + digitalCatalogCount;
@@ -832,6 +838,28 @@ const AdminDashboard: React.FC = () => {
                             <div className="mt-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700 overflow-hidden flex" aria-hidden="true"><div className="bg-sky-500 h-full transition-all duration-500" style={{ width: arabicDigitalShare + '%' }} /><div className="bg-slate-400 dark:bg-slate-500 flex-1" /></div>
                         </div>
                     </div>
+                    <div className="mt-5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/40 p-4 sm:p-5">
+                      <div className="flex flex-wrap gap-2 items-center justify-between mb-3">
+                        <h3 className="font-black text-slate-900 dark:text-white text-sm sm:text-base">{isAr?'التقسيم الدقيق لمحتويات المكتبة':'Verified catalog breakdown'}</h3>
+                        <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{isAr?'من بيانات الفهارس الفعلية':'From live catalog arrays'}</span>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2.5">
+                        {[
+                          {key:'physical',label:isAr?'الكتب الورقية':'Physical catalog',value:physicalCatalogCount},
+                          {key:'national-physical',label:isAr?'هوية وطنية ورقية':'National identity (print)',value:physicalNationalCount},
+                          {key:'arabic',label:isAr?'الرقمية العربية':'Arabic digital',value:arabicDigitalCoreCount},
+                          {key:'english',label:isAr?'الرقمية الإنجليزية':'English digital',value:englishDigitalCount},
+                          {key:'national-digital',label:isAr?'الهوية الوطنية الرقمية':'National identity (digital)',value:nationalDigitalCount}
+                        ].map(item=><div key={item.key} className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-4">
+                          <div className="font-black text-xl sm:text-2xl text-emerald-700 dark:text-emerald-300 tabular-nums">{formatCatalogCount(item.value)}</div>
+                          <div className="mt-2 text-xs font-bold text-slate-600 dark:text-slate-300">{item.label}</div>
+                        </div>)}
+                      </div>
+                      <p className="mt-3 text-xs leading-6 text-slate-500 dark:text-slate-400">
+                        {isAr?`كتب الهوية الوطنية الورقية (${formatCatalogCount(physicalNationalCount)}) ضمن إجمالي الفهرس الورقي، وليست زيادة عليه. منها ${formatCatalogCount(physicalShelf41Count)} سجلًا في الرف 41. الكتب الرقمية الإجمالية: ${formatCatalogCount(digitalCatalogCount)}؛ وإجمالي السجلات دون عدّ مزدوج: ${formatCatalogCount(allCatalogCount)}.`:`National-identity print records (${formatCatalogCount(physicalNationalCount)}) are already included in the physical total, including ${formatCatalogCount(physicalShelf41Count)} on shelf 41. Digital total: ${formatCatalogCount(digitalCatalogCount)}; non-overlapping combined records: ${formatCatalogCount(allCatalogCount)}.`}
+                      </p>
+                      <p className="mt-1 text-[11px] leading-5 text-slate-500 dark:text-slate-400">{isAr?'الأعداد سجلات فهرس، وليست إثباتًا لتوافر النسخة للإعارة أو صلاحية الرابط.':'Counts represent catalog records, not physical inventory availability or link health.'}</p>
+                    </div>
                 </section>
 
                 </>}
@@ -908,6 +936,7 @@ const AdminDashboard: React.FC = () => {
                 </section>
                 </>}
                 {activeSection === 'analytics' && <>
+                <AdminSaqrProviderMetrics isAr={isAr} />
                 <AdminInsightsPanels
                     isAr={isAr} locale={locale} students={studentsList} teachers={teachersList}
                     logs={loginActivity} schedule={scheduleSlots} lessons={lessonReportsList}
