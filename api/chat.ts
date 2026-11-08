@@ -3347,57 +3347,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
-  // Temporary Preview-only connectivity diagnostic: fixed generic prompt, no user data.
-  // Protected by Vercel's Preview authentication. Remove after validation.
-  if (req.method === 'GET' && req.query?.reference === 'cloudflare-connectivity') {
-    if (process.env.VERCEL_ENV !== 'preview') return res.status(404).json({ status: 'unavailable' });
-    res.setHeader('Cache-Control', 'no-store');
-    const accountId = (process.env.CLOUDFLARE_ACCOUNT_ID || '').trim();
-    const token = (process.env.CLOUDFLARE_AI_API_TOKEN || '').trim();
-    if (!/^[a-f0-9]{32}$/i.test(accountId) || !token)
-      return res.status(200).json({
-        status: 'invalid_configuration',
-        accountIdFormatValid: /^[a-f0-9]{32}$/i.test(accountId),
-        hasApiToken: Boolean(token),
-      });
-    try {
-      const response = await fetch(
-        `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/@cf/zai-org/glm-4.7-flash`,
-        {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            messages: [{ role: 'user', content: 'Say hello briefly in Arabic.' }],
-            chat_template_kwargs: { enable_thinking: false },
-            max_completion_tokens: 200
-          }),
-          signal: AbortSignal.timeout(18000)
-        }
-      );
-      const payload: any = await response.json().catch(() => null);
-      const result = payload?.result || payload;
-      const hasText = Boolean(
-        (typeof result?.response === 'string' && result.response.trim()) ||
-        (typeof result?.choices?.[0]?.message?.content === 'string' && result.choices[0].message.content.trim())
-      );
-      const errorCodes = Array.isArray(payload?.errors)
-        ? payload.errors.map((x: any) => Number(x?.code)).filter(Number.isFinite).slice(0, 3)
-        : [];
-      return res.status(200).json({
-        status: response.ok && payload?.success !== false ? 'cloudflare_reachable' : 'cloudflare_error',
-        httpStatus: response.status, hasText, errorCodes,
-        resultKeys: result && typeof result === 'object' ? Object.keys(result).slice(0, 16) : [],
-        topLevelKeys: payload && typeof payload === 'object' ? Object.keys(payload).slice(0, 16) : [],
-        responseType: typeof result?.response,
-        contentType: typeof result?.choices?.[0]?.message?.content,
-        finishReason: result?.choices?.[0]?.finish_reason || null,
-        completionTokens: Number(result?.usage?.completion_tokens || 0)
-      });
-    } catch (e: any) {
-      return res.status(200).json({ status: 'network_error', kind: e?.name || 'UnknownError' });
-    }
-  }
-
   // Optional bibliographic lookup shares the existing Chat function so the
   // Vercel Hobby deployment stays under 12 serverless functions. Ordinary
   // chat POST requests continue through the original code unchanged below.
@@ -3474,6 +3423,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               body: JSON.stringify({
                 messages: saqrMessages,
                 temperature: 0.7,
+                chat_template_kwargs: { enable_thinking: false },
                 max_completion_tokens: 500
               }),
               signal: AbortSignal.timeout(20000)
