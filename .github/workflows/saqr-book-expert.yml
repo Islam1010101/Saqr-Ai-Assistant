@@ -4,7 +4,8 @@ on:
     paths:
       - 'src/utils/saqrBookExpert.ts'
       - 'pages/SmartSearchPage.tsx'
-      - 'api/book-reference.ts'
+      - 'api/chat.ts'
+      - 'src/utils/saqrOpenLibrary.js'
       - 'tests/saqrBookExpert.test.ts'
       - '.github/workflows/saqr-book-expert.yml'
   push:
@@ -12,7 +13,8 @@ on:
     paths:
       - 'src/utils/saqrBookExpert.ts'
       - 'pages/SmartSearchPage.tsx'
-      - 'api/book-reference.ts'
+      - 'api/chat.ts'
+      - 'src/utils/saqrOpenLibrary.js'
       - 'tests/saqrBookExpert.test.ts'
       - '.github/workflows/saqr-book-expert.yml'
 jobs:
