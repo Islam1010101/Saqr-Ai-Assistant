@@ -15,6 +15,7 @@ import { supabase } from '../src/utils/supabase';
 import {nationalIdentityBooks, searchNationalIdentityBooks} from '../src/utils/nationalIdentityCatalog';
 import { stripSaqrEmoji } from '../src/utils/saqrText';
 import { isSaqrCatalogLookup, renderSaqrCatalogAnswer } from '../src/utils/saqrCatalogReply';
+import { withSaqrFollowUpQuestion, type SaqrFollowUpKind } from '../src/utils/saqrFollowUp';
 import { extractSaqrSpecificBookTitle, findSaqrBookTitleHoldings, saqrBookExpertContext, renderSaqrBookHoldingStatus, type SaqrExternalBookReference } from '../src/utils/saqrBookExpert';
 import { saqrExtraContext, isNewDiscussion, discussionOpening } from '../src/utils/saqrSafeEnhancements';
 import {detectSaqrIntroduction,saqrIntroductionReply} from '../src/utils/saqrIntroductionReplies';
@@ -352,6 +353,12 @@ const SmartSearchPage: React.FC = () => {
   const handleSendMessage = async () => {
     if (input.trim() === '' || isLoading) return;
     const userQuery = input.trim();
+    // Only a final, context-aware question is added to displayed answers.
+    // Storytelling, certificates, and the content of prior functions remain intact.
+    const finishSaqrReply = (answer: string, kind: SaqrFollowUpKind = 'auto') =>
+      withSaqrFollowUpQuestion(answer, {
+        locale: locale === 'ar' ? 'ar' : 'en', question: userQuery, history: messages, kind
+      });
     setResearchReady(false);
 
     setMessages(prev => [...prev, { role: 'user', content: userQuery }]);
@@ -363,7 +370,7 @@ const SmartSearchPage: React.FC = () => {
     // follows the existing Saqr flow, prompt and catalogue search unchanged.
     const introductionIntent=detectSaqrIntroduction(userQuery);
     if(introductionIntent){
-      setMessages(prev=>[...prev,{role:'assistant',content:saqrIntroductionReply(introductionIntent,locale==='ar'?'ar':'en')}]);
+      setMessages(prev=>[...prev,{role:'assistant',content:finishSaqrReply(saqrIntroductionReply(introductionIntent,locale==='ar'?'ar':'en'),'introduction')}]);
       setIsLoading(false);
       setSaqrState('idle');
       return;
@@ -401,7 +408,7 @@ const SmartSearchPage: React.FC = () => {
       const books=clean?searchNationalIdentityBooks(clean):nationalIdentityBooks;
       const ar=locale==='ar';
       const info=books.length?books.slice(0,12).map((book,i)=>String(i+1)+'. **'+book.title+'** — '+(ar?'المؤلف':'Author')+': '+book.author+' — '+(ar?'الرف':'Shelf')+' '+book.shelf+' / '+(ar?'الصف':'Row')+' '+book.row).join('\n\n'):(ar?'لا توجد نتائج مطابقة في جناح الهوية الوطنية.':'No matching national-identity catalog titles.');
-      setMessages(prev=>[...prev,{role:'assistant',content:(ar?'## كتب جناح الهوية الوطنية\n\n':'## National Identity Pavilion\n\n')+info+'\n\n'+(ar?'[تصفح كتب جناح الهوية الوطنية](/#/saqr-national-identity/books)':'[Browse National Identity Pavilion books](/#/saqr-national-identity/books)')}]);
+      setMessages(prev=>[...prev,{role:'assistant',content:finishSaqrReply((ar?'## كتب جناح الهوية الوطنية\n\n':'## National Identity Pavilion\n\n')+info+'\n\n'+(ar?'[تصفح كتب جناح الهوية الوطنية](/#/saqr-national-identity/books)':'[Browse National Identity Pavilion books](/#/saqr-national-identity/books)'), 'identity')}]);
       setSaqrState('idle');setIsLoading(false);return;
     }
     // Retrieve verified catalog records across Arabic/English subjects and titles.
@@ -431,7 +438,7 @@ const SmartSearchPage: React.FC = () => {
       ? findSaqrBookTitleHoldings(namedBookTitle,foundBooks) : [];
     if(preIntent==='none' && isSaqrCatalogLookup(userQuery) && !namedBookTitle){
       const answer=renderSaqrCatalogAnswer(userQuery,foundBooks,locale==='ar'?'ar':'en');
-      setMessages(prev=>[...prev,{role:'assistant',content:answer}]);
+      setMessages(prev=>[...prev,{role:'assistant',content:finishSaqrReply(answer,'catalog')}]);
       setSaqrState('idle');
       setIsLoading(false);
       return;
@@ -477,9 +484,9 @@ const SmartSearchPage: React.FC = () => {
            : (locale==='ar'?'لا يظهر حجز لهذه الحصة في البيانات المقروءة، لكن تأكد من توفرها داخل الجدول قبل الحفظ.':'No matching booking was visible in readable records; confirm availability in the timetable before saving.'))
            : (locale==='ar'?'تحب تحجز يوم إيه ورقم الحصة كام؟':'Which day and period would you like to book?');
       } catch {status=locale==='ar'?'لم أتمكن من تأكيد حالة الحصص حاليًا.':'I could not verify the timetable right now.';}
-      setMessages(prev=>[...prev,{role:'assistant',content:locale==='ar'
+      setMessages(prev=>[...prev,{role:'assistant',content:finishSaqrReply(locale==='ar'
         ? 'أقدر أساعدك تختار حصة مناسبة. '+status+' افتح [جدول حجز المكتبة](https://www.efipslibrary.com/#/schedule) لإتمام الحجز بنفسك؛ لا يتم حفظ حجز من المحادثة.'
-        : 'I can help you choose a library period. '+status+' Use the [library schedule](https://www.efipslibrary.com/#/schedule) to submit it; chat cannot save a booking.'}]);
+        : 'I can help you choose a library period. '+status+' Use the [library schedule](https://www.efipslibrary.com/#/schedule) to submit it; chat cannot save a booking.', 'schedule')}]);
       setIsLoading(false);setSaqrState('idle');return;
     }
     if(learningIntent==='personal-library'){
@@ -510,7 +517,7 @@ const SmartSearchPage: React.FC = () => {
       const response=entries.length?intro+entries.slice(0,12).map((title,i)=>String(i+1)+'. '+title).join('\n')+
        (locale==='ar'?'\n\nيلا نقرأ! قل لي اسم كتاب من القائمة لألخص لك موضوعه من وصف الفهرس، أو أساعدك تناقشه.':'\n\nLet’s read! Name one of these books and I can summarize its catalog description or discuss it with you.')
         :(locale==='ar'?'لم أجد كتبًا محفوظة أو استعارات نشطة يمكن لهذا الحساب قراءتها. أضف كتابًا لقائمة القراءة أو راجع الاستعارات في الصفحة الرئيسية.':'No saved books or active loans were visible to this account. Add a book to the reading list or check Home.');
-      setMessages(prev=>[...prev,{role:'assistant',content:response}]);
+      setMessages(prev=>[...prev,{role:'assistant',content:finishSaqrReply(response,'reading-list')}]);
       setIsLoading(false);setSaqrState('idle');return;
     }
     const learningContext=saqrLearningInstructions(learningIntent,safeReader.role,safeReader.grade,locale==='ar'?'ar':'en');
@@ -617,12 +624,12 @@ When the user asks for books, identify the matching titles exactly as recorded, 
       if(expertContext && namedBookTitle){
         reply=reply.trim()+'\n\n'+renderSaqrBookHoldingStatus(namedBookTitle,namedBookHoldings,locale==='ar'?'ar':'en');
       }
-      setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: finishSaqrReply(reply, namedBookTitle ? 'named-book' : learningIntent==='research' ? 'research' : learningIntent==='tutoring' ? 'tutoring' : 'auto') }]);
     } catch (error) {
       console.error('Error sending chat message:', error);
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: locale === 'ar' ? 'حدث خطأ في الاتصال، يرجى المحاولة مرة أخرى.' : 'Connection error, please try again.'
+        content: finishSaqrReply(locale === 'ar' ? 'حدث خطأ في الاتصال، يرجى المحاولة مرة أخرى.' : 'Connection error, please try again.', 'error')
       }]);
       setSaqrState('idle');
     } finally {
