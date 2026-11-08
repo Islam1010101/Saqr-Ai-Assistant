@@ -436,7 +436,10 @@ const SmartSearchPage: React.FC = () => {
       ? extractSaqrSpecificBookTitle(userQuery) : null;
     const namedBookHoldings=namedBookTitle
       ? findSaqrBookTitleHoldings(namedBookTitle,foundBooks) : [];
-    if(preIntent==='none' && isSaqrCatalogLookup(userQuery) && !namedBookTitle){
+    // Explicit "find this title" requests should show verified holdings, not
+    // an unrelated book explanation. "Tell me more" uses the expert path.
+    const explicitCatalogSearch=/(?:^|\s)(?:دورلي|دور\s*لي|دور|ابحث(?:لي)?|إبحث(?:لي)?|وريني|هاتلي|search|find|look\s+for|show\s+me)(?=\s|$)/i.test(userQuery);
+    if(preIntent==='none' && isSaqrCatalogLookup(userQuery) && (explicitCatalogSearch || !namedBookTitle)){
       const answer=renderSaqrCatalogAnswer(userQuery,foundBooks,locale==='ar'?'ar':'en');
       setMessages(prev=>[...prev,{role:'assistant',content:finishSaqrReply(answer,'catalog')}]);
       setSaqrState('idle');
