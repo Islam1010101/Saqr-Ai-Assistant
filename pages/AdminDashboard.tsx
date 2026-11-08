@@ -732,10 +732,10 @@ const AdminDashboard: React.FC = () => {
                      <span className="font-black text-sm text-slate-800 dark:text-slate-100">{isAr ? 'مركز التحكم' : 'Command Center'}</span>
                      <span className="text-[11px] sm:text-xs font-bold text-slate-500 dark:text-slate-400">{isAr ? 'اختر القسم الذي تريد العمل عليه' : 'Open only the section you need'}</span>
                  </div>
-                 <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-7 gap-2">
+                 <div className="flex gap-2 overflow-x-auto overscroll-x-contain pb-1 xl:grid xl:grid-cols-7 xl:overflow-visible scrollbar-thin">
                      {dashboardSections.map(item=><button type="button" key={item.id} aria-pressed={activeSection===item.id}
                          onClick={()=>switchAdminSection(item.id)}
-                         className={`min-w-0 rounded-2xl border px-2 py-3 sm:py-3.5 flex flex-col sm:flex-row xl:flex-col items-center justify-center gap-1.5 sm:gap-2 text-center transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-500 ${activeSection===item.id ? 'bg-emerald-700 text-white border-emerald-700 shadow-md shadow-emerald-700/15' : 'bg-slate-50 dark:bg-slate-800/70 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:border-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30'}`}>
+                         className={`shrink-0 min-w-[122px] xl:min-w-0 rounded-2xl border px-3 py-2.5 sm:py-3 flex flex-row xl:flex-col items-center justify-center gap-2 text-center transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-500 ${activeSection===item.id ? 'bg-emerald-700 text-white border-emerald-700 shadow-md shadow-emerald-700/15' : 'bg-slate-50 dark:bg-slate-800/70 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:border-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30'}`}>
                          <OutlineIcon name={item.icon} className="h-5 w-5 shrink-0"/><span className="text-[11px] sm:text-xs font-black leading-5">{item.label}</span>
                      </button>)}
                  </div>
