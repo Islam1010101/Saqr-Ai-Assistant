@@ -3368,7 +3368,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({
             messages: [{ role: 'user', content: 'Say hello briefly in Arabic.' }],
-            max_completion_tokens: 800
+            chat_template_kwargs: { enable_thinking: false },
+            max_completion_tokens: 200
           }),
           signal: AbortSignal.timeout(18000)
         }
