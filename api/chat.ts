@@ -3368,7 +3368,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({
             messages: [{ role: 'user', content: 'Say hello briefly in Arabic.' }],
-            max_completion_tokens: 120
+            max_completion_tokens: 800
           }),
           signal: AbortSignal.timeout(18000)
         }
@@ -3384,7 +3384,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         : [];
       return res.status(200).json({
         status: response.ok && payload?.success !== false ? 'cloudflare_reachable' : 'cloudflare_error',
-        httpStatus: response.status, hasText, errorCodes
+        httpStatus: response.status, hasText, errorCodes,
+        resultKeys: result && typeof result === 'object' ? Object.keys(result).slice(0, 16) : [],
+        topLevelKeys: payload && typeof payload === 'object' ? Object.keys(payload).slice(0, 16) : [],
+        responseType: typeof result?.response,
+        contentType: typeof result?.choices?.[0]?.message?.content,
+        finishReason: result?.choices?.[0]?.finish_reason || null,
+        completionTokens: Number(result?.usage?.completion_tokens || 0)
       });
     } catch (e: any) {
       return res.status(200).json({ status: 'network_error', kind: e?.name || 'UnknownError' });
