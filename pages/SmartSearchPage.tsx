@@ -520,7 +520,7 @@ const SmartSearchPage: React.FC = () => {
     let externalBookReference:SaqrExternalBookReference|null=null;
     if(namedBookTitle && learningIntent==='none'){
       try {
-        const lookup=await fetch('/api/book-reference?title='+encodeURIComponent(namedBookTitle),{
+        const lookup=await fetch('/api/chat?reference=book&title='+encodeURIComponent(namedBookTitle),{
           signal:AbortSignal.timeout(3800)
         });
         if(lookup.ok){
