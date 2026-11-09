@@ -83,6 +83,7 @@ export default function ImageBookPages({pages,storageKey,ar}:{
       if(existing)return existing;
       const img=new Image();
       img.decoding='async';
+      img.referrerPolicy='no-referrer';
       cache.set(url,img);
       // A bounded image buffer avoids keeping dozens of decoded textbook
       // pages in mobile memory. The browser HTTP cache handles older pages.
