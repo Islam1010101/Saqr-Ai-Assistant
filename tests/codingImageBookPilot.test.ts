@@ -32,12 +32,17 @@ assert.ok(images.includes('preloadCache=useRef(new Map<string,HTMLImageElement>(
   'Keep prefetched images resident instead of cancelling them during page turns');
 assert.ok(!images.includes("return()=>{image.src='';}"),
   'Changing pages must not cancel the in-flight next-page request');
-assert.ok(images.includes('if(!loaded || thumbnailFailed)return'),
+assert.ok(images.includes("if(!loaded || thumbnailFailed || sourceMode!=='cdn')return"),
   'Prefetch should not contend with an unloaded visible page on slow connections');
 assert.ok(images.includes('img.referrerPolicy=\'no-referrer\''),
   'Use the same request context for the preload and visible image');
 assert.ok(images.includes("next.addEventListener('load',thenSecond,{once:true})"),
   'Warm up the second following page once the next image has loaded');
 
+assert.ok(images.includes("'https://lh3.googleusercontent.com/d/'"),'Use separate Google image host for the first attempted page image');
+assert.ok(images.includes("'https://drive.google.com/thumbnail?id='"),'Keep original Drive thumbnail as a second image source');
+assert.ok(images.includes('window.setTimeout'), 'Require a finite timeout for stalled mobile image loading');
+assert.ok(images.includes('setThumbnailFailed(true)'), 'Show single-image Drive preview when both sources are unavailable');
+assert.ok(images.includes('className="efips-image-book-quick-preview"'), 'Let readers bypass slow image loading');
 assert.ok(style.includes('.efips-image-book-stage'), 'Mobile responsive reader styles must exist');
 console.log('PASS: 70 sequential coding image pages, internal EFIPS image reader, unchanged 77 English and 452 Arabic books');
