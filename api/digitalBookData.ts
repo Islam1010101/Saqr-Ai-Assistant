@@ -1,5 +1,6 @@
 import { DIGITAL_SERIES_VOLUMES } from '../src/data/digitalSeriesVolumes.js';
 import { NEW_ENGLISH_DIGITAL_BOOKS_20261109 } from '../src/data/newEnglishDigitalBooks20261109.ts';
+import { EXTRA_ENGLISH_DIGITAL_BOOKS_20261109 } from '../src/data/extraEnglishDigitalBooks20261109.ts';
 
 /** Shared single source for both digital libraries and Saqr catalog search.
  * Keep book metadata, IDs, links and existing display behavior unchanged.
@@ -198,6 +199,20 @@ for(const raw of NEW_ENGLISH_DIGITAL_BOOKS_20261109){
   knownEnglishTitles.add(key);
   knownEnglishLinks.add(book.driveLink);
 }
+// Editor-reviewed supplemental titles from the renamed/new PDFs in English Books / New.
+// All seven supplementary PDFs have school-domain read-only access.
+// Actual download/print/copy restrictions and content rights are not verifiable
+// by the connected Drive metadata tools. See the editorial import notes.
+// All pre-existing digital library records remain unchanged.
+const supplementaryEnglishDriveBooks:DigitalLibraryBook[]=[];
+for(const raw of EXTRA_ENGLISH_DIGITAL_BOOKS_20261109) {
+  const book:DigitalLibraryBook={...raw,keywords:[...raw.keywords]};
+  const key=normalizeDigitalTitle(book.title);
+  if(!key||knownEnglishTitles.has(key)||knownEnglishLinks.has(book.driveLink))continue;
+  supplementaryEnglishDriveBooks.push(book);
+  knownEnglishTitles.add(key);
+  knownEnglishLinks.add(book.driveLink);
+}
 export const ENGLISH_LIBRARY_DATABASE: DigitalLibraryBook[] = expandDigitalSeries(
-  [...ENGLISH_LIBRARY_SEED,...newlyCataloguedEnglishBooks],'en'
+  [...ENGLISH_LIBRARY_SEED,...newlyCataloguedEnglishBooks,...supplementaryEnglishDriveBooks],'en'
 );

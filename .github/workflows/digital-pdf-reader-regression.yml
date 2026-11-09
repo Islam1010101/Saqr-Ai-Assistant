@@ -4,6 +4,8 @@ on:
     paths:
       - 'api/digitalBookData.ts'
       - 'src/data/newEnglishDigitalBooks20261109.ts'
+      - 'src/data/extraEnglishDigitalBooks20261109.ts'
+      - 'tests/englishNewViewOnlyPending.test.ts'
       - 'tests/newEnglishDriveBooks.test.ts'
       - 'pages/EnglishLibraryInternalPage.tsx'
       - 'api/nationalIdentityDigitalBooks.ts'
@@ -28,6 +30,8 @@ on:
     paths:
       - 'api/digitalBookData.ts'
       - 'src/data/newEnglishDigitalBooks20261109.ts'
+      - 'src/data/extraEnglishDigitalBooks20261109.ts'
+      - 'tests/englishNewViewOnlyPending.test.ts'
       - 'tests/newEnglishDriveBooks.test.ts'
       - 'pages/EnglishLibraryInternalPage.tsx'
       - 'api/nationalIdentityDigitalBooks.ts'
@@ -59,4 +63,5 @@ jobs:
       - run: npm run test:pdf-reader
       - run: node --experimental-strip-types tests/saqrDigitalReferrals.test.ts
       - run: node --experimental-strip-types tests/newEnglishDriveBooks.test.ts
+      - run: node --experimental-strip-types tests/englishNewViewOnlyPending.test.ts
       - run: npm run build
