@@ -10,6 +10,15 @@ import DigitalLibraryDialog from '../src/components/DigitalLibraryDialog';
 import DigitalBookReader from '../src/components/DigitalBookReader';
 import { CODING_IMAGE_BOOK_ID, CODING_IMAGE_BOOK_PAGES } from '../src/data/codingImageBookPilot';
 import { COMPLETED_ENGLISH_IMAGE_BOOK_PAGES } from '../src/data/completedEnglishImageBooks20261109';
+/** Load the remaining large photo-book page lists on demand, not on library entry. */
+const RemainingEnglishPhotoBookReader = React.lazy(() => import('../src/components/RemainingEnglishPhotoBookReader'));
+const REMAINING_COMPLETED_ENGLISH_IMAGE_IDS = new Set([
+    'EN_NEW_20261109_05', // Knowledge Encyclopedia
+    'EN_NEW_20261109_07', // 1000 Inventions and Discoveries
+    'EN_NEW_20261109_10', // Dog Man: Twenty Thousand Fleas Under the Sea
+    'EN_NEW_20261109_16', // Space! The Universe
+    'EN_NEW_20261109_18', // Artist's Painting Techniques
+]);
 import { digitalReaderSource } from '../src/utils/digitalReaderSource';
 import { useDigitalReadingProgress } from '../src/utils/useDigitalReadingProgress';
 import { pdfProgressPercent, type PdfReadingState } from '../src/utils/pdfReadingState';
@@ -208,6 +217,23 @@ const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void
     const ageGroup = book?.reviewedAgeGroup || book?.readingAudience ? ageLabels[(book.reviewedAgeGroup || book.readingAudience)!] : '';
 
     if (!book) return null;
+    if (readerOpen && REMAINING_COMPLETED_ENGLISH_IMAGE_IDS.has(String(book.id))) return (
+        <React.Suspense fallback={
+            <DigitalLibraryDialog title={book.title} variant="reader" onClose={onClose}>
+                <section className="efips-book-reader flex flex-col items-center justify-center gap-5 p-6" role="status">
+                    <h2 dir="auto">{book.title}</h2>
+                    <p>{locale==='ar'?'جاري تجهيز صفحات الكتاب...':'Preparing book pages...'}</p>
+                    <button type="button" data-book-close onClick={onClose}
+                        className="rounded-xl bg-emerald-700 px-5 py-3 text-white font-bold">
+                        {locale==='ar'?'إغلاق':'Close'}
+                    </button>
+                </section>
+            </DigitalLibraryDialog>
+        }>
+            <RemainingEnglishPhotoBookReader book={book} locale={locale}
+                onBack={() => setReaderOpen(false)} onClose={onClose} />
+        </React.Suspense>
+    );
     if (readerOpen) return <DigitalBookReader title={book.title} source={book.driveLink} bookKey={digitalBookKey('en', book)} locale={locale}
         schoolOnly={Boolean(book.requiresSchoolGoogleAccess)} sourceSizeBytes={book.fileSizeBytes}
         imagePages={String(book.id)===CODING_IMAGE_BOOK_ID ? CODING_IMAGE_BOOK_PAGES : COMPLETED_ENGLISH_IMAGE_BOOK_PAGES[String(book.id)]}
