@@ -141,6 +141,11 @@ export default function DigitalBookReader({ title, source, bookKey, locale, onBa
             </button>}
           </section>}
           {showPreview && preview && <div className="efips-reader-preview-host">
+            {embeddedSchoolPreview && !schoolAccess && <button
+              type="button" onClick={() => setShowPreview(false)}
+              className="self-center m-2 px-5 py-2 rounded-xl bg-emerald-700 text-white font-bold text-sm">
+              {ar?'استخدم قارئ صقر الكامل':'Use full EFIPS reader'}
+            </button>}
             {!embeddedSchoolPreview && <div className="efips-reader-preview-controls" role="status" aria-live="polite">
               {error
                 ? <span>{downloadDisabled
