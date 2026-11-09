@@ -8,6 +8,7 @@ import { useReadingPassport, digitalBookKey } from '../src/utils/readingPassport
 import DigitalBookRating from '../src/components/DigitalBookRating';
 import DigitalLibraryDialog from '../src/components/DigitalLibraryDialog';
 import DigitalBookReader from '../src/components/DigitalBookReader';
+import { CODING_IMAGE_BOOK_ID, CODING_IMAGE_BOOK_PAGES } from '../src/data/codingImageBookPilot';
 import { digitalReaderSource } from '../src/utils/digitalReaderSource';
 import { useDigitalReadingProgress } from '../src/utils/useDigitalReadingProgress';
 import { pdfProgressPercent, type PdfReadingState } from '../src/utils/pdfReadingState';
@@ -207,7 +208,9 @@ const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void
 
     if (!book) return null;
     if (readerOpen) return <DigitalBookReader title={book.title} source={book.driveLink} bookKey={digitalBookKey('en', book)} locale={locale}
-        schoolOnly={Boolean(book.requiresSchoolGoogleAccess)} sourceSizeBytes={book.fileSizeBytes} onBack={() => setReaderOpen(false)} onClose={onClose} />;
+        schoolOnly={Boolean(book.requiresSchoolGoogleAccess)} sourceSizeBytes={book.fileSizeBytes}
+        imagePages={String(book.id)===CODING_IMAGE_BOOK_ID ? CODING_IMAGE_BOOK_PAGES : undefined}
+        onBack={() => setReaderOpen(false)} onClose={onClose} />;
 
     return (
         <DigitalLibraryDialog title={book.title} onClose={onClose}>

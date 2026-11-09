@@ -1,0 +1,28 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { CODING_IMAGE_BOOK_ID, CODING_IMAGE_BOOK_PAGES, CODING_IMAGE_BOOK_FOLDER_ID } from '../src/data/codingImageBookPilot.ts';
+import { ENGLISH_LIBRARY_DATABASE, ARABIC_LIBRARY_DATABASE } from '../api/digitalBookData.ts';
+assert.equal(CODING_IMAGE_BOOK_ID,'EN_NEW_20261109_17');
+assert.equal(CODING_IMAGE_BOOK_FOLDER_ID,'1z5ZUJZ4hlzGEFp9DQ3WDP1w1avpjO-Wg');
+assert.equal(CODING_IMAGE_BOOK_PAGES.length,70,'All observed Coding JPEG pages 1..70 are present');
+assert.deepEqual(CODING_IMAGE_BOOK_PAGES.map(item=>item.page),Array.from({length:70},(_,i)=>i+1));
+assert.equal(new Set(CODING_IMAGE_BOOK_PAGES.map(item=>item.fileId)).size,70);
+for(const image of CODING_IMAGE_BOOK_PAGES)assert.match(image.fileId,/^[A-Za-z0-9_-]{20,}$/);
+assert.equal(ENGLISH_LIBRARY_DATABASE.length,77);
+assert.equal(ARABIC_LIBRARY_DATABASE.length,452);
+const book=ENGLISH_LIBRARY_DATABASE.find(b=>String(b.id)===CODING_IMAGE_BOOK_ID);
+assert.ok(book,'Original Coding catalog entry must remain unchanged');
+assert.ok(book.driveLink.includes('199Avu7T8tUyLqDcYYuDSl7TyLTWKecFk'));
+const englishUI=readFileSync('pages/EnglishLibraryInternalPage.tsx','utf8');
+const readerUI=readFileSync('src/components/DigitalBookReader.tsx','utf8');
+const images=readFileSync('src/components/ImageBookPages.tsx','utf8');
+const style=readFileSync('src/components/digitalBookReader.css','utf8');
+assert.ok(englishUI.includes('String(book.id)===CODING_IMAGE_BOOK_ID ? CODING_IMAGE_BOOK_PAGES : undefined'),
+  'Use image mode only for the coding pilot');
+assert.ok(readerUI.includes('imagePages?.length ? <ImageBookPages'), 'Reader must branch into images when provided');
+assert.ok(readerUI.includes('<PdfBookPages'), 'Original PDF.js mode is still present');
+assert.ok(images.includes('writePdfState'), 'Bookmark and page progress must be saved');
+assert.ok(images.includes('drive.google.com/thumbnail?id='), 'Display individual Drive image thumbnails');
+assert.ok(images.includes('drive.google.com/file/d/'), 'Single-page preview fallback for blocked image thumbnails');
+assert.ok(style.includes('.efips-image-book-stage'), 'Mobile responsive reader styles must exist');
+console.log('PASS: 70 sequential coding image pages, internal EFIPS image reader, unchanged 77 English and 452 Arabic books');
