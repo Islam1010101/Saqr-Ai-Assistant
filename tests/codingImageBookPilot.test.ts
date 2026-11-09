@@ -24,5 +24,20 @@ assert.ok(readerUI.includes('<PdfBookPages'), 'Original PDF.js mode is still pre
 assert.ok(images.includes('writePdfState'), 'Bookmark and page progress must be saved');
 assert.ok(images.includes('drive.google.com/thumbnail?id='), 'Display individual Drive image thumbnails');
 assert.ok(images.includes('drive.google.com/file/d/'), 'Single-page preview fallback for blocked image thumbnails');
+assert.ok(images.includes('fastImageWidth = (viewportWidth:number) => viewportWidth <= 720 ? 840 : 1100'),
+  'Default reading thumbnails should be smaller on mobile and desktop than the former 1600px default');
+assert.ok(images.includes("const [highQuality,setHighQuality]=useState(false)"),
+  'Use the quicker image size unless the reader explicitly enables HD');
+assert.ok(images.includes('preloadCache=useRef(new Map<string,HTMLImageElement>())'),
+  'Keep prefetched images resident instead of cancelling them during page turns');
+assert.ok(!images.includes("return()=>{image.src='';}"),
+  'Changing pages must not cancel the in-flight next-page request');
+assert.ok(images.includes('if(!loaded || thumbnailFailed)return'),
+  'Prefetch should not contend with an unloaded visible page on slow connections');
+assert.ok(images.includes('img.referrerPolicy=\'no-referrer\''),
+  'Use the same request context for the preload and visible image');
+assert.ok(images.includes("next.addEventListener('load',thenSecond,{once:true})"),
+  'Warm up the second following page once the next image has loaded');
+
 assert.ok(style.includes('.efips-image-book-stage'), 'Mobile responsive reader styles must exist');
 console.log('PASS: 70 sequential coding image pages, internal EFIPS image reader, unchanged 77 English and 452 Arabic books');
