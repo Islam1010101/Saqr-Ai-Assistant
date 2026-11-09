@@ -58,7 +58,7 @@ export async function createSchoolDrivePdfBookTask(
   let task:PDFDocumentLoadingTask;
   class AuthorizedSchoolRange extends pdf.PDFDataRangeTransport{
     requestDataRange(begin:number,end:number){
-      void fetchSchoolPdfByteRange(fileId,providerToken,begin,end,rangeController.signal).then(bytes=>{
+      void fetchSchoolPdfByteRange(fileId,providerToken,begin,end,rangeController.signal,fetch,bootstrap.length).then(bytes=>{
         if(!signal.aborted && !rangeController.signal.aborted)this.onDataRange(begin,bytes);
       }).catch(error=>{
         if(!signal.aborted && !rangeController.signal.aborted){
