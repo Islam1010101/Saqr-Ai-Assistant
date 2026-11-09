@@ -17,7 +17,7 @@ assert.ok(!englishUi.includes('book.requiresSchoolGoogleAccess ? (<a'),
   'Do not open a new Google Drive browser tab as the primary reading action');
 assert.ok(englishUi.includes('digitalReaderSource(book.driveLink) ? (<button'),
   'Reuse the same internal read button for both school and public books');
-assert.ok(readerUi.includes('!schoolOnly && <div className="efips-reader-native"'),
+assert.ok(readerUi.includes('(!schoolOnly || !!schoolAccess) && <div className="efips-reader-native"'),
   'Never try to download restricted PDFs with the anonymous PDF.js proxy');
 assert.ok(readerUi.includes('src={preview} loading="eager"'),
   'Render Google Drive preview directly inside the existing fullscreen reader');
