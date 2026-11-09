@@ -39,5 +39,10 @@ assert.ok(images.includes('img.referrerPolicy=\'no-referrer\''),
 assert.ok(images.includes("next.addEventListener('load',thenSecond,{once:true})"),
   'Warm up the second following page once the next image has loaded');
 
+assert.ok(images.includes("'https://lh3.googleusercontent.com/d/'"),'Use separate Google image host for the first attempted page image');
+assert.ok(images.includes("'https://drive.google.com/thumbnail?id='"),'Keep original Drive thumbnail as a second image source');
+assert.ok(images.includes('window.setTimeout'), 'Require a finite timeout for stalled mobile image loading');
+assert.ok(images.includes('setThumbnailFailed(true)'), 'Show single-image Drive preview when both sources are unavailable');
+assert.ok(images.includes('className="efips-image-book-quick-preview"'), 'Let readers bypass slow image loading');
 assert.ok(style.includes('.efips-image-book-stage'), 'Mobile responsive reader styles must exist');
 console.log('PASS: 70 sequential coding image pages, internal EFIPS image reader, unchanged 77 English and 452 Arabic books');
