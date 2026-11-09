@@ -294,3 +294,60 @@ body.efips-reader-open .efips-navbar-surface {
 .efips-image-book-quick-preview { display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:.65rem .9rem; background:#047857; color:#fff; font-size:.875rem; font-weight:700; border-radius:.75rem; border:0; cursor:pointer; }
 .efips-image-book-quick-preview:focus-visible { outline:3px solid #0ea5e9; outline-offset:2px; }
 .dark .efips-image-book-quick-preview { background:#059669; color:#fff; }
+
+/* Coding image-reader: lightweight 3D paper-turn effect, drawn only AFTER a
+   page loads. Pure compositor transforms prevent reflow and extra Drive
+   downloads; the sheet direction follows previous / next navigation. */
+.efips-image-book-stage { perspective: 1400px; }
+.efips-image-book-sheet {
+  position:relative;
+  flex:none;
+  margin:0 auto;
+  background:white;
+  transform-style:preserve-3d;
+  backface-visibility:hidden;
+  border-radius:2px;
+  box-shadow:0 7px 22px rgb(15 23 42 / .19), 0 0 0 1px rgb(15 23 42 / .07);
+}
+.efips-image-book-sheet .efips-image-book-page {
+  border-radius:2px;
+  box-shadow:none;
+}
+.efips-image-book-sheet::after {
+  content:'';
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(to right, rgb(15 23 42 / .17), transparent 11%, transparent 84%, rgb(15 23 42 / .08));
+  opacity:.46;
+}
+.efips-image-book-sheet--next {
+  transform-origin:left center;
+  animation:efips-image-book-turn-next 390ms cubic-bezier(.19,.76,.2,1) both;
+}
+.efips-image-book-sheet--prev {
+  transform-origin:right center;
+  animation:efips-image-book-turn-prev 390ms cubic-bezier(.19,.76,.2,1) both;
+}
+@keyframes efips-image-book-turn-next {
+  0% { transform:rotateY(-68deg) translateX(14px) scale(.975); filter:brightness(.77); }
+  55% { transform:rotateY(-12deg) translateX(3px) scale(.993); filter:brightness(.93); }
+  100% { transform:rotateY(0) translateX(0) scale(1); filter:brightness(1); }
+}
+@keyframes efips-image-book-turn-prev {
+  0% { transform:rotateY(68deg) translateX(-14px) scale(.975); filter:brightness(.77); }
+  55% { transform:rotateY(12deg) translateX(-3px) scale(.993); filter:brightness(.93); }
+  100% { transform:rotateY(0) translateX(0) scale(1); filter:brightness(1); }
+}
+@media (max-width:600px) {
+  .efips-image-book-sheet--next,.efips-image-book-sheet--prev {
+    animation-duration:310ms;
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  .efips-image-book-sheet--next,.efips-image-book-sheet--prev {
+    animation:none!important;
+    transform:none!important;
+    filter:none!important;
+  }
+}
