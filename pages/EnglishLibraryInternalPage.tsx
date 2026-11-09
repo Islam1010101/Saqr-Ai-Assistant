@@ -9,6 +9,7 @@ import DigitalBookRating from '../src/components/DigitalBookRating';
 import DigitalLibraryDialog from '../src/components/DigitalLibraryDialog';
 import DigitalBookReader from '../src/components/DigitalBookReader';
 import { CODING_IMAGE_BOOK_ID, CODING_IMAGE_BOOK_PAGES } from '../src/data/codingImageBookPilot';
+import { COMPLETED_ENGLISH_IMAGE_BOOK_PAGES } from '../src/data/completedEnglishImageBooks20261109';
 import { digitalReaderSource } from '../src/utils/digitalReaderSource';
 import { useDigitalReadingProgress } from '../src/utils/useDigitalReadingProgress';
 import { pdfProgressPercent, type PdfReadingState } from '../src/utils/pdfReadingState';
@@ -209,7 +210,7 @@ const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void
     if (!book) return null;
     if (readerOpen) return <DigitalBookReader title={book.title} source={book.driveLink} bookKey={digitalBookKey('en', book)} locale={locale}
         schoolOnly={Boolean(book.requiresSchoolGoogleAccess)} sourceSizeBytes={book.fileSizeBytes}
-        imagePages={String(book.id)===CODING_IMAGE_BOOK_ID ? CODING_IMAGE_BOOK_PAGES : undefined}
+        imagePages={String(book.id)===CODING_IMAGE_BOOK_ID ? CODING_IMAGE_BOOK_PAGES : COMPLETED_ENGLISH_IMAGE_BOOK_PAGES[String(book.id)]}
         onBack={() => setReaderOpen(false)} onClose={onClose} />;
 
     return (

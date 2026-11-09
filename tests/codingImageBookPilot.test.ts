@@ -17,7 +17,7 @@ const englishUI=readFileSync('pages/EnglishLibraryInternalPage.tsx','utf8');
 const readerUI=readFileSync('src/components/DigitalBookReader.tsx','utf8');
 const images=readFileSync('src/components/ImageBookPages.tsx','utf8');
 const style=readFileSync('src/components/digitalBookReader.css','utf8');
-assert.ok(englishUI.includes('String(book.id)===CODING_IMAGE_BOOK_ID ? CODING_IMAGE_BOOK_PAGES : undefined'),
+assert.ok(englishUI.includes('String(book.id)===CODING_IMAGE_BOOK_ID ? CODING_IMAGE_BOOK_PAGES : COMPLETED_ENGLISH_IMAGE_BOOK_PAGES[String(book.id)]'),
   'Use image mode only for the coding pilot');
 assert.ok(readerUI.includes('imagePages?.length ? <ImageBookPages'), 'Reader must branch into images when provided');
 assert.ok(readerUI.includes('<PdfBookPages'), 'Original PDF.js mode is still present');
