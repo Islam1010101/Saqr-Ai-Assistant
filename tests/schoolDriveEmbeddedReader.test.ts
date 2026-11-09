@@ -22,7 +22,13 @@ assert.ok(readerUi.includes('!schoolOnly && <div className="efips-reader-native"
 assert.ok(readerUi.includes('src={preview} loading="eager"'),
   'Render Google Drive preview directly inside the existing fullscreen reader');
 assert.ok(readerUi.includes('embeddedSchoolPreview'),
-  'Provide a clear, school-login-aware restricted-file reading mode');
+  'Keep school-restricted files in a dedicated embedded preview mode');
+assert.ok(!readerUi.includes('الكتاب معروض داخل واجهة مكتبة صقر عبر Google Drive'),
+  'Remove the confusing banner above the school-only PDF preview');
+assert.ok(readerUi.includes('{!embeddedSchoolPreview && <div className="efips-reader-preview-controls"'),
+  'Do not cover school-only book pages with the old preview status toolbar');
+assert.ok(readerUi.includes('{!schoolOnly && <a href={source}'),
+  'Do not promote external Google Drive as a primary action for school-only books');
 assert.ok(readerUi.includes('href={source} target="_blank"'),
   'Keep an alternate signed-in Drive tab for browsers blocking third-party cookies');
 
