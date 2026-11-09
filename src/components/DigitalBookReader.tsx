@@ -8,14 +8,18 @@ import { schoolDriveFileId } from '../utils/schoolDrivePdfRanges';
 import { supabase } from '../utils/supabase';
 import './digitalBookReader.css';
 
-export default function DigitalBookReader({ title, source, bookKey, locale, onBack, onClose, schoolOnly = false }: {
+export default function DigitalBookReader({ title, source, bookKey, locale, onBack, onClose, schoolOnly = false, sourceSizeBytes }: {
   title: string; source: string; bookKey: string; locale: string; onBack: () => void; onClose: () => void;
   /** School-domain PDFs can be previewed by a signed-in school user, not fetched by the anonymous public-PDF endpoint. */
   schoolOnly?: boolean;
+  sourceSizeBytes?: number;
 }) {
   const ar = locale === 'ar';
   const preview = digitalReaderSource(source);
   const embeddedSchoolPreview = schoolOnly && Boolean(preview);
+  // Google may fail to preview PDFs even well below 100 MB; never show its
+  // broken Download fallback for our known large school books.
+  const allowDrivePreview = !schoolOnly || (Number.isSafeInteger(sourceSizeBytes) && Number(sourceSizeBytes) > 0 && Number(sourceSizeBytes) <= 20 * 1024 * 1024);
   const schoolFileId = schoolOnly ? schoolDriveFileId(source) : null;
   const [schoolToken,setSchoolToken] = useState<string | null>(null);
   const [checkingSchoolToken,setCheckingSchoolToken] = useState(schoolOnly);
@@ -28,14 +32,15 @@ export default function DigitalBookReader({ title, source, bookKey, locale, onBa
   const storageKey = pdfReadingStorageKey(deviceAccount || user?.id || null, bookKey, preview || source);
   const [error, setError] = useState<Error | null>(null);
   // Open the known book preview on the very first render, no 3-second fallback.
-  const [showPreview, setShowPreview] = useState(() => !schoolOnly && Boolean(preview));
+  const [showPreview, setShowPreview] = useState(() => allowDrivePreview && Boolean(preview));
   const [ready, setReady] = useState(false);
   const [attempt, setAttempt] = useState(0);
   // Keep the on-site PDF reader mounted in the background so that page
   // bookmarks and saved position remain available as soon as it is ready.
   useEffect(() => {
-    setError(null); setShowPreview(!schoolOnly && Boolean(preview)); setReady(false); setAttempt(0);
-  }, [bookKey, source, preview, schoolOnly]);
+    setError(null); setShowPreview(allowDrivePreview && Boolean(preview)); setReady(false); setAttempt(0);
+  }, [bookKey, source, preview, schoolOnly, allowDrivePreview]);
+  useEffect(()=>{if(schoolOnly && schoolAccess)setShowPreview(false);},[schoolOnly,schoolAccess?.token]);
   useEffect(() => {
     if(!schoolOnly){setCheckingSchoolToken(false);setSchoolToken(null);return;}
     if(!user?.id){setCheckingSchoolToken(false);return;}
@@ -76,7 +81,7 @@ export default function DigitalBookReader({ title, source, bookKey, locale, onBa
     }
   };
   const retry = () => {
-    setError(null); setReady(false); setShowPreview(!schoolOnly && Boolean(preview));
+    setError(null); setReady(false); setShowPreview(allowDrivePreview && Boolean(preview));
     setAttempt(v => v + 1);
   };
   const reportReaderError = (failure: Error) => { setError(failure); setShowPreview(!schoolOnly); };
@@ -130,7 +135,7 @@ export default function DigitalBookReader({ title, source, bookKey, locale, onBa
               ? 'الموافقة اختيارية وتسمح للتطبيق بقراءة ملفات Google Drive التي يحق لحسابك الوصول إليها. قد تحتاج موافقة مسؤول Google Workspace. لن نرسل رمز Google إلى سيرفر الموقع.'
               : 'Optional Google consent permits the app to read Drive files your account can access. Your Workspace admin may need to approve it. The token stays in your browser.'}
             </p>
-            {preview && <button type="button" onClick={() => setShowPreview(true)}
+            {preview && allowDrivePreview && <button type="button" onClick={() => setShowPreview(true)}
               className="underline text-sky-700 dark:text-sky-300 text-sm font-bold">
               {ar?'جرّب معاينة Google للكتب الصغيرة':'Try Google preview for small PDFs'}
             </button>}
