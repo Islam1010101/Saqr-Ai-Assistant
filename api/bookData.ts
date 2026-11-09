@@ -4,7 +4,7 @@ import {shelf30SourceRecords} from './shelf30Catalog.ts';
 import {uploadedLibraryBooks} from './uploadedCatalog20261028.ts';
 import {reviewedShelf41Books} from './shelf41ReviewedCatalog.ts';
 import { physicalBookAdditions } from './bookAdditions.ts';
-import {orisonCuratedRecords} from './orisonCurated20261109.ts';
+import {orisonCuratedRecords} from '../src/data/orisonCurated20261109.ts';
 import { classifyLiteraryGenre, literaryGenreLabels } from '../src/utils/literaryGenreCatalog.ts';
 import { refineLegacyLiterature } from '../src/utils/legacyLiteratureClassification.ts';
 import { applyPhysicalCatalogAudit } from '../src/utils/catalogBibliographicCorrections.ts';
