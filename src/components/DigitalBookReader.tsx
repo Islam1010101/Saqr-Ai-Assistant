@@ -46,7 +46,7 @@ export default function DigitalBookReader({ title, source, bookKey, locale, onBa
         <h2 dir="auto">{title}</h2>
         <nav className="efips-reader-nav" aria-label={ar ? 'أدوات القراءة' : 'Reading controls'}>
           <button ref={back} type="button" onClick={onBack}>{ar ? 'تفاصيل الكتاب' : 'Book details'}</button>
-          <a href={source} target="_blank" rel="noopener noreferrer">{ar ? 'فتح المصدر في نافذة جديدة' : 'Open source in new tab'}</a>
+          {!schoolOnly && <a href={source} target="_blank" rel="noopener noreferrer">{ar ? 'فتح المصدر في نافذة جديدة' : 'Open source in new tab'}</a>}
           <button type="button" data-book-close onClick={onClose}>{ar ? 'إغلاق القارئ' : 'Close reader'}</button>
         </nav>
       </header>
@@ -57,12 +57,8 @@ export default function DigitalBookReader({ title, source, bookKey, locale, onBa
               onError={reportReaderError} />
           </div>}
           {showPreview && preview && <div className="efips-reader-preview-host">
-            <div className="efips-reader-preview-controls" role="status" aria-live="polite">
-              {embeddedSchoolPreview
-                ? <span>{ar
-                    ? 'الكتاب معروض داخل واجهة مكتبة صقر عبر Google Drive بحساب المدرسة. استخدم حسابك المدرسي إذا طُلب تسجيل الدخول؛ أدوات حفظ الصفحات في القارئ الأصلي لا تعمل مع الملفات المقيدة.'
-                    : 'School-account Google Drive preview inside the EFIPS reader. Sign in with your school Google account if prompted; native PDF bookmarks and page tools are unavailable for restricted files.'}</span>
-                : error
+            {!embeddedSchoolPreview && <div className="efips-reader-preview-controls" role="status" aria-live="polite">
+              {error
                 ? <span>{downloadDisabled
                     ? (ar ? 'إعدادات Google Drive تمنع تحميل هذا الكتاب داخل القارئ؛ اقرأه عبر المعاينة.' : 'Drive settings block direct PDF loading. Read with the preview.')
                     : sourceRangeUnsupported
@@ -73,15 +69,13 @@ export default function DigitalBookReader({ title, source, bookKey, locale, onBa
                 : ready
                   ? <span>{ar ? 'القارئ الداخلي وأدوات حفظ الصفحات جاهزة.' : 'The page reader and reading bookmarks are ready.'}</span>
                   : <span>{ar ? 'معاينة الكتاب مفتوحة، وجاري تجهيز أدوات الصفحات والحفظ.' : 'Book preview opened. Page and bookmark tools are loading.'}</span>}
-              {embeddedSchoolPreview
-                ? <button type="button" onClick={retry}>{ar ? 'إعادة تحميل المعاينة' : 'Reload preview'}</button>
-                : ready && !error
+              {ready && !error
                 ? <button type="button" onClick={() => setShowPreview(false)}>{ar ? 'استخدام القارئ وحفظ موضع القراءة' : 'Use page reader and save progress'}</button>
                 : error
                 ? <button type="button" onClick={retry}>{ar ? 'إعادة محاولة القارئ الداخلي' : 'Retry internal reader'}</button>
                 : null}
-            </div>
-            <iframe key={embeddedSchoolPreview ? `${bookKey}:${attempt}` : bookKey} src={preview} loading="eager" title={ar ? `معاينة: ${title}` : `Preview: ${title}`}
+            </div>}
+                        <iframe key={embeddedSchoolPreview ? `${bookKey}:${attempt}` : bookKey} src={preview} loading="eager" title={ar ? `معاينة: ${title}` : `Preview: ${title}`}
               referrerPolicy="no-referrer" allow="fullscreen" allowFullScreen />
           </div>}
           {error && !preview && <div className="efips-reader-fallback" role="alert">
