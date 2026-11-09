@@ -47,7 +47,7 @@ assert.ok(images.includes('efips-image-book-error'), 'Show an in-site retry pane
 assert.ok(style.includes('.efips-image-book-stage'), 'Mobile responsive reader styles must exist');
 assert.ok(images.includes('readPdfState(storageKey,.25)'), 'Image reader restores 25% zoom independently of the PDF.js minimum');
 assert.ok(images.includes('Math.max(.25,Number((z-.25).toFixed(2)))'), 'Image reader zooms down to 25%');
-assert.ok(images.includes("setTurnDirection(next>page ? 'next' : 'prev')"), 'Page-turn motion responds to previous/next navigation');
+assert.ok(/setTurnDirection\(next>page\s*\?\s*'next'\s*:\s*'prev'\)/.test(images), 'Page-turn motion responds to previous/next navigation');
 assert.ok(images.includes("loaded && turnDirection"), 'Do not animate blank pages while Drive loads');
 assert.ok(images.includes("key={current.fileId}"), 'Each new page should have a stable independent page-flip surface');
 assert.ok(style.includes('@keyframes efips-image-book-turn-next'), 'Advance page gets a paper-turn animation');
