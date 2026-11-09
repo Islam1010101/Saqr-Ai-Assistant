@@ -198,6 +198,10 @@ assert.notEqual(key,pdfReadingStorageKey('student-B','digital:en:9','file-v1'));
 assert.notEqual(key,pdfReadingStorageKey('student-A','digital:en:9','file-v2'));
 assert.equal(writePdfState(key,{page:4,bookmarks:[2,4],zoom:1.5}),true);
 assert.deepEqual(readPdfState(key),{page:4,bookmarks:[2,4],zoom:1.5});
+values.set(key!,JSON.stringify({page:4,bookmarks:[2,4],zoom:.25}));
+assert.equal(readPdfState(key).zoom,.75,'The PDF.js reader keeps its existing 75% minimum');
+assert.equal(readPdfState(key,.25).zoom,.25,'The image reader restores the saved 25% zoom');
+
 assert.equal(readPdfState(pdfReadingStorageKey('student-B','digital:en:9','file-v1')).page,1);
 assert.equal(clampPdfPage(100,6),6);assert.equal(clampPdfPage(-1,6),1);assert.equal(parsePdfPage('٣٢'),32);
 values.set(key!,JSON.stringify({page:-5,bookmarks:[-1,2,2,'5'],zoom:900}));

@@ -21,12 +21,13 @@ const driveImagePreview = (id:string) =>
 export default function ImageBookPages({pages,storageKey,ar}:{
   pages:ReadonlyArray<ImageBookPage>;storageKey:string|null;ar:boolean;
 }){
-  const initial=useRef(readPdfState(storageKey)).current;
+  const initial=useRef(readPdfState(storageKey,.25)).current;
   const baseWidth=useRef(typeof window!=='undefined' ? fastImageWidth(window.innerWidth) : 1100).current;
   const [highQuality,setHighQuality]=useState(false);
   const width=highQuality ? 1600 : baseWidth;
   const [page,setPage]=useState(()=>clampPdfPage(initial.page,pages.length));
   const [pageInput,setPageInput]=useState(String(clampPdfPage(initial.page,pages.length)));
+  const [turnDirection,setTurnDirection]=useState<'next'|'prev'|null>(null);
   const [zoom,setZoom]=useState(initial.zoom);
   const [bookmarks,setBookmarks]=useState<number[]>(initial.bookmarks.filter(n=>n<=pages.length));
   const [loaded,setLoaded]=useState(false);
@@ -48,6 +49,7 @@ export default function ImageBookPages({pages,storageKey,ar}:{
   const go=useCallback((to:number)=>{
     const next=clampPdfPage(to,pages.length);
     if(next===page)return;
+    setTurnDirection(next>page ? 'next' : 'prev');
     setPage(next);setPageInput(String(next));setSourceMode('cdn');
     const cached=pages[next-1] && preloadCache.current.get(driveReaderImage(pages[next-1].fileId,width));
     setLoaded(Boolean(cached?.complete && cached.naturalWidth>0));
@@ -172,10 +174,12 @@ export default function ImageBookPages({pages,storageKey,ar}:{
       <button type="button" aria-pressed={bookmarks.includes(page)} onClick={toggleBookmark}>
         {bookmarks.includes(page)?(ar?'إزالة العلامة':'Remove bookmark'):(ar?'حفظ الصفحة':'Bookmark')}
       </button>
-      <button type="button" onClick={()=>setZoom(z=>Math.max(.75,Number((z-.25).toFixed(2))))}
+      <button type="button" disabled={zoom<=.25}
+        onClick={()=>setZoom(z=>Math.max(.25,Number((z-.25).toFixed(2))))}
         aria-label={ar?'تصغير':'Zoom out'}>−</button>
       <strong aria-live="polite">{Math.round(zoom*100)}%</strong>
-      <button type="button" onClick={()=>setZoom(z=>Math.min(2,Number((z+.25).toFixed(2))))}
+      <button type="button" disabled={zoom>=2}
+        onClick={()=>setZoom(z=>Math.min(2,Number((z+.25).toFixed(2))))}
         aria-label={ar?'تكبير':'Zoom in'}>+</button>
       <button type="button" aria-pressed={highQuality} onClick={changeQuality}
         title={ar?'حمّل صورة عالية الدقة عند الحاجة فقط':'Load high-resolution pages only when needed'}>
@@ -200,12 +204,18 @@ export default function ImageBookPages({pages,storageKey,ar}:{
               {ar?'إعادة محاولة الصورة':'Retry image'}
             </button>
           </div>
-        : <img key={current.fileId+'-'+width+'-'+sourceMode+'-'+refresh} className="efips-image-book-page"
-            src={imageUrl(current.fileId)} loading="eager" decoding="async"
-            alt={ar?'صفحة '+page+' من '+pages.length:'Page '+page+' of '+pages.length}
-            referrerPolicy="no-referrer"
-            style={{width:(zoom*100)+'%',maxWidth:'none',display:loaded?'block':'none'}}
-            onLoad={()=>setLoaded(true)} onError={advanceImageSource}/>}
+        : <div key={current.fileId} className={
+            'efips-image-book-sheet'+
+            (loaded && turnDirection ? ' efips-image-book-sheet--'+turnDirection : '')
+          } style={{width:(zoom*100)+'%',maxWidth:'none',display:loaded?'block':'none'}}>
+            <img key={current.fileId+'-'+width+'-'+sourceMode+'-'+refresh}
+              className="efips-image-book-page"
+              src={imageUrl(current.fileId)} loading="eager" decoding="async"
+              alt={ar?'صفحة '+page+' من '+pages.length:'Page '+page+' of '+pages.length}
+              referrerPolicy="no-referrer"
+              style={{width:'100%',maxWidth:'none'}}
+              onLoad={()=>setLoaded(true)} onError={advanceImageSource}/>
+          </div>}
     </div>
     {bookmarks.length>0&&<div className="efips-image-book-bookmarks">
       <span>{ar?'الصفحات المحفوظة:':'Bookmarks:'}</span>
