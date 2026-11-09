@@ -1,11 +1,3 @@
-/** EFIPS English Books / New (9 Nov 2026).
- * Nine supplementary English PDF editions are catalogued with school-domain
- * reader permissions. The new two editions are The Magical Yet and The 7 Habits
- * of Happy Kids, ISBN not inferred for the scanned edition.
- * Google Drive restrictions on download/print/copy remain unverified, and
- * school copyright/reproduction rights should be reviewed independently.
- * The original English/Arabic book data is preserved unchanged.
- */
 export const EXTRA_ENGLISH_DIGITAL_BOOKS_20261109 = [
   {
     "id": "EN_NEW_20261109_15",
@@ -23,7 +15,8 @@ export const EXTRA_ENGLISH_DIGITAL_BOOKS_20261109 = [
       "illustrated fiction"
     ],
     "requiresSchoolGoogleAccess": true,
-    "reviewStatus": "pending"
+    "reviewStatus": "pending",
+    "fileSizeBytes": 748575525
   },
   {
     "id": "EN_NEW_20261109_16",
@@ -44,7 +37,8 @@ export const EXTRA_ENGLISH_DIGITAL_BOOKS_20261109 = [
       "DK"
     ],
     "requiresSchoolGoogleAccess": true,
-    "reviewStatus": "pending"
+    "reviewStatus": "pending",
+    "fileSizeBytes": 258189059
   },
   {
     "id": "EN_NEW_20261109_17",
@@ -65,7 +59,8 @@ export const EXTRA_ENGLISH_DIGITAL_BOOKS_20261109 = [
       "Python"
     ],
     "requiresSchoolGoogleAccess": true,
-    "reviewStatus": "pending"
+    "reviewStatus": "pending",
+    "fileSizeBytes": 134243375
   },
   {
     "id": "EN_NEW_20261109_18",
@@ -87,7 +82,8 @@ export const EXTRA_ENGLISH_DIGITAL_BOOKS_20261109 = [
       "techniques"
     ],
     "requiresSchoolGoogleAccess": true,
-    "reviewStatus": "pending"
+    "reviewStatus": "pending",
+    "fileSizeBytes": 171161283
   },
   {
     "id": "EN_NEW_20261109_19",
@@ -109,7 +105,8 @@ export const EXTRA_ENGLISH_DIGITAL_BOOKS_20261109 = [
       "creativity"
     ],
     "requiresSchoolGoogleAccess": true,
-    "reviewStatus": "pending"
+    "reviewStatus": "pending",
+    "fileSizeBytes": 100474876
   },
   {
     "id": "EN_NEW_20261109_20",
@@ -130,7 +127,8 @@ export const EXTRA_ENGLISH_DIGITAL_BOOKS_20261109 = [
       "graphic novel"
     ],
     "requiresSchoolGoogleAccess": true,
-    "reviewStatus": "pending"
+    "reviewStatus": "pending",
+    "fileSizeBytes": 16424240
   },
   {
     "id": "EN_NEW_20261109_21",
@@ -151,7 +149,8 @@ export const EXTRA_ENGLISH_DIGITAL_BOOKS_20261109 = [
       "comic book"
     ],
     "requiresSchoolGoogleAccess": true,
-    "reviewStatus": "pending"
+    "reviewStatus": "pending",
+    "fileSizeBytes": 18441376
   },
   {
     "id": "EN_NEW_20261109_22",
@@ -174,7 +173,8 @@ export const EXTRA_ENGLISH_DIGITAL_BOOKS_20261109 = [
       "learning from mistakes"
     ],
     "requiresSchoolGoogleAccess": true,
-    "reviewStatus": "pending"
+    "reviewStatus": "pending",
+    "fileSizeBytes": 10165805
   },
   {
     "id": "EN_NEW_20261109_23",
@@ -196,6 +196,7 @@ export const EXTRA_ENGLISH_DIGITAL_BOOKS_20261109 = [
       "Stacy Curtis"
     ],
     "requiresSchoolGoogleAccess": true,
-    "reviewStatus": "pending"
+    "reviewStatus": "pending",
+    "fileSizeBytes": 18085153
   }
 ] as const;
