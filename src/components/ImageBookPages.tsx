@@ -186,7 +186,10 @@ export default function ImageBookPages({pages,storageKey,ar}:{
         {highQuality?(ar?'وضع سريع':'Fast mode'):(ar?'جودة عالية':'HD')}
       </button>
     </div>
-    <div className="efips-image-book-stage" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+    <div className="efips-image-book-stage"
+      onContextMenu={event => event.preventDefault()}
+      onDragStart={event => event.preventDefault()}
+      onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
       {!loaded && !thumbnailFailed && <div className="efips-image-book-loading" role="status">
         {ar?'جاري تحميل صفحة الكتاب...':'Loading page...'}
         <button type="button" className="efips-image-book-quick-preview"
@@ -204,12 +207,14 @@ export default function ImageBookPages({pages,storageKey,ar}:{
               {ar?'إعادة محاولة الصورة':'Retry image'}
             </button>
           </div>
-        : <div key={current.fileId} className={
+        : <div key={current.fileId} onContextMenu={event => event.preventDefault()} className={
             'efips-image-book-sheet'+
             (loaded && turnDirection ? ' efips-image-book-sheet--'+turnDirection : '')
           } style={{width:(zoom*100)+'%',maxWidth:'none',display:loaded?'block':'none'}}>
             <img key={current.fileId+'-'+width+'-'+sourceMode+'-'+refresh}
-              className="efips-image-book-page"
+              className="efips-image-book-page" draggable={false}
+              onContextMenu={event => event.preventDefault()}
+              onDragStart={event => event.preventDefault()}
               src={imageUrl(current.fileId)} loading="eager" decoding="async"
               alt={ar?'صفحة '+page+' من '+pages.length:'Page '+page+' of '+pages.length}
               referrerPolicy="no-referrer"
