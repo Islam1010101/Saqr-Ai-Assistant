@@ -95,8 +95,8 @@ export default function DigitalBookReader({ title, source, bookKey, locale, onBa
   const sourceRangeUnsupported = errorCode === 'SOURCE_RANGE_UNSUPPORTED';
   const sourceNotPdf = errorCode === 'SOURCE_NOT_PDF';
   return <DigitalLibraryDialog title={title} onClose={onClose} variant="reader">
-    <section className="efips-book-reader" dir={ar ? 'rtl' : 'ltr'}>
-      <header className="efips-reader-header">
+    <section className={`efips-book-reader${imagePages?.length ? ' efips-book-reader--images' : ''}`} dir={ar ? 'rtl' : 'ltr'}>
+      {!imagePages?.length && <header className="efips-reader-header">
         <div className="efips-reader-brand">
           <img src="/school-logo.png" width={64} height={64} loading="eager"
             alt={ar ? 'شعار مدرسة صقر الإمارات الدولية الخاصة' : 'Emirates Falcon International Private School logo'} />
@@ -107,9 +107,10 @@ export default function DigitalBookReader({ title, source, bookKey, locale, onBa
           {!schoolOnly && <a href={source} target="_blank" rel="noopener noreferrer">{ar ? 'فتح المصدر في نافذة جديدة' : 'Open source in new tab'}</a>}
           <button type="button" data-book-close onClick={onClose}>{ar ? 'إغلاق القارئ' : 'Close reader'}</button>
         </nav>
-      </header>
+      </header>}
       <div className="efips-reader-stage">
-        {imagePages?.length ? <ImageBookPages pages={imagePages} storageKey={storageKey} ar={ar}/> : <>
+        {imagePages?.length ? <ImageBookPages pages={imagePages} storageKey={storageKey} ar={ar}
+          title={title} onBack={onBack} onClose={onClose}/> : <>
           {!error && (!schoolOnly || !!schoolAccess) && <div className="efips-reader-native" aria-hidden={showPreview}>
             <PdfBookPages key={`${storageKey || bookKey}:${attempt}`} bookKey={bookKey}
               storageKey={storageKey} ar={ar} schoolAccess={schoolAccess} onReady={() => setReady(true)}
