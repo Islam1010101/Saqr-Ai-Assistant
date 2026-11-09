@@ -5,6 +5,10 @@ import {uploadedLibraryBooks} from './uploadedCatalog20261028.ts';
 import {reviewedShelf41Books} from './shelf41ReviewedCatalog.ts';
 import { physicalBookAdditions } from './bookAdditions.ts';
 import {orisonCuratedRecords} from '../src/data/orisonCurated20261109.ts';
+import {orisonExtendedPart1} from '../src/data/orisonExtendedPart1.ts';
+import {orisonExtendedPart2} from '../src/data/orisonExtendedPart2.ts';
+import {orisonExtendedPart3} from '../src/data/orisonExtendedPart3.ts';
+import {orisonExtendedPart4} from '../src/data/orisonExtendedPart4.ts';
 import { classifyLiteraryGenre, literaryGenreLabels } from '../src/utils/literaryGenreCatalog.ts';
 import { refineLegacyLiterature } from '../src/utils/legacyLiteratureClassification.ts';
 import { applyPhysicalCatalogAudit } from '../src/utils/catalogBibliographicCorrections.ts';
@@ -3810,7 +3814,90 @@ for(const [titleKey,group] of orisonGroupedByTitle){
   knownOrisonTitles.add(titleKey);
   knownOrisonIsbns.add(isbn);
 }
-export const bookData:Book[]=[...preOrisonCatalog,...importedOrisonBooks];
+// Expand the physical holdings only with metadata-complete Orison records whose
+// shelf category is supported by the approved EFIPS physical-wing map.
+// These rows DO NOT verify an exact physical row position; old books/IDs untouched.
+const extendedSourceLines=[
+  orisonExtendedPart1,orisonExtendedPart2,orisonExtendedPart3,orisonExtendedPart4
+].join('\n');
+type ExtendedOrisonItem={
+  shelf:number;isbn:string;barcodes:string[];title:string;author:string
+};
+const extendedSource:ExtendedOrisonItem[]=extendedSourceLines.trim().split(/\r?\n/)
+  .filter(Boolean).map(line=>{
+    const [shelf,isbn,barcodes,title,author]=line.split('|');
+    return {shelf:Number(shelf),isbn:String(isbn||'').trim(),
+      barcodes:String(barcodes||'').split(',').filter(Boolean),
+      title:String(title||'').trim(),author:String(author||'').trim()};
+  });
+// Deliberately defer misleading classifications. These are not actual puzzles,
+// music reference titles or science textbooks despite matching a keyword.
+const heldBackExpandedTitles=new Set([
+  'A Birds-Eye View : A First Book Of Maps',
+  'A Clue For The Puzzle Lady',
+  'A Song For Jeffrey',
+  'Arthurs Computer Disaster',
+  '"When Chickens Grow Teeth" : A Story From The French Of Guy De Maupassant',
+  'A Lion To Guard Us',
+  'A New Life : Pregnancy, Birth, And Your Childs First Year'
+].map(orisonTitleKey));
+const expandedShelfOverrides=new Map<string,number>([
+  ['A Bugs Life',22],
+  ['A Pet For A Princess',22],
+  ['A Dog Owners Guide To German Shepherd Dogs',23],
+  ['Atlas De Poche Larousse',26],
+  ['Annos Counting Book',53],
+  ['1 To 100 Busy Counting Book',53],
+  ['1, 2, 3, Numbers',53],
+  ['A Baby Sister For Frances',43],
+  ['A Baby Sister For Herry',43],
+  ['Arthurs Baby',43]
+].map(([title,shelf])=>[orisonTitleKey(String(title)),Number(shelf)]));
+const extendedGrouped=new Map<string,{source:ExtendedOrisonItem;barcodes:Set<string>}>();
+for(const source of extendedSource){
+  const titleKey=orisonTitleKey(source.title);
+  if(!source.isbn||!source.title||!source.barcodes.length ||
+    !source.author||source.author.toLowerCase()==='none' ||
+    source.author.toLowerCase()==='unknown author' ||
+    heldBackExpandedTitles.has(titleKey))continue;
+  const current=extendedGrouped.get(titleKey);
+  if(current){ source.barcodes.forEach(barcode=>current.barcodes.add(barcode)); }
+  else{extendedGrouped.set(titleKey,{source,barcodes:new Set(source.barcodes)});}
+}
+const extendedKnownTitles=new Set([...preOrisonCatalog,...importedOrisonBooks]
+  .map(book=>orisonTitleKey(book.title)));
+const extendedKnownIsbns=new Set([...preOrisonCatalog,...importedOrisonBooks]
+  .map(book=>orisonIsbnKey(book.isbn||'')).filter(Boolean));
+const importedExtendedOrisonBooks:Book[]=[];
+for(const [titleKey,record] of extendedGrouped){
+  const source=record.source, isbn=orisonIsbnKey(source.isbn);
+  if(extendedKnownTitles.has(titleKey)||extendedKnownIsbns.has(isbn))continue;
+  const shelf=expandedShelfOverrides.get(titleKey)??source.shelf;
+  const subject=shelf===22?'Disney Stories':
+    shelf===23?'Animals & Wildlife':
+    shelf===24?'Science & Mathematics':
+    shelf===26?'Languages, Puzzles & Music':
+    shelf===53?'Early Learning':
+    shelf===43?'Junior Reading':
+    shelf===1?'General Reference & Computing':
+    shelf===2?'Psychology & Personal Development':
+    shelf===3?'Business & Social Sciences':
+    shelf===7?'Specialist Science':
+    shelf===8?'Applied Sciences & Health':
+    shelf===21?'History & Geography':'General Knowledge';
+  const barcodes=Array.from(record.barcodes);
+  importedExtendedOrisonBooks.push({
+    id:'orison-expanded-20261109-'+barcodes[0],
+    title:source.title,author:source.author,
+    isbn:source.isbn,isbnStatus:'candidate',
+    shelf,row:1,copies:barcodes.length,language:'EN',subject,
+    level:'General',
+    summary:'Listed in the school Orison inventory; exact row has not been verified.'
+  });
+  extendedKnownTitles.add(titleKey);
+  extendedKnownIsbns.add(isbn);
+}
+export const bookData:Book[]=[...preOrisonCatalog,...importedOrisonBooks,...importedExtendedOrisonBooks];
 
 // 5. دالة البحث المخصصة للاستخدام في تطبيق الويب
 export function findInCatalog(q: string): Book[] {
