@@ -8,7 +8,12 @@ export type ImageBookPage = {page:number; fileId:string};
  * Keep the URL exactly the same for <img> and preloading, so browser cache
  * reuse does not require any proxy, storage provider, or new Google scopes. */
 export const fastImageWidth = (viewportWidth:number) => viewportWidth <= 720 ? 840 : 1100;
+// Google's main Drive thumbnail endpoint can stall inside mobile in-app browsers.
+ // Start with Google's separate image-delivery hostname. These are public-link
+ // URL conventions, not a guaranteed CDN: always fall back after a deadline.
 export const driveReaderImage = (id:string,width:number) =>
+  'https://lh3.googleusercontent.com/d/'+encodeURIComponent(id)+'=w'+width;
+export const driveBackupImage = (id:string,width:number) =>
   'https://drive.google.com/thumbnail?id='+encodeURIComponent(id)+'&sz=w'+width;
 const driveImagePreview = (id:string) =>
   'https://drive.google.com/file/d/'+encodeURIComponent(id)+'/preview';
@@ -25,6 +30,7 @@ export default function ImageBookPages({pages,storageKey,ar}:{
   const [zoom,setZoom]=useState(initial.zoom);
   const [bookmarks,setBookmarks]=useState<number[]>(initial.bookmarks.filter(n=>n<=pages.length));
   const [loaded,setLoaded]=useState(false);
+  const [sourceMode,setSourceMode]=useState<'cdn'|'drive'>('cdn');
   const [thumbnailFailed,setThumbnailFailed]=useState(false);
   const [refresh,setRefresh]=useState(0);
   // Keep prefetched Image objects alive across page changes. The previous
@@ -33,7 +39,8 @@ export default function ImageBookPages({pages,storageKey,ar}:{
   const furthestPage=useRef(initial.furthestPage||initial.page);
   const swipeStart=useRef<{x:number;y:number}|null>(null);
   const current=pages[page-1];
-  const imageUrl=(fileId:string)=>driveReaderImage(fileId,width);
+  const imageUrl=(fileId:string)=>sourceMode==='cdn'
+    ? driveReaderImage(fileId,width) : driveBackupImage(fileId,width);
   const isCached=(fileId:string)=>{
     const cached=preloadCache.current.get(imageUrl(fileId));
     return !!cached && cached.complete && cached.naturalWidth>0;
@@ -41,7 +48,7 @@ export default function ImageBookPages({pages,storageKey,ar}:{
   const go=useCallback((to:number)=>{
     const next=clampPdfPage(to,pages.length);
     if(next===page)return;
-    setPage(next);setPageInput(String(next));
+    setPage(next);setPageInput(String(next));setSourceMode('cdn');
     const cached=pages[next-1] && preloadCache.current.get(driveReaderImage(pages[next-1].fileId,width));
     setLoaded(Boolean(cached?.complete && cached.naturalWidth>0));
     setThumbnailFailed(false);
@@ -58,6 +65,23 @@ export default function ImageBookPages({pages,storageKey,ar}:{
     window.addEventListener('keydown',listener);
     return()=>window.removeEventListener('keydown',listener);
   },[page,go]);
+  // An image that neither loads nor errors must never leave the reader
+  // frozen indefinitely. Try the alternate Drive host, then a single-image
+  // preview. Clear the deadline whenever the page, URL, or load state changes.
+  const advanceImageSource=()=>{
+    setLoaded(false);
+    if(sourceMode==='cdn')setSourceMode('drive');
+    else setThumbnailFailed(true);
+  };
+  useEffect(()=>{
+    if(loaded || thumbnailFailed)return;
+    const timeout=window.setTimeout(()=>{
+      if(sourceMode==='cdn')setSourceMode('drive');
+      else setThumbnailFailed(true);
+    },4500);
+    return()=>window.clearTimeout(timeout);
+  },[page,width,sourceMode,loaded,thumbnailFailed,refresh]);
+
   useEffect(()=>{
     if(!loaded)return;
     furthestPage.current=Math.max(furthestPage.current,page);
@@ -72,7 +96,7 @@ export default function ImageBookPages({pages,storageKey,ar}:{
   // promptly. Sequential requests avoid competing with the visible page on a
   // slow mobile connection. Never cancel an in-flight preload during turns.
   useEffect(()=>{
-    if(!loaded || thumbnailFailed)return;
+    if(!loaded || thumbnailFailed || sourceMode!=='cdn')return;
     let cancelled=false;
     const create=(index:number):HTMLImageElement|null=>{
       const entry=pages[index];
@@ -103,7 +127,7 @@ export default function ImageBookPages({pages,storageKey,ar}:{
       return()=>{cancelled=true;next.removeEventListener('load',thenSecond);};
     }
     return()=>{cancelled=true;};
-  },[page,pages,width,loaded,thumbnailFailed,highQuality,baseWidth]);
+  },[page,pages,width,loaded,thumbnailFailed,highQuality,baseWidth,sourceMode]);
 
   const toggleBookmark=()=>setBookmarks(old=>
     old.includes(page)?old.filter(n=>n!==page):[...old,page].sort((a,b)=>a-b)
@@ -129,7 +153,7 @@ export default function ImageBookPages({pages,storageKey,ar}:{
     const nextWidth=!highQuality?1600:baseWidth;
     setLoaded(Boolean(current && preloadCache.current.get(driveReaderImage(current.fileId,nextWidth))?.complete &&
       preloadCache.current.get(driveReaderImage(current.fileId,nextWidth))?.naturalWidth));
-    setThumbnailFailed(false);
+    setThumbnailFailed(false);setSourceMode('cdn');
     setHighQuality(v=>!v);
   };
   if(!current)return <p role="alert">{ar?'لا توجد صفحات مرفوعة لهذا الكتاب.':'No uploaded pages are available.'}</p>;
@@ -161,6 +185,10 @@ export default function ImageBookPages({pages,storageKey,ar}:{
     <div className="efips-image-book-stage" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
       {!loaded && !thumbnailFailed && <div className="efips-image-book-loading" role="status">
         {ar?'جاري تحميل صفحة الكتاب...':'Loading page...'}
+        <button type="button" className="efips-image-book-quick-preview"
+          onClick={()=>setThumbnailFailed(true)}>
+          {ar?'عرض الصفحة بمعاينة Google':'Show page preview'}
+        </button>
       </div>}
       {thumbnailFailed
         ? <div className="efips-image-book-fallback">
@@ -168,16 +196,16 @@ export default function ImageBookPages({pages,storageKey,ar}:{
               'Direct image loading failed. Showing this single page in a Drive frame.'}</p>
             <iframe title={ar?'معاينة الصفحة':'Page preview'} src={driveImagePreview(current.fileId)}
               allow="fullscreen" allowFullScreen loading="eager" referrerPolicy="no-referrer"/>
-            <button type="button" onClick={()=>{setThumbnailFailed(false);setLoaded(false);setRefresh(v=>v+1);}}>
+            <button type="button" onClick={()=>{setThumbnailFailed(false);setLoaded(false);setSourceMode('cdn');setRefresh(v=>v+1);}}>
               {ar?'إعادة محاولة الصورة':'Retry image'}
             </button>
           </div>
-        : <img key={current.fileId+'-'+width+'-'+refresh} className="efips-image-book-page"
+        : <img key={current.fileId+'-'+width+'-'+sourceMode+'-'+refresh} className="efips-image-book-page"
             src={imageUrl(current.fileId)} loading="eager" decoding="async"
             alt={ar?'صفحة '+page+' من '+pages.length:'Page '+page+' of '+pages.length}
             referrerPolicy="no-referrer"
             style={{width:(zoom*100)+'%',maxWidth:'none',display:loaded?'block':'none'}}
-            onLoad={()=>setLoaded(true)} onError={()=>{setThumbnailFailed(true);setLoaded(false);}}/>}
+            onLoad={()=>setLoaded(true)} onError={advanceImageSource}/>}
     </div>
     {bookmarks.length>0&&<div className="efips-image-book-bookmarks">
       <span>{ar?'الصفحات المحفوظة:':'Bookmarks:'}</span>
