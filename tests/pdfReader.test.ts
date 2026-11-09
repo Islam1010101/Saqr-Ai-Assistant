@@ -20,9 +20,9 @@ assert.equal(Object.values(DIGITAL_SERIES_VOLUMES).reduce((sum,books)=>sum+books
 assert.equal(ARABIC_LIBRARY_DATABASE.length,452);
 assert.equal(ENGLISH_LIBRARY_DATABASE.filter(b=>!String(b.id).startsWith('EN_NEW_20261109_')).length,54, 'Keep original English digital holdings');
 assert.equal(ENGLISH_LIBRARY_DATABASE.filter(b=>/^EN_NEW_20261109_(?:0[1-9]|1[0-4])$/.test(String(b.id))).length,14, 'Keep the initial 14 new school-domain titles');
-assert.equal(ENGLISH_LIBRARY_DATABASE.filter(b=>/^EN_NEW_20261109_(?:1[5-8])$/.test(String(b.id))).length,4, 'Prepare four further English Drive books');
-assert.equal(ENGLISH_LIBRARY_DATABASE.length,72);
-assert.equal(allDigitalBooks.length,524); // 506 original cards + 18 new English books; six heritage e-books in their own list
+assert.equal(ENGLISH_LIBRARY_DATABASE.filter(b=>/^EN_NEW_20261109_(?:1[5-9]|2[01])$/.test(String(b.id))).length,7, 'Prepare four new editions and three Cat Kid volumes');
+assert.equal(ENGLISH_LIBRARY_DATABASE.length,75);
+assert.equal(allDigitalBooks.length,527); // 506 original cards + 21 new English books; six heritage e-books in their own list
 assert.ok(allDigitalBooks.every(b=>b.driveLink.includes('/file/d/')), 'No digital library card may point to a Drive folder');
 assert.equal(ARABIC_LIBRARY_DATABASE.filter(b=>Boolean(b.audioId)).length,23,'Keep all original audio summaries');
 assert.ok(allDigitalBooks.every(b=>Boolean(b.readingAudience)),'Every digital volume needs a suggested reading group');
