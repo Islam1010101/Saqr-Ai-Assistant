@@ -186,7 +186,7 @@ export const ARABIC_LIBRARY_DATABASE: DigitalLibraryBook[] = expandDigitalSeries
 // Preserve the original seed and the 412 established series PDFs; append
 // only distinct, editor-mapped records from the new school-domain Drive folder.
 const normalizeDigitalTitle = (text:string)=>text.normalize('NFKC').toLowerCase()
-  .replace(/[^\\p{L}\\p{N}]+/gu,'').trim();
+  .replace(/[^\p{L}\p{N}]+/gu,'').trim();
 const knownEnglishTitles = new Set(ENGLISH_LIBRARY_SEED.map(b=>normalizeDigitalTitle(b.title)));
 const knownEnglishLinks = new Set(ENGLISH_LIBRARY_SEED.map(b=>b.driveLink));
 const newlyCataloguedEnglishBooks:DigitalLibraryBook[]=[];
