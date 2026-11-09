@@ -33,9 +33,11 @@ const ui=readFileSync('pages/EnglishLibraryInternalPage.tsx','utf8');
 const reader=readFileSync('src/components/ImageBookPages.tsx','utf8');
 assert.ok(ui.includes('COMPLETED_ENGLISH_IMAGE_BOOK_PAGES[String(book.id)]'));
 assert.ok(ui.includes('String(book.id)===CODING_IMAGE_BOOK_ID ? CODING_IMAGE_BOOK_PAGES'));
-assert.ok(reader.includes('onContextMenu={event => event.preventDefault()}'),
+assert.ok(/onContextMenu=\{event\s*=>\s*event\.preventDefault\(\)\}/.test(reader),
   'Existing simple right-click suppression must apply to the two completed books');
 assert.ok(reader.includes('Math.max(.25,Number((z-.25).toFixed(2)))'), 'Retain 25% zoom');
 assert.ok(reader.includes('efips-image-book-sheet--'), 'Retain page turn animation');
 assert.ok(reader.includes('writePdfState'), 'Retain bookmarks and progress');
-console.log('PASS: DK 312 pages and Disney 96 pages complete, isolated to image reader without catalog changes');
+assert.ok(!reader.includes('<iframe'), 'DK and Disney image books must never display Google Drive preview');
+assert.ok(reader.includes('efips-image-book-glass-ui'), 'Both books share the immersive glass controls');
+console.log('PASS: DK 312 pages, Disney 96 pages, immersive in-site image reader and unchanged catalog');
