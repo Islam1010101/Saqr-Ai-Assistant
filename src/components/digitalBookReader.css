@@ -250,3 +250,40 @@ body.efips-reader-open .efips-navbar-surface {
   .efips-digital-dialog-backdrop-reader .efips-reader-brand img { animation: none; }
   .efips-digital-dialog-backdrop-reader .efips-book-reader nav > * { transition: none; }
 }
+
+/* Coding image-book pilot: keep the existing EFIPS fullscreen shell and show
+   one lightweight Drive JPEG at a time. No changes to public PDF.js books. */
+.efips-image-book { display:flex; flex-direction:column; height:100%; width:100%; min-height:0; background:#f8fafc; color:#0f172a; }
+.efips-image-book-toolbar { flex-shrink:0; display:flex; flex-wrap:wrap; gap:.4rem; align-items:center; justify-content:center; padding:.55rem; background:#ecfdf5; border-bottom:1px solid #a7f3d0; }
+.efips-image-book-toolbar form { display:inline-flex; flex-wrap:wrap; align-items:center; gap:.35rem; }
+.efips-image-book-toolbar button, .efips-image-book-bookmarks button, .efips-image-book-fallback button {
+  border:0; border-radius:.75rem; background:#047857; color:white; font-size:.84rem; font-weight:750;
+  min-height:44px; padding:.5rem .8rem; cursor:pointer;
+}
+.efips-image-book-toolbar button[aria-pressed="true"] { background:#9a3412; }
+.efips-image-book-toolbar button:disabled { opacity:.4; cursor:not-allowed; }
+.efips-image-book-toolbar input { width:4rem; min-height:44px; padding:.5rem; border:2px solid #94a3b8; border-radius:.7rem; background:white; color:#0f172a; text-align:center; }
+.efips-image-book-toolbar button:focus-visible, .efips-image-book-toolbar input:focus-visible, .efips-image-book-bookmarks button:focus-visible {
+  outline:3px solid #0ea5e9; outline-offset:2px;
+}
+.efips-image-book-stage { flex:1; min-height:0; overflow:auto; overscroll-behavior:contain; touch-action:pan-y; display:flex; flex-direction:column; align-items:center; background:#cbd5e1; padding:1rem; -webkit-overflow-scrolling:touch; }
+.efips-image-book-page { display:block; height:auto; object-fit:contain; margin:0 auto; box-shadow:0 4px 24px #0f172a33; background:white; }
+.efips-image-book-loading { margin:auto; padding:1rem; font-size:.9rem; font-weight:700; color:#334155; }
+.efips-image-book-fallback { flex:1; width:100%; min-height:0; display:flex; flex-direction:column; gap:.5rem; align-items:center; text-align:center; }
+.efips-image-book-fallback p { margin:.2rem; font-weight:700; font-size:.85rem; }
+.efips-image-book-fallback iframe { flex:1; width:100%; min-height:280px; border:0; background:white; }
+.efips-image-book-bookmarks { flex-shrink:0; display:flex; flex-wrap:wrap; gap:.4rem; align-items:center; max-height:90px; overflow:auto; padding:.45rem .6rem; }
+.efips-image-book-bookmarks button { min-height:36px; }
+.efips-image-book-footer { flex-shrink:0; padding:.45rem .75rem; text-align:center; font-size:.7rem; background:#f1f5f9; color:#475569; }
+.dark .efips-image-book { background:#020617; color:#f8fafc; }
+.dark .efips-image-book-toolbar { background:#064e3b; border-color:#059669; }
+.dark .efips-image-book-stage { background:#020617; }
+.dark .efips-image-book-footer { background:#0f172a; color:#cbd5e1; }
+.dark .efips-image-book-loading { color:#cbd5e1; }
+@media(max-width:600px) {
+  .efips-image-book-toolbar { gap:.3rem; padding:.35rem; }
+  .efips-image-book-toolbar button { flex:1 1 auto; min-width:44px; padding:.45rem; font-size:.78rem; }
+  .efips-image-book-toolbar form { flex:1 1 auto; justify-content:center; }
+  .efips-image-book-stage { padding:.3rem; }
+  .efips-image-book-footer { font-size:.65rem; }
+}
