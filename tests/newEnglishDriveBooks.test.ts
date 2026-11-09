@@ -31,7 +31,7 @@ assert.ok(page.includes('schoolOnly={Boolean(book.requiresSchoolGoogleAccess)}')
 assert.ok(!page.includes('book.requiresSchoolGoogleAccess ? (<a'),
   'A separate Drive tab must not be the primary school-only reading action');
 const reader=readFileSync(new URL('../src/components/DigitalBookReader.tsx', import.meta.url),'utf8');
-assert.ok(reader.includes('!schoolOnly && <div className="efips-reader-native"'),
+assert.ok(reader.includes('(!schoolOnly || !!schoolAccess) && <div className="efips-reader-native"'),
   'School-only PDFs must never go through the anonymous byte-range PDF.js proxy');
 assert.ok(reader.includes('src={preview} loading="eager"'),
   'School-only PDF preview must be embedded inside the existing reader');

@@ -78,7 +78,13 @@ export default function GoogleSchoolReturn() {
 
         localStorage.setItem('current_user',JSON.stringify(profile));
         localStorage.setItem('user_type',role);
-        window.location.replace(window.location.origin + '/#/home');
+        // Return to the exact book after an explicit, reader-only Google Drive
+        // scope grant. Never trust a redirect URL from sessionStorage.
+        const pendingBook=sessionStorage.getItem('efips_drive_reader_return') || '';
+        sessionStorage.removeItem('efips_drive_reader_return');
+        const match=/^digital:en:(EN_NEW_[0-9]{8}_[0-9]{2})$/.exec(pendingBook);
+        window.location.replace(window.location.origin +
+          (match ? '/#/digital-library/english?open='+encodeURIComponent(match[1]) : '/#/home'));
       } catch (caught) {
         try { sessionStorage.removeItem('efips_oauth_school_email'); } catch { /* sessionStorage restricted */ }
         await supabase.auth.signOut().catch(() => {});

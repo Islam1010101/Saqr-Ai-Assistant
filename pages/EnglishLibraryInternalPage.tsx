@@ -196,10 +196,10 @@ const SaqrAudioPlayer: React.FC<{ audioSrc: string; t: any }> = ({ audioSrc, t }
 };
 
 // --- 3. Component: BookModal ---
-const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void; t: any; progress?: PdfReadingState }> = ({ book, onClose, t, progress }) => {
+const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void; t: any; progress?: PdfReadingState; autoOpen?: boolean }> = ({ book, onClose, t, progress, autoOpen=false }) => {
     const { locale } = useLanguage();
     const [readerOpen, setReaderOpen] = useState(false);
-    useEffect(() => { setReaderOpen(false); }, [book?.id]);
+    useEffect(() => { setReaderOpen(autoOpen); }, [book?.id, autoOpen]);
     const ageLabels = locale === 'ar'
         ? { children: 'أطفال', teens: 'يافعون', adults: 'كبار' }
         : { children: 'Children', teens: 'Teens', adults: 'Adults' };
@@ -207,7 +207,7 @@ const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void
 
     if (!book) return null;
     if (readerOpen) return <DigitalBookReader title={book.title} source={book.driveLink} bookKey={digitalBookKey('en', book)} locale={locale}
-        schoolOnly={Boolean(book.requiresSchoolGoogleAccess)} onBack={() => setReaderOpen(false)} onClose={onClose} />;
+        schoolOnly={Boolean(book.requiresSchoolGoogleAccess)} sourceSizeBytes={book.fileSizeBytes} onBack={() => setReaderOpen(false)} onClose={onClose} />;
 
     return (
         <DigitalLibraryDialog title={book.title} onClose={onClose}>
@@ -366,6 +366,20 @@ const EnglishLibraryInternalPage: React.FC = () => {
     const [audioOnly, setAudioOnly] = useState(false);
     const hasAudio = ENGLISH_LIBRARY_DATABASE.some(book => !!book.audioId);
     const [selectedBook, setSelectedBook] = useState<DigitalLibraryBook | null>(null);
+    const [resumeBookId,setResumeBookId] = useState<string | null>(null);
+    useEffect(()=>{
+      // A reader-only Google Drive consent flow can restore one allow-listed
+      // EFIPS English book. No arbitrary URLs are accepted from the hash.
+      const path=window.location.hash;
+      const query=path.includes('?')?path.slice(path.indexOf('?')+1):'';
+      const id=new URLSearchParams(query).get('open');
+      if(!id || !/^EN_NEW_[0-9]{8}_[0-9]{2}$/.test(id))return;
+      const matching=ENGLISH_LIBRARY_DATABASE.find(book=>String(book.id)===id && book.requiresSchoolGoogleAccess);
+      if(!matching)return;
+      setSelectedBook(matching);
+      setResumeBookId(id);
+      window.history.replaceState(null,'',window.location.pathname+'#/digital-library/english');
+    },[]);
     const readingProgress = useDigitalReadingProgress(ENGLISH_LIBRARY_DATABASE,'en');
     const booksInProgress = useMemo(()=>ENGLISH_LIBRARY_DATABASE.filter(b=>readingProgress.has(digitalBookKey('en',b))).sort((a,b)=>(readingProgress.get(digitalBookKey('en',b))?.lastReadAt||0)-(readingProgress.get(digitalBookKey('en',a))?.lastReadAt||0)).slice(0,8),[readingProgress]);
     const [visibleCount, setVisibleCount] = useState(12); // تغيير ليكون العدد متوافق مع الموبايل
@@ -516,7 +530,7 @@ const EnglishLibraryInternalPage: React.FC = () => {
                     </div>
                 )}
 
-                <BookModal book={selectedBook} onClose={() => setSelectedBook(null)} t={t} progress={selectedBook?readingProgress.get(digitalBookKey('en',selectedBook)):undefined} />
+                <BookModal book={selectedBook} onClose={() => {setSelectedBook(null);setResumeBookId(null);}} t={t} autoOpen={Boolean(selectedBook && String(selectedBook.id)===resumeBookId)} progress={selectedBook?readingProgress.get(digitalBookKey('en',selectedBook)):undefined} />
 
             </div>
 

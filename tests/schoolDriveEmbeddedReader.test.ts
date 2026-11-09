@@ -9,6 +9,12 @@ const readerServer=readFileSync('src/server/digitalBookPdf.ts','utf8');
 
 const schoolBooks=ENGLISH_LIBRARY_DATABASE.filter(book=>book.requiresSchoolGoogleAccess);
 assert.equal(schoolBooks.length,23,'Keep the 14 + 7 + 2 school-only English books in the catalog');
+assert.ok(schoolBooks.every(book=>Number.isSafeInteger(book.fileSizeBytes) && Number(book.fileSizeBytes)>0),
+  'Drive metadata must record the exact size of each school PDF');
+assert.equal(schoolBooks.filter(book=>Number(book.fileSizeBytes)>100*1024*1024).length,8,
+  'Eight school PDFs are too large for reliable Google Drive previews');
+assert.ok(readerUi.includes('allowDrivePreview'),
+  'Large school PDFs must bypass the fragile Drive preview iframe');
 assert.equal(ENGLISH_LIBRARY_DATABASE.length,77,'Do not remove or duplicate English books');
 assert.equal(ARABIC_LIBRARY_DATABASE.length,452,'Do not alter Arabic books');
 assert.ok(englishUi.includes('schoolOnly={Boolean(book.requiresSchoolGoogleAccess)}'),
@@ -17,7 +23,7 @@ assert.ok(!englishUi.includes('book.requiresSchoolGoogleAccess ? (<a'),
   'Do not open a new Google Drive browser tab as the primary reading action');
 assert.ok(englishUi.includes('digitalReaderSource(book.driveLink) ? (<button'),
   'Reuse the same internal read button for both school and public books');
-assert.ok(readerUi.includes('!schoolOnly && <div className="efips-reader-native"'),
+assert.ok(readerUi.includes('(!schoolOnly || !!schoolAccess) && <div className="efips-reader-native"'),
   'Never try to download restricted PDFs with the anonymous PDF.js proxy');
 assert.ok(readerUi.includes('src={preview} loading="eager"'),
   'Render Google Drive preview directly inside the existing fullscreen reader');

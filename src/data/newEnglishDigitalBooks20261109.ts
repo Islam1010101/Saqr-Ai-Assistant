@@ -1,11 +1,3 @@
-/**
- * EFIPS English Books / New, discovered on 9 Nov 2026.
- * School domain viewer links: falcon-school.com (not publicly accessible).
- * Reader opens these records on Google Drive using the signed-in school account.
- * Provenance of the PDF editions and school distribution rights should be
- * verified by school administration before broadening access.
- * Each title is a separate actual PDF, with no guessed ISBN or publication year.
- */
 export const NEW_ENGLISH_DIGITAL_BOOKS_20261109 = [
   {
     "id": "EN_NEW_20261109_01",
@@ -21,7 +13,8 @@ export const NEW_ENGLISH_DIGITAL_BOOKS_20261109 = [
       "classic novel"
     ],
     "driveLink": "https://drive.google.com/file/d/1aqVVSats6yCOG_9_v_2QpObg9-FGt_WY/view",
-    "requiresSchoolGoogleAccess": true
+    "requiresSchoolGoogleAccess": true,
+    "fileSizeBytes": 17726011
   },
   {
     "id": "EN_NEW_20261109_02",
@@ -38,7 +31,8 @@ export const NEW_ENGLISH_DIGITAL_BOOKS_20261109 = [
       "graphic adaptation"
     ],
     "driveLink": "https://drive.google.com/file/d/1Zwu0FfURjc92kwxVm9V68COVXpHkTeFQ/view",
-    "requiresSchoolGoogleAccess": true
+    "requiresSchoolGoogleAccess": true,
+    "fileSizeBytes": 21695164
   },
   {
     "id": "EN_NEW_20261109_03",
@@ -55,7 +49,8 @@ export const NEW_ENGLISH_DIGITAL_BOOKS_20261109 = [
       "Pocket Classics"
     ],
     "driveLink": "https://drive.google.com/file/d/1bQvMPSAOYix7MeIvT2AHMGS6LpOTX-L4/view",
-    "requiresSchoolGoogleAccess": true
+    "requiresSchoolGoogleAccess": true,
+    "fileSizeBytes": 3437616
   },
   {
     "id": "EN_NEW_20261109_04",
@@ -72,7 +67,8 @@ export const NEW_ENGLISH_DIGITAL_BOOKS_20261109 = [
       "Pocket Classics"
     ],
     "driveLink": "https://drive.google.com/file/d/1ig20-VptueIPi6ZfXDX00QgZLfOkEa3i/view",
-    "requiresSchoolGoogleAccess": true
+    "requiresSchoolGoogleAccess": true,
+    "fileSizeBytes": 8079360
   },
   {
     "id": "EN_NEW_20261109_05",
@@ -91,7 +87,8 @@ export const NEW_ENGLISH_DIGITAL_BOOKS_20261109 = [
       "Smithsonian"
     ],
     "driveLink": "https://drive.google.com/file/d/1TF4kIiavKRlffcTifzTr_0R5AcyeL5iP/view",
-    "requiresSchoolGoogleAccess": true
+    "requiresSchoolGoogleAccess": true,
+    "fileSizeBytes": 277766012
   },
   {
     "id": "EN_NEW_20261109_06",
@@ -108,7 +105,8 @@ export const NEW_ENGLISH_DIGITAL_BOOKS_20261109 = [
       "illustrated"
     ],
     "driveLink": "https://drive.google.com/file/d/1IW-BtKsJ0VzM6JWlFYEVOJXqAv0_zdBq/view",
-    "requiresSchoolGoogleAccess": true
+    "requiresSchoolGoogleAccess": true,
+    "fileSizeBytes": 5994019
   },
   {
     "id": "EN_NEW_20261109_07",
@@ -125,7 +123,8 @@ export const NEW_ENGLISH_DIGITAL_BOOKS_20261109 = [
       "technology"
     ],
     "driveLink": "https://drive.google.com/file/d/1cu-yhRFUhFW9j6esGTK20Uf1o7tm7j0s/view",
-    "requiresSchoolGoogleAccess": true
+    "requiresSchoolGoogleAccess": true,
+    "fileSizeBytes": 187596847
   },
   {
     "id": "EN_NEW_20261109_08",
@@ -142,7 +141,8 @@ export const NEW_ENGLISH_DIGITAL_BOOKS_20261109 = [
       "learning"
     ],
     "driveLink": "https://drive.google.com/file/d/1ZrNr1D6gQIufQJFk0eSmIPluD__zwSFp/view",
-    "requiresSchoolGoogleAccess": true
+    "requiresSchoolGoogleAccess": true,
+    "fileSizeBytes": 186438506
   },
   {
     "id": "EN_NEW_20261109_09",
@@ -161,7 +161,8 @@ export const NEW_ENGLISH_DIGITAL_BOOKS_20261109 = [
       "graphic novel"
     ],
     "driveLink": "https://drive.google.com/file/d/1-r4qhGCbezMnSMuOhYBzbxnLZpPosEfN/view",
-    "requiresSchoolGoogleAccess": true
+    "requiresSchoolGoogleAccess": true,
+    "fileSizeBytes": 99740559
   },
   {
     "id": "EN_NEW_20261109_10",
@@ -180,7 +181,8 @@ export const NEW_ENGLISH_DIGITAL_BOOKS_20261109 = [
       "graphic novel"
     ],
     "driveLink": "https://drive.google.com/file/d/1DptTmoK-yki9_Du0PPHUotrf4NcfFQRn/view",
-    "requiresSchoolGoogleAccess": true
+    "requiresSchoolGoogleAccess": true,
+    "fileSizeBytes": 163580531
   },
   {
     "id": "EN_NEW_20261109_11",
@@ -199,7 +201,8 @@ export const NEW_ENGLISH_DIGITAL_BOOKS_20261109 = [
       "humor"
     ],
     "driveLink": "https://drive.google.com/file/d/1k2m0JIovOIFKrQ-OD3vUSgFlxf8hcBl2/view",
-    "requiresSchoolGoogleAccess": true
+    "requiresSchoolGoogleAccess": true,
+    "fileSizeBytes": 69325832
   },
   {
     "id": "EN_NEW_20261109_12",
@@ -217,7 +220,8 @@ export const NEW_ENGLISH_DIGITAL_BOOKS_20261109 = [
       "illustration"
     ],
     "driveLink": "https://drive.google.com/file/d/13wXqJ_iNWu0OeYuuydonzZ8eV3XFfVOK/view",
-    "requiresSchoolGoogleAccess": true
+    "requiresSchoolGoogleAccess": true,
+    "fileSizeBytes": 35466176
   },
   {
     "id": "EN_NEW_20261109_13",
@@ -234,7 +238,8 @@ export const NEW_ENGLISH_DIGITAL_BOOKS_20261109 = [
       "media"
     ],
     "driveLink": "https://drive.google.com/file/d/1o0PC1hfKwjwtUsD449jTWfdAmxRIDsE3/view",
-    "requiresSchoolGoogleAccess": true
+    "requiresSchoolGoogleAccess": true,
+    "fileSizeBytes": 61761606
   },
   {
     "id": "EN_NEW_20261109_14",
@@ -253,6 +258,7 @@ export const NEW_ENGLISH_DIGITAL_BOOKS_20261109 = [
       "graphic novel"
     ],
     "driveLink": "https://drive.google.com/file/d/1M6U4GxNK-ORaETADGspe7KjkxG485_W3/view",
-    "requiresSchoolGoogleAccess": true
+    "requiresSchoolGoogleAccess": true,
+    "fileSizeBytes": 36821096
   }
 ] as const;

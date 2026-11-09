@@ -115,7 +115,7 @@ const brokenBootstrap=(async()=>new Response(bootstrapBytes.subarray(0,5),{statu
 await assert.rejects(fetchPdfBootstrap('/api/digital-book?book=example',new AbortController().signal,brokenBootstrap),
   e=>e instanceof Error&&e.message==='SOURCE_NOT_PDF');
 const readerSource=readFileSync('src/components/DigitalBookReader.tsx','utf8');
-assert.ok(readerSource.includes('useState(() => Boolean(preview))'),
+assert.ok(readerSource.includes('useState(() => allowDrivePreview && Boolean(preview))'),
   'Drive preview must render immediately, not after a timer');
 assert.ok(!readerSource.includes('setTimeout(() => setShowPreview(true)'),
   'Never delay the book preview behind a loading timer');

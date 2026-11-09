@@ -29,6 +29,8 @@ export type DigitalLibraryBook = {
   reviewStatus?: 'pending' | 'approved' | 'needs-changes';
   /** Open privately in Google Drive with the school Google account; not a public PDF proxy source. */
   requiresSchoolGoogleAccess?: boolean;
+  /** Verified raw Drive PDF size; used to avoid Google preview for very large books. */
+  fileSizeBytes?: number;
   reviewedOn?: string;
 };
 const ARABIC_LIBRARY_SEED: DigitalLibraryBook[] = [
