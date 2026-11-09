@@ -365,3 +365,481 @@ body.efips-reader-open .efips-navbar-surface {
   -webkit-user-drag: none;
   user-drag: none;
 }
+
+
+/* --------------------------------------------------------------------------
+   EFIPS photo books — immersive reading canvas.
+   Full screen is owned by the image itself; all tools float OVER the page
+   and auto-hide. Scoped to photo books: existing PDF.js reader untouched.
+   Liquid-glass-inspired material: restrained blur, tiny highlights and
+   responsive touch targets, with reduced-motion and no-backdrop fallbacks.
+   -------------------------------------------------------------------------- */
+.efips-digital-dialog-backdrop-reader .efips-book-reader--images {
+  background:#0b141a;
+  color:#f8fafc;
+}
+.efips-book-reader--images .efips-reader-stage {
+  position:relative;
+  height:100%;
+  min-height:0;
+  flex:1 1 auto;
+}
+.efips-book-reader--images .efips-image-book--immersive {
+  position:absolute;
+  inset:0;
+  display:block;
+  height:100%;
+  width:100%;
+  min-width:0;
+  min-height:0;
+  overflow:hidden;
+  isolation:isolate;
+  background:linear-gradient(140deg,#0e2029,#10171b 55%,#0b1218);
+  color:#f8fafc;
+}
+.efips-image-book--immersive .efips-image-book-stage {
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  min-width:0;
+  min-height:0;
+  padding:0;
+  margin:0;
+  overflow:auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overscroll-behavior:contain;
+  touch-action:pan-y;
+  -webkit-overflow-scrolling:touch;
+  background:transparent;
+  scrollbar-width:thin;
+  scrollbar-color:rgb(167 243 208 / .4) transparent;
+}
+.efips-image-book--immersive .efips-image-book-stage:focus-visible {
+  outline:2px solid #5eead4;
+  outline-offset:-3px;
+}
+.efips-image-book--immersive .efips-image-book-sheet {
+  position:relative;
+  flex:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-width:0;
+  min-height:0;
+  margin:auto;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  transform-style:flat;
+}
+.efips-image-book--immersive .efips-image-book-sheet::after { display:none; }
+.efips-image-book--immersive .efips-image-book-sheet .efips-image-book-page {
+  display:block;
+  width:100%;
+  height:100%;
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain;
+  margin:auto;
+  padding:0;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+  background:transparent;
+  -webkit-touch-callout:none;
+  -webkit-user-drag:none;
+  user-select:none;
+}
+.efips-image-book--immersive .efips-image-book-sheet--next {
+  animation:efips-glass-page-next 230ms cubic-bezier(.2,.7,.25,1) both;
+}
+.efips-image-book--immersive .efips-image-book-sheet--prev {
+  animation:efips-glass-page-prev 230ms cubic-bezier(.2,.7,.25,1) both;
+}
+@keyframes efips-glass-page-next {
+  from { opacity:.88; transform:translate3d(7px,0,0) scale(.993); }
+  to { opacity:1; transform:translate3d(0,0,0) scale(1); }
+}
+@keyframes efips-glass-page-prev {
+  from { opacity:.88; transform:translate3d(-7px,0,0) scale(.993); }
+  to { opacity:1; transform:translate3d(0,0,0) scale(1); }
+}
+
+/* Two independent on-page floating groups, NOT a permanent toolbar. */
+.efips-image-book--immersive .efips-image-book-glass-ui {
+  position:absolute;
+  inset:0;
+  z-index:5;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  gap:.75rem;
+  padding:
+    max(.6rem,env(safe-area-inset-top, 0px))
+    max(.65rem,env(safe-area-inset-right, 0px))
+    max(.65rem,env(safe-area-inset-bottom, 0px))
+    max(.65rem,env(safe-area-inset-left, 0px));
+  opacity:1;
+  visibility:visible;
+  pointer-events:none;
+  transition:opacity 180ms ease,visibility 0s;
+}
+.efips-image-book--immersive .efips-image-book-glass-ui[data-visible="false"] {
+  opacity:0;
+  visibility:hidden;
+  transition:opacity 180ms ease,visibility 0s linear 180ms;
+}
+.efips-image-book--immersive .efips-image-book-glass-ui > * { pointer-events:auto; }
+.efips-image-book--immersive .efips-image-book-glass-ui[data-visible="false"] > * { pointer-events:none; }
+.efips-image-book--immersive .efips-glass-material,
+.efips-image-book--immersive .efips-glass-image-reveal {
+  background:linear-gradient(145deg,rgba(251,255,253,.86),rgba(226,243,240,.72));
+  border:1px solid rgb(255 255 255 / .68);
+  box-shadow:0 4px 20px rgb(0 22 33 / .18),inset 0 1px 0 rgb(255 255 255 / .66);
+  -webkit-backdrop-filter:blur(13px) saturate(1.22);
+  backdrop-filter:blur(13px) saturate(1.22);
+  color:#103b40;
+  border-radius:999px;
+}
+.efips-glass-image-top {
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:.5rem;
+  min-width:0;
+  width:100%;
+}
+.efips-glass-image-title {
+  display:inline-flex;
+  align-items:center;
+  gap:.5rem;
+  min-width:0;
+  max-width:min(68ch,calc(100% - 9.8rem));
+  min-height:46px;
+  padding:.35rem .85rem .35rem .45rem;
+}
+.efips-glass-image-title img {
+  display:block;
+  width:30px;
+  height:30px;
+  flex:none;
+  object-fit:contain;
+}
+.efips-glass-image-title span {
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-weight:750;
+  font-size:clamp(.78rem,2vw,.94rem);
+}
+.efips-glass-image-top-actions {
+  display:flex;
+  align-items:center;
+  flex:none;
+  gap:.2rem;
+  min-height:46px;
+  padding:.16rem;
+}
+.efips-image-book--immersive .efips-glass-image-top-actions button {
+  min-width:42px;
+  min-height:42px;
+  padding:.25rem .65rem;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  background:transparent;
+  color:inherit;
+  font-size:.85rem;
+  font-weight:750;
+  border:0;
+  cursor:pointer;
+  transition:background 140ms ease,transform 140ms ease;
+}
+.efips-image-book--immersive .efips-glass-image-top-actions button svg {
+  width:20px;
+  height:20px;
+}
+.efips-image-book--immersive .efips-glass-image-top-actions button:hover {
+  background:rgb(6 95 70 / .12);
+}
+.efips-glass-image-bottom {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-end;
+  gap:.4rem;
+  width:100%;
+  min-width:0;
+}
+.efips-glass-image-pager,.efips-glass-image-tools {
+  display:inline-flex;
+  justify-content:center;
+  align-items:center;
+  flex-wrap:nowrap;
+  gap:.12rem;
+  max-width:100%;
+  padding:.24rem;
+}
+.efips-image-book--immersive .efips-glass-image-pager button,
+.efips-image-book--immersive .efips-glass-image-tools button,
+.efips-image-book--immersive .efips-glass-image-saved button {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.25rem;
+  min-width:42px;
+  min-height:42px;
+  padding:.3rem .55rem;
+  border:0;
+  border-radius:999px;
+  background:transparent;
+  color:inherit;
+  font-size:.86rem;
+  font-weight:750;
+  cursor:pointer;
+  transition:background 140ms ease,transform 140ms ease,opacity 140ms ease;
+}
+.efips-image-book--immersive .efips-glass-image-pager button:hover,
+.efips-image-book--immersive .efips-glass-image-tools button:hover,
+.efips-image-book--immersive .efips-glass-image-saved button:hover {
+  background:rgb(5 150 105 / .13);
+}
+.efips-image-book--immersive button:active {
+  transform:scale(.965);
+}
+.efips-image-book--immersive button:disabled {
+  opacity:.3;
+  cursor:not-allowed;
+}
+.efips-image-book--immersive button:focus-visible,
+.efips-image-book--immersive input:focus-visible {
+  outline:2px solid #0d9488;
+  outline-offset:2px;
+}
+.efips-glass-image-pager button svg,
+.efips-glass-image-tools button svg {
+  width:19px;
+  height:19px;
+}
+.efips-glass-image-pager form {
+  display:inline-flex;
+  align-items:center;
+  flex-wrap:nowrap;
+  gap:.34rem;
+  margin:0 .12rem;
+}
+.efips-glass-image-pager form label,
+.efips-glass-image-pager form span { font-weight:700; font-size:.8rem; white-space:nowrap; }
+.efips-glass-image-pager input {
+  appearance:textfield;
+  width:3.6rem;
+  min-height:38px;
+  padding:.26rem .24rem;
+  text-align:center;
+  font-variant-numeric:tabular-nums;
+  font-size:1rem;
+  font-weight:800;
+  color:#064e3b;
+  background:rgba(255,255,255,.6);
+  border:1px solid rgb(16 185 129 / .3);
+  border-radius:.75rem;
+}
+.efips-glass-image-pager input::-webkit-inner-spin-button,
+.efips-glass-image-pager input::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
+.efips-image-book--immersive .efips-glass-image-pager .efips-glass-image-go {
+  min-width:40px;
+  min-height:38px;
+  padding:.2rem .45rem;
+  font-size:.78rem;
+  background:rgba(16,185,129,.15);
+  color:#065f46;
+}
+.efips-glass-image-tools > strong {
+  min-width:3.05rem;
+  font-size:.81rem;
+  font-variant-numeric:tabular-nums;
+  text-align:center;
+}
+.efips-image-book--immersive .efips-glass-image-tools button[aria-pressed="true"] {
+  background:rgba(5,150,105,.18);
+  color:#035d49;
+}
+.efips-glass-image-bookmark-count {
+  font-size:.76rem;
+  font-variant-numeric:tabular-nums;
+}
+.efips-glass-image-saved {
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:.25rem;
+  max-width:min(100%,31rem);
+  max-height:min(20dvh,9rem);
+  overflow:auto;
+  padding:.4rem .5rem;
+  border-radius:1.15rem !important;
+}
+.efips-glass-image-saved span {
+  font-size:.78rem;
+  font-weight:750;
+  padding-inline:.3rem;
+}
+.efips-glass-image-hint {
+  font-size:.68rem;
+  color:rgb(255 255 255 / .8);
+  text-shadow:0 1px 4px rgba(0,0,0,.45);
+  font-weight:600;
+  line-height:1.25;
+}
+.efips-image-book--immersive .efips-glass-image-reveal {
+  position:absolute;
+  z-index:6;
+  inset-block-end:max(.65rem,env(safe-area-inset-bottom, 0px));
+  left:50%;
+  transform:translateX(-50%);
+  width:39px;
+  height:34px;
+  min-width:39px;
+  min-height:34px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  cursor:pointer;
+  opacity:.79;
+}
+.efips-glass-image-reveal svg { width:17px; height:17px; }
+.efips-image-book--immersive .efips-image-book-loading {
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:.9rem;
+  margin:auto;
+  padding:1.25rem;
+  text-align:center;
+  color:#d1fae5;
+  font-size:.9rem;
+  font-weight:700;
+}
+.efips-image-book-loader {
+  width:27px;
+  height:27px;
+  border:2px solid rgb(167 243 208 / .2);
+  border-top-color:#5eead4;
+  border-radius:50%;
+  animation:efips-glass-spinner .8s linear infinite;
+}
+@keyframes efips-glass-spinner { to { transform:rotate(360deg); } }
+.efips-image-book--immersive .efips-image-book-error {
+  flex:none;
+  align-self:center;
+  margin:auto;
+  max-width:min(92vw,26rem);
+  padding:1.5rem;
+  text-align:center;
+  background:rgb(6 38 44 / .88);
+  border:1px solid rgb(167 243 208 / .25);
+  border-radius:1.2rem;
+  color:#ecfdf5;
+  box-shadow:0 16px 50px rgb(0 0 0 / .25);
+  -webkit-backdrop-filter:blur(10px);
+  backdrop-filter:blur(10px);
+}
+.efips-image-book--immersive .efips-image-book-error p {
+  font-size:.84rem;
+  line-height:1.65;
+  margin:.6rem 0;
+}
+.efips-image-book--immersive .efips-image-book-error button {
+  color:#fff;
+  background:#047857;
+  padding:.65rem 1rem;
+  min-height:44px;
+  border-radius:.8rem;
+  border:0;
+  font-weight:750;
+}
+.dark .efips-image-book--immersive .efips-glass-material,
+.dark .efips-image-book--immersive .efips-glass-image-reveal {
+  background:linear-gradient(145deg,rgba(20,49,54,.78),rgba(5,32,38,.74));
+  border-color:rgb(167 243 208 / .19);
+  color:#f0fdfa;
+  box-shadow:0 6px 20px rgb(0 0 0 / .26),inset 0 1px 0 rgb(255 255 255 / .13);
+}
+.dark .efips-image-book--immersive .efips-glass-image-pager input {
+  background:rgba(3,40,43,.68);
+  color:#f0fdfa;
+  border-color:rgb(167 243 208 / .22);
+}
+.dark .efips-image-book--immersive .efips-glass-image-tools button[aria-pressed="true"] {
+  color:#a7f3d0;
+}
+.dark .efips-image-book--immersive .efips-glass-image-pager .efips-glass-image-go {
+  color:#d1fae5;
+}
+
+@media (max-width:600px) {
+  .efips-image-book--immersive .efips-image-book-glass-ui {
+    padding:
+      max(.42rem,env(safe-area-inset-top, 0px))
+      max(.38rem,env(safe-area-inset-right, 0px))
+      max(.42rem,env(safe-area-inset-bottom, 0px))
+      max(.38rem,env(safe-area-inset-left, 0px));
+  }
+  .efips-glass-image-top { gap:.35rem; }
+  .efips-glass-image-title { min-height:43px; max-width:calc(100% - 8.3rem); padding:.3rem .55rem .3rem .25rem; }
+  .efips-glass-image-title img { width:27px; height:27px; }
+  .efips-glass-image-title span { font-size:.78rem; }
+  .efips-glass-image-top-actions { min-height:43px; }
+  .efips-image-book--immersive .efips-glass-image-top-actions button {
+    min-width:41px; min-height:40px; padding:.25rem .45rem; font-size:.78rem;
+  }
+  .efips-glass-image-pager,.efips-glass-image-tools { gap:0; padding:.16rem; }
+  .efips-image-book--immersive .efips-glass-image-pager button,
+  .efips-image-book--immersive .efips-glass-image-tools button { min-width:40px; min-height:42px; padding:.26rem .36rem; }
+  .efips-glass-image-pager form { gap:.22rem; }
+  .efips-glass-image-pager form label { font-size:.7rem; }
+  .efips-glass-image-pager form span { font-size:.7rem; }
+  .efips-glass-image-pager input { width:3rem; min-height:36px; padding:.15rem; }
+  .efips-glass-image-tools > strong { min-width:2.75rem; }
+  .efips-glass-image-hint { display:none; }
+}
+@media (max-width:350px) {
+  .efips-glass-image-pager form label { display:none; }
+  .efips-image-book--immersive .efips-glass-image-pager button { min-width:36px; }
+  .efips-glass-image-pager input { width:2.7rem; }
+  .efips-glass-image-title { max-width:calc(100% - 7.8rem); }
+}
+@media (max-height:520px) and (orientation:landscape) {
+  .efips-image-book--immersive .efips-image-book-glass-ui { padding-block:.2rem; }
+  .efips-glass-image-top-actions,.efips-glass-image-title { min-height:40px; }
+  .efips-glass-image-title img { width:24px; height:24px; }
+  .efips-glass-image-bottom { gap:.2rem; }
+  .efips-glass-image-hint { display:none; }
+  .efips-image-book--immersive .efips-glass-image-pager button,
+  .efips-image-book--immersive .efips-glass-image-tools button { min-height:36px; }
+  .efips-glass-image-pager input { min-height:34px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .efips-image-book--immersive .efips-image-book-glass-ui,
+  .efips-image-book--immersive button { transition:none !important; }
+  .efips-image-book--immersive .efips-image-book-sheet--next,
+  .efips-image-book--immersive .efips-image-book-sheet--prev,
+  .efips-image-book--immersive .efips-image-book-loader { animation:none !important; }
+}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) {
+  .efips-image-book--immersive .efips-glass-material,
+  .efips-image-book--immersive .efips-glass-image-reveal { background:#e4f5f0; }
+  .dark .efips-image-book--immersive .efips-glass-material,
+  .dark .efips-image-book--immersive .efips-glass-image-reveal { background:#123b3e; }
+}

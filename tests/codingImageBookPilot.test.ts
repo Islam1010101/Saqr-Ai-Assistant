@@ -23,7 +23,7 @@ assert.ok(readerUI.includes('imagePages?.length ? <ImageBookPages'), 'Reader mus
 assert.ok(readerUI.includes('<PdfBookPages'), 'Original PDF.js mode is still present');
 assert.ok(images.includes('writePdfState'), 'Bookmark and page progress must be saved');
 assert.ok(images.includes('drive.google.com/thumbnail?id='), 'Display individual Drive image thumbnails');
-assert.ok(images.includes('drive.google.com/file/d/'), 'Single-page preview fallback for blocked image thumbnails');
+assert.ok(!images.includes('<iframe') && !images.includes('/preview'), 'Never render a Google Drive embedded image or PDF preview in photo-book mode');
 assert.ok(images.includes('fastImageWidth = (viewportWidth:number) => viewportWidth <= 720 ? 840 : 1100'),
   'Default reading thumbnails should be smaller on mobile and desktop than the former 1600px default');
 assert.ok(images.includes("const [highQuality,setHighQuality]=useState(false)"),
@@ -42,29 +42,39 @@ assert.ok(images.includes("next.addEventListener('load',thenSecond,{once:true})"
 assert.ok(images.includes("'https://lh3.googleusercontent.com/d/'"),'Use separate Google image host for the first attempted page image');
 assert.ok(images.includes("'https://drive.google.com/thumbnail?id='"),'Keep original Drive thumbnail as a second image source');
 assert.ok(images.includes('window.setTimeout'), 'Require a finite timeout for stalled mobile image loading');
-assert.ok(images.includes('setThumbnailFailed(true)'), 'Show single-image Drive preview when both sources are unavailable');
-assert.ok(images.includes('className="efips-image-book-quick-preview"'), 'Let readers bypass slow image loading');
+assert.ok(images.includes('setThumbnailFailed(true)'), 'Stop loading after both image sources fail and offer an internal retry screen');
+assert.ok(images.includes('efips-image-book-error'), 'Show an in-site retry panel without any Drive UI');
 assert.ok(style.includes('.efips-image-book-stage'), 'Mobile responsive reader styles must exist');
 assert.ok(images.includes('readPdfState(storageKey,.25)'), 'Image reader restores 25% zoom independently of the PDF.js minimum');
 assert.ok(images.includes('Math.max(.25,Number((z-.25).toFixed(2)))'), 'Image reader zooms down to 25%');
-assert.ok(images.includes("setTurnDirection(next>page ? 'next' : 'prev')"), 'Page-turn motion responds to previous/next navigation');
+assert.ok(/setTurnDirection\(next>page\s*\?\s*'next'\s*:\s*'prev'\)/.test(images), 'Page-turn motion responds to previous/next navigation');
 assert.ok(images.includes("loaded && turnDirection"), 'Do not animate blank pages while Drive loads');
 assert.ok(images.includes("key={current.fileId}"), 'Each new page should have a stable independent page-flip surface');
 assert.ok(style.includes('@keyframes efips-image-book-turn-next'), 'Advance page gets a paper-turn animation');
 assert.ok(style.includes('@keyframes efips-image-book-turn-prev'), 'Previous page gets a reverse paper-turn animation');
 assert.ok(style.includes('@media (prefers-reduced-motion:reduce)'), 'Respect reduced-motion accessibility preferences');
-assert.ok(images.includes('onContextMenu={event => event.preventDefault()}'),
+assert.ok(/onContextMenu=\{event\s*=>\s*event\.preventDefault\(\)\}/.test(images),
   'Native right-click context menu must be suppressed on the Coding image viewport');
 assert.ok(images.includes('className="efips-image-book-page" draggable={false}'),
   'Image drag-to-save should be disabled');
-assert.ok(images.includes('onDragStart={event => event.preventDefault()}'),
+assert.ok(/onDragStart=\{event\s*=>\s*event\.preventDefault\(\)\}/.test(images),
   'Image and stage drag events should not start native drag-and-drop');
-assert.ok(style.includes('-webkit-touch-callout: none;'),
+assert.ok(/-webkit-touch-callout:\s*none;/.test(style),
   'Avoid mobile long-press image save calls where browser supports it');
-assert.ok(style.includes('-webkit-user-select: none;'),
+assert.ok(/-webkit-user-select:\s*none;/.test(style),
   'Prevent image selection on mobile without disabling reading controls');
 assert.ok(images.includes('onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}'),
   'Keep touch-based page turning intact');
 
 
-console.log('PASS: 70 sequential coding image pages, internal EFIPS image reader, unchanged 77 English and 452 Arabic books');
+assert.ok(images.includes('data-visible={controlsVisible'), 'Reading tools auto-hide over the photo-book page');
+assert.ok(images.includes('efips-glass-image-top') && images.includes('efips-glass-image-pager') &&
+  images.includes('efips-glass-image-tools'), 'Glass UI must expose navigation, zoom, bookmarks and book actions');
+assert.ok(images.includes('onBack={onBack}')===false || images.includes('onClick={onBack}'), 'Keep details button');
+assert.ok(images.includes('onClick={onClose}'), 'Keep close action');
+assert.ok(images.includes('onClick={toggleBookmark}'), 'Keep bookmark control');
+assert.ok(images.includes('onSubmit={onJump}'), 'Keep page number navigation');
+assert.ok(images.includes('changeQuality'), 'Keep HD mode');
+assert.ok(!images.includes('Google Drive</') && !images.includes('المصدر Google Drive'), 'No Drive chrome or captions in image mode');
+assert.ok(style.includes('efips-image-book--immersive'), 'Photo book must use immersive viewport-specific styles');
+console.log('PASS: 70 Coding images, fullscreen glass controls and no Google Drive UI, 77 English and 452 Arabic books retained');
