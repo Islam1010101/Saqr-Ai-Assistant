@@ -48,8 +48,10 @@ export async function readSchoolPdfRange(
   }
   if(response.status===401){ await response.body?.cancel(); throw new SchoolDrivePdfError('SCHOOL_DRIVE_TOKEN_EXPIRED'); }
   if(response.status===403){
-    await response.body?.cancel();
-    throw new SchoolDrivePdfError('SCHOOL_DRIVE_PERMISSION_REQUIRED');
+    const limited=await response.text().catch(()=>'');
+    const isDownloadBlocked=/cannotdownload|download is restricted|downloads? (?:are|is) (?:not allowed|disabled|restricted)/i.test(limited.slice(0,3000));
+    throw new SchoolDrivePdfError(isDownloadBlocked
+      ?'SCHOOL_DRIVE_DOWNLOAD_BLOCKED':'SCHOOL_DRIVE_PERMISSION_REQUIRED');
   }
   if(response.status!==206){
     // Never accidentally download a multi-hundred-megabyte file when Range
@@ -67,8 +69,20 @@ export async function readSchoolPdfRange(
     throw new SchoolDrivePdfError('SCHOOL_DRIVE_RANGE_UNAVAILABLE');
   }
   const expected=last-first+1;
-  const bytes=new Uint8Array(await response.arrayBuffer());
-  if(bytes.length!==expected)throw new SchoolDrivePdfError('SCHOOL_DRIVE_RANGE_UNAVAILABLE');
+  if(!response.body)throw new SchoolDrivePdfError('SCHOOL_DRIVE_RANGE_UNAVAILABLE');
+  // Bound memory even when an upstream server mistakenly sends extra bytes.
+  const bytes=new Uint8Array(expected);
+  const reader=response.body.getReader();
+  let written=0;
+  try{
+    while(written<expected){
+      const {value,done}=await reader.read();
+      if(done)break;
+      if(value.length>expected-written)throw new SchoolDrivePdfError('SCHOOL_DRIVE_RANGE_UNAVAILABLE');
+      bytes.set(value,written);written+=value.length;
+    }
+  } finally {await reader.cancel().catch(()=>{});}
+  if(written!==expected)throw new SchoolDrivePdfError('SCHOOL_DRIVE_RANGE_UNAVAILABLE');
   if(begin===0 && new TextDecoder().decode(bytes.subarray(0,5))!=='%PDF-')
     throw new SchoolDrivePdfError('SOURCE_NOT_PDF');
   return {bytes,length};
