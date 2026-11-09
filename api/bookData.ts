@@ -4,6 +4,7 @@ import {shelf30SourceRecords} from './shelf30Catalog.ts';
 import {uploadedLibraryBooks} from './uploadedCatalog20261028.ts';
 import {reviewedShelf41Books} from './shelf41ReviewedCatalog.ts';
 import { physicalBookAdditions } from './bookAdditions.ts';
+import {orisonCuratedRecords} from './orisonCurated20261109.ts';
 import { classifyLiteraryGenre, literaryGenreLabels } from '../src/utils/literaryGenreCatalog.ts';
 import { refineLegacyLiterature } from '../src/utils/legacyLiteratureClassification.ts';
 import { applyPhysicalCatalogAudit } from '../src/utils/catalogBibliographicCorrections.ts';
@@ -3752,11 +3753,59 @@ const classifyDramaAndTheatre = (book: Book): Book => {
   return book;
 };
 
-export const bookData:Book[]=[...beforeShelf22,...newShelf22Books]
+// Preserve every existing book and its ID. Merge Orison only into the
+// public physical catalog after the current curation and audit pipeline.
+const preOrisonCatalog:Book[]=[...beforeShelf22,...newShelf22Books]
   .map(classifyDramaAndTheatre)
   .map(classifyLiteraryGenre)
   .map(refineLegacyLiterature)
   .map(applyPhysicalCatalogAudit);
+
+// Title-based suppression is intentionally conservative: never replace an
+// existing catalog record, even when Orison has an additional edition.
+// The source file retains the edition ISBNs and all source barcodes.
+const orisonTitleKey=(text:string):string=>String(text||'')
+  .normalize('NFKC').toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu,'');
+const orisonIsbnKey=(text:string):string=>String(text||'').toUpperCase().replace(/[^0-9X]/g,'');
+const knownOrisonTitles=new Set(preOrisonCatalog.map(book=>orisonTitleKey(book.title)));
+const knownOrisonIsbns=new Set(preOrisonCatalog.map(book=>orisonIsbnKey(book.isbn||'')).filter(Boolean));
+
+// Aggregate separately barcoded copies into a single searchable title.
+const orisonGroupedByTitle=new Map<string,{
+  source:(typeof orisonCuratedRecords)[number];barcodes:Set<string>
+}>();
+for(const source of orisonCuratedRecords){
+  const key=orisonTitleKey(source.title);
+  if(!key||!source.isbn||!source.author||!source.barcodes.length)continue;
+  const current=orisonGroupedByTitle.get(key);
+  if(current){
+    source.barcodes.forEach(barcode=>current.barcodes.add(barcode));
+  }else{
+    orisonGroupedByTitle.set(key,{source,barcodes:new Set(source.barcodes)});
+  }
+}
+const importedOrisonBooks:Book[]=[];
+for(const [titleKey,group] of orisonGroupedByTitle){
+  const isbn=orisonIsbnKey(group.source.isbn);
+  if(knownOrisonTitles.has(titleKey)||knownOrisonIsbns.has(isbn))continue;
+  const source=group.source;
+  const barcodes=Array.from(group.barcodes);
+  importedOrisonBooks.push({
+    id:'orison-20261109-'+barcodes[0],
+    title:source.title,author:source.author,
+    isbn:source.isbn,isbnStatus:'candidate',
+    shelf:source.shelf,
+    // Orison export has no physical row, and the school asked to organize by shelf only.
+    // This is a compatibility placeholder, NOT a verified row location.
+    row:1,copies:barcodes.length,language:'EN',
+    subject:inferredSubject(source.title,source.author,'',source.shelf),
+    level:'General',
+    summary:'Catalogued from the school Orison inventory. Exact physical row was not supplied in the export.'
+  });
+  knownOrisonTitles.add(titleKey);
+  knownOrisonIsbns.add(isbn);
+}
+export const bookData:Book[]=[...preOrisonCatalog,...importedOrisonBooks];
 
 // 5. دالة البحث المخصصة للاستخدام في تطبيق الويب
 export function findInCatalog(q: string): Book[] {
