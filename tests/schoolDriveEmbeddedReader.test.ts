@@ -8,8 +8,8 @@ const readerUi=readFileSync('src/components/DigitalBookReader.tsx','utf8');
 const readerServer=readFileSync('src/server/digitalBookPdf.ts','utf8');
 
 const schoolBooks=ENGLISH_LIBRARY_DATABASE.filter(book=>book.requiresSchoolGoogleAccess);
-assert.equal(schoolBooks.length,21,'Keep the 14 + 7 school-only English books in the catalog');
-assert.equal(ENGLISH_LIBRARY_DATABASE.length,75,'Do not remove or duplicate English books');
+assert.equal(schoolBooks.length,23,'Keep the 14 + 7 + 2 school-only English books in the catalog');
+assert.equal(ENGLISH_LIBRARY_DATABASE.length,77,'Do not remove or duplicate English books');
 assert.equal(ARABIC_LIBRARY_DATABASE.length,452,'Do not alter Arabic books');
 assert.ok(englishUi.includes('schoolOnly={Boolean(book.requiresSchoolGoogleAccess)}'),
   'Pass school-only mode to the existing fullscreen EFIPS reader');
@@ -36,4 +36,4 @@ assert.ok(readerServer.includes('if (!book || book.requiresSchoolGoogleAccess) r
   'Anonymous PDF proxy must explicitly reject all school-only Drive books');
 assert.ok(readerServer.includes("readPublicPdfRange"),
   'Keep the original public PDF byte-range flow unchanged');
-console.log('PASS: all 21 school-only books open inside EFIPS preview, never the public byte-range API; existing readers unchanged');
+console.log('PASS: all 23 school-only books open inside EFIPS preview, never the public byte-range API; existing readers unchanged');
