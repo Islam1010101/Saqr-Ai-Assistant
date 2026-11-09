@@ -6,11 +6,14 @@ import { useCloudReader } from '../utils/efipsCloud';
 import { pdfReadingStorageKey, readerDeviceAccount } from '../utils/pdfReadingState';
 import './digitalBookReader.css';
 
-export default function DigitalBookReader({ title, source, bookKey, locale, onBack, onClose }: {
+export default function DigitalBookReader({ title, source, bookKey, locale, onBack, onClose, schoolOnly = false }: {
   title: string; source: string; bookKey: string; locale: string; onBack: () => void; onClose: () => void;
+  /** School-domain PDFs can be previewed by a signed-in school user, not fetched by the anonymous public-PDF endpoint. */
+  schoolOnly?: boolean;
 }) {
   const ar = locale === 'ar';
   const preview = digitalReaderSource(source);
+  const embeddedSchoolPreview = schoolOnly && Boolean(preview);
   const [deviceAccount] = useState(() => readerDeviceAccount());
   const { user } = useCloudReader();
   // Rendering the Drive book must never wait for an additional auth call.
@@ -24,7 +27,7 @@ export default function DigitalBookReader({ title, source, bookKey, locale, onBa
   // bookmarks and saved position remain available as soon as it is ready.
   useEffect(() => {
     setError(null); setShowPreview(Boolean(preview)); setReady(false); setAttempt(0);
-  }, [bookKey, source, preview]);
+  }, [bookKey, source, preview, schoolOnly]);
   const retry = () => { setError(null); setReady(false); setAttempt(v => v + 1); };
   const reportReaderError = (failure: Error) => { setError(failure); setShowPreview(true); };
   const back = useRef<HTMLButtonElement>(null);
@@ -48,14 +51,18 @@ export default function DigitalBookReader({ title, source, bookKey, locale, onBa
         </nav>
       </header>
       <div className="efips-reader-stage">
-          {!error && <div className="efips-reader-native" aria-hidden={showPreview}>
+          {!error && !schoolOnly && <div className="efips-reader-native" aria-hidden={showPreview}>
             <PdfBookPages key={`${storageKey || bookKey}:${attempt}`} bookKey={bookKey}
               storageKey={storageKey} ar={ar} onReady={() => setReady(true)}
               onError={reportReaderError} />
           </div>}
           {showPreview && preview && <div className="efips-reader-preview-host">
             <div className="efips-reader-preview-controls" role="status" aria-live="polite">
-              {error
+              {embeddedSchoolPreview
+                ? <span>{ar
+                    ? 'الكتاب معروض داخل واجهة مكتبة صقر عبر Google Drive بحساب المدرسة. استخدم حسابك المدرسي إذا طُلب تسجيل الدخول؛ أدوات حفظ الصفحات في القارئ الأصلي لا تعمل مع الملفات المقيدة.'
+                    : 'School-account Google Drive preview inside the EFIPS reader. Sign in with your school Google account if prompted; native PDF bookmarks and page tools are unavailable for restricted files.'}</span>
+                : error
                 ? <span>{downloadDisabled
                     ? (ar ? 'إعدادات Google Drive تمنع تحميل هذا الكتاب داخل القارئ؛ اقرأه عبر المعاينة.' : 'Drive settings block direct PDF loading. Read with the preview.')
                     : sourceRangeUnsupported
@@ -66,13 +73,15 @@ export default function DigitalBookReader({ title, source, bookKey, locale, onBa
                 : ready
                   ? <span>{ar ? 'القارئ الداخلي وأدوات حفظ الصفحات جاهزة.' : 'The page reader and reading bookmarks are ready.'}</span>
                   : <span>{ar ? 'معاينة الكتاب مفتوحة، وجاري تجهيز أدوات الصفحات والحفظ.' : 'Book preview opened. Page and bookmark tools are loading.'}</span>}
-              {ready && !error
+              {embeddedSchoolPreview
+                ? <button type="button" onClick={retry}>{ar ? 'إعادة تحميل المعاينة' : 'Reload preview'}</button>
+                : ready && !error
                 ? <button type="button" onClick={() => setShowPreview(false)}>{ar ? 'استخدام القارئ وحفظ موضع القراءة' : 'Use page reader and save progress'}</button>
                 : error
                 ? <button type="button" onClick={retry}>{ar ? 'إعادة محاولة القارئ الداخلي' : 'Retry internal reader'}</button>
                 : null}
             </div>
-            <iframe src={preview} loading="eager" title={ar ? `معاينة: ${title}` : `Preview: ${title}`}
+            <iframe key={embeddedSchoolPreview ? `${bookKey}:${attempt}` : bookKey} src={preview} loading="eager" title={ar ? `معاينة: ${title}` : `Preview: ${title}`}
               referrerPolicy="no-referrer" allow="fullscreen" allowFullScreen />
           </div>}
           {error && !preview && <div className="efips-reader-fallback" role="alert">
