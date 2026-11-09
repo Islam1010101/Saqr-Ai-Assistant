@@ -182,7 +182,7 @@ export default function ImageBookPages({pages,storageKey,ar}:{
     {bookmarks.length>0&&<div className="efips-image-book-bookmarks">
       <span>{ar?'الصفحات المحفوظة:':'Bookmarks:'}</span>
       {bookmarks.map(n=><button key={n} type="button" onClick={()=>go(n)}>{n}</button>)}
-    </div>
+    </div>}
     <div className="efips-image-book-footer" role="status">
       {ar?'وضع القراءة السريع · المصدر Google Drive':'Fast image reading · Source: Google Drive'}
       {' · '}
