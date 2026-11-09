@@ -45,4 +45,13 @@ assert.ok(images.includes('window.setTimeout'), 'Require a finite timeout for st
 assert.ok(images.includes('setThumbnailFailed(true)'), 'Show single-image Drive preview when both sources are unavailable');
 assert.ok(images.includes('className="efips-image-book-quick-preview"'), 'Let readers bypass slow image loading');
 assert.ok(style.includes('.efips-image-book-stage'), 'Mobile responsive reader styles must exist');
+assert.ok(images.includes('readPdfState(storageKey,.25)'), 'Image reader restores 25% zoom independently of the PDF.js minimum');
+assert.ok(images.includes('Math.max(.25,Number((z-.25).toFixed(2)))'), 'Image reader zooms down to 25%');
+assert.ok(images.includes("setTurnDirection(next>page ? 'next' : 'prev')"), 'Page-turn motion responds to previous/next navigation');
+assert.ok(images.includes("loaded && turnDirection"), 'Do not animate blank pages while Drive loads');
+assert.ok(images.includes("key={current.fileId}"), 'Each new page should have a stable independent page-flip surface');
+assert.ok(style.includes('@keyframes efips-image-book-turn-next'), 'Advance page gets a paper-turn animation');
+assert.ok(style.includes('@keyframes efips-image-book-turn-prev'), 'Previous page gets a reverse paper-turn animation');
+assert.ok(style.includes('@media (prefers-reduced-motion:reduce)'), 'Respect reduced-motion accessibility preferences');
+
 console.log('PASS: 70 sequential coding image pages, internal EFIPS image reader, unchanged 77 English and 452 Arabic books');
