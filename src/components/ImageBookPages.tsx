@@ -2,20 +2,24 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { clampPdfPage, parsePdfPage, readPdfState, writePdfState } from '../utils/pdfReadingState';
 
 export type ImageBookPage = {page:number; fileId:string};
-const driveThumbnail = (id:string) =>
-  'https://drive.google.com/thumbnail?id='+encodeURIComponent(id)+'&sz=w1600';
+
+/* Fetch a smaller Drive-hosted image for ordinary reading. Full resolution is
+ * still available on demand, without fetching a 1600px thumbnail on every tap.
+ * Keep the URL exactly the same for <img> and preloading, so browser cache
+ * reuse does not require any proxy, storage provider, or new Google scopes. */
+export const fastImageWidth = (viewportWidth:number) => viewportWidth <= 720 ? 840 : 1100;
+export const driveReaderImage = (id:string,width:number) =>
+  'https://drive.google.com/thumbnail?id='+encodeURIComponent(id)+'&sz=w'+width;
 const driveImagePreview = (id:string) =>
   'https://drive.google.com/file/d/'+encodeURIComponent(id)+'/preview';
 
-/**
- * A single-book pilot: the original big PDF stays on Drive; only its
- * individually-uploaded JPEG pages are displayed inside the EFIPS reader.
- * Avoids Drive PDF previews, and requests only one small page at a time.
- */
 export default function ImageBookPages({pages,storageKey,ar}:{
   pages:ReadonlyArray<ImageBookPage>;storageKey:string|null;ar:boolean;
 }){
   const initial=useRef(readPdfState(storageKey)).current;
+  const baseWidth=useRef(typeof window!=='undefined' ? fastImageWidth(window.innerWidth) : 1100).current;
+  const [highQuality,setHighQuality]=useState(false);
+  const width=highQuality ? 1600 : baseWidth;
   const [page,setPage]=useState(()=>clampPdfPage(initial.page,pages.length));
   const [pageInput,setPageInput]=useState(String(clampPdfPage(initial.page,pages.length)));
   const [zoom,setZoom]=useState(initial.zoom);
@@ -23,13 +27,25 @@ export default function ImageBookPages({pages,storageKey,ar}:{
   const [loaded,setLoaded]=useState(false);
   const [thumbnailFailed,setThumbnailFailed]=useState(false);
   const [refresh,setRefresh]=useState(0);
+  // Keep prefetched Image objects alive across page changes. The previous
+  // reader cancelled its next-page request on every navigation, causing waits.
+  const preloadCache=useRef(new Map<string,HTMLImageElement>());
   const furthestPage=useRef(initial.furthestPage||initial.page);
   const swipeStart=useRef<{x:number;y:number}|null>(null);
   const current=pages[page-1];
+  const imageUrl=(fileId:string)=>driveReaderImage(fileId,width);
+  const isCached=(fileId:string)=>{
+    const cached=preloadCache.current.get(imageUrl(fileId));
+    return !!cached && cached.complete && cached.naturalWidth>0;
+  };
   const go=useCallback((to:number)=>{
     const next=clampPdfPage(to,pages.length);
-    setPage(next);setPageInput(String(next));setLoaded(false);setThumbnailFailed(false);
-  },[pages.length]);
+    if(next===page)return;
+    setPage(next);setPageInput(String(next));
+    const cached=pages[next-1] && preloadCache.current.get(driveReaderImage(pages[next-1].fileId,width));
+    setLoaded(Boolean(cached?.complete && cached.naturalWidth>0));
+    setThumbnailFailed(false);
+  },[pages,page,width]);
   useEffect(()=>{
     const listener=(event:KeyboardEvent)=>{
       if(event.altKey||event.ctrlKey||event.metaKey||
@@ -50,16 +66,47 @@ export default function ImageBookPages({pages,storageKey,ar}:{
       totalPages:pages.length,lastReadAt:Date.now()
     });
   },[page,loaded,zoom,bookmarks,storageKey,pages.length]);
+
+  // Preload ahead only AFTER the current page has appeared. A small, ordered
+  // look-ahead buffer makes normal forward reading instant when Drive responds
+  // promptly. Sequential requests avoid competing with the visible page on a
+  // slow mobile connection. Never cancel an in-flight preload during turns.
   useEffect(()=>{
-    const next=pages[page];
-    if(!next)return;
-    const image=new Image();
-    image.src=driveThumbnail(next.fileId);
-    return()=>{image.src='';};
-  },[page,pages]);
-  const toggleBookmark=()=>{
-    setBookmarks(old=>old.includes(page)?old.filter(n=>n!==page):[...old,page].sort((a,b)=>a-b));
-  };
+    if(!loaded || thumbnailFailed)return;
+    let cancelled=false;
+    const create=(index:number):HTMLImageElement|null=>{
+      const entry=pages[index];
+      if(!entry)return null;
+      const url=driveReaderImage(entry.fileId,width);
+      const cache=preloadCache.current;
+      const existing=cache.get(url);
+      if(existing)return existing;
+      const img=new Image();
+      img.decoding='async';
+      cache.set(url,img);
+      // A bounded image buffer avoids keeping dozens of decoded textbook
+      // pages in mobile memory. The browser HTTP cache handles older pages.
+      while(cache.size > (baseWidth===840 ? 5 : 8)){
+        const oldest=cache.keys().next().value;
+        if(oldest===undefined)break;
+        cache.delete(oldest);
+      }
+      img.src=url;
+      return img;
+    };
+    const next=create(page);
+    if(next && !highQuality){
+      const thenSecond=()=>{if(!cancelled)create(page+1);};
+      if(next.complete && next.naturalWidth>0)thenSecond();
+      else next.addEventListener('load',thenSecond,{once:true});
+      return()=>{cancelled=true;next.removeEventListener('load',thenSecond);};
+    }
+    return()=>{cancelled=true;};
+  },[page,pages,width,loaded,thumbnailFailed,highQuality,baseWidth]);
+
+  const toggleBookmark=()=>setBookmarks(old=>
+    old.includes(page)?old.filter(n=>n!==page):[...old,page].sort((a,b)=>a-b)
+  );
   const onTouchStart=(event:React.TouchEvent)=>{
     const t=event.touches[0];swipeStart.current=t?{x:t.clientX,y:t.clientY}:null;
   };
@@ -76,6 +123,13 @@ export default function ImageBookPages({pages,storageKey,ar}:{
     event.preventDefault();
     const n=parsePdfPage(pageInput);
     if(Number.isFinite(n))go(n);
+  };
+  const changeQuality=()=>{
+    const nextWidth=!highQuality?1600:baseWidth;
+    setLoaded(Boolean(current && preloadCache.current.get(driveReaderImage(current.fileId,nextWidth))?.complete &&
+      preloadCache.current.get(driveReaderImage(current.fileId,nextWidth))?.naturalWidth));
+    setThumbnailFailed(false);
+    setHighQuality(v=>!v);
   };
   if(!current)return <p role="alert">{ar?'لا توجد صفحات مرفوعة لهذا الكتاب.':'No uploaded pages are available.'}</p>;
   return <div className="efips-image-book" dir={ar?'rtl':'ltr'}>
@@ -98,6 +152,10 @@ export default function ImageBookPages({pages,storageKey,ar}:{
       <strong aria-live="polite">{Math.round(zoom*100)}%</strong>
       <button type="button" onClick={()=>setZoom(z=>Math.min(2,Number((z+.25).toFixed(2))))}
         aria-label={ar?'تكبير':'Zoom in'}>+</button>
+      <button type="button" aria-pressed={highQuality} onClick={changeQuality}
+        title={ar?'حمّل صورة عالية الدقة عند الحاجة فقط':'Load high-resolution pages only when needed'}>
+        {highQuality?(ar?'وضع سريع':'Fast mode'):(ar?'جودة عالية':'HD')}
+      </button>
     </div>
     <div className="efips-image-book-stage" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
       {!loaded && !thumbnailFailed && <div className="efips-image-book-loading" role="status">
@@ -113,8 +171,8 @@ export default function ImageBookPages({pages,storageKey,ar}:{
               {ar?'إعادة محاولة الصورة':'Retry image'}
             </button>
           </div>
-        : <img key={current.fileId+'-'+refresh} className="efips-image-book-page" 
-            src={driveThumbnail(current.fileId)} loading="eager" decoding="async"
+        : <img key={current.fileId+'-'+width+'-'+refresh} className="efips-image-book-page"
+            src={imageUrl(current.fileId)} loading="eager" decoding="async"
             alt={ar?'صفحة '+page+' من '+pages.length:'Page '+page+' of '+pages.length}
             referrerPolicy="no-referrer"
             style={{width:(zoom*100)+'%',maxWidth:'none',display:loaded?'block':'none'}}
@@ -123,9 +181,9 @@ export default function ImageBookPages({pages,storageKey,ar}:{
     {bookmarks.length>0&&<div className="efips-image-book-bookmarks">
       <span>{ar?'الصفحات المحفوظة:':'Bookmarks:'}</span>
       {bookmarks.map(n=><button key={n} type="button" onClick={()=>go(n)}>{n}</button>)}
-    </div>}
+    </div>
     <div className="efips-image-book-footer" role="status">
-      {ar?'نسخة صور للقراءة التجريبية · المصدر Google Drive':'Image-reading pilot · Source: Google Drive'}
+      {ar?'وضع القراءة السريع · المصدر Google Drive':'Fast image reading · Source: Google Drive'}
       {' · '}
       {ar?'آخر صفحة يتم حفظها على الجهاز':'Reading position saved on this device'}
     </div>
