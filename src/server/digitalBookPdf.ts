@@ -11,7 +11,10 @@ export function readerFileId(key: string): string | null {
   if (!match) return null;
   const books = match[1] === 'ar' ? [...ARABIC_LIBRARY_DATABASE, ...NATIONAL_IDENTITY_DIGITAL_BOOKS] : ENGLISH_LIBRARY_DATABASE;
   const book = books.find(b => String(b.id) === match[2]);
-  return book?.driveLink.match(/^https:\/\/drive\.google\.com\/file\/d\/([A-Za-z0-9_-]+)(?:\/|$)/)?.[1] || null;
+  // The anonymous byte-range proxy must never serve a school-domain-only
+  // PDF, even if its Drive sharing settings change in the future.
+  if (!book || book.requiresSchoolGoogleAccess) return null;
+  return book.driveLink.match(/^https:\/\/drive\.google\.com\/file\/d\/([A-Za-z0-9_-]+)(?:\/|$)/)?.[1] || null;
 }
 const MAX_RANGE = 1024 * 1024;
 export function readerByteRange(start: unknown, end: unknown): [number, number] | null {
