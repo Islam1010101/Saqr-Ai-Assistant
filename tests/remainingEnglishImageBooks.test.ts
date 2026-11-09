@@ -48,6 +48,8 @@ for(const id of Object.keys(expected))assert.ok(english.includes("'"+id+"'"),'Mi
 assert.ok(reader.includes('imagePages={pages}'),'Render page images in existing Saqr reader');
 assert.ok(reader.includes("digitalBookKey('en',book)"),'Use existing reading-progress keys');
 assert.ok(image.includes('driveReaderImage'), 'Use same image host with timeout and fallback as Coding');
-assert.ok(image.includes('efips-image-book-quick-preview'), 'Preserve instant preview escape option');
+assert.ok(image.includes('efips-image-book-error') && !image.includes('<iframe'), 'Show internal retry, never an embedded Drive preview');
 assert.ok(image.includes('writePdfState'), 'Save reading progress');
-console.log('PASS: five additional completed photo books, 1,393 sequential pages, lazy manifest loading, unchanged 77/452 catalog and prior three image books');
+assert.ok(image.includes('efips-glass-image-top') && image.includes('efips-glass-image-tools'),
+  'All five books share the same glass overlay controls');
+console.log('PASS: five photo books, 1,393 pages, lazy loading, glass reader and preserved 77/452 catalog');
