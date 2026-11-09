@@ -3798,7 +3798,12 @@ for(const [titleKey,group] of orisonGroupedByTitle){
     // Orison export has no physical row, and the school asked to organize by shelf only.
     // This is a compatibility placeholder, NOT a verified row location.
     row:1,copies:barcodes.length,language:'EN',
-    subject:inferredSubject(source.title,source.author,'',source.shelf),
+    subject:source.shelf===22?'Disney Stories'
+      :source.shelf===23?'Animals & Wildlife'
+      :source.shelf===24?'Science & Mathematics'
+      :/jokes?|riddles?|games?|puzzles?/i.test(source.title)?'Puzzles & Games'
+      :/piano|music|song/i.test(source.title)?'Music'
+      :'Foreign Languages',
     level:'General',
     summary:'Catalogued from the school Orison inventory. Exact physical row was not supplied in the export.'
   });
