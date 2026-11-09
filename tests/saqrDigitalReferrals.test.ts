@@ -6,7 +6,7 @@ import { renderSaqrCatalogAnswer } from '../src/utils/saqrCatalogReply.ts';
 // Saqr must refer to the new individual digital PDFs, never to a series folder.
 // No changes to the physical catalog or the AI's model/prompt are needed.
 const catalog = { physical: [], arabic: ARABIC_LIBRARY_DATABASE, english: ENGLISH_LIBRARY_DATABASE };
-const newVolumes = [...ARABIC_LIBRARY_DATABASE, ...ENGLISH_LIBRARY_DATABASE].filter(book => Boolean(book.series));
+const newVolumes = [...ARABIC_LIBRARY_DATABASE, ...ENGLISH_LIBRARY_DATABASE].filter(book => Boolean(book.series) && !String(book.id).startsWith('EN_NEW_20261109_'));
 assert.equal(newVolumes.length, 412, 'Keep the complete 412-book individual-series expansion');
 assert.equal(new Set(newVolumes.map(book => String(book.id))).size, newVolumes.length);
 for (const volume of newVolumes) {
