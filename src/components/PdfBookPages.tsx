@@ -1,10 +1,12 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
 import type { PDFDocumentProxy, RenderTask, PDFDocumentLoadingTask } from 'pdfjs-dist';
-import { createPdfBookTask } from '../utils/pdfBookLoader';
+import { createPdfBookTask, createSchoolDrivePdfBookTask } from '../utils/pdfBookLoader';
 import { clampPdfPage, parsePdfPage, pdfProgressPercent, readPdfState, writePdfState } from '../utils/pdfReadingState';
 
-export default function PdfBookPages({ bookKey, storageKey, ar, onError, onReady }: {
+export default function PdfBookPages({ bookKey, storageKey, ar, onError, onReady, schoolAccess }: {
   bookKey: string; storageKey: string | null; ar: boolean; onError: (error: Error) => void; onReady?: () => void;
+  /** Browser-only Google OAuth bearer token for authenticated, range-based school PDFs. */
+  schoolAccess?: { fileId: string; token: string } | null;
 }) {
   const [initial] = useState(() => readPdfState(storageKey));
   const [pdf, setPdf] = useState<PDFDocumentProxy | null>(null);
@@ -39,7 +41,9 @@ export default function PdfBookPages({ bookKey, storageKey, ar, onError, onReady
   useEffect(() => {
     const controller = new AbortController(); let task: PDFDocumentLoadingTask | null = null;
     void (async () => {
-      task = await createPdfBookTask(bookKey, controller.signal, error => errorCallback.current(error));
+      task = schoolAccess
+        ? await createSchoolDrivePdfBookTask(schoolAccess.fileId, schoolAccess.token, controller.signal, error => errorCallback.current(error))
+        : await createPdfBookTask(bookKey, controller.signal, error => errorCallback.current(error));
       const doc = await task.promise;
       if (controller.signal.aborted) return;
       const valid = clampPdfPage(initial.page, doc.numPages);
@@ -47,7 +51,7 @@ export default function PdfBookPages({ bookKey, storageKey, ar, onError, onReady
       setBookmarks(old => old.filter(p => p <= doc.numPages)); setPdf(doc);
     })().catch(error => { if (!controller.signal.aborted) errorCallback.current(error); });
     return () => { controller.abort(); void task?.destroy(); };
-  }, [bookKey, initial.page]);
+  }, [bookKey, initial.page, schoolAccess?.fileId, schoolAccess?.token]);
   useEffect(() => {
     if (!pdf || !width) return;
     let disposed = false; let task: RenderTask | undefined;
