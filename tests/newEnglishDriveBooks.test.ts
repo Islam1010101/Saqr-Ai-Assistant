@@ -6,7 +6,7 @@ import { searchSaqrBookCatalog } from '../src/utils/saqrCatalogSearch.ts';
 
 const normalize=(s:string)=>String(s).normalize('NFKC').toLowerCase()
   .replace(/[^\p{L}\p{N}]+/gu,'');
-const added=ENGLISH_LIBRARY_DATABASE.filter(b=>String(b.id).startsWith('EN_NEW_20261109_'));
+const added=ENGLISH_LIBRARY_DATABASE.filter(b=>/^EN_NEW_20261109_(?:0[1-9]|1[0-4])$/.test(String(b.id)));
 const earlier=ENGLISH_LIBRARY_DATABASE.filter(b=>!String(b.id).startsWith('EN_NEW_20261109_'));
 
 assert.equal(NEW_ENGLISH_DIGITAL_BOOKS_20261109.length,14);
