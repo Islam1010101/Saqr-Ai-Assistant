@@ -200,18 +200,19 @@ for(const raw of NEW_ENGLISH_DIGITAL_BOOKS_20261109){
   knownEnglishLinks.add(book.driveLink);
 }
 // Editor-reviewed supplemental titles from the renamed/new PDFs in English Books / New.
-// The addition is not safe to merge/publish until the Drive owner enables
-// download/print/copy restrictions and grants school-domain reader access.
-// The previously published 14 new titles and all existing libraries remain unchanged.
-export const pendingEnglishDriveBooks:DigitalLibraryBook[]=[];
+// All seven supplementary PDFs have school-domain read-only access.
+// Actual download/print/copy restrictions and content rights are not verifiable
+// by the connected Drive metadata tools. See the editorial import notes.
+// All pre-existing digital library records remain unchanged.
+const supplementaryEnglishDriveBooks:DigitalLibraryBook[]=[];
 for(const raw of EXTRA_ENGLISH_DIGITAL_BOOKS_20261109) {
   const book:DigitalLibraryBook={...raw,keywords:[...raw.keywords]};
   const key=normalizeDigitalTitle(book.title);
   if(!key||knownEnglishTitles.has(key)||knownEnglishLinks.has(book.driveLink))continue;
-  pendingEnglishDriveBooks.push(book);
+  supplementaryEnglishDriveBooks.push(book);
   knownEnglishTitles.add(key);
   knownEnglishLinks.add(book.driveLink);
 }
 export const ENGLISH_LIBRARY_DATABASE: DigitalLibraryBook[] = expandDigitalSeries(
-  [...ENGLISH_LIBRARY_SEED,...newlyCataloguedEnglishBooks,...pendingEnglishDriveBooks],'en'
+  [...ENGLISH_LIBRARY_SEED,...newlyCataloguedEnglishBooks,...supplementaryEnglishDriveBooks],'en'
 );
