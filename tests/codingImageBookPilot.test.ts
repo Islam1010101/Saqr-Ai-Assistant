@@ -32,7 +32,7 @@ assert.ok(images.includes('preloadCache=useRef(new Map<string,HTMLImageElement>(
   'Keep prefetched images resident instead of cancelling them during page turns');
 assert.ok(!images.includes("return()=>{image.src='';}"),
   'Changing pages must not cancel the in-flight next-page request');
-assert.ok(images.includes('if(!loaded || thumbnailFailed)return'),
+assert.ok(images.includes("if(!loaded || thumbnailFailed || sourceMode!=='cdn')return"),
   'Prefetch should not contend with an unloaded visible page on slow connections');
 assert.ok(images.includes('img.referrerPolicy=\'no-referrer\''),
   'Use the same request context for the preload and visible image');
