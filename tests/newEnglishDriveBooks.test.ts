@@ -26,8 +26,15 @@ const earlierLinks=new Set(earlier.map(b=>b.driveLink));
 assert.ok(added.every(b=>!earlierTitles.has(normalize(b.title))&&!earlierLinks.has(b.driveLink)),
   'Do not overwrite or duplicate an earlier English holding');
 const page=readFileSync(new URL('../pages/EnglishLibraryInternalPage.tsx', import.meta.url),'utf8');
-assert.ok(page.includes('book.requiresSchoolGoogleAccess ? (<a'),
-  'School-only books must open in a signed-in Drive browser tab, never through the public PDF-range proxy');
+assert.ok(page.includes('schoolOnly={Boolean(book.requiresSchoolGoogleAccess)}'),
+  'School-only books must open inside the EFIPS digital reader');
+assert.ok(!page.includes('book.requiresSchoolGoogleAccess ? (<a'),
+  'A separate Drive tab must not be the primary school-only reading action');
+const reader=readFileSync(new URL('../src/components/DigitalBookReader.tsx', import.meta.url),'utf8');
+assert.ok(reader.includes('!schoolOnly && <div className="efips-reader-native"'),
+  'School-only PDFs must never go through the anonymous byte-range PDF.js proxy');
+assert.ok(reader.includes('src={preview} loading="eager"'),
+  'School-only PDF preview must be embedded inside the existing reader');
 for(const title of [
   'Knowledge Encyclopedia','Dog Man: Big Jim Believes',
   'Hamlet: The Manga Edition','Gravity Falls: Lost Legends'
@@ -41,4 +48,4 @@ for(const title of [
  assert.ok(results.some(b=>b.title===title&&b.driveLink===match.driveLink),
    'Saqr must find correct new title and school Drive link '+title);
 }
-console.log('PASS: 14 curated school-domain English PDFs, 54 previous titles retained, zero duplicate IDs/links, Saqr referrals and Drive-only reader');
+console.log('PASS: 14 curated school-domain English PDFs, 54 previous titles retained, zero duplicate IDs/links, Saqr referrals and embedded school reader');

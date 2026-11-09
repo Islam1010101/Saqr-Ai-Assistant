@@ -38,6 +38,14 @@ console.log('PASS: 412 per-volume PDFs, 506 digital library cards, suggested aud
 assert.equal(readerFileId('https://example.com/private.pdf'), null);
 assert.equal(readerFileId('digital:ar:AR_1'), null); // collection, not a single PDF
 assert.equal(readerFileId('digital:en:9'), '1i7G7xoUBk77DPDYyNzEkxMGsJi5XA2gc');
+const schoolOnlyEnglish=ENGLISH_LIBRARY_DATABASE.filter(b=>b.requiresSchoolGoogleAccess);
+assert.equal(schoolOnlyEnglish.length,21,'All 21 new books require school Google access');
+for(const book of schoolOnlyEnglish){
+  assert.equal(readerFileId('digital:en:'+book.id),null,
+    'Anonymous public PDF proxy must not serve restricted school book: '+book.title);
+}
+assert.ok(readerFileId('digital:en:'+wimpy.id),
+  'Existing public English series must remain available through the internal reader');
 assert.ok(readerFileId('digital:ar:NI_1'));
 for (const [a,b] of [['-1','10'],['0','1048576'],['20','10'],['1.5','20'],['0','999999999']]) assert.equal(readerByteRange(a,b),null);
 assert.deepEqual(readerByteRange('0','1048575'),[0,1048575]);
