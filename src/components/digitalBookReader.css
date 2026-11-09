@@ -703,7 +703,7 @@ body.efips-reader-open .efips-navbar-surface {
   position:absolute;
   z-index:6;
   inset-block-end:max(.65rem,env(safe-area-inset-bottom, 0px));
-  inset-inline-start:50%;
+  left:50%;
   transform:translateX(-50%);
   width:39px;
   height:34px;
