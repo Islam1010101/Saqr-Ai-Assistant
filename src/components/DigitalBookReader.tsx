@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import DigitalLibraryDialog from './DigitalLibraryDialog';
 import PdfBookPages from './PdfBookPages';
+import ImageBookPages, { type ImageBookPage } from './ImageBookPages';
 import { digitalReaderSource } from '../utils/digitalReaderSource';
 import { useCloudReader } from '../utils/efipsCloud';
 import { pdfReadingStorageKey, readerDeviceAccount } from '../utils/pdfReadingState';
@@ -8,11 +9,13 @@ import { schoolDriveFileId } from '../utils/schoolDrivePdfRanges';
 import { supabase } from '../utils/supabase';
 import './digitalBookReader.css';
 
-export default function DigitalBookReader({ title, source, bookKey, locale, onBack, onClose, schoolOnly = false, sourceSizeBytes }: {
+export default function DigitalBookReader({ title, source, bookKey, locale, onBack, onClose, schoolOnly = false, sourceSizeBytes, imagePages }: {
   title: string; source: string; bookKey: string; locale: string; onBack: () => void; onClose: () => void;
   /** School-domain PDFs can be previewed by a signed-in school user, not fetched by the anonymous public-PDF endpoint. */
   schoolOnly?: boolean;
   sourceSizeBytes?: number;
+  /** Optional Drive JPEG pilot. Other books keep the original PDF flows. */
+  imagePages?: ReadonlyArray<ImageBookPage>;
 }) {
   const ar = locale === 'ar';
   const preview = digitalReaderSource(source);
@@ -106,6 +109,7 @@ export default function DigitalBookReader({ title, source, bookKey, locale, onBa
         </nav>
       </header>
       <div className="efips-reader-stage">
+        {imagePages?.length ? <ImageBookPages pages={imagePages} storageKey={storageKey} ar={ar}/> : <>
           {!error && (!schoolOnly || !!schoolAccess) && <div className="efips-reader-native" aria-hidden={showPreview}>
             <PdfBookPages key={`${storageKey || bookKey}:${attempt}`} bookKey={bookKey}
               storageKey={storageKey} ar={ar} schoolAccess={schoolAccess} onReady={() => setReady(true)}
@@ -171,6 +175,7 @@ export default function DigitalBookReader({ title, source, bookKey, locale, onBa
             {ar ? 'تعذر فتح هذا الملف داخل القارئ. افتح المصدر في نافذة جديدة.' : 'Could not open this file in the reader. Open the source in a new tab.'}
             <button type="button" onClick={retry}>{ar ? 'إعادة المحاولة' : 'Try again'}</button>
           </div>}
+        </>}
         </div>
     </section>
   </DigitalLibraryDialog>;
