@@ -1,8 +1,9 @@
-/** Four metadata-reviewed additions from the school Drive folder after its 9 Nov rename.
- * STAGING ONLY: Google Drive download/copy/print restriction not yet verified,
- * and not all PDFs have been shared with the school domain.
- * Never merge this file into the public catalog until source access is secured.
- * ISBN and precise edition not asserted without checking the PDF's title pages.
+/** Seven catalog-ready English editions from the school Drive folder, curated on 9 Nov 2026.
+ * Google Workspace school-domain reader permissions verified on all seven PDFs.
+ * Google Drive download/copy/print restrictions remain UNVERIFIED by this connector.
+ * User requested publication, but read-only permission DOES NOT ensure no downloads.
+ * The school must verify the permissions and reproduction rights of each actual PDF.
+ * No ISBN or publication year is inferred from file names.
  */
 export const EXTRA_ENGLISH_DIGITAL_BOOKS_20261109 = [
   {
@@ -83,6 +84,70 @@ export const EXTRA_ENGLISH_DIGITAL_BOOKS_20261109 = [
       "oil painting",
       "drawing",
       "techniques"
+    ],
+    "requiresSchoolGoogleAccess": true,
+    "reviewStatus": "pending"
+  },
+  {
+    "id": "EN_NEW_20261109_19",
+    "title": "Cat Kid Comic Club",
+    "author": "Dav Pilkey",
+    "subject": "Graphic Novels & Humor",
+    "driveLink": "https://drive.google.com/file/d/1HTDaWF6Jt4EfzSoW1JyncBXU0dbQW2U7/view",
+    "bio": "Dav Pilkey is the author and illustrator behind Dog Man and Cat Kid Comic Club.",
+    "summary": "Li'l Petey invites a group of baby frogs to create their own comic books, celebrating imagination, storytelling and teamwork.",
+    "readingAudience": "children",
+    "series": "Cat Kid Comic Club",
+    "seriesOrder": 1,
+    "keywords": [
+      "Dav Pilkey",
+      "Cat Kid",
+      "graphic novel",
+      "comic book",
+      "drawing",
+      "creativity"
+    ],
+    "requiresSchoolGoogleAccess": true,
+    "reviewStatus": "pending"
+  },
+  {
+    "id": "EN_NEW_20261109_20",
+    "title": "Cat Kid Comic Club: Perspectives",
+    "author": "Dav Pilkey",
+    "subject": "Graphic Novels & Humor",
+    "driveLink": "https://drive.google.com/file/d/1zpYwGBpmiyYi87nMlJxyXg5jt-LxMBUb/view",
+    "bio": "Dav Pilkey is an American author and illustrator known for humorous, imaginative illustrated books for young readers.",
+    "summary": "The young frog cartoonists explore new ways of seeing and telling stories as they develop their comic-book projects.",
+    "readingAudience": "children",
+    "series": "Cat Kid Comic Club",
+    "seriesOrder": 2,
+    "keywords": [
+      "Dav Pilkey",
+      "Cat Kid",
+      "perspectives",
+      "comics",
+      "graphic novel"
+    ],
+    "requiresSchoolGoogleAccess": true,
+    "reviewStatus": "pending"
+  },
+  {
+    "id": "EN_NEW_20261109_21",
+    "title": "Cat Kid Comic Club: Collaborations",
+    "author": "Dav Pilkey",
+    "subject": "Graphic Novels & Humor",
+    "driveLink": "https://drive.google.com/file/d/1L0EsWXeXrkOPiJ1e7ziyfsoRC-9Lotxo/view",
+    "bio": "Dav Pilkey writes and illustrates popular children's graphic-novel series including Dog Man and Cat Kid Comic Club.",
+    "summary": "Li'l Petey and the comic-club members collaborate to make new comics, learning to work together while staying creative.",
+    "readingAudience": "children",
+    "series": "Cat Kid Comic Club",
+    "seriesOrder": 4,
+    "keywords": [
+      "Dav Pilkey",
+      "Cat Kid",
+      "collaborations",
+      "teamwork",
+      "comic book"
     ],
     "requiresSchoolGoogleAccess": true,
     "reviewStatus": "pending"
