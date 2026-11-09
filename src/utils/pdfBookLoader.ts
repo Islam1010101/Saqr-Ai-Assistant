@@ -1,5 +1,6 @@
 import type { PDFDocumentLoadingTask } from 'pdfjs-dist';
 import { fetchPdfBootstrap, fetchPdfByteRange, PDF_BYTE_CHUNK } from './pdfRangeTransport';
+import { bootstrapSchoolPdf, fetchSchoolPdfByteRange } from './schoolDrivePdfRanges';
 
 export class PdfReaderError extends Error {
   code: string;
@@ -35,5 +36,45 @@ export async function createPdfBookTask(bookKey: string, signal: AbortSignal, on
     standardFontDataUrl: '/pdfjs/standard_fonts/', wasmUrl: '/pdfjs/wasm/',
   });
   signal.addEventListener('abort', () => { rangeController.abort(); void task.destroy(); }, { once: true });
+  return task;
+}
+
+/**
+ * Authenticated alternative for school-domain PDF links. This reads only
+ * authorized 1 MiB ranges, directly from Google in the student's browser.
+ * Never exposes Google tokens to Vercel or an unauthenticated endpoint.
+ */
+export async function createSchoolDrivePdfBookTask(
+  fileId:string, providerToken:string, signal:AbortSignal, onError:(error:Error)=>void
+):Promise<PDFDocumentLoadingTask>{
+  const [bootstrap,pdf,worker]=await Promise.all([
+    bootstrapSchoolPdf(fileId,providerToken,signal),
+    import('pdfjs-dist/legacy/build/pdf.mjs'),
+    import('pdfjs-dist/legacy/build/pdf.worker.min.mjs?url')
+  ]);
+  if(signal.aborted)throw new DOMException('Aborted','AbortError');
+  pdf.GlobalWorkerOptions.workerSrc=worker.default;
+  const rangeController=new AbortController();
+  let task:PDFDocumentLoadingTask;
+  class AuthorizedSchoolRange extends pdf.PDFDataRangeTransport{
+    requestDataRange(begin:number,end:number){
+      void fetchSchoolPdfByteRange(fileId,providerToken,begin,end,rangeController.signal).then(bytes=>{
+        if(!signal.aborted && !rangeController.signal.aborted)this.onDataRange(begin,bytes);
+      }).catch(error=>{
+        if(!signal.aborted && !rangeController.signal.aborted){
+          onError(error instanceof Error?error:new Error('SCHOOL_DRIVE_NETWORK'));
+          void task?.destroy();
+        }
+      });
+    }
+    abort(){rangeController.abort();}
+  }
+  const transport=new AuthorizedSchoolRange(bootstrap.length,bootstrap.bytes);
+  task=pdf.getDocument({range:transport,rangeChunkSize:PDF_BYTE_CHUNK,
+    disableStream:true,disableAutoFetch:true,
+    cMapUrl:'/pdfjs/cmaps/',cMapPacked:true,
+    standardFontDataUrl:'/pdfjs/standard_fonts/',wasmUrl:'/pdfjs/wasm/'
+  });
+  signal.addEventListener('abort',()=>{rangeController.abort();void task.destroy();},{once:true});
   return task;
 }
