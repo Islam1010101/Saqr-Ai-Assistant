@@ -6,7 +6,7 @@ import {CODING_IMAGE_BOOK_ID,CODING_IMAGE_BOOK_PAGES} from '../src/data/codingIm
 
 // These two Drive photo-book folders have complete, strictly sequential JPEG pages.
 const expected:Record<string,{count:number;pdfId:string}> = {
-  EN_NEW_20261109_08:{count:312,pdfId:'1'},
+  EN_NEW_20261109_08:{count:312,pdfId:'1ZrNr1D6gQIufQJFk0eSmIPluD__zwSFp'},
   EN_NEW_20261109_15:{count:96,pdfId:'1DaMllJU2OKeznGEJTH_eiRE-CLvOqCRQ'}
 };
 assert.deepEqual(Object.keys(COMPLETED_ENGLISH_IMAGE_BOOK_PAGES).sort(),Object.keys(expected).sort(),
@@ -23,7 +23,7 @@ for(const [bookId,info] of Object.entries(expected)){
   const catalog=ENGLISH_LIBRARY_DATABASE.find(book=>String(book.id)===bookId);
   assert.ok(catalog,'Existing English catalog card must remain');
   assert.equal(catalog.requiresSchoolGoogleAccess,true);
-  if(bookId==='EN_NEW_20261109_15')assert.ok(catalog.driveLink.includes(info.pdfId));
+  assert.ok(catalog.driveLink.includes(info.pdfId),'Original PDF Drive link must remain unchanged');
 }
 assert.equal(ENGLISH_LIBRARY_DATABASE.length,77,'Do not create duplicate English catalog records');
 assert.equal(ARABIC_LIBRARY_DATABASE.length,452,'Never change the Arabic library');
