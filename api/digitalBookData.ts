@@ -1,4 +1,5 @@
 import { DIGITAL_SERIES_VOLUMES } from '../src/data/digitalSeriesVolumes.js';
+import { NEW_ENGLISH_DIGITAL_BOOKS_20261109 } from '../src/data/newEnglishDigitalBooks20261109.ts';
 
 /** Shared single source for both digital libraries and Saqr catalog search.
  * Keep book metadata, IDs, links and existing display behavior unchanged.
@@ -25,6 +26,8 @@ export type DigitalLibraryBook = {
   /** School-facing reading audience suggestion, distinct from edition-approved age metadata. */
   readingAudience?: 'children' | 'teens' | 'adults';
   reviewStatus?: 'pending' | 'approved' | 'needs-changes';
+  /** Open privately in Google Drive with the school Google account; not a public PDF proxy source. */
+  requiresSchoolGoogleAccess?: boolean;
   reviewedOn?: string;
 };
 const ARABIC_LIBRARY_SEED: DigitalLibraryBook[] = [
@@ -151,7 +154,7 @@ function suggestedAudience(lang: 'ar'|'en', book: DigitalLibraryBook): 'children
 /** Expand collection cards to one card per real PDF, retaining all standalone books. */
 function expandDigitalSeries(books: DigitalLibraryBook[], lang: 'ar'|'en'): DigitalLibraryBook[] {
   return books.flatMap<DigitalLibraryBook>(book => {
-    const readingAudience = book.reviewedAgeGroup || suggestedAudience(lang, book);
+    const readingAudience = book.reviewedAgeGroup || book.readingAudience || suggestedAudience(lang, book);
     const volumes = DIGITAL_SERIES_VOLUMES[String(book.id)];
     if (!volumes?.length) return [{ ...book, readingAudience }];
     return volumes.map(volume => ({
@@ -180,4 +183,21 @@ function expandDigitalSeries(books: DigitalLibraryBook[], lang: 'ar'|'en'): Digi
 }
 
 export const ARABIC_LIBRARY_DATABASE: DigitalLibraryBook[] = expandDigitalSeries(ARABIC_LIBRARY_SEED, 'ar');
-export const ENGLISH_LIBRARY_DATABASE: DigitalLibraryBook[] = expandDigitalSeries(ENGLISH_LIBRARY_SEED, 'en');
+// Preserve the original seed and the 412 established series PDFs; append
+// only distinct, editor-mapped records from the new school-domain Drive folder.
+const normalizeDigitalTitle = (text:string)=>text.normalize('NFKC').toLowerCase()
+  .replace(/[^\p{L}\p{N}]+/gu,'').trim();
+const knownEnglishTitles = new Set(ENGLISH_LIBRARY_SEED.map(b=>normalizeDigitalTitle(b.title)));
+const knownEnglishLinks = new Set(ENGLISH_LIBRARY_SEED.map(b=>b.driveLink));
+const newlyCataloguedEnglishBooks:DigitalLibraryBook[]=[];
+for(const raw of NEW_ENGLISH_DIGITAL_BOOKS_20261109){
+  const book:DigitalLibraryBook={...raw,keywords:[...raw.keywords]};
+  const key=normalizeDigitalTitle(book.title);
+  if(!key||knownEnglishTitles.has(key)||knownEnglishLinks.has(book.driveLink))continue;
+  newlyCataloguedEnglishBooks.push(book);
+  knownEnglishTitles.add(key);
+  knownEnglishLinks.add(book.driveLink);
+}
+export const ENGLISH_LIBRARY_DATABASE: DigitalLibraryBook[] = expandDigitalSeries(
+  [...ENGLISH_LIBRARY_SEED,...newlyCataloguedEnglishBooks],'en'
+);
