@@ -207,7 +207,7 @@ const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void
 
     if (!book) return null;
     if (readerOpen) return <DigitalBookReader title={book.title} source={book.driveLink} bookKey={digitalBookKey('en', book)} locale={locale}
-        schoolOnly={Boolean(book.requiresSchoolGoogleAccess)} onBack={() => setReaderOpen(false)} onClose={onClose} />;
+        schoolOnly={Boolean(book.requiresSchoolGoogleAccess)} sourceSizeBytes={book.fileSizeBytes} onBack={() => setReaderOpen(false)} onClose={onClose} />;
 
     return (
         <DigitalLibraryDialog title={book.title} onClose={onClose}>
