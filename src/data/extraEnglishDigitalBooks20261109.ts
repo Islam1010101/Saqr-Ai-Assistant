@@ -1,9 +1,10 @@
-/** Seven catalog-ready English editions from the school Drive folder, curated on 9 Nov 2026.
- * Google Workspace school-domain reader permissions verified on all seven PDFs.
- * Google Drive download/copy/print restrictions remain UNVERIFIED by this connector.
- * User requested publication, but read-only permission DOES NOT ensure no downloads.
- * The school must verify the permissions and reproduction rights of each actual PDF.
- * No ISBN or publication year is inferred from file names.
+/** EFIPS English Books / New (9 Nov 2026).
+ * Nine supplementary English PDF editions are catalogued with school-domain
+ * reader permissions. The new two editions are The Magical Yet and The 7 Habits
+ * of Happy Kids, ISBN not inferred for the scanned edition.
+ * Google Drive restrictions on download/print/copy remain unverified, and
+ * school copyright/reproduction rights should be reviewed independently.
+ * The original English/Arabic book data is preserved unchanged.
  */
 export const EXTRA_ENGLISH_DIGITAL_BOOKS_20261109 = [
   {
@@ -148,6 +149,51 @@ export const EXTRA_ENGLISH_DIGITAL_BOOKS_20261109 = [
       "collaborations",
       "teamwork",
       "comic book"
+    ],
+    "requiresSchoolGoogleAccess": true,
+    "reviewStatus": "pending"
+  },
+  {
+    "id": "EN_NEW_20261109_22",
+    "title": "The Magical Yet",
+    "author": "Angela DiTerlizzi",
+    "subject": "Picture Books & Growth Mindset",
+    "publisher": "Disney-Hyperion",
+    "driveLink": "https://drive.google.com/file/d/19PFa6U8PbzoSWa2HqAeEg7FGKtedu41W/view",
+    "bio": "Angela DiTerlizzi is a children's book author who writes imaginative picture books. Illustrations for this edition are by Lorena Alvarez.",
+    "summary": "A rhyming picture book that encourages children to persevere, practice and discover what they cannot do yet. The story introduces the Magical Yet as a cheerful companion to learning.",
+    "readingAudience": "children",
+    "edition": "First edition, April 2020",
+    "keywords": [
+      "growth mindset",
+      "yet",
+      "perseverance",
+      "resilience",
+      "picture book",
+      "Lorena Alvarez",
+      "learning from mistakes"
+    ],
+    "requiresSchoolGoogleAccess": true,
+    "reviewStatus": "pending"
+  },
+  {
+    "id": "EN_NEW_20261109_23",
+    "title": "The 7 Habits of Happy Kids",
+    "author": "Sean Covey",
+    "subject": "Children's Life Skills & Personal Development",
+    "publisher": "Simon & Schuster",
+    "driveLink": "https://drive.google.com/file/d/13fVuhPppFanVL951N2zZNyVzC1RntNhC/view",
+    "bio": "Sean Covey is an author of books about personal effectiveness and the 7 Habits principles for children and young people. Illustrations are credited to Stacy Curtis.",
+    "summary": "A collection of illustrated stories introducing seven habits including responsibility, setting goals, cooperation and self-improvement through relatable children's characters.",
+    "readingAudience": "children",
+    "keywords": [
+      "habits",
+      "responsibility",
+      "life skills",
+      "positive behavior",
+      "teamwork",
+      "social emotional learning",
+      "Stacy Curtis"
     ],
     "requiresSchoolGoogleAccess": true,
     "reviewStatus": "pending"
