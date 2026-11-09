@@ -351,3 +351,17 @@ body.efips-reader-open .efips-navbar-surface {
     filter:none!important;
   }
 }
+
+/* Coding image reader only: discourage one-click image saving without blocking
+   keyboard reading controls, swipes, zoom, or browser accessibility gestures.
+   This is a UI deterrent, not DRM or a restriction on already public Drive URLs. */
+.efips-image-book-sheet,
+.efips-image-book-sheet .efips-image-book-page {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.efips-image-book-sheet .efips-image-book-page {
+  -webkit-user-drag: none;
+  user-drag: none;
+}

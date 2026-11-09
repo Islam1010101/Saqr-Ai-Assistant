@@ -53,5 +53,18 @@ assert.ok(images.includes("key={current.fileId}"), 'Each new page should have a 
 assert.ok(style.includes('@keyframes efips-image-book-turn-next'), 'Advance page gets a paper-turn animation');
 assert.ok(style.includes('@keyframes efips-image-book-turn-prev'), 'Previous page gets a reverse paper-turn animation');
 assert.ok(style.includes('@media (prefers-reduced-motion:reduce)'), 'Respect reduced-motion accessibility preferences');
+assert.ok(images.includes('onContextMenu={event => event.preventDefault()}'),
+  'Native right-click context menu must be suppressed on the Coding image viewport');
+assert.ok(images.includes('className="efips-image-book-page" draggable={false}'),
+  'Image drag-to-save should be disabled');
+assert.ok(images.includes('onDragStart={event => event.preventDefault()}'),
+  'Image and stage drag events should not start native drag-and-drop');
+assert.ok(style.includes('-webkit-touch-callout: none;'),
+  'Avoid mobile long-press image save calls where browser supports it');
+assert.ok(style.includes('-webkit-user-select: none;'),
+  'Prevent image selection on mobile without disabling reading controls');
+assert.ok(images.includes('onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}'),
+  'Keep touch-based page turning intact');
+
 
 console.log('PASS: 70 sequential coding image pages, internal EFIPS image reader, unchanged 77 English and 452 Arabic books');
