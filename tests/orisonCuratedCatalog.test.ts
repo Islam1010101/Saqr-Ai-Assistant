@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {bookData} from '../api/bookData.ts';
-import {orisonCuratedRecords} from '../api/orisonCurated20261109.ts';
+import {orisonCuratedRecords} from '../src/data/orisonCurated20261109.ts';
+import {searchSaqrBookCatalog} from '../src/utils/saqrCatalogSearch.ts';
 
 const titleKey=(s:string)=>s.normalize('NFKC').toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu,'');
 const imported=bookData.filter(book=>book.id.startsWith('orison-20261109-'));
@@ -23,5 +24,10 @@ for(const book of imported){
   assert.equal(book.copies,new Set(matching.flatMap(r=>r.barcodes)).size,'Preserve barcode-derived copy count');
   assert.equal(book.isbnStatus,'candidate','Unverified edition ISBN must never be presented as verified');
 }
+assert.ok(imported.length>0,'The curated batch must add at least one new title');
+const saqrSample=imported[0];
+const saqrResults=searchSaqrBookCatalog(saqrSample.title,{physical:bookData,arabic:[],english:[]});
+assert.ok(saqrResults.some(book=>titleKey(book.title)===titleKey(saqrSample.title)
+  &&book.shelf===saqrSample.shelf),'Saqr catalog search must find the newly imported book');
 console.log('PASS: Curated Orison candidate records '+orisonCuratedRecords.length+
   '; barcoded copies '+allBarcodes.length+'; additive catalog titles '+imported.length);
