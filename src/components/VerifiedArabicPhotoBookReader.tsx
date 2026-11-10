@@ -40,6 +40,7 @@ import { SERIES_ARABIC_PHOTO_PAGES_U } from '../data/seriesArabicPhotoPages20261
 import { SERIES_ARABIC_PHOTO_PAGES_V } from '../data/seriesArabicPhotoPages20261110V';
 import { SERIES_ARABIC_PHOTO_PAGES_W } from '../data/seriesArabicPhotoPages20261110W';
 import { SERIES_ARABIC_PHOTO_PAGES_X } from '../data/seriesArabicPhotoPages20261110X';
+import { SERIES_ARABIC_PHOTO_PAGES_Y } from '../data/seriesArabicPhotoPages20261110Y';
 import DigitalBookReader from './DigitalBookReader';
 
 /** Lazy loaded on book-open; English reader and all original PDF files remain intact.
@@ -90,7 +91,8 @@ export default function VerifiedArabicPhotoBookReader({ book, locale, onBack, on
     ?? SERIES_ARABIC_PHOTO_PAGES_U[id]
     ?? SERIES_ARABIC_PHOTO_PAGES_V[id]
     ?? SERIES_ARABIC_PHOTO_PAGES_W[id]
-    ?? SERIES_ARABIC_PHOTO_PAGES_X[id];
+    ?? SERIES_ARABIC_PHOTO_PAGES_X[id]
+    ?? SERIES_ARABIC_PHOTO_PAGES_Y[id];
 
   if (!pages?.length) {
     return <section role="alert" aria-live="polite">
