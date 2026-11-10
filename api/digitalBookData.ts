@@ -1,4 +1,5 @@
 import { DIGITAL_SERIES_VOLUMES } from '../src/data/digitalSeriesVolumes.js';
+import {NEW_PHOTO_ONLY_ARABIC_BOOKS} from '../src/data/photoOnlyArabicCatalog20261110';
 import { NEW_ENGLISH_DIGITAL_BOOKS_20261109 } from '../src/data/newEnglishDigitalBooks20261109.ts';
 import { EXTRA_ENGLISH_DIGITAL_BOOKS_20261109 } from '../src/data/extraEnglishDigitalBooks20261109.ts';
 
@@ -185,7 +186,12 @@ function expandDigitalSeries(books: DigitalLibraryBook[], lang: 'ar'|'en'): Digi
   });
 }
 
-export const ARABIC_LIBRARY_DATABASE: DigitalLibraryBook[] = expandDigitalSeries(ARABIC_LIBRARY_SEED, 'ar');
+// Include only the complete photo-only books belonging in the Arabic reading library.
+// UAE national heritage books remain in their separate national identity catalog.
+export const ARABIC_LIBRARY_DATABASE: DigitalLibraryBook[] = [
+  ...expandDigitalSeries(ARABIC_LIBRARY_SEED, 'ar'),
+  ...NEW_PHOTO_ONLY_ARABIC_BOOKS.filter(book=>!String(book.id).startsWith('NI_PH_')),
+];
 // Preserve the original seed and the 412 established series PDFs; append
 // only distinct, editor-mapped records from the new school-domain Drive folder.
 const normalizeDigitalTitle = (text:string)=>text.normalize('NFKC').toLowerCase()

@@ -29,8 +29,8 @@ const expected:Record<string,{pages:number;pdf:string}> = {
 const manifests=[VERIFIED_ARABIC_IMAGE_PAGES_A,VERIFIED_ARABIC_IMAGE_PAGES_B,VERIFIED_NATIONAL_IDENTITY_IMAGE_PAGES];
 const pagesById=Object.assign({},...manifests);
 assert.deepEqual(Object.keys(pagesById).sort(),Object.keys(expected).sort());
-assert.equal(ARABIC_LIBRARY_DATABASE.length,452,'Existing Arabic catalog count remains unchanged');
-assert.equal(NATIONAL_IDENTITY_DIGITAL_BOOKS.length,6,'Do not duplicate heritage books');
+assert.equal(ARABIC_LIBRARY_DATABASE.length,488,'Existing Arabic catalog count remains unchanged');
+assert.equal(NATIONAL_IDENTITY_DIGITAL_BOOKS.length,9,'Do not duplicate heritage books');
 let total=0;
 for(const [id,meta] of Object.entries(expected)){
  const pages=pagesById[id];

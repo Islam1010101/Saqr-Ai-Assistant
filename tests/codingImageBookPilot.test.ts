@@ -9,7 +9,7 @@ assert.deepEqual(CODING_IMAGE_BOOK_PAGES.map(item=>item.page),Array.from({length
 assert.equal(new Set(CODING_IMAGE_BOOK_PAGES.map(item=>item.fileId)).size,70);
 for(const image of CODING_IMAGE_BOOK_PAGES)assert.match(image.fileId,/^[A-Za-z0-9_-]{20,}$/);
 assert.equal(ENGLISH_LIBRARY_DATABASE.length,77);
-assert.equal(ARABIC_LIBRARY_DATABASE.length,452);
+assert.equal(ARABIC_LIBRARY_DATABASE.length,488);
 const book=ENGLISH_LIBRARY_DATABASE.find(b=>String(b.id)===CODING_IMAGE_BOOK_ID);
 assert.ok(book,'Original Coding catalog entry must remain unchanged');
 assert.ok(book.driveLink.includes('199Avu7T8tUyLqDcYYuDSl7TyLTWKecFk'));
@@ -77,4 +77,4 @@ assert.ok(images.includes('onSubmit={onJump}'), 'Keep page number navigation');
 assert.ok(images.includes('changeQuality'), 'Keep HD mode');
 assert.ok(!images.includes('Google Drive</') && !images.includes('المصدر Google Drive'), 'No Drive chrome or captions in image mode');
 assert.ok(style.includes('efips-image-book--immersive'), 'Photo book must use immersive viewport-specific styles');
-console.log('PASS: 70 Coding images, fullscreen glass controls and no Google Drive UI, 77 English and 452 Arabic books retained');
+console.log('PASS: 70 Coding images, fullscreen glass controls and no Google Drive UI, 77 English and 488 Arabic books retained');

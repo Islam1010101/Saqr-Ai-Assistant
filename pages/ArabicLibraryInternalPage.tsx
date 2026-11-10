@@ -10,6 +10,8 @@ import DigitalLibraryDialog from '../src/components/DigitalLibraryDialog';
 import DigitalBookReader from '../src/components/DigitalBookReader';
 /** Keep the much larger page manifest out of the initial library bundle. */
 const VerifiedArabicPhotoBookReader = React.lazy(() => import('../src/components/VerifiedArabicPhotoBookReader'));
+/** The 39 new photo-only records have no matching PDFs; open their complete JPEGs. */
+const PhotoOnlyArabicBookReader = React.lazy(() => import('../src/components/PhotoOnlyArabicBookReader'));
 const VERIFIED_ARABIC_PHOTO_BOOK_IDS = new Set([
   'AR_41','AR_44','AR_45','AR_50','AR_52','AR_53','AR_54','AR_55','AR_56','AR_57','AR_58','AR_60',
   'NI_1','NI_2','NI_3','NI_4','NI_5','NI_6',
@@ -183,6 +185,11 @@ const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void
     if (!book) return null;
     if (readerOpen) {
         const onBack = () => setReaderOpen(false);
+        if (/^(?:AR_PH_HP_|AR_NG_|NI_PH_)/.test(String(book.id))) {
+            return <React.Suspense fallback={<div role="status" className="p-8 text-center font-bold text-emerald-700 dark:text-emerald-200">{locale === 'ar' ? 'جار تجهيز صفحات الكتاب...' : 'Preparing book pages...'}</div>}>
+                <PhotoOnlyArabicBookReader book={book} locale={locale} onBack={onBack} onClose={onClose} />
+            </React.Suspense>;
+        }
         if (VERIFIED_ARABIC_PHOTO_BOOK_IDS.has(String(book.id))) {
             return <React.Suspense fallback={<div role="status" className="p-8 text-center font-bold text-emerald-700 dark:text-emerald-200">{locale === 'ar' ? 'جار تجهيز صفحات الكتاب...' : 'Preparing book pages...'}</div>}>
                 <VerifiedArabicPhotoBookReader book={book} locale={locale} onBack={onBack} onClose={onClose} />
