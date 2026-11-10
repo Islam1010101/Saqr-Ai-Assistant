@@ -1,4 +1,4 @@
-import { mkdtemp, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, writeFile, readFile, readdir, rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { createRequire } from 'node:module';
@@ -17,6 +17,26 @@ try {
   ], { stdio: 'inherit' });
   if (compile.status !== 0) process.exitCode = compile.status || 1;
   else {
+    // TypeScript's Bundler module resolution preserves extensionless relative
+    // specifiers. Node ESM requires the emitted .js extension in this test
+    // sandbox; rewrite emitted imports only, never application sources.
+    const rewriteEmittedImports = async folder => {
+      for (const entry of await readdir(folder, { withFileTypes: true })) {
+        const filename = path.join(folder, entry.name);
+        if (entry.isDirectory()) {
+          await rewriteEmittedImports(filename);
+        } else if (entry.isFile() && entry.name.endsWith('.js')) {
+          const original = await readFile(filename, 'utf8');
+          const updated = original.replace(
+            /(\\b(?:from\\s*|import\\s*\\(\\s*|import\\s*)['"])(\\.\\.?\\/[^'"]+)(['"])/g,
+            (whole, prefix, specifier, suffix) =>
+              path.extname(specifier) ? whole : `${prefix}${specifier}.js${suffix}`
+          );
+          if (updated !== original) await writeFile(filename, updated);
+        }
+      }
+    };
+    await rewriteEmittedImports(directory);
     const test = spawnSync(process.execPath, [path.join(directory, 'tests/pdfReader.test.js')], { stdio: 'inherit' });
     process.exitCode = test.status || 0;
   }
