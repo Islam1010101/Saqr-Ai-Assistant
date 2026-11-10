@@ -26,7 +26,7 @@ for(const [bookId,info] of Object.entries(expected)){
   assert.ok(catalog.driveLink.includes(info.pdfId),'Original PDF Drive link must remain unchanged');
 }
 assert.equal(ENGLISH_LIBRARY_DATABASE.length,77,'Do not create duplicate English catalog records');
-assert.equal(ARABIC_LIBRARY_DATABASE.length,488,'Never change the Arabic library');
+assert.equal(ARABIC_LIBRARY_DATABASE.length,494,'Preserve established Arabic records with six verified new image editions');
 assert.equal(CODING_IMAGE_BOOK_ID,'EN_NEW_20261109_17');
 assert.equal(CODING_IMAGE_BOOK_PAGES.length,70,'The existing Coding pilot remains unchanged');
 const ui=readFileSync('pages/EnglishLibraryInternalPage.tsx','utf8');
