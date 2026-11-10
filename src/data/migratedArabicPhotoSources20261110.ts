@@ -44,5 +44,105 @@ export const MIGRATED_ARABIC_PHOTO_SOURCES:ReadonlyArray<{id:string;driveLink:st
     "id": "AR_59",
     "driveLink": "https://drive.google.com/drive/folders/1w4cSwf3HScne6hdYsAwCpssQCeIp0dN0",
     "pageCount": 218
+  },
+  {
+    "id": "AR_8",
+    "driveLink": "https://drive.google.com/drive/folders/1B0uC3ZZe9Pe2OGXMaoTGJPk3jsSmRYQI",
+    "pageCount": 182
+  },
+  {
+    "id": "AR_10",
+    "driveLink": "https://drive.google.com/drive/folders/1bXCmQKsivgd9T3KhCB_H6xdFMnfkBC-t",
+    "pageCount": 277
+  },
+  {
+    "id": "AR_11",
+    "driveLink": "https://drive.google.com/drive/folders/1FIQEKM7LvwEfUOvooZrOgQfnF1HfGRip",
+    "pageCount": 100
+  },
+  {
+    "id": "AR_12",
+    "driveLink": "https://drive.google.com/drive/folders/1de77gqFLQAdo9DQBKkC3sCeuPF13q5Rk",
+    "pageCount": 111
+  },
+  {
+    "id": "AR_14",
+    "driveLink": "https://drive.google.com/drive/folders/1K_V-a_d0GXG8PQTmvQFcz02DwRnJJeCo",
+    "pageCount": 174
+  },
+  {
+    "id": "AR_16",
+    "driveLink": "https://drive.google.com/drive/folders/1BlUmvtb6v0rWJw_ll_Rq3i3SJ8QzhL2F",
+    "pageCount": 191
+  },
+  {
+    "id": "AR_9",
+    "driveLink": "https://drive.google.com/drive/folders/1usrjGuapKM5V3m6e1KAs0XiJSG8x6JnQ",
+    "pageCount": 582
+  },
+  {
+    "id": "AR_15",
+    "driveLink": "https://drive.google.com/drive/folders/1pwEzkMttmxGtO7_6vbACj4S69JtWvazy",
+    "pageCount": 530
+  },
+  {
+    "id": "AR_17",
+    "driveLink": "https://drive.google.com/drive/folders/1QiawZLQv8AJQ6gmdXj60jBh4VDSEJLDM",
+    "pageCount": 941
+  },
+  {
+    "id": "AR_30",
+    "driveLink": "https://drive.google.com/drive/folders/10W39vD-tlIkH9f8E5zlZyhoqYueJklUx",
+    "pageCount": 167
+  },
+  {
+    "id": "AR_31",
+    "driveLink": "https://drive.google.com/drive/folders/1nbmG7EjOSusyGmz6qvMSggqHyEQSmPxx",
+    "pageCount": 63
+  },
+  {
+    "id": "AR_33",
+    "driveLink": "https://drive.google.com/drive/folders/1awRmSJHnXpm1OglW5apzQdlNSvBXU6gH",
+    "pageCount": 194
+  },
+  {
+    "id": "AR_35",
+    "driveLink": "https://drive.google.com/drive/folders/1aVyp8BtLckWkkkxvf77xcG2ulTYbcPgH",
+    "pageCount": 193
+  },
+  {
+    "id": "AR_29",
+    "driveLink": "https://drive.google.com/drive/folders/186DpA9zYAk0Gy77Ehpyn5ok9Q9GCW3Tq",
+    "pageCount": 244
+  },
+  {
+    "id": "AR_34",
+    "driveLink": "https://drive.google.com/drive/folders/1F9H4hr_HxmYcT1jKM3xhUp7VcjA75RZn",
+    "pageCount": 272
+  },
+  {
+    "id": "AR_49",
+    "driveLink": "https://drive.google.com/drive/folders/14nrsR4E1RR8iAs-WZnHRXPyfmXMW_2Rw",
+    "pageCount": 199
+  },
+  {
+    "id": "AR_32",
+    "driveLink": "https://drive.google.com/drive/folders/1lXnzxE0Z5iw0bpqUvsT4CQOkL79AIZ6M",
+    "pageCount": 233
+  },
+  {
+    "id": "AR_4",
+    "driveLink": "https://drive.google.com/drive/folders/16lbTupKdtGEqe5hbiNxCUDr4hcst8-0U",
+    "pageCount": 353
+  },
+  {
+    "id": "AR_46",
+    "driveLink": "https://drive.google.com/drive/folders/1fwWSAYKvvZxbVYJ0kRMMfbgLwM7cd1cI",
+    "pageCount": 434
+  },
+  {
+    "id": "AR_47",
+    "driveLink": "https://drive.google.com/drive/folders/1xIT2ovR7GGrCuwK6w_q-Rxlz_5C1zn0o",
+    "pageCount": 324
   }
 ];

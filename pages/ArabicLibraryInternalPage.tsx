@@ -16,6 +16,7 @@ const VERIFIED_ARABIC_PHOTO_BOOK_IDS = new Set([
   'AR_41','AR_44','AR_45','AR_50','AR_52','AR_53','AR_54','AR_55','AR_56','AR_57','AR_58','AR_60',
   'NI_1','NI_2','NI_3','NI_4','NI_5','NI_6',
   ...MIGRATED_ARABIC_PHOTO_SOURCES.map(source=>source.id),
+  ...SERIES_ARABIC_PHOTO_BOOK_IDS,
 ]);
 import { digitalReaderSource } from '../src/utils/digitalReaderSource';
 import { useDigitalReadingProgress } from '../src/utils/useDigitalReadingProgress';
@@ -24,6 +25,7 @@ import { pdfProgressPercent, type PdfReadingState } from '../src/utils/pdfReadin
 // Shared with Saqr catalog search; preserve book IDs and source links.
 import { ARABIC_LIBRARY_DATABASE, type DigitalLibraryBook } from '../api/digitalBookData';
 import { MIGRATED_ARABIC_PHOTO_SOURCES } from '../src/data/migratedArabicPhotoSources20261110';
+import { SERIES_ARABIC_PHOTO_BOOK_IDS } from '../src/data/seriesArabicPhotoIndex20261110';
 export { ARABIC_LIBRARY_DATABASE } from '../api/digitalBookData';
 
 const translations = {
