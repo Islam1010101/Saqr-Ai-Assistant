@@ -28,7 +28,8 @@ export function resolveSaqrBookFollowUp(
   // a book query after the user switches to a lesson, homework, or new subject.
   const recent=history.filter(turn=>turn.role==='user').slice(-5);
   const last=recent[recent.length-1]?.content?.trim()||'';
-  const lastIsLinked=bookSubject.test(last)||followUpClue.test(last);
+  const changedTopic=/(?:اشرح|شرح|فهمني|تحضير|درس|واجب|مس[أا]لة|homework|lesson|explain)/i.test(last);
+  const lastIsLinked=bookSubject.test(last)||(followUpClue.test(last)&&!changedTopic);
   if(!lastIsLinked)return unchanged;
   const prior=[...recent].reverse().find(turn=>bookSubject.test(turn.content));
   if(!prior)return unchanged;
