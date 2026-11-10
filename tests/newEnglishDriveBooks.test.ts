@@ -12,7 +12,7 @@ const earlier=ENGLISH_LIBRARY_DATABASE.filter(b=>!String(b.id).startsWith('EN_NE
 assert.equal(NEW_ENGLISH_DIGITAL_BOOKS_20261109.length,14);
 assert.equal(added.length,14,'Every selected English book must be added once');
 assert.equal(earlier.length,54,'Preserve the original English catalogue and expanded series');
-assert.equal(ARABIC_LIBRARY_DATABASE.length,488,'The Arabic digital catalogue must not change');
+assert.equal(ARABIC_LIBRARY_DATABASE.length,494,'Keep established Arabic records and include six verified titles');
 assert.equal(new Set(ENGLISH_LIBRARY_DATABASE.map(b=>String(b.id))).size,ENGLISH_LIBRARY_DATABASE.length);
 assert.equal(new Set(added.map(b=>normalize(b.title))).size,added.length);
 assert.equal(new Set(added.map(b=>b.driveLink)).size,added.length);
