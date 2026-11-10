@@ -22,8 +22,9 @@ assert.equal(ENGLISH_LIBRARY_DATABASE.filter(b=>!String(b.id).startsWith('EN_NEW
 assert.equal(ENGLISH_LIBRARY_DATABASE.filter(b=>/^EN_NEW_20261109_(?:0[1-9]|1[0-4])$/.test(String(b.id))).length,14, 'Keep the initial 14 new school-domain titles');
 assert.equal(ENGLISH_LIBRARY_DATABASE.filter(b=>/^EN_NEW_20261109_(?:1[5-9]|2[0-3])$/.test(String(b.id))).length,9, 'Prepare nine supplementary English Drive books including two new picture books');
 assert.equal(ENGLISH_LIBRARY_DATABASE.length,77);
-assert.equal(allDigitalBooks.length,529); // 506 original cards + 23 new English books; six heritage e-books in their own list
-assert.ok(allDigitalBooks.every(b=>b.driveLink.includes('/file/d/')), 'No digital library card may point to a Drive folder');
+assert.equal(allDigitalBooks.length,575); // 498 Arabic + 77 English records; heritage titles remain separately catalogued.
+assert.ok(allDigitalBooks.every(b=>/^https:\/\/drive\.google\.com\/(?:file\/d\/|drive\/folders\/)/.test(b.driveLink)),
+  'All books need a real school Drive file or photo-folder source');
 assert.equal(ARABIC_LIBRARY_DATABASE.filter(b=>Boolean(b.audioId)).length,23,'Keep all original audio summaries');
 assert.ok(allDigitalBooks.every(b=>Boolean(b.readingAudience)),'Every digital volume needs a suggested reading group');
 const greenVolume = ARABIC_LIBRARY_DATABASE.find(b=>b.series==='المكتبة الخضراء للأطفال');
@@ -33,7 +34,7 @@ assert.equal(readerFileId('digital:ar:'+greenVolume.id), greenVolume.driveLink.m
 const wimpy = ENGLISH_LIBRARY_DATABASE.find(b=>b.series==='Diary Of A Wimpy');
 assert.ok(wimpy);
 assert.equal(wimpy.readingAudience,'children');
-console.log('PASS: 412 per-volume PDFs, 506 digital library cards, suggested audiences, audio integrity and server allowlisting');
+console.log('PASS: 412 original per-volume records, 575 digital library cards, suggested audiences, audio integrity and server allowlisting');
 
 assert.equal(readerFileId('https://example.com/private.pdf'), null);
 assert.equal(readerFileId('digital:ar:AR_1'), null); // collection, not a single PDF
