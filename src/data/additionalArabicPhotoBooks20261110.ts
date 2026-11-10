@@ -11,7 +11,7 @@ export const ADDITIONAL_ARABIC_PHOTO_BOOKS:DigitalLibraryBook[]=[
     "bio": "",
     "summary": "كتاب مصور متاح للقراءة داخل منصة صقر. بيانات الطبعة والمؤلف تحتاج مراجعة إذا لم تكن محددة.",
     "pageCount": 97,
-    "readingAudience": "specialist",
+    "readingAudience": "adults",
     "keywords": [
       "الإدارة الرقمية للمعلم وتطبيق الحصة التفاعلية: استراتيجيات الذكاء الاصطناعي من التخطيط إلى الفصل",
       "التعليم والتكنولوجيا"
