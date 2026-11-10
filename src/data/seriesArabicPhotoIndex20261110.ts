@@ -132,5 +132,19 @@ export const SERIES_ARABIC_PHOTO_BOOK_IDS:ReadonlyArray<string> = [
   "AR_19-1X1euFzhkQHg13vbBfDZJZJEuE3MyjIe4",
   "AR_19-1ilMB0kPgO29h7yC0hfMKpApxdx0ATVqA",
   "AR_19-1qY_LbmrOvsNU8X2q796waL7IfP7_airC",
-  "AR_19-1XFVw_NjYq1aVHsY_fE9GWRH2Wq75LSpj"
+  "AR_19-1XFVw_NjYq1aVHsY_fE9GWRH2Wq75LSpj",
+  "AR_19-1pKEv-QSrR36Ez8CGWzQVjdmgjS3G3Wul",
+  "AR_19-1Hx5YuwrPuOdBnn5lOYHClvEXZIjec8pw",
+  "AR_19-1BEGxjDICWt3HbyUMe2L5douKuwIjClbT",
+  "AR_19-1hIxsqrX6aSbyreJq-fZudYQs4VEr4iVz",
+  "AR_19-17HT1Aes0HUKcgI115np1pkCOVQr_AHri",
+  "AR_19-1zPxyo0rjdp8yMTuzyuU5yIsPY2OEOB8D",
+  "AR_19-1gSQps-hwB0p4U856nDH8iwHcUIL-ZUOU",
+  "AR_19-1nLkXgO0Gx7OIUkJPT2cJ2Q7xxpZD3RuN",
+  "AR_19-1ZSX4Fa4ETJd3sV-hQcz2r-uJ3jgYzA8j",
+  "AR_19-1gCSdKveKoAXg4p6-GNIrw1s5YXHV6I6h",
+  "AR_19-1Sq3mx84z7DCs1NqZ6qqLmSIGGfi97ZKG",
+  "AR_19-1vkwmY5uQiyByPyThWHPFc5ddF8eLyWG9",
+  "AR_19-1Y-0DX5PbVXDHqvdHTHmTqjf_-4Xjv-dm",
+  "AR_19-190aXxgagDYjFFuEfGUR_kcEWjT7sF-5S"
 ];
