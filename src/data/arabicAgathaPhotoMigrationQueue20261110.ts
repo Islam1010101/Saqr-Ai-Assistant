@@ -26,7 +26,7 @@ export const ARABIC_AGATHA_PHOTO_MIGRATION_QUEUE:ReadonlyArray<{id:string;title:
     "title": "الأربعة الكبار",
     "folderId": "1ONds8N2WwelfSGR-cKc_HQ24QtB6HxC9",
     "originalPdfId": "1QpA9U8pyqZ1bv0mmqv6VUxguC2Gj51Pk",
-    "expectedPages": null
+    "expectedPages": 42
   },
   {
     "id": "AR_1-1DFXYAQtsDwLosXQxkynjKiAu0jPkxOhd",
@@ -40,7 +40,7 @@ export const ARABIC_AGATHA_PHOTO_MIGRATION_QUEUE:ReadonlyArray<{id:string;title:
     "title": "البيت الأعوج",
     "folderId": "12T3_leWc7FjxtJz5UpICqZQYzlx6tD95",
     "originalPdfId": "1o4c1SED3Y8OH--_B8hGL1ATHSK3UkxIG",
-    "expectedPages": null
+    "expectedPages": 344
   },
   {
     "id": "AR_1-1ddfxv77cg4DKisw-WX4eefoAtE3LeHwi",
@@ -68,7 +68,7 @@ export const ARABIC_AGATHA_PHOTO_MIGRATION_QUEUE:ReadonlyArray<{id:string;title:
     "title": "الرجل الغامض",
     "folderId": "19dxWJ7-ArnS2sjwQb8GvogFYxGtnnX5U",
     "originalPdfId": "1aLwhL3DK4E8op9ItB7SbNjUW98y7yldu",
-    "expectedPages": null
+    "expectedPages": 155
   },
   {
     "id": "AR_1-1i8e6RMiNr_2POtKYHFa15dHbuIqu7k2K",
@@ -124,7 +124,7 @@ export const ARABIC_AGATHA_PHOTO_MIGRATION_QUEUE:ReadonlyArray<{id:string;title:
     "title": "جثة في المكتبة",
     "folderId": "17I8tKdmC_w0Tcw3DO3g2pMtSRIfF-fe_",
     "originalPdfId": "1_VFmp4-rUUWOVXxRgDYGEgEA_hlwRzU1",
-    "expectedPages": null
+    "expectedPages": 44
   },
   {
     "id": "AR_1-1utvKSt4enxCVuFXbFnuM1kQUrTvr68PS",
@@ -145,28 +145,28 @@ export const ARABIC_AGATHA_PHOTO_MIGRATION_QUEUE:ReadonlyArray<{id:string;title:
     "title": "جريمة في القصر",
     "folderId": "1PUIRrIOXJZHzXVeVdh1Ju7edB7xyJyes",
     "originalPdfId": "1tu8Ae6qWmdO8EK_UY4LLRKxr6WxuzPB1",
-    "expectedPages": null
+    "expectedPages": 196
   },
   {
     "id": "AR_1-1QJO66BTHDnR7sw5LkorjcqWziVWx7-N-",
     "title": "خداع المرايا",
     "folderId": "1_68Vmqlmpoiz8FE1AqKRGRwl1vEx5tFs",
     "originalPdfId": "1QJO66BTHDnR7sw5LkorjcqWziVWx7-N-",
-    "expectedPages": null
+    "expectedPages": 148
   },
   {
     "id": "AR_1-1-EiiAeF-Rnt_1IDx0LMORANtefi_KIYc",
     "title": "رجل بلا وجه",
     "folderId": "1Y7fbyZ5CvItGaBwKvz31U6MW9N3pzMcE",
     "originalPdfId": "1-EiiAeF-Rnt_1IDx0LMORANtefi_KIYc",
-    "expectedPages": null
+    "expectedPages": 164
   },
   {
     "id": "AR_1-16d3jkgkGsfNVi5mCKh1eP_Qb2uFJ7iYK",
     "title": "رصاصة في الرأس",
     "folderId": "1QI3UFi8pq3JCGpDQmir_k99Ali73LtBo",
     "originalPdfId": "16d3jkgkGsfNVi5mCKh1eP_Qb2uFJ7iYK",
-    "expectedPages": null
+    "expectedPages": 196
   },
   {
     "id": "AR_1-1uHRPNI95uZnkQ-HolXW88zqFi46c2Rm_",
@@ -187,6 +187,6 @@ export const ARABIC_AGATHA_PHOTO_MIGRATION_QUEUE:ReadonlyArray<{id:string;title:
     "title": "وصلوا الى بغداد",
     "folderId": "1bkZyW9GzHKY7pSM5Y2EeGcELugtN7MJz",
     "originalPdfId": "1kg8C37Haj2BzoOWf19OF08d03UwLCU5F",
-    "expectedPages": null
+    "expectedPages": 392
   }
 ];
