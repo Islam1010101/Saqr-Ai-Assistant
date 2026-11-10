@@ -183,9 +183,15 @@ const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void
     const ageGroup = book?.reviewedAgeGroup || book?.readingAudience ? ageLabels[(book.reviewedAgeGroup || book.readingAudience)!] : '';
 
     if (!book) return null;
+    // Drive folder URLs are storage references for completed image books, not reader links.
+    // Let all verified images open inside the same in-site reader as the English library.
+    const isPhotoOnlyBook = /^(?:AR_PH_HP_|AR_NG_|NI_PH_)/.test(String(book.id));
+    const hasInternalReader = isPhotoOnlyBook
+        || VERIFIED_ARABIC_PHOTO_BOOK_IDS.has(String(book.id))
+        || Boolean(digitalReaderSource(book.driveLink));
     if (readerOpen) {
         const onBack = () => setReaderOpen(false);
-        if (/^(?:AR_PH_HP_|AR_NG_|NI_PH_)/.test(String(book.id))) {
+        if (isPhotoOnlyBook) {
             return <React.Suspense fallback={<div role="status" className="p-8 text-center font-bold text-emerald-700 dark:text-emerald-200">{locale === 'ar' ? 'جار تجهيز صفحات الكتاب...' : 'Preparing book pages...'}</div>}>
                 <PhotoOnlyArabicBookReader book={book} locale={locale} onBack={onBack} onClose={onClose} />
             </React.Suspense>;
@@ -246,7 +252,7 @@ const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void
                         <DigitalBookRating bookId={digitalBookKey('ar', book)} compact={false} />
 
                         <div className="pt-2 md:pt-6">
-                            {digitalReaderSource(book.driveLink) ? (<button type="button" onClick={() => setReaderOpen(true)} className="w-full block bg-emerald-500 text-white font-black py-4 rounded-[2rem] hover:-translate-y-1 active:translate-y-2 border-b-8 border-emerald-700 active:border-b-0 transition-all text-center uppercase tracking-widest text-base shadow-md">
+                            {hasInternalReader ? (<button type="button" onClick={() => setReaderOpen(true)} className="w-full block bg-emerald-500 text-white font-black py-4 rounded-[2rem] hover:-translate-y-1 active:translate-y-2 border-b-8 border-emerald-700 active:border-b-0 transition-all text-center uppercase tracking-widest text-base shadow-md">
                                 {progress && progress.page>1 ? (locale==='ar'?'أكمل القراءة':'Continue reading') : t('read')}
                             </button>) : (<a href={book.driveLink} target="_blank" rel="noreferrer" className="w-full block bg-emerald-500 text-white font-black py-4 rounded-[2rem] hover:-translate-y-1 active:translate-y-2 border-b-8 border-emerald-700 active:border-b-0 transition-all text-center uppercase tracking-widest text-base shadow-md">
                                 {t('read')}
