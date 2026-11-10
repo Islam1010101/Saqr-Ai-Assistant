@@ -636,7 +636,7 @@ When the user asks for books, identify the matching titles exactly as recorded, 
       if(expertContext && namedBookTitle){
         reply=reply.trim()+'\n\n'+renderSaqrBookHoldingStatus(namedBookTitle,namedBookHoldings,locale==='ar'?'ar':'en');
       }
-      setMessages(prev => [...prev, { role: 'assistant', content: reply // Model answers already decide if a context-specific follow-up question is useful. }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
     } catch (error) {
       console.error('Error sending chat message:', error);
       setMessages(prev => [...prev, {
