@@ -16,6 +16,7 @@ import { MIGRATED_ARABIC_PHOTO_PAGES_I } from '../data/migratedArabicPhotoPages2
 import { MIGRATED_ARABIC_PHOTO_PAGES_J } from '../data/migratedArabicPhotoPages20261110J';
 import { MIGRATED_ARABIC_PHOTO_PAGES_K } from '../data/migratedArabicPhotoPages20261110K';
 import { MIGRATED_ARABIC_PHOTO_PAGES_L } from '../data/migratedArabicPhotoPages20261110L';
+import { MIGRATED_ARABIC_PHOTO_PAGES_M } from '../data/migratedArabicPhotoPages20261110M';
 import { SERIES_ARABIC_PHOTO_PAGES_A } from '../data/seriesArabicPhotoPages20261110A';
 import { SERIES_ARABIC_PHOTO_PAGES_B } from '../data/seriesArabicPhotoPages20261110B';
 import { SERIES_ARABIC_PHOTO_PAGES_C } from '../data/seriesArabicPhotoPages20261110C';
@@ -69,6 +70,7 @@ export default function VerifiedArabicPhotoBookReader({ book, locale, onBack, on
     ?? MIGRATED_ARABIC_PHOTO_PAGES_J[id]
     ?? MIGRATED_ARABIC_PHOTO_PAGES_K[id]
     ?? MIGRATED_ARABIC_PHOTO_PAGES_L[id]
+    ?? MIGRATED_ARABIC_PHOTO_PAGES_M[id]
     ?? SERIES_ARABIC_PHOTO_PAGES_A[id]
     ?? SERIES_ARABIC_PHOTO_PAGES_B[id]
     ?? SERIES_ARABIC_PHOTO_PAGES_C[id]
