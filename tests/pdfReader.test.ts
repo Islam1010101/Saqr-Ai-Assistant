@@ -17,7 +17,7 @@ console.log('PASS: Vercel server import paths reference emitted JavaScript, not 
 const allDigitalBooks = [...ARABIC_LIBRARY_DATABASE,...ENGLISH_LIBRARY_DATABASE];
 assert.equal(Object.keys(DIGITAL_SERIES_VOLUMES).length,10);
 assert.equal(Object.values(DIGITAL_SERIES_VOLUMES).reduce((sum,books)=>sum+books.length,0),412);
-assert.equal(ARABIC_LIBRARY_DATABASE.length,452);
+assert.equal(ARABIC_LIBRARY_DATABASE.length,488);
 assert.equal(ENGLISH_LIBRARY_DATABASE.filter(b=>!String(b.id).startsWith('EN_NEW_20261109_')).length,54, 'Keep original English digital holdings');
 assert.equal(ENGLISH_LIBRARY_DATABASE.filter(b=>/^EN_NEW_20261109_(?:0[1-9]|1[0-4])$/.test(String(b.id))).length,14, 'Keep the initial 14 new school-domain titles');
 assert.equal(ENGLISH_LIBRARY_DATABASE.filter(b=>/^EN_NEW_20261109_(?:1[5-9]|2[0-3])$/.test(String(b.id))).length,9, 'Prepare nine supplementary English Drive books including two new picture books');
