@@ -8,6 +8,31 @@ import { MIGRATED_ARABIC_PHOTO_PAGES_A } from '../data/migratedArabicPhotoPages2
 import { MIGRATED_ARABIC_PHOTO_PAGES_B } from '../data/migratedArabicPhotoPages20261110B';
 import { MIGRATED_ARABIC_PHOTO_PAGES_C } from '../data/migratedArabicPhotoPages20261110C';
 import { MIGRATED_ARABIC_PHOTO_PAGES_D } from '../data/migratedArabicPhotoPages20261110D';
+import { MIGRATED_ARABIC_PHOTO_PAGES_E } from '../data/migratedArabicPhotoPages20261110E';
+import { MIGRATED_ARABIC_PHOTO_PAGES_F } from '../data/migratedArabicPhotoPages20261110F';
+import { MIGRATED_ARABIC_PHOTO_PAGES_G } from '../data/migratedArabicPhotoPages20261110G';
+import { MIGRATED_ARABIC_PHOTO_PAGES_H } from '../data/migratedArabicPhotoPages20261110H';
+import { MIGRATED_ARABIC_PHOTO_PAGES_I } from '../data/migratedArabicPhotoPages20261110I';
+import { MIGRATED_ARABIC_PHOTO_PAGES_J } from '../data/migratedArabicPhotoPages20261110J';
+import { MIGRATED_ARABIC_PHOTO_PAGES_K } from '../data/migratedArabicPhotoPages20261110K';
+import { SERIES_ARABIC_PHOTO_PAGES_A } from '../data/seriesArabicPhotoPages20261110A';
+import { SERIES_ARABIC_PHOTO_PAGES_B } from '../data/seriesArabicPhotoPages20261110B';
+import { SERIES_ARABIC_PHOTO_PAGES_C } from '../data/seriesArabicPhotoPages20261110C';
+import { SERIES_ARABIC_PHOTO_PAGES_D } from '../data/seriesArabicPhotoPages20261110D';
+import { SERIES_ARABIC_PHOTO_PAGES_E } from '../data/seriesArabicPhotoPages20261110E';
+import { SERIES_ARABIC_PHOTO_PAGES_F } from '../data/seriesArabicPhotoPages20261110F';
+import { SERIES_ARABIC_PHOTO_PAGES_G } from '../data/seriesArabicPhotoPages20261110G';
+import { SERIES_ARABIC_PHOTO_PAGES_H } from '../data/seriesArabicPhotoPages20261110H';
+import { SERIES_ARABIC_PHOTO_PAGES_I } from '../data/seriesArabicPhotoPages20261110I';
+import { SERIES_ARABIC_PHOTO_PAGES_J } from '../data/seriesArabicPhotoPages20261110J';
+import { SERIES_ARABIC_PHOTO_PAGES_K } from '../data/seriesArabicPhotoPages20261110K';
+import { SERIES_ARABIC_PHOTO_PAGES_L } from '../data/seriesArabicPhotoPages20261110L';
+import { SERIES_ARABIC_PHOTO_PAGES_M } from '../data/seriesArabicPhotoPages20261110M';
+import { SERIES_ARABIC_PHOTO_PAGES_N } from '../data/seriesArabicPhotoPages20261110N';
+import { SERIES_ARABIC_PHOTO_PAGES_O } from '../data/seriesArabicPhotoPages20261110O';
+import { SERIES_ARABIC_PHOTO_PAGES_P } from '../data/seriesArabicPhotoPages20261110P';
+import { SERIES_ARABIC_PHOTO_PAGES_Q } from '../data/seriesArabicPhotoPages20261110Q';
+import { SERIES_ARABIC_PHOTO_PAGES_R } from '../data/seriesArabicPhotoPages20261110R';
 import DigitalBookReader from './DigitalBookReader';
 
 /** Lazy loaded on book-open; English reader and all original PDF files remain intact.
@@ -26,7 +51,32 @@ export default function VerifiedArabicPhotoBookReader({ book, locale, onBack, on
     ?? MIGRATED_ARABIC_PHOTO_PAGES_A[id]
     ?? MIGRATED_ARABIC_PHOTO_PAGES_B[id]
     ?? MIGRATED_ARABIC_PHOTO_PAGES_C[id]
-    ?? MIGRATED_ARABIC_PHOTO_PAGES_D[id];
+    ?? MIGRATED_ARABIC_PHOTO_PAGES_D[id]
+    ?? MIGRATED_ARABIC_PHOTO_PAGES_E[id]
+    ?? MIGRATED_ARABIC_PHOTO_PAGES_F[id]
+    ?? MIGRATED_ARABIC_PHOTO_PAGES_G[id]
+    ?? MIGRATED_ARABIC_PHOTO_PAGES_H[id]
+    ?? MIGRATED_ARABIC_PHOTO_PAGES_I[id]
+    ?? MIGRATED_ARABIC_PHOTO_PAGES_J[id]
+    ?? MIGRATED_ARABIC_PHOTO_PAGES_K[id]
+    ?? SERIES_ARABIC_PHOTO_PAGES_A[id]
+    ?? SERIES_ARABIC_PHOTO_PAGES_B[id]
+    ?? SERIES_ARABIC_PHOTO_PAGES_C[id]
+    ?? SERIES_ARABIC_PHOTO_PAGES_D[id]
+    ?? SERIES_ARABIC_PHOTO_PAGES_E[id]
+    ?? SERIES_ARABIC_PHOTO_PAGES_F[id]
+    ?? SERIES_ARABIC_PHOTO_PAGES_G[id]
+    ?? SERIES_ARABIC_PHOTO_PAGES_H[id]
+    ?? SERIES_ARABIC_PHOTO_PAGES_I[id]
+    ?? SERIES_ARABIC_PHOTO_PAGES_J[id]
+    ?? SERIES_ARABIC_PHOTO_PAGES_K[id]
+    ?? SERIES_ARABIC_PHOTO_PAGES_L[id]
+    ?? SERIES_ARABIC_PHOTO_PAGES_M[id]
+    ?? SERIES_ARABIC_PHOTO_PAGES_N[id]
+    ?? SERIES_ARABIC_PHOTO_PAGES_O[id]
+    ?? SERIES_ARABIC_PHOTO_PAGES_P[id]
+    ?? SERIES_ARABIC_PHOTO_PAGES_Q[id]
+    ?? SERIES_ARABIC_PHOTO_PAGES_R[id];
 
   if (!pages?.length) {
     return <section role="alert" aria-live="polite">
