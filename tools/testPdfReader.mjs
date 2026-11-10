@@ -28,7 +28,7 @@ try {
         } else if (entry.isFile() && entry.name.endsWith('.js')) {
           const original = await readFile(filename, 'utf8');
           const updated = original.replace(
-            /(\\b(?:from\\s*|import\\s*\\(\\s*|import\\s*)['"])(\\.\\.?\\/[^'"]+)(['"])/g,
+            /(\b(?:from\s*|import\s*\(\s*|import\s*)['"])(\.\.?\/[^'"]+)(['"])/g,
             (whole, prefix, specifier, suffix) =>
               path.extname(specifier) ? whole : `${prefix}${specifier}.js${suffix}`
           );
