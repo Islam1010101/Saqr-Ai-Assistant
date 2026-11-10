@@ -96,5 +96,10 @@ export const SERIES_ARABIC_PHOTO_BOOK_IDS:ReadonlyArray<string> = [
   "AR_1-1Id_Y9Uiel_8zfvjruYyB-ALEgY_uvUco",
   "AR_1-1RLqKQ0FGSQBo2PlRk4rCU4FEiUsByGQN",
   "AR_1-1QpA9U8pyqZ1bv0mmqv6VUxguC2Gj51Pk",
-  "AR_1-1DFXYAQtsDwLosXQxkynjKiAu0jPkxOhd"
+  "AR_1-1DFXYAQtsDwLosXQxkynjKiAu0jPkxOhd",
+  "AR_1-1o4c1SED3Y8OH--_B8hGL1ATHSK3UkxIG",
+  "AR_1-1ddfxv77cg4DKisw-WX4eefoAtE3LeHwi",
+  "AR_1-1Eur7KiD2pCVPs1N-d6slf3Wh7KLtZQKg",
+  "AR_1-1ZEdv_Kib_ZNR6DbrnmsHgQP2ueXMZw0w",
+  "AR_1-1aLwhL3DK4E8op9ItB7SbNjUW98y7yldu"
 ];
