@@ -129,5 +129,20 @@ export const MIGRATED_ARABIC_PHOTO_SOURCES:ReadonlyArray<{id:string;driveLink:st
     "id": "AR_32",
     "driveLink": "https://drive.google.com/drive/folders/1lXnzxE0Z5iw0bpqUvsT4CQOkL79AIZ6M",
     "pageCount": 233
+  },
+  {
+    "id": "AR_4",
+    "driveLink": "https://drive.google.com/drive/folders/16lbTupKdtGEqe5hbiNxCUDr4hcst8-0U",
+    "pageCount": 353
+  },
+  {
+    "id": "AR_46",
+    "driveLink": "https://drive.google.com/drive/folders/1fwWSAYKvvZxbVYJ0kRMMfbgLwM7cd1cI",
+    "pageCount": 434
+  },
+  {
+    "id": "AR_47",
+    "driveLink": "https://drive.google.com/drive/folders/1xIT2ovR7GGrCuwK6w_q-Rxlz_5C1zn0o",
+    "pageCount": 324
   }
 ];
