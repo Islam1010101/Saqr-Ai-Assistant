@@ -15,6 +15,7 @@ const PhotoOnlyArabicBookReader = React.lazy(() => import('../src/components/Pho
 const VERIFIED_ARABIC_PHOTO_BOOK_IDS = new Set([
   'AR_41','AR_44','AR_45','AR_50','AR_52','AR_53','AR_54','AR_55','AR_56','AR_57','AR_58','AR_60',
   'NI_1','NI_2','NI_3','NI_4','NI_5','NI_6',
+  ...MIGRATED_ARABIC_PHOTO_SOURCES.map(source=>source.id),
 ]);
 import { digitalReaderSource } from '../src/utils/digitalReaderSource';
 import { useDigitalReadingProgress } from '../src/utils/useDigitalReadingProgress';
@@ -22,6 +23,7 @@ import { pdfProgressPercent, type PdfReadingState } from '../src/utils/pdfReadin
 
 // Shared with Saqr catalog search; preserve book IDs and source links.
 import { ARABIC_LIBRARY_DATABASE, type DigitalLibraryBook } from '../api/digitalBookData';
+import { MIGRATED_ARABIC_PHOTO_SOURCES } from '../src/data/migratedArabicPhotoSources20261110';
 export { ARABIC_LIBRARY_DATABASE } from '../api/digitalBookData';
 
 const translations = {
@@ -185,7 +187,7 @@ const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void
     if (!book) return null;
     // Drive folder URLs are storage references for completed image books, not reader links.
     // Let all verified images open inside the same in-site reader as the English library.
-    const isPhotoOnlyBook = /^(?:AR_PH_HP_|AR_NG_|NI_PH_)/.test(String(book.id));
+    const isPhotoOnlyBook = /^(?:AR_PH_|AR_NG_|NI_PH_)/.test(String(book.id));
     const hasInternalReader = isPhotoOnlyBook
         || VERIFIED_ARABIC_PHOTO_BOOK_IDS.has(String(book.id))
         || Boolean(digitalReaderSource(book.driveLink));

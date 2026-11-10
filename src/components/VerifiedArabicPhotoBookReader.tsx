@@ -4,6 +4,10 @@ import { digitalBookKey } from '../utils/readingPassport';
 import { VERIFIED_ARABIC_IMAGE_PAGES_A } from '../data/verifiedArabicImageBooks20261110A';
 import { VERIFIED_ARABIC_IMAGE_PAGES_B } from '../data/verifiedArabicImageBooks20261110B';
 import { VERIFIED_NATIONAL_IDENTITY_IMAGE_PAGES } from '../data/verifiedNationalIdentityImageBooks20261110';
+import { MIGRATED_ARABIC_PHOTO_PAGES_A } from '../data/migratedArabicPhotoPages20261110A';
+import { MIGRATED_ARABIC_PHOTO_PAGES_B } from '../data/migratedArabicPhotoPages20261110B';
+import { MIGRATED_ARABIC_PHOTO_PAGES_C } from '../data/migratedArabicPhotoPages20261110C';
+import { MIGRATED_ARABIC_PHOTO_PAGES_D } from '../data/migratedArabicPhotoPages20261110D';
 import DigitalBookReader from './DigitalBookReader';
 
 /** Lazy loaded on book-open; English reader and all original PDF files remain intact.
@@ -18,7 +22,11 @@ export default function VerifiedArabicPhotoBookReader({ book, locale, onBack, on
   const id = String(book.id);
   const pages = VERIFIED_ARABIC_IMAGE_PAGES_A[id]
     ?? VERIFIED_ARABIC_IMAGE_PAGES_B[id]
-    ?? VERIFIED_NATIONAL_IDENTITY_IMAGE_PAGES[id];
+    ?? VERIFIED_NATIONAL_IDENTITY_IMAGE_PAGES[id]
+    ?? MIGRATED_ARABIC_PHOTO_PAGES_A[id]
+    ?? MIGRATED_ARABIC_PHOTO_PAGES_B[id]
+    ?? MIGRATED_ARABIC_PHOTO_PAGES_C[id]
+    ?? MIGRATED_ARABIC_PHOTO_PAGES_D[id];
 
   if (!pages?.length) {
     return <section role="alert" aria-live="polite">

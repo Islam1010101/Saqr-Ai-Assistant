@@ -33,7 +33,7 @@ for (const [id,expectedBook] of Object.entries(expected)){
 }
 assert.equal(verified,1393);
 assert.equal(ENGLISH_LIBRARY_DATABASE.length,77,'Do not change English library catalog counts');
-assert.equal(ARABIC_LIBRARY_DATABASE.length,488,'Do not touch Arabic library content');
+assert.equal(ARABIC_LIBRARY_DATABASE.length,494,'Preserve Arabic records while adding six verified image titles');
 assert.equal(CODING_IMAGE_BOOK_PAGES.length,70,'Existing Coding pilot unchanged');
 assert.equal(COMPLETED_ENGLISH_IMAGE_BOOK_PAGES['EN_NEW_20261109_08'].length,312,'Existing DK image book unchanged');
 assert.equal(COMPLETED_ENGLISH_IMAGE_BOOK_PAGES['EN_NEW_20261109_15'].length,96,'Existing Disney image book unchanged');
@@ -52,4 +52,4 @@ assert.ok(image.includes('efips-image-book-error') && !image.includes('<iframe')
 assert.ok(image.includes('writePdfState'), 'Save reading progress');
 assert.ok(image.includes('efips-glass-image-top') && image.includes('efips-glass-image-tools'),
   'All five books share the same glass overlay controls');
-console.log('PASS: five photo books, 1,393 pages, lazy loading, glass reader and preserved 77/488 catalog');
+console.log('PASS: five photo books, 1,393 pages, lazy loading, glass reader and preserved 77/494 catalog');
