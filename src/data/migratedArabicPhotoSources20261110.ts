@@ -84,5 +84,10 @@ export const MIGRATED_ARABIC_PHOTO_SOURCES:ReadonlyArray<{id:string;driveLink:st
     "id": "AR_15",
     "driveLink": "https://drive.google.com/drive/folders/1pwEzkMttmxGtO7_6vbACj4S69JtWvazy",
     "pageCount": 530
+  },
+  {
+    "id": "AR_17",
+    "driveLink": "https://drive.google.com/drive/folders/1QiawZLQv8AJQ6gmdXj60jBh4VDSEJLDM",
+    "pageCount": 941
   }
 ];
