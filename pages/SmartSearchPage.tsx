@@ -14,7 +14,7 @@ import { NATIONAL_IDENTITY_DIGITAL_BOOKS } from '../api/nationalIdentityDigitalB
 import { supabase } from '../src/utils/supabase';
 import {nationalIdentityBooks, searchNationalIdentityBooks} from '../src/utils/nationalIdentityCatalog';
 import { stripSaqrEmoji } from '../src/utils/saqrText';
-import { isSaqrCatalogLookup, renderSaqrCatalogAnswer } from '../src/utils/saqrCatalogReply';
+import { isSaqrCatalogLookup, isSaqrRecommendationRequest, renderSaqrCatalogAnswer } from '../src/utils/saqrCatalogReply';
 import { withSaqrFollowUpQuestion, type SaqrFollowUpKind } from '../src/utils/saqrFollowUp';
 import { extractSaqrSpecificBookTitle, findSaqrBookTitleHoldings, saqrBookExpertContext, renderSaqrBookHoldingStatus, type SaqrExternalBookReference } from '../src/utils/saqrBookExpert';
 import { saqrExtraContext, isNewDiscussion, discussionOpening } from '../src/utils/saqrSafeEnhancements';
@@ -356,6 +356,10 @@ const SmartSearchPage: React.FC = () => {
     const userQuery = input.trim();
     // Keep the user's actual message intact; use earlier book context only for discovery.
     const linkedBookTurn = resolveSaqrBookFollowUp(userQuery, messages);
+    const recommendationTurn = isSaqrRecommendationRequest(userQuery) ||
+      (linkedBookTurn.continued &&
+        isSaqrRecommendationRequest(linkedBookTurn.anchoredTurn || '') &&
+        /(?:اسهل|أسهل|اصعب|أصعب|غيره|غيرها|حاجة|اقصر|أقصر|اطول|أطول|easier|simpler|harder|another|similar|shorter)/i.test(userQuery));
     // Only a final, context-aware question is added to displayed answers.
     // Storytelling, certificates, and the content of prior functions remain intact.
     const finishSaqrReply = (answer: string, kind: SaqrFollowUpKind = 'auto') =>
@@ -558,7 +562,10 @@ const SmartSearchPage: React.FC = () => {
       ? 'EFIPS LIBRARY RECORDS FOUND: EXACT TITLE-MATCHED HOLDINGS ONLY: '
         +JSON.stringify(namedBookHoldings)+'. Other fuzzy topic matches are NOT evidence that the named book is owned by the school.'
       : foundBooks.length > 0
-      ? `EFIPS LIBRARY RECORDS FOUND (relevance-ranked, bilingual topic matching): ${JSON.stringify(foundBooks)}.
+      ? recommendationTurn
+        ? `EFIPS VERIFIED CATALOG CANDIDATES FOR A PERSONALIZED RECOMMENDATION: ${JSON.stringify(foundBooks.slice(0,10))}.
+RECOMMENDATION CONVERSATION, NOT A CATALOG DUMP: Pick only 2 or 3 genuinely relevant recorded titles and briefly explain why each fits the user's topic and known reading level. Lead with your best pick. Do not list all matches or group every library section. If the student's grade is unknown, give an initial recommendation and optionally ask one specific question about reading level or preferred language. On a follow-up requesting an easier book, keep the previous topic and adjust the level instead of repeating a long list. Give exact shelf and row for physical titles and the existing link for a digital title. Catalog subject classifications and suggested age suitability are provisional; never treat them as proof of a book's contents. Never invent a book, a link, a synopsis, or live borrowing availability.`
+        : `EFIPS LIBRARY RECORDS FOUND (relevance-ranked, bilingual topic matching): ${JSON.stringify(foundBooks)}.
 When the user asks for books, identify the matching titles exactly as recorded, grouped clearly by physical, Arabic digital and English digital library. For physical books provide the actual shelf (shelf) and row (row); for digital books provide their existing driveLink. Answer in the user's requested language. Do not invent titles, shelves, rows, summaries or links. Some physical-book subject tags are inferred from titles and may be approximate.`
       : 'EFIPS LIBRARY RECORDS FOUND: No verified matching records supplied. Do not invent a library title, shelf, row or digital link.';
 
