@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {formatSaqrRecommendationReply,hasMalformedSaqrRecommendationTable}
+import {formatSaqrRecommendationReply,hasMalformedSaqrRecommendationTable,polishSaqrRecommendationProse}
   from '../src/utils/saqrRecommendationPresentation.ts';
 
 const books=[
@@ -35,8 +35,23 @@ const english=formatSaqrRecommendationReply(
 assert.match(english,/Physical library/);
 assert.doesNotMatch(english,/\|---/);
 assert.match(english,/Would you prefer to read in Arabic or English/);
+const overbold=[
+ '**أهلاً بك يا أستاذ. بصفتي مكتبة المدرسة، يسعدني أن أرشح لك بعض الكتب المتميزة عن الفضاء.**',
+ '',
+ '**إليك ترشيحاتي لكتب الفضاء:**',
+ '',
+ '- **(ASTRONOMY) - المكتبة العادية، رف 6، صف 4: مرجع عن علم الفلك.**',
+ '- **Astronomy in Color**',
+].join('\\n');
+const cleaned=polishSaqrRecommendationProse(overbold);
+assert.doesNotMatch(cleaned,/بصفتي مكتبة المدرسة/);
+assert.doesNotMatch(cleaned,/\\*\\*أهلاً بك|\\*\\*إليك ترشيحاتي|\\*\\*\\(ASTRONOMY\\)/);
+assert.match(cleaned,/\\*\\*Astronomy in Color\\*\\*/,'Book title styling is preserved');
+assert.equal(polishSaqrRecommendationProse(ordinary),ordinary,
+  'Already natural conversation and emphasis are unchanged');
 const page=readFileSync('pages/SmartSearchPage.tsx','utf8');
 assert.ok(page.includes('formatSaqrRecommendationReply(reply, foundBooks'));
+assert.ok(page.includes('polishSaqrRecommendationProse('));
 assert.ok(page.includes('Never produce a Markdown table'));
 assert.ok(page.includes('if (recommendationTurn)'),'Fallback is restricted to recommendation turns');
 console.log('PASS: AI recommendation tables are repaired into grounded, natural chat replies in Arabic and English');
