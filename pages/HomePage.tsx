@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../App';
 import { supabase } from '../src/utils/supabase';
-import SaqrLearningEntry from '../src/components/SaqrLearningEntry';
+import SaqrOrbitNavigation from '../src/components/SaqrOrbitNavigation';
 import { getTeacherLibrarySlots, type TeacherLibrarySlot } from '../src/utils/teacherLibrarySchedule';
 import HomeReadingHub from '../src/components/HomeReadingHub';
 
@@ -598,7 +598,7 @@ const HomePage: React.FC = () => {
     }, []);
 
     return (
-        <div dir={dir} className="w-full min-h-[100dvh] flex flex-col items-center bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden p-4 md:p-8 transition-colors duration-500">
+        <div dir={dir} className="w-full min-h-[100dvh] flex flex-col items-center bg-white dark:bg-slate-950 font-sans relative overflow-x-hidden p-4 md:p-8 transition-colors duration-500">
             
             {sparkles.map(s => (
                 <div key={s.id} className="fixed z-[9999] pointer-events-none animate-fade-out" style={{ left: s.x, top: s.y }}>
@@ -657,36 +657,29 @@ const HomePage: React.FC = () => {
                     </div>
                 </RevealSection>
 
-                <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-center">
-                    <RevealSection delay={140}>
-                        <HomeReadingHub variant="challenge" />
-                    </RevealSection>
-                    <div className="min-w-0 flex flex-col items-center justify-center relative">
-                        <RevealSection delay={400}>
-                            <div onClick={handleMascotInteraction} className="relative cursor-pointer group flex flex-col items-center">
-                                <img src="/school-logo.png" alt="" className="absolute inset-0 m-auto w-48 h-48 md:w-56 md:h-56 object-contain opacity-10 dark:opacity-25 dark:brightness-0 dark:invert z-0 pointer-events-none transition-all duration-300" />
-
-                                {bursts.map((burst) => (
-                                    <div key={burst.id} 
-                                        className={`absolute z-[100] animate-burst-steady pointer-events-none ${burst.color}`}
-                                        style={{ '--tx': `${burst.tx}px`, '--ty': `${burst.ty}px`, '--rot': `${burst.rot}deg` } as any}>
-                                        <StarIcon className="w-8 h-8 drop-shadow-md" />
-                                    </div>
-                                ))}
-
-                                {showBubble && (
-                                    <div className="absolute -top-14 bg-white dark:bg-slate-800 px-6 py-2.5 rounded-2xl border-4 border-rose-500 shadow-2xl text-rose-600 dark:text-rose-400 font-black text-sm md:text-base animate-bounce z-30">
-                                        {isAr ? 'فخورين بالإمارات 🇦🇪' : 'Proud of the UAE 🇦🇪'}
-                                    </div>
-                                )}
-
-                                <img src="/saqr-full.png" alt="Saqr Mascot" className="h-40 md:h-56 object-contain relative z-10 animate-float drop-shadow-2xl group-hover:scale-105 transition-transform duration-300" />
+                <RevealSection delay={200}>
+                    <div className="w-full max-w-5xl mx-auto relative z-30 flex items-center bg-white dark:bg-slate-800 border-4 border-amber-300 dark:border-amber-700 rounded-full shadow-lg overflow-hidden h-14 md:h-16">
+                        <div className="bg-amber-400 text-slate-900 font-black px-5 md:px-8 h-full flex items-center gap-2 relative z-20 shrink-0 text-xs md:text-sm uppercase">
+                            <div className="w-3 h-3 bg-white rounded-full animate-ping"></div>
+                            {t('newsTitle')}
+                        </div>
+                        <div className="flex-1 overflow-hidden h-full flex items-center bg-amber-50 dark:bg-slate-800">
+                            <div className={`whitespace-nowrap inline-block ${isAr ? 'animate-marquee-rtl' : 'animate-marquee-ltr'} text-slate-800 dark:text-slate-100 font-bold text-xs md:text-base px-4`}>
+                                {t('newsContent')}
                             </div>
-                        </RevealSection>
+                        </div>
                     </div>
+                </RevealSection>
 
+                <RevealSection delay={210}>
+                    <SaqrOrbitNavigation isAr={isAr} userType={userType} onMascotClick={handleMascotInteraction} showMascotBubble={showBubble} bursts={bursts} />
+                </RevealSection>
 
-                </div>
+                <RevealSection delay={250}>
+                    <div className="w-full max-w-5xl mx-auto">
+                        <HomeReadingHub variant="challenge" />
+                    </div>
+                </RevealSection>
 
                 {/* This section exists only for teachers with saved library periods. */}
                 {userType === 'teacher' && teacherSchedule.length > 0 && (
@@ -820,123 +813,7 @@ const HomePage: React.FC = () => {
 
 
 
-                <RevealSection delay={200}>
-                    <div className="w-full max-w-5xl mx-auto relative z-30 flex items-center bg-white dark:bg-slate-800 border-4 border-amber-300 dark:border-amber-700 rounded-full shadow-lg overflow-hidden h-14 md:h-16">
-                        <div className="bg-amber-400 text-slate-900 font-black px-5 md:px-8 h-full flex items-center gap-2 relative z-20 shrink-0 text-xs md:text-sm uppercase">
-                            <div className="w-3 h-3 bg-white rounded-full animate-ping"></div>
-                            {t('newsTitle')}
-                        </div>
-                        <div className="flex-1 overflow-hidden h-full flex items-center bg-amber-50 dark:bg-slate-800">
-                            <div className={`whitespace-nowrap inline-block ${isAr ? 'animate-marquee-rtl' : 'animate-marquee-ltr'} text-slate-800 dark:text-slate-100 font-bold text-xs md:text-base px-4`}>
-                                {t('newsContent')}
-                            </div>
-                        </div>
-                    </div>
-                </RevealSection>
 
-                <RevealSection delay={300}>
-                    <div className="efips-nav-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
-                        
-                        <Link to="/search" className="group relative text-[#23374b] p-6 rounded-[2.5rem] shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden efips-nav-tile efips-nav-tile--soft bg-[#ef6266] border-[#ba3b43]">
-                            <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
-                                <SearchIcon />
-                            </div>
-                            <div>
-                                <h3 className="text-xl md:text-2xl font-black mb-1 tracking-tight">{t('manualSearch')}</h3>
-                                <p className="text-xs md:text-sm opacity-90 font-normal leading-snug">{t('manualDesc')}</p>
-                            </div>
-                        </Link>
-
-                        <Link to="/smart-search" className="group relative text-[#23374b] p-6 rounded-[2.5rem] shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden efips-nav-tile efips-nav-tile--soft bg-[#56c5e6] border-[#258bad]">
-                            <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
-                                <SmartIcon />
-                            </div>
-                            <div>
-                                <h3 className="text-xl md:text-2xl font-black mb-1 tracking-tight">{t('smartSearch')}</h3>
-                                <p className="text-xs md:text-sm opacity-90 font-normal leading-snug">{t('smartDesc')}</p>
-                            </div>
-                        </Link>
-
-                        <Link to="/digital-library" className="group relative text-[#23374b] p-6 rounded-[2.5rem] shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden efips-nav-tile efips-nav-tile--soft bg-[#527bd8] border-[#3357b2]">
-                            <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
-                                <BookIcon />
-                            </div>
-                            <div>
-                                <h3 className="text-xl md:text-2xl font-black mb-1 tracking-tight">{t('digitalLibrary')}</h3>
-                                <p className="text-xs md:text-sm opacity-90 font-normal leading-snug">{t('digitalDesc')}</p>
-                            </div>
-                        </Link>
-
-                        <Link to="/creators" className="group relative text-[#23374b] p-6 rounded-[2.5rem] shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden efips-nav-tile efips-nav-tile--soft bg-[#e56aac] border-[#ad3c78]">
-                            <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
-                                <CreatorIcon />
-                            </div>
-                            <div>
-                                <h3 className="text-xl md:text-2xl font-black mb-1 tracking-tight">{t('creators')}</h3>
-                                <p className="text-xs md:text-sm opacity-90 font-normal leading-snug">{t('creatorsDesc')}</p>
-                            </div>
-                        </Link>
-
-                        {(userType === 'student' || userType === 'admin') && <SaqrLearningEntry isAr={isAr} />}
-
-                        {(userType === 'student' || userType === 'admin') && (
-                            <Link to="/saqr-national-identity"
-                                className="group relative flex items-center gap-5 overflow-hidden rounded-[2.5rem] border-b-8 p-6 text-white shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl active:translate-y-2 active:border-b-0 bg-gradient-to-br from-[#075B49] via-[#087555] to-[#116759] border-[#084e3f] efips-nav-tile">
-                                <div aria-hidden="true" className="absolute top-0 end-0 flex h-1.5 w-32 overflow-hidden rounded-bl-xl">
-                                    <span className="w-1/4 bg-red-500" /><span className="w-1/4 bg-emerald-400" /><span className="w-1/4 bg-white" /><span className="w-1/4 bg-slate-950" />
-                                </div>
-                                <div className="relative shrink-0 rounded-2xl border border-white/25 bg-white/15 p-3.5 backdrop-blur-md transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6">
-                                    <svg className="h-9 w-9" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                                        <path d="M24 11C18 7 11 7 5 9v29c7-2 14-1 19 3 5-4 12-5 19-3V9c-6-2-13-2-19 2ZM24 11v30" />
-                                        <path d="m30 19 3-6 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1Z" fill="currentColor" fillOpacity=".24" />
-                                    </svg>
-                                </div>
-                                <div className="relative min-w-0">
-                                    <h3 className="mb-1 text-xl font-black tracking-tight md:text-2xl">{t('nationalIdentityTitle')}</h3>
-                                    <p className="text-xs font-semibold leading-relaxed text-white/90 md:text-sm">{t('nationalIdentityDesc')}</p>
-                                </div>
-                            </Link>
-                        )}
-
-                        {(userType === 'student' || userType === 'admin') && (
-                            <Link to="/saqr-challenges" className="group relative flex items-center gap-5 rounded-[2.5rem] p-6 text-[#23374b] shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl active:translate-y-2 active:border-b-0 efips-nav-tile efips-nav-tile--soft bg-[#f3c54e] border-[#c48d23]">
-                                <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/20"><GameIcon /></span>
-                                <span className="min-w-0"><strong className="block text-xl font-black md:text-2xl">{t('saqrChallengesTitle')}</strong><small className="mt-1 block text-xs md:text-sm">{t('saqrChallengesDesc')}</small></span>
-                            </Link>
-                        )}
-
-                        {userType === 'teacher' && (
-                            <Link to="/saqr-reading-quest" className="group relative flex items-center gap-5 rounded-[2.5rem] p-6 text-[#23374b] shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl active:translate-y-2 active:border-b-0 efips-nav-tile efips-nav-tile--soft bg-[#5ab8e9] border-[#2889ba]">
-                                <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/20"><BookIcon /></span>
-                                <span className="min-w-0"><strong className="block text-xl font-black md:text-2xl">{t('readingQuestTitle')}</strong><small className="mt-1 block text-xs md:text-sm">{t('readingQuestDesc')}</small></span>
-                            </Link>
-                        )}
-
-                        {(userType === 'teacher' || userType === 'admin') && (
-                            <Link to="/schedule" className="group relative text-[#23374b] p-6 rounded-[2.5rem] shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 overflow-hidden efips-nav-tile efips-nav-tile--soft bg-[#a77bdc] border-[#754aa8]">
-                                <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
-                                    <ScheduleIcon />
-                                </div>
-                                <div>
-                                    <h3 className="text-xl md:text-2xl font-black mb-1 tracking-tight">{t('scheduleTitle')}</h3>
-                                    <p className="text-xs md:text-sm opacity-90 font-normal leading-snug">{t('scheduleDesc')}</p>
-                                </div>
-                            </Link>
-                        )}
-
-                        {userType === 'admin' && (
-                            <Link to="/admin-dashboard" className="group relative text-[#23374b] p-6 rounded-[2.5rem] shadow-xl hover:-translate-y-2 hover:shadow-2xl active:border-b-0 active:translate-y-2 transition-all duration-300 flex items-center gap-5 sm:col-span-2 lg:col-span-3 overflow-hidden efips-nav-tile efips-nav-tile--soft bg-[#b28355] border-[#805531]">
-                                <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
-                                    <AdminIcon />
-                                </div>
-                                <div>
-                                    <h3 className="text-xl md:text-2xl font-black mb-1 tracking-tight">{t('adminSettingsTitle')}</h3>
-                                    <p className="text-xs md:text-sm opacity-90 font-normal leading-snug">{t('adminSettingsDesc')}</p>
-                                </div>
-                            </Link>
-                        )}
-                    </div>
-                </RevealSection>
 
                 <RevealSection delay={460}>
                     <HomeReadingHub variant="books" />
