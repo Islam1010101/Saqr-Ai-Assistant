@@ -182,6 +182,13 @@ export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=
   const astronomyTitle = /(?:الفضاء|فضاء|الفلك|فلك|كواكب|نجوم|مجرات|رواد الفضاء|space|astronom|astrophys|planet|galax|cosmos|universe|solar system|telescope)/i;
   const astronomyDigitalSubject = /(?:astronomy|space science|astrophys|solar system|علم الفلك|علوم الفضاء|الفلك والفضاء|الكواكب والمجرات)/i;
   const figurativeOrFictionalSpace = /(?:الفضاء التأويلي|الفضاء التاويلي|space war|space warfare|deep space nine)/i;
+  // A general space request is usually for the science subject. Do not
+  // mistake a fantasy novel mentioning stars for astronomy teaching material.
+  // Explicit story/fantasy/novel queries and exact-title searches remain valid.
+  const spaceFictionRequested = /(?:رواي|قصص|قصه|خيال|الفانتازيا|اسطوره|fiction|fantasy|novel|story|sci fi)/i.test(normalizedQuery);
+  const fictionalBookSubject = /(?:fantasy|fiction|horror|thriller|رواي|رعب|فانتازيا|خيال)/i;
+  const fictionalSeries = /(?:ما\s*وراء\s*الطبيعه|ماوراء\s*الطبيعه|paranormal|supernatural)/i;
+  const fictionalSpaceTitle = /(?:^|\s)اسطوره(?:\s|$)|(?:^|\s)(?:space war|space warfare|deep space nine)(?:\s|$)/i;
   const aliasHints = TITLE_ALIASES.filter(pair=>pair.arabic.test(normalizedQuery)||pair.english.test(normalizedQuery));
   const detectedTopics = hasBookIntent ? TOPICS.filter(topic=>topic.query.test(normalizedQuery)) : [];
   const detectedThemes = hasBookIntent ? THEMES.filter(theme=>theme.query.test(normalizedQuery)) : [];
@@ -208,6 +215,10 @@ export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=
       if(astronomyRequest){
         const directEvidence=astronomyTitle.test(titleText)||astronomyTitle.test(seriesText);
         const trustedSubject=origin.source!=='physical'&&astronomyDigitalSubject.test(subjectText);
+        const explicitNamedBook=titleText.length>=9 && normalizedQuery.includes(titleText);
+        const fictionalEvidence=fictionalBookSubject.test(subjectText)||
+          fictionalSeries.test(seriesText)||fictionalSpaceTitle.test(titleText);
+        if(!spaceFictionRequested && !explicitNamedBook && fictionalEvidence)continue;
         if(figurativeOrFictionalSpace.test(titleText)||(!directEvidence&&!trustedSubject))continue;
       }
       // Do not recommend unrelated Arabic heritage or general histories for UAE.
