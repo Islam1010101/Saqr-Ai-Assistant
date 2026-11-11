@@ -91,7 +91,7 @@
   background: #17252a;
   border-radius: 50%;
   box-shadow: 0 0 1px rgba(0,0,0,.3);
-  transform: translate(calc(-50% + var(--saqr-look-x) * .32), calc(-50% + var(--saqr-look-y) * .32));
+  transform: translate(calc(-50% + var(--saqr-look-x)), calc(-50% + var(--saqr-look-y)));
   pointer-events: none;
   opacity: .82;
   transition: transform 110ms ease-out;
