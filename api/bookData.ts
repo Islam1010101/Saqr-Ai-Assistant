@@ -3434,6 +3434,11 @@ const authorSubjectHints: Array<[RegExp,string]> = [
   [/نجيب محفوظ|طه حسين|توفيق الحكيم/,'Literature & Fiction']
 ];
 const inferredSubject = (title: string, author: string, topicHint: string, shelf: number): string => {
+  // "الفضاء التأويلي" concerns linguistic interpretation, not astronomy.
+  // Verified against UAE Ministry of Culture library catalog: "فضاء التأويل"
+  // by Abdel Salam Al-Massadi, Arabic language/history and philology (PJ6071).
+  if (title.trim() === 'الفضاء التأويلي' && /عبد\s*السلام\s*المسدي/.test(author))
+    return 'Language & Linguistics';
   // بيانات الموضوع الصريحة تتقدم على الاستنتاج، مع توحيد فئات البحث قدر الإمكان.
   if (topicHint.trim()) {
     const hint = topicHint.trim();
