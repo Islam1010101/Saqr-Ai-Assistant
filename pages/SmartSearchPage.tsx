@@ -15,6 +15,7 @@ import { supabase } from '../src/utils/supabase';
 import {nationalIdentityBooks, searchNationalIdentityBooks} from '../src/utils/nationalIdentityCatalog';
 import { stripSaqrEmoji } from '../src/utils/saqrText';
 import { isSaqrCatalogLookup, isSaqrRecommendationRequest, renderSaqrCatalogAnswer } from '../src/utils/saqrCatalogReply';
+import { formatSaqrRecommendationReply } from '../src/utils/saqrRecommendationPresentation';
 import { withSaqrFollowUpQuestion, type SaqrFollowUpKind } from '../src/utils/saqrFollowUp';
 import { extractSaqrSpecificBookTitle, findSaqrBookTitleHoldings, saqrBookExpertContext, renderSaqrBookHoldingStatus, type SaqrExternalBookReference } from '../src/utils/saqrBookExpert';
 import { saqrExtraContext, isNewDiscussion, discussionOpening } from '../src/utils/saqrSafeEnhancements';
