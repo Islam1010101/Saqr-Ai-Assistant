@@ -25,7 +25,9 @@ const catalogs={
   ],
   arabic:[
     {title:'الفيزياء للصغار',author:'ليونيد سيكوروك',subject:'علوم'},
-    {title:'أعظم 100عالم غيروا العالم',author:'جون بالتشين',subject:'علوم'}
+    {title:'أعظم 100عالم غيروا العالم',author:'جون بالتشين',subject:'علوم'},
+    {title:'أسطورة فى جانب النجوم',author:'أحمد خالد توفيق',subject:'Science & Physics',
+      series:'سلسلة ما وراء الطبيعة',driveLink:'https://drive.google.com/file/d/storySpaceSample/view'}
   ],
   english:[
     {title:"Knowledge Encyclopedia Space!: The Universe as You've Never Seen It Before",
@@ -38,7 +40,7 @@ const matches=searchSaqrBookCatalog('رشحلي كتاب عن الفضاء',cata
 const titles=matches.map(x=>x.title);
 assert.ok(matches.length>=4,'Genuine space holdings remain accessible');
 for(const forbidden of ['الفضاء التأويلي','SPACE WAR','الفيزياء للصغار','أعظم 100عالم غيروا العالم',
-  '1000 Inventions and Discoveries','DKfindout! Coding']){
+  'أسطورة فى جانب النجوم','1000 Inventions and Discoveries','DKfindout! Coding']){
   assert.ok(!titles.includes(forbidden),'Unrelated item must not be a space recommendation: '+forbidden);
 }
 for(const expected of ['في الفضاء الفسيح: علماء الفلك','افتح النوافذ واكتشف : الفضاء',
@@ -46,6 +48,17 @@ for(const expected of ['في الفضاء الفسيح: علماء الفلك','
  "Knowledge Encyclopedia Space!: The Universe as You've Never Seen It Before"]){
   assert.ok(titles.includes(expected),'Genuine astronomy/space title should be discoverable: '+expected);
 }
+// Fiction is never treated as educational astronomy just because the title
+// contains «النجوم», even if its catalogue subject is an overly broad science tag.
+const ordinarySpaceSearch=searchSaqrBookCatalog('ابحث عن كتب الفضاء',catalogs);
+assert.ok(!ordinarySpaceSearch.some(b=>b.title==='أسطورة فى جانب النجوم'));
+const fictionalSpace=searchSaqrBookCatalog('رشحلي رواية خيال عن النجوم',catalogs);
+assert.ok(fictionalSpace.some(b=>b.title==='أسطورة فى جانب النجوم'),
+  'An explicit fantasy/story request may include the novel');
+const namedStory=searchSaqrBookCatalog('ابحث عن أسطورة فى جانب النجوم',catalogs);
+assert.ok(namedStory.some(b=>b.title==='أسطورة فى جانب النجوم'),
+  'Named-book search must retain genuine fictional library holdings');
+
 const englishMatches=searchSaqrBookCatalog('Recommend a book about space',catalogs);
 assert.ok(englishMatches.some(b=>b.title.startsWith('Knowledge Encyclopedia Space!')));
 assert.ok(englishMatches.every(x=>!x.title.includes('Coding') && !x.title.includes('1000 Inventions')));
@@ -57,6 +70,9 @@ assert.ok(listing.includes('نتائج البحث في فهارس مكتبة EFI
 
 const page=readFileSync('pages/SmartSearchPage.tsx','utf8');
 assert.ok(page.includes('recommendationTurn = isSaqrRecommendationRequest(userQuery)'));
+assert.ok(page.includes("Never say 'بصفتي مكتبة المدرسة'"));
+assert.ok(page.includes('Differentiate science/non-fiction books about space'));
+assert.ok(page.includes('Use their name sparingly'));
 assert.ok(page.includes('RECOMMENDATION CONVERSATION, NOT A CATALOG DUMP'));
 assert.ok(page.includes('linkedBookTurn.continued'),'Recommendation follow-ups retain the topic');
 assert.ok(page.includes("content: reply"),'Generated recommendations are not given a canned extra question');
