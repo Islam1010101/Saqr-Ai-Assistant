@@ -604,6 +604,12 @@ When the user asks for books, identify the matching titles exactly as recorded, 
       // Filter assistant prose only: preserve Markdown, links, author certificates
       // and all of Saqr's existing UI illustrations.
       reply = stripSaqrEmoji(reply);
+      // AI models sometimes return a one-line Markdown table with unsupported
+      // age/plot claims. Repair only malformed recommendation replies using
+      // the verified catalogue; keep all other AI and story paths untouched.
+      if (recommendationTurn) {
+        reply = formatSaqrRecommendationReply(reply, foundBooks, locale === 'ar' ? 'ar' : 'en');
+      }
 
       if (reply.includes('[WINNER:')) {
         // Parse the exact winner format while accepting the required pipe separators.
