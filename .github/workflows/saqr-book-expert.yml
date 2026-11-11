@@ -4,6 +4,8 @@ on:
     paths:
       - 'src/utils/saqrBookExpert.ts'
       - 'src/utils/saqrFollowUp.ts'
+      - 'src/utils/saqrNaturalDialogue.ts'
+      - 'tests/saqrNaturalDialogue.test.ts'
       - 'tests/saqrFollowUp.test.ts'
       - 'pages/SmartSearchPage.tsx'
       - 'api/chat.ts'
@@ -15,6 +17,8 @@ on:
     paths:
       - 'src/utils/saqrBookExpert.ts'
       - 'src/utils/saqrFollowUp.ts'
+      - 'src/utils/saqrNaturalDialogue.ts'
+      - 'tests/saqrNaturalDialogue.test.ts'
       - 'tests/saqrFollowUp.test.ts'
       - 'pages/SmartSearchPage.tsx'
       - 'api/chat.ts'
@@ -33,4 +37,5 @@ jobs:
       - run: npm install --no-package-lock --no-audit --no-fund
       - run: node --experimental-strip-types tests/saqrBookExpert.test.ts
       - run: node --experimental-strip-types tests/saqrFollowUp.test.ts
+      - run: node --experimental-strip-types tests/saqrNaturalDialogue.test.ts
       - run: npm run build
