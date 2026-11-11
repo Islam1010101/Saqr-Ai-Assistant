@@ -3,7 +3,7 @@ import {readFileSync} from 'node:fs';
 import {searchSaqrBookCatalog} from '../src/utils/saqrCatalogSearch.ts';
 import {isSaqrCatalogLookup,isSaqrRecommendationRequest,renderSaqrCatalogAnswer} from '../src/utils/saqrCatalogReply.ts';
 
-for(const question of ['رشحلي كتاب عن الفضاء','اقترح كتاب عن الفضاء','ممكن ترشحلي كتاب عن الفضاء؟','Recommend a book about space','Suggest some space books']){
+for(const question of ['رشحلي كتاب عن الفضاء','اقترح كتاب عن الفضاء','ممكن ترشحلي كتاب عن الفضاء؟','عايز رواية خيالية عن الفضاء','أبغي قصة خيالية عن النجوم','Recommend a book about space','Suggest some space books']){
   assert.equal(isSaqrRecommendationRequest(question),true,question);
   assert.equal(isSaqrCatalogLookup(question),false,
     'Recommendations must reach Saqr model for dialogue, not raw catalog listing: '+question);
