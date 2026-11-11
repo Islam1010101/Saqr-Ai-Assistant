@@ -58,3 +58,23 @@ export function formatSaqrRecommendationReply(
     : 'Would you prefer to read in Arabic or English?';
   return [head,items.join('\n'),note,question].join('\n\n');
 }
+
+/**
+ * A narrow presentation cleanup for generated *recommendation* prose.
+ * Preserve book-title emphasis, paragraph text and verified links. This does
+ * not run on lessons, discussion, research, certificates or ordinary catalog
+ * lookup routes.
+ */
+export function polishSaqrRecommendationProse(reply:string):string{
+  return String(reply||'')
+    .replace(/بصفتي مكتبة المدرسة[،,]?\s*/g,'')
+    .split('\n').map(line=>{
+      const allBold=line.match(/^(\s*(?:-\s*)?)\*\*(.+)\*\*(\s*)$/);
+      if(!allBold)return line;
+      const inner=allBold[2];
+      // Unbold whole conversational sentences and full multi-clause bullets,
+      // not short standalone book titles.
+      if(inner.length<55 && !/[.:؟!]$/.test(inner))return line;
+      return allBold[1]+inner+allBold[3];
+    }).join('\n');
+}
