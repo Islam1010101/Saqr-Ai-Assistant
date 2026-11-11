@@ -67,7 +67,8 @@ assert.ok(page.includes("content:finishSaqrReply(response,'reading-list')"),'Rea
 assert.ok(page.includes("content:finishSaqrReply(saqrIntroductionReply("),'Introduction route is covered');
 assert.ok(page.includes("content:finishSaqrReply((ar?'## كتب جناح الهوية الوطنية"),'National identity route is covered');
 assert.ok(page.includes("content:finishSaqrReply(locale==='ar'"),'Schedule route is covered');
-assert.ok(page.includes("content: finishSaqrReply(reply, namedBookTitle ? 'named-book'"),'Generative/book route is covered');
+assert.ok(page.includes("content: reply"),'Generative/book route uses model-written natural follow-ups');
+assert.ok(page.includes('saqrNaturalDialogueInstructions({'),'Natural dialogue instructions are wired into model requests');
 assert.ok(page.includes("content: finishSaqrReply(locale === 'ar'"),'Network error route is covered');
 assert.ok(page.includes('renderSaqrBookHoldingStatus(namedBookTitle,namedBookHoldings'),
   'Book-holdings report still comes before the closing question');
@@ -78,4 +79,4 @@ assert.ok(page.includes('isStoryBeginning(userQuery)'),
 assert.ok(page.includes('setResearchAnswer(reply)'), 'Research PDF retains original generated content');
 assert.ok(page.includes("reply = stripSaqrEmoji(reply)"),'Original reply sanitization remains');
 
-console.log('PASS: Saqr ends normal responses with one relevant Arabic/English question; existing questions, story/challenge, certificates, knowledge, research PDF, catalogs and functions are preserved');
+console.log('PASS: Saqr preserves question guardrails for fixed routes while using natural AI follow-ups for model replies; story, certificates, research and catalog flows preserved');
