@@ -15,7 +15,7 @@ import { supabase } from '../src/utils/supabase';
 import {nationalIdentityBooks, searchNationalIdentityBooks} from '../src/utils/nationalIdentityCatalog';
 import { stripSaqrEmoji } from '../src/utils/saqrText';
 import { isSaqrCatalogLookup, isSaqrRecommendationRequest, renderSaqrCatalogAnswer } from '../src/utils/saqrCatalogReply';
-import { formatSaqrRecommendationReply } from '../src/utils/saqrRecommendationPresentation';
+import { formatSaqrRecommendationReply, polishSaqrRecommendationProse } from '../src/utils/saqrRecommendationPresentation';
 import { withSaqrFollowUpQuestion, type SaqrFollowUpKind } from '../src/utils/saqrFollowUp';
 import { extractSaqrSpecificBookTitle, findSaqrBookTitleHoldings, saqrBookExpertContext, renderSaqrBookHoldingStatus, type SaqrExternalBookReference } from '../src/utils/saqrBookExpert';
 import { saqrExtraContext, isNewDiscussion, discussionOpening } from '../src/utils/saqrSafeEnhancements';
@@ -608,7 +608,9 @@ When the user asks for books, identify the matching titles exactly as recorded, 
       // age/plot claims. Repair only malformed recommendation replies using
       // the verified catalogue; keep all other AI and story paths untouched.
       if (recommendationTurn) {
-        reply = formatSaqrRecommendationReply(reply, foundBooks, locale === 'ar' ? 'ar' : 'en');
+        reply = polishSaqrRecommendationProse(
+          formatSaqrRecommendationReply(reply, foundBooks, locale === 'ar' ? 'ar' : 'en')
+        );
       }
 
       if (reply.includes('[WINNER:')) {
