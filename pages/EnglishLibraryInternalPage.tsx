@@ -12,6 +12,7 @@ import { CODING_IMAGE_BOOK_ID, CODING_IMAGE_BOOK_PAGES } from '../src/data/codin
 import { COMPLETED_ENGLISH_IMAGE_BOOK_PAGES } from '../src/data/completedEnglishImageBooks20261109';
 /** Load the remaining large photo-book page lists on demand, not on library entry. */
 const RemainingEnglishPhotoBookReader = React.lazy(() => import('../src/components/RemainingEnglishPhotoBookReader'));
+const EnglishPhotoBookReader = React.lazy(() => import('../src/components/EnglishPhotoBookReader'));
 const REMAINING_COMPLETED_ENGLISH_IMAGE_IDS = new Set([
     'EN_NEW_20261109_05', // Knowledge Encyclopedia
     'EN_NEW_20261109_07', // 1000 Inventions and Discoveries
@@ -217,6 +218,14 @@ const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void
     const ageGroup = book?.reviewedAgeGroup || book?.readingAudience ? ageLabels[(book.reviewedAgeGroup || book.readingAudience)!] : '';
 
     if (!book) return null;
+    if (readerOpen && book.photoBatch) return <React.Suspense fallback={
+        <DigitalLibraryDialog title={book.title} variant="reader" onClose={onClose}>
+            <section className="efips-book-reader flex items-center justify-center p-8" role="status">
+                {locale==='ar'?'جاري فتح قارئ صقر الزجاجي...':'Opening the EFIPS glass book reader...'}
+            </section>
+        </DigitalLibraryDialog>
+    }><EnglishPhotoBookReader book={book} locale={locale}
+        onBack={() => setReaderOpen(false)} onClose={onClose}/></React.Suspense>;
     if (readerOpen && REMAINING_COMPLETED_ENGLISH_IMAGE_IDS.has(String(book.id))) return (
         <React.Suspense fallback={
             <DigitalLibraryDialog title={book.title} variant="reader" onClose={onClose}>
@@ -285,7 +294,7 @@ const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void
                         <DigitalBookRating bookId={digitalBookKey('en', book)} compact={false} />
 
                         <div className="pt-2 md:pt-6">
-                            {digitalReaderSource(book.driveLink) ? (<button type="button" onClick={() => setReaderOpen(true)} className="w-full block bg-sky-500 text-white font-black py-4 rounded-[2rem] hover:-translate-y-1 active:translate-y-2 border-b-8 border-sky-700 active:border-b-0 transition-all text-center uppercase tracking-widest text-base shadow-md">
+                            {(book.photoBatch || digitalReaderSource(book.driveLink)) ? (<button type="button" onClick={() => setReaderOpen(true)} className="w-full block bg-sky-500 text-white font-black py-4 rounded-[2rem] hover:-translate-y-1 active:translate-y-2 border-b-8 border-sky-700 active:border-b-0 transition-all text-center uppercase tracking-widest text-base shadow-md">
                                 {book.requiresSchoolGoogleAccess ? t('read') : progress && progress.page>1 ? (locale==='ar'?'أكمل القراءة':'Continue reading') : t('read')}
                             </button>) : (<a href={book.driveLink} target="_blank" rel="noreferrer" className="w-full block bg-sky-500 text-white font-black py-4 rounded-[2rem] hover:-translate-y-1 active:translate-y-2 border-b-8 border-sky-700 active:border-b-0 transition-all text-center uppercase tracking-widest text-base shadow-md">
                                 {t('read')}
