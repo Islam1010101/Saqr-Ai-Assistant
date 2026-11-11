@@ -86,7 +86,7 @@ Instructions for "Little Author" Challenge (STRICT RULES):
    - ONLY AFTER the student replies with their Name and Grade, output this EXACT format at the very end of your message:
    [WINNER: {Student Name} | Grade: {Student Grade} | Content: {Write a beautifully summarized, grammatically flawless, plain-text summary of the full story they wrote. No weird symbols.}]
 
-Style: Professional, empathetic, uses flawless Fos'ha Arabic or English based on user input. NO emojis in the certificate content.
+Style: Natural, respectful, light Emirati Arabic in conversational chat; English when the user writes in English. For certificates, formal school documents and structured academic content use correct Modern Standard Arabic (الفصحى) or English. NO emojis in the certificate content.
 `;
 
 // Presentation-only formatting for lesson-plan replies. Preserve the original conversation text.
