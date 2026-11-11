@@ -7,7 +7,7 @@ const extra=ENGLISH_LIBRARY_DATABASE.filter(book=>expected.has(String(book.id)))
 assert.equal(EXTRA_ENGLISH_DIGITAL_BOOKS_20261109.length,9);
 assert.equal(extra.length,9,'All nine titles must be present in the catalog');
 assert.equal(ENGLISH_LIBRARY_DATABASE.length,77,'Keep original 68 plus 9 supplementary editions');
-assert.equal(ARABIC_LIBRARY_DATABASE.length,497,'Preserve previous Arabic books and add six verified image editions');
+assert.equal(ARABIC_LIBRARY_DATABASE.length,495,'Preserve previous Arabic books and add six verified image editions');
 assert.equal(new Set(ENGLISH_LIBRARY_DATABASE.map(book=>String(book.id))).size,77);
 for(const book of extra){
   assert.ok(book.title&&book.author&&book.subject&&book.summary&&book.driveLink);

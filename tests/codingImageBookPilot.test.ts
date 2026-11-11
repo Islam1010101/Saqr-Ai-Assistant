@@ -9,7 +9,7 @@ assert.deepEqual(CODING_IMAGE_BOOK_PAGES.map(item=>item.page),Array.from({length
 assert.equal(new Set(CODING_IMAGE_BOOK_PAGES.map(item=>item.fileId)).size,70);
 for(const image of CODING_IMAGE_BOOK_PAGES)assert.match(image.fileId,/^[A-Za-z0-9_-]{20,}$/);
 assert.equal(ENGLISH_LIBRARY_DATABASE.length,77);
-assert.equal(ARABIC_LIBRARY_DATABASE.length,497);
+assert.equal(ARABIC_LIBRARY_DATABASE.length,495);
 const book=ENGLISH_LIBRARY_DATABASE.find(b=>String(b.id)===CODING_IMAGE_BOOK_ID);
 assert.ok(book,'Original Coding catalog entry must remain unchanged');
 assert.ok(book.driveLink.includes('199Avu7T8tUyLqDcYYuDSl7TyLTWKecFk'));

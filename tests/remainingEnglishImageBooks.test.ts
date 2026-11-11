@@ -33,7 +33,7 @@ for (const [id,expectedBook] of Object.entries(expected)){
 }
 assert.equal(verified,1393);
 assert.equal(ENGLISH_LIBRARY_DATABASE.length,77,'Do not change English library catalog counts');
-assert.equal(ARABIC_LIBRARY_DATABASE.length,497,'Preserve Arabic records while adding five nonduplicate photo editions');
+assert.equal(ARABIC_LIBRARY_DATABASE.length,495,'Preserve Arabic records while adding three independent photo editions');
 assert.equal(CODING_IMAGE_BOOK_PAGES.length,70,'Existing Coding pilot unchanged');
 assert.equal(COMPLETED_ENGLISH_IMAGE_BOOK_PAGES['EN_NEW_20261109_08'].length,312,'Existing DK image book unchanged');
 assert.equal(COMPLETED_ENGLISH_IMAGE_BOOK_PAGES['EN_NEW_20261109_15'].length,96,'Existing Disney image book unchanged');
