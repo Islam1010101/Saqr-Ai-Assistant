@@ -51,7 +51,7 @@ assert.ok(login.includes("redirectTo: window.location.origin + '/?efips_google_s
 assert.ok(app.includes('GoogleSchoolReturn'));
 assert.ok(app.includes('<GoogleSchoolReturn />'));
 assert.ok(app.includes('<GoogleTeacherReturn />'),'Allow in-flight old teacher sign-ins');
-assert.ok(callback.includes("supabase.auth.getUser(session.access_token)"));
+assert.ok(callback.includes("supabase.auth.getUser(accessToken)"));
 assert.ok(callback.includes("supabase.functions.invoke('google-school-login'"));
 assert.ok(callback.includes("sessionStorage.removeItem('efips_oauth_school_email')"));
 assert.ok(!callback.includes("sessionStorage.getItem('efips_oauth_school_email')"), 'No typed email comparison after Google OAuth');
