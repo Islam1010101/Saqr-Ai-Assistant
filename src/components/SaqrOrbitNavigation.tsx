@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './SaqrOrbitNavigation.css';
+import { getSaqrLearningAccess } from '../utils/saqrLearningAccess';
 
 type Role = 'student' | 'teacher' | 'admin';
 type OrbitItem = {
@@ -62,9 +63,19 @@ export default function SaqrOrbitNavigation({
   const navigationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const swipeX = useRef<number | null>(null);
   const [page, setPage] = useState(0);
+  const [learningAllowed, setLearningAllowed] = useState(false);
   const [transitioning, setTransitioning] = useState(false);
   const role: Role = userType === 'teacher' ? 'teacher' : userType === 'admin' ? 'admin' : 'student';
-  const links = useMemo(() => ITEMS.filter(item => item.roles.includes(role)), [role]);
+  const links = useMemo(() => ITEMS.filter(item => item.roles.includes(role) && (item.key !== 'learning' || learningAllowed)), [role, learningAllowed]);
+  useEffect(() => {
+    let live = true;
+    setLearningAllowed(false);
+    if (role === 'student' || role === 'admin') {
+      getSaqrLearningAccess().then(result => { if (live) setLearningAllowed(result.allowed); })
+        .catch(() => { if (live) setLearningAllowed(false); });
+    }
+    return () => { live = false; };
+  }, [role]);
   const pageCount = Math.max(1, Math.ceil(links.length / 8));
   const visible = links.slice(page * 8, page * 8 + 8);
   useEffect(() => setPage(0), [role]);
