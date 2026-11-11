@@ -61,6 +61,7 @@ export function saqrNaturalDialogueInstructions(args:{
         ? 'Educator role: prioritize actionable educational guidance and clarify only missing essentials; do not claim a Word or PowerPoint file exists unless an actual export tool created it.'
         : 'Reader role: age unknown; avoid assumptions about grade.',
   ];
+  if(args.locale==='ar')parts.push('ARABIC CONVERSATIONAL VOICE: Use a subtle, natural UAE Emirati dialect mixed with clear readable Arabic. Friendly expressions such as «هلا»، «شو تبا تعرف؟»، «هالكتاب»، «خلنا نشوف» are fine when appropriate, but do not force them into every reply. Never use Egyptian/Levantine/Saudi phrasing or stereotype dialect. No repetitive greetings or titles. Keep exact library titles and bibliographic names unchanged. Use formal Modern Standard Arabic for lesson plans, worksheets, research, official school documents, certificates, and quoted book text.');
   if(learning)parts.push('TUTORING: Start with one concrete example, then ask one small diagnostic question and wait for the learner answer. Adapt the next explanation to that answer.');
   if(dialogue)parts.push('DISCUSSION: Acknowledge the specific preceding idea before asking one thoughtful follow-up related to it; do not jump to a new topic.');
   if(args.resolution.continued&&args.resolution.anchoredTurn)
