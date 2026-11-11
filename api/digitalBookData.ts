@@ -1,4 +1,5 @@
 import { DIGITAL_SERIES_VOLUMES } from '../src/data/digitalSeriesVolumes.js';
+import { ENGLISH_PHOTO_LIBRARY_20261111 } from '../src/data/englishPhotoLibrary20261111';
 import {NEW_PHOTO_ONLY_ARABIC_BOOKS} from '../src/data/photoOnlyArabicCatalog20261110';
 import {ADDITIONAL_ARABIC_PHOTO_BOOKS} from '../src/data/additionalArabicPhotoBooks20261110';
 import {MIGRATED_ARABIC_PHOTO_SOURCES} from '../src/data/migratedArabicPhotoSources20261110';
@@ -34,6 +35,8 @@ export type DigitalLibraryBook = {
   requiresSchoolGoogleAccess?: boolean;
   /** Verified raw Drive PDF size; used to avoid Google preview for very large books. */
   fileSizeBytes?: number;
+  /** Verified English photo-edition page-manifest batch. */
+  photoBatch?: string;
   reviewedOn?: string;
 };
 const ARABIC_LIBRARY_SEED: DigitalLibraryBook[] = [
@@ -229,6 +232,7 @@ for(const raw of EXTRA_ENGLISH_DIGITAL_BOOKS_20261109) {
   knownEnglishTitles.add(key);
   knownEnglishLinks.add(book.driveLink);
 }
-export const ENGLISH_LIBRARY_DATABASE: DigitalLibraryBook[] = expandDigitalSeries(
-  [...ENGLISH_LIBRARY_SEED,...newlyCataloguedEnglishBooks,...supplementaryEnglishDriveBooks],'en'
-);
+// Photo-only English library replacement. Old PDF records and partial image folders
+// are NOT exported to the site, search, reading challenges, or Saqr's shared index.
+// Keep previous source data untouched to avoid changing unrelated modules.
+export const ENGLISH_LIBRARY_DATABASE: DigitalLibraryBook[] = ENGLISH_PHOTO_LIBRARY_20261111 as DigitalLibraryBook[];
