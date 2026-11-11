@@ -55,6 +55,13 @@ assert.ok(!ordinarySpaceSearch.some(b=>b.title==='أسطورة فى جانب ا�
 const fictionalSpace=searchSaqrBookCatalog('رشحلي رواية خيال عن النجوم',catalogs);
 assert.ok(fictionalSpace.some(b=>b.title==='أسطورة فى جانب النجوم'),
   'An explicit fantasy/story request may include the novel');
+const actualGenreRequest=searchSaqrBookCatalog('عايز رواية خيالية عن الفضاء',catalogs);
+assert.ok(actualGenreRequest.some(b=>b.title==='أسطورة فى جانب النجوم'),
+  'Genre requests should discover recorded star-themed fiction');
+assert.ok(!actualGenreRequest.some(b=>b.title==='Astronomy in Color'),
+  'Fiction searches must not be filled with astronomy reference titles');
+assert.ok(!actualGenreRequest.some(b=>b.title==='علم الفضاء للأطفال الفضوليين'),
+  'Fiction requests must not include astronomy non-fiction');
 const namedStory=searchSaqrBookCatalog('ابحث عن أسطورة فى جانب النجوم',catalogs);
 assert.ok(namedStory.some(b=>b.title==='أسطورة فى جانب النجوم'),
   'Named-book search must retain genuine fictional library holdings');
