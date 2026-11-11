@@ -15,7 +15,7 @@ import { supabase } from '../src/utils/supabase';
 import {nationalIdentityBooks, searchNationalIdentityBooks} from '../src/utils/nationalIdentityCatalog';
 import { stripSaqrEmoji } from '../src/utils/saqrText';
 import { isSaqrCatalogLookup, isSaqrRecommendationRequest, renderSaqrCatalogAnswer } from '../src/utils/saqrCatalogReply';
-import { formatSaqrRecommendationReply } from '../src/utils/saqrRecommendationPresentation';
+import { formatSaqrRecommendationReply, polishSaqrRecommendationProse } from '../src/utils/saqrRecommendationPresentation';
 import { withSaqrFollowUpQuestion, type SaqrFollowUpKind } from '../src/utils/saqrFollowUp';
 import { extractSaqrSpecificBookTitle, findSaqrBookTitleHoldings, saqrBookExpertContext, renderSaqrBookHoldingStatus, type SaqrExternalBookReference } from '../src/utils/saqrBookExpert';
 import { saqrExtraContext, isNewDiscussion, discussionOpening } from '../src/utils/saqrSafeEnhancements';
@@ -565,7 +565,7 @@ const SmartSearchPage: React.FC = () => {
       : foundBooks.length > 0
       ? recommendationTurn
         ? `EFIPS VERIFIED CATALOG CANDIDATES FOR A PERSONALIZED RECOMMENDATION: ${JSON.stringify(foundBooks.slice(0,10))}.
-RECOMMENDATION CONVERSATION, NOT A CATALOG DUMP: Speak like a thoughtful librarian in a natural written chat. Start with one short friendly sentence, then recommend only 2 or 3 relevant verified titles in separate short paragraphs or bullets, each with exact title and catalogued shelf/row or existing digital link. Never produce a Markdown table, HTML table, pipe-delimited columns, code fences, or a bold wrapper around the entire reply. Do not make up descriptions, image content, writing style, grade suitability, or a plot based on titles/categories; if a verified summary field is supplied you may use it carefully as a catalog summary, not as first-hand reading. Lead with the strongest match, and adapt to known user reading level without inventing one. If grade/language is unknown, make a useful initial suggestion first and ask at most one short, genuine follow-up question such as preferred reading language; no formal questionnaire. On an easier-book follow-up keep the topic and do not repeat the previous book list. No invented holdings, links or live availability. Avoid unnecessary headings and separators.`
+RECOMMENDATION CONVERSATION, NOT A CATALOG DUMP: You are Saqr, an AI librarian, not the library building. Never say 'بصفتي مكتبة المدرسة' or open with a ceremonial greeting, role declaration or repeated 'يا أستاذ'. Speak like a thoughtful librarian in a natural written chat. Start with one short friendly sentence, then recommend only 2 or 3 relevant verified titles in separate short paragraphs or bullets, each with exact title and catalogued shelf/row or existing digital link. Never produce a Markdown table, HTML table, pipe-delimited columns, code fences, or a bold wrapper around the entire reply. Differentiate science/non-fiction books about space from fictional stories set among stars: only suggest stories if the reader requests fiction. Do not make up descriptions, illustrations, narrative style, grade suitability, or a plot based on titles/categories; if a verified summary field is supplied you may use it carefully as a catalog summary, not as first-hand reading. Lead with the strongest match, and adapt to known user reading level without inventing one. If grade/language is unknown, make a useful initial suggestion first and ask at most one short, genuine follow-up question such as preferred reading language; no formal questionnaire. When a reader asks for an easier option, explain the specific change in selection in one short sentence and do not restart the greeting. Do not repeatedly request age/grade, and do not end every turn with a question. On an easier-book follow-up keep the topic and do not repeat the previous book list. No invented holdings, links or live availability. Avoid unnecessary headings and separators.`
         : `EFIPS LIBRARY RECORDS FOUND (relevance-ranked, bilingual topic matching): ${JSON.stringify(foundBooks)}.
 When the user asks for books, identify the matching titles exactly as recorded, grouped clearly by physical, Arabic digital and English digital library. For physical books provide the actual shelf (shelf) and row (row); for digital books provide their existing driveLink. Answer in the user's requested language. Do not invent titles, shelves, rows, summaries or links. Some physical-book subject tags are inferred from titles and may be approximate.`
       : 'EFIPS LIBRARY RECORDS FOUND: No verified matching records supplied. Do not invent a library title, shelf, row or digital link.';
@@ -578,7 +578,7 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         const rawName = locale === 'ar' ? (user.name_ar || user.name_en) : (user.name_en || user.name_ar);
         const name = formatFirstAndLastName(rawName || '');
         const type = localStorage.getItem('user_type') === 'student' ? 'Student' : (localStorage.getItem('user_type') === 'teacher' ? 'Teacher' : 'Administrator');
-        userContextInfo = `\nCurrent User Context: The person talking to you is a ${type} named "${name}". Use their name occasionally to be friendly.`;
+        userContextInfo = `\nCurrent User Context: The person talking to you is a ${type} named "${name}". Use their name sparingly when genuinely helpful; do not repeat greetings, titles, or their name across consecutive turns.`;
       } catch (error) {
         console.error('Could not parse current user context:', error);
       }
@@ -608,7 +608,9 @@ When the user asks for books, identify the matching titles exactly as recorded, 
       // age/plot claims. Repair only malformed recommendation replies using
       // the verified catalogue; keep all other AI and story paths untouched.
       if (recommendationTurn) {
-        reply = formatSaqrRecommendationReply(reply, foundBooks, locale === 'ar' ? 'ar' : 'en');
+        reply = polishSaqrRecommendationProse(
+          formatSaqrRecommendationReply(reply, foundBooks, locale === 'ar' ? 'ar' : 'en')
+        );
       }
 
       if (reply.includes('[WINNER:')) {
