@@ -42,11 +42,11 @@ const overbold=[
  '',
  '- **(ASTRONOMY) - المكتبة العادية، رف 6، صف 4: مرجع عن علم الفلك.**',
  '- **Astronomy in Color**',
-].join('\\n');
+].join('\n');
 const cleaned=polishSaqrRecommendationProse(overbold);
 assert.doesNotMatch(cleaned,/بصفتي مكتبة المدرسة/);
-assert.doesNotMatch(cleaned,/\\*\\*أهلاً بك|\\*\\*إليك ترشيحاتي|\\*\\*\\(ASTRONOMY\\)/);
-assert.match(cleaned,/\\*\\*Astronomy in Color\\*\\*/,'Book title styling is preserved');
+assert.doesNotMatch(cleaned,/\*\*أهلاً بك|\*\*إليك ترشيحاتي|\*\*\(ASTRONOMY\)/);
+assert.match(cleaned,/\*\*Astronomy in Color\*\*/,'Book title styling is preserved');
 assert.equal(polishSaqrRecommendationProse(ordinary),ordinary,
   'Already natural conversation and emphasis are unchanged');
 const page=readFileSync('pages/SmartSearchPage.tsx','utf8');
