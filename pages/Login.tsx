@@ -95,7 +95,7 @@ export default function Login() {
       // Clear any old manually-entered-email hint from a previous login attempt.
       // Google is the ONLY source of email; Supabase validates its identity.
       try { sessionStorage.removeItem('efips_oauth_school_email'); } catch { /* restricted storage */ }
-      await supabase.auth.signOut();
+      await supabase.auth.signOut({ scope: 'local' });
       const { error: googleError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
