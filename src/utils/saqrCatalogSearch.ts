@@ -165,7 +165,7 @@ const UAE_TERMS = String.raw`(?:الامارات(?:يه|ي)?|بالامارات|
 const UAE_GEO_PATTERN = new RegExp(String.raw`(?:^|[^\p{L}\p{N}])`+UAE_TERMS+String.raw`(?=$|[^\p{L}\p{N}])`,'u');
 const isUaeExplicit = (text:string):boolean=>UAE_GEO_PATTERN.test(text);
 
-const bookIntent = /(?:\b(?:books?|novels?|catalog(?:ue)?|library|booklist|read(?:ing)?|reference(?:s)?|recommend\w*|titles?)\b|كتب|كتاب|الكتب|المكتبه|مكتبه|فهرس|مراجع|روايات|اقترح|رشح|ترشح|للقراءه|للقراءة|عندكم|توجد كتب|هل يوجد)/;
+const bookIntent = /(?:\b(?:books?|novels?|catalog(?:ue)?|library|booklist|read(?:ing)?|reference(?:s)?|recommend\w*|titles?)\b|كتب|كتاب|الكتب|المكتبه|مكتبه|فهرس|مراجع|روايات|رواي[ةه]|قص[ةه]|اقترح|رشح|ترشح|للقراءه|للقراءة|عندكم|توجد كتب|هل يوجد)/;
 
 /** Preserve exact title/author matching even if the user didn't say "book". */
 export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=12):SaqrBookMatch[] => {
@@ -219,6 +219,9 @@ export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=
         const fictionalEvidence=fictionalBookSubject.test(subjectText)||
           fictionalSeries.test(seriesText)||fictionalSpaceTitle.test(titleText);
         if(!spaceFictionRequested && !explicitNamedBook && fictionalEvidence)continue;
+        // When the reader explicitly asks for a fictional space story, don't
+        // fill the suggestions with astronomy reference books.
+        if(spaceFictionRequested && !explicitNamedBook && !fictionalEvidence)continue;
         if(figurativeOrFictionalSpace.test(titleText)||(!directEvidence&&!trustedSubject))continue;
       }
       // Do not recommend unrelated Arabic heritage or general histories for UAE.

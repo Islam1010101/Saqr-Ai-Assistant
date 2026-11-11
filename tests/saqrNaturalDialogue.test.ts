@@ -32,6 +32,8 @@ const dialogue=saqrNaturalDialogueInstructions({
 assert.match(dialogue,/TUTORING/);
 assert.match(dialogue,/grade 5/);
 assert.match(dialogue,/one small diagnostic question/);
+assert.match(dialogue,/UAE Emirati dialect/);
+assert.match(dialogue,/formal Modern Standard Arabic/);
 const educator=saqrNaturalDialogueInstructions({
   question:'حضّر لي درس',history:[],role:'teacher',grade:null,locale:'ar',
   resolution:resolveSaqrBookFollowUp('حضّر لي درس',[])

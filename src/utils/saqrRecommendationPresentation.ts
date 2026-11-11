@@ -27,10 +27,37 @@ export function hasMalformedSaqrRecommendationTable(reply:string):boolean{
     /\|\s*(?:العنوان|الكتاب|title|book)\s*\|/i.test(text);
 }
 
+/**
+ * Protect real school locations. It is not enough for a shelf to exist:
+ * the exact title must also be associated with the shelf AND row in the
+ * verified catalogue records supplied for this recommendation.
+ */
+export function hasUnsupportedSaqrRecommendationShelf(
+  reply:string,matches:ReadonlyArray<SaqrBookMatch>
+):boolean{
+  const location=/(?:الرف|رف|shelf)\s*[:：#-]?\s*(\d{1,3})[\s\S]{0,75}?(?:الصف|صف|row)\s*[:：#-]?\s*(\d{1,3})/gi;
+  for(const claimed of String(reply||'').matchAll(location)){
+    const shelf=Number(claimed[1]),row=Number(claimed[2]);
+    const preceding=String(reply||'').slice(Math.max(0,(claimed.index||0)-230),(claimed.index||0)+claimed[0].length);
+    const verified=matches.some(book=>
+      book.shelf===shelf&&book.row===row&&
+      normalize(preceding).includes(normalize(book.title))
+    );
+    if(!verified)return true;
+  }
+  return false;
+}
+
 export function formatSaqrRecommendationReply(
   reply:string,matches:ReadonlyArray<SaqrBookMatch>,locale:'ar'|'en'
 ):string{
-  if(!hasMalformedSaqrRecommendationTable(reply)||!matches.length)return reply;
+  const invalidLocation=hasUnsupportedSaqrRecommendationShelf(reply,matches);
+  if(!hasMalformedSaqrRecommendationTable(reply)&&!invalidLocation)return reply;
+  if(!matches.length) return invalidLocation
+    ? (locale==='ar'
+      ? 'ما قدرت أأكد عنوان مطابق في الفهرس الإلكتروني الحالي، لكن هذا ما يعني إن الكتاب مب موجود فعليًا. خلنا نبحث باسم الكتاب أو المؤلف عشان نتأكد.'
+      : 'I could not verify a matching title in our current electronic catalogue. That does not rule out a physical copy. Let’s check the exact title or author.')
+    : reply;
   const normalizedReply=normalize(reply);
   const identified=matches.map(book=>({book,pos:normalizedReply.indexOf(normalize(book.title))}))
     .filter(x=>x.pos>=0).sort((a,b)=>a.pos-b.pos);
@@ -38,12 +65,12 @@ export function formatSaqrRecommendationReply(
   const selected=(identified.length?identified.map(x=>x.book):matches).slice(0,3);
   const arabic=locale==='ar';
   const head=arabic
-    ? 'لقيت لك شوية كتب عن الموضوع ده في فهارس مكتبة المدرسة. دول ممكن تبدأ بيهم:'
+    ? 'من فهرس المكتبة، هذي بعض الكتب اللي ممكن تناسب طلبك:'
     : 'I found a few books on this topic in our school catalogue. Here are some good starting points:';
   const items=selected.map(book=>{
     const where=book.shelf!==undefined
       ? (arabic
-        ? 'موجود في المكتبة الورقية، الرف '+book.shelf+'، الصف '+book.row
+        ? 'في المكتبة الورقية، الرف '+book.shelf+'، الصف '+book.row
         : 'Physical library, shelf '+book.shelf+', row '+book.row)
       : (arabic?'في المكتبة الرقمية':'In the digital library');
     const href=book.shelf===undefined?validLink(book.driveLink):null;
@@ -51,10 +78,10 @@ export function formatSaqrRecommendationReply(
     return '- **'+escapeMd(book.title)+'** — '+where+link+'.';
   });
   const note=arabic
-    ? 'الترشيحات مبنية على بيانات الفهرس، مش مراجعة لمحتوى كل كتاب، وما بتأكدش توافر النسخة للاستعارة دلوقتي.'
+    ? 'هذي ترشيحات من بيانات الفهرس، وما تعني تأكيد توافر النسخة للإعارة الحين.'
     : 'These suggestions use catalogue records, not a verified reading of every book or live loan availability.';
   const question=arabic
-    ? 'تحب تقرأ بالعربي ولا بالإنجليزي؟'
+    ? 'تفضّل كتب بالعربي ولا بالإنجليزي؟'
     : 'Would you prefer to read in Arabic or English?';
   return [head,items.join('\n'),note,question].join('\n\n');
 }
