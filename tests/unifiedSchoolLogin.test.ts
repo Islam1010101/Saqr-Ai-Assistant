@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { normalizeSchoolEmail, resolveSchoolLoginRole } from '../supabase/functions/google-school-login/roleSelection.ts';
+import { classifySchoolLoginFailure, verifySchoolLoginWithRetry } from '../src/utils/schoolLoginRetry.ts';
 
 assert.equal(normalizeSchoolEmail('  STUDENT@FALCON-SCHOOL.COM '),'student@falcon-school.com');
 assert.equal(resolveSchoolLoginRole('123456@falcon-school.com',null,null),'student');
@@ -50,14 +51,21 @@ assert.ok(login.includes("redirectTo: window.location.origin + '/?efips_google_s
 assert.ok(app.includes('GoogleSchoolReturn'));
 assert.ok(app.includes('<GoogleSchoolReturn />'));
 assert.ok(app.includes('<GoogleTeacherReturn />'),'Allow in-flight old teacher sign-ins');
-assert.ok(callback.includes("supabase.auth.getUser(session.access_token)"));
+assert.ok(callback.includes("supabase.auth.getUser(accessToken)"));
 assert.ok(callback.includes("supabase.functions.invoke('google-school-login'"));
 assert.ok(callback.includes("sessionStorage.removeItem('efips_oauth_school_email')"));
 assert.ok(!callback.includes("sessionStorage.getItem('efips_oauth_school_email')"), 'No typed email comparison after Google OAuth');
 assert.ok(!callback.includes('wrong_account'), 'Old manual-email error state removed');
 assert.ok(callback.includes("localStorage.setItem('current_user'"));
 assert.ok(callback.includes("localStorage.setItem('user_type'"));
-assert.ok(callback.includes("await supabase.auth.signOut()"));
+assert.ok(callback.includes("await supabase.auth.signOut({scope: 'local'})"));
+assert.ok(login.includes("await supabase.auth.signOut({ scope: 'local' })"));
+assert.ok(callback.includes("verifySchoolLoginWithRetry"));
+assert.ok(callback.includes("setStep('retryable')"));
+assert.ok(callback.includes("setRetryKey(value => value + 1)"));
+assert.ok(server.includes('lookupWithRetry("staff_accounts"'));
+assert.ok(server.includes('lookupWithRetry("teacher_profile"'));
+assert.ok(server.includes('lookupWithRetry("student_profile"'));
 assert.ok(server.includes("await auth.auth.getUser(token)"));
 assert.ok(server.includes('identity.provider === "google"'));
 assert.ok(server.includes('identity.identity_data?.email_verified === true'));
@@ -69,3 +77,38 @@ assert.ok(server.includes('efips_verified_school_readers'));
 assert.ok(server.includes('login_logs'));
 assert.ok(!server.includes('req.json()'),'Server must not accept client-supplied roles or emails');
 console.log('PASS: unified school OAuth role resolution, student/staff/admin isolation, original profile keys and backward compatibility');
+
+
+// Behavioral regressions: transient 503 recovers without a second Google sign-in.
+const httpError = (status: number, code: string) => ({
+  context: new Response(JSON.stringify({code}), {
+    status, headers: {'Content-Type': 'application/json'},
+  }),
+});
+assert.equal(await classifySchoolLoginFailure(httpError(503,'DIRECTORY_UNAVAILABLE'),null),'RETRYABLE');
+assert.equal(await classifySchoolLoginFailure(httpError(403,'ACCOUNT_DISABLED'),null),'BLOCKED');
+assert.equal(await classifySchoolLoginFailure(httpError(403,'ACCOUNT_NOT_REGISTERED'),null),'UNREGISTERED');
+assert.equal(await classifySchoolLoginFailure(httpError(403,'SCHOOL_GOOGLE_REQUIRED'),null),'SCHOOL');
+assert.equal(await classifySchoolLoginFailure(httpError(401,'AUTH_INVALID'),null),'AUTH');
+let transientAttempts = 0;
+const verified = await verifySchoolLoginWithRetry(async () => {
+  transientAttempts++;
+  return transientAttempts === 1
+    ? {data: null, error: httpError(503,'DIRECTORY_UNAVAILABLE')}
+    : {data: {role: 'admin'}, error: null};
+}, async () => {});
+assert.deepEqual(verified,{role:'admin'});
+assert.equal(transientAttempts,2);
+let rejectedAttempts = 0;
+await assert.rejects(() => verifySchoolLoginWithRetry(async () => {
+  rejectedAttempts++;
+  return {data: null, error: httpError(403,'ACCOUNT_DISABLED')};
+}, async () => {}),/BLOCKED/);
+assert.equal(rejectedAttempts,1,'Disabled accounts cannot be retried into access');
+let exhaustedAttempts = 0;
+await assert.rejects(() => verifySchoolLoginWithRetry(async () => {
+  exhaustedAttempts++;
+  return {data: null, error: httpError(503,'DIRECTORY_UNAVAILABLE')};
+}, async () => {}),/RETRYABLE/);
+assert.equal(exhaustedAttempts,4,'Retries must be bounded');
+console.log('PASS: temporary school login recovery and strict permanent-denial handling');

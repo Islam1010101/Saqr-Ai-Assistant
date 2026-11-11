@@ -14,6 +14,30 @@ const allowedOrigin = (origin: string | null) => !!origin && (
   /^https:\/\/[a-z0-9-]+\.vercel\.app$/.test(origin)
 );
 
+type DirectoryResponse<T> = {data: T | null; error: {code?: string} | null; status: number};
+async function lookupWithRetry<T>(
+  stage: string,
+  lookup: () => PromiseLike<DirectoryResponse<T>>,
+): Promise<DirectoryResponse<T>> {
+  let result = await lookup();
+  if (result.error) {
+    const transient = result.status === 0 || result.status >= 500 ||
+      result.error.code === "PGRST000";
+    // Safe operational diagnostics: no email, student IDs, tokens or query data.
+    console.error("EFIPS school directory lookup failure", {
+      stage, status: result.status, code: result.error.code || "UNKNOWN", retry: transient,
+    });
+    if (transient) {
+      await new Promise(resolve => setTimeout(resolve, 250));
+      result = await lookup();
+      if (result.error) console.error("EFIPS school directory lookup retry failed", {
+        stage, status: result.status, code: result.error.code || "UNKNOWN",
+      });
+    }
+  }
+  return result;
+}
+
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get("origin");
   const headers: Record<string,string> = {
@@ -57,8 +81,8 @@ Deno.serve(async (req: Request) => {
 
   const admin = createClient(url, serviceKey, {auth:{persistSession:false,autoRefreshToken:false}});
   const [controlResult, staffResult] = await Promise.all([
-    admin.from("efips_account_access_controls").select("disabled_at,login_role").eq("email",email).maybeSingle(),
-    admin.from("efips_google_staff_accounts").select("teacher_id,role").eq("email",email).maybeSingle(),
+    lookupWithRetry("access_controls", () => admin.from("efips_account_access_controls").select("disabled_at,login_role").eq("email",email).maybeSingle()),
+    lookupWithRetry("staff_accounts", () => admin.from("efips_google_staff_accounts").select("teacher_id,role").eq("email",email).maybeSingle()),
   ]);
   if (controlResult.error || staffResult.error)
     return respond(503, {code:"DIRECTORY_UNAVAILABLE"});
@@ -72,8 +96,8 @@ Deno.serve(async (req: Request) => {
     if (!staff?.teacher_id || staff.role !== role)
       return respond(403, {code:"ACCOUNT_NOT_REGISTERED"});
     const [teacherResult, sourceResult] = await Promise.all([
-      admin.from("teachers").select("id,teacher_id,name_ar,name_en,created_at").eq("teacher_id",staff.teacher_id).maybeSingle(),
-      admin.from("efips_google_staff_source").select("name_ar,name_en").eq("email",email).maybeSingle(),
+      lookupWithRetry("teacher_profile", () => admin.from("teachers").select("id,teacher_id,name_ar,name_en,created_at").eq("teacher_id",staff.teacher_id).maybeSingle()),
+      lookupWithRetry("staff_source", () => admin.from("efips_google_staff_source").select("name_ar,name_en").eq("email",email).maybeSingle()),
     ]);
     if (teacherResult.error || sourceResult.error)
       return respond(503, {code:"DIRECTORY_UNAVAILABLE"});
@@ -91,15 +115,15 @@ Deno.serve(async (req: Request) => {
   // The student ID is derived only from the provider-verified institutional
   // address, never the form value. Match an actual school roster row.
   const studentId = email.split("@")[0];
-  const {data:student,error:studentError} = await admin.from("students")
+  const {data:student,error:studentError} = await lookupWithRetry("student_profile", () => admin.from("students")
     .select("id,student_id,name_ar,name_en,grade,points,created_at")
-    .eq("student_id",studentId).maybeSingle();
+    .eq("student_id",studentId).maybeSingle());
   if (studentError) return respond(503, {code:"DIRECTORY_UNAVAILABLE"});
   if (!student) return respond(403, {code:"ACCOUNT_NOT_REGISTERED"});
 
-  const {data:existing,error:mappingError} = await admin
+  const {data:existing,error:mappingError} = await lookupWithRetry("student_mapping", () => admin
     .from("efips_verified_school_readers").select("school_user_id,user_type")
-    .eq("auth_user_id",user.id).maybeSingle();
+    .eq("auth_user_id",user.id).maybeSingle());
   if (mappingError) return respond(503, {code:"DIRECTORY_UNAVAILABLE"});
   if (existing && (existing.user_type !== "student" || existing.school_user_id !== studentId))
     return respond(403, {code:"ACCOUNT_LINK_CONFLICT"});
@@ -110,8 +134,8 @@ Deno.serve(async (req: Request) => {
     if (insertError && insertError.code !== "23505")
       return respond(503, {code:"DIRECTORY_UNAVAILABLE"});
     if (insertError) {
-      const {data:latest,error:checkError} = await admin.from("efips_verified_school_readers")
-        .select("school_user_id,user_type").eq("auth_user_id",user.id).maybeSingle();
+      const {data:latest,error:checkError} = await lookupWithRetry("mapping_conflict", () => admin.from("efips_verified_school_readers")
+        .select("school_user_id,user_type").eq("auth_user_id",user.id).maybeSingle());
       if (checkError || latest?.user_type !== "student" || latest.school_user_id !== studentId)
         return respond(403, {code:"ACCOUNT_LINK_CONFLICT"});
     }
