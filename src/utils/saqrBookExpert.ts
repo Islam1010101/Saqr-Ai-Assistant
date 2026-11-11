@@ -13,6 +13,10 @@ const normalize = (text: string): string => String(text || '')
 
 const stopTitle = /^(?:عن|حول|في|ل|لل|بال|عن\s+موضوع|للأطفال|للاطفال|للمعلمين|للطلبة|من|علم|حول\s+موضوع|about|on|for|in|to|some|any|books|more|recommended)\s/i;
 const generalRequests = /(?:رشح|اقترح|توصيات|أقترح|أفضل\s+كتاب|احسن\s+كتاب|recommend|suggest|best\s+books?|books about|novels about|كتب عن|روايات عن|كتاب عن|كتاب في موضوع|كتاب لتعلم|كتاب لتعليم|book about|a book about|books for|كتاب مناسب|كتب مناسبة|كتب للاطفال|لخص|تلخيص|ملخص|summari[sz]e|summary|ناقشني|نتناقش|discuss|discussion)/i;
+// Generic requests for a genre/topic are not named titles, even when they start
+// with "رواية" or "قصة". Otherwise "رواية خيالية عن الفضاء" becomes the
+// invented specific title "خيالية عن الفضاء" and triggers a false holdings check.
+const genreTopicRequest = /(?:كتاب|رواي[ةه]|قص[ةه]|books?|novels?|stor(?:y|ies))\s+(?:(?:خيالي[ةه]?|علمي[ةه]?|مصور[ةه]?|سهل[ةه]?|مبسط[ةه]?|قصير[ةه]?|مشوق[ةه]?|science[-\s]*fiction|fantasy|fiction|easy|short)\s+)*(?:عن|في|حول|about|on)\s+/i;
 const suffixes = /(?:[,،؛]\s*|\s+)(?:هل\s+(?:هو\s+)?(?:موجود|متوفر)|(?:موجود|متوفر)\s+(?:عندكم|في\s+المكتبة)|هل\s+عندكم|is\s+(?:it|this)\s+available|do\s+you\s+have\s+(?:it|this))[\s\S]*$/i;
 
 export function extractSaqrSpecificBookTitle(question: string): string | null {
