@@ -1,4 +1,6 @@
 import { DIGITAL_SERIES_VOLUMES } from '../src/data/digitalSeriesVolumes.js';
+import { PHOTO_SERIES_FOLDERS_20261111 } from '../src/data/photoSeriesFolders20261111.js';
+import { EXTRA_MAN_OF_IMPOSSIBLE_PHOTO_BOOKS_20261111 } from '../src/data/extraManOfImpossibleCatalog20261111.js';
 import {NEW_PHOTO_ONLY_ARABIC_BOOKS} from '../src/data/photoOnlyArabicCatalog20261110';
 import {ADDITIONAL_ARABIC_PHOTO_BOOKS} from '../src/data/additionalArabicPhotoBooks20261110';
 import {MIGRATED_ARABIC_PHOTO_SOURCES} from '../src/data/migratedArabicPhotoSources20261110';
@@ -157,7 +159,7 @@ function suggestedAudience(lang: 'ar'|'en', book: DigitalLibraryBook): 'children
   return CHILDREN_AUDIENCE_IDS.has(key) ? 'children' : TEENS_AUDIENCE_IDS.has(key) ? 'teens' : 'adults';
 }
 
-/** Expand collection cards to one card per real PDF, retaining all standalone books. */
+/** Expand series to their stable volume IDs; prefer fully verified photographed editions over legacy PDF links. */
 function expandDigitalSeries(books: DigitalLibraryBook[], lang: 'ar'|'en'): DigitalLibraryBook[] {
   return books.flatMap<DigitalLibraryBook>(book => {
     const readingAudience = book.reviewedAgeGroup || book.readingAudience || suggestedAudience(lang, book);
@@ -167,7 +169,9 @@ function expandDigitalSeries(books: DigitalLibraryBook[], lang: 'ar'|'en'): Digi
       ...book,
       id: String(book.id) + '-' + volume.fileId,
       title: volume.title,
-      driveLink: 'https://drive.google.com/file/d/' + volume.fileId + '/view',
+      driveLink: PHOTO_SERIES_FOLDERS_20261111[String(book.id) + '-' + volume.fileId]
+        ? 'https://drive.google.com/drive/folders/' + PHOTO_SERIES_FOLDERS_20261111[String(book.id) + '-' + volume.fileId]
+        : 'https://drive.google.com/file/d/' + volume.fileId + '/view',
       series: book.title,
       seriesOrder: volume.order ?? undefined,
       readingAudience,
@@ -199,9 +203,10 @@ export const ARABIC_LIBRARY_DATABASE: DigitalLibraryBook[] = [
   ...expandDigitalSeries(ARABIC_LIBRARY_PHOTO_SEED, 'ar'),
   ...NEW_PHOTO_ONLY_ARABIC_BOOKS.filter(book=>!String(book.id).startsWith('NI_PH_')),
   ...ADDITIONAL_ARABIC_PHOTO_BOOKS,
+  ...(EXTRA_MAN_OF_IMPOSSIBLE_PHOTO_BOOKS_20261111 as DigitalLibraryBook[]),
 ];
-// Preserve the original seed and the 412 established series PDFs; append
-// only distinct, editor-mapped records from the new school-domain Drive folder.
+// Retain all stable IDs while replacing the 170 verified series PDF URLs with photo folders.
+// New special editions are distinct and exclude empty, partial, or duplicate uploads.
 const normalizeDigitalTitle = (text:string)=>text.normalize('NFKC').toLowerCase()
   .replace(/[^\p{L}\p{N}]+/gu,'').trim();
 const knownEnglishTitles = new Set(ENGLISH_LIBRARY_SEED.map(b=>normalizeDigitalTitle(b.title)));

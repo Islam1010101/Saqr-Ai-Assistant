@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { ARABIC_LIBRARY_DATABASE, ENGLISH_LIBRARY_DATABASE } from '../api/digitalBookData.ts';
 import { DIGITAL_SERIES_VOLUMES } from '../src/data/digitalSeriesVolumes.js';
+import './newSeriesPhotoCoverage20261111.test.ts';
 
 import { readerByteRange, readerFileId, readPublicPdfRange, PdfSourceError, publicDownloadConfirmation } from '../src/server/digitalBookPdf.ts';
 import { clampPdfPage, parsePdfPage, pdfReadingStorageKey, readPdfState, writePdfState } from '../src/utils/pdfReadingState.ts';
@@ -17,13 +18,13 @@ console.log('PASS: Vercel server import paths reference emitted JavaScript, not 
 const allDigitalBooks = [...ARABIC_LIBRARY_DATABASE,...ENGLISH_LIBRARY_DATABASE];
 assert.equal(Object.keys(DIGITAL_SERIES_VOLUMES).length,10);
 assert.equal(Object.values(DIGITAL_SERIES_VOLUMES).reduce((sum,books)=>sum+books.length,0),412);
-assert.equal(ARABIC_LIBRARY_DATABASE.length,495);
+assert.equal(ARABIC_LIBRARY_DATABASE.length,520);
 assert.equal(ARABIC_LIBRARY_DATABASE.filter(b=>b.title==='الأعمال الكاملة للشاعر صلاح جاهين').length,1,'Do not duplicate the original photographed Salah Jahin book');
 assert.equal(ENGLISH_LIBRARY_DATABASE.filter(b=>!String(b.id).startsWith('EN_NEW_20261109_')).length,54, 'Keep original English digital holdings');
 assert.equal(ENGLISH_LIBRARY_DATABASE.filter(b=>/^EN_NEW_20261109_(?:0[1-9]|1[0-4])$/.test(String(b.id))).length,14, 'Keep the initial 14 new school-domain titles');
 assert.equal(ENGLISH_LIBRARY_DATABASE.filter(b=>/^EN_NEW_20261109_(?:1[5-9]|2[0-3])$/.test(String(b.id))).length,9, 'Prepare nine supplementary English Drive books including two new picture books');
 assert.equal(ENGLISH_LIBRARY_DATABASE.length,77);
-assert.equal(allDigitalBooks.length,572); // 495 Arabic + 77 English records; heritage titles remain separately catalogued.
+assert.equal(allDigitalBooks.length,597); // 520 Arabic + 77 English records; heritage titles remain separately catalogued.
 assert.ok(allDigitalBooks.every(b=>/^https:\/\/drive\.google\.com\/(?:file\/d\/|drive\/folders\/)/.test(b.driveLink)),
   'All books need a real school Drive file or photo-folder source');
 assert.equal(ARABIC_LIBRARY_DATABASE.filter(b=>Boolean(b.audioId)).length,23,'Keep all original audio summaries');
@@ -35,7 +36,7 @@ assert.equal(readerFileId('digital:ar:'+greenVolume.id), greenVolume.driveLink.m
 const wimpy = ENGLISH_LIBRARY_DATABASE.find(b=>b.series==='Diary Of A Wimpy');
 assert.ok(wimpy);
 assert.equal(wimpy.readingAudience,'children');
-console.log('PASS: 412 original per-volume records, 572 digital library cards, suggested audiences, audio integrity and server allowlisting');
+console.log('PASS: 412 original per-volume records, 597 digital library cards, suggested audiences, audio integrity and server allowlisting');
 
 assert.equal(readerFileId('https://example.com/private.pdf'), null);
 assert.equal(readerFileId('digital:ar:AR_1'), null); // collection, not a single PDF

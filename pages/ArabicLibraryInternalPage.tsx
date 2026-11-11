@@ -10,6 +10,8 @@ import DigitalLibraryDialog from '../src/components/DigitalLibraryDialog';
 import DigitalBookReader from '../src/components/DigitalBookReader';
 /** Keep the much larger page manifest out of the initial library bundle. */
 const VerifiedArabicPhotoBookReader = React.lazy(() => import('../src/components/VerifiedArabicPhotoBookReader'));
+/** Load only the selected new series photo manifest; keep the main library bundle small. */
+const NewArabicSeriesPhotoReader20261111 = React.lazy(() => import('../src/components/NewArabicSeriesPhotoReader20261111'));
 /** The 39 new photo-only records have no matching PDFs; open their complete JPEGs. */
 const PhotoOnlyArabicBookReader = React.lazy(() => import('../src/components/PhotoOnlyArabicBookReader'));
 const VERIFIED_ARABIC_PHOTO_BOOK_IDS = new Set([
@@ -18,6 +20,7 @@ const VERIFIED_ARABIC_PHOTO_BOOK_IDS = new Set([
   ...MIGRATED_ARABIC_PHOTO_SOURCES.map(source=>source.id),
   ...SERIES_ARABIC_PHOTO_BOOK_IDS,
 ]);
+const NEW_SERIES_PHOTO_BOOK_ID_SET = new Set(NEW_SERIES_PHOTO_IDS);
 import { digitalReaderSource } from '../src/utils/digitalReaderSource';
 import { useDigitalReadingProgress } from '../src/utils/useDigitalReadingProgress';
 import { pdfProgressPercent, type PdfReadingState } from '../src/utils/pdfReadingState';
@@ -26,6 +29,7 @@ import { pdfProgressPercent, type PdfReadingState } from '../src/utils/pdfReadin
 import { ARABIC_LIBRARY_DATABASE, type DigitalLibraryBook } from '../api/digitalBookData';
 import { MIGRATED_ARABIC_PHOTO_SOURCES } from '../src/data/migratedArabicPhotoSources20261110';
 import { SERIES_ARABIC_PHOTO_BOOK_IDS } from '../src/data/seriesArabicPhotoIndex20261110';
+import { NEW_SERIES_PHOTO_IDS } from '../src/data/newSeriesPhotoRouting20261111';
 export { ARABIC_LIBRARY_DATABASE } from '../api/digitalBookData';
 
 const translations = {
@@ -191,6 +195,7 @@ const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void
     // Let all verified images open inside the same in-site reader as the English library.
     const isPhotoOnlyBook = /^(?:AR_PH_|AR_NG_|NI_PH_)/.test(String(book.id));
     const hasInternalReader = isPhotoOnlyBook
+        || NEW_SERIES_PHOTO_BOOK_ID_SET.has(String(book.id))
         || VERIFIED_ARABIC_PHOTO_BOOK_IDS.has(String(book.id))
         || Boolean(digitalReaderSource(book.driveLink));
     if (readerOpen) {
@@ -198,6 +203,11 @@ const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void
         if (isPhotoOnlyBook) {
             return <React.Suspense fallback={<div role="status" className="p-8 text-center font-bold text-emerald-700 dark:text-emerald-200">{locale === 'ar' ? 'جار تجهيز صفحات الكتاب...' : 'Preparing book pages...'}</div>}>
                 <PhotoOnlyArabicBookReader book={book} locale={locale} onBack={onBack} onClose={onClose} />
+            </React.Suspense>;
+        }
+        if (NEW_SERIES_PHOTO_BOOK_ID_SET.has(String(book.id))) {
+            return <React.Suspense fallback={<div role="status" className="p-8 text-center font-bold text-emerald-700 dark:text-emerald-200">{locale === 'ar' ? 'جار تجهيز صفحات الكتاب...' : 'Preparing book pages...'}</div>}>
+                <NewArabicSeriesPhotoReader20261111 book={book} locale={locale} onBack={onBack} onClose={onClose} />
             </React.Suspense>;
         }
         if (VERIFIED_ARABIC_PHOTO_BOOK_IDS.has(String(book.id))) {

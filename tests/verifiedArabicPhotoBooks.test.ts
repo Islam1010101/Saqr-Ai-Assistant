@@ -29,7 +29,7 @@ const expected:Record<string,{pages:number;pdf:string}> = {
 const manifests=[VERIFIED_ARABIC_IMAGE_PAGES_A,VERIFIED_ARABIC_IMAGE_PAGES_B,VERIFIED_NATIONAL_IDENTITY_IMAGE_PAGES];
 const pagesById=Object.assign({},...manifests);
 assert.deepEqual(Object.keys(pagesById).sort(),Object.keys(expected).sort());
-assert.equal(ARABIC_LIBRARY_DATABASE.length,495,'Preserve previous Arabic titles and include three independent nonduplicate additional editions');
+assert.equal(ARABIC_LIBRARY_DATABASE.length,520,'Preserve original records and add 25 unique, complete special editions');
 assert.equal(NATIONAL_IDENTITY_DIGITAL_BOOKS.length,9,'Do not duplicate heritage books');
 let total=0;
 for(const [id,meta] of Object.entries(expected)){
