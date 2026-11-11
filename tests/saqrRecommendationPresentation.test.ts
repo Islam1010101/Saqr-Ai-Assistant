@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {formatSaqrRecommendationReply,hasMalformedSaqrRecommendationTable,polishSaqrRecommendationProse}
+import {formatSaqrRecommendationReply,hasMalformedSaqrRecommendationTable,polishSaqrRecommendationProse,hasUnsupportedSaqrRecommendationShelf}
   from '../src/utils/saqrRecommendationPresentation.ts';
 
 const books=[
