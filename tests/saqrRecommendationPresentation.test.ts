@@ -67,7 +67,9 @@ assert.match(physicallyPossible,/ما يعني إن الكتاب مب موجود
 assert.equal(hasUnsupportedSaqrRecommendationShelf(ordinary,books),false,
   'Verified title and shelf/row must remain unchanged');
 const page=readFileSync('pages/SmartSearchPage.tsx','utf8');
-assert.ok(page.includes('formatSaqrRecommendationReply(reply, foundBooks'));
+assert.ok(page.includes('formatSaqrRecommendationReply('));
+assert.ok(page.includes('annotateSaqrExternalRecommendations(reply'),
+  'External suggestions are explicitly labelled before recommendation fallback');
 assert.ok(page.includes('polishSaqrRecommendationProse('));
 assert.ok(page.includes('Never produce a Markdown table'));
 assert.ok(page.includes('if (recommendationTurn)'),'Fallback is restricted to recommendation turns');
