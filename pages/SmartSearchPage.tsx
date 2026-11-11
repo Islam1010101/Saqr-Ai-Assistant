@@ -16,6 +16,7 @@ import {nationalIdentityBooks, searchNationalIdentityBooks} from '../src/utils/n
 import { stripSaqrEmoji } from '../src/utils/saqrText';
 import { isSaqrCatalogLookup, isSaqrRecommendationRequest, renderSaqrCatalogAnswer } from '../src/utils/saqrCatalogReply';
 import { formatSaqrRecommendationReply, polishSaqrRecommendationProse } from '../src/utils/saqrRecommendationPresentation';
+import { annotateSaqrExternalRecommendations } from '../src/utils/saqrExternalRecommendations';
 import { withSaqrFollowUpQuestion, type SaqrFollowUpKind } from '../src/utils/saqrFollowUp';
 import { extractSaqrSpecificBookTitle, findSaqrBookTitleHoldings, saqrBookExpertContext, renderSaqrBookHoldingStatus, type SaqrExternalBookReference } from '../src/utils/saqrBookExpert';
 import { saqrExtraContext, isNewDiscussion, discussionOpening } from '../src/utils/saqrSafeEnhancements';
@@ -563,10 +564,10 @@ const SmartSearchPage: React.FC = () => {
     const searchContext = expertContext
       ? 'EFIPS LIBRARY RECORDS FOUND: EXACT TITLE-MATCHED HOLDINGS ONLY: '
         +JSON.stringify(namedBookHoldings)+'. Other fuzzy topic matches are NOT evidence that the named book is owned by the school.'
-      : foundBooks.length > 0
+      : (foundBooks.length > 0 || recommendationTurn)
       ? recommendationTurn
         ? `EFIPS VERIFIED CATALOG CANDIDATES FOR A PERSONALIZED RECOMMENDATION: ${JSON.stringify(foundBooks.slice(0,10))}.
-RECOMMENDATION CONVERSATION, NOT A CATALOG DUMP: You are Saqr, an AI librarian, not the library building. Never say 'بصفتي مكتبة المدرسة' or open with a ceremonial greeting, role declaration or repeated 'يا أستاذ'. Speak like a thoughtful librarian in a natural written chat. Start with one short friendly sentence, then recommend only 2 or 3 relevant verified titles in separate short paragraphs or bullets, each with exact title and catalogued shelf/row or existing digital link. Never produce a Markdown table, HTML table, pipe-delimited columns, code fences, or a bold wrapper around the entire reply. Differentiate science/non-fiction books about space from fictional stories set among stars: only suggest stories if the reader requests fiction. Do not make up descriptions, illustrations, narrative style, grade suitability, or a plot based on titles/categories; if a verified summary field is supplied you may use it carefully as a catalog summary, not as first-hand reading. Lead with the strongest match, and adapt to known user reading level without inventing one. If grade/language is unknown, make a useful initial suggestion first and ask at most one short, genuine follow-up question such as preferred reading language; no formal questionnaire. When a reader asks for an easier option, explain the specific change in selection in one short sentence and do not restart the greeting. Do not repeatedly request age/grade, and do not end every turn with a question. On an easier-book follow-up keep the topic and do not repeat the previous book list. No invented holdings, links or live availability. Avoid unnecessary headings and separators.`
+RECOMMENDATION CONVERSATION, NOT A CATALOG DUMP: You are Saqr, an AI librarian, not the library building. Never say 'بصفتي مكتبة المدرسة' or open with a ceremonial greeting, role declaration or repeated 'يا أستاذ'. Speak like a thoughtful librarian in a natural written chat. Start with one short friendly sentence, then suggest 2 or 3 relevant books in separate short paragraphs or bullets. PRIORITIZE verified EFIPS physical/digital holdings when they fit the request. You MAY also recommend real published books known from general knowledge even when the school has no matching title record. Clearly label each such book as an EXTERNAL suggestion with no confirmed matching record in the CURRENT EFIPS PHYSICAL OR DIGITAL catalogue; do not represent electronic catalogue absence as proof a physical copy cannot exist. For verified physical holdings give only their recorded shelf/row; for verified digital holdings give only their recorded library link. For an external suggestion NEVER supply an EFIPS shelf, row, school availability, or school PDF/link. If there are no verified topic matches, honestly say so but still suggest one or two real published books when confident; if unsure of a real title, do not make it up. Never produce a Markdown table, HTML table, pipe-delimited columns, code fences, or a bold wrapper around the entire reply. Differentiate science/non-fiction books about space from fictional stories set among stars: only suggest stories if the reader requests fiction. Do not make up descriptions, illustrations, narrative style, grade suitability, or a plot based on titles/categories; if a verified summary field is supplied you may use it carefully as a catalog summary, not as first-hand reading. Lead with the strongest match, and adapt to known user reading level without inventing one. If grade/language is unknown, make a useful initial suggestion first and ask at most one short, genuine follow-up question such as preferred reading language; no formal questionnaire. When a reader asks for an easier option, explain the specific change in selection in one short sentence and do not restart the greeting. Do not repeatedly request age/grade, and do not end every turn with a question. On an easier-book follow-up keep the topic and do not repeat the previous book list. No invented holdings, links or live availability. Avoid unnecessary headings and separators.`
         : `EFIPS LIBRARY RECORDS FOUND (relevance-ranked, bilingual topic matching): ${JSON.stringify(foundBooks)}.
 When the user asks for books, identify the matching titles exactly as recorded, grouped clearly by physical, Arabic digital and English digital library. For physical books provide the actual shelf (shelf) and row (row); for digital books provide their existing driveLink. Answer in the user's requested language. Do not invent titles, shelves, rows, summaries or links. Some physical-book subject tags are inferred from titles and may be approximate.`
       : 'EFIPS LIBRARY RECORDS FOUND: No verified matching records supplied. Do not invent a library title, shelf, row or digital link.';
@@ -610,7 +611,13 @@ When the user asks for books, identify the matching titles exactly as recorded, 
       // the verified catalogue; keep all other AI and story paths untouched.
       if (recommendationTurn) {
         reply = polishSaqrRecommendationProse(
-          formatSaqrRecommendationReply(reply, foundBooks, locale === 'ar' ? 'ar' : 'en')
+          formatSaqrRecommendationReply(
+            annotateSaqrExternalRecommendations(reply, [
+              ...bookData, ...ARABIC_LIBRARY_DATABASE, ...NATIONAL_IDENTITY_DIGITAL_BOOKS,
+              ...ENGLISH_LIBRARY_DATABASE
+            ], locale === 'ar' ? 'ar' : 'en'),
+            foundBooks, locale === 'ar' ? 'ar' : 'en'
+          )
         );
       }
 
