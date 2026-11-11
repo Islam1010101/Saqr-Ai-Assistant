@@ -21,7 +21,7 @@ const suffixes = /(?:[,،؛]\s*|\s+)(?:هل\s+(?:هو\s+)?(?:موجود|متوف
 
 export function extractSaqrSpecificBookTitle(question: string): string | null {
   const text = String(question || '').trim();
-  if (!text || text.length > 350 || /https?:\/\//i.test(text) || generalRequests.test(text)) return null;
+  if (!text || text.length > 350 || /https?:\/\//i.test(text) || generalRequests.test(text) || genreTopicRequest.test(text)) return null;
   // Requests to learn about a recognizable work are explanations, not
   // requests to list whatever matched loosely in the three catalogs.
   // Require a known bilingual title when the reader omits the word "book";
