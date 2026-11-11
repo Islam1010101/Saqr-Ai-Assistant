@@ -15,6 +15,7 @@ const PHOTO_PAGE_LOADERS:Readonly<Record<string,()=>Promise<PageModule>>>={
  b07:()=>import('../data/englishPhotoPages/b07'),
  b08:()=>import('../data/englishPhotoPages/b08'),
  b09:()=>import('../data/englishPhotoPages/b09'),
+ b10:()=>import('../data/englishPhotoPages/b10'),
 };
 
 /** Only the chosen book's page manifest is fetched. Existing immersive glass reader stays untouched. */
