@@ -173,6 +173,15 @@ export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=
   const needsUaeEvidence = isUaeExplicit(normalizedQuery);
   const tokens = [...new Set(wordsOf(question).filter(word=>word.length>=3 && !STOP_WORDS.has(word)))];
   const hasBookIntent = bookIntent.test(normalizedQuery) || isCrossLanguageTitleQuery(question);
+  // A request for astronomy/outer space should not be broadened into generic science,
+  // programming or figurative uses of "space". Leave exact interpretive-book
+  // searches untouched so named catalog holdings remain findable.
+  const astronomyRequest = hasBookIntent &&
+    /(?:الفضاء|فضاء|الفلك|فلك|الكواكب|كواكب|النجوم|نجوم|المجرات|مجرات|space|astronom|planet|galax|cosmos|universe|solar system)/i.test(normalizedQuery) &&
+    !/(?:التاويل|التاويلي|التأويل)/i.test(normalizedQuery);
+  const astronomyTitle = /(?:الفضاء|فضاء|الفلك|فلك|كواكب|نجوم|مجرات|رواد الفضاء|space|astronom|astrophys|planet|galax|cosmos|universe|solar system|telescope)/i;
+  const astronomyDigitalSubject = /(?:astronomy|space science|astrophys|solar system|علم الفلك|علوم الفضاء|الفلك والفضاء|الكواكب والمجرات)/i;
+  const figurativeOrFictionalSpace = /(?:الفضاء التأويلي|الفضاء التاويلي|space war|space warfare|deep space nine)/i;
   const aliasHints = TITLE_ALIASES.filter(pair=>pair.arabic.test(normalizedQuery)||pair.english.test(normalizedQuery));
   const detectedTopics = hasBookIntent ? TOPICS.filter(topic=>topic.query.test(normalizedQuery)) : [];
   const detectedThemes = hasBookIntent ? THEMES.filter(theme=>theme.query.test(normalizedQuery)) : [];
@@ -196,6 +205,11 @@ export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=
       const subjectText=normalize(subject);
       const seriesText=origin.source==='physical' ? '' : normalize(book.series);
       const descriptionText=normalize(book.summary);
+      if(astronomyRequest){
+        const directEvidence=astronomyTitle.test(titleText)||astronomyTitle.test(seriesText);
+        const trustedSubject=origin.source!=='physical'&&astronomyDigitalSubject.test(subjectText);
+        if(figurativeOrFictionalSpace.test(titleText)||(!directEvidence&&!trustedSubject))continue;
+      }
       // Do not recommend unrelated Arabic heritage or general histories for UAE.
       if(needsUaeEvidence){
         // Physical catalog subject tags are inferred from the title by

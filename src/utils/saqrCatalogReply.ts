@@ -7,8 +7,12 @@ const summarize = /(?:لخص|تلخيص|ملخص|ملخّص|اشرح\s+(?:لي\s
 const discussion = /(?:ناقشني|نتناقش|نناقش|مناقش[ةه]|خلينا نتكلم|discuss|discussion|debate)/i;
 // Learning about a named book is a librarian explanation, not a catalog list.
 const learnMore = /(?:اعرف|أعرف|معرفه|معرفة|معلومات|تفاصيل|نبذه|نبذة|عرفني|احكيلي|اخبرني|أخبرني|tell me|learn more|know more|more (?:information|details) about)/i;
+// Recommendations are a librarian conversation, not a raw catalogue dump.
+// Keep explicit "find/search/show" requests on the verified catalogue fast path.
+const recommend = /(?:رشح(?:لي|لى|\s*لي|\s*لى)?|ترشح|ترشيح|اقترح|اقتراح|توصي[ةه]|توصيات|نصيحة\s*بكتاب|\brecommend\w*\b|\bsuggest\w*\b)/i;
+export const isSaqrRecommendationRequest = (query:string):boolean => recommend.test(query);
 export const isSaqrCatalogLookup = (query:string):boolean =>
-  (overview.test(query)||isCrossLanguageTitleQuery(query)) && !summarize.test(query) && !discussion.test(query) && !learnMore.test(query);
+  (overview.test(query)||isCrossLanguageTitleQuery(query)) && !isSaqrRecommendationRequest(query) && !summarize.test(query) && !discussion.test(query) && !learnMore.test(query);
 
 export const selectSaqrCatalogScope=(question:string):'physical'|'arabic'|'english'|'all'=>{
   if(/المكتبة\s*(?:الرقمية\s*)?(?:ال[إا]نجليزية|ال[إا]نكليزية)|english\s+(?:digital\s+)?library|english\s+(?:ebooks?|catalog)/i.test(question))return 'english';
