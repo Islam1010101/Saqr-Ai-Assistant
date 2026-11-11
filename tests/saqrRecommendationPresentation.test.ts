@@ -22,7 +22,7 @@ assert.match(repaired,/الرف 35، الصف 2/);
 assert.match(repaired,/Knowledge Encyclopedia Space!/);
 assert.match(repaired,/https:\/\/drive\.google\.com\/file\/d\/exampleSpaceID\/view/);
 assert.match(repaired,/Astronomy in Color/);
-assert.equal((repaired.match(/تحب تقرأ بالعربي ولا بالإنجليزي؟/g)||[]).length,1);
+assert.equal((repaired.match(/تفضّل كتب بالعربي ولا بالإنجليزي؟/g)||[]).length,1);
 assert.ok(repaired.indexOf('في الفضاء الفسيح')<repaired.indexOf('Knowledge Encyclopedia'),
   'AI-selected title order is retained');
 const ordinary='ممكن تبدأ بـ **Astronomy in Color**، موجود على الرف 15، الصف 2. تحب تقرأ بالعربي؟';
@@ -49,6 +49,23 @@ assert.doesNotMatch(cleaned,/\*\*أهلاً بك|\*\*إليك ترشيحاتي|\
 assert.match(cleaned,/\*\*Astronomy in Color\*\*/,'Book title styling is preserved');
 assert.equal(polishSaqrRecommendationProse(ordinary),ordinary,
   'Already natural conversation and emphasis are unchanged');
+const falselyLocated='أرشّح رواية «رحلة إلى القمر» لجول فيرن. موقعها: الرف 14، الصف 3.';
+const nearbyDifferentBook=[...books,{
+  title:'Journey to the Center of the Earth',author:'Jules Verne',subject:'Adventure Stories',
+  pageLocation:'المكتبة العادية (Physical Library)',shelf:14,row:3,matchBasis:'title'
+}];
+assert.equal(hasUnsupportedSaqrRecommendationShelf(falselyLocated,nearbyDifferentBook),true,
+  'Having a different Jules Verne book at shelf 14 row 3 cannot verify this title');
+const checked=formatSaqrRecommendationReply(falselyLocated,nearbyDifferentBook,'ar');
+assert.doesNotMatch(checked,/رحلة إلى القمر|الرف 14، الصف 3/,
+  'The AI cannot make a catalogue claim for an unverified book-title/shelf pair');
+assert.match(checked,/في الفضاء الفسيح/,'Verified catalogue suggestions are retained');
+const physicallyPossible=formatSaqrRecommendationReply(falselyLocated,[],'ar');
+assert.match(physicallyPossible,/الفهرس الإلكتروني/);
+assert.match(physicallyPossible,/ما يعني إن الكتاب مب موجود فعليًا/,
+  'An absent electronic record must not deny a real uncatalogued physical copy');
+assert.equal(hasUnsupportedSaqrRecommendationShelf(ordinary,books),false,
+  'Verified title and shelf/row must remain unchanged');
 const page=readFileSync('pages/SmartSearchPage.tsx','utf8');
 assert.ok(page.includes('formatSaqrRecommendationReply(reply, foundBooks'));
 assert.ok(page.includes('polishSaqrRecommendationProse('));
