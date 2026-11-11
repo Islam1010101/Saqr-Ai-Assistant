@@ -219,6 +219,9 @@ export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=
         const fictionalEvidence=fictionalBookSubject.test(subjectText)||
           fictionalSeries.test(seriesText)||fictionalSpaceTitle.test(titleText);
         if(!spaceFictionRequested && !explicitNamedBook && fictionalEvidence)continue;
+        // When the reader explicitly asks for a fictional space story, don't
+        // fill the suggestions with astronomy reference books.
+        if(spaceFictionRequested && !explicitNamedBook && !fictionalEvidence)continue;
         if(figurativeOrFictionalSpace.test(titleText)||(!directEvidence&&!trustedSubject))continue;
       }
       // Do not recommend unrelated Arabic heritage or general histories for UAE.
