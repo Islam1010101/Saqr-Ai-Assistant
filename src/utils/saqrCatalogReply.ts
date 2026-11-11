@@ -9,6 +9,7 @@ const discussion = /(?:ناقشني|نتناقش|نناقش|مناقش[ةه]|خ�
 const learnMore = /(?:اعرف|أعرف|معرفه|معرفة|معلومات|تفاصيل|نبذه|نبذة|عرفني|احكيلي|اخبرني|أخبرني|tell me|learn more|know more|more (?:information|details) about)/i;
 // Recommendations are a librarian conversation, not a raw catalogue dump.
 // Keep explicit "find/search/show" requests on the verified catalogue fast path.
+const broadGenreRequest = /(?:(?:عايز|عاوز|أبغي|ابغي|أبغى|أبي|ابي|أريد|اريد|محتاج|تبا)\s+(?:لي\s+)?(?:كتاب|رواي[ةه]|قص[ةه]|كتب|روايات)\s+(?:(?:خيالي[ةه]?|علمي[ةه]?|مصور[ةه]?|سهل[ةه]?|مبسط[ةه]?|مشوق[ةه]?)\s+)*(?:عن|في|حول)\s+|(?:i want|i need|looking for)\s+(?:a\s+|some\s+)?(?:books?|novels?|stories)\s+(?:(?:science fiction|fantasy|easy|short)\s+)*(?:about|on|set in)\s+)/i;
 const recommend = /(?:رشح(?:لي|لى|\s*لي|\s*لى)?|ترشح|ترشيح|اقترح|اقتراح|توصي[ةه]|توصيات|نصيحة\s*بكتاب|\brecommend\w*\b|\bsuggest\w*\b)/i;
 export const isSaqrRecommendationRequest = (query:string):boolean => recommend.test(query);
 export const isSaqrCatalogLookup = (query:string):boolean =>
