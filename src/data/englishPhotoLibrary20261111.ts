@@ -11,6 +11,7 @@ import { EN_PHOTO_B06 } from './englishPhotoMeta/b06';
 import { EN_PHOTO_B07 } from './englishPhotoMeta/b07';
 import { EN_PHOTO_B08 } from './englishPhotoMeta/b08';
 import { EN_PHOTO_B09 } from './englishPhotoMeta/b09';
+import { EN_PHOTO_B10 } from './englishPhotoMeta/b10';
 
 const AUTHOR_BY_TITLE:Readonly<Record<string,string>>={
   "Super Shark Encyclopedia": "DK",
@@ -60,7 +61,7 @@ const AUTHOR_BY_TITLE:Readonly<Record<string,string>>={
 };
 const CHILDRENS_TITLES=new Set(['Super Shark Encyclopedia','The Magical Yet','The 7 Habits of Happy Kids','DK Children\'s Encyclopedia','Dog Man: Sneak Peek at New Movie','Barry\'s Buzzy World','The Sand Witch','The Lion King','Brother Bear']);
 const ADULT_TITLES=new Set(['Understanding Comics','Artist\'s Painting Techniques','What Is the Name of This Book?','The 5 Second Rule','Atomic Habits','How to Win Friends and Influence People']);
-const ALL_ENGLISH_PHOTO_BOOKS=[EN_PHOTO_B01,EN_PHOTO_B02,EN_PHOTO_B03,EN_PHOTO_B04,EN_PHOTO_B05,EN_PHOTO_B06,EN_PHOTO_B07,EN_PHOTO_B08,EN_PHOTO_B09].flat();
+const ALL_ENGLISH_PHOTO_BOOKS=[EN_PHOTO_B01,EN_PHOTO_B02,EN_PHOTO_B03,EN_PHOTO_B04,EN_PHOTO_B05,EN_PHOTO_B06,EN_PHOTO_B07,EN_PHOTO_B08,EN_PHOTO_B09,EN_PHOTO_B10].flat();
 export const ENGLISH_PHOTO_LIBRARY_20261111=ALL_ENGLISH_PHOTO_BOOKS.map(b=>({
  ...b, author:AUTHOR_BY_TITLE[b.title]||b.author,
  readingAudience:CHILDRENS_TITLES.has(b.title)?'children':ADULT_TITLES.has(b.title)?'adults':b.readingAudience,
