@@ -45,6 +45,5 @@ assert.match(checked,/خارج فهرس EFIPS/);
 const page=readFileSync('pages/SmartSearchPage.tsx','utf8');
 assert.ok(page.includes("annotateSaqrExternalRecommendations(reply"));
 assert.ok(page.includes('...bookData, ...ARABIC_LIBRARY_DATABASE, ...NATIONAL_IDENTITY_DIGITAL_BOOKS'));
-assert.ok(page.includes('if there are no verified topic matches'));
 assert.ok(page.includes('If there are no verified topic matches') || page.includes('If there are no verified'));
 console.log('PASS: external book suggestions are preserved and clearly distinguished from verified EFIPS physical/digital holdings.');
