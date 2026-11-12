@@ -1,62 +1,10 @@
-/** Verified direct PDF file IDs from the ten original EFIPS Google Drive series folders.
+/** Verified direct PDF file IDs from the the Arabic EFIPS Google Drive series folders.
  * Source folders stay unchanged in Drive. Each volume has its own stable reading key.
  * Titles come from PDF filenames; age groups, levels and page counts are not inferred.
  */
 /** @typedef {{fileId: string, title: string, order: number | null}} DigitalSeriesVolume */
 /** @type {Record<string, DigitalSeriesVolume[]>} */
 export const DIGITAL_SERIES_VOLUMES = {
-  "38": [
-    {
-      "fileId": "16LGHNPV2Ckoc0NUr9a4VinDy7dhOPY6C",
-      "title": "Diary of A Wimpy Kid (1)",
-      "order": 1
-    },
-    {
-      "fileId": "17w6NLyMFX8kXOvem3xqhtNQ8q1r-6y4J",
-      "title": "Rodrick Rules (2)",
-      "order": 2
-    },
-    {
-      "fileId": "1WrM43dmZu_vr4kGuSwFUGLiBaH-tOS1R",
-      "title": "Cabin Fever (6)",
-      "order": 6
-    },
-    {
-      "fileId": "1z0W4VhjKH-RWmysytSUbzR6tgx5cmry8",
-      "title": "The Third Wheel (7)",
-      "order": 7
-    },
-    {
-      "fileId": "10fsESHKDYF62ULsG7JUlndcyD2id50lv",
-      "title": "Hard Luck (8)",
-      "order": 8
-    },
-    {
-      "fileId": "1jUonzBR8xaQSPnYLeWoIwJUz152He1Cj",
-      "title": "The Long Haul (9)",
-      "order": 9
-    },
-    {
-      "fileId": "1FNi2C2-FQCxpL_EBxt-zCQlcznom6tBh",
-      "title": "Old School (10)",
-      "order": 10
-    },
-    {
-      "fileId": "1chryme5U_OmPiCakjtSLkXUetB5LP-sM",
-      "title": "Double Down (11)",
-      "order": 11
-    },
-    {
-      "fileId": "1WjxgBn1uFJ1Zg5-Bs5zrEFi40UO2zLMx",
-      "title": "The Getaway (12)",
-      "order": 12
-    },
-    {
-      "fileId": "1N8HdBLTCOVaeH0tg5buWR_N8NkPOzG8N",
-      "title": "Meldown (13)",
-      "order": 13
-    }
-  ],
   "AR_1": [
     {
       "fileId": "1pf0MvdcLiBQlp7iSNIjbDOKRtcl8WMyU",
