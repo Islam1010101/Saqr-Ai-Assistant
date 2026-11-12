@@ -84,7 +84,7 @@ assert.equal(fetches,1);
 console.log('PASS: external bibliographic metadata is optionally verified via an allowlisted Open Library host, not EFIPS holdings');
 
 const page=readFileSync('pages/SmartSearchPage.tsx','utf8');
-assert.ok(page.includes("if(preIntent==='none' && isSaqrCatalogLookup(userQuery) && (explicitCatalogSearch || !namedBookTitle))"),
+assert.ok(page.includes("if(librarySearchIntent && preIntent==='none' && isSaqrCatalogLookup(userQuery) && (explicitCatalogSearch || !namedBookTitle))"),
   'Broad catalog searches keep their old immediate response');
 assert.ok(page.includes('resolveSaqrBookFollowUp(userQuery, messages)'),
   'Natural short-turn book resolution is wired into the main chat page');

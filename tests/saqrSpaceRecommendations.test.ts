@@ -76,10 +76,10 @@ const listing=renderSaqrCatalogAnswer('ابحث عن كتب الفضاء',matche
 assert.ok(listing.includes('نتائج البحث في فهارس مكتبة EFIPS'),'Explicit search still shows verified catalog');
 
 const page=readFileSync('pages/SmartSearchPage.tsx','utf8');
-assert.ok(page.includes('recommendationTurn = isSaqrRecommendationRequest(userQuery)'));
+assert.ok(page.includes('recommendationTurn = librarySearchIntent && (isSaqrRecommendationRequest(userQuery)'));
 assert.ok(page.includes("Never say 'بصفتي مكتبة المدرسة'"));
 assert.ok(page.includes('Differentiate science/non-fiction books about space'));
-assert.ok(page.includes('Use their name sparingly'));
+assert.ok(page.includes('Use the true name naturally once'));
 assert.ok(page.includes('RECOMMENDATION CONVERSATION, NOT A CATALOG DUMP'));
 assert.ok(page.includes('linkedBookTurn.continued'),'Recommendation follow-ups retain the topic');
 assert.ok(page.includes("content: reply"),'Generated recommendations are not given a canned extra question');

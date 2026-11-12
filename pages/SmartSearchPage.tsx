@@ -22,19 +22,20 @@ import { extractSaqrSpecificBookTitle, findSaqrBookTitleHoldings, saqrBookExpert
 import { saqrExtraContext, isNewDiscussion, discussionOpening } from '../src/utils/saqrSafeEnhancements';
 import {detectSaqrIntroduction,saqrIntroductionReply} from '../src/utils/saqrIntroductionReplies';
 import { resolveSaqrBookFollowUp, saqrNaturalDialogueInstructions } from '../src/utils/saqrNaturalDialogue';
+import { isSaqrLibrarySearchIntent, isSaqrCreativeTurn } from '../src/utils/saqrIntentRouter';
 
 // --- بروتوكول عقل صقر ---
 const SAQR_ELITE_PROMPT = `
 Identity: You are "Saqr" (صقر), the official Elite AI Librarian and Educational Expert of Emirates Falcon International Private School (EFIPS).
 
 General Rules & Information:
-1. PRE-SEARCH REQUIREMENT: Before answering any book query, you MUST first search the Physical Library Index, the Arabic Digital Library, and the English Digital Library.
+1. INTENT-FIRST LIBRARY SEARCH: Consult the EFIPS physical and digital catalogues ONLY when the user is actually looking for school books by title, topic or author, wants a book recommendation, or asks for an item's availability/location. Never show book holdings or catalogue checks while chatting, giving educational explanations, teaching, or co-writing a story.
 2. SCHOOL INFO: If asked about the school (Emirates Falcon International Private School) or when it was established, provide the information and share the official website: www.flacon-school.com
 3. LIBRARIAN & CREATOR INFO: If asked about the current librarian or the creator of this system, clearly state that it is "Islam Soliman" (إسلام سليمان). For communication, provide his email: islam.ahmed@falcon-school.com
 
 Instructions for Books & Search:
-1. If the user asks about a book, ALWAYS check the "EFIPS LIBRARY RECORDS FOUND" context provided at the end of this prompt.
-2. If found, tell them EXACTLY where it is based on the data. For Physical Library (المكتبة العادية), mention the shelf or row number if available. For Digital Libraries, specify if it's the Arabic or English Digital Library.
+1. When the user explicitly looks for school book holdings, use EFIPS LIBRARY RECORDS FOUND as the sole source for availability and locations. When the user wants normal discussion, creativity, a certificate or a lesson, reply naturally without any EFIPS catalogue status.
+2. Only on an explicit library lookup, if a book is found tell them EXACTLY where it is based on the data. For Physical Library (المكتبة العادية), mention the shelf or row number if available. For Digital Libraries, specify if it's the Arabic or English Digital Library.
 3. If the user searches in Arabic for an English book (e.g., "هاري بوتر"), use your AI knowledge to recognize they mean "Harry Potter", and answer accordingly.
 
 Instructions for Teacher Support & McGraw-Hill Curricula (أوامر تحضير المعلمين والتحضير المفصل):
@@ -73,19 +74,15 @@ Formatting Rules for Responses:
 - For Arabic CHAT, write in authentic, light UAE Emirati dialect blended with clear accessible Arabic (examples: «هلا»، «شو تفضّل؟»، «تبا»، «هالكتاب»، «خلّنا نشوف»، «عندنا»). Keep it subtle, friendly, age-appropriate and readable, not exaggerated or stereotyped. Do not mix in Egyptian or other regional dialects. Preserve exact book titles, names, citations, and bibliographic wording from recorded sources. Use Modern Standard Arabic for formal educational content, quotations, worksheets, lesson plans, and certificates. In English, keep natural professional English.
 
 Instructions for "Little Author" Challenge (STRICT RULES):
-1. UAE THEMES: Start stories inspired by UAE identity (Space, Pearl Diving, Desert Heritage, Falcons, Zayed's legacy).
-2. INTERACTION: Write ONLY ONE short sentence to continue the plot naturally.
-   - DO NOT give hints. DO NOT suggest what happens next.
-   - DO NOT ask "Are you finished?", "What happens next?", or ANY questions. Just write your sentence and wait.
-   - Use plain, clear text. DO NOT use weird symbols, markdown asterisks, or formatting in the story.
-3. SILENT CORRECTION: Check the student's text for spelling/grammar errors. ONLY IF there is an actual mistake, politely point it out and provide the correct word, then write your sentence to continue the story. If there are NO errors, JUST continue the story. NEVER ask if there are errors.
-4. ENDING THE STORY:
-   - Wait patiently until the student explicitly types "انتهت" or "finished".
-   - DO NOT output the WINNER tag yet.
-   - Praise their story, then EXPLICITLY ASK: "ما هو اسمك الكامل؟ وما هو مستواك الدراسي؟" (What is your full name and grade level?).
-5. ISSUING THE CERTIFICATE:
-   - ONLY AFTER the student replies with their Name and Grade, output this EXACT format at the very end of your message:
-   [WINNER: {Student Name} | Grade: {Student Grade} | Content: {Write a beautifully summarized, grammatically flawless, plain-text summary of the full story they wrote. No weird symbols.}]
+1. STORY IS NOT A CATALOGUE SEARCH. Never show EFIPS book holdings or verification when co-writing, correcting, or celebrating a student's story.
+2. ROLE AND IDENTITY. Address a signed-in student by their first name naturally at the opening; do not repeatedly greet or name them. For a teacher, assist in facilitating student creativity without calling the teacher a child. No invented school profile.
+3. LANGUAGE. In an Arabic interface, conversational encouragement and error feedback are gentle UAE Emirati Arabic; every authored STORY SENTENCE and certificate summary must be entirely in correct Modern Standard Arabic (الفصحى). In an English interface, chat, story and feedback are all English. No mixing dialect into story narration or student-authored text.
+4. IMAGINATION. Co-create inventive, coherent scenes with surprising discoveries, subtle magic, mystery, curiosity, lively sensory detail, and meaningful choices. Draw on UAE heritage or places where natural, but follow the student's chosen setting; don't force an Emirati landmark into every scene.
+5. ONE SENTENCE. Contribute ONE short vivid story sentence each turn, then wait for the student's turn. No extra plot alternatives, automatic questions, book lists, or verbose commentary.
+6. SPELLING/GRAMMAR. Examine ONLY the student's most recent writing, and identify actual, demonstrable spelling or grammar mistakes. IF there is a real mistake, briefly show "incorrect → correct" in friendly Emirati Arabic (or English), then add your one new formal-Arabic story sentence (or English). If there is NO mistake, add ONLY your story sentence; no invented corrections, no rewriting the student's work.
+7. FINISHING. Wait for the student to explicitly say "انتهت" or "finished", then celebrate briefly. Ask for name and grade only if missing from the signed-in student profile; for teachers request the actual student's details before issuing a student certificate.
+8. CERTIFICATE. Only after a completed story and known student name/grade, end your response with this exact tag, on one line, with a concise faithful 70-110 word formal-Arabic or English synopsis and no line breaks/Markdown inside:
+   [WINNER: {Student Name} | Grade: {Student Grade} | Content: {Story summary}]
 
 Style: Natural, respectful, light Emirati Arabic in conversational chat; English when the user writes in English. For certificates, formal school documents and structured academic content use correct Modern Standard Arabic (الفصحى) or English. NO emojis in the certificate content.
 `;
@@ -240,12 +237,12 @@ const SmartSearchPage: React.FC = () => {
 
         if (storedType === 'student') {
           welcomeMessage = locale === 'ar'
-            ? `أهلاً بك يا صديقي المبدع **${name}**! \n\nأنا "صقر"، المساعد الذكي لمكتبتك. هل نؤلف قصة ممتعة معاً اليوم، أم تبحث عن كتاب محدد لتقرأه؟`
-            : `Welcome my creative friend **${name}**! 🎓\n\nI'm 'Saqr', your AI Librarian. Shall we co-author a story today, or are you looking for a specific book?`;
+            ? `هلا **${name}**! أنا صقر، حياك الله. شو رايك نبتكر قصة فيها مغامرة، أو نختار لك كتاب على ذوقك؟`
+            : `Welcome, **${name}**! I'm Saqr. Want to create an imaginative story together or find something great to read?`;
         } else if (storedType === 'teacher' || storedType === 'admin') {
           welcomeMessage = locale === 'ar'
-            ? `أهلاً بك أستاذي الفاضل **${name}**! \n\nأنا "صقر" في خدمتك. كيف يمكنني مساعدتك اليوم؟`
-            : `Welcome esteemed teacher **${name}**! 👨‍🏫\n\nI am 'Saqr', at your service. How can I assist you today ?`;
+            ? `هلا **${name}**، حياك الله! أنا صقر، أقدر أساعدك في التحضير والأنشطة والمصادر التعليمية. شو تحب نبدأ فيه؟`
+            : `Welcome, **${name}**! I'm Saqr. I can help with lessons, creative activities and library resources. What shall we work on?`;
         }
       } catch (error) {
         console.error('Could not parse current user:', error);
@@ -257,7 +254,7 @@ const SmartSearchPage: React.FC = () => {
 
     if (!welcomeMessage) {
       welcomeMessage = locale === 'ar'
-        ? 'أهلاً بك! أنا "صقر"، المساعد الذكي لمكتبة المدرسة. هل نؤلف قصة معاً اليوم، أم تبحث عن كتاب محدد؟'
+        ? 'هلا ومرحبا! أنا صقر، نقدر نتعلم ونتخيل ونكتب قصص مع بعض. شو تحب نسوي اليوم؟'
         : "Welcome! I'm 'Saqr', your AI Librarian. Shall we co-author a story today, or are you looking for a specific book?";
     }
     setMessages([{ role: 'assistant', content: welcomeMessage }]);
@@ -278,20 +275,25 @@ const SmartSearchPage: React.FC = () => {
     try {
       if(document.fonts?.ready) await document.fonts.ready;
       await Promise.all(Array.from(certificate.querySelectorAll('img')).map(img => img.complete ? Promise.resolve() : new Promise<void>(resolve => { img.addEventListener('load',()=>resolve(),{once:true});img.addEventListener('error',()=>resolve(),{once:true});setTimeout(resolve,2200); })));
-      const canvas=await html2canvas(certificate,{scale:2,backgroundColor:'#ffffff',useCORS:true,allowTaint:false,logging:false,width:794,height:Math.max(1123,certificate.scrollHeight)});
-      const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true});
-      const perPage=Math.floor(canvas.width*(297/210));
-      const pages=Math.ceil(canvas.height/perPage);
-      for(let i=0;i<pages;i++){
-        if(i>0)pdf.addPage();
-        const start=i*perPage;
-        const h=Math.min(perPage,canvas.height-start);
-        const slice=document.createElement('canvas');slice.width=canvas.width;slice.height=perPage;
-        const context=slice.getContext('2d');if(!context)throw new Error('Canvas unavailable');
-        context.fillStyle='#ffffff';context.fillRect(0,0,slice.width,slice.height);
-        context.drawImage(canvas,0,start,canvas.width,h,0,0,canvas.width,h);
-        pdf.addImage(slice.toDataURL('image/jpeg',0.93),'JPEG',0,0,210,297,undefined,'FAST');
+      // One fixed A4 canvas and exactly one PDF page. The old scrollHeight-
+      // based slicing could create a blank second page due to a tiny overflow.
+      const summary = certificate.querySelector('.cert-summary p') as HTMLElement | null;
+      const summaryFrame = certificate.querySelector('.cert-summary') as HTMLElement | null;
+      const originalSummaryFont = summary?.style.fontSize ?? '';
+      if(summary){
+        for(let font=16;font>=10 && summaryFrame && summaryFrame.scrollHeight>summaryFrame.clientHeight;font--){
+          summary.style.fontSize=font+'px';
+        }
       }
+      let canvas:HTMLCanvasElement;
+      try {
+        canvas=await html2canvas(certificate,{scale:2,backgroundColor:'#ffffff',
+          useCORS:true,allowTaint:false,logging:false,width:794,height:1123});
+      } finally {
+        if(summary)summary.style.fontSize=originalSummaryFont;
+      }
+      const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true});
+      pdf.addImage(canvas.toDataURL('image/jpeg',0.94),'JPEG',0,0,210,297,undefined,'FAST');
       const filename=String(winnerData?.name||'Certificate').replace(/[\\/:*?"<>|]/g,'_').slice(0,50);
       pdf.save('EFIPS_Little_Author_'+filename+'.pdf');
     } catch(error) {
@@ -357,12 +359,14 @@ const SmartSearchPage: React.FC = () => {
   const handleSendMessage = async () => {
     if (input.trim() === '' || isLoading) return;
     const userQuery = input.trim();
-    // Keep the user's actual message intact; use earlier book context only for discovery.
-    const linkedBookTurn = resolveSaqrBookFollowUp(userQuery, messages);
-    const recommendationTurn = isSaqrRecommendationRequest(userQuery) ||
+    const librarySearchIntent = isSaqrLibrarySearchIntent(userQuery, messages);
+    const creativeTurn = isSaqrCreativeTurn(userQuery, messages) && !librarySearchIntent;
+    // Only genuine library discovery inherits earlier catalogue context.
+    const linkedBookTurn = librarySearchIntent ? resolveSaqrBookFollowUp(userQuery, messages) : {searchQuery:userQuery,anchoredTurn:null,continued:false};
+    const recommendationTurn = librarySearchIntent && (isSaqrRecommendationRequest(userQuery) ||
       (linkedBookTurn.continued &&
         isSaqrRecommendationRequest(linkedBookTurn.anchoredTurn || '') &&
-        /(?:اسهل|أسهل|اصعب|أصعب|غيره|غيرها|حاجة|اقصر|أقصر|اطول|أطول|easier|simpler|harder|another|similar|shorter)/i.test(userQuery));
+        /(?:اسهل|أسهل|اصعب|أصعب|غيره|غيرها|حاجة|اقصر|أقصر|اطول|أطول|easier|simpler|harder|another|similar|shorter)/i.test(userQuery)));
     // Only a final, context-aware question is added to displayed answers.
     // Storytelling, certificates, and the content of prior functions remain intact.
     const finishSaqrReply = (answer: string, kind: SaqrFollowUpKind = 'auto') =>
@@ -413,7 +417,7 @@ const SmartSearchPage: React.FC = () => {
     }
 
     // Exact national-identity collection request: show only recorded physical books.
-    if(/(?:ركن|جناح)\s+الهوي[ةه]\s+الوطني[ةه]|national\s+identity\s+(?:(?:book\s+)?corner|pavilion)|(?:كتب|books)\s+(?:الرف\s+|on\s+shelf\s+)41/i.test(userQuery)){
+    if(librarySearchIntent && /(?:ركن|جناح)\s+الهوي[ةه]\s+الوطني[ةه]|national\s+identity\s+(?:(?:book\s+)?corner|pavilion)|(?:كتب|books)\s+(?:الرف\s+|on\s+shelf\s+)41/i.test(userQuery)){
       const clean=userQuery.replace(/(?:ركن|جناح)\s+الهوي[ةه]\s+الوطني[ةه]|national\s+identity\s+(?:(?:book\s+)?corner|pavilion)|(?:كتب|books)\s+(?:الرف\s+|on\s+shelf\s+)41/ig,'').replace(/^(?:كتب|ابحث|عن|في|ابحث عن|show|books|find)\s*/i,'').trim();
       const books=clean?searchNationalIdentityBooks(clean):nationalIdentityBooks;
       const ar=locale==='ar';
@@ -423,11 +427,11 @@ const SmartSearchPage: React.FC = () => {
     }
     // Retrieve verified catalog records across Arabic/English subjects and titles.
     // This changes only the book context; Saqr's system prompt and chat flow stay intact.
-    const foundBooks = searchSaqrBookCatalog(linkedBookTurn.searchQuery, {
+    const foundBooks = librarySearchIntent ? searchSaqrBookCatalog(linkedBookTurn.searchQuery, {
       physical: bookData,
       arabic: [...ARABIC_LIBRARY_DATABASE, ...NATIONAL_IDENTITY_DIGITAL_BOOKS],
       english: ENGLISH_LIBRARY_DATABASE
-    });
+    }) : [];
 
     // Offer varied national-identity plots without touching the strict author story flow.
     if(isStoryBeginning(userQuery) && /(?:أفكار|افكار|اقترح|اختار|مواضيع|variety|ideas|topics)/i.test(userQuery)){
@@ -442,7 +446,7 @@ const SmartSearchPage: React.FC = () => {
     // A named book should receive the knowledge of an experienced librarian
     // EVEN if EFIPS does not catalogue it. Broad topic/catalog searches retain
     // their exact existing fast path and all school data remains authoritative.
-    const namedBookTitle=preIntent==='none'
+    const namedBookTitle=librarySearchIntent && preIntent==='none'
       ? (extractSaqrSpecificBookTitle(userQuery) || (linkedBookTurn.continued && linkedBookTurn.anchoredTurn
         ? extractSaqrSpecificBookTitle(linkedBookTurn.anchoredTurn) : null)) : null;
     const namedBookHoldings=namedBookTitle
@@ -450,7 +454,7 @@ const SmartSearchPage: React.FC = () => {
     // Explicit "find this title" requests should show verified holdings, not
     // an unrelated book explanation. "Tell me more" uses the expert path.
     const explicitCatalogSearch=/(?:^|\s)(?:دورلي|دور\s*لي|دور|ابحث(?:لي)?|إبحث(?:لي)?|وريني|هاتلي|search|find|look\s+for|show\s+me)(?=\s|$)/i.test(userQuery);
-    if(preIntent==='none' && isSaqrCatalogLookup(userQuery) && (explicitCatalogSearch || !namedBookTitle)){
+    if(librarySearchIntent && preIntent==='none' && isSaqrCatalogLookup(userQuery) && (explicitCatalogSearch || !namedBookTitle)){
       const answer=renderSaqrCatalogAnswer(userQuery,foundBooks,locale==='ar'?'ar':'en');
       setMessages(prev=>[...prev,{role:'assistant',content:finishSaqrReply(answer,'catalog')}]);
       setSaqrState('idle');
@@ -561,7 +565,9 @@ const SmartSearchPage: React.FC = () => {
     const expertContext=namedBookTitle && learningIntent==='none'
       ? saqrBookExpertContext(namedBookTitle,namedBookHoldings,externalBookReference) : '';
 
-    const searchContext = expertContext
+    const searchContext = !librarySearchIntent
+      ? 'NO CATALOGUE SEARCH INTENT: Do not mention school book holdings, availability, shelf numbers or a library record verification section. Answer the actual educational, conversational, lesson or creative-writing request directly.'
+      : expertContext
       ? 'EFIPS LIBRARY RECORDS FOUND: EXACT TITLE-MATCHED HOLDINGS ONLY: '
         +JSON.stringify(namedBookHoldings)+'. Other fuzzy topic matches are NOT evidence that the named book is owned by the school.'
       : (foundBooks.length > 0 || recommendationTurn)
@@ -579,8 +585,9 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         const user = JSON.parse(storedUser);
         const rawName = locale === 'ar' ? (user.name_ar || user.name_en) : (user.name_en || user.name_ar);
         const name = formatFirstAndLastName(rawName || '');
-        const type = localStorage.getItem('user_type') === 'student' ? 'Student' : (localStorage.getItem('user_type') === 'teacher' ? 'Teacher' : 'Administrator');
-        userContextInfo = `\nCurrent User Context: The person talking to you is a ${type} named "${name}". Use their name sparingly when genuinely helpful; do not repeat greetings, titles, or their name across consecutive turns.`;
+        const roleNow = safeReader.role;
+        const type = roleNow === 'student' ? 'Student' : roleNow === 'teacher' ? 'Teacher' : roleNow === 'admin' ? 'Administrator' : 'Guest';
+        userContextInfo = `\nCurrent User Context: The signed-in user role is ${type}, name is "${name}"${roleNow==='student' && safeReader.grade ? ', grade is '+safeReader.grade : ''}. Use the true name naturally once when opening a new challenge, then sparingly. For students offer accessible, encouraging participatory activities; for teachers offer professional lesson and facilitation help; for administrators offer school-management-level guidance. Never pretend a teacher is a student or invent profile data. Never announce catalogue availability unless explicitly asked.`;
       } catch (error) {
         console.error('Could not parse current user context:', error);
       }
@@ -592,7 +599,7 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [
-            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}${safeEnhancement.context ? '\n\n'+safeEnhancement.context : ''}${learningContext ? '\n\n'+learningContext : ''}${expertContext ? '\n\n'+expertContext : ''}${naturalDialogueContext ? '\n\n'+naturalDialogueContext : ''}${isStoryBeginning(userQuery) ? '\n\nIf the user requests a NEW Little Author story without a specific theme, begin with exactly one short story sentence inspired by this rotating Emirati idea: '+storyIdeaAt(messages.filter(m=>m.role==='user').length,locale==='ar'?'ar':'en')+'. Preserve all established Little Author spelling correction, one-sentence response, ending and certificate instructions.' : ''}` },
+            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}${safeEnhancement.context ? '\n\n'+safeEnhancement.context : ''}${learningContext ? '\n\n'+learningContext : ''}${expertContext ? '\n\n'+expertContext : ''}${naturalDialogueContext ? '\n\n'+naturalDialogueContext : ''}${creativeTurn ? '\n\nACTIVE LITTLE AUTHOR CHALLENGE: NO catalogue searches or catalogue references. Friendly UAE Emirati dialogue with the reader, but write ALL story prose and certificate summaries in formal Modern Standard Arabic in Arabic UI, or entirely in English in English UI. Add exactly one imaginative story sentence per story turn. Flag only demonstrable spelling/grammar errors in the student input with a brief correct form, never stylistic preferences. Respect signed-in role and name; do not invent student profile data.' : ''}${isStoryBeginning(userQuery) ? '\n\nIf the user requests a NEW Little Author story without a specific theme, begin with exactly one short story sentence inspired by this rotating Emirati idea: '+storyIdeaAt(messages.filter(m=>m.role==='user').length,locale==='ar'?'ar':'en')+'. Preserve all established Little Author spelling correction, one-sentence response, ending and certificate instructions.' : ''}` },
             ...messages,
             { role: 'user', content: userQuery }
           ],
@@ -628,7 +635,7 @@ When the user asks for books, identify the matching titles exactly as recorded, 
           const dateOptions: Intl.DateTimeFormatOptions = {
             weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
           };
-          const formattedDate = new Date().toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', dateOptions);
+          const formattedDate = new Date().toLocaleDateString(locale === 'ar' ? 'ar-AE' : 'en-US', dateOptions);
           const info = {
             name: match[1].trim(),
             grade: match[2].trim(),
@@ -899,9 +906,9 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         <div ref={certificateRef} className="saqr-certificate" dir={locale === 'ar' ? 'rtl' : 'ltr'} lang={locale}>
           <div className="cert-top-stripe" />
           <header className="cert-header">
-            <img src="https://www.efipslibrary.online/school-logo.png" crossOrigin="anonymous" className="cert-logo" alt="EFIPS" />
+            <img src="/school-logo.png" className="cert-logo" alt="EFIPS" />
             <div className="cert-school"><h3>مدرسة صقر الإمارات الدولية الخاصة</h3><p dir="ltr">Emirates Falcon International Private School</p><span>{t('certChallenge')}</span></div>
-            <div className="cert-seal" dir="ltr">EFIPS</div>
+            <div className="cert-seal" dir="ltr"><img src="/school-logo.png" alt={locale==='ar'?'شعار المدرسة':'School crest'} /></div>
           </header>
           <main className="cert-body">
             <span className="cert-ornament" aria-hidden="true">✦ ✧ ✦</span>
@@ -909,12 +916,12 @@ When the user asks for books, identify the matching titles exactly as recorded, 
             <p className="cert-subtitle">{t('certSubtitle')}</p>
             <h2 className="cert-winner" dir="auto">{winnerData?.name || '—'}</h2>
             <p className="cert-grade">{t('certGrade')} <strong>{winnerData?.grade || '—'}</strong></p>
-            <section className="cert-summary"><h3>{locale === 'ar' ? 'ملخص القصة المؤلَّفة' : 'Summary of the Creative Story'}</h3><p dir="auto">{winnerData?.content || '—'}</p></section>
+            <section className="cert-summary"><h3>{locale === 'ar' ? 'ملخص القصة المؤلَّفة' : 'Summary of the Creative Story'}</h3><p dir={locale==='ar'?'rtl':'ltr'}>{winnerData?.content || '—'}</p></section>
             <p className="cert-commendation">{locale === 'ar' ? 'إبداع يستحق التقدير، وقصة تستحق أن تُروى' : 'An imagination worth celebrating, a story worth sharing'}</p>
           </main>
           <footer className="cert-footer">
             <div><span>{t('certDate')}</span><strong>{winnerData?.date}</strong></div>
-            <div className="cert-library" dir="ltr">EFIPS ✦ LIBRARY</div>
+            <div className="cert-library" dir="ltr"><img src="/school-logo.png" alt={locale==='ar'?'شعار المدرسة':'School crest'} /></div>
             <div><span>{locale === 'ar' ? 'توقيع صقر' : 'Saqr Signature'}</span><strong className="cert-signature">{locale === 'ar' ? 'صقر' : 'Saqr'}</strong><small>{t('certSaqr')}</small></div>
           </footer>
           <div className="cert-bottom-stripe" />
@@ -1361,31 +1368,31 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         .saqr-footer-note { margin: 4px 0 0; color: #94a3b8; font-size: 9px; line-height: 1.3; text-align: center; }
 
         .saqr-certificate-host { position:fixed;top:0;left:-9999px;width:794px;pointer-events:none; }
-        .saqr-certificate { box-sizing:border-box;display:flex;flex-direction:column;position:relative;width:794px;min-height:1123px;height:auto;overflow:visible;padding:55px 56px 48px;border:11px solid #087e72;background:#fff;color:#203549;font-family:'Cairo',Tahoma,Arial,sans-serif;line-height:1.55;letter-spacing:normal;text-rendering:optimizeLegibility; }
+        .saqr-certificate { box-sizing:border-box;display:flex;flex-direction:column;position:relative;width:794px;min-height:1123px;height:1123px;max-height:1123px;overflow:hidden;padding:48px 52px 42px;border:11px solid #087e72;background:#fff;color:#203549;font-family:'Cairo',Tahoma,Arial,sans-serif;line-height:1.55;letter-spacing:normal;text-rendering:optimizeLegibility; }
         .saqr-certificate[dir='rtl'],.saqr-certificate[dir='rtl'] * { letter-spacing:normal!important;word-spacing:normal!important;font-kerning:normal!important; }
         .saqr-certificate [dir='ltr'] { direction:ltr;unicode-bidi:isolate; }
         .cert-top-stripe,.cert-bottom-stripe { position:absolute;left:0;right:0;height:8px;background:linear-gradient(90deg,#d92332 0 25%,#009c6b 25% 50%,#edbe63 50% 75%,#162c40 75%); }
         .cert-top-stripe {top:0}.cert-bottom-stripe {bottom:0}
         .cert-header {display:flex;gap:17px;align-items:center;border-bottom:2px solid #cde6df;padding-bottom:23px}
         .cert-logo {width:92px;height:92px;object-fit:contain;flex-shrink:0}
-        .cert-school {flex:1;text-align:start}.cert-school h3 {font-size:18px;font-weight:900;color:#0b695c;margin:0}
+        .cert-school {flex:1;text-align:center}.cert-school h3 {font-size:18px;font-weight:900;color:#0b695c;margin:0}
         .cert-school p {font:700 11px Arial,sans-serif;color:#475569;margin:6px 0}
         .cert-school span {display:inline-block;padding:5px 13px;border-radius:18px;background:#e9f7f3;color:#087e72;font-size:13px;font-weight:900}
-        .cert-seal {width:70px;height:70px;border-radius:50%;border:3px solid #cba151;display:flex;align-items:center;justify-content:center;color:#a98432;font:900 16px Arial,sans-serif;flex-shrink:0}
-        .cert-body {flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;min-height:645px;padding-top:28px}
+        .cert-seal {width:80px;height:80px;border-radius:50%;border:3px solid #cba151;display:flex;align-items:center;justify-content:center;background:#fff9e8;flex-shrink:0;overflow:hidden}.cert-seal img{width:67px;height:67px;object-fit:contain}
+        .cert-body {flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;min-height:0;padding-top:22px;overflow:hidden}
         .cert-ornament {color:#c89b45;font-size:25px}
-        .cert-body h1 {font-size:35px;line-height:1.4;color:#087e72;font-weight:900;margin:12px 0}
+        .cert-body h1 {width:100%;text-align:center;font-size:35px;line-height:1.4;color:#087e72;font-weight:900;margin:12px 0}
         .cert-subtitle {font-size:17px;font-weight:700;color:#475569;margin:3px 0 18px}
         .cert-winner {width:100%;font-size:30px;font-weight:900;border-bottom:3px solid #d5a64c;padding:0 8px 10px;margin:0;overflow-wrap:anywhere}
         .cert-grade {font-size:17px;color:#475569;font-weight:700;margin:16px 0 25px}.cert-grade strong{color:#087e72}
-        .cert-summary {box-sizing:border-box;width:100%;min-height:245px;border:2px solid #c5e2da;border-radius:20px;background:#f4faf8;padding:18px 23px 22px;text-align:start}
+        .cert-summary {box-sizing:border-box;width:100%;flex:1;min-height:0;overflow:hidden;border:2px solid #c5e2da;border-radius:20px;background:#f4faf8;padding:14px 20px 16px;text-align:start}
         .cert-summary h3 {font-size:19px;font-weight:900;color:#087e72;margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid #cde8df}
-        .cert-summary p {font-size:16px;font-weight:700;color:#203549;margin:0;line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere;unicode-bidi:plaintext;text-align:start}
-        .cert-commendation {font-size:15px;font-weight:800;color:#ac8738;margin:25px 0 15px}
-        .cert-footer {display:flex;align-items:flex-end;justify-content:space-between;gap:14px;border-top:2px solid #cce8df;margin-top:25px;padding-top:22px}
+        .cert-summary p {font-size:16px;font-weight:700;color:#203549;margin:0;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere;unicode-bidi:plaintext;text-align:start}
+        .cert-commendation {font-size:15px;font-weight:800;color:#ac8738;margin:12px 0 8px}
+        .cert-footer {display:flex;align-items:flex-end;justify-content:space-between;gap:14px;border-top:2px solid #cce8df;margin-top:12px;padding-top:16px}
         .cert-footer>div:not(.cert-library) {display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;width:180px;color:#64748b;font-size:13px;font-weight:700}
         .cert-footer strong {font-size:17px;color:#193447;font-weight:900}.cert-footer small{font-size:11px}
-        .cert-library {height:94px;width:94px;border:2px solid #b9dad2;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#087e72;font:900 12px Arial,sans-serif;text-align:center}
+        .cert-library {height:94px;width:94px;border:2px solid #b9dad2;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fff;text-align:center;overflow:hidden}.cert-library img{width:82px;height:82px;object-fit:contain}
         .cert-footer strong.cert-signature {font-family:'Cairo',Tahoma,sans-serif;font-size:36px;color:#087e72;font-style:italic;transform:rotate(-5deg);}
         @keyframes saqr-ring-pulse {
           0%, 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, .10); }

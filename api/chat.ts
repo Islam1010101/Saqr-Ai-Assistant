@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Groq from 'groq-sdk';
 import { createHmac, randomUUID } from 'node:crypto';
 import { findBookReference } from '../src/utils/saqrOpenLibrary.js';
+import { isSaqrLibrarySearchIntent } from '../src/utils/saqrIntentRouter';
 
 // ==========================================
 // 1. البيانات المحلية
@@ -3412,13 +3413,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const { messages = [], locale = 'en' } = req.body || {};
     const userMsg = messages[messages.length - 1]?.content || '';
 
-    // البحث عن الكتاب وموقعه
-    const found = findBooks(userMsg);
+    // The server must not inject catalogue data into unrelated educational,
+    // creative or everyday requests. Keep provider routing and quotas intact.
+    const catalogRequested = isSaqrLibrarySearchIntent(userMsg, messages.slice(0,-1));
+    const found = catalogRequested ? findBooks(userMsg) : [];
     
     // تجهيز السياق
-    const context = found.length 
-      ? found.map(b => `- "${b.title}" by ${b.author} is located at (Shelf ${b.shelf}, Row ${b.row})`).join('\n') 
-      : 'No specific location found in the local database.';
+    const context = !catalogRequested
+      ? 'No school-catalogue search was requested. Do not discuss EFIPS holdings, shelves, availability or book-record checks; answer the normal user request directly.'
+      : found.length
+        ? found.map(b => `- "${b.title}" by ${b.author} is located at (Shelf ${b.shelf}, Row ${b.row})`).join('\n')
+        : 'No matching local shelf in this server-side list; use any VERIFIED EFIPS book records passed by the chat interface for explicit library searches. Never invent a shelf.';
 
     const saqrMessages = [
         {
@@ -3426,11 +3431,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           content: `You are Saqr, a smart school librarian.
           Current Language: ${locale === 'ar' ? 'Arabic' : 'English'}.
 
-          Here is the location data from the library catalog:
+          ${catalogRequested ? 'Verified school catalogue lookup context:' : 'Normal educational or creative chat (NOT a school catalogue search):'}
           ${context}
 
           **CRITICAL INSTRUCTIONS:**
-          1. **Location Queries:** If the user asks "Where is...", use the catalog data above to give the Shelf and Row.
+          1. **Location Queries:** Only if the user is explicitly asking where a school book is, use VERIFIED matching title and location data to give the Shelf and Row. No shelf/status/availability claims during creative writing, lessons or normal conversations.
           2. **Summary Queries:** If the user asks for a **summary** or "what is this book about", **DO NOT** say "I cannot find it". Instead, **use your own general knowledge** to write a helpful summary of the book.
           3. If the book is completely unknown to you and not in the catalog, apologize politely.
           
