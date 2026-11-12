@@ -50,6 +50,8 @@ const translations = {
         back: "Back",
         ageClassification: "Age Group",
         bioLabel: "Author Bio:",
+        publisherLabel: "Publisher",
+        publisherPending: "Not verified in this edition",
         summaryLabel: "Book Summary",
         aiSubject: "AI Category"
     },
@@ -74,6 +76,8 @@ const translations = {
         back: "العودة",
         ageClassification: "التصنيف العمري",
         bioLabel: "نبذة عن المؤلف:",
+        publisherLabel: "دار النشر",
+        publisherPending: "لم يتم التحقق من بيانات هذه الطبعة",
         summaryLabel: "نبذة عن الكتاب",
         aiSubject: "تصنيف ذكي"
     }
@@ -284,6 +288,11 @@ const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void
                         <div className="bg-white dark:bg-slate-800 p-3 md:p-5 rounded-xl md:rounded-[2rem] border-4 border-slate-200 dark:border-slate-600 shadow-sm">
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{t('subjectLabel')}</p>
                             <p className="text-base md:text-xl font-black text-slate-900 dark:text-white break-words">{book.subject}</p>
+                        </div>
+                        
+                        <div className="bg-white dark:bg-slate-800 p-3 md:p-5 rounded-xl md:rounded-[2rem] border-4 border-slate-200 dark:border-slate-600 shadow-sm">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{t('publisherLabel')}</p>
+                            <p className="text-sm md:text-base font-bold text-slate-800 dark:text-slate-100 break-words" dir="auto">{book.publisher || t('publisherPending')}</p>
                         </div>
                         
                         <div className="bg-sky-50 dark:bg-slate-800 p-3 md:p-5 rounded-xl md:rounded-[2rem] border-4 border-sky-200 dark:border-slate-600 shadow-sm">
