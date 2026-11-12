@@ -237,12 +237,12 @@ const SmartSearchPage: React.FC = () => {
 
         if (storedType === 'student') {
           welcomeMessage = locale === 'ar'
-            ? `أهلاً بك يا صديقي المبدع **${name}**! \n\nأنا "صقر"، المساعد الذكي لمكتبتك. هل نؤلف قصة ممتعة معاً اليوم، أم تبحث عن كتاب محدد لتقرأه؟`
-            : `Welcome my creative friend **${name}**! 🎓\n\nI'm 'Saqr', your AI Librarian. Shall we co-author a story today, or are you looking for a specific book?`;
+            ? `هلا **${name}**! أنا صقر، حياك الله. شو رايك نبتكر قصة فيها مغامرة، أو نختار لك كتاب على ذوقك؟`
+            : `Welcome, **${name}**! I'm Saqr. Want to create an imaginative story together or find something great to read?`;
         } else if (storedType === 'teacher' || storedType === 'admin') {
           welcomeMessage = locale === 'ar'
-            ? `أهلاً بك أستاذي الفاضل **${name}**! \n\nأنا "صقر" في خدمتك. كيف يمكنني مساعدتك اليوم؟`
-            : `Welcome esteemed teacher **${name}**! 👨‍🏫\n\nI am 'Saqr', at your service. How can I assist you today ?`;
+            ? `هلا **${name}**، حياك الله! أنا صقر، أقدر أساعدك في التحضير والأنشطة والمصادر التعليمية. شو تحب نبدأ فيه؟`
+            : `Welcome, **${name}**! I'm Saqr. I can help with lessons, creative activities and library resources. What shall we work on?`;
         }
       } catch (error) {
         console.error('Could not parse current user:', error);
@@ -254,7 +254,7 @@ const SmartSearchPage: React.FC = () => {
 
     if (!welcomeMessage) {
       welcomeMessage = locale === 'ar'
-        ? 'أهلاً بك! أنا "صقر"، المساعد الذكي لمكتبة المدرسة. هل نؤلف قصة معاً اليوم، أم تبحث عن كتاب محدد؟'
+        ? 'هلا ومرحبا! أنا صقر، نقدر نتعلم ونتخيل ونكتب قصص مع بعض. شو تحب نسوي اليوم؟'
         : "Welcome! I'm 'Saqr', your AI Librarian. Shall we co-author a story today, or are you looking for a specific book?";
     }
     setMessages([{ role: 'assistant', content: welcomeMessage }]);
@@ -580,8 +580,9 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         const user = JSON.parse(storedUser);
         const rawName = locale === 'ar' ? (user.name_ar || user.name_en) : (user.name_en || user.name_ar);
         const name = formatFirstAndLastName(rawName || '');
-        const type = localStorage.getItem('user_type') === 'student' ? 'Student' : (localStorage.getItem('user_type') === 'teacher' ? 'Teacher' : 'Administrator');
-        userContextInfo = `\nCurrent User Context: The person talking to you is a ${type} named "${name}". Use their name sparingly when genuinely helpful; do not repeat greetings, titles, or their name across consecutive turns.`;
+        const roleNow = safeReader.role;
+        const type = roleNow === 'student' ? 'Student' : roleNow === 'teacher' ? 'Teacher' : roleNow === 'admin' ? 'Administrator' : 'Guest';
+        userContextInfo = `\nCurrent User Context: The signed-in user role is ${type}, name is "${name}"${roleNow==='student' && safeReader.grade ? ', grade is '+safeReader.grade : ''}. Use the true name naturally once when opening a new challenge, then sparingly. For students offer accessible, encouraging participatory activities; for teachers offer professional lesson and facilitation help; for administrators offer school-management-level guidance. Never pretend a teacher is a student or invent profile data. Never announce catalogue availability unless explicitly asked.`;
       } catch (error) {
         console.error('Could not parse current user context:', error);
       }
@@ -629,7 +630,7 @@ When the user asks for books, identify the matching titles exactly as recorded, 
           const dateOptions: Intl.DateTimeFormatOptions = {
             weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
           };
-          const formattedDate = new Date().toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', dateOptions);
+          const formattedDate = new Date().toLocaleDateString(locale === 'ar' ? 'ar-AE' : 'en-US', dateOptions);
           const info = {
             name: match[1].trim(),
             grade: match[2].trim(),
