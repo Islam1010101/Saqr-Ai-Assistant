@@ -4,7 +4,10 @@ on:
   # This workflow never runs for PRs or edits to Saqr's chat code.
   push:
     branches: [main]
-    paths: ['.github/workflows/arabic-book-index.yml']
+    paths:
+      - '.github/workflows/arabic-book-index.yml'
+      - 'tools/arabic-knowledge/export-manifest.mjs'
+      - 'tools/arabic-knowledge/index-books.py'
   workflow_dispatch:
     inputs:
       book_id:
