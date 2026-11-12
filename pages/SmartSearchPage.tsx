@@ -278,9 +278,10 @@ const SmartSearchPage: React.FC = () => {
       // One fixed A4 canvas and exactly one PDF page. The old scrollHeight-
       // based slicing could create a blank second page due to a tiny overflow.
       const summary = certificate.querySelector('.cert-summary p') as HTMLElement | null;
+      const summaryFrame = certificate.querySelector('.cert-summary') as HTMLElement | null;
       const originalSummaryFont = summary?.style.fontSize ?? '';
       if(summary){
-        for(let font=16;font>=10 && summary.scrollHeight>summary.clientHeight;font--){
+        for(let font=16;font>=10 && summaryFrame && summaryFrame.scrollHeight>summaryFrame.clientHeight;font--){
           summary.style.fontSize=font+'px';
         }
       }
@@ -920,7 +921,7 @@ When the user asks for books, identify the matching titles exactly as recorded, 
           </main>
           <footer className="cert-footer">
             <div><span>{t('certDate')}</span><strong>{winnerData?.date}</strong></div>
-            <div className="cert-library" dir="ltr">EFIPS ✦ LIBRARY</div>
+            <div className="cert-library" dir="ltr"><img src="/school-logo.png" alt={locale==='ar'?'شعار المدرسة':'School crest'} /></div>
             <div><span>{locale === 'ar' ? 'توقيع صقر' : 'Saqr Signature'}</span><strong className="cert-signature">{locale === 'ar' ? 'صقر' : 'Saqr'}</strong><small>{t('certSaqr')}</small></div>
           </footer>
           <div className="cert-bottom-stripe" />
@@ -1391,7 +1392,7 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         .cert-footer {display:flex;align-items:flex-end;justify-content:space-between;gap:14px;border-top:2px solid #cce8df;margin-top:12px;padding-top:16px}
         .cert-footer>div:not(.cert-library) {display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;width:180px;color:#64748b;font-size:13px;font-weight:700}
         .cert-footer strong {font-size:17px;color:#193447;font-weight:900}.cert-footer small{font-size:11px}
-        .cert-library {height:94px;width:94px;border:2px solid #b9dad2;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#087e72;font:900 12px Arial,sans-serif;text-align:center}
+        .cert-library {height:94px;width:94px;border:2px solid #b9dad2;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fff;text-align:center;overflow:hidden}.cert-library img{width:82px;height:82px;object-fit:contain}
         .cert-footer strong.cert-signature {font-family:'Cairo',Tahoma,sans-serif;font-size:36px;color:#087e72;font-style:italic;transform:rotate(-5deg);}
         @keyframes saqr-ring-pulse {
           0%, 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, .10); }
