@@ -120,6 +120,7 @@ def main():
     parser.add_argument('--manifest',required=True)
     parser.add_argument('--book-id',default='')
     parser.add_argument('--start-id',default='')
+    parser.add_argument('--offset',type=int,default=0,help='Zero-based position in the 502-book catalog')
     parser.add_argument('--max-books',type=int,default=5,
                         help='0 means all books; process in batches to protect free quotas')
     parser.add_argument('--max-pages',type=int,default=80,
@@ -136,6 +137,8 @@ def main():
         if not books:raise SystemExit('Unknown Arabic book ID')
     if args.start_id:
         books=[b for b in books if b['id']>=args.start_id]
+    if args.offset>0:
+        books=books[args.offset:]
     if args.max_books>0:books=books[:args.max_books]
     url=os.environ.get('SUPABASE_URL','').rstrip('/')
     key=os.environ.get('SUPABASE_SERVICE_ROLE_KEY','')
