@@ -16,15 +16,13 @@ console.log('PASS: Vercel server import paths reference emitted JavaScript, not 
 
 // Regression: a folder link must not masquerade as a PDF; all series volumes are direct files.
 const allDigitalBooks = [...ARABIC_LIBRARY_DATABASE,...ENGLISH_LIBRARY_DATABASE];
-assert.equal(Object.keys(DIGITAL_SERIES_VOLUMES).length,10);
-assert.equal(Object.values(DIGITAL_SERIES_VOLUMES).reduce((sum,books)=>sum+books.length,0),412);
+assert.equal(Object.keys(DIGITAL_SERIES_VOLUMES).length,9);
+assert.equal(Object.values(DIGITAL_SERIES_VOLUMES).reduce((sum,books)=>sum+books.length,0),402);
 assert.equal(ARABIC_LIBRARY_DATABASE.length,520);
 assert.equal(ARABIC_LIBRARY_DATABASE.filter(b=>b.title==='الأعمال الكاملة للشاعر صلاح جاهين').length,1,'Do not duplicate the original photographed Salah Jahin book');
-assert.equal(ENGLISH_LIBRARY_DATABASE.filter(b=>!String(b.id).startsWith('EN_NEW_20261109_')).length,54, 'Keep original English digital holdings');
-assert.equal(ENGLISH_LIBRARY_DATABASE.filter(b=>/^EN_NEW_20261109_(?:0[1-9]|1[0-4])$/.test(String(b.id))).length,14, 'Keep the initial 14 new school-domain titles');
-assert.equal(ENGLISH_LIBRARY_DATABASE.filter(b=>/^EN_NEW_20261109_(?:1[5-9]|2[0-3])$/.test(String(b.id))).length,9, 'Prepare nine supplementary English Drive books including two new picture books');
-assert.equal(ENGLISH_LIBRARY_DATABASE.length,77);
-assert.equal(allDigitalBooks.length,597); // 520 Arabic + 77 English records; heritage titles remain separately catalogued.
+assert.equal(ENGLISH_LIBRARY_DATABASE.length,71,'Use the current verified English photo catalog only');
+assert.ok(ENGLISH_LIBRARY_DATABASE.every(b=>String(b.id).startsWith('EN_PH_')&&b.photoBatch),'No legacy English PDF books can enter the official index');
+assert.equal(allDigitalBooks.length,591); // 520 Arabic + 71 English (national identity digital is separate).
 assert.ok(allDigitalBooks.every(b=>/^https:\/\/drive\.google\.com\/(?:file\/d\/|drive\/folders\/)/.test(b.driveLink)),
   'All books need a real school Drive file or photo-folder source');
 assert.equal(ARABIC_LIBRARY_DATABASE.filter(b=>Boolean(b.audioId)).length,23,'Keep all original audio summaries');
@@ -33,22 +31,21 @@ const greenVolume = ARABIC_LIBRARY_DATABASE.find(b=>b.series==='المكتبة �
 assert.ok(greenVolume);
 assert.equal(greenVolume.readingAudience,'children');
 assert.equal(readerFileId('digital:ar:'+greenVolume.id), greenVolume.driveLink.match(/\/file\/d\/([^/]+)/)?.[1]);
-const wimpy = ENGLISH_LIBRARY_DATABASE.find(b=>b.series==='Diary Of A Wimpy');
-assert.ok(wimpy);
-assert.equal(wimpy.readingAudience,'children');
-console.log('PASS: 412 original per-volume records, 597 digital library cards, suggested audiences, audio integrity and server allowlisting');
+const currentEnglishBook = ENGLISH_LIBRARY_DATABASE.find(b=>b.title==='Diary of a Wimpy Kid: The Meltdown');
+assert.ok(currentEnglishBook?.photoBatch,'Current Wimpy Kid edition remains available in the English photo reader');
+console.log('PASS: 402 Arabic source-series volumes, 591 active Arabic/English digital cards, and current photo-only English indexing');
 
 assert.equal(readerFileId('https://example.com/private.pdf'), null);
 assert.equal(readerFileId('digital:ar:AR_1'), null); // collection, not a single PDF
-assert.equal(readerFileId('digital:en:9'), '1i7G7xoUBk77DPDYyNzEkxMGsJi5XA2gc');
+assert.equal(readerFileId('digital:en:'+String(ENGLISH_LIBRARY_DATABASE[0].id)),null,'Retired English PDF URLs must not remain accessible');
 const schoolOnlyEnglish=ENGLISH_LIBRARY_DATABASE.filter(b=>b.requiresSchoolGoogleAccess);
-assert.equal(schoolOnlyEnglish.length,23,'All 23 new books require school Google access');
+assert.equal(schoolOnlyEnglish.length,71,'All 71 current English photo books use school access');
 for(const book of schoolOnlyEnglish){
   assert.equal(readerFileId('digital:en:'+book.id),null,
     'Anonymous public PDF proxy must not serve restricted school book: '+book.title);
 }
-assert.ok(readerFileId('digital:en:'+wimpy.id),
-  'Existing public English series must remain available through the internal reader');
+assert.equal(readerFileId('digital:en:'+currentEnglishBook.id),null,
+  'Current English photo books must never be served as raw public PDFs');
 assert.ok(readerFileId('digital:ar:NI_1'));
 for (const [a,b] of [['-1','10'],['0','1048576'],['20','10'],['1.5','20'],['0','999999999']]) assert.equal(readerByteRange(a,b),null);
 assert.deepEqual(readerByteRange('0','1048575'),[0,1048575]);
@@ -196,16 +193,16 @@ console.log('PASS: large multi-part range assembly preserves all bytes and bound
 
 const values=new Map<string,string>();
 Object.defineProperty(globalThis,'localStorage',{configurable:true,value:{getItem:(k:string)=>values.get(k)||null,setItem:(k:string,v:string)=>values.set(k,v)}});
-const key=pdfReadingStorageKey('student-A','digital:en:9','file-v1');
-assert.notEqual(key,pdfReadingStorageKey('student-B','digital:en:9','file-v1'));
-assert.notEqual(key,pdfReadingStorageKey('student-A','digital:en:9','file-v2'));
+const key=pdfReadingStorageKey('student-A','digital:en:'+String(ENGLISH_LIBRARY_DATABASE[0].id),'file-v1');
+assert.notEqual(key,pdfReadingStorageKey('student-B','digital:en:'+String(ENGLISH_LIBRARY_DATABASE[0].id),'file-v1'));
+assert.notEqual(key,pdfReadingStorageKey('student-A','digital:en:'+String(ENGLISH_LIBRARY_DATABASE[0].id),'file-v2'));
 assert.equal(writePdfState(key,{page:4,bookmarks:[2,4],zoom:1.5}),true);
 assert.deepEqual(readPdfState(key),{page:4,bookmarks:[2,4],zoom:1.5});
 values.set(key!,JSON.stringify({page:4,bookmarks:[2,4],zoom:.25}));
 assert.equal(readPdfState(key).zoom,.75,'The PDF.js reader keeps its existing 75% minimum');
 assert.equal(readPdfState(key,.25).zoom,.25,'The image reader restores the saved 25% zoom');
 
-assert.equal(readPdfState(pdfReadingStorageKey('student-B','digital:en:9','file-v1')).page,1);
+assert.equal(readPdfState(pdfReadingStorageKey('student-B','digital:en:'+String(ENGLISH_LIBRARY_DATABASE[0].id),'file-v1')).page,1);
 assert.equal(clampPdfPage(100,6),6);assert.equal(clampPdfPage(-1,6),1);assert.equal(parsePdfPage('٣٢'),32);
 values.set(key!,JSON.stringify({page:-5,bookmarks:[-1,2,2,'5'],zoom:900}));
 assert.deepEqual(readPdfState(key),{page:1,bookmarks:[2],zoom:2});
