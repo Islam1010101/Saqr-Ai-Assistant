@@ -73,7 +73,7 @@ assert.ok(orbit.includes("to: '/saqr-reading-quest'") && orbit.includes("roles: 
 assert.ok(!home.includes('to="/game"'),'Game shortcut must be inside student challenges hub');
 assert.ok(!home.includes('to="/saqr-studio"'),'Studio shortcut must be inside student challenges hub');
 for(const path of ['/saqr-reading-quest','/game','/saqr-studio'])assert.ok(hub.includes(path));
-assert.ok(home.includes("userType === 'teacher' && ("));
+assert.ok(home.includes("userType === 'teacher' && teacherSchedule.length > 0 && ("));
 console.log('PASS 59 physical books + '+digitalReadingChallengeBooks.length+' currently catalogued and verified digital challenge books; role and language separation');
 
 assert.ok(!page.includes('books.map(({key,book,questions})'),'Do not spoil all books before the journey');
