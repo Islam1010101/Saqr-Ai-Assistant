@@ -23,6 +23,7 @@ import { saqrExtraContext, isNewDiscussion, discussionOpening } from '../src/uti
 import {detectSaqrIntroduction,saqrIntroductionReply} from '../src/utils/saqrIntroductionReplies';
 import { resolveSaqrBookFollowUp, saqrNaturalDialogueInstructions } from '../src/utils/saqrNaturalDialogue';
 import { isSaqrLibrarySearchIntent, isSaqrCreativeTurn } from '../src/utils/saqrIntentRouter';
+import { saqrProofreadingInstructions, isSaqrLessonPreparationRequest, isSaqrExplicitProofreadingRequest } from '../src/utils/saqrProofreading';
 
 // --- بروتوكول عقل صقر ---
 const SAQR_ELITE_PROMPT = `
@@ -361,6 +362,12 @@ const SmartSearchPage: React.FC = () => {
     const userQuery = input.trim();
     const librarySearchIntent = isSaqrLibrarySearchIntent(userQuery, messages);
     const creativeTurn = isSaqrCreativeTurn(userQuery, messages) && !librarySearchIntent;
+    const proofreadingContext = saqrProofreadingInstructions({
+      locale: locale === 'ar' ? 'ar' : 'en',
+      creativeTurn,
+      lessonTurn: isSaqrLessonPreparationRequest(userQuery) || isLessonPlanRequest(userQuery),
+      explicitReview: isSaqrExplicitProofreadingRequest(userQuery)
+    });
     // Only genuine library discovery inherits earlier catalogue context.
     const linkedBookTurn = librarySearchIntent ? resolveSaqrBookFollowUp(userQuery, messages) : {searchQuery:userQuery,anchoredTurn:null,continued:false};
     const recommendationTurn = librarySearchIntent && (isSaqrRecommendationRequest(userQuery) ||
@@ -599,7 +606,7 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [
-            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}${safeEnhancement.context ? '\n\n'+safeEnhancement.context : ''}${learningContext ? '\n\n'+learningContext : ''}${expertContext ? '\n\n'+expertContext : ''}${naturalDialogueContext ? '\n\n'+naturalDialogueContext : ''}${creativeTurn ? '\n\nACTIVE LITTLE AUTHOR CHALLENGE: NO catalogue searches or catalogue references. Friendly UAE Emirati dialogue with the reader, but write ALL story prose and certificate summaries in formal Modern Standard Arabic in Arabic UI, or entirely in English in English UI. Add exactly one imaginative story sentence per story turn. Flag only demonstrable spelling/grammar errors in the student input with a brief correct form, never stylistic preferences. Respect signed-in role and name; do not invent student profile data.' : ''}${isStoryBeginning(userQuery) ? '\n\nIf the user requests a NEW Little Author story without a specific theme, begin with exactly one short story sentence inspired by this rotating Emirati idea: '+storyIdeaAt(messages.filter(m=>m.role==='user').length,locale==='ar'?'ar':'en')+'. Preserve all established Little Author spelling correction, one-sentence response, ending and certificate instructions.' : ''}` },
+            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}${safeEnhancement.context ? '\n\n'+safeEnhancement.context : ''}${learningContext ? '\n\n'+learningContext : ''}${proofreadingContext ? '\n\n'+proofreadingContext : ''}${expertContext ? '\n\n'+expertContext : ''}${naturalDialogueContext ? '\n\n'+naturalDialogueContext : ''}${creativeTurn ? '\n\nACTIVE LITTLE AUTHOR CHALLENGE: NO catalogue searches or catalogue references. Friendly UAE Emirati dialogue with the reader, but write ALL story prose and certificate summaries in formal Modern Standard Arabic in Arabic UI, or entirely in English in English UI. Add exactly one imaginative story sentence per story turn. Flag only demonstrable spelling/grammar errors in the student input with a brief correct form, never stylistic preferences. Respect signed-in role and name; do not invent student profile data.' : ''}${isStoryBeginning(userQuery) ? '\n\nIf the user requests a NEW Little Author story without a specific theme, begin with exactly one short story sentence inspired by this rotating Emirati idea: '+storyIdeaAt(messages.filter(m=>m.role==='user').length,locale==='ar'?'ar':'en')+'. Preserve all established Little Author spelling correction, one-sentence response, ending and certificate instructions.' : ''}` },
             ...messages,
             { role: 'user', content: userQuery }
           ],
