@@ -41,7 +41,7 @@ jobs:
       MAX_PAGES: ${{ inputs.max_pages }}
     steps:
       - name: Checkout the exact reviewed source
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Configure Node for the read-only catalog exporter
         uses: actions/setup-node@v4
         with:
