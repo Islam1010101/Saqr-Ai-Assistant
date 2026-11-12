@@ -17,7 +17,10 @@ export type SaqrArabicPageEvidence={
 const STOP=new Set(['ابحث','ابحثلي','دور','دورلي','على','عن','في','من','الى','إلى',
   'كتاب','الكتاب','كتب','الكتب','عايز','اريد','أريد','رشح','رشحلي','اقترح',
   'المكتبة','مكتبة','الرقمية','العربية','معلومات','اعرف','أعرف','لي','the',
-  'books','book','find','search','recommend','arabic','library','about','with','for']);
+  'books','book','find','search','recommend','arabic','library','about','with','for',
+  'لخص','تلخيص','ملخص','تحليل','حلل','اشرح','شرح','ناقش','مضمون','محتوى',
+  'احكيلي','اخبرني','خبرني','عرفني','ماذا','يتناول','يتكلم','الموضوع','موضوع',
+  'tell','summarize','summarise','summary','analyze','analyse','explain','discuss','content']);
 export const arabicEvidenceQuery=(input:string):string=>String(input||'')
   .normalize('NFKC').replace(/[\u064B-\u065F\u0670\u0640]/g,'')
   .replace(/[^\p{L}\p{N} ]+/gu,' ')
