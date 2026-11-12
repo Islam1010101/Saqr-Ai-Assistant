@@ -25,7 +25,11 @@ export const isSaqrLibrarySearchIntent=(
   if(challenge.test(q)||isStoryBeginning(q))return false;
   // A fresh explicit book request is permitted after a story, but ordinary
   // replies to a writing challenge must never turn into catalogue searches.
-  const explicitNewSearch=locationRequest.test(q)||(
+  const lastUser=[...history].reverse().find(turn=>turn.role==='user');
+  const followUpToLibrary=continuation.test(q)&&!!lastUser&&
+    (discoveryRequest.test(lastUser.content)||locationRequest.test(lastUser.content))&&
+    catalogWords.test(lastUser.content);
+  const explicitNewSearch=locationRequest.test(q)||followUpToLibrary||(
     discoveryRequest.test(q)&&catalogWords.test(q)&&!pureTask.test(q)
   );
   if(isSaqrCreativeTurn(q,history)&&!explicitNewSearch)return false;
