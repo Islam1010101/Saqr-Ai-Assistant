@@ -39,7 +39,7 @@ for (const [series, ar] of [
 }
 for (const title of ['Knowledge Encyclopedia','Diary of a Wimpy Kid: The Meltdown']) {
   const hits=searchSaqrBookCatalog('Books '+title,catalog);
-  assert.ok(hits.some(book=>book.title===title && book.bookKey?.startsWith('digital:en:')),
+  assert.ok(hits.some(book=>book.title===title && book.driveLink===ENGLISH_LIBRARY_DATABASE.find(entry=>entry.title===title)?.driveLink),
     'Saqr must refer to the new photo edition: '+title);
 }
 console.log('PASS: 242 active Arabic series volumes and new English photo books retain Saqr catalog referrals');
