@@ -109,8 +109,8 @@ const localization: any = {
     you: 'أنت',
     certSchool: 'مدرسة صقر الإمارات الدولية الخاصة',
     certChallenge: 'تحدي المؤلف الصغير',
-    certTitle: 'شهادة إبداع أدبي',
-    certSubtitle: 'يفخر "صقر" المساعد الذكي بتوثيق الإنجاز الأدبي للمبدع(ة):',
+    certTitle: 'شهادة المؤلف الصغير',
+    certSubtitle: 'تُمنح هذه الشهادة تقديرًا للإبداع في تأليف قصة أدبية للطالب(ة):',
     certGrade: 'المستوى الدراسي:',
     certStory: 'القصة المبدعة',
     certDate: 'تاريخ الإصدار',
@@ -131,8 +131,8 @@ const localization: any = {
     you: 'YOU',
     certSchool: 'Emirates Falcon International Private School',
     certChallenge: 'Little Author Challenge',
-    certTitle: 'CERTIFICATE OF LITERARY CREATIVITY',
-    certSubtitle: 'Saqr, the AI Librarian, proudly documents the achievement of:',
+    certTitle: 'LITTLE AUTHOR ACHIEVEMENT CERTIFICATE',
+    certSubtitle: 'Proudly awarded in recognition of creative storytelling to:',
     certGrade: 'Grade Level:',
     certStory: 'The Creative Story',
     certDate: 'Date of Issue',
@@ -952,23 +952,30 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         <div ref={certificateRef} className="saqr-certificate" dir={locale === 'ar' ? 'rtl' : 'ltr'} lang={locale}>
           <div className="cert-top-stripe" />
           <header className="cert-header">
-            <img src="/school-logo.png" className="cert-logo" alt="EFIPS" />
+            <img src="/school-logo.png" className="cert-logo" alt={locale==='ar'?'شعار مدرسة صقر الإمارات':'EFIPS school logo'} />
             <div className="cert-school"><h3>مدرسة صقر الإمارات الدولية الخاصة</h3><p dir="ltr">Emirates Falcon International Private School</p><span>{t('certChallenge')}</span></div>
-            <div className="cert-seal" dir="ltr"><img src="/school-logo.png" alt={locale==='ar'?'شعار المدرسة':'School crest'} /></div>
+            <div className="cert-header-mark" dir="ltr"><strong>EFIPS</strong><span>LIBRARY</span></div>
           </header>
           <main className="cert-body">
-            <span className="cert-ornament" aria-hidden="true">✦ ✧ ✦</span>
-            <h1>{t('certTitle')}</h1>
-            <p className="cert-subtitle">{t('certSubtitle')}</p>
-            <h2 className="cert-winner" dir="auto">{winnerData?.name || '—'}</h2>
-            <p className="cert-grade">{t('certGrade')} <strong>{winnerData?.grade || '—'}</strong></p>
-            <section className="cert-summary"><h3>{locale === 'ar' ? 'ملخص القصة المؤلَّفة' : 'Summary of the Creative Story'}</h3><p dir={locale==='ar'?'rtl':'ltr'}>{winnerData?.content || '—'}</p></section>
+            <div className="cert-title-group">
+              <div className="cert-title-rule" aria-hidden="true" />
+              <h1>{t('certTitle')}</h1>
+              <p className="cert-subtitle">{t('certSubtitle')}</p>
+            </div>
+            <div className="cert-recipient">
+              <h2 className="cert-winner" dir="auto">{winnerData?.name || '—'}</h2>
+              <p className="cert-grade">{t('certGrade')} <strong>{winnerData?.grade || '—'}</strong></p>
+            </div>
+            <section className="cert-summary"><h3>{locale === 'ar' ? 'ملخص القصة المؤلَّفة' : 'Creative Story Synopsis'}</h3><p dir={locale==='ar'?'rtl':'ltr'}>{winnerData?.content || '—'}</p></section>
             <p className="cert-commendation">{locale === 'ar' ? 'إبداع يستحق التقدير، وقصة تستحق أن تُروى' : 'An imagination worth celebrating, a story worth sharing'}</p>
           </main>
           <footer className="cert-footer">
-            <div><span>{t('certDate')}</span><strong>{winnerData?.date}</strong></div>
-            <div className="cert-library" dir="ltr"><img src="/school-logo.png" alt={locale==='ar'?'شعار المدرسة':'School crest'} /></div>
-            <div><span>{locale === 'ar' ? 'توقيع صقر' : 'Saqr Signature'}</span><strong className="cert-signature">{locale === 'ar' ? 'صقر' : 'Saqr'}</strong><small>{t('certSaqr')}</small></div>
+            <div className="cert-footer-field"><span>{t('certDate')}</span><strong>{winnerData?.date}</strong></div>
+            <div className="cert-seal" dir="ltr">
+              <div className="cert-seal-disc"><img src="/school-logo.png" alt={locale==='ar'?'شعار المدرسة داخل الختم':'School crest inside seal'} /></div>
+              <small>{locale==='ar'?'ختم المدرسة':'School Seal'}</small>
+            </div>
+            <div className="cert-footer-field"><span>{locale === 'ar' ? 'توقيع صقر' : 'Saqr Signature'}</span><strong className="cert-signature">{locale === 'ar' ? 'صقر' : 'Saqr'}</strong><small>{t('certSaqr')}</small></div>
           </footer>
           <div className="cert-bottom-stripe" />
         </div>
