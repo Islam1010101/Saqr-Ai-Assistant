@@ -12,6 +12,7 @@ for(const batch of BATCH_IDS){
 const records=ENGLISH_LIBRARY_DATABASE;
 assert.equal(records.length,71,'The current Drive contains 71 fully numbered EFIPS reading entries');
 assert.equal(new Set(records.map(x=>String(x.id))).size,71,'Book IDs must be unique');
+assert.ok(records.every(x=>String(x.id).startsWith('EN_PH_')),'Only current English photo IDs, never retired PDFs');
 assert.equal(new Set(records.map(x=>x.driveLink)).size,71,'Each image edition needs its own current folder');
 assert.equal(Object.keys(allPages).length,71,'A manifest must exist for every indexed title');
 let totalPages=0;
