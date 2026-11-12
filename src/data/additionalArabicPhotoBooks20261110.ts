@@ -98,7 +98,6 @@ export const ADDITIONAL_ARABIC_PHOTO_BOOKS:DigitalLibraryBook[]=[
     ]
   },
   {
-      {
     "id": "AR_PH_20261110_CHILD_LITERATURE",
     "title": "أدب الأطفال",
     "author": "ربحي مصطفى عليان",
