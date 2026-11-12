@@ -16,15 +16,15 @@ type OrbitItem = {
 type Burst = { id: number; tx: number; ty: number; rot: number; color: string };
 
 const ITEMS: OrbitItem[] = [
-  { key: 'catalog', to: '/search', ar: 'دليل المكتبة', en: 'Library Catalog', icon: 'search', tint: '251, 165, 95', roles: ['student', 'teacher', 'admin'] },
-  { key: 'smart', to: '/smart-search', ar: 'صقر الذكي', en: 'Ask Saqr AI', icon: 'spark', tint: '160, 124, 225', roles: ['student', 'teacher', 'admin'] },
-  { key: 'digital', to: '/digital-library', ar: 'المكتبة الرقمية', en: 'Digital Library', icon: 'book', tint: '69, 183, 216', roles: ['student', 'teacher', 'admin'] },
-  { key: 'creators', to: '/creators', ar: 'بوابة المبدعين', en: 'Creators Portal', icon: 'pen', tint: '238, 128, 173', roles: ['student', 'teacher', 'admin'] },
-  { key: 'learning', to: '/saqr-learning', ar: 'صقر يساعدني', en: 'Saqr Helps Me', icon: 'cap', tint: '84, 183, 155', roles: ['student', 'admin'] },
+  { key: 'catalog', to: '/search', ar: 'دليل المكتبة', en: 'Library Catalog', icon: 'search', tint: '74, 209, 162', roles: ['student', 'teacher', 'admin'] },
+  { key: 'smart', to: '/smart-search', ar: 'صقر الذكي', en: 'Ask Saqr AI', icon: 'spark', tint: '91, 195, 251', roles: ['student', 'teacher', 'admin'] },
+  { key: 'digital', to: '/digital-library', ar: 'المكتبة الرقمية', en: 'Digital Library', icon: 'book', tint: '183, 128, 241', roles: ['student', 'teacher', 'admin'] },
+  { key: 'creators', to: '/creators', ar: 'بوابة المبدعين', en: 'Creators Portal', icon: 'pen', tint: '249, 132, 180', roles: ['student', 'teacher', 'admin'] },
+  { key: 'learning', to: '/saqr-learning', ar: 'صقر يساعدني', en: 'Saqr Helps Me', icon: 'cap', tint: '247, 193, 108', roles: ['student', 'admin'] },
   { key: 'identity', to: '/saqr-national-identity', ar: 'صقر وهوية وطن', en: 'Saqr & Nation', icon: 'flag', tint: '75, 170, 116', roles: ['student', 'admin'] },
   { key: 'challenges', to: '/saqr-challenges', ar: 'تحديات صقر', en: 'Saqr Challenges', icon: 'trophy', tint: '242, 184, 75', roles: ['student', 'admin'] },
   { key: 'reading-quest', to: '/saqr-reading-quest', ar: 'بين السطور', en: 'Between the Lines', icon: 'reading', tint: '80, 157, 229', roles: ['teacher'] },
-  { key: 'schedule', to: '/schedule', ar: 'حجز المكتبة', en: 'Library Schedule', icon: 'calendar', tint: '148, 132, 214', roles: ['teacher', 'admin'] },
+  { key: 'schedule', to: '/schedule', ar: 'حجز المكتبة', en: 'Library Schedule', icon: 'calendar', tint: '94, 203, 206', roles: ['teacher', 'admin'] },
   { key: 'admin', to: '/admin-dashboard', ar: 'إدارة النظام', en: 'Administration', icon: 'settings', tint: '180, 131, 91', roles: ['admin'] },
 ];
 
@@ -59,7 +59,7 @@ export default function SaqrOrbitNavigation({
   bursts: Burst[];
 }) {
   const navigate = useNavigate();
-  const bubbleRefs = useRef<HTMLElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
   const navigationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const swipeX = useRef<number | null>(null);
   const [page, setPage] = useState(0);
@@ -76,29 +76,39 @@ export default function SaqrOrbitNavigation({
     }
     return () => { live = false; };
   }, [role]);
-  const pageCount = Math.max(1, Math.ceil(links.length / 8));
-  const visible = links.slice(page * 8, page * 8 + 8);
+  const pageCount = Math.max(1, Math.ceil(links.length / 6));
+  const visible = links.slice(page * 6, page * 6 + 6);
   useEffect(() => setPage(0), [role]);
-  // Each sphere fades into view while it enters the viewport. Avoid hiding content when
-  // IntersectionObserver is unavailable or the user prefers reduced motion.
+  useEffect(() => setPage(current => Math.min(current, pageCount - 1)), [pageCount]);
+  // Observe the whole orbit rather than each floating sphere: individual observers
+  // previously made visible spheres disappear on desktop and on Safari.
   useEffect(() => {
-    const nav = bubbleRefs.current;
-    if (!nav || typeof IntersectionObserver === 'undefined' ||
+    const stage = stageRef.current;
+    if (!stage || typeof IntersectionObserver === 'undefined' ||
         window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const bubbles = Array.from(nav.querySelectorAll<HTMLElement>('.saqr-orbit-bubble'));
     const observer = new IntersectionObserver(entries => {
-      for (const entry of entries) {
-        entry.target.classList.toggle('is-revealed', entry.isIntersecting);
-      }
-    }, { threshold: 0.12, rootMargin: '0px 0px -3% 0px' });
-    nav.classList.add('saqr-orbit-motion-ready');
-    bubbles.forEach(bubble => observer.observe(bubble));
-    return () => {
-      observer.disconnect();
-      nav.classList.remove('saqr-orbit-motion-ready');
-      bubbles.forEach(bubble => bubble.classList.remove('is-revealed'));
-    };
-  }, [page, role, learningAllowed]);
+      for (const entry of entries) stage.classList.toggle('is-in-view', entry.isIntersecting);
+    }, { threshold: 0.035, rootMargin: '0px 0px -2% 0px' });
+    observer.observe(stage);
+    stage.classList.add('saqr-orbit-motion-ready');
+    return () => { observer.disconnect(); stage.classList.remove('saqr-orbit-motion-ready', 'is-in-view'); };
+  }, []);
+  const moveLight = (event: React.PointerEvent<HTMLAnchorElement>) => {
+    if (event.pointerType === 'touch') return;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const x = Math.max(0, Math.min(1, (event.clientX - bounds.left) / Math.max(1, bounds.width)));
+    const y = Math.max(0, Math.min(1, (event.clientY - bounds.top) / Math.max(1, bounds.height)));
+    event.currentTarget.style.setProperty('--light-x', (x * 100).toFixed(0) + '%');
+    event.currentTarget.style.setProperty('--light-y', (y * 100).toFixed(0) + '%');
+    event.currentTarget.style.setProperty('--tilt-x', ((x - .5) * 12).toFixed(1) + 'deg');
+    event.currentTarget.style.setProperty('--tilt-y', ((.5 - y) * 12).toFixed(1) + 'deg');
+  };
+  const clearLight = (event: React.PointerEvent<HTMLAnchorElement>) => {
+    event.currentTarget.style.removeProperty('--light-x');
+    event.currentTarget.style.removeProperty('--light-y');
+    event.currentTarget.style.removeProperty('--tilt-x');
+    event.currentTarget.style.removeProperty('--tilt-y');
+  };
   useEffect(() => () => { if (navigationTimer.current) clearTimeout(navigationTimer.current); }, []);
   const openLink = (e: React.MouseEvent<HTMLAnchorElement>, destination: string) => {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
@@ -111,11 +121,9 @@ export default function SaqrOrbitNavigation({
   const turnPage = (delta: number) => setPage(current => (current + delta + pageCount) % pageCount);
   return (
     <section className="saqr-orbit-section" dir={isAr ? 'rtl' : 'ltr'} aria-label={isAr ? 'خدمات المكتبة التفاعلية' : 'Interactive library navigation'}>
-      <header className="saqr-orbit-heading">
-        <h2>{isAr ? 'اكتشف عالم المكتبة مع صقر' : 'Explore the Library with Saqr'}</h2>
-      </header>
       <div
         className="saqr-orbit-stage"
+        ref={stageRef}
         onTouchStart={event => { swipeX.current = event.touches[0]?.clientX ?? null; }}
         onTouchEnd={event => {
           if (swipeX.current !== null && event.changedTouches[0]) {
@@ -136,20 +144,25 @@ export default function SaqrOrbitNavigation({
           <span className="saqr-orbit-saqr-portrait">
             <img src="/Saqr.png" alt={isAr ? 'شخصية صقر الأصلية من مدرسة صقر الإمارات' : 'Official Saqr mascot'} loading="eager" decoding="async"/>
           </span>
-          <span className="saqr-orbit-name">{isAr ? 'صقر معاك في كل خطوة' : 'Saqr is here to help'}</span>
           {showMascotBubble && <span className="saqr-orbit-talk">{isAr ? 'فخورين بالإمارات' : 'Proud of the UAE'}</span>}
           {bursts.map(burst => <svg key={burst.id} className="saqr-orbit-burst" viewBox="0 0 24 24" style={{ '--burst-x': burst.tx + 'px', '--burst-y': burst.ty + 'px', '--burst-rot': burst.rot + 'deg' } as React.CSSProperties} aria-hidden="true"><path d="m12 2 2.5 6.5L21 11l-6.5 2.5L12 20l-2.5-6.5L3 11l6.5-2.5L12 2Z" fill="#e1a82c"/></svg>)}
         </button>
         </div>
-        <nav ref={bubbleRefs} aria-label={isAr ? 'روابط خدمات المكتبة' : 'Library service links'} className="saqr-orbit-links">
+        <nav aria-label={isAr ? 'روابط خدمات المكتبة' : 'Library service links'} className="saqr-orbit-links">
           {visible.map((item, index) => (
             <Link key={item.key} to={item.to} className={'saqr-orbit-bubble saqr-orbit-position-' + index}
-              style={{ '--bubble-rgb': item.tint, '--bubble-delay': (index * -.4) + 's' } as React.CSSProperties}
+              style={{ '--bubble-rgb': item.tint, '--bubble-delay': (index * -.43) + 's', '--reveal-delay': (index * 75) + 'ms' } as React.CSSProperties}
               onClick={event => openLink(event, item.to)}
+              onPointerMove={moveLight}
+              onPointerLeave={clearLight}
               aria-label={isAr ? item.ar : item.en}>
-              <span className="saqr-orbit-glass-shine" aria-hidden="true"/>
-              <OrbitIcon kind={item.icon}/>
-              <span className="saqr-orbit-bubble-label">{isAr ? item.ar : item.en}</span>
+              <span className="saqr-orbit-float">
+                <span className="saqr-orbit-glass">
+                  <span className="saqr-orbit-glass-shine" aria-hidden="true"/>
+                  <OrbitIcon kind={item.icon}/>
+                  <span className="saqr-orbit-bubble-label">{isAr ? item.ar : item.en}</span>
+                </span>
+              </span>
             </Link>
           ))}
         </nav>
