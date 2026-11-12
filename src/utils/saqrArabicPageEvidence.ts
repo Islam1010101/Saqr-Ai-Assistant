@@ -33,9 +33,9 @@ export const exactArabicBookContentId=(
   question:string,books:ReadonlyArray<DigitalLibraryBook>
 ):string|null=>{
   const clean=(value:string)=>String(value||'').normalize('NFKC').toLowerCase()
-    .replace(/[\\u064B-\\u065F\\u0670\\u0640]/g,'')
+    .replace(/[\u064B-\u065F\u0670\u0640]/g,'')
     .replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه')
-    .replace(/[^\\p{L}\\p{N}]+/gu,' ').trim();
+    .replace(/[^\p{L}\p{N}]+/gu,' ').trim();
   const raw=String(question||'');
   if(!/(?:لخص|ملخص|تحليل|حلل|اشرح|شرح|ناقش|مضمون|محتوى|summari[sz]e|summary|analy[sz]e|explain|discuss)/i.test(raw))return null;
   if(/(?:تحدي|المؤلف الصغير|تأليف|اكتب قصة|تحضير|درس|ورقة عمل|شهادة|lesson|worksheet|certificate|story challenge)/i.test(raw))return null;
