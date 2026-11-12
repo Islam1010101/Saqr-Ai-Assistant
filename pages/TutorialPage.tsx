@@ -466,28 +466,35 @@ export default function TutorialPage() {
 
       <main className="relative z-10 flex w-full flex-col items-center p-4 pt-28 transition-colors duration-500 md:p-8 md:pt-28">
         <div className="w-full max-w-[1300px] mt-3 flex flex-col gap-8 md:mt-2 md:gap-10">
-          <section className="tutorial-tour-intro rounded-[1.75rem] border-2 border-emerald-200 dark:border-emerald-900 bg-white/95 dark:bg-slate-900/95 px-5 py-4 sm:px-7 sm:py-5 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div><p className="text-xs font-black text-emerald-700 dark:text-emerald-300">{label('دليل بوابة المعرفة','KNOWLEDGE PORTAL TOUR')}</p><h2 className="mt-1 text-lg sm:text-xl font-black">{label('دليل شامل لخدمات البوابة من منظور الإدارة','Explore all portal features from the admin perspective')}</h2><p className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300">{label('اكتشف وظائف البوابة بالتفصيل، وشاهد أقسام التحديات والهوية الوطنية والخدمات الإدارية. يمكنك فتح البطاقة لمعرفة المزيد، مع الحفاظ على خصوصية الحسابات.','Discover the complete portal, including challenges, heritage learning and administrative services. Tap the main tiles for details; visitor privacy is preserved.')}</p></div>
-            {hasSignedInSession && <Link to="/home" className="shrink-0 min-h-11 inline-flex items-center rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white px-5 py-3 font-black text-xs sm:text-sm shadow-md">{label('الدخول للبوابة الأصلية','Open the real home page')}</Link>}
-            {!hasSignedInSession && <Link to="/" className="shrink-0 min-h-11 inline-flex items-center rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white px-5 py-3 font-black text-xs sm:text-sm shadow-md">{label('تسجيل الدخول لاستخدام الخدمات','Sign in to use services')}</Link>}
-          </section>
           <HintTarget id="welcome-panel" title={label('منطقة الترحيب', 'Welcome panel')} description={label('يعرض الموقع الحقيقي ترحيبًا مخصصًا حسب الحساب. تم إخفاء اسم المستخدم ونوع الحساب في نسخة الزائر.', 'The live site personalizes this area by account. User names and account roles are hidden in this visitor tour.')} interactive={false} {...hintState}>
             <section className="mx-auto max-w-4xl space-y-3 text-center">
               <div className="inline-block rounded-full border-2 border-slate-200 bg-white/90 px-5 py-2 text-xs font-bold text-slate-700 shadow-md backdrop-blur-md dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-200 md:text-sm">
                 {label('جولة شاملة', 'Complete tour')}
               </div>
               <div className="flex flex-col items-center gap-2 pt-1">
-                <span className="text-lg sm:text-xl md:text-2xl font-black tracking-wide text-emerald-700 dark:text-emerald-300">{label('مرحبًا بك أيها الزائر في بوابة المعرفة', 'Welcome, visitor, to the Knowledge Portal')}</span>
+                <span className="text-lg sm:text-xl md:text-2xl font-black tracking-wide text-emerald-700 dark:text-emerald-300">{label('أهلاً بك', 'Welcome')}</span>
                 <div className="group relative cursor-default overflow-hidden rounded-[2.5rem] border-2 border-white/90 bg-white/80 px-8 py-3.5 shadow-2xl backdrop-blur-2xl dark:border-slate-800 dark:bg-slate-900/80">
                   <div className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-1000 group-hover:translate-x-full dark:via-white/10" />
                   <h1 className="text-2xl font-black tracking-tight text-slate-800 dark:text-white sm:text-4xl md:text-5xl">
-                    <span className="bg-gradient-to-r from-blue-600 to-emerald-500 bg-clip-text text-transparent">{label('استكشف خدمات مكتبة صقر الإمارات', 'Explore the EFIPS Library')}</span>
+                    <span className="bg-gradient-to-r from-blue-600 to-emerald-500 bg-clip-text text-transparent">{label('زائر المكتبة', 'Library Visitor')}</span>
                   </h1>
                 </div>
               </div>
-              <p className="mx-auto max-w-xl pt-2 text-sm font-normal text-slate-600 dark:text-slate-400 md:text-lg">
+              <p className="mx-auto max-w-xl pt-2 text-sm font-semibold text-slate-600 dark:text-slate-400 md:text-lg">
                 {label('بوابتك الذكية للوصول إلى المعلومات والإبداع.', 'Your smart gateway to knowledge and creativity.')}
               </p>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                {label('نسخة توضيحية للواجهة — اضغط على أي عنصر لمعرفة وظيفته.', 'Illustrative homepage tour — select any element to learn what it does.')}
+              </p>
+              {hasSignedInSession ? (
+                <Link to="/home" className="mt-2 inline-flex min-h-11 items-center rounded-xl bg-emerald-700 hover:bg-emerald-800 px-5 py-2.5 text-sm font-black text-white shadow-sm">
+                  {label('العودة إلى البوابة', 'Open the real homepage')}
+                </Link>
+              ) : (
+                <Link to="/" className="mt-2 inline-flex min-h-11 items-center rounded-xl bg-emerald-700 hover:bg-emerald-800 px-5 py-2.5 text-sm font-black text-white shadow-sm">
+                  {label('تسجيل الدخول لاستخدام الخدمات', 'Sign in to use the services')}
+                </Link>
+              )
             </section>
           </HintTarget>
 
@@ -526,7 +533,8 @@ export default function TutorialPage() {
             )}
           </section>
 
-          <div className="tutorial-reading-goal w-full max-w-5xl mx-auto">          <HintTarget id="monthly-reading-goal" title={label('تحدي القراءة الشهري', 'Monthly Reading Challenge')} description={label('اختر هدف القراءة الشهري وسجّل الكتب التي أنهيتها؛ زر «قائمة القراءة» يفتح قائمة منبثقة تضم الكتب المختارة، مع تحديد تمت القراءة أو لم تتم القراءة؛ وتُحتسب الإنجازات المكتملة هذا الشهر فقط. الحسابات الموثقة يمكنها مزامنة التقدم؛ لا توجد بيانات حقيقية في الجولة.', 'Set a monthly reading goal and mark books finished. The Reading list button opens a popup listing selected books with Read / Not read statuses; only books completed during the current month count. Verified accounts may sync progress; this tour shows no real data.')} interactive={false} {...hintState}>
+          <div className="tutorial-reading-goal w-full max-w-5xl mx-auto">
+            <HintTarget id="monthly-reading-goal" title={label('تحدي القراءة الشهري', 'Monthly Reading Challenge')} description={label('اختر هدف القراءة الشهري وسجّل الكتب التي أنهيتها؛ زر «قائمة القراءة» يفتح قائمة منبثقة تضم الكتب المختارة، مع تحديد تمت القراءة أو لم تتم القراءة؛ وتُحتسب الإنجازات المكتملة هذا الشهر فقط. الحسابات الموثقة يمكنها مزامنة التقدم؛ لا توجد بيانات حقيقية في الجولة.', 'Set a monthly reading goal and mark books finished. The Reading list button opens a popup listing selected books with Read / Not read statuses; only books completed during the current month count. Verified accounts may sync progress; this tour shows no real data.')} interactive={false} {...hintState}>
             <section className="homepage-alerts w-full overflow-hidden rounded-[1.75rem] border-2 border-amber-300 dark:border-amber-500/50 bg-gradient-to-br from-blue-600 via-emerald-600 to-teal-600 dark:from-blue-800 dark:via-emerald-800 dark:to-teal-900 p-4 sm:p-5 shadow-xl text-white transition-all hover:-translate-y-1 hover:shadow-2xl">
               <div className="flex flex-wrap justify-between items-center gap-4">
                 <div className="flex gap-3 items-center"><div className="rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 p-3 text-white shadow-lg"><BookIcon /></div><div><h2 className="text-base md:text-lg font-black text-white">{label('تحدي القراءة الشهري','Monthly Reading Challenge')}</h2><p className="mt-1 text-xs sm:text-sm text-white/90 font-semibold">{label('جواز القارئ — هدف شخصي','Reading Passport — personal goal')}</p></div></div>
@@ -544,8 +552,34 @@ export default function TutorialPage() {
           </HintTarget>
           </div>
 
-          {/* Notifications are rendered with deliberately masked sample fields. */}
-          <p className="text-center text-xs font-semibold text-slate-500 dark:text-slate-400">{label('تنبيهات الاستعارات ومواعيد الحصص تظهر للمستخدم حين توجد سجلات مرتبطة بحسابه، وتظل بياناتها خاصة.', 'Borrowing reminders and class periods appear only when relevant to the signed-in account; personal records stay private.')}</p>
+          {/* The real homepage shows these sections only with records; sample fields stay masked. */}
+          <details className="mx-auto w-full max-w-5xl rounded-[1.5rem] border border-emerald-200 dark:border-emerald-900 bg-white/95 dark:bg-slate-900/95 p-4 shadow-sm">
+            <summary className="cursor-pointer min-h-11 flex items-center text-sm sm:text-base font-black text-emerald-800 dark:text-emerald-200">
+              {label('متى تظهر حجوزات المعلم وتنبيهات الاستعارة؟', 'When do teacher bookings and borrowing reminders appear?')}
+            </summary>
+            <p className="mt-2 mb-4 text-sm leading-7 font-semibold text-slate-600 dark:text-slate-300">
+              {label('تظهر الأقسام التالية في الصفحة الرئيسية فقط عند وجود سجلات مرتبطة بحساب المستخدم. هذه البطاقات توضيحية ولا تعرض أي أسماء أو بيانات حقيقية.', 'The following panels appear on the real homepage only when records are linked to the user. This is a privacy-safe illustration with no real names or records.')}
+            </p>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <HintTarget id="teacher-schedule-preview" title={label('جدول المعلم', 'Teacher schedule')} description={label('يُعرض جدول حصص المكتبة المحجوزة لهذا الأسبوع للمعلم فقط عند وجود حجوزات. يمكنك مراجعة اليوم والحصة والمادة والصف والانتقال إلى صفحة الجدول.', 'The teacher sees booked library periods only when they exist, with day, period, subject and grade, and a link to the schedule.')} interactive={false} {...hintState}>
+                <article className="homepage-alerts rounded-[1.75rem] border border-emerald-200 dark:border-emerald-800 bg-gradient-to-br from-white to-teal-50 dark:from-slate-900 dark:to-slate-800 p-5 shadow-sm">
+                  <h3 className="font-black text-emerald-800 dark:text-emerald-300">{label('جدول استخدام المكتبة الخاص بك', 'Your Library Schedule')}</h3>
+                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">{label('حصصك المحجوزة لهذا الأسبوع', 'Your booked periods this week')}</p>
+                  <div className="mt-4 grid grid-cols-2 gap-2">
+                    <span className="rounded-xl bg-white/90 dark:bg-slate-700 p-3 text-xs font-bold">{label('اليوم: —','Day: —')}</span>
+                    <span className="rounded-xl bg-white/90 dark:bg-slate-700 p-3 text-xs font-bold">{label('الحصة: —','Period: —')}</span>
+                  </div>
+                </article>
+              </HintTarget>
+              <HintTarget id="borrow-notification-preview" title={label('تنبيهات الاستعارة', 'Borrowing notifications')} description={label('تُعرض تنبيهات الاستعارة المرتبطة بحساب المستخدم فقط عند وجود استعارات أو مواعيد إرجاع. يستطيع المستخدم فتح تفاصيلها من صفحته الخاصة.', 'Borrowing notifications appear only when there are books or return dates linked to the signed-in account; users access their own details.')} interactive={false} {...hintState}>
+                <article className="homepage-alerts rounded-[1.75rem] border border-emerald-200 dark:border-emerald-800 bg-gradient-to-br from-white to-emerald-50 dark:from-slate-900 dark:to-slate-800 p-5 shadow-sm">
+                  <h3 className="font-black text-emerald-800 dark:text-emerald-300">{label('تنبيهات استعارة الكتب', 'Book Borrowing Alerts')}</h3>
+                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">{label('تظهر عند وجود سجلات مرتبطة بحسابك', 'Shown when your account has linked records')}</p>
+                  <div className="mt-4 rounded-xl bg-white/90 dark:bg-slate-700 p-3 text-xs font-bold">{label('عنوان الكتاب: — / موعد الإرجاع: —','Book: — / Return date: —')}</div>
+                </article>
+              </HintTarget>
+            </div>
+          </details>
 
 
 
