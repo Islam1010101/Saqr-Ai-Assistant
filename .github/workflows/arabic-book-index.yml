@@ -1,0 +1,65 @@
+name: Arabic digital books - isolated text indexing
+on:
+  workflow_dispatch:
+    inputs:
+      book_id:
+        description: 'Optional exact Arabic book ID (blank means batch)'
+        required: false
+        type: string
+      offset:
+        description: 'Zero-based book offset in the 502-book catalog'
+        required: false
+        default: '0'
+        type: string
+      max_books:
+        description: 'Books per run; 0 means all remaining'
+        required: false
+        default: '5'
+        type: string
+      max_pages:
+        description: 'New pages to OCR per book this run; 0 means all remaining'
+        required: false
+        default: '80'
+        type: string
+permissions:
+  contents: read
+jobs:
+  index:
+    runs-on: ubuntu-latest
+    timeout-minutes: 175
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      BOOK_ID: ${{ inputs.book_id }}
+      OFFSET: ${{ inputs.offset }}
+      MAX_BOOKS: ${{ inputs.max_books }}
+      MAX_PAGES: ${{ inputs.max_pages }}
+    steps:
+      - name: Checkout the exact reviewed source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9
+      - name: Install Arabic OCR and PDF readers
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq tesseract-ocr tesseract-ocr-ara tesseract-ocr-eng poppler-utils
+      - name: Install existing app dependencies
+        run: npm ci
+      - name: Export current catalog + verified page manifests (read-only)
+        run: node tools/arabic-knowledge/export-manifest.mjs /tmp/saqr-arabic-manifest.json
+      - name: Index bounded batch into isolated RLS-protected table
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=(--manifest /tmp/saqr-arabic-manifest.json --report /tmp/saqr-arabic-index-report.json --upload
+                --offset "$OFFSET" --max-books "$MAX_BOOKS" --max-pages "$MAX_PAGES" --time-budget-minutes 140)
+          if [[ -n "$BOOK_ID" ]]; then
+            args+=(--book-id "$BOOK_ID")
+          fi
+          python3 tools/arabic-knowledge/index-books.py "${args[@]}"
+      - name: Attach missing-page and indexed-page report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: arabic-index-report
+          path: /tmp/saqr-arabic-index-report.json
+          if-no-files-found: ignore
+          retention-days: 14
