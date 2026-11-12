@@ -31,6 +31,7 @@ const AUTHOR_BY_TITLE:Readonly<Record<string,string>>={
   "Dog Man: Twenty Thousand Fleas Under the Sea": "Dav Pilkey",
   "Dog Man: A Tale of Two Kitties": "Dav Pilkey",
   "Big Jim Believes": "Dav Pilkey",
+  "Disney Adventures: Super Comic Special": "Disney",
   "Cat Kid Comic Club: Perspectives": "Dav Pilkey",
   "The 7 Habits of Happy Kids": "Sean Covey",
   "DK Children's Encyclopedia": "DK",
