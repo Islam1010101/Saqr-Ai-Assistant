@@ -40,7 +40,9 @@ for(const record of digitalReadingChallengeBooks){
 for(const [role,locale] of groups){
  const books=getRoleReadingBooks(role,locale);
  assert.ok(books.length>=4,`Not enough validated books for ${role}/${locale}`);
- assert.ok(books.length>readingChallengeBooks.filter(b=>b.role===role&&b.locale===locale).length,`New digital books must extend ${role}/${locale}`);
+ const physicalCount=readingChallengeBooks.filter(b=>b.role===role&&b.locale===locale).length;
+ assert.ok(books.length>=physicalCount,`Retiring old English PDFs must not remove existing physical challenges for ${role}/${locale}`);
+ if(locale==='ar') assert.ok(books.length>physicalCount,`The verified Arabic digital challenges must extend ${role}/${locale}`);
  for(const entry of books){
   assert.equal(entry.role,role);assert.equal(entry.locale,locale);
   assert.equal(entry.book.language.toLowerCase(),locale);
