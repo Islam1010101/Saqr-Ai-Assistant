@@ -59,7 +59,7 @@ export default function SaqrOrbitNavigation({
   bursts: Burst[];
 }) {
   const navigate = useNavigate();
-  const frameRef = useRef<HTMLDivElement>(null);
+  const bubbleRefs = useRef<HTMLElement>(null);
   const navigationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const swipeX = useRef<number | null>(null);
   const [page, setPage] = useState(0);
@@ -79,26 +79,26 @@ export default function SaqrOrbitNavigation({
   const pageCount = Math.max(1, Math.ceil(links.length / 8));
   const visible = links.slice(page * 8, page * 8 + 8);
   useEffect(() => setPage(0), [role]);
+  // Each sphere fades into view while it enters the viewport. Avoid hiding content when
+  // IntersectionObserver is unavailable or the user prefers reduced motion.
   useEffect(() => {
-    const container = frameRef.current;
-    if (!container || !window.matchMedia('(pointer: fine)').matches || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    let raf = 0;
-    const update = (e: PointerEvent) => {
-      if (raf) cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const box = container.getBoundingClientRect();
-        const x = Math.max(-1, Math.min(1, (e.clientX - (box.left + box.width / 2)) / Math.max(box.width / 2, 170)));
-        const y = Math.max(-1, Math.min(1, (e.clientY - (box.top + box.height * .45)) / Math.max(box.height / 2, 170)));
-        container.style.setProperty('--saqr-look-x', (x * 5).toFixed(2) + 'px');
-        container.style.setProperty('--saqr-look-y', (y * 4).toFixed(2) + 'px');
-        container.style.setProperty('--saqr-turn-y', (x * 5).toFixed(2) + 'deg');
-        container.style.setProperty('--saqr-turn-x', (-y * 3).toFixed(2) + 'deg');
-        container.style.setProperty('--saqr-ray-x', (x * 13).toFixed(2) + 'px');
-      });
+    const nav = bubbleRefs.current;
+    if (!nav || typeof IntersectionObserver === 'undefined' ||
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const bubbles = Array.from(nav.querySelectorAll<HTMLElement>('.saqr-orbit-bubble'));
+    const observer = new IntersectionObserver(entries => {
+      for (const entry of entries) {
+        entry.target.classList.toggle('is-revealed', entry.isIntersecting);
+      }
+    }, { threshold: 0.12, rootMargin: '0px 0px -3% 0px' });
+    nav.classList.add('saqr-orbit-motion-ready');
+    bubbles.forEach(bubble => observer.observe(bubble));
+    return () => {
+      observer.disconnect();
+      nav.classList.remove('saqr-orbit-motion-ready');
+      bubbles.forEach(bubble => bubble.classList.remove('is-revealed'));
     };
-    window.addEventListener('pointermove', update, { passive: true });
-    return () => { window.removeEventListener('pointermove', update); if (raf) cancelAnimationFrame(raf); };
-  }, []);
+  }, [page, role, learningAllowed]);
   useEffect(() => () => { if (navigationTimer.current) clearTimeout(navigationTimer.current); }, []);
   const openLink = (e: React.MouseEvent<HTMLAnchorElement>, destination: string) => {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
@@ -112,13 +112,10 @@ export default function SaqrOrbitNavigation({
   return (
     <section className="saqr-orbit-section" dir={isAr ? 'rtl' : 'ltr'} aria-label={isAr ? 'خدمات المكتبة التفاعلية' : 'Interactive library navigation'}>
       <header className="saqr-orbit-heading">
-        <span className="saqr-orbit-kicker">EFIPS LIBRARY EXPERIENCE</span>
         <h2>{isAr ? 'اكتشف عالم المكتبة مع صقر' : 'Explore the Library with Saqr'}</h2>
-        <p>{isAr ? 'اختَر كرتك الزجاجية لبدء مغامرتك' : 'Choose a glass sphere to begin your adventure'}</p>
       </header>
       <div
         className="saqr-orbit-stage"
-        ref={frameRef}
         onTouchStart={event => { swipeX.current = event.touches[0]?.clientX ?? null; }}
         onTouchEnd={event => {
           if (swipeX.current !== null && event.changedTouches[0]) {
@@ -128,6 +125,7 @@ export default function SaqrOrbitNavigation({
           swipeX.current = null;
         }}
       >
+        <div className="saqr-orbit-scene">
         <div className="saqr-orbit-halo saqr-orbit-halo-outer" aria-hidden="true" />
         <div className="saqr-orbit-halo saqr-orbit-halo-inner" aria-hidden="true" />
         <div className="saqr-orbit-brand-aura" aria-hidden="true">
@@ -136,15 +134,14 @@ export default function SaqrOrbitNavigation({
         </div>
         <button type="button" className="saqr-orbit-character" onClick={onMascotClick} aria-label={isAr ? 'تفاعل مع شخصية صقر' : 'Interact with Saqr'}>
           <span className="saqr-orbit-saqr-portrait">
-            <img src="/saqr-full.png" alt={isAr ? 'شخصية صقر الأصلية من مدرسة صقر الإمارات' : 'Official Saqr mascot'} loading="eager"/>
-            <span className="saqr-orbit-eye saqr-orbit-eye-left" aria-hidden="true"/>
-            <span className="saqr-orbit-eye saqr-orbit-eye-right" aria-hidden="true"/>
+            <img src="/Saqr.png" alt={isAr ? 'شخصية صقر الأصلية من مدرسة صقر الإمارات' : 'Official Saqr mascot'} loading="eager" decoding="async"/>
           </span>
           <span className="saqr-orbit-name">{isAr ? 'صقر معاك في كل خطوة' : 'Saqr is here to help'}</span>
           {showMascotBubble && <span className="saqr-orbit-talk">{isAr ? 'فخورين بالإمارات' : 'Proud of the UAE'}</span>}
           {bursts.map(burst => <svg key={burst.id} className="saqr-orbit-burst" viewBox="0 0 24 24" style={{ '--burst-x': burst.tx + 'px', '--burst-y': burst.ty + 'px', '--burst-rot': burst.rot + 'deg' } as React.CSSProperties} aria-hidden="true"><path d="m12 2 2.5 6.5L21 11l-6.5 2.5L12 20l-2.5-6.5L3 11l6.5-2.5L12 2Z" fill="#e1a82c"/></svg>)}
         </button>
-        <nav aria-label={isAr ? 'روابط خدمات المكتبة' : 'Library service links'} className="saqr-orbit-links">
+        </div>
+        <nav ref={bubbleRefs} aria-label={isAr ? 'روابط خدمات المكتبة' : 'Library service links'} className="saqr-orbit-links">
           {visible.map((item, index) => (
             <Link key={item.key} to={item.to} className={'saqr-orbit-bubble saqr-orbit-position-' + index}
               style={{ '--bubble-rgb': item.tint, '--bubble-delay': (index * -.4) + 's' } as React.CSSProperties}
@@ -168,7 +165,6 @@ export default function SaqrOrbitNavigation({
         )}
         <div className={'saqr-orbit-page-transition' + (transitioning ? ' is-visible' : '')} aria-hidden="true"><span/></div>
       </div>
-      <p className="saqr-orbit-instruction">{isAr ? 'مرّر المؤشر أو المس الكرات لاستكشاف الخدمات' : 'Move the pointer or tap the spheres to explore'}</p>
     </section>
   );
 }
