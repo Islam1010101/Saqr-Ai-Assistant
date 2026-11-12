@@ -11,7 +11,7 @@ const catalog = { physical: [], arabic: ARABIC_LIBRARY_DATABASE, english: ENGLIS
 const seriesKeys = Object.keys(DIGITAL_SERIES_VOLUMES);
 const newVolumes = [...ARABIC_LIBRARY_DATABASE, ...ENGLISH_LIBRARY_DATABASE]
   .filter(book => seriesKeys.some(id => String(book.id).startsWith(id + '-')));
-assert.equal(newVolumes.length, 412, 'Keep the complete 412-book individual-series expansion');
+assert.equal(newVolumes.length, 242, 'All 242 currently catalogued Arabic-series volumes remain findable; retired English PDF series are excluded');
 assert.equal(new Set(newVolumes.map(book => String(book.id))).size, newVolumes.length);
 for (const volume of newVolumes) {
   const photoFolderId = PHOTO_SERIES_FOLDERS_20261111[String(volume.id)];
@@ -23,7 +23,6 @@ for (const [series, ar] of [
   ['مجموعة روايات أجاثا كريستي', true],
   ['المكتبة الخضراء للأطفال', true],
   ['3D قصص الأنبياء', true],
-  ['Diary Of A Wimpy', false],
 ] as const) {
   const matches = searchSaqrBookCatalog((ar ? 'كتب ' : 'Books in ') + series, catalog);
   const volume = matches.find(result => result.series === series);
@@ -38,4 +37,9 @@ for (const [series, ar] of [
   assert.ok(answer.includes(series), 'Catalog answer must identify the parent series');
   assert.ok(answer.includes(volume.driveLink!), 'Catalog answer must link to the verified individual-book source');
 }
-console.log('PASS: all 412 individual volumes retain accurate PDF or verified-photo referrals in Saqr');
+for (const title of ['Knowledge Encyclopedia','Diary of a Wimpy Kid: The Meltdown']) {
+  const hits=searchSaqrBookCatalog('Books '+title,catalog);
+  assert.ok(hits.some(book=>book.title===title && book.driveLink===ENGLISH_LIBRARY_DATABASE.find(entry=>entry.title===title)?.driveLink),
+    'Saqr must refer to the new photo edition: '+title);
+}
+console.log('PASS: 242 active Arabic series volumes and new English photo books retain Saqr catalog referrals');

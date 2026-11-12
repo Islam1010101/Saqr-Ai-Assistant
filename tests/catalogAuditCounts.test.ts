@@ -1,9 +1,12 @@
+import assert from 'node:assert/strict';
 import {bookData} from '../api/bookData.ts';
 import {ARABIC_LIBRARY_DATABASE,ENGLISH_LIBRARY_DATABASE} from '../api/digitalBookData.ts';
 import {NATIONAL_IDENTITY_DIGITAL_BOOKS} from '../api/nationalIdentityDigitalBooks.ts';
 import {nationalIdentityBooks} from '../src/utils/nationalIdentityCatalog.ts';
 const physical=bookData.length,arabic=ARABIC_LIBRARY_DATABASE.length,english=ENGLISH_LIBRARY_DATABASE.length,
   nationalDigital=NATIONAL_IDENTITY_DIGITAL_BOOKS.length,nationalPhysical=nationalIdentityBooks.length;
+assert.equal(ENGLISH_LIBRARY_DATABASE.length,71,'Only the new English photo collection may be counted');
+assert.ok(ENGLISH_LIBRARY_DATABASE.every(book=>/^(?:EN_PH_|EN_DRIVE_)/.test(String(book.id))));
 const links=[...ARABIC_LIBRARY_DATABASE,...ENGLISH_LIBRARY_DATABASE,...NATIONAL_IDENTITY_DIGITAL_BOOKS];
 const titles=books=>new Set(books.map(b=>String(b.title||'').trim().toLowerCase())).size;
 const duplicatedIds=books=>books.length-new Set(books.map(b=>String(b.id))).size;
@@ -22,4 +25,5 @@ const summary={
  identitySubsetOfPhysical:nationalIdentityBooks.every(b=>bookData.some(row=>row.id===b.id))
 };
 if(summary.catalogTotal!==summary.physical+summary.digitalTotal || !summary.identitySubsetOfPhysical)throw Error('Catalog count integrity failed');
+assert.equal(summary.digitalUniqueIds.english,71,'Duplicate English catalog IDs found');
 console.log('EFIPS_CATALOG_AUDIT_RESULT='+JSON.stringify(summary));

@@ -7,24 +7,11 @@ import { supabase } from '../src/utils/supabase';
 import { useReadingPassport, digitalBookKey } from '../src/utils/readingPassport';
 import DigitalBookRating from '../src/components/DigitalBookRating';
 import DigitalLibraryDialog from '../src/components/DigitalLibraryDialog';
-import DigitalBookReader from '../src/components/DigitalBookReader';
-import { CODING_IMAGE_BOOK_ID, CODING_IMAGE_BOOK_PAGES } from '../src/data/codingImageBookPilot';
-import { COMPLETED_ENGLISH_IMAGE_BOOK_PAGES } from '../src/data/completedEnglishImageBooks20261109';
-/** Load the remaining large photo-book page lists on demand, not on library entry. */
-const RemainingEnglishPhotoBookReader = React.lazy(() => import('../src/components/RemainingEnglishPhotoBookReader'));
 const EnglishPhotoBookReader = React.lazy(() => import('../src/components/EnglishPhotoBookReader'));
-const REMAINING_COMPLETED_ENGLISH_IMAGE_IDS = new Set([
-    'EN_NEW_20261109_05', // Knowledge Encyclopedia
-    'EN_NEW_20261109_07', // 1000 Inventions and Discoveries
-    'EN_NEW_20261109_10', // Dog Man: Twenty Thousand Fleas Under the Sea
-    'EN_NEW_20261109_16', // Space! The Universe
-    'EN_NEW_20261109_18', // Artist's Painting Techniques
-]);
-import { digitalReaderSource } from '../src/utils/digitalReaderSource';
 import { useDigitalReadingProgress } from '../src/utils/useDigitalReadingProgress';
 import { pdfProgressPercent, type PdfReadingState } from '../src/utils/pdfReadingState';
 
-// Shared with Saqr catalog search; preserve book IDs and source links.
+// Current English photo catalog, shared unchanged with Saqr catalog search.
 import { ENGLISH_LIBRARY_DATABASE, type DigitalLibraryBook } from '../api/digitalBookData';
 export { ENGLISH_LIBRARY_DATABASE } from '../api/digitalBookData';
 
@@ -222,7 +209,7 @@ const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void
     const ageGroup = book?.reviewedAgeGroup || book?.readingAudience ? ageLabels[(book.reviewedAgeGroup || book.readingAudience)!] : '';
 
     if (!book) return null;
-    if (readerOpen && book.photoBatch) return <React.Suspense fallback={
+    if (readerOpen) return <React.Suspense fallback={
         <DigitalLibraryDialog title={book.title} variant="reader" onClose={onClose}>
             <section className="efips-book-reader flex items-center justify-center p-8" role="status">
                 {locale==='ar'?'جاري فتح قارئ صقر الزجاجي...':'Opening the EFIPS glass book reader...'}
@@ -230,28 +217,6 @@ const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void
         </DigitalLibraryDialog>
     }><EnglishPhotoBookReader book={book} locale={locale}
         onBack={() => setReaderOpen(false)} onClose={onClose}/></React.Suspense>;
-    if (readerOpen && REMAINING_COMPLETED_ENGLISH_IMAGE_IDS.has(String(book.id))) return (
-        <React.Suspense fallback={
-            <DigitalLibraryDialog title={book.title} variant="reader" onClose={onClose}>
-                <section className="efips-book-reader flex flex-col items-center justify-center gap-5 p-6" role="status">
-                    <h2 dir="auto">{book.title}</h2>
-                    <p>{locale==='ar'?'جاري تجهيز صفحات الكتاب...':'Preparing book pages...'}</p>
-                    <button type="button" data-book-close onClick={onClose}
-                        className="rounded-xl bg-emerald-700 px-5 py-3 text-white font-bold">
-                        {locale==='ar'?'إغلاق':'Close'}
-                    </button>
-                </section>
-            </DigitalLibraryDialog>
-        }>
-            <RemainingEnglishPhotoBookReader book={book} locale={locale}
-                onBack={() => setReaderOpen(false)} onClose={onClose} />
-        </React.Suspense>
-    );
-    if (readerOpen) return <DigitalBookReader title={book.title} source={book.driveLink} bookKey={digitalBookKey('en', book)} locale={locale}
-        schoolOnly={Boolean(book.requiresSchoolGoogleAccess)} sourceSizeBytes={book.fileSizeBytes}
-        imagePages={String(book.id)===CODING_IMAGE_BOOK_ID ? CODING_IMAGE_BOOK_PAGES : COMPLETED_ENGLISH_IMAGE_BOOK_PAGES[String(book.id)]}
-        onBack={() => setReaderOpen(false)} onClose={onClose} />;
-
     return (
         <DigitalLibraryDialog title={book.title} onClose={onClose}>
                 <button onClick={onClose} data-book-close aria-label={t('close')} className="efips-digital-dialog-close bg-rose-500 text-white rounded-full hover:bg-rose-600 shadow-lg">
@@ -303,12 +268,7 @@ const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void
                         <DigitalBookRating bookId={digitalBookKey('en', book)} compact={false} />
 
                         <div className="pt-2 md:pt-6">
-                            {(book.photoBatch || digitalReaderSource(book.driveLink)) ? (<button type="button" onClick={() => setReaderOpen(true)} className="w-full block bg-sky-500 text-white font-black py-4 rounded-[2rem] hover:-translate-y-1 active:translate-y-2 border-b-8 border-sky-700 active:border-b-0 transition-all text-center uppercase tracking-widest text-base shadow-md">
-                                {book.requiresSchoolGoogleAccess ? t('read') : progress && progress.page>1 ? (locale==='ar'?'أكمل القراءة':'Continue reading') : t('read')}
-                            </button>) : (<a href={book.driveLink} target="_blank" rel="noreferrer" className="w-full block bg-sky-500 text-white font-black py-4 rounded-[2rem] hover:-translate-y-1 active:translate-y-2 border-b-8 border-sky-700 active:border-b-0 transition-all text-center uppercase tracking-widest text-base shadow-md">
-                                {t('read')}
-                            </a>)}
-                        </div>
+                            <button type="button" onClick={() => setReaderOpen(true)} className="w-full block bg-sky-500 text-white font-black py-4 rounded-[2rem] hover:-translate-y-1 active:translate-y-2 border-b-8 border-sky-700 active:border-b-0 transition-all text-center uppercase tracking-widest text-base shadow-md">{t('read')}</button>                        </div>
                     </div>
                 </div>
         </DigitalLibraryDialog>
@@ -421,7 +381,7 @@ const EnglishLibraryInternalPage: React.FC = () => {
       const path=window.location.hash;
       const query=path.includes('?')?path.slice(path.indexOf('?')+1):'';
       const id=new URLSearchParams(query).get('open');
-      if(!id || !/^EN_NEW_[0-9]{8}_[0-9]{2}$/.test(id))return;
+      if(!id || !/^(?:EN_PH_|EN_DRIVE_)[A-Za-z0-9_-]+$/.test(id))return;
       const matching=ENGLISH_LIBRARY_DATABASE.find(book=>String(book.id)===id && book.requiresSchoolGoogleAccess);
       if(!matching)return;
       setSelectedBook(matching);

@@ -7,6 +7,9 @@ on:
       - 'src/data/englishPhotoLibrary20261111.ts'
       - 'src/data/englishBookEditorial20261112.ts'
       - 'src/components/EnglishPhotoBookReader.tsx'
+      - 'api/digitalBookData.ts'
+      - 'src/data/digitalSeriesVolumes.js'
+      - 'tests/catalogAuditCounts.test.ts'
       - 'pages/EnglishLibraryInternalPage.tsx'
       - 'tests/englishPhotoDrive20261112.test.ts'
       - '.github/workflows/english-photo-20261112.yml'
@@ -31,4 +34,5 @@ jobs:
           cache: npm
       - run: npm install --no-package-lock --no-audit --no-fund
       - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/englishPhotoDrive20261112.test.ts
+      - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/catalogAuditCounts.test.ts
       - run: npm run build

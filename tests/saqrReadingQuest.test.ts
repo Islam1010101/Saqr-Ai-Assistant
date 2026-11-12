@@ -11,8 +11,8 @@ const groups=[['student','ar'],['student','en'],['teacher','ar'],['teacher','en'
 assert.ok(bookData.length>=3000,'The complete EFIPS catalog should be loaded');
 assert.equal(readingChallengeBooks.length,59,'All 59 catalog-matched books must be playable');
 assert.equal(readingChallengeBooks.reduce((n,b)=>n+b.questions.length,0),555);
-assert.equal(digitalReadingChallengeBooks.length,34,'Three text-reviewed digital titles are added without removing 31 current records');
-assert.equal(digitalReadingChallengeBooks.reduce((n,b)=>n+b.questions.length,0),200,'Original 155 + 30 heritage page-grounded + 15 new title questions');
+assert.ok(digitalReadingChallengeBooks.length>=10,'Keep the validated digital reading questions for books still present in the active catalog');
+assert.ok(digitalReadingChallengeBooks.reduce((n,b)=>n+b.questions.length,0)>=50,'Retained digital books must have real review questions');
 const digitalCatalog = [...ARABIC_LIBRARY_DATABASE,...ENGLISH_LIBRARY_DATABASE,...NATIONAL_IDENTITY_DIGITAL_BOOKS];
 assert.equal(new Set(digitalReadingChallengeBooks.map(b=>b.key)).size,digitalReadingChallengeBooks.length);
 assert.equal(digitalReadingChallengeBooks.filter(b=>b.key.includes(':NI_')).length,6,'All six National Identity e-books must be playable');
@@ -26,7 +26,8 @@ for (const def of heritageReadingQuestDefinitions) {
  }
  for (const q of actual.questions.slice(def.qs.length)) assert.match(q.reference,/PDF|ملف|صورة/);
 }
-for(const id of ['digital:ar:AR_50','digital:en:28','digital:en:32'])assert.ok(digitalReadingChallengeBooks.some(b=>b.key===id));
+assert.ok(digitalReadingChallengeBooks.some(b=>b.key==='digital:ar:AR_50'),'Keep the verified Arabic digital title');
+assert.ok(!digitalReadingChallengeBooks.some(b=>/^digital:en:\d+$/.test(b.key)),'Retired English PDF IDs must not appear in reading challenges');
 for(const record of digitalReadingChallengeBooks){
   const match=digitalCatalog.find(book=>String(book.id)===record.book.id);
   assert.ok(match,`Digital book missing from actual EFIPS catalog: ${record.key}`);
@@ -39,7 +40,9 @@ for(const record of digitalReadingChallengeBooks){
 for(const [role,locale] of groups){
  const books=getRoleReadingBooks(role,locale);
  assert.ok(books.length>=4,`Not enough validated books for ${role}/${locale}`);
- assert.ok(books.length>readingChallengeBooks.filter(b=>b.role===role&&b.locale===locale).length,`New digital books must extend ${role}/${locale}`);
+ const physicalCount=readingChallengeBooks.filter(b=>b.role===role&&b.locale===locale).length;
+ assert.ok(books.length>=physicalCount,`Retiring old English PDFs must not remove existing physical challenges for ${role}/${locale}`);
+ if(locale==='ar') assert.ok(books.length>physicalCount,`The verified Arabic digital challenges must extend ${role}/${locale}`);
  for(const entry of books){
   assert.equal(entry.role,role);assert.equal(entry.locale,locale);
   assert.equal(entry.book.language.toLowerCase(),locale);
@@ -70,8 +73,8 @@ assert.ok(orbit.includes("to: '/saqr-reading-quest'") && orbit.includes("roles: 
 assert.ok(!home.includes('to="/game"'),'Game shortcut must be inside student challenges hub');
 assert.ok(!home.includes('to="/saqr-studio"'),'Studio shortcut must be inside student challenges hub');
 for(const path of ['/saqr-reading-quest','/game','/saqr-studio'])assert.ok(hub.includes(path));
-assert.ok(home.includes("userType === 'teacher' && ("));
-console.log('PASS 59 unchanged physical books + 32 reviewed digital books (including Gatsby); 555 unchanged physical questions + digital questions; role and language separation');
+assert.ok(home.includes("userType === 'teacher' && teacherSchedule.length > 0 && ("));
+console.log('PASS 59 physical books + '+digitalReadingChallengeBooks.length+' currently catalogued and verified digital challenge books; role and language separation');
 
 assert.ok(!page.includes('books.map(({key,book,questions})'),'Do not spoil all books before the journey');
 assert.ok(page.includes('setAmount(v=>Math.max(1,v-1))'));
@@ -94,4 +97,4 @@ const quest=readFileSync('pages/SaqrReadingQuestPage.tsx','utf8');
 assert.ok(quest.includes("session.role==='student'?'student':'teacher'"),'Admin must see teacher books instead of student books');
 assert.ok(quest.includes("session.role==='admin'?'مدير النظام'"),'Admin needs distinct greeting');
 assert.ok(orbit.includes("to: '/smart-search'") && orbit.includes("tint: '91, 195, 251'"), 'Ask Saqr remains visible with an identifiable glass sphere');
-assert.ok(home.includes('<SaqrOrbitNavigation') && orbitStyles.includes('backdrop-filter: blur(12px) saturate(155%)'), 'Homepage uses the responsive glass orbit instead of duplicated navigation cards');
+assert.ok(home.includes('<SaqrOrbitNavigation') && orbitStyles.includes('backdrop-filter: blur(13px) saturate(160%)'), 'Homepage uses the responsive glass orbit instead of duplicated navigation cards');

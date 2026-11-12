@@ -48,6 +48,6 @@ for(const book of ARABIC_LIBRARY_DATABASE){
 }
 assert.equal(DIGITAL_SERIES_VOLUMES.AR_18.length,160,'Legacy source is not destructively modified');
 assert.equal(ARABIC_LIBRARY_DATABASE.length,502,'Other Arabic library holdings must remain unchanged');
-assert.equal(ENGLISH_LIBRARY_DATABASE.length,77);
+assert.equal(ENGLISH_LIBRARY_DATABASE.length,71);
 assert.equal(NATIONAL_IDENTITY_DIGITAL_BOOKS.length,9);
 console.log('PASS: 167 unique complete Man of the Impossible Drive photo editions, 13,216 pages, original series removed; reader manifests intact');

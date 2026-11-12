@@ -5,7 +5,7 @@ import { MAN_IMPOSSIBLE_20261112_CATALOG } from '../src/data/manImpossible202611
 import { ARABIC_AUTHOR_BIOS_20261112 } from '../src/data/arabicEditorialBios20261112.ts';
 
 assert.equal(ARABIC_LIBRARY_DATABASE.length,502,'All Arabic digital books must remain available');
-assert.equal(ENGLISH_LIBRARY_DATABASE.length,47,'The English library must remain unchanged');
+assert.equal(ENGLISH_LIBRARY_DATABASE.length,71,'The new English photo library must remain complete');
 assert.equal(NATIONAL_IDENTITY_DIGITAL_BOOKS.length,9,'National-identity holdings must remain unchanged');
 assert.equal(MAN_IMPOSSIBLE_20261112_CATALOG.length,167);
 const ids = new Set<string>();
@@ -35,8 +35,8 @@ assert.doesNotMatch(byID.get('AR_48')?.summary||'',/قواعد جارتين/,'Do
 assert.match(byID.get('AR_54')?.summary||'',/الحُصين/);
 assert.match(byID.get('AR_52')?.bio||'',/النمسا/);
 assert.match(byID.get('AR_56')?.bio||'',/بيركلي/);
-assert.match(byID.get('AR_PH_20261110_AI_WORLD')?.summary||'',/لم تتحقق/);
-assert.match(byID.get('AR_PH_20261110_AI_WORLD')?.bio||'',/لم يُتحقق/);
+assert.match(byID.get('AR_PH_20261110_AI_WORLD')?.summary||'',/لم تتحقق|لم تُراجع/);
+assert.match(byID.get('AR_PH_20261110_AI_WORLD')?.bio||'',/عادل عبدالنور/);
 for(const id of ['AR_PH_HP_1','AR_PH_HP_2','AR_PH_HP_3','AR_PH_HP_4','AR_PH_HP_5','AR_PH_HP_6','AR_PH_HP_7']){
   assert.match(byID.get(id)?.bio||'',/هاري بوتر/);
 }
