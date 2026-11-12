@@ -2,6 +2,7 @@ import { DIGITAL_SERIES_VOLUMES } from '../src/data/digitalSeriesVolumes.js';
 import { ENGLISH_PHOTO_LIBRARY_20261111 } from '../src/data/englishPhotoLibrary20261111';
 import { PHOTO_SERIES_FOLDERS_20261111 } from '../src/data/photoSeriesFolders20261111.js';
 import { MAN_IMPOSSIBLE_20261112_CATALOG } from '../src/data/manImpossible20261112Index';
+import { reviewArabicDigitalLibrary } from '../src/data/arabicEditorialReview20261112';
 import {NEW_PHOTO_ONLY_ARABIC_BOOKS} from '../src/data/photoOnlyArabicCatalog20261110';
 import {ADDITIONAL_ARABIC_PHOTO_BOOKS} from '../src/data/additionalArabicPhotoBooks20261110';
 import {MIGRATED_ARABIC_PHOTO_SOURCES} from '../src/data/migratedArabicPhotoSources20261110';
@@ -204,12 +205,12 @@ const ARABIC_LIBRARY_PHOTO_SEED = ARABIC_LIBRARY_SEED.map(book => {
 });
 // Include only the complete photo-only books belonging in the Arabic reading library.
 // UAE national heritage books remain in their separate national identity catalog.
-export const ARABIC_LIBRARY_DATABASE: DigitalLibraryBook[] = [
+export const ARABIC_LIBRARY_DATABASE: DigitalLibraryBook[] = reviewArabicDigitalLibrary([
   ...expandDigitalSeries(ARABIC_LIBRARY_PHOTO_SEED, 'ar'),
   ...NEW_PHOTO_ONLY_ARABIC_BOOKS.filter(book=>!String(book.id).startsWith('NI_PH_')),
   ...ADDITIONAL_ARABIC_PHOTO_BOOKS,
   ...MAN_IMPOSSIBLE_20261112_CATALOG.map(book => ({...book, keywords:[...book.keywords]})),
-];
+]);
 // The 10 prophet-book volume IDs remain untouched. All former Man of the Impossible records
 // are replaced with the complete, duplicate-free November 12 Drive photo edition.
 const normalizeDigitalTitle = (text:string)=>text.normalize('NFKC').toLowerCase()
