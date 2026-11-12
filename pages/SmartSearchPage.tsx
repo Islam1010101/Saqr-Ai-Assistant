@@ -275,20 +275,24 @@ const SmartSearchPage: React.FC = () => {
     try {
       if(document.fonts?.ready) await document.fonts.ready;
       await Promise.all(Array.from(certificate.querySelectorAll('img')).map(img => img.complete ? Promise.resolve() : new Promise<void>(resolve => { img.addEventListener('load',()=>resolve(),{once:true});img.addEventListener('error',()=>resolve(),{once:true});setTimeout(resolve,2200); })));
-      const canvas=await html2canvas(certificate,{scale:2,backgroundColor:'#ffffff',useCORS:true,allowTaint:false,logging:false,width:794,height:Math.max(1123,certificate.scrollHeight)});
-      const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true});
-      const perPage=Math.floor(canvas.width*(297/210));
-      const pages=Math.ceil(canvas.height/perPage);
-      for(let i=0;i<pages;i++){
-        if(i>0)pdf.addPage();
-        const start=i*perPage;
-        const h=Math.min(perPage,canvas.height-start);
-        const slice=document.createElement('canvas');slice.width=canvas.width;slice.height=perPage;
-        const context=slice.getContext('2d');if(!context)throw new Error('Canvas unavailable');
-        context.fillStyle='#ffffff';context.fillRect(0,0,slice.width,slice.height);
-        context.drawImage(canvas,0,start,canvas.width,h,0,0,canvas.width,h);
-        pdf.addImage(slice.toDataURL('image/jpeg',0.93),'JPEG',0,0,210,297,undefined,'FAST');
+      // One fixed A4 canvas and exactly one PDF page. The old scrollHeight-
+      // based slicing could create a blank second page due to a tiny overflow.
+      const summary = certificate.querySelector('.cert-summary p') as HTMLElement | null;
+      const originalSummaryFont = summary?.style.fontSize ?? '';
+      if(summary){
+        for(let font=16;font>=10 && summary.scrollHeight>summary.clientHeight;font--){
+          summary.style.fontSize=font+'px';
+        }
       }
+      let canvas:HTMLCanvasElement;
+      try {
+        canvas=await html2canvas(certificate,{scale:2,backgroundColor:'#ffffff',
+          useCORS:true,allowTaint:false,logging:false,width:794,height:1123});
+      } finally {
+        if(summary)summary.style.fontSize=originalSummaryFont;
+      }
+      const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true});
+      pdf.addImage(canvas.toDataURL('image/jpeg',0.94),'JPEG',0,0,210,297,undefined,'FAST');
       const filename=String(winnerData?.name||'Certificate').replace(/[\\/:*?"<>|]/g,'_').slice(0,50);
       pdf.save('EFIPS_Little_Author_'+filename+'.pdf');
     } catch(error) {
@@ -901,9 +905,9 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         <div ref={certificateRef} className="saqr-certificate" dir={locale === 'ar' ? 'rtl' : 'ltr'} lang={locale}>
           <div className="cert-top-stripe" />
           <header className="cert-header">
-            <img src="https://www.efipslibrary.online/school-logo.png" crossOrigin="anonymous" className="cert-logo" alt="EFIPS" />
+            <img src="/school-logo.png" className="cert-logo" alt="EFIPS" />
             <div className="cert-school"><h3>مدرسة صقر الإمارات الدولية الخاصة</h3><p dir="ltr">Emirates Falcon International Private School</p><span>{t('certChallenge')}</span></div>
-            <div className="cert-seal" dir="ltr">EFIPS</div>
+            <div className="cert-seal" dir="ltr"><img src="/school-logo.png" alt={locale==='ar'?'شعار المدرسة':'School crest'} /></div>
           </header>
           <main className="cert-body">
             <span className="cert-ornament" aria-hidden="true">✦ ✧ ✦</span>
@@ -911,7 +915,7 @@ When the user asks for books, identify the matching titles exactly as recorded, 
             <p className="cert-subtitle">{t('certSubtitle')}</p>
             <h2 className="cert-winner" dir="auto">{winnerData?.name || '—'}</h2>
             <p className="cert-grade">{t('certGrade')} <strong>{winnerData?.grade || '—'}</strong></p>
-            <section className="cert-summary"><h3>{locale === 'ar' ? 'ملخص القصة المؤلَّفة' : 'Summary of the Creative Story'}</h3><p dir="auto">{winnerData?.content || '—'}</p></section>
+            <section className="cert-summary"><h3>{locale === 'ar' ? 'ملخص القصة المؤلَّفة' : 'Summary of the Creative Story'}</h3><p dir={locale==='ar'?'rtl':'ltr'}>{winnerData?.content || '—'}</p></section>
             <p className="cert-commendation">{locale === 'ar' ? 'إبداع يستحق التقدير، وقصة تستحق أن تُروى' : 'An imagination worth celebrating, a story worth sharing'}</p>
           </main>
           <footer className="cert-footer">
@@ -1363,28 +1367,28 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         .saqr-footer-note { margin: 4px 0 0; color: #94a3b8; font-size: 9px; line-height: 1.3; text-align: center; }
 
         .saqr-certificate-host { position:fixed;top:0;left:-9999px;width:794px;pointer-events:none; }
-        .saqr-certificate { box-sizing:border-box;display:flex;flex-direction:column;position:relative;width:794px;min-height:1123px;height:auto;overflow:visible;padding:55px 56px 48px;border:11px solid #087e72;background:#fff;color:#203549;font-family:'Cairo',Tahoma,Arial,sans-serif;line-height:1.55;letter-spacing:normal;text-rendering:optimizeLegibility; }
+        .saqr-certificate { box-sizing:border-box;display:flex;flex-direction:column;position:relative;width:794px;min-height:1123px;height:1123px;max-height:1123px;overflow:hidden;padding:48px 52px 42px;border:11px solid #087e72;background:#fff;color:#203549;font-family:'Cairo',Tahoma,Arial,sans-serif;line-height:1.55;letter-spacing:normal;text-rendering:optimizeLegibility; }
         .saqr-certificate[dir='rtl'],.saqr-certificate[dir='rtl'] * { letter-spacing:normal!important;word-spacing:normal!important;font-kerning:normal!important; }
         .saqr-certificate [dir='ltr'] { direction:ltr;unicode-bidi:isolate; }
         .cert-top-stripe,.cert-bottom-stripe { position:absolute;left:0;right:0;height:8px;background:linear-gradient(90deg,#d92332 0 25%,#009c6b 25% 50%,#edbe63 50% 75%,#162c40 75%); }
         .cert-top-stripe {top:0}.cert-bottom-stripe {bottom:0}
         .cert-header {display:flex;gap:17px;align-items:center;border-bottom:2px solid #cde6df;padding-bottom:23px}
         .cert-logo {width:92px;height:92px;object-fit:contain;flex-shrink:0}
-        .cert-school {flex:1;text-align:start}.cert-school h3 {font-size:18px;font-weight:900;color:#0b695c;margin:0}
+        .cert-school {flex:1;text-align:center}.cert-school h3 {font-size:18px;font-weight:900;color:#0b695c;margin:0}
         .cert-school p {font:700 11px Arial,sans-serif;color:#475569;margin:6px 0}
         .cert-school span {display:inline-block;padding:5px 13px;border-radius:18px;background:#e9f7f3;color:#087e72;font-size:13px;font-weight:900}
-        .cert-seal {width:70px;height:70px;border-radius:50%;border:3px solid #cba151;display:flex;align-items:center;justify-content:center;color:#a98432;font:900 16px Arial,sans-serif;flex-shrink:0}
-        .cert-body {flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;min-height:645px;padding-top:28px}
+        .cert-seal {width:80px;height:80px;border-radius:50%;border:3px solid #cba151;display:flex;align-items:center;justify-content:center;background:#fff9e8;flex-shrink:0;overflow:hidden}.cert-seal img{width:67px;height:67px;object-fit:contain}
+        .cert-body {flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;min-height:0;padding-top:22px;overflow:hidden}
         .cert-ornament {color:#c89b45;font-size:25px}
-        .cert-body h1 {font-size:35px;line-height:1.4;color:#087e72;font-weight:900;margin:12px 0}
+        .cert-body h1 {width:100%;text-align:center;font-size:35px;line-height:1.4;color:#087e72;font-weight:900;margin:12px 0}
         .cert-subtitle {font-size:17px;font-weight:700;color:#475569;margin:3px 0 18px}
         .cert-winner {width:100%;font-size:30px;font-weight:900;border-bottom:3px solid #d5a64c;padding:0 8px 10px;margin:0;overflow-wrap:anywhere}
         .cert-grade {font-size:17px;color:#475569;font-weight:700;margin:16px 0 25px}.cert-grade strong{color:#087e72}
-        .cert-summary {box-sizing:border-box;width:100%;min-height:245px;border:2px solid #c5e2da;border-radius:20px;background:#f4faf8;padding:18px 23px 22px;text-align:start}
+        .cert-summary {box-sizing:border-box;width:100%;flex:1;min-height:0;overflow:hidden;border:2px solid #c5e2da;border-radius:20px;background:#f4faf8;padding:14px 20px 16px;text-align:start}
         .cert-summary h3 {font-size:19px;font-weight:900;color:#087e72;margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid #cde8df}
-        .cert-summary p {font-size:16px;font-weight:700;color:#203549;margin:0;line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere;unicode-bidi:plaintext;text-align:start}
-        .cert-commendation {font-size:15px;font-weight:800;color:#ac8738;margin:25px 0 15px}
-        .cert-footer {display:flex;align-items:flex-end;justify-content:space-between;gap:14px;border-top:2px solid #cce8df;margin-top:25px;padding-top:22px}
+        .cert-summary p {font-size:16px;font-weight:700;color:#203549;margin:0;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere;unicode-bidi:plaintext;text-align:start}
+        .cert-commendation {font-size:15px;font-weight:800;color:#ac8738;margin:12px 0 8px}
+        .cert-footer {display:flex;align-items:flex-end;justify-content:space-between;gap:14px;border-top:2px solid #cce8df;margin-top:12px;padding-top:16px}
         .cert-footer>div:not(.cert-library) {display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;width:180px;color:#64748b;font-size:13px;font-weight:700}
         .cert-footer strong {font-size:17px;color:#193447;font-weight:900}.cert-footer small{font-size:11px}
         .cert-library {height:94px;width:94px;border:2px solid #b9dad2;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#087e72;font:900 12px Arial,sans-serif;text-align:center}
