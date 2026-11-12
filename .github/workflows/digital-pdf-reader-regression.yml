@@ -8,6 +8,11 @@ on:
       - 'tests/englishNewViewOnlyPending.test.ts'
       - 'tests/newEnglishDriveBooks.test.ts'
       - 'pages/EnglishLibraryInternalPage.tsx'
+      - 'src/data/englishPhotoMeta/**'
+      - 'src/data/englishPhotoPages/**'
+      - 'src/data/englishPhotoLibrary20261111.ts'
+      - 'src/data/englishBookEditorial20261112.ts'
+      - 'tests/englishPhotoDrive20261112.test.ts'
       - 'api/nationalIdentityDigitalBooks.ts'
       - 'src/data/digitalSeriesVolumes.js'
       - 'src/server/digitalBookPdf.ts'
@@ -122,6 +127,7 @@ jobs:
       - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/saqrDigitalReferrals.test.ts
       - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/newEnglishDriveBooks.test.ts
       - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/englishNewViewOnlyPending.test.ts
+      - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/englishPhotoDrive20261112.test.ts
       - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/schoolDriveEmbeddedReader.test.ts
       - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/codingImageBookPilot.test.ts
       - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/completedEnglishImageBooks.test.ts
