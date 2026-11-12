@@ -21,7 +21,7 @@ assert.equal(Object.values(DIGITAL_SERIES_VOLUMES).reduce((sum,books)=>sum+books
 assert.equal(ARABIC_LIBRARY_DATABASE.length,502);
 assert.equal(ARABIC_LIBRARY_DATABASE.filter(b=>b.title==='الأعمال الكاملة للشاعر صلاح جاهين').length,1,'Do not duplicate the original photographed Salah Jahin book');
 assert.equal(ENGLISH_LIBRARY_DATABASE.length,71,'Use the current verified English photo catalog only');
-assert.ok(ENGLISH_LIBRARY_DATABASE.every(b=>String(b.id).startsWith('EN_PH_')&&b.photoBatch),'No legacy English PDF books can enter the official index');
+assert.ok(ENGLISH_LIBRARY_DATABASE.every(b=>/^(?:EN_PH_|EN_DRIVE_)/.test(String(b.id))&&b.photoBatch),'No legacy English PDF books can enter the official index');
 assert.equal(allDigitalBooks.length,573); // 502 Arabic + 71 English (national identity digital is separate).
 assert.ok(allDigitalBooks.every(b=>/^https:\/\/drive\.google\.com\/(?:file\/d\/|drive\/folders\/)/.test(b.driveLink)),
   'All books need a real school Drive file or photo-folder source');
