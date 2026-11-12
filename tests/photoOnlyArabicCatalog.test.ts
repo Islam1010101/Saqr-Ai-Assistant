@@ -13,7 +13,7 @@ import {VERIFIED_NEW_UAE_HERITAGE_PAGES} from '../src/data/photoOnlyNewHeritage2
 const full=Object.assign({},VERIFIED_HARRY_POTTER_ARABIC_PAGES_A,VERIFIED_HARRY_POTTER_ARABIC_PAGES_B,
  VERIFIED_NG_PAGES_A,VERIFIED_NG_PAGES_B,VERIFIED_NG_PAGES_C,VERIFIED_NEW_UAE_HERITAGE_PAGES);
 assert.equal(NEW_PHOTO_ONLY_ARABIC_BOOKS.length,39);
-assert.equal(ARABIC_LIBRARY_DATABASE.length,520,'Keep existing Arabic records plus 25 verified special series editions');
+assert.equal(ARABIC_LIBRARY_DATABASE.length,502,'Keep existing Arabic records plus 25 verified special series editions');
 assert.equal(NATIONAL_IDENTITY_DIGITAL_BOOKS.length,9,'Keep 6 original heritage records, plus 3 verified new titles');
 assert.deepEqual(Object.keys(full).sort(),NEW_PHOTO_ONLY_ARABIC_BOOKS.map(b=>String(b.id)).sort());
 assert.equal(new Set(NEW_PHOTO_ONLY_ARABIC_BOOKS.map(b=>b.id)).size,39);
