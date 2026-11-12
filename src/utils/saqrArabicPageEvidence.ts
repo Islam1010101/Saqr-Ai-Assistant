@@ -24,8 +24,31 @@ export const arabicEvidenceQuery=(input:string):string=>String(input||'')
   .split(/\s+/).filter(s=>s.length>=3&&!STOP.has(s.toLowerCase()))
   .slice(0,5).join(' ').slice(0,170);
 
+/**
+ * A separate, narrow content-analysis gate. It does not change the
+ * existing Saqr catalogue-intent router, story modes or lesson planning.
+ * Requires an EXACT recorded Arabic book title in the user's question.
+ */
+export const exactArabicBookContentId=(
+  question:string,books:ReadonlyArray<DigitalLibraryBook>
+):string|null=>{
+  const clean=(value:string)=>String(value||'').normalize('NFKC').toLowerCase()
+    .replace(/[\\u064B-\\u065F\\u0670\\u0640]/g,'')
+    .replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه')
+    .replace(/[^\\p{L}\\p{N}]+/gu,' ').trim();
+  const raw=String(question||'');
+  if(!/(?:لخص|ملخص|تحليل|حلل|اشرح|شرح|ناقش|مضمون|محتوى|summari[sz]e|summary|analy[sz]e|explain|discuss)/i.test(raw))return null;
+  if(/(?:تحدي|المؤلف الصغير|تأليف|اكتب قصة|تحضير|درس|ورقة عمل|شهادة|lesson|worksheet|certificate|story challenge)/i.test(raw))return null;
+  const q=clean(raw);
+  const candidates=books.filter(book=>{
+    const title=clean(book.title);
+    return title.length>=7&&q.includes(title);
+  }).sort((a,b)=>b.title.length-a.title.length);
+  return candidates.length?String(candidates[0].id):null;
+};
+
 export async function retrieveSaqrArabicPageEvidence(
-  question:string, books:ReadonlyArray<DigitalLibraryBook>
+  question:string, books:ReadonlyArray<DigitalLibraryBook>, onlyBookId:string|null=null
 ):Promise<SaqrArabicPageEvidence[]>{
   const text=arabicEvidenceQuery(question);
   if(text.length<3)return [];
@@ -34,7 +57,7 @@ export async function retrieveSaqrArabicPageEvidence(
     const timeout=setTimeout(()=>controller.abort(),1900);
     try{
       const {data,error}=await supabase.rpc('saqr_search_arabic_page_passages',{
-        p_query:text,p_book_ids:null,p_limit:6
+        p_query:text,p_book_ids:onlyBookId?[onlyBookId]:null,p_limit:6
       }).abortSignal(controller.signal);
       if(error||!Array.isArray(data))return [];
       const byId=new Map(books.map(book=>[String(book.id),book]));
