@@ -345,3 +345,41 @@
     opacity: 1 !important; filter: none !important; pointer-events: auto !important;
   }
 }
+
+/* Dark-mode contrast: keep the same brand style without light-on-light text. */
+.dark .efips-home-glass {
+  background: #020617;
+}
+.dark .tutorial-page {
+  background: #020617 !important;
+  color: #f8fafc;
+}
+.dark .tutorial-page .tutorial-tour-intro,
+.dark .tutorial-page .tutorial-glass-card {
+  background: #131e30 !important;
+  color: #f8fafc;
+  border-color: rgba(148,163,184,.25) !important;
+}
+.dark .tutorial-page .tutorial-topbar {
+  background: rgba(15,23,42,.94) !important;
+  border-color: #334155 !important;
+}
+.dark .efips-home-glass .efips-news-ribbon,
+.dark .tutorial-page .tutorial-news-ribbon {
+  background: #152135 !important;
+  border-color: #41506a !important;
+}
+.dark .efips-home-glass .efips-news-ribbon > div:nth-child(2),
+.dark .tutorial-page .tutorial-news-ribbon > div:nth-child(2) {
+  background: #1e293b !important;
+}
+.dark .efips-home-glass .efips-home-info-card {
+  background-color: #0f172a;
+  border-color: rgba(148,163,184,.25) !important;
+}
+.dark .tutorial-page .tutorial-glass-detail {
+  background: #1e293b;
+  color: #f8fafc;
+  border-color: #475569;
+}
+.dark .tutorial-page .tutorial-glass-detail strong { color: #f9a8bb; }
