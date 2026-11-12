@@ -3,10 +3,7 @@ on:
   pull_request:
     paths:
       - 'api/digitalBookData.ts'
-      - 'src/data/newEnglishDigitalBooks20261109.ts'
-      - 'src/data/extraEnglishDigitalBooks20261109.ts'
-      - 'tests/englishNewViewOnlyPending.test.ts'
-      - 'tests/newEnglishDriveBooks.test.ts'
+      - 'src/components/EnglishPhotoBookReader.tsx'
       - 'pages/EnglishLibraryInternalPage.tsx'
       - 'src/data/englishPhotoMeta/**'
       - 'src/data/englishPhotoPages/**'
@@ -16,7 +13,6 @@ on:
       - 'api/nationalIdentityDigitalBooks.ts'
       - 'src/data/digitalSeriesVolumes.js'
       - 'src/server/digitalBookPdf.ts'
-      - 'tests/schoolDriveEmbeddedReader.test.ts'
       - 'src/utils/pdfRangeTransport.ts'
       - 'src/utils/schoolDrivePdfRanges.ts'
       - 'tests/schoolDrivePdfRanges.test.ts'
@@ -25,12 +21,6 @@ on:
       - 'src/utils/pdfReadingState.ts'
       - 'src/components/PdfBookPages.tsx'
       - 'src/components/ImageBookPages.tsx'
-      - 'src/data/codingImageBookPilot.ts'
-      - 'tests/codingImageBookPilot.test.ts'
-      - 'src/data/completedEnglishImageBooks20261109.ts'
-      - 'src/data/remainingEnglishImageBooks20261109.ts'
-      - 'src/components/RemainingEnglishPhotoBookReader.tsx'
-      - 'tests/remainingEnglishImageBooks.test.ts'
       - 'pages/ArabicLibraryInternalPage.tsx'
       - 'src/components/VerifiedArabicPhotoBookReader.tsx'
       - 'src/data/verifiedArabicImageBooks20261110A.ts'
@@ -48,7 +38,6 @@ on:
       - 'src/components/PhotoOnlyArabicBookReader.tsx'
       - 'tests/photoOnlyArabicCatalog.test.ts'
       - 'tests/photoOnlyReadButton.test.ts'
-      - 'tests/completedEnglishImageBooks.test.ts'
       - 'src/components/DigitalBookReader.tsx'
       - 'src/components/DigitalLibraryDialog.tsx'
       - 'src/components/digitalBookReader.css'
@@ -56,6 +45,7 @@ on:
       - 'src/utils/saqrCatalogSearch.ts'
       - 'src/utils/saqrCatalogReply.ts'
       - 'tests/saqrDigitalReferrals.test.ts'
+      - 'tests/catalogAuditCounts.test.ts'
       - 'tests/pdfReader.test.ts'
       - 'tools/testPdfReader.mjs'
       - '.github/workflows/digital-pdf-reader-regression.yml'
@@ -63,15 +53,10 @@ on:
     branches: [main]
     paths:
       - 'api/digitalBookData.ts'
-      - 'src/data/newEnglishDigitalBooks20261109.ts'
-      - 'src/data/extraEnglishDigitalBooks20261109.ts'
-      - 'tests/englishNewViewOnlyPending.test.ts'
-      - 'tests/newEnglishDriveBooks.test.ts'
       - 'pages/EnglishLibraryInternalPage.tsx'
       - 'api/nationalIdentityDigitalBooks.ts'
-      - 'src/data/digitalSeriesVolumes.ts'
+      - 'src/data/digitalSeriesVolumes.js'
       - 'src/server/digitalBookPdf.ts'
-      - 'tests/schoolDriveEmbeddedReader.test.ts'
       - 'src/utils/pdfRangeTransport.ts'
       - 'src/utils/schoolDrivePdfRanges.ts'
       - 'tests/schoolDrivePdfRanges.test.ts'
@@ -80,12 +65,6 @@ on:
       - 'src/utils/pdfReadingState.ts'
       - 'src/components/PdfBookPages.tsx'
       - 'src/components/ImageBookPages.tsx'
-      - 'src/data/codingImageBookPilot.ts'
-      - 'tests/codingImageBookPilot.test.ts'
-      - 'src/data/completedEnglishImageBooks20261109.ts'
-      - 'src/data/remainingEnglishImageBooks20261109.ts'
-      - 'src/components/RemainingEnglishPhotoBookReader.tsx'
-      - 'tests/remainingEnglishImageBooks.test.ts'
       - 'pages/ArabicLibraryInternalPage.tsx'
       - 'src/components/VerifiedArabicPhotoBookReader.tsx'
       - 'src/data/verifiedArabicImageBooks20261110A.ts'
@@ -103,7 +82,6 @@ on:
       - 'src/components/PhotoOnlyArabicBookReader.tsx'
       - 'tests/photoOnlyArabicCatalog.test.ts'
       - 'tests/photoOnlyReadButton.test.ts'
-      - 'tests/completedEnglishImageBooks.test.ts'
       - 'src/components/DigitalLibraryDialog.tsx'
       - 'src/components/DigitalBookReader.tsx'
       - 'src/components/digitalBookReader.css'
@@ -125,15 +103,10 @@ jobs:
       - run: npm install --no-package-lock --no-audit --no-fund
       - run: npm run test:pdf-reader
       - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/saqrDigitalReferrals.test.ts
-      - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/newEnglishDriveBooks.test.ts
-      - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/englishNewViewOnlyPending.test.ts
       - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/englishPhotoDrive20261112.test.ts
-      - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/schoolDriveEmbeddedReader.test.ts
-      - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/codingImageBookPilot.test.ts
-      - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/completedEnglishImageBooks.test.ts
-      - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/remainingEnglishImageBooks.test.ts
       - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/verifiedArabicPhotoBooks.test.ts
       - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/photoOnlyArabicCatalog.test.ts
       - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/photoOnlyReadButton.test.ts
       - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/schoolDrivePdfRanges.test.ts
+      - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/catalogAuditCounts.test.ts
       - run: npm run build
