@@ -8,7 +8,7 @@ import { STORY_IDEAS, storyIdeaAt, isStoryBeginning, detectLearningIntent, resea
 import { borrowerIds, deviceReadingKey, filterActiveBorrowings, readingShelfFromDevice, catalogBookSynopsis } from '../src/utils/saqrReaderContext';
 import { bookData } from '../api/bookData';
 import { searchSaqrBookCatalog } from '../src/utils/saqrCatalogSearch';
-import { retrieveSaqrArabicPageEvidence, saqrArabicPageEvidenceContext, renderArabicPageEvidence } from '../src/utils/saqrArabicPageEvidence';
+import { retrieveSaqrArabicPageEvidence, exactArabicBookContentId, saqrArabicPageEvidenceContext, renderArabicPageEvidence } from '../src/utils/saqrArabicPageEvidence';
 import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
 import { NATIONAL_IDENTITY_DIGITAL_BOOKS } from '../api/nationalIdentityDigitalBooks';
@@ -480,8 +480,11 @@ const SmartSearchPage: React.FC = () => {
     }) : [];
     // Optional page evidence, ONLY for explicit school-book discovery.
     // Zero page matches or any fetch failure leaves all Saqr behavior unchanged.
-    const arabicPageEvidence = librarySearchIntent
-      ? await retrieveSaqrArabicPageEvidence(linkedBookTurn.searchQuery, ARABIC_LIBRARY_DATABASE)
+    const requestedArabicContentBookId = !librarySearchIntent
+      ? exactArabicBookContentId(userQuery, ARABIC_LIBRARY_DATABASE) : null;
+    const arabicPageEvidence = (librarySearchIntent || requestedArabicContentBookId)
+      ? await retrieveSaqrArabicPageEvidence(linkedBookTurn.searchQuery,
+          ARABIC_LIBRARY_DATABASE, requestedArabicContentBookId)
       : [];
 
     // Offer varied national-identity plots without touching the strict author story flow.
@@ -617,7 +620,9 @@ const SmartSearchPage: React.FC = () => {
     const expertContext=namedBookTitle && learningIntent==='none'
       ? saqrBookExpertContext(namedBookTitle,namedBookHoldings,externalBookReference) : '';
 
-    const arabicPageContext=saqrArabicPageEvidenceContext(arabicPageEvidence);
+    const arabicPageContext=saqrArabicPageEvidenceContext(namedBookTitle
+      ? arabicPageEvidence.filter(page=>namedBookHoldings.some(book=>book.driveLink===page.driveLink))
+      : arabicPageEvidence);
     const searchContext = !librarySearchIntent
       ? 'NO CATALOGUE SEARCH INTENT: Do not mention school book holdings, availability, shelf numbers or a library record verification section. Answer the actual educational, conversational, lesson or creative-writing request directly.'
       : expertContext
