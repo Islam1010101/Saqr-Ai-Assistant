@@ -64,3 +64,38 @@
 | How to Win Friends and Influence People | 232 | [Drive](https://drive.google.com/drive/folders/1yhy4okxr2tUD2FG1A_9JBsrDqBio88A5) |
 | Diary of a Wimpy Kid — Collected Photo Edition | 1279 | [Drive](https://drive.google.com/drive/folders/1wgKOQml3GAHva_d0z93WUiDl_ft00fll) |
 
+## Additional 24 current Drive titles
+
+| Title | Images | Publisher (edition evidence) | Current Drive folder |
+| --- | ---: | --- | --- |
+| Knowledge Encyclopedia | 368 | DK | [Drive](https://drive.google.com/drive/folders/1Gom1O60XO28Ze0IMO6pWbY-O4lcNv-qN) |
+| Space! The Universe as You've Never Seen It Before | 216 | DK | [Drive](https://drive.google.com/drive/folders/18GH3LLVIibC9f9aUVCUQja3aOV7qmSuo) |
+| The Magical Yet | 38 | Disney-Hyperion | [Drive](https://drive.google.com/drive/folders/1AT1JRt6xe2ObzN-a68OXbJVw5MfC5ois) |
+| The Power of Habit | 386 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1N8I7bEFDkyanQM7_taynR_DX1xXMmSRr) |
+| Mindset: The New Psychology of Success | 283 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1SD7B9qOZKm8A5dwsv9He44PklCVhc_Qn) |
+| Deep Work: Rules for Focused Success in a Distracted World | 190 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1v4QY_1TWDCnxV_Qk6hB--fxeU19SyqmV) |
+| Who Will Cry When You Die? | 135 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1aZ9Pt7BwV07hpIQr5rpsS4YDa1zjDL0H) |
+| The 7 Habits of Highly Effective People | 282 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1VtUqxIlppb9edR05nLtRXRZ-O2-E1vSE) |
+| The Kite Runner | 374 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1fXg5LDgJ2uDQaAdhiAERi_JfoS6YkOiE) |
+| Me Before You | 393 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1kQ2FQovVhUg98ZP8WefJ-e5jkpXDI8pa) |
+| The Girl on the Train | 181 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/15bqnegQmYdeeDIzTmJKHe0d7pj9cfwc8) |
+| The Silent Patient | 299 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1pa_Ap9Sez2S2Sxs_U2Mr0n1My43KSQQm) |
+| The Lottery | 16 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1CJZsz-kbp0qMdeTntVrIOeNQVgnDX-2c) |
+| The Landlady | 5 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1jCCE3XMXKQYsl1327U8CmGXJP6slzgS4) |
+| The Bet | 7 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/13kxtbGs6Wn6et5GsnRGdZftL9WobtQkA) |
+| The Death of Ivan Ilyich | 28 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1z2YluisB59IhspsEO0s5qAGSSBGBFwFn) |
+| Clam-I-Am! All About the Beach | 40 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1btikwfqB0hqvJnx4mG5x4c1QWqyi_s8N) |
+| DC Comics Encyclopedia | 394 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1R7ccg_YrngwXAgc50XJ701oTcxNHnEAt) |
+| Pocahontas (Illustrated Story) | 21 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1YhitHxwoCVuUNfIoScRB7NaarqjcuVxD) |
+| Marvel Encyclopedia: New Edition | 450 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1IqYym6qoVISMYGqevViv-vTY2nDuuczY) |
+| Diary of a Wimpy Kid: The Long Haul | 226 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1Viz-RXGtaH88BuEL55M4BaYKs3TQLNQW) |
+| Diary of a Wimpy Kid: Old School | 226 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1pKmXmOyN6y9h4LirviTMDD2SpgmDQyiA) |
+| Diary of a Wimpy Kid: The Getaway | 226 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1uT1p1IYb8Cjv4sw0TOeLEvknIYeKX9sx) |
+| Diary of a Wimpy Kid: The Meltdown | 226 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1yf4umFh2VdzcsYBic2p8wAV8BvufYXQd) |
+
+## Remaining verification before production
+
+1. Check the first/last spread of each scanned edition against a physical or complete original; numbered images alone cannot certify the original's full length.
+2. Verify publishers against actual title and copyright pages wherever the photographed edition does not visibly state an imprint; do not infer a publisher from a novel's original publication.
+3. Smoke-test thumbnails and glass-reader page turns using a real school Google account; connector access does not prove every student's permissions.
+4. Run all relevant GitHub checks and release preview when Vercel's free daily deployment limit permits. Do not merge this draft while checks or release verification are blocked.
