@@ -603,7 +603,8 @@ When the user asks for books, identify the matching titles exactly as recorded, 
             ...messages,
             { role: 'user', content: userQuery }
           ],
-          locale
+          locale,
+          catalogueIntent: librarySearchIntent
         })
       });
 
