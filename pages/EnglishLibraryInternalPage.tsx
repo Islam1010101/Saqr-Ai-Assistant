@@ -381,7 +381,7 @@ const EnglishLibraryInternalPage: React.FC = () => {
       const path=window.location.hash;
       const query=path.includes('?')?path.slice(path.indexOf('?')+1):'';
       const id=new URLSearchParams(query).get('open');
-      if(!id || !/^EN_PH_[A-Za-z0-9_-]+$/.test(id))return;
+      if(!id || !/^(?:EN_PH_|EN_DRIVE_)[A-Za-z0-9_-]+$/.test(id))return;
       const matching=ENGLISH_LIBRARY_DATABASE.find(book=>String(book.id)===id && book.requiresSchoolGoogleAccess);
       if(!matching)return;
       setSelectedBook(matching);
