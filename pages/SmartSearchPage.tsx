@@ -23,6 +23,7 @@ import { saqrExtraContext, isNewDiscussion, discussionOpening } from '../src/uti
 import {detectSaqrIntroduction,saqrIntroductionReply} from '../src/utils/saqrIntroductionReplies';
 import { resolveSaqrBookFollowUp, saqrNaturalDialogueInstructions } from '../src/utils/saqrNaturalDialogue';
 import { isSaqrLibrarySearchIntent, isSaqrCreativeTurn } from '../src/utils/saqrIntentRouter';
+import { saqrProofreadingInstructions, isSaqrLessonPreparationRequest, isSaqrExplicitProofreadingRequest } from '../src/utils/saqrProofreading';
 
 // --- بروتوكول عقل صقر ---
 const SAQR_ELITE_PROMPT = `
@@ -108,8 +109,8 @@ const localization: any = {
     you: 'أنت',
     certSchool: 'مدرسة صقر الإمارات الدولية الخاصة',
     certChallenge: 'تحدي المؤلف الصغير',
-    certTitle: 'شهادة إبداع أدبي',
-    certSubtitle: 'يفخر "صقر" المساعد الذكي بتوثيق الإنجاز الأدبي للمبدع(ة):',
+    certTitle: 'شهادة المؤلف الصغير',
+    certSubtitle: 'تُمنح هذه الشهادة تقديرًا للإبداع في تأليف قصة أدبية للطالب(ة):',
     certGrade: 'المستوى الدراسي:',
     certStory: 'القصة المبدعة',
     certDate: 'تاريخ الإصدار',
@@ -130,8 +131,8 @@ const localization: any = {
     you: 'YOU',
     certSchool: 'Emirates Falcon International Private School',
     certChallenge: 'Little Author Challenge',
-    certTitle: 'CERTIFICATE OF LITERARY CREATIVITY',
-    certSubtitle: 'Saqr, the AI Librarian, proudly documents the achievement of:',
+    certTitle: 'LITTLE AUTHOR ACHIEVEMENT CERTIFICATE',
+    certSubtitle: 'Proudly awarded in recognition of creative storytelling to:',
     certGrade: 'Grade Level:',
     certStory: 'The Creative Story',
     certDate: 'Date of Issue',
@@ -267,40 +268,78 @@ const SmartSearchPage: React.FC = () => {
   }, [messages, isLoading]);
 
   const handleDownloadCertificatePDF = async () => {
-    if (!certificateRef.current) return;
-
-    const certificate = certificateRef.current;
-    const original = { position:certificate.style.position,left:certificate.style.left,top:certificate.style.top,zIndex:certificate.style.zIndex };
-    certificate.style.position='fixed';certificate.style.left='0px';certificate.style.top='0px';certificate.style.zIndex='-9999';
+    if (!certificateRef.current || !winnerData) return;
+    // Export a fresh, viewport-mounted certificate clone. Capturing the hidden
+    // component offscreen caused unreliable PDF output in some browsers.
+    const exportSurface=document.createElement('div');
+    exportSurface.className='saqr-certificate-export-surface';
+    exportSurface.setAttribute('aria-hidden','true');
+    exportSurface.style.cssText='position:fixed;top:0;left:0;z-index:2147483600;width:794px;height:1123px;background:#fff;pointer-events:none;overflow:hidden';
+    const snapshot=certificateRef.current.cloneNode(true) as HTMLDivElement;
+    snapshot.style.width='794px';
+    snapshot.style.minHeight='1123px';
+    snapshot.style.height='1123px';
+    snapshot.style.maxHeight='1123px';
+    snapshot.style.transform='none';
+    exportSurface.appendChild(snapshot);
+    document.body.appendChild(exportSurface);
     try {
       if(document.fonts?.ready) await document.fonts.ready;
-      await Promise.all(Array.from(certificate.querySelectorAll('img')).map(img => img.complete ? Promise.resolve() : new Promise<void>(resolve => { img.addEventListener('load',()=>resolve(),{once:true});img.addEventListener('error',()=>resolve(),{once:true});setTimeout(resolve,2200); })));
-      // One fixed A4 canvas and exactly one PDF page. The old scrollHeight-
-      // based slicing could create a blank second page due to a tiny overflow.
-      const summary = certificate.querySelector('.cert-summary p') as HTMLElement | null;
-      const summaryFrame = certificate.querySelector('.cert-summary') as HTMLElement | null;
-      const originalSummaryFont = summary?.style.fontSize ?? '';
-      if(summary){
-        for(let font=16;font>=10 && summaryFrame && summaryFrame.scrollHeight>summaryFrame.clientHeight;font--){
-          summary.style.fontSize=font+'px';
+      const logos=Array.from(snapshot.querySelectorAll<HTMLImageElement>('img'));
+      await Promise.all(logos.map(async img=>{
+        if(typeof img.decode==='function'){
+          await img.decode().catch(()=>undefined);
+        } else if(!img.complete){
+          await new Promise<void>(resolve=>{
+            img.addEventListener('load',()=>resolve(),{once:true});
+            img.addEventListener('error',()=>resolve(),{once:true});
+          });
         }
+      }));
+      if(logos.some(img=>!img.naturalWidth))throw new Error('EFIPS school logo unavailable in certificate export');
+
+      // Fit the full authored-story synopsis INSIDE its allocated panel.
+      // Do not crop the student's achievement or generate an extra PDF page.
+      const summary=snapshot.querySelector('.cert-summary p') as HTMLElement|null;
+      const frame=snapshot.querySelector('.cert-summary') as HTMLElement|null;
+      const heading=snapshot.querySelector('.cert-summary h3') as HTMLElement|null;
+      if(summary&&frame){
+        const available=()=>frame.clientHeight-(heading?.offsetHeight||0)-
+          parseFloat(getComputedStyle(frame).paddingTop||'0')-
+          parseFloat(getComputedStyle(frame).paddingBottom||'0')-8;
+        for(let font=16;font>=10;font--){
+          summary.style.fontSize=font+'px';
+          if(summary.scrollHeight<=available())break;
+        }
+        if(summary.scrollHeight>available())throw new Error('Story summary exceeds single-page certificate layout');
       }
-      let canvas:HTMLCanvasElement;
-      try {
-        canvas=await html2canvas(certificate,{scale:2,backgroundColor:'#ffffff',
-          useCORS:true,allowTaint:false,logging:false,width:794,height:1123});
-      } finally {
-        if(summary)summary.style.fontSize=originalSummaryFont;
-      }
+      const canvas=await html2canvas(snapshot,{
+        scale:2,
+        backgroundColor:'#ffffff',
+        useCORS:true,
+        allowTaint:false,
+        logging:false,
+        width:794,
+        height:1123,
+        windowWidth:Math.max(794,document.documentElement.clientWidth),
+        windowHeight:Math.max(1123,document.documentElement.clientHeight),
+        scrollX:0,
+        scrollY:0
+      });
+      if(canvas.width===0||canvas.height===0)throw new Error('Certificate capture returned an empty canvas');
       const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true});
-      pdf.addImage(canvas.toDataURL('image/jpeg',0.94),'JPEG',0,0,210,297,undefined,'FAST');
-      const filename=String(winnerData?.name||'Certificate').replace(/[\\/:*?"<>|]/g,'_').slice(0,50);
+      pdf.setProperties({title:'EFIPS Little Author Certificate',subject:'Little Author Challenge'});
+      pdf.addImage(canvas.toDataURL('image/jpeg',0.96),'JPEG',0,0,210,297,undefined,'FAST');
+      if(pdf.getNumberOfPages()!==1)throw new Error('Certificate PDF must be exactly one A4 page');
+      const filename=String(winnerData.name||'Certificate').replace(/[\\/:*?"<>|]/g,'_').slice(0,50);
       pdf.save('EFIPS_Little_Author_'+filename+'.pdf');
     } catch(error) {
       console.error('Certificate PDF export failed:',error);
-      alert(locale==='ar'?'تعذر تحميل شهادة PDF. يرجى المحاولة مجددًا.':'Unable to export PDF certificate. Please retry.');
+      alert(locale==='ar'
+        ? 'تعذر إنشاء الشهادة في صفحة A4 واحدة. حاول مرة ثانية، أو تواصل مع مسؤول المكتبة.'
+        : 'Could not fit the certificate on one A4 page. Please retry or contact the librarian.');
     } finally {
-      certificate.style.position=original.position;certificate.style.left=original.left;certificate.style.top=original.top;certificate.style.zIndex=original.zIndex;
+      exportSurface.remove();
     }
   };
 
@@ -361,6 +400,12 @@ const SmartSearchPage: React.FC = () => {
     const userQuery = input.trim();
     const librarySearchIntent = isSaqrLibrarySearchIntent(userQuery, messages);
     const creativeTurn = isSaqrCreativeTurn(userQuery, messages) && !librarySearchIntent;
+    const proofreadingContext = saqrProofreadingInstructions({
+      locale: locale === 'ar' ? 'ar' : 'en',
+      creativeTurn,
+      lessonTurn: isSaqrLessonPreparationRequest(userQuery) || isLessonPlanRequest(userQuery),
+      explicitReview: isSaqrExplicitProofreadingRequest(userQuery)
+    });
     // Only genuine library discovery inherits earlier catalogue context.
     const linkedBookTurn = librarySearchIntent ? resolveSaqrBookFollowUp(userQuery, messages) : {searchQuery:userQuery,anchoredTurn:null,continued:false};
     const recommendationTurn = librarySearchIntent && (isSaqrRecommendationRequest(userQuery) ||
@@ -599,7 +644,7 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [
-            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}${safeEnhancement.context ? '\n\n'+safeEnhancement.context : ''}${learningContext ? '\n\n'+learningContext : ''}${expertContext ? '\n\n'+expertContext : ''}${naturalDialogueContext ? '\n\n'+naturalDialogueContext : ''}${creativeTurn ? '\n\nACTIVE LITTLE AUTHOR CHALLENGE: NO catalogue searches or catalogue references. Friendly UAE Emirati dialogue with the reader, but write ALL story prose and certificate summaries in formal Modern Standard Arabic in Arabic UI, or entirely in English in English UI. Add exactly one imaginative story sentence per story turn. Flag only demonstrable spelling/grammar errors in the student input with a brief correct form, never stylistic preferences. Respect signed-in role and name; do not invent student profile data.' : ''}${isStoryBeginning(userQuery) ? '\n\nIf the user requests a NEW Little Author story without a specific theme, begin with exactly one short story sentence inspired by this rotating Emirati idea: '+storyIdeaAt(messages.filter(m=>m.role==='user').length,locale==='ar'?'ar':'en')+'. Preserve all established Little Author spelling correction, one-sentence response, ending and certificate instructions.' : ''}` },
+            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}${safeEnhancement.context ? '\n\n'+safeEnhancement.context : ''}${learningContext ? '\n\n'+learningContext : ''}${proofreadingContext ? '\n\n'+proofreadingContext : ''}${expertContext ? '\n\n'+expertContext : ''}${naturalDialogueContext ? '\n\n'+naturalDialogueContext : ''}${creativeTurn ? '\n\nACTIVE LITTLE AUTHOR CHALLENGE: NO catalogue searches or catalogue references. Friendly UAE Emirati dialogue with the reader, but write ALL story prose and certificate summaries in formal Modern Standard Arabic in Arabic UI, or entirely in English in English UI. Add exactly one imaginative story sentence per story turn. Flag only demonstrable spelling/grammar errors in the student input with a brief correct form, never stylistic preferences. Respect signed-in role and name; do not invent student profile data.' : ''}${isStoryBeginning(userQuery) ? '\n\nIf the user requests a NEW Little Author story without a specific theme, begin with exactly one short story sentence inspired by this rotating Emirati idea: '+storyIdeaAt(messages.filter(m=>m.role==='user').length,locale==='ar'?'ar':'en')+'. Preserve all established Little Author spelling correction, one-sentence response, ending and certificate instructions.' : ''}` },
             ...messages,
             { role: 'user', content: userQuery }
           ],
@@ -907,23 +952,30 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         <div ref={certificateRef} className="saqr-certificate" dir={locale === 'ar' ? 'rtl' : 'ltr'} lang={locale}>
           <div className="cert-top-stripe" />
           <header className="cert-header">
-            <img src="/school-logo.png" className="cert-logo" alt="EFIPS" />
+            <img src="/school-logo.png" className="cert-logo" alt={locale==='ar'?'شعار مدرسة صقر الإمارات':'EFIPS school logo'} />
             <div className="cert-school"><h3>مدرسة صقر الإمارات الدولية الخاصة</h3><p dir="ltr">Emirates Falcon International Private School</p><span>{t('certChallenge')}</span></div>
-            <div className="cert-seal" dir="ltr"><img src="/school-logo.png" alt={locale==='ar'?'شعار المدرسة':'School crest'} /></div>
+            <div className="cert-header-mark" dir="ltr"><strong>EFIPS</strong><span>LIBRARY</span></div>
           </header>
           <main className="cert-body">
-            <span className="cert-ornament" aria-hidden="true">✦ ✧ ✦</span>
-            <h1>{t('certTitle')}</h1>
-            <p className="cert-subtitle">{t('certSubtitle')}</p>
-            <h2 className="cert-winner" dir="auto">{winnerData?.name || '—'}</h2>
-            <p className="cert-grade">{t('certGrade')} <strong>{winnerData?.grade || '—'}</strong></p>
-            <section className="cert-summary"><h3>{locale === 'ar' ? 'ملخص القصة المؤلَّفة' : 'Summary of the Creative Story'}</h3><p dir={locale==='ar'?'rtl':'ltr'}>{winnerData?.content || '—'}</p></section>
+            <div className="cert-title-group">
+              <div className="cert-title-rule" aria-hidden="true" />
+              <h1>{t('certTitle')}</h1>
+              <p className="cert-subtitle">{t('certSubtitle')}</p>
+            </div>
+            <div className="cert-recipient">
+              <h2 className="cert-winner" dir="auto">{winnerData?.name || '—'}</h2>
+              <p className="cert-grade">{t('certGrade')} <strong>{winnerData?.grade || '—'}</strong></p>
+            </div>
+            <section className="cert-summary"><h3>{locale === 'ar' ? 'ملخص القصة المؤلَّفة' : 'Creative Story Synopsis'}</h3><p dir={locale==='ar'?'rtl':'ltr'}>{winnerData?.content || '—'}</p></section>
             <p className="cert-commendation">{locale === 'ar' ? 'إبداع يستحق التقدير، وقصة تستحق أن تُروى' : 'An imagination worth celebrating, a story worth sharing'}</p>
           </main>
           <footer className="cert-footer">
-            <div><span>{t('certDate')}</span><strong>{winnerData?.date}</strong></div>
-            <div className="cert-library" dir="ltr"><img src="/school-logo.png" alt={locale==='ar'?'شعار المدرسة':'School crest'} /></div>
-            <div><span>{locale === 'ar' ? 'توقيع صقر' : 'Saqr Signature'}</span><strong className="cert-signature">{locale === 'ar' ? 'صقر' : 'Saqr'}</strong><small>{t('certSaqr')}</small></div>
+            <div className="cert-footer-field"><span>{t('certDate')}</span><strong>{winnerData?.date}</strong></div>
+            <div className="cert-seal" dir="ltr">
+              <div className="cert-seal-disc"><img src="/school-logo.png" alt={locale==='ar'?'شعار المدرسة داخل الختم':'School crest inside seal'} /></div>
+              <small>{locale==='ar'?'ختم المدرسة':'School Seal'}</small>
+            </div>
+            <div className="cert-footer-field"><span>{locale === 'ar' ? 'توقيع صقر' : 'Saqr Signature'}</span><strong className="cert-signature">{locale === 'ar' ? 'صقر' : 'Saqr'}</strong><small>{t('certSaqr')}</small></div>
           </footer>
           <div className="cert-bottom-stripe" />
         </div>
@@ -1368,33 +1420,77 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         .saqr-progress-bar { position: absolute; inset-block: 0; left: 0; width: 45%; border-radius: inherit; background: linear-gradient(90deg, #0ea5e9, #f59e0b, #10b981); animation: saqr-progress 1.4s ease-in-out infinite; }
         .saqr-footer-note { margin: 4px 0 0; color: #94a3b8; font-size: 9px; line-height: 1.3; text-align: center; }
 
+        /* Fixed-size 794 × 1123 px A4 certificate canvas, independent of viewport. */
         .saqr-certificate-host { position:fixed;top:0;left:-9999px;width:794px;pointer-events:none; }
-        .saqr-certificate { box-sizing:border-box;display:flex;flex-direction:column;position:relative;width:794px;min-height:1123px;height:1123px;max-height:1123px;overflow:hidden;padding:48px 52px 42px;border:11px solid #087e72;background:#fff;color:#203549;font-family:'Cairo',Tahoma,Arial,sans-serif;line-height:1.55;letter-spacing:normal;text-rendering:optimizeLegibility; }
-        .saqr-certificate[dir='rtl'],.saqr-certificate[dir='rtl'] * { letter-spacing:normal!important;word-spacing:normal!important;font-kerning:normal!important; }
-        .saqr-certificate [dir='ltr'] { direction:ltr;unicode-bidi:isolate; }
-        .cert-top-stripe,.cert-bottom-stripe { position:absolute;left:0;right:0;height:8px;background:linear-gradient(90deg,#d92332 0 25%,#009c6b 25% 50%,#edbe63 50% 75%,#162c40 75%); }
+        .saqr-certificate {
+          box-sizing:border-box;display:flex;flex-direction:column;position:relative;
+          width:794px;min-height:1123px;height:1123px;max-height:1123px;overflow:hidden;
+          padding:36px 43px 32px;border:11px solid #087e72;
+          background:#fffdf8;color:#203549;font-family:'Cairo',Tahoma,Arial,sans-serif;
+          line-height:1.5;letter-spacing:normal;text-rendering:optimizeLegibility;
+        }
+        .saqr-certificate::before {content:"";position:absolute;inset:9px;border:2px solid #e7c785;pointer-events:none}
+        .saqr-certificate[dir='rtl'],.saqr-certificate[dir='rtl'] * {letter-spacing:normal!important;word-spacing:normal!important;font-kerning:normal!important}
+        .saqr-certificate [dir='ltr'] {direction:ltr;unicode-bidi:isolate}
+        .cert-top-stripe,.cert-bottom-stripe {
+          position:absolute;left:0;right:0;height:8px;
+          background:linear-gradient(90deg,#d92332 0 25%,#009c6b 25% 50%,#edbe63 50% 75%,#162c40 75%)
+        }
         .cert-top-stripe {top:0}.cert-bottom-stripe {bottom:0}
-        .cert-header {display:flex;gap:17px;align-items:center;border-bottom:2px solid #cde6df;padding-bottom:23px}
-        .cert-logo {width:92px;height:92px;object-fit:contain;flex-shrink:0}
-        .cert-school {flex:1;text-align:center}.cert-school h3 {font-size:18px;font-weight:900;color:#0b695c;margin:0}
-        .cert-school p {font:700 11px Arial,sans-serif;color:#475569;margin:6px 0}
-        .cert-school span {display:inline-block;padding:5px 13px;border-radius:18px;background:#e9f7f3;color:#087e72;font-size:13px;font-weight:900}
-        .cert-seal {width:80px;height:80px;border-radius:50%;border:3px solid #cba151;display:flex;align-items:center;justify-content:center;background:#fff9e8;flex-shrink:0;overflow:hidden}.cert-seal img{width:67px;height:67px;object-fit:contain}
-        .cert-body {flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;min-height:0;padding-top:22px;overflow:hidden}
-        .cert-ornament {color:#c89b45;font-size:25px}
-        .cert-body h1 {width:100%;text-align:center;font-size:35px;line-height:1.4;color:#087e72;font-weight:900;margin:12px 0}
-        .cert-subtitle {font-size:17px;font-weight:700;color:#475569;margin:3px 0 18px}
-        .cert-winner {width:100%;font-size:30px;font-weight:900;border-bottom:3px solid #d5a64c;padding:0 8px 10px;margin:0;overflow-wrap:anywhere}
-        .cert-grade {font-size:17px;color:#475569;font-weight:700;margin:16px 0 25px}.cert-grade strong{color:#087e72}
-        .cert-summary {box-sizing:border-box;width:100%;flex:1;min-height:0;overflow:hidden;border:2px solid #c5e2da;border-radius:20px;background:#f4faf8;padding:14px 20px 16px;text-align:start}
-        .cert-summary h3 {font-size:19px;font-weight:900;color:#087e72;margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid #cde8df}
-        .cert-summary p {font-size:16px;font-weight:700;color:#203549;margin:0;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere;unicode-bidi:plaintext;text-align:start}
-        .cert-commendation {font-size:15px;font-weight:800;color:#ac8738;margin:12px 0 8px}
-        .cert-footer {display:flex;align-items:flex-end;justify-content:space-between;gap:14px;border-top:2px solid #cce8df;margin-top:12px;padding-top:16px}
-        .cert-footer>div:not(.cert-library) {display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;width:180px;color:#64748b;font-size:13px;font-weight:700}
-        .cert-footer strong {font-size:17px;color:#193447;font-weight:900}.cert-footer small{font-size:11px}
-        .cert-library {height:94px;width:94px;border:2px solid #b9dad2;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fff;text-align:center;overflow:hidden}.cert-library img{width:82px;height:82px;object-fit:contain}
-        .cert-footer strong.cert-signature {font-family:'Cairo',Tahoma,sans-serif;font-size:36px;color:#087e72;font-style:italic;transform:rotate(-5deg);}
+        .cert-header {
+          display:grid;grid-template-columns:96px minmax(0,1fr) 96px;align-items:center;
+          gap:18px;flex-shrink:0;min-height:119px;
+          padding:4px 8px 16px;border-bottom:2px solid #c7dfd5
+        }
+        .cert-logo {width:94px;height:94px;object-fit:contain;justify-self:center}
+        .cert-school {min-width:0;text-align:center}
+        .cert-school h3 {font-size:18px;line-height:1.55;font-weight:900;color:#0b695c;margin:0}
+        .cert-school p {font:700 11px/1.5 Arial,sans-serif;color:#475569;margin:4px 0 7px}
+        .cert-school span {display:inline-block;padding:4px 15px;border-radius:15px;background:#e9f7f3;color:#087e72;font-size:12px;font-weight:900}
+        .cert-header-mark {
+          box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;
+          width:86px;height:86px;justify-self:center;border-radius:16px;
+          border:2px solid #dfc181;background:#fff9eb;color:#106b5f
+        }
+        .cert-header-mark strong {font:900 19px/1.3 Arial,sans-serif}
+        .cert-header-mark span {font:800 9px/1.4 Arial,sans-serif;letter-spacing:1px}
+        .cert-body {
+          flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;
+          min-height:0;padding:16px 11px 0;overflow:hidden
+        }
+        .cert-title-group {width:100%;flex-shrink:0;display:flex;flex-direction:column;align-items:center;text-align:center}
+        .cert-title-rule {width:144px;height:3px;border-radius:99px;background:#d0a150;margin:3px auto 13px}
+        .cert-body h1 {box-sizing:border-box;width:100%;text-align:center;font-size:36px;line-height:1.45;color:#087e72;font-weight:900;margin:0 0 7px}
+        .cert-subtitle {width:100%;text-align:center;font-size:16px;line-height:1.8;font-weight:700;color:#475569;margin:0 0 13px}
+        .cert-recipient {width:100%;flex-shrink:0;display:flex;flex-direction:column;align-items:center}
+        .cert-winner {width:96%;text-align:center;font-size:31px;line-height:1.5;font-weight:900;color:#163f40;border-bottom:3px solid #d5a64c;padding:0 8px 7px;margin:0;overflow-wrap:anywhere}
+        .cert-grade {font-size:16px;color:#475569;font-weight:700;margin:9px 0 13px}
+        .cert-grade strong {color:#087e72}
+        .cert-summary {
+          box-sizing:border-box;width:100%;flex:1;min-height:0;overflow:hidden;
+          border:2px solid #c5e2da;border-radius:18px;background:#f1f9f6;
+          padding:13px 19px 13px;text-align:start
+        }
+        .cert-summary h3 {font-size:18px;font-weight:900;color:#087e72;margin:0 0 9px;padding-bottom:8px;border-bottom:1px solid #cde8df;text-align:start}
+        .cert-summary p {font-size:16px;font-weight:700;color:#203549;margin:0;line-height:1.67;white-space:pre-wrap;overflow-wrap:anywhere;unicode-bidi:plaintext;text-align:start}
+        .cert-commendation {font-size:14px;line-height:1.55;font-weight:800;color:#9b762c;margin:11px 0 6px;flex-shrink:0}
+        .cert-footer {
+          display:grid;grid-template-columns:minmax(0,1fr) 135px minmax(0,1fr);
+          align-items:center;gap:10px;flex-shrink:0;min-height:122px;
+          border-top:2px solid #cce8df;margin-top:11px;padding:9px 6px 0
+        }
+        .cert-footer-field {display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;min-width:0;color:#64748b;font-size:12px;font-weight:700}
+        .cert-footer-field strong {font-size:15px;color:#193447;font-weight:900}
+        .cert-footer-field small {font-size:10px}
+        .cert-seal {display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;color:#87662b}
+        .cert-seal-disc {
+          box-sizing:border-box;width:87px;height:87px;border-radius:50%;
+          border:4px double #bf9645;background:#fff;display:flex;align-items:center;justify-content:center;
+          box-shadow:0 0 0 4px #fff4dd,0 0 0 5px #d1aa64
+        }
+        .cert-seal-disc img {width:72px;height:72px;object-fit:contain}
+        .cert-seal small {font-size:11px;font-weight:900;line-height:1.15;text-align:center}
+        .cert-footer-field strong.cert-signature {font-family:'Cairo',Tahoma,sans-serif;font-size:31px;color:#087e72;font-style:italic;transform:rotate(-4deg)}
         @keyframes saqr-ring-pulse {
           0%, 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, .10); }
           50% { box-shadow: 0 0 0 4px rgba(251, 191, 36, .34); }
