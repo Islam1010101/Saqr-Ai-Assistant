@@ -72,9 +72,9 @@
 | Space! The Universe as You've Never Seen It Before | 216 | DK | [Drive](https://drive.google.com/drive/folders/18GH3LLVIibC9f9aUVCUQja3aOV7qmSuo) |
 | The Magical Yet | 38 | Disney-Hyperion | [Drive](https://drive.google.com/drive/folders/1AT1JRt6xe2ObzN-a68OXbJVw5MfC5ois) |
 | The Power of Habit | 386 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1N8I7bEFDkyanQM7_taynR_DX1xXMmSRr) |
-| Mindset: The New Psychology of Success | 283 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1SD7B9qOZKm8A5dwsv9He44PklCVhc_Qn) |
-| Deep Work: Rules for Focused Success in a Distracted World | 190 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1v4QY_1TWDCnxV_Qk6hB--fxeU19SyqmV) |
-| Who Will Cry When You Die? | 135 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1aZ9Pt7BwV07hpIQr5rpsS4YDa1zjDL0H) |
+| Mindset: The New Psychology of Success | 283 | Random House | [Drive](https://drive.google.com/drive/folders/1SD7B9qOZKm8A5dwsv9He44PklCVhc_Qn) |
+| Deep Work: Rules for Focused Success in a Distracted World | 190 | Grand Central Publishing | [Drive](https://drive.google.com/drive/folders/1v4QY_1TWDCnxV_Qk6hB--fxeU19SyqmV) |
+| Who Will Cry When You Die? | 135 | HarperCollins e-books | [Drive](https://drive.google.com/drive/folders/1aZ9Pt7BwV07hpIQr5rpsS4YDa1zjDL0H) |
 | The 7 Habits of Highly Effective People | 282 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1VtUqxIlppb9edR05nLtRXRZ-O2-E1vSE) |
 | The Kite Runner | 374 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1fXg5LDgJ2uDQaAdhiAERi_JfoS6YkOiE) |
 | Me Before You | 393 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1kQ2FQovVhUg98ZP8WefJ-e5jkpXDI8pa) |
