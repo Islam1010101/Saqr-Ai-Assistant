@@ -268,40 +268,78 @@ const SmartSearchPage: React.FC = () => {
   }, [messages, isLoading]);
 
   const handleDownloadCertificatePDF = async () => {
-    if (!certificateRef.current) return;
-
-    const certificate = certificateRef.current;
-    const original = { position:certificate.style.position,left:certificate.style.left,top:certificate.style.top,zIndex:certificate.style.zIndex };
-    certificate.style.position='fixed';certificate.style.left='0px';certificate.style.top='0px';certificate.style.zIndex='-9999';
+    if (!certificateRef.current || !winnerData) return;
+    // Export a fresh, viewport-mounted certificate clone. Capturing the hidden
+    // component offscreen caused unreliable PDF output in some browsers.
+    const exportSurface=document.createElement('div');
+    exportSurface.className='saqr-certificate-export-surface';
+    exportSurface.setAttribute('aria-hidden','true');
+    exportSurface.style.cssText='position:fixed;top:0;left:0;z-index:2147483600;width:794px;height:1123px;background:#fff;pointer-events:none;overflow:hidden';
+    const snapshot=certificateRef.current.cloneNode(true) as HTMLDivElement;
+    snapshot.style.width='794px';
+    snapshot.style.minHeight='1123px';
+    snapshot.style.height='1123px';
+    snapshot.style.maxHeight='1123px';
+    snapshot.style.transform='none';
+    exportSurface.appendChild(snapshot);
+    document.body.appendChild(exportSurface);
     try {
       if(document.fonts?.ready) await document.fonts.ready;
-      await Promise.all(Array.from(certificate.querySelectorAll('img')).map(img => img.complete ? Promise.resolve() : new Promise<void>(resolve => { img.addEventListener('load',()=>resolve(),{once:true});img.addEventListener('error',()=>resolve(),{once:true});setTimeout(resolve,2200); })));
-      // One fixed A4 canvas and exactly one PDF page. The old scrollHeight-
-      // based slicing could create a blank second page due to a tiny overflow.
-      const summary = certificate.querySelector('.cert-summary p') as HTMLElement | null;
-      const summaryFrame = certificate.querySelector('.cert-summary') as HTMLElement | null;
-      const originalSummaryFont = summary?.style.fontSize ?? '';
-      if(summary){
-        for(let font=16;font>=10 && summaryFrame && summaryFrame.scrollHeight>summaryFrame.clientHeight;font--){
-          summary.style.fontSize=font+'px';
+      const logos=Array.from(snapshot.querySelectorAll<HTMLImageElement>('img'));
+      await Promise.all(logos.map(async img=>{
+        if(typeof img.decode==='function'){
+          await img.decode().catch(()=>undefined);
+        } else if(!img.complete){
+          await new Promise<void>(resolve=>{
+            img.addEventListener('load',()=>resolve(),{once:true});
+            img.addEventListener('error',()=>resolve(),{once:true});
+          });
         }
+      }));
+      if(logos.some(img=>!img.naturalWidth))throw new Error('EFIPS school logo unavailable in certificate export');
+
+      // Fit the full authored-story synopsis INSIDE its allocated panel.
+      // Do not crop the student's achievement or generate an extra PDF page.
+      const summary=snapshot.querySelector('.cert-summary p') as HTMLElement|null;
+      const frame=snapshot.querySelector('.cert-summary') as HTMLElement|null;
+      const heading=snapshot.querySelector('.cert-summary h3') as HTMLElement|null;
+      if(summary&&frame){
+        const available=()=>frame.clientHeight-(heading?.offsetHeight||0)-
+          parseFloat(getComputedStyle(frame).paddingTop||'0')-
+          parseFloat(getComputedStyle(frame).paddingBottom||'0')-8;
+        for(let font=16;font>=10;font--){
+          summary.style.fontSize=font+'px';
+          if(summary.scrollHeight<=available())break;
+        }
+        if(summary.scrollHeight>available())throw new Error('Story summary exceeds single-page certificate layout');
       }
-      let canvas:HTMLCanvasElement;
-      try {
-        canvas=await html2canvas(certificate,{scale:2,backgroundColor:'#ffffff',
-          useCORS:true,allowTaint:false,logging:false,width:794,height:1123});
-      } finally {
-        if(summary)summary.style.fontSize=originalSummaryFont;
-      }
+      const canvas=await html2canvas(snapshot,{
+        scale:2,
+        backgroundColor:'#ffffff',
+        useCORS:true,
+        allowTaint:false,
+        logging:false,
+        width:794,
+        height:1123,
+        windowWidth:Math.max(794,document.documentElement.clientWidth),
+        windowHeight:Math.max(1123,document.documentElement.clientHeight),
+        scrollX:0,
+        scrollY:0
+      });
+      if(canvas.width===0||canvas.height===0)throw new Error('Certificate capture returned an empty canvas');
       const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true});
-      pdf.addImage(canvas.toDataURL('image/jpeg',0.94),'JPEG',0,0,210,297,undefined,'FAST');
-      const filename=String(winnerData?.name||'Certificate').replace(/[\\/:*?"<>|]/g,'_').slice(0,50);
+      pdf.setProperties({title:'EFIPS Little Author Certificate',subject:'Little Author Challenge'});
+      pdf.addImage(canvas.toDataURL('image/jpeg',0.96),'JPEG',0,0,210,297,undefined,'FAST');
+      if(pdf.getNumberOfPages()!==1)throw new Error('Certificate PDF must be exactly one A4 page');
+      const filename=String(winnerData.name||'Certificate').replace(/[\\/:*?"<>|]/g,'_').slice(0,50);
       pdf.save('EFIPS_Little_Author_'+filename+'.pdf');
     } catch(error) {
       console.error('Certificate PDF export failed:',error);
-      alert(locale==='ar'?'تعذر تحميل شهادة PDF. يرجى المحاولة مجددًا.':'Unable to export PDF certificate. Please retry.');
+      alert(locale==='ar'
+        ? 'تعذر إنشاء الشهادة في صفحة A4 واحدة. حاول مرة ثانية، أو تواصل مع مسؤول المكتبة.'
+        : 'Could not fit the certificate on one A4 page. Please retry or contact the librarian.');
     } finally {
-      certificate.style.position=original.position;certificate.style.left=original.left;certificate.style.top=original.top;certificate.style.zIndex=original.zIndex;
+      exportSurface.remove();
     }
   };
 
