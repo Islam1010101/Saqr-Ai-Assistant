@@ -22,6 +22,7 @@ import { extractSaqrSpecificBookTitle, findSaqrBookTitleHoldings, saqrBookExpert
 import { saqrExtraContext, isNewDiscussion, discussionOpening } from '../src/utils/saqrSafeEnhancements';
 import {detectSaqrIntroduction,saqrIntroductionReply} from '../src/utils/saqrIntroductionReplies';
 import { resolveSaqrBookFollowUp, saqrNaturalDialogueInstructions } from '../src/utils/saqrNaturalDialogue';
+import { isSaqrLibrarySearchIntent, isSaqrCreativeTurn } from '../src/utils/saqrIntentRouter';
 
 // --- بروتوكول عقل صقر ---
 const SAQR_ELITE_PROMPT = `
@@ -357,12 +358,14 @@ const SmartSearchPage: React.FC = () => {
   const handleSendMessage = async () => {
     if (input.trim() === '' || isLoading) return;
     const userQuery = input.trim();
-    // Keep the user's actual message intact; use earlier book context only for discovery.
-    const linkedBookTurn = resolveSaqrBookFollowUp(userQuery, messages);
-    const recommendationTurn = isSaqrRecommendationRequest(userQuery) ||
+    const librarySearchIntent = isSaqrLibrarySearchIntent(userQuery, messages);
+    const creativeTurn = isSaqrCreativeTurn(userQuery, messages) && !librarySearchIntent;
+    // Only genuine library discovery inherits earlier catalogue context.
+    const linkedBookTurn = librarySearchIntent ? resolveSaqrBookFollowUp(userQuery, messages) : {searchQuery:userQuery,anchoredTurn:null,continued:false};
+    const recommendationTurn = librarySearchIntent && (isSaqrRecommendationRequest(userQuery) ||
       (linkedBookTurn.continued &&
         isSaqrRecommendationRequest(linkedBookTurn.anchoredTurn || '') &&
-        /(?:اسهل|أسهل|اصعب|أصعب|غيره|غيرها|حاجة|اقصر|أقصر|اطول|أطول|easier|simpler|harder|another|similar|shorter)/i.test(userQuery));
+        /(?:اسهل|أسهل|اصعب|أصعب|غيره|غيرها|حاجة|اقصر|أقصر|اطول|أطول|easier|simpler|harder|another|similar|shorter)/i.test(userQuery)));
     // Only a final, context-aware question is added to displayed answers.
     // Storytelling, certificates, and the content of prior functions remain intact.
     const finishSaqrReply = (answer: string, kind: SaqrFollowUpKind = 'auto') =>
@@ -423,11 +426,11 @@ const SmartSearchPage: React.FC = () => {
     }
     // Retrieve verified catalog records across Arabic/English subjects and titles.
     // This changes only the book context; Saqr's system prompt and chat flow stay intact.
-    const foundBooks = searchSaqrBookCatalog(linkedBookTurn.searchQuery, {
+    const foundBooks = librarySearchIntent ? searchSaqrBookCatalog(linkedBookTurn.searchQuery, {
       physical: bookData,
       arabic: [...ARABIC_LIBRARY_DATABASE, ...NATIONAL_IDENTITY_DIGITAL_BOOKS],
       english: ENGLISH_LIBRARY_DATABASE
-    });
+    }) : [];
 
     // Offer varied national-identity plots without touching the strict author story flow.
     if(isStoryBeginning(userQuery) && /(?:أفكار|افكار|اقترح|اختار|مواضيع|variety|ideas|topics)/i.test(userQuery)){
@@ -442,7 +445,7 @@ const SmartSearchPage: React.FC = () => {
     // A named book should receive the knowledge of an experienced librarian
     // EVEN if EFIPS does not catalogue it. Broad topic/catalog searches retain
     // their exact existing fast path and all school data remains authoritative.
-    const namedBookTitle=preIntent==='none'
+    const namedBookTitle=librarySearchIntent && preIntent==='none'
       ? (extractSaqrSpecificBookTitle(userQuery) || (linkedBookTurn.continued && linkedBookTurn.anchoredTurn
         ? extractSaqrSpecificBookTitle(linkedBookTurn.anchoredTurn) : null)) : null;
     const namedBookHoldings=namedBookTitle
@@ -450,7 +453,7 @@ const SmartSearchPage: React.FC = () => {
     // Explicit "find this title" requests should show verified holdings, not
     // an unrelated book explanation. "Tell me more" uses the expert path.
     const explicitCatalogSearch=/(?:^|\s)(?:دورلي|دور\s*لي|دور|ابحث(?:لي)?|إبحث(?:لي)?|وريني|هاتلي|search|find|look\s+for|show\s+me)(?=\s|$)/i.test(userQuery);
-    if(preIntent==='none' && isSaqrCatalogLookup(userQuery) && (explicitCatalogSearch || !namedBookTitle)){
+    if(librarySearchIntent && preIntent==='none' && isSaqrCatalogLookup(userQuery) && (explicitCatalogSearch || !namedBookTitle)){
       const answer=renderSaqrCatalogAnswer(userQuery,foundBooks,locale==='ar'?'ar':'en');
       setMessages(prev=>[...prev,{role:'assistant',content:finishSaqrReply(answer,'catalog')}]);
       setSaqrState('idle');
@@ -561,7 +564,9 @@ const SmartSearchPage: React.FC = () => {
     const expertContext=namedBookTitle && learningIntent==='none'
       ? saqrBookExpertContext(namedBookTitle,namedBookHoldings,externalBookReference) : '';
 
-    const searchContext = expertContext
+    const searchContext = !librarySearchIntent
+      ? 'NO CATALOGUE SEARCH INTENT: Do not mention school book holdings, availability, shelf numbers or a library record verification section. Answer the actual educational, conversational, lesson or creative-writing request directly.'
+      : expertContext
       ? 'EFIPS LIBRARY RECORDS FOUND: EXACT TITLE-MATCHED HOLDINGS ONLY: '
         +JSON.stringify(namedBookHoldings)+'. Other fuzzy topic matches are NOT evidence that the named book is owned by the school.'
       : (foundBooks.length > 0 || recommendationTurn)
@@ -592,7 +597,7 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [
-            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}${safeEnhancement.context ? '\n\n'+safeEnhancement.context : ''}${learningContext ? '\n\n'+learningContext : ''}${expertContext ? '\n\n'+expertContext : ''}${naturalDialogueContext ? '\n\n'+naturalDialogueContext : ''}${isStoryBeginning(userQuery) ? '\n\nIf the user requests a NEW Little Author story without a specific theme, begin with exactly one short story sentence inspired by this rotating Emirati idea: '+storyIdeaAt(messages.filter(m=>m.role==='user').length,locale==='ar'?'ar':'en')+'. Preserve all established Little Author spelling correction, one-sentence response, ending and certificate instructions.' : ''}` },
+            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}${safeEnhancement.context ? '\n\n'+safeEnhancement.context : ''}${learningContext ? '\n\n'+learningContext : ''}${expertContext ? '\n\n'+expertContext : ''}${naturalDialogueContext ? '\n\n'+naturalDialogueContext : ''}${creativeTurn ? '\n\nACTIVE LITTLE AUTHOR CHALLENGE: NO catalogue searches or catalogue references. Friendly UAE Emirati dialogue with the reader, but write ALL story prose and certificate summaries in formal Modern Standard Arabic in Arabic UI, or entirely in English in English UI. Add exactly one imaginative story sentence per story turn. Flag only demonstrable spelling/grammar errors in the student input with a brief correct form, never stylistic preferences. Respect signed-in role and name; do not invent student profile data.' : ''}${isStoryBeginning(userQuery) ? '\n\nIf the user requests a NEW Little Author story without a specific theme, begin with exactly one short story sentence inspired by this rotating Emirati idea: '+storyIdeaAt(messages.filter(m=>m.role==='user').length,locale==='ar'?'ar':'en')+'. Preserve all established Little Author spelling correction, one-sentence response, ending and certificate instructions.' : ''}` },
             ...messages,
             { role: 'user', content: userQuery }
           ],
