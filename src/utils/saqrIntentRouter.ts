@@ -20,6 +20,9 @@ export const isSaqrLibrarySearchIntent=(
 ):boolean=>{
   const q=String(question||'').trim();
   if(!q)return false;
+  // Writing a story is never a request to search the school catalogue, even
+  // when the fictional scene happens inside the library or features a book.
+  if(challenge.test(q)||isStoryBeginning(q))return false;
   // A fresh explicit book request is permitted after a story, but ordinary
   // replies to a writing challenge must never turn into catalogue searches.
   const explicitNewSearch=locationRequest.test(q)||(
