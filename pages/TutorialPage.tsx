@@ -494,7 +494,7 @@ export default function TutorialPage() {
                 <Link to="/" className="mt-2 inline-flex min-h-11 items-center rounded-xl bg-emerald-700 hover:bg-emerald-800 px-5 py-2.5 text-sm font-black text-white shadow-sm">
                   {label('تسجيل الدخول لاستخدام الخدمات', 'Sign in to use the services')}
                 </Link>
-              )
+              )}
             </section>
           </HintTarget>
 
