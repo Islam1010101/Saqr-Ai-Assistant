@@ -2,7 +2,6 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Groq from 'groq-sdk';
 import { createHmac, randomUUID } from 'node:crypto';
 import { findBookReference } from '../src/utils/saqrOpenLibrary.js';
-import { isSaqrLibrarySearchIntent } from '../src/utils/saqrIntentRouter';
 
 // ==========================================
 // 1. البيانات المحلية
@@ -3331,6 +3330,16 @@ const localBookData = [
 { "title": "New Webster's Dictionary And Roget's Thesaurus", "author": "Book Essentials Inc", "shelf": 6, "row": 3 }
 ];
 
+// Deliberately self-contained: Vercel's Node ESM serverless bundle does not
+// resolve extensionless imports from this API module to src/*.ts at runtime.
+// Keep the server-side detection local to avoid breaking EVERY chat request.
+function isSaqrApiLibrarySearch(text:string):boolean{
+  const q=String(text||'').trim();
+  if(!q)return false;
+  if(/(?:تحدي\s*(?:المؤلف|التأليف)|المؤلف\s*الصغير|little\s*author|(?:اكتب|نكتب|نؤلف|ألف|ابتكر)\s+(?:لي\s*)?قص[ةه]|(?:write|create|continue)\s+(?:a\s+)?story|تحضير\s+(?:درس|حصة)|خطة\s*درس|lesson\s*plan|worksheet|ورق[ةه]\s+عمل|شهاد[ةه]|certificate|presentation|عرض\s+تقديمي)/i.test(q))return false;
+  return /(?:ابحث|دورلي|دور\s+على|رشح(?:لي)?|اقترح|كتب\s+(?:عن|في)|كتاب\s+(?:عن|في)|(?:كتاب|رواي[ةه])\s+(?:اسمه|بعنوان)|(?:فهرس|الرف|مكان\s+الكتاب|متوفر\s+في\s+المكتبة|موجود\s+عندكم)|(?:find|search|recommend|suggest|locate)\s+(?:me\s+|a\s+|some\s+)?(?:books?|novels?|authors?)|books?\s+(?:about|by)|library\s+(?:catalog|catalogue|shelf))/i.test(q);
+}
+
 function findBooks(q: string) {
   const query = (q || '').toLowerCase().trim();
   if (!query) return [];
@@ -3410,12 +3419,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const apiKey = process.env.GROQ_API_KEY?.trim();
 
   try {
-    const { messages = [], locale = 'en' } = req.body || {};
+    const { messages = [], locale = 'en', catalogueIntent } = req.body || {};
     const userMsg = messages[messages.length - 1]?.content || '';
 
     // The server must not inject catalogue data into unrelated educational,
     // creative or everyday requests. Keep provider routing and quotas intact.
-    const catalogRequested = isSaqrLibrarySearchIntent(userMsg, messages.slice(0,-1));
+    // The main Saqr UI already routes intent using its tested browser helper;
+    // older chat clients can omit this flag and use a conservative local check.
+    // Do NOT import frontend-only TypeScript helpers in this serverless module.
+    const catalogRequested = typeof catalogueIntent === 'boolean'
+      ? catalogueIntent : isSaqrApiLibrarySearch(userMsg);
     const found = catalogRequested ? findBooks(userMsg) : [];
     
     // تجهيز السياق
