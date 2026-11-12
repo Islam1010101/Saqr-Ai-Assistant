@@ -49,6 +49,11 @@ assert.equal(isSaqrLibrarySearchIntent('طب عايز حاجة أسهل',history
   'A genuine recommendation follow-up remains connected to the library');
 assert.equal(isSaqrLibrarySearchIntent('ابحث عن كتاب الفضاء في المكتبة',history('تحدي المؤلف الصغير')),true,
   'Explicit new book request overrides an old story conversation');
+const server=readFileSync('api/chat.ts','utf8');
+assert.ok(server.includes('const catalogRequested = isSaqrLibrarySearchIntent(userMsg);'));
+assert.ok(server.includes('const found = catalogRequested ? findBooks(userMsg) : [];'));
+assert.ok(server.includes('Normal educational or creative chat (NOT a school catalogue search)'));
+assert.ok(server.includes('No school-catalogue search was requested.'));
 const page=readFileSync('pages/SmartSearchPage.tsx','utf8');
 assert.ok(page.includes('const librarySearchIntent = isSaqrLibrarySearchIntent(userQuery, messages);'));
 assert.ok(page.includes('const foundBooks = librarySearchIntent ? searchSaqrBookCatalog('));
