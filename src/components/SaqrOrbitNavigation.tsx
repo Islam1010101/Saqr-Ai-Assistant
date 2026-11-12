@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import './SaqrOrbitNavigation.css';
 import { getSaqrLearningAccess } from '../utils/saqrLearningAccess';
 
@@ -52,7 +53,8 @@ export default function SaqrOrbitNavigation({
   showMascotBubble,
   bursts,
   tourMode = false,
-  onTourSelect,
+  tourDescriptions,
+  tourRoles,
 }: {
   isAr: boolean;
   userType: string | null;
@@ -60,12 +62,17 @@ export default function SaqrOrbitNavigation({
   showMascotBubble: boolean;
   bursts: Burst[];
   tourMode?: boolean;
-  onTourSelect?: (item: OrbitItem) => void;
+  tourDescriptions?: Record<string, string>;
+  tourRoles?: Record<string, string>;
 }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const swipeX = useRef<number | null>(null);
   const [page, setPage] = useState(0);
   const [learningAllowed, setLearningAllowed] = useState(false);
+  const [hoveredTourKey, setHoveredTourKey] = useState<string | null>(null);
+  const [tappedTourKey, setTappedTourKey] = useState<string | null>(null);
+  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
+  const lastPointerType = useRef<string>('mouse');
   const role: Role = userType === 'teacher' ? 'teacher' : userType === 'admin' ? 'admin' : 'student';
   // The public tutorial is a read-only visual replica, including services hidden by role.
   // The real homepage keeps its existing permissions and entitlement checks.
@@ -115,6 +122,59 @@ export default function SaqrOrbitNavigation({
     event.currentTarget.style.removeProperty('--tilt-x');
     event.currentTarget.style.removeProperty('--tilt-y');
   };
+  // Only the public tutorial shows these contextual explanations. The real homepage
+  // retains its original links, pointer effects and access controls unchanged.
+  const activeTourKey = tappedTourKey || hoveredTourKey;
+  const tourItem = activeTourKey ? ITEMS.find(item => item.key === activeTourKey) : undefined;
+  const tourTitle = tourItem ? (isAr ? tourItem.ar : tourItem.en) : '';
+  const tourDescription = activeTourKey ? tourDescriptions?.[activeTourKey] : undefined;
+  const tourAudience = activeTourKey ? tourRoles?.[activeTourKey] : undefined;
+  const showTourHint = Boolean(tourMode && tourItem && tourDescription);
+
+  const followCursor = (event: React.PointerEvent<HTMLElement>, key: string) => {
+    if (!tourMode || event.pointerType === 'touch') return;
+    setTappedTourKey(null);
+    setHoveredTourKey(key);
+    setCursorPosition({ x: event.clientX, y: event.clientY });
+  };
+
+  const closeHover = (event: React.PointerEvent<HTMLElement>, key: string) => {
+    if (tourMode && event.pointerType !== 'touch') {
+      setHoveredTourKey(current => current === key ? null : current);
+    }
+  };
+
+  useEffect(() => {
+    if (!tourMode || !tappedTourKey) return;
+    const dismissOutside = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (target.closest('.saqr-orbit-bubble, [data-saqr-tour-hint]')) return;
+      setTappedTourKey(null);
+    };
+    const dismissEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setTappedTourKey(null);
+    };
+    document.addEventListener('pointerdown', dismissOutside);
+    window.addEventListener('keydown', dismissEscape);
+    return () => {
+      document.removeEventListener('pointerdown', dismissOutside);
+      window.removeEventListener('keydown', dismissEscape);
+    };
+  }, [tourMode, tappedTourKey]);
+
+  useEffect(() => {
+    // Switching pages of the orbit must never leave a stale explanation visible.
+    setHoveredTourKey(null);
+    setTappedTourKey(null);
+  }, [page]);
+
+  const viewportWidth = typeof window === 'undefined' ? 1024 : window.innerWidth;
+  const viewportHeight = typeof window === 'undefined' ? 768 : window.innerHeight;
+  const hoverLeft = Math.max(12, Math.min(viewportWidth - 355, cursorPosition.x + 20));
+  const hoverTop = Math.max(12, Math.min(viewportHeight - 250,
+    cursorPosition.y + 250 > viewportHeight ? cursorPosition.y - 235 : cursorPosition.y + 20));
+
   const turnPage = (delta: number) => setPage(current => (current + delta + pageCount) % pageCount);
   return (
     <section className="saqr-orbit-section" dir={isAr ? 'rtl' : 'ltr'} aria-label={isAr ? 'خدمات المكتبة التفاعلية' : 'Interactive library navigation'}>
@@ -165,8 +225,27 @@ export default function SaqrOrbitNavigation({
             const ariaLabel = isAr ? item.ar : item.en;
             return tourMode ? (
               <button type="button" key={item.key} className={className} style={bubbleStyle}
-                onClick={() => onTourSelect?.(item)}
-                onPointerMove={moveLight} onPointerLeave={clearLight} aria-label={ariaLabel}>
+                aria-label={ariaLabel}
+                aria-expanded={tappedTourKey === item.key}
+                aria-describedby={activeTourKey === item.key ? 'saqr-tour-hint-' + item.key : undefined}
+                onPointerDown={(event) => { lastPointerType.current = event.pointerType; }}
+                onPointerEnter={(event) => followCursor(event, item.key)}
+                onPointerMove={(event) => { moveLight(event); followCursor(event, item.key); }}
+                onPointerLeave={(event) => { clearLight(event); closeHover(event, item.key); }}
+                onFocus={(event) => {
+                  if (event.currentTarget.matches(':focus-visible')) {
+                    setHoveredTourKey(item.key);
+                    const rect = event.currentTarget.getBoundingClientRect();
+                    setCursorPosition({ x: rect.right, y: rect.top + rect.height / 2 });
+                  }
+                }}
+                onBlur={() => setHoveredTourKey(key => key === item.key ? null : key)}
+                onClick={(event) => {
+                  if (lastPointerType.current === 'touch' || event.detail === 0) {
+                    setTappedTourKey(current => current === item.key ? null : item.key);
+                    setHoveredTourKey(null);
+                  }
+                }}>
                 {bubbleContent}
               </button>
             ) : (
@@ -188,6 +267,38 @@ export default function SaqrOrbitNavigation({
           </div>
         )}
       </div>
+      {showTourHint && typeof document !== 'undefined' && createPortal(
+        <div
+          data-saqr-tour-hint="true"
+          id={'saqr-tour-hint-' + activeTourKey}
+          role={tappedTourKey ? 'dialog' : 'tooltip'}
+          aria-label={tourTitle}
+          dir={isAr ? 'rtl' : 'ltr'}
+          className={
+            'fixed z-[999999] rounded-[1.3rem] border border-emerald-300/65 bg-slate-950/95 px-4 py-3.5 text-start text-white shadow-[0_20px_55px_rgba(6,26,40,0.42)] backdrop-blur-xl ' +
+            (tappedTourKey
+              ? 'bottom-4 left-1/2 w-[min(350px,calc(100vw-28px))] max-h-[min(50dvh,380px)] -translate-x-1/2 overflow-y-auto'
+              : 'w-[min(335px,calc(100vw-24px))] max-h-[min(300px,calc(100dvh-24px))] overflow-hidden pointer-events-none')
+          }
+          style={tappedTourKey ? undefined : { left: hoverLeft, top: hoverTop, fontFamily: 'Cairo, sans-serif' }}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <strong className="block text-[15px] font-black leading-7 text-white">{tourTitle}</strong>
+            {tappedTourKey && (
+              <button type="button" onClick={() => setTappedTourKey(null)}
+                aria-label={isAr ? 'إغلاق التلميح' : 'Close hint'}
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/30 text-xl font-black text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-300">×</button>
+            )}
+          </div>
+          <p className="mt-1 text-sm font-semibold leading-6 text-slate-100">{tourDescription}</p>
+          {tourAudience && (
+            <p className="mt-2 border-t border-white/20 pt-2 text-xs font-bold leading-5 text-emerald-200">
+              {isAr ? 'متاح لـ: ' : 'Available to: '}{tourAudience}
+            </p>
+          )}
+        </div>,
+        document.body
+      )}
     </section>
   );
 }

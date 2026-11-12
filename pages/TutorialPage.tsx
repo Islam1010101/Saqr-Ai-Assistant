@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { useLanguage, useTheme } from '../App';
 import TutorialFeatureShowcase from './TutorialFeatureShowcase';
-import SaqrOrbitNavigation, { type OrbitItem } from '../src/components/SaqrOrbitNavigation';
+import SaqrOrbitNavigation from '../src/components/SaqrOrbitNavigation';
 import '../src/components/EFIPSGlassVisualTheme.css';
 
 /**
@@ -301,7 +301,6 @@ export default function TutorialPage() {
   const [bursts, setBursts] = useState<BurstItem[]>([]);
   const [showBubble, setShowBubble] = useState(false);
   const [readingPreviewOpen, setReadingPreviewOpen] = useState(false);
-  const [selectedOrbit, setSelectedOrbit] = useState<OrbitItem | 'mascot' | null>(null);
   const hasSignedInSession = React.useMemo(() => {
     try {
       const type = localStorage.getItem('user_type');
@@ -514,23 +513,9 @@ export default function TutorialPage() {
 
           <section className="w-full" aria-label={label('واجهة صقر التفاعلية','Saqr interactive homepage tour')}>
             <SaqrOrbitNavigation isAr={isAr} userType="admin" tourMode
-              onTourSelect={(item) => setSelectedOrbit(item)}
-              onMascotClick={() => { handleMascotInteraction(); setSelectedOrbit('mascot'); }}
+              tourDescriptions={orbitDescriptions} tourRoles={orbitRoles}
+              onMascotClick={() => handleMascotInteraction()}
               showMascotBubble={showBubble} bursts={bursts} />
-            {selectedOrbit && (
-              <div role="status" aria-live="polite" className="mx-auto mt-3 w-full max-w-4xl rounded-[1.5rem] border border-rose-200 dark:border-rose-900 bg-white/95 dark:bg-slate-900 p-4 sm:p-5 shadow-lg text-start">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <h3 className="text-lg font-black text-rose-700 dark:text-rose-300">{selectedOrbit === 'mascot' ? label('شخصية صقر','Saqr mascot') : (isAr ? selectedOrbit.ar : selectedOrbit.en)}</h3>
-                    <p className="mt-2 text-sm leading-7 font-semibold text-slate-700 dark:text-slate-200">{orbitDescriptions[selectedOrbit === 'mascot' ? 'mascot' : selectedOrbit.key]}</p>
-                    <p className="mt-2 text-xs font-bold text-emerald-700 dark:text-emerald-300">{label('متاح لـ: ','Available to: ')}{orbitRoles[selectedOrbit === 'mascot' ? 'mascot' : selectedOrbit.key]}</p>
-                  </div>
-                  <button type="button" onClick={() => setSelectedOrbit(null)} aria-label={label('إغلاق الشرح','Close explanation')}
-                    className="shrink-0 min-h-11 min-w-11 rounded-xl bg-rose-50 dark:bg-slate-800 text-rose-800 dark:text-rose-200 text-xl font-black hover:bg-rose-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-rose-600">×</button>
-                </div>
-                <p className="mt-3 text-xs font-semibold text-slate-500 dark:text-slate-400">{label('شرح تجريبي فقط — لا يتم فتح أقسام خاصة أو عرض بيانات حقيقية.','Tour only — no private sections or real records are opened.')}</p>
-              </div>
-            )}
           </section>
 
           <div className="tutorial-reading-goal w-full max-w-5xl mx-auto">
