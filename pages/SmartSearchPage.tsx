@@ -1420,33 +1420,77 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         .saqr-progress-bar { position: absolute; inset-block: 0; left: 0; width: 45%; border-radius: inherit; background: linear-gradient(90deg, #0ea5e9, #f59e0b, #10b981); animation: saqr-progress 1.4s ease-in-out infinite; }
         .saqr-footer-note { margin: 4px 0 0; color: #94a3b8; font-size: 9px; line-height: 1.3; text-align: center; }
 
+        /* Fixed-size 794 × 1123 px A4 certificate canvas, independent of viewport. */
         .saqr-certificate-host { position:fixed;top:0;left:-9999px;width:794px;pointer-events:none; }
-        .saqr-certificate { box-sizing:border-box;display:flex;flex-direction:column;position:relative;width:794px;min-height:1123px;height:1123px;max-height:1123px;overflow:hidden;padding:48px 52px 42px;border:11px solid #087e72;background:#fff;color:#203549;font-family:'Cairo',Tahoma,Arial,sans-serif;line-height:1.55;letter-spacing:normal;text-rendering:optimizeLegibility; }
-        .saqr-certificate[dir='rtl'],.saqr-certificate[dir='rtl'] * { letter-spacing:normal!important;word-spacing:normal!important;font-kerning:normal!important; }
-        .saqr-certificate [dir='ltr'] { direction:ltr;unicode-bidi:isolate; }
-        .cert-top-stripe,.cert-bottom-stripe { position:absolute;left:0;right:0;height:8px;background:linear-gradient(90deg,#d92332 0 25%,#009c6b 25% 50%,#edbe63 50% 75%,#162c40 75%); }
+        .saqr-certificate {
+          box-sizing:border-box;display:flex;flex-direction:column;position:relative;
+          width:794px;min-height:1123px;height:1123px;max-height:1123px;overflow:hidden;
+          padding:36px 43px 32px;border:11px solid #087e72;
+          background:#fffdf8;color:#203549;font-family:'Cairo',Tahoma,Arial,sans-serif;
+          line-height:1.5;letter-spacing:normal;text-rendering:optimizeLegibility;
+        }
+        .saqr-certificate::before {content:"";position:absolute;inset:9px;border:2px solid #e7c785;pointer-events:none}
+        .saqr-certificate[dir='rtl'],.saqr-certificate[dir='rtl'] * {letter-spacing:normal!important;word-spacing:normal!important;font-kerning:normal!important}
+        .saqr-certificate [dir='ltr'] {direction:ltr;unicode-bidi:isolate}
+        .cert-top-stripe,.cert-bottom-stripe {
+          position:absolute;left:0;right:0;height:8px;
+          background:linear-gradient(90deg,#d92332 0 25%,#009c6b 25% 50%,#edbe63 50% 75%,#162c40 75%)
+        }
         .cert-top-stripe {top:0}.cert-bottom-stripe {bottom:0}
-        .cert-header {display:flex;gap:17px;align-items:center;border-bottom:2px solid #cde6df;padding-bottom:23px}
-        .cert-logo {width:92px;height:92px;object-fit:contain;flex-shrink:0}
-        .cert-school {flex:1;text-align:center}.cert-school h3 {font-size:18px;font-weight:900;color:#0b695c;margin:0}
-        .cert-school p {font:700 11px Arial,sans-serif;color:#475569;margin:6px 0}
-        .cert-school span {display:inline-block;padding:5px 13px;border-radius:18px;background:#e9f7f3;color:#087e72;font-size:13px;font-weight:900}
-        .cert-seal {width:80px;height:80px;border-radius:50%;border:3px solid #cba151;display:flex;align-items:center;justify-content:center;background:#fff9e8;flex-shrink:0;overflow:hidden}.cert-seal img{width:67px;height:67px;object-fit:contain}
-        .cert-body {flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;min-height:0;padding-top:22px;overflow:hidden}
-        .cert-ornament {color:#c89b45;font-size:25px}
-        .cert-body h1 {width:100%;text-align:center;font-size:35px;line-height:1.4;color:#087e72;font-weight:900;margin:12px 0}
-        .cert-subtitle {font-size:17px;font-weight:700;color:#475569;margin:3px 0 18px}
-        .cert-winner {width:100%;font-size:30px;font-weight:900;border-bottom:3px solid #d5a64c;padding:0 8px 10px;margin:0;overflow-wrap:anywhere}
-        .cert-grade {font-size:17px;color:#475569;font-weight:700;margin:16px 0 25px}.cert-grade strong{color:#087e72}
-        .cert-summary {box-sizing:border-box;width:100%;flex:1;min-height:0;overflow:hidden;border:2px solid #c5e2da;border-radius:20px;background:#f4faf8;padding:14px 20px 16px;text-align:start}
-        .cert-summary h3 {font-size:19px;font-weight:900;color:#087e72;margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid #cde8df}
-        .cert-summary p {font-size:16px;font-weight:700;color:#203549;margin:0;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere;unicode-bidi:plaintext;text-align:start}
-        .cert-commendation {font-size:15px;font-weight:800;color:#ac8738;margin:12px 0 8px}
-        .cert-footer {display:flex;align-items:flex-end;justify-content:space-between;gap:14px;border-top:2px solid #cce8df;margin-top:12px;padding-top:16px}
-        .cert-footer>div:not(.cert-library) {display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;width:180px;color:#64748b;font-size:13px;font-weight:700}
-        .cert-footer strong {font-size:17px;color:#193447;font-weight:900}.cert-footer small{font-size:11px}
-        .cert-library {height:94px;width:94px;border:2px solid #b9dad2;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fff;text-align:center;overflow:hidden}.cert-library img{width:82px;height:82px;object-fit:contain}
-        .cert-footer strong.cert-signature {font-family:'Cairo',Tahoma,sans-serif;font-size:36px;color:#087e72;font-style:italic;transform:rotate(-5deg);}
+        .cert-header {
+          display:grid;grid-template-columns:96px minmax(0,1fr) 96px;align-items:center;
+          gap:18px;flex-shrink:0;min-height:119px;
+          padding:4px 8px 16px;border-bottom:2px solid #c7dfd5
+        }
+        .cert-logo {width:94px;height:94px;object-fit:contain;justify-self:center}
+        .cert-school {min-width:0;text-align:center}
+        .cert-school h3 {font-size:18px;line-height:1.55;font-weight:900;color:#0b695c;margin:0}
+        .cert-school p {font:700 11px/1.5 Arial,sans-serif;color:#475569;margin:4px 0 7px}
+        .cert-school span {display:inline-block;padding:4px 15px;border-radius:15px;background:#e9f7f3;color:#087e72;font-size:12px;font-weight:900}
+        .cert-header-mark {
+          box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;
+          width:86px;height:86px;justify-self:center;border-radius:16px;
+          border:2px solid #dfc181;background:#fff9eb;color:#106b5f
+        }
+        .cert-header-mark strong {font:900 19px/1.3 Arial,sans-serif}
+        .cert-header-mark span {font:800 9px/1.4 Arial,sans-serif;letter-spacing:1px}
+        .cert-body {
+          flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;
+          min-height:0;padding:16px 11px 0;overflow:hidden
+        }
+        .cert-title-group {width:100%;flex-shrink:0;display:flex;flex-direction:column;align-items:center;text-align:center}
+        .cert-title-rule {width:144px;height:3px;border-radius:99px;background:#d0a150;margin:3px auto 13px}
+        .cert-body h1 {box-sizing:border-box;width:100%;text-align:center;font-size:36px;line-height:1.45;color:#087e72;font-weight:900;margin:0 0 7px}
+        .cert-subtitle {width:100%;text-align:center;font-size:16px;line-height:1.8;font-weight:700;color:#475569;margin:0 0 13px}
+        .cert-recipient {width:100%;flex-shrink:0;display:flex;flex-direction:column;align-items:center}
+        .cert-winner {width:96%;text-align:center;font-size:31px;line-height:1.5;font-weight:900;color:#163f40;border-bottom:3px solid #d5a64c;padding:0 8px 7px;margin:0;overflow-wrap:anywhere}
+        .cert-grade {font-size:16px;color:#475569;font-weight:700;margin:9px 0 13px}
+        .cert-grade strong {color:#087e72}
+        .cert-summary {
+          box-sizing:border-box;width:100%;flex:1;min-height:0;overflow:hidden;
+          border:2px solid #c5e2da;border-radius:18px;background:#f1f9f6;
+          padding:13px 19px 13px;text-align:start
+        }
+        .cert-summary h3 {font-size:18px;font-weight:900;color:#087e72;margin:0 0 9px;padding-bottom:8px;border-bottom:1px solid #cde8df;text-align:start}
+        .cert-summary p {font-size:16px;font-weight:700;color:#203549;margin:0;line-height:1.67;white-space:pre-wrap;overflow-wrap:anywhere;unicode-bidi:plaintext;text-align:start}
+        .cert-commendation {font-size:14px;line-height:1.55;font-weight:800;color:#9b762c;margin:11px 0 6px;flex-shrink:0}
+        .cert-footer {
+          display:grid;grid-template-columns:minmax(0,1fr) 135px minmax(0,1fr);
+          align-items:center;gap:10px;flex-shrink:0;min-height:122px;
+          border-top:2px solid #cce8df;margin-top:11px;padding:9px 6px 0
+        }
+        .cert-footer-field {display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;min-width:0;color:#64748b;font-size:12px;font-weight:700}
+        .cert-footer-field strong {font-size:15px;color:#193447;font-weight:900}
+        .cert-footer-field small {font-size:10px}
+        .cert-seal {display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;color:#87662b}
+        .cert-seal-disc {
+          box-sizing:border-box;width:87px;height:87px;border-radius:50%;
+          border:4px double #bf9645;background:#fff;display:flex;align-items:center;justify-content:center;
+          box-shadow:0 0 0 4px #fff4dd,0 0 0 5px #d1aa64
+        }
+        .cert-seal-disc img {width:72px;height:72px;object-fit:contain}
+        .cert-seal small {font-size:11px;font-weight:900;line-height:1.15;text-align:center}
+        .cert-footer-field strong.cert-signature {font-family:'Cairo',Tahoma,sans-serif;font-size:31px;color:#087e72;font-style:italic;transform:rotate(-4deg)}
         @keyframes saqr-ring-pulse {
           0%, 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, .10); }
           50% { box-shadow: 0 0 0 4px rgba(251, 191, 36, .34); }
