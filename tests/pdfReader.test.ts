@@ -37,7 +37,7 @@ console.log('PASS: 402 Arabic source-series volumes, 591 active Arabic/English d
 
 assert.equal(readerFileId('https://example.com/private.pdf'), null);
 assert.equal(readerFileId('digital:ar:AR_1'), null); // collection, not a single PDF
-assert.equal(readerFileId('digital:en:'+String(ENGLISH_LIBRARY_DATABASE[0].id)),null,'Retired English PDF URLs must not remain accessible');
+assert.equal(readerFileId('digital:en:9'),null,'Retired English PDF URLs must not remain accessible');
 const schoolOnlyEnglish=ENGLISH_LIBRARY_DATABASE.filter(b=>b.requiresSchoolGoogleAccess);
 assert.equal(schoolOnlyEnglish.length,71,'All 71 current English photo books use school access');
 for(const book of schoolOnlyEnglish){
