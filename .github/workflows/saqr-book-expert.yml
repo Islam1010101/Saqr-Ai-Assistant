@@ -13,6 +13,8 @@ on:
       - 'tests/saqrRecommendationPresentation.test.ts'
       - 'src/utils/saqrExternalRecommendations.ts'
       - 'tests/saqrExternalRecommendations.test.ts'
+      - 'src/utils/saqrIntentRouter.ts'
+      - 'tests/saqrIntentStoryCertificate.test.ts'
       - 'tests/saqrNaturalDialogue.test.ts'
       - 'tests/saqrFollowUp.test.ts'
       - 'pages/SmartSearchPage.tsx'
@@ -34,6 +36,8 @@ on:
       - 'tests/saqrRecommendationPresentation.test.ts'
       - 'src/utils/saqrExternalRecommendations.ts'
       - 'tests/saqrExternalRecommendations.test.ts'
+      - 'src/utils/saqrIntentRouter.ts'
+      - 'tests/saqrIntentStoryCertificate.test.ts'
       - 'tests/saqrNaturalDialogue.test.ts'
       - 'tests/saqrFollowUp.test.ts'
       - 'pages/SmartSearchPage.tsx'
@@ -57,4 +61,5 @@ jobs:
       - run: node --experimental-strip-types tests/saqrSpaceRecommendations.test.ts
       - run: node --experimental-strip-types tests/saqrRecommendationPresentation.test.ts
       - run: node --experimental-strip-types tests/saqrExternalRecommendations.test.ts
+      - run: node --experimental-strip-types tests/saqrIntentStoryCertificate.test.ts
       - run: npm run build
