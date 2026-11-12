@@ -88,7 +88,9 @@ export default function SaqrOrbitNavigation({
   // previously made visible spheres disappear on desktop and on Safari.
   useEffect(() => {
     const stage = stageRef.current;
-    if (!stage || typeof IntersectionObserver === 'undefined' ||
+    // The tutorial keeps all spheres visible while a description is open.
+    // Only the actual homepage uses enter/leave scroll reveals.
+    if (tourMode || !stage || typeof IntersectionObserver === 'undefined' ||
         window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const observer = new IntersectionObserver(entries => {
       for (const entry of entries) stage.classList.toggle('is-in-view', entry.isIntersecting);
@@ -96,7 +98,7 @@ export default function SaqrOrbitNavigation({
     observer.observe(stage);
     stage.classList.add('saqr-orbit-motion-ready');
     return () => { observer.disconnect(); stage.classList.remove('saqr-orbit-motion-ready', 'is-in-view'); };
-  }, []);
+  }, [tourMode]);
   const moveLight = (event: React.PointerEvent<HTMLElement>) => {
     if (event.pointerType === 'touch') return;
     const bounds = event.currentTarget.getBoundingClientRect();
