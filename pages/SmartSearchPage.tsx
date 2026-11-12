@@ -8,6 +8,7 @@ import { STORY_IDEAS, storyIdeaAt, isStoryBeginning, detectLearningIntent, resea
 import { borrowerIds, deviceReadingKey, filterActiveBorrowings, readingShelfFromDevice, catalogBookSynopsis } from '../src/utils/saqrReaderContext';
 import { bookData } from '../api/bookData';
 import { searchSaqrBookCatalog } from '../src/utils/saqrCatalogSearch';
+import { retrieveSaqrArabicPageEvidence, saqrArabicPageEvidenceContext, renderArabicPageEvidence } from '../src/utils/saqrArabicPageEvidence';
 import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
 import { NATIONAL_IDENTITY_DIGITAL_BOOKS } from '../api/nationalIdentityDigitalBooks';
@@ -477,6 +478,11 @@ const SmartSearchPage: React.FC = () => {
       arabic: [...ARABIC_LIBRARY_DATABASE, ...NATIONAL_IDENTITY_DIGITAL_BOOKS],
       english: ENGLISH_LIBRARY_DATABASE
     }) : [];
+    // Optional page evidence, ONLY for explicit school-book discovery.
+    // Zero page matches or any fetch failure leaves all Saqr behavior unchanged.
+    const arabicPageEvidence = librarySearchIntent
+      ? await retrieveSaqrArabicPageEvidence(linkedBookTurn.searchQuery, ARABIC_LIBRARY_DATABASE)
+      : [];
 
     // Offer varied national-identity plots without touching the strict author story flow.
     if(isStoryBeginning(userQuery) && /(?:أفكار|افكار|اقترح|اختار|مواضيع|variety|ideas|topics)/i.test(userQuery)){
@@ -501,7 +507,8 @@ const SmartSearchPage: React.FC = () => {
     const explicitCatalogSearch=/(?:^|\s)(?:دورلي|دور\s*لي|دور|ابحث(?:لي)?|إبحث(?:لي)?|وريني|هاتلي|search|find|look\s+for|show\s+me)(?=\s|$)/i.test(userQuery);
     if(librarySearchIntent && preIntent==='none' && isSaqrCatalogLookup(userQuery) && (explicitCatalogSearch || !namedBookTitle)){
       const answer=renderSaqrCatalogAnswer(userQuery,foundBooks,locale==='ar'?'ar':'en');
-      setMessages(prev=>[...prev,{role:'assistant',content:finishSaqrReply(answer,'catalog')}]);
+      const withPageEvidence=answer+renderArabicPageEvidence(arabicPageEvidence,locale==='ar');
+      setMessages(prev=>[...prev,{role:'assistant',content:finishSaqrReply(withPageEvidence,'catalog')}]);
       setSaqrState('idle');
       setIsLoading(false);
       return;
@@ -610,6 +617,7 @@ const SmartSearchPage: React.FC = () => {
     const expertContext=namedBookTitle && learningIntent==='none'
       ? saqrBookExpertContext(namedBookTitle,namedBookHoldings,externalBookReference) : '';
 
+    const arabicPageContext=saqrArabicPageEvidenceContext(arabicPageEvidence);
     const searchContext = !librarySearchIntent
       ? 'NO CATALOGUE SEARCH INTENT: Do not mention school book holdings, availability, shelf numbers or a library record verification section. Answer the actual educational, conversational, lesson or creative-writing request directly.'
       : expertContext
@@ -644,7 +652,7 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [
-            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}${safeEnhancement.context ? '\n\n'+safeEnhancement.context : ''}${learningContext ? '\n\n'+learningContext : ''}${proofreadingContext ? '\n\n'+proofreadingContext : ''}${expertContext ? '\n\n'+expertContext : ''}${naturalDialogueContext ? '\n\n'+naturalDialogueContext : ''}${creativeTurn ? '\n\nACTIVE LITTLE AUTHOR CHALLENGE: NO catalogue searches or catalogue references. Friendly UAE Emirati dialogue with the reader, but write ALL story prose and certificate summaries in formal Modern Standard Arabic in Arabic UI, or entirely in English in English UI. Add exactly one imaginative story sentence per story turn. Flag only demonstrable spelling/grammar errors in the student input with a brief correct form, never stylistic preferences. Respect signed-in role and name; do not invent student profile data.' : ''}${isStoryBeginning(userQuery) ? '\n\nIf the user requests a NEW Little Author story without a specific theme, begin with exactly one short story sentence inspired by this rotating Emirati idea: '+storyIdeaAt(messages.filter(m=>m.role==='user').length,locale==='ar'?'ar':'en')+'. Preserve all established Little Author spelling correction, one-sentence response, ending and certificate instructions.' : ''}` },
+            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}${arabicPageContext ? '\n\n'+arabicPageContext : ''}${safeEnhancement.context ? '\n\n'+safeEnhancement.context : ''}${learningContext ? '\n\n'+learningContext : ''}${proofreadingContext ? '\n\n'+proofreadingContext : ''}${expertContext ? '\n\n'+expertContext : ''}${naturalDialogueContext ? '\n\n'+naturalDialogueContext : ''}${creativeTurn ? '\n\nACTIVE LITTLE AUTHOR CHALLENGE: NO catalogue searches or catalogue references. Friendly UAE Emirati dialogue with the reader, but write ALL story prose and certificate summaries in formal Modern Standard Arabic in Arabic UI, or entirely in English in English UI. Add exactly one imaginative story sentence per story turn. Flag only demonstrable spelling/grammar errors in the student input with a brief correct form, never stylistic preferences. Respect signed-in role and name; do not invent student profile data.' : ''}${isStoryBeginning(userQuery) ? '\n\nIf the user requests a NEW Little Author story without a specific theme, begin with exactly one short story sentence inspired by this rotating Emirati idea: '+storyIdeaAt(messages.filter(m=>m.role==='user').length,locale==='ar'?'ar':'en')+'. Preserve all established Little Author spelling correction, one-sentence response, ending and certificate instructions.' : ''}` },
             ...messages,
             { role: 'user', content: userQuery }
           ],
