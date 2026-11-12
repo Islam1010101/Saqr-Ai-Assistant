@@ -14,7 +14,7 @@ export const isSaqrLessonPreparationRequest=(input:string):boolean=>
   /(?:تحضير\s*(?:درس|حصة|حصه)|خطة\s*(?:درس|حصة|حصه)|تحضير\s*الدرس|تحضير\s*الدروس|جهز\s*(?:لي\s*)?(?:درس|حصة)|حضّر\s*(?:لي\s*)?(?:درس|حصة)|lesson\s*(?:plan|prepar(?:ation|e))|prepar(?:e|ing)\s+(?:a\s+)?lesson|teaching\s*plan|lesson\s*objectives)/i.test(input);
 
 export const isSaqrExplicitProofreadingRequest=(input:string):boolean=>
-  /(?:دق[قك]\s*(?:لي\s*)?(?:املائيا|إملائي(?:ا|ً)?|لغويا|لغوي(?:ا|ً)?)|تدقيق\s*(?:إملائي|املائي|لغوي|نحوي)|صح[حح]\s*(?:لي\s*)?(?:الاخطاء|الأخطاء|الإملاء|الاملاء|اللغة)|راجع\s*(?:لي\s*)?(?:اللغة|الإملاء|الاملاء|النص|القصة|الدرس)|أخطاء\s*(?:إملائية|املائية|نحوية|لغوية)|proofread|spell[\s-]?check|grammar[\s-]?check|check\s+(?:my\s+)?(?:spelling|grammar|writing)|correct\s+(?:my\s+)?(?:spelling|grammar|text))/i.test(input);
+  /(?:دقق\s+(?:لي\s+)?(?:الأخطاء|الاخطاء|النص|القصة|الدرس|الإملاء|الاملاء)|دق[قك]\s*(?:لي\s*)?(?:املائيا|إملائي(?:ا|ً)?|لغويا|لغوي(?:ا|ً)?)|تدقيق\s*(?:إملائي|املائي|لغوي|نحوي)|صح[حح]\s*(?:لي\s*)?(?:الاخطاء|الأخطاء|الإملاء|الاملاء|اللغة)|راجع\s*(?:لي\s*)?(?:اللغة|الإملاء|الاملاء|النص|القصة|الدرس)|أخطاء\s*(?:إملائية|املائية|نحوية|لغوية)|proofread|spell[\s-]?check|grammar[\s-]?check|check\s+(?:my\s+)?(?:spelling|grammar|writing)|correct\s+(?:my\s+)?(?:spelling|grammar|text))/i.test(input);
 
 export function saqrProofreadingInstructions(ctx:SaqrProofreadingContext):string{
   const ar=ctx.locale==='ar';
