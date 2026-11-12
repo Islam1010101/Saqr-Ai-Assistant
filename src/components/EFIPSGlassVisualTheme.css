@@ -1,0 +1,347 @@
+/* Shared page-level glass design; all selectors are scoped to home or public tour. */
+.efips-home-glass, .tutorial-page {
+  --efips-glass-ink: #193e45;
+  --efips-glass-border: rgba(194,70,82,.15);
+  --efips-glass-shadow: 0 14px 38px rgba(49,56,70,.08);
+  font-family: 'Cairo', sans-serif;
+}
+.efips-home-glass { background: #fff; }
+.efips-home-glass .efips-news-ribbon,
+.tutorial-page .tutorial-news-ribbon {
+  border-color: #ead2d7 !important;
+  border-width: 2px !important;
+  box-shadow: 0 10px 26px rgba(119,52,61,.08) !important;
+  background: rgba(255,255,255,.95) !important;
+}
+.efips-home-glass .efips-news-ribbon > div:first-child,
+.tutorial-page .tutorial-news-ribbon > div:first-child {
+  background: #b83c52 !important;
+  color: #fff !important;
+}
+.efips-home-glass .efips-news-ribbon > div:first-child .animate-ping,
+.tutorial-page .tutorial-news-ribbon > div:first-child .animate-ping {
+  background: #fff !important;
+}
+.efips-home-glass .efips-news-ribbon > div:nth-child(2),
+.tutorial-page .tutorial-news-ribbon > div:nth-child(2) {
+  background: #fff8f9 !important;
+}
+.efips-home-glass .homepage-alerts,
+.efips-home-glass .homepage-alert-card,
+.efips-home-glass #reading-passport,
+.efips-home-glass #monthly-reading-challenge {
+  border-radius: 24px;
+  box-shadow: var(--efips-glass-shadow);
+}
+.efips-home-glass .homepage-alerts {
+  border-color: rgba(34,133,119,.24);
+}
+.efips-home-glass .efips-home-info-card {
+  border: 1px solid rgba(194,70,82,.18) !important;
+  border-radius: 24px !important;
+  box-shadow: var(--efips-glass-shadow) !important;
+  background-color: #fff;
+}
+.efips-home-glass .efips-home-info-card:focus-within {
+  outline: 2px solid #b53b50;
+  outline-offset: 2px;
+}
+.efips-home-glass .efips-home-dashboard {
+  gap: clamp(14px, 2vw, 26px);
+}
+.tutorial-page {
+  background: #fff !important;
+  color: var(--efips-glass-ink);
+}
+.tutorial-page .tutorial-ambient-glow {
+  opacity: .20;
+}
+.tutorial-page .tutorial-tour-intro,
+.tutorial-page .tutorial-glass-card {
+  background: rgba(255,255,255,.95) !important;
+  border: 1px solid rgba(190,65,85,.17) !important;
+  border-radius: 25px;
+  box-shadow: var(--efips-glass-shadow);
+}
+.tutorial-page .tutorial-topbar {
+  background: rgba(255,255,255,.89) !important;
+  border: 1px solid rgba(185,69,90,.16) !important;
+  box-shadow: 0 8px 35px rgba(51,65,75,.09) !important;
+  -webkit-backdrop-filter: blur(17px);
+  backdrop-filter: blur(17px);
+}
+.tutorial-page .tutorial-feature-card {
+  border-radius: 23px;
+  box-shadow: 0 10px 27px rgba(49,56,70,.10) !important;
+}
+.tutorial-page .tutorial-feature-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: inherit;
+  border: 1px solid rgba(255,255,255,.62);
+  background: linear-gradient(118deg, rgba(255,255,255,.19), transparent 42%, rgba(255,255,255,.07) 84%);
+}
+.tutorial-page .tutorial-feature-card > div { min-width: 0; }
+.tutorial-page .tutorial-feature-card svg { flex-shrink: 0; }
+.tutorial-page .tutorial-feature-card h3 { font-weight: 900; }
+.tutorial-glass-orbit {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  width: 100%;
+  max-width: 1080px;
+  min-height: 515px;
+  margin: 0 auto;
+  border: 1px solid rgba(211,217,225,.8);
+  background: #fff;
+  border-radius: 30px;
+  box-shadow: var(--efips-glass-shadow);
+}
+.tutorial-glass-orbit-head {
+  position: relative;
+  z-index: 7;
+  text-align: center;
+  padding: 24px 16px 0;
+}
+.tutorial-glass-orbit-head h2 {
+  font-size: clamp(1.25rem,2.5vw,2rem);
+  line-height: 1.7;
+  font-weight: 900;
+  color: #183d43;
+  margin: 0;
+}
+.tutorial-glass-orbit-scene {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.tutorial-glass-orbit-scene::before,
+.tutorial-glass-orbit-scene::after {
+  content: ''; position: absolute; left: 50%; top: 52%;
+  transform: translate(-50%,-50%); border-radius: 50%;
+  border: 1px solid rgba(197,61,79,.16); width: 77%; height: 74%;
+}
+.tutorial-glass-orbit-scene::after {
+  border-style: dashed; width: 55%; height: 57%; opacity: .7;
+}
+.tutorial-glass-crest {
+  position: absolute;
+  left: 50%; top: 50%; width: 310px; height: 310px;
+  transform: translate(-50%,-50%);
+  display: grid; place-items: center;
+}
+.tutorial-glass-crest > img { width: 100%; height: 100%; object-fit: contain; opacity: .12; }
+.tutorial-glass-crest::after {
+  content: ''; position: absolute; z-index: -1;
+  top: 61%; left: 50%; width: 130%; height: 32%;
+  transform: translate(-50%,-50%) rotate(-17deg);
+  border-radius: 50%; border: 2px solid rgba(202,40,57,.25);
+  box-shadow: 0 0 28px 15px rgba(202,40,57,.12);
+  background: radial-gradient(ellipse, rgba(224,38,64,.15),transparent 72%);
+  filter: blur(6px);
+  animation: tutorial-red-glow 6s ease-in-out infinite alternate;
+}
+.tutorial-glass-mascot {
+  position: absolute;
+  z-index: 5;
+  left: 50%; top: 49%;
+  transform: translate(-50%,-50%);
+  width: min(37%, 280px);
+  min-width: 185px;
+  display: flex;
+  flex-direction: column; align-items: center;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.tutorial-glass-mascot img { width: 100%; height: auto; max-height: 320px; object-fit: contain; filter: drop-shadow(0 12px 12px rgba(32,39,50,.15)); }
+.tutorial-glass-mascot-caption {
+  margin-top: -4px; padding: 6px 13px; border-radius: 99px;
+  background: #fff; border: 1px solid #e9cdd3; color: #982e44;
+  font-size: .78rem; font-weight: 900;
+}
+.tutorial-glass-orb {
+  --tour-rgb: 165,123,216;
+  position: absolute; z-index: 4;
+  left: 50%; top: 50%;
+  transform: translate(-50%,-50%);
+  width: clamp(92px,12vw,130px);
+  aspect-ratio: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 6px; text-align: center;
+  border-radius: 50%; padding: 12px;
+  color: #163c43;
+  background:
+    radial-gradient(ellipse at 24% 15%, #fff 0%,#fffa 9%,transparent 33%),
+    radial-gradient(circle at 80% 84%,rgba(var(--tour-rgb),.32),transparent 48%),
+    linear-gradient(150deg,#ffffffa6,rgba(var(--tour-rgb),.23),#ffffff83);
+  border: 1.5px solid #fffe;
+  box-shadow: inset 6px 7px 14px #fffe, inset -8px -9px 16px rgba(var(--tour-rgb),.18), 0 12px 23px rgba(28,44,56,.12);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  animation: tutorial-orb-float 5s ease-in-out var(--orb-delay,0s) infinite alternate;
+}
+.tutorial-glass-orb svg { width: 27px; height: 27px; }
+.tutorial-glass-orb strong { font-size: clamp(.65rem,1.2vw,.84rem); font-weight:900; line-height: 1.4; }
+.tutorial-glass-orb:nth-of-type(1) { left: 26%; top: 28%; --tour-rgb: 227,167,74; }
+.tutorial-glass-orb:nth-of-type(2) { left: 74%; top: 28%; --tour-rgb: 157,129,218; }
+.tutorial-glass-orb:nth-of-type(3) { left: 13%; top: 59%; --tour-rgb: 72,165,217; }
+.tutorial-glass-orb:nth-of-type(4) { left: 87%; top: 59%; --tour-rgb: 226,110,167; }
+.tutorial-glass-orb:nth-of-type(5) { left: 29%; top: 82%; --tour-rgb: 73,177,130; }
+.tutorial-glass-orb:nth-of-type(6) { left: 71%; top: 82%; --tour-rgb: 227,175,80; }
+@keyframes tutorial-orb-float {
+  from { transform: translate(-50%,calc(-50% - 5px)) scale(1); }
+  to { transform: translate(-50%,calc(-50% + 6px)) scale(1.025); }
+}
+@keyframes tutorial-red-glow { from {opacity: .65;} to {opacity:1;} }
+@media (max-width: 700px) {
+  .efips-home-glass { padding-inline: 10px !important; }
+  .efips-home-glass .efips-home-dashboard { gap: 14px; margin-top: 9px; }
+  .efips-home-glass .efips-news-ribbon, .tutorial-page .tutorial-news-ribbon { height: 52px !important; }
+  .efips-home-glass .efips-news-ribbon > div:first-child, .tutorial-page .tutorial-news-ribbon > div:first-child {
+    padding-inline: 12px !important; font-size: 11px !important;
+  }
+  .efips-home-glass .efips-news-ribbon > div:nth-child(2) { min-width: 0; }
+  .tutorial-page main { padding-inline: 10px !important; padding-top: 104px !important; }
+  .tutorial-page main > div { gap: 18px !important; }
+  .tutorial-page .tutorial-topbar { padding: 7px 8px !important; border-radius: 21px !important; }
+  .tutorial-page .tutorial-feature-card { min-height: 122px !important; padding: 14px !important; gap: 11px !important; }
+  .tutorial-page .tutorial-feature-card h3 { font-size: 1rem !important; }
+  .tutorial-page .tutorial-feature-card p { font-size: .75rem !important; }
+  .tutorial-glass-orbit {
+    border-radius: 24px; padding: 0 8px 13px; min-height: 0; overflow: visible;
+  }
+  .tutorial-glass-orbit-head { padding: 13px 5px 0; }
+  .tutorial-glass-orbit-head h2 { font-size: clamp(1.2rem,5vw,1.55rem); }
+  .tutorial-glass-orbit-scene {
+    position: relative; inset: auto; height: 205px;
+  }
+  .tutorial-glass-crest { width: min(68%,220px); height: 200px; top: 48%; }
+  .tutorial-glass-mascot { width: min(53%,200px); min-width: 155px; top: 50%; }
+  .tutorial-glass-mascot img { max-height: 187px; }
+  .tutorial-glass-orbits {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 12px 8px;
+    justify-items: center;
+    padding: 4px 12px 16px;
+  }
+  .tutorial-glass-orb, .tutorial-glass-orb:nth-of-type(n) {
+    position: relative; top: auto; left: auto; transform: none;
+    width: min(116px,32vw);
+    min-width: 94px;
+    height: min(116px,32vw);
+    padding: 10px;
+    animation-name: tutorial-orb-mobile-float;
+  }
+  .tutorial-glass-orb strong { font-size: .69rem; }
+  @keyframes tutorial-orb-mobile-float {
+    from { transform: translateY(-3px); }
+    to { transform: translateY(5px); }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tutorial-glass-orb, .tutorial-glass-crest::after { animation: none !important; }
+}
+
+/* The public tour uses illustrative spheres; the real route controls stay inside the verified portal. */
+.tutorial-glass-orbits {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.tutorial-glass-orb {
+  pointer-events: auto;
+  cursor: pointer;
+  font-family: 'Cairo', sans-serif;
+  transition: opacity .55s ease, filter .55s ease, box-shadow .25s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.tutorial-glass-orb > span { display: grid; place-items: center; flex-shrink: 0; }
+.tutorial-glass-orb > span svg { width: 28px; height: 28px; }
+.tutorial-glass-orb:focus-visible { outline: 3px solid #b53049; outline-offset: 4px; }
+.tutorial-glass-orb.is-selected, .tutorial-glass-orb:active {
+  box-shadow: inset 5px 6px 16px #fff, 0 12px 31px rgba(187,45,71,.23), 0 0 0 4px rgba(187,45,71,.12);
+}
+@media (hover:hover) and (pointer:fine) {
+  .tutorial-glass-orb:hover { box-shadow: inset 5px 6px 16px #fff, 0 15px 30px rgba(62,74,89,.19); }
+}
+.tutorial-orbit-motion-ready .tutorial-glass-orb:not(.is-revealed) {
+  opacity: 0;
+  filter: blur(7px);
+  pointer-events: none;
+}
+.tutorial-orbit-motion-ready .tutorial-glass-orb.is-revealed {
+  opacity: 1;
+  filter: none;
+}
+.tutorial-glass-detail {
+  position: relative;
+  z-index: 8;
+  max-width: 630px;
+  margin: 0 auto 18px;
+  padding: 13px 17px;
+  border: 1px solid rgba(190,58,77,.22);
+  border-radius: 17px;
+  background: rgba(255,249,250,.97);
+  box-shadow: 0 9px 24px rgba(82,45,63,.08);
+  color: #193d44;
+  text-align: start;
+}
+.tutorial-glass-detail strong { display:block; color: #9c3549; font-size: .92rem; font-weight: 900; }
+.tutorial-glass-detail p { margin-top: 5px; font-size: .81rem; line-height: 1.8; font-weight: 700; }
+.tutorial-glass-speech {
+  position: absolute;
+  top: -6px; left: 64%;
+  display: inline-block;
+  padding: 6px 10px;
+  color: #aa3348;
+  background: white;
+  border: 2px solid #d27a89;
+  border-radius: 14px;
+  white-space: nowrap;
+  font-size: .8rem;
+  font-weight: 900;
+  box-shadow: 0 7px 20px rgba(150,55,73,.11);
+}
+.tutorial-glass-burst {
+  position: absolute;
+  top: 15%; left: 50%; width: 24px; height: 24px;
+  animation: saqr-burst-fly 2.4s ease-out forwards;
+  pointer-events: none;
+}
+.tutorial-glass-mascot {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+.tutorial-glass-mascot:focus-visible {
+  outline: 3px solid #b53049;
+  outline-offset: 6px;
+  border-radius: 20px;
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .tutorial-glass-orb { background-color: rgba(251,251,253,.93); }
+  .tutorial-page .tutorial-topbar { background-color: #fff !important; }
+}
+@media (max-width: 700px) {
+  .tutorial-glass-orbits {
+    position: relative;
+    inset: auto;
+    pointer-events: auto;
+  }
+  .tutorial-glass-orb:active { animation-play-state: paused; }
+  .tutorial-glass-speech { top: 0; font-size: .66rem; }
+  .tutorial-glass-detail { margin: 2px 10px 13px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tutorial-orbit-motion-ready .tutorial-glass-orb:not(.is-revealed) {
+    opacity: 1 !important; filter: none !important; pointer-events: auto !important;
+  }
+}

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '../App';
 import { supabase } from '../src/utils/supabase';
 import SaqrOrbitNavigation from '../src/components/SaqrOrbitNavigation';
+import '../src/components/EFIPSGlassVisualTheme.css';
 import { getTeacherLibrarySlots, type TeacherLibrarySlot } from '../src/utils/teacherLibrarySchedule';
 import HomeReadingHub from '../src/components/HomeReadingHub';
 
@@ -598,7 +599,7 @@ const HomePage: React.FC = () => {
     }, []);
 
     return (
-        <div dir={dir} className="w-full min-h-[100dvh] flex flex-col items-center bg-white dark:bg-slate-950 font-sans relative overflow-x-hidden p-4 md:p-8 transition-colors duration-500">
+        <div dir={dir} className="efips-home-glass w-full min-h-[100dvh] flex flex-col items-center bg-white dark:bg-slate-950 font-sans relative overflow-x-hidden p-4 md:p-8 transition-colors duration-500">
             
             {sparkles.map(s => (
                 <div key={s.id} className="fixed z-[9999] pointer-events-none animate-fade-out" style={{ left: s.x, top: s.y }}>
@@ -623,7 +624,7 @@ const HomePage: React.FC = () => {
                 </button>
             </div>
 
-            <div className="w-full max-w-[1300px] flex flex-col gap-10 mt-10 md:mt-6">
+            <div className="efips-home-dashboard w-full max-w-[1300px] flex flex-col gap-8 mt-10 md:mt-6">
                 
                 <RevealSection delay={100}>
                     <div className="text-center space-y-3 max-w-4xl mx-auto">
@@ -658,7 +659,7 @@ const HomePage: React.FC = () => {
                 </RevealSection>
 
                 <RevealSection delay={200}>
-                    <div className="w-full max-w-5xl mx-auto relative z-30 flex items-center bg-white dark:bg-slate-800 border-4 border-amber-300 dark:border-amber-700 rounded-full shadow-lg overflow-hidden h-14 md:h-16">
+                    <div className="efips-news-ribbon w-full max-w-5xl mx-auto relative z-30 flex items-center bg-white dark:bg-slate-800 border-4 border-amber-300 dark:border-amber-700 rounded-full shadow-lg overflow-hidden h-14 md:h-16">
                         <div className="bg-amber-400 text-slate-900 font-black px-5 md:px-8 h-full flex items-center gap-2 relative z-20 shrink-0 text-xs md:text-sm uppercase">
                             <div className="w-3 h-3 bg-white rounded-full animate-ping"></div>
                             {t('newsTitle')}
@@ -824,7 +825,7 @@ const HomePage: React.FC = () => {
                     <>
                         
                         <RevealSection delay={500}>
-                            <div className="bg-gradient-to-br from-amber-100 via-amber-50 to-emerald-50 dark:from-slate-900 dark:to-slate-950 p-4 lg:p-5 rounded-[2rem] border-4 border-amber-400 dark:border-amber-600 shadow-2xl relative overflow-hidden flex flex-col items-center text-center">
+                            <div className="efips-home-info-card bg-gradient-to-br from-amber-100 via-amber-50 to-emerald-50 dark:from-slate-900 dark:to-slate-950 p-4 lg:p-5 rounded-[2rem] border-4 border-amber-400 dark:border-amber-600 shadow-2xl relative overflow-hidden flex flex-col items-center text-center">
                                 
                                 <div className="absolute top-0 left-0 right-0 h-2.5 flex">
                                     <div className="bg-red-600 w-1/4"></div>
@@ -853,7 +854,7 @@ const HomePage: React.FC = () => {
                         <>
                             
                             <RevealSection delay={600}>
-                                <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border-4 border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between items-center text-center h-full">
+                                <div className="efips-home-info-card bg-white dark:bg-slate-900 p-6 rounded-[2rem] border-4 border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between items-center text-center h-full">
                                     <div className="flex items-center gap-2 mb-2">
                                         <div className="w-3 h-3 bg-emerald-500 rounded-full animate-ping"></div>
                                         <span className="text-slate-600 dark:text-slate-400 font-bold text-xs md:text-sm">{t('visitorsLabel')}</span>
@@ -868,7 +869,7 @@ const HomePage: React.FC = () => {
                             <RevealSection delay={700}>
                                 <div 
                                     onClick={handleNationalDayCelebration}
-                                    className="group relative bg-gradient-to-br from-white via-emerald-50/40 to-rose-50/40 dark:from-slate-900 dark:via-emerald-950/20 dark:to-rose-950/20 p-6 rounded-[2rem] border-4 border-emerald-500/80 dark:border-emerald-600 shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col justify-between items-center text-center h-full overflow-hidden cursor-pointer active:scale-95"
+                                    className="efips-home-info-card group relative bg-gradient-to-br from-white via-emerald-50/40 to-rose-50/40 dark:from-slate-900 dark:via-emerald-950/20 dark:to-rose-950/20 p-6 rounded-[2rem] border-4 border-emerald-500/80 dark:border-emerald-600 shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col justify-between items-center text-center h-full overflow-hidden cursor-pointer active:scale-95"
                                 >
                                     <div className="absolute top-0 left-0 right-0 h-2 flex">
                                         <div className="bg-[#ff0000] w-1/4"></div>
