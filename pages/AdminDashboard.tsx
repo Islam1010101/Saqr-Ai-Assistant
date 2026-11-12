@@ -677,12 +677,12 @@ const AdminDashboard: React.FC = () => {
     const physicalShelf41Count = bookData.filter(book=>book.shelf===41).length;
     const arabicDigitalCoreCount = ARABIC_LIBRARY_DATABASE.length;
     const nationalDigitalCount = NATIONAL_IDENTITY_DIGITAL_BOOKS.length;
-    const arabicDigitalCount = arabicDigitalCoreCount + nationalDigitalCount;
     const englishDigitalCount = ENGLISH_LIBRARY_DATABASE.length;
-    const digitalCatalogCount = arabicDigitalCount + englishDigitalCount;
+    const digitalCatalogCount = arabicDigitalCoreCount + englishDigitalCount + nationalDigitalCount;
     const allCatalogCount = physicalCatalogCount + digitalCatalogCount;
     const physicalShare = allCatalogCount ? (physicalCatalogCount / allCatalogCount) * 100 : 0;
-    const arabicDigitalShare = digitalCatalogCount ? (arabicDigitalCount / digitalCatalogCount) * 100 : 0;
+    const arabicDigitalShare = digitalCatalogCount ? (arabicDigitalCoreCount / digitalCatalogCount) * 100 : 0;
+    const nationalDigitalShare = digitalCatalogCount ? (nationalDigitalCount / digitalCatalogCount) * 100 : 0;
     const ringLength = 2 * Math.PI * 38;
     const formatCatalogCount = (count: number) => count.toLocaleString(isAr ? 'ar-EG' : 'en-US');
     const dashboardSections: Array<{id:AdminSection;label:string;description:string;icon:IconName}> = [
@@ -818,7 +818,7 @@ const AdminDashboard: React.FC = () => {
                                 <div className="min-w-0">
                                     <div className="flex items-center gap-2 text-sky-700 dark:text-sky-300 text-xs font-black"><OutlineIcon name="book-open" className="w-4 h-4" /><span>{isAr ? 'الكتب الإلكترونية' : 'Digital Books'}</span></div>
                                     <div className="mt-3 text-4xl md:text-5xl font-black tabular-nums text-sky-800 dark:text-sky-200">{formatCatalogCount(digitalCatalogCount)}</div>
-                                    <p className="mt-2 text-xs font-bold text-slate-600 dark:text-slate-300">{isAr ? 'كتاب في المكتبتين الرقميتين' : 'Entries across both digital libraries'}</p>
+                                    <p className="mt-2 text-xs font-bold text-slate-600 dark:text-slate-300">{isAr ? 'كتاب في المكتبات الرقمية العربية والإنجليزية والهوية الوطنية' : 'Entries across Arabic, English and national identity digital libraries'}</p>
                                 </div>
                                 <div className="relative w-24 h-24 shrink-0" aria-hidden="true">
                                     <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
@@ -832,10 +832,11 @@ const AdminDashboard: React.FC = () => {
                                 </div>
                             </div>
                             <div className="mt-5 flex justify-between gap-3 text-xs font-bold text-slate-600 dark:text-slate-300">
-                                <span>{isAr ? 'العربية' : 'Arabic'} <strong className="tabular-nums text-sky-700 dark:text-sky-300">{formatCatalogCount(arabicDigitalCount)}</strong></span>
+                                <span>{isAr ? 'العربية' : 'Arabic'} <strong className="tabular-nums text-sky-700 dark:text-sky-300">{formatCatalogCount(arabicDigitalCoreCount)}</strong></span>
                                 <span>{isAr ? 'الإنجليزية' : 'English'} <strong className="tabular-nums text-slate-700 dark:text-slate-100">{formatCatalogCount(englishDigitalCount)}</strong></span>
+                                 <span>{isAr ? 'الهوية الوطنية' : 'National identity'} <strong className="tabular-nums text-teal-700 dark:text-teal-300">{formatCatalogCount(nationalDigitalCount)}</strong></span>
                             </div>
-                            <div className="mt-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700 overflow-hidden flex" aria-hidden="true"><div className="bg-sky-500 h-full transition-all duration-500" style={{ width: arabicDigitalShare + '%' }} /><div className="bg-slate-400 dark:bg-slate-500 flex-1" /></div>
+                            <div className="mt-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700 overflow-hidden flex" aria-hidden="true"><div className="bg-sky-500 h-full transition-all duration-500" style={{ width: arabicDigitalShare + '%' }} /><div className="bg-teal-500 h-full transition-all duration-500" style={{ width: nationalDigitalShare + '%' }} /><div className="bg-slate-400 dark:bg-slate-500 flex-1" /></div>
                         </div>
                     </div>
                     <div className="mt-5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/40 p-4 sm:p-5">
@@ -942,7 +943,7 @@ const AdminDashboard: React.FC = () => {
                     logs={loginActivity} schedule={scheduleSlots} lessons={lessonReportsList}
                     activeLoans={borrowingsList} pendingLoans={pendingRequestsList} allLoans={allBorrowingRecords}
                     digitalReads={digitalBookReadStats} digitalAvailable={digitalBookReadStatsAvailable}
-                    physicalTotal={physicalCatalogCount} arabicTotal={arabicDigitalCount} englishTotal={englishDigitalCount}
+                    physicalTotal={physicalCatalogCount} arabicTotal={arabicDigitalCoreCount} englishTotal={englishDigitalCount}
                     topBooks={topBooksStats}
                     onOpenTab={tab => switchAdminSection('management',tab)}
                     onShowReading={() => { setShowReadingReport(true);switchAdminSection('reading'); }}
