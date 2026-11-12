@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import './SaqrOrbitNavigation.css';
 import { getSaqrLearningAccess } from '../utils/saqrLearningAccess';
 
@@ -58,13 +58,10 @@ export default function SaqrOrbitNavigation({
   showMascotBubble: boolean;
   bursts: Burst[];
 }) {
-  const navigate = useNavigate();
   const stageRef = useRef<HTMLDivElement>(null);
-  const navigationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const swipeX = useRef<number | null>(null);
   const [page, setPage] = useState(0);
   const [learningAllowed, setLearningAllowed] = useState(false);
-  const [transitioning, setTransitioning] = useState(false);
   const role: Role = userType === 'teacher' ? 'teacher' : userType === 'admin' ? 'admin' : 'student';
   const links = useMemo(() => ITEMS.filter(item => item.roles.includes(role) && (item.key !== 'learning' || learningAllowed)), [role, learningAllowed]);
   useEffect(() => {
@@ -109,15 +106,6 @@ export default function SaqrOrbitNavigation({
     event.currentTarget.style.removeProperty('--tilt-x');
     event.currentTarget.style.removeProperty('--tilt-y');
   };
-  useEffect(() => () => { if (navigationTimer.current) clearTimeout(navigationTimer.current); }, []);
-  const openLink = (e: React.MouseEvent<HTMLAnchorElement>, destination: string) => {
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
-    e.preventDefault();
-    if (transitioning) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { navigate(destination); return; }
-    setTransitioning(true);
-    navigationTimer.current = setTimeout(() => navigate(destination), 490);
-  };
   const turnPage = (delta: number) => setPage(current => (current + delta + pageCount) % pageCount);
   return (
     <section className="saqr-orbit-section" dir={isAr ? 'rtl' : 'ltr'} aria-label={isAr ? 'خدمات المكتبة التفاعلية' : 'Interactive library navigation'}>
@@ -152,7 +140,6 @@ export default function SaqrOrbitNavigation({
           {visible.map((item, index) => (
             <Link key={item.key} to={item.to} className={'saqr-orbit-bubble saqr-orbit-position-' + index}
               style={{ '--bubble-rgb': item.tint, '--bubble-delay': (index * -.43) + 's', '--reveal-delay': (index * 75) + 'ms' } as React.CSSProperties}
-              onClick={event => openLink(event, item.to)}
               onPointerMove={moveLight}
               onPointerLeave={clearLight}
               aria-label={isAr ? item.ar : item.en}>
@@ -176,7 +163,6 @@ export default function SaqrOrbitNavigation({
             <button type="button" onClick={() => turnPage(1)} aria-label={isAr ? 'الخدمات التالية' : 'Next services'}>›</button>
           </div>
         )}
-        <div className={'saqr-orbit-page-transition' + (transitioning ? ' is-visible' : '')} aria-hidden="true"><span/></div>
       </div>
     </section>
   );
