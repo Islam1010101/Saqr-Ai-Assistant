@@ -42,7 +42,6 @@ on:
       - 'src/data/photoOnlyNewHeritage20261110.ts'
       - 'src/components/PhotoOnlyArabicBookReader.tsx'
       - 'tests/photoOnlyArabicCatalog.test.ts'
-      - 'tests/arabicEditorialFullCoverage20261112.test.ts'
       - 'tests/photoOnlyReadButton.test.ts'
       - 'tests/completedEnglishImageBooks.test.ts'
       - 'src/components/DigitalBookReader.tsx'
@@ -98,7 +97,6 @@ on:
       - 'src/data/photoOnlyNewHeritage20261110.ts'
       - 'src/components/PhotoOnlyArabicBookReader.tsx'
       - 'tests/photoOnlyArabicCatalog.test.ts'
-      - 'tests/arabicEditorialFullCoverage20261112.test.ts'
       - 'tests/photoOnlyReadButton.test.ts'
       - 'tests/completedEnglishImageBooks.test.ts'
       - 'src/components/DigitalLibraryDialog.tsx'
@@ -130,7 +128,6 @@ jobs:
       - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/remainingEnglishImageBooks.test.ts
       - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/verifiedArabicPhotoBooks.test.ts
       - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/photoOnlyArabicCatalog.test.ts
-      - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/arabicEditorialFullCoverage20261112.test.ts
       - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/photoOnlyReadButton.test.ts
       - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/schoolDrivePdfRanges.test.ts
       - run: npm run build

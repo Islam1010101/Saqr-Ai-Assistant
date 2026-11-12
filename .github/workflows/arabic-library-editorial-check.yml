@@ -1,0 +1,35 @@
+name: EFIPS Arabic library editorial coverage
+on:
+  pull_request:
+    paths:
+      - 'api/digitalBookData.ts'
+      - 'src/data/arabicEditorialBios20261112.ts'
+      - 'src/data/arabicEditorialReview20261112.ts'
+      - 'src/data/arabicSeriesSummaries20261112A.ts'
+      - 'src/data/arabicSeriesSummaries20261112B.ts'
+      - 'tests/arabicEditorialFullCoverage20261112.test.ts'
+      - '.github/workflows/arabic-library-editorial-check.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'api/digitalBookData.ts'
+      - 'src/data/arabicEditorialBios20261112.ts'
+      - 'src/data/arabicEditorialReview20261112.ts'
+      - 'src/data/arabicSeriesSummaries20261112A.ts'
+      - 'src/data/arabicSeriesSummaries20261112B.ts'
+      - 'tests/arabicEditorialFullCoverage20261112.test.ts'
+      - '.github/workflows/arabic-library-editorial-check.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+          cache: npm
+      - run: npm install --no-package-lock --no-audit --no-fund
+      - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/arabicEditorialFullCoverage20261112.test.ts
+      - run: npm run build
