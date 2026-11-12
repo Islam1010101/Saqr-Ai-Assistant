@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { useLanguage, useTheme } from '../App';
 import TutorialFeatureShowcase from './TutorialFeatureShowcase';
+import TutorialGlassOrbit from '../src/components/TutorialGlassOrbit';
+import '../src/components/EFIPSGlassVisualTheme.css';
 
 /**
  * Public, visual-only replica of the real EFIPS library home screen.
@@ -424,7 +426,7 @@ export default function TutorialPage() {
 
 
   return (
-    <div dir={dir} className="tutorial-page min-h-screen w-full overflow-x-hidden bg-[#f8fafc] font-sans text-slate-900 transition-colors duration-500 dark:bg-slate-950 dark:text-white">
+    <div dir={dir} className="tutorial-page min-h-screen w-full overflow-x-hidden bg-white font-sans text-slate-900 transition-colors duration-500 dark:bg-slate-950 dark:text-white">
       {sparkles.map((sparkle) => (
         <div key={sparkle.id} className="pointer-events-none fixed z-[9998] animate-fade-out" style={{ left: sparkle.x, top: sparkle.y }}>
           <StarIcon className="h-6 w-6 animate-spin text-amber-400 drop-shadow-md" />
@@ -442,7 +444,7 @@ export default function TutorialPage() {
 
       {/* The real site's pill-shaped navigation, reproduced without live links. */}
       <header className="fixed top-4 left-0 right-0 z-[100] flex justify-center px-2">
-        <div className="w-full max-w-[98%] px-4 py-2.5 rounded-[2rem] border-4 border-white/70 dark:border-slate-700/40 flex items-center justify-between md:justify-center gap-4 shadow-2xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-2xl">
+        <div className="tutorial-topbar w-full max-w-[98%] px-4 py-2.5 rounded-[2rem] border-4 border-white/70 dark:border-slate-700/40 flex items-center justify-between md:justify-center gap-4 shadow-2xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-2xl">
           <HintTarget id="school-logo" title={label('هوية المدرسة', 'School identity')} description={label('شعار مدرسة صقر الإمارات الدولية الخاصة، كما يظهر في الموقع الفعلي.', 'The Emirates Falcon International Private School logo used throughout the live site.')} className="shrink-0" tooltipBelow {...hintState}>
             <div className="flex items-center gap-2 group flex-shrink-0 me-3 animate-fade-in-up" style={{ animationDelay: '0ms' }}>
               <img src="/school-logo.png" alt="EFIPS" className="h-8 w-8 md:h-10 md:w-10 object-contain dark:brightness-0 dark:invert shrink-0 transition-transform group-hover:scale-110" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
@@ -487,7 +489,7 @@ export default function TutorialPage() {
 
       <main className="relative z-10 flex w-full flex-col items-center p-4 pt-28 transition-colors duration-500 md:p-8 md:pt-28">
         <div className="w-full max-w-[1300px] mt-3 flex flex-col gap-8 md:mt-2 md:gap-10">
-          <section className="rounded-[1.75rem] border-2 border-emerald-200 dark:border-emerald-900 bg-white/95 dark:bg-slate-900/95 px-5 py-4 sm:px-7 sm:py-5 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <section className="tutorial-tour-intro rounded-[1.75rem] border-2 border-emerald-200 dark:border-emerald-900 bg-white/95 dark:bg-slate-900/95 px-5 py-4 sm:px-7 sm:py-5 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div><p className="text-xs font-black text-emerald-700 dark:text-emerald-300">{label('دليل بوابة المعرفة','KNOWLEDGE PORTAL TOUR')}</p><h2 className="mt-1 text-lg sm:text-xl font-black">{label('دليل شامل لخدمات البوابة من منظور الإدارة','Explore all portal features from the admin perspective')}</h2><p className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300">{label('اكتشف وظائف البوابة بالتفصيل، وشاهد أقسام التحديات والهوية الوطنية والخدمات الإدارية. يمكنك فتح البطاقة لمعرفة المزيد، مع الحفاظ على خصوصية الحسابات.','Discover the complete portal, including challenges, heritage learning and administrative services. Tap the main tiles for details; visitor privacy is preserved.')}</p></div>
             {hasSignedInSession && <Link to="/home" className="shrink-0 min-h-11 inline-flex items-center rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white px-5 py-3 font-black text-xs sm:text-sm shadow-md">{label('الدخول للبوابة الأصلية','Open the real home page')}</Link>}
             {!hasSignedInSession && <Link to="/" className="shrink-0 min-h-11 inline-flex items-center rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white px-5 py-3 font-black text-xs sm:text-sm shadow-md">{label('تسجيل الدخول لاستخدام الخدمات','Sign in to use services')}</Link>}
@@ -512,8 +514,25 @@ export default function TutorialPage() {
             </section>
           </HintTarget>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-center">
-          <HintTarget id="monthly-reading-goal" title={label('تحدي القراءة الشهري', 'Monthly Reading Challenge')} description={label('اختر هدف القراءة الشهري وسجّل الكتب التي أنهيتها؛ زر «قائمة القراءة» يفتح قائمة منبثقة تضم الكتب المختارة، مع تحديد تمت القراءة أو لم تتم القراءة؛ وتُحتسب الإنجازات المكتملة هذا الشهر فقط. الحسابات الموثقة يمكنها مزامنة التقدم؛ لا توجد بيانات حقيقية في الجولة.', 'Set a monthly reading goal and mark books finished. The Reading list button opens a popup listing selected books with Read / Not read statuses; only books completed during the current month count. Verified accounts may sync progress; this tour shows no real data.')} interactive={false} {...hintState}>
+          <HintTarget id="news-banner" title={label('جديدنا — يظهر فورًا', 'What\'s New — visible immediately')} description={label('يعرض شريط جديدنا آخر إضافات المكتبة منذ ظهور الصفحة، دون انتظار دخول النص من خارج الشاشة. هذه نسخة توضيحية لا تجلب أخبارًا حية.', 'What\'s New shows library updates as soon as the page appears, without waiting for offscreen scrolling text. This is an illustrative preview, not a live feed.')} interactive={false} {...hintState}>
+            <div className="tutorial-news-ribbon relative z-30 mx-auto flex h-14 w-full max-w-5xl items-center overflow-hidden rounded-full border-4 border-amber-300 bg-white shadow-lg dark:border-amber-700 dark:bg-slate-800 md:h-16">
+              <div className="relative z-20 flex h-full shrink-0 items-center gap-2 bg-amber-400 px-5 text-xs font-black uppercase text-slate-900 md:px-8 md:text-sm">
+                <span className="h-3 w-3 animate-ping rounded-full bg-white" />
+                {label('جديدنا', "What's New")}
+              </div>
+              <div className="flex h-full flex-1 items-center overflow-hidden bg-amber-50 dark:bg-slate-800">
+                <div className="min-w-0 px-4 text-xs font-bold leading-6 text-slate-800 dark:text-slate-100 md:text-sm">
+                  {label('جديدنا: ألوان مبهجة للبوابة · كتب جديدة في دليل المكتبة · بين السطور حسب نوع الحساب ولغة الواجهة · تحديات صقر للطلاب · راجع استعاراتك وقائمة قراءتك', "What’s New: bright portal colors · new physical books in the catalogue · role- and language-specific reading adventures · student Saqr Challenges · borrowing and reading lists")}
+                </div>
+              </div>
+            </div>
+          </HintTarget>
+
+          <HintTarget id="saqr-mascot" title={label('شخصية صقر', 'Saqr mascot')} description={label('اضغط أو المس شخصية صقر في الموقع الحقيقي لمشاهدة التفاعل والرسائل الترحيبية.', 'The live site mascot offers small interactive moments and welcoming messages.')} interactive={false} className="min-w-0 w-full" {...hintState}>
+            <TutorialGlassOrbit isAr={isAr} items={featureCards.slice(0, 6).map(card => ({ id: card.id, title: card.title, description: card.hint, icon: card.icon }))} onMascotClick={handleMascotInteraction} showBubble={showBubble} bursts={bursts} />
+          </HintTarget>
+
+          <div className="tutorial-reading-goal w-full max-w-5xl mx-auto">          <HintTarget id="monthly-reading-goal" title={label('تحدي القراءة الشهري', 'Monthly Reading Challenge')} description={label('اختر هدف القراءة الشهري وسجّل الكتب التي أنهيتها؛ زر «قائمة القراءة» يفتح قائمة منبثقة تضم الكتب المختارة، مع تحديد تمت القراءة أو لم تتم القراءة؛ وتُحتسب الإنجازات المكتملة هذا الشهر فقط. الحسابات الموثقة يمكنها مزامنة التقدم؛ لا توجد بيانات حقيقية في الجولة.', 'Set a monthly reading goal and mark books finished. The Reading list button opens a popup listing selected books with Read / Not read statuses; only books completed during the current month count. Verified accounts may sync progress; this tour shows no real data.')} interactive={false} {...hintState}>
             <section className="homepage-alerts w-full overflow-hidden rounded-[1.75rem] border-2 border-amber-300 dark:border-amber-500/50 bg-gradient-to-br from-blue-600 via-emerald-600 to-teal-600 dark:from-blue-800 dark:via-emerald-800 dark:to-teal-900 p-4 sm:p-5 shadow-xl text-white transition-all hover:-translate-y-1 hover:shadow-2xl">
               <div className="flex flex-wrap justify-between items-center gap-4">
                 <div className="flex gap-3 items-center"><div className="rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 p-3 text-white shadow-lg"><BookIcon /></div><div><h2 className="text-base md:text-lg font-black text-white">{label('تحدي القراءة الشهري','Monthly Reading Challenge')}</h2><p className="mt-1 text-xs sm:text-sm text-white/90 font-semibold">{label('جواز القارئ — هدف شخصي','Reading Passport — personal goal')}</p></div></div>
@@ -529,44 +548,12 @@ export default function TutorialPage() {
               </div>
             </section>
           </HintTarget>
-
-
-            <HintTarget id="saqr-mascot" title={label('شخصية صقر', 'Saqr mascot')} description={label('اضغط أو المس شخصية صقر في الموقع الحقيقي لمشاهدة التفاعل والرسائل الترحيبية.', 'The live site mascot offers small interactive moments and welcoming messages.')} interactive={false} className="min-w-0 flex flex-col items-center justify-center" {...hintState}>
-              <div onClick={handleMascotInteraction} className="group relative flex cursor-pointer flex-col items-center">
-                {bursts.map((burst) => (
-                  <div key={burst.id} className={'pointer-events-none absolute z-[100] animate-burst-steady ' + burst.color} style={{ '--tx': burst.tx + 'px', '--ty': burst.ty + 'px', '--rot': burst.rot + 'deg' } as React.CSSProperties}>
-                    <StarIcon className="h-8 w-8 drop-shadow-md" />
-                  </div>
-                ))}
-                {showBubble && (
-                  <div className="animate-bounce absolute -top-14 z-30 rounded-2xl border-4 border-rose-500 bg-white px-6 py-2.5 text-sm font-black text-rose-600 shadow-2xl dark:bg-slate-800 dark:text-rose-400 md:text-base">
-                    {label('فخورين بالإمارات', 'Proud of the UAE')} <UaeFlagIcon className="inline-block h-5 w-7 align-middle" />
-                  </div>
-                )}
-                <img src="/school-logo.png" alt="" className="pointer-events-none absolute inset-0 z-0 m-auto h-48 w-48 md:h-56 md:w-56 object-contain opacity-10 transition-all duration-300 dark:opacity-25 dark:brightness-0 dark:invert" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                <img src="/saqr-full.png" alt="Saqr mascot" className="relative z-10 h-40 object-contain drop-shadow-2xl transition-transform duration-300 group-hover:scale-105 md:h-56" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-              </div>
-            </HintTarget>
-
-
           </div>
 
           {/* Notifications are rendered with deliberately masked sample fields. */}
           <p className="text-center text-xs font-semibold text-slate-500 dark:text-slate-400">{label('تنبيهات الاستعارات ومواعيد الحصص تظهر للمستخدم حين توجد سجلات مرتبطة بحسابه، وتظل بياناتها خاصة.', 'Borrowing reminders and class periods appear only when relevant to the signed-in account; personal records stay private.')}</p>
 
-          <HintTarget id="news-banner" title={label('جديدنا — يظهر فورًا', 'What\'s New — visible immediately')} description={label('يعرض شريط جديدنا آخر إضافات المكتبة منذ ظهور الصفحة، دون انتظار دخول النص من خارج الشاشة. هذه نسخة توضيحية لا تجلب أخبارًا حية.', 'What\'s New shows library updates as soon as the page appears, without waiting for offscreen scrolling text. This is an illustrative preview, not a live feed.')} interactive={false} {...hintState}>
-            <div className="relative z-30 mx-auto flex h-14 w-full max-w-5xl items-center overflow-hidden rounded-full border-4 border-amber-300 bg-white shadow-lg dark:border-amber-700 dark:bg-slate-800 md:h-16">
-              <div className="relative z-20 flex h-full shrink-0 items-center gap-2 bg-amber-400 px-5 text-xs font-black uppercase text-slate-900 md:px-8 md:text-sm">
-                <span className="h-3 w-3 animate-ping rounded-full bg-white" />
-                {label('جديدنا', "What's New")}
-              </div>
-              <div className="flex h-full flex-1 items-center overflow-hidden bg-amber-50 dark:bg-slate-800">
-                <div className="min-w-0 px-4 text-xs font-bold leading-6 text-slate-800 dark:text-slate-100 md:text-sm">
-                  {label('جديدنا: ألوان مبهجة للبوابة · كتب جديدة في دليل المكتبة · بين السطور حسب نوع الحساب ولغة الواجهة · تحديات صقر للطلاب · راجع استعاراتك وقائمة قراءتك', "What’s New: bright portal colors · new physical books in the catalogue · role- and language-specific reading adventures · student Saqr Challenges · borrowing and reading lists")}
-                </div>
-              </div>
-            </div>
-          </HintTarget>
+
 
           {/* The cards preserve the exact colors, borders, radii, and icon artwork from HomePage. */}
           <section>
