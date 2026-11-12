@@ -3415,7 +3415,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // The server must not inject catalogue data into unrelated educational,
     // creative or everyday requests. Keep provider routing and quotas intact.
-    const catalogRequested = isSaqrLibrarySearchIntent(userMsg);
+    const catalogRequested = isSaqrLibrarySearchIntent(userMsg, messages.slice(0,-1));
     const found = catalogRequested ? findBooks(userMsg) : [];
     
     // تجهيز السياق
