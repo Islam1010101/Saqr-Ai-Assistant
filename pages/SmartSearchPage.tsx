@@ -417,7 +417,7 @@ const SmartSearchPage: React.FC = () => {
     }
 
     // Exact national-identity collection request: show only recorded physical books.
-    if(/(?:ركن|جناح)\s+الهوي[ةه]\s+الوطني[ةه]|national\s+identity\s+(?:(?:book\s+)?corner|pavilion)|(?:كتب|books)\s+(?:الرف\s+|on\s+shelf\s+)41/i.test(userQuery)){
+    if(librarySearchIntent && /(?:ركن|جناح)\s+الهوي[ةه]\s+الوطني[ةه]|national\s+identity\s+(?:(?:book\s+)?corner|pavilion)|(?:كتب|books)\s+(?:الرف\s+|on\s+shelf\s+)41/i.test(userQuery)){
       const clean=userQuery.replace(/(?:ركن|جناح)\s+الهوي[ةه]\s+الوطني[ةه]|national\s+identity\s+(?:(?:book\s+)?corner|pavilion)|(?:كتب|books)\s+(?:الرف\s+|on\s+shelf\s+)41/ig,'').replace(/^(?:كتب|ابحث|عن|في|ابحث عن|show|books|find)\s*/i,'').trim();
       const books=clean?searchNationalIdentityBooks(clean):nationalIdentityBooks;
       const ar=locale==='ar';
