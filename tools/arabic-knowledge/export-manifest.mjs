@@ -22,8 +22,23 @@ function parsePageManifest(text,path){
   while((match=decl.exec(text)))last=match;
   if(!last)throw Error('Missing literal page map: '+path);
   const start=last.index+last[0].length-1;
-  const json=text.slice(start).trim().replace(/;\s*$/,'');
-  const map=JSON.parse(json);
+  // Some generated page files add a TypeScript "as const" or "satisfies"
+  // annotation after the JSON map. Scan only the balanced object literal.
+  let depth=0,inString=false,escaped=false,end=-1;
+  for(let i=start;i<text.length;i++){
+    const char=text[i];
+    if(inString){
+      if(escaped)escaped=false;
+      else if(char==='\\')escaped=true;
+      else if(char==='"')inString=false;
+      continue;
+    }
+    if(char==='"'){inString=true;continue;}
+    if(char==='{')depth++;
+    else if(char==='}' && --depth===0){end=i+1;break;}
+  }
+  if(end<0)throw Error('Unterminated page map: '+path);
+  const map=JSON.parse(text.slice(start,end));
   if(!map||typeof map!=='object'||Array.isArray(map))throw Error('Invalid page map: '+path);
   return map;
 }
