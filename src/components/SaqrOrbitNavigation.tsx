@@ -4,7 +4,7 @@ import './SaqrOrbitNavigation.css';
 import { getSaqrLearningAccess } from '../utils/saqrLearningAccess';
 
 type Role = 'student' | 'teacher' | 'admin';
-type OrbitItem = {
+export type OrbitItem = {
   key: string;
   to: string;
   ar: string;
@@ -51,28 +51,35 @@ export default function SaqrOrbitNavigation({
   onMascotClick,
   showMascotBubble,
   bursts,
+  tourMode = false,
+  onTourSelect,
 }: {
   isAr: boolean;
   userType: string | null;
   onMascotClick: () => void;
   showMascotBubble: boolean;
   bursts: Burst[];
+  tourMode?: boolean;
+  onTourSelect?: (item: OrbitItem) => void;
 }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const swipeX = useRef<number | null>(null);
   const [page, setPage] = useState(0);
   const [learningAllowed, setLearningAllowed] = useState(false);
   const role: Role = userType === 'teacher' ? 'teacher' : userType === 'admin' ? 'admin' : 'student';
-  const links = useMemo(() => ITEMS.filter(item => item.roles.includes(role) && (item.key !== 'learning' || learningAllowed)), [role, learningAllowed]);
+  // The public tutorial is a read-only visual replica, including services hidden by role.
+  // The real homepage keeps its existing permissions and entitlement checks.
+  const links = useMemo(() => tourMode ? ITEMS : ITEMS.filter(item => item.roles.includes(role) && (item.key !== 'learning' || learningAllowed)), [role, learningAllowed, tourMode]);
   useEffect(() => {
     let live = true;
     setLearningAllowed(false);
+    if (tourMode) return () => { live = false; };
     if (role === 'student' || role === 'admin') {
       getSaqrLearningAccess().then(result => { if (live) setLearningAllowed(result.allowed); })
         .catch(() => { if (live) setLearningAllowed(false); });
     }
     return () => { live = false; };
-  }, [role]);
+  }, [role, tourMode]);
   const pageCount = Math.max(1, Math.ceil(links.length / 6));
   const visible = links.slice(page * 6, page * 6 + 6);
   useEffect(() => setPage(0), [role]);
@@ -90,7 +97,7 @@ export default function SaqrOrbitNavigation({
     stage.classList.add('saqr-orbit-motion-ready');
     return () => { observer.disconnect(); stage.classList.remove('saqr-orbit-motion-ready', 'is-in-view'); };
   }, []);
-  const moveLight = (event: React.PointerEvent<HTMLAnchorElement>) => {
+  const moveLight = (event: React.PointerEvent<HTMLElement>) => {
     if (event.pointerType === 'touch') return;
     const bounds = event.currentTarget.getBoundingClientRect();
     const x = Math.max(0, Math.min(1, (event.clientX - bounds.left) / Math.max(1, bounds.width)));
@@ -100,7 +107,7 @@ export default function SaqrOrbitNavigation({
     event.currentTarget.style.setProperty('--tilt-x', ((x - .5) * 12).toFixed(1) + 'deg');
     event.currentTarget.style.setProperty('--tilt-y', ((.5 - y) * 12).toFixed(1) + 'deg');
   };
-  const clearLight = (event: React.PointerEvent<HTMLAnchorElement>) => {
+  const clearLight = (event: React.PointerEvent<HTMLElement>) => {
     event.currentTarget.style.removeProperty('--light-x');
     event.currentTarget.style.removeProperty('--light-y');
     event.currentTarget.style.removeProperty('--tilt-x');
@@ -137,12 +144,13 @@ export default function SaqrOrbitNavigation({
         </button>
         </div>
         <nav aria-label={isAr ? 'روابط خدمات المكتبة' : 'Library service links'} className="saqr-orbit-links">
-          {visible.map((item, index) => (
-            <Link key={item.key} to={item.to} className={'saqr-orbit-bubble saqr-orbit-position-' + index}
-              style={{ '--bubble-rgb': item.tint, '--bubble-delay': (index * -.43) + 's', '--reveal-delay': (index * 75) + 'ms' } as React.CSSProperties}
-              onPointerMove={moveLight}
-              onPointerLeave={clearLight}
-              aria-label={isAr ? item.ar : item.en}>
+          {visible.map((item, index) => {
+            const bubbleStyle = {
+              '--bubble-rgb': item.tint,
+              '--bubble-delay': (index * -.43) + 's',
+              '--reveal-delay': (index * 75) + 'ms',
+            } as React.CSSProperties;
+            const bubbleContent = (
               <span className="saqr-orbit-float">
                 <span className="saqr-orbit-glass">
                   <span className="saqr-orbit-glass-shine" aria-hidden="true"/>
@@ -150,8 +158,22 @@ export default function SaqrOrbitNavigation({
                   <span className="saqr-orbit-bubble-label">{isAr ? item.ar : item.en}</span>
                 </span>
               </span>
-            </Link>
-          ))}
+            );
+            const className = 'saqr-orbit-bubble saqr-orbit-position-' + index;
+            const ariaLabel = isAr ? item.ar : item.en;
+            return tourMode ? (
+              <button type="button" key={item.key} className={className} style={bubbleStyle}
+                onClick={() => onTourSelect?.(item)}
+                onPointerMove={moveLight} onPointerLeave={clearLight} aria-label={ariaLabel}>
+                {bubbleContent}
+              </button>
+            ) : (
+              <Link key={item.key} to={item.to} className={className} style={bubbleStyle}
+                onPointerMove={moveLight} onPointerLeave={clearLight} aria-label={ariaLabel}>
+                {bubbleContent}
+              </Link>
+            );
+          })}
         </nav>
         {pageCount > 1 && (
           <div className="saqr-orbit-pagination" role="group" aria-label={isAr ? 'مجموعات الخدمات' : 'Navigation pages'}>
