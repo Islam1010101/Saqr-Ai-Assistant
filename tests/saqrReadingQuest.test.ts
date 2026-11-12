@@ -27,7 +27,7 @@ for (const def of heritageReadingQuestDefinitions) {
  for (const q of actual.questions.slice(def.qs.length)) assert.match(q.reference,/PDF|ملف|صورة/);
 }
 assert.ok(digitalReadingChallengeBooks.some(b=>b.key==='digital:ar:AR_50'),'Keep the verified Arabic digital title');
-assert.ok(!digitalReadingChallengeBooks.some(b=>/^digital:en:\\d+$/.test(b.key)),'Retired English PDF IDs must not appear in reading challenges');
+assert.ok(!digitalReadingChallengeBooks.some(b=>/^digital:en:\d+$/.test(b.key)),'Retired English PDF IDs must not appear in reading challenges');
 for(const record of digitalReadingChallengeBooks){
   const match=digitalCatalog.find(book=>String(book.id)===record.book.id);
   assert.ok(match,`Digital book missing from actual EFIPS catalog: ${record.key}`);
