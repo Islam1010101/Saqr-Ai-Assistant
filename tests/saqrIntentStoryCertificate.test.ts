@@ -52,12 +52,19 @@ assert.equal(isSaqrLibrarySearchIntent('ابحث عن كتاب الفضاء في
 assert.equal(isSaqrLibrarySearchIntent('طب عايز حاجة أسهل',history('تحدي المؤلف الصغير','رشحلي كتاب عن الفضاء')),true,
   'Book follow-ups stay connected after leaving a prior story challenge');
 const server=readFileSync('api/chat.ts','utf8');
-assert.ok(server.includes('const catalogRequested = isSaqrLibrarySearchIntent(userMsg, messages.slice(0,-1));'));
+assert.ok(!server.includes("import { isSaqrLibrarySearchIntent }"),
+  'No extensionless TypeScript import in Vercel Node.js serverless entry');
+assert.ok(server.includes('function isSaqrApiLibrarySearch(text:string):boolean'));
+assert.ok(server.includes("const { messages = [], locale = 'en', catalogueIntent }"));
+assert.ok(server.includes("typeof catalogueIntent === 'boolean'"));
+assert.ok(server.includes('catalogueIntent : isSaqrApiLibrarySearch(userMsg)'));
 assert.ok(server.includes('const found = catalogRequested ? findBooks(userMsg) : [];'));
 assert.ok(server.includes('Normal educational or creative chat (NOT a school catalogue search)'));
 assert.ok(server.includes('No school-catalogue search was requested.'));
 const page=readFileSync('pages/SmartSearchPage.tsx','utf8');
 assert.ok(page.includes('const librarySearchIntent = isSaqrLibrarySearchIntent(userQuery, messages);'));
+assert.ok(page.includes('catalogueIntent: librarySearchIntent'));
+assert.ok(!server.includes("from '../src/utils/saqrIntentRouter'"));
 assert.ok(page.includes('const foundBooks = librarySearchIntent ? searchSaqrBookCatalog('));
 assert.ok(page.includes("const searchContext = !librarySearchIntent"));
 assert.ok(page.includes("const namedBookTitle=librarySearchIntent && preIntent==='none'"));
