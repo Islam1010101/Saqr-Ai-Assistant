@@ -11,8 +11,9 @@ const exporter=read('tools/arabic-knowledge/export-manifest.mjs');
 
 // All original Saqr provider/model decisions, protected educational flows and
 // strict creativity gates are retained. The new service is optional.
-assert.ok(chat.includes("const arabicPageEvidence = librarySearchIntent"));
-assert.ok(chat.includes("await retrieveSaqrArabicPageEvidence(linkedBookTurn.searchQuery, ARABIC_LIBRARY_DATABASE)"));
+assert.ok(chat.includes("const arabicPageEvidence = (librarySearchIntent || requestedArabicContentBookId)"));
+assert.ok(chat.includes("exactArabicBookContentId(userQuery, ARABIC_LIBRARY_DATABASE)"));
+assert.ok(chat.includes("await retrieveSaqrArabicPageEvidence(linkedBookTurn.searchQuery,"));
 assert.ok(chat.includes("const foundBooks = librarySearchIntent ? searchSaqrBookCatalog("));
 assert.ok(chat.includes("const librarySearchIntent = isSaqrLibrarySearchIntent(userQuery, messages)"));
 assert.ok(chat.includes("catalogueIntent: librarySearchIntent"));
@@ -36,6 +37,7 @@ assert.ok(extra.includes("if(text.length<3)return []"));
 assert.ok(extra.includes("if(error||!Array.isArray(data))return []"));
 assert.ok(extra.includes("return [];}"));
 assert.ok(extra.includes("reviewed:Boolean(row.reviewed)"));
+assert.ok(extra.includes("if(/(?:تحدي|المؤلف الصغير|تأليف|اكتب قصة|تحضير|درس|ورقة عمل|شهادة"));
 assert.ok(extra.includes("do not claim you read an entire book"));
 assert.ok(worker.includes("book.get('imagePages',[])"));
 assert.ok(worker.includes("method='arabic_ocr'"));
