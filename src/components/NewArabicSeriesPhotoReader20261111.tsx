@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import type { DigitalLibraryBook } from '../../api/digitalBookData';
 import { digitalBookKey } from '../utils/readingPassport';
 import { NEW_SERIES_PHOTO_CHUNK_BY_ID } from '../data/newSeriesPhotoRouting20261111';
+import { MAN_IMPOSSIBLE_20261112_CHUNK_BY_ID } from '../data/manImpossible20261112Index';
 import DigitalBookReader from './DigitalBookReader';
 
 type Page = {page:number;fileId:string};
@@ -23,6 +24,20 @@ const MANIFEST_LOADERS: Record<string, () => Promise<Manifest>> = {
   AN: () => import('../data/seriesArabicPhotoPages20261110AN').then(module => module.SERIES_ARABIC_PHOTO_PAGES_AN),
   AO: () => import('../data/seriesArabicPhotoPages20261110AO').then(module => module.SERIES_ARABIC_PHOTO_PAGES_AO),
   AP: () => import('../data/seriesArabicPhotoPages20261110AP').then(module => module.SERIES_ARABIC_PHOTO_PAGES_AP),
+  RM01: () => import('../data/manImpossible20261112Pages01').then(module => module.MAN_IMPOSSIBLE_20261112_PAGES_01),
+  RM02: () => import('../data/manImpossible20261112Pages02').then(module => module.MAN_IMPOSSIBLE_20261112_PAGES_02),
+  RM03: () => import('../data/manImpossible20261112Pages03').then(module => module.MAN_IMPOSSIBLE_20261112_PAGES_03),
+  RM04: () => import('../data/manImpossible20261112Pages04').then(module => module.MAN_IMPOSSIBLE_20261112_PAGES_04),
+  RM05: () => import('../data/manImpossible20261112Pages05').then(module => module.MAN_IMPOSSIBLE_20261112_PAGES_05),
+  RM06: () => import('../data/manImpossible20261112Pages06').then(module => module.MAN_IMPOSSIBLE_20261112_PAGES_06),
+  RM07: () => import('../data/manImpossible20261112Pages07').then(module => module.MAN_IMPOSSIBLE_20261112_PAGES_07),
+  RM08: () => import('../data/manImpossible20261112Pages08').then(module => module.MAN_IMPOSSIBLE_20261112_PAGES_08),
+  RM09: () => import('../data/manImpossible20261112Pages09').then(module => module.MAN_IMPOSSIBLE_20261112_PAGES_09),
+  RM10: () => import('../data/manImpossible20261112Pages10').then(module => module.MAN_IMPOSSIBLE_20261112_PAGES_10),
+  RM11: () => import('../data/manImpossible20261112Pages11').then(module => module.MAN_IMPOSSIBLE_20261112_PAGES_11),
+  RM12: () => import('../data/manImpossible20261112Pages12').then(module => module.MAN_IMPOSSIBLE_20261112_PAGES_12),
+  RM13: () => import('../data/manImpossible20261112Pages13').then(module => module.MAN_IMPOSSIBLE_20261112_PAGES_13),
+  RM14: () => import('../data/manImpossible20261112Pages14').then(module => module.MAN_IMPOSSIBLE_20261112_PAGES_14),
 };
 
 export default function NewArabicSeriesPhotoReader20261111({ book, locale, onBack, onClose }: {
@@ -39,7 +54,8 @@ export default function NewArabicSeriesPhotoReader20261111({ book, locale, onBac
     let active = true;
     setPages(null);
     setFailed(false);
-    const load = MANIFEST_LOADERS[NEW_SERIES_PHOTO_CHUNK_BY_ID[id]];
+    const chunk = MAN_IMPOSSIBLE_20261112_CHUNK_BY_ID[id] || NEW_SERIES_PHOTO_CHUNK_BY_ID[id];
+    const load = MANIFEST_LOADERS[chunk];
     if (!load) {
       setFailed(true);
       return () => {active = false;};

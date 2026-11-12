@@ -1,7 +1,7 @@
 import { DIGITAL_SERIES_VOLUMES } from '../src/data/digitalSeriesVolumes.js';
 import { ENGLISH_PHOTO_LIBRARY_20261111 } from '../src/data/englishPhotoLibrary20261111';
 import { PHOTO_SERIES_FOLDERS_20261111 } from '../src/data/photoSeriesFolders20261111.js';
-import { EXTRA_MAN_OF_IMPOSSIBLE_PHOTO_BOOKS_20261111 } from '../src/data/extraManOfImpossibleCatalog20261111.js';
+import { MAN_IMPOSSIBLE_20261112_CATALOG } from '../src/data/manImpossible20261112Index';
 import {NEW_PHOTO_ONLY_ARABIC_BOOKS} from '../src/data/photoOnlyArabicCatalog20261110';
 import {ADDITIONAL_ARABIC_PHOTO_BOOKS} from '../src/data/additionalArabicPhotoBooks20261110';
 import {MIGRATED_ARABIC_PHOTO_SOURCES} from '../src/data/migratedArabicPhotoSources20261110';
@@ -166,6 +166,8 @@ function suggestedAudience(lang: 'ar'|'en', book: DigitalLibraryBook): 'children
 function expandDigitalSeries(books: DigitalLibraryBook[], lang: 'ar'|'en'): DigitalLibraryBook[] {
   return books.flatMap<DigitalLibraryBook>(book => {
     const readingAudience = book.reviewedAgeGroup || book.readingAudience || suggestedAudience(lang, book);
+    // Retire the original Man of the Impossible books; they are replaced only by complete new Drive JPEG editions.
+    if (lang === 'ar' && String(book.id) === 'AR_18') return [];
     const volumes = DIGITAL_SERIES_VOLUMES[String(book.id)];
     if (!volumes?.length) return [{ ...book, readingAudience }];
     return volumes.map(volume => ({
@@ -206,10 +208,10 @@ export const ARABIC_LIBRARY_DATABASE: DigitalLibraryBook[] = [
   ...expandDigitalSeries(ARABIC_LIBRARY_PHOTO_SEED, 'ar'),
   ...NEW_PHOTO_ONLY_ARABIC_BOOKS.filter(book=>!String(book.id).startsWith('NI_PH_')),
   ...ADDITIONAL_ARABIC_PHOTO_BOOKS,
-  ...(EXTRA_MAN_OF_IMPOSSIBLE_PHOTO_BOOKS_20261111 as DigitalLibraryBook[]),
+  ...MAN_IMPOSSIBLE_20261112_CATALOG.map(book => ({...book, keywords:[...book.keywords]})),
 ];
-// Retain all stable IDs while replacing the 170 verified series PDF URLs with photo folders.
-// New special editions are distinct and exclude empty, partial, or duplicate uploads.
+// The 10 prophet-book volume IDs remain untouched. All former Man of the Impossible records
+// are replaced with the complete, duplicate-free November 12 Drive photo edition.
 const normalizeDigitalTitle = (text:string)=>text.normalize('NFKC').toLowerCase()
   .replace(/[^\p{L}\p{N}]+/gu,'').trim();
 const knownEnglishTitles = new Set(ENGLISH_LIBRARY_SEED.map(b=>normalizeDigitalTitle(b.title)));

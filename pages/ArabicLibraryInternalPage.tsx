@@ -20,7 +20,7 @@ const VERIFIED_ARABIC_PHOTO_BOOK_IDS = new Set([
   ...MIGRATED_ARABIC_PHOTO_SOURCES.map(source=>source.id),
   ...SERIES_ARABIC_PHOTO_BOOK_IDS,
 ]);
-const NEW_SERIES_PHOTO_BOOK_ID_SET = new Set(NEW_SERIES_PHOTO_IDS);
+const NEW_SERIES_PHOTO_BOOK_ID_SET = new Set([...NEW_SERIES_PHOTO_IDS, ...MAN_IMPOSSIBLE_20261112_BOOK_IDS]);
 import { digitalReaderSource } from '../src/utils/digitalReaderSource';
 import { useDigitalReadingProgress } from '../src/utils/useDigitalReadingProgress';
 import { pdfProgressPercent, type PdfReadingState } from '../src/utils/pdfReadingState';
@@ -30,6 +30,7 @@ import { ARABIC_LIBRARY_DATABASE, type DigitalLibraryBook } from '../api/digital
 import { MIGRATED_ARABIC_PHOTO_SOURCES } from '../src/data/migratedArabicPhotoSources20261110';
 import { SERIES_ARABIC_PHOTO_BOOK_IDS } from '../src/data/seriesArabicPhotoIndex20261110';
 import { NEW_SERIES_PHOTO_IDS } from '../src/data/newSeriesPhotoRouting20261111';
+import { MAN_IMPOSSIBLE_20261112_BOOK_IDS } from '../src/data/manImpossible20261112Index';
 export { ARABIC_LIBRARY_DATABASE } from '../api/digitalBookData';
 
 const translations = {
