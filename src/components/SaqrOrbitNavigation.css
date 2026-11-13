@@ -308,12 +308,24 @@
   transform: scale(.94);
   filter: saturate(1.23) brightness(.99);
 }
-.saqr-orbit-position-0 {left:25%;top:22%}
-.saqr-orbit-position-1 {left:75%;top:22%}
-.saqr-orbit-position-2 {left:11%;top:51%}
-.saqr-orbit-position-3 {left:89%;top:51%}
-.saqr-orbit-position-4 {left:26%;top:82%}
-.saqr-orbit-position-5 {left:74%;top:82%}
+/* Original six-slot design remains intact for smaller role menus. */
+.saqr-orbit-stage[data-orbit-layout="compact"] .saqr-orbit-position-0 {left:25%;top:22%}
+.saqr-orbit-stage[data-orbit-layout="compact"] .saqr-orbit-position-1 {left:75%;top:22%}
+.saqr-orbit-stage[data-orbit-layout="compact"] .saqr-orbit-position-2 {left:11%;top:51%}
+.saqr-orbit-stage[data-orbit-layout="compact"] .saqr-orbit-position-3 {left:89%;top:51%}
+.saqr-orbit-stage[data-orbit-layout="compact"] .saqr-orbit-position-4 {left:26%;top:82%}
+.saqr-orbit-stage[data-orbit-layout="compact"] .saqr-orbit-position-5 {left:74%;top:82%}
+/* Ten collision-safe orbit slots let all role-authorized services fit at once. */
+.saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-0 {left:28%;top:13%}
+.saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-1 {left:72%;top:13%}
+.saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-2 {left:84%;top:29%}
+.saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-3 {left:92%;top:50%}
+.saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-4 {left:84%;top:71%}
+.saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-5 {left:72%;top:87%}
+.saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-6 {left:28%;top:87%}
+.saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-7 {left:16%;top:71%}
+.saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-8 {left:8%;top:50%}
+.saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-9 {left:16%;top:29%}
 .saqr-orbit-stage.saqr-orbit-motion-ready:not(.is-in-view) .saqr-orbit-bubble {
   opacity: 0;
   filter: blur(8px);
@@ -325,44 +337,6 @@
   filter: none;
   transform: translate(-50%,-50%) scale(1);
 }
-.saqr-orbit-pagination {
-  position: absolute;
-  z-index: 10;
-  bottom: 2px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  direction: ltr;
-}
-.saqr-orbit-pagination button {
-  display: grid;
-  place-items: center;
-  padding: 0;
-  width: 42px;
-  height: 42px;
-  min-width: 42px;
-  min-height: 42px;
-  background: rgba(255,255,255,.95);
-  border: 1px solid #e6ced5;
-  border-radius: 99px;
-  color: #a12e4c;
-  font-size: 24px;
-  font-weight: 900;
-  cursor: pointer;
-  touch-action: manipulation;
-  box-shadow: 0 2px 7px rgba(133,39,58,.08);
-}
-.saqr-orbit-pagination button span {
-  width: 9px;
-  height: 9px;
-  background: #e5d2d9;
-  border-radius: 50%;
-}
-.saqr-orbit-pagination button.is-active span { width: 15px; background: #c13758; border-radius: 30px; }
-.saqr-orbit-pagination button:focus-visible { outline: 3px solid #b13450; outline-offset: 2px; }
 @keyframes saqr-orbit-sphere-float {
   0% {transform:translateY(-5px) rotate(-1deg)}
   100% {transform:translateY(7px) rotate(1.2deg)}
@@ -383,10 +357,12 @@
   .saqr-orbit-stage {height:clamp(540px,71vw,630px)}
   .saqr-orbit-bubble {--bubble-size:clamp(104px,15vw,136px)}
   .saqr-orbit-character {width:clamp(225px,34%,315px)}
-  .saqr-orbit-position-0 {left:24%;top:23%}
-  .saqr-orbit-position-1 {left:76%;top:23%}
-  .saqr-orbit-position-4 {left:24%;top:80%}
-  .saqr-orbit-position-5 {left:76%;top:80%}
+  .saqr-orbit-stage[data-orbit-layout="compact"] .saqr-orbit-position-0 {left:24%;top:23%}
+  .saqr-orbit-stage[data-orbit-layout="compact"] .saqr-orbit-position-1 {left:76%;top:23%}
+  .saqr-orbit-stage[data-orbit-layout="compact"] .saqr-orbit-position-4 {left:24%;top:80%}
+  .saqr-orbit-stage[data-orbit-layout="compact"] .saqr-orbit-position-5 {left:76%;top:80%}
+  .saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-3 {left:90.5%}
+  .saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-8 {left:9.5%}
 }
 /* Phones preserve the same circle-around-Saqr composition with safe touch targets. */
 @media (max-width: 700px) {
@@ -402,26 +378,37 @@
   .saqr-orbit-glass {gap:5px;padding:8px 5px;border-width:1.5px}
   .saqr-orbit-glass > svg {width:clamp(24px,6vw,30px);height:clamp(24px,6vw,30px)}
   .saqr-orbit-bubble-label {font-size:clamp(.63rem,2.45vw,.81rem);line-height:1.32}
-  .saqr-orbit-position-0 {left:21%;top:18%}
-  .saqr-orbit-position-1 {left:79%;top:18%}
-  .saqr-orbit-position-2 {left:13%;top:49%}
-  .saqr-orbit-position-3 {left:87%;top:49%}
-  .saqr-orbit-position-4 {left:22%;top:80%}
-  .saqr-orbit-position-5 {left:78%;top:80%}
-  .saqr-orbit-pagination {bottom:0}
-  .saqr-orbit-pagination button {width:44px;height:44px}
+  .saqr-orbit-stage[data-orbit-layout="compact"] .saqr-orbit-position-0 {left:21%;top:18%}
+  .saqr-orbit-stage[data-orbit-layout="compact"] .saqr-orbit-position-1 {left:79%;top:18%}
+  .saqr-orbit-stage[data-orbit-layout="compact"] .saqr-orbit-position-2 {left:13%;top:49%}
+  .saqr-orbit-stage[data-orbit-layout="compact"] .saqr-orbit-position-3 {left:87%;top:49%}
+  .saqr-orbit-stage[data-orbit-layout="compact"] .saqr-orbit-position-4 {left:22%;top:80%}
+  .saqr-orbit-stage[data-orbit-layout="compact"] .saqr-orbit-position-5 {left:78%;top:80%}
+  /* Extra vertical space keeps all ten glass bubbles clear of each other on phones. */
+  .saqr-orbit-stage[data-orbit-layout="expanded"] {height:clamp(590px,128vw,650px)}
+  .saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-0 {left:28%;top:10%}
+  .saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-1 {left:72%;top:10%}
+  .saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-2 {left:82%;top:30%}
+  .saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-3 {left:85%;top:50%}
+  .saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-4 {left:82%;top:70%}
+  .saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-5 {left:72%;top:90%}
+  .saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-6 {left:28%;top:90%}
+  .saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-7 {left:18%;top:70%}
+  .saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-8 {left:15%;top:50%}
+  .saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-9 {left:18%;top:30%}
   .saqr-orbit-talk {font-size:.64rem;padding:5px 9px;left:56%;top:0}
 }
 @media (max-width: 375px) {
   .saqr-orbit-stage {height:490px}
   .saqr-orbit-character {width:clamp(165px,49%,195px)}
   .saqr-orbit-bubble {--bubble-size:clamp(79px,24vw,90px)}
-  .saqr-orbit-position-0 {left:21%;top:19%}
-  .saqr-orbit-position-1 {left:79%;top:19%}
-  .saqr-orbit-position-2 {left:15%;top:50%}
-  .saqr-orbit-position-3 {left:85%;top:50%}
-  .saqr-orbit-position-4 {left:22%;top:80%}
-  .saqr-orbit-position-5 {left:78%;top:80%}
+  .saqr-orbit-stage[data-orbit-layout="compact"] .saqr-orbit-position-0 {left:21%;top:19%}
+  .saqr-orbit-stage[data-orbit-layout="compact"] .saqr-orbit-position-1 {left:79%;top:19%}
+  .saqr-orbit-stage[data-orbit-layout="compact"] .saqr-orbit-position-2 {left:15%;top:50%}
+  .saqr-orbit-stage[data-orbit-layout="compact"] .saqr-orbit-position-3 {left:85%;top:50%}
+  .saqr-orbit-stage[data-orbit-layout="compact"] .saqr-orbit-position-4 {left:22%;top:80%}
+  .saqr-orbit-stage[data-orbit-layout="compact"] .saqr-orbit-position-5 {left:78%;top:80%}
+  .saqr-orbit-stage[data-orbit-layout="expanded"] {height:540px}
   .saqr-orbit-bubble-label {font-size:clamp(.61rem,2.75vw,.73rem)}
 }
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) {
