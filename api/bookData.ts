@@ -3607,6 +3607,13 @@ const editionCandidateMap = new Map(editionCandidates.map(item =>
 
 // 3. دالة معالجة البيانات
 const processBookData = (rawData: any[]): Book[] => {
+  // A duplicated Secrecy row was removed just before WW III on 13 Nov 2026.
+  // Retain its historical sequence gap, so all subsequent pre-existing IDs
+  // (and saved-reading/borrowing references) stay exactly as they were.
+  const deletedDuplicateBoundary = rawData.findIndex(book =>
+    book.title === 'WW III (World War III)' && book.author === 'Ian Slater' &&
+    book.shelf === 15 && book.row === 2
+  );
   return rawData.map((rawBook, index) => {
     let author = (rawBook.author || "").toString();
     let subject = 'General Knowledge';
@@ -3635,7 +3642,7 @@ const processBookData = (rawData: any[]): Book[] => {
 
 
     return {
-      id: `${rawBook.shelf}-${rawBook.row}-${index + 1}`,
+      id: `${rawBook.shelf}-${rawBook.row}-${index + 1 + (deletedDuplicateBoundary >= 0 && index >= deletedDuplicateBoundary ? 1 : 0)}`,
       title: rawBook.title,
       author: author,
       subject: subject,
