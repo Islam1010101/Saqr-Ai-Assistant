@@ -6,6 +6,7 @@ import { ARABIC_LIBRARY_DATABASE } from '../../pages/ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from '../../pages/EnglishLibraryInternalPage';
 import { digitalBookKey, physicalReadingCatalog, type ReadingBook, useReadingPassport } from '../utils/readingPassport';
 import { bookData, getLocalizedSubject } from '../../api/bookData';
+import { classifyBookAudience } from '../../api/bookAudience';
 import { NATIONAL_IDENTITY_DIGITAL_BOOKS } from '../../api/nationalIdentityDigitalBooks';
 
 const digitalCatalog: ReadingBook[] = [
@@ -31,11 +32,12 @@ const physicalBookLanguages = new Map<string, 'ar' | 'en'>(
 );
 const bookLanguage = (book: ReadingBook): 'ar' | 'en' => {
   if (book.format === 'ar' || book.format === 'en') return book.format;
+  // A physical book's catalogue language is more reliable than its title script.
+  const catalogLanguage = physicalBookLanguages.get(book.key);
+  if (catalogLanguage) return catalogLanguage;
   const arabic = (book.title.match(/[\u0600-\u06ff]/g) || []).length;
   const latin = (book.title.match(/[a-z]/gi) || []).length;
-  if (arabic > latin) return 'ar';
-  if (latin > arabic) return 'en';
-  return physicalBookLanguages.get(book.key) || 'en';
+  return arabic > latin ? 'ar' : 'en';
 };
 const normalizeBookText = (value: string) => value.toLowerCase()
   .replace(/[\u064b-\u065f\u0670\u0640]/g, '')
@@ -56,6 +58,58 @@ const isAdvancedAdultTopic = (book: ReadingBook): boolean =>
 const meaningfulTitleWords = (value: string) => normalizeBookText(value)
   .split(/[^\p{L}\p{N}]+/u)
   .filter(word => word.length > 2 && !/^(the|and|for|with|from|book|story|stories|novel|volume|كتاب|كتب|روايه|قصه|التي|الذي|هذا|هذه|على|الى)$/.test(word));
+// Reuse the school's existing audience classification and digital metadata.
+ // The audience tags are guidance for homepage discovery, not certified age ratings.
+type SuggestedAudience = 'children' | 'teens' | 'adults' | 'unknown';
+const digitalAudienceByKey = new Map<string, SuggestedAudience>([
+  ...ARABIC_LIBRARY_DATABASE.map(book => [digitalBookKey('ar', book), book.reviewedAgeGroup || book.readingAudience || 'unknown'] as const),
+  ...NATIONAL_IDENTITY_DIGITAL_BOOKS.map(book => [digitalBookKey('ar', book), book.reviewedAgeGroup || book.readingAudience || 'unknown'] as const),
+  ...ENGLISH_LIBRARY_DATABASE.map(book => [digitalBookKey('en', book), book.reviewedAgeGroup || book.readingAudience || 'unknown'] as const)
+]);
+const physicalAudienceByKey = new Map<string, ReturnType<typeof classifyBookAudience>>(
+  bookData.map(book => ['physical:' + book.id, classifyBookAudience(book)])
+);
+const nationalIdentityKeys = new Set<string>([
+  ...NATIONAL_IDENTITY_DIGITAL_BOOKS.map(book => digitalBookKey('ar', book)),
+  ...bookData.filter(book => book.shelf === 41).map(book => 'physical:' + book.id)
+]);
+const isNationalIdentityBook = (book: ReadingBook) => nationalIdentityKeys.has(book.key);
+const isTeachingMaterial = (text: string) =>
+  /(?:education|educational|teach(?:ing|er|ers)?|pedagog|curriculum|classroom|lesson plan|learning strateg|instructional|school leadership|early childhood education|teacher training|تربيه|تعليم|تدريس|معلم|مناهج|التعلم|اداره الصف|استراتيجيات التدريس|التعليم المبكر|صعوبات التعلم|ادب الطفل|ادب الاطفال|تاهيل المعلمين)/.test(text);
+const isClearlyChildMaterial = (text: string) =>
+  /(?:children.s (?:books?|fiction|stories)|kids|for children|childrens|picture books?|early readers?|juvenile|fairy tale|phonics|قصص اطفال|قصص للاطفال|ادب للاطفال|مجلات علميه للاطفال|للصغار|حكايات للاطفال|مصور للاطفال|القراءه المبكره|رياض الاطفال|قصص مصوره|الطفل الصغير)/.test(text);
+const isClearlyTeenMaterial = (text: string) =>
+  /(?:young adult|young readers|teens?|teenage|adolescent|secondary school|high school|يافعين|لليافعين|الناشئه|المراهقين|المرحله الثانويه|للفتيان)/.test(text);
+const isClearlyAdultMaterial = (text: string) =>
+  /(?:adult|professional|higher education|university|management|leadership|research|psycholog|philosoph|literature|poetry|history|politic|تخصص|للكبار|اكاديم|جامع|اداره|قياده|بحوث|دراسات|علم النفس|فلسفه|روايات|ادب|شعر|تاريخ|تنميه بشريه)/.test(text);
+const suggestedAudience = (book: ReadingBook): SuggestedAudience => {
+  const digital = digitalAudienceByKey.get(book.key);
+  if (digital && digital !== 'unknown') return digital;
+  const physical = physicalAudienceByKey.get(book.key);
+  const text = normalizeBookText(book.subject + ' ' + book.title);
+  if (physical === 'specialist') return 'adults';
+  // A guide on teaching children is for teachers, not necessarily for children.
+  if (isTeachingMaterial(text) && /(?:ادب الطفل|ادب الاطفال|child development|early childhood education|teacher training)/.test(text)) return 'adults';
+  if (isClearlyChildMaterial(text)) return 'children';
+  if (isClearlyTeenMaterial(text)) return 'teens';
+  if (physical === 'children') return 'children';
+  if (physical === 'youth' || physical === 'youthTeens') return 'teens';
+  if (physical === 'nationalIdentity') return 'adults';
+  if (isTeachingMaterial(text) || isClearlyAdultMaterial(text)) return 'adults';
+  return 'unknown';
+};
+const fitsReaderAudience = (book: ReadingBook, role: string, grade: number): boolean => {
+  const audience = suggestedAudience(book);
+  const text = normalizeBookText(book.subject + ' ' + book.title);
+  if (role === 'teacher' || role === 'admin') {
+    // Staff: education, specialist and adult reading; not children's picture-book lists.
+    return audience === 'adults' || (audience === 'unknown' && isTeachingMaterial(text));
+  }
+  // A student never gets specialist/adult or unclassified titles as cold-start suggestions.
+  if (isAdvancedAdultTopic(book) || (isTeachingMaterial(text) && audience !== 'children' && audience !== 'teens')) return false;
+  if (grade > 0 && grade <= 6) return audience === 'children';
+  return audience === 'children' || audience === 'teens';
+};
 const BOOK_GRADIENTS = [
   'from-blue-500 to-sky-500 border-blue-200',
   'from-emerald-500 to-teal-400 border-emerald-200',
@@ -87,15 +141,19 @@ const relevanceScore = (
   const olderTopics = /science|physics|math|history|technology|novel|literature|biolog|chemistry|علوم|فيزياء|رياضيات|تاريخ|تكنولوجيا|روايات|ادب/;
   let score = subjects.includes(book.subject) ? 45 : 0;
   if (role === 'teacher' || role === 'admin') {
+    if (isTeachingMaterial(text)) score += 120;
     if (teacherTopics.test(text)) score += 30;
     if (olderTopics.test(text)) score += 8;
   } else if (grade > 0 && grade <= 6) {
+    if (suggestedAudience(book) === 'children') score += 65;
     if (youngerTopics.test(text)) score += 30;
     if (olderTopics.test(text)) score -= 12;
   } else if (grade >= 7) {
+    if (suggestedAudience(book) === 'teens') score += 65;
     if (olderTopics.test(text)) score += 25;
     if (youngerTopics.test(text)) score -= 16;
   } else if (youngerTopics.test(text)) score += 8;
+  if (isNationalIdentityBook(book)) score += 18;
   const lang = bookLanguage(book);
   score += languageWeights[lang] * 5;
   // Reader-selected books provide stronger evidence of interests than a personal name.
@@ -156,32 +214,21 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
     return [...count.entries()].sort((a,b)=>b[1]-a[1]).slice(0,3).map(([subject])=>subject);
   },[savedBooks,completedBooks]);
   const suggestions = useMemo(()=>{
-    // Reading choices and UI language are signals of book-language preference,
-    // never proof of nationality, mother tongue, or religious identity.
+    // UI language is the mandatory language filter; reading history only ranks
+    // already-eligible books and can never override Arabic/English selection.
     const history = [...completedBooks, ...savedBooks].slice(-24);
     const languageWeights: Record<'ar' | 'en', number> = { ar: 0, en: 0 };
     completedBooks.forEach(book => { languageWeights[bookLanguage(book)] += 3; });
     savedBooks.forEach(book => { languageWeights[bookLanguage(book)] += 2; });
-    const total = languageWeights.ar + languageWeights.en;
-    const observedLanguage: 'ar' | 'en' | 'both' = total === 0
-      ? (ar ? 'ar' : 'en')
-      : (Math.min(languageWeights.ar, languageWeights.en) / total >= 0.35
-        ? 'both' : (languageWeights.ar > languageWeights.en ? 'ar' : 'en'));
-    const suggestedLanguages = observedLanguage === 'both'
-      ? new Set<'ar' | 'en'>(['ar', 'en'])
-      : new Set<'ar' | 'en'>([observedLanguage]);
     const interestedInFaithBooks = history.some(isFaithFocused);
     const candidates = catalog.filter(book => {
       if (category !== 'all' && book.format !== category) return false;
       if (data.completed.includes(book.key) || data.saved.includes(book.key)) return false;
-      // Direct choices of Arabic/English digital catalogs remain available as before.
-      if ((category === 'all' || category === 'physical') &&
-        !suggestedLanguages.has(bookLanguage(book))) return false;
+      if (bookLanguage(book) !== locale) return false;
+      if (!fitsReaderAudience(book, profile.role, profile.grade)) return false;
       // Do not assign religious identity from names or automatically promote faith books.
       // Only a person's own saved/completed reading choices can indicate topic interest.
       if (!interestedInFaithBooks && isFaithFocused(book)) return false;
-      if (profile.role === 'student' && profile.grade > 0 && profile.grade <= 6 &&
-        isAdvancedAdultTopic(book)) return false;
       return true;
     });
     const ranked = candidates.map(book => ({
@@ -210,6 +257,20 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
         if (selected.length >= 36) break;
         const title = normalizeBookText(entry.book.title).trim();
         if (!seenTitles.has(title)) { selected.push(entry.book); seenTitles.add(title); }
+      }
+    }
+    // Include an age-appropriate National Identity title in the first four cards
+    // whenever the chosen format and interface language have one available.
+    const identityIndex = selected.findIndex(isNationalIdentityBook);
+    if (identityIndex >= 4) {
+      const [identity] = selected.splice(identityIndex, 1);
+      selected.splice(3, 0, identity);
+    } else if (identityIndex < 0) {
+      const identity = ranked.find(({ book }) =>
+        isNationalIdentityBook(book) && !seenTitles.has(normalizeBookText(book.title).trim()));
+      if (identity) {
+        selected.splice(Math.min(3, selected.length), 0, identity.book);
+        if (selected.length > 36) selected.pop();
       }
     }
     return selected;
