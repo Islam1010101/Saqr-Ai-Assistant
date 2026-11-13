@@ -22,7 +22,7 @@ const EXPANDED_ORBIT_SLOTS: Record<number, readonly number[]> = {
   // Odd menus put one bubble on the vertical centerline: both sides stay equal.
   7: [0, 1, 3, 5, 6, 8, 10],
   8: [0, 1, 2, 4, 5, 6, 7, 9],
-  9: [0, 1, 2, 4, 5, 6, 7, 9, 10],
+  9: [0, 1, 2, 3, 4, 5, 6, 7, 9],
   10: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
 };
 const randomizeOrbit = (): string[] => {
