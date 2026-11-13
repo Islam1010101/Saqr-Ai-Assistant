@@ -4,14 +4,16 @@ This is a **catalog record audit**, not a physical stocktake or a guarantee that
 
 | Section | Active catalog records | Distinct normalized titles | Notes |
 | --- | ---: | ---: | --- |
-| Physical library | **4,056** | **3,841** | The source is `api/bookData.ts` |
-| UAE national identity — physical subset | **99** | **94** | **Already within physical 4,056**, do not add again; 93 records are on shelf 41 |
+| Physical library | **4,070** | **3,856** | The source is `api/bookData.ts` |
+| UAE national identity — physical subset | **99** | **94** | **Already within physical 4,070**, do not add again; 93 records are on shelf 41 |
 | Arabic digital library | **502** | **502** | `ARABIC_LIBRARY_DATABASE` |
 | English digital library — **current Drive photo collection only** | **73** | **73** | `ENGLISH_LIBRARY_DATABASE`; 14,178 ordered JPEG pages, 16 lazy page batches (three clearly marked samples) |
 | UAE national identity — digital | **9** | **9** | Independent `NATIONAL_IDENTITY_DIGITAL_BOOKS` |
 
 - **All digital catalog records:** 502 + 73 + 9 = **584**.
-- **All non-overlapping physical and digital catalog records:** 4,056 + 584 = **4,640**.
+- **All non-overlapping physical and digital catalog records:** 4,070 + 584 = **4,654**.
+- **13 November 2026 physical refresh:** 15 new physical titles were added and one repeated `Secrecy` row was removed (net +14). Updated counts above are derived from the previous audited physical total of 4,056 and the verified source-code diff; the automated test is configured to recompute totals during CI. Historical book identifiers have been preserved.
+- Physical summaries are written in each book's recorded language. Source-grounded summaries are provided for identifiable works; where content cannot be verified, an explicitly provisional bibliographic note replaces misleading placeholder text.
 - **All 584 digital entries have HTTPS links** in the current catalog snapshot; linked assets were not exhaustively tested with school accounts.
 - Digital catalog IDs are unique within all three sections; 99 national identity physical records are confirmed to be included in the physical library total.
 - The old **77-book English PDF index** is **retired**, not included in any number. The new English photo edition is the sole English public listing and Saqr catalog source.
