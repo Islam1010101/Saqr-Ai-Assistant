@@ -292,7 +292,7 @@ export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=
             ...(book.id!==undefined ? {bookKey:'digital:'+(origin.source==='arabic'?'ar':'en')+':'+String(book.id)} : {})
           } : {})
         }),
-        matchBasis: subjectMatch ? 'Catalog subject/topic' : titleMatch ? 'Book title' : 'Description/author'
+        matchBasis: namedEntity?.kind==='author' ? 'Recorded author' : namedEntity ? 'Recorded title or series' : subjectMatch ? 'Catalog subject/topic' : titleMatch ? 'Book title' : 'Description/author'
       };
       candidates.push({score,origin:origin.source,value,aliasTitleMatch});
     }
