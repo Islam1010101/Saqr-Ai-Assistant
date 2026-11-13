@@ -67,7 +67,7 @@ const digitalAudienceByKey = new Map<string, SuggestedAudience>([
   ...ENGLISH_LIBRARY_DATABASE.map(book => [digitalBookKey('en', book), book.reviewedAgeGroup || book.readingAudience || 'unknown'] as const)
 ]);
 const physicalAudienceByKey = new Map<string, ReturnType<typeof classifyBookAudience>>(
-  bookData.map(book => ['physical:' + book.id, classifyBookAudience(book)])
+  bookData.map(book => ['physical:' + book.id, classifyBookAudience(book)] as const)
 );
 const nationalIdentityKeys = new Set<string>([
   ...NATIONAL_IDENTITY_DIGITAL_BOOKS.map(book => digitalBookKey('ar', book)),
