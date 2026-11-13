@@ -38,7 +38,7 @@ const NOISE=new Set([
   'recommend','suggest','give','need','have','do','you','is','there','are','where','can','some'
 ]);
 const words=(text:string):string[]=>normalize(text).split(' ')
-  .filter(word=>!!word && !NOISE.has(word) && (word.length>1 || /^\d+$/.test(word)));
+  .filter(word=>!!word && !NOISE.has(word));
 const normalizedFieldWords=(text:string):string[]=>normalize(text).split(' ')
   .filter(word=>!!word && !['د','dr','mr','mrs','prof'].includes(word))
   .map(word=>word.startsWith('ال')&&word.length>=6?word.slice(2):word);
@@ -65,8 +65,45 @@ const tokenDifference=(a:string,b:string):number=>{
   if(Math.min(a.length,b.length)<5)return 99;
   return distance(a,b,cap);
 };
+// Conservative phonetic fallback for names written in a different script.
+// It works from each ACTUAL catalog entry, not a list of famous writers.
+// Require at least two matching words and a long combined consonant skeleton;
+// never use this for one-word category/topic matches.
+const arabicRoman:Readonly<Record<string,string>>={
+  'ا':'a','ب':'b','ت':'t','ث':'th','ج':'g','ح':'h','خ':'kh','د':'d','ذ':'dh',
+  'ر':'r','ز':'z','س':'s','ش':'sh','ص':'s','ض':'d','ط':'t','ظ':'z','ع':'a',
+  'غ':'gh','ف':'f','ق':'k','ك':'k','ل':'l','م':'m','ن':'n','ه':'h','و':'w',
+  'ي':'y','ئ':'y','ؤ':'w','ء':'','پ':'b','ڤ':'f','چ':'k'
+};
+const phonetic=(word:string):string=>{
+  const arabic=/[\u0600-\u06ff]/.test(word);
+  let latin=arabic?[...word].map(c=>arabicRoman[c]??c).join(''):word;
+  latin=latin.replace(/sch/g,'sh').replace(/ch|ck|kh|qu/g,'k')
+    .replace(/th/g,'t').replace(/ph/g,'f').replace(/gh/g,'g')
+    .replace(/c/g,'k').replace(/j/g,'g').replace(/q/g,'k').replace(/p/g,'b')
+    .replace(/v/g,'f').replace(/[aeiouy]/g,'').replace(/(?!^)w/g,'')
+    .replace(/(.)\1+/g,'$1');
+  return latin;
+};
+const phoneticPhraseMatch=(needle:readonly string[],haystack:readonly string[]):boolean=>{
+  if(needle.length<2||haystack.length<needle.length)return false;
+  for(let i=0;i<=haystack.length-needle.length;i++){
+    const words=haystack.slice(i,i+needle.length);
+    const left=needle.map(phonetic),right=words.map(phonetic);
+    if(left.some((x,j)=>x.length<2||right[j].length<2) ||
+       left.join('').length<5 || right.join('').length<5)continue;
+    let errors=0;
+    for(let j=0;j<left.length;j++)errors+=distance(left[j],right[j],1);
+    if(errors<=1)return true;
+  }
+  return false;
+};
 const phraseMatch=(needle:readonly string[],haystack:readonly string[]):'exact'|'close'|null=>{
   if(haystack.length<needle.length||needle.length<2)return null;
+  // Same-script fuzzy comparison is preferred. Cross-script is allowed only
+  // for sufficiently distinctive multi-word names or transliterated series.
+  const crossScript=/[\u0600-\u06ff]/.test(needle.join(''))!==/[\u0600-\u06ff]/.test(haystack.join(''));
+  if(crossScript)return phoneticPhraseMatch(needle,haystack)?'close':null;
   for(let i=0;i<=haystack.length-needle.length;i++){
     let errors=0,failed=false;
     for(let j=0;j<needle.length;j++){
