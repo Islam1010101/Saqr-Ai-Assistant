@@ -12,6 +12,7 @@ import {orisonExtendedPart4} from '../src/data/orisonExtendedPart4.ts';
 import { classifyLiteraryGenre, literaryGenreLabels } from '../src/utils/literaryGenreCatalog.ts';
 import { refineLegacyLiterature } from '../src/utils/legacyLiteratureClassification.ts';
 import { applyPhysicalCatalogAudit } from '../src/utils/catalogBibliographicCorrections.ts';
+import { physicalCatalogSummary, isPhysicalCatalogPlaceholder } from '../src/utils/physicalCatalogSummaries20261113.ts';
 // 1. تعريف نوع البيانات
 export type Book = {
   id: string;
@@ -3924,7 +3925,17 @@ for(const [titleKey,record] of extendedGrouped){
   extendedKnownTitles.add(titleKey);
   extendedKnownIsbns.add(isbn);
 }
-export const bookData:Book[]=[...preOrisonCatalog,...importedOrisonBooks,...importedExtendedOrisonBooks];
+// Keep verified reviews unchanged. Where only a title/author/subject is known,
+ // provide a language-matched, explicitly provisional catalogue description.
+ // This updates what Saqr and the public index read from one canonical array.
+export const bookData:Book[]=[...preOrisonCatalog,...importedOrisonBooks,...importedExtendedOrisonBooks]
+  .map(book=>isPhysicalCatalogPlaceholder(book.summary)
+    ? {...book,summary:physicalCatalogSummary({
+        title:book.title,author:book.author,
+        subject:getLocalizedSubject(book.subject,book.language==='AR'?'ar':'en'),
+        language:book.language
+      })}
+    : book);
 
 // 5. دالة البحث المخصصة للاستخدام في تطبيق الويب
 export function findInCatalog(q: string): Book[] {
