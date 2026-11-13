@@ -406,7 +406,7 @@ const SmartSearchPage: React.FC = () => {
     // Resolve it against actual catalog records, not a hard-coded title list.
     // Educational, creative and lesson-planning requests stay on their own route.
     const namedSearchRequest = isSaqrExplicitNamedCatalogRequest(userQuery) &&
-      !/(?:تحضير|درس|ورقة\\s*عمل|ورقه\\s*عمل|تحدي|المؤلف\\s*الصغير|worksheet|lesson|homework|quiz|story\\s*challenge)/i.test(userQuery);
+      !/(?:تحضير|درس|ورقة\s*عمل|ورقه\s*عمل|تحدي|المؤلف\s*الصغير|worksheet|lesson|homework|quiz|story\s*challenge)/i.test(userQuery);
     const namedCatalogEntity = namedSearchRequest ? resolveSaqrCatalogEntity(userQuery,{
       physical:bookData,
       arabic:[...ARABIC_LIBRARY_DATABASE,...NATIONAL_IDENTITY_DIGITAL_BOOKS],
