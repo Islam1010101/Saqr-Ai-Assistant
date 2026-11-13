@@ -19,9 +19,10 @@ type Burst = { id: number; tx: number; ty: number; rot: number; color: string };
 // Evenly spaced positions for all bubbles; only the service-to-position
 // assignment is randomized. This prevents overlap/clipping at small widths.
 const EXPANDED_ORBIT_SLOTS: Record<number, readonly number[]> = {
-  7: [0, 1, 2, 4, 5, 6, 8],
+  // Odd menus put one bubble on the vertical centerline: both sides stay equal.
+  7: [0, 1, 3, 5, 6, 8, 10],
   8: [0, 1, 2, 4, 5, 6, 7, 9],
-  9: [0, 1, 2, 3, 4, 5, 6, 7, 9],
+  9: [0, 1, 2, 4, 5, 6, 7, 9, 10],
   10: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
 };
 const randomizeOrbit = (): string[] => {
@@ -196,7 +197,7 @@ export default function SaqrOrbitNavigation({
 
   return (
     <section className="saqr-orbit-section" dir={isAr ? 'rtl' : 'ltr'} aria-label={isAr ? 'خدمات المكتبة التفاعلية' : 'Interactive library navigation'}>
-      <div className="saqr-orbit-stage" data-orbit-layout={expandedOrbit ? 'expanded' : 'compact'} ref={stageRef}>
+      <div className="saqr-orbit-stage" data-orbit-layout={expandedOrbit ? 'expanded' : 'compact'} data-orbit-count={visible.length} ref={stageRef}>
         <div className="saqr-orbit-scene">
         <div className="saqr-orbit-halo saqr-orbit-halo-outer" aria-hidden="true" />
         <div className="saqr-orbit-halo saqr-orbit-halo-inner" aria-hidden="true" />
