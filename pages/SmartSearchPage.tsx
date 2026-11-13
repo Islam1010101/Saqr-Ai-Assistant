@@ -445,7 +445,7 @@ const SmartSearchPage: React.FC = () => {
           arabic:[...ARABIC_LIBRARY_DATABASE,...NATIONAL_IDENTITY_DIGITAL_BOOKS],
           english:ENGLISH_LIBRARY_DATABASE,
           interests:readingInterview.interests,age:readingInterview.age,
-          grade:readingInterview.grade,locale:locale==='ar'?'ar':'en'
+          grade:readingInterview.grade,locale:readingInterview.locale
         });
         setMessages(prev=>[...prev,{role:'assistant',content:suggestion}]);
       }else{
