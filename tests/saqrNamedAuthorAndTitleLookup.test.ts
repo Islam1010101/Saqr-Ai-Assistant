@@ -18,7 +18,7 @@ const authorQueries=[
  'Agatha Christie novels'
 ];
 for(const query of authorQueries){
- assert.equal(isSaqrNamedAuthorQuery(query),true,'Recognize the requested novelist: '+query);
+ assert.equal(isSaqrNamedAuthorQuery(query,catalogs),true,'Recognize the requested novelist: '+query);
  const matches=searchSaqrBookCatalog(query,catalogs,12);
  assert.ok(matches.length>=5,'Return a meaningful selection from actual school holdings: '+query);
  assert.ok(matches.every(book=>/اجاثا\s+كريستي|agatha\s+christie/i.test((book.author+' '+(book.series||''))
