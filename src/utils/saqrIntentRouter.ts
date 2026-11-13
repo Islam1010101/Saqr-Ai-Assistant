@@ -1,5 +1,6 @@
 import {isStoryBeginning} from './saqrLearning.ts';
 import {isSaqrRecommendationRequest} from './saqrCatalogReply.ts';
+import {isCrossLanguageTitleQuery} from './saqrCatalogSearch.ts';
 
 export type SaqrRoutingTurn={role:string;content:string};
 const challenge=/(?:تحدي\s*(?:المؤلف|التأليف|كتابه\s*قصه)|المؤلف\s*الصغير|little\s*author|young\s*author|نؤلف\s*قص[ةه]|نألف\s*قص[ةه]|اكتب\s*(?:لي\s*)?قص[ةه]|اكتب\s*قص[ةه]|تأليف\s*قص[ةه]|تصحيح\s*قص[ةه]|نكمل\s*قصتنا|story\s*(?:challenge|writing)|(?:write|create|continue)\s*(?:a\s*)?story)/i;
@@ -29,14 +30,18 @@ export const isSaqrLibrarySearchIntent=(
   const followUpToLibrary=continuation.test(q)&&!!lastUser&&
     (discoveryRequest.test(lastUser.content)||locationRequest.test(lastUser.content))&&
     catalogWords.test(lastUser.content);
+  // Explicit lookups of recognized bilingual book titles must reach the
+  // real catalogue even when the reader omits the word "book": e.g.
+  // "ابحث عن هاري بوتر". Never treat a bare creative/lesson prompt as lookup.
+  const namedTitleSearch=isCrossLanguageTitleQuery(q) && discoveryRequest.test(q);
   const explicitNewSearch=locationRequest.test(q)||followUpToLibrary||(
-    discoveryRequest.test(q)&&catalogWords.test(q)&&!pureTask.test(q)
+    discoveryRequest.test(q)&&(catalogWords.test(q)||namedTitleSearch)&&!pureTask.test(q)
   );
   if(isSaqrCreativeTurn(q,history)&&!explicitNewSearch)return false;
   if(pureTask.test(q)&&!explicitNewSearch)return false;
   if(locationRequest.test(q) && (!pureTask.test(q) || /(?:فهرس|الرف|مكان\s+(?:الكتاب|الرواية)|catalog)/i.test(q)))return true;
   if(literaryExplanation.test(q)&&!discoveryRequest.test(q))return false;
-  if(discoveryRequest.test(q)&&catalogWords.test(q))return true;
+  if(discoveryRequest.test(q)&&(catalogWords.test(q)||namedTitleSearch))return true;
   if(isSaqrRecommendationRequest(q)&&catalogWords.test(q))return true;
   // A follow-up to a book-recommendation request may keep using catalogue
   // evidence only if it is clearly continuing that selection.
