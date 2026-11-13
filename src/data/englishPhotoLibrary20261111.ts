@@ -17,6 +17,7 @@ import { EN_PHOTO_B12 } from './englishPhotoMeta/b12';
 import { EN_PHOTO_B13 } from './englishPhotoMeta/b13';
 import { EN_PHOTO_B14 } from './englishPhotoMeta/b14';
 import { EN_PHOTO_B15 } from './englishPhotoMeta/b15';
+import { EN_PHOTO_B16 } from './englishPhotoMeta/b16';
 import { ENGLISH_BOOK_SUMMARIES, ENGLISH_AUTHOR_BIOS, ENGLISH_BOOK_EDITION_OVERRIDES } from './englishBookEditorial20261112';
 
 const AUTHOR_BY_TITLE:Readonly<Record<string,string>>={
@@ -68,7 +69,7 @@ const AUTHOR_BY_TITLE:Readonly<Record<string,string>>={
 };
 const CHILDRENS_TITLES=new Set(['Super Shark Encyclopedia','The Magical Yet','The 7 Habits of Happy Kids','DK Children\'s Encyclopedia','Dog Man: Sneak Peek at New Movie','Barry\'s Buzzy World','The Sand Witch','The Lion King','Brother Bear']);
 const ADULT_TITLES=new Set(['Understanding Comics','Artist\'s Painting Techniques','What Is the Name of This Book?','The 5 Second Rule','Atomic Habits','How to Win Friends and Influence People']);
-const ALL_ENGLISH_PHOTO_BOOKS=[EN_PHOTO_B01,EN_PHOTO_B02,EN_PHOTO_B03,EN_PHOTO_B04,EN_PHOTO_B05,EN_PHOTO_B06,EN_PHOTO_B07,EN_PHOTO_B08,EN_PHOTO_B09,EN_PHOTO_B10,EN_PHOTO_B11,EN_PHOTO_B12,EN_PHOTO_B13,EN_PHOTO_B14,EN_PHOTO_B15].flat();
+const ALL_ENGLISH_PHOTO_BOOKS=[EN_PHOTO_B01,EN_PHOTO_B02,EN_PHOTO_B03,EN_PHOTO_B04,EN_PHOTO_B05,EN_PHOTO_B06,EN_PHOTO_B07,EN_PHOTO_B08,EN_PHOTO_B09,EN_PHOTO_B10,EN_PHOTO_B11,EN_PHOTO_B12,EN_PHOTO_B13,EN_PHOTO_B14,EN_PHOTO_B15,EN_PHOTO_B16].flat();
 export const ENGLISH_PHOTO_LIBRARY_20261111=ALL_ENGLISH_PHOTO_BOOKS.map(b=>{
  const edition=ENGLISH_BOOK_EDITION_OVERRIDES[b.title]||{};
  const author=edition.author||AUTHOR_BY_TITLE[b.title]||b.author;
