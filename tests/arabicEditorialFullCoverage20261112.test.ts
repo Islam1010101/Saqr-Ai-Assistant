@@ -5,7 +5,7 @@ import { MAN_IMPOSSIBLE_20261112_CATALOG } from '../src/data/manImpossible202611
 import { ARABIC_AUTHOR_BIOS_20261112 } from '../src/data/arabicEditorialBios20261112.ts';
 
 assert.equal(ARABIC_LIBRARY_DATABASE.length,502,'All Arabic digital books must remain available');
-assert.equal(ENGLISH_LIBRARY_DATABASE.length,71,'The new English photo library must remain complete');
+assert.equal(ENGLISH_LIBRARY_DATABASE.length,73,'The new English photo library must remain complete');
 assert.equal(NATIONAL_IDENTITY_DIGITAL_BOOKS.length,9,'National-identity holdings must remain unchanged');
 assert.equal(MAN_IMPOSSIBLE_20261112_CATALOG.length,167);
 const ids = new Set<string>();

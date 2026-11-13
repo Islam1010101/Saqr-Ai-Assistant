@@ -243,6 +243,7 @@ const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void
                         <p className="text-slate-700 dark:text-slate-200 text-base md:text-lg font-bold leading-relaxed">
                            {book.summary}
                         </p>
+                        {book.isExcerpt && <p role="note" className="mt-4 rounded-xl border border-amber-400 bg-amber-50 p-3 text-sm font-bold text-amber-900 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-200">{locale==='ar' ? `معاينة أو مقتطف فقط: المتاح ${book.pageCount} صفحة مصورة، وليس الكتاب الكامل.` : `Preview or excerpt only: ${book.pageCount} photographed pages are available, not the complete book.`}</p>}
                     </div>
 
                     {book.audioId && <SaqrAudioPlayer audioSrc={book.audioId} t={t}/>}
@@ -336,6 +337,7 @@ const BookCard = React.memo(({ book, onClick, t, progress }: { book: DigitalLibr
             </span>
             {book.publisher && <span className="min-w-0 max-w-full truncate border-s border-white/40 ps-2 text-white/85">{book.publisher}</span>}
           </div>
+          {book.isExcerpt && <p role="note" className="rounded-full border border-white/60 bg-black/25 px-2 py-1 text-xs font-black text-white">{t('summaryLabel') === 'Book Summary' ? `Preview / excerpt · ${book.pageCount} pages` : `معاينة فقط · ${book.pageCount} صفحة`}</p>}
           {book.series && <p className="text-white/95 text-xs font-black" dir="auto">{book.series}{book.seriesOrder?' · #'+book.seriesOrder:''}</p>}
           {book.readingAudience && <p className="text-white/95 text-xs font-bold">{({children:'Children',teens:'Teens',adults:'Adults'} as const)[book.readingAudience]}</p>}
           {progress && <div className="text-white font-black text-xs">{'Continue from page '+progress.page}{percent!==null?' · '+percent+'%':''}<div className="h-1.5 w-full mt-1 bg-white/30 rounded-full overflow-hidden"><div className="h-full bg-white" style={{width:(percent??0)+'%'}} /></div></div>}
