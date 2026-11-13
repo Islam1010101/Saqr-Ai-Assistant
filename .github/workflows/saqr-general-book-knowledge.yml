@@ -1,0 +1,35 @@
+name: Saqr bilingual general book knowledge audit
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/utils/saqrBookGeneralKnowledge.ts'
+      - 'pages/SmartSearchPage.tsx'
+      - 'tools/book-knowledge/audit-general-overviews.mjs'
+      - 'tests/saqrGeneralBookKnowledge.test.mjs'
+      - '.github/workflows/saqr-general-book-knowledge.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install app dependencies without changing lockfile
+        run: npm ci
+      - name: Test bilingual book-topic context and strict intent isolation
+        run: node --test tests/saqrGeneralBookKnowledge.test.mjs
+      - name: Export Arabic and English general book profiles
+        run: node tools/book-knowledge/audit-general-overviews.mjs /tmp/saqr-general-book-overviews.json
+      - name: Upload book-by-book audit, including uncertainty labels
+        uses: actions/upload-artifact@v4
+        with:
+          name: saqr-bilingual-general-book-overviews
+          path: /tmp/saqr-general-book-overviews.json
+          retention-days: 30
