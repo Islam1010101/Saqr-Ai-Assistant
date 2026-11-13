@@ -149,6 +149,9 @@ const NAMED_AUTHOR_ALIASES: Array<{query:RegExp;catalog:RegExp}> = [
   {query:/(?:اجاثا\s+كري(?:ستي|سيتي|ستى)|agatha\s+christie)/i,
    catalog:/(?:اجاثا\s+كريستي|agatha\s+christie)/i}
 ];
+export const isSaqrNamedAuthorQuery=(question:string):boolean=>
+  NAMED_AUTHOR_ALIASES.some(alias=>alias.query.test(normalize(question)));
+
 const TITLE_ALIASES: Array<{arabic:RegExp;english:RegExp}> = [
   {arabic:/هاري\s+بوتر/,english:/\bharry\s+potter\b/},
   {arabic:/شيرلوك\s+هولمز|شرلوك\s+هولمز/,english:/\bsherlock\s+holmes\b/},
