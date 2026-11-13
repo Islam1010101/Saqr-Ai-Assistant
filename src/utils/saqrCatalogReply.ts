@@ -1,5 +1,5 @@
 import type {SaqrBookMatch} from './saqrCatalogSearch.ts';
-import {isCrossLanguageTitleQuery} from './saqrCatalogSearch.ts';
+import {isCrossLanguageTitleQuery, isSaqrNamedAuthorQuery} from './saqrCatalogSearch.ts';
 
 // Verified holding answers are assembled from recorded catalog data, not LLM guesses.
 const overview = /(?:^|\s)(?:books?|novels?|catalog(?:ue)?|ebooks?|titles?|reading\s+list)(?:\s|$)|كتب|كتاب|فهرس|المكتبة|مكتبة|روايات|اقترح|رشح|الرف|مكان\s+الكتاب/i;
@@ -37,6 +37,7 @@ const digitalLink=(url:string|undefined):string|null=>{
 export function renderSaqrCatalogAnswer(question:string,matches:SaqrBookMatch[],locale:'ar'|'en'):string{
   const ar=locale==='ar';
   const scope=selectSaqrCatalogScope(question);
+  const namedAuthorSearch=isSaqrNamedAuthorQuery(question);
   const valid=matches.filter(book=>scope==='all'||collection(book)===scope);
   if(!valid.length) return ar
     ? 'لم أعثر على نتيجة مؤكدة تطابق بحثك في الفهرس المحدد. هذا لا يعني أن الكتاب غير موجود في مكان آخر. جرّب تحديد موضوع أدق أو عنوان أو مؤلف.'
@@ -46,7 +47,9 @@ export function renderSaqrCatalogAnswer(question:string,matches:SaqrBookMatch[],
   for(const [kind,label] of groups){
     const items=valid.filter(book=>collection(book)===kind);
     if(!items.length){
-      if(scope==='all' || scope===kind){
+      // Author-name searches show only collections holding books by that
+      // author, not irrelevant empty groups or broad genre suggestions.
+      if(!namedAuthorSearch && (scope==='all' || scope===kind)){
         output.push('### '+label);
         output.push(ar?'لا توجد نتائج مؤكدة مطابقة للموضوع في هذا الفهرس.':'No verified catalog results match this topic in this collection.');
       }
