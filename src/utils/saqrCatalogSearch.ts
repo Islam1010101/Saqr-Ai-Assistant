@@ -1,3 +1,6 @@
+import {resolveSaqrCatalogEntity, catalogBookMatchesEntity} from './saqrCatalogEntitySearch.ts';
+export {isSaqrNamedAuthorQuery} from './saqrCatalogEntitySearch.ts';
+
 /**
  * Catalog retrieval for Saqr's existing chat context only.
  * Searches the three existing libraries, without changing Saqr's system prompt,
@@ -141,17 +144,6 @@ const THEMES: Array<{query:RegExp;evidence:RegExp}> = [
 
 // Cross-script aliases are ONLY query-expansion hints. A title is returned
 // exclusively when an actual recorded holding contains the counterpart name.
-// A specific AUTHOR request is not a generic subject search. An author match
-// must come from a recorded author (or parent series), never from a broad
-// genre such as "novels" and never from synopsis mentions of other writers.
-// Include common transliterations and keyboard misspellings of Christie.
-const NAMED_AUTHOR_ALIASES: Array<{query:RegExp;catalog:RegExp}> = [
-  {query:/(?:اجاثا\s+كري(?:ستي|سيتي|ستى)|agatha\s+christie)/i,
-   catalog:/(?:اجاثا\s+كريستي|agatha\s+christie)/i}
-];
-export const isSaqrNamedAuthorQuery=(question:string):boolean=>
-  NAMED_AUTHOR_ALIASES.some(alias=>alias.query.test(normalize(question)));
-
 const TITLE_ALIASES: Array<{arabic:RegExp;english:RegExp}> = [
   {arabic:/هاري\s+بوتر/,english:/\bharry\s+potter\b/},
   {arabic:/شيرلوك\s+هولمز|شرلوك\s+هولمز/,english:/\bsherlock\s+holmes\b/},
@@ -201,7 +193,7 @@ export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=
   const fictionalSeries = /(?:ما\s*وراء\s*الطبيعه|ماوراء\s*الطبيعه|paranormal|supernatural)/i;
   const fictionalSpaceTitle = /(?:^|\s)اسطوره(?:\s|$)|(?:^|\s)(?:space war|space warfare|deep space nine)(?:\s|$)/i;
   const aliasHints = TITLE_ALIASES.filter(pair=>pair.arabic.test(normalizedQuery)||pair.english.test(normalizedQuery));
-  const namedAuthorHints = NAMED_AUTHOR_ALIASES.filter(pair=>pair.query.test(normalizedQuery));
+  const namedEntity = resolveSaqrCatalogEntity(question,catalogs);
   const detectedTopics = hasBookIntent ? TOPICS.filter(topic=>topic.query.test(normalizedQuery)) : [];
   const detectedThemes = hasBookIntent ? THEMES.filter(theme=>theme.query.test(normalizedQuery)) : [];
   if (!tokens.length && !detectedTopics.length && !detectedThemes.length) return [];
@@ -224,11 +216,10 @@ export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=
       const subjectText=normalize(subject);
       const seriesText=origin.source==='physical' ? '' : normalize(book.series);
       const descriptionText=normalize(book.summary);
-      const confirmedNamedAuthor = namedAuthorHints.some(hint=>
-        hint.catalog.test(authorText)||hint.catalog.test(seriesText));
-      // When the query specifies a creator, unrelated broad-topic hits must
-      // never enter the result set (even if they mention novels/stories).
-      if(namedAuthorHints.length && !confirmedNamedAuthor)continue;
+      // A named author, series or title is matched against that exact
+      // bibliographic field throughout all three catalogs. Never backfill
+      // results based on a general "stories" category or summary text.
+      if(namedEntity && !catalogBookMatchesEntity(book,namedEntity))continue;
       if(astronomyRequest){
         const directEvidence=astronomyTitle.test(titleText)||astronomyTitle.test(seriesText);
         const trustedSubject=origin.source!=='physical'&&astronomyDigitalSubject.test(subjectText);
@@ -249,7 +240,7 @@ export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=
           ? [titleText] : [titleText,subjectText,descriptionText];
         if(!evidence.some(isUaeExplicit) && !(origin.source==='physical'&&book.shelf===41))continue;
       }
-      let score=confirmedNamedAuthor ? 500 : 0;
+      let score=namedEntity ? 500 : 0;
       let subjectMatch=false;
       let titleMatch=false;
       // A named bilingual title must be evidenced by a recorded title or
@@ -323,9 +314,9 @@ export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=
     if(seen.has(key)) return;
     chosen.push(entry);seen.add(key);counts[entry.origin]++;
   };
-  // When a specific author is named, all slots belong to verified works by
-  // that author. Never cap digital titles at four or backfill with topic hits.
-  if(namedAuthorHints.length){
+  // Named author, series and title lookups are always strict: no generic
+  // physical/Arabic/English quota filling with unrelated subject matches.
+  if(namedEntity){
     for(const entry of ranked){
       if(chosen.length>=limit)break;
       add(entry);
