@@ -99,20 +99,29 @@ const phoneticPhraseMatch=(needle:readonly string[],haystack:readonly string[]):
   return false;
 };
 const phraseMatch=(needle:readonly string[],haystack:readonly string[]):'exact'|'close'|null=>{
-  if(haystack.length<needle.length||needle.length<2)return null;
-  // Same-script fuzzy comparison is preferred. Cross-script is allowed only
-  // for sufficiently distinctive multi-word names or transliterated series.
-  const crossScript=/[\u0600-\u06ff]/.test(needle.join(''))!==/[\u0600-\u06ff]/.test(haystack.join(''));
-  if(crossScript)return phoneticPhraseMatch(needle,haystack)?'close':null;
-  for(let i=0;i<=haystack.length-needle.length;i++){
-    let errors=0,failed=false;
-    for(let j=0;j<needle.length;j++){
-      const diff=tokenDifference(needle[j],haystack[i+j]);
-      if(diff>2){failed=true;break;}
-      errors+=diff;
-      if(errors>2){failed=true;break;}
+  if(needle.length<2)return null;
+  // Also try omitting single-letter middle initials in a recorded name:
+  // Craig R. Hickman is still found by "Craig Hickman".
+  const variants=[haystack,haystack.filter(word=>word.length>1)];
+  for(const field of variants){
+    if(field.length<needle.length)continue;
+    // Phonetics are a strict cross-script fallback, never a replacement for
+    // direct title/author matches in the same writing system.
+    const crossScript=/[\u0600-\u06ff]/.test(needle.join(''))!==/[\u0600-\u06ff]/.test(field.join(''));
+    if(crossScript){
+      if(phoneticPhraseMatch(needle,field))return 'close';
+      continue;
     }
-    if(!failed)return errors===0?'exact':'close';
+    for(let i=0;i<=field.length-needle.length;i++){
+      let errors=0,failed=false;
+      for(let j=0;j<needle.length;j++){
+        const diff=tokenDifference(needle[j],field[i+j]);
+        if(diff>2){failed=true;break;}
+        errors+=diff;
+        if(errors>2){failed=true;break;}
+      }
+      if(!failed)return errors===0?'exact':'close';
+    }
   }
   return null;
 };
