@@ -9,6 +9,7 @@ import { borrowerIds, deviceReadingKey, filterActiveBorrowings, readingShelfFrom
 import { bookData } from '../api/bookData';
 import { searchSaqrBookCatalog } from '../src/utils/saqrCatalogSearch';
 import { retrieveSaqrArabicPageEvidence, exactArabicBookContentId, saqrArabicPageEvidenceContext, renderArabicPageEvidence } from '../src/utils/saqrArabicPageEvidence';
+import { saqrGeneralBookKnowledgeContext } from '../src/utils/saqrBookGeneralKnowledge';
 import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
 import { ENGLISH_LIBRARY_DATABASE } from './EnglishLibraryInternalPage';
 import { NATIONAL_IDENTITY_DIGITAL_BOOKS } from '../api/nationalIdentityDigitalBooks';
@@ -623,6 +624,12 @@ const SmartSearchPage: React.FC = () => {
     const arabicPageContext=saqrArabicPageEvidenceContext(namedBookTitle
       ? arabicPageEvidence.filter(page=>namedBookHoldings.some(book=>book.driveLink===page.driveLink))
       : arabicPageEvidence);
+    // General, existing-catalogue-grounded descriptions for BOTH digital libraries.
+    // Only for genuine book queries; no impact on lessons, stories, Saqr routing or providers.
+    const generalBookContext=librarySearchIntent && learningIntent==='none'
+      ? saqrGeneralBookKnowledgeContext(namedBookTitle?namedBookHoldings:foundBooks,
+          ARABIC_LIBRARY_DATABASE, ENGLISH_LIBRARY_DATABASE)
+      : '';
     const searchContext = !librarySearchIntent
       ? 'NO CATALOGUE SEARCH INTENT: Do not mention school book holdings, availability, shelf numbers or a library record verification section. Answer the actual educational, conversational, lesson or creative-writing request directly.'
       : expertContext
@@ -657,7 +664,7 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [
-            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}${arabicPageContext ? '\n\n'+arabicPageContext : ''}${safeEnhancement.context ? '\n\n'+safeEnhancement.context : ''}${learningContext ? '\n\n'+learningContext : ''}${proofreadingContext ? '\n\n'+proofreadingContext : ''}${expertContext ? '\n\n'+expertContext : ''}${naturalDialogueContext ? '\n\n'+naturalDialogueContext : ''}${creativeTurn ? '\n\nACTIVE LITTLE AUTHOR CHALLENGE: NO catalogue searches or catalogue references. Friendly UAE Emirati dialogue with the reader, but write ALL story prose and certificate summaries in formal Modern Standard Arabic in Arabic UI, or entirely in English in English UI. Add exactly one imaginative story sentence per story turn. Flag only demonstrable spelling/grammar errors in the student input with a brief correct form, never stylistic preferences. Respect signed-in role and name; do not invent student profile data.' : ''}${isStoryBeginning(userQuery) ? '\n\nIf the user requests a NEW Little Author story without a specific theme, begin with exactly one short story sentence inspired by this rotating Emirati idea: '+storyIdeaAt(messages.filter(m=>m.role==='user').length,locale==='ar'?'ar':'en')+'. Preserve all established Little Author spelling correction, one-sentence response, ending and certificate instructions.' : ''}` },
+            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}${generalBookContext ? '\n\n'+generalBookContext : ''}${arabicPageContext ? '\n\n'+arabicPageContext : ''}${safeEnhancement.context ? '\n\n'+safeEnhancement.context : ''}${learningContext ? '\n\n'+learningContext : ''}${proofreadingContext ? '\n\n'+proofreadingContext : ''}${expertContext ? '\n\n'+expertContext : ''}${naturalDialogueContext ? '\n\n'+naturalDialogueContext : ''}${creativeTurn ? '\n\nACTIVE LITTLE AUTHOR CHALLENGE: NO catalogue searches or catalogue references. Friendly UAE Emirati dialogue with the reader, but write ALL story prose and certificate summaries in formal Modern Standard Arabic in Arabic UI, or entirely in English in English UI. Add exactly one imaginative story sentence per story turn. Flag only demonstrable spelling/grammar errors in the student input with a brief correct form, never stylistic preferences. Respect signed-in role and name; do not invent student profile data.' : ''}${isStoryBeginning(userQuery) ? '\n\nIf the user requests a NEW Little Author story without a specific theme, begin with exactly one short story sentence inspired by this rotating Emirati idea: '+storyIdeaAt(messages.filter(m=>m.role==='user').length,locale==='ar'?'ar':'en')+'. Preserve all established Little Author spelling correction, one-sentence response, ending and certificate instructions.' : ''}` },
             ...messages,
             { role: 'user', content: userQuery }
           ],
