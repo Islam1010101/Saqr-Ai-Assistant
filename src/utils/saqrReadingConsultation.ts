@@ -123,7 +123,7 @@ export function renderReadingInterviewSuggestions(args:{
     const audience=bandFor(book,source);
     // Never automatically select adult/specialist material for minors.
     if(range==='children' && audience!=='children')return [];
-    if(range==='teens' && audience==='adults')return [];
+    if(range==='teens' && audience!=='children' && audience!=='teens')return [];
     if(range==='adults' && audience==='children')return [];
     if(range==='unknown' && audience==='adults')return [];
     return [{book,source,audience}];
