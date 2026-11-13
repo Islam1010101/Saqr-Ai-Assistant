@@ -28,6 +28,8 @@ function verify(query:string,kind:'author'|'title',atLeast=1){
 }
 // Actual, distinct authors across the physical, Arabic and English catalogs.
 verify('مؤلفات نجيب محفوظ','author');
+verify('يا صقر، ابحث عن نجيب محفوظ','author');
+verify('دورلي على كتب نجيب محفوظ','author');
 verify('روايات أحمد خالد توفيق','author');
 verify('روايات أجاثا كريسيتي','author',5); // Typo in a real author name
 verify('Agatha Christie novels','author');
@@ -53,6 +55,7 @@ const cross=verify('Agatha Christie novels','author');
 assert.ok(cross.some(b=>b.pageLocation.includes('العربية')),'English author name finds matching Arabic editions');
 assert.ok(cross.some(b=>b.pageLocation.includes('الإنجليزية')),'Same query finds catalogued English editions');
 assert.equal(isSaqrLibrarySearchIntent('Agatha Christie novels'),true);
+assert.equal(isSaqrExplicitNamedCatalogRequest('يا صقر، ابحث عن نجيب محفوظ'),true);
 assert.equal(isSaqrExplicitNamedCatalogRequest('ابحث عن نجيب محفوظ'),true);
 assert.equal(resolveSaqrCatalogEntity('كتب عن الفضاء',catalogs),null,'Topic requests remain broad topic searches');
 assert.equal(resolveSaqrCatalogEntity('كتب عن تاريخ الإمارات',catalogs),null);
