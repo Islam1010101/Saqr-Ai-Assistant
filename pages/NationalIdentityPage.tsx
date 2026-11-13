@@ -409,7 +409,6 @@ const NationalIdentityPage: React.FC = () => {
                 <path d="M12 7v51M8 58h8" />
                 <path d="m45 49 3 5 6-10" stroke="#FFE0A3" strokeWidth="3"/>
               </svg>
-              <div className="mt-5 text-xs font-black text-white/80">{tr(l('تحدي تفاعلي · يوم العلم','INTERACTIVE · FLAG DAY'))}</div>
               <h3 className="relative mt-1 text-xl font-black leading-snug">{tr(l('تحدي راية المجد','Flag Day Challenge'))}</h3>
             </div>
             <div className="p-5 sm:p-6">
