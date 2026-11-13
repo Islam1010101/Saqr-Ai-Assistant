@@ -25,6 +25,8 @@ export type DigitalLibraryBook = {
   readingLevel?: string;
   pageCount?: number;
   edition?: string;
+  /** True only for a separately labeled partial photo excerpt or promotional preview. */
+  isExcerpt?: boolean;
   keywords?: string[];
   /** A volume appears as an individual book while retaining its series grouping. */
   series?: string;
