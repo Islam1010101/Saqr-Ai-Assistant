@@ -138,8 +138,25 @@ export const resolveSaqrCatalogEntity=(
   query:string,collections:CatalogEntityCollections
 ):SaqrCatalogEntity|null=>{
   const q=String(query||'').trim(),tokens=normalizedQueryWords(q);
-  if(q.length>180||tokens.length<2||tokens.length>8 || tokens.join('').length<5 ||
-     isGenericTopicRequest(q))return null;
+  const single=tokens.length===1 && tokens[0].length>=4;
+  if(q.length>180||tokens.length>8 || tokens.join('').length<4 ||
+     (!single && tokens.length<2) || isGenericTopicRequest(q))return null;
+  // A single name is searched only as an EXACT recorded standalone title,
+  // or an author's distinctive surname with an explicit author cue.
+  if(single){
+    if(!isSaqrExplicitNamedCatalogRequest(q))return null;
+    const authorCue=/(?:مؤلفات|للكاتب|للمؤلف|الكاتب|\b(?:by|author|writer)\b)/i.test(q);
+    const collection=[...collections.physical,...collections.arabic,...collections.english];
+    if(authorCue && collection.some(book=>{
+      const author=normalizedFieldWords(book.author||'');
+      return author.length>=2 && author[author.length-1]===tokens[0];
+    }))return {kind:'author',tokens,confidence:'exact'};
+    if(collection.some(book=>{
+      const title=normalizedFieldWords(book.title||'');
+      return title.length===1 && title[0]===tokens[0];
+    }))return {kind:'title',tokens,confidence:'exact'};
+    return null;
+  }
   const authorCue=/(?:مؤلفات|مؤلفاته|للمؤلف|للكاتب|الكاتب|\b(?:by|author|writer)\b)/i.test(q);
   const titleCue=/(?:بعنوان|اسمه|اسمها|عنوان|\b(?:called|titled|named)\b)/i.test(q);
   const collection=[...collections.physical,...collections.arabic,...collections.english];
@@ -162,7 +179,20 @@ export const resolveSaqrCatalogEntity=(
   }
   return best?.value||null;
 };
-export const catalogBookMatchesEntity=(book:CatalogEntityRecord,entity:SaqrCatalogEntity):boolean=>
-  hasNamedField(book,entity);
+export const catalogBookMatchesEntity=(book:CatalogEntityRecord,entity:SaqrCatalogEntity):boolean=>{
+  if(entity.tokens.length===1){
+    const word=entity.tokens[0];
+    if(entity.kind==='title'){
+      const title=normalizedFieldWords(book.title||'');
+      return title.length===1 && title[0]===word;
+    }
+    if(entity.kind==='author'){
+      const author=normalizedFieldWords(book.author||'');
+      return author.length>=2 && author[author.length-1]===word;
+    }
+    return false;
+  }
+  return hasNamedField(book,entity);
+};
 export const isSaqrNamedAuthorQuery=(query:string,catalogs:CatalogEntityCollections):boolean=>
   resolveSaqrCatalogEntity(query,catalogs)?.kind==='author';
