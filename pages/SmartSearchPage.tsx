@@ -8,6 +8,7 @@ import { STORY_IDEAS, storyIdeaAt, isStoryBeginning, detectLearningIntent, resea
 import { borrowerIds, deviceReadingKey, filterActiveBorrowings, readingShelfFromDevice, catalogBookSynopsis } from '../src/utils/saqrReaderContext';
 import { bookData } from '../api/bookData';
 import { searchSaqrBookCatalog } from '../src/utils/saqrCatalogSearch';
+import { resolveSaqrCatalogEntity, isSaqrExplicitNamedCatalogRequest } from '../src/utils/saqrCatalogEntitySearch';
 import { retrieveSaqrArabicPageEvidence, exactArabicBookContentId, saqrArabicPageEvidenceContext, renderArabicPageEvidence } from '../src/utils/saqrArabicPageEvidence';
 import { saqrGeneralBookKnowledgeContext } from '../src/utils/saqrBookGeneralKnowledge';
 import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
@@ -401,7 +402,17 @@ const SmartSearchPage: React.FC = () => {
   const handleSendMessage = async () => {
     if (input.trim() === '' || isLoading) return;
     const userQuery = input.trim();
-    const librarySearchIntent = isSaqrLibrarySearchIntent(userQuery, messages);
+    // A named author/title/series may be requested without the word "book".
+    // Resolve it against actual catalog records, not a hard-coded title list.
+    // Educational, creative and lesson-planning requests stay on their own route.
+    const namedSearchRequest = isSaqrExplicitNamedCatalogRequest(userQuery) &&
+      !/(?:تحضير|درس|ورقة\\s*عمل|ورقه\\s*عمل|تحدي|المؤلف\\s*الصغير|worksheet|lesson|homework|quiz|story\\s*challenge)/i.test(userQuery);
+    const namedCatalogEntity = namedSearchRequest ? resolveSaqrCatalogEntity(userQuery,{
+      physical:bookData,
+      arabic:[...ARABIC_LIBRARY_DATABASE,...NATIONAL_IDENTITY_DIGITAL_BOOKS],
+      english:ENGLISH_LIBRARY_DATABASE
+    }):null;
+    const librarySearchIntent = isSaqrLibrarySearchIntent(userQuery, messages) || !!namedCatalogEntity;
     const creativeTurn = isSaqrCreativeTurn(userQuery, messages) && !librarySearchIntent;
     const proofreadingContext = saqrProofreadingInstructions({
       locale: locale === 'ar' ? 'ar' : 'en',
@@ -538,7 +549,7 @@ const SmartSearchPage: React.FC = () => {
     // Explicit "find this title" requests should show verified holdings, not
     // an unrelated book explanation. "Tell me more" uses the expert path.
     const explicitCatalogSearch=/(?:^|\s)(?:دورلي|دور\s*لي|دور|ابحث(?:لي)?|إبحث(?:لي)?|وريني|هاتلي|search|find|look\s+for|show\s+me)(?=\s|$)/i.test(userQuery);
-    if(librarySearchIntent && preIntent==='none' && isSaqrCatalogLookup(userQuery) && (explicitCatalogSearch || !namedBookTitle)){
+    if(librarySearchIntent && preIntent==='none' && (isSaqrCatalogLookup(userQuery) || !!namedCatalogEntity) && (explicitCatalogSearch || !namedBookTitle)){
       const answer=renderSaqrCatalogAnswer(userQuery,foundBooks,locale==='ar'?'ar':'en');
       const withPageEvidence=answer+renderArabicPageEvidence(arabicPageEvidence,locale==='ar');
       setMessages(prev=>[...prev,{role:'assistant',content:finishSaqrReply(withPageEvidence,'catalog')}]);
