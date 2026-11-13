@@ -3107,7 +3107,6 @@ const rawBookData = [
 { "title": "Great Whale of Kansas", "author": "Richard W. Jennings", "shelf": 15, "row": 4 },
 { "title": "Monkey Trouble", "author": "Gertrude Chandler Warner", "shelf": 15, "row": 4 },
 { "title": "Stone Fox", "author": "John Reynolds Gardiner", "shelf": 15, "row": 4 },
-{ "title": "Love That Dog", "author": "Sharon Creech", "shelf": 15, "row": 4 },
 { "title": "The Planet of Junior Brown", "author": "Virginia Hamilton", "shelf": 15, "row": 4 },
 { "title": "Brain Boy and the DeathMaster", "author": "Tor Seidler", "shelf": 15, "row": 4 },
 { "title": "Sixth-Grade Sleepover", "author": "Eve Bunting", "shelf": 15, "row": 4 },
