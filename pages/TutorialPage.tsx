@@ -374,7 +374,7 @@ export default function TutorialPage() {
     'reading-quest': label('نسخة المعلم من بين السطور مع صقر: اختر عدد الكتب ثم ناقش الشخصيات والأفكار والأحداث بأسئلة تناسب الكتاب ولغة الواجهة.', 'The teacher version of Between the Lines: choose books, then discuss characters, ideas and events through reading-comprehension questions in the chosen interface language.'),
     schedule: label('يستطيع المعلمون عرض الجدول الأسبوعي وحجز حصص المكتبة وإدارة الحجوزات المسموح بها. تظهر مواعيدهم المسجلة فقط عند توفرها.', 'Teachers can view the weekly timetable, reserve library sessions and manage permitted bookings. Their schedule appears only when records exist.'),
     admin: label('لوحة الإدارة للمخولين فقط، وتضم إدارة المستخدمين والأدوار والإحصائيات والحجوزات والاستعارات. بيانات الإدارة غير متاحة لزوار هذه الجولة.', 'The restricted admin dashboard manages roles, users, statistics, bookings and borrowing. Its private data is never exposed to visitors.'),
-    mascot: label('صقر هو الشخصية الإرشادية للمكتبة. يمكنك الضغط عليه للتفاعل معه، واستخدام الفقاعات المحيطة للوصول إلى خدمات المكتبة عند تسجيل الدخول.', 'Saqr is the library guide. Tap the mascot for a friendly interaction and choose a surrounding sphere to access features after sign-in.'),
+    mascot: label('صقر هو الشخصية الإرشادية للمكتبة. تظهر جميع فقاعات الخدمات المتاحة حوله معًا دون أسهم أو صفحات إضافية، وتتبدل أماكن الخدمات عشوائيًا عند فتح الواجهة. اضغط على صقر للتفاعل معه، أو اختر فقاعة للتعرف على الخدمة.', 'Saqr is the library guide. Every available service sphere is shown at once, without arrows or extra pages. Service positions shuffle each time the view opens. Tap Saqr for a friendly interaction or choose a sphere to learn about a feature.'),
   };
   const orbitRoles: Record<string, string> = {
     catalog: label('الطلاب والمعلمون والإدارة', 'Students, teachers and admins'),
@@ -511,7 +511,7 @@ export default function TutorialPage() {
             </div>
           </HintTarget>
 
-          <section className="w-full" aria-label={label('واجهة صقر التفاعلية','Saqr interactive homepage tour')}>
+          <section className="w-full" aria-label={label('واجهة صقر التفاعلية بجميع الفقاعات وترتيبها العشوائي','Saqr interactive homepage tour with all spheres in randomized positions')}>
             <SaqrOrbitNavigation isAr={isAr} userType="admin" tourMode
               tourDescriptions={orbitDescriptions} tourRoles={orbitRoles}
               onMascotClick={() => handleMascotInteraction()}
