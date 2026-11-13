@@ -220,7 +220,7 @@ export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=
       // bibliographic field throughout all three catalogs. Never backfill
       // results based on a general "stories" category or summary text.
       if(namedEntity && !catalogBookMatchesEntity(book,namedEntity))continue;
-      if(astronomyRequest){
+      if(!namedEntity && astronomyRequest){
         const directEvidence=astronomyTitle.test(titleText)||astronomyTitle.test(seriesText);
         const trustedSubject=origin.source!=='physical'&&astronomyDigitalSubject.test(subjectText);
         const explicitNamedBook=titleText.length>=9 && normalizedQuery.includes(titleText);
@@ -233,14 +233,16 @@ export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=
         if(figurativeOrFictionalSpace.test(titleText)||(!directEvidence&&!trustedSubject))continue;
       }
       // Do not recommend unrelated Arabic heritage or general histories for UAE.
-      if(needsUaeEvidence){
+      if(!namedEntity && needsUaeEvidence){
         // Physical catalog subject tags are inferred from the title by
         // bookData.ts; generic falconry/Gulf heritage is NOT proof of UAE.
         const evidence = origin.source==='physical'
           ? [titleText] : [titleText,subjectText,descriptionText];
         if(!evidence.some(isUaeExplicit) && !(origin.source==='physical'&&book.shelf===41))continue;
       }
-      let score=namedEntity ? 500 : 0;
+      const queryIsArabic=/[\u0600-\u06ff]/.test(question);
+      const bookIsArabic=/[\u0600-\u06ff]/.test(title+' '+author);
+      let score=namedEntity ? 500+(queryIsArabic===bookIsArabic?45:0) : 0;
       let subjectMatch=false;
       let titleMatch=false;
       // A named bilingual title must be evidenced by a recorded title or
@@ -299,9 +301,11 @@ export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=
   }
   // Exact named-work requests never include irrelevant fuzzy matches merely
   // to fill the physical/Arabic/English group quotas.
-  const ranked=aliasHints.length
-    ? candidates.filter(entry=>entry.aliasTitleMatch)
-    : candidates;
+  const ranked=namedEntity
+    ? candidates
+    : aliasHints.length
+      ? candidates.filter(entry=>entry.aliasTitleMatch)
+      : candidates;
   ranked.sort((a,b)=>b.score-a.score || a.value.title.localeCompare(b.value.title));
   // Keep the best matches, then make room for genuinely matching digital and
   // print items; the former first-ten-physical ordering hid bilingual results.
