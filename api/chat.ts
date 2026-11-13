@@ -3016,7 +3016,6 @@ const localBookData = [
 { "title": "Secrecy", "author": "Belva Plain", "shelf": 15, "row": 2 },
 { "title": "Lost Island", "author": "Phyllis A. Whitney", "shelf": 15, "row": 2 },
 { "title": "Astronomy in Color", "author": "Peter Lancaster Brown", "shelf": 15, "row": 2 },
-{ "title": "Secrecy", "author": "Belva Plain", "shelf": 15, "row": 2 },
 { "title": "WW III (World War III)", "author": "Ian Slater", "shelf": 15, "row": 2 },
 { "title": "A Midsummer Night's Dream", "author": "William Shakespeare", "shelf": 15, "row": 2 },
 { "title": "Clothing: Image and Impact", "author": "Jeane G. Johnson / Anne G. Foster", "shelf": 15, "row": 2 },
@@ -3327,7 +3326,22 @@ const localBookData = [
 { "title": "Soudium Counter", "author": "Louis Weber", "shelf": 10, "row": 1 },  
 { "title": "Zoo Frankfurt", "author": "R. Faust", "shelf": 10, "row": 1 },
 { "title": "At The Love Corner Of Love And Heartache", "author": "Curtiss Ann Matlock", "shelf": 19, "row": 6 },
-{ "title": "New Webster's Dictionary And Roget's Thesaurus", "author": "Book Essentials Inc", "shelf": 6, "row": 3 }
+{ "title": "New Webster's Dictionary And Roget's Thesaurus", "author": "Book Essentials Inc", "shelf": 6, "row": 3 },
+{ "title": "Elizabeth Gail And Strange Birthday Party", "author": "Hilda Stahl", "shelf": 13, "row": 1 },
+{ "title": "100 Peaple Who Changed America", "author": "Russell Freedman", "shelf": 20, "row": 3 },
+{ "title": "SACAGAWEA", "author": "Judith St.George", "shelf": 13, "row": 3 },
+{ "title": "Colourful London", "author": "A.N Court", "shelf": 21, "row": 3 },
+{ "title": "The Decline & Fall Of Welfare State", "author": "James Dale Davidson", "shelf": 4, "row": 3 },
+{ "title": "The Good Fat Bad Fat", "author": "Sheila Buff", "shelf": 8, "row": 3 },
+{ "title": "african american quilting : The Warmth of Tradition", "author": "Sule Greg C.Wilson", "shelf": 8, "row": 3 },
+{ "title": "Buttermilk Hill", "author": "Ruth White", "shelf": 14, "row": 1 },
+{ "title": "Cyber Qust", "author": "Scholastic", "shelf": 12, "row": 3 },
+{ "title": "Puppy Care And Training", "author": "TFH pub", "shelf": 9, "row": 2 },
+{ "title": "Death Of a Salesman", "author": "Arthur Miller", "shelf": 18, "row": 3 },
+{ "title": "The White Stallion", "author": "Elozabeth Shub", "shelf": 30, "row": 2 },
+{ "title": "Megan", "author": "Marisa Carroll", "shelf": 15, "row": 2 },
+{ "title": "Helping Your PreSchool Child", "author": "Education Publications Center", "shelf": 4, "row": 1 },
+{ "title": "The 10 Funniest People", "author": "Education Publications Center", "shelf": 4, "row": 1 }
 ];
 
 // Deliberately self-contained: Vercel's Node ESM serverless bundle does not
