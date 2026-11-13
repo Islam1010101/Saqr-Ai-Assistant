@@ -11,7 +11,7 @@ export type InterviewStep =
   | {kind:'none'}
   | {kind:'ask-interests';reply:string}
   | {kind:'ask-age';interests:string;reply:string}
-  | {kind:'recommend';interests:string;age:number|null;grade:number|null;reply?:never}
+  | {kind:'recommend';interests:string;age:number|null;grade:number|null;locale:'ar'|'en';reply?:never}
   | {kind:'repeat-age';reply:string};
 
 const INTERESTS = {
@@ -57,26 +57,30 @@ export function getReadingInterviewStep(
   const q=String(query||'').trim();
   if(!q||cancel.test(q)||explicitNewTask.test(q))return {kind:'none'};
   const lastAssistant=[...history].reverse().find(m=>m.role==='assistant')?.content?.trim();
+  const responseLanguage: 'ar'|'en' =
+    lastAssistant===INTERESTS.en||lastAssistant===AGE.en||lastAssistant===AGE_RETRY.en ? 'en' :
+    lastAssistant===INTERESTS.ar||lastAssistant===AGE.ar||lastAssistant===AGE_RETRY.ar ? 'ar' :
+    /[\u0600-\u06ff]/.test(q) ? 'ar' : /[a-z]{2,}/i.test(q) ? 'en' : locale;
   if(lastAssistant===INTERESTS.ar||lastAssistant===INTERESTS.en){
     // If both hobby and age were supplied at once, skip the redundant question.
     const parsed=parseReadingAge(q);
     if(parsed.age!==null||parsed.grade!==null){
-      const interests=q.replace(/\b(?:age|aged|years?\s*old|grade|year|class)\b\s*\d{1,2}/gi,'').trim();
-      return {kind:'recommend',interests:interests||q,age:parsed.age,grade:parsed.grade};
+      const interests=q.replace(/(?:\b(?:age|aged|grade|year|class)\s*)?\b\d{1,2}\b(?:\s*years?\s*old)?/gi,'').trim();
+      return {kind:'recommend',interests:interests||q,age:parsed.age,grade:parsed.grade,locale:responseLanguage};
     }
-    if(q.length<2)return {kind:'ask-interests',reply:INTERESTS[locale]};
-    return {kind:'ask-age',interests:q,reply:AGE[locale]};
+    if(q.length<2)return {kind:'ask-interests',reply:INTERESTS[responseLanguage]};
+    return {kind:'ask-age',interests:q,reply:AGE[responseLanguage]};
   }
   if(lastAssistant===AGE.ar||lastAssistant===AGE.en||lastAssistant===AGE_RETRY.ar||lastAssistant===AGE_RETRY.en){
     const parsed=parseReadingAge(q);
-    if(parsed.age===null&&parsed.grade===null)return {kind:'repeat-age',reply:AGE_RETRY[locale]};
-    const previousQuestionIndex=history.findLastIndex(turn=>turn.role==='assistant' && (turn.content===INTERESTS.ar||turn.content===INTERESTS.en));
+    if(parsed.age===null&&parsed.grade===null)return {kind:'repeat-age',reply:AGE_RETRY[responseLanguage]};
+    const previousQuestionIndex=history.map(turn=>turn.role==='assistant' && (turn.content===INTERESTS.ar||turn.content===INTERESTS.en)).lastIndexOf(true);
     const interests=previousQuestionIndex>=0
       ? history.slice(previousQuestionIndex+1).find(turn=>turn.role==='user')?.content||''
       : '';
-    return {kind:'recommend',interests:interests||'books',age:parsed.age,grade:parsed.grade};
+    return {kind:'recommend',interests:interests||'books',age:parsed.age,grade:parsed.grade,locale:responseLanguage};
   }
-  if(isOpenEndedBookAdvice(q))return {kind:'ask-interests',reply:INTERESTS[locale]};
+  if(isOpenEndedBookAdvice(q))return {kind:'ask-interests',reply:INTERESTS[responseLanguage]};
   return {kind:'none'};
 }
 type CatalogBook={
@@ -133,7 +137,6 @@ export function renderReadingInterviewSuggestions(args:{
     selected.push(candidate);
     if(selected.length>=3)break;
   }
-  const preferences=args.interests.replace(/[\r\n]+/g,' ').trim().slice(0,110);
   const opener=ar?'بناءً على اهتماماتك، هذه كتب وجدتها في فهرس مكتبتنا:'
     :'Based on what you enjoy, these are books I found in our school catalogue:';
   if(!selected.length)return ar
