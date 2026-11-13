@@ -1,16 +1,16 @@
 # EFIPS English digital library — current Drive inventory
 
-**Audit:** 12 November 2026. **Implementation:** [Draft PR #195](https://github.com/Islam1010101/Saqr-Ai-Assistant/pull/195).
+**Audit updated:** 13 November 2026. **Current branch:** `feat/english-photo-full-census-20261113` (the 12 November baseline was PR #195).
 
 ## Summary
 
 - Source of truth: current Google Drive **English Books / Photo Books** folders, not the obsolete 11 November folder URLs.
-- **71** consecutively numbered reading records, containing **14,514** JPEG pages: 47 previously catalogued book records linked to new Drive source IDs and 24 additional entries.
+- **73** consecutively numbered Drive reading records, containing **14,178** JPEG pages: 70 currently available book folders plus 3 partial preview/excerpt folders. The previous obsolete 394-page `DC Comics Encyclopedia` manifest is retired.
 - Every indexed page-manifest sequence was checked for 1…N numbering, no gaps, and nonempty Drive image IDs. This cannot independently guarantee that the scanned original includes all publisher pages or that all school accounts can load each image.
 - Reader behavior remains the existing immersive Saqr glass reader; no changes to AI prompts, intent logic, conversation state, lesson preparation, or other modules.
 - Saqr's catalog imports the same `ENGLISH_LIBRARY_DATABASE` as the English library page; this makes titles, descriptions, authors, and source links visible to the existing recommendation/catalog retrieval. **This is not full-page book-text OCR or semantic full-text indexing.**
 - Author biographies and title-specific summaries were added or corrected. Publisher is displayed only when supported by inspected source imprint; unverified imprints are marked as pending.
-- Excluded as unverified *full* books: **Dog Man: Sneak Peek at New Movie** (16 photos), **Murdle** (21 photos), **The Sherlock Holmes Puzzle Collection** (21 photos). These source folders remain untouched.
+- Included only as **clearly labeled previews, not complete editions**: **Dog Man: Sneak Peek at New Movie** (16 photos), **Murdle** (21 photos), and **The Sherlock Holmes Puzzle Collection** (21 photos). Their source images and folders remain untouched.
 
 ## Existing 47 titles — replaced source image manifests
 
@@ -64,7 +64,7 @@
 | How to Win Friends and Influence People | 232 | [Drive](https://drive.google.com/drive/folders/1yhy4okxr2tUD2FG1A_9JBsrDqBio88A5) |
 | Diary of a Wimpy Kid — Collected Photo Edition | 1279 | [Drive](https://drive.google.com/drive/folders/1wgKOQml3GAHva_d0z93WUiDl_ft00fll) |
 
-## Additional 24 current Drive titles
+## Additional 23 current Drive titles (excluding DC Comics)
 
 | Title | Images | Publisher (edition evidence) | Current Drive folder |
 | --- | ---: | --- | --- |
@@ -85,7 +85,6 @@
 | The Bet | 7 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/13kxtbGs6Wn6et5GsnRGdZftL9WobtQkA) |
 | The Death of Ivan Ilyich | 28 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1z2YluisB59IhspsEO0s5qAGSSBGBFwFn) |
 | Clam-I-Am! All About the Beach | 40 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1btikwfqB0hqvJnx4mG5x4c1QWqyi_s8N) |
-| DC Comics Encyclopedia | 394 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1R7ccg_YrngwXAgc50XJ701oTcxNHnEAt) |
 | Pocahontas (Illustrated Story) | 21 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1YhitHxwoCVuUNfIoScRB7NaarqjcuVxD) |
 | Marvel Encyclopedia: New Edition | 450 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1IqYym6qoVISMYGqevViv-vTY2nDuuczY) |
 | Diary of a Wimpy Kid: The Long Haul | 226 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1Viz-RXGtaH88BuEL55M4BaYKs3TQLNQW) |
@@ -93,9 +92,19 @@
 | Diary of a Wimpy Kid: The Getaway | 226 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1uT1p1IYb8Cjv4sw0TOeLEvknIYeKX9sx) |
 | Diary of a Wimpy Kid: The Meltdown | 226 | Edition not yet verified | [Drive](https://drive.google.com/drive/folders/1yf4umFh2VdzcsYBic2p8wAV8BvufYXQd) |
 
+## Three previously unindexed Drive folders — PREVIEW ONLY
+
+| Title | Photographed pages | Current Drive source | Completeness |
+| --- | ---: | --- | --- |
+| Dog Man: Sneak Peek at New Movie | 16 | [Drive](https://drive.google.com/drive/folders/1cfg39GKdPkbvyc-Jj3DhT-EPFTkqccTG) | Promotional preview only, not a whole novel |
+| Murdle | 21 | [Drive](https://drive.google.com/drive/folders/1HE8qMVlAURTsk0qCRhbYAsQkIkZPwNVc) | Incomplete excerpt of larger book |
+| The Sherlock Holmes Puzzle Collection | 21 | [Drive](https://drive.google.com/drive/folders/1tabp8qJ8diyyCZSBt9A6LY4xEsyun8gc) | Incomplete excerpt of larger collection |
+
+**Source census:** 25 folders under New, 4 under Puzzle Books, 36 under Novels (including subcategories), 8 under Self Development: **73 total**. All 73 are now represented in the English photo catalog. The old DC Comics folder is empty and outside this current set. There are 70 ordinary book records and 3 clearly marked previews. The old catalog had 71 records, but one was the obsolete DC Comics item, leaving 70 currently sourced records before this update. This is a completeness statement about the *folder inventory*, not about the original publishing editions.
+
 ## Remaining verification before production
 
 1. Check the first/last spread of each scanned edition against a physical or complete original; numbered images alone cannot certify the original's full length.
 2. Verify publishers against actual title and copyright pages wherever the photographed edition does not visibly state an imprint; do not infer a publisher from a novel's original publication.
 3. Smoke-test thumbnails and glass-reader page turns using a real school Google account; connector access does not prove every student's permissions.
-4. Run all relevant GitHub checks and release preview when Vercel's free daily deployment limit permits. Do not merge this draft while checks or release verification are blocked.
+4. Run relevant GitHub checks and confirm Vercel production points to the new commit; keep access restrictions and no changes to Saqr's AI logic.
