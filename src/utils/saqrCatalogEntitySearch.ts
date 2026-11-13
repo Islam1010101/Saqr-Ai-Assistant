@@ -80,14 +80,14 @@ const phraseMatch=(needle:readonly string[],haystack:readonly string[]):'exact'|
   return null;
 };
 const isGenericTopicRequest=(q:string):boolean=>
-  /(?:\b(?:books?|novels?|stories)\s+(?:about|on)\b|(?:كتب|كتاب|روايات|قصص|روايه)\s+(?:عن|حول|في)\b)/i.test(q);
+  /(?:\b(?:books?|novels?|stories)\s+(?:about|on)\b|(?:كتب|كتاب|روايات|قصص|روايه)\s+(?:عن|حول|في)(?:\s|$))/i.test(q);
 const hasNamedField=(book:CatalogEntityRecord,entity:SaqrCatalogEntity):boolean=>{
   const fields=entity.kind==='author'?[book.author||'']:
     entity.kind==='series'?[book.series||'']:[book.title||'',book.series||''];
   return fields.some(value=>phraseMatch(entity.tokens,normalizedFieldWords(value))!==null);
 };
 export const isSaqrExplicitNamedCatalogRequest=(query:string):boolean=>
-  /(?:^(?:ابحث|إبحث|ابحثلي|دور|دورلي|هاتلي|وريني|find|search|show|look\s+for)\b|(?:^|\s)(?:مؤلفات|روايات|كتب|للكاتب|للمؤلف|books?\s+by|novels?\s+by|works?\s+by)\b|\b(?:books?|novels?)\s*$)/i.test(query);
+  /(?:^(?:ابحث|إبحث|ابحثلي|دور|دورلي|هاتلي|وريني|find|search|show|look\s+for)(?:\s|$)|(?:^|\s)(?:مؤلفات|روايات|كتب|للكاتب|للمؤلف)(?:\s|$)|\b(?:books?\s+by|novels?\s+by|works?\s+by)\b|\b(?:books?|novels?)\s*$)/i.test(query);
 export const resolveSaqrCatalogEntity=(
   query:string,collections:CatalogEntityCollections
 ):SaqrCatalogEntity|null=>{
