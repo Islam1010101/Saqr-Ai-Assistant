@@ -7,6 +7,7 @@ import { matchesCatalogQuery } from '../src/utils/catalogTextSearch';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../src/utils/supabase';
 import { classifyBookAudience, type BookAudience } from '../api/bookAudience';
+import { isPhysicalCatalogMetadataNote, isPhysicalCatalogPlaceholder, physicalCatalogSummary } from '../src/utils/physicalCatalogSummaries20261113';
 import { getChildReadingReference, type ChildReadingTier } from '../src/utils/childrenReadingReferences';
 import './catalogHeroVisual.css';
 
@@ -186,12 +187,12 @@ const RevealOnScroll = ({ children, delay = 0 }: { children: React.ReactNode, de
 
 // Book-card analysis adapter only. This does not change the shared Saqr engine.
 const verifiedCatalogDescription = (value: string): boolean => {
-    const text = String(value || '').trim();
-    return text.length > 0 && !/^(?:a verified (?:book )?description is not yet available|a verified description is not yet available for this physical library book|الوصف التفصيلي لهذا الكتاب غير متاح)/i.test(text);
+    const text=String(value||'').trim();
+    return text.length>0 && !isPhysicalCatalogPlaceholder(text) && !isPhysicalCatalogMetadataNote(text);
 };
 const parseBookAnalysis = (raw: unknown, genreFallback: string): {summary:string;genre:string} => {
     if (typeof raw !== 'string' || !raw.trim()) throw new Error('Empty book analysis');
-    const text=raw.trim().replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'').trim();
+    const text=raw.trim().replace(/^\`\`\`(?:json)?\s*/i,'').replace(/\s*\`\`\`$/,'').trim();
     const first=text.indexOf('{'), last=text.lastIndexOf('}');
     if(first>=0 && last>first) {
         try {
@@ -207,10 +208,14 @@ const parseBookAnalysis = (raw: unknown, genreFallback: string): {summary:string
     }
     throw new Error('Invalid book analysis format');
 };
-const catalogSummary = (book:Book, locale:string):string => verifiedCatalogDescription(book.summary) ? book.summary :
-    locale==='ar'
-      ? 'لا يتوفر وصف موثّق لمحتوى هذا الكتاب في الفهرس حاليًا. بياناته: «'+book.title+'»'+(book.author?'، المؤلف: '+book.author:'')+'، الرف '+book.shelf+'، الصف '+book.row+'.'
-      : 'No verified description is available in the catalog for this book. Record: “'+book.title+'”'+(book.author?', author: '+book.author:'')+', shelf '+book.shelf+', row '+book.row+'.';
+const catalogSummary=(book:Book):string=>{
+    if(book.summary?.trim() && !isPhysicalCatalogPlaceholder(book.summary))return book.summary;
+    return physicalCatalogSummary({
+        title:book.title,author:book.author,
+        subject:getLocalizedSubject(book.subject,book.language==='AR'?'ar':'en'),
+        language:book.language
+    });
+};
 // --- 3. Component: BookModal ---
 const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
     const { locale, dir } = useLanguage();
@@ -247,24 +252,24 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                     headers:{'Content-Type':'application/json'},
                     signal:controller.signal,
                     body:JSON.stringify({
-                        locale:locale==='ar'?'ar':'en',
+                        locale:book.language==='AR'?'ar':'en',
                         messages:[{
                             role:'user',
                             content:'Analyze the book from the EFIPS printed library. Catalog record:\n'+record+
                                 '\nProvide a concise overview and a specific topic. Use known reliable information and the record; the book full text has NOT been provided. '+
                                 'If contents are unknown, state that clearly; do not invent plots, characters or chapters. '+
-                                'Answer in '+(locale==='ar'?'Arabic':'English')+'. Return JSON only: {"summary":"...","genre":"..."}'
+                                'Answer in '+(book.language==='AR'?'Arabic':'English')+'. Return JSON only: {"summary":"...","genre":"..."}'
                         }]
                     })
                 });
                 if(!response.ok)throw new Error('Analysis request HTTP '+response.status);
                 const body=await response.json();
-                const parsed=parseBookAnalysis(body?.reply,getLocalizedSubject(book.subject,locale));
+                const parsed=parseBookAnalysis(body?.reply,getLocalizedSubject(book.subject,book.language==='AR'?'ar':'en'));
                 if(!controller.signal.aborted){setAiContent(parsed);setAnalysisState('ready');}
             } catch(err) {
                 if(!controller.signal.aborted){
                     console.warn('Catalog analysis unavailable',err);
-                    setAiContent({summary:catalogSummary(book,locale),genre:getLocalizedSubject(book.subject,locale)});
+                    setAiContent({summary:catalogSummary(book),genre:getLocalizedSubject(book.subject,book.language==='AR'?'ar':'en')});
                     setAnalysisState('unavailable');
                 }
             } finally {if(!controller.signal.aborted)setLoading(false);}
