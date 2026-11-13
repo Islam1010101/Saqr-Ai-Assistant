@@ -16,6 +16,23 @@ export type OrbitItem = {
 };
 type Burst = { id: number; tx: number; ty: number; rot: number; color: string };
 
+// Evenly spaced positions for all bubbles; only the service-to-position
+// assignment is randomized. This prevents overlap/clipping at small widths.
+const EXPANDED_ORBIT_SLOTS: Record<number, readonly number[]> = {
+  7: [0, 1, 2, 4, 5, 6, 8],
+  8: [0, 1, 2, 4, 5, 6, 7, 9],
+  9: [0, 1, 2, 3, 4, 5, 6, 7, 9],
+  10: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+};
+const randomizeOrbit = (): string[] => {
+  const keys = ITEMS.map(item => item.key);
+  for (let i = keys.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [keys[i], keys[j]] = [keys[j], keys[i]];
+  }
+  return keys;
+};
+
 const ITEMS: OrbitItem[] = [
   { key: 'catalog', to: '/search', ar: 'دليل المكتبة', en: 'Library Catalog', icon: 'search', tint: '74, 209, 162', roles: ['student', 'teacher', 'admin'] },
   { key: 'smart', to: '/smart-search', ar: 'صقر الذكي', en: 'Ask Saqr AI', icon: 'spark', tint: '91, 195, 251', roles: ['student', 'teacher', 'admin'] },
@@ -66,8 +83,8 @@ export default function SaqrOrbitNavigation({
   tourRoles?: Record<string, string>;
 }) {
   const stageRef = useRef<HTMLDivElement>(null);
-  const swipeX = useRef<number | null>(null);
-  const [page, setPage] = useState(0);
+  // New shuffled order on every fresh mount; stable while the page is open.
+  const [randomizedKeys] = useState(randomizeOrbit);
   const [learningAllowed, setLearningAllowed] = useState(false);
   const [hoveredTourKey, setHoveredTourKey] = useState<string | null>(null);
   const [tappedTourKey, setTappedTourKey] = useState<string | null>(null);
@@ -87,10 +104,12 @@ export default function SaqrOrbitNavigation({
     }
     return () => { live = false; };
   }, [role, tourMode]);
-  const pageCount = Math.max(1, Math.ceil(links.length / 6));
-  const visible = links.slice(page * 6, page * 6 + 6);
-  useEffect(() => setPage(0), [role]);
-  useEffect(() => setPage(current => Math.min(current, pageCount - 1)), [pageCount]);
+  const visible = useMemo(() => randomizedKeys.flatMap(key => {
+    const item = links.find(link => link.key === key);
+    return item ? [item] : [];
+  }), [links, randomizedKeys]);
+  const expandedOrbit = visible.length > 6;
+  const slotIndices = EXPANDED_ORBIT_SLOTS[visible.length];
   // Observe the whole orbit rather than each floating sphere: individual observers
   // previously made visible spheres disappear on desktop and on Safari.
   useEffect(() => {
@@ -164,10 +183,10 @@ export default function SaqrOrbitNavigation({
   }, [tourMode, tappedTourKey]);
 
   useEffect(() => {
-    // Switching pages of the orbit must never leave a stale explanation visible.
+    // If access/role changes, close any hint about a no-longer-visible service.
     setHoveredTourKey(null);
     setTappedTourKey(null);
-  }, [page]);
+  }, [visible]);
 
   const viewportWidth = typeof window === 'undefined' ? 1024 : window.innerWidth;
   const viewportHeight = typeof window === 'undefined' ? 768 : window.innerHeight;
@@ -175,21 +194,9 @@ export default function SaqrOrbitNavigation({
   const hoverTop = Math.max(12, Math.min(viewportHeight - 250,
     cursorPosition.y + 250 > viewportHeight ? cursorPosition.y - 235 : cursorPosition.y + 20));
 
-  const turnPage = (delta: number) => setPage(current => (current + delta + pageCount) % pageCount);
   return (
     <section className="saqr-orbit-section" dir={isAr ? 'rtl' : 'ltr'} aria-label={isAr ? 'خدمات المكتبة التفاعلية' : 'Interactive library navigation'}>
-      <div
-        className="saqr-orbit-stage"
-        ref={stageRef}
-        onTouchStart={event => { swipeX.current = event.touches[0]?.clientX ?? null; }}
-        onTouchEnd={event => {
-          if (swipeX.current !== null && event.changedTouches[0]) {
-            const dx = event.changedTouches[0].clientX - swipeX.current;
-            if (Math.abs(dx) > 65 && pageCount > 1) turnPage(dx < 0 ? 1 : -1);
-          }
-          swipeX.current = null;
-        }}
-      >
+      <div className="saqr-orbit-stage" data-orbit-layout={expandedOrbit ? 'expanded' : 'compact'} ref={stageRef}>
         <div className="saqr-orbit-scene">
         <div className="saqr-orbit-halo saqr-orbit-halo-outer" aria-hidden="true" />
         <div className="saqr-orbit-halo saqr-orbit-halo-inner" aria-hidden="true" />
@@ -221,7 +228,8 @@ export default function SaqrOrbitNavigation({
                 </span>
               </span>
             );
-            const className = 'saqr-orbit-bubble saqr-orbit-position-' + index;
+            const slot = expandedOrbit ? (slotIndices?.[index] ?? index) : index;
+            const className = 'saqr-orbit-bubble saqr-orbit-position-' + slot;
             const ariaLabel = isAr ? item.ar : item.en;
             return tourMode ? (
               <button type="button" key={item.key} className={className} style={bubbleStyle}
@@ -256,16 +264,6 @@ export default function SaqrOrbitNavigation({
             );
           })}
         </nav>
-        {pageCount > 1 && (
-          <div className="saqr-orbit-pagination" role="group" aria-label={isAr ? 'مجموعات الخدمات' : 'Navigation pages'}>
-            <button type="button" onClick={() => turnPage(-1)} aria-label={isAr ? 'الخدمات السابقة' : 'Previous services'}>‹</button>
-            {Array.from({ length: pageCount }, (_, index) =>
-              <button type="button" key={index} aria-label={isAr ? 'صفحة ' + (index + 1) : 'Page ' + (index + 1)}
-                aria-current={index === page ? 'page' : undefined} className={index === page ? 'is-active' : ''}
-                onClick={() => setPage(index)}><span/></button>)}
-            <button type="button" onClick={() => turnPage(1)} aria-label={isAr ? 'الخدمات التالية' : 'Next services'}>›</button>
-          </div>
-        )}
       </div>
       {showTourHint && typeof document !== 'undefined' && createPortal(
         <div
