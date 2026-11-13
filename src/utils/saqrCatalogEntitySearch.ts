@@ -25,7 +25,7 @@ const normalize=(text:string):string=>String(text||'').normalize('NFKC').toLocal
 // In particular: "روايات أجاثا..." and "Agatha Christie novels".
 const NOISE=new Set([
   'اين','فين','هل','اي','ايه','ما','ماذا','اسم','اسماء','لديكم','عندكم','عندي',
-  'يا','صقر','فضلك','شكرا','يريت','ياريت','تجيبلي','جيبلي','هاتلي','اشوف','شوف','عايزه','عاوزه','عاوزة','بتاع','بتاعة','بتاعت','حابه','حابب','لدينا','فيه',
+  'يا','فضلك','شكرا','يريت','ياريت','تجيبلي','جيبلي','هاتلي','اشوف','شوف','عايزه','عاوزه','عاوزة','بتاع','بتاعة','بتاعت','حابه','حابب','لدينا','فيه',
   'ابحث','ابحثلي','دور','دورلي','دورلي','دورلي','وريني','هات','هاتلي','عايز','عاوز','اريد','ابي','ابغي',
   'اعطني','ارني','ممكن','لو','سمحت','اقترح','رشحلي','ترشحلي','اللي','في','عن','على','حول',
   'مكتبه','المكتبه','فهرس','الفهرس','مدرستنا','المدرسه','الرقميه','العربيه','الانجليزيه','الورقيه',
@@ -38,7 +38,9 @@ const NOISE=new Set([
   'by','author','writer','series','titles','title','all','any','about','of','and','read','reading',
   'recommend','suggest','give','need','have','do','you','is','there','are','where','can','some'
 ]);
-const words=(text:string):string[]=>String(text||'').normalize('NFKC').toLocaleLowerCase()
+const words=(text:string):string[]=>String(text||'')
+  .replace(/^\s*(?:يا\s+)?صقر[\s،,.:]+(?=(?:ابحث|إبحث|دور|دورلي|وريني|هاتلي|find|search|show))/i,'')
+  .normalize('NFKC').toLocaleLowerCase()
   .replace(/[\u064b-\u065f\u0670\u0640]/g,'')
   .split(/[^\p{L}\p{N}]+/gu)
   // Filter ORIGINAL Arabic spelling first: "على" is a preposition,
@@ -144,8 +146,8 @@ export const resolveSaqrCatalogEntity=(
   query:string,collections:CatalogEntityCollections
 ):SaqrCatalogEntity|null=>{
   const q=String(query||'').trim(),tokens=normalizedQueryWords(q);
-  const single=tokens.length===1 && tokens[0].length>=4;
-  if(q.length>180||tokens.length>8 || tokens.join('').length<4 ||
+  const single=tokens.length===1 && tokens[0].length>=3;
+  if(q.length>180||tokens.length>8 || tokens.join('').length<3 ||
      (!single && tokens.length<2) || isGenericTopicRequest(q))return null;
   // A single name is searched only as an EXACT recorded standalone title,
   // or an author's distinctive surname with an explicit author cue.
@@ -153,7 +155,7 @@ export const resolveSaqrCatalogEntity=(
     if(!isSaqrExplicitNamedCatalogRequest(q))return null;
     const authorCue=/(?:مؤلفات|للكاتب|للمؤلف|الكاتب|\b(?:by|author|writer)\b)/i.test(q);
     const collection=[...collections.physical,...collections.arabic,...collections.english];
-    if(authorCue && collection.some(book=>{
+    if(authorCue && tokens[0].length>=4 && collection.some(book=>{
       const author=normalizedFieldWords(book.author||'');
       return author.length>=2 && author[author.length-1]===tokens[0];
     }))return {kind:'author',tokens,confidence:'exact'};
