@@ -25,6 +25,7 @@ import { saqrExtraContext, isNewDiscussion, discussionOpening } from '../src/uti
 import {detectSaqrIntroduction,saqrIntroductionReply} from '../src/utils/saqrIntroductionReplies';
 import { resolveSaqrBookFollowUp, saqrNaturalDialogueInstructions } from '../src/utils/saqrNaturalDialogue';
 import { isSaqrLibrarySearchIntent, isSaqrCreativeTurn } from '../src/utils/saqrIntentRouter';
+import { getReadingInterviewStep, renderReadingInterviewSuggestions } from '../src/utils/saqrReadingConsultation';
 import { saqrProofreadingInstructions, isSaqrLessonPreparationRequest, isSaqrExplicitProofreadingRequest } from '../src/utils/saqrProofreading';
 
 // --- بروتوكول عقل صقر ---
@@ -426,6 +427,34 @@ const SmartSearchPage: React.FC = () => {
     setInput('');
     setIsLoading(true);
     setSaqrState('thinking');
+
+    // Reader-led book discovery: ask about interests and age before suggesting
+    // anything. Only open-ended requests and their immediate replies use this
+    // path; named-book searches, Little Author, teacher tools and AI stay intact.
+    const readingInterview=getReadingInterviewStep(userQuery,messages,locale==='ar'?'ar':'en');
+    if(readingInterview.kind!=='none' && !creativeTurn){
+      if(readingInterview.kind==='recommend'){
+        const interviewQuery='recommend books about '+readingInterview.interests.slice(0,180);
+        const matches=searchSaqrBookCatalog(interviewQuery,{
+          physical:bookData,
+          arabic:[...ARABIC_LIBRARY_DATABASE,...NATIONAL_IDENTITY_DIGITAL_BOOKS],
+          english:ENGLISH_LIBRARY_DATABASE
+        },36);
+        const suggestion=renderReadingInterviewSuggestions({
+          matches,physical:bookData,
+          arabic:[...ARABIC_LIBRARY_DATABASE,...NATIONAL_IDENTITY_DIGITAL_BOOKS],
+          english:ENGLISH_LIBRARY_DATABASE,
+          interests:readingInterview.interests,age:readingInterview.age,
+          grade:readingInterview.grade,locale:locale==='ar'?'ar':'en'
+        });
+        setMessages(prev=>[...prev,{role:'assistant',content:suggestion}]);
+      }else{
+        setMessages(prev=>[...prev,{role:'assistant',content:readingInterview.reply}]);
+      }
+      setIsLoading(false);
+      setSaqrState('idle');
+      return;
+    }
 
     // Narrow, source-controlled self/portal introductions only. Everything else
     // follows the existing Saqr flow, prompt and catalogue search unchanged.
