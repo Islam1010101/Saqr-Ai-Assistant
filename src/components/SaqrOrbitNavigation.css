@@ -326,6 +326,8 @@
 .saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-7 {left:16%;top:71%}
 .saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-8 {left:8%;top:50%}
 .saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-9 {left:16%;top:29%}
+/* One centered top sphere balances odd service counts (3+1+3 or 4+1+4). */
+.saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-10 {left:50%;top:13%}
 .saqr-orbit-stage.saqr-orbit-motion-ready:not(.is-in-view) .saqr-orbit-bubble {
   opacity: 0;
   filter: blur(8px);
@@ -396,6 +398,12 @@
   .saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-7 {left:18%;top:70%}
   .saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-8 {left:15%;top:50%}
   .saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-9 {left:18%;top:30%}
+  .saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-10 {left:50%;top:10%}
+  /* Spread the top trio on narrow screens without changing bubble sizes. */
+  .saqr-orbit-stage[data-orbit-count="7"] .saqr-orbit-position-0,
+  .saqr-orbit-stage[data-orbit-count="9"] .saqr-orbit-position-0 {left:18%}
+  .saqr-orbit-stage[data-orbit-count="7"] .saqr-orbit-position-1,
+  .saqr-orbit-stage[data-orbit-count="9"] .saqr-orbit-position-1 {left:82%}
   .saqr-orbit-talk {font-size:.64rem;padding:5px 9px;left:56%;top:0}
 }
 @media (max-width: 375px) {
