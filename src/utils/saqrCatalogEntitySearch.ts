@@ -37,8 +37,13 @@ const NOISE=new Set([
   'by','author','writer','series','titles','title','all','any','about','of','and','read','reading',
   'recommend','suggest','give','need','have','do','you','is','there','are','where','can','some'
 ]);
-const words=(text:string):string[]=>normalize(text).split(' ')
-  .filter(word=>!!word && !NOISE.has(word));
+const words=(text:string):string[]=>String(text||'').normalize('NFKC').toLocaleLowerCase()
+  .replace(/[\u064b-\u065f\u0670\u0640]/g,'')
+  .split(/[^\p{L}\p{N}]+/gu)
+  // Filter ORIGINAL Arabic spelling first: "على" is a preposition,
+  // while "علي" is a real person's name. Never merge them as stop words.
+  .filter(word=>!!word && !NOISE.has(word) && !NOISE.has(normalize(word)))
+  .map(normalize).filter(Boolean);
 const normalizedFieldWords=(text:string):string[]=>normalize(text).split(' ')
   .filter(word=>!!word && !['د','dr','mr','mrs','prof'].includes(word))
   .map(word=>word.startsWith('ال')&&word.length>=6?word.slice(2):word);
