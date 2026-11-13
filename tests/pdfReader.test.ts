@@ -20,9 +20,9 @@ assert.equal(Object.keys(DIGITAL_SERIES_VOLUMES).length,9);
 assert.equal(Object.values(DIGITAL_SERIES_VOLUMES).reduce((sum,books)=>sum+books.length,0),402);
 assert.equal(ARABIC_LIBRARY_DATABASE.length,502);
 assert.equal(ARABIC_LIBRARY_DATABASE.filter(b=>b.title==='الأعمال الكاملة للشاعر صلاح جاهين').length,1,'Do not duplicate the original photographed Salah Jahin book');
-assert.equal(ENGLISH_LIBRARY_DATABASE.length,71,'Use the current verified English photo catalog only');
+assert.equal(ENGLISH_LIBRARY_DATABASE.length,73,'Use the current verified English photo catalog only');
 assert.ok(ENGLISH_LIBRARY_DATABASE.every(b=>/^(?:EN_PH_|EN_DRIVE_)/.test(String(b.id))&&b.photoBatch),'No legacy English PDF books can enter the official index');
-assert.equal(allDigitalBooks.length,573); // 502 Arabic + 71 English (national identity digital is separate).
+assert.equal(allDigitalBooks.length,575); // 502 Arabic + 73 English (national identity digital is separate).
 assert.ok(allDigitalBooks.every(b=>/^https:\/\/drive\.google\.com\/(?:file\/d\/|drive\/folders\/)/.test(b.driveLink)),
   'All books need a real school Drive file or photo-folder source');
 assert.equal(ARABIC_LIBRARY_DATABASE.filter(b=>Boolean(b.audioId)).length,23,'Keep all original audio summaries');
@@ -33,13 +33,13 @@ assert.equal(greenVolume.readingAudience,'children');
 assert.equal(readerFileId('digital:ar:'+greenVolume.id), greenVolume.driveLink.match(/\/file\/d\/([^/]+)/)?.[1]);
 const currentEnglishBook = ENGLISH_LIBRARY_DATABASE.find(b=>b.title==='Diary of a Wimpy Kid: The Meltdown');
 assert.ok(currentEnglishBook?.photoBatch,'Current Wimpy Kid edition remains available in the English photo reader');
-console.log('PASS: 402 Arabic source-series volumes, 573 active Arabic/English digital cards, and current photo-only English indexing');
+console.log('PASS: 402 Arabic source-series volumes, 575 active Arabic/English digital cards, and current photo-only English indexing');
 
 assert.equal(readerFileId('https://example.com/private.pdf'), null);
 assert.equal(readerFileId('digital:ar:AR_1'), null); // collection, not a single PDF
 assert.equal(readerFileId('digital:en:9'),null,'Retired English PDF URLs must not remain accessible');
 const schoolOnlyEnglish=ENGLISH_LIBRARY_DATABASE.filter(b=>b.requiresSchoolGoogleAccess);
-assert.equal(schoolOnlyEnglish.length,71,'All 71 current English photo books use school access');
+assert.equal(schoolOnlyEnglish.length,73,'All 73 current English photo entries use school access');
 for(const book of schoolOnlyEnglish){
   assert.equal(readerFileId('digital:en:'+book.id),null,
     'Anonymous public PDF proxy must not serve restricted school book: '+book.title);
