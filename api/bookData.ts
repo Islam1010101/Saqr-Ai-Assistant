@@ -3365,7 +3365,7 @@ const rawBookData = [
 { "title": "african american quilting : The Warmth of Tradition", "author": "Sule Greg C.Wilson", "shelf": 8, "row": 3 },
 { "title": "Buttermilk Hill", "author": "Ruth White", "shelf": 14, "row": 1 },
 { "title": "Cyber Qust", "author": "Scholastic", "shelf": 12, "row": 3 },
-{ "title": "Puppy Care And Training", "author": "TFH pub", "shelf": 9, "row": 2 }
+{ "title": "Puppy Care And Training", "author": "TFH pub", "shelf": 9, "row": 2 },
 { "title": "Death Of a Salesman", "author": "Arthur Miller", "shelf": 18, "row": 3 },
 { "title": "The White Stallion", "author": "Elozabeth Shub", "shelf": 30, "row": 2 },
 { "title": "Megan", "author": "Marisa Carroll", "shelf": 15, "row": 2 },
