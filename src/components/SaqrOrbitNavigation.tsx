@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import './SaqrOrbitNavigation.css';
 import { getSaqrLearningAccess } from '../utils/saqrLearningAccess';
+import { isNationalIdentityTeacher } from '../utils/nationalIdentityAccess';
 
 type Role = 'student' | 'teacher' | 'admin';
 export type OrbitItem = {
@@ -67,6 +68,7 @@ function OrbitIcon({ kind }: { kind: string }) {
 export default function SaqrOrbitNavigation({
   isAr,
   userType,
+  teacherId,
   onMascotClick,
   showMascotBubble,
   bursts,
@@ -76,6 +78,7 @@ export default function SaqrOrbitNavigation({
 }: {
   isAr: boolean;
   userType: string | null;
+  teacherId?: string | null;
   onMascotClick: () => void;
   showMascotBubble: boolean;
   bursts: Burst[];
@@ -94,7 +97,10 @@ export default function SaqrOrbitNavigation({
   const role: Role = userType === 'teacher' ? 'teacher' : userType === 'admin' ? 'admin' : 'student';
   // The public tutorial is a read-only visual replica, including services hidden by role.
   // The real homepage keeps its existing permissions and entitlement checks.
-  const links = useMemo(() => tourMode ? ITEMS : ITEMS.filter(item => item.roles.includes(role) && (item.key !== 'learning' || learningAllowed)), [role, learningAllowed, tourMode]);
+  const links = useMemo(() => tourMode ? ITEMS : ITEMS.filter(item =>
+    (item.roles.includes(role) || (item.key === 'identity' && isNationalIdentityTeacher(role, teacherId))) &&
+    (item.key !== 'learning' || learningAllowed)
+  ), [role, teacherId, learningAllowed, tourMode]);
   useEffect(() => {
     let live = true;
     setLearningAllowed(false);
