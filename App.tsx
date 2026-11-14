@@ -33,6 +33,7 @@ import FlagDayChallenge from './pages/FlagDayChallenge'; // Prepared for future 
 import NationalIdentityPage from './pages/NationalIdentityPage';
 import NationalIdentityBooksPage from './pages/NationalIdentityBooksPage';
 import NationalIdentityDigitalBooksPage from './pages/NationalIdentityDigitalBooksPage';
+import NationalAnthemChallengePage from './pages/NationalAnthemChallengePage';
 import { canAccessNationalIdentity } from './src/utils/nationalIdentityAccess';
 
 export type Locale = 'en' | 'ar';
@@ -610,6 +611,7 @@ const MainLayout: React.FC = () => {
           <Route path="/game" element={<ProtectedRoute><DeweyGame /></ProtectedRoute>} />
           <Route path="/saqr-national-identity" element={<ProtectedRoute><NationalIdentityRoute><NationalIdentityPage /></NationalIdentityRoute></ProtectedRoute>} />
           <Route path="/saqr-national-identity/books" element={<ProtectedRoute><NationalIdentityRoute><NationalIdentityBooksPage /></NationalIdentityRoute></ProtectedRoute>} />
+          <Route path="/saqr-national-identity/anthem" element={<ProtectedRoute><NationalIdentityRoute><NationalAnthemChallengePage /></NationalIdentityRoute></ProtectedRoute>} />
           <Route path="/schedule" element={<ProtectedRoute><SchedulePage /></ProtectedRoute>} />
         </Routes>
       </main>
