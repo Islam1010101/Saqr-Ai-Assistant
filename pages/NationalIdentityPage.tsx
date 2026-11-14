@@ -2,6 +2,7 @@ import './challengesMobileResponsive.css';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useLanguage } from '../App';
+import { canAccessNationalIdentity } from '../src/utils/nationalIdentityAccess';
 import FlagDayChallenge from './FlagDayChallenge';
 import './nationalHeritageTheme.css';
 import './nationalIdentityLanding.css';
@@ -227,15 +228,15 @@ const NationalIdentityPage: React.FC = () => {
   const [identity] = useState(() => {
     try {
       const role = localStorage.getItem('user_type');
-      if (role !== 'student' && role !== 'admin') return '';
       const user = JSON.parse(localStorage.getItem('current_user') || 'null');
+      if (!canAccessNationalIdentity(role, user)) return '';
       const id = role === 'student' ? user?.student_id : user?.teacher_id;
       if (typeof id !== 'string' && typeof id !== 'number') return '';
       const normalizedId = String(id).trim();
       return normalizedId ? role + ':' + normalizedId : '';
     } catch { return ''; }
   });
-  // Keep existing student progress keys unchanged; administrators have separate progress.
+  // Keep existing student/admin progress keys unchanged; HR040 uses a separate teacher key.
   const storageKey = useMemo(() => 'efips-national-identity-v1:' + identity, [identity]);
   const [progress,setProgress] = useState<Progress>(() => identity ? readSaved(storageKey) : emptyProgress());
   const [mode,setMode] = useState<Mode>('home');
