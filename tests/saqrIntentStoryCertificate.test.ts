@@ -62,13 +62,15 @@ assert.ok(server.includes('const found = catalogRequested ? findBooks(userMsg) :
 assert.ok(server.includes('Normal educational or creative chat (NOT a school catalogue search)'));
 assert.ok(server.includes('No school-catalogue search was requested.'));
 const page=readFileSync('pages/SmartSearchPage.tsx','utf8');
-assert.ok(page.includes('const librarySearchIntent = isSaqrLibrarySearchIntent(userQuery, messages);'));
+assert.match(page,/const librarySearchIntent\s*=\s*isSaqrLibrarySearchIntent\(userQuery,\s*messages\)\s*\|\|\s*!!namedCatalogEntity/,
+  'Genuine library search or exact verified title/author lookups can open catalog');
 assert.ok(page.includes('catalogueIntent: librarySearchIntent'));
 assert.ok(!server.includes("from '../src/utils/saqrIntentRouter'"));
 assert.ok(page.includes('const foundBooks = librarySearchIntent ? searchSaqrBookCatalog('));
 assert.ok(page.includes("const searchContext = !librarySearchIntent"));
 assert.ok(page.includes("const namedBookTitle=librarySearchIntent && preIntent==='none'"));
-assert.ok(page.includes("if(librarySearchIntent && preIntent==='none' && isSaqrCatalogLookup"));
+assert.match(page,/if\s*\(librarySearchIntent\s*&&\s*preIntent\s*===\s*['"]none['"]\s*&&\s*\(isSaqrCatalogLookup\(userQuery\)\s*\|\|\s*!!namedCatalogEntity\)/,
+  'Immediate catalog lookup supports broad requests and verified named entities only');
 assert.ok(page.includes('if(librarySearchIntent && /(?:ركن|جناح)'));
 assert.ok(page.includes('ACTIVE LITTLE AUTHOR CHALLENGE: NO catalogue searches'));
 assert.ok(page.includes('formal Modern Standard Arabic'));
