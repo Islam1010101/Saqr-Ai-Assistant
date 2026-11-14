@@ -49,14 +49,19 @@ export function saqrTeacherLessonPartInstructions(
   +continuation+' Keep original grade, subject, language and educational scope. '
   +'Write detailed, usable teaching content in '+(locale==='ar'?'formal Arabic FUSHA':'academic English')
   +', with specific actionable activities and Bloom objectives. Avoid invented textbook sources. '
+  +'STRICT REGISTER SEPARATION: This lesson plan, its headings, objectives, stages, activities, assessment, worksheets and any printable teaching material must use formal academic language exclusively. '
+  +(locale==='ar'
+    ? 'Use correct Modern Standard Arabic throughout the lesson text, without Emirati or Egyptian colloquial expressions; only chat messages OUTSIDE the lesson are in natural UAE Emirati Arabic. '
+    : 'Write every heading and item of the lesson plan in professional academic English, translating the Arabic internal outline rather than mixing languages; do not use Arabic dialect in the lesson. ')
+  +'Do not include conversational greetings, dialectal remarks, or a continue/print question inside the lesson document. '
   +'Do not ask whether to continue or print; the interface adds that question. '
   +'Never claim the entire plan is complete before part six. '
   +'Only once this section is fully covered, finish with [[SAQR_LESSON_PART_DONE]] as the final standalone line. '
   +'If output is interrupted mid-section, DO NOT use that marker.';
 }
 export const saqrTeacherLessonContinueQuestion=(locale:'ar'|'en'):string=>
- locale==='ar'?'التحضير لسه ما اكتمل. تحب أكمل لك باقي التحضير؟'
+ locale==='ar'?'بعدنا ما خلصنا التحضير كامل. تبا أكمل لك باقي التحضير؟'
   :'The lesson plan is not finished yet. Would you like me to continue?';
 export const saqrTeacherLessonPrintQuestion=(locale:'ar'|'en'):string=>
- locale==='ar'?'كده اكتمل التحضير بكل أجزائه. تحب أجهزهولك للطباعة؟'
+ locale==='ar'?'خلصنا التحضير كامل بكل أجزائه. تبا أجهزه لك للطباعة؟'
   :'The complete lesson plan is ready. Would you like me to prepare it for printing?';
