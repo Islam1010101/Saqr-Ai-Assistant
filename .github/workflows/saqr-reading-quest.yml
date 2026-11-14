@@ -7,6 +7,10 @@ on:
       - 'pages/SaqrReadingQuestPage.tsx'
       - 'pages/SaqrChallengesHubPage.tsx'
       - 'pages/HomePage.tsx'
+      - 'pages/NationalIdentityPage.tsx'
+      - 'src/components/SaqrOrbitNavigation.tsx'
+      - 'src/utils/nationalIdentityAccess.ts'
+      - 'App.tsx'
       - 'src/utils/saqrReadingQuestBank.ts'
       - 'src/utils/saqrReadingQuestDigitalBank.ts'
       - 'src/utils/saqrReadingQuestHeritageSources.ts'
@@ -16,6 +20,7 @@ on:
       - 'api/digitalBookData.ts'
       - 'api/nationalIdentityDigitalBooks.ts'
       - 'tests/saqrReadingQuest.test.ts'
+      - 'tests/nationalIdentityHR040.test.ts'
       - 'tests/flagTimerAndBooks.test.ts'
       - '.github/workflows/saqr-reading-quest.yml'
 permissions:
@@ -33,6 +38,7 @@ jobs:
       # Avoid changing the production lockfile as part of this isolated feature.
       - run: npm install --no-package-lock --no-audit --no-fund
       - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/saqrReadingQuest.test.ts
+      - run: node --experimental-strip-types tests/nationalIdentityHR040.test.ts
       - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/shelf30Catalog.test.ts
       - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/saqrIntroduction.test.ts
       - run: node --import ./tools/registerTsResolver.mjs --experimental-strip-types tests/flagTimerAndBooks.test.ts
