@@ -49,3 +49,21 @@ assert.ok(anthem.includes("t('مصادر النشيد','Anthem sources')"), 'Ren
 assert.ok(!anthem.includes('الصوت يُسجَّل ويُخلَط محليًا في متصفحك.'), 'Hide requested Arabic privacy note');
 assert.ok(!anthem.includes('Your voice is recorded and mixed locally in your browser.'), 'Hide requested English privacy note');
 assert.ok(anthem.includes('recordingToMp3(captured)'), 'The recording/download functionality must stay intact');
+
+assert.ok(landing.includes('xl:grid-cols-3'), 'The National Identity landing cards should use three columns on large screens');
+assert.ok(identityStyles.includes('grid-template-columns:repeat(3,minmax(0,1fr))'), 'Desktop challenge grid is exactly three columns');
+assert.ok(identityStyles.includes('grid-template-columns:repeat(2,minmax(0,1fr))'), 'Tablet challenge grid retains two columns');
+assert.ok(identityStyles.includes('grid-template-columns:1fr;gap:16px'), 'Mobile challenge grid stays one column');
+assert.ok(anthem.includes('nh-anthem-actionbar'), 'Keep recording controls grouped for narrow screens');
+assert.ok(anthem.includes('nh-anthem-equalizer') && anthem.includes('data-active={busyRecording}'), 'Meter animates only while singing');
+assert.ok(anthem.includes("transform: 'scaleX(' + ratio / 100"), 'Recording progress uses compositor transform, not width reflow');
+assert.ok(anthem.includes('}, 300);'), 'Throttle visual progress updates without changing audio capture');
+assert.ok(anthemStyles.includes('nh-anthem-meter') && anthemStyles.includes('[data-active="true"] i'), 'Keep tiny recording-only effect');
+assert.ok(anthemStyles.includes('@media(max-width:860px)') && anthemStyles.includes('grid-template-columns:minmax(0,1fr)'), 'Tablet-sized studio stacks');
+assert.ok(anthemStyles.includes('@media(max-width:660px)') && anthemStyles.includes('.nh-anthem-actionbar'), 'Phone buttons become full width');
+assert.ok(anthemStyles.includes('env(safe-area-inset-bottom)'), 'Allow mobile safe area in portrait');
+assert.ok(anthemStyles.includes('prefers-reduced-motion:reduce'), 'Respect reduced-motion preference');
+assert.ok(anthemStyles.includes('animation:none;') && anthemStyles.includes('.nh-v2-art-orbit'), 'Eliminate persistent rotating decorative orbits');
+assert.ok(anthemStyles.includes('filter:none;') && anthemStyles.includes('.nh-v2-art-glow'), 'Avoid live blurred backdrops on phones');
+assert.ok(anthem.includes('recordingToMp3(captured)') && anthem.includes('getUserMedia({') && anthem.includes('download="EFIPS-Voice-of-the-Union.mp3"'), 'MP3/microphone functionality stays unchanged');
+console.log('PASS: responsive 3/2/1 identity cards and efficient Safari/mobile anthem visuals');
