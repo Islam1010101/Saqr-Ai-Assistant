@@ -103,7 +103,7 @@
 .national-heritage.nh-v2 .nh-v2-section-heading{margin-top:clamp(28px,4vw,46px);margin-bottom:clamp(16px,2.3vw,25px)}
 .national-heritage.nh-v2 .nh-v2-section-heading h2{font-size:clamp(23px,2.6vw,33px);line-height:1.5}
 .national-heritage.nh-v2 .nh-challenges.nh-v2-grid{
- grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(12px,1.7vw,23px);
+ grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(14px,1.8vw,24px);
 }
 .national-heritage.nh-v2 .nh-v2-grid .nh-challenge-card{
  position:relative;display:flex;flex-direction:column;min-width:0;height:100%;
@@ -203,6 +203,9 @@
 @media(hover:none),(pointer:coarse){
  .national-heritage.nh-v2 .nh-v2-grid .nh-challenge-card:hover{transform:none}
  .national-heritage.nh-v2 .nh-v2-pavilion-card:hover{transform:none}
+ /* Avoid continuous decorative card repaints on touch/mobile browsers. */
+ .national-heritage.nh-v2 .nh-v2-grid .nh-card-top:before{animation:none}
+ .national-heritage.nh-v2 .nh-v2-grid .nh-challenge-card{animation:none}
 }
 @media(prefers-reduced-motion:reduce){
  .national-heritage.nh-v2 .nh-v2-hero *,

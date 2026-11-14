@@ -278,7 +278,7 @@ export default function NationalAnthemChallengePage() {
       progressTimer.current = window.setInterval(() => {
         if (!mounted.current) return;
         setElapsed(Math.min(audioBuffer.current?.duration || 0, Math.max(0, ctx.currentTime - startAt)));
-      }, 150);
+      }, 300);
     } catch (err) {
       discard.current = true;
       if (recorder.current?.state === 'recording') {
@@ -350,7 +350,7 @@ export default function NationalAnthemChallengePage() {
             <span className="nh-v2-symbol nh-v2-symbol--star" aria-hidden="true">
               <MicrophoneIcon className="h-8 w-8"/>
             </span>
-            <img src="/SAQR%20Singer.png" alt="" className="nh-saqr nh-v2-character nh-anthem-singer" fetchPriority="high"/>
+            <img src="/SAQR%20Singer.png" alt="" className="nh-saqr nh-v2-character nh-anthem-singer" decoding="async" fetchPriority="high"/>
           </div>
         </div>
       </section>
@@ -398,22 +398,25 @@ export default function NationalAnthemChallengePage() {
           </div>
 
           <div className="nh-anthem-progress mt-7 rounded-2xl border border-emerald-200 bg-[#f8fbf9] p-4 dark:border-emerald-900 dark:bg-[#071e18]">
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-sm font-black text-emerald-950 dark:text-emerald-100">{busyRecording ? t('يتم تسجيل غنائك الآن','Recording your singing') : t('جاهز للتسجيل','Ready to record')}</span>
-              <span className="text-sm font-black tabular-nums text-emerald-800 dark:text-emerald-200">{formatTime(elapsed)} / {formatTime(trackSeconds)}</span>
+            <div className="flex min-w-0 items-center justify-between gap-3">
+              <span className="flex min-w-0 items-center gap-2 text-sm font-black text-emerald-950 dark:text-emerald-100">
+                <span className="nh-anthem-equalizer" data-active={busyRecording} aria-hidden="true"><i/><i/><i/><i/></span>
+                {busyRecording ? t('يتم تسجيل غنائك الآن','Recording your singing') : t('جاهز للتسجيل','Ready to record')}
+              </span>
+              <span className="shrink-0 text-sm font-black tabular-nums text-emerald-800 dark:text-emerald-200">{formatTime(elapsed)} / {formatTime(trackSeconds)}</span>
             </div>
             <div className="mt-3 h-3 overflow-hidden rounded-full bg-emerald-100 dark:bg-emerald-950" role="progressbar" aria-label={t('تقدم التسجيل','Recording progress')} aria-valuenow={Math.round(ratio)} aria-valuemin={0} aria-valuemax={100}>
-              <div className="h-full rounded-full bg-gradient-to-r from-emerald-600 via-amber-400 to-red-500 transition-[width] duration-150" style={{ width: ratio + '%' }}/>
+              <div className="h-full w-full rounded-full bg-gradient-to-r from-emerald-600 via-amber-400 to-red-500 transition-transform duration-300" style={{ transform: 'scaleX(' + ratio / 100 + ')', transformOrigin: ar ? 'right center' : 'left center' }}/>
             </div>
           </div>
 
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="nh-anthem-actionbar mt-6 flex flex-wrap gap-3">
             {busyRecording
-              ? <button type="button" onClick={stopRecording} className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rose-700 px-6 py-3 text-sm font-black text-white hover:bg-rose-800">
+              ? <button type="button" onClick={stopRecording} className="nh-anthem-action inline-flex min-h-12 items-center gap-2 rounded-xl bg-rose-700 px-6 py-3 text-sm font-black text-white hover:bg-rose-800">
                 <span aria-hidden="true" className="h-3 w-3 rounded-sm bg-white"/>{t('إنهاء التسجيل','Finish recording')}
                 </button>
               : <button type="button" onClick={() => void startRecording()} disabled={!canRecord || busyProcessing}
-                  className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-emerald-700 px-6 py-3 text-sm font-black text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50">
+                  className="nh-anthem-action inline-flex min-h-12 items-center gap-2 rounded-xl bg-emerald-700 px-6 py-3 text-sm font-black text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50">
                   <MicrophoneIcon className="h-5 w-5"/>{status === 'loading' ? t('تحميل الموسيقى…','Loading music…') : t('ابدأ الغناء والتسجيل','Start singing and recording')}
                 </button>
             }
@@ -428,7 +431,7 @@ export default function NationalAnthemChallengePage() {
             <p className="mt-2 text-sm text-emerald-900 dark:text-emerald-100">{t('استمع لصوتك مع الموسيقى، أو احتفظ بملف MP3 على جهازك.','Listen to your voice with the music, or save the MP3 to your device.')}</p>
             <audio controls src={mp3Url} className="mt-4 w-full" aria-label={t('استمع إلى تسجيلك','Listen to your recording')}/>
             <a href={mp3Url} download="EFIPS-Voice-of-the-Union.mp3"
-              className="mt-4 inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-700 px-6 py-3 text-sm font-black text-white hover:bg-emerald-800">
+              className="nh-anthem-download mt-4 inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-700 px-6 py-3 text-sm font-black text-white hover:bg-emerald-800">
               {t('تحميل تسجيلك بصيغة MP3','Download your MP3')}
             </a>
           </div>}
