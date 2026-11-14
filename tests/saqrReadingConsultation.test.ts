@@ -71,5 +71,6 @@ assert.match(noMatches,/could not confirm a matching book/i,
 const page=readFileSync('pages/SmartSearchPage.tsx','utf8');
 assert.ok(page.includes('getReadingInterviewStep(userQuery,messages'));
 assert.ok(page.includes('renderReadingInterviewSuggestions({'));
-assert.ok(page.includes('if(readingInterview.kind!==\'none\' && !creativeTurn)'));
+assert.ok(page.includes('if(!activeTeacherLesson && readingInterview.kind!==\'none\' && !creativeTurn)'),
+  'Reading interview must not intercept a teacher lesson continuation');
 console.log('PASS: Saqr asks hobbies and age, then suggests only verified age-aware school books');
