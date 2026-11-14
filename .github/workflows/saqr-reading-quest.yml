@@ -9,6 +9,8 @@ on:
       - 'pages/HomePage.tsx'
       - 'pages/NationalIdentityPage.tsx'
       - 'pages/NationalAnthemChallengePage.tsx'
+      - 'pages/nationalIdentityLanding.css'
+      - 'pages/nationalAnthemChallenge.css'
       - 'src/components/SaqrOrbitNavigation.tsx'
       - 'src/utils/nationalIdentityAccess.ts'
       - 'App.tsx'
