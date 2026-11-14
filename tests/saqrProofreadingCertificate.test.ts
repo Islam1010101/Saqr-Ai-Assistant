@@ -18,7 +18,16 @@ const storyAr=saqrProofreadingInstructions({locale:'ar',creativeTurn:true,lesson
 assert.match(storyAr,/Arabic FUSHA/);
 assert.match(storyAr,/actual|genuine/);
 assert.match(storyAr,/incorrect|wrong|تصحيح|الصحيح/);
-assert.match(storyAr,/Emirati/);
+assert.match(storyAr,/formal Modern Standard Arabic \(الفصحى\)/,
+  'All Little Author guidance and corrections must be formal Arabic');
+assert.match(storyAr,/NEVER Emirati or other dialect/,
+  'Every Little Author turn must avoid colloquial speech');
+assert.match(storyAr,/hamza and ta marbuta/,
+  'Student correction rules must cover frequent Arabic spelling errors');
+assert.match(storyAr,/exact original fragment and its minimal correct form/,
+  'Only actual student writing errors may be quoted and corrected');
+assert.doesNotMatch(storyAr,/هني خطأ بسيط|brief Emirati-language note/,
+  'Old Emirati correction template must never enter Little Author');
 assert.match(storyAr,/If no genuine errors|If there is NO mistake|If no actual mistakes/i);
 const storyEn=saqrProofreadingInstructions({locale:'en',creativeTurn:true,lessonTurn:false,explicitReview:false});
 assert.match(storyEn,/latest English story contribution/);
@@ -37,6 +46,12 @@ assert.match(requested,/only provide a fully rewritten corrected passage when re
 
 const page=readFileSync('pages/SmartSearchPage.tsx','utf8');
 assert.ok(page.includes('saqrProofreadingInstructions({'),'Saqr must actually apply proofreading instructions');
+assert.ok(page.includes('EVERY Little Author response must be in correct formal Modern Standard Arabic'),
+  'Main Little Author rules must require formal Arabic for instructions and encouragement');
+assert.ok(page.includes('ALL instructions, dialogue, encouragement, spelling/grammar feedback'),
+  'The active Little Author turn must override the ordinary Emirati chat voice');
+assert.ok(page.includes('NEVER Little Author')===false,
+  'Story correction instructions should remain constructive');
 assert.ok(page.includes('creativeTurn,'));
 assert.ok(page.includes('isSaqrLessonPreparationRequest(userQuery)'));
 assert.ok(page.includes('isSaqrExplicitProofreadingRequest(userQuery)'));
