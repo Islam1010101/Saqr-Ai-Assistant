@@ -689,7 +689,7 @@ const HomePage: React.FC = () => {
                 <RevealSection delay={200}>
                     <div data-news-paused={newsPaused} className="efips-news-ribbon w-full max-w-5xl mx-auto relative z-30 flex items-center bg-white dark:bg-slate-800 border-4 border-amber-300 dark:border-amber-700 rounded-full shadow-lg overflow-hidden h-14 md:h-16">
                         <button type="button" onClick={() => setNewsPaused(paused => !paused)}
-                            aria-label={newsPaused ? (isAr ? 'استئناف حركة جديدنا' : 'Resume What's New') : (isAr ? 'إيقاف حركة جديدنا لقراءة الأخبار' : 'Pause What's New to read')}
+                            aria-label={newsPaused ? (isAr ? 'استئناف حركة جديدنا' : 'Resume the news ticker') : (isAr ? 'إيقاف حركة جديدنا لقراءة الأخبار' : 'Pause the news ticker to read')}
                             aria-pressed={newsPaused}
                             title={newsPaused ? (isAr ? 'استئناف الشريط' : 'Resume ticker') : (isAr ? 'إيقاف الشريط مؤقتًا' : 'Pause ticker')}
                             className="bg-amber-400 text-slate-900 font-black px-3 sm:px-5 md:px-8 h-full flex items-center gap-2 relative z-20 shrink-0 text-xs md:text-sm uppercase focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-600 focus-visible:-outline-offset-4">
