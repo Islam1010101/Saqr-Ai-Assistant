@@ -12,15 +12,25 @@ line('<span className="efips-brand-heading-line">المكتبة الرقمية</
 line('<span className="efips-brand-heading-line">لصقر الإمارات</span>');
 line('<span className="efips-brand-heading-line">EFIPS</span>');
 line('<span className="efips-brand-heading-line">DIGITAL LIBRARY</span>');
-/* Both language variants share the exact same original line and subtitle
-   classes; only their paint uses the four official UAE flag colors. */
-line('.efips-login-brand-panel .efips-brand-heading-line,');
+/* The moving video must not wash out the Arabic or English wording:
+   solid high-contrast UAE green/red/dark text with no white gradient or
+   dark lettering outline. A static neutral background avoids video flicker. */
+line('.efips-login-brand-panel .efips-brand-heading-line:first-child {');
+line('color:#075C3D;');
+line('-webkit-text-fill-color:#075C3D;');
+line('.efips-login-brand-panel .efips-brand-heading-line:last-child {');
+line('color:#B31C31;');
+line('-webkit-text-fill-color:#B31C31;');
 line('.efips-login-brand-panel .efips-brand-subtitle {');
-for (const color of ['#CE1126','#00843D','#FFFFFF','#101820']) line(color);
-line('-webkit-background-clip:text;');
-line('background-clip:text;');
-line('-webkit-text-fill-color:transparent;');
-line('-webkit-text-stroke:.45px rgba(13,49,39,.57);');
+line('color:#162728;');
+line('-webkit-text-fill-color:#162728;');
+line('-webkit-text-stroke:0;');
+line('background:none;');
+line('.efips-login-brand-panel .efips-login-brand-copy::before {');
+line('background:rgba(248,252,249,.78);');
+assert.ok(!login.includes('-webkit-text-stroke:.45px rgba(13,49,39,.57);'));
+assert.ok(!login.includes('-webkit-text-fill-color:transparent;'));
+assert.ok(!login.includes('#FFFFFF 51%,#FFFFFF 68%'));
 
 line('.efips-brand-heading-line {');
 line('white-space:nowrap;');
