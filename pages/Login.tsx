@@ -539,6 +539,20 @@ export default function Login() {
         .efips-login-language button {min-height:37px;}
         .efips-login-brand-panel .efips-brand-heading {color:#075f4c;}
         .efips-login-brand-panel .efips-brand-subtitle {color:#355d57;}
+        /* UAE flag palette for the existing bilingual title and subtitle only.
+           Keep the original wording, line sizing, centering and login flow. */
+        .efips-login-brand-panel .efips-brand-heading-line,
+        .efips-login-brand-panel .efips-brand-subtitle {
+          background-image:linear-gradient(90deg,
+            #CE1126 0%,#CE1126 22%,
+            #00843D 22%,#00843D 51%,
+            #FFFFFF 51%,#FFFFFF 68%,
+            #101820 68%,#101820 100%);
+          -webkit-background-clip:text;
+          background-clip:text;
+          -webkit-text-fill-color:transparent;
+          -webkit-text-stroke:.45px rgba(13,49,39,.57);
+        }
         @media (min-width:1024px) {
           .efips-login-page {align-items:center;padding-block:60px 34px!important;padding-inline:26px!important;}
           .efips-login-frame {min-height:min(760px,calc(100dvh - 100px));}
