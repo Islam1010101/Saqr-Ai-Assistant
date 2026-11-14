@@ -71,7 +71,11 @@ const tokenDifference=(a:string,b:string):number=>{
   // Allow one clear typo in a long word; two edits only for very long words.
   const cap=Math.min(a.length,b.length)>=10?2:1;
   if(Math.min(a.length,b.length)<5)return 99;
-  return distance(a,b,cap);
+  // distance() returns cap+1 for every word farther than cap; that
+  // sentinel must NOT count as a legitimate second typo in phraseMatch().
+  // Otherwise "Death ... Salesman" falsely matches "Death ... series".
+  const edits=distance(a,b,cap);
+  return edits<=cap?edits:99;
 };
 // Conservative phonetic fallback for names written in a different script.
 // It works from each ACTUAL catalog entry, not a list of famous writers.
