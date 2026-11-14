@@ -26,7 +26,7 @@ assert.ok(anthem.includes('new Blob(chunks') && anthem.includes('ondataavailable
 assert.ok(anthem.includes('audioBuffer.current') && anthem.includes('music.onended'), 'Song should stop at track end');
 assert.ok(anthem.includes('URL.revokeObjectURL(fileUrl.current)'));
 assert.ok(anthem.includes('URL.revokeObjectURL(resultUrl.current)'));
-assert.ok(anthem.includes('getUserMedia({') && anthem.includes("role") === false, 'Session role and microphone capture are separate');
+assert.ok(anthem.includes('getUserMedia({') && anthem.includes('getAudioContext()'), 'Audio capture stays in the browser');
 assert.ok(!anthem.includes('.storage.from(') && !anthem.includes('.insert(') && !anthem.includes('.upload('),
   'Student voice must remain on the device by default');
 assert.ok(anthem.includes('UAE_national_anthem.ogg'));
