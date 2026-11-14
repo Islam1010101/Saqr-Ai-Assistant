@@ -26,6 +26,15 @@ assert.ok(finished.finished);
 assert.ok(!finished.content.includes('SAQR_LESSON_PART_DONE'));
 let plan=startSaqrTeacherLesson('تحضير درس عن استدامة المياه للصف السادس');
 assert.ok(saqrTeacherLessonPartInstructions(plan,'ar').includes('استدامة المياه'));
+const formalArabicLesson=saqrTeacherLessonPartInstructions(plan,'ar');
+const formalEnglishLesson=saqrTeacherLessonPartInstructions(plan,'en');
+assert.match(formalArabicLesson,/STRICT REGISTER SEPARATION/);
+assert.match(formalArabicLesson,/Use correct Modern Standard Arabic throughout the lesson text/);
+assert.match(formalArabicLesson,/without Emirati or Egyptian colloquial expressions/);
+assert.match(formalEnglishLesson,/professional academic English/);
+assert.match(formalEnglishLesson,/rather than mixing languages/);
+assert.match(saqrTeacherLessonContinueQuestion('ar'),/تبا/);
+assert.match(saqrTeacherLessonPrintQuestion('ar'),/تبا/);
 const interrupted=advanceSaqrTeacherLesson(plan,
  readSaqrTeacherLessonPart('## أهداف الدرس\nبدأنا بالأهداف ومخرجات التعلم ولم نكمل بعد'));
 assert.equal(interrupted.stage,0);
