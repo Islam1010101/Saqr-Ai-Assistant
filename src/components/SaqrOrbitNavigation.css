@@ -212,8 +212,10 @@
     linear-gradient(145deg,
       rgba(255,255,255,.38) 0%,rgba(var(--bubble-rgb),.15) 37%,
       rgba(var(--bubble-rgb),.29) 70%,rgba(255,255,255,.22) 100%);
-  backdrop-filter: blur(13px) saturate(160%);
-  -webkit-backdrop-filter: blur(13px) saturate(160%);
+  /* Gradient highlights provide the same glass color without sampling the
+     moving page behind every animated sphere on each scroll frame. */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   box-shadow:
     inset 0 9px 19px rgba(255,255,255,.78),
     inset 0 -15px 25px rgba(var(--bubble-rgb),.23),
