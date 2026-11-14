@@ -6,6 +6,11 @@ import {
 } from '../src/utils/saqrBookExpert.ts';
 import {findBookReference,pickVerifiedBook} from '../src/utils/saqrOpenLibrary.js';
 import type {SaqrBookMatch} from '../src/utils/saqrCatalogSearch.ts';
+import {isSaqrCatalogLookup} from '../src/utils/saqrCatalogReply.ts';
+import {isSaqrLibrarySearchIntent} from '../src/utils/saqrIntentRouter.ts';
+import {
+  isSaqrExplicitNamedCatalogRequest,resolveSaqrCatalogEntity,catalogBookMatchesEntity
+} from '../src/utils/saqrCatalogEntitySearch.ts';
 
 for(const [question,title] of [
   ['تعرف كتاب الأمير الصغير؟','الأمير الصغير'],
@@ -84,8 +89,36 @@ assert.equal(fetches,1);
 console.log('PASS: external bibliographic metadata is optionally verified via an allowlisted Open Library host, not EFIPS holdings');
 
 const page=readFileSync('pages/SmartSearchPage.tsx','utf8');
-assert.ok(page.includes("if(librarySearchIntent && preIntent==='none' && isSaqrCatalogLookup(userQuery) && (explicitCatalogSearch || !namedBookTitle))"),
-  'Broad catalog searches keep their old immediate response');
+// Check the actual exported routing rules, not one historical spelling of
+// a UI condition. The additional namedCatalogEntity path is deliberate.
+const catalogueFixture = {
+  physical: [{title:'A Forest Mystery',author:'Agatha Christie'}],
+  arabic: [{title:'جريمة في القصر',author:'أجاثا كريستي'}],
+  english: [{title:'The Moon Guide',author:'Another Author'}]
+};
+const namedAuthor = resolveSaqrCatalogEntity('روايات أجاثا كريستي',catalogueFixture);
+assert.ok(namedAuthor,'A real named author must resolve through the catalogue');
+assert.equal(namedAuthor.kind,'author');
+assert.ok(catalogBookMatchesEntity(catalogueFixture.arabic[0],namedAuthor));
+assert.ok(!catalogBookMatchesEntity(catalogueFixture.english[0],namedAuthor));
+assert.equal(isSaqrExplicitNamedCatalogRequest('روايات أجاثا كريستي'),true);
+for(const query of ['كتب عن البيئة','books about astronomy','ابحث عن كتب العلوم']){
+  assert.equal(isSaqrLibrarySearchIntent(query),true,'Broad school-book intent: '+query);
+  assert.equal(isSaqrCatalogLookup(query),true,'Broad catalogue answer: '+query);
+}
+for(const query of ['تحدي المؤلف الصغير','تحضير درس عن الكتب','اكتب قصة عن المكتبة']){
+  assert.equal(isSaqrLibrarySearchIntent(query),false,'Creative/lesson request must not enter catalogue: '+query);
+}
+assert.match(page,/const namedCatalogEntity\s*=\s*namedSearchRequest\s*\?/,
+  'Named catalogue entities must be gated by explicit search intent');
+assert.match(page,/const librarySearchIntent\s*=\s*isSaqrLibrarySearchIntent\(userQuery,\s*messages\)\s*\|\|\s*!!namedCatalogEntity/,
+  'Preserve broad book searches plus verified title/author lookups');
+assert.match(page,/if\s*\(librarySearchIntent\s*&&\s*preIntent\s*===\s*['"]none['"]\s*&&/,
+  'Keep direct catalogue response gated on genuine library intent');
+assert.match(page,/\(isSaqrCatalogLookup\(userQuery\)\s*\|\|\s*!!namedCatalogEntity\)/,
+  'Fast catalogue branch supports broad lookups and verified named entities');
+assert.match(page,/\(explicitCatalogSearch\s*\|\|\s*!namedBookTitle\)/,
+  'Keep explanatory named-book requests outside the direct catalogue fast path');
 assert.ok(page.includes('resolveSaqrBookFollowUp(userQuery, messages)'),
   'Natural short-turn book resolution is wired into the main chat page');
 assert.ok(page.includes("fetch('/api/chat?reference=book&title='+encodeURIComponent(namedBookTitle)"),
