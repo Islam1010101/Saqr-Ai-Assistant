@@ -12,6 +12,16 @@ line('<span className="efips-brand-heading-line">المكتبة الرقمية</
 line('<span className="efips-brand-heading-line">لصقر الإمارات</span>');
 line('<span className="efips-brand-heading-line">EFIPS</span>');
 line('<span className="efips-brand-heading-line">DIGITAL LIBRARY</span>');
+/* Both language variants share the exact same original line and subtitle
+   classes; only their paint uses the four official UAE flag colors. */
+line('.efips-login-brand-panel .efips-brand-heading-line,');
+line('.efips-login-brand-panel .efips-brand-subtitle {');
+for (const color of ['#CE1126','#00843D','#FFFFFF','#101820']) line(color);
+line('-webkit-background-clip:text;');
+line('background-clip:text;');
+line('-webkit-text-fill-color:transparent;');
+line('-webkit-text-stroke:.45px rgba(13,49,39,.57);');
+
 line('.efips-brand-heading-line {');
 line('white-space:nowrap;');
 line('line-height:1.67;');
