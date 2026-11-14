@@ -497,7 +497,7 @@ export default function TutorialPage() {
             </section>
           </HintTarget>
 
-          <HintTarget id="news-banner" title={label('جديدنا — يظهر فورًا', 'What\'s New — visible immediately')} description={label('يعرض شريط جديدنا آخر إضافات المكتبة منذ ظهور الصفحة، دون انتظار دخول النص من خارج الشاشة. هذه نسخة توضيحية لا تجلب أخبارًا حية.', 'What\'s New shows library updates as soon as the page appears, without waiting for offscreen scrolling text. This is an illustrative preview, not a live feed.')} interactive={false} {...hintState}>
+          <HintTarget id="news-banner" title={label('جديدنا — يظهر فورًا', 'What\'s New — visible immediately')} description={label('يعرض شريط جديدنا خدمات المكتبة والتحديات والألعاب وآخر إضافات صقر بالعربية والإنجليزية؛ ويمكن إيقاف الشريط مؤقتًا لقراءة العبارات. هذه نسخة توضيحية دون بيانات حية.', 'What\'s New showcases Saqr services, games, challenges, and recent additions in Arabic and English. You can pause the ribbon to read. This is an illustrative preview, not a live feed.')} interactive={false} {...hintState}>
             <div className="tutorial-news-ribbon relative z-30 mx-auto flex h-14 w-full max-w-5xl items-center overflow-hidden rounded-full border-4 border-amber-300 bg-white shadow-lg dark:border-amber-700 dark:bg-slate-800 md:h-16">
               <div className="relative z-20 flex h-full shrink-0 items-center gap-2 bg-amber-400 px-5 text-xs font-black uppercase text-slate-900 md:px-8 md:text-sm">
                 <span className="h-3 w-3 animate-ping rounded-full bg-white" />
@@ -505,7 +505,7 @@ export default function TutorialPage() {
               </div>
               <div className="flex h-full flex-1 items-center overflow-hidden bg-amber-50 dark:bg-slate-800">
                 <div className="min-w-0 px-4 text-xs font-bold leading-6 text-slate-800 dark:text-slate-100 md:text-sm">
-                  {label('جديدنا: ألوان مبهجة للبوابة · كتب جديدة في دليل المكتبة · بين السطور حسب نوع الحساب ولغة الواجهة · تحديات صقر للطلاب · راجع استعاراتك وقائمة قراءتك', "What’s New: bright portal colors · new physical books in the catalogue · role- and language-specific reading adventures · student Saqr Challenges · borrowing and reading lists")}
+                  {label('صوت الاتحاد وتسجيل MP3 · خمس مغامرات لصقر وهوية وطن · بين السطور · رتّب المكتبة · المؤلف الصغير · ترشيحات تناسب لغتك · بودكاست صقر · وكل خدمات مكتبتنا!', "Voice of the Union MP3 · five UAE heritage quests · Between the Lines · Organize the Library · Little Author · reading picks in your language · Saqr Podcast · and more!")}
                 </div>
               </div>
             </div>
