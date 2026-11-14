@@ -204,8 +204,8 @@ const CreatorsPortalPage: React.FC = () => {
         <div dir={dir} className="creators-portal creator-gateway-v2 w-full min-h-[100dvh] flex flex-col items-center bg-[#F8FAF9] dark:bg-black font-sans relative overflow-x-hidden text-slate-900 dark:text-white transition-colors duration-500 pb-16">
             
             <div className="absolute inset-0 w-full h-full overflow-hidden z-0 pointer-events-none opacity-60 dark:opacity-30">
-               <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-400/20 rounded-full blur-[100px] animate-blob"></div>
-               <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-amber-400/15 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
+               <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-400/20 rounded-full blur-[100px]"></div>
+               <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-amber-400/15 rounded-full blur-[100px] animation-delay-2000"></div>
             </div>
 
             <div className="creator-gateway-shell w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 antialiased">
