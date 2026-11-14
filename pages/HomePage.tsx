@@ -228,10 +228,10 @@ const RevealSection: React.FC<{ children: React.ReactNode, delay?: number }> = (
     return (
         <div
             ref={sectionRef}
-            className={`transition-all duration-700 ease-in-out transform ${
-                isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-10 scale-95'
+            className={`transition-[opacity,transform] duration-300 ease-out transform ${
+                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
             }`}
-            style={{ transitionDelay: `${delay}ms` }}
+            style={{ transitionDelay: `${Math.min(delay, 80)}ms` }}
         >
             {children}
         </div>
