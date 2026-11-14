@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {bookData} from '../api/bookData.ts';
 import {searchSaqrBookCatalog} from '../src/utils/saqrCatalogSearch.ts';
+import {resolveSaqrCatalogEntity} from '../src/utils/saqrCatalogEntitySearch.ts';
 import {isPhysicalCatalogMetadataNote,isPhysicalCatalogPlaceholder} from '../src/utils/physicalCatalogSummaries20261113.ts';
 
 const added=[
@@ -32,6 +33,7 @@ for(const title of added){
  assert.ok(!isPhysicalCatalogPlaceholder(item.summary),'New records must not use Coming Soon placeholders');
  assert.ok(item.summary.length>=65,'New record has a meaningful description: '+title);
  const results=searchSaqrBookCatalog(title,{physical:bookData,arabic:[],english:[]},20);
+ if(title==='Death Of a Salesman') console.error('DEBUG DEATH SALESMAN',JSON.stringify({entity:resolveSaqrCatalogEntity(title,{physical:bookData,arabic:[],english:[]}),titles:results.map(x=>x.title)}));
  assert.ok(results.some(result=>normalize(result.title)===normalize(title)),
   'Saqr catalog can locate new book: '+title);
 }
