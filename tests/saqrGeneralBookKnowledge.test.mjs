@@ -5,7 +5,8 @@ import {createServer} from 'vite';
 const page=readFileSync('pages/SmartSearchPage.tsx','utf8');
 assert.ok(page.includes("const generalBookContext=librarySearchIntent && learningIntent==='none'"));
 assert.ok(page.includes("saqrGeneralBookKnowledgeContext(namedBookTitle?namedBookHoldings:foundBooks,"));
-assert.ok(page.includes("const librarySearchIntent = isSaqrLibrarySearchIntent(userQuery, messages)"));
+assert.match(page,/const librarySearchIntent\s*=\s*!activeTeacherLesson\s*&&\s*\(isSaqrLibrarySearchIntent\(userQuery,\s*messages\)\s*\|\|\s*!!namedCatalogEntity\)/,
+  'Catalog and bilingual book knowledge must not intercept teacher lessons or Little Author');
 assert.ok(page.includes("ACTIVE LITTLE AUTHOR CHALLENGE: NO catalogue searches"));
 assert.ok(page.includes("const response = await fetch('/api/chat'"));
 
