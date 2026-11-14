@@ -343,7 +343,7 @@ export default function NationalAnthemChallengePage() {
                 {t('استخدام ملف موسيقى آخر من الجهاز','Use a different music file')}
               </label>
               <input id="anthem-backing-file" type="file" accept="audio/*,.mp3,.ogg,.wav,.m4a,.aac" className="sr-only"
-                disabled={busyRecording || busyProcessing} onChange={event => {
+                disabled={busyRecording || status === 'encoding'} onChange={event => {
                   void chooseMusic(event.target.files?.[0]);
                   event.currentTarget.value = '';
                 }}/>
