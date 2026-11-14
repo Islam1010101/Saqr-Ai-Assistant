@@ -25,5 +25,6 @@ const summary={
  identitySubsetOfPhysical:nationalIdentityBooks.every(b=>bookData.some(row=>row.id===b.id))
 };
 if(summary.catalogTotal!==summary.physical+summary.digitalTotal || !summary.identitySubsetOfPhysical)throw Error('Catalog count integrity failed');
-assert.equal(summary.digitalUniqueIds.english,0,'Duplicate English catalog IDs found');
+assert.equal(duplicatedIds(ENGLISH_LIBRARY_DATABASE),0,'Duplicate English catalog IDs found');
+assert.equal(summary.digitalUniqueIds.english,english,'All 73 English book IDs must remain unique');
 console.log('EFIPS_CATALOG_AUDIT_RESULT='+JSON.stringify(summary));
