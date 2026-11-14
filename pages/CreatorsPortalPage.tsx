@@ -54,10 +54,10 @@ const RevealOnScroll = ({ children, delay = 0 }: { children: React.ReactNode, de
     return (
         <div
             ref={elementRef}
-            className={`transition-all duration-700 ease-out transform w-full ${
-                isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-12 scale-95 pointer-events-none'
+            className={`transition-[opacity,transform] duration-300 ease-out transform w-full ${
+                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3 pointer-events-none'
             }`}
-            style={{ transitionDelay: `${delay}ms` }}
+            style={{ transitionDelay: `${Math.min(delay, 80)}ms` }}
         >
             {children}
         </div>
@@ -140,17 +140,25 @@ const CreatorsPortalPage: React.FC = () => {
     const lastScrollY = useRef(0);
 
     useEffect(() => {
-        const handleScroll = () => {
-            const currentScrollY = window.scrollY;
-            if (currentScrollY > lastScrollY.current && currentScrollY > 150) {
-                setIsVisible(false);
-            } else {
-                setIsVisible(true);
-            }
+        lastScrollY.current = Math.max(0, window.scrollY);
+        let scrollFrame: number | null = null;
+        const updateVisibility = () => {
+            scrollFrame = null;
+            const currentScrollY = Math.max(0, window.scrollY);
+            const delta = currentScrollY - lastScrollY.current;
+            if (Math.abs(delta) < 18 && currentScrollY > 150) return;
+            const shouldShow = currentScrollY <= 150 || delta < 0;
+            setIsVisible(visible => visible === shouldShow ? visible : shouldShow);
             lastScrollY.current = currentScrollY;
         };
+        const handleScroll = () => {
+            if (scrollFrame === null) scrollFrame = window.requestAnimationFrame(updateVisibility);
+        };
         window.addEventListener('scroll', handleScroll, { passive: true });
-        return () => window.removeEventListener('scroll', handleScroll);
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            if (scrollFrame !== null) window.cancelAnimationFrame(scrollFrame);
+        };
     }, []);
 
     const studentWorks = [
