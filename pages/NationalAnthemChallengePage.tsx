@@ -5,7 +5,8 @@ import { canAccessNationalIdentity } from '../src/utils/nationalIdentityAccess';
 import { recordingToMp3 } from '../src/utils/podcastMp3';
 import './nationalHeritageTheme.css';
 
-const COMMONS_AUDIO = 'https://upload.wikimedia.org/wikipedia/commons/9/92/UAE_national_anthem.ogg';
+const COMMONS_AUDIO = 'https://upload.wikimedia.org/wikipedia/commons/transcoded/9/92/UAE_national_anthem.ogg/UAE_national_anthem.ogg.mp3';
+const COMMONS_OGG_FALLBACK = 'https://upload.wikimedia.org/wikipedia/commons/9/92/UAE_national_anthem.ogg';
 const COMMONS_SOURCE = 'https://commons.wikimedia.org/wiki/File:UAE_national_anthem.ogg';
 const OFFICIAL_ANTHEM = 'https://www.protocol.dubai.ae/ar/protocols-listing/protocols/translation-of-uae-national-anthem/';
 const MAX_SECONDS = 150;
@@ -122,25 +123,30 @@ export default function NationalAnthemChallengePage() {
     mounted.current = true;
     const version = ++loadVersion.current;
     if (allowed) {
-      fetch(COMMONS_AUDIO, { mode: 'cors', cache: 'force-cache' })
-        .then(async response => {
-          if (!response.ok) throw new Error('DOWNLOAD_FAILED');
-          const bytes = await response.arrayBuffer();
-          const decoded = await prepareBuffer(bytes);
-          if (!mounted.current || loadVersion.current !== version) return;
-          audioBuffer.current = decoded;
-          setTrackSeconds(decoded.duration);
-          setStatus('ready');
-        })
-        .catch(() => {
-          if (!mounted.current || loadVersion.current !== version) return;
-          audioBuffer.current = null;
-          setStatus('error');
-          setErrorMessage(t(
-            'تعذر تحميل المقطوعة تلقائيًا. يمكنك اختيار ملف موسيقى النشيد من جهازك.',
-            'Could not load the instrumental track. Choose an anthem music file from your device.'
-          ));
-        });
+      // MP3 transcode works on Safari/iOS; OGG is a fallback for other browsers.
+      const load = async () => {
+        for (const url of [COMMONS_AUDIO, COMMONS_OGG_FALLBACK]) {
+          try {
+            const response = await fetch(url, { mode: 'cors', cache: 'force-cache' });
+            if (!response.ok) continue;
+            const decoded = await prepareBuffer(await response.arrayBuffer());
+            if (!mounted.current || loadVersion.current !== version) return;
+            audioBuffer.current = decoded;
+            setPreviewUrl(url);
+            setTrackSeconds(decoded.duration);
+            setStatus('ready');
+            return;
+          } catch { /* Try the second Commons format. */ }
+        }
+        if (!mounted.current || loadVersion.current !== version) return;
+        audioBuffer.current = null;
+        setStatus('error');
+        setErrorMessage(t(
+          'تعذر تحميل المقطوعة تلقائيًا. يمكنك اختيار ملف موسيقى النشيد من جهازك.',
+          'Could not load the instrumental track. Choose an anthem music file from your device.'
+        ));
+      };
+      void load();
     }
     return () => {
       mounted.current = false;
