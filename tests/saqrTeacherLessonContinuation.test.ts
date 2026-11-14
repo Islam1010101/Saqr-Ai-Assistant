@@ -39,7 +39,7 @@ for(let i=0;i<SAQR_TEACHER_LESSON_PARTS.length;i++){
 }
 assert.equal(plan.parts.length,6);
 assert.ok(saqrTeacherLessonContinueQuestion('ar').includes('أكمل'));
-assert.ok(saqrTeacherLessonPrintQuestion('ar').includes('الطباعة'));
+assert.ok(saqrTeacherLessonPrintQuestion('ar').includes('للطباعة'));
 const page=readFileSync('pages/SmartSearchPage.tsx','utf8');
 assert.ok(page.includes('lessonPart: Boolean(activeTeacherLesson)'));
 assert.ok(page.includes('const teacherPartContext = activeTeacherLesson'));
