@@ -13,7 +13,8 @@ export type SaqrTeacherLessonSession={
 export const startSaqrTeacherLesson=(request:string):SaqrTeacherLessonSession=>
  ({request:request.trim(),stage:0,attempts:0,parts:[],done:false,lastMessageCount:0});
 const normalizeConsent=(value:string):string=>String(value||'').normalize('NFKC').toLowerCase()
- .replace(/[\u064b-\u065f\u0670\u0640]/g,'').replace(/[.,،؟?!]+/g,' ').replace(/\s+/g,' ').trim();
+ .replace(/[\u064b-\u065f\u0670\u0640]/g,'').replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه')
+ .replace(/[.,،؟?!]+/g,' ').replace(/\s+/g,' ').trim();
 export const isSaqrLessonContinueConsent=(input:string):boolean=>
  /^(?:نعم|ايوه|ايوا|اه|تمام|اكمل|كمل|واصل|تابع|yes|continue|go on|next|ok|okay|sure)(?: (?:اكمل|كمل|التحضير|باقي التحضير|الباقي|من فضلك|please))*$/iu
  .test(normalizeConsent(input));
