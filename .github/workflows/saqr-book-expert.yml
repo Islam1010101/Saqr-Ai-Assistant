@@ -32,6 +32,8 @@ on:
       - 'api/chat.ts'
       - 'src/utils/saqrOpenLibrary.js'
       - 'tests/saqrBookExpert.test.ts'
+      - 'src/utils/saqrTeacherLessonContinuation.ts'
+      - 'tests/saqrTeacherLessonContinuation.test.ts'
       - 'tests/resolveTsExtensionless.mjs'
       - 'tests/catalogAuditCounts.test.ts'
       - '.github/workflows/saqr-book-expert.yml'
@@ -68,6 +70,8 @@ on:
       - 'api/chat.ts'
       - 'src/utils/saqrOpenLibrary.js'
       - 'tests/saqrBookExpert.test.ts'
+      - 'src/utils/saqrTeacherLessonContinuation.ts'
+      - 'tests/saqrTeacherLessonContinuation.test.ts'
       - 'tests/resolveTsExtensionless.mjs'
       - 'tests/catalogAuditCounts.test.ts'
       - '.github/workflows/saqr-book-expert.yml'
@@ -81,6 +85,7 @@ jobs:
           node-version: '22.16.0'
           cache: npm
       - run: npm install --no-package-lock --no-audit --no-fund
+      - run: node --experimental-strip-types tests/saqrTeacherLessonContinuation.test.ts
       - run: node --experimental-strip-types tests/saqrBookExpert.test.ts
       - run: node --experimental-strip-types tests/saqrFollowUp.test.ts
       - run: node --experimental-strip-types tests/saqrNaturalDialogue.test.ts
