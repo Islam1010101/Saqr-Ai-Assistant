@@ -42,4 +42,27 @@ assert.ok(digital.includes('.efips-digital-ambient .animate-blob { animation: no
 assert.ok(digital.includes('bg-emerald-400/20') && digital.includes('bg-sky-400/20'),
   'Preserve original digital-library background colors');
 assert.ok(app.includes('<Routes>') && app.includes('<Route path="/home"'), 'Routing stays intact');
+const search = readFileSync('pages/SearchPage.tsx', 'utf8');
+const creators = readFileSync('pages/CreatorsPortalPage.tsx', 'utf8');
+const orbit = readFileSync('src/components/SaqrOrbitNavigation.css', 'utf8');
+const tutorialVisual = readFileSync('src/components/EFIPSGlassVisualTheme.css', 'utf8');
+assert.ok(app.includes('Math.abs(currentY - previousY) < 18'),
+  'Navbar hides/shows after a meaningful scroll direction change, not trackpad jitter');
+assert.ok(app.includes('.tutorial-topbar') && app.includes('backdrop-filter: none !important'),
+  'Desktop and mobile fixed navigation surfaces do not re-blur every scroll frame');
+assert.ok(orbit.includes('backdrop-filter: none;') && !orbit.includes('backdrop-filter: blur(13px)'),
+  'Animated orbit bubbles keep gradients without live backdrop blur');
+assert.ok(tutorialVisual.includes('backdrop-filter: none;'),
+  'Tour bubbles avoid live blur while preserving their glass fills');
+assert.ok(search.includes('window.requestAnimationFrame(updateSearchVisibility)') &&
+  search.includes('window.cancelAnimationFrame(scrollFrame)') &&
+  search.includes('setShowSearch(visible => visible === shouldShow ? visible : shouldShow)'),
+  'Catalog scroll controls throttle and clean up frames without redundant React updates');
+assert.ok(creators.includes('window.requestAnimationFrame(updateVisibility)') &&
+  creators.includes('window.cancelAnimationFrame(scrollFrame)') &&
+  creators.includes('setIsVisible(visible => visible === shouldShow ? visible : shouldShow)'),
+  'Creators navigation uses the same stable, passive scroll behavior');
+assert.ok(home.includes('Math.min(delay, 80)') && home.includes('transition-[opacity,transform] duration-300'),
+  'Homepage reveal keeps motion short and avoids heavy scaling');
+
 console.log('PASS: scroll event throttling, countdown isolation, once-only reveals, Safari compositing and preserved features');
