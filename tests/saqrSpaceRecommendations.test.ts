@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {searchSaqrBookCatalog} from '../src/utils/saqrCatalogSearch.ts';
+import {resolveSaqrCatalogEntity} from '../src/utils/saqrCatalogEntitySearch.ts';
 import {isSaqrCatalogLookup,isSaqrRecommendationRequest,renderSaqrCatalogAnswer} from '../src/utils/saqrCatalogReply.ts';
 
 for(const question of ['رشحلي كتاب عن الفضاء','اقترح كتاب عن الفضاء','ممكن ترشحلي كتاب عن الفضاء؟','عايز رواية خيالية عن الفضاء','أبغي قصة خيالية عن النجوم','Recommend a book about space','Suggest some space books']){
@@ -56,6 +57,7 @@ const fictionalSpace=searchSaqrBookCatalog('رشحلي رواية خيال عن 
 assert.ok(fictionalSpace.some(b=>b.title==='أسطورة فى جانب النجوم'),
   'An explicit fantasy/story request may include the novel');
 const actualGenreRequest=searchSaqrBookCatalog('عايز رواية خيالية عن الفضاء',catalogs);
+console.error('DEBUG SPACE GENRE', JSON.stringify({titles:actualGenreRequest.map(b=>b.title), namedEntity:resolveSaqrCatalogEntity('عايز رواية خيالية عن الفضاء',catalogs)}));
 assert.ok(actualGenreRequest.some(b=>b.title==='أسطورة فى جانب النجوم'),
   'Genre requests should discover recorded star-themed fiction');
 assert.ok(!actualGenreRequest.some(b=>b.title==='Astronomy in Color'),
