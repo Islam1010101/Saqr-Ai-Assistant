@@ -379,7 +379,7 @@ const NationalIdentityPage: React.FC = () => {
           <div><p className="text-xs font-black text-emerald-700 dark:text-emerald-400">{tr(l('تحديات الهوية الوطنية','NATIONAL IDENTITY CHALLENGES'))}</p><h2 className="text-xl sm:text-2xl font-black mt-1">{tr(l('اختر رحلتك','Choose your journey'))}</h2></div>
           <div className="rounded-full bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 px-4 py-2 text-xs font-black text-amber-800 dark:text-amber-200">{totalCompleted}/{sourcedEmirates.length+dictionaryActivities.length+sourcedCases.length} {tr(l('مهمة مكتملة','missions completed'))}</div>
         </div>
-        <div className="nh-challenges nh-v2-grid grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5">
+        <div className="nh-challenges nh-v2-grid grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
           {modules.map(m=><button type="button" key={m.id} onClick={()=>go(m.id)} className="nh-challenge-card group overflow-hidden text-start rounded-[1.8rem] bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 shadow-lg hover:shadow-2xl hover:-translate-y-1 hover:border-emerald-400 dark:hover:border-emerald-700 transition-all focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-500">
             <div className={'nh-card-top nh-card-top-'+m.id+' relative bg-gradient-to-br '+m.color+' p-6 text-white overflow-hidden'}>
               <div className="absolute -end-5 -top-6 h-36 w-36 border-[17px] rounded-full border-white/10"/>
