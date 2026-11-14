@@ -3433,7 +3433,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const apiKey = process.env.GROQ_API_KEY?.trim();
 
   try {
-    const { messages = [], locale = 'en', catalogueIntent } = req.body || {};
+    const { messages = [], locale = 'en', catalogueIntent, lessonPart } = req.body || {};
+    // Teacher-plan parts get room to finish one section; normal Saqr chat is unchanged.
+    const responseTokenLimit = lessonPart === true ? 900 : 500;
     const userMsg = messages[messages.length - 1]?.content || '';
 
     // The server must not inject catalogue data into unrelated educational,
@@ -3514,7 +3516,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 messages: saqrMessages,
                 temperature: 0.7,
                 chat_template_kwargs: { enable_thinking: false },
-                max_completion_tokens: 500
+                max_completion_tokens: responseTokenLimit
               }),
               signal: AbortSignal.timeout(18000)
             }
@@ -3536,7 +3538,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             model: 'openai/gpt-oss-120b',
             messages: saqrMessages,
             temperature: 0.7,
-            max_tokens: 500
+            max_tokens: responseTokenLimit
           });
           reply = (completion.choices[0]?.message?.content || '').trim();
         }
