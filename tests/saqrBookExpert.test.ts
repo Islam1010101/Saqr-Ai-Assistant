@@ -111,7 +111,7 @@ for(const query of ['تحدي المؤلف الصغير','تحضير درس عن
 }
 assert.match(page,/const namedCatalogEntity\s*=\s*namedSearchRequest\s*\?/,
   'Named catalogue entities must be gated by explicit search intent');
-assert.match(page,/const librarySearchIntent\s*=\s*isSaqrLibrarySearchIntent\(userQuery,\s*messages\)\s*\|\|\s*!!namedCatalogEntity/,
+assert.match(page,/const librarySearchIntent\s*=\s*!activeTeacherLesson\s*&&\s*\(isSaqrLibrarySearchIntent\(userQuery,\s*messages\)\s*\|\|\s*!!namedCatalogEntity\)/,
   'Preserve broad book searches plus verified title/author lookups');
 assert.match(page,/if\s*\(librarySearchIntent\s*&&\s*preIntent\s*===\s*['"]none['"]\s*&&/,
   'Keep direct catalogue response gated on genuine library intent');
