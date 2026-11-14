@@ -5,6 +5,9 @@ const app = readFileSync('App.tsx', 'utf8');
 const landing = readFileSync('pages/NationalIdentityPage.tsx', 'utf8');
 const anthem = readFileSync('pages/NationalAnthemChallengePage.tsx', 'utf8');
 const convert = readFileSync('src/utils/podcastMp3.ts', 'utf8');
+const anthemStyles = readFileSync('pages/nationalAnthemChallenge.css', 'utf8');
+const identityStyles = readFileSync('pages/nationalIdentityLanding.css', 'utf8');
+
 const permissions = readFileSync('src/utils/nationalIdentityAccess.ts', 'utf8');
 
 assert.ok(app.includes('path="/saqr-national-identity/anthem"'));
@@ -33,3 +36,16 @@ assert.ok(anthem.includes('UAE_national_anthem.ogg'));
 assert.ok(anthem.includes('File:UAE_national_anthem.ogg'));
 assert.ok(anthem.includes('https://www.protocol.dubai.ae/'));
 console.log('PASS: UAE anthem route, microphone, mixing, privacy, and true MP3 download');
+
+assert.ok(anthem.includes("import './nationalIdentityLanding.css'"), 'Reuse National Identity visual language');
+assert.ok(anthem.includes("import './nationalAnthemChallenge.css'"), 'Apply scoped responsive Singer layout');
+assert.ok(anthem.includes('className="national-heritage nh-v2 nh-anthem-page'), 'Use national identity page layout');
+assert.ok(anthem.includes('className="nh-hero nh-v2-hero nh-anthem-hero'), 'Reuse National Identity emerald hero');
+assert.ok(anthem.includes('src="/SAQR%20Singer.png"'), 'Show existing SAQR Singer artwork as hero');
+assert.ok(anthem.includes('nh-anthem-singer'), 'Apply responsive artwork fit');
+assert.ok(anthemStyles.includes('.nh-anthem-singer') && anthemStyles.includes('@media(max-width:660px)'));
+assert.ok(identityStyles.includes('.nh-v2-hero-grid'), 'Shared layout must exist');
+assert.ok(anthem.includes("t('مصادر النشيد','Anthem sources')"), 'Rename source panel after removal of privacy text');
+assert.ok(!anthem.includes('الصوت يُسجَّل ويُخلَط محليًا في متصفحك.'), 'Hide requested Arabic privacy note');
+assert.ok(!anthem.includes('Your voice is recorded and mixed locally in your browser.'), 'Hide requested English privacy note');
+assert.ok(anthem.includes('recordingToMp3(captured)'), 'The recording/download functionality must stay intact');
