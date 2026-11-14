@@ -97,4 +97,4 @@ const quest=readFileSync('pages/SaqrReadingQuestPage.tsx','utf8');
 assert.ok(quest.includes("session.role==='student'?'student':'teacher'"),'Admin must see teacher books instead of student books');
 assert.ok(quest.includes("session.role==='admin'?'مدير النظام'"),'Admin needs distinct greeting');
 assert.ok(orbit.includes("to: '/smart-search'") && orbit.includes("tint: '91, 195, 251'"), 'Ask Saqr remains visible with an identifiable glass sphere');
-assert.ok(home.includes('<SaqrOrbitNavigation') && orbitStyles.includes('backdrop-filter: blur(13px) saturate(160%)'), 'Homepage uses the responsive glass orbit instead of duplicated navigation cards');
+assert.ok(home.includes('<SaqrOrbitNavigation') && orbitStyles.includes('backdrop-filter: none;'), 'Homepage uses the responsive orbit with the current cross-browser scroll optimization');

@@ -33,6 +33,7 @@ import FlagDayChallenge from './pages/FlagDayChallenge'; // Prepared for future 
 import NationalIdentityPage from './pages/NationalIdentityPage';
 import NationalIdentityBooksPage from './pages/NationalIdentityBooksPage';
 import NationalIdentityDigitalBooksPage from './pages/NationalIdentityDigitalBooksPage';
+import { canAccessNationalIdentity } from './src/utils/nationalIdentityAccess';
 
 export type Locale = 'en' | 'ar';
 
@@ -69,13 +70,12 @@ const ProtectedRoute: React.FC<{ children: ReactNode }> = ({ children }) => {
   return <>{children}</>;
 };
 
-// National identity activities are open to student and administrator accounts.
+// National identity activities remain for students/admins, plus teacher HR040.
 const NationalIdentityRoute: React.FC<{ children: ReactNode }> = ({ children }) => {
   try {
     const account = JSON.parse(localStorage.getItem('current_user') || 'null');
     const role = localStorage.getItem('user_type');
-    if ((role === 'student' && account?.student_id) ||
-        (role === 'admin' && account?.teacher_id)) {
+    if (canAccessNationalIdentity(role, account)) {
       return <>{children}</>;
     }
   } catch {
@@ -233,10 +233,18 @@ const Header: React.FC = () => {
   const lastScrollYRef = useRef(0);
   const scrollFrameRef = useRef<number | null>(null);
   const [userRole, setUserRole] = useState<'student' | 'teacher' | 'admin' | null>(null);
+  const [identityAllowed, setIdentityAllowed] = useState(false);
 
   useEffect(() => {
-    const role = localStorage.getItem('user_type') as 'student' | 'teacher' | 'admin' | null;
-    setUserRole(role);
+    try {
+      const role = localStorage.getItem('user_type') as 'student' | 'teacher' | 'admin' | null;
+      const profile = JSON.parse(localStorage.getItem('current_user') || 'null');
+      setUserRole(role);
+      setIdentityAllowed(canAccessNationalIdentity(role, profile));
+    } catch {
+      setUserRole(null);
+      setIdentityAllowed(false);
+    }
   }, [location.pathname]);
 
   useEffect(() => {
@@ -285,7 +293,7 @@ const Header: React.FC = () => {
     { path: '/admin-dashboard', label: locale === 'en' ? 'Admin' : 'الإدارة', hint: 'Admin', color: 'bg-rose-600', roles: ['admin'] },
   ];
 
-  const allowedLinks = allLinks.filter(link => link.path === '/saqr-national-identity' ? (userRole === 'student' || userRole === 'admin') : !userRole || link.roles.includes(userRole));
+  const allowedLinks = allLinks.filter(link => link.path === '/saqr-national-identity' ? identityAllowed : !userRole || link.roles.includes(userRole));
 
   return (
     <header
