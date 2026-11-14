@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 520" width="520" height="520" role="img" aria-labelledby="title">
+<title id="title">Cognia Accredited</title>
+<defs>
+  <path id="upper-arc" d="M 61,260 A 199,199 0 0 1 459,260"/>
+  <path id="lower-arc" d="M 60,287 A 200,200 0 0 0 460,287"/>
+</defs>
+<circle cx="260" cy="260" r="249" fill="none" stroke="#292724" stroke-width="6"/>
+<text fill="#292724" font-family="Arial, Helvetica, sans-serif" font-size="39" font-weight="700" letter-spacing="5"><textPath href="#upper-arc" startOffset="50%" text-anchor="middle">ACCREDITED</textPath></text>
+<g fill="#292724" font-family="Arial, Helvetica, sans-serif" font-weight="800">
+  <text x="260" y="304" text-anchor="middle" font-size="100" letter-spacing="-6">cognia</text>
+</g>
+<circle cx="119" cy="257" r="8.5" fill="#ff5b55"/>
+<text fill="#292724" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="600" letter-spacing="3"><textPath href="#lower-arc" startOffset="50%" text-anchor="middle">NCA CASI  |  NWAC  |  SACS CASI</textPath></text>
+</svg>
