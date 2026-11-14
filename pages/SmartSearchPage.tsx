@@ -28,6 +28,7 @@ import { resolveSaqrBookFollowUp, saqrNaturalDialogueInstructions } from '../src
 import { isSaqrLibrarySearchIntent, isSaqrCreativeTurn } from '../src/utils/saqrIntentRouter';
 import { getReadingInterviewStep, renderReadingInterviewSuggestions } from '../src/utils/saqrReadingConsultation';
 import { saqrProofreadingInstructions, isSaqrLessonPreparationRequest, isSaqrExplicitProofreadingRequest } from '../src/utils/saqrProofreading';
+import { SAQR_TEACHER_LESSON_PARTS, type SaqrTeacherLessonSession, startSaqrTeacherLesson, isSaqrLessonContinueConsent, isSaqrLessonPrintConsent, saqrTeacherLessonPartInstructions, readSaqrTeacherLessonPart, advanceSaqrTeacherLesson, saqrTeacherLessonContinueQuestion, saqrTeacherLessonPrintQuestion } from '../src/utils/saqrTeacherLessonContinuation';
 
 // --- بروتوكول عقل صقر ---
 const SAQR_ELITE_PROMPT = `
@@ -210,6 +211,7 @@ const SmartSearchPage: React.FC = () => {
   const t = (key: string) => localization[locale]?.[key] ?? localization.ar[key] ?? key;
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [teacherLesson, setTeacherLesson] = useState<SaqrTeacherLessonSession|null>(null);
   const [researchAnswer,setResearchAnswer]=useState<string>('');
   const [researchReady,setResearchReady]=useState(false);
   const [input, setInput] = useState('');
@@ -263,6 +265,7 @@ const SmartSearchPage: React.FC = () => {
         : "Welcome! I'm 'Saqr', your AI Librarian. Shall we co-author a story today, or are you looking for a specific book?";
     }
     setMessages([{ role: 'assistant', content: welcomeMessage }]);
+    setTeacherLesson(null);
   }, [locale]);
 
   useEffect(() => {
@@ -399,25 +402,47 @@ const SmartSearchPage: React.FC = () => {
     composerInputRef.current?.focus();
   };
 
-  const handleSendMessage = async () => {
-    if (input.trim() === '' || isLoading) return;
-    const userQuery = input.trim();
+  const handleSendMessage = async (quickText?: string) => {
+    if (!(quickText ?? input).trim() || isLoading) return;
+    const userQuery = (quickText ?? input).trim();
+    const teacherAccount = ['teacher','admin'].includes(localStorage.getItem('user_type') || '');
+    const startingTeacherLesson = teacherAccount && isSaqrLessonPreparationRequest(userQuery);
+    const resumingTeacherLesson = teacherAccount && !startingTeacherLesson &&
+      Boolean(teacherLesson && !teacherLesson.done && isSaqrLessonContinueConsent(userQuery));
+    const printingTeacherLesson = teacherAccount && Boolean(
+      teacherLesson?.done && isSaqrLessonPrintConsent(userQuery)
+    );
+    if(printingTeacherLesson && teacherLesson){
+      setMessages(prev=>[...prev,{role:'user',content:userQuery},{
+        role:'assistant',content:locale==='ar'
+          ? 'تفضل، فتحت لك التحضير كاملًا للطباعة.'
+          : 'The complete lesson plan is ready in your print dialog.'
+      }]);
+      setInput('');
+      window.print();
+      return;
+    }
+    const activeTeacherLesson:SaqrTeacherLessonSession|null = startingTeacherLesson
+      ? startSaqrTeacherLesson(userQuery)
+      : resumingTeacherLesson ? teacherLesson : null;
+    // A new unrelated question leaves this lesson; it must never hijack chat.
+    if(!activeTeacherLesson && teacherLesson)setTeacherLesson(null);
     // A named author/title/series may be requested without the word "book".
     // Resolve it against actual catalog records, not a hard-coded title list.
     // Educational, creative and lesson-planning requests stay on their own route.
-    const namedSearchRequest = isSaqrExplicitNamedCatalogRequest(userQuery) &&
+    const namedSearchRequest = !activeTeacherLesson && isSaqrExplicitNamedCatalogRequest(userQuery) &&
       !/(?:تحضير|درس|ورقة\s*عمل|ورقه\s*عمل|تحدي|المؤلف\s*الصغير|worksheet|lesson|homework|quiz|story\s*challenge)/i.test(userQuery);
     const namedCatalogEntity = namedSearchRequest ? resolveSaqrCatalogEntity(userQuery,{
       physical:bookData,
       arabic:[...ARABIC_LIBRARY_DATABASE,...NATIONAL_IDENTITY_DIGITAL_BOOKS],
       english:ENGLISH_LIBRARY_DATABASE
     }):null;
-    const librarySearchIntent = isSaqrLibrarySearchIntent(userQuery, messages) || !!namedCatalogEntity;
-    const creativeTurn = isSaqrCreativeTurn(userQuery, messages) && !librarySearchIntent;
+    const librarySearchIntent = !activeTeacherLesson && (isSaqrLibrarySearchIntent(userQuery, messages) || !!namedCatalogEntity);
+    const creativeTurn = !activeTeacherLesson && isSaqrCreativeTurn(userQuery, messages) && !librarySearchIntent;
     const proofreadingContext = saqrProofreadingInstructions({
       locale: locale === 'ar' ? 'ar' : 'en',
       creativeTurn,
-      lessonTurn: isSaqrLessonPreparationRequest(userQuery) || isLessonPlanRequest(userQuery),
+      lessonTurn: Boolean(activeTeacherLesson) || isSaqrLessonPreparationRequest(userQuery) || isLessonPlanRequest(userQuery),
       explicitReview: isSaqrExplicitProofreadingRequest(userQuery)
     });
     // Only genuine library discovery inherits earlier catalogue context.
@@ -443,7 +468,7 @@ const SmartSearchPage: React.FC = () => {
     // anything. Only open-ended requests and their immediate replies use this
     // path; named-book searches, Little Author, teacher tools and AI stay intact.
     const readingInterview=getReadingInterviewStep(userQuery,messages,locale==='ar'?'ar':'en');
-    if(readingInterview.kind!=='none' && !creativeTurn){
+    if(!activeTeacherLesson && readingInterview.kind!=='none' && !creativeTurn){
       if(readingInterview.kind==='recommend'){
         const interviewQuery='recommend books about '+readingInterview.interests.slice(0,180);
         const matches=searchSaqrBookCatalog(interviewQuery,{
@@ -470,7 +495,7 @@ const SmartSearchPage: React.FC = () => {
     // Narrow, source-controlled self/portal introductions only. Everything else
     // follows the existing Saqr flow, prompt and catalogue search unchanged.
     const introductionIntent=detectSaqrIntroduction(userQuery);
-    if(introductionIntent){
+    if(!activeTeacherLesson && introductionIntent){
       setMessages(prev=>[...prev,{role:'assistant',content:finishSaqrReply(saqrIntroductionReply(introductionIntent,locale==='ar'?'ar':'en'),'introduction')}]);
       setIsLoading(false);
       setSaqrState('idle');
@@ -576,14 +601,14 @@ const SmartSearchPage: React.FC = () => {
       grade:safeReader.grade,locale:locale==='ar'?'ar':'en',matches:namedBookTitle?namedBookHoldings:foundBooks
     });
 
-    if (isNewDiscussion(userQuery,messages)) {
+    if (!activeTeacherLesson && isNewDiscussion(userQuery,messages)) {
       setMessages(prev => [...prev,{role:'assistant',content:discussionOpening(locale==='ar'?'ar':'en')}]);
       setIsLoading(false);
       setSaqrState('idle');
       return;
     }
 
-    const learningIntent=detectLearningIntent(userQuery,safeReader.role,messages);
+    const learningIntent=activeTeacherLesson ? 'none' : detectLearningIntent(userQuery,safeReader.role,messages);
     if(learningIntent==='schedule'){
       const selectedDay=/(?:الاثنين|الإثنين|الثلاثاء|الأربعاء|الاربعاء|الخميس|الجمعة|monday|tuesday|wednesday|thursday|friday)/i.exec(userQuery)?.[0];
       const period=/(?:الحصة|حصه|period)\\s*([1-8])/i.exec(userQuery)?.[1];
@@ -698,18 +723,21 @@ When the user asks for books, identify the matching titles exactly as recorded, 
       }
     }
 
+    const teacherPartContext = activeTeacherLesson
+      ? saqrTeacherLessonPartInstructions(activeTeacherLesson,locale==='ar'?'ar':'en') : '';
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [
-            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}${generalBookContext ? '\n\n'+generalBookContext : ''}${arabicPageContext ? '\n\n'+arabicPageContext : ''}${safeEnhancement.context ? '\n\n'+safeEnhancement.context : ''}${learningContext ? '\n\n'+learningContext : ''}${proofreadingContext ? '\n\n'+proofreadingContext : ''}${expertContext ? '\n\n'+expertContext : ''}${naturalDialogueContext ? '\n\n'+naturalDialogueContext : ''}${creativeTurn ? '\n\nACTIVE LITTLE AUTHOR CHALLENGE: NO catalogue searches or catalogue references. Friendly UAE Emirati dialogue with the reader, but write ALL story prose and certificate summaries in formal Modern Standard Arabic in Arabic UI, or entirely in English in English UI. Add exactly one imaginative story sentence per story turn. Flag only demonstrable spelling/grammar errors in the student input with a brief correct form, never stylistic preferences. Respect signed-in role and name; do not invent student profile data.' : ''}${isStoryBeginning(userQuery) ? '\n\nIf the user requests a NEW Little Author story without a specific theme, begin with exactly one short story sentence inspired by this rotating Emirati idea: '+storyIdeaAt(messages.filter(m=>m.role==='user').length,locale==='ar'?'ar':'en')+'. Preserve all established Little Author spelling correction, one-sentence response, ending and certificate instructions.' : ''}` },
+            { role: 'system', content: `${SAQR_ELITE_PROMPT}\n\n${userContextInfo}\n\n${searchContext}${generalBookContext ? '\n\n'+generalBookContext : ''}${arabicPageContext ? '\n\n'+arabicPageContext : ''}${safeEnhancement.context ? '\n\n'+safeEnhancement.context : ''}${learningContext ? '\n\n'+learningContext : ''}${proofreadingContext ? '\n\n'+proofreadingContext : ''}${expertContext ? '\n\n'+expertContext : ''}${naturalDialogueContext ? '\n\n'+naturalDialogueContext : ''}${creativeTurn ? '\n\nACTIVE LITTLE AUTHOR CHALLENGE: NO catalogue searches or catalogue references. Friendly UAE Emirati dialogue with the reader, but write ALL story prose and certificate summaries in formal Modern Standard Arabic in Arabic UI, or entirely in English in English UI. Add exactly one imaginative story sentence per story turn. Flag only demonstrable spelling/grammar errors in the student input with a brief correct form, never stylistic preferences. Respect signed-in role and name; do not invent student profile data.' : ''}${isStoryBeginning(userQuery) ? '\n\nIf the user requests a NEW Little Author story without a specific theme, begin with exactly one short story sentence inspired by this rotating Emirati idea: '+storyIdeaAt(messages.filter(m=>m.role==='user').length,locale==='ar'?'ar':'en')+'. Preserve all established Little Author spelling correction, one-sentence response, ending and certificate instructions.' : ''}${teacherPartContext ? '\n\n'+teacherPartContext : ''}` },
             ...messages,
             { role: 'user', content: userQuery }
           ],
           locale,
-          catalogueIntent: librarySearchIntent
+          catalogueIntent: librarySearchIntent,
+          lessonPart: Boolean(activeTeacherLesson)
         })
       });
 
@@ -719,6 +747,15 @@ When the user asks for books, identify the matching titles exactly as recorded, 
       // Filter assistant prose only: preserve Markdown, links, author certificates
       // and all of Saqr's existing UI illustrations.
       reply = stripSaqrEmoji(reply);
+      if(activeTeacherLesson){
+        const part = readSaqrTeacherLessonPart(reply);
+        if(!part.content)throw new Error('Empty teacher lesson part');
+        const updatedLesson = advanceSaqrTeacherLesson(activeTeacherLesson,part);
+        setTeacherLesson({...updatedLesson,lastMessageCount:messages.length+2});
+        reply=part.content+'\n\n'+(updatedLesson.done
+          ? saqrTeacherLessonPrintQuestion(locale==='ar'?'ar':'en')
+          : saqrTeacherLessonContinueQuestion(locale==='ar'?'ar':'en'));
+      }
       // AI models sometimes return a one-line Markdown table with unsupported
       // age/plot claims. Repair only malformed recommendation replies using
       // the verified catalogue; keep all other AI and story paths untouched.
@@ -966,6 +1003,17 @@ When the user asks for books, identify the matching titles exactly as recorded, 
                             <ReactMarkdown>{msg.role === 'assistant' && index > 0 && isLessonPlanRequest(visibleMessages[index - 1]?.content || '') ? formatLessonPlanDisplay(msg.content) : msg.content}</ReactMarkdown>
                           </div>
                         </div>
+                        {teacherLesson && !isLoading && teacherLesson.lastMessageCount === messages.length &&
+                          index === visibleMessages.length - 1 && (
+                          <button type="button" className="saqr-inline-download mt-3"
+                            onClick={() => teacherLesson.done ? window.print() :
+                              void handleSendMessage(locale==='ar'?'أكمل التحضير':'Continue')}>
+                            {teacherLesson.done ? <DownloadIcon /> : <span aria-hidden="true">›</span>}
+                            <span>{teacherLesson.done
+                              ? (locale==='ar'?'طباعة التحضير الكامل':'Print complete lesson plan')
+                              : (locale==='ar'?'أكمل باقي التحضير':'Continue lesson plan')}</span>
+                          </button>
+                        )}
                         {researchReady && researchAnswer && index === visibleMessages.length - 1 && msg.role==='assistant' && (
                           <button type="button" className="saqr-inline-download mt-3" onClick={()=>void downloadResearchPdf()}>
                             <DownloadIcon /><span>{locale==='ar'?'تحميل البحث PDF':'Download research PDF'}</span>
@@ -1007,6 +1055,19 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         </main>
       )}
 
+      {/* Only a verified complete six-part lesson is printed, never chat controls. */}
+      {teacherLesson?.done && teacherLesson.stage===SAQR_TEACHER_LESSON_PARTS.length && (
+        <section className="saqr-teacher-print" dir={locale==='ar'?'rtl':'ltr'}>
+          <header className="saqr-teacher-print-header">
+            <img src="/school-logo.png" alt="EFIPS" />
+            <div><h1>{locale==='ar'?'التحضير الكامل للدرس':'Complete Lesson Plan'}</h1>
+              <p>Emirates Falcon International Private School</p></div>
+          </header>
+          <div className="saqr-teacher-print-content">
+            <ReactMarkdown>{teacherLesson.parts.join('\n\n')}</ReactMarkdown>
+          </div>
+        </section>
+      )}
       {/* A4 certificate export only; no alteration to Saqr AI or challenge logic. */}
       <div className="saqr-certificate-host" aria-hidden="true">
         <div ref={certificateRef} className="saqr-certificate" dir={locale === 'ar' ? 'rtl' : 'ltr'} lang={locale}>
@@ -1042,6 +1103,22 @@ When the user asks for books, identify the matching titles exactly as recorded, 
       </div>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
+        .saqr-teacher-print {display:none}
+        @media print {
+          @page {size:A4;margin:16mm}
+          .saqr-page {display:block!important;height:auto!important;min-height:0!important;overflow:visible!important;background:#fff!important;color:#111!important}
+          .dark .saqr-page {background:#fff!important;color:#111!important}
+          .saqr-page > :not(.saqr-teacher-print) {display:none!important}
+          .saqr-page .saqr-teacher-print {display:block!important;position:static!important;width:100%!important;overflow:visible!important;background:#fff!important;color:#111!important;font:12pt/1.7 'Cairo',sans-serif!important}
+          .saqr-teacher-print-header {display:flex;align-items:center;gap:14px;border-bottom:2px solid #14532d;padding-bottom:10mm;margin-bottom:8mm}
+          .saqr-teacher-print-header img {width:60px;height:60px;object-fit:contain}
+          .saqr-teacher-print-header h1 {font-size:19pt;font-weight:800;margin:0}
+          .saqr-teacher-print-header p {font-size:10pt;margin:0}
+          .saqr-teacher-print-content h1,.saqr-teacher-print-content h2,.saqr-teacher-print-content h3 {color:#111!important;break-after:avoid;font-weight:800;margin-top:1em}
+          .saqr-teacher-print-content p,.saqr-teacher-print-content li {orphans:3;widows:3}
+          .saqr-teacher-print-content table {width:100%;border-collapse:collapse}
+          .saqr-teacher-print-content th,.saqr-teacher-print-content td {border:1px solid #bbb;padding:5px}
+        }
 
         .saqr-page {
           position: relative;
