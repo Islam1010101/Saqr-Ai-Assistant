@@ -560,17 +560,6 @@ export default function Login() {
           color:#162728;
           -webkit-text-fill-color:#162728;
         }
-        /* A still translucent surface shields the text from changing video
-           brightness without any blur, motion, reflow or font-size changes. */
-        .efips-login-brand-panel .efips-login-brand-copy::before {
-          content:'';
-          position:absolute;
-          inset:-5px -8px;
-          z-index:-1;
-          pointer-events:none;
-          border-radius:19px;
-          background:rgba(248,252,249,.78);
-        }
         @media (min-width:1024px) {
           .efips-login-page {align-items:center;padding-block:60px 34px!important;padding-inline:26px!important;}
           .efips-login-frame {min-height:min(760px,calc(100dvh - 100px));}
