@@ -6,6 +6,7 @@ import SaqrOrbitNavigation from '../src/components/SaqrOrbitNavigation';
 import '../src/components/EFIPSGlassVisualTheme.css';
 import { getTeacherLibrarySlots, type TeacherLibrarySlot } from '../src/utils/teacherLibrarySchedule';
 import HomeReadingHub from '../src/components/HomeReadingHub';
+import { getSaqrNewsTicker } from '../src/data/saqrWhatsNew';
 
 const translations = {
     ar: {
@@ -19,7 +20,7 @@ const translations = {
         adminSettings: "إدارة النظام",
         adminSettingsDesc: "التحكم الشامل في المنصة والبيانات",
         newsTitle: "جديدنا",
-        newsContent: "جديد: بين السطور مع صقر — اختر كتابًا من مكتبتنا وأجب عن أسئلته! | جناح الهوية الوطنية فتح أبوابه: اكتشف كتب الإمارات وابحث عن مؤلفك المفضل! | راية المجد تنتظرك: عشرة أسئلة مشوقة عن علم الإمارات نحو القمة! | تحدي القراءة الشهري: كم كتابًا أنهيت؟ افتح قائمة القراءة واحتفل بإنجازك! | صقر الذكي يساعدك في اكتشاف كتب المكتبة الورقية والرقمية | صوتك يستحق أن يُسمع: سجل حلقتك في بودكاست صقر! | كتب وإصدارات جديدة في مكتبتنا الورقية بانتظار قراءتك!",
+        newsContent: getSaqrNewsTicker('ar'),
         manualSearch: "دليل كتب المكتبة",
         manualDesc: "استكشف وتعرف واستعر الكتب المتوفرة في مكتبة المدرسة",
         smartSearch: "اسأل صقر الذكي",
@@ -84,7 +85,7 @@ const translations = {
         adminSettings: "System Admin",
         adminSettingsDesc: "Full platform and data control",
         newsTitle: "What's New",
-        newsContent: "New: Between the Lines with Saqr — read EFIPS books and answer source-backed questions! | Explore the National Identity Pavilion: discover UAE books and their authors! | Take the Flag of Glory Challenge: ten exciting UAE flag questions to the summit! | Monthly Reading Challenge: how many books have you finished? Celebrate your progress! | Ask Saqr to discover books across our physical and digital libraries | Your voice belongs here: record a Saqr Podcast episode! | Fresh books are arriving in our school library: your next great read awaits!",
+        newsContent: getSaqrNewsTicker('en'),
         manualSearch: "Library Book Catalog",
         manualDesc: "Explore,Find and Borrow the school library’s",
         smartSearch: "Ask Saqr (AI)",
@@ -316,6 +317,7 @@ const HomePage: React.FC = () => {
 
     const [bursts, setBursts] = useState<BurstItem[]>([]);
     const [showBubble, setShowBubble] = useState(false);
+    const [newsPaused, setNewsPaused] = useState(false);
     const [daysLeft, setDaysLeft] = useState<number | null>(null);
     const [sparkles, setSparkles] = useState<SparkleItem[]>([]);
     const [flyingFlags, setFlyingFlags] = useState<FlagFlyItem[]>([]);
@@ -685,13 +687,21 @@ const HomePage: React.FC = () => {
                 </RevealSection>
 
                 <RevealSection delay={200}>
-                    <div className="efips-news-ribbon w-full max-w-5xl mx-auto relative z-30 flex items-center bg-white dark:bg-slate-800 border-4 border-amber-300 dark:border-amber-700 rounded-full shadow-lg overflow-hidden h-14 md:h-16">
-                        <div className="bg-amber-400 text-slate-900 font-black px-5 md:px-8 h-full flex items-center gap-2 relative z-20 shrink-0 text-xs md:text-sm uppercase">
-                            <div className="w-3 h-3 bg-white rounded-full animate-ping"></div>
+                    <div data-news-paused={newsPaused} className="efips-news-ribbon w-full max-w-5xl mx-auto relative z-30 flex items-center bg-white dark:bg-slate-800 border-4 border-amber-300 dark:border-amber-700 rounded-full shadow-lg overflow-hidden h-14 md:h-16">
+                        <button type="button" onClick={() => setNewsPaused(paused => !paused)}
+                            aria-label={newsPaused ? (isAr ? 'استئناف حركة جديدنا' : 'Resume What's New') : (isAr ? 'إيقاف حركة جديدنا لقراءة الأخبار' : 'Pause What's New to read')}
+                            aria-pressed={newsPaused}
+                            title={newsPaused ? (isAr ? 'استئناف الشريط' : 'Resume ticker') : (isAr ? 'إيقاف الشريط مؤقتًا' : 'Pause ticker')}
+                            className="bg-amber-400 text-slate-900 font-black px-3 sm:px-5 md:px-8 h-full flex items-center gap-2 relative z-20 shrink-0 text-xs md:text-sm uppercase focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-600 focus-visible:-outline-offset-4">
+                            <span className="w-2.5 h-2.5 bg-white rounded-full shrink-0" aria-hidden="true"></span>
                             {t('newsTitle')}
-                        </div>
-                        <div className="flex-1 overflow-hidden h-full flex items-center bg-amber-50 dark:bg-slate-800">
-                            <div className={`whitespace-nowrap inline-block ${isAr ? 'animate-marquee-rtl' : 'animate-marquee-ltr'} text-slate-800 dark:text-slate-100 font-bold text-xs md:text-base px-4`}>
+                            <svg className="w-3.5 h-3.5 shrink-0 opacity-80" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                                {newsPaused ? <path d="M4 2.5v11l9-5.5-9-5.5Z"/> : <path d="M3 2h3v12H3zm7 0h3v12h-3z"/>}
+                            </svg>
+                        </button>
+                        <div className="flex-1 min-w-0 overflow-hidden h-full flex items-center bg-amber-50 dark:bg-slate-800">
+                            <div aria-live="off" className={`whitespace-nowrap inline-block ${isAr ? 'animate-marquee-rtl' : 'animate-marquee-ltr'} text-slate-800 dark:text-slate-100 font-bold text-xs md:text-base px-4`}
+                                style={{ animationDuration: isAr ? '205s' : '235s' }}>
                                 {t('newsContent')}
                             </div>
                         </div>
@@ -1021,6 +1031,20 @@ const HomePage: React.FC = () => {
                 @keyframes marquee-rtl { 0% { transform: translateX(0); } 100% { transform: translateX(100%); } }
                 .animate-marquee-ltr { animation: marquee-ltr 65s linear infinite; }
                 .animate-marquee-rtl { animation: marquee-rtl 65s linear infinite; }
+                /* Long-form bilingual news stays lightweight: one transform animation only. */
+                .efips-news-ribbon[data-news-paused="true"] .animate-marquee-ltr,
+                .efips-news-ribbon[data-news-paused="true"] .animate-marquee-rtl,
+                .efips-news-ribbon:hover .animate-marquee-ltr,
+                .efips-news-ribbon:hover .animate-marquee-rtl,
+                .efips-news-ribbon:focus-within .animate-marquee-ltr,
+                .efips-news-ribbon:focus-within .animate-marquee-rtl {
+                    animation-play-state: paused;
+                }
+                @media (prefers-reduced-motion: reduce) {
+                    .efips-news-ribbon .animate-marquee-ltr,
+                    .efips-news-ribbon .animate-marquee-rtl { animation: none !important; }
+                    .efips-news-ribbon > div:last-child { overflow-x: auto; }
+                }
 
                 @keyframes fade-out {
                     0% { opacity: 1; transform: scale(1) translateY(0); }
