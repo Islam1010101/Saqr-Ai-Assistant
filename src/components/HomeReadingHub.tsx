@@ -176,7 +176,7 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
   const { locale, dir } = useLanguage();
   const ar = locale === 'ar';
   const { data, toggleSaved, toggleCompleted, setGoal } = useReadingPassport();
-  const [category, setCategory] = useState<'all'|'physical'|'ar'|'en'>('all');
+  const [category, setCategory] = useState<'all'|'physical'|'digital'>('all');
   const [tab, setTab] = useState<'saved'|'suggested'>('suggested');
   const [pickerOpen,setPickerOpen] = useState(false);
   const [pickerQuery,setPickerQuery] = useState('');
@@ -222,7 +222,10 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
     savedBooks.forEach(book => { languageWeights[bookLanguage(book)] += 2; });
     const interestedInFaithBooks = history.some(isFaithFocused);
     const candidates = catalog.filter(book => {
-      if (category !== 'all' && book.format !== category) return false;
+      // A single Digital choice follows the UI language, never the book's saved
+      // history or the reader's name. Keep paper and All filters unchanged.
+      if (category === 'physical' && book.format !== 'physical') return false;
+      if (category === 'digital' && book.format === 'physical') return false;
       if (data.completed.includes(book.key) || data.saved.includes(book.key)) return false;
       if (bookLanguage(book) !== locale) return false;
       if (!fitsReaderAudience(book, profile.role, profile.grade)) return false;
@@ -367,8 +370,7 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
             className="rounded-xl ms-2 px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
             <option value="all">{ar?'الكل':'All'}</option>
             <option value="physical">{ar?'ورقي':'Physical'}</option>
-            <option value="ar">{ar?'رقمي عربي':'Arabic digital'}</option>
-            <option value="en">{ar?'رقمي إنجليزي':'English digital'}</option>
+            <option value="digital">{ar?'رقمي':'Digital'}</option>
           </select>
         </label>
       </div>
