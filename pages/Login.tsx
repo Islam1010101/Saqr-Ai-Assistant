@@ -539,19 +539,37 @@ export default function Login() {
         .efips-login-language button {min-height:37px;}
         .efips-login-brand-panel .efips-brand-heading {color:#075f4c;}
         .efips-login-brand-panel .efips-brand-subtitle {color:#355d57;}
-        /* UAE flag palette for the existing bilingual title and subtitle only.
-           Keep the original wording, line sizing, centering and login flow. */
+        /* Readable UAE-flag text above a moving video, in Arabic and English.
+           The first title line is deep green, the second UAE red, and the
+           subtitle flag-black. No white letters, gradient or black stroke. */
         .efips-login-brand-panel .efips-brand-heading-line,
         .efips-login-brand-panel .efips-brand-subtitle {
-          background-image:linear-gradient(90deg,
-            #CE1126 0%,#CE1126 22%,
-            #00843D 22%,#00843D 51%,
-            #FFFFFF 51%,#FFFFFF 68%,
-            #101820 68%,#101820 100%);
-          -webkit-background-clip:text;
-          background-clip:text;
-          -webkit-text-fill-color:transparent;
-          -webkit-text-stroke:.45px rgba(13,49,39,.57);
+          background:none;
+          -webkit-text-stroke:0;
+          text-shadow:none;
+        }
+        .efips-login-brand-panel .efips-brand-heading-line:first-child {
+          color:#075C3D;
+          -webkit-text-fill-color:#075C3D;
+        }
+        .efips-login-brand-panel .efips-brand-heading-line:last-child {
+          color:#B31C31;
+          -webkit-text-fill-color:#B31C31;
+        }
+        .efips-login-brand-panel .efips-brand-subtitle {
+          color:#162728;
+          -webkit-text-fill-color:#162728;
+        }
+        /* A still translucent surface shields the text from changing video
+           brightness without any blur, motion, reflow or font-size changes. */
+        .efips-login-brand-panel .efips-login-brand-copy::before {
+          content:'';
+          position:absolute;
+          inset:-5px -8px;
+          z-index:-1;
+          pointer-events:none;
+          border-radius:19px;
+          background:rgba(248,252,249,.78);
         }
         @media (min-width:1024px) {
           .efips-login-page {align-items:center;padding-block:60px 34px!important;padding-inline:26px!important;}
