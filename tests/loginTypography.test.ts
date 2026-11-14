@@ -128,4 +128,11 @@ assert.ok(partnerBlock.includes('dir="rtl"') && (partnerBlock.match(/<img /g) ||
 assert.ok(login.includes('from-white/65 via-white/55 to-sky-50/60') &&
   !login.includes('via-emerald-50/85 to-white/80 backdrop-blur-[1px]'),
   'Video must be more visible through a neutral, unblurred overlay');
+const cogniaFallback = readFileSync('public/cognia-logo.svg', 'utf8');
+assert.ok(partnerBlock.includes('loading="eager"') && partnerBlock.includes("event.currentTarget.src = '/cognia-logo.svg'"),
+  'Cognia must render eagerly and fall back to the local logo if third-party images fail');
+assert.ok(cogniaFallback.includes('viewBox="0 0 520 520"') && cogniaFallback.includes('ACCREDITED') &&
+  cogniaFallback.includes('cognia'), 'Local Cognia seal fallback is available');
+assert.ok(!login.includes('bg-white/95 backdrop-blur-xl'), 'Avoid expensive video-panel backdrop blur');
+
 console.log('PASS: centered Saqr Enter art, interactive Emirati heritage welcome and unchanged school OAuth');

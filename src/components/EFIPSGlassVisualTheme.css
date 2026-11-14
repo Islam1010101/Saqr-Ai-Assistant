@@ -180,8 +180,9 @@
     linear-gradient(150deg,#ffffffa6,rgba(var(--tour-rgb),.23),#ffffff83);
   border: 1.5px solid #fffe;
   box-shadow: inset 6px 7px 14px #fffe, inset -8px -9px 16px rgba(var(--tour-rgb),.18), 0 12px 23px rgba(28,44,56,.12);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
+  /* The translucent gradient remains, but moving orbs avoid live background blur. */
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
   animation: tutorial-orb-float 5s ease-in-out var(--orb-delay,0s) infinite alternate;
 }
 .tutorial-glass-orb svg { width: 27px; height: 27px; }

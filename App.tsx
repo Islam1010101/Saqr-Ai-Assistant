@@ -253,7 +253,7 @@ const Header: React.FC = () => {
       scrollFrameRef.current = null;
       const currentY = Math.max(0, window.scrollY);
       const previousY = lastScrollYRef.current;
-      if (Math.abs(currentY - previousY) < 3) return;
+      if (Math.abs(currentY - previousY) < 18 && currentY > 60) return;
       const shouldShow = currentY <= 60 || currentY < previousY;
       setIsVisible(visible => visible === shouldShow ? visible : shouldShow);
       lastScrollYRef.current = currentY;
@@ -623,16 +623,16 @@ const MainLayout: React.FC = () => {
         </div>
       </DraggableSaqrModal>
 
-      {/* Mobile Safari: removing the expensive live blur only for the fixed
-          navigation surface avoids repeated full-width backdrop compositing. */}
+      {/* Opaque fixed navigation avoids per-frame backdrop recomposition in
+          Safari, Chromium and Firefox while preserving the original colors. */}
       <style>{`
-        @media (hover: none) and (pointer: coarse) {
-          .efips-navbar-surface {
-            -webkit-backdrop-filter: none !important;
-            backdrop-filter: none !important;
-            background-color: rgba(255,255,255,.96) !important;
-          }
-          .dark .efips-navbar-surface { background-color: rgba(15,23,42,.96) !important; }
+        .efips-navbar-surface, .tutorial-topbar {
+          -webkit-backdrop-filter: none !important;
+          backdrop-filter: none !important;
+          background-color: rgba(255,255,255,.96) !important;
+        }
+        .dark .efips-navbar-surface, .dark .tutorial-topbar {
+          background-color: rgba(15,23,42,.96) !important;
         }
       `}</style>
 

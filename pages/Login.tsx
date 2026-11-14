@@ -180,7 +180,7 @@ export default function Login() {
           <button onClick={() => setLang('en')} className={`px-4 py-1.5 rounded-full font-bold text-xs md:text-sm border-2 transition-all ${lang === 'en' ? 'bg-indigo-600 border-indigo-600 text-white shadow-md' : 'bg-white border-slate-300 text-slate-600 hover:border-indigo-400'}`}>English</button>
       </div>
 
-      <div className="efips-login-frame max-w-[1180px] w-full bg-white/95 backdrop-blur-xl border border-emerald-100 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col lg:flex-row z-10">
+      <div className="efips-login-frame max-w-[1180px] w-full bg-white/95 border border-emerald-100 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col lg:flex-row z-10">
         
         {/* ================= القسم الأول: الهوية البصرية وصقر (مع خلفية الفيديو العشوائية) ================= */}
         <div className="efips-login-brand-panel lg:w-1/2 min-w-0 px-4 py-6 sm:px-8 sm:py-8 lg:px-8 xl:px-10 lg:py-9 flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br from-emerald-50/80 to-sky-50/70 border-b lg:border-b-0 lg:border-l border-emerald-100">
@@ -402,7 +402,13 @@ export default function Login() {
               title="Cognia" aria-label="Visit Cognia website"
               className="efips-login-partner flex min-w-0 items-center justify-center rounded-2xl border border-emerald-100 bg-white px-2 py-3 transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600">
               <img src="https://masarschool.com/wp-content/uploads/2024/07/cognia.png"
-                alt="Cognia logo" className="h-14 w-full object-contain sm:h-[76px]" loading="lazy" decoding="async" />
+                alt="Cognia logo" width="156" height="156"
+                className="h-14 w-full object-contain sm:h-[76px]" loading="eager" decoding="async"
+                onError={(event) => {
+                  // Some browsers block the external school CDN. Always display our local fallback.
+                  event.currentTarget.onerror = null;
+                  event.currentTarget.src = '/cognia-logo.svg';
+                }} />
             </a>
             <a href="https://www.adek.gov.ae/" target="_blank" rel="noopener noreferrer"
               title={lang === 'ar' ? 'دائرة التعليم والمعرفة أبوظبي' : 'Abu Dhabi Department of Education and Knowledge'}
