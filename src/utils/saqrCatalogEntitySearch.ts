@@ -134,7 +134,9 @@ const phraseMatch=(needle:readonly string[],haystack:readonly string[]):'exact'|
   return null;
 };
 const isGenericTopicRequest=(q:string):boolean=>
-  /(?:\b(?:books?|novels?|stories)\s+(?:about|on)\b|(?:كتب|كتاب|روايات|قصص|روايه)\s+(?:عن|حول|في)(?:\s|$))/i.test(q);
+  // Generic subject requests stay generic even with a genre/style adjective:
+  // "رواية خيالية عن الفضاء" is NOT a named title ("خيالية الفضاء").
+  /(?:\b(?:books?|novels?|stories)\s+(?:about|on)\b|(?:كتب|كتاب|روايات|قصص|رواي[ةه]|قص[ةه])\s+(?:(?:خيال(?:ي[ةه])?|علمي[ةه]?|مصور[ةه]?|سهل[ةه]?|مبسط[ةه]?|مشوق[ةه]?|fantasy|science fiction)\s+)*(?:عن|حول|في)(?:\s|$))/i.test(normalize(q));
 const hasNamedField=(book:CatalogEntityRecord,entity:SaqrCatalogEntity):boolean=>{
   const fields=entity.kind==='author'?[book.author||'']:
     entity.kind==='series'?[book.series||'']:[book.title||'',book.series||''];
