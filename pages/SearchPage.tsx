@@ -174,10 +174,10 @@ const RevealOnScroll = ({ children, delay = 0 }: { children: React.ReactNode, de
     return (
         <div
             ref={elementRef}
-            className={`transition-all duration-700 ease-out transform w-full ${
-                isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-12 scale-95 pointer-events-none'
+            className={`transition-[opacity,transform] duration-300 ease-out transform w-full ${
+                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3 pointer-events-none'
             }`}
-            style={{ transitionDelay: `${delay}ms` }}
+            style={{ transitionDelay: `${Math.min(delay, 80)}ms` }}
         >
             {children}
         </div>
@@ -571,18 +571,26 @@ const SearchPage: React.FC = () => {
     const lastScrollY = useRef(0);
 
     useEffect(() => {
-        const handleScroll = () => {
-            const currentScrollY = window.scrollY;
-            if (currentScrollY > lastScrollY.current && currentScrollY > 150) {
-                setShowSearch(false); 
-            } else {
-                setShowSearch(true); 
-            }
+        lastScrollY.current = Math.max(0, window.scrollY);
+        let scrollFrame: number | null = null;
+        const updateSearchVisibility = () => {
+            scrollFrame = null;
+            const currentScrollY = Math.max(0, window.scrollY);
+            const delta = currentScrollY - lastScrollY.current;
+            // Small trackpad/touch changes should not re-render the sticky search panel.
+            if (Math.abs(delta) < 18 && currentScrollY > 150) return;
+            const shouldShow = currentScrollY <= 150 || delta < 0;
+            setShowSearch(visible => visible === shouldShow ? visible : shouldShow);
             lastScrollY.current = currentScrollY;
         };
-
+        const handleScroll = () => {
+            if (scrollFrame === null) scrollFrame = window.requestAnimationFrame(updateSearchVisibility);
+        };
         window.addEventListener('scroll', handleScroll, { passive: true });
-        return () => window.removeEventListener('scroll', handleScroll);
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            if (scrollFrame !== null) window.cancelAnimationFrame(scrollFrame);
+        };
     }, []);
 
     const filters = useMemo(() => ({
@@ -668,7 +676,7 @@ const SearchPage: React.FC = () => {
                     </div>
                 </header>
 
-                <div className={`sticky z-[100] mb-12 transition-all duration-500 ease-in-out ${showSearch ? 'top-4 md:top-6 opacity-100 translate-y-0' : '-top-40 opacity-0 -translate-y-full'}`}>
+                <div className={`sticky z-[100] mb-12 transition-[opacity,transform] duration-300 ease-out ${showSearch ? 'top-4 md:top-6 opacity-100 translate-y-0' : 'top-4 md:top-6 opacity-0 -translate-y-full pointer-events-none'}`}>
                     <div className="bg-white dark:bg-slate-800 p-5 md:p-8 rounded-[3rem] border-4 border-amber-300 dark:border-amber-600 shadow-xl max-w-5xl mx-auto">
                         <div className="flex flex-col gap-5">
                             <div className="relative group">
