@@ -422,6 +422,29 @@ const NationalIdentityPage: React.FC = () => {
               </span>
             </div>
           </button>
+          <Link to="/saqr-national-identity/anthem"
+            className="nh-challenge-card group overflow-hidden text-start rounded-[1.8rem] bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 shadow-lg hover:shadow-2xl hover:-translate-y-1 hover:border-emerald-400 dark:hover:border-emerald-700 transition-all focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-500"
+            aria-label={tr(l('ابدأ تحدي صوت الاتحاد للنشيد الوطني الإماراتي','Start the Voice of the Union national anthem challenge'))}>
+            <div className="nh-card-top relative overflow-hidden bg-gradient-to-br from-[#b12b3b] via-[#a4432e] to-[#704019] p-6 text-white">
+              <div aria-hidden="true" className="absolute inset-x-0 top-0 flex h-1.5"><span className="w-1/4 bg-red-500"/><span className="w-1/4 bg-emerald-400"/><span className="w-1/4 bg-white"/><span className="w-1/4 bg-slate-950"/></div>
+              <div className="absolute -end-5 -top-6 h-36 w-36 rounded-full border-[17px] border-white/10" aria-hidden="true"/>
+              <svg className="relative h-14 w-14" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="25" y="9" width="14" height="29" rx="7"/>
+                <path d="M17 29a15 15 0 0 0 30 0M32 44v12m-10 0h20"/>
+                <path d="M48 9v13m0-13 6 4v13" stroke="#FFE0A3"/>
+              </svg>
+              <h3 className="relative mt-1 text-xl font-black leading-snug">{tr(l('تحدي صوت الاتحاد','Voice of the Union'))}</h3>
+            </div>
+            <div className="p-5 sm:p-6">
+              <p className="min-h-[84px] text-sm leading-7 font-semibold text-slate-600 dark:text-slate-300">{tr(l('غنِّ النشيد الوطني مع الموسيقى، وسجّل صوتك وحمّل أداءك بصيغة MP3.','Sing the national anthem with its music, record your voice, and download your MP3 performance.'))}</p>
+              <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                <div className="h-full w-full rounded-full bg-gradient-to-r from-red-500 via-amber-400 to-emerald-500"/>
+              </div>
+              <span className="mt-5 inline-flex items-center gap-2 text-sm font-black text-emerald-700 dark:text-emerald-300">
+                {tr(l('ابدأ الغناء','Start singing'))}<Icon kind="arrow" className={'h-5 w-5 '+(lang==='ar'?'rotate-180':'')}/>
+              </span>
+            </div>
+          </Link>
         </div>
         {progress.stamps.length===7 && <div role="status" className="mt-6 rounded-[1.5rem] border-2 border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/25 px-6 py-5 text-amber-900 dark:text-amber-200 font-black">
           {tr(l('أحسنت! جمعت أختام الإمارات السبع وأكملت جواز صقر الثقافي.','Well done! You have collected all seven emirate stamps and completed your cultural passport.'))}
