@@ -55,7 +55,9 @@ const server=readFileSync('api/chat.ts','utf8');
 assert.ok(!server.includes("import { isSaqrLibrarySearchIntent }"),
   'No extensionless TypeScript import in Vercel Node.js serverless entry');
 assert.ok(server.includes('function isSaqrApiLibrarySearch(text:string):boolean'));
-assert.ok(server.includes("const { messages = [], locale = 'en', catalogueIntent }"));
+assert.ok(server.includes("const { messages = [], locale = 'en', catalogueIntent, lessonPart }"));
+assert.ok(server.includes('lessonPart === true ? 900 : 500'),
+  'Only staged lesson requests get a higher reply token allowance');
 assert.ok(server.includes("typeof catalogueIntent === 'boolean'"));
 assert.ok(server.includes('catalogueIntent : isSaqrApiLibrarySearch(userMsg)'));
 assert.ok(server.includes('const found = catalogRequested ? findBooks(userMsg) : [];'));
