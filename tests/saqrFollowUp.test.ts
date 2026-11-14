@@ -62,7 +62,12 @@ assert.equal(finish(certificate,'انتهت','ar','auto',protectedHistory),certi
 assert.equal(finish(certificate,'اكتب شهادة','ar','auto'),certificate,'Never attach text after certificate tags');
 
 const page=readFileSync('pages/SmartSearchPage.tsx','utf8');
-assert.ok(page.includes("content:finishSaqrReply(answer,'catalog')"),'Direct catalog route is covered');
+// The fast catalogue route now also appends optional verified Arabic page
+// evidence. Keep testing the original answer AND the follow-up guard.
+assert.match(page,/const withPageEvidence\s*=\s*answer\s*\+\s*renderArabicPageEvidence\(arabicPageEvidence,\s*locale\s*===\s*['"]ar['"]\)/,
+  'Direct catalogue answer still starts with the verified catalogue results');
+assert.match(page,/content:\s*finishSaqrReply\(withPageEvidence,\s*['"]catalog['"]\)/,
+  'Direct catalogue and optional page evidence retain the catalog follow-up');
 assert.ok(page.includes("content:finishSaqrReply(response,'reading-list')"),'Reading-list route is covered');
 assert.ok(page.includes("content:finishSaqrReply(saqrIntroductionReply("),'Introduction route is covered');
 assert.ok(page.includes("content:finishSaqrReply((ar?'## كتب جناح الهوية الوطنية"),'National identity route is covered');
