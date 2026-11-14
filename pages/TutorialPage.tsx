@@ -590,11 +590,10 @@ export default function TutorialPage() {
                 </div>
                 <span className="rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2 text-xs text-slate-600 dark:text-slate-300">{label('نوع الكتاب: الكل','Book type: All')}</span>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {[
                   { kind:label('كتاب ورقي','Physical book'), color:'from-blue-500 to-sky-500 border-blue-200'},
-                  { kind:label('رقمي عربي','Arabic digital'), color:'from-emerald-500 to-teal-400 border-emerald-200'},
-                  { kind:label('رقمي إنجليزي','English digital'), color:'from-rose-500 to-pink-500 border-rose-200'},
+                  { kind:label('كتاب رقمي','Digital book'), color:'from-emerald-500 to-teal-400 border-emerald-200'},
                   { kind:label('كتاب مقترح','Suggested book'), color:'from-purple-500 to-indigo-500 border-purple-200'}
                 ].map((card,index)=><article key={index} className={'homepage-alert-card group min-h-[200px] rounded-[1.75rem] border-4 bg-gradient-to-br p-4 sm:p-5 text-white shadow-lg transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl flex flex-col gap-4 '+card.color}>
                   <span className="self-start rounded-full border border-white/30 bg-white/20 px-3 py-1 text-[11px] font-black">{card.kind}</span>
