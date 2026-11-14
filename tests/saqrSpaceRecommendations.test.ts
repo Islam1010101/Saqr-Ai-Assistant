@@ -56,8 +56,11 @@ assert.ok(!ordinarySpaceSearch.some(b=>b.title==='أسطورة فى جانب ا�
 const fictionalSpace=searchSaqrBookCatalog('رشحلي رواية خيال عن النجوم',catalogs);
 assert.ok(fictionalSpace.some(b=>b.title==='أسطورة فى جانب النجوم'),
   'An explicit fantasy/story request may include the novel');
+for(const genreQuery of ['عايز رواية خيالية عن الفضاء','أبغي قصة خيالية عن النجوم']){
+  assert.equal(resolveSaqrCatalogEntity(genreQuery,catalogs),null,
+    'Genre/topic request must not be falsely resolved as a named catalogue title: '+genreQuery);
+}
 const actualGenreRequest=searchSaqrBookCatalog('عايز رواية خيالية عن الفضاء',catalogs);
-console.error('DEBUG SPACE GENRE', JSON.stringify({titles:actualGenreRequest.map(b=>b.title), namedEntity:resolveSaqrCatalogEntity('عايز رواية خيالية عن الفضاء',catalogs)}));
 assert.ok(actualGenreRequest.some(b=>b.title==='أسطورة فى جانب النجوم'),
   'Genre requests should discover recorded star-themed fiction');
 assert.ok(!actualGenreRequest.some(b=>b.title==='Astronomy in Color'),
