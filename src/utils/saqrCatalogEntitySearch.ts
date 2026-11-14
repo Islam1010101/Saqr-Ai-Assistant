@@ -47,8 +47,12 @@ const words=(text:string):string[]=>String(text||'')
   // while "علي" is a real person's name. Never merge them as stop words.
   .filter(word=>!!word && !NOISE.has(word) && !NOISE.has(normalize(word)))
   .map(normalize).filter(Boolean);
+// User query tokens already omit connective words. Apply the same rule
+// to recorded titles so "Death Of a Salesman" matches its complete title,
+// rather than an unrelated "In Death" series volume.
+const FIELD_CONNECTORS=new Set(['a','an','the','and','of','in','on','to','for','at']);
 const normalizedFieldWords=(text:string):string[]=>normalize(text).split(' ')
-  .filter(word=>!!word && !['د','dr','mr','mrs','prof'].includes(word))
+  .filter(word=>!!word&&!FIELD_CONNECTORS.has(word)&&!['د','dr','mr','mrs','prof'].includes(word))
   .map(word=>word.startsWith('ال')&&word.length>=6?word.slice(2):word);
 const normalizedQueryWords=(text:string):string[]=>words(text)
   .map(word=>word.startsWith('ال')&&word.length>=6?word.slice(2):word);
