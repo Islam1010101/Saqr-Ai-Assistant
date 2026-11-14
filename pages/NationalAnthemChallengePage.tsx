@@ -4,6 +4,8 @@ import { useLanguage } from '../App';
 import { canAccessNationalIdentity } from '../src/utils/nationalIdentityAccess';
 import { recordingToMp3 } from '../src/utils/podcastMp3';
 import './nationalHeritageTheme.css';
+import './nationalIdentityLanding.css';
+import './nationalAnthemChallenge.css';
 
 const COMMONS_AUDIO = 'https://upload.wikimedia.org/wikipedia/commons/transcoded/9/92/UAE_national_anthem.ogg/UAE_national_anthem.ogg.mp3';
 const COMMONS_OGG_FALLBACK = 'https://upload.wikimedia.org/wikipedia/commons/9/92/UAE_national_anthem.ogg';
@@ -303,42 +305,70 @@ export default function NationalAnthemChallengePage() {
     } catch { return ''; }
   })();
 
-  return <main dir={dir} className="national-heritage min-h-[100dvh] bg-[#f5f9f7] dark:bg-[#071b16] text-slate-900 dark:text-white pb-16">
-    <div className="mx-auto max-w-5xl px-4 pt-6 sm:px-6 sm:pt-10">
-      <nav className="flex flex-wrap items-center justify-between gap-3 mb-6" aria-label={t('التنقل','Navigation')}>
-        <Link to="/saqr-national-identity" className="rounded-xl border border-emerald-300 dark:border-emerald-700 bg-white dark:bg-emerald-950 px-5 py-3 text-sm font-black text-emerald-800 dark:text-emerald-100 hover:border-emerald-500">
+  return <main dir={dir} className="national-heritage nh-v2 nh-anthem-page relative min-h-[100dvh] overflow-hidden bg-[#f8fafc] dark:bg-[#061912] text-slate-900 dark:text-white">
+    <div className="nh-v2-shell relative mx-auto max-w-7xl px-4 pb-16 pt-5 sm:px-6 sm:pt-8 lg:px-8">
+      <nav className="nh-v2-nav relative z-10 mb-6 flex flex-wrap items-center justify-between gap-3" aria-label={t('التنقل','Navigation')}>
+        <Link to="/saqr-national-identity" className="nh-v2-back inline-flex min-h-11 items-center gap-2 rounded-2xl border border-emerald-200 bg-white/95 px-4 py-2.5 text-sm font-black text-emerald-800 shadow-sm transition hover:border-emerald-400 hover:shadow-md dark:border-emerald-900 dark:bg-slate-950 dark:text-emerald-200">
+          <svg className={`h-4 w-4 ${ar ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M19 12H5m7-7-7 7 7 7"/></svg>
           {t('العودة لتحديات الهوية الوطنية','Back to National Identity')}
         </Link>
-        <img src="/school-logo.png" alt="EFIPS" className="h-12 w-12 object-contain"/>
+        <div className="flex items-center gap-2 text-xs font-bold text-emerald-900 dark:text-emerald-100">
+          <img src="/school-logo.png" alt="EFIPS" className="h-9 w-9 object-contain"/>
+          <span>{t('مكتبة مدرسة صقر الإمارات','EFIPS School Library')}</span>
+        </div>
       </nav>
 
-      <section className="relative overflow-hidden rounded-[2rem] border border-emerald-700/20 bg-[#07513f] p-6 text-white shadow-xl sm:p-9">
-        <div className="absolute inset-x-0 top-0 flex h-2" aria-hidden="true">
-          <span className="w-1/4 bg-[#ec3543]"/><span className="w-1/4 bg-[#079050]"/><span className="w-1/4 bg-white"/><span className="w-1/4 bg-[#10191a]"/>
+      <section className="nh-hero nh-v2-hero nh-anthem-hero relative overflow-hidden text-white" aria-labelledby="anthem-challenge-heading">
+        <div className="absolute inset-x-0 top-0 z-10 flex h-2 overflow-hidden" aria-hidden="true">
+          <span className="w-1/4 bg-[#e83142]"/><span className="w-1/4 bg-[#078b4c]"/><span className="w-1/4 bg-white"/><span className="w-1/4 bg-[#131b1d]"/>
         </div>
-        <div className="relative grid gap-5 sm:grid-cols-[1fr_auto] sm:items-center">
-          <div>
-            <span className="rounded-full border border-white/25 bg-white/10 px-4 py-2 text-xs font-black">{t('تحديات صقر وهوية وطن','SAQR NATIONAL IDENTITY')}</span>
-            <h1 className="mt-5 text-3xl font-black sm:text-4xl">{t('تحدي صوت الاتحاد','Voice of the Union Challenge')}</h1>
-            <p className="mt-4 max-w-2xl text-sm font-semibold leading-8 text-emerald-50">
-              {t('غنِّ النشيد الوطني الإماراتي مع موسيقاه، ثم استمع إلى أدائك وحمّله بصيغة MP3.','Sing the UAE national anthem with its instrumental music, listen to your performance, and download a real MP3.')}
+        <div className="nh-v2-hero-grid nh-anthem-hero-grid relative grid items-center">
+          <div className="nh-v2-hero-copy relative z-10 min-w-0">
+            <p className="nh-v2-hero-kicker">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true"><path d="M5 3v18M5 4h14l-3 5 3 5H5"/></svg>
+              {t('صقر وهوية وطن · تحدي وطني','SAQR & NATIONAL IDENTITY · NATIONAL CHALLENGE')}
             </p>
-            {userName && <p className="mt-2 text-sm font-bold text-amber-100">{t('جاهز يا ','Ready, ')}{userName}{t('؟','?')}</p>}
+            <h1 id="anthem-challenge-heading" className="nh-v2-hero-heading font-black">{t('تحدي صوت الاتحاد','Voice of the Union')}</h1>
+            <p className="nh-v2-hero-description font-semibold">
+              {t('خلّ صوتك يعبّر عن حب الإمارات! غنِّ النشيد الوطني مع موسيقاه، سجّل أداءك واحتفظ به بصيغة MP3.','Let your voice celebrate the UAE! Sing along with the national anthem, record your performance and save it as an MP3.')}
+            </p>
+            {userName && <p className="mt-4 text-sm font-black text-amber-100">{t('جاهز تغنّي يا ','Ready to sing, ')}{userName}{t('؟','?')}</p>}
+            <div className="nh-anthem-steps mt-6 flex flex-wrap gap-2.5" aria-label={t('مراحل التحدي','Challenge stages')}>
+              <span>{t('استمع','Listen')}</span><span>{t('غنِّ','Sing')}</span><span>{t('سجّل','Record')}</span><span>{t('حمّل MP3','Save MP3')}</span>
+            </div>
           </div>
-          <div aria-hidden="true" className="grid h-28 w-28 place-items-center rounded-full border-4 border-white/20 bg-white/10 shadow-inner">
-            <MicrophoneIcon className="h-16 w-16 text-amber-100"/>
+          <div className="nh-hero-art nh-v2-hero-art nh-anthem-hero-art relative flex justify-center" role="img" aria-label={t('صقر يغنّي النشيد الوطني بسماعات وميكروفون','Saqr singing the anthem with headphones and microphone')}>
+            <span className="nh-v2-art-glow" aria-hidden="true"/>
+            <span className="nh-v2-art-orbit" aria-hidden="true"/>
+            <span className="nh-v2-art-orbit nh-v2-art-orbit--inner" aria-hidden="true"/>
+            <span className="nh-v2-symbol nh-v2-symbol--flag" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M5 21V3m0 2c5-3 9 3 14 0v11c-5 3-9-3-14 0"/></svg>
+            </span>
+            <span className="nh-v2-symbol nh-v2-symbol--compass" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M9 18V6l11-2v12M9 9l11-2"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg>
+            </span>
+            <span className="nh-v2-symbol nh-v2-symbol--star" aria-hidden="true">
+              <MicrophoneIcon className="h-8 w-8"/>
+            </span>
+            <img src="/SAQR%20Singer.png" alt="" className="nh-saqr nh-v2-character nh-anthem-singer" fetchPriority="high"/>
           </div>
         </div>
       </section>
 
-      <div className="mt-7 grid gap-6 lg:grid-cols-[1fr_260px]">
-        <section className="min-w-0 rounded-[1.7rem] border border-emerald-200 bg-white p-5 shadow-lg dark:border-emerald-900 dark:bg-[#0b2a22] sm:p-7" aria-labelledby="anthem-recorder-heading">
-          <h2 id="anthem-recorder-heading" className="text-xl font-black text-emerald-900 dark:text-emerald-100">{t('استديو تسجيل النشيد','Anthem recording studio')}</h2>
+      <div className="nh-anthem-workspace mt-7 grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(255px,.75fr)]">
+        <section className="nh-anthem-panel min-w-0 rounded-[1.85rem] border-2 border-emerald-200 bg-white p-5 shadow-xl dark:border-emerald-900 dark:bg-[#0b2a22] sm:p-8" aria-labelledby="anthem-recorder-heading">
+          <div className="mb-4 flex items-center gap-3">
+            <span className="nh-anthem-title-icon"><MicrophoneIcon className="h-6 w-6"/></span>
+            <div>
+              <p className="text-xs font-black tracking-wide text-amber-700 dark:text-amber-300">{t('رحلتك تبدأ هنا','YOUR STUDIO')}</p>
+              <h2 id="anthem-recorder-heading" className="text-xl font-black text-emerald-900 dark:text-emerald-100 sm:text-2xl">{t('استديو تسجيل النشيد','Anthem recording studio')}</h2>
+            </div>
+          </div>
           <p className="mt-2 text-sm leading-7 text-slate-600 dark:text-slate-300">
             {t('استمع إلى الموسيقى أولًا، ثم اضغط «ابدأ الغناء». يبدأ تسجيل صوتك مع الموسيقى في ملف واحد.','Preview the music, then select Start singing. Your voice and the backing track will be recorded together.')}
           </p>
 
-          <div className="mt-6 rounded-2xl bg-emerald-50 p-4 dark:bg-emerald-950/50">
+          <div className="nh-anthem-audio-card mt-6 rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 dark:border-emerald-800 dark:bg-emerald-950/50">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <strong className="text-sm font-black text-emerald-900 dark:text-emerald-100">{trackLabel}</strong>
               <span className="text-xs font-semibold text-emerald-800 dark:text-emerald-200">{formatTime(trackSeconds)}</span>
@@ -367,7 +397,7 @@ export default function NationalAnthemChallengePage() {
             </label>
           </div>
 
-          <div className="mt-7 rounded-2xl border border-emerald-200 bg-[#f8fbf9] p-4 dark:border-emerald-900 dark:bg-[#071e18]">
+          <div className="nh-anthem-progress mt-7 rounded-2xl border border-emerald-200 bg-[#f8fbf9] p-4 dark:border-emerald-900 dark:bg-[#071e18]">
             <div className="flex items-center justify-between gap-3">
               <span className="text-sm font-black text-emerald-950 dark:text-emerald-100">{busyRecording ? t('يتم تسجيل غنائك الآن','Recording your singing') : t('جاهز للتسجيل','Ready to record')}</span>
               <span className="text-sm font-black tabular-nums text-emerald-800 dark:text-emerald-200">{formatTime(elapsed)} / {formatTime(trackSeconds)}</span>
@@ -404,8 +434,8 @@ export default function NationalAnthemChallengePage() {
           </div>}
         </section>
 
-        <aside className="space-y-5">
-          <section className="rounded-[1.5rem] border border-amber-200 bg-amber-50 p-5 dark:border-amber-900 dark:bg-amber-950/30">
+        <aside className="nh-anthem-aside space-y-5">
+          <section className="nh-anthem-guide rounded-[1.7rem] border-2 border-amber-200 bg-amber-50 p-5 shadow-md dark:border-amber-900 dark:bg-amber-950/30">
             <h2 className="font-black text-amber-950 dark:text-amber-100">{t('خطوات التحدي','Challenge steps')}</h2>
             <ol className="mt-4 list-inside list-decimal space-y-3 text-sm font-semibold leading-7 text-amber-950 dark:text-amber-100">
               <li>{t('استخدم سماعات الرأس للحصول على تسجيل أوضح.','Use headphones for a cleaner recording.')}</li>
@@ -414,8 +444,8 @@ export default function NationalAnthemChallengePage() {
               <li>{t('استمع لنتيجتك وحمّل ملف MP3.','Listen to your result and download the MP3.')}</li>
             </ol>
           </section>
-          <section className="rounded-[1.5rem] border border-emerald-200 bg-white p-5 dark:border-emerald-900 dark:bg-[#0b2a22]">
-            <h2 className="font-black text-emerald-950 dark:text-emerald-100">{t('مصادر النشيد والخصوصية','Anthem sources & privacy')}</h2>
+          <section className="nh-anthem-sources rounded-[1.7rem] border-2 border-emerald-200 bg-white p-5 shadow-md dark:border-emerald-900 dark:bg-[#0b2a22]">
+            <h2 className="font-black text-emerald-950 dark:text-emerald-100">{t('مصادر النشيد','Anthem sources')}</h2>
             <p className="mt-3 text-xs font-semibold leading-6 text-slate-600 dark:text-slate-300">
               {t('الموسيقى الآلية: أداء فرقة البحرية الأمريكية، من Wikimedia Commons (ملف في النطاق العام).','Instrumental track: U.S. Navy Band performance via Wikimedia Commons (public-domain file).')}
             </p>
@@ -425,9 +455,6 @@ export default function NationalAnthemChallengePage() {
             <a href={OFFICIAL_ANTHEM} target="_blank" rel="noopener noreferrer" className="mt-3 block text-xs font-black text-emerald-700 underline dark:text-emerald-300">
               {t('كلمات النشيد من بروتوكول دبي','Official anthem text — Dubai Protocol')}
             </a>
-            <p className="mt-4 text-xs font-semibold leading-6 text-slate-600 dark:text-slate-300">
-              {t('الصوت يُسجَّل ويُخلَط محليًا في متصفحك. لا يُرفع التسجيل تلقائيًا للموقع أو إلى قاعدة البيانات.','Your voice is recorded and mixed locally in your browser. It is not automatically uploaded to the website or database.')}
-            </p>
           </section>
         </aside>
       </div>
