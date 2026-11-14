@@ -699,7 +699,7 @@ const HomePage: React.FC = () => {
                 </RevealSection>
 
                 <RevealSection delay={210}>
-                    <SaqrOrbitNavigation isAr={isAr} userType={userType} onMascotClick={handleMascotInteraction} showMascotBubble={showBubble} bursts={bursts} />
+                    <SaqrOrbitNavigation isAr={isAr} userType={userType} teacherId={userData?.teacher_id} onMascotClick={handleMascotInteraction} showMascotBubble={showBubble} bursts={bursts} />
                 </RevealSection>
 
                 <RevealSection delay={250}>
