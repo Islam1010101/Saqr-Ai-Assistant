@@ -64,7 +64,7 @@ assert.ok(server.includes('const found = catalogRequested ? findBooks(userMsg) :
 assert.ok(server.includes('Normal educational or creative chat (NOT a school catalogue search)'));
 assert.ok(server.includes('No school-catalogue search was requested.'));
 const page=readFileSync('pages/SmartSearchPage.tsx','utf8');
-assert.match(page,/const librarySearchIntent\s*=\s*isSaqrLibrarySearchIntent\(userQuery,\s*messages\)\s*\|\|\s*!!namedCatalogEntity/,
+assert.match(page,/const librarySearchIntent\s*=\s*!activeTeacherLesson\s*&&\s*\(isSaqrLibrarySearchIntent\(userQuery,\s*messages\)\s*\|\|\s*!!namedCatalogEntity\)/,
   'Genuine library search or exact verified title/author lookups can open catalog');
 assert.ok(page.includes('catalogueIntent: librarySearchIntent'));
 assert.ok(!server.includes("from '../src/utils/saqrIntentRouter'"));
