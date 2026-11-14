@@ -33,6 +33,7 @@ on:
       - 'src/utils/saqrOpenLibrary.js'
       - 'tests/saqrBookExpert.test.ts'
       - 'tests/resolveTsExtensionless.mjs'
+      - 'tests/catalogAuditCounts.test.ts'
       - '.github/workflows/saqr-book-expert.yml'
   push:
     branches: [main]
@@ -68,6 +69,7 @@ on:
       - 'src/utils/saqrOpenLibrary.js'
       - 'tests/saqrBookExpert.test.ts'
       - 'tests/resolveTsExtensionless.mjs'
+      - 'tests/catalogAuditCounts.test.ts'
       - '.github/workflows/saqr-book-expert.yml'
 jobs:
   verify:
