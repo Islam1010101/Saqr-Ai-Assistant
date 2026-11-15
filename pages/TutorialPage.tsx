@@ -3,6 +3,9 @@ import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { useLanguage, useTheme } from '../App';
 import TutorialFeatureShowcase from './TutorialFeatureShowcase';
+import TutorialPlatformDirectory from './TutorialPlatformDirectory';
+import './tutorialPageMobileParity.css';
+import { getSaqrNewsTicker } from '../src/data/saqrWhatsNew';
 import SaqrOrbitNavigation from '../src/components/SaqrOrbitNavigation';
 import '../src/components/EFIPSGlassVisualTheme.css';
 
@@ -281,8 +284,8 @@ const RevealSection: React.FC<{ children: React.ReactNode; delay?: number }> = (
   return (
     <div
       ref={sectionRef}
-      className={'transform transition-all duration-700 ease-in-out ' + (isVisible ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-10 scale-95 opacity-0')}
-      style={{ transitionDelay: delay + 'ms' }}
+      className={'transform transition-[opacity,transform] duration-300 ease-out ' + (isVisible ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0')}
+      style={{ transitionDelay: Math.min(delay,80) + 'ms' }}
     >
       {children}
     </div>
@@ -301,6 +304,9 @@ export default function TutorialPage() {
   const [bursts, setBursts] = useState<BurstItem[]>([]);
   const [showBubble, setShowBubble] = useState(false);
   const [readingPreviewOpen, setReadingPreviewOpen] = useState(false);
+  const [suggestionPreviewOpen, setSuggestionPreviewOpen] = useState(false);
+  const [previewBookType, setPreviewBookType] = useState<'all'|'physical'|'digital'>('all');
+  const [newsPaused, setNewsPaused] = useState(false);
   const hasSignedInSession = React.useMemo(() => {
     try {
       const type = localStorage.getItem('user_type');
@@ -312,13 +318,13 @@ export default function TutorialPage() {
   const label = (ar: string, en: string) => isAr ? ar : en;
 
   useEffect(() => {
-    if (!readingPreviewOpen) return;
+    if (!readingPreviewOpen && !suggestionPreviewOpen) return;
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setReadingPreviewOpen(false);
+      if (event.key === 'Escape') { setReadingPreviewOpen(false); setSuggestionPreviewOpen(false); }
     };
     window.addEventListener('keydown', closeOnEscape);
     return () => window.removeEventListener('keydown', closeOnEscape);
-  }, [readingPreviewOpen]);
+  }, [readingPreviewOpen, suggestionPreviewOpen]);
 
   const handleMascotInteraction = (event?: React.MouseEvent<HTMLElement>) => {
     const rect = event?.currentTarget.getBoundingClientRect() ?? { left: window.innerWidth / 2 - 110, top: window.innerHeight / 2 - 100, width: 220, height: 200 };
@@ -420,7 +426,7 @@ export default function TutorialPage() {
 
       {/* The real site's pill-shaped navigation, reproduced without live links. */}
       <header className="fixed top-4 left-0 right-0 z-[100] flex justify-center px-2">
-        <div className="tutorial-topbar w-full max-w-[98%] px-4 py-2.5 rounded-[2rem] border-4 border-white/70 dark:border-slate-700/40 flex items-center justify-between md:justify-center gap-4 shadow-2xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-2xl">
+        <div className="tutorial-topbar efips-navbar-surface w-full max-w-[98%] md:w-fit px-4 py-2.5 rounded-[2rem] border-4 border-white/70 dark:border-slate-700/40 flex items-center justify-between md:justify-center gap-4 shadow-2xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-2xl">
           <HintTarget id="school-logo" title={label('هوية المدرسة', 'School identity')} description={label('شعار مدرسة صقر الإمارات الدولية الخاصة، كما يظهر في الموقع الفعلي.', 'The Emirates Falcon International Private School logo used throughout the live site.')} className="shrink-0" tooltipBelow {...hintState}>
             <div className="flex items-center gap-2 group flex-shrink-0 me-3 animate-fade-in-up" style={{ animationDelay: '0ms' }}>
               <img src="/school-logo.png" alt="EFIPS" className="h-8 w-8 md:h-10 md:w-10 object-contain dark:brightness-0 dark:invert shrink-0 transition-transform group-hover:scale-110" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
@@ -463,8 +469,8 @@ export default function TutorialPage() {
         </div>
       </header>
 
-      <main className="relative z-10 flex w-full flex-col items-center p-4 pt-28 transition-colors duration-500 md:p-8 md:pt-28">
-        <div className="w-full max-w-[1300px] mt-3 flex flex-col gap-8 md:mt-2 md:gap-10">
+      <main className="relative z-10 flex w-full min-w-0 flex-col items-center px-3 pb-16 pt-28 transition-colors duration-500 sm:px-4 md:px-8 md:pt-28">
+        <div className="efips-home-dashboard w-full min-w-0 max-w-[1300px] mt-10 flex flex-col gap-8 md:mt-6 md:gap-10">
           <HintTarget id="welcome-panel" title={label('منطقة الترحيب', 'Welcome panel')} description={label('يعرض الموقع الحقيقي ترحيبًا مخصصًا حسب الحساب. تم إخفاء اسم المستخدم ونوع الحساب في نسخة الزائر.', 'The live site personalizes this area by account. User names and account roles are hidden in this visitor tour.')} interactive={false} {...hintState}>
             <section className="mx-auto max-w-4xl space-y-3 text-center">
               <div className="inline-block rounded-full border-2 border-slate-200 bg-white/90 px-5 py-2 text-xs font-bold text-slate-700 shadow-md backdrop-blur-md dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-200 md:text-sm">
@@ -497,15 +503,27 @@ export default function TutorialPage() {
             </section>
           </HintTarget>
 
+          <nav className="tutorial-review-jumps mx-auto flex w-full max-w-5xl flex-wrap items-center justify-center gap-2" aria-label={label('اختصارات الجولة', 'Tour review shortcuts')}>
+            <a href="#tutorial-directory" className="rounded-xl border border-emerald-300 bg-white px-3 py-2.5 text-xs font-black text-emerald-800 shadow-sm dark:border-emerald-800 dark:bg-slate-900 dark:text-emerald-200">{label('كل صفحات صقر','All platform pages')}</a>
+            <a href="#tutorial-challenges-details" className="rounded-xl border border-violet-200 bg-white px-3 py-2.5 text-xs font-black text-violet-800 shadow-sm dark:border-violet-900 dark:bg-slate-900 dark:text-violet-200">{label('الألعاب والتحديات','Games & challenges')}</a>
+            <a href="#tutorial-identity-details" className="rounded-xl border border-amber-300 bg-white px-3 py-2.5 text-xs font-black text-amber-900 shadow-sm dark:border-amber-800 dark:bg-slate-900 dark:text-amber-200">{label('صقر وهوية وطن','UAE heritage')}</a>
+          </nav>
+
           <HintTarget id="news-banner" title={label('جديدنا — يظهر فورًا', 'What\'s New — visible immediately')} description={label('يعرض شريط جديدنا خدمات المكتبة والتحديات والألعاب وآخر إضافات صقر بالعربية والإنجليزية؛ ويمكن إيقاف الشريط مؤقتًا لقراءة العبارات. هذه نسخة توضيحية دون بيانات حية.', 'What\'s New showcases Saqr services, games, challenges, and recent additions in Arabic and English. You can pause the ribbon to read. This is an illustrative preview, not a live feed.')} interactive={false} {...hintState}>
-            <div className="tutorial-news-ribbon relative z-30 mx-auto flex h-14 w-full max-w-5xl items-center overflow-hidden rounded-full border-4 border-amber-300 bg-white shadow-lg dark:border-amber-700 dark:bg-slate-800 md:h-16">
-              <div className="relative z-20 flex h-full shrink-0 items-center gap-2 bg-amber-400 px-5 text-xs font-black uppercase text-slate-900 md:px-8 md:text-sm">
-                <span className="h-3 w-3 animate-ping rounded-full bg-white" />
+            <div data-news-paused={newsPaused} className="tutorial-news-ribbon efips-news-ribbon w-full max-w-5xl mx-auto relative z-30 flex items-center bg-white dark:bg-slate-800 border-4 border-amber-300 dark:border-amber-700 rounded-full shadow-lg overflow-hidden h-14 md:h-16">
+              <button type="button" onClick={() => setNewsPaused(p => !p)} aria-pressed={newsPaused}
+                aria-label={newsPaused ? label('استئناف جديدنا', 'Resume news') : label('إيقاف جديدنا لقراءة الأخبار', 'Pause the news to read')}
+                className="bg-amber-400 text-slate-900 font-black px-3 sm:px-5 md:px-8 h-full flex items-center gap-2 relative z-20 shrink-0 text-xs md:text-sm uppercase focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-600">
+                <span className="w-2.5 h-2.5 bg-white rounded-full shrink-0" aria-hidden="true"/>
                 {label('جديدنا', "What's New")}
-              </div>
-              <div className="flex h-full flex-1 items-center overflow-hidden bg-amber-50 dark:bg-slate-800">
-                <div className="min-w-0 px-4 text-xs font-bold leading-6 text-slate-800 dark:text-slate-100 md:text-sm">
-                  {label('صوت الاتحاد وتسجيل MP3 · خمس مغامرات لصقر وهوية وطن · بين السطور · رتّب المكتبة · المؤلف الصغير · ترشيحات تناسب لغتك · بودكاست صقر · وكل خدمات مكتبتنا!', "Voice of the Union MP3 · five UAE heritage quests · Between the Lines · Organize the Library · Little Author · reading picks in your language · Saqr Podcast · and more!")}
+                <svg className="w-3.5 h-3.5 shrink-0 opacity-80" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                  {newsPaused ? <path d="M4 2.5v11l9-5.5-9-5.5Z"/> : <path d="M3 2h3v12H3zm7 0h3v12h-3z"/>}
+                </svg>
+              </button>
+              <div className="flex-1 min-w-0 overflow-hidden h-full flex items-center bg-amber-50 dark:bg-slate-800">
+                <div aria-live="off" className={`whitespace-nowrap inline-block ${isAr ? 'animate-marquee-rtl' : 'animate-marquee-ltr'} text-slate-800 dark:text-slate-100 font-bold text-xs md:text-base px-4`}
+                  style={{ animationDuration: isAr ? '205s' : '235s' }}>
+                  {getSaqrNewsTicker(locale)}
                 </div>
               </div>
             </div>
@@ -568,7 +586,7 @@ export default function TutorialPage() {
 
 
 
-          <details className="mx-auto w-full max-w-5xl rounded-[1.5rem] border border-rose-100 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 p-4 sm:p-5 shadow-sm">
+          <details defaultOpen className="mx-auto w-full max-w-5xl rounded-[1.5rem] border border-rose-100 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 p-4 sm:p-5 shadow-sm">
             <summary className="cursor-pointer min-h-11 flex items-center text-base font-black text-rose-700 dark:text-rose-300">
               {label('التعرف على تفاصيل التحديات والهوية الوطنية','Explore the activities inside Saqr Challenges and National Identity')}
             </summary>
@@ -588,14 +606,23 @@ export default function TutorialPage() {
                   <span className="rounded-xl bg-emerald-600 text-white px-4 py-2.5 font-black text-xs">{label('اقتراحات القراءة','Suggestions')}</span>
                   
                 </div>
-                <span className="rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2 text-xs text-slate-600 dark:text-slate-300">{label('نوع الكتاب: الكل','Book type: All')}</span>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-200">{label('نوع الكتاب','Book type')}
+                  <select value={previewBookType} onChange={e=>setPreviewBookType(e.target.value as typeof previewBookType)}
+                    className="ms-2 min-h-11 rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                    <option value="all">{label('الكل','All')}</option>
+                    <option value="physical">{label('ورقي','Physical')}</option>
+                    <option value="digital">{label('رقمي','Digital')}</option>
+                  </select>
+                </label>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                  { kind:label('كتاب ورقي','Physical book'), color:'from-blue-500 to-sky-500 border-blue-200'},
-                  { kind:label('كتاب رقمي','Digital book'), color:'from-emerald-500 to-teal-400 border-emerald-200'},
-                  { kind:label('كتاب مقترح','Suggested book'), color:'from-purple-500 to-indigo-500 border-purple-200'}
-                ].map((card,index)=><article key={index} className={'homepage-alert-card group min-h-[200px] rounded-[1.75rem] border-4 bg-gradient-to-br p-4 sm:p-5 text-white shadow-lg transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl flex flex-col gap-4 '+card.color}>
+                  { format:'physical', kind:label('كتاب ورقي','Physical book'), color:'from-blue-500 to-sky-500 border-blue-200'},
+                  { format:'digital', kind:label('كتاب رقمي','Digital book'), color:'from-emerald-500 to-teal-400 border-emerald-200'},
+                  { format:'physical', kind:label('كتاب ورقي','Physical book'), color:'from-rose-500 to-pink-500 border-rose-200'},
+                  { format:'digital', kind:label('كتاب رقمي','Digital book'), color:'from-amber-500 to-orange-400 border-amber-200'}
+                ].filter(card=>previewBookType==='all'||card.format===previewBookType)
+                 .map((card,index)=><article key={index} className={'homepage-alert-card group min-h-[200px] rounded-[1.75rem] border-4 bg-gradient-to-br p-4 sm:p-5 text-white shadow-lg transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl flex flex-col gap-4 '+card.color}>
                   <span className="self-start rounded-full border border-white/30 bg-white/20 px-3 py-1 text-[11px] font-black">{card.kind}</span>
                   <div className="flex items-start gap-2 justify-between">
                     <div className="flex-1 space-y-2">
@@ -611,7 +638,7 @@ export default function TutorialPage() {
                 </article>)}
               </div>
               <div className="mt-5 flex justify-center">
-                <span className="rounded-xl border-2 border-emerald-400 bg-transparent px-6 py-3 text-sm font-black text-emerald-700 dark:text-emerald-300">{label('عرض المزيد — نافذة منبثقة','View more — popup dialog')}</span>
+                <button type="button" onClick={()=>setSuggestionPreviewOpen(true)} className="min-h-11 rounded-xl border-2 border-emerald-400 bg-transparent px-6 py-3 text-sm font-black text-emerald-700 dark:text-emerald-300">{label('عرض المزيد','View more')}</button>
               </div>
               <p className="mt-4 text-center text-[11px] font-semibold text-slate-500 dark:text-slate-400">{label('معاينة تعليمية بدون بيانات أو استعلامات حقيقية','Sample-only preview with no live data or requests')}</p>
             </section>
@@ -671,6 +698,8 @@ export default function TutorialPage() {
             </>
           </section>
 
+          <TutorialPlatformDirectory isAr={isAr} />
+
           <section className="rounded-[2rem] border border-emerald-200 bg-white/80 p-5 shadow-sm backdrop-blur-xl dark:border-emerald-900 dark:bg-slate-900/80 sm:p-7">
             <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
               <div>
@@ -693,6 +722,30 @@ export default function TutorialPage() {
           </span>
         </div>
       </HintTarget>
+
+      {suggestionPreviewOpen && createPortal(
+        <div role="presentation" onMouseDown={event=>{if(event.target===event.currentTarget)setSuggestionPreviewOpen(false);}}
+          className="fixed inset-0 z-[6000] flex items-center justify-center bg-slate-950/75 p-3 sm:p-6">
+          <div role="dialog" aria-modal="true" aria-labelledby="tutorial-suggestion-dialog-title" dir={dir}
+            className="w-full max-w-xl overflow-hidden rounded-[1.75rem] border-2 border-emerald-200 bg-white shadow-2xl dark:border-emerald-900 dark:bg-slate-950">
+            <header className="flex items-start justify-between gap-4 bg-gradient-to-br from-emerald-600 to-teal-700 p-5 text-white">
+              <h2 id="tutorial-suggestion-dialog-title" className="text-xl font-black">{label('اقتراحات قراءة إضافية','More reading suggestions')}</h2>
+              <button type="button" onClick={()=>setSuggestionPreviewOpen(false)} aria-label={label('إغلاق','Close')}
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/40 bg-white/15 text-lg font-black text-white">×</button>
+            </header>
+            <div className="p-5 sm:p-7">
+              <p className="text-sm font-semibold leading-8 text-slate-700 dark:text-slate-200">
+                {label('في المنصة الحقيقية تعرض هذه النافذة عناوين إضافية مناسبة للمرحلة والعمر والاهتمامات باللغة المختارة، ويمكن إضافة الكتب إلى تحدي القراءة. هنا لا نعرض أي بيانات مستخدم حقيقية.',
+                  'The real portal shows more age- and interest-appropriate titles in the selected language, with options to add them to the reading challenge. This preview shows no private records.')}
+              </p>
+              <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-xs font-bold leading-7 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">
+                {label('نوع الكتاب: الكل – ورقي – رقمي. الكتب الرقمية تتبع لغة الواجهة تلقائيًا.',
+                  'Book type: All – Physical – Digital. Digital picks automatically follow the interface language.')}
+              </div>
+            </div>
+          </div>
+        </div>, document.body
+      )}
 
       {readingPreviewOpen && createPortal(
         <div role="presentation" onMouseDown={event => {if(event.target===event.currentTarget)setReadingPreviewOpen(false);}}

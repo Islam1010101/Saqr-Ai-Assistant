@@ -1,7 +1,7 @@
 import React from 'react';
 import './tutorialFeatureShowcase.css';
 
-type FeatureIconName = 'book' | 'shelves' | 'microphone' | 'passport' | 'words' | 'detective' | 'flag' | 'pavilion' | 'students' | 'calendar' | 'report' | 'borrowing';
+type FeatureIconName = 'book' | 'shelves' | 'microphone' | 'passport' | 'words' | 'detective' | 'flag' | 'pavilion' | 'students' | 'calendar' | 'report' | 'borrowing' | 'anthem';
 
 function FeatureIcon({ name }: { name: FeatureIconName }) {
   const common = {fill:'none',stroke:'currentColor',strokeWidth:1.85,strokeLinecap:'round' as const,strokeLinejoin:'round' as const};
@@ -13,6 +13,7 @@ function FeatureIcon({ name }: { name: FeatureIconName }) {
     {name==='words' && <><path d="M4 5h16M12 3v2m-6 4h12m-2-4c-.5 6-4 11-10 14m4-9c1 4 4 7 8 9"/><path d="m15 19 2-5 2 5m-3-2h2"/></>}
     {name==='detective' && <><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5M8 11l2 2 4-5"/></>}
     {name==='flag' && <><path d="M5 22V3m0 2c5-4 9 4 15 0v12c-6 4-10-4-15 0"/></>}
+    {name==='anthem' && <><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0m-7 7v4m-4 0h8M17 5l4 2v5"/></>}
     {name==='pavilion' && <><path d="M3 10 12 3l9 7v10H3V10ZM7 20v-8h10v8M3 20h18"/></>}
     {name==='students' && <><circle cx="9" cy="8" r="3"/><path d="M2 20v-2a7 7 0 0 1 14 0v2m1-15a3 3 0 0 1 0 6m1 4c3 0 4 2 4 5"/></>}
     {name==='calendar' && <><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18m-13 5 2 2 5-5"/></>}
@@ -33,9 +34,10 @@ export default function TutorialFeatureShowcase({ isAr }: { isAr:boolean }) {
     {id:'passport',icon:'passport',tone:'emerald',marker:'01',title:l('جواز صقر الثقافي','Saqr Cultural Passport'),description:l('اكتشف الإمارات السبع، واقرأ القصص واجمع أختام جواز صقر.','Explore all seven emirates, read their stories and collect passport stamps.'),detail:l('مهام قراءة وبحث بمصادر وكتب، تتقدم فيها عبر مستويات الجواز.','Reading and research activities using sources and books across passport levels.')},
     {id:'words',icon:'words',tone:'gold',marker:'02',title:l('كنوز لغتنا الإماراتية','Treasures of Emirati Language'),description:l('اكتشف معاني المفردات الإماراتية من المعجم من خلال عشرة أسئلة.','Explore Emirati vocabulary using the dictionary through ten questions.'),detail:l('تُعرض الكلمات والمراجع ضمن نشاط تعليمي متعدد المستويات.','Words and reference material are presented in a graded learning challenge.')},
     {id:'archive',icon:'detective',tone:'sky',marker:'03',title:l('محقق ذاكرة الوطن','Heritage Research Detective'),description:l('حقق في أدلة وأسئلة عشوائية من مصادر تراثية موثوقة.','Investigate randomized questions and evidence from reliable heritage sources.'),detail:l('عشر مسائل في كل جولة لتدريب مهارات التحقق والبحث.','Ten questions per round to practise source verification and research.')},
-    {id:'flag',icon:'flag',tone:'flag',marker:'04',title:l('تحدي راية المجد','Flag of Glory Challenge'),description:l('أجب عن أسئلة يوم العلم، وساعد العلم الإماراتي على الارتفاع.','Answer UAE Flag Day questions to raise the national flag.'),detail:l('تحدٍّ متدرج بالمعلومات والمعالم الإماراتية ومؤثرات احتفالية.','Progressive UAE facts and landmarks with celebratory effects.')},
-    {id:'pavilion',icon:'pavilion',tone:'forest',marker:'05',title:l('جناح كتب الهوية الوطنية','National Identity Book Pavilion'),description:l('تصفح كتب المكتبة المتعلقة بالتاريخ والتراث والهوية الوطنية.','Browse library books on UAE history, heritage and national identity.'),detail:l('دليل مستقل للكتب المرتبطة بالهوية الوطنية، خارج ألعاب التحديات.','A separate catalog for national identity books, distinct from the games.')}
+    {id:'flag',icon:'flag',tone:'flag',marker:'04',title:l('تحدي راية المجد','Flag of Glory Challenge'),description:l('أجب عن أسئلة يوم العلم، وساعد العلم الإماراتي على الارتفاع.','Answer UAE Flag Day questions to raise the national flag.'),detail:l('تحدٍّ بمؤقت سريع وأسئلة متدرجة ومؤثرات احتفالية.','Timed, progressive UAE flag questions with celebratory effects.')},
+    {id:'anthem',icon:'anthem',tone:'coral',marker:'05',title:l('تحدي صوت الاتحاد','Voice of the Union'),description:l('غنّ النشيد الوطني الإماراتي مع الموسيقى، وسجّل غناءك وحمّله بصيغة MP3.','Sing the UAE national anthem with instrumental music, record and download your MP3.'),detail:l('استديو غناء متوافق مع الهاتف، مع الاستماع والتسجيل ومؤشر التقدم وتنزيل الملف الصوتي.','A mobile-friendly singing studio with preview, recording, progress and audio download.')}
   ];
+  const pavilionItem:Entry = {id:'pavilion',icon:'pavilion',tone:'forest',marker:'+',title:l('جناح كتب الهوية الوطنية','National Identity Book Pavilion'),description:l('استكشف كتب التاريخ والتراث الإماراتي في ركن مستقل عن التحديات الخمسة.','Explore UAE history and heritage books in a dedicated pavilion, separate from the five challenges.'),detail:l('يمكن فتح الكتب المتاحة من المكتبة الرقمية أو التعرف إلى الكتاب في الفهرس، وفق صلاحيات المستخدم.','Open available digital titles or locate books in the catalog, according to school permissions.')};
 
   const card=(item:Entry,index:number)=><article key={item.id} className={'tutorial-showcase-card tutorial-showcase-card--'+item.tone} style={{animationDelay:index*85+'ms'}}>
     <div className="tutorial-showcase-card-top">
@@ -71,11 +73,12 @@ export default function TutorialFeatureShowcase({ isAr }: { isAr:boolean }) {
         <div className="tutorial-showcase-head-copy">
           <span className="tutorial-showcase-eyebrow">{l('داخل بطاقة صقر وهوية وطن','INSIDE SAQR & NATIONAL IDENTITY')}</span>
           <h2 id="tutorial-identity-title">{l('تحديات تراثنا وجناح كتب الهوية','Heritage challenges and the book pavilion')}</h2>
-          <p>{l('أربع تجارب ثقافية وتاريخية، وجناح مستقل لكتب الهوية الوطنية، ضمن قسم واحد منظم وواضح.','Four cultural and historical challenges, plus a dedicated identity book collection, in one accessible section.')}</p>
+          <p>{l('خمسة تحديات وطنية، وجناح مستقل لكتب الهوية الوطنية؛ تمامًا مثل صفحة صقر وهوية وطن الفعلية.','Five national identity challenges plus a dedicated book pavilion, just like the real Saqr & National Identity page.')}</p>
         </div>
         <div className="tutorial-showcase-flag" aria-hidden="true"><span className="tutorial-showcase-flag-red"/><span className="tutorial-showcase-flag-stripes"><span/><span/><span/></span></div>
       </header>
       <div className="tutorial-showcase-grid tutorial-showcase-heritage-grid">{heritageItems.map(card)}</div>
+      <div className="tutorial-showcase-pavilion">{card(pavilionItem,5)}</div>
     </section>
 
   </div>;

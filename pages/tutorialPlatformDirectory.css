@@ -1,0 +1,82 @@
+/* Public review deck: same emerald/teal, rounded cards and breakpoints as EFIPS home.
+   Grid layouts follow the live home (1/2/4) and national challenges (1/2/3).
+   Contained, static surfaces avoid Safari compositing work on narrow devices. */
+.tutorial-directory{width:100%;min-width:0;margin-inline:auto;max-width:1300px;border-radius:32px;border:1px solid #c9e6dc;background:linear-gradient(130deg,#f5fcf9,#f8fafc);padding:clamp(17px,3vw,30px);color:#16392e}
+.dark .tutorial-directory{background:linear-gradient(130deg,#102820,#0c1e22);border-color:#255549;color:#ecfff7}
+.tutorial-directory *{min-width:0}
+.tutorial-directory-head{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:22px}
+.tutorial-directory-head>div{max-width:850px}
+.tutorial-directory-head>img{width:clamp(80px,11vw,125px);height:clamp(80px,11vw,125px);object-fit:contain;flex-shrink:0}
+.tutorial-directory-kicker{font-size:11px;font-weight:900;letter-spacing:.07em;color:#0a8164}
+.dark .tutorial-directory-kicker{color:#7ce8c2}
+.tutorial-directory h2{font-size:clamp(25px,3vw,37px);line-height:1.45;font-weight:900;margin:3px 0 7px}
+.tutorial-directory-head p:not(.tutorial-directory-kicker){font-size:clamp(12px,1.3vw,15px);line-height:1.8;color:#516c65;font-weight:650}
+.dark .tutorial-directory-head p:not(.tutorial-directory-kicker){color:#b6d4c8}
+.tutorial-directory-filters{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-block:15px}
+.tutorial-directory-tabs{display:flex;flex-wrap:wrap;gap:7px}
+.tutorial-directory-tabs button{min-height:42px;padding:9px 13px;font-size:12px;font-weight:900;border:1px solid #c1e1d2;border-radius:14px;background:#fff;color:#145544;touch-action:manipulation;transition:background-color .18s,color .18s}
+.tutorial-directory-tabs button.is-selected{background:#086447;color:#fff;border-color:#086447}
+.dark .tutorial-directory-tabs button{background:#162f2b;color:#e0fff3;border-color:#3c645a}
+.dark .tutorial-directory-tabs button.is-selected{background:#15966b;color:#071c17}
+.tutorial-directory-role{display:flex;flex-wrap:wrap;align-items:center;gap:9px;font-weight:900;font-size:12px;color:#315c4f}
+.dark .tutorial-directory-role{color:#d5eee4}
+.tutorial-directory-role select{min-height:44px;max-width:100%;background:#fff;color:#194a3b;border-radius:12px;border:1px solid #b4dace;padding:8px 10px}
+.dark .tutorial-directory-role select{background:#14362e;color:#fff;border-color:#386d5d}
+.tutorial-directory :is(button,summary,select):focus-visible{outline:3px solid #d7a852;outline-offset:3px}
+.tutorial-directory-count{margin:0 0 14px;font-size:11px;font-weight:850;color:#586f65}
+.dark .tutorial-directory-count{color:#b9d3c8}
+.tutorial-directory-group{margin-top:24px}
+.tutorial-directory-group-head{display:flex;align-items:center;gap:12px;margin-bottom:13px;border-bottom:1px solid #b9dfce;padding-bottom:12px}
+.dark .tutorial-directory-group-head{border-color:#326e54}
+.tutorial-directory-group-head img{width:64px;height:64px;object-fit:contain}
+.tutorial-directory-group-head h3{font-size:clamp(18px,2.4vw,26px);line-height:1.4;font-weight:950;color:#075f44}
+.dark .tutorial-directory-group-head h3{color:#e5fff2}
+.tutorial-directory-group-head p{font-size:12px;line-height:1.7;font-weight:650;color:#61756c}
+.dark .tutorial-directory-group-head p{color:#b5d4c8}
+.tutorial-directory-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(11px,1.5vw,18px)}
+.tutorial-directory-card{display:flex;flex-direction:column;gap:9px;border:2px solid #cae1d8;border-radius:clamp(19px,2.2vw,27px);background:#fff;padding:clamp(14px,1.6vw,19px);box-shadow:0 7px 21px rgba(6,70,48,.08);overflow-wrap:anywhere}
+.dark .tutorial-directory-card{background:#102f28;border-color:#346358}
+.tutorial-directory-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:9px}
+.tutorial-directory-card-head img{width:61px;height:61px;object-fit:contain}
+.tutorial-directory-ordinal{font-size:13px;font-weight:900;color:#0c8062;letter-spacing:.1em}
+.dark .tutorial-directory-ordinal{color:#7eecc2}
+.tutorial-directory-mark{display:grid;place-items:center;width:49px;height:49px;border-radius:15px;background:#e2f5ec;color:#087759}
+.tutorial-directory-mark svg{width:24px;height:24px}
+.dark .tutorial-directory-mark{background:#20493e;color:#adf6cf}
+.tutorial-directory-card h4{font-size:clamp(15px,1.45vw,18px);font-weight:900;line-height:1.52;color:#07583f}
+.dark .tutorial-directory-card h4{color:#f0fff6}
+.tutorial-directory-card>p{font-size:12px;line-height:1.8;font-weight:675;color:#4f675d;flex:1}
+.dark .tutorial-directory-card>p{color:#b9d6cb}
+.tutorial-directory-card-footer{display:flex;flex-direction:column;align-items:stretch;gap:10px;margin-top:auto;padding-top:10px;border-top:1px solid #e0eae5}
+.dark .tutorial-directory-card-footer{border-color:#2b5648}
+.tutorial-directory-card-footer>span{font-size:10.5px;font-weight:900;color:#0c6c52}
+.dark .tutorial-directory-card-footer>span{color:#9ee8c4}
+.tutorial-directory-card details{font-size:12px;line-height:1.8}
+.tutorial-directory-card summary{min-height:35px;display:flex;align-items:center;cursor:pointer;font-size:11px;font-weight:900;color:#076b52;list-style-position:inside;touch-action:manipulation}
+.dark .tutorial-directory-card summary{color:#8be3bf}
+.tutorial-directory-card details p{margin:5px 0;font-size:11.5px;color:#546b61;line-height:1.75}
+.dark .tutorial-directory-card details p{color:#c9e0d5}
+.tutorial-directory-card code{display:block;direction:ltr;text-align:start;overflow-wrap:anywhere;padding:6px;border-radius:8px;background:#ebf6ef;color:#164a36;font-size:11px}
+.dark .tutorial-directory-card code{background:#25483c;color:#dcffef}
+@media(max-width:1020px){.tutorial-directory-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:660px){
+ .tutorial-directory{padding:15px 12px 22px;border-radius:24px}
+ .tutorial-directory-head{gap:8px;margin-bottom:14px}
+ .tutorial-directory-head img{width:68px;height:70px}
+ .tutorial-directory h2{font-size:23px}
+ .tutorial-directory-head p:not(.tutorial-directory-kicker){font-size:11.5px;line-height:1.7}
+ .tutorial-directory-filters{flex-direction:column;align-items:stretch}
+ .tutorial-directory-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}
+ .tutorial-directory-tabs button{width:100%;padding:10px 6px;font-size:11px;text-align:center;min-height:44px}
+ .tutorial-directory-role{justify-content:space-between;gap:6px}
+ .tutorial-directory-role select{max-width:58%;font-size:12px}
+ .tutorial-directory-grid{grid-template-columns:minmax(0,1fr);gap:11px}
+ .tutorial-directory-group{margin-top:18px}
+ .tutorial-directory-group-head img{width:51px;height:51px}
+ .tutorial-directory-card{padding:15px;border-radius:19px;gap:7px}
+ .tutorial-directory-card-head img{height:49px;width:49px}
+ .tutorial-directory-card>p{font-size:12px}
+}
+@media(max-width:375px){.tutorial-directory-tabs button{font-size:10.5px}.tutorial-directory-head>img{width:55px}}
+@media(hover:none),(pointer:coarse){.tutorial-directory-card{transition:none}}
+@media(prefers-reduced-motion:reduce){.tutorial-directory *{animation:none!important;transition:none!important}}
