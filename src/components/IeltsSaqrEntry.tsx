@@ -1,14 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
+import IeltsListeningPractice from './IeltsListeningPractice';
 import { IELTS_SELF_TEST_CHOICES, ieltsSaqrOpening, type IeltsSelfTestLocale, type IeltsSelfTestSkill } from '../utils/ieltsSaqrPractice';
 
 export default function IeltsSaqrEntry({
   locale, onChoose, disabled,
 }: {
   locale:IeltsSelfTestLocale;
-  onChoose:(skill:IeltsSelfTestSkill)=>void;
+  onChoose:(skill:IeltsSelfTestSkill, listeningPrompt?:string)=>void;
   disabled?:boolean;
 }) {
   const ar=locale==='ar';
+  const [listeningOpen, setListeningOpen] = useState(false);
+  if (listeningOpen) return <IeltsListeningPractice locale={locale} disabled={disabled}
+    onBack={() => setListeningOpen(false)}
+    onReview={prompt => onChoose('listening', prompt)} />;
   return (
     <section className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 overflow-y-auto px-4 py-5 text-center" aria-label={ar?'اختبر نفسك مع صقر':'Test yourself with Saqr'}>
       <div className="relative flex size-28 items-center justify-center rounded-full border-2 border-emerald-200 bg-emerald-50 shadow-lg dark:border-emerald-800 dark:bg-emerald-950/40 sm:size-36">
@@ -25,7 +30,7 @@ export default function IeltsSaqrEntry({
         <div className="mt-4 flex flex-wrap justify-center gap-2">
           {IELTS_SELF_TEST_CHOICES.map(choice=>(
             <button type="button" key={choice.id} disabled={disabled}
-              onClick={()=>onChoose(choice.id)}
+              onClick={()=>choice.id==='listening' ? setListeningOpen(true) : onChoose(choice.id)}
               className="inline-flex min-h-11 items-center justify-center rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2 text-sm font-black text-emerald-950 transition hover:border-emerald-700 hover:bg-emerald-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-700 disabled:opacity-50 dark:border-emerald-700 dark:bg-emerald-950 dark:text-emerald-100 dark:hover:bg-emerald-900">
               {ar?choice.ar:choice.en}
             </button>
