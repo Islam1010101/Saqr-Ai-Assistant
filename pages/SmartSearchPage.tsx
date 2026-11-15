@@ -234,6 +234,9 @@ const SmartSearchPage: React.FC = () => {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const certificateRef = useRef<HTMLDivElement>(null);
   const composerInputRef = useRef<HTMLInputElement>(null);
+  // Presentation-only: do not display the initial IELTS request as a chat bubble.
+  // The original Saqr send handler still receives and processes the full request.
+  const ieltsLaunchPromptRef = useRef<string|null>(null);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('current_user');
@@ -858,7 +861,9 @@ When the user asks for books, identify the matching titles exactly as recorded, 
   // but is shown in the welcome banner instead of being duplicated in the chat.
   const hasConversation = messages.some((message) => message.role === 'user');
   const visibleMessages = hasConversation
-    ? messages.filter((message, index) => !(index === 0 && message.role === 'assistant'))
+    ? messages.filter((message, index) =>
+        !(index === 0 && message.role === 'assistant') &&
+        !(index === 1 && message.role === 'user' && ieltsLaunchPromptRef.current === message.content))
     : [];
 
   const welcomeTitle = locale === 'ar'
@@ -970,8 +975,10 @@ When the user asks for books, identify the matching titles exactly as recorded, 
             onChoose={skill => {
               // Consume the launch flag after selection; all later Saqr turns
               // are ordinary chat turns on the unchanged /smart-search route.
+              const practicePrompt = ieltsSaqrPracticeRequest(skill, locale);
+              ieltsLaunchPromptRef.current = practicePrompt;
               navigate('/smart-search', { replace: true, state: null });
-              void handleSendMessage(ieltsSaqrPracticeRequest(skill, locale));
+              void handleSendMessage(practicePrompt);
             }} />
           {composer}
         </main>
