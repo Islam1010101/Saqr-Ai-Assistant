@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { useLanguage, useTheme } from '../App';
 import TutorialFeatureShowcase from './TutorialFeatureShowcase';
+import TutorialPlatformDirectory from './TutorialPlatformDirectory';
+import { getSaqrNewsTicker } from '../src/data/saqrWhatsNew';
 import SaqrOrbitNavigation from '../src/components/SaqrOrbitNavigation';
 import '../src/components/EFIPSGlassVisualTheme.css';
 
@@ -281,8 +283,8 @@ const RevealSection: React.FC<{ children: React.ReactNode; delay?: number }> = (
   return (
     <div
       ref={sectionRef}
-      className={'transform transition-all duration-700 ease-in-out ' + (isVisible ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-10 scale-95 opacity-0')}
-      style={{ transitionDelay: delay + 'ms' }}
+      className={'transform transition-[opacity,transform] duration-300 ease-out ' + (isVisible ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0')}
+      style={{ transitionDelay: Math.min(delay,80) + 'ms' }}
     >
       {children}
     </div>
@@ -301,6 +303,9 @@ export default function TutorialPage() {
   const [bursts, setBursts] = useState<BurstItem[]>([]);
   const [showBubble, setShowBubble] = useState(false);
   const [readingPreviewOpen, setReadingPreviewOpen] = useState(false);
+  const [suggestionPreviewOpen, setSuggestionPreviewOpen] = useState(false);
+  const [previewBookType, setPreviewBookType] = useState<'all'|'physical'|'digital'>('all');
+  const [newsPaused, setNewsPaused] = useState(false);
   const hasSignedInSession = React.useMemo(() => {
     try {
       const type = localStorage.getItem('user_type');
@@ -312,13 +317,13 @@ export default function TutorialPage() {
   const label = (ar: string, en: string) => isAr ? ar : en;
 
   useEffect(() => {
-    if (!readingPreviewOpen) return;
+    if (!readingPreviewOpen && !suggestionPreviewOpen) return;
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setReadingPreviewOpen(false);
+      if (event.key === 'Escape') { setReadingPreviewOpen(false); setSuggestionPreviewOpen(false); }
     };
     window.addEventListener('keydown', closeOnEscape);
     return () => window.removeEventListener('keydown', closeOnEscape);
-  }, [readingPreviewOpen]);
+  }, [readingPreviewOpen, suggestionPreviewOpen]);
 
   const handleMascotInteraction = (event?: React.MouseEvent<HTMLElement>) => {
     const rect = event?.currentTarget.getBoundingClientRect() ?? { left: window.innerWidth / 2 - 110, top: window.innerHeight / 2 - 100, width: 220, height: 200 };
@@ -420,7 +425,7 @@ export default function TutorialPage() {
 
       {/* The real site's pill-shaped navigation, reproduced without live links. */}
       <header className="fixed top-4 left-0 right-0 z-[100] flex justify-center px-2">
-        <div className="tutorial-topbar w-full max-w-[98%] px-4 py-2.5 rounded-[2rem] border-4 border-white/70 dark:border-slate-700/40 flex items-center justify-between md:justify-center gap-4 shadow-2xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-2xl">
+        <div className="tutorial-topbar efips-navbar-surface w-full max-w-[98%] md:w-fit px-4 py-2.5 rounded-[2rem] border-4 border-white/70 dark:border-slate-700/40 flex items-center justify-between md:justify-center gap-4 shadow-2xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-2xl">
           <HintTarget id="school-logo" title={label('هوية المدرسة', 'School identity')} description={label('شعار مدرسة صقر الإمارات الدولية الخاصة، كما يظهر في الموقع الفعلي.', 'The Emirates Falcon International Private School logo used throughout the live site.')} className="shrink-0" tooltipBelow {...hintState}>
             <div className="flex items-center gap-2 group flex-shrink-0 me-3 animate-fade-in-up" style={{ animationDelay: '0ms' }}>
               <img src="/school-logo.png" alt="EFIPS" className="h-8 w-8 md:h-10 md:w-10 object-contain dark:brightness-0 dark:invert shrink-0 transition-transform group-hover:scale-110" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
@@ -463,8 +468,8 @@ export default function TutorialPage() {
         </div>
       </header>
 
-      <main className="relative z-10 flex w-full flex-col items-center p-4 pt-28 transition-colors duration-500 md:p-8 md:pt-28">
-        <div className="w-full max-w-[1300px] mt-3 flex flex-col gap-8 md:mt-2 md:gap-10">
+      <main className="relative z-10 flex w-full min-w-0 flex-col items-center px-3 pb-16 pt-28 transition-colors duration-500 sm:px-4 md:px-8 md:pt-28">
+        <div className="efips-home-dashboard w-full min-w-0 max-w-[1300px] mt-10 flex flex-col gap-8 md:mt-6 md:gap-10">
           <HintTarget id="welcome-panel" title={label('منطقة الترحيب', 'Welcome panel')} description={label('يعرض الموقع الحقيقي ترحيبًا مخصصًا حسب الحساب. تم إخفاء اسم المستخدم ونوع الحساب في نسخة الزائر.', 'The live site personalizes this area by account. User names and account roles are hidden in this visitor tour.')} interactive={false} {...hintState}>
             <section className="mx-auto max-w-4xl space-y-3 text-center">
               <div className="inline-block rounded-full border-2 border-slate-200 bg-white/90 px-5 py-2 text-xs font-bold text-slate-700 shadow-md backdrop-blur-md dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-200 md:text-sm">
@@ -568,7 +573,7 @@ export default function TutorialPage() {
 
 
 
-          <details className="mx-auto w-full max-w-5xl rounded-[1.5rem] border border-rose-100 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 p-4 sm:p-5 shadow-sm">
+          <details defaultOpen className="mx-auto w-full max-w-5xl rounded-[1.5rem] border border-rose-100 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 p-4 sm:p-5 shadow-sm">
             <summary className="cursor-pointer min-h-11 flex items-center text-base font-black text-rose-700 dark:text-rose-300">
               {label('التعرف على تفاصيل التحديات والهوية الوطنية','Explore the activities inside Saqr Challenges and National Identity')}
             </summary>
