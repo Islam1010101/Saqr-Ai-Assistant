@@ -206,7 +206,7 @@ export default function IeltsListeningPractice({
                     disabled={disabled} className="size-4 accent-emerald-700"/>
                   <span>{String.fromCharCode(65 + index)}. {option}</span>
                 </label>
-              ))}
+              )}
             </fieldset>
             {!audioStarted && !audioFailed && <p className="mt-3 text-xs font-semibold text-amber-700 dark:text-amber-200">
               {ar ? 'ابدأ تشغيل التسجيل قبل الإجابة لتحصل على تدريب استماع حقيقي.' : 'Play the recording before answering for authentic listening practice.'}
