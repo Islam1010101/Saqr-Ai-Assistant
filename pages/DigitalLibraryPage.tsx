@@ -233,9 +233,22 @@ const DigitalLibraryPage: React.FC = () => {
                         </RevealOnScroll>
 
                         <RevealOnScroll delay={125}>
-                            <Link to="/digital-library/english/ielts" className="flex min-h-16 flex-wrap items-center justify-between gap-3 rounded-3xl border-2 border-emerald-200 bg-emerald-50 px-5 py-4 text-emerald-950 transition hover:border-emerald-500 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-100">
-                                <span className="font-black">IELTS Preparation Center</span>
-                                <span className="text-sm font-bold">{locale==='ar'?'مراجع Cambridge وتدريب مع صقر':'Cambridge resources & Saqr coaching'}</span>
+                            <Link to="/digital-library/english/ielts" className="group relative flex flex-col items-center gap-5 overflow-hidden rounded-[2.5rem] border-4 border-emerald-300 border-b-[7px] bg-white p-5 text-center shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-emerald-500 hover:shadow-xl active:translate-y-0 active:border-b-4 dark:border-emerald-800 dark:bg-slate-800 md:flex-row md:p-7 md:text-start">
+                                <div aria-hidden="true" className="pointer-events-none absolute -right-10 -top-14 size-40 rounded-full bg-emerald-100/70 blur-2xl dark:bg-emerald-700/20" />
+                                <div className="relative flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-[1.6rem] border-4 border-emerald-100 bg-emerald-50 shadow-inner transition-transform duration-300 group-hover:scale-105 dark:border-emerald-900 dark:bg-slate-900 md:size-28">
+                                    <img src="/SAQR%20IELTS.png" alt="" className="size-full object-contain" />
+                                </div>
+                                <div className="relative flex-1 space-y-1.5">
+                                    <span className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-[11px] font-black tracking-wide text-emerald-900 dark:bg-emerald-900/50 dark:text-emerald-100">
+                                        <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M8 3h8v3H8zM5 21h14V7H5zM9 12h6M9 16h6" /></svg>
+                                        EFIPS • CAMBRIDGE
+                                    </span>
+                                    <h3 className="text-2xl font-black tracking-tight text-slate-800 dark:text-white md:text-3xl lg:text-4xl">{isAr?'مركز IELTS':'IELTS Center'}</h3>
+                                    <p className="text-sm font-bold leading-7 text-slate-500 dark:text-slate-300 md:text-base">{isAr?'مراجع كامبريدج، خطة مذاكرة منظمة، واختبار تفاعلي مع صقر.':'Cambridge resources, structured study plans and interactive Saqr practice.'}</p>
+                                </div>
+                                <span className="relative inline-flex size-12 shrink-0 items-center justify-center rounded-full bg-emerald-700 text-white shadow-lg transition group-hover:bg-emerald-800" aria-hidden="true">
+                                    <svg className={`size-6 ${isAr?'rotate-180':''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
+                                </span>
                             </Link>
                         </RevealOnScroll>
 
