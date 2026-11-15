@@ -13,6 +13,11 @@ export type IeltsListeningQuestion = Readonly<{
   options: readonly string[];
   correctIndex: number;
   explanation: string;
+  /** IELTS-style answer format: original questions, never copied from an official paper. */
+  kind?: 'multiple-choice' | 'note-completion' | 'table-completion' | 'short-answer';
+  /** Used for original short-answer and completion tasks instead of a multiple-choice index. */
+  answerText?: string;
+  acceptedAnswers?: readonly string[];
 }>;
 export type IeltsListeningLesson = Readonly<{
   id: string;

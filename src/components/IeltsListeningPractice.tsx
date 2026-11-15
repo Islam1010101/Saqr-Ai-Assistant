@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { IELTS_LISTENING_LESSONS } from '../data/ieltsListeningLessons';
+import { IELTS_GRADED_LISTENING_LESSONS, type IeltsListeningStage } from '../data/ieltsListeningExpanded';
+import { isListeningAnswerComplete, isListeningAnswerCorrect, isListeningCompletion, type IeltsListeningAnswer } from '../utils/ieltsListeningGrading';
 import { ieltsListeningReviewRequest } from '../utils/ieltsListeningReview';
 import type { IeltsSelfTestLocale } from '../utils/ieltsSaqrPractice';
 
@@ -18,22 +19,24 @@ export default function IeltsListeningPractice({
   onReview: (prompt: string) => void;
 }) {
   const ar = locale === 'ar';
-  const [lessonId, setLessonId] = useState(IELTS_LISTENING_LESSONS[0].id);
-  const [answers, setAnswers] = useState<number[]>([]);
+  const [stage, setStage] = useState<IeltsListeningStage>(1);
+  const [lessonId, setLessonId] = useState(IELTS_GRADED_LISTENING_LESSONS[0].id);
+  const [answers, setAnswers] = useState<IeltsListeningAnswer[]>([]);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [completed, setCompleted] = useState(false);
   const [revealTranscript, setRevealTranscript] = useState(false);
   const [audioFailed, setAudioFailed] = useState(false);
   const [audioStarted, setAudioStarted] = useState(false);
 
-  const lesson = IELTS_LISTENING_LESSONS.find(item => item.id === lessonId) || IELTS_LISTENING_LESSONS[0];
+  const lesson = IELTS_GRADED_LISTENING_LESSONS.find(item => item.id === lessonId) || IELTS_GRADED_LISTENING_LESSONS[0];
+  const stageLessons = IELTS_GRADED_LISTENING_LESSONS.filter(item => item.stage === stage);
   const current = lesson.questions[questionIndex];
   const chosen = answers[questionIndex];
   const score = lesson.questions.reduce((total, question, index) =>
-    total + (answers[index] === question.correctIndex ? 1 : 0), 0);
+    total + (isListeningAnswerCorrect(question, answers[index]) ? 1 : 0), 0);
 
   const selectLesson = (id: string) => {
-    if (!IELTS_LISTENING_LESSONS.some(item => item.id === id)) return;
+    if (!IELTS_GRADED_LISTENING_LESSONS.some(item => item.id === id)) return;
     setLessonId(id);
     setAnswers([]);
     setQuestionIndex(0);
@@ -42,7 +45,7 @@ export default function IeltsListeningPractice({
     setAudioFailed(false);
     setAudioStarted(false);
   };
-  const chooseAnswer = (selected: number) => {
+  const chooseAnswer = (selected: IeltsListeningAnswer) => {
     if (completed || disabled) return;
     setAnswers(previous => {
       const next = [...previous];
@@ -51,7 +54,7 @@ export default function IeltsListeningPractice({
     });
   };
   const advance = () => {
-    if (chosen === undefined) return;
+    if (!isListeningAnswerComplete(chosen)) return;
     if (questionIndex + 1 < lesson.questions.length) setQuestionIndex(index => index + 1);
     else setCompleted(true);
   };
@@ -87,12 +90,55 @@ export default function IeltsListeningPractice({
           </div>
         </div>
 
+        <aside className="mt-5 rounded-2xl border border-cyan-200 bg-cyan-50/80 px-4 py-4 text-start dark:border-cyan-900 dark:bg-cyan-950/30" aria-label={ar ? 'النماذج الرسمية' : 'Official sample resources'}>
+          <h3 className="text-sm font-black text-slate-900 dark:text-white">{ar ? 'نماذج IELTS الرسمية — على الموقع الأصلي' : 'Official IELTS samples — on the original provider site'}</h3>
+          <p className="mt-1 text-xs font-semibold leading-6 text-slate-600 dark:text-slate-300">
+            {ar
+              ? 'اتعرّف على شكل أسئلة الاختيار من متعدد، وإكمال الملاحظات والجداول، والخرائط. تدريبات صقر هنا أصلية باستخدام VOA وليست نسخًا من اختبارات IELTS الرسمية.'
+              : 'Explore official multiple choice, note/table completion and map tasks. Saqr exercises below are newly authored from VOA recordings, not copied official IELTS tests.'}
+          </p>
+          <div className="mt-2 flex flex-wrap gap-x-5 gap-y-2 text-xs font-black">
+            <a href="https://ielts.org/take-a-test/preparation-resources/sample-test-questions/academic-test"
+               target="_blank" rel="noopener noreferrer" className="text-cyan-800 underline underline-offset-4 dark:text-cyan-200">
+              {ar ? 'نماذج IELTS Listening المعتمدة' : 'IELTS.org official Listening task samples'}
+            </a>
+            <a href="https://takeielts.britishcouncil.org/prepare/ielts-free-practice-mock-tests/academic/listening"
+               target="_blank" rel="noopener noreferrer" className="text-cyan-800 underline underline-offset-4 dark:text-cyan-200">
+              {ar ? 'اختبارات تدريب British Council' : 'British Council official practice'}
+            </a>
+          </div>
+        </aside>
+        <div className="mt-5" aria-label={ar ? 'التدرّج في صعوبة الاستماع' : 'Listening progression'}>
+          <h3 className="mb-2 text-sm font-black text-slate-800 dark:text-white">{ar ? 'تدرّج مع صقر من الأسهل للأصعب' : 'Progress from easier to more demanding lessons'}</h3>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {([1,2,3,4] as const).map(level => (
+              <button type="button" key={level}
+                aria-pressed={stage===level}
+                onClick={() => {
+                  const next=IELTS_GRADED_LISTENING_LESSONS.find(item => item.stage===level);
+                  if (next) {setStage(level);selectLesson(next.id);}
+                }}
+                className={'min-h-12 rounded-xl border px-3 py-2 text-start text-xs font-bold transition focus-visible:outline-2 focus-visible:outline-emerald-600 ' +
+                  (stage===level ? 'border-emerald-700 bg-emerald-700 text-white shadow-md' : 'border-slate-200 bg-white text-slate-700 hover:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100')}>
+                <span className="block text-sm font-black">{ar ? 'المرحلة ' : 'Stage '}{level}</span>
+                <span className="mt-0.5 block font-semibold">{ar
+                  ? (['تعارف ومعلومات','مواقف واتجاهات','نقاشات وتفاصيل','تقارير أطول'][level-1])
+                  : (['Introductions','Everyday directions','Discussions','Extended reports'][level-1])}</span>
+                <span className="mt-0.5 block opacity-80">{IELTS_GRADED_LISTENING_LESSONS.filter(item=>item.stage===level).length} {ar ? 'تسجيلات' : 'recordings'}</span>
+              </button>
+            ))}
+          </div>
+          <p className="mt-2 text-xs font-semibold leading-6 text-slate-600 dark:text-slate-300">
+            {ar ? 'المراحل من إعداد صقر للتعلّم بالتدرّج وليست أجزاء IELTS الأربعة أو تقديرًا للدرجة.' : 'These are Saqr learning stages, not official IELTS test parts or band predictions.'}
+          </p>
+        </div>
+
         <label className="mt-5 block text-sm font-black text-slate-700 dark:text-slate-100">
           {ar ? 'اختر التسجيل' : 'Choose your recording'}
           <select value={lessonId} onChange={event => selectLesson(event.target.value)}
             className="mt-2 block min-h-12 w-full rounded-2xl border-2 border-emerald-200 bg-slate-50 px-4 text-sm font-bold text-slate-900 outline-none focus:border-emerald-600 dark:border-emerald-800 dark:bg-slate-800 dark:text-white">
-            {IELTS_LISTENING_LESSONS.map(item =>
-              <option key={item.id} value={item.id}>{item.level} · {item.title}</option>)}
+            {stageLessons.map(item =>
+              <option key={item.id} value={item.id}>{item.title} · {locale==='ar'?item.contextAr:item.contextEn}</option>)}
           </select>
         </label>
 
@@ -100,7 +146,7 @@ export default function IeltsListeningPractice({
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <div>
               <strong className="block text-base font-black text-slate-900 dark:text-white">{lesson.title}</strong>
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-300">{lesson.level} · {Math.ceil(lesson.durationSeconds / 60)} min</span>
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-300">{lesson.level} · {ar?lesson.contextAr:lesson.contextEn}{lesson.durationSeconds>0?' · '+Math.ceil(lesson.durationSeconds/60)+' min':''}</span>
             </div>
             <span className="rounded-full bg-emerald-100 px-3 py-1 text-[11px] font-black text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">VOA AUDIO</span>
           </div>
@@ -132,12 +178,27 @@ export default function IeltsListeningPractice({
         {!completed ? (
           <div className="mt-5" aria-live="polite">
             <div className="mb-3 flex items-center justify-between gap-3">
-              <h3 className="text-base font-black text-slate-900 dark:text-white">{ar ? 'أسئلة الفهم' : 'Listening questions'}</h3>
+              <h3 className="text-base font-black text-slate-900 dark:text-white">{ar ? 'أسئلة الفهم — بأسلوب IELTS' : 'IELTS-style listening questions'}</h3>
               <span className="text-xs font-bold text-slate-500 dark:text-slate-300">{questionIndex + 1} / {lesson.questions.length}</span>
             </div>
             <fieldset dir="ltr" className="space-y-3 rounded-2xl border-2 border-slate-100 bg-white p-4 dark:border-slate-700 dark:bg-slate-950">
               <legend className="px-1 text-start text-sm font-black leading-7 text-slate-900 dark:text-white">{current.prompt}</legend>
-              {current.options.map((option, index) =>
+              {isListeningCompletion(current) ? (
+                <div className="space-y-2">
+                  <label htmlFor="ielts-listening-completion" className="block text-xs font-bold text-slate-600 dark:text-slate-300">
+                    {ar ? 'اكتب الإجابة القصيرة من التسجيل (لا تظهر الإجابة الصحيحة إلا بعد المراجعة).' : 'Enter the short answer you heard. The correct answer stays hidden until review.'}
+                  </label>
+                  <input id="ielts-listening-completion" key={lesson.id + '-' + questionIndex}
+                    type="text" autoComplete="off" maxLength={80}
+                    value={typeof chosen==='string'?chosen:''}
+                    onChange={event => chooseAnswer(event.target.value)}
+                    disabled={disabled} placeholder={ar ? 'اكتب إجابتك بالإنجليزية' : 'Type your answer'}
+                    className="min-h-12 w-full rounded-xl border-2 border-emerald-200 bg-white px-4 text-sm font-bold text-slate-900 focus:border-emerald-700 focus:outline-none dark:border-emerald-800 dark:bg-slate-900 dark:text-white" />
+                  <p className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
+                    {current.kind==='table-completion' ? 'Table completion' : current.kind==='short-answer' ? 'Short answer' : 'Note completion'}
+                  </p>
+                </div>
+              ) : current.options.map((option, index) =>
                 <label key={option} className={'flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border p-3 text-start text-sm font-semibold transition ' +
                   (chosen === index ? 'border-emerald-600 bg-emerald-50 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-100' : 'border-slate-200 bg-white text-slate-800 hover:border-emerald-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100')}>
                   <input type="radio" name={'listening-' + lesson.id + '-' + questionIndex}
@@ -150,7 +211,7 @@ export default function IeltsListeningPractice({
             {!audioStarted && !audioFailed && <p className="mt-3 text-xs font-semibold text-amber-700 dark:text-amber-200">
               {ar ? 'ابدأ تشغيل التسجيل قبل الإجابة لتحصل على تدريب استماع حقيقي.' : 'Play the recording before answering for authentic listening practice.'}
             </p>}
-            <button type="button" disabled={chosen === undefined || disabled || (!audioStarted && !audioFailed)}
+            <button type="button" disabled={!isListeningAnswerComplete(chosen) || disabled || (!audioStarted && !audioFailed)}
               onClick={advance}
               className="mt-4 inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-700 px-6 py-3 text-sm font-black text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50">
               {questionIndex + 1 < lesson.questions.length
@@ -174,7 +235,7 @@ export default function IeltsListeningPractice({
             </button>
             {revealTranscript && <div className="mt-4 rounded-xl bg-white p-4 dark:bg-slate-900">
               <p className="mb-2 text-xs font-black text-slate-500 dark:text-slate-300">
-                {lesson.transcriptKind === 'complete' ? (ar ? 'نص التسجيل الكامل' : 'Full conversation transcript') : (ar ? 'مقتطف موثق من بداية التسجيل فقط' : 'Verified opening excerpt only')}
+                {lesson.transcriptKind === 'complete' ? (ar ? 'نص التسجيل الكامل' : 'Full conversation transcript') : (ar ? 'مقتطف تعليمي مختار من التسجيل — النص الأصلي الكامل عند المصدر' : 'Selected teaching excerpt — find the full source transcript on VOA')}
               </p>
               <p dir="ltr" className="whitespace-pre-line text-start text-xs font-semibold leading-7 text-slate-800 dark:text-slate-200">{lesson.transcript}</p>
               {lesson.verifiedSummary && <p dir="ltr" className="mt-4 border-t border-slate-200 pt-3 text-start text-xs leading-7 text-slate-600 dark:border-slate-700 dark:text-slate-300">
