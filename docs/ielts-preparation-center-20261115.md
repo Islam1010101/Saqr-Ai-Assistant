@@ -18,14 +18,14 @@
 - \`/#/digital-library/english/ielts\`: dedicated bilingual study centre with four skills, configurable four-phase plan, individual PDF records, search, Cambridge track label filter, and study references.
 - Discovery: CTA inside English Library and shortcut on Digital Library landing page.
 - Reuses \`DigitalBookReader\` (PDF.js, page navigation, reading progress). Keeps \`EnglishPhotoBookReader\` unchanged.
-- Saqr buttons link to \`/#/smart-search?ielts=<skill>\`; SmartSearchPage pre-fills an editable prompt and does **not** auto-send or alter the original chat routing, model providers, lesson plans, certificates or library search rules.
-- Extends GoogleSchoolReturn for the 24 explicitly allowlisted IELTS IDs so an authorised Google OAuth reader-consent return reopens the same file.
+- Saqr buttons open an isolated modal on the IELTS page with an original practice prompt; the student copies the prompt and opens the **unchanged** Saqr chat. SmartSearchPage, chat intent/router, model providers, teacher lessons, challenges, and responses are **byte-for-byte identical to the baseline**.
+- Does not modify GoogleSchoolReturn, GoogleTeacherReturn, or the existing PDF/image readers. If Google asks for extra Drive consent, the normal sign-in flow returns to the usual home route; the student can reopen the IELTS resource afterwards.
 - The study plan is a suggested timeline, **not** a verified estimate of IELTS score, official test, or persistent assessment.
 
 ## Verification / release gate
 1. Run \`node --test tests/ieltsCenter.test.mjs\`.
-2. Run \`npm run build\` and (where possible) \`npx tsc --noEmit\`.
+2. Run \`npm run build\` and (where possible) \`npx tsc --noEmit\`. CI additionally compares the full Saqr core/auth/reader paths to the unchanged 15 November baseline.
 3. Smoke-test route in both languages, light and dark mode, mobile and desktop.
 4. From school student account, open a small (<20MB) and large (>20MB) IELTS PDF inside the glass reader, including OAuth re-consent return.
-5. Verify Saqr's four pre-filled prompts, no unrelated catalog search, and unchanged teacher/young-author behavior.
+5. Verify the four on-page copyable Saqr prompts, then paste each into the unchanged chat; confirm no unrelated catalogue search and unchanged teacher/young-author behavior.
 6. Merge and deploy only after the branch checks and a human review; no production deployment is part of this change.
