@@ -3,18 +3,11 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../App';
 import DigitalLibraryDialog from '../src/components/DigitalLibraryDialog';
 import DigitalBookReader from '../src/components/DigitalBookReader';
-import { findIeltsResource, IELTS_COACH_STARTERS, IELTS_RESOURCES, type IeltsCoachSkill, type IeltsResource } from '../src/data/ieltsResources';
+import { findIeltsResource, IELTS_RESOURCES, type IeltsResource } from '../src/data/ieltsResources';
 
 type Group = 'all' | 'cambridge' | 'study';
 type TrackFilter = 'all' | 'general' | 'unspecified';
 type PlanTrack = 'academic' | 'general';
-
-const SKILLS: ReadonlyArray<{key:IeltsCoachSkill; name:string; ar:string; detail:string; detailAr:string; number:string}> = [
-  {key:'reading',name:'Reading',ar:'القراءة',detail:'Understand passages and practise question types',detailAr:'فهم النصوص والتدرب على أنواع الأسئلة',number:'01'},
-  {key:'writing',name:'Writing',ar:'الكتابة',detail:'Original writing tasks with detailed feedback',detailAr:'مهام كتابة أصلية مع تصحيح مفصل',number:'02'},
-  {key:'listening',name:'Listening',ar:'الاستماع',detail:'Listening strategies and honest text-only alternatives',detailAr:'استراتيجيات استماع وتدريبات نصية عند غياب الصوت',number:'03'},
-  {key:'speaking',name:'Speaking',ar:'المحادثة',detail:'Question-by-question interview practice',detailAr:'محاكاة مقابلة بأسئلة متدرجة',number:'04'}
-];
 
 const studyPhases = [
   {en:'Discover your level',ar:'تحديد المستوى',desc:'Choose your test type, identify strengths and set a target.',descAr:'اختر نوع الاختبار وحدد نقاط القوة والدرجة المستهدفة.'},
@@ -49,18 +42,6 @@ const IeltsPreparationCenterPage: React.FC = () => {
   const [search,setSearch]=useState('');
   const [selected,setSelected]=useState<IeltsResource|null>(null);
   const [readerOpen,setReaderOpen]=useState(false);
-  // IELTS practice prompts stay inside this add-on; the existing Saqr chat
-  // component and all its routing/personalities remain byte-for-byte unchanged.
-  const [coachSkill,setCoachSkill]=useState<IeltsCoachSkill|null>(null);
-  const [copyStatus,setCopyStatus]=useState<'idle'|'copied'|'manual'>('idle');
-  const openCoach=(skill:IeltsCoachSkill)=>{setCoachSkill(skill);setCopyStatus('idle');};
-  const copyCoach=async()=>{
-    if(!coachSkill)return;
-    try{
-      await navigator.clipboard.writeText(IELTS_COACH_STARTERS[coachSkill]);
-      setCopyStatus('copied');
-    }catch{setCopyStatus('manual');}
-  };
   const [target,setTarget]=useState('6.5');
   const [weeks,setWeeks]=useState(8);
   const [planTrack,setPlanTrack]=useState<PlanTrack>('academic');
@@ -109,7 +90,7 @@ const IeltsPreparationCenterPage: React.FC = () => {
               <p className="mt-4 text-base font-bold leading-8 text-emerald-50 sm:text-lg">{l('مركز صقر للتحضير لاختبار IELTS: مراجع Cambridge وتدريبات تفاعلية ومساعد ذكي لتطوير مهاراتك الأربع.','Study resources from Cambridge, a personalised preparation outline and Saqr-powered practice for all four IELTS skills.')}</p>
               <div className="mt-6 flex flex-wrap justify-center gap-3 md:justify-start">
                 <a href="#ielts-resources" className="inline-flex min-h-12 items-center justify-center rounded-xl bg-white px-5 text-sm font-black text-emerald-950 transition hover:bg-emerald-50">{l('استكشف المراجع','Explore resources')}</a>
-                <button type="button" onClick={()=>openCoach('writing')} className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/60 bg-white/10 px-5 text-sm font-black text-white transition hover:bg-white/20">{l('تدرّب مع صقر','Practise with Saqr')}</button>
+                <Link to="/smart-search?ielts=self-test" className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/60 bg-white/10 px-5 text-sm font-black text-white transition hover:bg-white/20">{l('اختبر نفسك مع صقر','Test Yourself with Saqr')}</Link>
               </div>
             </div>
             <img src="/saqr-full.png" alt={l('شخصية صقر','Saqr mascot')} className="h-36 w-auto object-contain drop-shadow-2xl sm:h-48 md:h-56"/>
@@ -121,25 +102,26 @@ const IeltsPreparationCenterPage: React.FC = () => {
             ['24',l('مرجعًا دراسيًا','Study resources')],
             ['19',l('جزء Cambridge','Cambridge volumes')],
             ['05',l('مراجع متخصصة','Study guides')],
-            ['04',l('مهارات IELTS','IELTS skills')]
+            ['01',l('اختبار تفاعلي مع صقر','Saqr interactive self-test')]
           ].map(([number,label])=><div key={label} className="rounded-2xl border border-emerald-100 bg-white p-4 text-center shadow-sm dark:border-emerald-900 dark:bg-slate-900">
             <strong className="block text-3xl font-black text-emerald-800 dark:text-emerald-300">{number}</strong>
             <span className="block text-xs font-bold text-slate-600 dark:text-slate-300 sm:text-sm">{label}</span>
           </div>)}
         </section>
 
-        <section className="mt-12" aria-labelledby="ielts-skills-title">
-          <div className="mb-5">
-            <h2 id="ielts-skills-title" className="text-2xl font-black sm:text-3xl">{l('تدرب على المهارات الأربع مع صقر','Practise all four skills with Saqr')}</h2>
-            <p className="mt-2 text-sm font-bold text-slate-600 dark:text-slate-300">{l('اختر مهارة، وانسخ رسالة تدريب مخصصة، ثم افتح صقر والصقها في المحادثة دون أي تعديل في منطق صقر أو ردوده.','Choose a skill, copy a tailored practice prompt, then open Saqr and paste it into the existing chat. Saqr itself is unchanged.')}</p>
-          </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {SKILLS.map(skill=><button type="button" key={skill.key} onClick={()=>openCoach(skill.key)} className="group rounded-3xl border border-slate-200 bg-white p-5 text-start shadow-sm transition hover:-translate-y-1 hover:border-emerald-500 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-500 dark:border-slate-700 dark:bg-slate-900">
-              <span aria-hidden="true" className="inline-flex size-12 items-center justify-center rounded-2xl bg-emerald-100 text-lg font-black text-emerald-900 dark:bg-emerald-900 dark:text-white">{skill.number}</span>
-              <h3 className="mt-3 text-xl font-black">{ar?skill.ar:skill.name}</h3>
-              <p className="mt-2 min-h-12 text-sm font-semibold leading-6 text-slate-600 dark:text-slate-300">{ar?skill.detailAr:skill.detail}</p>
-              <span className="mt-3 block text-sm font-black text-emerald-800 dark:text-emerald-300">{l('ابدأ التدريب','Start practice')}</span>
-            </button>)}
+        <section className="mt-12 overflow-hidden rounded-[2rem] border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-teal-50 p-6 shadow-md dark:border-emerald-900 dark:from-emerald-950/50 dark:via-slate-900 dark:to-teal-950/40 sm:p-9" aria-labelledby="ielts-self-test-title">
+          <div className="flex flex-col items-center justify-between gap-5 md:flex-row">
+            <div className="max-w-3xl text-center md:text-start">
+              <p className="text-xs font-black uppercase tracking-[.12em] text-emerald-800 dark:text-emerald-300">SAQR AI • IELTS SELF-TEST</p>
+              <h2 id="ielts-self-test-title" className="mt-2 text-2xl font-black text-slate-900 dark:text-white sm:text-3xl">{l('اختبر نفسك مع صقر','Test Yourself with Saqr')}</h2>
+              <p className="mt-3 text-sm font-bold leading-8 text-slate-700 dark:text-slate-200 sm:text-base">
+                {l('اضغط وادخل على محادثة صقر مباشرة. صقر بيسألك تختار نوع التدريب اللي تبيه، وبعدها يبدأ أسئلة تفاعلية ويصحح لك إجاباتك، مع الاسترشاد بمراجع IELTS الموجودة في المركز.','Open Saqr directly. He will ask which kind of IELTS practice you want, then test you one question at a time with feedback, guided by the center’s indexed resources.')}
+              </p>
+              <p className="mt-2 text-xs font-semibold leading-6 text-slate-600 dark:text-slate-300">{l('المراجع مفهرسة بالعناوين والأنواع؛ لا نعتبر محتوى ملفات PDF محلّلًا داخل صقر بعد.','The resource inventory is indexed by title and type; PDF page text has not yet been ingested into Saqr.')}</p>
+            </div>
+            <Link to="/smart-search?ielts=self-test" className="inline-flex min-h-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-700 px-8 py-4 text-base font-black text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-emerald-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-500">
+              {l('ابدأ الاختبار مع صقر','Start Self-Test with Saqr')}
+            </Link>
           </div>
         </section>
 
@@ -149,7 +131,7 @@ const IeltsPreparationCenterPage: React.FC = () => {
               <h2 id="ielts-plan-title" className="text-2xl font-black sm:text-3xl">{l('خطة مذاكرة مرنة','Your flexible study outline')}</h2>
               <p className="mt-2 text-sm font-semibold text-slate-600 dark:text-slate-300">{l('خطة استرشادية وليست تقييم مستوى أو ضمانًا لدرجة معينة.','A suggested outline, not a level assessment or a guaranteed exam band.')}</p>
             </div>
-            <button type="button" onClick={()=>openCoach('reading')} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-700 px-5 text-sm font-black text-white hover:bg-emerald-800">{l('ابدأ مع صقر','Start with Saqr')}</button>
+            <Link to="/smart-search?ielts=self-test" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-700 px-5 text-sm font-black text-white hover:bg-emerald-800">{l('اختبر نفسك مع صقر','Test Yourself with Saqr')}</Link>
           </div>
           <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
             <label className="text-sm font-black">{l('نوع الاختبار','Test type')}
@@ -222,21 +204,6 @@ const IeltsPreparationCenterPage: React.FC = () => {
           {l('تُفتح ملفات PDF من Google Drive باستخدام صلاحيات حساب المدرسة. قد يتطلب فتح كتاب كبير منح إذن قراءة Drive مرة واحدة. الملفات الصوتية المستقلة وكتاب Cambridge 20 غير موجودين في الجرد الحالي؛ ولا تمثل تدريبات صقر اختبارات IELTS رسمية أو درجات معتمدة.','PDF access remains governed by your school Google Drive permissions. Larger files may request a one-time Drive read permission. Cambridge 20 and separate listening audio files were not in the current inventory. Saqr exercises are not official IELTS tests or certified band assessments.')}
         </aside>
       </div>
-
-      {coachSkill && <DigitalLibraryDialog title={l('التدريب مع صقر','Practise with Saqr')} onClose={()=>setCoachSkill(null)}>
-        <div dir={dir} className="max-h-[80vh] w-full overflow-y-auto bg-white p-5 text-slate-900 dark:bg-slate-900 dark:text-white sm:p-8" style={{fontFamily:"Cairo, sans-serif"}}>
-          <h2 className="text-xl font-black sm:text-2xl">{l('التدريب مع صقر','Practise with Saqr')} • {coachSkill}</h2>
-          <p className="mt-3 text-sm font-semibold leading-7">{l('انسخ الطلب التالي ثم افتح محادثة صقر والصقه في مربع الكتابة. يمكنك تعديله قبل الإرسال. لم نغيّر أي جزء من عقل صقر أو تحدياته أو ردوده.','Copy the prompt, open your regular Saqr chat and paste it into the message box. You may edit it before sending. No Saqr reasoning or challenge logic was changed.')}</p>
-          <label htmlFor="ielts-coach-prompt" className="mt-5 block text-sm font-black">{l('رسالة التدريب الجاهزة','Prepared practice prompt')}</label>
-          <textarea id="ielts-coach-prompt" readOnly value={IELTS_COACH_STARTERS[coachSkill]} rows={8} onFocus={e=>e.currentTarget.select()} className="mt-2 block w-full resize-y rounded-xl border border-slate-300 bg-slate-50 p-3 text-sm font-semibold leading-6 text-slate-900 dark:border-slate-600 dark:bg-slate-800 dark:text-white"/>
-          <div className="mt-5 flex flex-wrap items-center gap-3">
-            <button type="button" onClick={()=>void copyCoach()} className="min-h-12 rounded-xl bg-emerald-700 px-5 text-sm font-black text-white hover:bg-emerald-800">{l('نسخ الطلب','Copy prompt')}</button>
-            <Link to="/smart-search" className="inline-flex min-h-12 items-center rounded-xl border border-emerald-700 px-5 text-sm font-black text-emerald-900 dark:text-emerald-200">{l('افتح صقر','Open Saqr')}</Link>
-            <button type="button" onClick={()=>setCoachSkill(null)} className="min-h-12 rounded-xl border border-slate-300 px-4 text-sm font-bold dark:border-slate-600">{l('إغلاق','Close')}</button>
-          </div>
-          {copyStatus!=='idle'&&<p role="status" className="mt-3 text-xs font-bold text-emerald-800 dark:text-emerald-300">{copyStatus==='copied'?l('تم النسخ؛ افتح صقر والصق الطلب.','Copied. Open Saqr and paste the prompt.'):l('النسخ التلقائي غير متاح؛ حدد نص الطلب وانسخه يدويًا.','Clipboard access is unavailable. Select the prompt text and copy it manually.')}</p>}
-        </div>
-      </DigitalLibraryDialog>}
 
       {selected && !readerOpen && <DigitalLibraryDialog title={selected.title} onClose={close}>
         <div className="max-h-[80vh] w-full overflow-y-auto bg-white p-6 text-slate-900 dark:bg-slate-900 dark:text-white sm:p-8" dir={dir}>
