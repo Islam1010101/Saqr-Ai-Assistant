@@ -76,3 +76,14 @@ test('Text-only speaking uses Saqr existing message handler with no audio scorin
   assert.match(chat,/void handleSendMessage\(practicePrompt\)/);
   assert.doesNotMatch(exam+ui,/SpeechRecognition|MediaRecorder|fetch\(|localStorage|signInWithOAuth/);
 });
+
+test('IELTS trainer hides redundant explanatory text but keeps skill selection and original practice flows',()=>{
+  assert.doesNotMatch(entry,/صقر هيكمل معك في محادثته المعتادة|اختر المهارة عشان يبدأ صقر يسألك|التدريب مسترشد بفهرس مراجع IELTS/);
+  assert.doesNotMatch(entry,/Saqr continues in the existing chat|Graded human-recorded listening, original exam-style Reading and Writing/);
+  assert.doesNotMatch(entry,/className="mt-2 text-xs font-semibold leading-6 text-slate-600/);
+  assert.match(entry,/ieltsSaqrOpening\(locale\)/);
+  assert.match(entry,/IELTS_SELF_TEST_CHOICES\.map/);
+  assert.match(entry,/setActivePractice\(choice\.id\)/);
+  assert.match(entry,/onChoose\('speaking', ieltsWrittenSpeakingRequest\(locale\)\)/);
+  assert.match(entry,/onReview={prompt => onChoose\('listening', prompt\)}/);
+});

@@ -28,11 +28,6 @@ export default function IeltsSaqrEntry({
       <span className="rounded-full border border-emerald-200 bg-emerald-50 px-4 py-1 text-xs font-black text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">IELTS • EFIPS</span>
       <div className="max-w-2xl rounded-[1.75rem] border border-emerald-200 bg-white px-5 py-5 text-start shadow-md dark:border-emerald-800 dark:bg-slate-900 sm:px-8">
         <p className="text-base font-black leading-9 text-slate-900 dark:text-white sm:text-xl" role="status">{ieltsSaqrOpening(locale)}</p>
-        <p className="mt-2 text-xs font-semibold leading-6 text-slate-600 dark:text-slate-300">
-          {ar
-            ? 'الاستماع بتسجيلات بشرية متدرجة، والقراءة والكتابة بمحاكاة أصلية لأنواع المهام الرسمية، والمحادثة شات كتابي بالإنجليزي بينك وبين صقر.'
-            : 'Graded human-recorded listening, original exam-style Reading and Writing, and a text-only English conversation with Saqr.'}
-        </p>
         <div className="mt-4 flex flex-wrap justify-center gap-2">
           {IELTS_SELF_TEST_CHOICES.map(choice=>(
             <button type="button" key={choice.id} disabled={disabled}
@@ -47,9 +42,6 @@ export default function IeltsSaqrEntry({
           ))}
         </div>
       </div>
-      <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-        {ar?'صقر هيكمل معك في محادثته المعتادة، ومن غير أي تعديل في تحدياته أو تحضير المعلمين.':'Saqr continues in the existing chat, with its original challenges and teacher workflows unchanged.'}
-      </p>
     </section>
   );
 }
