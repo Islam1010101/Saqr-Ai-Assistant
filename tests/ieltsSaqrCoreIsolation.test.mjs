@@ -53,7 +53,7 @@ const allowedPatches = [
       '            onChoose={(skill, listeningPrompt) => {',
       '              // Consume the launch flag after selection; all later Saqr turns',
       '              // are ordinary chat turns on the unchanged /smart-search route.',
-      '              const practicePrompt = ieltsSaqrPracticeRequest(skill, locale);',
+      '              const practicePrompt = listeningPrompt || ieltsSaqrPracticeRequest(skill, locale);',
       '              ieltsLaunchPromptRef.current = practicePrompt;',
       "              navigate('/smart-search', { replace: true, state: null });",
       '              void handleSendMessage(practicePrompt);',
