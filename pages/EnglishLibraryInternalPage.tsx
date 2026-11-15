@@ -448,15 +448,17 @@ const EnglishLibraryInternalPage: React.FC = () => {
                     </div>
                 </RevealOnScroll>
 
-                <section aria-label={currentLocale==='ar'?'مركز التحضير لاختبار IELTS':'IELTS Preparation Center'} className="mb-7 rounded-[2rem] bg-gradient-to-br from-emerald-900 via-teal-800 to-emerald-700 p-5 text-white shadow-xl sm:p-7">
-                    <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-                        <div className="min-w-0 text-center sm:text-start">
-                            <p className="text-xs font-black uppercase tracking-widest text-emerald-100">EFIPS • CAMBRIDGE STUDY RESOURCES</p>
-                            <h2 className="mt-2 text-2xl font-black sm:text-3xl">IELTS Preparation Center</h2>
-                            <p className="mt-2 max-w-2xl text-sm font-semibold leading-7 text-emerald-50">{currentLocale==='ar'?'24 مرجعًا دراسيًا، 19 جزءًا من Cambridge، وتدريبات المهارات الأربع مع صقر.':'24 study references, 19 Cambridge volumes and Saqr-powered practice for all four skills.'}</p>
+                <section aria-label={currentLocale==='ar'?'مركز IELTS':'IELTS Center'} className="mb-8 overflow-hidden rounded-[2.5rem] border-4 border-emerald-200 bg-white p-5 shadow-md dark:border-emerald-900 dark:bg-slate-800 sm:p-7">
+                    <div className="flex flex-col items-center gap-5 sm:flex-row sm:text-start">
+                        <img src="/SAQR%20IELTS.png" alt="" className="size-28 shrink-0 rounded-[1.6rem] bg-emerald-50 object-contain p-1 dark:bg-slate-900 sm:size-36" />
+                        <div className="min-w-0 flex-1 text-center sm:text-start">
+                            <span className="text-xs font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-300">EFIPS • IELTS STUDY CENTER</span>
+                            <h2 className="mt-1 text-2xl font-black text-slate-900 dark:text-white sm:text-3xl">{currentLocale==='ar'?'مركز IELTS':'IELTS Center'}</h2>
+                            <p className="mt-2 max-w-2xl text-sm font-bold leading-7 text-slate-600 dark:text-slate-300">{currentLocale==='ar'?'مكتبة متخصصة تضم 24 مرجعًا من كامبريدج، وخطة مذاكرة بحسب مستواك، واختبارًا تفاعليًا مع صقر.':'A dedicated space with 24 Cambridge study references, a level-aware preparation plan and a Saqr self-test.'}</p>
                         </div>
-                        <button type="button" onClick={()=>navigate('/digital-library/english/ielts')} className="min-h-12 shrink-0 rounded-2xl bg-white px-6 py-3 text-sm font-black text-emerald-950 shadow-md transition hover:bg-emerald-50">
-                            {currentLocale==='ar'?'استكشف مركز IELTS':'Explore IELTS Center'}
+                        <button type="button" onClick={()=>navigate('/digital-library/english/ielts')} className="inline-flex min-h-12 shrink-0 items-center gap-2 rounded-2xl bg-emerald-700 px-6 py-3 text-sm font-black text-white shadow-md transition hover:bg-emerald-800">
+                            <span>{currentLocale==='ar'?'ادخل مركز IELTS':'Enter IELTS Center'}</span>
+                            <svg aria-hidden="true" className="size-5 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
                         </button>
                     </div>
                 </section>
