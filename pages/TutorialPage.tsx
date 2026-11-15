@@ -605,14 +605,23 @@ export default function TutorialPage() {
                   <span className="rounded-xl bg-emerald-600 text-white px-4 py-2.5 font-black text-xs">{label('اقتراحات القراءة','Suggestions')}</span>
                   
                 </div>
-                <span className="rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2 text-xs text-slate-600 dark:text-slate-300">{label('نوع الكتاب: الكل','Book type: All')}</span>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-200">{label('نوع الكتاب','Book type')}
+                  <select value={previewBookType} onChange={e=>setPreviewBookType(e.target.value as typeof previewBookType)}
+                    className="ms-2 min-h-11 rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                    <option value="all">{label('الكل','All')}</option>
+                    <option value="physical">{label('ورقي','Physical')}</option>
+                    <option value="digital">{label('رقمي','Digital')}</option>
+                  </select>
+                </label>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                  { kind:label('كتاب ورقي','Physical book'), color:'from-blue-500 to-sky-500 border-blue-200'},
-                  { kind:label('كتاب رقمي','Digital book'), color:'from-emerald-500 to-teal-400 border-emerald-200'},
-                  { kind:label('كتاب مقترح','Suggested book'), color:'from-purple-500 to-indigo-500 border-purple-200'}
-                ].map((card,index)=><article key={index} className={'homepage-alert-card group min-h-[200px] rounded-[1.75rem] border-4 bg-gradient-to-br p-4 sm:p-5 text-white shadow-lg transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl flex flex-col gap-4 '+card.color}>
+                  { format:'physical', kind:label('كتاب ورقي','Physical book'), color:'from-blue-500 to-sky-500 border-blue-200'},
+                  { format:'digital', kind:label('كتاب رقمي','Digital book'), color:'from-emerald-500 to-teal-400 border-emerald-200'},
+                  { format:'physical', kind:label('كتاب ورقي','Physical book'), color:'from-rose-500 to-pink-500 border-rose-200'},
+                  { format:'digital', kind:label('كتاب رقمي','Digital book'), color:'from-amber-500 to-orange-400 border-amber-200'}
+                ].filter(card=>previewBookType==='all'||card.format===previewBookType)
+                 .map((card,index)=><article key={index} className={'homepage-alert-card group min-h-[200px] rounded-[1.75rem] border-4 bg-gradient-to-br p-4 sm:p-5 text-white shadow-lg transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl flex flex-col gap-4 '+card.color}>
                   <span className="self-start rounded-full border border-white/30 bg-white/20 px-3 py-1 text-[11px] font-black">{card.kind}</span>
                   <div className="flex items-start gap-2 justify-between">
                     <div className="flex-1 space-y-2">
@@ -628,7 +637,7 @@ export default function TutorialPage() {
                 </article>)}
               </div>
               <div className="mt-5 flex justify-center">
-                <span className="rounded-xl border-2 border-emerald-400 bg-transparent px-6 py-3 text-sm font-black text-emerald-700 dark:text-emerald-300">{label('عرض المزيد — نافذة منبثقة','View more — popup dialog')}</span>
+                <button type="button" onClick={()=>setSuggestionPreviewOpen(true)} className="min-h-11 rounded-xl border-2 border-emerald-400 bg-transparent px-6 py-3 text-sm font-black text-emerald-700 dark:text-emerald-300">{label('عرض المزيد','View more')}</button>
               </div>
               <p className="mt-4 text-center text-[11px] font-semibold text-slate-500 dark:text-slate-400">{label('معاينة تعليمية بدون بيانات أو استعلامات حقيقية','Sample-only preview with no live data or requests')}</p>
             </section>
@@ -687,6 +696,8 @@ export default function TutorialPage() {
               </>
             </>
           </section>
+
+          <TutorialPlatformDirectory isAr={isAr} />
 
           <section className="rounded-[2rem] border border-emerald-200 bg-white/80 p-5 shadow-sm backdrop-blur-xl dark:border-emerald-900 dark:bg-slate-900/80 sm:p-7">
             <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
