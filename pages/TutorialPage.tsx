@@ -502,15 +502,27 @@ export default function TutorialPage() {
             </section>
           </HintTarget>
 
+          <nav className="tutorial-review-jumps mx-auto flex w-full max-w-5xl flex-wrap items-center justify-center gap-2" aria-label={label('اختصارات الجولة', 'Tour review shortcuts')}>
+            <a href="#tutorial-directory" className="rounded-xl border border-emerald-300 bg-white px-3 py-2.5 text-xs font-black text-emerald-800 shadow-sm dark:border-emerald-800 dark:bg-slate-900 dark:text-emerald-200">{label('كل صفحات صقر','All platform pages')}</a>
+            <a href="#tutorial-challenges-details" className="rounded-xl border border-violet-200 bg-white px-3 py-2.5 text-xs font-black text-violet-800 shadow-sm dark:border-violet-900 dark:bg-slate-900 dark:text-violet-200">{label('الألعاب والتحديات','Games & challenges')}</a>
+            <a href="#tutorial-identity-details" className="rounded-xl border border-amber-300 bg-white px-3 py-2.5 text-xs font-black text-amber-900 shadow-sm dark:border-amber-800 dark:bg-slate-900 dark:text-amber-200">{label('صقر وهوية وطن','UAE heritage')}</a>
+          </nav>
+
           <HintTarget id="news-banner" title={label('جديدنا — يظهر فورًا', 'What\'s New — visible immediately')} description={label('يعرض شريط جديدنا خدمات المكتبة والتحديات والألعاب وآخر إضافات صقر بالعربية والإنجليزية؛ ويمكن إيقاف الشريط مؤقتًا لقراءة العبارات. هذه نسخة توضيحية دون بيانات حية.', 'What\'s New showcases Saqr services, games, challenges, and recent additions in Arabic and English. You can pause the ribbon to read. This is an illustrative preview, not a live feed.')} interactive={false} {...hintState}>
-            <div className="tutorial-news-ribbon relative z-30 mx-auto flex h-14 w-full max-w-5xl items-center overflow-hidden rounded-full border-4 border-amber-300 bg-white shadow-lg dark:border-amber-700 dark:bg-slate-800 md:h-16">
-              <div className="relative z-20 flex h-full shrink-0 items-center gap-2 bg-amber-400 px-5 text-xs font-black uppercase text-slate-900 md:px-8 md:text-sm">
-                <span className="h-3 w-3 animate-ping rounded-full bg-white" />
+            <div data-news-paused={newsPaused} className="tutorial-news-ribbon efips-news-ribbon w-full max-w-5xl mx-auto relative z-30 flex items-center bg-white dark:bg-slate-800 border-4 border-amber-300 dark:border-amber-700 rounded-full shadow-lg overflow-hidden h-14 md:h-16">
+              <button type="button" onClick={() => setNewsPaused(p => !p)} aria-pressed={newsPaused}
+                aria-label={newsPaused ? label('استئناف جديدنا', 'Resume news') : label('إيقاف جديدنا لقراءة الأخبار', 'Pause the news to read')}
+                className="bg-amber-400 text-slate-900 font-black px-3 sm:px-5 md:px-8 h-full flex items-center gap-2 relative z-20 shrink-0 text-xs md:text-sm uppercase focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-600">
+                <span className="w-2.5 h-2.5 bg-white rounded-full shrink-0" aria-hidden="true"/>
                 {label('جديدنا', "What's New")}
-              </div>
-              <div className="flex h-full flex-1 items-center overflow-hidden bg-amber-50 dark:bg-slate-800">
-                <div className="min-w-0 px-4 text-xs font-bold leading-6 text-slate-800 dark:text-slate-100 md:text-sm">
-                  {label('صوت الاتحاد وتسجيل MP3 · خمس مغامرات لصقر وهوية وطن · بين السطور · رتّب المكتبة · المؤلف الصغير · ترشيحات تناسب لغتك · بودكاست صقر · وكل خدمات مكتبتنا!', "Voice of the Union MP3 · five UAE heritage quests · Between the Lines · Organize the Library · Little Author · reading picks in your language · Saqr Podcast · and more!")}
+                <svg className="w-3.5 h-3.5 shrink-0 opacity-80" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                  {newsPaused ? <path d="M4 2.5v11l9-5.5-9-5.5Z"/> : <path d="M3 2h3v12H3zm7 0h3v12h-3z"/>}
+                </svg>
+              </button>
+              <div className="flex-1 min-w-0 overflow-hidden h-full flex items-center bg-amber-50 dark:bg-slate-800">
+                <div aria-live="off" className={`whitespace-nowrap inline-block ${isAr ? 'animate-marquee-rtl' : 'animate-marquee-ltr'} text-slate-800 dark:text-slate-100 font-bold text-xs md:text-base px-4`}
+                  style={{ animationDuration: isAr ? '205s' : '235s' }}>
+                  {getSaqrNewsTicker(locale)}
                 </div>
               </div>
             </div>
