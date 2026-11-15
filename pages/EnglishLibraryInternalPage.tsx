@@ -436,23 +436,31 @@ const EnglishLibraryInternalPage: React.FC = () => {
                 
                 <RevealOnScroll>
                     <div className="efips-library-title-wrap text-center mt-12 mb-12 relative">
-                        <div className="efips-library-topbar flex flex-wrap items-center justify-between gap-3">
+                        <div className="efips-library-topbar">
                             <button onClick={() => navigate(-1)} className="efips-library-back start-0 bg-white dark:bg-slate-800 text-slate-800 dark:text-white px-5 py-2.5 rounded-full font-black text-sm hover:bg-slate-200 hover:-translate-x-1 active:translate-y-1 border-b-4 border-slate-300 dark:border-slate-700 active:border-b-0 transition-all flex items-center gap-2 shadow-sm">
                                 <span className="text-xl leading-none rtl:rotate-180">←</span> {t('back')}
-                            </button>
-                            <button type="button"
-                                aria-label={currentLocale==='ar'?'فتح مركز IELTS':'Open IELTS Center'}
-                                onClick={() => navigate('/digital-library/english/ielts')}
-                                className="group inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full border-2 border-emerald-300 bg-emerald-50 px-4 py-2 text-sm font-black text-emerald-900 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-500 hover:bg-emerald-100 focus-visible:outline-2 focus-visible:outline-emerald-600 dark:border-emerald-700 dark:bg-emerald-950 dark:text-emerald-100 dark:hover:bg-emerald-900">
-                                <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M12 6c-3-2-7-2-9-1v14c3-1 7-1 9 1 3-2 7-2 9-1V5c-3-1-7-1-9 1Zm0 0v14"/>
-                                    <path d="M17 2v3m-1.5-1.5h3" />
-                                </svg>
-                                <span>{currentLocale==='ar'?'مركز IELTS':'IELTS Center'}</span>
                             </button>
                         </div>
                         {/* العناوين الإنجليزية تكون بوزن أسود عريض جداً والخطوط موحدة Cairo */}
                         <h1 className="efips-library-page-title text-4xl md:text-6xl font-black text-slate-800 dark:text-white tracking-tight uppercase">{t('pageTitle')}</h1>
+                        <div className="mt-5 flex justify-center">
+                            <button
+                                type="button"
+                                aria-label={currentLocale==='ar'?'فتح مركز IELTS':'Open IELTS Center'}
+                                onClick={() => navigate('/digital-library/english/ielts')}
+                                className="group relative isolate inline-flex min-h-12 items-center justify-center gap-2.5 rounded-full border border-emerald-300/80 bg-gradient-to-r from-emerald-700 via-teal-600 to-cyan-600 px-6 py-3 text-sm font-black text-white shadow-[0_0_24px_rgba(16,185,129,0.5)] transition-all duration-300 hover:-translate-y-0.5 hover:scale-105 hover:shadow-[0_0_36px_rgba(16,185,129,0.78)] focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-emerald-500 dark:border-emerald-400/70 sm:px-8 sm:text-base"
+                            >
+                                <span aria-hidden="true" className="pointer-events-none absolute -inset-1.5 -z-10 rounded-full bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 opacity-65 blur-lg motion-safe:animate-pulse group-hover:opacity-90" />
+                                <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5 shrink-0 drop-shadow-sm" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M12 6c-3-2-7-2-9-1v14c3-1 7-1 9 1 3-2 7-2 9-1V5c-3-1-7-1-9 1Zm0 0v14"/>
+                                    <path d="M17 2v3m-1.5-1.5h3"/>
+                                </svg>
+                                <span>{currentLocale==='ar'?'مركز IELTS':'IELTS Center'}</span>
+                                <svg aria-hidden="true" viewBox="0 0 24 24" className={`size-4 shrink-0 ${currentLocale==='ar'?'rotate-180':''}`} fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M5 12h14m-6-6 6 6-6 6"/>
+                                </svg>
+                            </button>
+                        </div>
                         <div className="efips-library-title-stripes flex justify-center gap-3 mt-6">
                             <div className="w-16 h-2 bg-sky-500 rounded-full" />
                             <div className="w-8 h-2 bg-amber-400 rounded-full" />
