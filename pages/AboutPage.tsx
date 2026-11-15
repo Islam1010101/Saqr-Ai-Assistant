@@ -1,8 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useLanguage, useTheme } from '../App';
+import { useLanguage } from '../App';
 import './aboutVisual.css';
 
+// Preserve the school's existing, approved bilingual history, five wings,
+// service descriptions, opening hours and contact information.
 const translations = {
     ar: {
         schoolHistory: "عن مدرسة صقر الإمارات الدولية الخاصة",
@@ -58,370 +60,263 @@ const translations = {
     }
 };
 
-// ==========================================
-// أيقونات SVG جذابة
-// ==========================================
-const BuildingIcon = () => (
-  <svg className="w-10 h-10 md:w-12 md:h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-  </svg>
-);
 
-const Wing1Icon = () => (
-  <svg className="w-8 h-8 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 2l9 4.9V17L12 22l-9-4.9V6.9z" />
-    <path d="M12 22V12" />
-    <path d="M12 12l9-4.9" />
-    <path d="M12 12L3 7.1" />
-  </svg>
-);
+type AboutIcon =
+  | 'school' | 'library' | 'spark' | 'clock' | 'mail' | 'external'
+  | 'adult' | 'youth' | 'arabic' | 'children' | 'flag'
+  | 'reading' | 'worksheet' | 'workshop' | 'borrowing' | 'award' | 'ai' | 'arrow';
 
-const Wing2Icon = () => (
-  <svg className="w-8 h-8 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M13.5 2H5a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V8.5L13.5 2z" />
-    <path d="M13 2v7h7" />
-    <circle cx="12" cy="13" r="3" />
-    <path d="M12 16v3" />
-  </svg>
-);
-
-const Wing3Icon = () => (
-  <svg className="w-8 h-8 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-  </svg>
-);
-
-const Wing4Icon = () => (
-  <svg className="w-8 h-8 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8z" />
-    <circle cx="12" cy="10" r="3" />
-  </svg>
-);
-
-const ClockIcon = () => (
-  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10" />
-    <polyline points="12 6 12 12 16 14" />
-  </svg>
-);
-
-const MailIcon = () => (
-  <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-    <polyline points="22,6 12,13 2,6" />
-  </svg>
-);
-
-// Reveal each section once and disconnect. Never hide content again while
-// scrolling on Safari or Android browsers.
-const RevealOnScroll = ({ children, delay = 0 }: { children: React.ReactNode, delay?: number }) => {
-    const [isVisible, setIsVisible] = useState(true);
-    const elementRef = useRef<HTMLDivElement>(null);
-    useEffect(() => {
-        const element = elementRef.current;
-        if (!element || typeof IntersectionObserver === 'undefined' ||
-            window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-        let entered = false;
-        const observer = new IntersectionObserver(([entry]) => {
-            if (entry.isIntersecting) {
-                entered = true;
-                setIsVisible(true);
-                observer.disconnect();
-            } else if (!entered) {
-                setIsVisible(false);
-            }
-        }, { threshold: 0, rootMargin: '160px 0px 160px 0px' });
-        observer.observe(element);
-        return () => observer.disconnect();
-    }, []);
-    return (
-        <div ref={elementRef}
-            className={'about-reveal w-full transition-[opacity,transform] duration-300 ease-out ' +
-                (isVisible ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0')}
-            style={{ transitionDelay: Math.min(delay, 80) + 'ms' }}>
-            {children}
-        </div>
-    );
+const Icon = ({ kind, className = '' }: { kind: AboutIcon; className?: string }) => {
+  const shapes: Record<AboutIcon, React.ReactNode> = {
+    school: <><path d="M3 21h18M5 21V5l7-3 7 3v16M9 7h2m2 0h2M9 11h2m2 0h2M10 21v-5h4v5"/></>,
+    library: <><path d="M3 6c3-2 6-2 9 0 3-2 6-2 9 0v13c-3-2-6-2-9 0-3-2-6-2-9 0V6Zm9 0v13"/></>,
+    spark: <><path d="m12 2 2.5 6.4L21 11l-6.5 2.6L12 20l-2.5-6.4L3 11l6.5-2.6L12 2ZM20 18l.8 1.8L22.5 20l-1.7.6L20 22.5l-.6-1.9L17.5 20l1.9-.7L20 18Z"/></>,
+    clock: <><circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/></>,
+    mail: <><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></>,
+    external: <><path d="M13 4h7v7m0-7-9 9"/><path d="M19 14v5H5V5h5"/></>,
+    adult: <><path d="M4 21v-3a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v3"/><circle cx="12" cy="6" r="4"/></>,
+    youth: <><path d="m2 9 10-5 10 5-10 5-10-5ZM6 12v5c4 3 8 3 12 0v-5"/></>,
+    arabic: <><path d="M4 6h16M12 4v2M6 10h12M8 10c0 5 3 8 8 9M16 10c-1 5-3 7-8 9"/></>,
+    children: <><path d="M4 5h16v14H4zM8 10h8M8 14h5"/><circle cx="17" cy="16" r="1"/></>,
+    flag: <><path d="M4 22V3m0 2c5-3 10 3 16 0v12c-6 3-11-3-16 0"/></>,
+    reading: <><path d="M3 5c3-2 6-2 9 0 3-2 6-2 9 0v14c-3-2-6-2-9 0-3-2-6-2-9 0V5Zm9 0v14"/></>,
+    worksheet: <><path d="M6 3h9l4 4v14H6V3Zm9 0v4h4M9 11h7M9 15h6M9 19h4"/></>,
+    workshop: <><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Z"/></>,
+    borrowing: <><path d="M5 4h11v15H5zM9 8h4m-4 4h4M16 7h4v14H9v-2"/></>,
+    award: <><path d="M8 3h8v7a4 4 0 0 1-8 0V3ZM8 5H5a3 3 0 0 0 3 4m8-4h3a3 3 0 0 1-3 4M12 14v5m-5 2h10"/></>,
+    ai: <><rect x="4" y="6" width="16" height="14" rx="3"/><path d="M12 3v3m-5 7h1m8 0h1M9 17h6"/></>,
+    arrow: <><path d="m7 17 10-10M8 7h9v9"/></>,
+  };
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth="1.85" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {shapes[kind]}
+    </svg>
+  );
 };
 
-// Local section buttons reuse the same SVG line-art language as Saqr's bubbles
-// without opening protected routes or fetching any user information.
-type AboutBubbleKey = 'school' | 'wings' | 'services' | 'hours' | 'contact';
-const AboutBubbleIcon = ({ kind }: { kind: AboutBubbleKey }) => {
-    const shape: Record<AboutBubbleKey, React.ReactNode> = {
-        school: <><path d="M3 21h18M5 21V5l7-3 7 3v16M9 7h2m2 0h2M9 11h2m2 0h2M10 21v-5h4v5"/></>,
-        wings: <><path d="M3 6.5c3-2 6-2 9 0 3-2 6-2 9 0V19c-3-2-6-2-9 0-3-2-6-2-9 0V6.5ZM12 6.5V19"/></>,
-        services: <><path d="m12 2 2.4 6.2L21 11l-6.6 2.8L12 20l-2.4-6.2L3 11l6.6-2.8L12 2ZM19 17l1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2Z"/></>,
-        hours: <><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></>,
-        contact: <><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></>,
-    };
-    return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75"
-        strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{shape[kind]}</svg>;
-};
+type BubbleKey = 'school' | 'library' | 'services' | 'hours' | 'contact';
+const schoolWebsite = 'https://www.falcon-school.com';
+const librarianEmail = 'islam.ahmed@falcon-school.com';
 
 const AboutPage: React.FC = () => {
-    // Keep this public page synchronized with the login and tutorial language.
-    const { locale: lang, dir, setLocale } = useLanguage();
-    const { theme, toggleTheme } = useTheme();
-    const isAr = lang === 'ar';
-    const t = (key: keyof typeof translations.ar) => translations[lang][key];
-    const navigate = useNavigate();
-    const quickLinks: { id: AboutBubbleKey; target: string; ar: string; en: string }[] = [
-        { id: 'school', target: 'about-school', ar: 'مدرستنا', en: 'Our School' },
-        { id: 'wings', target: 'about-wings', ar: 'أجنحة المكتبة', en: 'Library Wings' },
-        { id: 'services', target: 'about-services', ar: 'خدمات صقر', en: 'Saqr Services' },
-        { id: 'hours', target: 'about-hours', ar: 'مواعيد العمل', en: 'Opening Hours' },
-        { id: 'contact', target: 'about-contact', ar: 'التواصل', en: 'Contact' },
-    ];
-    const jumpTo = (id: string) => {
-        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        document.getElementById(id)?.scrollIntoView({
-            behavior: reducedMotion ? 'auto' : 'smooth', block: 'start'
-        });
-    };
+  // Both login and About read the same persisted saqr_lang via LanguageProvider.
+  // No local About language switch or theme switch: this public page is always light.
+  const { locale: lang, dir } = useLanguage();
+  const isAr = lang === 'ar';
+  const t = (key: keyof typeof translations.ar) => translations[lang][key];
+  const l = (ar: string, en: string) => isAr ? ar : en;
+  const navigate = useNavigate();
+  const [openWing, setOpenWing] = useState<number | null>(null);
+  const [hoverWing, setHoverWing] = useState<number | null>(null);
+  const selectedWing = hoverWing ?? openWing;
 
-    return (
-        <div dir={dir} className="efips-about-v2 w-full min-h-[100dvh] flex flex-col bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300 py-4 md:py-8 px-3 md:px-6">
-            
-            {/* Static UAE-colour background: no expensive live blurs or loops. */}
-            <div className="about-ambient" aria-hidden="true" />
+  useEffect(() => {
+    // Non-blocking, page-scoped Cairo request with font-display:swap.
+    // Never override font styling on any other part of the platform.
+    if (document.getElementById('efips-about-cairo')) return;
+    const font = document.createElement('link');
+    font.id = 'efips-about-cairo';
+    font.rel = 'stylesheet';
+    font.href = 'https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap';
+    document.head.appendChild(font);
+  }, []);
 
-            <div className="about-shell w-full max-w-[1200px] mx-auto flex flex-col gap-6 md:gap-10 relative z-10">
-                
-                {/* زر العودة */}
-                <div className="about-back-bar relative">
-                    <button onClick={() => navigate('/')} className="about-back-btn bg-white dark:bg-slate-800 text-slate-800 dark:text-white px-4 py-2 rounded-full font-black text-xs md:text-sm hover:bg-slate-200 hover:-translate-x-1 active:translate-y-1 border-b-4 border-slate-300 dark:border-slate-700 active:border-b-0 transition-all flex items-center gap-2 shadow-sm w-fit">
-                        <span className="text-lg leading-none rtl:rotate-180">←</span> {isAr ? 'العودة لصفحة التسجيل' : 'Back to Login'}
-                    </button>
-                    <div className="about-top-controls">
-                        <span className="about-brand"><img src="/school-logo.png" width="34" height="34" alt="" />EFIPS</span>
-                        <button type="button" className="about-language-btn" onClick={() => setLocale(isAr ? 'en' : 'ar')}
-                            aria-label={isAr ? 'Switch to English' : 'التبديل إلى اللغة العربية'} title={isAr ? 'English' : 'العربية'}>
-                            {isAr ? 'EN' : 'AR'}
-                        </button>
-                        <button type="button" className="about-theme-btn" onClick={toggleTheme}
-                            aria-label={isAr ? 'تغيير الوضع الفاتح والداكن' : 'Toggle light and dark mode'}
-                            title={isAr ? 'تغيير المظهر' : 'Change appearance'}>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true">
-                                {theme === 'light' ? <path d="M20 15a8 8 0 0 1-11-11A8.5 8.5 0 1 0 20 15Z"/> : <><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4M17.6 17.6 19 19M19 5l-1.4 1.4M6.4 17.6 5 19"/></>}
-                            </svg>
-                        </button>
-                    </div>
-                </div>
+  const navBubbles: { id: BubbleKey; target: string; ar: string; en: string; icon: AboutIcon }[] = [
+    { id: 'school', target: 'about-school', ar: 'مدرستنا', en: 'Our School', icon: 'school' },
+    { id: 'library', target: 'about-wings', ar: 'أجنحة المكتبة', en: 'Library Wings', icon: 'library' },
+    { id: 'services', target: 'about-services', ar: 'خدمات صقر', en: 'Saqr Services', icon: 'spark' },
+    { id: 'hours', target: 'about-hours', ar: 'المواعيد', en: 'Hours', icon: 'clock' },
+    { id: 'contact', target: 'about-contact', ar: 'التواصل', en: 'Contact', icon: 'mail' },
+  ];
+  const wings: { icon: AboutIcon; title: string; desc: string; tone: string }[] = [
+    { icon: 'adult', title: t('wing1'), desc: t('wing1Desc'), tone: 'slate' },
+    { icon: 'youth', title: t('wing2'), desc: t('wing2Desc'), tone: 'teal' },
+    { icon: 'arabic', title: t('wing3'), desc: t('wing3Desc'), tone: 'rose' },
+    { icon: 'children', title: t('wing4'), desc: t('wing4Desc'), tone: 'sky' },
+    { icon: 'flag', title: t('wing5'), desc: t('wing5Desc'), tone: 'gold' },
+  ];
+  const serviceIcons: AboutIcon[] = ['reading','worksheet','workshop','borrowing','award','ai'];
+  const services = t('servicesList').split(' • ');
+  const jumpTo = (id: string) => {
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
+    document.getElementById(id)?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+  };
+  const hours = [
+    { key: 'monThu' as const, icon: 'clock' as const, status: 'weekday' },
+    { key: 'fri' as const, icon: 'clock' as const, status: 'friday' },
+    { key: 'satSun' as const, icon: 'clock' as const, status: 'closed' },
+  ];
 
-                {/* --- 1. قسم عن المدرسة --- */}
-                <RevealOnScroll>
-                    <section id="about-school" className="about-hero group relative">
-                        
-                        <div className="absolute top-0 start-0 w-3 h-full bg-amber-400 rounded-s-[2rem]"></div>
-                        
-                        <div className="about-hero-copy flex-1 space-y-4 relative z-10 text-center md:text-start ps-2">
-                            <div className="about-hero-eyebrow">
-                                <BuildingIcon />
-                                EFIPS
-                            </div>
-                            <h1 className={`about-hero-title ${!isAr && 'tracking-tight'}`}>
-                                {t('schoolHistory')}
-                            </h1>
-                            <p className="about-hero-description">
-                                {t('historyText')}
-                            </p>
-                            <div className="pt-2 flex justify-center md:justify-start">
-                                <a 
-                                    href="https://www.falcon-school.com" 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="about-website-btn group"
-                                >
-                                    <span>{t('visitWebsite')}</span>
-                                    <svg className="w-5 h-5 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-                                </a>
-                            </div>
-                        </div>
-                        
-                        <div className="about-hero-art">
-                            <span className="about-hero-halo" aria-hidden="true"/>
-                            <span className="about-hero-ring" aria-hidden="true"/>
-                            <span className="about-hero-ring about-hero-ring-2" aria-hidden="true"/>
-                            <div className="about-logo-disc">
-                                <img src="/school-logo.png"
-                                    alt={isAr ? 'شعار مدرسة صقر الإمارات الدولية الخاصة' : 'Emirates Falcon International Private School logo'}
-                                    className="about-hero-logo" width="272" height="272"
-                                    loading="eager" decoding="async" />
-                            </div>
-                            <nav className="about-bubble-nav" aria-label={isAr ? 'فقاعات أقسام المدرسة والمكتبة' : 'School and library section bubbles'}>
-                                {quickLinks.map(link => (
-                                    <button key={link.id} type="button" className={'about-bubble about-bubble--' + link.id}
-                                        onClick={() => jumpTo(link.target)}
-                                        aria-label={isAr ? link.ar : link.en} title={isAr ? link.ar : link.en}>
-                                        <AboutBubbleIcon kind={link.id}/>
-                                        <span>{isAr ? link.ar : link.en}</span>
-                                    </button>
-                                ))}
-                            </nav>
-                        </div>
-                    </section>
-                </RevealOnScroll>
+  return (
+    <div dir={dir} className="efips-about-v3" data-about-theme="light">
+      <div className="about3-shell">
+        <header className="about3-topbar">
+          <button type="button" onClick={() => navigate('/')} className="about3-back">
+            <span aria-hidden="true">{isAr ? '←' : '←'}</span>
+            {l('العودة لصفحة تسجيل الدخول', 'Back to Login')}
+          </button>
+          <span className="about3-brand">
+            <img src="/school-logo.png" alt="" width="38" height="38" decoding="async" />
+            <span>{l('مدرسة صقر الإمارات', 'EFIPS School')}</span>
+          </span>
+        </header>
 
-                {/* --- 2. قسم عن المكتبة والأجنحة --- */}
-                <RevealOnScroll delay={100}>
-                    <section id="about-wings" className="relative z-10">
-                        <div className="about-heading text-center mb-8 md:mb-10">
-                            <span className="about-heading-tag">
-                                {isAr ? 'تعرف إلى مكتبتنا' : 'Library Overview'}
-                            </span>
-                            <h3 className={`text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 dark:text-white mb-3 ${!isAr && 'tracking-tight'}`}>
-                                {t('librarySection')}
-                            </h3>
-                            <p className="text-xs sm:text-sm md:text-base text-slate-600 dark:text-slate-400 font-bold max-w-3xl mx-auto leading-relaxed px-2">
-                                {t('libraryIntro')}
-                            </p>
-                        </div>
-
-                        <div className="about-wing-grid grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                            {[
-                                { title: t('wing1'), desc: t('wing1Desc'), color: "bg-slate-700", border: "border-slate-900", icon: <Wing1Icon /> },
-                                { title: t('wing2'), desc: t('wing2Desc'), color: "bg-emerald-500", border: "border-emerald-700", icon: <Wing2Icon /> },
-                                { title: t('wing3'), desc: t('wing3Desc'), color: "bg-rose-500", border: "border-rose-700", icon: <Wing3Icon /> },
-                                { title: t('wing4'), desc: t('wing4Desc'), color: "bg-blue-500", border: "border-blue-700", icon: <Wing4Icon /> }
-                            ].map((w, i) => (
-                                <RevealOnScroll key={i} delay={i * 40}>
-                                    <div className={`about-wing-card ${w.color} ${w.border} text-white p-6 sm:p-8 rounded-[2rem] border-b-6 hover:-translate-y-1.5 transition-all duration-300 flex flex-col items-center md:items-start text-center md:text-start shadow-sm h-full`}>
-                                        <div className="about-wing-icon text-white/90 drop-shadow-sm">{w.icon}</div>
-                                        <h4 className="text-xl sm:text-2xl font-black mb-2">{w.title}</h4>
-                                        <p className="text-xs sm:text-sm md:text-base font-bold opacity-90 leading-relaxed">{w.desc}</p>
-                                    </div>
-                                </RevealOnScroll>
-                            ))}
-
-                            {/* الجناح الخامس - الهوية الوطنية */}
-                            <div className="md:col-span-2 relative mt-1">
-                                <RevealOnScroll delay={200}>
-                                    <div className="about-identity-wing text-white">
-
-                                        <div className="about-identity-art relative z-10 bg-white rounded-full flex items-center justify-center shrink-0 border-4 border-slate-700">
-                                           <svg viewBox="0 0 640 480" className="w-12 h-12 sm:w-16 sm:h-16 rounded shadow-sm overflow-hidden" preserveAspectRatio="none">
-                                              <path fill="#00732f" d="M0 0h640v160H0z"/>
-                                              <path fill="#fff" d="M0 160h640v160H0z"/>
-                                              <path fill="#000" d="M0 320h640v160H0z"/>
-                                              <path fill="#ff0000" d="M0 0h220v480H0z"/>
-                                           </svg>
-                                        </div>
-                                        
-                                        <div className="relative z-10 flex-1 text-center md:text-start">
-                                            <div className="inline-block px-3 py-1 rounded-full bg-white/10 text-white/90 text-[10px] md:text-xs font-black uppercase tracking-widest mb-2 border border-white/20">
-                                                {isAr ? 'جناح الهوية الوطنية' : 'National Identity Wing'}
-                                            </div>
-                                            <h4 className="text-xl sm:text-2xl md:text-3xl font-black mb-2 leading-tight">
-                                                {t('wing5')}
-                                            </h4>
-                                            <p className="text-xs sm:text-sm md:text-base text-slate-300 font-bold leading-relaxed max-w-3xl">
-                                                {t('wing5Desc')}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </RevealOnScroll>
-                            </div>
-                        </div>
-                    </section>
-                </RevealOnScroll>
-
-                {/* --- 3. خدمات المكتبة --- */}
-                <RevealOnScroll delay={120}>
-                    <section id="about-services" className="relative z-10">
-                        <div className="about-service-panel text-center relative">
-                            <div className="about-service-title-row">
-                                <img src="/Saqr.png" width="94" height="94" loading="lazy" decoding="async"
-                                    className="about-services-saqr" alt={isAr ? 'شخصية صقر مساعد المكتبة' : 'Saqr library assistant mascot'} />
-                                <div>
-                                    <span className="about-service-kicker">{isAr ? 'مع صقر… المعرفة أقرب' : 'EXPLORE WITH SAQR'}</span>
-                                    <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 dark:text-white">
-                                        {t('libServices')}
-                                    </h3>
-                                </div>
-                            </div>
-                            
-                            <div className="about-service-list flex flex-wrap justify-center gap-2.5 md:gap-3">
-                                {t('servicesList').split(' • ').map((service, index) => (
-                                    <div key={index} className="about-service-item">
-                                        {service}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </section>
-                </RevealOnScroll>
-
-                {/* --- 4. التواصل ومواعيد العمل --- */}
-                <RevealOnScroll delay={150}>
-                    <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 relative z-10">
-                        
-                        {/* مواعيد العمل */}
-                        <div className="lg:col-span-7">
-                            <div id="about-hours" className="about-hours-panel h-full relative overflow-hidden flex flex-col justify-between">
-                                <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-500 rounded-full flex items-center justify-center border-2 border-emerald-200 dark:border-emerald-800">
-                                       <ClockIcon />
-                                    </div>
-                                    <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 dark:text-white">{t('operatingHours')}</h3>
-                                </div>
-
-                                <div className="space-y-2.5 font-black text-xs sm:text-sm md:text-base text-slate-600 dark:text-slate-400">
-                                    <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-1.5 p-3 bg-slate-50 dark:bg-slate-900 rounded-[1.5rem] border-2 border-slate-100 dark:border-slate-700">
-                                        <span>{t('monThu').split(' (')[0]}</span>
-                                        <span className="text-slate-900 dark:text-white bg-white dark:bg-slate-800 px-3 py-1 rounded-xl border border-slate-200 dark:border-slate-600 text-xs">{t('monThu').split(' (')[1]?.replace(')', '')}</span>
-                                    </div>
-                                    <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-1.5 p-3 bg-slate-50 dark:bg-slate-900 rounded-[1.5rem] border-2 border-slate-100 dark:border-slate-700">
-                                        <span>{t('fri').split(' (')[0]}</span>
-                                        <span className="text-slate-900 dark:text-white bg-white dark:bg-slate-800 px-3 py-1 rounded-xl border border-slate-200 dark:border-slate-600 text-xs">{t('fri').split(' (')[1]?.replace(')', '')}</span>
-                                    </div>
-                                    <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-1.5 p-3 bg-rose-50 dark:bg-rose-900/10 rounded-[1.5rem] border-2 border-rose-200 dark:border-rose-900/30">
-                                        <span className="text-rose-600 dark:text-rose-400">{t('satSun').split(' (')[0]}</span>
-                                        <span className="text-rose-700 dark:text-rose-300 bg-white dark:bg-slate-800 px-3 py-1 rounded-xl border border-rose-200 dark:border-rose-900/50 text-xs">{t('satSun').split(' (')[1]?.replace(')', '')}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* التواصل */}
-                        <div className="lg:col-span-5 h-full">
-                            <a 
-                                id="about-contact"
-                                href="mailto:islam.ahmed@falcon-school.com"
-                                className="about-contact-card block h-full bg-rose-500 border-b-6 border-rose-700 p-6 sm:p-8 rounded-[2.5rem] text-center group hover:-translate-y-1.5 active:border-b-0 active:translate-y-2 transition-all shadow-sm"
-                            >
-                                <div className="h-full flex flex-col justify-center items-center">
-                                    <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300 border-2 border-white/30">
-                                        <MailIcon />
-                                    </div>
-                                    <h3 className="text-lg sm:text-xl font-black mb-2 text-white">{t('contactLink')}</h3>
-                                    <p className="text-white font-bold text-xs sm:text-sm break-all bg-black/10 px-3 py-2 rounded-[1.2rem] border border-white/20">islam.ahmed@falcon-school.com</p>
-                                </div>
-                            </a>
-                        </div>
-                    </section>
-                </RevealOnScroll>
-
-                {/* --- الخاتمة --- */}
-                <RevealOnScroll delay={200}>
-                    <div className="mt-6 md:mt-8 text-center relative z-10">
-                        <p className="about-motto italic px-4">
-                            "{t('motto')}"
-                        </p>
-                        <div className="flex justify-center gap-2.5 mt-6">
-                            <div className="h-1.5 w-10 bg-amber-400 rounded-full"></div>
-                            <div className="h-1.5 w-2.5 bg-sky-400/20 dark:bg-sky-400/40 rounded-full"></div>
-                            <div className="h-1.5 w-2.5 bg-rose-400/20 dark:bg-rose-400/40 rounded-full"></div>
-                        </div>
-                    </div>
-                </RevealOnScroll>
-
+        <main>
+          <section id="about-school" className="about3-hero" aria-labelledby="about-school-title">
+            <div className="about3-hero-visual">
+              <span className="about3-guide-ring about3-guide-ring--outer" aria-hidden="true"/>
+              <span className="about3-guide-ring about3-guide-ring--inner" aria-hidden="true"/>
+              <a href={schoolWebsite} target="_blank" rel="noopener noreferrer"
+                className="about3-crest-link"
+                aria-label={l('شعار مدرسة صقر الإمارات، فتح الموقع الرسمي للمدرسة', 'Emirates Falcon school logo, open official school website')}
+                title={t('visitWebsite')}>
+                <img src="/school-logo.png" width="280" height="280"
+                  alt={l('شعار مدرسة صقر الإمارات الدولية الخاصة', 'Emirates Falcon International Private School logo')}
+                  loading="eager" decoding="async" />
+              </a>
+              <nav className="about3-hero-bubbles"
+                aria-label={l('انتقل إلى أقسام الصفحة', 'Jump to About sections')}>
+                {navBubbles.map((bubble) => (
+                  <button type="button" key={bubble.id} className={'about3-hero-bubble about3-hero-bubble--'+bubble.id}
+                    onClick={() => jumpTo(bubble.target)} title={l(bubble.ar,bubble.en)}>
+                    <Icon kind={bubble.icon} />
+                    <span>{l(bubble.ar,bubble.en)}</span>
+                  </button>
+                ))}
+              </nav>
             </div>
+            <div className="about3-hero-copy">
+              <span className="about3-eyebrow"><Icon kind="school" /> {l('من مدرستنا… إلى عالم من المعرفة', 'OUR SCHOOL. OUR STORY.')}</span>
+              <h1 id="about-school-title">{t('schoolHistory')}</h1>
+              <p>{t('historyText')}</p>
+              <a href={schoolWebsite} target="_blank" rel="noopener noreferrer" className="about3-website">
+                {t('visitWebsite')} <Icon kind="external"/>
+              </a>
+            </div>
+          </section>
 
+          <section id="about-wings" className="about3-section about3-library-section"
+            aria-labelledby="about-library-title">
+            <header className="about3-section-heading">
+              <span className="about3-eyebrow"><Icon kind="library" /> {l('رحلة بين أجنحة المكتبة','DISCOVER OUR LIBRARY')}</span>
+              <h2 id="about-library-title">{t('librarySection')}</h2>
+              <p>{t('libraryIntro')}</p>
+              <p className="about3-help-text">{l('مرر الماوس على أي جناح لمعرفة التفاصيل، أو اضغط عليه من الهاتف.',
+                'Hover over a wing for details, or tap a bubble on your phone.')}</p>
+            </header>
 
-        </div>
-    );
+            <div className="about3-wings-stage">
+              <div className="about3-wings-center">
+                <img src="/Saqr.png" alt={l('شخصية صقر مساعد المكتبة','Saqr library assistant mascot')}
+                  width="218" height="230" loading="lazy" decoding="async"/>
+                <span>{l('صقر يعرّفك بمكتبتنا', 'Explore with Saqr')}</span>
+              </div>
+              <div className="about3-wings-orbit" aria-label={l('أجنحة المكتبة الخمسة','Five library wings')}>
+                {wings.map((wing,index) => (
+                  <div key={index} className={'about3-wing-slot about3-wing-slot--'+(index+1)}
+                    data-active={selectedWing===index}>
+                    <button type="button" className={'about3-wing-bubble about3-wing-bubble--'+wing.tone}
+                      aria-expanded={openWing === index} aria-describedby={'about-wing-tip-'+index}
+                      onMouseEnter={() => setHoverWing(index)}
+                      onMouseLeave={() => setHoverWing(null)}
+                      onFocus={() => setHoverWing(index)}
+                      onBlur={() => setHoverWing(null)}
+                      onClick={() => setOpenWing(current => current===index ? null : index)}>
+                      <Icon kind={wing.icon}/>
+                      <span>{wing.title}</span>
+                    </button>
+                    <div role="tooltip" id={'about-wing-tip-'+index} className="about3-wing-tooltip">
+                      <strong>{wing.title}</strong>
+                      <p>{wing.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="about3-wing-info" role="status" aria-live="polite">
+              {selectedWing === null ? (
+                <p>{l('اختر أحد الأجنحة الخمسة لتتعرف إلى الكتب والخدمات الموجودة فيه.',
+                  'Choose one of the five wings to discover its books and resources.')}</p>
+              ) : (
+                <>
+                  <strong>{wings[selectedWing].title}</strong>
+                  <p>{wings[selectedWing].desc}</p>
+                </>
+              )}
+            </div>
+          </section>
+
+          <section id="about-services" className="about3-section about3-services" aria-labelledby="about-services-title">
+            <header className="about3-section-heading">
+              <span className="about3-eyebrow"><Icon kind="spark"/> {l('مع صقر كل يوم جديد','DISCOVER WITH SAQR')}</span>
+              <h2 id="about-services-title">{t('libServices')}</h2>
+              <p>{l('نقرأ، نتعلم، نبدع… ونشارك المعرفة معًا.','Read, learn, create and share what you discover.')}</p>
+            </header>
+            <div className="about3-services-layout">
+              <img className="about3-services-mascot" src="/Saqr.png" width="145" height="175" loading="lazy" decoding="async"
+                alt={l('شخصية صقر','Saqr mascot')}/>
+              <div className="about3-services-bubbles">
+                {services.map((service,index) => (
+                  <div key={service} className={'about3-service-bubble about3-service-bubble--'+(index%3)}>
+                    <Icon kind={serviceIcons[index] ?? 'spark'} />
+                    <span>{service}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section className="about3-contact-grid" aria-label={t('contactSection')}>
+            <article id="about-hours" className="about3-hours-panel" aria-labelledby="about-hours-title">
+              <header className="about3-panel-heading">
+                <span className="about3-panel-icon about3-panel-icon--green"><Icon kind="clock"/></span>
+                <div><span className="about3-panel-kicker">{l('نرحب بكم','VISIT OUR LIBRARY')}</span>
+                  <h2 id="about-hours-title">{t('operatingHours')}</h2></div>
+              </header>
+              <div className="about3-hours-list">
+                {hours.map((row) => {
+                  const parts=t(row.key).split(' (');
+                  return (
+                    <div key={row.key} className={'about3-hour-row about3-hour-row--'+row.status}>
+                      <Icon kind={row.icon}/>
+                      <span className="about3-hour-day">{parts[0]}</span>
+                      <span className="about3-hour-time" dir="auto">{parts[1]?.replace(')','') ?? ''}</span>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="about3-panel-note">{l('يسعدنا استقبال استفساراتكم خلال أوقات العمل.',
+                'We are happy to help with library questions during operating hours.')}</p>
+            </article>
+
+            <article id="about-contact" className="about3-contact-panel" aria-labelledby="about-contact-title">
+              <header className="about3-panel-heading">
+                <span className="about3-panel-icon about3-panel-icon--rose"><Icon kind="mail"/></span>
+                <div><span className="about3-panel-kicker">{l('خلّنا على تواصل','GET IN TOUCH')}</span>
+                  <h2 id="about-contact-title">{t('contactLink')}</h2></div>
+              </header>
+              <p>{l('عندك سؤال عن كتاب أو خدمة مكتبية؟ تواصل مع أمين المكتبة مباشرة.',
+                'Need help finding a book or using a library service? Reach out to the librarian.')}</p>
+              <div className="about3-contact-icon" aria-hidden="true"><Icon kind="mail"/></div>
+              <a href={'mailto:'+librarianEmail} className="about3-contact-link">
+                <Icon kind="mail"/> <span dir="ltr">{librarianEmail}</span>
+              </a>
+              <p className="about3-panel-note">{l('اضغط على البريد الإلكتروني لفتح تطبيق المراسلة.',
+                'Tap the email address to open your email app.')}</p>
+            </article>
+          </section>
+
+          <footer className="about3-footer">
+            <p>{t('motto')}</p>
+            <span className="about3-flag-bar" aria-hidden="true">
+              <i/><i/><i/><i/>
+            </span>
+          </footer>
+        </main>
+      </div>
+    </div>
+  );
 };
 
 export default AboutPage;
