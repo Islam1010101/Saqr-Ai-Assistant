@@ -20,9 +20,10 @@ export default function DigitalBookReader({ title, source, bookKey, locale, onBa
   imagePages?: ReadonlyArray<ImageBookPage>;
 }) {
   const ar = locale === 'ar';
-  // Avoid Google's iframe preview in view-only mode: its own toolbar may show Download/Print.
-  // The existing school-authenticated, page-by-page PDF renderer remains the only viewer.
-  const preview = viewOnly ? null : digitalReaderSource(source);
+  // Google preview is never the default in view-only mode because its toolbar can
+  // offer Download/Print when the owner has not restricted them. A fallback is
+  // allowed only if Google explicitly reports downloading is blocked.
+  const preview = digitalReaderSource(source);
   const embeddedSchoolPreview = schoolOnly && Boolean(preview);
   // Google may fail to preview PDFs even well below 100 MB; never show its
   // broken Download fallback for our known large school books.
@@ -91,7 +92,12 @@ export default function DigitalBookReader({ title, source, bookKey, locale, onBa
     setError(null); setReady(false); setShowPreview(allowDrivePreview && Boolean(preview));
     setAttempt(v => v + 1);
   };
-  const reportReaderError = (failure: Error) => { setError(failure); setShowPreview(!schoolOnly); };
+  const reportReaderError = (failure: Error) => {
+    setError(failure);
+    const code=(failure as Error & {code?:string}).code || failure.message;
+    const restrictedDrivePreview=viewOnly && schoolOnly && code==='SCHOOL_DRIVE_DOWNLOAD_BLOCKED';
+    setShowPreview(restrictedDrivePreview ? Boolean(preview) : !schoolOnly && !viewOnly);
+  };
   const back = useRef<HTMLButtonElement>(null);
   useEffect(() => { back.current?.focus(); }, []);
   const errorCode = (error as Error & { code?: string })?.code || error?.message;
@@ -159,6 +165,7 @@ export default function DigitalBookReader({ title, source, bookKey, locale, onBa
             </button>}
           </section>}
           {showPreview && preview && <div className="efips-reader-preview-host">
+            {viewOnly && <p role="status" className="px-4 py-2 text-center text-xs font-bold text-emerald-800 dark:text-emerald-200">{ar?'معاينة قراءة مقيدة من مالك الملف على Google Drive.':'Google Drive owner-restricted viewing preview.'}</p>}
             {embeddedSchoolPreview && !schoolAccess && <button
               type="button" onClick={() => setShowPreview(false)}
               className="self-center m-2 px-5 py-2 rounded-xl bg-emerald-700 text-white font-bold text-sm">
