@@ -446,3 +446,38 @@
   .efips-about-v2 .about-bubble,
   .efips-about-v2 .about-logo-disc{animation:none!important;transition:none!important}
 }
+
+.efips-about-v2 .about-service-title-row{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:15px;
+  min-width:0;
+  margin-bottom:25px;
+  text-align:start;
+}
+.efips-about-v2 .about-service-title-row>div{min-width:0}
+.efips-about-v2 .about-service-title-row h3{margin:0}
+.efips-about-v2 .about-service-kicker{
+  display:block;
+  margin-bottom:5px;
+  color:#077a5d;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.03em;
+}
+.efips-about-v2 .about-services-saqr{
+  display:block;
+  width:clamp(68px,8vw,96px);
+  height:clamp(68px,8vw,96px);
+  object-fit:contain;
+  flex-shrink:0;
+  animation:none;
+  filter:none;
+}
+.dark .efips-about-v2 .about-service-kicker{color:#8ceec5}
+@media(max-width:650px){
+  .efips-about-v2 .about-service-title-row{gap:8px;margin-bottom:17px}
+  .efips-about-v2 .about-services-saqr{width:65px;height:65px}
+  .efips-about-v2 .about-service-kicker{font-size:10px}
+}
