@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../App';
 import DigitalLibraryDialog from '../src/components/DigitalLibraryDialog';
 import DigitalBookReader from '../src/components/DigitalBookReader';
-import { findIeltsResource, IELTS_COACH_STARTERS, IELTS_RESOURCES, type IeltsCategory, type IeltsCoachSkill, type IeltsResource } from '../src/data/ieltsResources';
+import { findIeltsResource, IELTS_RESOURCES, type IeltsCoachSkill, type IeltsResource } from '../src/data/ieltsResources';
 
 type Group = 'all' | 'cambridge' | 'study';
 type TrackFilter = 'all' | 'general' | 'unspecified';
@@ -66,7 +66,7 @@ const IeltsPreparationCenterPage: React.FC = () => {
   const listed=useMemo(()=>IELTS_RESOURCES.filter(resource=>{
     if(group==='cambridge'&&resource.category!=='cambridge')return false;
     if(group==='study'&&resource.category==='cambridge')return false;
-    if(trackFilter!=='all'&&resource.category==='cambridge'&&resource.track!==trackFilter)return false;
+    if(trackFilter!=='all'&&(resource.category!=='cambridge'||resource.track!==trackFilter))return false;
     const q=search.trim().toLocaleLowerCase();
     return !q||[resource.title,resource.originalName,resource.description,resource.category].some(v=>v.toLocaleLowerCase().includes(q));
   }),[group,trackFilter,search]);
