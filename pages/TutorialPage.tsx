@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { useLanguage, useTheme } from '../App';
 import TutorialFeatureShowcase from './TutorialFeatureShowcase';
-import TutorialPlatformDirectory from './TutorialPlatformDirectory';
 import './tutorialPageMobileParity.css';
 import { getSaqrNewsTicker } from '../src/data/saqrWhatsNew';
 import SaqrOrbitNavigation from '../src/components/SaqrOrbitNavigation';
@@ -504,7 +503,6 @@ export default function TutorialPage() {
           </HintTarget>
 
           <nav className="tutorial-review-jumps mx-auto flex w-full max-w-5xl flex-wrap items-center justify-center gap-2" aria-label={label('اختصارات الجولة', 'Tour review shortcuts')}>
-            <a href="#tutorial-directory" className="rounded-xl border border-emerald-300 bg-white px-3 py-2.5 text-xs font-black text-emerald-800 shadow-sm dark:border-emerald-800 dark:bg-slate-900 dark:text-emerald-200">{label('كل صفحات صقر','All platform pages')}</a>
             <a href="#tutorial-challenges-details" className="rounded-xl border border-violet-200 bg-white px-3 py-2.5 text-xs font-black text-violet-800 shadow-sm dark:border-violet-900 dark:bg-slate-900 dark:text-violet-200">{label('الألعاب والتحديات','Games & challenges')}</a>
             <a href="#tutorial-identity-details" className="rounded-xl border border-amber-300 bg-white px-3 py-2.5 text-xs font-black text-amber-900 shadow-sm dark:border-amber-800 dark:bg-slate-900 dark:text-amber-200">{label('صقر وهوية وطن','UAE heritage')}</a>
           </nav>
@@ -697,8 +695,6 @@ export default function TutorialPage() {
               </>
             </>
           </section>
-
-          <TutorialPlatformDirectory isAr={isAr} />
 
           <section className="rounded-[2rem] border border-emerald-200 bg-white/80 p-5 shadow-sm backdrop-blur-xl dark:border-emerald-900 dark:bg-slate-900/80 sm:p-7">
             <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
