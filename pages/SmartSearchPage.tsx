@@ -1,4 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import IeltsSaqrEntry from '../src/components/IeltsSaqrEntry';
+import { ieltsSaqrPracticeRequest } from '../src/utils/ieltsSaqrPractice';
 import { useLanguage } from '../App';
 import { ChatMessage } from '../types';
 import ReactMarkdown from 'react-markdown';
@@ -208,6 +211,11 @@ const RevealMessage = ({ children, delay = 0 }: { children: React.ReactNode; del
 
 const SmartSearchPage: React.FC = () => {
   const { locale, dir } = useLanguage();
+  const { state: chatNavigationState } = useLocation();
+  const navigate = useNavigate();
+  // Only an explicit navigation from the IELTS center passes this route state.
+  // Direct /smart-search or hand-typed query URLs remain the exact normal Saqr.
+  const showIeltsSkillChoice = chatNavigationState?.ieltsSelfTest === true;
   const t = (key: string) => localization[locale]?.[key] ?? localization.ar[key] ?? key;
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -956,7 +964,18 @@ When the user asks for books, identify the matching titles exactly as recorded, 
         Empty state: a compact visual hero occupies the flexible space, while the composer stays at the bottom.
         Active state: the transcript scrolls independently and the same composer remains available.
       */}
-      {!hasConversation ? (
+      {showIeltsSkillChoice && !hasConversation ? (
+        <main className="saqr-empty-chat" data-ielts-self-test="true">
+          <IeltsSaqrEntry locale={locale} disabled={isLoading}
+            onChoose={skill => {
+              // Consume the launch flag after selection; all later Saqr turns
+              // are ordinary chat turns on the unchanged /smart-search route.
+              navigate('/smart-search', { replace: true, state: null });
+              void handleSendMessage(ieltsSaqrPracticeRequest(skill, locale));
+            }} />
+          {composer}
+        </main>
+      ) : !hasConversation ? (
         <main className="saqr-empty-chat">
           <div className="saqr-empty-guidance">
             <div className="saqr-hero-kicker">
