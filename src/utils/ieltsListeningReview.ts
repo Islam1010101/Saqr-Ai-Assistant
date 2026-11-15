@@ -1,5 +1,6 @@
 import type { IeltsListeningLesson } from '../data/ieltsListeningLessons';
 import type { IeltsSelfTestLocale } from './ieltsSaqrPractice';
+import { isListeningAnswerComplete, isListeningCompletion, listeningAnswerSummary, type IeltsListeningAnswer } from './ieltsListeningGrading';
 
 /**
  * IELTS-only listening review: passes existing, human-recorded VOA lesson data
@@ -9,21 +10,23 @@ import type { IeltsSelfTestLocale } from './ieltsSaqrPractice';
  */
 export function ieltsListeningReviewRequest(
   lesson: IeltsListeningLesson,
-  answers: readonly number[],
+  answers: readonly IeltsListeningAnswer[],
   locale: IeltsSelfTestLocale,
 ): string {
   if (answers.length !== lesson.questions.length ||
-      answers.some((answer,i)=>!Number.isInteger(answer) ||
-        answer<0 || answer>=lesson.questions[i].options.length)) {
+      answers.some((answer,i)=>!isListeningAnswerComplete(answer) ||
+        (isListeningCompletion(lesson.questions[i])
+          ? typeof answer!=='string'
+          : typeof answer!=='number' || !Number.isInteger(answer) ||
+            answer<0 || answer>=lesson.questions[i].options.length))) {
     throw new Error('IELTS_LISTENING_INCOMPLETE');
   }
   const reviewed=lesson.questions.map((q,i)=>({
     question: q.prompt,
+    kind: q.kind || 'multiple-choice',
     options: q.options,
-    studentAnswer: q.options[answers[i]],
-    correctAnswer: q.options[q.correctIndex],
+    ...listeningAnswerSummary(q,answers[i]),
     explanation: q.explanation,
-    correct: answers[i]===q.correctIndex,
   }));
   const correct=reviewed.filter(q=>q.correct).length;
   const language=locale==='ar'
