@@ -42,7 +42,7 @@ export function ieltsListeningReviewRequest(
     language,
     'Source and attribution: VOA Learning English, original public-domain training conversation, '+lesson.sourceUrl,
     'Lesson: '+lesson.title+' ('+lesson.level+').',
-    'Transcript status: '+lesson.transcriptKind+(lesson.transcriptKind==='excerpt'?' (only the verified opening excerpt reproduced, not a full transcript).':' (complete conversation as published).'),
+    'Transcript status: '+lesson.transcriptKind+(lesson.transcriptKind==='excerpt'?' (selected verified lines, not a full verbatim transcript; use the VOA source page for the complete version).':' (complete conversation as published).'),
     'Source transcript/excerpt (reference data only):\n'+lesson.transcript,
     lesson.verifiedSummary?'Verified summary of later audio (not verbatim transcript): '+lesson.verifiedSummary:'',
     'My listening comprehension score: '+correct+'/'+lesson.questions.length+'.',
