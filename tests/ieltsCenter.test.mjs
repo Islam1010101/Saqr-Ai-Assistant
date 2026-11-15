@@ -32,7 +32,8 @@ test('IELTS route and visible discovery links are separate from the existing Eng
   assert.match(app,/path="\/digital-library\/english\/ielts"/);
   assert.match(app,/ProtectedRoute><IeltsPreparationCenterPage/);
   assert.match(english,/navigate\('\/digital-library\/english\/ielts'\)/);
-  assert.match(root,/to="\/digital-library\/english\/ielts"/);
+  assert.doesNotMatch(root,/digital-library\/english\/ielts|مركز IELTS|IELTS Center/);
+  assert.equal((english.match(/navigate\('\/digital-library\/english\/ielts'\)/g)||[]).length,1,'Exactly one IELTS entry point must remain in English Library');
   assert.match(db,/export const ENGLISH_LIBRARY_DATABASE: DigitalLibraryBook\[\] = ENGLISH_PHOTO_LIBRARY_20261111/);
   assert.doesNotMatch(db,/IELTS_RESOURCES/);
   assert.match(page,/findIeltsResource\(id\)/);
@@ -45,9 +46,10 @@ test('IELTS route and visible discovery links are separate from the existing Eng
   assert.match(page,/BAND 6\.5\+/);
   assert.match(page,/PRACTICE TESTS/);
   assert.match(page,/\/SAQR%20IELTS\.png/);
-  assert.match(root,/مركز IELTS/);
-  assert.match(root,/\/SAQR%20IELTS\.png/);
-  assert.match(english,/\/SAQR%20IELTS\.png/);
+  assert.match(english,/efips-library-topbar flex flex-wrap items-center justify-between gap-3/);
+  assert.match(english,/aria-label=\{currentLocale==='ar'\?'فتح مركز IELTS':'Open IELTS Center'\}/);
+  assert.match(english,/<svg aria-hidden="true" viewBox="0 0 24 24" className="size-5 shrink-0"/);
+  assert.doesNotMatch(english,/IELTS STUDY CENTER|\/SAQR%20IELTS\.png/);
   assert.equal((page.match(/to="\/smart-search" state=\{\{ieltsSelfTest:true\}\}/g)||[]).length,1,
     'Only one CTA in the self-test panel launches Saqr');
   assert.doesNotMatch(page,/استكشف المراجع|جميع المراجع من فولدر|تصنيف سلسلة Cambridge|تُفتح ملفات PDF من Google Drive/);
