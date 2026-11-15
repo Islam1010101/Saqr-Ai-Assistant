@@ -10,8 +10,6 @@ on:
       - 'pages/TutorialPage.tsx'
       - 'pages/TutorialFeatureShowcase.tsx'
       - 'pages/tutorialFeatureShowcase.css'
-      - 'pages/TutorialPlatformDirectory.tsx'
-      - 'pages/tutorialPlatformDirectory.css'
       - 'pages/tutorialPageMobileParity.css'
       - 'src/data/saqrWhatsNew.ts'
       - 'src/components/HomeReadingHub.tsx'
