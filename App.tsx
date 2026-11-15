@@ -20,6 +20,7 @@ import AboutPage from './pages/AboutPage';
 import DigitalLibraryPage from './pages/DigitalLibraryPage';
 import ArabicLibraryInternalPage from './pages/ArabicLibraryInternalPage';
 import EnglishLibraryInternalPage from './pages/EnglishLibraryInternalPage';
+import IeltsPreparationCenterPage from './pages/IeltsPreparationCenterPage';
 import FeedbackPage from './pages/FeedbackPage';
 import CreatorsPortalPage from './pages/CreatorsPortalPage';
 import SaqrStudioPage from './pages/SaqrStudioPage';
@@ -600,6 +601,7 @@ const MainLayout: React.FC = () => {
           <Route path="/digital-library" element={<ProtectedRoute><DigitalLibraryPage /></ProtectedRoute>} />
           <Route path="/digital-library/arabic" element={<ProtectedRoute><ArabicLibraryInternalPage /></ProtectedRoute>} />
           <Route path="/digital-library/english" element={<ProtectedRoute><EnglishLibraryInternalPage /></ProtectedRoute>} />
+            <Route path="/digital-library/english/ielts" element={<ProtectedRoute><IeltsPreparationCenterPage /></ProtectedRoute>} />
           <Route path="/digital-library/national-identity" element={<ProtectedRoute><NationalIdentityDigitalBooksPage /></ProtectedRoute>} />
           <Route path="/creators" element={<ProtectedRoute><CreatorsPortalPage /></ProtectedRoute>} />
           <Route path="/saqr-studio" element={<ProtectedRoute><SaqrStudioPage /></ProtectedRoute>} />

@@ -1,0 +1,41 @@
+name: IELTS preparation center
+
+on:
+  pull_request:
+    paths:
+      - "src/data/ieltsResources.ts"
+      - "pages/IeltsPreparationCenterPage.tsx"
+      - "pages/EnglishLibraryInternalPage.tsx"
+      - "pages/DigitalLibraryPage.tsx"
+      - "pages/SmartSearchPage.tsx"
+      - "App.tsx"
+      - "src/components/GoogleSchoolReturn.tsx"
+      - "tests/ieltsCenter.test.mjs"
+      - ".github/workflows/ielts-center.yml"
+  push:
+    branches:
+      - "feat/ielts-preparation-center-20261115"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify Saqr core and existing reader/auth code are unchanged
+        run: |
+          git fetch --no-tags --depth=1 origin 3686350f464e72b2ebd2f90f9b1cb4fa443e22d7
+          git diff --exit-code 3686350f464e72b2ebd2f90f9b1cb4fa443e22d7 HEAD -- \
+            pages/SmartSearchPage.tsx pages/SaqrReadingQuestPage.tsx \
+            pages/SaqrChallengesHubPage.tsx pages/FlagDayChallenge.tsx \
+            pages/NationalIdentityPage.tsx pages/SaqrLearningPage.tsx \
+            pages/game.tsx src/utils/ src/components/GoogleSchoolReturn.tsx \
+            src/components/GoogleTeacherReturn.tsx src/components/DigitalBookReader.tsx \
+            src/components/EnglishPhotoBookReader.tsx api/chat.ts \
+            api/digitalBookData.ts supabase/functions/
+      - run: npm install --no-package-lock --no-audit --no-fund
+      - run: node --test tests/ieltsCenter.test.mjs
+      - run: npm run build
