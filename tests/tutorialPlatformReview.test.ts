@@ -13,8 +13,11 @@ const highlights = readFileSync('src/data/saqrWhatsNew.ts','utf8');
 assert.ok(!tutorial.includes('TutorialPlatformDirectory'), 'Remove standalone directory entirely');
 assert.ok(!tutorial.includes('tutorial-directory'), 'No orphaned directory anchor');
 assert.ok(!tutorial.includes('كل صفحات صقر'), 'Remove directory-specific shortcut');
-assert.ok(tutorial.includes('tutorial-challenges-details'), 'Preserve challenge shortcut');
-assert.ok(tutorial.includes('tutorial-identity-details'), 'Preserve heritage shortcut');
+assert.ok(!tutorial.includes('tutorial-review-jumps'), 'Remove the entire top shortcut container');
+assert.ok(!tutorial.includes('href="#tutorial-challenges-details"'), 'Remove top Games & Challenges shortcut');
+assert.ok(!tutorial.includes('href="#tutorial-identity-details"'), 'Remove top Saqr & National Identity shortcut');
+assert.ok(showcase.includes('id="tutorial-challenges-details"'), 'Keep actual challenges section unchanged');
+assert.ok(showcase.includes('id="tutorial-identity-details"'), 'Keep actual heritage section unchanged');
 
 const identityList=showcase.slice(showcase.indexOf('const heritageItems:'),showcase.indexOf('const pavilionItem:'));
 assert.equal([...identityList.matchAll(/id:'(passport|words|archive|flag|anthem)'/g)].length,5,'All five identity games are previewed');
