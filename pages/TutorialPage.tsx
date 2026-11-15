@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useLanguage, useTheme } from '../App';
 import TutorialFeatureShowcase from './TutorialFeatureShowcase';
 import TutorialPlatformDirectory from './TutorialPlatformDirectory';
+import './tutorialPageMobileParity.css';
 import { getSaqrNewsTicker } from '../src/data/saqrWhatsNew';
 import SaqrOrbitNavigation from '../src/components/SaqrOrbitNavigation';
 import '../src/components/EFIPSGlassVisualTheme.css';
@@ -721,6 +722,30 @@ export default function TutorialPage() {
           </span>
         </div>
       </HintTarget>
+
+      {suggestionPreviewOpen && createPortal(
+        <div role="presentation" onMouseDown={event=>{if(event.target===event.currentTarget)setSuggestionPreviewOpen(false);}}
+          className="fixed inset-0 z-[6000] flex items-center justify-center bg-slate-950/75 p-3 sm:p-6">
+          <div role="dialog" aria-modal="true" aria-labelledby="tutorial-suggestion-dialog-title" dir={dir}
+            className="w-full max-w-xl overflow-hidden rounded-[1.75rem] border-2 border-emerald-200 bg-white shadow-2xl dark:border-emerald-900 dark:bg-slate-950">
+            <header className="flex items-start justify-between gap-4 bg-gradient-to-br from-emerald-600 to-teal-700 p-5 text-white">
+              <h2 id="tutorial-suggestion-dialog-title" className="text-xl font-black">{label('اقتراحات قراءة إضافية','More reading suggestions')}</h2>
+              <button type="button" onClick={()=>setSuggestionPreviewOpen(false)} aria-label={label('إغلاق','Close')}
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/40 bg-white/15 text-lg font-black text-white">×</button>
+            </header>
+            <div className="p-5 sm:p-7">
+              <p className="text-sm font-semibold leading-8 text-slate-700 dark:text-slate-200">
+                {label('في المنصة الحقيقية تعرض هذه النافذة عناوين إضافية مناسبة للمرحلة والعمر والاهتمامات باللغة المختارة، ويمكن إضافة الكتب إلى تحدي القراءة. هنا لا نعرض أي بيانات مستخدم حقيقية.',
+                  'The real portal shows more age- and interest-appropriate titles in the selected language, with options to add them to the reading challenge. This preview shows no private records.')}
+              </p>
+              <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-xs font-bold leading-7 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">
+                {label('نوع الكتاب: الكل – ورقي – رقمي. الكتب الرقمية تتبع لغة الواجهة تلقائيًا.',
+                  'Book type: All – Physical – Digital. Digital picks automatically follow the interface language.')}
+              </div>
+            </div>
+          </div>
+        </div>, document.body
+      )}
 
       {readingPreviewOpen && createPortal(
         <div role="presentation" onMouseDown={event => {if(event.target===event.currentTarget)setReadingPreviewOpen(false);}}
