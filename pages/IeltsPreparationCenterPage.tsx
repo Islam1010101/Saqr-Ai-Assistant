@@ -90,7 +90,7 @@ const IeltsPreparationCenterPage: React.FC = () => {
               <p className="mt-4 text-base font-bold leading-8 text-emerald-50 sm:text-lg">{l('مركز صقر للتحضير لاختبار IELTS: مراجع Cambridge وتدريبات تفاعلية ومساعد ذكي لتطوير مهاراتك الأربع.','Study resources from Cambridge, a personalised preparation outline and Saqr-powered practice for all four IELTS skills.')}</p>
               <div className="mt-6 flex flex-wrap justify-center gap-3 md:justify-start">
                 <a href="#ielts-resources" className="inline-flex min-h-12 items-center justify-center rounded-xl bg-white px-5 text-sm font-black text-emerald-950 transition hover:bg-emerald-50">{l('استكشف المراجع','Explore resources')}</a>
-                <Link to="/smart-search?ielts=self-test" className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/60 bg-white/10 px-5 text-sm font-black text-white transition hover:bg-white/20">{l('اختبر نفسك مع صقر','Test Yourself with Saqr')}</Link>
+                <Link to="/smart-search" state={{ieltsSelfTest:true}} className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/60 bg-white/10 px-5 text-sm font-black text-white transition hover:bg-white/20">{l('اختبر نفسك مع صقر','Test Yourself with Saqr')}</Link>
               </div>
             </div>
             <img src="/saqr-full.png" alt={l('شخصية صقر','Saqr mascot')} className="h-36 w-auto object-contain drop-shadow-2xl sm:h-48 md:h-56"/>
@@ -119,7 +119,7 @@ const IeltsPreparationCenterPage: React.FC = () => {
               </p>
               <p className="mt-2 text-xs font-semibold leading-6 text-slate-600 dark:text-slate-300">{l('المراجع مفهرسة بالعناوين والأنواع؛ لا نعتبر محتوى ملفات PDF محلّلًا داخل صقر بعد.','The resource inventory is indexed by title and type; PDF page text has not yet been ingested into Saqr.')}</p>
             </div>
-            <Link to="/smart-search?ielts=self-test" className="inline-flex min-h-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-700 px-8 py-4 text-base font-black text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-emerald-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-500">
+            <Link to="/smart-search" state={{ieltsSelfTest:true}} className="inline-flex min-h-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-700 px-8 py-4 text-base font-black text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-emerald-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-500">
               {l('ابدأ الاختبار مع صقر','Start Self-Test with Saqr')}
             </Link>
           </div>
@@ -131,7 +131,7 @@ const IeltsPreparationCenterPage: React.FC = () => {
               <h2 id="ielts-plan-title" className="text-2xl font-black sm:text-3xl">{l('خطة مذاكرة مرنة','Your flexible study outline')}</h2>
               <p className="mt-2 text-sm font-semibold text-slate-600 dark:text-slate-300">{l('خطة استرشادية وليست تقييم مستوى أو ضمانًا لدرجة معينة.','A suggested outline, not a level assessment or a guaranteed exam band.')}</p>
             </div>
-            <Link to="/smart-search?ielts=self-test" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-700 px-5 text-sm font-black text-white hover:bg-emerald-800">{l('اختبر نفسك مع صقر','Test Yourself with Saqr')}</Link>
+            <Link to="/smart-search" state={{ieltsSelfTest:true}} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-700 px-5 text-sm font-black text-white hover:bg-emerald-800">{l('اختبر نفسك مع صقر','Test Yourself with Saqr')}</Link>
           </div>
           <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
             <label className="text-sm font-black">{l('نوع الاختبار','Test type')}
