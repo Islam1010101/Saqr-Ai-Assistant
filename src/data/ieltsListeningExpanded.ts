@@ -39,7 +39,7 @@ export const IELTS_LISTENING_EXTRA: readonly IeltsGradedListeningLesson[] = [
     "sourceUrl": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-5-where-are-you/3168971.html",
     "audioUrl": "https://voa-audio.voanews.eu/vle/2016/03/01/ab9c2944-eddc-4806-9296-290bfa8c6ff2_hq.mp3",
     "durationSeconds": 0,
-    "transcriptKind": "complete",
+    "transcriptKind": "excerpt",
     "transcript": "Anna: Hello, everyone! Today my friend Marsha is at her friend's house. She says it is beautiful. I want to see this house! Here we are!\nAnna: Marsha, I am in the kitchen! It is a beautiful kitchen!\nMarsha: It is beautiful. We cook in the kitchen.\nAnna: I eat in the kitchen.\nMarsha: We relax in the living room.\nAnna: I relax in the living room. Marsha, let’s go upstairs!\nMarsha: Anna? Where are you?\nAnna: Marsha, I am in the bathroom! I wash in the bathroom.\nMarsha: I am in the bedroom. We sleep in the bedroom.\nAnna: I sleep in the bedroom!",
     "questions": [
       {
@@ -93,7 +93,7 @@ export const IELTS_LISTENING_EXTRA: readonly IeltsGradedListeningLesson[] = [
     "sourceUrl": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-6-where-is-the-gym/3225958.html",
     "audioUrl": "https://voa-audio.voanews.eu/vle/2016/03/10/66b63229-1dc5-40ab-886d-1f4b891adf6b_hq.mp3",
     "durationSeconds": 108,
-    "transcriptKind": "complete",
+    "transcriptKind": "excerpt",
     "transcript": "Anna: I live in Washington, D.C. People in Washington like to work out! Oh, hi, Pete. How’s it going?\nPete: Hi, Anna. It’s going great.\nAnna: Pete, I want to work out. Where is the gym?\nPete: The gym is across from the lounge. It’s next to the mailroom. Go that way.\nAnna: Thanks, Pete!\nPete: No, Anna! Not that way! Go that way!\nAnna: Oh, Pete. This is not the gym.\nPete: That’s right, Anna. This is the mailroom.\nAnna: The gym is across from … what?\nPete: The gym is across from the lounge.\nAnna: Across from the lounge. Right. Thanks!\nAnna: Pete! This is not the gym!\nPete: The gym is across from the lounge. It is behind the lobby.\nAnna: This is not the gym. This is a parking garage.\nAnna: This is not a gym. This is a rooftop.\nAnna: Pete! Pete?\nPete: I want to work out too! Join me!\nAnna: I’m good.",
     "questions": [
       {
@@ -205,7 +205,7 @@ export const IELTS_LISTENING_EXTRA: readonly IeltsGradedListeningLesson[] = [
     "sourceUrl": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-8-are-you-busy/3253185.html",
     "audioUrl": "https://voa-audio.voanews.eu/vle/2016/03/25/ae6c5055-13ae-485b-995d-b347125ecf10_hq.mp3",
     "durationSeconds": 0,
-    "transcriptKind": "complete",
+    "transcriptKind": "excerpt",
     "transcript": "Anna: Here I am at my new job! Today I want to apologize to my co-workers.\nAnna: Hi, Anne. Are you busy?\nAnne: Yes. At 10 a.m. I am writing. Every day I do my morning show. Sorry!\nAnna: Okay. See you later, maybe.\nAnna: Hi, Jonathan. Are you busy?\nJonathan: Yes, I’m busy. When the studio light is on, I am recording my evening show.\nAnna: Right. Sorry about yesterday.\nJonathan: No worries.\nAnna: May I see the studio?\nJonathan: Um, maybe another time? Right now I am busy.\nAnna: Hi, Amelia! Are you busy?\nAmelia: I’m a little busy.\nAnna: I want to say I’m sorry for yesterday.\nAmelia: It’s okay, Anna. Come by this afternoon.\nCaty: Anna. Are you busy?\nAnna: Yes, Ms. Weaver. I am busy.\nCaty: My office. 5:00 p.m.\nAnna: 5:00 p.m.\nCo-Workers: Surprise!\nAnna: A party! Awesome! And I still have my job!",
     "questions": [
       {
@@ -264,7 +264,7 @@ export const IELTS_LISTENING_EXTRA: readonly IeltsGradedListeningLesson[] = [
     "sourceUrl": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-10/3285228.html",
     "audioUrl": "https://voa-audio.voanews.eu/vle/2016/04/14/442a6a50-693e-411f-8cff-99e40d16614c_hq.mp3",
     "durationSeconds": 90,
-    "transcriptKind": "complete",
+    "transcriptKind": "excerpt",
     "transcript": "Anna: Hi! Today, my friend Ashley, is coming over. I am showing her my new apartment! Oh! That’s Ashley calling.\nAshley: Hi Anna! I’m coming to your apartment. Where is your apartment?\nAnna: My apartment is near the Columbia Heights Metro.\nAshley: Is it near the Columbia Heights Metro?\nAnna: Yes. Exit the Metro and turn right. Then at the bus station turn left. Then walk straight ahead.\nAshley: Exit Metro, turn right, turn left, then go straight ahead?\nAnna: Yes. My apartment is near a coffee shop.\nAshley: Anna, which coffee shop? There are three coffee shops.\nAnna: Okay, my apartment is across from a big department store.\nAshley: A big department store? Ah, I see it!\nAnna: Ashley! Over here! It’s Anna!\nAnna: I love having my friends over.",
     "questions": [
       {
