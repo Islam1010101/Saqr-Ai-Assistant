@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import IeltsSaqrEntry from '../src/components/IeltsSaqrEntry';
 import { ieltsSaqrPracticeRequest } from '../src/utils/ieltsSaqrPractice';
 import { useLanguage } from '../App';
@@ -211,9 +211,11 @@ const RevealMessage = ({ children, delay = 0 }: { children: React.ReactNode; del
 
 const SmartSearchPage: React.FC = () => {
   const { locale, dir } = useLanguage();
-  const { search: chatSearch } = useLocation();
-  // IELTS entry modifies presentation only; all Saqr reasoning/dispatch stays original.
-  const showIeltsSkillChoice = new URLSearchParams(chatSearch).get('ielts') === 'self-test';
+  const { state: chatNavigationState } = useLocation();
+  const navigate = useNavigate();
+  // Only an explicit navigation from the IELTS center passes this route state.
+  // Direct /smart-search or hand-typed query URLs remain the exact normal Saqr.
+  const showIeltsSkillChoice = chatNavigationState?.ieltsSelfTest === true;
   const t = (key: string) => localization[locale]?.[key] ?? localization.ar[key] ?? key;
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -965,7 +967,12 @@ When the user asks for books, identify the matching titles exactly as recorded, 
       {showIeltsSkillChoice && !hasConversation ? (
         <main className="saqr-empty-chat" data-ielts-self-test="true">
           <IeltsSaqrEntry locale={locale} disabled={isLoading}
-            onChoose={skill => { void handleSendMessage(ieltsSaqrPracticeRequest(skill, locale)); }} />
+            onChoose={skill => {
+              // Consume the launch flag after selection; all later Saqr turns
+              // are ordinary chat turns on the unchanged /smart-search route.
+              navigate('/smart-search', { replace: true, state: null });
+              void handleSendMessage(ieltsSaqrPracticeRequest(skill, locale));
+            }} />
           {composer}
         </main>
       ) : !hasConversation ? (
