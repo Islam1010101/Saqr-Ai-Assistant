@@ -46,9 +46,14 @@ test('IELTS route and visible discovery links are separate from the existing Eng
   assert.match(page,/BAND 6\.5\+/);
   assert.match(page,/PRACTICE TESTS/);
   assert.match(page,/\/SAQR%20IELTS\.png/);
-  assert.match(english,/efips-library-topbar flex flex-wrap items-center justify-between gap-3/);
+  assert.doesNotMatch(page,/EFIPS DIGITAL LIBRARY\s*<\/span>\s*<h1/);
+  assert.match(english,/efips-library-topbar/);
   assert.match(english,/aria-label=\{currentLocale==='ar'\?'فتح مركز IELTS':'Open IELTS Center'\}/);
-  assert.match(english,/<svg aria-hidden="true" viewBox="0 0 24 24" className="size-5 shrink-0"/);
+  assert.match(english,/efips-library-page-title[^\n]*\n\s*<div className="mt-5 flex justify-center">/);
+  assert.match(english,/shadow-\[0_0_24px_rgba\(16,185,129,0\.5\)\]/);
+  assert.match(english,/motion-safe:animate-pulse/);
+  assert.match(english,/<svg aria-hidden="true" viewBox="0 0 24 24" className="size-5 shrink-0 drop-shadow-sm"/);
+  assert.doesNotMatch(english,/efips-library-topbar[\s\S]*?<\/div>\s*\{\/\* العناوين[^\n]*[\s\S]*?navigate\('\/digital-library\/english\/ielts'\)/);
   assert.doesNotMatch(english,/IELTS STUDY CENTER|\/SAQR%20IELTS\.png/);
   assert.equal((page.match(/to="\/smart-search" state=\{\{ieltsSelfTest:true\}\}/g)||[]).length,1,
     'Only one CTA in the self-test panel launches Saqr');
