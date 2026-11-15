@@ -235,7 +235,7 @@ export default function IeltsListeningPractice({
             </button>
             {revealTranscript && <div className="mt-4 rounded-xl bg-white p-4 dark:bg-slate-900">
               <p className="mb-2 text-xs font-black text-slate-500 dark:text-slate-300">
-                {lesson.transcriptKind === 'complete' ? (ar ? 'نص التسجيل الكامل' : 'Full conversation transcript') : (ar ? 'مقتطف موثق من بداية التسجيل فقط' : 'Verified opening excerpt only')}
+                {lesson.transcriptKind === 'complete' ? (ar ? 'نص التسجيل الكامل' : 'Full conversation transcript') : (ar ? 'مقتطف تعليمي مختار من التسجيل — النص الأصلي الكامل عند المصدر' : 'Selected teaching excerpt — find the full source transcript on VOA')}
               </p>
               <p dir="ltr" className="whitespace-pre-line text-start text-xs font-semibold leading-7 text-slate-800 dark:text-slate-200">{lesson.transcript}</p>
               {lesson.verifiedSummary && <p dir="ltr" className="mt-4 border-t border-slate-200 pt-3 text-start text-xs leading-7 text-slate-600 dark:border-slate-700 dark:text-slate-300">
