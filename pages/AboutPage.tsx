@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useLanguage } from '../App';
+import { useLanguage, useTheme } from '../App';
 import './aboutVisual.css';
 
 const translations = {
@@ -113,56 +113,73 @@ const MailIcon = () => (
   </svg>
 );
 
-// --- مكون التلاشي المخصص (Reveal Component) ---
+// Reveal each section once and disconnect. Never hide content again while
+// scrolling on Safari or Android browsers.
 const RevealOnScroll = ({ children, delay = 0 }: { children: React.ReactNode, delay?: number }) => {
     const [isVisible, setIsVisible] = useState(true);
     const elementRef = useRef<HTMLDivElement>(null);
-
     useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (entry.isIntersecting) {
-                    setIsVisible(true);
-                } else {
-                    setIsVisible(false);
-                }
-            },
-            {
-                threshold: 0.15,
-                rootMargin: "-30px 0px -30px 0px"
+        const element = elementRef.current;
+        if (!element || typeof IntersectionObserver === 'undefined' ||
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        let entered = false;
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting) {
+                entered = true;
+                setIsVisible(true);
+                observer.disconnect();
+            } else if (!entered) {
+                setIsVisible(false);
             }
-        );
-
-        if (elementRef.current) {
-            observer.observe(elementRef.current);
-        }
-
-        return () => {
-            if (elementRef.current) {
-                observer.unobserve(elementRef.current);
-            }
-        };
+        }, { threshold: 0, rootMargin: '160px 0px 160px 0px' });
+        observer.observe(element);
+        return () => observer.disconnect();
     }, []);
-
     return (
-        <div
-            ref={elementRef}
-            className={`transition-all duration-700 ease-out transform w-full ${
-                isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95 pointer-events-none'
-            }`}
-            style={{ transitionDelay: `${delay}ms` }}
-        >
+        <div ref={elementRef}
+            className={'about-reveal w-full transition-[opacity,transform] duration-300 ease-out ' +
+                (isVisible ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0')}
+            style={{ transitionDelay: Math.min(delay, 80) + 'ms' }}>
             {children}
         </div>
     );
 };
 
+// Local section buttons reuse the same SVG line-art language as Saqr's bubbles
+// without opening protected routes or fetching any user information.
+type AboutBubbleKey = 'school' | 'wings' | 'services' | 'hours' | 'contact';
+const AboutBubbleIcon = ({ kind }: { kind: AboutBubbleKey }) => {
+    const shape: Record<AboutBubbleKey, React.ReactNode> = {
+        school: <><path d="M3 21h18M5 21V5l7-3 7 3v16M9 7h2m2 0h2M9 11h2m2 0h2M10 21v-5h4v5"/></>,
+        wings: <><path d="M3 6.5c3-2 6-2 9 0 3-2 6-2 9 0V19c-3-2-6-2-9 0-3-2-6-2-9 0V6.5ZM12 6.5V19"/></>,
+        services: <><path d="m12 2 2.4 6.2L21 11l-6.6 2.8L12 20l-2.4-6.2L3 11l6.6-2.8L12 2ZM19 17l1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2Z"/></>,
+        hours: <><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></>,
+        contact: <><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></>,
+    };
+    return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75"
+        strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{shape[kind]}</svg>;
+};
+
 const AboutPage: React.FC = () => {
     // Keep this public page synchronized with the login and tutorial language.
-    const { locale: lang, dir } = useLanguage();
+    const { locale: lang, dir, setLocale } = useLanguage();
+    const { theme, toggleTheme } = useTheme();
     const isAr = lang === 'ar';
     const t = (key: keyof typeof translations.ar) => translations[lang][key];
     const navigate = useNavigate();
+    const quickLinks: { id: AboutBubbleKey; target: string; ar: string; en: string }[] = [
+        { id: 'school', target: 'about-school', ar: 'مدرستنا', en: 'Our School' },
+        { id: 'wings', target: 'about-wings', ar: 'أجنحة المكتبة', en: 'Library Wings' },
+        { id: 'services', target: 'about-services', ar: 'خدمات صقر', en: 'Saqr Services' },
+        { id: 'hours', target: 'about-hours', ar: 'مواعيد العمل', en: 'Opening Hours' },
+        { id: 'contact', target: 'about-contact', ar: 'التواصل', en: 'Contact' },
+    ];
+    const jumpTo = (id: string) => {
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        document.getElementById(id)?.scrollIntoView({
+            behavior: reducedMotion ? 'auto' : 'smooth', block: 'start'
+        });
+    };
 
     return (
         <div dir={dir} className="efips-about-v2 w-full min-h-[100dvh] flex flex-col bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300 py-4 md:py-8 px-3 md:px-6">
