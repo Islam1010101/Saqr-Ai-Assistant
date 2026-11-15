@@ -31,7 +31,7 @@ test('Six official publisher resources are linked, never copied or claimed as Sa
   assert.match(center,/target="_blank" rel="noopener noreferrer"/);
   assert.match(exam,/not official IELTS or Cambridge/);
   assert.match(exam,/DO NOT reproduce its copyrighted passages/);
-  assert.match(exam,/never copy any official copyrighted sample question/);
+  assert.match(exam,/never copy any official copyrighted sample question/i);
 });
 
 test('Reading creates original Academic or General Training content and mixed IELTS-format questions',()=>{
