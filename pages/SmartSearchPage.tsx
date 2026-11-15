@@ -972,10 +972,10 @@ When the user asks for books, identify the matching titles exactly as recorded, 
       {showIeltsSkillChoice && !hasConversation ? (
         <main className="saqr-empty-chat" data-ielts-self-test="true">
           <IeltsSaqrEntry locale={locale} disabled={isLoading}
-            onChoose={skill => {
+            onChoose={(skill, listeningPrompt) => {
               // Consume the launch flag after selection; all later Saqr turns
               // are ordinary chat turns on the unchanged /smart-search route.
-              const practicePrompt = ieltsSaqrPracticeRequest(skill, locale);
+              const practicePrompt = listeningPrompt || ieltsSaqrPracticeRequest(skill, locale);
               ieltsLaunchPromptRef.current = practicePrompt;
               navigate('/smart-search', { replace: true, state: null });
               void handleSendMessage(practicePrompt);
