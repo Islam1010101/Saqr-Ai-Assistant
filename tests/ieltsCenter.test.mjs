@@ -43,23 +43,34 @@ test('IELTS route and visible discovery links are separate from the existing Eng
   assert.match(page,/Study references/);
 });
 
-test('IELTS coach adds prompts outside Saqr; the existing AI chat contains no IELTS changes',()=>{
-  const chat=read('pages/SmartSearchPage.tsx');
-  const page=read('pages/IeltsPreparationCenterPage.tsx');
-  assert.doesNotMatch(chat,/IELTS_COACH_STARTERS|ieltsResources|location.search\).get\('ielts'/);
+test('IELTS self-test entry belongs exclusively to the center navigation', () => {
+  const chat = read('pages/SmartSearchPage.tsx');
+  const page = read('pages/IeltsPreparationCenterPage.tsx');
+  const entry = read('src/components/IeltsSaqrEntry.tsx');
+  const helper = read('src/utils/ieltsSaqrPractice.ts');
+
+  assert.match(page,/اختبر نفسك مع صقر/);
+  assert.match(page,/to="\/smart-search" state=\{\{ieltsSelfTest:true\}\}/);
+  assert.doesNotMatch(page,/ielts-skills-title|SKILLS\.map|coachSkill|IELTS_COACH_STARTERS/);
+  assert.doesNotMatch(page,/smart-search\?ielts=/);
+  assert.match(chat,/chatNavigationState\?\.ieltsSelfTest === true/);
+  assert.doesNotMatch(chat,/chatSearch|location\.search\).get\('ielts'\)/);
+  assert.match(chat,/showIeltsSkillChoice && !hasConversation/);
+  assert.match(chat,/navigate\('\/smart-search', \{ replace: true, state: null \}\)/);
+  assert.match(chat,/handleSendMessage\(ieltsSaqrPracticeRequest\(skill, locale\)\)/);
   assert.match(chat,/isSaqrLibrarySearchIntent\(userQuery, messages\)/);
   assert.match(chat,/startSaqrTeacherLesson\(userQuery\)/);
-  assert.match(page,/IELTS_COACH_STARTERS\[coachSkill\]/);
-  assert.match(page,/navigator.clipboard.writeText/);
-  assert.match(page,/to="\/smart-search"/);
-  assert.doesNotMatch(page,/smart-search\?ielts=/);
-  for(const skill of ['reading','writing','listening','speaking'])
-    assert.match(catalog,new RegExp('  '+skill+': "Act as my IELTS '));
-  assert.match(catalog,/do not claim to evaluate my pronunciation/i);
-  assert.match(catalog,/not a real listening test/i);
+  assert.match(entry,/ieltsSaqrOpening\(locale\)/);
+  for(const skill of ['listening','reading','writing','speaking','mixed'])
+    assert.match(helper,new RegExp("id:'"+skill+"'"));
+  assert.match(helper,/IELTS_RESOURCES\.map/);
+  assert.match(helper,/do not claim to have read PDF pages/);
+  assert.match(helper,/do not claim an official IELTS band score/i);
+  assert.match(helper,/not a real listening test/);
+  assert.match(helper,/do not claim to assess spoken pronunciation/);
 });
 
-test('Existing Google login and school reader stay untouched by IELTS',()=>{
+test('Existing login, readers, book counts and other Saqr routes stay untouched',()=>{
   const callback=read('src/components/GoogleSchoolReturn.tsx');
   assert.doesNotMatch(callback,/ieltsResources|IELTS_CAMBRIDGE_|findIeltsResource/);
   assert.match(callback,/verifySchoolLoginWithRetry/);
@@ -67,4 +78,6 @@ test('Existing Google login and school reader stay untouched by IELTS',()=>{
   assert.match(callback,/EN_NEW_\[0-9\]\{8\}/);
   const reader=read('src/components/DigitalBookReader.tsx');
   assert.match(reader,/enableSchoolReader/);
+  const db=read('api/digitalBookData.ts');
+  assert.match(db,/export const ENGLISH_LIBRARY_DATABASE: DigitalLibraryBook\[\] = ENGLISH_PHOTO_LIBRARY_20261111/);
 });
