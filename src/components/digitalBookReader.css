@@ -843,3 +843,29 @@ body.efips-reader-open .efips-navbar-surface {
   .dark .efips-image-book--immersive .efips-glass-material,
   .dark .efips-image-book--immersive .efips-glass-image-reveal { background:#123b3e; }
 }
+
+/* IELTS opt-in reader: only the authenticated in-page canvas is presented.
+   This reduces casual copying/printing but is not DRM over browser-delivered pixels. */
+.efips-reader-view-only-label {
+  display:inline-flex;
+  align-items:center;
+  padding:.3rem .8rem;
+  border:1px solid rgba(16,185,129,.35);
+  border-radius:999px;
+  background:rgba(16,185,129,.08);
+  color:#047857;
+  font-size:.75rem;
+  font-weight:800;
+  white-space:nowrap;
+}
+.dark .efips-reader-view-only-label {color:#a7f3d0}
+.efips-book-reader--view-only .efips-pdf-surface canvas {
+  -webkit-user-select:none;
+  user-select:none;
+  -webkit-user-drag:none;
+}
+@media print {
+  .efips-book-reader--view-only .efips-reader-stage {
+    display:none !important;
+  }
+}
