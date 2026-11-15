@@ -16,7 +16,7 @@ test('All original graded listening stages and official links remain unchanged',
   assert.match(graded,/IELTS_LISTENING_EXTRA/);
   assert.match(listening,/IELTS_GRADED_LISTENING_LESSONS\.filter/);
   assert.match(listening,/isListeningAnswerCorrect/);
-  assert.match(listening,/IELTS Listening samples|نماذج Listening/);
+  assert.match(listening,/https:\/\/ielts\.org\/take-a-test\/preparation-resources\/sample-test-questions\/academic-test/);
   assert.match(entry,/onReview={prompt => onChoose\('listening', prompt\)}/);
   assert.doesNotMatch(entry,/IeltsListeningPractice\s*\(/);
 });
