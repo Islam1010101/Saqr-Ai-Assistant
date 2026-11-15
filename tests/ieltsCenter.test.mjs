@@ -40,7 +40,18 @@ test('IELTS route and visible discovery links are separate from the existing Eng
   assert.match(page,/sourceSizeBytes=\{selected.fileSizeBytes\}/);
   assert.match(page,/DigitalBookReader/);
   assert.match(page,/new URLSearchParams\(location.search\).get\('open'\)/);
-  assert.match(page,/Study references/);
+  assert.match(page,/resourceGroups/);
+  assert.match(page,/the Official Cambridge Guide/i);
+  assert.match(page,/BAND 6\.5\+/);
+  assert.match(page,/PRACTICE TESTS/);
+  assert.match(page,/\/SAQR%20IELTS\.png/);
+  assert.match(root,/مركز IELTS/);
+  assert.match(root,/\/SAQR%20IELTS\.png/);
+  assert.match(english,/\/SAQR%20IELTS\.png/);
+  assert.equal((page.match(/to="\/smart-search" state=\{\{ieltsSelfTest:true\}\}/g)||[]).length,1,
+    'Only one CTA in the self-test panel launches Saqr');
+  assert.doesNotMatch(page,/استكشف المراجع|جميع المراجع من فولدر|تصنيف سلسلة Cambridge|تُفتح ملفات PDF من Google Drive/);
+  assert.doesNotMatch(page,/trackFilter|chooseGroup|onClick=\{\(\)=>openCoach/);
 });
 
 test('IELTS self-test entry belongs exclusively to the center navigation', () => {
@@ -57,7 +68,10 @@ test('IELTS self-test entry belongs exclusively to the center navigation', () =>
   assert.doesNotMatch(chat,/chatSearch|location\.search\).get\('ielts'\)/);
   assert.match(chat,/showIeltsSkillChoice && !hasConversation/);
   assert.match(chat,/navigate\('\/smart-search', \{ replace: true, state: null \}\)/);
-  assert.match(chat,/handleSendMessage\(ieltsSaqrPracticeRequest\(skill, locale\)\)/);
+  assert.match(chat,/const practicePrompt = ieltsSaqrPracticeRequest\(skill, locale\)/);
+  assert.match(chat,/ieltsLaunchPromptRef\.current = practicePrompt/);
+  assert.match(chat,/handleSendMessage\(practicePrompt\)/);
+  assert.match(chat,/index === 1 && message\.role === 'user' && ieltsLaunchPromptRef\.current === message\.content/);
   assert.match(chat,/isSaqrLibrarySearchIntent\(userQuery, messages\)/);
   assert.match(chat,/startSaqrTeacherLesson\(userQuery\)/);
   assert.match(entry,/ieltsSaqrOpening\(locale\)/);
