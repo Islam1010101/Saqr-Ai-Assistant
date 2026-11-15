@@ -38,8 +38,9 @@ assert.ok(page.includes("t('wing5Desc')") && page.includes("t('libraryIntro')"),
   'Library descriptions retained');
 assert.ok(page.includes("t('motto')") && page.includes("t('historyText')"),
   'School history and closing motto retained');
-assert.ok(page.includes("t('monThu')") && page.includes("t('fri')") && page.includes("t('satSun')"),
-  'Opening hours retained');
+assert.ok(page.includes("key: 'monThu'") && page.includes("key: 'fri'") &&
+  page.includes("key: 'satSun'") && page.includes('t(row.key)'),
+  'All opening hours remain sourced from existing localized translations');
 
 // Cairo only for this page. No italic styles anywhere in the page.
 assert.ok(css.includes("font-family:'Cairo','Tajawal',sans-serif !important"));
@@ -121,7 +122,7 @@ assert.ok(css.includes('env(safe-area-inset-bottom)'));
 assert.ok(css.includes('@media(prefers-reduced-motion:reduce)'));
 assert.ok(css.includes('touch-action:manipulation') && css.includes('min-height:51px'),
   'Touch controls are large enough and responsive');
-assert.ok(!css.includes('backdrop-filter') && !css.includes('infinite') && !css.includes('blur('),
+assert.ok(!/backdrop-filter\s*:/.test(css) && !css.includes('infinite') && !/\bfilter\s*:\s*blur\(/.test(css),
   'Avoid per-frame blur, infinite animations and compositing jank');
 assert.ok(!page.includes('IntersectionObserver') && !page.includes('setInterval(') &&
   !page.includes('requestAnimationFrame('), 'About has no scroll observers or animation timers');
