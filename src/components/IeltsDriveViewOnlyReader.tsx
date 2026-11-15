@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import DigitalLibraryDialog from './DigitalLibraryDialog';
 import { useCloudReader } from '../utils/efipsCloud';
 import { digitalReaderSource } from '../utils/digitalReaderSource';
@@ -26,7 +26,6 @@ export default function IeltsDriveViewOnlyReader({
 }) {
   const ar = locale === 'ar';
   const { user, loading } = useCloudReader();
-  const [reload, setReload] = useState(0);
   const fileId = schoolDriveFileId(source);
   const preview = fileId ? digitalReaderSource(source) : null;
   const verifiedSchoolUser = Boolean(user?.id && user.email?.toLowerCase().endsWith('@falcon-school.com'));
@@ -89,7 +88,7 @@ export default function IeltsDriveViewOnlyReader({
             <div className="efips-reader-preview-host" aria-label={ar ? 'معاينة مرجع IELTS' : 'IELTS reference preview'}>
               {canPreview && (
                 <iframe
-                  key={fileId + ':' + reload}
+                  key={fileId}
                   src={preview}
                   loading="eager"
                   title={(ar ? 'قراءة: ' : 'Read: ') + title}
@@ -98,25 +97,6 @@ export default function IeltsDriveViewOnlyReader({
                   allowFullScreen
                 />
               )}
-              <div className="flex shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-bold leading-6 text-emerald-950 dark:border-emerald-900 dark:bg-slate-900 dark:text-emerald-100">
-                <span>
-                  {ar
-                    ? 'المعاينة من Google Drive بصلاحيات حساب المدرسة، ومن دون إذن إضافي لقراءة Drive API.'
-                    : 'Google Drive preview uses your school access without an extra Drive API consent.'}
-                </span>
-                <button type="button" onClick={() => setReload(v => v + 1)}
-                  className="rounded-lg border border-emerald-300 bg-white px-3 py-1 text-emerald-800 hover:bg-emerald-100 dark:border-emerald-700 dark:bg-slate-800 dark:text-emerald-100">
-                  {ar ? 'إعادة تحميل المعاينة' : 'Reload preview'}
-                </button>
-                <details className="w-full text-[11px] font-semibold">
-                  <summary className="cursor-pointer">{ar ? 'لو الكتاب مش ظاهر' : "If the PDF doesn't appear"}</summary>
-                  <p className="mt-1">
-                    {ar
-                      ? 'تأكد أنك مسجّل الدخول على Google في المتصفح بنفس حساب المدرسة. قد تحظر إعدادات الخصوصية في Safari ملفات الارتباط اللازمة لمعاينات Google المضمنة.'
-                      : 'Sign into Google in this browser with the same school account. Safari privacy settings may block cookies needed for embedded Google previews.'}
-                  </p>
-                </details>
-              </div>
             </div>
           </div>
         )}

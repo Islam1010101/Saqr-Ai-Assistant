@@ -70,6 +70,9 @@ test('IELTS opens its own verified school Drive preview without extra OAuth or r
   assert.match(ieltsReader,/verifiedSchoolUser && Boolean\(preview\)/);
   assert.match(ieltsReader,/<iframe/);
   assert.match(ieltsReader,/src={preview}/);
+  assert.doesNotMatch(ieltsReader,/المعاينة من Google Drive بصلاحيات حساب المدرسة|إعادة تحميل المعاينة|لو الكتاب مش ظاهر/);
+  assert.doesNotMatch(ieltsReader,/Google Drive preview uses your school access|Reload preview|If the PDF doesn't appear/);
+  assert.doesNotMatch(ieltsReader,/setReload|<details|<summary/);
   assert.match(ieltsReader,/efips-book-reader--view-only/);
   assert.doesNotMatch(ieltsReader,/signInWithOAuth|provider_token|fetch\(|createSchoolDrivePdfBookTask|<a\s+href|download=/);
   assert.doesNotMatch(ieltsReader,/alt=media/);
