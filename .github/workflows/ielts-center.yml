@@ -16,6 +16,7 @@ on:
       - "tests/ieltsCenter.test.mjs"
       - "tests/ieltsReaderViewOnly.test.mjs"
       - "src/components/DigitalBookReader.tsx"
+      - "src/components/IeltsDriveViewOnlyReader.tsx"
       - "src/components/digitalBookReader.css"
       - ".github/workflows/ielts-center.yml"
   push:
@@ -23,6 +24,7 @@ on:
       - "feat/ielts-preparation-center-20261115"
       - "feat/ielts-saqr-self-test-20261115"
       - "fix/ielts-view-only-school-access-20261115"
+      - "fix/ielts-drive-viewer-first-20261115"
 
 jobs:
   check:

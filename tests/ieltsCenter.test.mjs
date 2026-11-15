@@ -37,9 +37,9 @@ test('IELTS route and visible discovery links are separate from the existing Eng
   assert.match(db,/export const ENGLISH_LIBRARY_DATABASE: DigitalLibraryBook\[\] = ENGLISH_PHOTO_LIBRARY_20261111/);
   assert.doesNotMatch(db,/IELTS_RESOURCES/);
   assert.match(page,/findIeltsResource\(id\)/);
-  assert.match(page,/schoolOnly=\{true\}/);
-  assert.match(page,/sourceSizeBytes=\{selected.fileSizeBytes\}/);
-  assert.match(page,/DigitalBookReader/);
+  assert.match(page,/IeltsDriveViewOnlyReader/);
+  assert.match(page,/source={selected.driveLink}/);
+  assert.doesNotMatch(page,/DigitalBookReader|schoolOnly=\{true\}|viewOnly=\{true\}/);
   assert.match(page,/new URLSearchParams\(location.search\).get\('open'\)/);
   assert.match(page,/resourceGroups/);
   assert.match(page,/the Official Cambridge Guide/i);
