@@ -1,0 +1,54 @@
+/* Match the real EFIPS homepage layout and mobile behavior without any live data. */
+.tutorial-page{max-width:100%;overflow-x:clip}
+.tutorial-page .tutorial-topbar{max-width:98%;min-width:0}
+.tutorial-page .tutorial-topbar nav{min-width:0;touch-action:pan-x;overscroll-behavior-inline:contain}
+.tutorial-page .efips-home-dashboard{min-width:0}
+.tutorial-page [id^="tutorial-"]{scroll-margin-top:110px}
+.tutorial-page .tutorial-review-jumps a{min-height:44px;display:inline-flex;align-items:center;justify-content:center;text-align:center;touch-action:manipulation}
+.tutorial-page .tutorial-news-ribbon{min-width:0;isolation:isolate}
+.tutorial-page .tutorial-news-ribbon button{min-height:44px;touch-action:manipulation}
+.tutorial-page .animate-marquee-ltr{animation:tutorial-news-ltr 65s linear infinite;will-change:transform}
+.tutorial-page .animate-marquee-rtl{animation:tutorial-news-rtl 65s linear infinite;will-change:transform}
+@keyframes tutorial-news-ltr{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
+@keyframes tutorial-news-rtl{0%{transform:translateX(0)}100%{transform:translateX(100%)}}
+.tutorial-page .tutorial-news-ribbon[data-news-paused="true"] .animate-marquee-ltr,
+.tutorial-page .tutorial-news-ribbon[data-news-paused="true"] .animate-marquee-rtl,
+.tutorial-page .tutorial-news-ribbon:hover .animate-marquee-ltr,
+.tutorial-page .tutorial-news-ribbon:hover .animate-marquee-rtl,
+.tutorial-page .tutorial-news-ribbon:focus-within .animate-marquee-ltr,
+.tutorial-page .tutorial-news-ribbon:focus-within .animate-marquee-rtl{animation-play-state:paused}
+@media(max-width:660px){
+ .tutorial-page main{padding-inline:12px;padding-bottom:95px}
+ .tutorial-page .efips-home-dashboard{width:100%;gap:22px;margin-top:12px}
+ .tutorial-page .tutorial-topbar{padding-inline:9px;gap:7px;max-width:100%}
+ .tutorial-page .tutorial-topbar nav{height:44px}
+ .tutorial-page .tutorial-topbar nav>div{gap:4px}
+ .tutorial-page .tutorial-topbar nav .animate-fade-in-up{animation:none}
+ .tutorial-page .tutorial-topbar>div:last-child{gap:4px}
+ .tutorial-page .tutorial-review-jumps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .tutorial-page .tutorial-review-jumps a{width:100%;font-size:11px;padding:10px 5px;line-height:1.5}
+ .tutorial-page .tutorial-news-ribbon{height:54px}
+ .tutorial-page .tutorial-news-ribbon button{padding-inline:10px;font-size:11px}
+ .tutorial-page .tutorial-news-ribbon .animate-marquee-rtl,
+ .tutorial-page .tutorial-news-ribbon .animate-marquee-ltr{font-size:12px}
+ .tutorial-page .tutorial-ambient-glow{display:none}
+ .tutorial-page .homepage-alert-card{transform:none}
+ .tutorial-page :is(button,select,a,summary){-webkit-tap-highlight-color:transparent}
+ .tutorial-page footer{padding-bottom:calc(18px + env(safe-area-inset-bottom))}
+}
+@media(max-width:380px){
+ .tutorial-page .tutorial-topbar{padding-inline:6px;gap:5px}
+ .tutorial-page .tutorial-topbar nav{min-width:0}
+ .tutorial-page .tutorial-topbar button{flex-shrink:0}
+ .tutorial-page .tutorial-review-jumps a{font-size:10.5px}
+}
+@media(hover:none),(pointer:coarse){
+ .tutorial-page .homepage-alert-card:hover{transform:none!important}
+ .tutorial-page .tutorial-ambient-glow{animation:none!important}
+ .tutorial-page .animate-float{animation:none!important}
+}
+@media(prefers-reduced-motion:reduce){
+ .tutorial-page .animate-marquee-ltr,.tutorial-page .animate-marquee-rtl{animation:none!important;will-change:auto}
+ .tutorial-page .tutorial-news-ribbon>div:last-child{overflow-x:auto}
+ .tutorial-page .tutorial-ambient-glow{animation:none!important}
+}
