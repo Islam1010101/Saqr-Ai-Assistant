@@ -53,7 +53,8 @@ test('IELTS route and visible discovery links are separate from the existing Eng
   assert.match(english,/shadow-\[0_0_24px_rgba\(16,185,129,0\.5\)\]/);
   assert.match(english,/motion-safe:animate-pulse/);
   assert.match(english,/<svg aria-hidden="true" viewBox="0 0 24 24" className="size-5 shrink-0 drop-shadow-sm"/);
-  assert.doesNotMatch(english,/efips-library-topbar[\s\S]*?<\/div>\s*\{\/\* العناوين[^\n]*[\s\S]*?navigate\('\/digital-library\/english\/ielts'\)/);
+  const headingToolbar = english.slice(english.indexOf('<div className="efips-library-topbar">'), english.indexOf('{/* العناوين'));
+  assert.doesNotMatch(headingToolbar,/IELTS|ielts/,'No IELTS shortcut may remain in the top toolbar');
   assert.doesNotMatch(english,/IELTS STUDY CENTER|\/SAQR%20IELTS\.png/);
   assert.equal((page.match(/to="\/smart-search" state=\{\{ieltsSelfTest:true\}\}/g)||[]).length,1,
     'Only one CTA in the self-test panel launches Saqr');
