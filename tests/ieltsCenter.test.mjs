@@ -43,24 +43,28 @@ test('IELTS route and visible discovery links are separate from the existing Eng
   assert.match(page,/Study references/);
 });
 
-test('Saqr training starts as an editable prompt; old intent gate and lesson logic remain',()=>{
+test('IELTS coach adds prompts outside Saqr; the existing AI chat contains no IELTS changes',()=>{
   const chat=read('pages/SmartSearchPage.tsx');
-  assert.match(chat,/new URLSearchParams\(location.search\).get\('ielts'\)/);
-  assert.match(chat,/setInput\(IELTS_COACH_STARTERS\[skill as IeltsCoachSkill\]\)/);
-  assert.doesNotMatch(chat,/handleSendMessage\(IELTS_COACH_STARTERS/);
+  const page=read('pages/IeltsPreparationCenterPage.tsx');
+  assert.doesNotMatch(chat,/IELTS_COACH_STARTERS|ieltsResources|location.search\).get\('ielts'/);
   assert.match(chat,/isSaqrLibrarySearchIntent\(userQuery, messages\)/);
   assert.match(chat,/startSaqrTeacherLesson\(userQuery\)/);
+  assert.match(page,/IELTS_COACH_STARTERS\[coachSkill\]/);
+  assert.match(page,/navigator.clipboard.writeText/);
+  assert.match(page,/to="\/smart-search"/);
+  assert.doesNotMatch(page,/smart-search\?ielts=/);
   for(const skill of ['reading','writing','listening','speaking'])
     assert.match(catalog,new RegExp('  '+skill+': "Act as my IELTS '));
   assert.match(catalog,/do not claim to evaluate my pronunciation/i);
   assert.match(catalog,/not a real listening test/i);
 });
 
-test('Google OAuth return is allowlisted to IELTS references, leaving ordinary sign in unchanged',()=>{
+test('Existing Google login and school reader stay untouched by IELTS',()=>{
   const callback=read('src/components/GoogleSchoolReturn.tsx');
-  assert.match(callback,/findIeltsResource\(ieltsMatch\[1\]\)/);
-  assert.match(callback,/digital-library\/english\/ielts\?open=/);
-  assert.match(callback,/EN_NEW_\[0-9\]\{8\}/);
+  assert.doesNotMatch(callback,/ieltsResources|IELTS_CAMBRIDGE_|findIeltsResource/);
   assert.match(callback,/verifySchoolLoginWithRetry/);
   assert.match(callback,/localStorage.setItem\('user_type', role\)/);
+  assert.match(callback,/EN_NEW_\[0-9\]\{8\}/);
+  const reader=read('src/components/DigitalBookReader.tsx');
+  assert.match(reader,/enableSchoolReader/);
 });
