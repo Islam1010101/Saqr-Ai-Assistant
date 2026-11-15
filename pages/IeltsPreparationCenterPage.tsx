@@ -137,7 +137,8 @@ const IeltsPreparationCenterPage:React.FC=()=>{
   const close=()=>{setReaderOpen(false);setSelected(null);};
   const mb=(value:number)=>Math.round(value/1024/1024);
 
-  return <main dir={dir} className="relative min-h-screen overflow-x-hidden bg-[#f8fafc] text-slate-900 transition-colors dark:bg-slate-950 dark:text-white" style={{fontFamily:'Cairo, sans-serif'}}>
+  return (
+    <main dir={dir} className="relative min-h-screen overflow-x-hidden bg-[#f8fafc] text-slate-900 transition-colors dark:bg-slate-950 dark:text-white" style={{fontFamily:'Cairo, sans-serif'}}>
     <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[560px] bg-gradient-to-b from-emerald-100/60 via-sky-50/20 to-transparent dark:from-emerald-900/20 dark:via-slate-900/10"/>
     <div className="relative mx-auto max-w-[1380px] px-4 pb-20 pt-7 sm:px-7">
       <nav className="mb-6 flex flex-wrap items-center justify-between gap-3 text-sm font-bold" aria-label={l('التنقل','Navigation')}>
