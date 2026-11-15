@@ -53,5 +53,5 @@ assert.ok(home.includes('aria-pressed={newsPaused}') && home.includes('setNewsPa
 assert.ok(home.includes('animation-play-state: paused'));
 assert.ok(home.includes('animationDuration: isAr ?'));
 assert.ok(home.includes('prefers-reduced-motion: reduce'));
-assert.ok(tour.includes('صوت الاتحاد وتسجيل MP3') && tour.includes('Voice of the Union MP3'));
+assert.ok(tour.includes('getSaqrNewsTicker(locale)') && tour.includes('TutorialPlatformDirectory'), 'Tutorial mirrors the live localized news source instead of stale sample headlines');
 console.log('PASS: 32 bilingual Saqr news highlights, verified feature coverage, efficient pausable ticker and tour');
