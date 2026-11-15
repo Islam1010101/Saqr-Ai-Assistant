@@ -28,6 +28,19 @@ const expected = [
   'teacher-schedule','creators-portal','guided-tour','suggestions','admin-insights'
 ];
 for (const id of expected) assert.ok(ids.includes(id), 'Missing Saqr feature in ticker: ' + id);
+
+// Keep ALL 32 original announcements, and add the IELTS launch as a new first item.
+assert.equal(expected.length, 32, 'The original feature list must stay intact');
+assert.equal(SAQR_NEWS_HIGHLIGHTS.length, expected.length + 1, 'Only the new IELTS announcement is additive');
+assert.equal(ids[0], 'ielts-center', 'Feature launch should appear at the start of the ribbon');
+const ieltsNews = SAQR_NEWS_HIGHLIGHTS.find(x => x.id === 'ielts-center');
+assert.ok(ieltsNews?.ar.includes('مركز IELTS') && ieltsNews.ar.includes('المكتبة الإنجليزية'));
+assert.ok(ieltsNews?.en.includes('IELTS Center') && ieltsNews.en.includes('English Library'));
+assert.ok(ieltsNews?.ar.includes('24') && ieltsNews?.en.includes('24'), 'Do not misstate the verified resource count');
+assert.ok(app.includes('path="/digital-library/english/ielts"'), 'IELTS center route must exist');
+const englishLibrary = readFileSync('pages/EnglishLibraryInternalPage.tsx','utf8');
+assert.ok(englishLibrary.includes("navigate('/digital-library/english/ielts')"), 'The entry remains exclusively in English Library');
+
 for (const locale of ['ar','en'] as const) {
   const ticker = getSaqrNewsTicker(locale);
   assert.equal(ticker.split('   •   ').length, SAQR_NEWS_HIGHLIGHTS.length);
@@ -54,4 +67,4 @@ assert.ok(home.includes('animation-play-state: paused'));
 assert.ok(home.includes('animationDuration: isAr ?'));
 assert.ok(home.includes('prefers-reduced-motion: reduce'));
 assert.ok(tour.includes('getSaqrNewsTicker(locale)') && !tour.includes('TutorialPlatformDirectory'), 'Tutorial keeps the live localized news ribbon without the removed pages directory');
-console.log('PASS: 32 bilingual Saqr news highlights, verified feature coverage, efficient pausable ticker and tour');
+console.log(`PASS: ${SAQR_NEWS_HIGHLIGHTS.length} bilingual Saqr news highlights, all 32 originals preserved plus IELTS Center, efficient pausable ticker and tour`);

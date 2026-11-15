@@ -8,6 +8,11 @@
  */
 export const SAQR_NEWS_HIGHLIGHTS = [
   {
+    id: 'ielts-center',
+    ar: 'جاهز تتحدى نفسك في الإنجليزي؟ مركز IELTS الجديد في المكتبة الإنجليزية: 24 مرجعًا، خطة مذاكرة على هدفك، واختبر نفسك مع صقر!',
+    en: 'Ready to ace IELTS? Discover our NEW IELTS Center in the English Library: 24 study resources, a target-band study plan and practice with Saqr!'
+  },
+  {
     id: 'voice-of-union',
     ar: 'صوت الاتحاد: غنّ النشيد الوطني الإماراتي وخذ أداءك مع الموسيقى بصيغة MP3!',
     en: 'Voice of the Union: sing the UAE anthem and take your performance home as an MP3!'
