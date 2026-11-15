@@ -502,10 +502,6 @@ export default function TutorialPage() {
             </section>
           </HintTarget>
 
-          <nav className="tutorial-review-jumps mx-auto flex w-full max-w-5xl flex-wrap items-center justify-center gap-2" aria-label={label('اختصارات الجولة', 'Tour review shortcuts')}>
-            <a href="#tutorial-challenges-details" className="rounded-xl border border-violet-200 bg-white px-3 py-2.5 text-xs font-black text-violet-800 shadow-sm dark:border-violet-900 dark:bg-slate-900 dark:text-violet-200">{label('الألعاب والتحديات','Games & challenges')}</a>
-            <a href="#tutorial-identity-details" className="rounded-xl border border-amber-300 bg-white px-3 py-2.5 text-xs font-black text-amber-900 shadow-sm dark:border-amber-800 dark:bg-slate-900 dark:text-amber-200">{label('صقر وهوية وطن','UAE heritage')}</a>
-          </nav>
 
           <HintTarget id="news-banner" title={label('جديدنا — يظهر فورًا', 'What\'s New — visible immediately')} description={label('يعرض شريط جديدنا خدمات المكتبة والتحديات والألعاب وآخر إضافات صقر بالعربية والإنجليزية؛ ويمكن إيقاف الشريط مؤقتًا لقراءة العبارات. هذه نسخة توضيحية دون بيانات حية.', 'What\'s New showcases Saqr services, games, challenges, and recent additions in Arabic and English. You can pause the ribbon to read. This is an illustrative preview, not a live feed.')} interactive={false} {...hintState}>
             <div data-news-paused={newsPaused} className="tutorial-news-ribbon efips-news-ribbon w-full max-w-5xl mx-auto relative z-30 flex items-center bg-white dark:bg-slate-800 border-4 border-amber-300 dark:border-amber-700 rounded-full shadow-lg overflow-hidden h-14 md:h-16">
