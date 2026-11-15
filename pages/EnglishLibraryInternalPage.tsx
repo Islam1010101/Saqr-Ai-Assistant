@@ -436,9 +436,21 @@ const EnglishLibraryInternalPage: React.FC = () => {
                 
                 <RevealOnScroll>
                     <div className="efips-library-title-wrap text-center mt-12 mb-12 relative">
-                        <div className="efips-library-topbar"><button onClick={() => navigate(-1)} className="efips-library-back start-0 bg-white dark:bg-slate-800 text-slate-800 dark:text-white px-5 py-2.5 rounded-full font-black text-sm hover:bg-slate-200 hover:-translate-x-1 active:translate-y-1 border-b-4 border-slate-300 dark:border-slate-700 active:border-b-0 transition-all flex items-center gap-2 shadow-sm">
-                            <span className="text-xl leading-none rtl:rotate-180">←</span> {t('back')}
-                        </button></div>
+                        <div className="efips-library-topbar flex flex-wrap items-center justify-between gap-3">
+                            <button onClick={() => navigate(-1)} className="efips-library-back start-0 bg-white dark:bg-slate-800 text-slate-800 dark:text-white px-5 py-2.5 rounded-full font-black text-sm hover:bg-slate-200 hover:-translate-x-1 active:translate-y-1 border-b-4 border-slate-300 dark:border-slate-700 active:border-b-0 transition-all flex items-center gap-2 shadow-sm">
+                                <span className="text-xl leading-none rtl:rotate-180">←</span> {t('back')}
+                            </button>
+                            <button type="button"
+                                aria-label={currentLocale==='ar'?'فتح مركز IELTS':'Open IELTS Center'}
+                                onClick={() => navigate('/digital-library/english/ielts')}
+                                className="group inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full border-2 border-emerald-300 bg-emerald-50 px-4 py-2 text-sm font-black text-emerald-900 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-500 hover:bg-emerald-100 focus-visible:outline-2 focus-visible:outline-emerald-600 dark:border-emerald-700 dark:bg-emerald-950 dark:text-emerald-100 dark:hover:bg-emerald-900">
+                                <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M12 6c-3-2-7-2-9-1v14c3-1 7-1 9 1 3-2 7-2 9-1V5c-3-1-7-1-9 1Zm0 0v14"/>
+                                    <path d="M17 2v3m-1.5-1.5h3" />
+                                </svg>
+                                <span>{currentLocale==='ar'?'مركز IELTS':'IELTS Center'}</span>
+                            </button>
+                        </div>
                         {/* العناوين الإنجليزية تكون بوزن أسود عريض جداً والخطوط موحدة Cairo */}
                         <h1 className="efips-library-page-title text-4xl md:text-6xl font-black text-slate-800 dark:text-white tracking-tight uppercase">{t('pageTitle')}</h1>
                         <div className="efips-library-title-stripes flex justify-center gap-3 mt-6">
@@ -447,21 +459,6 @@ const EnglishLibraryInternalPage: React.FC = () => {
                         </div>
                     </div>
                 </RevealOnScroll>
-
-                <section aria-label={currentLocale==='ar'?'مركز IELTS':'IELTS Center'} className="mb-8 overflow-hidden rounded-[2.5rem] border-4 border-emerald-200 bg-white p-5 shadow-md dark:border-emerald-900 dark:bg-slate-800 sm:p-7">
-                    <div className="flex flex-col items-center gap-5 sm:flex-row sm:text-start">
-                        <img src="/SAQR%20IELTS.png" alt="" className="size-28 shrink-0 rounded-[1.6rem] bg-emerald-50 object-contain p-1 dark:bg-slate-900 sm:size-36" />
-                        <div className="min-w-0 flex-1 text-center sm:text-start">
-                            <span className="text-xs font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-300">EFIPS • IELTS STUDY CENTER</span>
-                            <h2 className="mt-1 text-2xl font-black text-slate-900 dark:text-white sm:text-3xl">{currentLocale==='ar'?'مركز IELTS':'IELTS Center'}</h2>
-                            <p className="mt-2 max-w-2xl text-sm font-bold leading-7 text-slate-600 dark:text-slate-300">{currentLocale==='ar'?'مكتبة متخصصة تضم 24 مرجعًا من كامبريدج، وخطة مذاكرة بحسب مستواك، واختبارًا تفاعليًا مع صقر.':'A dedicated space with 24 Cambridge study references, a level-aware preparation plan and a Saqr self-test.'}</p>
-                        </div>
-                        <button type="button" onClick={()=>navigate('/digital-library/english/ielts')} className="inline-flex min-h-12 shrink-0 items-center gap-2 rounded-2xl bg-emerald-700 px-6 py-3 text-sm font-black text-white shadow-md transition hover:bg-emerald-800">
-                            <span>{currentLocale==='ar'?'ادخل مركز IELTS':'Enter IELTS Center'}</span>
-                            <svg aria-hidden="true" className="size-5 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
-                        </button>
-                    </div>
-                </section>
 
                 <RevealOnScroll delay={100}>
                     <div className="mb-6 md:mb-10">
