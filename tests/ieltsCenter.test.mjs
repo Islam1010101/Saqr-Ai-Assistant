@@ -66,7 +66,7 @@ test('IELTS self-test entry belongs exclusively to the center navigation', () =>
   assert.match(helper,/IELTS_RESOURCES\.map/);
   assert.match(helper,/do not claim to have read PDF pages/);
   assert.match(helper,/do not claim an official IELTS band score/i);
-  assert.match(helper,/not a real listening test/);
+  assert.match(helper,/rather than a real listening test/);
   assert.match(helper,/do not claim to assess spoken pronunciation/);
 });
 
