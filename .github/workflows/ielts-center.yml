@@ -1,0 +1,30 @@
+name: IELTS preparation center
+
+on:
+  pull_request:
+    paths:
+      - "src/data/ieltsResources.ts"
+      - "pages/IeltsPreparationCenterPage.tsx"
+      - "pages/EnglishLibraryInternalPage.tsx"
+      - "pages/DigitalLibraryPage.tsx"
+      - "pages/SmartSearchPage.tsx"
+      - "App.tsx"
+      - "src/components/GoogleSchoolReturn.tsx"
+      - "tests/ieltsCenter.test.mjs"
+      - ".github/workflows/ielts-center.yml"
+  push:
+    branches:
+      - "feat/ielts-preparation-center-20261115"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install --no-package-lock --no-audit --no-fund
+      - run: node --test tests/ieltsCenter.test.mjs
+      - run: npm run build
