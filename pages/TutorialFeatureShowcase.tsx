@@ -38,7 +38,6 @@ export default function TutorialFeatureShowcase({ isAr }: { isAr:boolean }) {
     {id:'anthem',icon:'anthem',tone:'coral',marker:'05',title:l('تحدي صوت الاتحاد','Voice of the Union'),description:l('غنّ النشيد الوطني الإماراتي مع الموسيقى، وسجّل غناءك وحمّله بصيغة MP3.','Sing the UAE national anthem with instrumental music, record and download your MP3.'),detail:l('استديو غناء متوافق مع الهاتف، مع الاستماع والتسجيل ومؤشر التقدم وتنزيل الملف الصوتي.','A mobile-friendly singing studio with preview, recording, progress and audio download.')}
   ];
   const pavilionItem:Entry = {id:'pavilion',icon:'pavilion',tone:'forest',marker:'+',title:l('جناح كتب الهوية الوطنية','National Identity Book Pavilion'),description:l('استكشف كتب التاريخ والتراث الإماراتي في ركن مستقل عن التحديات الخمسة.','Explore UAE history and heritage books in a dedicated pavilion, separate from the five challenges.'),detail:l('يمكن فتح الكتب المتاحة من المكتبة الرقمية أو التعرف إلى الكتاب في الفهرس، وفق صلاحيات المستخدم.','Open available digital titles or locate books in the catalog, according to school permissions.')};
-  ];
 
   const card=(item:Entry,index:number)=><article key={item.id} className={'tutorial-showcase-card tutorial-showcase-card--'+item.tone} style={{animationDelay:index*85+'ms'}}>
     <div className="tutorial-showcase-card-top">
