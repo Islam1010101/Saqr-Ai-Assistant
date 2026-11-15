@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../utils/supabase';
 import { verifySchoolLoginWithRetry } from '../utils/schoolLoginRetry';
+import { findIeltsResource } from '../data/ieltsResources';
 
 type Step = 'checking' | 'unregistered' | 'school' | 'blocked' | 'failed' | 'retryable';
 const copy = {
@@ -88,8 +89,14 @@ export default function GoogleSchoolReturn() {
         const pendingBook = sessionStorage.getItem('efips_drive_reader_return') || '';
         sessionStorage.removeItem('efips_drive_reader_return');
         const match = /^digital:en:(EN_NEW_[0-9]{8}_[0-9]{2})$/.exec(pendingBook);
-        window.location.replace(window.location.origin +
-          (match ? '/#/digital-library/english?open=' + encodeURIComponent(match[1]) : '/#/home'));
+        const ieltsMatch = /^digital:en:(IELTS_[A-Z0-9_]{3,50})$/.exec(pendingBook);
+        const ieltsId = ieltsMatch && findIeltsResource(ieltsMatch[1]) ? ieltsMatch[1] : null;
+        // Existing English reader return is preserved. IELTS requests are
+        // strictly checked against our 24 school Drive resources.
+        const nextRoute = ieltsId
+          ? '/#/digital-library/english/ielts?open=' + encodeURIComponent(ieltsId)
+          : match ? '/#/digital-library/english?open=' + encodeURIComponent(match[1]) : '/#/home';
+        window.location.replace(window.location.origin + nextRoute);
       } catch (caught) {
         if (!active) return;
         try { sessionStorage.removeItem('efips_oauth_school_email'); } catch { /* restricted storage */ }
