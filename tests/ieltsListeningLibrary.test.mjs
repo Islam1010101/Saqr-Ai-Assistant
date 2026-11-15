@@ -14,11 +14,11 @@ const review=read('src/utils/ieltsListeningReview.ts');
 const helper=read('src/utils/ieltsSaqrPractice.ts');
 
 test('VOA human recordings have trusted source, published MP3 and verified teaching transcripts',()=>{
-  assert.equal(items.length,4,'Start with the four reviewed VOA lessons, not fictitious audio');
+  assert.equal(items.length,13,'Retain all four original recordings and add nine verified original VOA lessons');
   assert.equal(new Set(items.map(x=>x.id)).size,4);
   assert.equal(new Set(items.map(x=>x.audioUrl)).size,4);
   for(const item of items){
-    assert.match(item.audioUrl,/^https:\/\/voa-audio\.voanews\.eu\/vle\/\d{4}\/\d{2}\/\d{2}\/[\da-f-]{36}\.mp3$/i);
+    assert.match(item.audioUrl,/^https:\/\/voa-audio\.voanews\.eu\/vle\/\d{4}\/\d{2}\/\d{2}\/[\da-f-]{36}(?:_hq)?\.mp3$/i);
     assert.match(item.sourceUrl,/^https:\/\/learningenglish\.voanews\.com\/a\//);
     assert.ok(item.title && item.level && item.durationSeconds>20);
     assert.ok(item.transcript.length>=140);
@@ -26,7 +26,11 @@ test('VOA human recordings have trusted source, published MP3 and verified teach
     assert.ok(item.questions.every(q=>q.options.length>=3 && q.correctIndex>=0 && q.correctIndex<q.options.length));
     assert.ok(item.questions.every(q=>q.prompt.length>15 && q.explanation.length>15));
   }
-  assert.deepEqual(items.map(item=>item.transcriptKind),['complete','complete','complete','excerpt']);
+  assert.deepEqual(items.slice(0,4).map(item=>item.transcriptKind),['complete','complete','complete','excerpt'],'All four original recordings are unchanged');
+  assert.equal(items.filter(item=>item.stage).length,9,'Nine graded scenarios appended');
+  assert.deepEqual([...new Set(items.filter(item=>item.stage).map(item=>item.stage))],[1,2,3,4]);
+  assert.ok(items.filter(item=>item.stage).every(item=>item.context?.length>=12));
+  assert.equal(items.reduce((sum,item)=>sum+item.questions.length,0),39,'Expand to 39 sourced comprehension questions');
   assert.ok(items[0].transcript.includes('A-N-N-A') && items[0].transcript.includes('1400 Irving Street'));
   assert.ok(items[1].transcript.includes('apartment C2') && items[1].transcript.includes('Marsha is my roommate'));
   assert.ok(items[2].transcript.includes('555-8689') && items[2].transcript.includes('1500 Irving Street'));
@@ -44,7 +48,11 @@ test('IELTS-only audio player, transcript and sequential questions do not alter 
   assert.match(practice,/questionIndex \+ 1 < lesson.questions.length/);
   assert.match(practice,/revealTranscript &&/,'Source script only displayed after student submits');
   assert.match(practice,/ieltsListeningReviewRequest\(lesson, answers, locale\)/);
-  assert.match(entry,/choice.id==='listening' \? setListeningOpen\(true\) : onChoose\(choice.id\)/);
+  assert.match(entry,/setActivePractice\(choice.id\)/);
+  assert.match(entry,/IeltsReadingWritingPractice/);
+  assert.match(entry,/ieltsWrittenSpeakingRequest\(locale\)/);
+  assert.match(practice,/const stagedLessons = IELTS_LISTENING_LESSONS\.filter/);
+  assert.match(practice,/Official IELTS Listening samples|نماذج Listening الرسمية/);
   assert.match(entry,/onReview={prompt => onChoose\('listening', prompt\)}/);
   assert.match(helper,/id:'reading'/);
   assert.match(helper,/id:'writing'/);
