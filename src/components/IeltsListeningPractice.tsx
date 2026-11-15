@@ -18,6 +18,15 @@ export default function IeltsListeningPractice({
   onReview: (prompt: string) => void;
 }) {
   const ar = locale === 'ar';
+  const [stageFilter, setStageFilter] = useState(1);
+  const stageOf = (item: typeof IELTS_LISTENING_LESSONS[number]) => item.stage ?? (item.level.includes('Level 2') ? 3 : 1);
+  const stageNames = [
+    {number:1,ar:'١ · تأسيسي',en:'1 · Foundation'},
+    {number:2,ar:'٢ · مواقف يومية',en:'2 · Everyday life'},
+    {number:3,ar:'٣ · عمل ودراسة',en:'3 · Work & study'},
+    {number:4,ar:'٤ · نقاش متقدم',en:'4 · Challenging discussion'}
+  ];
+  const stagedLessons = IELTS_LISTENING_LESSONS.filter(item => stageOf(item) === stageFilter);
   const [lessonId, setLessonId] = useState(IELTS_LISTENING_LESSONS[0].id);
   const [answers, setAnswers] = useState<number[]>([]);
   const [questionIndex, setQuestionIndex] = useState(0);
@@ -32,6 +41,12 @@ export default function IeltsListeningPractice({
   const score = lesson.questions.reduce((total, question, index) =>
     total + (answers[index] === question.correctIndex ? 1 : 0), 0);
 
+  const changeStage = (stage: number) => {
+    const first = IELTS_LISTENING_LESSONS.find(item => stageOf(item) === stage);
+    if (!first) return;
+    setStageFilter(stage);
+    selectLesson(first.id);
+  };
   const selectLesson = (id: string) => {
     if (!IELTS_LISTENING_LESSONS.some(item => item.id === id)) return;
     setLessonId(id);
@@ -87,12 +102,30 @@ export default function IeltsListeningPractice({
           </div>
         </div>
 
+        <div className="mt-4 flex flex-wrap gap-2" role="group" aria-label={ar?'مراحل الاستماع من السهل للصعب':'Listening stages, easy to challenging'}>
+          {stageNames.map(stage => <button key={stage.number} type="button" onClick={() => changeStage(stage.number)}
+            aria-pressed={stageFilter===stage.number}
+            className={'min-h-11 rounded-xl border px-3 py-2 text-xs font-black transition ' +
+              (stageFilter===stage.number
+                ? 'border-emerald-700 bg-emerald-700 text-white'
+                : 'border-emerald-200 bg-white text-emerald-900 hover:border-emerald-600 dark:border-emerald-800 dark:bg-slate-800 dark:text-emerald-100')}>
+            {ar ? stage.ar : stage.en}
+          </button>)}
+        </div>
+        <p className="mt-2 text-xs font-semibold leading-6 text-slate-600 dark:text-slate-300">
+          {ar ? 'التدرج تعليمي من صقر، وليس مستويات أو درجات IELTS رسمية. النماذج الرسمية متاحة على موقع IELTS.' : 'Saqr learning stages, not official IELTS levels or bands. Official IELTS samples are linked separately.'}
+          {' '}
+          <a href="https://www.ielts.org/take-a-test/preparation-resources/sample-test-questions/academic-test"
+            target="_blank" rel="noopener noreferrer" className="font-black text-emerald-700 underline dark:text-emerald-300">
+            {ar ? 'نماذج Listening الرسمية' : 'Official IELTS Listening samples'}
+          </a>
+        </p>
         <label className="mt-5 block text-sm font-black text-slate-700 dark:text-slate-100">
           {ar ? 'اختر التسجيل' : 'Choose your recording'}
           <select value={lessonId} onChange={event => selectLesson(event.target.value)}
             className="mt-2 block min-h-12 w-full rounded-2xl border-2 border-emerald-200 bg-slate-50 px-4 text-sm font-bold text-slate-900 outline-none focus:border-emerald-600 dark:border-emerald-800 dark:bg-slate-800 dark:text-white">
-            {IELTS_LISTENING_LESSONS.map(item =>
-              <option key={item.id} value={item.id}>{item.level} · {item.title}</option>)}
+            {stagedLessons.map(item =>
+              <option key={item.id} value={item.id}>{item.context ? item.context + ' · ' : ''}{item.title}</option>)}
           </select>
         </label>
 
@@ -100,7 +133,7 @@ export default function IeltsListeningPractice({
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <div>
               <strong className="block text-base font-black text-slate-900 dark:text-white">{lesson.title}</strong>
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-300">{lesson.level} · {Math.ceil(lesson.durationSeconds / 60)} min</span>
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-300">{lesson.level} · {lesson.context || (ar?'حوار إنجليزي':'English conversation')} · {Math.ceil(lesson.durationSeconds / 60)} min</span>
             </div>
             <span className="rounded-full bg-emerald-100 px-3 py-1 text-[11px] font-black text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">VOA AUDIO</span>
           </div>
