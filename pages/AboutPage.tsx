@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useLanguage } from '../App';
+import { useLanguage, useTheme } from '../App';
 import './aboutVisual.css';
 
 const translations = {
@@ -113,65 +113,79 @@ const MailIcon = () => (
   </svg>
 );
 
-// --- مكون التلاشي المخصص (Reveal Component) ---
+// Reveal each section once and disconnect. Never hide content again while
+// scrolling on Safari or Android browsers.
 const RevealOnScroll = ({ children, delay = 0 }: { children: React.ReactNode, delay?: number }) => {
     const [isVisible, setIsVisible] = useState(true);
     const elementRef = useRef<HTMLDivElement>(null);
-
     useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (entry.isIntersecting) {
-                    setIsVisible(true);
-                } else {
-                    setIsVisible(false);
-                }
-            },
-            {
-                threshold: 0.15,
-                rootMargin: "-30px 0px -30px 0px"
+        const element = elementRef.current;
+        if (!element || typeof IntersectionObserver === 'undefined' ||
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        let entered = false;
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting) {
+                entered = true;
+                setIsVisible(true);
+                observer.disconnect();
+            } else if (!entered) {
+                setIsVisible(false);
             }
-        );
-
-        if (elementRef.current) {
-            observer.observe(elementRef.current);
-        }
-
-        return () => {
-            if (elementRef.current) {
-                observer.unobserve(elementRef.current);
-            }
-        };
+        }, { threshold: 0, rootMargin: '160px 0px 160px 0px' });
+        observer.observe(element);
+        return () => observer.disconnect();
     }, []);
-
     return (
-        <div
-            ref={elementRef}
-            className={`transition-all duration-700 ease-out transform w-full ${
-                isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95 pointer-events-none'
-            }`}
-            style={{ transitionDelay: `${delay}ms` }}
-        >
+        <div ref={elementRef}
+            className={'about-reveal w-full transition-[opacity,transform] duration-300 ease-out ' +
+                (isVisible ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0')}
+            style={{ transitionDelay: Math.min(delay, 80) + 'ms' }}>
             {children}
         </div>
     );
 };
 
+// Local section buttons reuse the same SVG line-art language as Saqr's bubbles
+// without opening protected routes or fetching any user information.
+type AboutBubbleKey = 'school' | 'wings' | 'services' | 'hours' | 'contact';
+const AboutBubbleIcon = ({ kind }: { kind: AboutBubbleKey }) => {
+    const shape: Record<AboutBubbleKey, React.ReactNode> = {
+        school: <><path d="M3 21h18M5 21V5l7-3 7 3v16M9 7h2m2 0h2M9 11h2m2 0h2M10 21v-5h4v5"/></>,
+        wings: <><path d="M3 6.5c3-2 6-2 9 0 3-2 6-2 9 0V19c-3-2-6-2-9 0-3-2-6-2-9 0V6.5ZM12 6.5V19"/></>,
+        services: <><path d="m12 2 2.4 6.2L21 11l-6.6 2.8L12 20l-2.4-6.2L3 11l6.6-2.8L12 2ZM19 17l1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2Z"/></>,
+        hours: <><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></>,
+        contact: <><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></>,
+    };
+    return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75"
+        strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{shape[kind]}</svg>;
+};
+
 const AboutPage: React.FC = () => {
     // Keep this public page synchronized with the login and tutorial language.
-    const { locale: lang, dir } = useLanguage();
+    const { locale: lang, dir, setLocale } = useLanguage();
+    const { theme, toggleTheme } = useTheme();
     const isAr = lang === 'ar';
     const t = (key: keyof typeof translations.ar) => translations[lang][key];
     const navigate = useNavigate();
+    const quickLinks: { id: AboutBubbleKey; target: string; ar: string; en: string }[] = [
+        { id: 'school', target: 'about-school', ar: 'مدرستنا', en: 'Our School' },
+        { id: 'wings', target: 'about-wings', ar: 'أجنحة المكتبة', en: 'Library Wings' },
+        { id: 'services', target: 'about-services', ar: 'خدمات صقر', en: 'Saqr Services' },
+        { id: 'hours', target: 'about-hours', ar: 'مواعيد العمل', en: 'Opening Hours' },
+        { id: 'contact', target: 'about-contact', ar: 'التواصل', en: 'Contact' },
+    ];
+    const jumpTo = (id: string) => {
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        document.getElementById(id)?.scrollIntoView({
+            behavior: reducedMotion ? 'auto' : 'smooth', block: 'start'
+        });
+    };
 
     return (
         <div dir={dir} className="efips-about-v2 w-full min-h-[100dvh] flex flex-col bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300 py-4 md:py-8 px-3 md:px-6">
             
-            {/* 🌟 خلفية بصرية نابضة */}
-            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-50 dark:opacity-20">
-               <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-amber-400/20 rounded-full blur-[100px] animate-blob"></div>
-               <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-sky-400/20 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
-            </div>
+            {/* Static UAE-colour background: no expensive live blurs or loops. */}
+            <div className="about-ambient" aria-hidden="true" />
 
             <div className="about-shell w-full max-w-[1200px] mx-auto flex flex-col gap-6 md:gap-10 relative z-10">
                 
@@ -180,11 +194,25 @@ const AboutPage: React.FC = () => {
                     <button onClick={() => navigate('/')} className="about-back-btn bg-white dark:bg-slate-800 text-slate-800 dark:text-white px-4 py-2 rounded-full font-black text-xs md:text-sm hover:bg-slate-200 hover:-translate-x-1 active:translate-y-1 border-b-4 border-slate-300 dark:border-slate-700 active:border-b-0 transition-all flex items-center gap-2 shadow-sm w-fit">
                         <span className="text-lg leading-none rtl:rotate-180">←</span> {isAr ? 'العودة لصفحة التسجيل' : 'Back to Login'}
                     </button>
+                    <div className="about-top-controls">
+                        <span className="about-brand"><img src="/school-logo.png" width="34" height="34" alt="" />EFIPS</span>
+                        <button type="button" className="about-language-btn" onClick={() => setLocale(isAr ? 'en' : 'ar')}
+                            aria-label={isAr ? 'Switch to English' : 'التبديل إلى اللغة العربية'} title={isAr ? 'English' : 'العربية'}>
+                            {isAr ? 'EN' : 'AR'}
+                        </button>
+                        <button type="button" className="about-theme-btn" onClick={toggleTheme}
+                            aria-label={isAr ? 'تغيير الوضع الفاتح والداكن' : 'Toggle light and dark mode'}
+                            title={isAr ? 'تغيير المظهر' : 'Change appearance'}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true">
+                                {theme === 'light' ? <path d="M20 15a8 8 0 0 1-11-11A8.5 8.5 0 1 0 20 15Z"/> : <><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4M17.6 17.6 19 19M19 5l-1.4 1.4M6.4 17.6 5 19"/></>}
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 {/* --- 1. قسم عن المدرسة --- */}
                 <RevealOnScroll>
-                    <section className="about-hero group relative">
+                    <section id="about-school" className="about-hero group relative">
                         
                         <div className="absolute top-0 start-0 w-3 h-full bg-amber-400 rounded-s-[2rem]"></div>
                         
@@ -193,9 +221,9 @@ const AboutPage: React.FC = () => {
                                 <BuildingIcon />
                                 EFIPS
                             </div>
-                            <h2 className={`about-hero-title ${!isAr && 'tracking-tight'}`}>
+                            <h1 className={`about-hero-title ${!isAr && 'tracking-tight'}`}>
                                 {t('schoolHistory')}
-                            </h2>
+                            </h1>
                             <p className="about-hero-description">
                                 {t('historyText')}
                             </p>
@@ -216,21 +244,32 @@ const AboutPage: React.FC = () => {
                             <span className="about-hero-halo" aria-hidden="true"/>
                             <span className="about-hero-ring" aria-hidden="true"/>
                             <span className="about-hero-ring about-hero-ring-2" aria-hidden="true"/>
-                            <img 
-                                src="/school-logo.png" 
-                                alt="EFIPS Logo" 
-                                className="about-hero-logo" 
-                            />
+                            <div className="about-logo-disc">
+                                <img src="/school-logo.png"
+                                    alt={isAr ? 'شعار مدرسة صقر الإمارات الدولية الخاصة' : 'Emirates Falcon International Private School logo'}
+                                    className="about-hero-logo" width="272" height="272"
+                                    loading="eager" decoding="async" />
+                            </div>
+                            <nav className="about-bubble-nav" aria-label={isAr ? 'فقاعات أقسام المدرسة والمكتبة' : 'School and library section bubbles'}>
+                                {quickLinks.map(link => (
+                                    <button key={link.id} type="button" className={'about-bubble about-bubble--' + link.id}
+                                        onClick={() => jumpTo(link.target)}
+                                        aria-label={isAr ? link.ar : link.en} title={isAr ? link.ar : link.en}>
+                                        <AboutBubbleIcon kind={link.id}/>
+                                        <span>{isAr ? link.ar : link.en}</span>
+                                    </button>
+                                ))}
+                            </nav>
                         </div>
                     </section>
                 </RevealOnScroll>
 
                 {/* --- 2. قسم عن المكتبة والأجنحة --- */}
                 <RevealOnScroll delay={100}>
-                    <section className="relative z-10">
+                    <section id="about-wings" className="relative z-10">
                         <div className="about-heading text-center mb-8 md:mb-10">
                             <span className="about-heading-tag">
-                                Library Overview
+                                {isAr ? 'تعرف إلى مكتبتنا' : 'Library Overview'}
                             </span>
                             <h3 className={`text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 dark:text-white mb-3 ${!isAr && 'tracking-tight'}`}>
                                 {t('librarySection')}
@@ -260,9 +299,7 @@ const AboutPage: React.FC = () => {
                             <div className="md:col-span-2 relative mt-1">
                                 <RevealOnScroll delay={200}>
                                     <div className="about-identity-wing text-white">
-                                        <div className="absolute top-[-20%] right-[-10%] w-48 h-48 bg-red-600/30 rounded-full blur-[60px]"></div>
-                                        <div className="absolute bottom-[-20%] left-[-10%] w-48 h-48 bg-green-600/30 rounded-full blur-[60px]"></div>
-                                        
+
                                         <div className="about-identity-art relative z-10 bg-white rounded-full flex items-center justify-center shrink-0 border-4 border-slate-700">
                                            <svg viewBox="0 0 640 480" className="w-12 h-12 sm:w-16 sm:h-16 rounded shadow-sm overflow-hidden" preserveAspectRatio="none">
                                               <path fill="#00732f" d="M0 0h640v160H0z"/>
@@ -274,7 +311,7 @@ const AboutPage: React.FC = () => {
                                         
                                         <div className="relative z-10 flex-1 text-center md:text-start">
                                             <div className="inline-block px-3 py-1 rounded-full bg-white/10 text-white/90 text-[10px] md:text-xs font-black uppercase tracking-widest mb-2 border border-white/20">
-                                                National Identity Wing
+                                                {isAr ? 'جناح الهوية الوطنية' : 'National Identity Wing'}
                                             </div>
                                             <h4 className="text-xl sm:text-2xl md:text-3xl font-black mb-2 leading-tight">
                                                 {t('wing5')}
@@ -292,11 +329,18 @@ const AboutPage: React.FC = () => {
 
                 {/* --- 3. خدمات المكتبة --- */}
                 <RevealOnScroll delay={120}>
-                    <section className="relative z-10">
+                    <section id="about-services" className="relative z-10">
                         <div className="about-service-panel text-center relative">
-                            <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 dark:text-white mb-6">
-                                {t('libServices')}
-                            </h3>
+                            <div className="about-service-title-row">
+                                <img src="/Saqr.png" width="94" height="94" loading="lazy" decoding="async"
+                                    className="about-services-saqr" alt={isAr ? 'شخصية صقر مساعد المكتبة' : 'Saqr library assistant mascot'} />
+                                <div>
+                                    <span className="about-service-kicker">{isAr ? 'مع صقر… المعرفة أقرب' : 'EXPLORE WITH SAQR'}</span>
+                                    <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 dark:text-white">
+                                        {t('libServices')}
+                                    </h3>
+                                </div>
+                            </div>
                             
                             <div className="about-service-list flex flex-wrap justify-center gap-2.5 md:gap-3">
                                 {t('servicesList').split(' • ').map((service, index) => (
@@ -315,7 +359,7 @@ const AboutPage: React.FC = () => {
                         
                         {/* مواعيد العمل */}
                         <div className="lg:col-span-7">
-                            <div className="about-hours-panel h-full relative overflow-hidden flex flex-col justify-between">
+                            <div id="about-hours" className="about-hours-panel h-full relative overflow-hidden flex flex-col justify-between">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-500 rounded-full flex items-center justify-center border-2 border-emerald-200 dark:border-emerald-800">
                                        <ClockIcon />
@@ -343,6 +387,7 @@ const AboutPage: React.FC = () => {
                         {/* التواصل */}
                         <div className="lg:col-span-5 h-full">
                             <a 
+                                id="about-contact"
                                 href="mailto:islam.ahmed@falcon-school.com"
                                 className="about-contact-card block h-full bg-rose-500 border-b-6 border-rose-700 p-6 sm:p-8 rounded-[2.5rem] text-center group hover:-translate-y-1.5 active:border-b-0 active:translate-y-2 transition-all shadow-sm"
                             >
@@ -374,24 +419,7 @@ const AboutPage: React.FC = () => {
 
             </div>
 
-            <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
-                * { font-family: 'Cairo', sans-serif !important; }
-                
-                @keyframes blob {
-                  0% { transform: translate(0px, 0px) scale(1); }
-                  33% { transform: translate(30px, -50px) scale(1.1); }
-                  66% { transform: translate(-20px, 20px) scale(0.9); }
-                  100% { transform: translate(0px, 0px) scale(1); }
-                }
-                .animate-blob { animation: blob 7s infinite alternate ease-in-out; }
-                
-                .animate-float { animation: float 6s ease-in-out infinite; }
-                @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-12px); } }
-                
-                @keyframes fade-in-up { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } z-index: 10; }
-                .animate-fade-in-up { animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-            `}</style>
+
         </div>
     );
 };
