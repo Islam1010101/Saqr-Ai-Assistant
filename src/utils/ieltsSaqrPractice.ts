@@ -37,7 +37,7 @@ export function ieltsSaqrPracticeRequest(
   // These prompts never ask Saqr to find a catalog title or claim access to
   // private PDF pages. Questions must be original and clearly non-official.
   return isAr
-    ? 'أريد تدريب IELTS تفاعليًا في مهارة ' + selected.ar + '. هذا تدريب تعليمي وليس طلب بحث في فهارس المكتبة. ' +
+    ? 'أريد تدريب IELTS تفاعليًا في مهارة ' + selected.ar + '. هذا تدريب تعليمي تفاعلي. ' +
       'مركز IELTS المدرسي لديه ' + count + ' مرجع PDF؛ قائمة المراجع المسجلة: ' + list + '. ' +
       'استخدم هذه القائمة للاستدلال على نطاق التحضير ومهارات IELTS، لكن لا تدّعي أنك قرأت صفحات PDF أو استخرجت أسئلة من أي مرجع لم يصل نصه إليك. ' +
       'أنشئ أسئلة أصلية غير منسوخة من الامتحانات، واستخدم الإنجليزية في نصوص الأسئلة والنماذج والإجابات، والعربية الإماراتية المبسطة في الحوار معي. ' +
@@ -52,7 +52,7 @@ export function ieltsSaqrPracticeRequest(
       (skill === 'mixed'
         ? 'وزع التدريب على القراءة والكتابة والاستماع والمحادثة بالتتابع، مع مراعاة غياب الصوت. '
         : '')
-    : 'I want an interactive IELTS ' + selected.en + ' self-test. This is learning practice, not a request to search library holdings. ' +
+    : 'I want an interactive IELTS ' + selected.en + ' self-test. This is an interactive learning exercise. ' +
       'The school IELTS center has ' + count + ' indexed PDF references: ' + list + '. ' +
       'Use the inventory to guide IELTS skill coverage, but do not claim to have read PDF pages or reproduced questions from texts you have not received. ' +
       'Create original, unofficial practice questions. First ask if I am preparing for Academic or General Training and my target band; wait for my answer. ' +
