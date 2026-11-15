@@ -58,16 +58,21 @@ test('shared PDF reader is byte-identical to production after removing IELTS-onl
   assert.equal(original,production,'No old reader, auth, pagination or Google OAuth behavior may change');
 });
 
-test('IELTS only uses read-only, authenticated in-site PDF viewer with no standard Drive preview',()=>{
-  assert.match(page,/schoolOnly=\{true\}/);
-  assert.match(page,/viewOnly=\{true\}/);
-  assert.doesNotMatch(page,/href=\{selected\.driveLink\}|target="_blank"[^>]*selected\.driveLink/);
-  assert.match(reader,/const allowDrivePreview = !viewOnly &&/);
-  assert.match(reader,/restrictedDrivePreview=viewOnly && schoolOnly && code==='SCHOOL_DRIVE_DOWNLOAD_BLOCKED'/);
-  assert.match(reader,/const schoolAccess = schoolOnly && schoolFileId && schoolToken/);
-  assert.match(reader,/session\.user\.id===user\.id/);
-  assert.match(reader,/@falcon-school\.com/);
-  assert.match(reader,/!schoolOnly && !viewOnly && <a href=\{source\}/);
+test('IELTS opens its own verified school Drive preview without extra OAuth or raw PDF downloads',()=>{
+  const ieltsReader=read('src/components/IeltsDriveViewOnlyReader.tsx');
+  assert.match(page,/IeltsDriveViewOnlyReader/);
+  assert.match(page,/source={selected.driveLink}/);
+  assert.doesNotMatch(page,/DigitalBookReader|schoolOnly=\{true\}|viewOnly=\{true\}/);
+  assert.match(ieltsReader,/import \{ useCloudReader \} from '\.\.\/utils\/efipsCloud'/);
+  assert.match(ieltsReader,/const verifiedSchoolUser = Boolean\(user\?\.id && user\.email\?\.toLowerCase\(\)\.endsWith\('@falcon-school\.com'\)\)/);
+  assert.match(ieltsReader,/const fileId = schoolDriveFileId\(source\)/);
+  assert.match(ieltsReader,/const preview = fileId \? digitalReaderSource\(source\) : null/);
+  assert.match(ieltsReader,/verifiedSchoolUser && Boolean\(preview\)/);
+  assert.match(ieltsReader,/<iframe/);
+  assert.match(ieltsReader,/src={preview}/);
+  assert.match(ieltsReader,/efips-book-reader--view-only/);
+  assert.doesNotMatch(ieltsReader,/signInWithOAuth|provider_token|fetch\(|createSchoolDrivePdfBookTask|<a\s+href|download=/);
+  assert.doesNotMatch(ieltsReader,/alt=media/);
   assert.match(css,/@media print\s*\{\s*\.efips-book-reader--view-only \.efips-reader-stage/);
 });
 
