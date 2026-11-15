@@ -1,6 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import { IELTS_COACH_STARTERS, type IeltsCoachSkill } from '../src/data/ieltsResources';
 import { useLanguage } from '../App';
 import { ChatMessage } from '../types';
 import ReactMarkdown from 'react-markdown';
@@ -210,7 +208,6 @@ const RevealMessage = ({ children, delay = 0 }: { children: React.ReactNode; del
 
 const SmartSearchPage: React.FC = () => {
   const { locale, dir } = useLanguage();
-  const location = useLocation();
   const t = (key: string) => localization[locale]?.[key] ?? localization.ar[key] ?? key;
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -218,13 +215,6 @@ const SmartSearchPage: React.FC = () => {
   const [researchAnswer,setResearchAnswer]=useState<string>('');
   const [researchReady,setResearchReady]=useState(false);
   const [input, setInput] = useState('');
-  // Only prepare a user-editable IELTS training message; never auto-send or
-  // change Saqr's existing catalog routing, provider logic or personality.
-  useEffect(() => {
-    const skill = new URLSearchParams(location.search).get('ielts');
-    if (!skill || !Object.prototype.hasOwnProperty.call(IELTS_COACH_STARTERS, skill)) return;
-    setInput(IELTS_COACH_STARTERS[skill as IeltsCoachSkill]);
-  }, [location.search]);
   const [isLoading, setIsLoading] = useState(false);
   const [winnerData, setWinnerData] = useState<any>(null);
   const [userName, setUserName] = useState<string>('');
