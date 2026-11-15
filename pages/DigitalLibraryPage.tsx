@@ -232,6 +232,13 @@ const DigitalLibraryPage: React.FC = () => {
                             </Link>
                         </RevealOnScroll>
 
+                        <RevealOnScroll delay={125}>
+                            <Link to="/digital-library/english/ielts" className="flex min-h-16 flex-wrap items-center justify-between gap-3 rounded-3xl border-2 border-emerald-200 bg-emerald-50 px-5 py-4 text-emerald-950 transition hover:border-emerald-500 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-100">
+                                <span className="font-black">IELTS Preparation Center</span>
+                                <span className="text-sm font-bold">{locale==='ar'?'مراجع Cambridge وتدريب مع صقر':'Cambridge resources & Saqr coaching'}</span>
+                            </Link>
+                        </RevealOnScroll>
+
                         <RevealOnScroll delay={150}>
                             <Link
                                 to="/digital-library/national-identity"
