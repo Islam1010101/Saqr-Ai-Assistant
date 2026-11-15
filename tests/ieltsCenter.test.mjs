@@ -76,7 +76,7 @@ test('IELTS self-test entry belongs exclusively to the center navigation', () =>
   assert.doesNotMatch(chat,/chatSearch|location\.search\).get\('ielts'\)/);
   assert.match(chat,/showIeltsSkillChoice && !hasConversation/);
   assert.match(chat,/navigate\('\/smart-search', \{ replace: true, state: null \}\)/);
-  assert.match(chat,/const practicePrompt = ieltsSaqrPracticeRequest\(skill, locale\)/);
+  assert.match(chat,/const practicePrompt = listeningPrompt \|\| ieltsSaqrPracticeRequest\(skill, locale\)/);
   assert.match(chat,/ieltsLaunchPromptRef\.current = practicePrompt/);
   assert.match(chat,/handleSendMessage\(practicePrompt\)/);
   assert.match(chat,/index === 1 && message\.role === 'user' && ieltsLaunchPromptRef\.current === message\.content/);

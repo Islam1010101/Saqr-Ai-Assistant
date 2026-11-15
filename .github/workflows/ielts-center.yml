@@ -9,6 +9,10 @@ on:
       - "pages/DigitalLibraryPage.tsx"
       - "pages/SmartSearchPage.tsx"
       - "src/components/IeltsSaqrEntry.tsx"
+      - "src/components/IeltsListeningPractice.tsx"
+      - "src/data/ieltsListeningLessons.ts"
+      - "src/utils/ieltsListeningReview.ts"
+      - "tests/ieltsListeningLibrary.test.mjs"
       - "src/utils/ieltsSaqrPractice.ts"
       - "tests/ieltsSaqrCoreIsolation.test.mjs"
       - "App.tsx"
@@ -47,7 +51,7 @@ jobs:
             src/components/GoogleTeacherReturn.tsx \
             src/components/EnglishPhotoBookReader.tsx api/chat.ts \
             api/digitalBookData.ts supabase/functions/
-          git diff --exit-code 6371f2bb8080674c268a1b64a105be18bc02f4f3 HEAD -- src/utils/ ':(exclude)src/utils/ieltsSaqrPractice.ts'
+          git diff --exit-code 6371f2bb8080674c268a1b64a105be18bc02f4f3 HEAD -- src/utils/ ':(exclude)src/utils/ieltsSaqrPractice.ts' ':(exclude)src/utils/ieltsListeningReview.ts'
       - run: npm install --no-package-lock --no-audit --no-fund
-      - run: node --test tests/ieltsCenter.test.mjs tests/ieltsSaqrCoreIsolation.test.mjs tests/ieltsReaderViewOnly.test.mjs
+      - run: node --test tests/ieltsCenter.test.mjs tests/ieltsSaqrCoreIsolation.test.mjs tests/ieltsReaderViewOnly.test.mjs tests/ieltsListeningLibrary.test.mjs
       - run: npm run build
