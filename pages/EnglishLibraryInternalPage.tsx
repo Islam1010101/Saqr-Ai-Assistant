@@ -448,6 +448,19 @@ const EnglishLibraryInternalPage: React.FC = () => {
                     </div>
                 </RevealOnScroll>
 
+                <section aria-label={currentLocale==='ar'?'مركز التحضير لاختبار IELTS':'IELTS Preparation Center'} className="mb-7 rounded-[2rem] bg-gradient-to-br from-emerald-900 via-teal-800 to-emerald-700 p-5 text-white shadow-xl sm:p-7">
+                    <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+                        <div className="min-w-0 text-center sm:text-start">
+                            <p className="text-xs font-black uppercase tracking-widest text-emerald-100">EFIPS • CAMBRIDGE STUDY RESOURCES</p>
+                            <h2 className="mt-2 text-2xl font-black sm:text-3xl">IELTS Preparation Center</h2>
+                            <p className="mt-2 max-w-2xl text-sm font-semibold leading-7 text-emerald-50">{currentLocale==='ar'?'24 مرجعًا دراسيًا، 19 جزءًا من Cambridge، وتدريبات المهارات الأربع مع صقر.':'24 study references, 19 Cambridge volumes and Saqr-powered practice for all four skills.'}</p>
+                        </div>
+                        <button type="button" onClick={()=>navigate('/digital-library/english/ielts')} className="min-h-12 shrink-0 rounded-2xl bg-white px-6 py-3 text-sm font-black text-emerald-950 shadow-md transition hover:bg-emerald-50">
+                            {currentLocale==='ar'?'استكشف مركز IELTS':'Explore IELTS Center'}
+                        </button>
+                    </div>
+                </section>
+
                 <RevealOnScroll delay={100}>
                     <div className="mb-6 md:mb-10">
                         <div className="efips-digital-search-panel bg-white dark:bg-slate-800 p-5 md:p-8 rounded-[3rem] border-4 border-sky-300 dark:border-sky-600 shadow-xl max-w-5xl mx-auto">
