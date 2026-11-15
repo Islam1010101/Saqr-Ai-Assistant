@@ -14,11 +14,15 @@ on:
       - "App.tsx"
       - "src/components/GoogleSchoolReturn.tsx"
       - "tests/ieltsCenter.test.mjs"
+      - "tests/ieltsReaderViewOnly.test.mjs"
+      - "src/components/DigitalBookReader.tsx"
+      - "src/components/digitalBookReader.css"
       - ".github/workflows/ielts-center.yml"
   push:
     branches:
       - "feat/ielts-preparation-center-20261115"
       - "feat/ielts-saqr-self-test-20261115"
+      - "fix/ielts-view-only-school-access-20261115"
 
 jobs:
   check:
@@ -32,15 +36,16 @@ jobs:
       - name: Verify Saqr, challenges, auth and all legacy readers are unchanged
         run: |
           git fetch --no-tags --depth=1 origin 6371f2bb8080674c268a1b64a105be18bc02f4f3
+          git fetch --no-tags --depth=1 origin fa6c9a6a47ae5f1deb43e1cdd5e57b84aa931f5c
           git diff --exit-code 6371f2bb8080674c268a1b64a105be18bc02f4f3 HEAD -- \
             pages/SaqrReadingQuestPage.tsx \
             pages/SaqrChallengesHubPage.tsx pages/FlagDayChallenge.tsx \
             pages/NationalIdentityPage.tsx pages/SaqrLearningPage.tsx \
             pages/game.tsx src/components/GoogleSchoolReturn.tsx \
-            src/components/GoogleTeacherReturn.tsx src/components/DigitalBookReader.tsx \
+            src/components/GoogleTeacherReturn.tsx \
             src/components/EnglishPhotoBookReader.tsx api/chat.ts \
             api/digitalBookData.ts supabase/functions/
           git diff --exit-code 6371f2bb8080674c268a1b64a105be18bc02f4f3 HEAD -- src/utils/ ':(exclude)src/utils/ieltsSaqrPractice.ts'
       - run: npm install --no-package-lock --no-audit --no-fund
-      - run: node --test tests/ieltsCenter.test.mjs tests/ieltsSaqrCoreIsolation.test.mjs
+      - run: node --test tests/ieltsCenter.test.mjs tests/ieltsSaqrCoreIsolation.test.mjs tests/ieltsReaderViewOnly.test.mjs
       - run: npm run build

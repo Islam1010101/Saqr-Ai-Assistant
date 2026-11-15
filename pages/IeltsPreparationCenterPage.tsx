@@ -322,7 +322,7 @@ const IeltsPreparationCenterPage:React.FC=()=>{
             <span className="rounded-lg bg-slate-100 px-3 py-2 dark:bg-slate-800">PDF • {mb(selected.fileSizeBytes)} MB</span>
             {selected.track==='general'&&<span className="rounded-lg bg-slate-100 px-3 py-2 dark:bg-slate-800">General Training</span>}
           </div>
-          <p className="mt-5 text-xs font-bold leading-6 text-slate-600 dark:text-slate-300">{l('يحتاج فتح الملف إلى حساب Google مخوّل بالوصول إليه. قد تختلف طريقة عرض الملفات الكبيرة حسب صلاحية Drive والمتصفح.','Opening this file requires a Google account authorised by the file owner. Large file rendering also depends on Drive API permissions and browser support.')}</p>
+          <p className="mt-5 text-xs font-bold leading-6 text-emerald-700 dark:text-emerald-300">{l('للقراءة داخل منصة صقر فقط بحساب المدرسة المخوّل. لا تتوفر خيارات تحميل أو طباعة في القارئ.','Read within Saqr using your authorised school account. The reader provides no download or print controls.')}</p>
           <div className="mt-6 flex flex-wrap gap-3">
             <button type="button" onClick={()=>setReaderOpen(true)} className="min-h-12 rounded-xl bg-emerald-700 px-6 text-sm font-black text-white hover:bg-emerald-800">{l('افتح بقارئ صقر الزجاجي','Open in Saqr glass reader')}</button>
             <button type="button" onClick={close} className="min-h-12 rounded-xl border border-slate-300 px-5 text-sm font-bold dark:border-slate-600">{l('إغلاق','Close')}</button>
@@ -336,6 +336,7 @@ const IeltsPreparationCenterPage:React.FC=()=>{
         bookKey={'digital:en:'+selected.id}
         locale={locale}
         schoolOnly={true}
+        viewOnly={true}
         sourceSizeBytes={selected.fileSizeBytes}
         onBack={()=>setReaderOpen(false)}
         onClose={close}
