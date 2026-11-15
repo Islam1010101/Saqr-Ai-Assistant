@@ -154,11 +154,7 @@ const IeltsPreparationCenterPage:React.FC=()=>{
         <div aria-hidden="true" className="pointer-events-none absolute -start-12 -top-20 size-48 rounded-full bg-sky-100/50 blur-2xl dark:bg-sky-800/10"/>
         <div className="relative z-10 flex flex-col-reverse items-center gap-5 md:flex-row md:justify-between md:gap-9">
           <div className="max-w-2xl flex-1 text-center md:text-start">
-            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-[11px] font-black tracking-wider text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-100">
-              <img src="/school-logo.png" alt="" className="size-7 object-contain" />
-              EFIPS DIGITAL LIBRARY
-            </span>
-            <h1 className="mt-5 text-4xl font-black leading-tight tracking-tight text-slate-900 dark:text-white sm:text-5xl lg:text-6xl">{l('مركز IELTS','IELTS Center')}</h1>
+            <h1 className="mt-1 text-4xl font-black leading-tight tracking-tight text-slate-900 dark:text-white sm:text-5xl lg:text-6xl">{l('مركز IELTS','IELTS Center')}</h1>
             <p className="mt-4 max-w-2xl text-base font-bold leading-8 text-slate-600 dark:text-slate-200 sm:text-lg">
               {l('رحلتك للاستعداد لاختبار IELTS: مراجع كامبريدج، خطة مذاكرة واضحة، وتدريب ذكي مع شخصية صقر.','Your IELTS learning space: Cambridge study resources, a clear preparation pathway and interactive practice with Saqr.')}
             </p>
