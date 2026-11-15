@@ -4,6 +4,7 @@ import { useLanguage } from '../App';
 import DigitalLibraryDialog from '../src/components/DigitalLibraryDialog';
 import IeltsDriveViewOnlyReader from '../src/components/IeltsDriveViewOnlyReader';
 import { findIeltsResource, IELTS_RESOURCES, type IeltsResource } from '../src/data/ieltsResources';
+import { IELTS_OFFICIAL_SAMPLE_LINKS } from '../src/utils/ieltsExamPractice';
 
 type PlanTrack = 'academic' | 'general';
 type ResourceLevel = 'foundation' | 'advanced' | 'practice';
@@ -209,6 +210,31 @@ const IeltsPreparationCenterPage:React.FC=()=>{
             <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m10 8 6 4-6 4z"/></svg>
             {l('ابدأ الاختبار مع صقر','Start Self-Test with Saqr')}
           </Link>
+        </div>
+      </section>
+
+      <section className="mt-9 rounded-[2.25rem] border-2 border-sky-200 bg-white p-5 shadow-md dark:border-sky-900 dark:bg-slate-800 sm:p-8" aria-labelledby="ielts-official-examples-title">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <span className="text-[11px] font-black uppercase tracking-wider text-sky-700 dark:text-sky-300">OFFICIAL IELTS SAMPLE MATERIALS</span>
+            <h2 id="ielts-official-examples-title" className="mt-1 text-xl font-black text-slate-900 dark:text-white sm:text-2xl">
+              {l('النماذج الأصلية من موقع IELTS','Official sample tests from IELTS')}
+            </h2>
+          </div>
+          <span className="rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-black text-sky-900 dark:border-sky-700 dark:bg-slate-900 dark:text-sky-100">
+            {l('روابط المصدر الرسمي','Official external links')}
+          </span>
+        </div>
+        <p className="mt-3 max-w-3xl text-xs font-semibold leading-7 text-slate-600 dark:text-slate-300 sm:text-sm">
+          {l('اطّلع على نماذج Listening وReading وWriting الرسمية من أصحابها مباشرة. تدريبات صقر أصلية وتحاكي نوع الأسئلة فقط، وليست اختبارات أو درجات IELTS معتمدة.',
+            'Explore official Listening, Reading and Writing samples on the IELTS website. Saqr creates original tasks that follow test formats, not official exam papers or certified scores.')}
+        </p>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {IELTS_OFFICIAL_SAMPLE_LINKS.map(item=><a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer"
+            className="group flex min-h-14 items-center justify-between gap-2 rounded-2xl border-2 border-slate-200 bg-slate-50 px-4 py-3 text-xs font-black text-emerald-800 transition hover:border-emerald-500 hover:bg-emerald-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600 dark:border-slate-700 dark:bg-slate-900 dark:text-emerald-200 dark:hover:border-emerald-500 sm:text-sm">
+            <span>{ar?item.ar:item.en}</span>
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 5h6v6m0-6-8 8"/><path d="M19 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5"/></svg>
+          </a>)}
         </div>
       </section>
 

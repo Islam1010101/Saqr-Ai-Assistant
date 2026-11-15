@@ -44,7 +44,9 @@ test('IELTS-only audio player, transcript and sequential questions do not alter 
   assert.match(practice,/questionIndex \+ 1 < lesson.questions.length/);
   assert.match(practice,/revealTranscript &&/,'Source script only displayed after student submits');
   assert.match(practice,/ieltsListeningReviewRequest\(lesson, answers, locale\)/);
-  assert.match(entry,/choice.id==='listening' \? setListeningOpen\(true\) : onChoose\(choice.id\)/);
+  assert.match(entry,/choice.id==='listening' \|\| choice.id==='reading' \|\| choice.id==='writing'/);
+  assert.match(entry,/setActivePractice\(choice.id\)/);
+  assert.match(entry,/onReview={prompt => onChoose\('listening', prompt\)}/);
   assert.match(entry,/onReview={prompt => onChoose\('listening', prompt\)}/);
   assert.match(helper,/id:'reading'/);
   assert.match(helper,/id:'writing'/);
