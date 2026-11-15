@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../App';
 import DigitalLibraryDialog from '../src/components/DigitalLibraryDialog';
-import DigitalBookReader from '../src/components/DigitalBookReader';
+import IeltsDriveViewOnlyReader from '../src/components/IeltsDriveViewOnlyReader';
 import { findIeltsResource, IELTS_RESOURCES, type IeltsResource } from '../src/data/ieltsResources';
 
 type PlanTrack = 'academic' | 'general';
@@ -330,14 +330,10 @@ const IeltsPreparationCenterPage:React.FC=()=>{
         </div>
       </DigitalLibraryDialog>}
 
-      {selected && readerOpen && <DigitalBookReader
+      {selected && readerOpen && <IeltsDriveViewOnlyReader
         title={selected.title}
         source={selected.driveLink}
-        bookKey={'digital:en:'+selected.id}
         locale={locale}
-        schoolOnly={true}
-        viewOnly={true}
-        sourceSizeBytes={selected.fileSizeBytes}
         onBack={()=>setReaderOpen(false)}
         onClose={close}
       />}
