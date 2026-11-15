@@ -299,9 +299,7 @@ const AboutPage: React.FC = () => {
                             <div className="md:col-span-2 relative mt-1">
                                 <RevealOnScroll delay={200}>
                                     <div className="about-identity-wing text-white">
-                                        <div className="absolute top-[-20%] right-[-10%] w-48 h-48 bg-red-600/30 rounded-full blur-[60px]"></div>
-                                        <div className="absolute bottom-[-20%] left-[-10%] w-48 h-48 bg-green-600/30 rounded-full blur-[60px]"></div>
-                                        
+
                                         <div className="about-identity-art relative z-10 bg-white rounded-full flex items-center justify-center shrink-0 border-4 border-slate-700">
                                            <svg viewBox="0 0 640 480" className="w-12 h-12 sm:w-16 sm:h-16 rounded shadow-sm overflow-hidden" preserveAspectRatio="none">
                                               <path fill="#00732f" d="M0 0h640v160H0z"/>
@@ -333,9 +331,16 @@ const AboutPage: React.FC = () => {
                 <RevealOnScroll delay={120}>
                     <section id="about-services" className="relative z-10">
                         <div className="about-service-panel text-center relative">
-                            <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 dark:text-white mb-6">
-                                {t('libServices')}
-                            </h3>
+                            <div className="about-service-title-row">
+                                <img src="/Saqr.png" width="94" height="94" loading="lazy" decoding="async"
+                                    className="about-services-saqr" alt={isAr ? 'شخصية صقر مساعد المكتبة' : 'Saqr library assistant mascot'} />
+                                <div>
+                                    <span className="about-service-kicker">{isAr ? 'مع صقر… المعرفة أقرب' : 'EXPLORE WITH SAQR'}</span>
+                                    <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 dark:text-white">
+                                        {t('libServices')}
+                                    </h3>
+                                </div>
+                            </div>
                             
                             <div className="about-service-list flex flex-wrap justify-center gap-2.5 md:gap-3">
                                 {t('servicesList').split(' • ').map((service, index) => (
