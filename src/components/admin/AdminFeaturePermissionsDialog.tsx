@@ -1,6 +1,6 @@
 import React,{useEffect,useState} from 'react';
 import {supabase} from '../../utils/supabase';
-import {SCHOOL_SERVICE_CATALOG,type SchoolServiceKey,type ServiceOverride,type SchoolRole} from '../utils/schoolServiceAccess';
+import {SCHOOL_SERVICE_CATALOG,type SchoolServiceKey,type ServiceOverride,type SchoolRole} from '../../utils/schoolServiceAccess';
 
 type Role = SchoolRole;
 type ReadResult = {
