@@ -24,6 +24,32 @@ Deno.serve(async(req:Request)=>{
  const db=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
  const {data:blocked,error:blockedError}=await db.from("efips_account_access_controls").select("disabled_at,login_role").eq("email",email).maybeSingle();
  if(blockedError||blocked?.disabled_at)return out(403,{error:"ACCESS_DENIED"});
+ // Individual administrator-approved exception is independent of the role;
+ // in its absence the existing student pilot and primary admin behavior remain intact.
+ const {data:featureRule,error:featureError}=await db.from("efips_user_feature_overrides")
+   .select("allowed").eq("email",email).eq("feature_key","saqr_learning").maybeSingle();
+ if(featureError)return out(503,{error:"FEATURE_ACCESS_UNAVAILABLE"});
+ if(featureRule?.allowed===false)return out(200,{allowed:false});
+ if(featureRule?.allowed===true){
+   let input:any={};try{input=await req.json()}catch{return out(400,{error:"INVALID_BODY"})}
+   if(input?.action!=="my-access")return out(400,{error:"UNSUPPORTED_ACTION"});
+   const {data:staff,error:staffError}=await db.from("efips_google_staff_accounts")
+     .select("teacher_id,role").eq("email",email).maybeSingle();
+   if(staffError)return out(503,{error:"STAFF_LOOKUP_FAILED"});
+   const staffRole=(staff?.role==="admin"||staff?.role==="teacher")&&staff.teacher_id?staff.role:null;
+   if(staffRole && (!blocked?.login_role||blocked.login_role===staffRole||blocked.login_role==="both"))
+     return out(200,{allowed:true,viewer:staffRole,features:Object.fromEntries(features.map(k=>[k,true]))});
+   const id=/^(\d{6,7})@falcon-school\.com$/.exec(email)?.[1];
+   if(id&&(!blocked?.login_role||blocked.login_role==="student"||blocked.login_role==="both")){
+     const {data:student,error:studentError}=await db.from("students").select("student_id").eq("student_id",id).maybeSingle();
+     const {data:verified,error:verifiedError}=await db.from("efips_verified_school_readers")
+       .select("school_user_id,user_type").eq("auth_user_id",user.id).maybeSingle();
+     if(studentError||verifiedError)return out(503,{error:"STUDENT_LOOKUP_FAILED"});
+     if(student && (!verified||(verified.school_user_id===id&&verified.user_type==="student")))
+       return out(200,{allowed:true,viewer:"student",features:Object.fromEntries(features.map(k=>[k,true]))});
+   }
+   return out(403,{error:"REGISTERED_SCHOOL_ACCOUNT_REQUIRED"});
+ }
  // Preview access is for one specifically authorized school administrator,
  // verified from the server-maintained staff directory, not a browser role hint.
  if(email==="islam.ahmed@falcon-school.com"){
