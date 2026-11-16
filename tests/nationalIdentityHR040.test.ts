@@ -43,4 +43,4 @@ assert.ok(tutorial.includes('tourMode'),
   'Public tutorial remains a role-independent visual preview');
 assert.ok(orbit.includes("roles: ['student', 'admin']"),
   'Identity still belongs to students and admins by default');
-console.log('PASS: Only teacher HR040 receives National Identity alongside every student/admin');
+console.log('PASS: HR040 retains its default National Identity invitation; others require verified individual admin grants');
