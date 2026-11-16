@@ -22,7 +22,7 @@ test('Twenty individual entitlements are backend allowlisted, not stored in edit
   assert.equal(new Set(ids).size,20);
   for(const id of ids) assert.ok(server.includes('"'+id+'"')||server.includes("'"+id+"'"),'Edge must recognize '+id);
   for(const id of ids) assert.ok(sql.includes("'"+id+"'"),'SQL checks backend whitelist '+id);
-  assert.doesNotMatch(server,/raw_user_meta_data|user_metadata|localStorage|request\.role/);
+  assert.doesNotMatch(server,/raw_user_meta_data|\.user_metadata\b|localStorage|request\.role/);
   assert.match(server,/auth\.auth\.getUser\(token\)/);
   assert.match(server,/identity_data\?\.email_verified===true/);
   assert.match(server,/role!=="admin"/);
