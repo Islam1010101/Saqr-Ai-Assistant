@@ -420,8 +420,5 @@
   .saqr-orbit-saqr-portrait,.saqr-orbit-red-ellipse,.saqr-orbit-float,.saqr-orbit-talk,.saqr-orbit-burst {
     animation:none !important;
   }
-  .saqr-orbit-stage.saqr-orbit-motion-ready .saqr-orbit-bubble {
-    opacity:1 !important;filter:none !important;transform:translate(-50%,-50%) !important;pointer-events:auto !important
-  }
   .saqr-orbit-bubble,.saqr-orbit-glass {transition:none !important}
 }
