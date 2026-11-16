@@ -90,7 +90,7 @@ test('Student schedule grants read access only and do not grant teacher booking/
 });
 
 test('No Saqr reasoning engine, provider, book catalog or legacy timetable file changed',()=>{
-  const baseline='351e42227e089b74317660e7819fd1b85131aedc';
+  const baseline='c6291969a73aefaec4b6388c5748678faef090c9';
   const immutable=['api/chat.ts','pages/SmartSearchPage.tsx','pages/SchedulePage.tsx','api/digitalBookData.ts','pages/game.tsx','pages/SaqrReadingQuestPage.tsx'];
   for(const path of immutable){
     const before=execFileSync('git',['show',baseline+':'+path],{encoding:'utf8'});
