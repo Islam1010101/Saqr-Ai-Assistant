@@ -103,7 +103,17 @@ Deno.serve(async(req:Request)=>{
       return defaults;
     };
     const resolve=async(target:string,profile:{role:Role;teacherId?:string;studentId?:string})=>{
-      const [base,overrides]=await Promise.all([defaults(target,profile),getOverrides(target)]);
+      const [base,storedOverrides]=await Promise.all([defaults(target,profile),getOverrides(target)]);
+      // Teachers may gain or lose individual student-facing services.
+      // Students may ONLY lose a service and restore its role default.
+      // Existing invalid positive rows must never elevate a student.
+      // Administrator permissions remain independent and immutable here.
+      const overrides:Override={};
+      for(const key of keys){
+        const choice=storedOverrides[key];
+        if(profile.role==="teacher" && typeof choice==="boolean")overrides[key]=choice;
+        if(profile.role==="student" && choice===false)overrides[key]=false;
+      }
       const features={...base};
       for(const key of keys)if(typeof overrides[key]==="boolean")features[key as Key]=overrides[key];
       // An explicitly granted challenge makes its parent discoverable, but
@@ -135,8 +145,11 @@ Deno.serve(async(req:Request)=>{
       return reply(200,{ok:true,email:target,...await resolve(target,targetProfile),disabled:!!targetControl?.disabled_at});
     }
     if(action!=="admin-set")return reply(400,{error:"UNKNOWN_ACTION"});
+    if(targetProfile.role==="admin")return reply(403,{error:"ADMIN_FEATURES_IMMUTABLE"});
     const key=String(body.feature||"");
     const value=body.value;
+    if(targetProfile.role==="student" && value===true)
+      return reply(403,{error:"STUDENT_ADDITIONAL_GRANTS_FORBIDDEN"});
     if(!keys.some(item=>item===key)||!(value===null||typeof value==="boolean"))
       return reply(400,{error:"INVALID_FEATURE_OR_VALUE"});
     // No self-admin promotion, cross-account authority or role edits.
