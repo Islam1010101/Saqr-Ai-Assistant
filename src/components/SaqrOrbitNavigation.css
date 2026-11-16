@@ -177,7 +177,8 @@
   filter: none;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
-  transition: opacity .58s ease var(--reveal-delay, 0ms),filter .58s ease var(--reveal-delay, 0ms),transform .58s cubic-bezier(.2,.75,.25,1) var(--reveal-delay, 0ms);
+  /* Entitlement-protected links paint as soon as verified. Hover float stays. */
+  transition: transform .22s cubic-bezier(.2,.75,.25,1);
 }
 .saqr-orbit-float {
   display: block;
@@ -330,17 +331,7 @@
 .saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-9 {left:16%;top:29%}
 /* One centered top sphere balances odd service counts (3+1+3 or 4+1+4). */
 .saqr-orbit-stage[data-orbit-layout="expanded"] .saqr-orbit-position-10 {left:50%;top:13%}
-.saqr-orbit-stage.saqr-orbit-motion-ready:not(.is-in-view) .saqr-orbit-bubble {
-  opacity: 0;
-  filter: blur(8px);
-  transform: translate(-50%,-50%) scale(.82);
-  pointer-events: none;
-}
-.saqr-orbit-stage.saqr-orbit-motion-ready.is-in-view .saqr-orbit-bubble {
-  opacity: 1;
-  filter: none;
-  transform: translate(-50%,-50%) scale(1);
-}
+/* No scroll-gated opacity or blur: bubbles are never hidden during first paint. */
 @keyframes saqr-orbit-sphere-float {
   0% {transform:translateY(-5px) rotate(-1deg)}
   100% {transform:translateY(7px) rotate(1.2deg)}
@@ -428,9 +419,6 @@
 @media (prefers-reduced-motion:reduce) {
   .saqr-orbit-saqr-portrait,.saqr-orbit-red-ellipse,.saqr-orbit-float,.saqr-orbit-talk,.saqr-orbit-burst {
     animation:none !important;
-  }
-  .saqr-orbit-stage.saqr-orbit-motion-ready .saqr-orbit-bubble {
-    opacity:1 !important;filter:none !important;transform:translate(-50%,-50%) !important;pointer-events:auto !important
   }
   .saqr-orbit-bubble,.saqr-orbit-glass {transition:none !important}
 }

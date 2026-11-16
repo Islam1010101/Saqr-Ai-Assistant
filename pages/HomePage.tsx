@@ -708,9 +708,9 @@ const HomePage: React.FC = () => {
                     </div>
                 </RevealSection>
 
-                <RevealSection delay={210}>
-                    <SaqrOrbitNavigation isAr={isAr} userType={userType} teacherId={userData?.teacher_id} onMascotClick={handleMascotInteraction} showMascotBubble={showBubble} bursts={bursts} />
-                </RevealSection>
+                {/* Service bubbles are already protected by verified account access.
+                    Avoid wrapping them in a second delayed/scroll-gated reveal. */}
+                <SaqrOrbitNavigation isAr={isAr} userType={userType} teacherId={userData?.teacher_id} onMascotClick={handleMascotInteraction} showMascotBubble={showBubble} bursts={bursts} />
 
                 <RevealSection delay={250}>
                     <div className="w-full max-w-5xl mx-auto">

@@ -38,7 +38,7 @@ import NationalAnthemChallengePage from './pages/NationalAnthemChallengePage';
 import { canAccessNationalIdentity } from './src/utils/nationalIdentityAccess';
 import SchoolFeatureRoute, { useSchoolFeatureContext } from './src/components/SchoolFeatureRoute';
 import StudentLibraryScheduleView from './src/components/StudentLibraryScheduleView';
-import { getSchoolFeatureAccess } from './src/utils/efipsFeatureAccess';
+import { getSchoolFeatureAccess, getCachedSchoolFeatureAccess } from './src/utils/efipsFeatureAccess';
 import type { EfipsFeatureMap } from './src/utils/efipsFeatures';
 
 export type Locale = 'en' | 'ar';
@@ -240,29 +240,35 @@ const Header: React.FC = () => {
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollYRef = useRef(0);
   const scrollFrameRef = useRef<number | null>(null);
-  const [userRole, setUserRole] = useState<'student' | 'teacher' | 'admin' | null>(null);
-  const [identityAllowed, setIdentityAllowed] = useState(false);
-  const [headerFeatures, setHeaderFeatures] = useState<EfipsFeatureMap | null>(null);
+  // Reuse the recently verified in-memory view on client-side navigation.
+  // Unverified permissions are NEVER used to render restricted links.
+  const [userRole, setUserRole] = useState<'student' | 'teacher' | 'admin' | null>(
+    () => getCachedSchoolFeatureAccess()?.role || null
+  );
+  const [headerFeatures, setHeaderFeatures] = useState<EfipsFeatureMap | null>(
+    () => getCachedSchoolFeatureAccess()?.features || null
+  );
 
   useEffect(() => {
     let live = true;
-    const refresh = () => {
+    const refresh = (force=false) => {
       if (['/','/about','/tutorial'].includes(location.pathname)) return;
-      getSchoolFeatureAccess(true).then(access => {
+      getSchoolFeatureAccess(force).then(access => {
         if (!live) return;
         setUserRole(access.role);
         setHeaderFeatures(access.features);
-        setIdentityAllowed(access.features.national_identity);
       }).catch(() => {
         if (!live) return;
         setUserRole(null);
         setHeaderFeatures(null);
-        setIdentityAllowed(false);
       });
     };
     refresh();
-    window.addEventListener('focus',refresh);
-    return () => {live=false;window.removeEventListener('focus',refresh);};
+    // One refresh when the tab regains focus; concurrent route/orbit requests
+    // share the same verified JWT request rather than flashing hidden links.
+    const onFocus = () => refresh(true);
+    window.addEventListener('focus',onFocus);
+    return () => {live=false;window.removeEventListener('focus',onFocus);};
   }, [location.pathname]);
 
   useEffect(() => {
@@ -328,7 +334,7 @@ const Header: React.FC = () => {
     >
       <div className="efips-navbar-surface w-full max-w-[98%] md:w-fit px-4 py-2.5 rounded-[2rem] border-4 border-white/70 dark:border-slate-700/40 flex items-center justify-between md:justify-center gap-4 shadow-2xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-2xl">
         
-        <Link to="/home" className="flex items-center gap-2 group flex-shrink-0 me-3 animate-fade-in-up" style={{ animationDelay: '0ms' }}>
+        <Link to="/home" className="flex items-center gap-2 group flex-shrink-0 me-3">
           <img
             src="/school-logo.png"
             alt="EFIPS"
@@ -346,12 +352,11 @@ const Header: React.FC = () => {
                 <Link
                   key={l.path}
                   to={l.path}
-                  className={`px-3 py-1.5 md:px-5 md:py-2 text-[10px] md:text-sm font-black rounded-full transition-all duration-300 shrink-0 animate-fade-in-up ${
+                  className={`px-3 py-1.5 md:px-5 md:py-2 text-[10px] md:text-sm font-black rounded-full transition-colors duration-200 shrink-0 ${
                     isActive
                       ? `${l.color} text-white shadow-md`
                       : 'text-slate-600 dark:text-slate-300 bg-slate-100/80 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700'
                   }`}
-                  style={{ animationDelay: `${(index + 1) * 50}ms` }}
                 >
                   {l.label}
                 </Link>
@@ -364,16 +369,14 @@ const Header: React.FC = () => {
           <button
             onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')}
             aria-label={locale === 'ar' ? 'تغيير لغة الموقع إلى الإنجليزية' : 'Change website language to Arabic'}
-            className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-slate-700 dark:text-slate-200 font-black text-[10px] border-2 border-slate-300/80 dark:border-slate-600 rounded-full bg-slate-50/80 dark:bg-slate-800/80 animate-fade-in-up"
-            style={{ animationDelay: `${(allowedLinks.length + 1) * 50}ms` }}
+            className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-slate-700 dark:text-slate-200 font-black text-[10px] border-2 border-slate-300/80 dark:border-slate-600 rounded-full bg-slate-50/80 dark:bg-slate-800/80 transition-colors duration-200"
           >
             {locale === 'en' ? 'AR' : 'EN'}
           </button>
           <button
             onClick={toggleTheme}
             aria-label={locale === 'ar' ? 'تبديل الوضع الفاتح والداكن' : 'Toggle light and dark mode'}
-            className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-slate-100/80 dark:bg-slate-800/80 rounded-full text-sm border-2 border-slate-200/80 dark:border-slate-600 animate-fade-in-up"
-            style={{ animationDelay: `${(allowedLinks.length + 2) * 50}ms` }}
+            className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-slate-100/80 dark:bg-slate-800/80 rounded-full text-sm border-2 border-slate-200/80 dark:border-slate-600 transition-colors duration-200"
           >
             {theme === 'light' ? '🌙' : '☀️'}
           </button>

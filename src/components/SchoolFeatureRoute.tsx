@@ -18,13 +18,16 @@ export default function SchoolFeatureRoute({feature,children}:{
  const [status,setStatus]=useState<'checking'|'allowed'|'denied'|'unavailable'>('checking');
  useEffect(()=>{
   let live=true;
-  const check=()=>{getSchoolFeatureAccess(true).then(result=>{
+  const check=(force=false)=>{getSchoolFeatureAccess(force).then(result=>{
     if(!live)return;
     setAccess(result);setStatus(result.features[feature]===true?'allowed':'denied');
   }).catch(()=>{if(live){setAccess(null);setStatus('unavailable')}})};
+  // A recently verified school JWT may be reused during normal navigation.
+  // Returning to the tab always forces a fresh server check; denial stays fail-closed.
   check();
-  window.addEventListener('focus',check);
-  return ()=>{live=false;window.removeEventListener('focus',check)};
+  const onFocus=()=>check(true);
+  window.addEventListener('focus',onFocus);
+  return ()=>{live=false;window.removeEventListener('focus',onFocus)};
  },[feature]);
  if(status==='checking')return <div role="status" className="flex min-h-[50dvh] items-center justify-center p-8 text-center font-bold text-emerald-700 dark:text-emerald-200">Verifying school access…</div>;
  if(status==='denied')return <Navigate to="/home" replace/>;
