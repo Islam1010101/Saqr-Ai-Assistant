@@ -45,7 +45,7 @@ const standalone=searchSaqrBookCatalog('ابحث عن أرض النفاق',catal
  .find(book=>book.title==='أرض النفاق');
 assert.ok(standalone?.bookKey?.startsWith('digital:ar:AR_'),
  'Standalone books, not just series volumes, need individual reader IDs');
-assert.match(saqrDigitalReaderHref(standalone!)||'',/^\\/#\\/digital-library\\/arabic\\?open=/);
+assert.ok(saqrDigitalReaderHref(standalone!)?.startsWith('/#/digital-library/arabic?open='));
 const englishBook=searchSaqrBookCatalog('Books Knowledge Encyclopedia',catalog)
  .find(book=>book.title==='Knowledge Encyclopedia');
 assert.ok(englishBook?.bookKey?.startsWith('digital:en:'));
