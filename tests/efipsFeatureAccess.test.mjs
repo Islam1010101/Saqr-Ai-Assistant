@@ -53,7 +53,9 @@ test('Grant/revoke UI is per-user, bilingual and independent of edit role/disabl
   assert.match(manage,/value="allow"/);
   assert.match(manage,/value="deny"/);
   assert.match(manage,/حسب الدور/);
-  assert.match(manage,/لا يغيّر دور المستخدم/);
+  assert.match(manage,/لا يمكن منح خدمات إضافية/);
+  assert.match(manage,/record.role==='teacher' && <option value="allow"/);
+  assert.match(manage,/record\?\.role==='student'&&value==='allow'/);
   assert.match(admin,/handleAccountAccess\(item, 'role'/);
   assert.match(admin,/handleAccountAccess\(item, disabled \? 'enable' : 'disable'\)/);
 });
@@ -81,12 +83,18 @@ test('All supported service routes reject denied users before mounting feature p
   assert.match(learning,/featureRule\?\.allowed===true/);
 });
 
-test('Student schedule grants read access only and do not grant teacher booking/delete powers',()=>{
-  assert.match(app,/access\.role === 'student' \? <StudentLibraryScheduleView \/> : <SchedulePage \/>/);
-  assert.match(student,/from\('library_schedule'\)\.select\('id,teacher,subject,grade'\)/);
-  assert.doesNotMatch(student,/\.insert\(|\.upsert\(|\.update\(|\.delete\(|handleOpenModal|handleSave|handleDeleteSlot/);
-  assert.match(student,/view-only access/);
-  assert.match(student,/Never mounts the booking UI/);
+test('Teachers can gain selected services, while students can only be denied or restored',()=>{
+  assert.match(server,/profile.role==="teacher" && typeof choice==="boolean"/);
+  assert.match(server,/profile.role==="student" && choice===false/);
+  assert.match(server,/targetProfile.role==="student" && value===true/);
+  assert.match(server,/STUDENT_ADDITIONAL_GRANTS_FORBIDDEN/);
+  assert.match(server,/ADMIN_FEATURES_IMMUTABLE/);
+  assert.match(manage,/record.role==='teacher' && <option value="allow"/);
+  assert.match(manage,/value="inherit"/);
+  assert.match(manage,/value="deny"/);
+  assert.match(app,/access.role === 'student' \? <Navigate to="\/home" replace \/> : <SchedulePage \/>/);
+  assert.doesNotMatch(app,/access.role === 'student' \? <StudentLibraryScheduleView/);
+  assert.match(admin,/staffRoleDirectory\[email.toLowerCase\(\)\] !== 'admin'/);
 });
 
 test('No Saqr reasoning engine, provider, book catalog or legacy timetable file changed',()=>{

@@ -1030,7 +1030,7 @@ const AdminDashboard: React.FC = () => {
                                       <option value="teacher">{isAr ? 'معلم' : 'Teacher'}</option>
                                       <option value="admin">{isAr ? 'مدير النظام' : 'Admin'}</option>
                                   </select>}
-                                  {email && <AdminUserFeaturePermissions email={email.toLowerCase()} name={String(item.name_ar || item.name_en || email)} isAr={isAr} />}
+                                  {email && (activeTab === 'students' || staffRoleDirectory[email.toLowerCase()] !== 'admin') && <AdminUserFeaturePermissions email={email.toLowerCase()} name={String(item.name_ar || item.name_en || email)} isAr={isAr} />}
                                   {email && <button type="button" disabled={busy || email.toLowerCase() === 'islam.ahmed@falcon-school.com'} onClick={() => void handleAccountAccess(item, disabled ? 'enable' : 'disable')}
                                       className={`rounded-lg text-xs font-bold text-white px-2.5 py-1.5 disabled:opacity-50 ${disabled ? 'bg-emerald-600' : 'bg-rose-600'}`}>
                                       {disabled ? (isAr ? 'استعادة الحساب' : 'Restore') : (isAr ? 'تعطيل / حذف الدخول' : 'Disable account')}
