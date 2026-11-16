@@ -32,7 +32,6 @@ const allowedPatches = [
     '',
   ],
   [
-    [
       "    // An IELTS self-test may contain \"preparation\", \"lesson\" or \"presentation\" as learning content.\n"+
       "    // Keep this session out of teacher-only lesson planning and lesson_reports on every follow-up turn.\n"+
       "    const isIeltsPracticeSession = ieltsLaunchPromptRef.current !== null;\n"+
