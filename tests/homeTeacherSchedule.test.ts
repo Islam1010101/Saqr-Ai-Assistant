@@ -27,7 +27,7 @@ assert.deepEqual(getTeacherLibrarySlots(rows,' hr045 ').map(s=>s.id),
   ['Monday_3','Monday_4','الثلاثاء_1','الخميس_8']);
 const homepage=readFileSync('pages/HomePage.tsx','utf8');
 const schedule=readFileSync('pages/SchedulePage.tsx','utf8');
-assert.ok(homepage.includes("userType === 'teacher' && teacherSchedule.length > 0"),
+assert.ok(homepage.includes("userType === 'teacher' && homeServiceAccess?.features.schedule===true && teacherSchedule.length > 0"),
   'Section only visible for teachers with real saved bookings');
 assert.ok(homepage.includes(".from('library_schedule')") && homepage.includes(".eq('user_id', teacherId)"),
   'Homepage reads only selected teacher slots from the shared booking table');
