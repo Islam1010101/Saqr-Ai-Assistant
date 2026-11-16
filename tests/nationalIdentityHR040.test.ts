@@ -19,28 +19,25 @@ assert.equal(canAccessNationalIdentity('admin', { student_id: 'S0001' }), false)
 assert.equal(canAccessNationalIdentity(null, { teacher_id: 'HR040' }), false);
 assert.equal(canAccessNationalIdentity('teacher', null), false);
 
-// The route, navbar, orbit and interior activity page all honor this exception.
+// HR040 remains the sole role-based teacher exception by default.
+// Additional individual teachers can ONLY be granted through Google-verified admin-only feature overrides.
 const app = readFileSync('App.tsx', 'utf8');
 const home = readFileSync('pages/HomePage.tsx', 'utf8');
 const orbit = readFileSync('src/components/SaqrOrbitNavigation.tsx', 'utf8');
 const page = readFileSync('pages/NationalIdentityPage.tsx', 'utf8');
 const tutorial = readFileSync('pages/TutorialPage.tsx', 'utf8');
-assert.ok(app.includes('if (canAccessNationalIdentity(role, account))'),
-  'Both identity routes share the role guard for HR040');
-assert.ok(app.includes("link.path === '/saqr-national-identity' ? identityAllowed"),
-  'Top navbar must filter the identity option by teacher ID');
-assert.ok(app.includes('setIdentityAllowed(canAccessNationalIdentity(role, profile))'),
-  'Navbar permission must use the signed-in profile, not only teacher role');
-assert.ok(orbit.includes("item.key === 'identity' && isNationalIdentityTeacher(role, teacherId)"),
-  'Only HR040 receives the additional homepage bubble');
+assert.ok(app.includes('if (canAccessNationalIdentity(role, account))'), 'HR040 legacy route check is preserved');
+assert.ok(app.includes('verified.features.national_identity'), 'Additional grants are verified by school Edge Functions');
+assert.ok(app.includes('headerFeatures[headerService[link.path]]'), 'Header uses verified individual features');
+assert.ok(orbit.includes('getSchoolFeatureAccess(true)'), 'Homepage orbit uses verified per-user grants');
 assert.ok(home.includes('teacherId={userData?.teacher_id}'),
   'Homepage passes the school teacher ID to the orbit component');
-assert.ok(page.includes('if (!canAccessNationalIdentity(role, user)) return'),
-  'Identity page must not redirect HR040 after the outer route guard passes');
+assert.ok(page.includes('!canAccessNationalIdentity(role, user) && !granted?.features.national_identity'),
+  'Teacher identity grant is accepted only after the server-verified route grants access');
 assert.ok(page.includes("role + ':' + normalizedId"),
   'Teacher challenge progress remains separated from student/admin progress');
 assert.ok(tutorial.includes('tourMode'),
   'Public tutorial remains a role-independent visual preview');
 assert.ok(orbit.includes("roles: ['student', 'admin']"),
   'Identity still belongs to students and admins by default');
-console.log('PASS: Only teacher HR040 receives National Identity alongside every student/admin');
+console.log('PASS: HR040 keeps baseline National Identity, additional teachers need individual server grants');
