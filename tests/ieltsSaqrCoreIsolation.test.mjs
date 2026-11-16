@@ -5,7 +5,7 @@ import test from 'node:test';
 
 // The initial production Saqr component before the dedicated IELTS entry.
 // The original system prompt, API request, lessons and challenges must remain
-// byte-identical once the five isolated, presentation-only edits are removed.
+// byte-identical after only the approved IELTS entry and no-lesson-report guards are removed.
 const BASELINE = '6371f2bb8080674c268a1b64a105be18bc02f4f3';
 const saqr = readFileSync('pages/SmartSearchPage.tsx', 'utf8');
 const baseline = execFileSync('git', ['show', BASELINE+':pages/SmartSearchPage.tsx'], {encoding:'utf8'});
@@ -30,6 +30,29 @@ const allowedPatches = [
     "  // The original Saqr send handler still receives and processes the full request.\n"+
     "  const ieltsLaunchPromptRef = useRef<string|null>(null);\n",
     '',
+  ],
+  [
+      "    // An IELTS self-test may contain \"preparation\", \"lesson\" or \"presentation\" as learning content.\n"+
+      "    // Keep this session out of teacher-only lesson planning and lesson_reports on every follow-up turn.\n"+
+      "    const isIeltsPracticeSession = ieltsLaunchPromptRef.current !== null;\n"+
+      "    const startingTeacherLesson = teacherAccount && !isIeltsPracticeSession && isSaqrLessonPreparationRequest(userQuery);",
+    "    const startingTeacherLesson = teacherAccount && isSaqrLessonPreparationRequest(userQuery);",
+  ],
+  [
+    "    const resumingTeacherLesson = teacherAccount && !isIeltsPracticeSession && !startingTeacherLesson &&",
+    "    const resumingTeacherLesson = teacherAccount && !startingTeacherLesson &&",
+  ],
+  [
+    "    const printingTeacherLesson = teacherAccount && !isIeltsPracticeSession && Boolean(",
+    "    const printingTeacherLesson = teacherAccount && Boolean(",
+  ],
+  [
+    "      lessonTurn: !isIeltsPracticeSession && (Boolean(activeTeacherLesson) || isSaqrLessonPreparationRequest(userQuery) || isLessonPlanRequest(userQuery)),",
+    "      lessonTurn: Boolean(activeTeacherLesson) || isSaqrLessonPreparationRequest(userQuery) || isLessonPlanRequest(userQuery),",
+  ],
+  [
+    "    if (isTeacherOrAdmin && !isIeltsPracticeSession && (",
+    "    if (isTeacherOrAdmin && (",
   ],
   [
     [
@@ -72,7 +95,7 @@ test('Saqr original logic, dispatch, system prompt, teacher workflows and challe
     assert.equal(restored.split(addition).length-1,1,'Each approved IELTS UI change appears exactly once');
     restored=restored.replace(addition,original);
   }
-  assert.equal(restored,baseline,'Only the five approved, narrowly scoped IELTS UI changes are allowed');
+  assert.equal(restored,baseline,'Only approved IELTS UI entry and no-report guards are allowed');
 });
 
 test('The invisible practice-prompt bubble only applies to the center-launched IELTS request',()=>{
