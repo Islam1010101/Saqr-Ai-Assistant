@@ -36,6 +36,8 @@ import NationalIdentityBooksPage from './pages/NationalIdentityBooksPage';
 import NationalIdentityDigitalBooksPage from './pages/NationalIdentityDigitalBooksPage';
 import NationalAnthemChallengePage from './pages/NationalAnthemChallengePage';
 import { canAccessNationalIdentity } from './src/utils/nationalIdentityAccess';
+import { useSchoolServiceAccess, schoolServiceForRoute } from './src/utils/schoolServiceAccess';
+import SchoolServiceGate from './src/components/auth/SchoolServiceGate';
 
 export type Locale = 'en' | 'ar';
 
@@ -74,14 +76,17 @@ const ProtectedRoute: React.FC<{ children: ReactNode }> = ({ children }) => {
 
 // National identity activities remain for students/admins, plus teacher HR040.
 const NationalIdentityRoute: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const {snapshot,loading}=useSchoolServiceAccess();
+  if(loading)return <p role="status" className="p-8 text-center font-bold">Checking school access...</p>;
+  if(!snapshot?.features.national_identity)return <Navigate to="/home" replace/>;
   try {
     const account = JSON.parse(localStorage.getItem('current_user') || 'null');
     const role = localStorage.getItem('user_type');
-    if (canAccessNationalIdentity(role, account)) {
+    if(canAccessNationalIdentity(role,account)||snapshot.overrides.national_identity===true)
       return <>{children}</>;
-    }
   } catch {
-    // Treat missing or unavailable local session data as unauthorized.
+    // The authenticated Edge Function is authoritative, but invalid local
+    // profile state cannot create access or progress under a fake identity.
   }
   return <Navigate to="/home" replace />;
 };
@@ -236,6 +241,7 @@ const Header: React.FC = () => {
   const scrollFrameRef = useRef<number | null>(null);
   const [userRole, setUserRole] = useState<'student' | 'teacher' | 'admin' | null>(null);
   const [identityAllowed, setIdentityAllowed] = useState(false);
+  const {snapshot:serviceAccess}=useSchoolServiceAccess();
 
   useEffect(() => {
     try {
@@ -295,7 +301,12 @@ const Header: React.FC = () => {
     { path: '/admin-dashboard', label: locale === 'en' ? 'Admin' : 'الإدارة', hint: 'Admin', color: 'bg-rose-600', roles: ['admin'] },
   ];
 
-  const allowedLinks = allLinks.filter(link => link.path === '/saqr-national-identity' ? identityAllowed : !userRole || link.roles.includes(userRole));
+  const allowedLinks = allLinks.filter(link => {
+    const service=schoolServiceForRoute(link.path);
+    if(service&&!serviceAccess?.features[service])return false;
+    if(service&&serviceAccess?.overrides[service]===true)return true;
+    return link.path==='/saqr-national-identity'?identityAllowed:!userRole||link.roles.includes(userRole);
+  });
 
   return (
     <header
@@ -593,28 +604,28 @@ const MainLayout: React.FC = () => {
           
           {/* باقي الصفحات محمية تتطلب تسجيل الدخول */}
           <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
-          <Route path="/saqr-learning" element={<ProtectedRoute><SaqrLearningPage /></ProtectedRoute>} />
+          <Route path="/saqr-learning" element={<ProtectedRoute><SchoolServiceGate feature="saqr_learning"><SaqrLearningPage /></SchoolServiceGate></ProtectedRoute>} />
           <Route path="/my-library" element={<ProtectedRoute><Navigate to="/home" replace /></ProtectedRoute>} />
           <Route path="/admin-dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-          <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
+          <Route path="/search" element={<ProtectedRoute><SchoolServiceGate feature="catalog"><SearchPage /></SchoolServiceGate></ProtectedRoute>} />
           <Route path="/smart-search" element={<ProtectedRoute><SmartSearchPage /></ProtectedRoute>} />
-          <Route path="/digital-library" element={<ProtectedRoute><DigitalLibraryPage /></ProtectedRoute>} />
-          <Route path="/digital-library/arabic" element={<ProtectedRoute><ArabicLibraryInternalPage /></ProtectedRoute>} />
-          <Route path="/digital-library/english" element={<ProtectedRoute><EnglishLibraryInternalPage /></ProtectedRoute>} />
-            <Route path="/digital-library/english/ielts" element={<ProtectedRoute><IeltsPreparationCenterPage /></ProtectedRoute>} />
-          <Route path="/digital-library/national-identity" element={<ProtectedRoute><NationalIdentityDigitalBooksPage /></ProtectedRoute>} />
-          <Route path="/creators" element={<ProtectedRoute><CreatorsPortalPage /></ProtectedRoute>} />
-          <Route path="/saqr-studio" element={<ProtectedRoute><SaqrStudioPage /></ProtectedRoute>} />
-          <Route path="/saqr-reading-quest" element={<ProtectedRoute><SaqrReadingQuestPage /></ProtectedRoute>} />
-          <Route path="/saqr-challenges" element={<ProtectedRoute><SaqrChallengesHubPage /></ProtectedRoute>} />
-          <Route path="/podcast" element={<ProtectedRoute><PodcastPage /></ProtectedRoute>} />
+          <Route path="/digital-library" element={<ProtectedRoute><SchoolServiceGate feature="digital_library"><DigitalLibraryPage /></SchoolServiceGate></ProtectedRoute>} />
+          <Route path="/digital-library/arabic" element={<ProtectedRoute><SchoolServiceGate feature="digital_library"><ArabicLibraryInternalPage /></SchoolServiceGate></ProtectedRoute>} />
+          <Route path="/digital-library/english" element={<ProtectedRoute><SchoolServiceGate feature="digital_library"><EnglishLibraryInternalPage /></SchoolServiceGate></ProtectedRoute>} />
+            <Route path="/digital-library/english/ielts" element={<ProtectedRoute><SchoolServiceGate feature="digital_library"><IeltsPreparationCenterPage /></SchoolServiceGate></ProtectedRoute>} />
+          <Route path="/digital-library/national-identity" element={<ProtectedRoute><SchoolServiceGate feature="digital_library"><NationalIdentityDigitalBooksPage /></SchoolServiceGate></ProtectedRoute>} />
+          <Route path="/creators" element={<ProtectedRoute><SchoolServiceGate feature="creators"><CreatorsPortalPage /></SchoolServiceGate></ProtectedRoute>} />
+          <Route path="/saqr-studio" element={<ProtectedRoute><SchoolServiceGate feature="studio"><SaqrStudioPage /></SchoolServiceGate></ProtectedRoute>} />
+          <Route path="/saqr-reading-quest" element={<ProtectedRoute><SchoolServiceGate feature="reading_quest"><SaqrReadingQuestPage /></SchoolServiceGate></ProtectedRoute>} />
+          <Route path="/saqr-challenges" element={<ProtectedRoute><SchoolServiceGate feature="challenges"><SaqrChallengesHubPage /></SchoolServiceGate></ProtectedRoute>} />
+          <Route path="/podcast" element={<ProtectedRoute><SchoolServiceGate feature="podcast"><PodcastPage /></SchoolServiceGate></ProtectedRoute>} />
           <Route path="/feedback" element={<ProtectedRoute><FeedbackPage /></ProtectedRoute>} />
           <Route path="/about" element={<AboutPage />} />
-          <Route path="/game" element={<ProtectedRoute><DeweyGame /></ProtectedRoute>} />
+          <Route path="/game" element={<ProtectedRoute><SchoolServiceGate feature="sort_library"><DeweyGame /></SchoolServiceGate></ProtectedRoute>} />
           <Route path="/saqr-national-identity" element={<ProtectedRoute><NationalIdentityRoute><NationalIdentityPage /></NationalIdentityRoute></ProtectedRoute>} />
           <Route path="/saqr-national-identity/books" element={<ProtectedRoute><NationalIdentityRoute><NationalIdentityBooksPage /></NationalIdentityRoute></ProtectedRoute>} />
           <Route path="/saqr-national-identity/anthem" element={<ProtectedRoute><NationalIdentityRoute><NationalAnthemChallengePage /></NationalIdentityRoute></ProtectedRoute>} />
-          <Route path="/schedule" element={<ProtectedRoute><SchedulePage /></ProtectedRoute>} />
+          <Route path="/schedule" element={<ProtectedRoute><SchoolServiceGate feature="schedule"><SchedulePage /></SchoolServiceGate></ProtectedRoute>} />
         </Routes>
       </main>
 
