@@ -5,7 +5,7 @@ export type LearningFeatures = {
   focus_steps: boolean;
   calm_display: boolean;
 };
-export async function getSaqrLearningAccess(): Promise<{allowed:boolean;viewer:'admin'|'student'|null;features:LearningFeatures|null}> {
+export async function getSaqrLearningAccess(): Promise<{allowed:boolean;viewer:'admin'|'teacher'|'student'|null;features:LearningFeatures|null}> {
   const sessionResult = await supabase.auth.getSession();
   const token = sessionResult.data.session?.access_token;
   if (sessionResult.error || !token) return {allowed:false,viewer:null,features:null};
