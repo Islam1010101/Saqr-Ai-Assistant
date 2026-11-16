@@ -225,7 +225,7 @@ export default function SaqrOrbitNavigation({
             const bubbleStyle = {
               '--bubble-rgb': item.tint,
               '--bubble-delay': (index * -.43) + 's',
-""            } as React.CSSProperties;
+            } as React.CSSProperties;
             const bubbleContent = (
               <span className="saqr-orbit-float">
                 <span className="saqr-orbit-glass">
