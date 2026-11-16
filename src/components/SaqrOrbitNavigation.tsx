@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import './SaqrOrbitNavigation.css';
 import { getSaqrLearningAccess } from '../utils/saqrLearningAccess';
 import { isNationalIdentityTeacher } from '../utils/nationalIdentityAccess';
+import { useSchoolServiceAccess,type SchoolServiceKey } from '../utils/schoolServiceAccess';
 
 type Role = 'student' | 'teacher' | 'admin';
 export type OrbitItem = {
@@ -16,6 +17,11 @@ export type OrbitItem = {
   roles: Role[];
 };
 type Burst = { id: number; tx: number; ty: number; rot: number; color: string };
+const ORBIT_SERVICE_KEYS:Partial<Record<string,SchoolServiceKey>>={
+  catalog:'catalog',digital:'digital_library',creators:'creators',
+  learning:'saqr_learning',identity:'national_identity',
+  challenges:'challenges','reading-quest':'reading_quest',schedule:'schedule'
+};
 
 // Evenly spaced positions for all bubbles; only the service-to-position
 // assignment is randomized. This prevents overlap/clipping at small widths.
@@ -90,6 +96,7 @@ export default function SaqrOrbitNavigation({
   // New shuffled order on every fresh mount; stable while the page is open.
   const [randomizedKeys] = useState(randomizeOrbit);
   const [learningAllowed, setLearningAllowed] = useState(false);
+  const {snapshot:serviceAccess}=useSchoolServiceAccess();
   const [hoveredTourKey, setHoveredTourKey] = useState<string | null>(null);
   const [tappedTourKey, setTappedTourKey] = useState<string | null>(null);
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
@@ -97,18 +104,22 @@ export default function SaqrOrbitNavigation({
   const role: Role = userType === 'teacher' ? 'teacher' : userType === 'admin' ? 'admin' : 'student';
   // The public tutorial is a read-only visual replica, including services hidden by role.
   // The real homepage keeps its existing permissions and entitlement checks.
-  const links = useMemo(() => tourMode ? ITEMS : ITEMS.filter(item =>
-    (item.roles.includes(role) || (item.key === 'identity' && isNationalIdentityTeacher(role, teacherId))) &&
-    (item.key !== 'learning' || learningAllowed)
-  ), [role, teacherId, learningAllowed, tourMode]);
+  const links = useMemo(() => tourMode ? ITEMS : ITEMS.filter(item => {
+    const feature=ORBIT_SERVICE_KEYS[item.key];
+    if(feature && serviceAccess?.features[feature]!==true)return false;
+    const roleVisible=item.roles.includes(role) ||
+      (item.key==='identity'&&isNationalIdentityTeacher(role,teacherId)) ||
+      (feature&&serviceAccess?.overrides[feature]===true);
+    return Boolean(roleVisible)&&(item.key!=='learning'||learningAllowed);
+  }), [role,teacherId,learningAllowed,tourMode,serviceAccess]);
   useEffect(() => {
     let live = true;
     setLearningAllowed(false);
     if (tourMode) return () => { live = false; };
-    if (role === 'student' || role === 'admin') {
-      getSaqrLearningAccess().then(result => { if (live) setLearningAllowed(result.allowed); })
-        .catch(() => { if (live) setLearningAllowed(false); });
-    }
+    // Includes individually invited teachers; the protected Edge Function
+    // validates the learner's identity and their explicit service grant.
+    getSaqrLearningAccess().then(result => { if (live) setLearningAllowed(result.allowed); })
+      .catch(() => { if (live) setLearningAllowed(false); });
     return () => { live = false; };
   }, [role, tourMode]);
   const visible = useMemo(() => randomizedKeys.flatMap(key => {
