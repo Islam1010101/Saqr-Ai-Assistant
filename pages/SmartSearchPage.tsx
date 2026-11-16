@@ -417,10 +417,13 @@ const SmartSearchPage: React.FC = () => {
     if (!(quickText ?? input).trim() || isLoading) return;
     const userQuery = (quickText ?? input).trim();
     const teacherAccount = ['teacher','admin'].includes(localStorage.getItem('user_type') || '');
-    const startingTeacherLesson = teacherAccount && isSaqrLessonPreparationRequest(userQuery);
-    const resumingTeacherLesson = teacherAccount && !startingTeacherLesson &&
+    // An IELTS self-test may contain "preparation", "lesson" or "presentation" as learning content.
+    // Keep this session out of teacher-only lesson planning and lesson_reports on every follow-up turn.
+    const isIeltsPracticeSession = ieltsLaunchPromptRef.current !== null;
+    const startingTeacherLesson = teacherAccount && !isIeltsPracticeSession && isSaqrLessonPreparationRequest(userQuery);
+    const resumingTeacherLesson = teacherAccount && !isIeltsPracticeSession && !startingTeacherLesson &&
       Boolean(teacherLesson && !teacherLesson.done && isSaqrLessonContinueConsent(userQuery));
-    const printingTeacherLesson = teacherAccount && Boolean(
+    const printingTeacherLesson = teacherAccount && !isIeltsPracticeSession && Boolean(
       teacherLesson?.done && isSaqrLessonPrintConsent(userQuery)
     );
     if(printingTeacherLesson && teacherLesson){
@@ -453,7 +456,7 @@ const SmartSearchPage: React.FC = () => {
     const proofreadingContext = saqrProofreadingInstructions({
       locale: locale === 'ar' ? 'ar' : 'en',
       creativeTurn,
-      lessonTurn: Boolean(activeTeacherLesson) || isSaqrLessonPreparationRequest(userQuery) || isLessonPlanRequest(userQuery),
+      lessonTurn: !isIeltsPracticeSession && (Boolean(activeTeacherLesson) || isSaqrLessonPreparationRequest(userQuery) || isLessonPlanRequest(userQuery)),
       explicitReview: isSaqrExplicitProofreadingRequest(userQuery)
     });
     // Only genuine library discovery inherits earlier catalogue context.
@@ -514,7 +517,7 @@ const SmartSearchPage: React.FC = () => {
     }
 
     // تسجيل التحضير في قاعدة بيانات الإدارة إذا استُخدمت الميزة.
-    if (isTeacherOrAdmin && (
+    if (isTeacherOrAdmin && !isIeltsPracticeSession && (
       userQuery.includes('تحضير') || userQuery.includes('عرض') ||
       userQuery.includes('lesson plan') || userQuery.includes('presentation')
     )) {
