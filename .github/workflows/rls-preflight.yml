@@ -1,0 +1,36 @@
+name: Saqr RLS read-only preflight
+
+on:
+  pull_request:
+    paths:
+      - 'tests/rlsSafetyPreflight.test.mjs'
+      - '.github/workflows/rls-preflight.yml'
+      - 'pages/Login.tsx'
+      - 'src/components/GoogleSchoolReturn.tsx'
+      - 'supabase/functions/google-school-login/**'
+      - 'supabase/functions/admin-verified-library/**'
+      - 'supabase/functions/efips-feature-access/**'
+      - 'src/components/SchoolFeatureRoute.tsx'
+      - 'src/components/StudentLibraryScheduleView.tsx'
+      - 'src/utils/efipsCloud.ts'
+      - 'pages/SchedulePage.tsx'
+      - 'pages/AdminDashboard.tsx'
+      - 'pages/SmartSearchPage.tsx'
+      - 'supabase/migrations/**'
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.16.0'
+      - name: Validate RLS migration blockers and login/role invariants (no database writes)
+        run: node --test tests/rlsSafetyPreflight.test.mjs
+      - name: Re-run existing school OAuth and role resolution tests
+        run: node --experimental-strip-types tests/unifiedSchoolLogin.test.ts
