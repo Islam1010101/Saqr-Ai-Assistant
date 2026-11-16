@@ -26,7 +26,7 @@ const normalize=(text:string):string=>String(text||'').normalize('NFKC').toLocal
 const NOISE=new Set([
   'اين','فين','هل','اي','ايه','ما','ماذا','اسم','اسماء','لديكم','عندكم','عندي',
   'يا','فضلك','شكرا','يريت','ياريت','تجيبلي','جيبلي','هاتلي','اشوف','شوف','عايزه','عاوزه','عاوزة','بتاع','بتاعة','بتاعت','حابه','حابب','لدينا','فيه',
-  'ابحث','ابحثلي','دور','دورلي','دورلي','دورلي','وريني','هات','هاتلي','عايز','عاوز','اريد','ابي','ابغي',
+  'ابحث','ابحثلي','دور','دورلي','بدور','بدورلي','بيدور','ببحث','ادور','وريني','هات','هاتلي','عايز','عاوز','اريد','ابي','ابغي',
   'اعطني','ارني','ممكن','لو','سمحت','اقترح','رشحلي','ترشحلي','اللي','في','عن','على','حول',
   'مكتبه','المكتبه','فهرس','الفهرس','مدرستنا','المدرسه','الرقميه','العربيه','الانجليزيه','الورقيه',
   'كتاب','الكتاب','كتب','الكتب','روايه','الروايه','روايات','الروايات','قصه','قصص',
@@ -151,7 +151,7 @@ const hasNamedField=(book:CatalogEntityRecord,entity:SaqrCatalogEntity):boolean=
   return fields.some(value=>phraseMatch(entity.tokens,normalizedFieldWords(value))!==null);
 };
 export const isSaqrExplicitNamedCatalogRequest=(query:string):boolean=>
-  /(?:(?:^|[\s،,:])(?:ابحث|إبحث|ابحثلي|دور|دورلي|هاتلي|وريني|find|search|show|look\s+for)(?:\s|$)|(?:^|\s)(?:مؤلفات|روايات|كتب|للكاتب|للمؤلف)(?:\s|$)|\b(?:books?\s+by|novels?\s+by|works?\s+by)\b|\b(?:books?|novels?)\s*$)/i.test(query);
+  /(?:(?:^|[\s،,:])(?:ابحث|إبحث|ابحثلي|دور|دورلي|بدور|بدورلي|بيدور|ببحث|ادور|أدور|هاتلي|وريني|find|search|show|look\s+for)(?:\s|$)|(?:^|\s)(?:مؤلفات|روايات|كتب|للكاتب|للمؤلف)(?:\s|$)|\b(?:books?\s+by|novels?\s+by|works?\s+by)\b|\b(?:books?|novels?)\s*$)/i.test(query);
 export const resolveSaqrCatalogEntity=(
   query:string,collections:CatalogEntityCollections
 ):SaqrCatalogEntity|null=>{
