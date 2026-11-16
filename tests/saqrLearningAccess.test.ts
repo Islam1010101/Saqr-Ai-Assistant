@@ -14,7 +14,7 @@ assert.ok(edge.includes('if(!entitlement?.enabled&&featureOverride?.enabled!==tr
 assert.ok(!edge.includes('ADHD')&&!edge.includes('autism'));
 assert.ok(entry.includes('if(!allowed)return null'));
 const orbit=read('src/components/SaqrOrbitNavigation.tsx');
-assert.ok(home.includes('<SaqrOrbitNavigation') && orbit.includes("to: '/saqr-learning'") && orbit.includes("roles: ['student', 'admin']"), 'Only student and admin orbit menus expose the private learning route');
+assert.ok(home.includes('<SaqrOrbitNavigation') && orbit.includes("to: '/saqr-learning'") && orbit.includes("roles: ['student', 'admin']") && orbit.includes('serviceAccess?.overrides[feature]===true'), 'Default orbit keeps student/admin roles, with server-verified individual teacher invitations');
 assert.ok(app.includes('path="/saqr-learning"'));
 assert.ok(page.includes("status === 'denied'"));
 assert.ok(auth.includes("supabase.functions.invoke('saqr-learning-access'"));
