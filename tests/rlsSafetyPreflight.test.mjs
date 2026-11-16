@@ -34,7 +34,8 @@ test('Per-user service entitlements are separate from login role changes', () =>
   assert.match(feature, /efips_user_feature_overrides/);
   assert.match(feature, /efips_google_staff_accounts/);
   assert.match(access, /supabase\.functions\.invoke\('efips-feature-access'/);
-  assert.match(route, /getSchoolFeatureAccess\(true\)/);
+  assert.match(route, /getSchoolFeatureAccess\(force\)/);
+  assert.match(route, /const onFocus=\(\)=>check\(true\)/);
   assert.match(route, /result\.features\[feature\]===true/);
   assert.doesNotMatch(feature, /\.auth\.admin\./);
 });
