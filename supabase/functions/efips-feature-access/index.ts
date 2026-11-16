@@ -96,7 +96,7 @@ Deno.serve(async(req:Request)=>{
         saqr_learning:(isAdmin&&target==="islam.ahmed@falcon-school.com")||pilot,
         schedule:role==="teacher"||isAdmin,
         national_identity:identity,passport:identity,emirati_language:identity,
-        heritage_detective:identity,flag_glory:identity,voice_union:identity,national_books:identity,
+        heritage_detective:identity,flag_glory:identity,voice_union:identity,national_books:true,
         challenges,reading_quest:true,sort_library:challenges,
         saqr_studio:challenges,podcast:challenges,
       };
