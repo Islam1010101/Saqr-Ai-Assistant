@@ -2,8 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import './SaqrOrbitNavigation.css';
-import { getSaqrLearningAccess } from '../utils/saqrLearningAccess';
-import { isNationalIdentityTeacher } from '../utils/nationalIdentityAccess';
+import {useFeatureAccess} from '../../App';
+import {canUseFeature, type FeatureKey} from '../utils/featurePermissions';
 
 type Role = 'student' | 'teacher' | 'admin';
 export type OrbitItem = {
@@ -89,28 +89,26 @@ export default function SaqrOrbitNavigation({
   const stageRef = useRef<HTMLDivElement>(null);
   // New shuffled order on every fresh mount; stable while the page is open.
   const [randomizedKeys] = useState(randomizeOrbit);
-  const [learningAllowed, setLearningAllowed] = useState(false);
+  const access=useFeatureAccess();
   const [hoveredTourKey, setHoveredTourKey] = useState<string | null>(null);
   const [tappedTourKey, setTappedTourKey] = useState<string | null>(null);
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const lastPointerType = useRef<string>('mouse');
   const role: Role = userType === 'teacher' ? 'teacher' : userType === 'admin' ? 'admin' : 'student';
-  // The public tutorial is a read-only visual replica, including services hidden by role.
-  // The real homepage keeps its existing permissions and entitlement checks.
-  const links = useMemo(() => tourMode ? ITEMS : ITEMS.filter(item =>
-    (item.roles.includes(role) || (item.key === 'identity' && isNationalIdentityTeacher(role, teacherId))) &&
-    (item.key !== 'learning' || learningAllowed)
-  ), [role, teacherId, learningAllowed, tourMode]);
-  useEffect(() => {
-    let live = true;
-    setLearningAllowed(false);
-    if (tourMode) return () => { live = false; };
-    if (role === 'student' || role === 'admin') {
-      getSaqrLearningAccess().then(result => { if (live) setLearningAllowed(result.allowed); })
-        .catch(() => { if (live) setLearningAllowed(false); });
-    }
-    return () => { live = false; };
-  }, [role, tourMode]);
+  // The tour stays a complete read-only preview. Actual service access is
+  // verified by the server; role labels are never used to elevate permissions.
+  const serviceKey:Record<string,FeatureKey>={
+    catalog:'catalog',smart:'saqr_ai',digital:'digital_library',
+    creators:'creators',learning:'saqr_learning',identity:'national_identity',
+    challenges:'challenges','reading-quest':'reading_quest',
+    schedule:'schedule',admin:'suggestions'
+  };
+  const links=useMemo(()=>tourMode?ITEMS:ITEMS.filter(item=>{
+    if(item.key==='admin')return role==='admin';
+    const key=serviceKey[item.key];
+    return Boolean(key)&&canUseFeature(access,key)&&
+      (item.roles.includes(role)||role==='teacher');
+  }),[role,access,tourMode]);
   const visible = useMemo(() => randomizedKeys.flatMap(key => {
     const item = links.find(link => link.key === key);
     return item ? [item] : [];
