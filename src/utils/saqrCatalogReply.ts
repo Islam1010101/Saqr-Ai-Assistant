@@ -1,5 +1,6 @@
 import type {SaqrBookMatch} from './saqrCatalogSearch.ts';
 import {isCrossLanguageTitleQuery} from './saqrCatalogSearch.ts';
+import {saqrDigitalReadAction} from './saqrDigitalReaderLinks.ts';
 
 // Verified holding answers are assembled from recorded catalog data, not LLM guesses.
 const overview = /(?:^|\s)(?:books?|novels?|catalog(?:ue)?|ebooks?|titles?|reading\s+list)(?:\s|$)|كتب|كتاب|فهرس|المكتبة|مكتبة|روايات|اقترح|رشح|الرف|مكان\s+الكتاب/i;
@@ -60,9 +61,10 @@ export function renderSaqrCatalogAnswer(question:string,matches:SaqrBookMatch[],
       const title=escapeMd(book.title),author=escapeMd(book.author|| (ar?'غير مسجل':'Not recorded'));
       const source=kind==='physical'
         ? (ar?'الرف':'Shelf')+': '+(book.shelf ?? (ar?'غير مسجل':'Not recorded'))+' — '+(ar?'الصف':'Row')+': '+(book.row ?? (ar?'غير مسجل':'Not recorded'))
-        : digitalLink(book.driveLink)
-          ? '['+(ar?'فتح الكتاب الرقمي':'Open digital book')+']('+digitalLink(book.driveLink)+')'
-          : (ar?'الرابط غير مسجل في الفهرس':'No catalog link recorded');
+        : (saqrDigitalReadAction(book,locale) ||
+          (digitalLink(book.driveLink)
+            ? '['+(ar?'مصدر الكتاب':'Book source')+']('+digitalLink(book.driveLink)+')'
+            : (ar?'الرابط غير مسجل في الفهرس':'No catalog link recorded')));
       const reason=escapeMd(book.subject || (ar?'دون تصنيف مفصل':'No detailed subject'));
       // Show the actual volume and its parent series only for the new
       // individual-series records; standalone and physical results are unchanged.

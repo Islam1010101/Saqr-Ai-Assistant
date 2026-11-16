@@ -11,6 +11,8 @@ assert.equal(isOpenEndedBookAdvice('Recommend a book about space'),false,
   'Topic-specific recommendations must keep the existing Saqr route');
 assert.equal(isOpenEndedBookAdvice('I need a lesson plan for my class'),false);
 assert.equal(isOpenEndedBookAdvice('عايز اقرا كتاب، ترشحلي إيه؟'),true);
+assert.equal(isOpenEndedBookAdvice('بدور عن كتاب'),true,
+ 'An unspecified colloquial search should ask what kind of book, not invent a title');
 const opener=getReadingInterviewStep(request,[],'ar');
 assert.equal(opener.kind,'ask-interests');
 if(opener.kind!=='ask-interests')throw new Error('Expected reader interests question');
@@ -39,7 +41,7 @@ assert.match(arOpener.reply,/هواياتك/);
 const sampleMatches=[
  {title:'Science Adventures',author:'School Publisher',subject:'Science',
   pageLocation:'المكتبة الرقمية الإنجليزية (English Digital Library)',
-  driveLink:'https://drive.google.com/file/d/teenStory/view',matchBasis:'subject'},
+  driveLink:'https://drive.google.com/file/d/teenStory/view',bookKey:'digital:en:EN_PH_teenStory',matchBasis:'subject'},
  {title:'The Accountant Handbook',author:'Technical Press',subject:'Professional Studies',
   pageLocation:'المكتبة الرقمية الإنجليزية (English Digital Library)',
   driveLink:'https://drive.google.com/file/d/adultBook/view',matchBasis:'subject'},
@@ -58,7 +60,8 @@ const message=renderReadingInterviewSuggestions({
  interests:'science and adventure',age:13,grade:null,locale:'en'
 });
 assert.match(message,/Science Adventures/);
-assert.match(message,/teenStory/);
+assert.match(message,/EN_PH_teenStory/);
+assert.match(message,/\[Read book\]\(\/#\/digital-library\/english\?open=/);
 assert.doesNotMatch(message,/Accountant Handbook|Fabricated outside school/,
   'Age-inappropriate and unverified titles are never included');
 assert.doesNotMatch(message,/\|\s*Genre\s*\|/,'No broken Markdown tables');

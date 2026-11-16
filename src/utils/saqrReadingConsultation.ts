@@ -4,6 +4,7 @@
  * separate from named-book searches, lesson planning and Little Author.
  */
 import type { SaqrBookMatch } from './saqrCatalogSearch.ts';
+import {saqrDigitalReadAction} from './saqrDigitalReaderLinks.ts';
 import { classifyBookAudience } from '../../api/bookAudience.ts';
 
 export type ReaderTurn = {role:string;content:string};
@@ -29,7 +30,7 @@ const AGE_RETRY = {
 const normalize = (s:string) => s.toLowerCase().replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').trim();
 const focusedRequest=/(?:\b(?:about|on|about the|for my class|by)\s+\S+|\b(?:fantasy|mystery|science|space|history|sports|adventure|horror|romance|coding|animals|comics)\b|(?:عن|حول|في)\s+(?:الفضاء|العلوم|الرياضه|التاريخ|التراث|المغامرات|موضوع|الحيوانات|البرمجه|قصه|روايه))/i;
 const readIntent=/(?:\b(?:read|reading|books?|novels?|stories|recommend|suggest|advi[cs]e|advace)\b|(?:اقرا|اقرأ|أقرأ|قراءه|كتاب|كتب|روايه|روايات|رشح|اقترح))/i;
-const openRequest=/(?:\b(?:i\s+(?:want|wanna|need|would\s+like|like)|what\s+(?:book|books)|can\s+you|could\s+you|please|recommend|suggest|advise|advice|advace|which\s+book)\b|(?:عايز|عاوز|نفسي|ابغي|ابي|اريد|محتاج|رشحلي|ترشحلي|اقترحلي|تنصحني|اختارلي))/i;
+const openRequest=/(?:\b(?:i\s+(?:want|wanna|need|would\s+like|like)|what\s+(?:book|books)|can\s+you|could\s+you|please|recommend|suggest|advise|advice|advace|which\s+book)\b|(?:عايز|عاوز|نفسي|ابغي|ابي|اريد|محتاج|بدور|بدورلي|ببحث|رشحلي|ترشحلي|اقترحلي|تنصحني|اختارلي))/i;
 const explicitNewTask=/(?:\b(?:lesson|worksheet|quiz|homework|presentation|write\s+(?:a|my)\s+story|find\s+in\s+the\s+library|where\s+is)\b|(?:تحضير|ورقه\s*عمل|واجب|اختبار|تحدي|المؤلف\s*الصغير|درس|فهرس|وين\s*الكتاب|اين\s*الكتاب))/i;
 const cancel=/(?:\b(?:cancel|stop|never\s*mind|forget\s*it|no\s*thanks)\b|(?:الغ[يى]|خلاص|مش\s*عايز|لا\s*شكرا|وقف))/i;
 export const isOpenEndedBookAdvice=(text:string):boolean=>{
@@ -145,9 +146,8 @@ export function renderReadingInterviewSuggestions(args:{
   const rows=selected.map(({book,source},i)=>{
     const where=book.shelf!==undefined
       ? (ar?`الرف ${book.shelf}، الصف ${book.row}`:`Shelf ${book.shelf}, row ${book.row}`)
-      : (book.driveLink && /^https:\/\//.test(book.driveLink)
-        ? `[${ar?'فتح الكتاب الرقمي':'Open digital book'}](${book.driveLink})`
-        : (ar?'في المكتبة الرقمية':'In the digital library'));
+      : (saqrDigitalReadAction(book,args.locale) ||
+          (ar?'في المكتبة الرقمية':'In the digital library'));
     const note=(source.subject||book.subject||'').trim().slice(0,100);
     return `${i+1}. **${book.title}**${source.author?' — '+source.author:''}\n   ${where}${note?' · '+note:''}`;
   });

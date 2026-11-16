@@ -1,4 +1,5 @@
 import type {SaqrBookMatch} from './saqrCatalogSearch.ts';
+import {saqrDigitalReadAction} from './saqrDigitalReaderLinks.ts';
 
 /**
  * Recover from AI providers that return a one-line Markdown table instead of
@@ -73,8 +74,10 @@ export function formatSaqrRecommendationReply(
         ? 'في المكتبة الورقية، الرف '+book.shelf+'، الصف '+book.row
         : 'Physical library, shelf '+book.shelf+', row '+book.row)
       : (arabic?'في المكتبة الرقمية':'In the digital library');
+    const readerAction=book.shelf===undefined?saqrDigitalReadAction(book,locale):null;
     const href=book.shelf===undefined?validLink(book.driveLink):null;
-    const link=href?' — ['+(arabic?'فتح الكتاب':'Open book')+']('+href+')':'';
+    const link=readerAction?' — '+readerAction
+      : href?' — ['+(arabic?'فتح الكتاب':'Open book')+']('+href+')':'';
     return '- **'+escapeMd(book.title)+'** — '+where+link+'.';
   });
   const note=arabic
