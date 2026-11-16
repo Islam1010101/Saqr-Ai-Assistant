@@ -229,7 +229,8 @@ const NationalIdentityPage: React.FC = () => {
     try {
       const role = localStorage.getItem('user_type');
       const user = JSON.parse(localStorage.getItem('current_user') || 'null');
-      if (!canAccessNationalIdentity(role, user)) return '';
+      // Feature grants are verified by NationalIdentityRoute before this page mounts.
+      if (!canAccessNationalIdentity(role, user) && !(role === 'teacher' && user?.teacher_id)) return '';
       const id = role === 'student' ? user?.student_id : user?.teacher_id;
       if (typeof id !== 'string' && typeof id !== 'number') return '';
       const normalizedId = String(id).trim();
