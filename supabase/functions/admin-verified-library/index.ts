@@ -64,18 +64,23 @@ Deno.serve(async(req:Request)=>{
     return res(400,{error:"Invalid school account, feature or permission"});
   if(target===email)return res(403,{error:"Your own administrator permissions cannot be changed"});
   const {data:targetStaff,error:targetError}=await admin.from("efips_google_staff_accounts")
-    .select("teacher_id").eq("email",target).maybeSingle();
+    .select("teacher_id,role").eq("email",target).maybeSingle();
   if(targetError)return res(503,{error:"Target lookup unavailable"});
+  if(targetStaff?.role==="admin")return res(403,{error:"Administrator services cannot be changed"});
   let found=!!targetStaff?.teacher_id;
+  let isStudent=false;
   if(!found){
     const id=/^([0-9]{6,7})@falcon-school\.com$/.exec(target)?.[1];
     if(id){
       const {data:student,error:studentError}=await admin.from("students").select("student_id").eq("student_id",id).maybeSingle();
       if(studentError)return res(503,{error:"Student lookup unavailable"});
       found=!!student;
+      isStudent=found;
     }
   }
   if(!found)return res(404,{error:"Approved school account not found"});
+  // Students can lose and restore existing features, never gain extra features.
+  if(isStudent && allowed===true)return res(403,{error:"Students cannot be granted additional services"});
   if(allowed===null){
     const {error:deleteError}=await admin.from("efips_user_feature_overrides").delete()
       .eq("email",target).eq("feature_key",feature);
