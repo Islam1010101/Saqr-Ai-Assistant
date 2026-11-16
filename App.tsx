@@ -35,7 +35,7 @@ import NationalIdentityPage from './pages/NationalIdentityPage';
 import NationalIdentityBooksPage from './pages/NationalIdentityBooksPage';
 import NationalIdentityDigitalBooksPage from './pages/NationalIdentityDigitalBooksPage';
 import NationalAnthemChallengePage from './pages/NationalAnthemChallengePage';
-import { canAccessNationalIdentity } from './src/utils/nationalIdentityAccess';
+import {getMyFeatureAccess, canUseFeature, featureForPath, EMPTY_FEATURE_ACCESS, type FeatureAccess} from './src/utils/featurePermissions';
 
 export type Locale = 'en' | 'ar';
 
@@ -53,8 +53,32 @@ const CloseIcon = () => (
   </svg>
 );
 
+// School feature access is resolved from the verified Google account on the server.
+const FeatureAccessContext = createContext<FeatureAccess>(EMPTY_FEATURE_ACCESS);
+export const useFeatureAccess = () => useContext(FeatureAccessContext);
+const FeatureAccessProvider: React.FC<{children:ReactNode}> = ({children}) => {
+  const location = useLocation();
+  const [access,setAccess] = useState<FeatureAccess>(EMPTY_FEATURE_ACCESS);
+  useEffect(() => {
+    let current=true;
+    const verify=()=> {
+      // Fail closed when the server is unavailable or when a grant is revoked.
+      setAccess(EMPTY_FEATURE_ACCESS);
+      getMyFeatureAccess().then(value=>{if(current)setAccess(value);})
+        .catch(()=>{if(current)setAccess({ready:true,role:null,features:null,error:true});});
+    };
+    if(location.pathname !== '/' && location.pathname !== '/tutorial' && location.pathname !== '/about')verify();
+    const onFocus=()=>{if(location.pathname!=='/'&&location.pathname!=='/tutorial'&&location.pathname!=='/about')verify();};
+    window.addEventListener('focus',onFocus);
+    return ()=>{current=false;window.removeEventListener('focus',onFocus);};
+  },[location.pathname]);
+  return <FeatureAccessContext.Provider value={access}>{children}</FeatureAccessContext.Provider>;
+};
+
 // -------- حماية المسارات (Route Guard) الآمنة لجميع المتصفحات --------
 const ProtectedRoute: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const location=useLocation();
+  const access=useFeatureAccess();
   let userType = null;
   let currentUser = null;
 
@@ -68,22 +92,19 @@ const ProtectedRoute: React.FC<{ children: ReactNode }> = ({ children }) => {
   if (!userType || !currentUser) {
     return <Navigate to="/" replace />;
   }
-
+  if(!access.ready)return <div role="status" className="min-h-[60vh] flex items-center justify-center font-black text-emerald-700">Checking school access… جارٍ التحقق من صلاحيات حسابك</div>;
+  if(access.error || !access.features || access.role!==userType){
+    return <div role="alert" className="min-h-[60vh] flex items-center justify-center text-center p-8 font-bold text-rose-700">Unable to verify school service permissions. تعذّر التحقق من صلاحيات الحساب. <a className="underline ms-2" href="#/home">Retry / إعادة المحاولة</a></div>;
+  }
+  const feature=featureForPath(location.pathname);
+  if(feature && !canUseFeature(access,feature))return <Navigate to="/home" replace/>;
   return <>{children}</>;
 };
 
 // National identity activities remain for students/admins, plus teacher HR040.
-const NationalIdentityRoute: React.FC<{ children: ReactNode }> = ({ children }) => {
-  try {
-    const account = JSON.parse(localStorage.getItem('current_user') || 'null');
-    const role = localStorage.getItem('user_type');
-    if (canAccessNationalIdentity(role, account)) {
-      return <>{children}</>;
-    }
-  } catch {
-    // Treat missing or unavailable local session data as unauthorized.
-  }
-  return <Navigate to="/home" replace />;
+const NationalIdentityRoute: React.FC<{children:ReactNode}> = ({children}) => {
+  const access=useFeatureAccess();
+  return canUseFeature(access,'national_identity') ? <>{children}</> : <Navigate to="/home" replace/>;
 };
 
 // -------- 1. مساعد صقر العائم --------
@@ -235,17 +256,14 @@ const Header: React.FC = () => {
   const lastScrollYRef = useRef(0);
   const scrollFrameRef = useRef<number | null>(null);
   const [userRole, setUserRole] = useState<'student' | 'teacher' | 'admin' | null>(null);
-  const [identityAllowed, setIdentityAllowed] = useState(false);
+  const access=useFeatureAccess();
 
   useEffect(() => {
     try {
       const role = localStorage.getItem('user_type') as 'student' | 'teacher' | 'admin' | null;
-      const profile = JSON.parse(localStorage.getItem('current_user') || 'null');
       setUserRole(role);
-      setIdentityAllowed(canAccessNationalIdentity(role, profile));
     } catch {
       setUserRole(null);
-      setIdentityAllowed(false);
     }
   }, [location.pathname]);
 
@@ -295,7 +313,11 @@ const Header: React.FC = () => {
     { path: '/admin-dashboard', label: locale === 'en' ? 'Admin' : 'الإدارة', hint: 'Admin', color: 'bg-rose-600', roles: ['admin'] },
   ];
 
-  const allowedLinks = allLinks.filter(link => link.path === '/saqr-national-identity' ? identityAllowed : !userRole || link.roles.includes(userRole));
+  const allowedLinks = allLinks.filter(link => {
+    const key=featureForPath(link.path);
+    return Boolean(userRole) && Boolean(key) && canUseFeature(access,key) &&
+      (link.roles.includes(userRole!) || userRole==='teacher');
+  });
 
   return (
     <header
@@ -706,7 +728,7 @@ const App: React.FC = () => {
     <ApplicationErrorBoundary>
       <ThemeProvider>
         <LanguageProvider>
-          {new URLSearchParams(window.location.search).get('efips_google_teacher') === '1' ? <GoogleTeacherReturn /> : new URLSearchParams(window.location.search).get('efips_google_student') === '1' ? <GoogleSchoolReturn /> : <HashRouter><MainLayout /></HashRouter>}
+          {new URLSearchParams(window.location.search).get('efips_google_teacher') === '1' ? <GoogleTeacherReturn /> : new URLSearchParams(window.location.search).get('efips_google_student') === '1' ? <GoogleSchoolReturn /> : <HashRouter><FeatureAccessProvider><MainLayout /></FeatureAccessProvider></HashRouter>}
         </LanguageProvider>
       </ThemeProvider>
     </ApplicationErrorBoundary>
