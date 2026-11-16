@@ -17,9 +17,15 @@ export function clearSchoolFeatureAccessCache(){
   pending=null;
 }
 
-/** Instant, already-verified UI display on same-tab navigation; never persisted. */
+/**
+ * Keep the last server-verified navigation snapshot visible for the lifetime of
+ * the SAME in-memory Google session, even after the network refresh TTL.
+ * Expiration still causes getSchoolFeatureAccess() to revalidate in the
+ * background. Page guards and protected APIs independently enforce grants.
+ * Auth changes/sign-out invalidate this snapshot immediately; no persistence.
+ */
 export function getCachedSchoolFeatureAccess():SchoolFeatureAccess|null {
-  return verified && Date.now()-verified.verifiedAt<CACHE_MS ? verified.access : null;
+  return verified?.access ?? null;
 }
 
 // Clear on school-account changes, Google sign-out or token rotation.
