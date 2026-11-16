@@ -11,6 +11,7 @@ import { STORY_IDEAS, storyIdeaAt, isStoryBeginning, detectLearningIntent, resea
 import { borrowerIds, deviceReadingKey, filterActiveBorrowings, readingShelfFromDevice, catalogBookSynopsis } from '../src/utils/saqrReaderContext';
 import { bookData } from '../api/bookData';
 import { searchSaqrBookCatalog } from '../src/utils/saqrCatalogSearch';
+import {isSaqrDigitalReaderHref} from '../src/utils/saqrDigitalReaderLinks';
 import { resolveSaqrCatalogEntity, isSaqrExplicitNamedCatalogRequest } from '../src/utils/saqrCatalogEntitySearch';
 import { retrieveSaqrArabicPageEvidence, exactArabicBookContentId, saqrArabicPageEvidenceContext, renderArabicPageEvidence } from '../src/utils/saqrArabicPageEvidence';
 import { saqrGeneralBookKnowledgeContext } from '../src/utils/saqrBookGeneralKnowledge';
@@ -481,7 +482,8 @@ const SmartSearchPage: React.FC = () => {
     // Reader-led book discovery: ask about interests and age before suggesting
     // anything. Only open-ended requests and their immediate replies use this
     // path; named-book searches, Little Author, teacher tools and AI stay intact.
-    const readingInterview=getReadingInterviewStep(userQuery,messages,locale==='ar'?'ar':'en');
+    const readingInterview=namedCatalogEntity ? {kind:'none' as const}
+      : getReadingInterviewStep(userQuery,messages,locale==='ar'?'ar':'en');
     if(!activeTeacherLesson && readingInterview.kind!=='none' && !creativeTurn){
       if(readingInterview.kind==='recommend'){
         const interviewQuery='recommend books about '+readingInterview.interests.slice(0,180);
@@ -587,7 +589,7 @@ const SmartSearchPage: React.FC = () => {
       ? findSaqrBookTitleHoldings(namedBookTitle,foundBooks) : [];
     // Explicit "find this title" requests should show verified holdings, not
     // an unrelated book explanation. "Tell me more" uses the expert path.
-    const explicitCatalogSearch=/(?:^|\s)(?:دورلي|دور\s*لي|دور|ابحث(?:لي)?|إبحث(?:لي)?|وريني|هاتلي|search|find|look\s+for|show\s+me)(?=\s|$)/i.test(userQuery);
+    const explicitCatalogSearch=/(?:^|\s)(?:بدور|بدورلي|بيدور|ببحث|ادور|أدور|دورلي|دور\s*لي|دور|ابحث(?:لي)?|إبحث(?:لي)?|وريني|هاتلي|search|find|look\s+for|show\s+me)(?=\s|$)/i.test(userQuery);
     if(librarySearchIntent && preIntent==='none' && (isSaqrCatalogLookup(userQuery) || !!namedCatalogEntity) && (explicitCatalogSearch || !namedBookTitle)){
       const answer=renderSaqrCatalogAnswer(userQuery,foundBooks,locale==='ar'?'ar':'en');
       const withPageEvidence=answer+renderArabicPageEvidence(arabicPageEvidence,locale==='ar');
@@ -1029,7 +1031,12 @@ When the user asks for books, identify the matching titles exactly as recorded, 
                       <div className="saqr-assistant-column">
                         <div className="saqr-assistant-bubble saqr-answer-enter" lang={locale}>
                           <div className={`saqr-markdown prose prose-slate max-w-none text-start dark:prose-invert ${index > 0 && isLessonPlanRequest(visibleMessages[index - 1]?.content || '') ? 'saqr-lesson-markdown' : ''}`}>
-                            <ReactMarkdown>{msg.role === 'assistant' && index > 0 && isLessonPlanRequest(visibleMessages[index - 1]?.content || '') ? formatLessonPlanDisplay(msg.content) : msg.content}</ReactMarkdown>
+                            <ReactMarkdown components={{a: ({node: _node,href,children,...props}) => (
+                              <a {...props} href={href}
+                                className={isSaqrDigitalReaderHref(href)
+                                  ? 'inline-flex items-center justify-center rounded-xl bg-emerald-700 px-4 py-2 my-1 font-bold text-white !no-underline hover:bg-emerald-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500'
+                                  : undefined}>{children}</a>
+                            )}}>{msg.role === 'assistant' && index > 0 && isLessonPlanRequest(visibleMessages[index - 1]?.content || '') ? formatLessonPlanDisplay(msg.content) : msg.content}</ReactMarkdown>
                           </div>
                         </div>
                         {teacherLesson && !isLoading && teacherLesson.lastMessageCount === messages.length &&
