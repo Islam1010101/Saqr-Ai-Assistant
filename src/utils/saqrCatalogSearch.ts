@@ -288,10 +288,10 @@ export const searchSaqrBookCatalog = (question:string, catalogs:Catalogs, limit=
         ...(book.summary ? {summary:String(book.summary).slice(0,500)} : {}),
         ...(origin.source==='physical' ? {shelf:book.shelf,row:book.row} : {
           driveLink:book.driveLink,
+          ...(book.id!==undefined ? {bookKey:'digital:'+(origin.source==='arabic'?'ar':'en')+':'+String(book.id)} : {}),
           ...(book.series ? {
             series:book.series,
-            ...(Number.isSafeInteger(book.seriesOrder) ? {seriesOrder:book.seriesOrder} : {}),
-            ...(book.id!==undefined ? {bookKey:'digital:'+(origin.source==='arabic'?'ar':'en')+':'+String(book.id)} : {})
+            ...(Number.isSafeInteger(book.seriesOrder) ? {seriesOrder:book.seriesOrder} : {})
           } : {})
         }),
         matchBasis: namedEntity?.kind==='author' ? 'Recorded author' : namedEntity ? 'Recorded title or series' : subjectMatch ? 'Catalog subject/topic' : titleMatch ? 'Book title' : 'Description/author'
