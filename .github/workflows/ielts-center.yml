@@ -22,6 +22,7 @@ on:
       - "tests/ieltsListeningLibrary.test.mjs"
       - "src/utils/ieltsSaqrPractice.ts"
       - "tests/ieltsSaqrCoreIsolation.test.mjs"
+      - "tests/ieltsNoLessonReports.test.mjs"
       - "App.tsx"
       - "src/components/GoogleSchoolReturn.tsx"
       - "tests/ieltsCenter.test.mjs"
@@ -60,6 +61,6 @@ jobs:
             api/digitalBookData.ts supabase/functions/
           git diff --exit-code 6371f2bb8080674c268a1b64a105be18bc02f4f3 HEAD -- src/utils/ ':(exclude)src/utils/ieltsSaqrPractice.ts' ':(exclude)src/utils/ieltsListeningReview.ts' ':(exclude)src/utils/ieltsListeningGrading.ts' ':(exclude)src/utils/ieltsExamPractice.ts'
       - run: npm install --no-package-lock --no-audit --no-fund
-      - run: node --test tests/ieltsCenter.test.mjs tests/ieltsSaqrCoreIsolation.test.mjs tests/ieltsReaderViewOnly.test.mjs tests/ieltsListeningLibrary.test.mjs tests/ieltsGradedListening.test.mjs tests/ieltsReadingWritingSpeaking.test.mjs
+      - run: node --test tests/ieltsCenter.test.mjs tests/ieltsSaqrCoreIsolation.test.mjs tests/ieltsReaderViewOnly.test.mjs tests/ieltsListeningLibrary.test.mjs tests/ieltsGradedListening.test.mjs tests/ieltsReadingWritingSpeaking.test.mjs tests/ieltsNoLessonReports.test.mjs
       - run: node --experimental-strip-types tests/ieltsListeningGrading.test.ts
       - run: npm run build
