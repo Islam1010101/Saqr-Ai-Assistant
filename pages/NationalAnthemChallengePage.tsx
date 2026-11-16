@@ -49,10 +49,11 @@ export default function NationalAnthemChallengePage() {
   const t = (arabic: string, english: string) => ar ? arabic : english;
   const [allowed] = useState(() => {
     try {
-      return canAccessNationalIdentity(
-        localStorage.getItem('user_type'),
-        JSON.parse(localStorage.getItem('current_user') || 'null')
-      );
+      const role=localStorage.getItem('user_type');
+      const account=JSON.parse(localStorage.getItem('current_user') || 'null');
+      // NationalIdentityRoute already verifies the per-user grant with the Edge API.
+      return canAccessNationalIdentity(role,account) ||
+        (role==='teacher' && Boolean(account?.teacher_id));
     } catch { return false; }
   });
 
