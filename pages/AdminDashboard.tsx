@@ -8,6 +8,7 @@ import AdminLibraryAttendance from '../src/components/AdminLibraryAttendance';
 import AdminInsightsPanels from '../src/components/AdminInsightsPanels';
 import AdminChildrenReadingReview from '../src/components/AdminChildrenReadingReview';
 import AdminSaqrProviderMetrics from '../src/components/AdminSaqrProviderMetrics';
+import AdminFeaturePermissionsDialog from '../src/components/admin/AdminFeaturePermissionsDialog';
 import {nationalIdentityBooks} from '../src/utils/nationalIdentityCatalog';
 import { bookData } from '../api/bookData';
 import { ARABIC_LIBRARY_DATABASE } from './ArabicLibraryInternalPage';
@@ -188,6 +189,7 @@ const AdminDashboard: React.FC = () => {
     const fallbackCheckedAt = useRef(0);
     const [modalMode, setModalMode] = useState<'addStudent' | 'addTeacher' | 'editStudent' | 'editTeacher' | 'addBorrow' | null>(null);
     const [selectedItem, setSelectedItem] = useState<any>(null);
+    const [featureUser,setFeatureUser] = useState<{email:string;name:string}|null>(null);
     const emptyForm = () => ({ student_id: '', teacher_id: '', name_ar: '', name_en: '', grade: 'الصف الخامس', points: 0, user_id: '', user_type: 'student', user_email: '', book_name: '', return_date: getDefaultReturnDate(15) });
     const [formData, setFormData] = useState(emptyForm);
 
@@ -1015,6 +1017,19 @@ const AdminDashboard: React.FC = () => {
                         {activeTab === 'reports' && <td className="p-3.5 font-bold text-xs md:text-sm text-slate-800 dark:text-slate-100">{item.lesson_topic}</td>}{activeTab === 'reports' && <td className="p-3.5 text-center font-black text-xs md:text-sm text-indigo-600 dark:text-indigo-400">{item.plan_type}</td>}{activeTab === 'reports' && <td className="p-3.5 text-xs md:text-sm text-slate-500">{item.created_at ? new Date(item.created_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US') : '-'}</td>}
                         {activeTab !== 'reports' && <td className="p-3.5"><div className="flex flex-wrap items-center justify-center gap-2">{activeTab === 'borrowings' ? <button type="button" disabled={processingRowId === item.id} onClick={() => void handleReturnBook(item.id)} className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white rounded-xl font-bold text-xs shadow-sm transition-all flex items-center gap-1"><OutlineIcon name="return" className="h-3.5 w-3.5" />{isAr ? 'إرجاع الكتاب' : 'Return Book'}</button> : activeTab === 'pending' ? <><button type="button" disabled={processingRowId === item.id} onClick={() => void handleInstantApprove(item)} className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white rounded-xl font-bold text-xs shadow-sm transition-all flex items-center gap-1"><OutlineIcon name="check" className="h-3.5 w-3.5" />{processingRowId === item.id ? (isAr ? 'جاري التأكيد...' : 'Approving...') : t('approveBtn')}</button><button type="button" disabled={processingRowId === item.id} onClick={() => void handleRejectRequest(item.id)} className="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 disabled:opacity-50 text-white rounded-xl font-bold text-xs shadow-sm transition-all flex items-center gap-1"><OutlineIcon name="x" className="h-3.5 w-3.5" />{t('rejectBtn')}</button></> : <>
                           <button type="button" onClick={() => { setSelectedItem(item); setFormData({ ...emptyForm(), student_id: item.student_id || '', teacher_id: item.teacher_id || '', name_ar: item.name_ar || '', name_en: item.name_en || '', grade: item.grade || '', points: item.points || 0 }); setModalMode(activeTab === 'students' ? 'editStudent' : 'editTeacher'); }} className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs shadow-sm transition-all">{t('editIdBtn')}</button>
+                          <button type="button" onClick={() => {
+                              const email = activeTab==='students'
+                                  ? (item.student_id?String(item.student_id)+'@falcon-school.com':'')
+                                  : String(item.email||'');
+                              if(!email)return setBorrowingsError(isAr?'هذا الحساب ليس لديه بريد مدرسي معتمد.':'This account has no approved school email.');
+                              setFeatureUser({
+                                  email:email.trim().toLowerCase(),
+                                  name:String((isAr?(item.name_ar||item.name_en):(item.name_en||item.name_ar))||email)
+                              });
+                          }}
+                          className="rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-900 transition hover:bg-emerald-100 focus-visible:outline-2 focus-visible:outline-emerald-600 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-100">
+                              {isAr?'صلاحيات الخدمات':'Service access'}
+                          </button>
                           {(() => {
                               const email = activeTab === 'students'
                                   ? (item.student_id ? String(item.student_id) + '@falcon-school.com' : '')
@@ -1041,6 +1056,8 @@ const AdminDashboard: React.FC = () => {
             </>}
                 </main>
 
+            {featureUser&&<AdminFeaturePermissionsDialog email={featureUser.email} name={featureUser.name} isAr={isAr}
+                onClose={()=>setFeatureUser(null)} />}
             {modalMode && <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in"><div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-8 rounded-[2.5rem] shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto scrollbar-thin">
                 <h3 className="text-lg md:text-xl font-black mb-6 text-slate-900 dark:text-white">{modalMode === 'addStudent' ? t('modalAddStudent') : modalMode === 'addTeacher' ? t('modalAddTeacher') : modalMode === 'editStudent' ? t('modalEditStudent') : modalMode === 'editTeacher' ? t('modalEditTeacher') : t('modalAddBorrow')}</h3>
                 <form onSubmit={handleSubmitForm} className="space-y-4">
