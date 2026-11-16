@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { canAccessNationalIdentity, isNationalIdentityTeacher } from '../src/utils/nationalIdentityAccess.ts';
 
-// The sole teacher exception; never expand this to a role-wide permission.
+// HR040 remains the sole DEFAULT teacher exception; additional teachers need an explicit server-verified service grant.
 for (const id of ['HR040', 'hr040', ' HR040 ']) {
   assert.equal(isNationalIdentityTeacher('teacher', id), true);
   assert.equal(canAccessNationalIdentity('teacher', { teacher_id: id }), true);
