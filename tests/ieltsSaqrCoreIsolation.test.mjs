@@ -87,6 +87,24 @@ const allowedPatches = [
     ].join('\n'),
     '      {!hasConversation ? (',
   ],
+  // Catalog-only exceptions are verified by Saqr bibliography and digital reader
+  // regression suites; keep this guard strict for every other IELTS/core line.
+  [
+    "import {isSaqrDigitalReaderHref} from '../src/utils/saqrDigitalReaderLinks';\n",
+    "",
+  ],
+  [
+    "const readingInterview=namedCatalogEntity ? {kind:'none' as const}\n      : getReadingInterviewStep(userQuery,messages,locale==='ar'?'ar':'en');",
+    "const readingInterview=getReadingInterviewStep(userQuery,messages,locale==='ar'?'ar':'en');",
+  ],
+  [
+    "    const explicitCatalogSearch=/(?:^|\\s)(?:بدور|بدورلي|بيدور|ببحث|ادور|أدور|دورلي|دور\\s*لي|دور|ابحث(?:لي)?|إبحث(?:لي)?|وريني|هاتلي|search|find|look\\s+for|show\\s+me)(?=\\s|$)/i.test(userQuery);",
+    "    const explicitCatalogSearch=/(?:^|\\s)(?:دورلي|دور\\s*لي|دور|ابحث(?:لي)?|إبحث(?:لي)?|وريني|هاتلي|search|find|look\\s+for|show\\s+me)(?=\\s|$)/i.test(userQuery);",
+  ],
+  [
+    "<ReactMarkdown components={{a: ({node: _node,href,children,...props}) => (\n                              <a {...props} href={href}\n                                className={isSaqrDigitalReaderHref(href)\n                                  ? 'inline-flex items-center justify-center rounded-xl bg-emerald-700 px-4 py-2 my-1 font-bold text-white !no-underline hover:bg-emerald-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500'\n                                  : undefined}>{children}</a>\n                            )}}>{msg.role === 'assistant' && index > 0 && isLessonPlanRequest(visibleMessages[index - 1]?.content || '') ? formatLessonPlanDisplay(msg.content) : msg.content}</ReactMarkdown>",
+    "<ReactMarkdown>{msg.role === 'assistant' && index > 0 && isLessonPlanRequest(visibleMessages[index - 1]?.content || '') ? formatLessonPlanDisplay(msg.content) : msg.content}</ReactMarkdown>",
+  ],
 ];
 
 test('Saqr original logic, dispatch, system prompt, teacher workflows and challenges remain byte-identical',()=>{
