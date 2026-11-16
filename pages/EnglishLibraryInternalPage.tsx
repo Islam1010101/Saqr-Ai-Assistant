@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useLanguage } from '../App';
 import { matchesCatalogQuery } from '../src/utils/catalogTextSearch';
 import LibraryLetterAtmosphere from '../src/components/LibraryLetterAtmosphere';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../src/utils/supabase';
 import { useReadingPassport, digitalBookKey } from '../src/utils/readingPassport';
 import DigitalBookRating from '../src/components/DigitalBookRating';
@@ -360,6 +360,7 @@ const EnglishLibraryInternalPage: React.FC = () => {
     const { locale, dir } = useLanguage();
     const [currentLocale, setCurrentLocale] = useState(locale || 'en');
     const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
         setCurrentLocale(locale);
@@ -378,18 +379,18 @@ const EnglishLibraryInternalPage: React.FC = () => {
     const [selectedBook, setSelectedBook] = useState<DigitalLibraryBook | null>(null);
     const [resumeBookId,setResumeBookId] = useState<string | null>(null);
     useEffect(()=>{
-      // A reader-only Google Drive consent flow can restore one allow-listed
-      // EFIPS English book. No arbitrary URLs are accepted from the hash.
-      const path=window.location.hash;
-      const query=path.includes('?')?path.slice(path.indexOf('?')+1):'';
-      const id=new URLSearchParams(query).get('open');
-      if(!id || !/^(?:EN_PH_|EN_DRIVE_)[A-Za-z0-9_-]+$/.test(id))return;
-      const matching=ENGLISH_LIBRARY_DATABASE.find(book=>String(book.id)===id && book.requiresSchoolGoogleAccess);
+      // Resolve only real, current English catalog IDs. Saqr can deep-link to
+      // the existing glass reader; a link never bypasses school access checks.
+      // Preserve the Google Drive consent return flow for protected editions.
+      const id=new URLSearchParams(location.search).get('open');
+      if(!id || !/^[A-Za-z0-9_-]{2,150}$/.test(id))return;
+      const matching=ENGLISH_LIBRARY_DATABASE.find(book=>String(book.id)===id && Boolean(book.driveLink));
       if(!matching)return;
       setSelectedBook(matching);
       setResumeBookId(id);
-      window.history.replaceState(null,'',window.location.pathname+'#/digital-library/english');
-    },[]);
+      if(matching.requiresSchoolGoogleAccess)
+        window.history.replaceState(null,'',window.location.pathname+'#/digital-library/english');
+    },[location.search]);
     const readingProgress = useDigitalReadingProgress(ENGLISH_LIBRARY_DATABASE,'en');
     const booksInProgress = useMemo(()=>ENGLISH_LIBRARY_DATABASE.filter(b=>readingProgress.has(digitalBookKey('en',b))).sort((a,b)=>(readingProgress.get(digitalBookKey('en',b))?.lastReadAt||0)-(readingProgress.get(digitalBookKey('en',a))?.lastReadAt||0)).slice(0,8),[readingProgress]);
     const [visibleCount, setVisibleCount] = useState(12); // تغيير ليكون العدد متوافق مع الموبايل
