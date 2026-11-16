@@ -242,17 +242,27 @@ const Header: React.FC = () => {
   const scrollFrameRef = useRef<number | null>(null);
   const [userRole, setUserRole] = useState<'student' | 'teacher' | 'admin' | null>(null);
   const [identityAllowed, setIdentityAllowed] = useState(false);
+  const [headerFeatures, setHeaderFeatures] = useState<EfipsFeatureMap | null>(null);
 
   useEffect(() => {
-    try {
-      const role = localStorage.getItem('user_type') as 'student' | 'teacher' | 'admin' | null;
-      const profile = JSON.parse(localStorage.getItem('current_user') || 'null');
-      setUserRole(role);
-      setIdentityAllowed(canAccessNationalIdentity(role, profile));
-    } catch {
-      setUserRole(null);
-      setIdentityAllowed(false);
-    }
+    let live = true;
+    const refresh = () => {
+      if (['/','/about','/tutorial'].includes(location.pathname)) return;
+      getSchoolFeatureAccess(true).then(access => {
+        if (!live) return;
+        setUserRole(access.role);
+        setHeaderFeatures(access.features);
+        setIdentityAllowed(access.features.national_identity);
+      }).catch(() => {
+        if (!live) return;
+        setUserRole(null);
+        setHeaderFeatures(null);
+        setIdentityAllowed(false);
+      });
+    };
+    refresh();
+    window.addEventListener('focus',refresh);
+    return () => {live=false;window.removeEventListener('focus',refresh);};
   }, [location.pathname]);
 
   useEffect(() => {
@@ -301,7 +311,14 @@ const Header: React.FC = () => {
     { path: '/admin-dashboard', label: locale === 'en' ? 'Admin' : 'الإدارة', hint: 'Admin', color: 'bg-rose-600', roles: ['admin'] },
   ];
 
-  const allowedLinks = allLinks.filter(link => link.path === '/saqr-national-identity' ? identityAllowed : !userRole || link.roles.includes(userRole));
+  const headerService:Record<string,keyof EfipsFeatureMap> = {
+    '/search':'catalog','/digital-library':'digital_library','/creators':'creators',
+    '/saqr-national-identity':'national_identity','/schedule':'schedule','/feedback':'suggestions',
+  };
+  const allowedLinks = allLinks.filter(link =>
+    link.path === '/admin-dashboard' ? (headerFeatures!==null && userRole==='admin') :
+    (headerFeatures!==null && headerFeatures[headerService[link.path]]===true)
+  );
 
   return (
     <header
