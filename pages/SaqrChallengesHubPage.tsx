@@ -51,7 +51,8 @@ export default function SaqrChallengesHubPage(){
   const account=JSON.parse(localStorage.getItem('current_user')||'{}');
   name=shortName(String((ar?account.name_ar:account.name_en)||account.name_ar||account.name_en||account.name||''));
  }catch{/* Existing site session guard handles restricted storage. */}
- if(role!=='student'&&role!=='admin')return <Navigate to="/home" replace/>;
+ // The parent route's server-verified service gate determines invitations.
+ if(!['student','teacher','admin'].includes(role))return <Navigate to="/home" replace/>;
  const items=[
   {to:'/saqr-reading-quest',type:'purple',icon:'book' as const,kicker:ar?'مغامرة القراءة':'READING ADVENTURE',label:ar?'بين السطور مع صقر':'Between the Lines with Saqr',desc:ar?'كتاب جديد وأسئلة تحكي قصته.':'Discover a book through its characters and story.',number:'01'},
   {to:'/game',type:'green',icon:'shelves' as const,kicker:ar?'مغامرة التصنيف':'LIBRARY QUEST',label:ar?'رتب المكتبة':'Organize the Library',desc:ar?'رتّب الكتب واكتشف أسرار الرفوف.':'Put books in their place and explore the shelves.',number:'02'},
