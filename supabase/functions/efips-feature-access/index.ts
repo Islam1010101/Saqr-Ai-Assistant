@@ -87,7 +87,9 @@ Deno.serve(async (req:Request) => {
     challenges:studentOrAdmin,
     reading_quest:true,sort_library:studentOrAdmin,saqr_studio:studentOrAdmin,podcast:studentOrAdmin
   };
-  const choices=new Map<string,boolean>((overrides.data||[]).map(x=>[x.feature_key,x.allowed===true]));
+  const choices=new Map<string,boolean>((overrides.data||[])
+    .filter(x=>role==="teacher" || (role==="student" && x.allowed===false))
+    .map(x=>[x.feature_key,x.allowed===true]));
   const resolved:Record<string,boolean>={};
   for (const key of keys) resolved[key]=choices.get(key)??defaultValues[key]??false;
   // A single granted heritage activity exposes only its container, not siblings.
