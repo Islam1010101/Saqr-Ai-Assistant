@@ -71,7 +71,8 @@ test('All supported service routes reject denied users before mounting feature p
    assert.ok(start!==-1,'missing route '+path);
    assert.ok(app.slice(start,start+260).includes('feature="'+feature+'"'),'not gated '+path);
   }
-  assert.match(gate,/getSchoolFeatureAccess\(true\)/);
+  assert.match(gate,/getSchoolFeatureAccess\(force\)/);
+  assert.match(gate,/const onFocus=\(\)=>check\(true\)/);
   assert.match(gate,/status==='denied'/);
   assert.match(gate,/<Navigate to="\/home" replace\/>/);
   assert.match(orbit,/schoolAccess\.features\[feature\]===true/);
