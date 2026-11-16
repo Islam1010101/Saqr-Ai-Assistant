@@ -49,7 +49,44 @@ Deno.serve(async(req:Request)=>{
   if(staffErr)return res(503,{error:"Staff directory unavailable"});
   const {data:controls,error:controlsError}=await admin.from("efips_account_access_controls").select("email,disabled_at,login_role");
   if(controlsError)return res(503,{error:"Account controls unavailable"});
-  return res(200,{ok:true,staff:staffList,controls});
+  const {data:permissions,error:permissionsError}=await admin.from("efips_user_feature_overrides").select("email,feature_key,allowed");
+  if(permissionsError)return res(503,{error:"Feature directory unavailable"});
+  return res(200,{ok:true,staff:staffList,controls,permissions:permissions||[]});
+ }
+ if(action==="feature-permission"){
+  const target=String(body.email||"").trim().toLowerCase();
+  const feature=String(body.feature_key||"");
+  const allowed=body.allowed;
+  const keys=new Set(["catalog","saqr_ai","digital_library","ielts","creators","saqr_learning",
+    "schedule","national_identity","passport","emirati_language","heritage_detective","flag_glory",
+    "voice_union","national_books","challenges","reading_quest","sort_library","saqr_studio","podcast","suggestions"]);
+  if(!/^[^@\s]+@falcon-school\.com$/.test(target)||!keys.has(feature)||![true,false,null].includes(allowed))
+    return res(400,{error:"Invalid school account, feature or permission"});
+  if(target===email)return res(403,{error:"Your own administrator permissions cannot be changed"});
+  const {data:targetStaff,error:targetError}=await admin.from("efips_google_staff_accounts")
+    .select("teacher_id").eq("email",target).maybeSingle();
+  if(targetError)return res(503,{error:"Target lookup unavailable"});
+  let found=!!targetStaff?.teacher_id;
+  if(!found){
+    const id=/^([0-9]{6,7})@falcon-school\.com$/.exec(target)?.[1];
+    if(id){
+      const {data:student,error:studentError}=await admin.from("students").select("student_id").eq("student_id",id).maybeSingle();
+      if(studentError)return res(503,{error:"Student lookup unavailable"});
+      found=!!student;
+    }
+  }
+  if(!found)return res(404,{error:"Approved school account not found"});
+  if(allowed===null){
+    const {error:deleteError}=await admin.from("efips_user_feature_overrides").delete()
+      .eq("email",target).eq("feature_key",feature);
+    if(deleteError)return res(503,{error:"Could not restore role default"});
+  }else{
+    const {error:writeError}=await admin.from("efips_user_feature_overrides")
+      .upsert({email:target,feature_key:feature,allowed,updated_by:email,updated_at:new Date().toISOString()},
+        {onConflict:"email,feature_key"});
+    if(writeError)return res(503,{error:"Could not update feature access"});
+  }
+  return res(200,{ok:true,email:target,feature_key:feature,allowed});
  }
  if(action==="create-user"){
   const type=String(body.user_type||"");
