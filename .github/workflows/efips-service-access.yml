@@ -1,0 +1,42 @@
+name: EFIPS individual service access isolation
+on:
+  pull_request:
+    paths:
+      - 'App.tsx'
+      - 'pages/AdminDashboard.tsx'
+      - 'pages/HomePage.tsx'
+      - 'pages/NationalIdentityPage.tsx'
+      - 'pages/NationalAnthemChallengePage.tsx'
+      - 'pages/SaqrChallengesHubPage.tsx'
+      - 'pages/SaqrLearningPage.tsx'
+      - 'src/components/SaqrOrbitNavigation.tsx'
+      - 'src/components/admin/AdminFeaturePermissionsDialog.tsx'
+      - 'src/components/auth/SchoolServiceGate.tsx'
+      - 'src/components/SaqrStudentScheduleView.tsx'
+      - 'src/utils/schoolServiceAccess.ts'
+      - 'src/utils/saqrLearningAccess.ts'
+      - 'supabase/functions/efips-feature-access/index.ts'
+      - 'supabase/functions/saqr-learning-access/index.ts'
+      - 'supabase/sql/efips_feature_permissions_20261116.sql'
+      - 'tests/efipsPerServicePermissions.test.mjs'
+      - '.github/workflows/efips-service-access.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-package-lock --no-audit --no-fund
+      - name: Verify isolated role-independent feature access and unchanged Saqr engine
+        run: node --test tests/efipsPerServicePermissions.test.mjs tests/ieltsSaqrCoreIsolation.test.mjs tests/ieltsReaderViewOnly.test.mjs
+      - name: Preserve original UAE heritage teacher HR040 support
+        run: node --experimental-strip-types tests/nationalIdentityHR040.test.ts
+      - name: Verify production Vite build
+        run: npm run build
