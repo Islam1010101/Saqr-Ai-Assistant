@@ -4,6 +4,7 @@
  * separate from named-book searches, lesson planning and Little Author.
  */
 import type { SaqrBookMatch } from './saqrCatalogSearch.ts';
+import {saqrDigitalReadAction} from './saqrDigitalReaderLinks.ts';
 import { classifyBookAudience } from '../../api/bookAudience.ts';
 
 export type ReaderTurn = {role:string;content:string};
@@ -145,9 +146,8 @@ export function renderReadingInterviewSuggestions(args:{
   const rows=selected.map(({book,source},i)=>{
     const where=book.shelf!==undefined
       ? (ar?`الرف ${book.shelf}، الصف ${book.row}`:`Shelf ${book.shelf}, row ${book.row}`)
-      : (book.driveLink && /^https:\/\//.test(book.driveLink)
-        ? `[${ar?'فتح الكتاب الرقمي':'Open digital book'}](${book.driveLink})`
-        : (ar?'في المكتبة الرقمية':'In the digital library'));
+      : (saqrDigitalReadAction(book,args.locale) ||
+          (ar?'في المكتبة الرقمية':'In the digital library'));
     const note=(source.subject||book.subject||'').trim().slice(0,100);
     return `${i+1}. **${book.title}**${source.author?' — '+source.author:''}\n   ${where}${note?' · '+note:''}`;
   });
