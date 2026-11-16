@@ -35,7 +35,7 @@ assert.ok(orbit.includes("item.key==='identity'&&isNationalIdentityTeacher(role,
   'Only HR040 receives the additional homepage bubble');
 assert.ok(home.includes('teacherId={userData?.teacher_id}'),
   'Homepage passes the school teacher ID to the orbit component');
-assert.ok(page.includes('if (!canAccessNationalIdentity(role, user)) return'),
+assert.ok(page.includes("if (!canAccessNationalIdentity(role, user) && !(role === 'teacher' && user?.teacher_id)) return"),
   'Identity page must not redirect HR040 after the outer route guard passes');
 assert.ok(page.includes("role + ':' + normalizedId"),
   'Teacher challenge progress remains separated from student/admin progress');
