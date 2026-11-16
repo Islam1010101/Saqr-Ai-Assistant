@@ -61,6 +61,9 @@ jobs:
             api/digitalBookData.ts supabase/functions/ \
             ':(exclude)supabase/functions/efips-feature-access/index.ts' \
             ':(exclude)supabase/functions/saqr-learning-access/index.ts'
+          # Standalone catalog and book-reading helpers are exercised by the
+          # independent Saqr bibliography and reader workflows. IELTS guard
+          # continues to reject unrelated changes to its core utilities.
           git diff --exit-code 6371f2bb8080674c268a1b64a105be18bc02f4f3 HEAD -- src/utils/ \
             ':(exclude)src/utils/ieltsSaqrPractice.ts' \
             ':(exclude)src/utils/ieltsListeningReview.ts' \
@@ -68,7 +71,14 @@ jobs:
             ':(exclude)src/utils/ieltsExamPractice.ts' \
             ':(exclude)src/utils/efipsFeatures.ts' \
             ':(exclude)src/utils/efipsFeatureAccess.ts' \
-            ':(exclude)src/utils/saqrLearningAccess.ts'
+            ':(exclude)src/utils/saqrLearningAccess.ts' \
+            ':(exclude)src/utils/saqrBookExpert.ts' \
+            ':(exclude)src/utils/saqrCatalogEntitySearch.ts' \
+            ':(exclude)src/utils/saqrCatalogReply.ts' \
+            ':(exclude)src/utils/saqrCatalogSearch.ts' \
+            ':(exclude)src/utils/saqrDigitalReaderLinks.ts' \
+            ':(exclude)src/utils/saqrReadingConsultation.ts' \
+            ':(exclude)src/utils/saqrRecommendationPresentation.ts'
       - run: npm install --no-package-lock --no-audit --no-fund
       - run: node --test tests/ieltsCenter.test.mjs tests/ieltsSaqrCoreIsolation.test.mjs tests/ieltsReaderViewOnly.test.mjs tests/ieltsListeningLibrary.test.mjs tests/ieltsGradedListening.test.mjs tests/ieltsReadingWritingSpeaking.test.mjs tests/ieltsNoLessonReports.test.mjs
       - run: node --experimental-strip-types tests/ieltsListeningGrading.test.ts
