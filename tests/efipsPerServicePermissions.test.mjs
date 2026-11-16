@@ -4,7 +4,7 @@ import {execFileSync} from 'node:child_process';
 import test from 'node:test';
 
 const read=p=>readFileSync(p,'utf8');
-const baseline='351e42227e089b74317660e7819fd1b85131aedc';
+const baseline='c6291969a73aefaec4b6388c5748678faef090c9';
 const catalog=read('src/utils/schoolServiceAccess.ts');
 const edge=read('supabase/functions/efips-feature-access/index.ts');
 const sql=read('supabase/sql/efips_feature_permissions_20261116.sql');
