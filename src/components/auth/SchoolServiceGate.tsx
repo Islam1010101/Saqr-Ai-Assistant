@@ -1,7 +1,7 @@
 import React,{type ReactNode} from 'react';
 import {Navigate} from 'react-router-dom';
 import {useSchoolServiceAllowed,type SchoolServiceKey} from '../../utils/schoolServiceAccess';
-import SaqrStudentScheduleView from './SaqrStudentScheduleView';
+import SaqrStudentScheduleView from '../SaqrStudentScheduleView';
 
 /** Route access is checked against the Edge Function on every mount/focus.
  * This is NOT authorization for underlying writes: server RLS, booking APIs,
