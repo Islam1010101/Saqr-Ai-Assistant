@@ -51,7 +51,6 @@ Deno.serve(async(req:Request)=>{
  if(linkError||existing&&(existing.school_user_id!==studentId||existing.user_type!=="student"))return out(403,{error:"IDENTITY_MISMATCH"});
  const {data:entitlement,error:lookupError}=await db.from("saqr_learning_access").select("enabled,read_together,picture_guidance,focus_steps,calm_display").eq("student_id",studentId).maybeSingle();
  if(lookupError)return out(503,{error:"LOOKUP_FAILED"});
- if(override.data?.allowed===true)return out(200,{allowed:true,viewer:"student",features:fullFeatures});
  if(!entitlement?.enabled)return out(200,{allowed:false});
  return out(200,{allowed:true,viewer:"student",features:Object.fromEntries(features.map(k=>[k,entitlement[k]===true]))});
 });
