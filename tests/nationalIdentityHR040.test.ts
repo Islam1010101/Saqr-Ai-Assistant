@@ -27,7 +27,7 @@ const page = readFileSync('pages/NationalIdentityPage.tsx', 'utf8');
 const tutorial = readFileSync('pages/TutorialPage.tsx', 'utf8');
 assert.ok(app.includes('canAccessNationalIdentity(role,account)||snapshot.overrides.national_identity===true'),
   'Both identity routes share the role guard for HR040');
-assert.ok(app.includes("link.path === '/saqr-national-identity' ? identityAllowed"),
+assert.ok(app.includes("link.path==='/saqr-national-identity'?identityAllowed"),
   'Top navbar must filter the identity option by teacher ID');
 assert.ok(app.includes('setIdentityAllowed(canAccessNationalIdentity(role, profile))'),
   'Navbar permission must use the signed-in profile, not only teacher role');
