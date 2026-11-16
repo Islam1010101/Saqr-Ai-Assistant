@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useLanguage } from '../App';
 import { canAccessNationalIdentity } from '../src/utils/nationalIdentityAccess';
+import { useSchoolFeatureContext } from '../src/components/SchoolFeatureRoute';
 import { recordingToMp3 } from '../src/utils/podcastMp3';
 import './nationalHeritageTheme.css';
 import './nationalIdentityLanding.css';
@@ -46,10 +47,11 @@ const MicrophoneIcon = ({ className = 'h-6 w-6' }: { className?: string }) =>
 export default function NationalAnthemChallengePage() {
   const { locale, dir } = useLanguage();
   const ar = locale === 'ar';
+  const grant=useSchoolFeatureContext();
   const t = (arabic: string, english: string) => ar ? arabic : english;
   const [allowed] = useState(() => {
     try {
-      return canAccessNationalIdentity(
+      return grant?.features.voice_union === true || canAccessNationalIdentity(
         localStorage.getItem('user_type'),
         JSON.parse(localStorage.getItem('current_user') || 'null')
       );
