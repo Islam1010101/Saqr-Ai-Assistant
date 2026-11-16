@@ -1,4 +1,5 @@
 import type { SaqrBookMatch } from './saqrCatalogSearch.ts';
+import {saqrDigitalReadAction} from './saqrDigitalReaderLinks.ts';
 
 /**
  * Additive title-only expert librarian route. Broad subject searches, book
@@ -132,6 +133,8 @@ export function renderSaqrBookHoldingStatus(title:string,holdings:readonly SaqrB
     const parts=books.slice(0,5).map(book=>{
       const name=label(book.title);
       if(key==='physical')return '**'+name+'** ('+(ar?'الدولاب':'Shelf')+' '+book.shelf+'، '+(ar?'الصف':'Row')+' '+book.row+')';
+      const readAction=saqrDigitalReadAction(book,locale);
+      if(readAction)return '**'+name+'** — '+readAction;
       if(!book.driveLink || !/^https:\/\/drive\.google\.com\/file\/d\/[\w-]+\/view(?:\?.*)?$/.test(book.driveLink))
         return '**'+name+'**';
       return '['+name+']('+book.driveLink+')';
