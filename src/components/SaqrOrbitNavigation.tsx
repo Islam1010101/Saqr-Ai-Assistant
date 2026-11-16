@@ -2,8 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import './SaqrOrbitNavigation.css';
-import { getSaqrLearningAccess } from '../utils/saqrLearningAccess';
-import { getSchoolFeatureAccess, type SchoolFeatureAccess } from '../utils/efipsFeatureAccess';
+
+import { getSchoolFeatureAccess, getCachedSchoolFeatureAccess, type SchoolFeatureAccess } from '../utils/efipsFeatureAccess';
 import type { EfipsFeature } from '../utils/efipsFeatures';
 
 type Role = 'student' | 'teacher' | 'admin';
@@ -87,11 +87,9 @@ export default function SaqrOrbitNavigation({
   tourDescriptions?: Record<string, string>;
   tourRoles?: Record<string, string>;
 }) {
-  const stageRef = useRef<HTMLDivElement>(null);
   // New shuffled order on every fresh mount; stable while the page is open.
   const [randomizedKeys] = useState(randomizeOrbit);
-  const [learningAllowed, setLearningAllowed] = useState(false);
-  const [schoolAccess, setSchoolAccess] = useState<SchoolFeatureAccess | null>(null);
+  const [schoolAccess, setSchoolAccess] = useState<SchoolFeatureAccess | null>(getCachedSchoolFeatureAccess);
   const [hoveredTourKey, setHoveredTourKey] = useState<string | null>(null);
   const [tappedTourKey, setTappedTourKey] = useState<string | null>(null);
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
@@ -108,48 +106,33 @@ export default function SaqrOrbitNavigation({
     if (!schoolAccess) return false; // Never flash features before verified school access.
     if (item.key === 'admin') return schoolAccess.role === 'admin';
     const feature=orbitFeature[item.key];
-    return feature!==undefined && schoolAccess.features[feature]===true &&
-      (item.key !== 'learning' || learningAllowed);
-  }), [schoolAccess, learningAllowed, tourMode]);
+    // The server's feature grant determines menu visibility; the specific
+    // Saqr Helps Me page independently revalidates its activity entitlement.
+    return feature!==undefined && schoolAccess.features[feature]===true;
+  }), [schoolAccess, tourMode]);
   useEffect(() => {
     let live=true;
-    if (tourMode) return ()=>{live=false};
-    const check=()=>getSchoolFeatureAccess(true).then(value=>{
+    if(tourMode)return ()=>{live=false};
+    const refresh=(force=false)=>getSchoolFeatureAccess(force).then(value=>{
       if(live)setSchoolAccess(value);
     }).catch(()=>{if(live)setSchoolAccess(null)});
-    void check();
-    window.addEventListener('focus',check);
-    return ()=>{live=false;window.removeEventListener('focus',check)};
+    // On initial mount reuse the same verified request as the site header.
+    void refresh();
+    const onFocus=()=>{void getSchoolFeatureAccess(true).then(value=>{
+      if(live)setSchoolAccess(value);
+    }).catch(()=>{if(live)setSchoolAccess(null)})};
+    window.addEventListener('focus',onFocus);
+    return ()=>{live=false;window.removeEventListener('focus',onFocus)};
   },[tourMode]);
-  useEffect(() => {
-    let live = true;
-    setLearningAllowed(false);
-    if (tourMode || !schoolAccess?.features.saqr_learning) return () => { live = false; };
-    getSaqrLearningAccess().then(result => { if (live) setLearningAllowed(result.allowed); })
-      .catch(() => { if (live) setLearningAllowed(false); });
-    return () => { live = false; };
-  }, [schoolAccess?.features.saqr_learning, tourMode]);
   const visible = useMemo(() => randomizedKeys.flatMap(key => {
     const item = links.find(link => link.key === key);
     return item ? [item] : [];
   }), [links, randomizedKeys]);
   const expandedOrbit = visible.length > 6;
   const slotIndices = EXPANDED_ORBIT_SLOTS[visible.length];
-  // Observe the whole orbit rather than each floating sphere: individual observers
-  // previously made visible spheres disappear on desktop and on Safari.
-  useEffect(() => {
-    const stage = stageRef.current;
-    // The tutorial keeps all spheres visible while a description is open.
-    // Only the actual homepage uses enter/leave scroll reveals.
-    if (tourMode || !stage || typeof IntersectionObserver === 'undefined' ||
-        window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const observer = new IntersectionObserver(entries => {
-      for (const entry of entries) stage.classList.toggle('is-in-view', entry.isIntersecting);
-    }, { threshold: 0.035, rootMargin: '0px 0px -2% 0px' });
-    observer.observe(stage);
-    stage.classList.add('saqr-orbit-motion-ready');
-    return () => { observer.disconnect(); stage.classList.remove('saqr-orbit-motion-ready', 'is-in-view'); };
-  }, [tourMode]);
+  // Keep the floating and hover effects, but NEVER hide the home bubbles
+  // behind a second IntersectionObserver or scroll-reveal delay.
+
   const moveLight = (event: React.PointerEvent<HTMLElement>) => {
     if (event.pointerType === 'touch') return;
     const bounds = event.currentTarget.getBoundingClientRect();
@@ -221,7 +204,7 @@ export default function SaqrOrbitNavigation({
 
   return (
     <section className="saqr-orbit-section" dir={isAr ? 'rtl' : 'ltr'} aria-label={isAr ? 'خدمات المكتبة التفاعلية' : 'Interactive library navigation'}>
-      <div className="saqr-orbit-stage" data-orbit-layout={expandedOrbit ? 'expanded' : 'compact'} data-orbit-count={visible.length} ref={stageRef}>
+      <div className="saqr-orbit-stage" data-orbit-layout={expandedOrbit ? 'expanded' : 'compact'} data-orbit-count={visible.length}>
         <div className="saqr-orbit-scene">
         <div className="saqr-orbit-halo saqr-orbit-halo-outer" aria-hidden="true" />
         <div className="saqr-orbit-halo saqr-orbit-halo-inner" aria-hidden="true" />
@@ -242,8 +225,7 @@ export default function SaqrOrbitNavigation({
             const bubbleStyle = {
               '--bubble-rgb': item.tint,
               '--bubble-delay': (index * -.43) + 's',
-              '--reveal-delay': (index * 75) + 'ms',
-            } as React.CSSProperties;
+""            } as React.CSSProperties;
             const bubbleContent = (
               <span className="saqr-orbit-float">
                 <span className="saqr-orbit-glass">
