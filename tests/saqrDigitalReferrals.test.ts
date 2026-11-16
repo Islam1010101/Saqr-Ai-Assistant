@@ -4,6 +4,7 @@ import { searchSaqrBookCatalog } from '../src/utils/saqrCatalogSearch.ts';
 import { DIGITAL_SERIES_VOLUMES } from '../src/data/digitalSeriesVolumes.js';
 import { PHOTO_SERIES_FOLDERS_20261111 } from '../src/data/photoSeriesFolders20261111.js';
 import { renderSaqrCatalogAnswer } from '../src/utils/saqrCatalogReply.ts';
+import {saqrDigitalReaderHref,isSaqrDigitalReaderHref} from '../src/utils/saqrDigitalReaderLinks.ts';
 
 // Saqr must link to an individual book (its PDF or its verified photo-edition folder), not a collection root.
 // No changes to the physical catalog or the AI's model/prompt are needed.
@@ -35,8 +36,23 @@ for (const [series, ar] of [
   assert.equal(volume.driveLink, holding?.driveLink, 'The referral URL must come from the recorded volume');
   const answer = renderSaqrCatalogAnswer((ar ? 'كتب ' : 'Books in ') + series, matches, ar ? 'ar' : 'en');
   assert.ok(answer.includes(series), 'Catalog answer must identify the parent series');
-  assert.ok(answer.includes(volume.driveLink!), 'Catalog answer must link to the verified individual-book source');
+  const readHref=saqrDigitalReaderHref(volume);
+  assert.ok(readHref,'A verified individual series volume has a reader deep link');
+  assert.ok(answer.includes(readHref!), 'Catalog answer links to the in-site verified reader');
+  assert.equal(isSaqrDigitalReaderHref(readHref!),true);
 }
+const standalone=searchSaqrBookCatalog('ابحث عن أرض النفاق',catalog)
+ .find(book=>book.title==='أرض النفاق');
+assert.ok(standalone?.bookKey?.startsWith('digital:ar:AR_'),
+ 'Standalone books, not just series volumes, need individual reader IDs');
+assert.match(saqrDigitalReaderHref(standalone!)||'',/^\\/#\\/digital-library\\/arabic\\?open=/);
+const englishBook=searchSaqrBookCatalog('Books Knowledge Encyclopedia',catalog)
+ .find(book=>book.title==='Knowledge Encyclopedia');
+assert.ok(englishBook?.bookKey?.startsWith('digital:en:'));
+assert.ok(saqrDigitalReaderHref(englishBook!)?.includes('/digital-library/english?open='));
+assert.equal(saqrDigitalReaderHref({bookKey:'digital:ar:../bad',driveLink:'https://drive.google.com/file/d/id/view'}),null,
+ 'Never let an unverified URL or arbitrary path control a reader route');
+assert.equal(saqrDigitalReaderHref({bookKey:'digital:ar:AR_1',driveLink:'javascript:alert(1)'}),null);
 for (const title of ['Knowledge Encyclopedia','Diary of a Wimpy Kid: The Meltdown']) {
   const hits=searchSaqrBookCatalog('Books '+title,catalog);
   assert.ok(hits.some(book=>book.title===title && book.driveLink===ENGLISH_LIBRARY_DATABASE.find(entry=>entry.title===title)?.driveLink),
