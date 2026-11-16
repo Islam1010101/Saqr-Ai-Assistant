@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import AdminFeaturePermissions from '../src/components/AdminFeaturePermissions';
+import type {FeatureKey} from '../src/utils/featurePermissions';
 import { Link } from 'react-router-dom';
 import { useLanguage, useTheme } from '../App';
 import { supabase } from '../src/utils/supabase';
@@ -173,6 +175,10 @@ const AdminDashboard: React.FC = () => {
     const [staffEmailDirectory, setStaffEmailDirectory] = useState<Record<string,string>>({});
     const [staffRoleDirectory, setStaffRoleDirectory] = useState<Record<string,string>>({});
     const [accountDisabled, setAccountDisabled] = useState<Record<string,boolean>>({});
+    const [featureDirectory, setFeatureDirectory] = useState<Record<string,Partial<Record<FeatureKey,boolean>>>>({});
+    const [selectedFeatureAccount, setSelectedFeatureAccount] = useState<{
+        email:string;name:string;role:'student'|'teacher'
+    }|null>(null);
     const [accessBusy, setAccessBusy] = useState('');
     const [teachersList, setTeachersList] = useState<any[]>([]);
     const [borrowingsList, setBorrowingsList] = useState<any[]>([]);
@@ -361,6 +367,14 @@ const AdminDashboard: React.FC = () => {
                     setStaffEmailDirectory(mapping);
                     setStaffRoleDirectory(Object.fromEntries(directory.staff.map((item: any) => [String(item.email).toLowerCase(), String(item.role)])));
                     setAccountDisabled(Object.fromEntries((directory.controls || []).map((item: any) => [String(item.email).toLowerCase(), Boolean(item.disabled_at)])));
+                    const featureEntries: Record<string, Partial<Record<FeatureKey,boolean>>> = {};
+                    (directory.permissions || []).forEach((entry:any) => {
+                        const email = String(entry.email || '').toLowerCase();
+                        if(!email) return;
+                        if(!featureEntries[email]) featureEntries[email] = {};
+                        featureEntries[email][entry.feature_key as FeatureKey] = entry.allowed === true;
+                    });
+                    setFeatureDirectory(featureEntries);
                     allTeachers = allTeachers.map(t => ({ ...t, email: mapping[String(t.teacher_id).toLowerCase()] || '' }));
                 }
             }
@@ -1029,6 +1043,13 @@ const AdminDashboard: React.FC = () => {
                                       <option value="teacher">{isAr ? 'معلم' : 'Teacher'}</option>
                                       <option value="admin">{isAr ? 'مدير النظام' : 'Admin'}</option>
                                   </select>}
+                                  {email && (activeTab === 'students' || staffRoleDirectory[email.toLowerCase()] !== 'admin') && <button type="button" disabled={busy} onClick={() => setSelectedFeatureAccount({
+                                      email:email.toLowerCase(),
+                                      name:String(isAr ? (item.name_ar || item.name_en) : (item.name_en || item.name_ar)),
+                                      role:activeTab === 'students'?'student':'teacher'
+                                  })} className="rounded-lg text-xs font-bold bg-teal-700 hover:bg-teal-800 text-white px-2.5 py-1.5">
+                                      {isAr ? 'صلاحيات الخدمات' : 'Service access'}
+                                  </button>}
                                   {email && <button type="button" disabled={busy || email.toLowerCase() === 'islam.ahmed@falcon-school.com'} onClick={() => void handleAccountAccess(item, disabled ? 'enable' : 'disable')}
                                       className={`rounded-lg text-xs font-bold text-white px-2.5 py-1.5 disabled:opacity-50 ${disabled ? 'bg-emerald-600' : 'bg-rose-600'}`}>
                                       {disabled ? (isAr ? 'استعادة الحساب' : 'Restore') : (isAr ? 'تعطيل / حذف الدخول' : 'Disable account')}
@@ -1041,6 +1062,21 @@ const AdminDashboard: React.FC = () => {
             </>}
                 </main>
 
+            {selectedFeatureAccount && <AdminFeaturePermissions
+                isAr={isAr}
+                key={selectedFeatureAccount.email}
+                email={selectedFeatureAccount.email}
+                name={selectedFeatureAccount.name}
+                role={selectedFeatureAccount.role}
+                initial={featureDirectory[selectedFeatureAccount.email] || {}}
+                onClose={() => setSelectedFeatureAccount(null)}
+                onSaved={(feature,allowed) => setFeatureDirectory(previous => {
+                    const email = selectedFeatureAccount.email;
+                    const next = {...(previous[email] || {})};
+                    if(allowed === null)delete next[feature];else next[feature] = allowed;
+                    return {...previous,[email]:next};
+                })}
+            />}
             {modalMode && <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in"><div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-8 rounded-[2.5rem] shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto scrollbar-thin">
                 <h3 className="text-lg md:text-xl font-black mb-6 text-slate-900 dark:text-white">{modalMode === 'addStudent' ? t('modalAddStudent') : modalMode === 'addTeacher' ? t('modalAddTeacher') : modalMode === 'editStudent' ? t('modalEditStudent') : modalMode === 'editTeacher' ? t('modalEditTeacher') : t('modalAddBorrow')}</h3>
                 <form onSubmit={handleSubmitForm} className="space-y-4">
