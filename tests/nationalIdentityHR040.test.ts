@@ -31,7 +31,7 @@ assert.ok(app.includes("link.path==='/saqr-national-identity'?identityAllowed"),
   'Top navbar must filter the identity option by teacher ID');
 assert.ok(app.includes('setIdentityAllowed(canAccessNationalIdentity(role, profile))'),
   'Navbar permission must use the signed-in profile, not only teacher role');
-assert.ok(orbit.includes("item.key === 'identity' && isNationalIdentityTeacher(role, teacherId)"),
+assert.ok(orbit.includes("item.key==='identity'&&isNationalIdentityTeacher(role,teacherId)"),
   'Only HR040 receives the additional homepage bubble');
 assert.ok(home.includes('teacherId={userData?.teacher_id}'),
   'Homepage passes the school teacher ID to the orbit component');
