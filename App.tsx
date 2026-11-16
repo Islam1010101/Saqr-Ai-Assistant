@@ -37,7 +37,6 @@ import NationalIdentityDigitalBooksPage from './pages/NationalIdentityDigitalBoo
 import NationalAnthemChallengePage from './pages/NationalAnthemChallengePage';
 import { canAccessNationalIdentity } from './src/utils/nationalIdentityAccess';
 import SchoolFeatureRoute, { useSchoolFeatureContext } from './src/components/SchoolFeatureRoute';
-import StudentLibraryScheduleView from './src/components/StudentLibraryScheduleView';
 import { getSchoolFeatureAccess } from './src/utils/efipsFeatureAccess';
 import type { EfipsFeatureMap } from './src/utils/efipsFeatures';
 
@@ -637,7 +636,7 @@ const MainLayout: React.FC = () => {
           <Route path="/saqr-national-identity" element={<ProtectedRoute><SchoolFeatureRoute feature="national_identity"><NationalIdentityRoute><NationalIdentityPage /></NationalIdentityRoute></SchoolFeatureRoute></ProtectedRoute>} />
           <Route path="/saqr-national-identity/books" element={<ProtectedRoute><SchoolFeatureRoute feature="national_books"><NationalIdentityRoute><NationalIdentityBooksPage /></NationalIdentityRoute></SchoolFeatureRoute></ProtectedRoute>} />
           <Route path="/saqr-national-identity/anthem" element={<ProtectedRoute><SchoolFeatureRoute feature="voice_union"><NationalIdentityRoute><NationalAnthemChallengePage /></NationalIdentityRoute></SchoolFeatureRoute></ProtectedRoute>} />
-          <Route path="/schedule" element={<ProtectedRoute><SchoolFeatureRoute feature="schedule">{access => access.role === 'student' ? <StudentLibraryScheduleView /> : <SchedulePage />}</SchoolFeatureRoute></ProtectedRoute>} />
+          <Route path="/schedule" element={<ProtectedRoute><SchoolFeatureRoute feature="schedule">{access => access.role === 'student' ? <Navigate to="/home" replace /> : <SchedulePage />}</SchoolFeatureRoute></ProtectedRoute>} />
         </Routes>
       </main>
 
