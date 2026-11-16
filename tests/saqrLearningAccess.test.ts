@@ -10,7 +10,7 @@ const home=read('pages/HomePage.tsx');
 assert.ok(edge.includes('auth.auth.getUser(jwt)'));
 assert.ok(edge.includes('identity_data?.email_verified'));
 assert.ok(edge.includes('saqr_learning_access'));
-assert.ok(edge.includes('if(!entitlement?.enabled)'));
+assert.ok(edge.includes('if(!entitlement?.enabled&&featureOverride?.enabled!==true)'));
 assert.ok(!edge.includes('ADHD')&&!edge.includes('autism'));
 assert.ok(entry.includes('if(!allowed)return null'));
 const orbit=read('src/components/SaqrOrbitNavigation.tsx');
@@ -46,7 +46,7 @@ assert.ok(!page.includes('<SaqrAccessibilityToolbar') &&
   'One shared accessibility toolbar is mounted at the site layout rather than within the learning page');
 assert.ok(app.includes('getSaqrLearningAccess().then(result =>') &&
   app.includes("result.viewer === 'admin' || result.features?.calm_display === true") &&
-  edge.includes('if(!entitlement?.enabled)'),
+  edge.includes('if(!entitlement?.enabled&&featureOverride?.enabled!==true)'),
   'Server-verified admin or individually permitted student access is required across site pages');
 assert.ok(app.includes("location.pathname === '/'") && app.includes('setPermitted(false)'),
   'Public sign-in screen never retains the private toolbar');
