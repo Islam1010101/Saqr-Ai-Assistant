@@ -7,6 +7,7 @@ import '../src/components/EFIPSGlassVisualTheme.css';
 import { getTeacherLibrarySlots, type TeacherLibrarySlot } from '../src/utils/teacherLibrarySchedule';
 import HomeReadingHub from '../src/components/HomeReadingHub';
 import { getSaqrNewsTicker } from '../src/data/saqrWhatsNew';
+import { useSchoolServiceAccess } from '../src/utils/schoolServiceAccess';
 
 const translations = {
     ar: {
@@ -314,6 +315,7 @@ const HomePage: React.FC = () => {
     const [userType, setUserType] = useState(() => {
         return localStorage.getItem('user_type') || null;
     });
+    const {snapshot:homeServiceAccess}=useSchoolServiceAccess();
 
     const [bursts, setBursts] = useState<BurstItem[]>([]);
     const [showBubble, setShowBubble] = useState(false);
@@ -719,7 +721,7 @@ const HomePage: React.FC = () => {
                 </RevealSection>
 
                 {/* This section exists only for teachers with saved library periods. */}
-                {userType === 'teacher' && teacherSchedule.length > 0 && (
+                {userType === 'teacher' && homeServiceAccess?.features.schedule===true && teacherSchedule.length > 0 && (
                     <RevealSection delay={150}>
                         <section
                             aria-labelledby="homepage-teacher-schedule-title"
