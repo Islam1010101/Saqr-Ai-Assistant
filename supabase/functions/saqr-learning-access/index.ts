@@ -24,6 +24,11 @@ Deno.serve(async(req:Request)=>{
  const db=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
  const {data:blocked,error:blockedError}=await db.from("efips_account_access_controls").select("disabled_at,login_role").eq("email",email).maybeSingle();
  if(blockedError||blocked?.disabled_at)return out(403,{error:"ACCESS_DENIED"});
+ // Per-service override does not alter a role or grant admin privileges.
+ const {data:featureOverride,error:featureError}=await db.from("efips_feature_permissions")
+   .select("enabled").eq("email",email).eq("feature_key","saqr_learning").maybeSingle();
+ if(featureError)return out(503,{error:"FEATURE_LOOKUP_FAILED"});
+ if(featureOverride?.enabled===false)return out(200,{allowed:false});
  // Preview access is for one specifically authorized school administrator,
  // verified from the server-maintained staff directory, not a browser role hint.
  if(email==="islam.ahmed@falcon-school.com"){
@@ -36,6 +41,18 @@ Deno.serve(async(req:Request)=>{
    }
    return out(403,{error:"ADMIN_REQUIRED"});
  }
+ // An explicitly invited teacher receives only this learning service.
+ // Other staff permissions, lesson preparation and admin role remain unchanged.
+ const {data:teacher,error:teacherLookupError}=await db.from("efips_google_staff_accounts")
+   .select("teacher_id,role").eq("email",email).maybeSingle();
+ if(teacherLookupError)return out(503,{error:"STAFF_LOOKUP_FAILED"});
+ if(teacher?.role==="teacher"){
+   if(blocked?.login_role&&blocked.login_role!=="teacher"&&blocked.login_role!=="both")return out(403,{error:"ACCESS_DENIED"});
+   if(featureOverride?.enabled!==true)return out(200,{allowed:false});
+   let input:any={};try{input=await req.json()}catch{return out(400,{error:"INVALID_BODY"})}
+   if(input?.action!=="my-access")return out(400,{error:"UNSUPPORTED_ACTION"});
+   return out(200,{allowed:true,viewer:"teacher",features:Object.fromEntries(features.map(k=>[k,true]))});
+ }
  if(!/^\d{6,7}@falcon-school\.com$/.test(email))return out(403,{error:"STUDENT_ONLY"});
  if(blocked?.login_role&&blocked.login_role!=="student"&&blocked.login_role!=="both")return out(403,{error:"ACCESS_DENIED"});
  const studentId=email.split("@")[0];
@@ -45,8 +62,8 @@ Deno.serve(async(req:Request)=>{
  if(linkError||existing&&(existing.school_user_id!==studentId||existing.user_type!=="student"))return out(403,{error:"IDENTITY_MISMATCH"});
  const {data:entitlement,error:lookupError}=await db.from("saqr_learning_access").select("enabled,read_together,picture_guidance,focus_steps,calm_display").eq("student_id",studentId).maybeSingle();
  if(lookupError)return out(503,{error:"LOOKUP_FAILED"});
- if(!entitlement?.enabled)return out(200,{allowed:false});
+ if(!entitlement?.enabled&&featureOverride?.enabled!==true)return out(200,{allowed:false});
  let input:any={};try{input=await req.json()}catch{return out(400,{error:"INVALID_BODY"})}
- if(input?.action==="my-access")return out(200,{allowed:true,viewer:"student",features:Object.fromEntries(features.map(k=>[k,entitlement[k]===true]))});
+ if(input?.action==="my-access")return out(200,{allowed:true,viewer:"student",features:Object.fromEntries(features.map(k=>[k,featureOverride?.enabled===true?true:entitlement?.[k]===true]))});
  return out(400,{error:"UNSUPPORTED_ACTION"});
 });
