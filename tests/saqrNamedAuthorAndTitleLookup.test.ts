@@ -4,6 +4,9 @@ import {ARABIC_LIBRARY_DATABASE,ENGLISH_LIBRARY_DATABASE} from '../api/digitalBo
 import {NATIONAL_IDENTITY_DIGITAL_BOOKS} from '../api/nationalIdentityDigitalBooks.ts';
 import {isSaqrLibrarySearchIntent} from '../src/utils/saqrIntentRouter.ts';
 import {searchSaqrBookCatalog,isSaqrNamedAuthorQuery} from '../src/utils/saqrCatalogSearch.ts';
+import {resolveSaqrCatalogEntity} from '../src/utils/saqrCatalogEntitySearch.ts';
+import {saqrDigitalReaderHref} from '../src/utils/saqrDigitalReaderLinks.ts';
+import {isOpenEndedBookAdvice} from '../src/utils/saqrReadingConsultation.ts';
 import {isSaqrCatalogLookup,renderSaqrCatalogAnswer} from '../src/utils/saqrCatalogReply.ts';
 
 const catalogs={
@@ -31,6 +34,24 @@ for(const query of authorQueries){
  assert.doesNotMatch(answer,/الكتب الورقية\s+لا توجد نتائج|المكتبة الرقمية الإنجليزية\s+لا توجد نتائج/,
   'Do not clutter author results with empty collection sections');
 }
+assert.equal(isOpenEndedBookAdvice('بدور عن كتاب'),true,
+ 'Unspecified book request is a reading interview, not a title called عن كتاب');
+assert.equal(resolveSaqrCatalogEntity('بدور عن كتاب',catalogs),null);
+assert.equal(resolveSaqrCatalogEntity('بدور عن كتاب اسمه عن كتاب',catalogs),null);
+for(const query of ['بدور عن اجاثا كريسيتي','بدور عن أجاثا كريستي','ببحث عن أجاثا كريستي']){
+ const named=resolveSaqrCatalogEntity(query,catalogs);
+ assert.equal(named?.kind,'author','Colloquial verb must not be part of author name: '+query);
+ const found=searchSaqrBookCatalog(query,catalogs,20);
+ assert.ok(found.length>=5,'Stored Christie books must be found: '+query);
+ assert.ok(found.every(book=>/اجاثا\\s+كريستي|agatha\\s+christie/i.test((book.author+' '+(book.series||'')).replace(/[أإآٱ]/g,'ا'))),
+   'No unrelated titles for '+query);
+ assert.ok(found.some(book=>saqrDigitalReaderHref(book)?.includes('/digital-library/arabic?open=')),
+   'Verified Christie volumes must offer in-platform reading');
+}
+const namedWork=resolveSaqrCatalogEntity('بدور عن كتاب اسمه أرض النفاق',catalogs);
+assert.equal(namedWork?.kind,'title','A named work must not be treated as the name of an author');
+assert.ok(searchSaqrBookCatalog('بدور عن كتاب اسمه أرض النفاق',catalogs)
+ .some(book=>book.title==='أرض النفاق'),'Named title resolves to its actual catalog record');
 assert.equal(isSaqrLibrarySearchIntent('روايات اجاثا كريسيتي'),true);
 assert.equal(isSaqrCatalogLookup('روايات اجاثا كريسيتي'),true);
 assert.equal(isSaqrLibrarySearchIntent('ابحث عن هاري بوتر'),true,
@@ -42,7 +63,8 @@ assert.ok(arabicHp.length>=7,'All seven recorded Arabic Harry Potter volumes mus
 assert.ok(arabicHp.every(book=>/هاري\s+بوتر/.test(book.title+' '+(book.series||''))));
 const hpReply=renderSaqrCatalogAnswer('ابحث عن هاري بوتر',hp,'ar');
 assert.match(hpReply,/هاري بوتر وحجر الفيلسوف/);
-assert.match(hpReply,/فتح الكتاب الرقمي/);
+assert.match(hpReply,/اقرأ الكتاب/);
+assert.match(hpReply,/\/#\/digital-library\/arabic\?open=AR_/);
 assert.doesNotMatch(hpReply,/لم أعثر على نتيجة مؤكدة/);
 assert.equal(isSaqrLibrarySearchIntent('تحدي المؤلف الصغير'),false,
  'Creative-writing requests must never trigger the library search');
