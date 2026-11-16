@@ -30,6 +30,8 @@ export default function AdminUserFeaturePermissions({email,name,isAr}:{
   finally{setLoading(false);}
  };
  const change=async(feature:EfipsFeature,value:FeatureOverride)=>{
+  if(record?.role==='student'&&value==='allow')return;
+  if(record?.role==='admin')return;
   setBusy(feature);setError('');setNotice('');
   try{
    const updated=await send({action:'admin-set',email,feature,value:value==='inherit'?null:value==='allow'});
@@ -59,7 +61,11 @@ export default function AdminUserFeaturePermissions({email,name,isAr}:{
       <h2 className="text-xl font-black text-emerald-900 dark:text-emerald-100">{isAr?'صلاحيات الخدمات والتحديات':'Individual service & challenge access'}</h2>
       <p className="mt-1 text-sm font-bold text-slate-700 dark:text-slate-200">{name}</p>
       <p dir="ltr" className="text-start text-xs text-slate-500 dark:text-slate-400">{email}</p>
-      <p className="mt-2 text-xs font-semibold leading-6 text-slate-600 dark:text-slate-300">{isAr?'المنح أو المنع هنا لا يغيّر دور المستخدم (أدمن / معلم / طالب) أو يمنح صلاحيات الإدارة.':'Allow/deny never changes the user’s student/teacher/admin role or grants admin control.'}</p>
+      <p className="mt-2 text-xs font-semibold leading-6 text-slate-600 dark:text-slate-300">
+        {record?.role==='student'
+          ? (isAr?'الطالب: يمكنك منع خدمة متاحة أو استعادة الإعداد الأصلي فقط. لا يمكن منح خدمات إضافية.':'Student: you can deny an existing service or restore its default. Additional grants are not allowed.')
+          : (isAr?'المعلم: يمكن إضافة أي خدمة طلابية أو منع خدمة حالية، دون تغيير دوره أو منحه صلاحيات المدير.':'Teacher: grant student-facing services or deny existing ones without changing the teacher role or granting admin rights.')}
+      </p>
      </div>
      <button type="button" onClick={()=>setOpen(false)} aria-label={isAr?'إغلاق':'Close'}
       className="grid size-11 shrink-0 place-items-center rounded-full border border-slate-300 text-xl font-black text-slate-700 dark:border-slate-600 dark:text-white">×</button>
@@ -84,14 +90,16 @@ export default function AdminUserFeaturePermissions({email,name,isAr}:{
           disabled={busy!==''} aria-label={(isAr?'صلاحية ':'Access to ')+(isAr?item.ar:item.en)}
           className="max-w-[130px] shrink-0 rounded-lg border border-emerald-200 bg-white p-2 text-xs font-bold text-emerald-900 disabled:opacity-50 dark:border-emerald-700 dark:bg-slate-900 dark:text-emerald-100">
           <option value="inherit">{isAr?'حسب الدور':'By role'}</option>
-          <option value="allow">{isAr?'سماح':'Allow'}</option>
+          {record.role==='teacher' && <option value="allow">{isAr?'سماح':'Allow'}</option>}
           <option value="deny">{isAr?'منع':'Deny'}</option>
          </select>
         </label>;
        })}
       </div>
     </div>)}
-    <p className="mt-2 text-[11px] font-bold leading-6 text-slate-500 dark:text-slate-400">{isAr?'تغيير كل خدمة مستقل. «حسب الدور» يعيد الإعداد الافتراضي، وتغييرات الجدول للطلاب تسمح بالعرض دون الحجز أو الحذف.':'Each switch is independent. By role restores default access. Students granted the schedule receive view-only access, never booking or deletion.'}</p>
+    <p className="mt-2 text-[11px] font-bold leading-6 text-slate-500 dark:text-slate-400">
+      {isAr?'تغيير كل خدمة مستقل. للمعلمين: سماح أو منع. للطلاب: منع أو استعادة حسب الدور فقط. لا تُمنح أي صلاحيات إدارية.':'Each service is independent. Teachers: allow or deny. Students: deny or restore the role default only. No administrator rights are granted.'}
+    </p>
    </section>
   </div>}
  </>;
