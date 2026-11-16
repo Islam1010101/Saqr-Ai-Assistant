@@ -30,7 +30,7 @@ test('IELTS route and visible discovery links are separate from the existing Eng
   const root=read('pages/DigitalLibraryPage.tsx');
   const db=read('api/digitalBookData.ts');
   assert.match(app,/path="\/digital-library\/english\/ielts"/);
-  assert.match(app,/ProtectedRoute><IeltsPreparationCenterPage/);
+  assert.match(app,/ProtectedRoute><SchoolFeatureRoute feature="ielts"><IeltsPreparationCenterPage/);
   assert.match(english,/navigate\('\/digital-library\/english\/ielts'\)/);
   assert.doesNotMatch(root,/digital-library\/english\/ielts|مركز IELTS|IELTS Center/);
   assert.equal((english.match(/navigate\('\/digital-library\/english\/ielts'\)/g)||[]).length,1,'Exactly one IELTS entry point must remain in English Library');
