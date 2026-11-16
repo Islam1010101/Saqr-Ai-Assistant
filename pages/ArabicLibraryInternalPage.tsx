@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useLanguage } from '../App';
 import { matchesCatalogQuery } from '../src/utils/catalogTextSearch';
 import LibraryLetterAtmosphere from '../src/components/LibraryLetterAtmosphere';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../src/utils/supabase';
 import { useReadingPassport, digitalBookKey } from '../src/utils/readingPassport';
 import DigitalBookRating from '../src/components/DigitalBookRating';
@@ -182,10 +182,10 @@ const SaqrAudioPlayer: React.FC<{ audioSrc: string; t: any }> = ({ audioSrc, t }
 };
 
 // --- 3. Component: BookModal ---
-const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void; t: any; progress?: PdfReadingState; showAgeClassification?: boolean }> = ({ book, onClose, t, progress, showAgeClassification = true }) => {
+const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void; t: any; progress?: PdfReadingState; showAgeClassification?: boolean; autoOpen?: boolean }> = ({ book, onClose, t, progress, showAgeClassification = true, autoOpen=false }) => {
     const { locale } = useLanguage();
     const [readerOpen, setReaderOpen] = useState(false);
-    useEffect(() => { setReaderOpen(false); }, [book?.id]);
+    useEffect(() => { setReaderOpen(autoOpen); }, [book?.id,autoOpen]);
     const ageLabels = locale === 'ar'
         ? { children: 'أطفال', teens: 'يافعون', adults: 'كبار' }
         : { children: 'Children', teens: 'Teens', adults: 'Adults' };
@@ -407,6 +407,7 @@ const ArabicLibraryInternalPage: React.FC<ArabicLibraryPageProps> = ({ books = A
     const { locale, dir } = useLanguage();
     const [currentLocale, setCurrentLocale] = useState(locale || 'en');
     const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
         setCurrentLocale(locale);
@@ -424,6 +425,17 @@ const ArabicLibraryInternalPage: React.FC<ArabicLibraryPageProps> = ({ books = A
     const [sortBy, setSortBy] = useState('alphabetical'); 
     const [audioOnly, setAudioOnly] = useState(false);
     const [selectedBook, setSelectedBook] = useState<DigitalLibraryBook | null>(null);
+    const [autoOpenBookId,setAutoOpenBookId] = useState<string|null>(null);
+    // A Saqr search result links by recorded book ID, never by an arbitrary URL.
+    // The existing school-feature route still checks reading access.
+    useEffect(()=>{
+      const id=new URLSearchParams(location.search).get('open');
+      if(!id || !/^[A-Za-z0-9_-]{2,150}$/.test(id))return;
+      const match=books.find(book=>String(book.id)===id && Boolean(book.driveLink));
+      if(!match)return;
+      setSelectedBook(match);
+      setAutoOpenBookId(id);
+    },[location.search,books]);
     const readingProgress = useDigitalReadingProgress(books, 'ar');
     const booksInProgress = useMemo(()=>books.filter(b=>readingProgress.has(digitalBookKey('ar',b)))
       .sort((a,b)=>(readingProgress.get(digitalBookKey('ar',b))?.lastReadAt || 0)-(readingProgress.get(digitalBookKey('ar',a))?.lastReadAt || 0)).slice(0,8),[books,readingProgress]);
@@ -590,7 +602,7 @@ const ArabicLibraryInternalPage: React.FC<ArabicLibraryPageProps> = ({ books = A
                     </div>
                 )}
 
-                <BookModal book={selectedBook} onClose={() => setSelectedBook(null)} t={t} progress={selectedBook ? readingProgress.get(digitalBookKey('ar',selectedBook)) : undefined} showAgeClassification={!pageTitle} />
+                <BookModal book={selectedBook} onClose={() => {setSelectedBook(null);setAutoOpenBookId(null);}} t={t} progress={selectedBook ? readingProgress.get(digitalBookKey('ar',selectedBook)) : undefined} showAgeClassification={!pageTitle} autoOpen={Boolean(selectedBook && String(selectedBook.id)===autoOpenBookId)} />
 
             </div>
 
