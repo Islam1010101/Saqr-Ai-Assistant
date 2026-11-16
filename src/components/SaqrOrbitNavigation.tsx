@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import './SaqrOrbitNavigation.css';
 import { getSaqrLearningAccess } from '../utils/saqrLearningAccess';
-import { isNationalIdentityTeacher } from '../utils/nationalIdentityAccess';
+import { getSchoolFeatureAccess, type SchoolFeatureAccess } from '../utils/efipsFeatureAccess';
+import type { EfipsFeature } from '../utils/efipsFeatures';
 
 type Role = 'student' | 'teacher' | 'admin';
 export type OrbitItem = {
@@ -90,6 +91,7 @@ export default function SaqrOrbitNavigation({
   // New shuffled order on every fresh mount; stable while the page is open.
   const [randomizedKeys] = useState(randomizeOrbit);
   const [learningAllowed, setLearningAllowed] = useState(false);
+  const [schoolAccess, setSchoolAccess] = useState<SchoolFeatureAccess | null>(null);
   const [hoveredTourKey, setHoveredTourKey] = useState<string | null>(null);
   const [tappedTourKey, setTappedTourKey] = useState<string | null>(null);
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
@@ -97,20 +99,36 @@ export default function SaqrOrbitNavigation({
   const role: Role = userType === 'teacher' ? 'teacher' : userType === 'admin' ? 'admin' : 'student';
   // The public tutorial is a read-only visual replica, including services hidden by role.
   // The real homepage keeps its existing permissions and entitlement checks.
-  const links = useMemo(() => tourMode ? ITEMS : ITEMS.filter(item =>
-    (item.roles.includes(role) || (item.key === 'identity' && isNationalIdentityTeacher(role, teacherId))) &&
-    (item.key !== 'learning' || learningAllowed)
-  ), [role, teacherId, learningAllowed, tourMode]);
+  const orbitFeature: Record<string,EfipsFeature> = {
+    catalog:'catalog',smart:'saqr_ai',digital:'digital_library',
+    creators:'creators',learning:'saqr_learning',identity:'national_identity',
+    challenges:'challenges',reading_quest:'reading_quest',schedule:'schedule',
+  };
+  const links = useMemo(() => tourMode ? ITEMS : ITEMS.filter(item => {
+    if (!schoolAccess) return false; // Never flash features before verified school access.
+    if (item.key === 'admin') return schoolAccess.role === 'admin';
+    const feature=orbitFeature[item.key];
+    return feature!==undefined && schoolAccess.features[feature]===true &&
+      (item.key !== 'learning' || learningAllowed);
+  }), [schoolAccess, learningAllowed, tourMode]);
+  useEffect(() => {
+    let live=true;
+    if (tourMode) return ()=>{live=false};
+    const check=()=>getSchoolFeatureAccess(true).then(value=>{
+      if(live)setSchoolAccess(value);
+    }).catch(()=>{if(live)setSchoolAccess(null)});
+    void check();
+    window.addEventListener('focus',check);
+    return ()=>{live=false;window.removeEventListener('focus',check)};
+  },[tourMode]);
   useEffect(() => {
     let live = true;
     setLearningAllowed(false);
-    if (tourMode) return () => { live = false; };
-    if (role === 'student' || role === 'admin') {
-      getSaqrLearningAccess().then(result => { if (live) setLearningAllowed(result.allowed); })
-        .catch(() => { if (live) setLearningAllowed(false); });
-    }
+    if (tourMode || !schoolAccess?.features.saqr_learning) return () => { live = false; };
+    getSaqrLearningAccess().then(result => { if (live) setLearningAllowed(result.allowed); })
+      .catch(() => { if (live) setLearningAllowed(false); });
     return () => { live = false; };
-  }, [role, tourMode]);
+  }, [schoolAccess?.features.saqr_learning, tourMode]);
   const visible = useMemo(() => randomizedKeys.flatMap(key => {
     const item = links.find(link => link.key === key);
     return item ? [item] : [];

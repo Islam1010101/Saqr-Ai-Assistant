@@ -1,6 +1,7 @@
 import React from 'react';
 import {Link,Navigate} from 'react-router-dom';
 import {useLanguage} from '../App';
+import {useSchoolFeatureContext} from '../src/components/SchoolFeatureRoute';
 import './saqrQuestVisual.css';
 import './saqrChallengesHub.css';
 
@@ -44,6 +45,7 @@ const moveGlow=(e:React.PointerEvent<HTMLElement>)=>{
 
 export default function SaqrChallengesHubPage(){
  const {locale,dir}=useLanguage();
+ const grant=useSchoolFeatureContext();
  const ar=locale==='ar';
  let role='',name='';
  try{
@@ -51,12 +53,17 @@ export default function SaqrChallengesHubPage(){
   const account=JSON.parse(localStorage.getItem('current_user')||'{}');
   name=shortName(String((ar?account.name_ar:account.name_en)||account.name_ar||account.name_en||account.name||''));
  }catch{/* Existing site session guard handles restricted storage. */}
- if(role!=='student'&&role!=='admin')return <Navigate to="/home" replace/>;
+ if(role!=='student'&&role!=='admin'&&!grant?.features.challenges)return <Navigate to="/home" replace/>;
  const items=[
   {to:'/saqr-reading-quest',type:'purple',icon:'book' as const,kicker:ar?'مغامرة القراءة':'READING ADVENTURE',label:ar?'بين السطور مع صقر':'Between the Lines with Saqr',desc:ar?'كتاب جديد وأسئلة تحكي قصته.':'Discover a book through its characters and story.',number:'01'},
   {to:'/game',type:'green',icon:'shelves' as const,kicker:ar?'مغامرة التصنيف':'LIBRARY QUEST',label:ar?'رتب المكتبة':'Organize the Library',desc:ar?'رتّب الكتب واكتشف أسرار الرفوف.':'Put books in their place and explore the shelves.',number:'02'},
   {to:'/saqr-studio',type:'red',icon:'mic' as const,kicker:ar?'مغامرة الإبداع':'CREATORS STUDIO',label:ar?'استديو صقر':'Saqr Studio',desc:ar?'صوتك يحكي، واستديو صقر يسمع.':'Record your story and let your voice shine.',number:'03'}
- ];
+ ].filter(item=>{
+   const byRoute:Record<string,'reading_quest'|'sort_library'|'saqr_studio'>={
+     '/saqr-reading-quest':'reading_quest','/game':'sort_library','/saqr-studio':'saqr_studio'
+   };
+   return grant?.features[byRoute[item.to]]!==false;
+ });
  return <div dir={dir} className="sq-page sq-challenges sq-joyful sq-hub-v2 font-sans">
   <div className="sq-ambient" aria-hidden="true"/>
   <main className="sq-shell sq-hub-shell">
@@ -74,10 +81,10 @@ export default function SaqrChallengesHubPage(){
     <div className="sq-hero-text sq-hub-hero-copy">
      <span className="sq-eyebrow sq-hub-eyebrow"><SvgIcon name="spark" className="w-4 h-4"/>{ar?'رحلتك مع صقر تبدأ هنا':'YOUR SAQR ADVENTURE STARTS HERE'}</span>
      <h1 className="sq-hero-title sq-hub-heading">{ar?'تحديات':'Saqr'} <span>{ar?'صقر':'Challenges'}</span></h1>
-     <p className="sq-hero-sub sq-hub-lead">{ar?'ثلاث مغامرات، عوالم من المعرفة والإبداع. اختر التحدي الذي يعجبك وابدأ رحلتك!':'Three adventures filled with knowledge and creativity. Choose your path and let the fun begin.'}</p>
+     <p className="sq-hero-sub sq-hub-lead">{ar?'مغامرات من المعرفة والإبداع. اختر التحدي المتاح لك وابدأ رحلتك!':'Choose from your available reading and creativity challenges.'}</p>
      {name&&<div className="sq-hub-greeting"><span className="sq-hub-greeting-spark" aria-hidden="true"><SvgIcon name="stars" className="w-5 h-5"/></span><span>{ar?'أهلًا بك يا':'Welcome,'}</span><strong dir="auto">{name}</strong></div>}
      <div className="sq-hub-hero-facts" aria-label={ar?'عدد التحديات':'Number of challenges'}>
-      <span className="sq-hub-fact-count">03</span>
+      <span className="sq-hub-fact-count">{String(items.length).padStart(2,'0')}</span>
       <span>{ar?'تحديات ممتعة':'CREATIVE CHALLENGES'}</span>
       <span className="sq-hub-fact-mark" aria-hidden="true"/>
       <span>{ar?'ابدأ • استكشف • أبدع':'PLAY • EXPLORE • CREATE'}</span>
@@ -101,7 +108,7 @@ export default function SaqrChallengesHubPage(){
       <h2 id="sq-hub-heading">{ar?'اختر مغامرتك':'Choose your adventure'}</h2>
       <p>{ar?'كل تحدٍّ له تجربة مختلفة… والمغامرة تبدأ بضغطة واحدة.':'Every challenge opens a different world. Pick one to begin.'}</p>
      </div>
-     <span className="sq-hub-counter" dir="ltr"><b>03</b><span>{ar?'مغامرات':'ADVENTURES'}</span></span>
+     <span className="sq-hub-counter" dir="ltr"><b>{String(items.length).padStart(2,'0')}</b><span>{ar?'مغامرات':'ADVENTURES'}</span></span>
     </div>
     <div className="sq-cards sq-hub-cards">
      {items.map((item,index)=><Link

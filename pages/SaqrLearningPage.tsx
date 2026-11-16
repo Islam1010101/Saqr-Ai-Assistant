@@ -72,7 +72,7 @@ export default function SaqrLearningPage() {
   })();
   const [status, setStatus] = useState<'loading' | 'allowed' | 'denied' | 'error'>('loading');
   const [settings, setSettings] = useState<LearningFeatures | null>(null);
-  const [viewer, setViewer] = useState<'admin' | 'student' | null>(null);
+  const [viewer, setViewer] = useState<'admin' | 'teacher' | 'student' | null>(null);
   const [active, setActive] = useState<FeatureName | null>(null);
   const { quiet } = useSaqrAccessibilityDisplay();
   const activityRef = useRef<HTMLElement>(null);

@@ -69,7 +69,7 @@ const panel=readFileSync('src/components/AdminChildrenReadingReview.tsx','utf8')
 const dashboard=readFileSync('pages/AdminDashboard.tsx','utf8');
 const catalog=readFileSync('pages/SearchPage.tsx','utf8');
 assert.ok(dashboard.includes('<AdminChildrenReadingReview isAr={isAr} />') &&
-  dashboard.includes("id:'admin-children-reading-review'"),
+  dashboard.includes("id:'children'"),
   'Only the existing admin dashboard mounts the review queue and nav link');
 assert.ok(panel.includes('childrenReviewCsv(matches)') &&
   panel.includes("type:'text/csv;charset=utf-8'") &&

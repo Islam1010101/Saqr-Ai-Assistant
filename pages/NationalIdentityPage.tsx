@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useLanguage } from '../App';
 import { canAccessNationalIdentity } from '../src/utils/nationalIdentityAccess';
+import { useSchoolFeatureContext } from '../src/components/SchoolFeatureRoute';
 import FlagDayChallenge from './FlagDayChallenge';
 import './nationalHeritageTheme.css';
 import './nationalIdentityLanding.css';
@@ -223,13 +224,14 @@ const HeritageArt = () => <svg viewBox="0 0 350 255" className="w-full max-w-[36
 
 const NationalIdentityPage: React.FC = () => {
   const {locale,dir} = useLanguage();
+  const granted=useSchoolFeatureContext();
   const lang: 'ar'|'en' = locale === 'ar' ? 'ar' : 'en';
   const tr = (x:L) => x[lang];
   const [identity] = useState(() => {
     try {
       const role = localStorage.getItem('user_type');
       const user = JSON.parse(localStorage.getItem('current_user') || 'null');
-      if (!canAccessNationalIdentity(role, user)) return '';
+      if (!canAccessNationalIdentity(role, user) && !granted?.features.national_identity) return '';
       const id = role === 'student' ? user?.student_id : user?.teacher_id;
       if (typeof id !== 'string' && typeof id !== 'number') return '';
       const normalizedId = String(id).trim();
@@ -328,6 +330,8 @@ const NationalIdentityPage: React.FC = () => {
     {id:'language' as const,icon:'weave' as const,title:l('كنوز لغتنا الإماراتية','Treasures of Emirati Language'),desc:l('اختر معنى 10 ألفاظ إماراتية بعد مراجعة المعجم الورقي.','Find the meanings of 10 Emirati words using the printed dictionary.'),total:10,count:entries.filter(x=>progress.words.includes(x.id)).length,color:'from-amber-600 to-orange-600'},
     {id:'archive' as const,icon:'document' as const,title:l('محقق ذاكرة الوطن','Heritage Research Detective'),desc:l('10 أسئلة عشوائية من بنك الأدلة والمصادر الموثوقة.','10 randomized questions from the verified evidence bank.'),total:DETECTIVE_ROUND_SIZE,count:currentMode==='archive'?entries.filter(x=>progress.cases.includes(x.id)).length:0,color:'from-sky-700 to-indigo-700'}
   ];
+  const moduleFeature={passport:'passport',language:'emirati_language',archive:'heritage_detective'} as const;
+  const visibleModules=modules.filter(m=>granted?.features[moduleFeature[m.id]]!==false);
   const selectedModule = modules.find(x=>x.id===currentMode) || modules[0];
   if (!identity) return <Navigate to="/home" replace />;
   if (flagChallengeOpen) return <FlagDayChallenge onClose={() => setFlagChallengeOpen(false)} />;
@@ -380,7 +384,7 @@ const NationalIdentityPage: React.FC = () => {
           <div className="rounded-full bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 px-4 py-2 text-xs font-black text-amber-800 dark:text-amber-200">{totalCompleted}/{sourcedEmirates.length+dictionaryActivities.length+sourcedCases.length} {tr(l('مهمة مكتملة','missions completed'))}</div>
         </div>
         <div className="nh-challenges nh-v2-grid grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
-          {modules.map(m=><button type="button" key={m.id} onClick={()=>go(m.id)} className="nh-challenge-card group overflow-hidden text-start rounded-[1.8rem] bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 shadow-lg hover:shadow-2xl hover:-translate-y-1 hover:border-emerald-400 dark:hover:border-emerald-700 transition-all focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-500">
+          {visibleModules.map(m=><button type="button" key={m.id} onClick={()=>go(m.id)} className="nh-challenge-card group overflow-hidden text-start rounded-[1.8rem] bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 shadow-lg hover:shadow-2xl hover:-translate-y-1 hover:border-emerald-400 dark:hover:border-emerald-700 transition-all focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-500">
             <div className={'nh-card-top nh-card-top-'+m.id+' relative bg-gradient-to-br '+m.color+' p-6 text-white overflow-hidden'}>
               <div className="absolute -end-5 -top-6 h-36 w-36 border-[17px] rounded-full border-white/10"/>
               <div className="nh-card-scene"><HeritageQuestArt kind={m.id}/></div><span className="nh-card-symbol"><Icon kind={m.icon} className="relative h-9 w-9"/></span>
@@ -395,7 +399,7 @@ const NationalIdentityPage: React.FC = () => {
               <span className="inline-flex mt-5 gap-2 items-center text-emerald-700 dark:text-emerald-300 text-sm font-black">{tr(l('ابدأ الاستكشاف','Start exploring'))}<Icon kind="arrow" className={'w-5 h-5 '+(lang==='ar'?'rotate-180':'')}/></span>
             </div>
           </button>)}
-          <button type="button" onClick={() => setFlagChallengeOpen(true)}
+          {granted?.features.flag_glory !== false && <button type="button" onClick={() => setFlagChallengeOpen(true)}
             className="nh-challenge-card group overflow-hidden text-start rounded-[1.8rem] bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 shadow-lg hover:shadow-2xl hover:-translate-y-1 hover:border-emerald-400 dark:hover:border-emerald-700 transition-all focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-500"
             aria-label={tr(l('ابدأ تحدي راية المجد في يوم العلم','Play the UAE Flag Day Challenge'))}>
             <div className="nh-card-top nh-card-top-flag relative overflow-hidden bg-gradient-to-br from-[#127C58] via-[#075B49] to-[#0D403D] p-6 text-white">
@@ -421,8 +425,8 @@ const NationalIdentityPage: React.FC = () => {
                 {tr(l('ابدأ التحدي','Start the challenge'))}<Icon kind="arrow" className={'h-5 w-5 '+(lang==='ar'?'rotate-180':'')}/>
               </span>
             </div>
-          </button>
-          <Link to="/saqr-national-identity/anthem"
+          </button>}
+          {granted?.features.voice_union !== false && <Link to="/saqr-national-identity/anthem"
             className="nh-challenge-card group overflow-hidden text-start rounded-[1.8rem] bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 shadow-lg hover:shadow-2xl hover:-translate-y-1 hover:border-emerald-400 dark:hover:border-emerald-700 transition-all focus-visible:outline focus-visible:outline-4 focus-visible:outline-emerald-500"
             aria-label={tr(l('ابدأ تحدي صوت الاتحاد للنشيد الوطني الإماراتي','Start the Voice of the Union national anthem challenge'))}>
             <div className="nh-card-top relative overflow-hidden bg-gradient-to-br from-[#b12b3b] via-[#a4432e] to-[#704019] p-6 text-white">
@@ -444,12 +448,12 @@ const NationalIdentityPage: React.FC = () => {
                 {tr(l('ابدأ الغناء','Start singing'))}<Icon kind="arrow" className={'h-5 w-5 '+(lang==='ar'?'rotate-180':'')}/>
               </span>
             </div>
-          </Link>
+          </Link>}
         </div>
         {progress.stamps.length===7 && <div role="status" className="mt-6 rounded-[1.5rem] border-2 border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/25 px-6 py-5 text-amber-900 dark:text-amber-200 font-black">
           {tr(l('أحسنت! جمعت أختام الإمارات السبع وأكملت جواز صقر الثقافي.','Well done! You have collected all seven emirate stamps and completed your cultural passport.'))}
         </div>}
-        <section aria-labelledby="nh-identity-library-heading" className="mt-12 sm:mt-14">
+        {granted?.features.national_books !== false && <section aria-labelledby="nh-identity-library-heading" className="mt-12 sm:mt-14">
           <div className="nh-v2-pavilion-heading mb-5 flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-xs font-black tracking-wider text-emerald-700 dark:text-emerald-400">{tr(l('قسم القراءة والمراجع','BOOKS & REFERENCE COLLECTION'))}</p>
@@ -483,7 +487,7 @@ const NationalIdentityPage: React.FC = () => {
               </div>
             </div>
           </Link>
-        </section>
+        </section>}
       </> : <section className={'nh-quest-page nh-v2-quest-area nh-quest-'+mode+' mt-7'}>
         <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
           <button type="button" onClick={()=>go('home')} className="inline-flex items-center gap-2 rounded-xl bg-slate-100 dark:bg-slate-900 px-4 py-2.5 text-xs sm:text-sm font-black hover:bg-emerald-50 dark:hover:bg-emerald-950/60 transition-colors">
