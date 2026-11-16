@@ -4,7 +4,7 @@ import {ARABIC_LIBRARY_DATABASE,ENGLISH_LIBRARY_DATABASE} from '../api/digitalBo
 import {NATIONAL_IDENTITY_DIGITAL_BOOKS} from '../api/nationalIdentityDigitalBooks.ts';
 import {isSaqrLibrarySearchIntent} from '../src/utils/saqrIntentRouter.ts';
 import {searchSaqrBookCatalog,isSaqrNamedAuthorQuery} from '../src/utils/saqrCatalogSearch.ts';
-import {resolveSaqrCatalogEntity} from '../src/utils/saqrCatalogEntitySearch.ts';
+import {resolveSaqrCatalogEntity,catalogBookMatchesEntity} from '../src/utils/saqrCatalogEntitySearch.ts';
 import {saqrDigitalReaderHref} from '../src/utils/saqrDigitalReaderLinks.ts';
 import {isOpenEndedBookAdvice} from '../src/utils/saqrReadingConsultation.ts';
 import {isSaqrCatalogLookup,renderSaqrCatalogAnswer} from '../src/utils/saqrCatalogReply.ts';
@@ -43,8 +43,10 @@ for(const query of ['بدور عن اجاثا كريسيتي','بدور عن أ�
  assert.equal(named?.kind,'author','Colloquial verb must not be part of author name: '+query);
  const found=searchSaqrBookCatalog(query,catalogs,20);
  assert.ok(found.length>=5,'Stored Christie books must be found: '+query);
- assert.ok(found.every(book=>/اجاثا\\s+كريستي|agatha\\s+christie/i.test((book.author+' '+(book.series||'')).replace(/[أإآٱ]/g,'ا'))),
-   'No unrelated titles for '+query);
+ assert.ok(found.every(book=>catalogBookMatchesEntity({title:book.title,author:book.author,series:book.series},named)),
+   'Only a verified author field may match the author query: '+query);
+ assert.doesNotMatch(found.map(book=>book.title).join(' | '),/Disney|Great Golf Stories|Anthology of Elizabethan/i,
+   'Never include unrelated school titles');
  assert.ok(found.some(book=>saqrDigitalReaderHref(book)?.includes('/digital-library/arabic?open=')),
    'Verified Christie volumes must offer in-platform reading');
 }
