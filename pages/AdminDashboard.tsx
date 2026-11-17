@@ -6,6 +6,7 @@ import { printA4Html } from '../src/utils/printA4Html';
 import AdminReadingChallenge from '../src/components/AdminReadingChallenge';
 import AdminLibraryAttendance from '../src/components/AdminLibraryAttendance';
 import AdminInsightsPanels from '../src/components/AdminInsightsPanels';
+import AdminPeriodReports from '../src/components/AdminPeriodReports';
 import AdminChildrenReadingReview from '../src/components/AdminChildrenReadingReview';
 import AdminSaqrProviderMetrics from '../src/components/AdminSaqrProviderMetrics';
 import AdminUserFeaturePermissions from '../src/components/AdminUserFeaturePermissions';
@@ -151,7 +152,7 @@ const buildBilingualBorrowEmail = (userName: string, bookName: string, borrowDat
 
 const SearchSvg = () => <OutlineIcon name="search" className="h-5 w-5 text-amber-500" />;
 
-type AdminSection = 'overview' | 'library' | 'analytics' | 'attendance' | 'reading' | 'children' | 'management';
+type AdminSection = 'overview' | 'reports' | 'library' | 'analytics' | 'attendance' | 'reading' | 'children' | 'management';
 
 const AdminDashboard: React.FC = () => {
     const { locale, dir } = useLanguage();
@@ -688,6 +689,7 @@ const AdminDashboard: React.FC = () => {
     const formatCatalogCount = (count: number) => count.toLocaleString(isAr ? 'ar-EG' : 'en-US');
     const dashboardSections: Array<{id:AdminSection;label:string;description:string;icon:IconName}> = [
         {id:'overview',label:isAr?'الرئيسية':'Overview',description:isAr?'المؤشرات والاختصارات':'Key metrics & shortcuts',icon:'grid'},
+        {id:'reports',label:isAr?'التقارير الدورية':'Periodic reports',description:isAr?'شهري وفصلي وطباعة PDF':'Monthly, quarterly & PDF',icon:'printer'},
         {id:'library',label:isAr?'المقتنيات والكتب':'Books & catalog',description:isAr?'الكتب الورقية والرقمية':'Physical & digital books',icon:'library'},
         {id:'analytics',label:isAr?'التقارير والتحليلات':'Analytics',description:isAr?'رسوم بيانية وتقارير النشاط':'Charts & activity',icon:'chart'},
         {id:'attendance',label:isAr?'الإشغال والحضور':'Attendance',description:isAr?'جدول استخدام المكتبة':'Library utilization',icon:'calendar'},
@@ -724,7 +726,7 @@ const AdminDashboard: React.FC = () => {
                 @keyframes efips-column-rise {from {transform:scaleY(.15)}to {transform:scaleY(1)}}
                 @media (prefers-reduced-motion:reduce) {.efips-admin .efips-panel,.efips-admin .efips-column {animation:none!important}.efips-admin * {scroll-behavior:auto!important}}
             `}</style>
-            <header className="efips-panel relative overflow-hidden max-w-7xl mx-auto flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5 mb-5 bg-gradient-to-br from-emerald-50 via-white to-sky-50 dark:from-emerald-950/40 dark:via-slate-900 dark:to-sky-950/30 border border-emerald-100 dark:border-emerald-900/50 p-5 sm:p-7 lg:p-9 rounded-[2rem] shadow-xl mt-2 sm:mt-4">
+            <header className="efips-panel max-w-7xl mx-auto flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 mb-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-4 sm:p-5 rounded-2xl shadow-sm">
                 <div><h1 className="text-2xl md:text-4xl font-black bg-gradient-to-r from-emerald-700 via-teal-600 to-sky-500 bg-clip-text text-transparent">{t('title')}</h1><p className="text-slate-500 dark:text-slate-400 font-bold text-xs md:text-sm mt-1">{t('welcome')} <span className="text-slate-900 dark:text-white font-black">{adminName}</span> | {t('subtitle')}</p></div>
                 <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full lg:w-auto justify-start lg:justify-end">
                     <button type="button" onClick={() => void fetchRealDashboardData()} className="px-4 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95 flex items-center gap-2"><OutlineIcon name="refresh" />{isAr ? 'تحديث البيانات' : 'Refresh Data'}</button>
@@ -734,16 +736,16 @@ const AdminDashboard: React.FC = () => {
                 </div>
             </header>
 
-             <nav aria-label={isAr ? 'أقسام لوحة الإدارة' : 'Dashboard sections'} className="sticky top-2 z-40 max-w-7xl mx-auto mb-5 rounded-[1.75rem] border border-emerald-100 dark:border-slate-700 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl shadow-lg px-3 py-3 sm:px-5 sm:py-4">
-                 <div className="flex flex-wrap items-center justify-between gap-2 mb-3 px-1">
+             <nav aria-label={isAr ? 'أقسام لوحة الإدارة' : 'Dashboard sections'} className="sticky top-2 z-40 max-w-7xl mx-auto mb-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg shadow-sm px-3 py-2">
+                 <div className="hidden sm:flex items-center justify-between gap-2 mb-2 px-1">
                      <span className="font-black text-sm text-slate-800 dark:text-slate-100">{isAr ? 'مركز التحكم' : 'Command Center'}</span>
                      <span className="text-[11px] sm:text-xs font-bold text-slate-500 dark:text-slate-400">{isAr ? 'اختر القسم الذي تريد العمل عليه' : 'Open only the section you need'}</span>
                  </div>
-                 <div className="flex gap-2 overflow-x-auto overscroll-x-contain pb-1 xl:grid xl:grid-cols-7 xl:overflow-visible scrollbar-thin">
+                 <div className="flex gap-1.5 overflow-x-auto overscroll-x-contain pb-1 scrollbar-thin">
                      {dashboardSections.map(item=><button type="button" key={item.id} aria-pressed={activeSection===item.id}
                          onClick={()=>switchAdminSection(item.id)}
-                         className={`shrink-0 min-w-[122px] xl:min-w-0 rounded-2xl border px-3 py-2.5 sm:py-3 flex flex-row xl:flex-col items-center justify-center gap-2 text-center transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-500 ${activeSection===item.id ? 'bg-emerald-700 text-white border-emerald-700 shadow-md shadow-emerald-700/15' : 'bg-slate-50 dark:bg-slate-800/70 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:border-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30'}`}>
-                         <OutlineIcon name={item.icon} className="h-5 w-5 shrink-0"/><span className="text-[11px] sm:text-xs font-black leading-5">{item.label}</span>
+                         className={`shrink-0 rounded-xl border px-3 py-2 flex items-center justify-center gap-1.5 text-center transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-500 ${activeSection===item.id ? 'bg-emerald-700 text-white border-emerald-700 shadow-md shadow-emerald-700/15' : 'bg-slate-50 dark:bg-slate-800/70 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:border-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30'}`}>
+                         <OutlineIcon name={item.icon} className="h-4 w-4 shrink-0"/><span className="text-xs font-bold whitespace-nowrap">{item.label}</span>
                      </button>)}
                  </div>
              </nav>
@@ -937,6 +939,7 @@ const AdminDashboard: React.FC = () => {
                     </div>
                 </section>
                 </>}
+                {activeSection === 'reports' && <AdminPeriodReports isAr={isAr} students={studentsList} teachers={teachersList} logs={loginActivity} loans={allBorrowingRecords} lessons={lessonReportsList} />}
                 {activeSection === 'analytics' && <>
                 <AdminSaqrProviderMetrics isAr={isAr} />
                 <AdminInsightsPanels
