@@ -183,6 +183,7 @@ const AdminDashboard: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'students' | 'teachers' | 'borrowings' | 'pending' | 'reports'>('pending');
     const [activeSection, setActiveSection] = useState<AdminSection>('overview');
     const [showReadingReport, setShowReadingReport] = useState(false);
+    const [expandedReports, setExpandedReports] = useState({reading:false,attendance:false,insights:false,providers:false});
     const [searchQuery, setSearchQuery] = useState('');
     const [borrowingsError, setBorrowingsError] = useState('');
     const [borrowingsNotice, setBorrowingsNotice] = useState('');
@@ -941,30 +942,30 @@ const AdminDashboard: React.FC = () => {
                   <AdminPeriodReports isAr={isAr} students={studentsList} teachers={teachersList} logs={loginActivity} loans={allBorrowingRecords} lessons={lessonReportsList} />
                   <section className="lg:col-span-4 grid grid-cols-1 gap-3">
                     <h3 className="text-base font-black text-slate-800 dark:text-slate-100">{isAr?'باقي التقارير في مكان واحد':'All other reports in one place'}</h3>
-                    <details id="admin-unified-reading" className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+                    <details id="admin-unified-reading" onToggle={e=>setExpandedReports(old=>({...old,reading:e.currentTarget.open}))} className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
                       <summary className="cursor-pointer px-4 py-4 font-bold text-sm text-emerald-700 dark:text-emerald-300">{isAr?'إنجاز الكتب وتحدي القراءة — طلاب ومعلمون':'Completed books & reading challenge — students and teachers'}</summary>
-                      <div className="p-3 pt-0"><p className="text-xs text-slate-500 mb-3">{isAr?'التقرير الموثق مستقل عن مرات فتح الكتاب، وله اختيار شهره الخاص.':'Verified completions are separate from book opens and have their own month selector.'}</p><AdminReadingChallenge isAr={isAr}/></div>
+                      <div className="p-3 pt-0"><p className="text-xs text-slate-500 mb-3">{isAr?'التقرير الموثق مستقل عن مرات فتح الكتاب، وله اختيار شهره الخاص.':'Verified completions are separate from book opens and have their own month selector.'}</p>{expandedReports.reading && <AdminReadingChallenge isAr={isAr}/>}</div>
                     </details>
-                    <details className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+                    <details onToggle={e=>setExpandedReports(old=>({...old,attendance:e.currentTarget.open}))} className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
                       <summary className="cursor-pointer px-4 py-4 font-bold text-sm text-emerald-700 dark:text-emerald-300">{isAr?'تقرير حضور المكتبة والحصص':'Library attendance & visits'}</summary>
-                      <div className="p-3 pt-0"><p className="text-xs text-amber-700 dark:text-amber-300 mb-3">{isAr?'تنبيه: سجل الحضور الموجود محفوظ محليًا في متصفح الإدارة، وليس سجلًا مركزيًا موحدًا.':'Note: current attendance data is saved in the admin browser, not in a central shared database.'}</p><AdminLibraryAttendance locale={locale} adminId={adminName || 'efips-admin'}/></div>
+                      <div className="p-3 pt-0"><p className="text-xs text-amber-700 dark:text-amber-300 mb-3">{isAr?'تنبيه: سجل الحضور الموجود محفوظ محليًا في متصفح الإدارة، وليس سجلًا مركزيًا موحدًا.':'Note: current attendance data is saved in the admin browser, not in a central shared database.'}</p>{expandedReports.attendance && <AdminLibraryAttendance locale={locale} adminId={adminName || 'efips-admin'}/>}</div>
                     </details>
-                    <details className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+                    <details onToggle={e=>setExpandedReports(old=>({...old,insights:e.currentTarget.open}))} className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
                       <summary className="cursor-pointer px-4 py-4 font-bold text-sm text-emerald-700 dark:text-emerald-300">{isAr?'تحليلات المكتبة التفصيلية':'Detailed library analytics'}</summary>
                       <div className="p-3 pt-0">
-                        <AdminInsightsPanels isAr={isAr} locale={locale} students={studentsList} teachers={teachersList}
+                        {expandedReports.insights && <AdminInsightsPanels isAr={isAr} locale={locale} students={studentsList} teachers={teachersList}
                           logs={loginActivity} schedule={scheduleSlots} lessons={lessonReportsList}
                           activeLoans={borrowingsList} pendingLoans={pendingRequestsList} allLoans={allBorrowingRecords}
                           digitalReads={digitalBookReadStats} digitalAvailable={digitalBookReadStatsAvailable}
                           physicalTotal={physicalCatalogCount} arabicTotal={arabicDigitalCoreCount} englishTotal={englishDigitalCount}
                           topBooks={topBooksStats}
                           onOpenTab={tab => switchAdminSection('management',tab)}
-                          onShowReading={() => document.getElementById('admin-unified-reading')?.setAttribute('open','')} />
+                          onShowReading={() => document.getElementById('admin-unified-reading')?.setAttribute('open','')} />}
                       </div>
                     </details>
-                    <details className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+                    <details onToggle={e=>setExpandedReports(old=>({...old,providers:e.currentTarget.open}))} className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
                       <summary className="cursor-pointer px-4 py-4 font-bold text-sm text-emerald-700 dark:text-emerald-300">{isAr?'مؤشرات مزودي ذكاء صقر':'Saqr AI provider metrics'}</summary>
-                      <div className="p-3 pt-0"><AdminSaqrProviderMetrics isAr={isAr}/></div>
+                      <div className="p-3 pt-0">{expandedReports.providers && <AdminSaqrProviderMetrics isAr={isAr}/>}</div>
                     </details>
                   </section>
                 </>}
