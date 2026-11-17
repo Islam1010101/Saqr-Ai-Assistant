@@ -8,9 +8,9 @@ import {
 import { readingTierLabel } from '../utils/childrenReadingReferences';
 
 type Filter = 'all' | 'sourced' | 'unsourced' | 'issues';
-type Review = {catalog_id:string;title:string;author:string;shelf:number;row_number:number;isbn:string;publisher:string;source_name:string;source_url:string;reading_tier:'beginner'|'intermediate'|'advanced'|null;decision:'pending'|'approved'|'rejected';notes:string;reviewed_at?:string;reviewed_by?:string};
+type Review = {original_title?:string;original_author?:string;original_shelf?:number;original_row?:number;catalog_id:string;title:string;author:string;shelf:number;row_number:number;isbn:string;publisher:string;source_name:string;source_url:string;reading_tier:'beginner'|'intermediate'|'advanced'|null;decision:'pending'|'approved'|'rejected';notes:string;reviewed_at?:string;reviewed_by?:string};
 type Candidate = Pick<Review,'title'|'author'|'publisher'|'isbn'|'source_name'|'source_url'>;
-const fromEntry=(entry:ChildrenReadingReviewEntry):Review=>({catalog_id:entry.id,title:entry.title,author:entry.author,shelf:entry.shelf,row_number:entry.row,isbn:entry.catalogIsbn,publisher:'',source_name:entry.sourceName,source_url:entry.sourceUrl,reading_tier:entry.candidateTier,decision:'pending',notes:''});
+const fromEntry=(entry:ChildrenReadingReviewEntry):Review=>({original_title:entry.title,original_author:entry.author,original_shelf:entry.shelf,original_row:entry.row,catalog_id:entry.id,title:entry.title,author:entry.author,shelf:entry.shelf,row_number:entry.row,isbn:entry.catalogIsbn,publisher:'',source_name:entry.sourceName,source_url:entry.sourceUrl,reading_tier:entry.candidateTier,decision:'pending',notes:''});
 const PAGE_SIZE = 24;
 
 /** Admin-only librarian review tools; no student information and no auto-approval. */
@@ -64,6 +64,7 @@ export default function AdminChildrenReadingReview({ isAr }: { isAr: boolean }) 
       const saved=data.record as Review;
       setSavedReviews(old=>({...old,[saved.catalog_id]:saved}));
       setSelected(saved);
+      window.dispatchEvent(new Event('efips-catalog-approved-changed'));
       setNotice(isAr?'تم حفظ قرار المراجعة في قاعدة البيانات.':'Review decision saved to database.');
     }catch(error:any){setNotice(error.message||String(error));}
     finally{setPending(false);}
