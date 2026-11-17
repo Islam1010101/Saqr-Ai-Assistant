@@ -7,7 +7,8 @@ export type ApprovedPhysicalCorrection = {
   original_title:string;original_author:string;original_shelf:number;original_row:number;
 };
 const originals = new Map<string,Book>();
-const allowedFields = ['title','author','shelf','row','isbn','publisher','level'] as const;
+let lastAppliedCount=0;
+const allowedFields = ['title','author','shelf','row','isbn','isbnStatus','publisher','level'] as const;
 
 /** Restores original catalog data before applying current approved rows; rejected edits cannot linger. */
 export function applyApprovedPhysicalCorrections(rows:ApprovedPhysicalCorrection[]):number {
@@ -28,6 +29,7 @@ export function applyApprovedPhysicalCorrections(rows:ApprovedPhysicalCorrection
     if(correction.reading_tier)book.level=correction.reading_tier;
     changed++;
   }
+  lastAppliedCount=changed;
   return changed;
 }
 export async function syncApprovedPhysicalCatalog():Promise<number> {
