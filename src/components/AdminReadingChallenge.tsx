@@ -16,6 +16,9 @@ const titles = new Map<string,string>([
   ...NATIONAL_IDENTITY_DIGITAL_BOOKS.map(book=>[digitalBookKey('ar',book),book.title] as [string,string]),
   ...ENGLISH_LIBRARY_DATABASE.map(book=>[digitalBookKey('en',book),book.title] as [string,string])
 ]);
+// Physical titles can be corrected by administrator approval without changing stable reading keys.
+const displayTitle=(key:string)=>key.startsWith('physical:')?
+  (bookData.find(book=>physicalBookKey(book)===key)?.title||titles.get(key)||key):(titles.get(key)||key);
 const htmlSafe=(value:unknown)=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]||char));
 const currentMonth=()=>{
   const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
@@ -51,7 +54,7 @@ const AdminReadingChallenge:React.FC<{isAr:boolean}> = ({isAr})=>{
   const members=useMemo(()=>report?.members.filter(member=>{
     const name=isAr?(member.name_ar||member.name_en):(member.name_en||member.name_ar);
     const q=term.trim().toLocaleLowerCase();
-    return (role==='all'||member.user_type===role)&&(!q||[name,member.school_user_id,member.grade,...member.books.map(book=>titles.get(book.book_key)||'')].some(v=>String(v).toLocaleLowerCase().includes(q)));
+    return (role==='all'||member.user_type===role)&&(!q||[name,member.school_user_id,member.grade,...member.books.map(book=>displayTitle(book.book_key))].some(v=>String(v).toLocaleLowerCase().includes(q)));
   })||[],[report,role,term,isAr]);
   const overall=useMemo(()=>({
     students:members.filter(r=>r.user_type==='student').length,
@@ -64,7 +67,7 @@ const AdminReadingChallenge:React.FC<{isAr:boolean}> = ({isAr})=>{
     const date=new Date().toLocaleDateString(locale);
     const monthLabel=new Date(report.month+'T12:00:00').toLocaleDateString(locale,{year:'numeric',month:'long'});
     const headings=isAr?['#','الصفة','الكود','الاسم','الصف','الهدف','العدد','عناوين الكتب المنجزة وتواريخها']:['#','Role','School ID','Name','Grade','Target','Count','Completed titles and dates'];
-    const rows=members.map((m,i)=>'<tr><td>'+(i+1)+'</td><td>'+htmlSafe(m.user_type==='student'?(isAr?'طالب':'Student'):(isAr?'معلم':'Teacher'))+'</td><td dir="ltr">'+htmlSafe(m.school_user_id)+'</td><td>'+htmlSafe(isAr?(m.name_ar||m.name_en):(m.name_en||m.name_ar))+'</td><td>'+htmlSafe(m.grade||'—')+'</td><td>'+htmlSafe(m.goal??'—')+'</td><td>'+m.completed_count+'</td><td class="titles">'+(m.books.length?m.books.map(b=>'<div>'+htmlSafe(titles.get(b.book_key)||b.book_key)+' <small>('+htmlSafe(b.completed_on)+')</small></div>').join(''):'—')+'</td></tr>').join('');
+    const rows=members.map((m,i)=>'<tr><td>'+(i+1)+'</td><td>'+htmlSafe(m.user_type==='student'?(isAr?'طالب':'Student'):(isAr?'معلم':'Teacher'))+'</td><td dir="ltr">'+htmlSafe(m.school_user_id)+'</td><td>'+htmlSafe(isAr?(m.name_ar||m.name_en):(m.name_en||m.name_ar))+'</td><td>'+htmlSafe(m.grade||'—')+'</td><td>'+htmlSafe(m.goal??'—')+'</td><td>'+m.completed_count+'</td><td class="titles">'+(m.books.length?m.books.map(b=>'<div>'+htmlSafe(displayTitle(b.book_key))+' <small>('+htmlSafe(b.completed_on)+')</small></div>').join(''):'—')+'</td></tr>').join('');
     const title=isAr?'تقرير تحدي القراءة الشهري':'Monthly Reading Challenge Report';
     const html='<!doctype html><html lang="'+(isAr?'ar':'en')+'" dir="'+(isAr?'rtl':'ltr')+'"><head><meta charset="utf-8"><title>'+title+' — EFIPS</title><style>'+
       '@page{size:A4 portrait;margin:13mm 11mm 15mm}*{box-sizing:border-box}body{margin:0;background:white;color:#172033;font-family:Cairo,Tahoma,Arial,sans-serif;font-size:10px;line-height:1.6}'+
@@ -117,12 +120,12 @@ const AdminReadingChallenge:React.FC<{isAr:boolean}> = ({isAr})=>{
         <p className="text-xs text-amber-900 dark:text-amber-200 mb-4">{isAr?'هذه بيانات أرسلها مستخدمون باستخدام كود المدرسة فقط، وليست إثباتًا للهوية أو لإنهاء القراءة. لا تدخل في الإحصائيات الرسمية أو تقرير الطباعة المعتمد.':'Submitted using a school code alone. Not identity-verified or independently verified reading. Excluded from official metrics and certified print reports.'}</p>
         <div className="overflow-x-auto"><table className="w-full min-w-[630px] text-xs text-start">
           <thead><tr>{(isAr?['الصفة','الكود','الاسم','الهدف','كتب مقدمة','العناوين']:['Role','School ID','Name','Goal','Reported books','Titles']).map(x=><th key={x} className="p-2 text-start border-b border-amber-300">{x}</th>)}</tr></thead>
-          <tbody>{report.pending.filter(m=>role==='all'||m.user_type===role).filter(m=>!term||[m.school_user_id,m.name_ar,m.name_en,...m.books.map(b=>titles.get(b.book_key)||b.book_key)].some(v=>String(v).toLowerCase().includes(term.toLowerCase()))).map(m=>
+          <tbody>{report.pending.filter(m=>role==='all'||m.user_type===role).filter(m=>!term||[m.school_user_id,m.name_ar,m.name_en,...m.books.map(b=>displayTitle(b.book_key))].some(v=>String(v).toLowerCase().includes(term.toLowerCase()))).map(m=>
             <tr key={m.user_type+':'+m.school_user_id} className="border-b border-amber-200 dark:border-amber-900">
               <td className="p-2">{m.user_type==='student'?(isAr?'طالب':'Student'):(isAr?'معلم':'Teacher')}</td>
               <td className="p-2 font-mono">{m.school_user_id}</td><td className="p-2">{isAr?(m.name_ar||m.name_en):(m.name_en||m.name_ar)}</td>
               <td className="p-2">{m.goal??'—'}</td><td className="p-2">{m.completed_count}</td>
-              <td className="p-2">{m.books.map((b,i)=><div key={b.book_key+i}>{titles.get(b.book_key)||b.book_key}</div>)}</td>
+              <td className="p-2">{m.books.map((b,i)=><div key={b.book_key+i}>{displayTitle(b.book_key)}</div>)}</td>
             </tr>)}</tbody>
         </table></div>
       </section>}
