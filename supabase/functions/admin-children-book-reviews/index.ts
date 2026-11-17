@@ -28,6 +28,25 @@ Deno.serve(async(req:Request)=>{
   const {data,error}=await admin.from("efips_children_book_reviews").select("*").order("reviewed_at",{ascending:false}).limit(5000);
   return error?respond(503,{error:"Review records unavailable"}):respond(200,{ok:true,records:data});
  }
+ if(body.action==="lookup"){
+  const title=text(body.title,160),author=text(body.author,120),isbn=text(body.isbn,32).replace(/[^0-9Xx]/g,"");
+  if(!title&&!isbn)return respond(400,{error:"Title or ISBN required"});
+  const suggestions:any[]=[];
+  const add=(record:any)=>{
+    if(!record?.title)return;
+    suggestions.push({title:text(record.title),author:text(record.author),publisher:text(record.publisher),isbn:text(record.isbn,32),source_name:text(record.source_name,80),source_url:text(record.source_url,600)});
+  };
+  const query=new URLSearchParams({limit:"6",fields:"key,title,author_name,isbn,publisher,edition_key"});
+  if(isbn)query.set("q","isbn:"+isbn);else {query.set("title",title);if(author)query.set("author",author);}
+  const googleQ=isbn?"isbn:"+isbn:("intitle:"+title+(author?" inauthor:"+author:""));
+  const sources=await Promise.allSettled([
+    fetch("https://openlibrary.org/search.json?"+query.toString(),{headers:{"Accept":"application/json"},signal:AbortSignal.timeout(8500)}).then(r=>{if(!r.ok)throw Error("Open Library unavailable");return r.json()}),
+    fetch("https://www.googleapis.com/books/v1/volumes?"+new URLSearchParams({q:googleQ,maxResults:"6"}),{headers:{"Accept":"application/json"},signal:AbortSignal.timeout(8500)}).then(r=>{if(!r.ok)throw Error("Google Books unavailable");return r.json()})
+  ]);
+  if(sources[0].status==="fulfilled")for(const d of (sources[0].value.docs||[]))add({title:d.title,author:d.author_name?.[0],publisher:d.publisher?.[0],isbn:d.isbn?.find((x:string)=>x.length===13)||d.isbn?.[0],source_name:"Open Library",source_url:"https://openlibrary.org"+String(d.key||"")});
+  if(sources[1].status==="fulfilled")for(const d of (sources[1].value.items||[])){const v=d.volumeInfo||{};add({title:v.title,author:v.authors?.join(", "),publisher:v.publisher,isbn:v.industryIdentifiers?.[0]?.identifier,source_name:"Google Books",source_url:v.infoLink||"https://books.google.com/books?id="+encodeURIComponent(d.id||"")});}
+  return respond(200,{ok:true,suggestions:suggestions.slice(0,12),source_errors:sources.map((result,i)=>result.status==="rejected"?(i===0?"Open Library":"Google Books"):null).filter(Boolean)});
+ }
  if(body.action!=="save")return respond(400,{error:"Unknown action"});
  const record=body.record||{},id=text(record.catalog_id,120),title=text(record.title),author=text(record.author),sourceUrl=text(record.source_url,600),decision=text(record.decision,20),tier=record.reading_tier||null;
  const shelf=Number(record.shelf),row=Number(record.row_number);
