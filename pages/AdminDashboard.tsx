@@ -691,9 +691,6 @@ const AdminDashboard: React.FC = () => {
         {id:'overview',label:isAr?'الرئيسية':'Overview',description:isAr?'المؤشرات والاختصارات':'Key metrics & shortcuts',icon:'grid'},
         {id:'reports',label:isAr?'التقارير الدورية':'Periodic reports',description:isAr?'شهري وفصلي وطباعة PDF':'Monthly, quarterly & PDF',icon:'printer'},
         {id:'library',label:isAr?'المقتنيات والكتب':'Books & catalog',description:isAr?'الكتب الورقية والرقمية':'Physical & digital books',icon:'library'},
-        {id:'analytics',label:isAr?'التقارير والتحليلات':'Analytics',description:isAr?'رسوم بيانية وتقارير النشاط':'Charts & activity',icon:'chart'},
-        {id:'attendance',label:isAr?'الإشغال والحضور':'Attendance',description:isAr?'جدول استخدام المكتبة':'Library utilization',icon:'calendar'},
-        {id:'reading',label:isAr?'تحديات القراءة':'Reading challenge',description:isAr?'تقارير إنجاز القراءة':'Reading progress',icon:'trophy'},
         {id:'children',label:isAr?'مستويات الأطفال':'Children levels',description:isAr?'مراجعة تصنيف القراءة':'Reading level reviews',icon:'book-open'},
         {id:'management',label:isAr?'الإدارة والسجلات':'Management',description:isAr?'المستخدمون والطلبات والاستعارات':'Users, requests & loans',icon:'users'}
     ];
@@ -939,7 +936,37 @@ const AdminDashboard: React.FC = () => {
                     </div>
                 </section>
                 </>}
-                {activeSection === 'reports' && <AdminPeriodReports isAr={isAr} students={studentsList} teachers={teachersList} logs={loginActivity} loans={allBorrowingRecords} lessons={lessonReportsList} />}
+                {activeSection === 'reports' && <>
+                  <AdminPeriodReports isAr={isAr} students={studentsList} teachers={teachersList} logs={loginActivity} loans={allBorrowingRecords} lessons={lessonReportsList} />
+                  <section className="lg:col-span-4 grid grid-cols-1 gap-3">
+                    <h3 className="text-base font-black text-slate-800 dark:text-slate-100">{isAr?'باقي التقارير في مكان واحد':'All other reports in one place'}</h3>
+                    <details id="admin-unified-reading" className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+                      <summary className="cursor-pointer px-4 py-4 font-bold text-sm text-emerald-700 dark:text-emerald-300">{isAr?'إنجاز الكتب وتحدي القراءة — طلاب ومعلمون':'Completed books & reading challenge — students and teachers'}</summary>
+                      <div className="p-3 pt-0"><p className="text-xs text-slate-500 mb-3">{isAr?'التقرير الموثق مستقل عن مرات فتح الكتاب، وله اختيار شهره الخاص.':'Verified completions are separate from book opens and have their own month selector.'}</p><AdminReadingChallenge isAr={isAr}/></div>
+                    </details>
+                    <details className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+                      <summary className="cursor-pointer px-4 py-4 font-bold text-sm text-emerald-700 dark:text-emerald-300">{isAr?'تقرير حضور المكتبة والحصص':'Library attendance & visits'}</summary>
+                      <div className="p-3 pt-0"><p className="text-xs text-amber-700 dark:text-amber-300 mb-3">{isAr?'تنبيه: سجل الحضور الموجود محفوظ محليًا في متصفح الإدارة، وليس سجلًا مركزيًا موحدًا.':'Note: current attendance data is saved in the admin browser, not in a central shared database.'}</p><AdminLibraryAttendance locale={locale} adminId={adminName || 'efips-admin'}/></div>
+                    </details>
+                    <details className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+                      <summary className="cursor-pointer px-4 py-4 font-bold text-sm text-emerald-700 dark:text-emerald-300">{isAr?'تحليلات المكتبة التفصيلية':'Detailed library analytics'}</summary>
+                      <div className="p-3 pt-0">
+                        <AdminInsightsPanels isAr={isAr} locale={locale} students={studentsList} teachers={teachersList}
+                          logs={loginActivity} schedule={scheduleSlots} lessons={lessonReportsList}
+                          activeLoans={borrowingsList} pendingLoans={pendingRequestsList} allLoans={allBorrowingRecords}
+                          digitalReads={digitalBookReadStats} digitalAvailable={digitalBookReadStatsAvailable}
+                          physicalTotal={physicalCatalogCount} arabicTotal={arabicDigitalCoreCount} englishTotal={englishDigitalCount}
+                          topBooks={topBooksStats}
+                          onOpenTab={tab => switchAdminSection('management',tab)}
+                          onShowReading={() => document.getElementById('admin-unified-reading')?.setAttribute('open','')} />
+                      </div>
+                    </details>
+                    <details className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+                      <summary className="cursor-pointer px-4 py-4 font-bold text-sm text-emerald-700 dark:text-emerald-300">{isAr?'مؤشرات مزودي ذكاء صقر':'Saqr AI provider metrics'}</summary>
+                      <div className="p-3 pt-0"><AdminSaqrProviderMetrics isAr={isAr}/></div>
+                    </details>
+                  </section>
+                </>}
                 {activeSection === 'analytics' && <>
                 <AdminSaqrProviderMetrics isAr={isAr} />
                 <AdminInsightsPanels
