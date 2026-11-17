@@ -3354,10 +3354,41 @@ function isSaqrApiLibrarySearch(text:string):boolean{
   return /(?:ابحث|دورلي|دور\s+على|رشح(?:لي)?|اقترح|كتب\s+(?:عن|في)|كتاب\s+(?:عن|في)|(?:كتاب|رواي[ةه])\s+(?:اسمه|بعنوان)|(?:فهرس|الرف|مكان\s+الكتاب|متوفر\s+في\s+المكتبة|موجود\s+عندكم)|(?:find|search|recommend|suggest|locate)\s+(?:me\s+|a\s+|some\s+)?(?:books?|novels?|authors?)|books?\s+(?:about|by)|library\s+(?:catalog|catalogue|shelf))/i.test(q);
 }
 
-function findBooks(q: string) {
+type ApiCorrection = {catalog_id:string;title:string;author:string;shelf:number;row_number:number;original_title:string;original_author:string;original_shelf:number;original_row:number};
+async function approvedCatalogForChat():Promise<typeof localBookData> {
+  // This local fallback is used only when the admin corrections endpoint cannot be contacted.
+  // The browser catalogue uses the canonical IDs to avoid ambiguity.
+  const anon=process.env.SUPABASE_ANON_KEY?.trim()||process.env.VITE_SUPABASE_ANON_KEY?.trim();
+  if(!anon)return localBookData;
+  try{
+    const response=await fetch('https://mgbzzgnprbddajyfieop.supabase.co/functions/v1/admin-children-book-reviews',{
+      method:'POST',
+      headers:{'apikey':anon,'authorization':'Bearer '+anon,'content-type':'application/json','origin':'https://www.efipslibrary.com'},
+      body:JSON.stringify({action:'catalog'}),
+      signal:AbortSignal.timeout(2400)
+    });
+    if(!response.ok)return localBookData;
+    const data=await response.json() as {records?:ApiCorrection[]};
+    if(!Array.isArray(data.records))return localBookData;
+    const updated=localBookData.map(book=>({...book}));
+    // Legacy server list has no canonical book ID. Match exact ORIGINAL title/author/location,
+    // and do not guess for ambiguous duplicate physical entries.
+    for(const correction of data.records) {
+      const indexes=updated.flatMap((book,i)=>
+        book.title.toLocaleLowerCase()===String(correction.original_title||'').toLocaleLowerCase()&&
+        book.author.toLocaleLowerCase()===String(correction.original_author||'').toLocaleLowerCase()&&
+        book.shelf===correction.original_shelf&&book.row===correction.original_row?[i]:[]);
+      if(indexes.length!==1)continue;
+      updated[indexes[0]]={...updated[indexes[0]],title:correction.title,author:correction.author,shelf:correction.shelf,row:correction.row_number};
+    }
+    return updated;
+  }catch{return localBookData;}
+}
+
+function findBooks(q: string, books:typeof localBookData=localBookData) {
   const query = (q || '').toLowerCase().trim();
   if (!query) return [];
-  return localBookData.filter(b => 
+  return books.filter(b => 
     (b.title + b.author).toLowerCase().includes(query)
   ).slice(0, 5);
 }
@@ -3445,7 +3476,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Do NOT import frontend-only TypeScript helpers in this serverless module.
     const catalogRequested = typeof catalogueIntent === 'boolean'
       ? catalogueIntent : isSaqrApiLibrarySearch(userMsg);
-    const found = catalogRequested ? findBooks(userMsg) : [];
+    const found = catalogRequested ? findBooks(userMsg,await approvedCatalogForChat()) : [];
     
     // تجهيز السياق
     const context = !catalogRequested
