@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Bilingual, HeritageInvestigation, heritageInvestigations } from '../src/data/heritageInvestigations';
+import { getGuidedHeritageBook } from '../src/utils/heritageBookGuides';
 
 type Props = {
   language: 'ar' | 'en';
@@ -33,6 +34,7 @@ const HeritageDetectiveGame: React.FC<Props> = ({language,completedIds,onComplet
   const [solved,setSolved] = useState(false);
   const [issues,setIssues] = useState<string[]>([]);
   const caseFile=heritageInvestigations[index];
+  const libraryBook=useMemo(()=>getGuidedHeritageBook(caseFile.id,caseFile.level),[caseFile.id,caseFile.level]);
   const t=(value:Bilingual)=>value[language];
   const chronological=useMemo(
     ()=>caseFile.timeline ? [...caseFile.timeline].reverse() : [],
@@ -154,6 +156,13 @@ const HeritageDetectiveGame: React.FC<Props> = ({language,completedIds,onComplet
       <p className="text-xs font-bold text-slate-500 dark:text-slate-400">{t({ar:'لوحة الإثبات',en:'Proof board'})}: {proof.length}/2 · {t({ar:'مستندات موثوقة مختارة',en:'selected documents'})} ({officialCount}/2) · {rejected?t({ar:'تم تحديد ادعاء للاستبعاد',en:'one claim flagged'}):t({ar:'لم يُستبعد ادعاء بعد',en:'no claim rejected yet'})}</p>
     </section>
 
+    {libraryBook && <aside className="rounded-2xl border border-emerald-300 bg-emerald-50/70 p-5 dark:border-emerald-900 dark:bg-emerald-950/20">
+      <h3 className="text-lg font-black">{t({ar:'مستند إثرائي من رف مكتبة صقر',en:'Supporting reading from the EFIPS shelves'})}</h3>
+      <p className="mt-2 text-sm font-black leading-7">{libraryBook.title} — {libraryBook.author}</p>
+      <p className="mt-1 text-sm font-semibold">{t({ar:'الرف',en:'Shelf'})} {libraryBook.shelf} · {t({ar:'الصف',en:'Row'})} {libraryBook.row}</p>
+      <p className="mt-2 text-sm leading-7">{t(libraryBook.task)}</p>
+      <p className="mt-2 text-xs leading-6 text-emerald-900 dark:text-emerald-200">{t({ar:'هذا كتاب موجود بالفهرس للبحث الإضافي، وليس اقتباسًا من صفحات لم نطّلع عليها. لا يُحتسب الكتاب دليلًا رسميًا إلا بعد قراءة الصفحة وتوثيقها.',en:'This is a real catalogued book for optional research, not an excerpt from uninspected pages. Read and cite actual pages before using it as supporting evidence.'})}</p>
+    </aside>}
     {caseFile.timeline && <section className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5 dark:border-amber-900 dark:bg-amber-950/20">
       <h3 className="text-xl font-black">{t({ar:'2. أعد بناء خط الأحداث',en:'2. Reconstruct the timeline'})}</h3>
       <p className="mt-2 text-sm leading-7">{t({ar:'الأحداث مبعثرة. استخدم الأسهم لترتيبها من الأقدم إلى الأحدث، مستعينًا بالتواريخ الموجودة في المصادر.',en:'Events are out of order. Use the arrows to arrange them from earliest to latest, using the source dates.'})}</p>
