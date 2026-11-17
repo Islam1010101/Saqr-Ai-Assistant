@@ -701,6 +701,7 @@ const AdminDashboard: React.FC = () => {
     };
     const currentSection = dashboardSections.find(item=>item.id===activeSection)!;
     const overviewShortcuts: Array<{label:string;count:number;caption:string;icon:IconName;section:AdminSection;tab?:'students'|'teachers'|'borrowings'|'pending'|'reports'}> = [
+        {label:isAr?'مركز التقارير':'Reports center',count:lessonReportsList.length,caption:isAr?'الرسوم والإحصائيات':'Charts & statistics',icon:'chart',section:'reports'},
         {label:isAr?'الطلبات المعلقة':'Pending requests',count:pendingRequestsList.length,caption:isAr?'مراجعة واعتماد':'Review & approve',icon:'clock',section:'management',tab:'pending'},
         {label:isAr?'الإعارات الحالية':'Current loans',count:borrowingsList.length,caption:isAr?'المتابعة والإرجاع':'Manage returns',icon:'book-open',section:'management',tab:'borrowings'},
         {label:isAr?'إدارة الطلاب':'Students',count:stats.students,caption:isAr?'الحسابات والصلاحيات':'Accounts & access',icon:'graduation-cap',section:'management',tab:'students'},
@@ -768,7 +769,7 @@ const AdminDashboard: React.FC = () => {
                         <div><h3 id="admin-shortcuts-title" className="text-base sm:text-lg font-black text-slate-900 dark:text-white">{isAr?'اختصارات المهام اليومية':'Daily shortcuts'}</h3>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{isAr?'ادخل مباشرة للقسم المطلوب بدل تصفح كل التقارير':'Jump straight to the task you need'}</p></div>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-7 gap-3">
                         {overviewShortcuts.map((item)=><button key={item.label} type="button" onClick={()=>switchAdminSection(item.section,item.tab)}
                             className="group min-w-0 text-start rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/50 px-3 py-4 sm:p-4 hover:border-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-500 transition-colors">
                             <div className="flex items-center justify-between mb-3"><span className="w-9 h-9 inline-flex items-center justify-center rounded-xl bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-300"><OutlineIcon name={item.icon} className="h-5 w-5"/></span><span className="text-xl font-black text-slate-900 dark:text-white tabular-nums">{formatCatalogCount(item.count)}</span></div>
