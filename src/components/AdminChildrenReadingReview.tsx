@@ -73,22 +73,23 @@ export default function AdminChildrenReadingReview({ isAr }: { isAr: boolean }) 
   const approvedCount=Object.values(savedReviews).filter(r=>r.decision==='approved').length;
   const rejectedCount=Object.values(savedReviews).filter(r=>r.decision==='rejected').length;
   const issueCount = queue.filter(entry => Boolean(entry.bibliographicAlertEn)).length;
-  const shelfCounts = useMemo(() => [...new Set(queue.map(entry => entry.shelf))]
+  const shelfCounts = useMemo(() => [...new Set(queue.map(entry => savedReviews[entry.id]?.shelf??entry.shelf))]
     .sort((a,b) => a-b).map(number => ({
-      number, count: queue.filter(entry => entry.shelf === number).length
-    })), [queue]);
+      number, count: queue.filter(entry => (savedReviews[entry.id]?.shelf??entry.shelf) === number).length
+    })), [queue,savedReviews]);
   const matches = useMemo(() => queue.filter(entry => {
-    if (shelf !== 'all' && entry.shelf !== Number(shelf)) return false;
+    const reviewed=savedReviews[entry.id];
+    if (shelf !== 'all' && (reviewed?.shelf??entry.shelf) !== Number(shelf)) return false;
     if (filter === 'issues' && !entry.bibliographicAlertEn) return false;
     if (filter === 'sourced' && !entry.sourceAvailable) return false;
     if (filter === 'unsourced' && entry.sourceAvailable) return false;
     const normalized = query.trim().toLocaleLowerCase();
-    return !normalized || [entry.title,entry.author,String(entry.shelf),entry.catalogIsbn]
+    return !normalized || [reviewed?.title||entry.title,reviewed?.author||entry.author,String(reviewed?.shelf??entry.shelf),reviewed?.isbn||entry.catalogIsbn]
       .some(field => field.toLocaleLowerCase().includes(normalized));
-  }), [queue,filter,query,shelf]);
+  }), [queue,filter,query,shelf,savedReviews]);
 
   const exportReview = () => {
-    const content = childrenReviewCsv(matches);
+    const content = childrenReviewCsv(matches.map(entry=>({...entry,title:savedReviews[entry.id]?.title||entry.title,author:savedReviews[entry.id]?.author||entry.author,shelf:savedReviews[entry.id]?.shelf??entry.shelf,row:savedReviews[entry.id]?.row_number??entry.row,catalogIsbn:savedReviews[entry.id]?.isbn??entry.catalogIsbn})));
     const url = URL.createObjectURL(new Blob([content], {type:'text/csv;charset=utf-8'}));
     const link = document.createElement('a');
     link.href = url;
@@ -192,10 +193,10 @@ export default function AdminChildrenReadingReview({ isAr }: { isAr: boolean }) 
         <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
           {matches.slice(0,limit).map((entry:ChildrenReadingReviewEntry) => <tr key={entry.id} className="align-top">
             <td className="p-3 max-w-[240px]">
-              <p dir="auto" className="font-black text-slate-900 dark:text-white break-words">{entry.title}</p>
-              <p dir="auto" className="text-xs text-slate-600 dark:text-slate-300 break-words mt-1">{entry.author}</p>
+              <p dir="auto" className="font-black text-slate-900 dark:text-white break-words">{savedReviews[entry.id]?.title||entry.title}</p>
+              <p dir="auto" className="text-xs text-slate-600 dark:text-slate-300 break-words mt-1">{savedReviews[entry.id]?.author||entry.author}</p>
               <p className="text-xs font-bold text-sky-800 dark:text-sky-200 mt-1">
-                {isAr?'رف':'Shelf'} {entry.shelf} · {isAr?'صف':'Row'} {entry.row}
+                {isAr?'رف':'Shelf'} {savedReviews[entry.id]?.shelf??entry.shelf} · {isAr?'صف':'Row'} {savedReviews[entry.id]?.row_number??entry.row}
               </p>
             </td>
             <td className="p-3">
