@@ -13,6 +13,7 @@ import SaqrLearningPage from './pages/SaqrLearningPage';
 import SaqrAccessibilityToolbar from './src/components/saqrLearning/SaqrAccessibilityToolbar';
 import { getSaqrLearningAccess } from './src/utils/saqrLearningAccess';
 import AdminDashboard from './pages/AdminDashboard';
+import { syncApprovedPhysicalCatalog } from './src/utils/approvedPhysicalCatalog';
 
 import SearchPage from './pages/SearchPage';
 import SmartSearchPage from './pages/SmartSearchPage';
@@ -728,11 +729,19 @@ const MainLayout: React.FC = () => {
 };
 
 const App: React.FC = () => {
+  const [catalogRevision,setCatalogRevision]=useState(0);
+  useEffect(()=>{
+    let active=true;
+    const refresh=()=>{void syncApprovedPhysicalCatalog().then(count=>{if(active&&count>=0)setCatalogRevision(value=>value+1);}).catch(error=>console.warn('Approved catalog sync unavailable; using unchanged school catalog',error));};
+    refresh();
+    window.addEventListener('efips-catalog-approved-changed',refresh);
+    return ()=>{active=false;window.removeEventListener('efips-catalog-approved-changed',refresh);};
+  },[]);
   return (
     <ApplicationErrorBoundary>
       <ThemeProvider>
         <LanguageProvider>
-          {new URLSearchParams(window.location.search).get('efips_google_teacher') === '1' ? <GoogleTeacherReturn /> : new URLSearchParams(window.location.search).get('efips_google_student') === '1' ? <GoogleSchoolReturn /> : <HashRouter><MainLayout /></HashRouter>}
+          {new URLSearchParams(window.location.search).get('efips_google_teacher') === '1' ? <GoogleTeacherReturn /> : new URLSearchParams(window.location.search).get('efips_google_student') === '1' ? <GoogleSchoolReturn /> : <HashRouter key={catalogRevision}><MainLayout /></HashRouter>}
         </LanguageProvider>
       </ThemeProvider>
     </ApplicationErrorBoundary>
