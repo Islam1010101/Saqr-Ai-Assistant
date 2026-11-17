@@ -194,7 +194,7 @@ const readSaved = (key: string): Progress => {
         if (typeof stored === 'string' && !Number.isNaN(Date.parse(stored))) stampDates[id] = stored;
       }
     }
-    return {stamps,words:valid(value.words,dictionaryActivities),cases:valid(value.cases,heritageInvestigations),notes,stampDates};
+    return {stamps,words:valid(value.words,dictionaryActivities),cases:valid(value.cases,[...activities.archive,...heritageInvestigations]),notes,stampDates};
   } catch { return emptyProgress(); }
 };
 const Icon: React.FC<{kind:'book'|'stamp'|'weave'|'document'|'check'|'arrow'|'lock'; className?:string}> = ({kind,className='w-7 h-7'}) => {
@@ -292,7 +292,8 @@ const NationalIdentityPage: React.FC = () => {
     for (let i=indexes.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[indexes[i],indexes[j]]=[indexes[j],indexes[i]];}
     return indexes;
   }, [currentMode,index,round,advancedPassport]);
-  const totalCompleted = progress.stamps.length + progress.words.length + progress.cases.length;
+  const resolvedCaseIds = progress.cases.filter(id=>heritageInvestigations.some(file=>file.id===id));
+  const totalCompleted = progress.stamps.length + progress.words.length + resolvedCaseIds.length;
   const go = (next: Mode) => { setMode(next);setIndex(0);setChosen(null);setFailed(false);setAdvancedPassport(false);setPassportTier(0);setStage('play');setNewlyStamped(null);setRound(n=>n+1); };
   const selectEntry = (nextIndex: number) => {setIndex(nextIndex);setChosen(null);setFailed(false);setAdvancedPassport(false);setStage('play');setSourceOpened(false);setNewlyStamped(null);};
   const submitAnswer = (answer: number) => {
@@ -330,7 +331,7 @@ const NationalIdentityPage: React.FC = () => {
   const modules = [
     {id:'passport' as const,icon:'stamp' as const,title:l('جواز صقر الثقافي','Saqr Cultural Passport'),desc:l('اكتشف الإمارات السبع، واقرأ حكاية كل إمارة واجمع ختمها.','Explore all seven emirates, read their stories and collect their stamps.'),total:sourcedEmirates.length,count:progress.stamps.length,color:'from-emerald-700 to-teal-600'},
     {id:'language' as const,icon:'weave' as const,title:l('كنوز لغتنا الإماراتية','Treasures of Emirati Language'),desc:l('اختر معنى 10 ألفاظ إماراتية بعد مراجعة المعجم الورقي.','Find the meanings of 10 Emirati words using the printed dictionary.'),total:10,count:entries.filter(x=>progress.words.includes(x.id)).length,color:'from-amber-600 to-orange-600'},
-    {id:'archive' as const,icon:'document' as const,title:l('محقق ذاكرة وطن','National Memory Detective'),desc:l('10 ملفات تحقيق تاريخي: افحص وثيقتين موثوقتين، اكتشف الادعاء غير الموثق، واصنع تقريرك بالأدلة.','10 historical cases: investigate two reliable sources, reject unsupported claims and submit an evidence-based report.'),total:heritageInvestigations.length,count:progress.cases.length,color:'from-sky-700 to-indigo-700'}
+    {id:'archive' as const,icon:'document' as const,title:l('محقق ذاكرة وطن','National Memory Detective'),desc:l('10 ملفات تحقيق تاريخي: افحص وثيقتين موثوقتين، اكتشف الادعاء غير الموثق، واصنع تقريرك بالأدلة.','10 historical cases: investigate two reliable sources, reject unsupported claims and submit an evidence-based report.'),total:heritageInvestigations.length,count:resolvedCaseIds.length,color:'from-sky-700 to-indigo-700'}
   ];
   const moduleFeature={passport:'passport',language:'emirati_language',archive:'heritage_detective'} as const;
   const visibleModules=modules.filter(m=>granted?.features[moduleFeature[m.id]]!==false);
@@ -365,7 +366,7 @@ const NationalIdentityPage: React.FC = () => {
             <div className="nh-v2-stats mt-6 flex flex-wrap items-center gap-3">
               <div className="rounded-xl border border-white/25 bg-white/10 px-4 py-3"><span className="block text-[11px] text-emerald-100">{tr(l('الأختام','Stamps'))}</span><strong className="text-xl font-black tabular-nums">{progress.stamps.length}/7</strong></div>
               <div className="rounded-xl border border-white/25 bg-white/10 px-4 py-3"><span className="block text-[11px] text-emerald-100">{tr(l('كنوز اللغة','Word treasures'))}</span><strong className="text-xl font-black tabular-nums">{progress.words.length}</strong></div>
-              <div className="rounded-xl border border-white/25 bg-white/10 px-4 py-3"><span className="block text-[11px] text-emerald-100">{tr(l('ملفات البحث','Research files'))}</span><strong className="text-xl font-black tabular-nums">{progress.cases.length}/{heritageInvestigations.length}</strong></div>
+              <div className="rounded-xl border border-white/25 bg-white/10 px-4 py-3"><span className="block text-[11px] text-emerald-100">{tr(l('ملفات البحث','Research files'))}</span><strong className="text-xl font-black tabular-nums">{resolvedCaseIds.length}/{heritageInvestigations.length}</strong></div>
             </div>
           </div>
           <div className="nh-hero-art nh-v2-hero-art flex justify-center" aria-label={tr(l('صقر يحمل علم الإمارات','Saqr holding the UAE flag'))} role="img">
@@ -490,7 +491,7 @@ const NationalIdentityPage: React.FC = () => {
             </div>
           </Link>
         </section>}
-      </> : mode==='archive' ? <div className="mt-7"><HeritageDetectiveGame language={lang} completedIds={progress.cases} onBack={()=>go('home')} onComplete={caseId=>setProgress(prev=>prev.cases.includes(caseId)?prev:{...prev,cases:[...prev.cases,caseId]})}/></div> : <section className={'nh-quest-page nh-v2-quest-area nh-quest-'+mode+' mt-7'}>
+      </> : mode==='archive' ? <div className="mt-7"><HeritageDetectiveGame language={lang} completedIds={resolvedCaseIds} onBack={()=>go('home')} onComplete={caseId=>setProgress(prev=>prev.cases.includes(caseId)?prev:{...prev,cases:[...prev.cases,caseId]})}/></div> : <section className={'nh-quest-page nh-v2-quest-area nh-quest-'+mode+' mt-7'}>
         <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
           <button type="button" onClick={()=>go('home')} className="inline-flex items-center gap-2 rounded-xl bg-slate-100 dark:bg-slate-900 px-4 py-2.5 text-xs sm:text-sm font-black hover:bg-emerald-50 dark:hover:bg-emerald-950/60 transition-colors">
             <Icon kind="arrow" className={'w-4 h-4 '+(lang==='ar'?'rotate-180':'')}/>{tr(l('كل المغامرات','All adventures'))}
