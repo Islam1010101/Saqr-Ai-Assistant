@@ -11,6 +11,16 @@ Deno.serve(async(req:Request)=>{
  if(req.method!=="POST"||!originAllowed(origin))return respond(403,{error:"Forbidden"});
  const url=Deno.env.get("SUPABASE_URL"),anon=Deno.env.get("SUPABASE_ANON_KEY"),secret=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
  if(!url||!anon||!secret)return respond(503,{error:"Service unavailable"});
+ // Public catalog gets only approved, non-sensitive book metadata; never exposes reviewer details.
+ let earlyBody:any;
+ try{earlyBody=await req.clone().json()}catch{return respond(400,{error:"Bad JSON"})}
+ if(earlyBody.action==="catalog"){
+  const catalogUrl=Deno.env.get("SUPABASE_URL"),catalogSecret=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if(!catalogUrl||!catalogSecret)return respond(503,{error:"Service unavailable"});
+  const db=createClient(catalogUrl,catalogSecret,{auth:{persistSession:false,autoRefreshToken:false}});
+  const {data,error}=await db.from("efips_children_book_reviews").select("catalog_id,title,author,shelf,row_number,isbn,publisher,reading_tier,original_title,original_author,original_shelf,original_row").eq("decision","approved").limit(5000);
+  return error?respond(503,{error:"Catalog corrections unavailable"}):respond(200,{ok:true,records:data});
+ }
  const token=req.headers.get("authorization")?.match(/^Bearer\s+(.+)$/i)?.[1];
  if(!token)return respond(401,{error:"Verified administrator sign-in required"});
  const publicClient=createClient(url,anon,{auth:{persistSession:false,autoRefreshToken:false}});
@@ -54,7 +64,13 @@ Deno.serve(async(req:Request)=>{
  if(!["pending","approved","rejected"].includes(decision)||tier&&!["beginner","intermediate","advanced"].includes(tier))return respond(400,{error:"Invalid decision or reading tier"});
  if(sourceUrl&&(!/^https:\/\//i.test(sourceUrl)||sourceUrl.length>600))return respond(400,{error:"HTTPS source link required"});
  if(decision==="approved"&&(!sourceUrl||!text(record.source_name)||!tier))return respond(400,{error:"Approval requires a source and reviewed reading tier"});
- const payload={catalog_id:id,title,author,shelf,row_number:row,isbn:text(record.isbn,32),publisher:text(record.publisher),source_name:text(record.source_name),source_url:sourceUrl,reading_tier:tier,decision,notes:text(record.notes,1000),reviewed_by:email,reviewed_at:new Date().toISOString()};
+ const {data:previous}=await admin.from("efips_children_book_reviews").select("original_title,original_author,original_shelf,original_row").eq("catalog_id",id).maybeSingle();
+ const originalTitle=text(previous?.original_title||record.original_title||record.title);
+ const originalAuthor=text(previous?.original_author||record.original_author||record.author);
+ const originalShelf=Number(previous?.original_shelf||record.original_shelf||shelf);
+ const originalRow=Number(previous?.original_row||record.original_row||row);
+ if(!originalTitle||!originalAuthor||!Number.isSafeInteger(originalShelf)||!Number.isSafeInteger(originalRow))return respond(400,{error:"Original catalog identity required"});
+ const payload={catalog_id:id,title,author,shelf,row_number:row,isbn:text(record.isbn,32),publisher:text(record.publisher),source_name:text(record.source_name),source_url:sourceUrl,reading_tier:tier,decision,notes:text(record.notes,1000),original_title:originalTitle,original_author:originalAuthor,original_shelf:originalShelf,original_row:originalRow,reviewed_by:email,reviewed_at:new Date().toISOString()};
  const {data,error:saveError}=await admin.from("efips_children_book_reviews").upsert(payload,{onConflict:"catalog_id"}).select("*").single();
  return saveError?respond(503,{error:"Could not save review"}):respond(200,{ok:true,record:data});
 });
