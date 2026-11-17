@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Bilingual, HeritageInvestigation, heritageInvestigations } from '../src/data/heritageInvestigations';
 import { getGuidedHeritageBook } from '../src/utils/heritageBookGuides';
+import './heritageDetectiveGame.css';
 
 type Props = {
   language: 'ar' | 'en';
@@ -10,42 +11,80 @@ type Props = {
   onBack: () => void;
 };
 type Verdict = HeritageInvestigation['verdict'];
-const verdicts: Array<{ id: Verdict; text: Bilingual }> = [
-  {id:'supported',text:{ar:'الادعاء مدعوم بالأدلة',en:'Claim supported by evidence'}},
-  {id:'misleading',text:{ar:'الادعاء مضلل أو ناقص',en:'Claim misleading or incomplete'}},
-  {id:'false',text:{ar:'الادعاء خاطئ',en:'Claim false'}}
+type Stage = 'brief' | 'evidence' | 'timeline' | 'verdict';
+type Mark = 'folder' | 'lens' | 'clock' | 'seal' | 'check' | 'arrow' | 'book' | 'file' | 'lock';
+
+const stageNames: Record<Stage, Bilingual> = {
+  brief: { ar: 'استلام البلاغ', en: 'The briefing' },
+  evidence: { ar: 'معمل الأدلة', en: 'Evidence lab' },
+  timeline: { ar: 'خط الأحداث', en: 'Timeline' },
+  verdict: { ar: 'كشف الحقيقة', en: 'The verdict' }
+};
+const stageIcons: Record<Stage, Mark> = {
+  brief: 'folder', evidence: 'lens', timeline: 'clock', verdict: 'seal'
+};
+const verdicts: Array<{ id: Verdict; label: Bilingual; tag: Bilingual }> = [
+  { id: 'supported', label: { ar: 'البلاغ صحيح', en: 'Supported' }, tag: { ar: 'مؤكد', en: 'Verified' } },
+  { id: 'misleading', label: { ar: 'الحقيقة ناقصة', en: 'Misleading' }, tag: { ar: 'مضلل', en: 'Misleading' } },
+  { id: 'false', label: { ar: 'البلاغ خاطئ', en: 'False claim' }, tag: { ar: 'مرفوض', en: 'Rejected' } }
 ];
-const move = <T,>(items:T[], from:number, to:number) => {
-  if(to<0||to>=items.length)return items;
-  const result=[...items];
-  result.splice(to,0,...result.splice(from,1));
-  return result;
+const move = <T,>(list: T[], from: number, to: number) => {
+  if (to < 0 || to >= list.length) return list;
+  const copy = [...list];
+  copy.splice(to, 0, ...copy.splice(from, 1));
+  return copy;
 };
 
-/** A self-contained evidence board: no AI grading, automatic answer reveals, or invented archival scans. */
-const HeritageDetectiveGame: React.FC<Props> = ({language,completedIds,onComplete,onBack}) => {
-  const [index,setIndex] = useState(0);
-  const [expanded,setExpanded] = useState<string | null>(null);
-  const [inspected,setInspected] = useState<string[]>([]);
-  const [proof,setProof] = useState<string[]>([]);
-  const [rejected,setRejected] = useState<string | null>(null);
-  const [verdict,setVerdict] = useState<Verdict | null>(null);
-  const [reason,setReason] = useState('');
-  const [solved,setSolved] = useState(false);
-  const [issues,setIssues] = useState<string[]>([]);
-  const caseFile=heritageInvestigations[index];
-  const libraryBook=useMemo(()=>getGuidedHeritageBook(caseFile.id,caseFile.level),[caseFile.id,caseFile.level]);
-  const t=(value:Bilingual)=>value[language];
-  const chronological=useMemo(
-    ()=>caseFile.timeline ? [...caseFile.timeline].reverse() : [],
-    [caseFile.id]
-  );
-  const [ordered,setOrdered]=useState<string[]>(()=>chronological.map(entry=>entry.id));
+/** Lightweight line icons. No icon font, external image, or third-party animation package. */
+const MarkIcon: React.FC<{ name: Mark; size?: number }> = ({ name, size = 24 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
+    strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    {name === 'folder' && <><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10H3Z"/><path d="M3 10h18"/></>}
+    {name === 'lens' && <><circle cx="10.7" cy="10.7" r="6.8"/><path d="m16 16 5 5M8 11l2 2 4-5"/></>}
+    {name === 'clock' && <><circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/></>}
+    {name === 'seal' && <><path d="M12 2 15 5l4-.1.4 4L22 12l-2.6 3.1-.4 4-4-.1-3 3-3-3-4 .1-.4-4L2 12l2.6-3.1.4-4 4 .1Z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></>}
+    {name === 'check' && <path d="m5 12 4 4L19 6"/>}
+    {name === 'arrow' && <><path d="m5 12 14 0M13 6l6 6-6 6"/></>}
+    {name === 'book' && <><path d="M12 6C9 4 6 4 2 5v14c4-1 7-1 10 1 3-2 6-2 10-1V5c-4-1-7-1-10 1Z"/><path d="M12 6v14"/></>}
+    {name === 'file' && <><path d="M6 2h8l4 4v16H6Z"/><path d="M14 2v5h4M9 12h6M9 16h5"/></>}
+    {name === 'lock' && <><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></>}
+  </svg>
+);
 
-  const selectCase=(next:number)=>{
-    if(next<0||next>=heritageInvestigations.length)return;
-    const target=heritageInvestigations[next];
-    setIndex(next);
+/** Staged investigation room: each case remains source-first, and validation remains unchanged. */
+const HeritageDetectiveGame: React.FC<Props> = ({ language, completedIds, onComplete, onBack }) => {
+  const [selectedCase, setSelectedCase] = useState<number | null>(null);
+  const [stage, setStage] = useState<Stage>('brief');
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [inspected, setInspected] = useState<string[]>([]);
+  const [proof, setProof] = useState<string[]>([]);
+  const [rejected, setRejected] = useState<string | null>(null);
+  const [verdict, setVerdict] = useState<Verdict | null>(null);
+  const [reason, setReason] = useState('');
+  const [solved, setSolved] = useState(false);
+  const [issues, setIssues] = useState<string[]>([]);
+  const [showBook, setShowBook] = useState(false);
+  const caseFile = heritageInvestigations[selectedCase ?? 0];
+  const libraryBook = useMemo(() => getGuidedHeritageBook(caseFile.id, caseFile.level), [caseFile.id, caseFile.level]);
+  const t = (value: Bilingual) => value[language];
+  const stages: Stage[] = caseFile.timeline ? ['brief', 'evidence', 'timeline', 'verdict'] : ['brief', 'evidence', 'verdict'];
+  const [ordered, setOrdered] = useState<string[]>(() =>
+    [...(heritageInvestigations[0].timeline || [])].reverse().map(entry => entry.id)
+  );
+  const completedCount = heritageInvestigations.filter(item => completedIds.includes(item.id)).length;
+  const selectedEvidence = caseFile.evidence.find(item => item.id === expanded);
+  const officialCount = caseFile.evidence.filter(item => proof.includes(item.id) && item.official).length;
+  const chronologicalDone = !caseFile.timeline || ordered.every((id, position) =>
+    caseFile.timeline?.find(item => item.id === id)?.order === position
+  );
+  const evidenceReady = inspected.length === caseFile.evidence.length && officialCount === 2 && !!rejected;
+  const stepPosition = stages.indexOf(stage);
+
+  const openCase = (next: number) => {
+    if (next < 0 || next >= heritageInvestigations.length) return;
+    const target = heritageInvestigations[next];
+    setSelectedCase(next);
+    setStage('brief');
     setExpanded(null);
     setInspected([]);
     setProof([]);
@@ -54,158 +93,222 @@ const HeritageDetectiveGame: React.FC<Props> = ({language,completedIds,onComplet
     setReason('');
     setSolved(false);
     setIssues([]);
-    setOrdered(target.timeline ? [...target.timeline].reverse().map(entry=>entry.id) : []);
+    setShowBook(false);
+    setOrdered(target.timeline ? [...target.timeline].reverse().map(entry => entry.id) : []);
   };
-  const inspect=(id:string)=>{
-    setExpanded(current=>current===id?null:id);
-    setInspected(current=>current.includes(id)?current:[...current,id]);
+  const inspect = (id: string) => {
+    setExpanded(id);
+    setInspected(current => current.includes(id) ? current : [...current, id]);
     setIssues([]);
   };
-  const toggleProof=(id:string)=>{
-    setProof(current=>current.includes(id)?current.filter(value=>value!==id):current.length<2?[...current,id]:current);
-    setRejected(current=>current===id?null:current);
+  const toggleProof = (id: string) => {
+    setProof(current => current.includes(id) ? current.filter(value => value !== id) : current.length < 2 ? [...current, id] : current);
+    setRejected(current => current === id ? null : current);
     setIssues([]);
   };
-  const markUnreliable=(id:string)=>{
-    setRejected(current=>current===id?null:id);
-    setProof(current=>current.filter(value=>value!==id));
+  const markUnreliable = (id: string) => {
+    setRejected(current => current === id ? null : id);
+    setProof(current => current.filter(value => value !== id));
     setIssues([]);
   };
-  const verify=()=>{
-    const errors:string[]=[];
-    if(inspected.length<caseFile.evidence.length)errors.push(t({ar:'افحص بطاقات الأدلة الثلاث أولًا، حتى لا تعتمد على أول معلومة. ',en:'Inspect all three evidence cards before deciding.'}));
-    if(proof.length!==2||caseFile.evidence.filter(item=>proof.includes(item.id)&&item.official).length!==2)
-      errors.push(t({ar:'اختر وثيقتين موثوقتين تؤيدان استنتاجك.',en:'Select two dependable documents supporting your finding.'}));
-    if(!rejected||caseFile.evidence.find(item=>item.id===rejected)?.official!==false)
-      errors.push(t({ar:'حدد الادعاء التدريبي غير الموثق واستبعده.',en:'Identify and reject the unattributed practice claim.'}));
-    if(verdict!==caseFile.verdict)
-      errors.push(t({ar:'حكمك لا يطابق الأدلة. قارن العبارات بالتواريخ والتفاصيل ثم أعد التقييم.',en:'Your finding conflicts with the evidence. Compare dates and details, then reassess.'}));
-    if(caseFile.timeline && ordered.some((id,position)=>caseFile.timeline?.find(item=>item.id===id)?.order!==position))
-      errors.push(t({ar:'التسلسل الزمني غير صحيح؛ راجع تاريخ كل حدث في الوثائق.',en:'The chronology is incorrect. Recheck every event date in the sources.'}));
-    if(reason.trim().length<25)
-      errors.push(t({ar:'اكتب استنتاجك بنفسك في 25 حرفًا على الأقل، مستندًا إلى الأدلة.',en:'Write at least 25 characters explaining the finding using evidence.'}));
+  const verify = () => {
+    const errors: string[] = [];
+    if (inspected.length < caseFile.evidence.length)
+      errors.push(t({ ar: 'افحص المستندات الثلاثة قبل حسم القضية.', en: 'Inspect all three records before closing the case.' }));
+    if (proof.length !== 2 || caseFile.evidence.filter(item => proof.includes(item.id) && item.official).length !== 2)
+      errors.push(t({ ar: 'ثبت وثيقتين موثوقتين على لوحة الأدلة.', en: 'Pin two dependable documents on the evidence board.' }));
+    if (!rejected || caseFile.evidence.find(item => item.id === rejected)?.official !== false)
+      errors.push(t({ ar: 'استبعد الادعاء التدريبي الذي لا يملك مصدرًا أصليًا.', en: 'Reject the unsourced practice claim.' }));
+    if (caseFile.timeline && !chronologicalDone)
+      errors.push(t({ ar: 'أعد ترتيب خط الأحداث من الأقدم إلى الأحدث.', en: 'Reconstruct the timeline from earliest to latest.' }));
+    if (verdict !== caseFile.verdict)
+      errors.push(t({ ar: 'قرارك لا يتوافق مع الأدلة. أعد مقارنة المصادر.', en: 'Your verdict conflicts with the evidence. Compare the sources again.' }));
+    if (reason.trim().length < 25)
+      errors.push(t({ ar: 'سجّل ملاحظة استنتاج من 25 حرفًا على الأقل.', en: 'Record a finding of at least 25 characters.' }));
     setIssues(errors);
-    if(errors.length)return;
+    if (errors.length) return;
     setSolved(true);
     onComplete(caseFile.id);
   };
-  const officialCount=caseFile.evidence.filter(item=>proof.includes(item.id)&&item.official).length;
-  return <section className="mx-auto max-w-5xl space-y-5" aria-label={t({ar:'مكتب تحقيق ذاكرة وطن',en:'National Memory Investigation Bureau'})}>
-    <div className="relative overflow-hidden rounded-[1.8rem] border border-sky-800/40 bg-gradient-to-br from-[#112b3b] via-[#174657] to-[#166049] p-5 sm:p-8 text-white shadow-xl">
-      <div className="absolute inset-x-0 top-0 flex h-1.5" aria-hidden="true"><span className="w-1/4 bg-red-500"/><span className="w-1/4 bg-green-500"/><span className="w-1/4 bg-white"/><span className="w-1/4 bg-slate-950"/></div>
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <button type="button" onClick={onBack} className="rounded-xl bg-white/15 px-4 py-2 text-sm font-black hover:bg-white/25">{t({ar:'العودة للتحديات',en:'Back to challenges'})}</button>
-        <span className="text-xs font-black tracking-wide text-sky-100">{t({ar:'مكتب التحقيق التاريخي · EFIPS',en:'HISTORICAL INVESTIGATION BUREAU · EFIPS'})}</span>
-      </div>
-      <div className="mt-5 flex items-center gap-3">
-        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/15">
-          <svg className="h-9 w-9" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="20" cy="20" r="12"/><path d="m29 29 12 12M15 20h10M20 15v10"/></svg>
-        </div>
-        <div><h2 className="text-2xl sm:text-3xl font-black">{t({ar:'محقق ذاكرة وطن',en:'National Memory Detective'})}</h2>
-          <p className="mt-2 text-sm leading-7 text-sky-50">{t({ar:'تحقيقات تاريخية حقيقية في وقائع موثقة: افحص، قارن، استبعد، واستنتج. لا توجد إجابة تنجح بمجرد التخمين.',en:'Real historical investigations: inspect sources, compare accounts, discard weak claims and build a supported finding.'})}</p>
-        </div>
-      </div>
-      <div className="mt-6 flex flex-wrap gap-3 text-xs font-black">
-        <span className="rounded-full bg-white/15 px-4 py-2">{t({ar:'ملفات محلولة',en:'Cases resolved'})}: {heritageInvestigations.filter(item=>completedIds.includes(item.id)).length} / {heritageInvestigations.length}</span>
-        <span className="rounded-full bg-white/15 px-4 py-2">{t({ar:'وثائق رسمية وروابط أصلية',en:'Official source records & links'})}</span>
-        <span className="rounded-full bg-white/15 px-4 py-2">{t({ar:'بدون توقيت قسري',en:'No forced timer'})}</span>
-      </div>
-    </div>
+  const nextStage = () => { if (stepPosition < stages.length - 1) setStage(stages[stepPosition + 1]); };
 
-    <nav aria-label={t({ar:'ملفات القضايا',en:'Case files'})} className="flex gap-2 overflow-x-auto pb-2">
-      {heritageInvestigations.map((file,position)=><button type="button" key={file.id} onClick={()=>selectCase(position)}
-        aria-current={index===position?'step':undefined}
-        aria-label={t(file.title)}
-        className={'min-w-11 shrink-0 rounded-xl border-2 px-4 py-3 text-sm font-black transition-colors '+(index===position?'border-sky-600 bg-sky-700 text-white':completedIds.includes(file.id)?'border-emerald-500 bg-emerald-50 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-100':'border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100')}>
-        {String(position+1).padStart(2,'0')}{completedIds.includes(file.id)?' ✓':''}
-      </button>)}
-    </nav>
-
-    <article className="rounded-[1.6rem] border border-slate-200 bg-white p-5 shadow-md dark:border-slate-700 dark:bg-slate-950 sm:p-7">
-      <div className="flex flex-wrap items-center justify-between gap-2"><span className="text-xs font-black uppercase tracking-widest text-sky-700 dark:text-sky-300">{t({ar:'ملف تحقيق',en:'CASE FILE'})} {index+1}/{heritageInvestigations.length}</span><span className="rounded-full bg-amber-100 px-3 py-1.5 text-xs font-black text-amber-900 dark:bg-amber-950 dark:text-amber-200">{t({ar:'مستوى',en:'Level'})} {caseFile.level}</span></div>
-      <h3 className="mt-3 text-xl sm:text-2xl font-black">{t(caseFile.title)}</h3>
-      <p className="mt-3 text-sm leading-8 text-slate-700 dark:text-slate-300">{t(caseFile.briefing)}</p>
-      <div className="mt-5 rounded-xl border-s-4 border-rose-500 bg-rose-50 p-4 dark:bg-rose-950/25">
-        <p className="text-xs font-black uppercase text-rose-800 dark:text-rose-300">{t({ar:'البلاغ المطلوب التحقق منه — ليس حقيقة مثبتة',en:'CLAIM TO INVESTIGATE — NOT VERIFIED FACT'})}</p>
-        <p className="mt-2 text-base font-black leading-8 text-rose-950 dark:text-rose-100">{t(caseFile.allegation)}</p>
+  return (
+    <section className="hd" dir={language === 'ar' ? 'rtl' : 'ltr'} aria-label={t({ ar: 'مكتب محقق ذاكرة وطن', en: 'National Memory Detective Bureau' })}>
+      <div className="hd-atmosphere" aria-hidden="true"><span/><span/><span/></div>
+      <div className="hd-topbar">
+        <button type="button" className="hd-back" onClick={selectedCase === null ? onBack : () => setSelectedCase(null)}>
+          <span className="hd-back-symbol" aria-hidden="true">‹</span>
+          {selectedCase === null ? t({ ar: 'تحديات صقر', en: 'Saqr challenges' }) : t({ ar: 'غرفة القضايا', en: 'Case room' })}
+        </button>
+        <div className="hd-brand"><span className="hd-status-light"/>{t({ ar: 'وحدة التحقيق التاريخي', en: 'HISTORICAL INVESTIGATION UNIT' })}<small>EFIPS</small></div>
       </div>
-    </article>
 
-    <section className="space-y-3" aria-label={t({ar:'مستندات الأدلة',en:'Evidence documents'})}>
-      <div className="flex flex-wrap items-baseline justify-between gap-3"><h3 className="text-xl font-black">{t({ar:'1. افتح ملف الأدلة وافحص مصدر كل وثيقة',en:'1. Inspect the evidence and its provenance'})}</h3><span className="text-xs font-bold text-slate-500 dark:text-slate-400">{t({ar:'تم فحص',en:'Inspected'})} {inspected.length}/3</span></div>
-      <p className="text-sm leading-7 text-slate-600 dark:text-slate-300">{t({ar:'البطاقات ملخصات تعليمية مستندة إلى روابط محددة، وليست صورًا لوثائق أرشيفية. إحدى البطاقات ادعاء تدريبي مختلق وغير موثق؛ دورك اكتشافه.',en:'Cards are educational summaries with traceable sources, not scans of archival documents. One card is a clearly fictional, unattributed practice claim; identify it.'})}</p>
-      <div className="grid gap-3 md:grid-cols-3">
-        {caseFile.evidence.map((item,position)=><div key={item.id} className={'min-w-0 rounded-2xl border-2 p-4 shadow-sm transition-colors '+(expanded===item.id?'border-sky-500 bg-sky-50 dark:border-sky-700 dark:bg-sky-950/40':'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-950')}>
-          <button type="button" onClick={()=>inspect(item.id)} aria-expanded={expanded===item.id} className="w-full text-start focus-visible:outline focus-visible:outline-4 focus-visible:outline-sky-400">
-            <span className="text-xs font-black tracking-wider text-sky-700 dark:text-sky-300">{t({ar:'مستند',en:'DOCUMENT'})} {String(position+1).padStart(2,'0')}</span>
-            <strong className="mt-2 block min-h-12 text-base font-black">{t(item.title)}</strong>
-            <span className="mt-2 block text-xs leading-6 text-slate-600 dark:text-slate-300">{t({ar:'الجهة المذكورة',en:'Attributed to'})}: {t(item.publisher)}</span>
-            <span className="mt-3 block font-black text-sky-700 dark:text-sky-300">{expanded===item.id?t({ar:'طيّ المستند',en:'Close file'}):t({ar:'فحص المستند',en:'Inspect file'})}</span>
-          </button>
-          {expanded===item.id && <div className="mt-4 space-y-3 border-t border-slate-200 pt-4 dark:border-slate-700">
-            <p className="text-sm leading-8">{t(item.summary)}</p>
-            {item.url?<a href={item.url} target="_blank" rel="noopener noreferrer" className="inline-flex rounded-xl border border-sky-300 bg-white px-3 py-2 text-xs font-black text-sky-800 underline underline-offset-4 dark:bg-slate-900 dark:text-sky-200">{t({ar:'مراجعة السجل الرسمي الأصلي',en:'Check original official record'})}</a>:
-              <p className="text-xs font-black text-rose-700 dark:text-rose-300">{t({ar:'لا توجد جهة نشر أو وثيقة أصلية لهذا الادعاء التدريبي.',en:'No publisher or original record exists for this practice claim.'})}</p>}
-            <div className="grid gap-2">
-              <button type="button" disabled={solved} onClick={()=>toggleProof(item.id)} aria-pressed={proof.includes(item.id)} className={'rounded-xl px-3 py-2.5 text-xs font-black '+(proof.includes(item.id)?'bg-emerald-700 text-white':'bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200')}>{proof.includes(item.id)?t({ar:'أُضيف إلى ملف الإثبات',en:'Added to proof file'}):t({ar:'اعتماد ضمن دليل الإثبات',en:'Use as supporting evidence'})}</button>
-              <button type="button" disabled={solved} onClick={()=>markUnreliable(item.id)} aria-pressed={rejected===item.id} className={'rounded-xl border px-3 py-2.5 text-xs font-black '+(rejected===item.id?'border-rose-700 bg-rose-700 text-white':'border-rose-200 text-rose-800 dark:border-rose-900 dark:text-rose-200')}>{rejected===item.id?t({ar:'استُبعد لغياب المصدر',en:'Rejected: no source'}):t({ar:'استبعاد باعتباره غير موثق',en:'Reject as unverified'})}</button>
+      {selectedCase === null ? (
+        <div className="hd-enter" key="case-room">
+          <header className="hd-hero">
+            <div className="hd-hero-copy">
+              <span className="hd-eyebrow"><span className="hd-pulse-dot"/>{t({ ar: 'ملفات حقيقية • مصادر رسمية', en: 'TRUE HISTORY • OFFICIAL SOURCES' })}</span>
+              <h2>{t({ ar: 'محقق', en: 'Memory' })}<br/><em>{t({ ar: 'ذاكرة وطن', en: 'Detective' })}</em></h2>
+              <p>{t({ ar: 'في الأرشيف أسرار لا تُحل بالتخمين. اختر قضية، افحص الأدلة، واربط الخيوط حتى تظهر الحقيقة.', en: 'There is more to every story. Choose a mystery, inspect the records, connect the clues and uncover the truth.' })}</p>
+              <div className="hd-hero-chips"><span>{t({ ar: '10 قضايا', en: '10 cases' })}</span><span>{t({ ar: 'أدلة رسمية', en: 'Verified records' })}</span><span>{t({ ar: 'بدون عداد وقت', en: 'No timer' })}</span></div>
             </div>
-          </div>}
-        </div>)}
-      </div>
-      <p className="text-xs font-bold text-slate-500 dark:text-slate-400">{t({ar:'لوحة الإثبات',en:'Proof board'})}: {proof.length}/2 · {t({ar:'مستندات موثوقة مختارة',en:'selected documents'})} ({officialCount}/2) · {rejected?t({ar:'تم تحديد ادعاء للاستبعاد',en:'one claim flagged'}):t({ar:'لم يُستبعد ادعاء بعد',en:'no claim rejected yet'})}</p>
-    </section>
-
-    {libraryBook && <aside className="rounded-2xl border border-emerald-300 bg-emerald-50/70 p-5 dark:border-emerald-900 dark:bg-emerald-950/20">
-      <h3 className="text-lg font-black">{t({ar:'مستند إثرائي من رف مكتبة صقر',en:'Supporting reading from the EFIPS shelves'})}</h3>
-      <p className="mt-2 text-sm font-black leading-7">{libraryBook.title} — {libraryBook.author}</p>
-      <p className="mt-1 text-sm font-semibold">{t({ar:'الرف',en:'Shelf'})} {libraryBook.shelf} · {t({ar:'الصف',en:'Row'})} {libraryBook.row}</p>
-      <p className="mt-2 text-sm leading-7">{t(libraryBook.task)}</p>
-      <p className="mt-2 text-xs leading-6 text-emerald-900 dark:text-emerald-200">{t({ar:'هذا كتاب موجود بالفهرس للبحث الإضافي، وليس اقتباسًا من صفحات لم نطّلع عليها. لا يُحتسب الكتاب دليلًا رسميًا إلا بعد قراءة الصفحة وتوثيقها.',en:'This is a real catalogued book for optional research, not an excerpt from uninspected pages. Read and cite actual pages before using it as supporting evidence.'})}</p>
-    </aside>}
-    {caseFile.timeline && <section className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5 dark:border-amber-900 dark:bg-amber-950/20">
-      <h3 className="text-xl font-black">{t({ar:'2. أعد بناء خط الأحداث',en:'2. Reconstruct the timeline'})}</h3>
-      <p className="mt-2 text-sm leading-7">{t({ar:'الأحداث مبعثرة. استخدم الأسهم لترتيبها من الأقدم إلى الأحدث، مستعينًا بالتواريخ الموجودة في المصادر.',en:'Events are out of order. Use the arrows to arrange them from earliest to latest, using the source dates.'})}</p>
-      <ol className="mt-4 space-y-2">
-        {ordered.map((id,position)=><li key={id} className="flex items-center gap-3 rounded-xl border border-amber-200 bg-white p-3 dark:border-amber-900 dark:bg-slate-900">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-sm font-black text-amber-900">{position+1}</span>
-          <span className="min-w-0 flex-1 text-sm font-bold leading-6">{t(caseFile.timeline!.find(entry=>entry.id===id)!.label)}</span>
-          <div className="flex shrink-0 gap-1">
-            <button type="button" disabled={position===0||solved} onClick={()=>setOrdered(items=>move(items,position,position-1))} className="rounded-lg border px-3 py-2 font-black disabled:opacity-30" aria-label={t({ar:'نقل الحدث إلى الأعلى',en:'Move event up'})}>↑</button>
-            <button type="button" disabled={position===ordered.length-1||solved} onClick={()=>setOrdered(items=>move(items,position,position+1))} className="rounded-lg border px-3 py-2 font-black disabled:opacity-30" aria-label={t({ar:'نقل الحدث إلى الأسفل',en:'Move event down'})}>↓</button>
+            <div className="hd-hero-art" aria-hidden="true">
+              <div className="hd-art-ring hd-art-ring-one"/><div className="hd-art-ring hd-art-ring-two"/>
+              <div className="hd-art-document"><span/><span/><span/><span/></div>
+              <div className="hd-art-magnifier"><div className="hd-art-glass"><div className="hd-art-fingerprint"/></div><i/></div>
+              <div className="hd-art-tag">CASE FILES</div>
+            </div>
+          </header>
+          <div className="hd-case-heading">
+            <div><span className="hd-kicker">{t({ ar: 'الأرشيف المفتوح', en: 'OPEN ARCHIVE' })}</span><h3>{t({ ar: 'اختر القضية التي ستكشفها', en: 'Choose your investigation' })}</h3></div>
+            <div className="hd-progress-badge"><MarkIcon name="seal" size={22}/><strong>{completedCount}</strong><span>/ {heritageInvestigations.length} {t({ ar: 'مكتملة', en: 'solved' })}</span></div>
           </div>
-        </li>)}
-      </ol>
-    </section>}
+          <div className="hd-case-grid">
+            {heritageInvestigations.map((item, position) => {
+              const done = completedIds.includes(item.id);
+              return <button type="button" key={item.id} onClick={() => openCase(position)} className={'hd-case-tile ' + (done ? 'hd-case-tile-done' : '')}>
+                <span className="hd-case-tile-top"><span className="hd-case-index">{String(position + 1).padStart(2, '0')}</span><span className="hd-case-mini-icon"><MarkIcon name={done ? 'check' : position % 3 === 0 ? 'lens' : position % 3 === 1 ? 'file' : 'folder'} size={25}/></span></span>
+                <strong>{t(item.title)}</strong>
+                <span className="hd-case-tile-bottom"><span>{t({ ar: 'مستوى', en: 'Level' })} {item.level}</span><span>{done ? t({ ar: 'تم حلها', en: 'Resolved' }) : t({ ar: 'افتح الملف', en: 'Open file' })} <MarkIcon name="arrow" size={17}/></span></span>
+                {done && <span className="hd-case-watermark" aria-hidden="true"><MarkIcon name="seal" size={56}/></span>}
+              </button>;
+            })}
+          </div>
+          <div className="hd-room-footer"><MarkIcon name="lock" size={17}/>{t({ ar: 'المعلومات مصدرها سجلات رسمية. بعض الأوراق داخل القضايا ادعاءات تدريبية غير موثقة، وليست وثائق أصلية.', en: 'Records are traced to official sources. Some cards are fictional training claims, not original archival documents.' })}</div>
+        </div>
+      ) : (
+        <div className="hd-enter" key={caseFile.id}>
+          <div className="hd-mission-head">
+            <div className="hd-mission-heading">
+              <span className="hd-kicker">{t({ ar: 'قضية رقم', en: 'CASE NO.' })} {String(selectedCase + 1).padStart(2, '0')} <i/> {t({ ar: 'مستوى', en: 'LEVEL' })} {caseFile.level}</span>
+              <h2>{t(caseFile.title)}</h2>
+              <span className="hd-mission-sub">{t({ ar: 'ملف تحقيق مفتوح • كل خطوة تكشف جزءًا من الصورة', en: 'Investigation open • Each stage uncovers another clue' })}</span>
+            </div>
+            <div className="hd-mission-progress"><div className="hd-progress-orbit"><span>{solved ? '100%' : String(Math.round(((stepPosition + 1) / stages.length) * 100)) + '%'}</span></div><small>{t({ ar: 'تقدم المهمة', en: 'MISSION PROGRESS' })}</small></div>
+          </div>
 
-    <section className="rounded-[1.5rem] border-2 border-slate-200 bg-white p-5 shadow-md dark:border-slate-700 dark:bg-slate-950 sm:p-7">
-      <h3 className="text-xl font-black">{t({ar:caseFile.timeline?'3. قرار المحقق وتقرير الاستنتاج':'2. قرار المحقق وتقرير الاستنتاج',en:caseFile.timeline?'3. Issue your finding and report':'2. Issue your finding and report'})}</h3>
-      <p className="mt-2 text-sm leading-7">{t({ar:'اختر الحكم الذي تؤيده الوثائق، ثم دوّن سببك بكلماتك. تصحيح الحكم والأدلة آلي، أما جودة الكتابة فيمكن للمعلم مراجعتها.',en:'Choose a finding supported by documents and explain it in your own words. Evidence choices are checked automatically; teachers can review written reasoning.'})}</p>
-      <div className="mt-4 grid gap-2 sm:grid-cols-3" role="group" aria-label={t({ar:'تصنيف الادعاء',en:'Claim assessment'})}>
-        {verdicts.map(entry=><button type="button" key={entry.id} disabled={solved} onClick={()=>{setVerdict(entry.id);setIssues([]);}} aria-pressed={verdict===entry.id} className={'min-h-16 rounded-xl border-2 px-4 py-3 text-start text-sm font-black '+(verdict===entry.id?'border-sky-600 bg-sky-700 text-white':'border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-900')}>{t(entry.text)}</button>)}
-      </div>
-      <label htmlFor="nh-investigation-reason" className="mt-5 block text-sm font-black">{t(caseFile.reasoningPrompt)}</label>
-      <textarea id="nh-investigation-reason" value={reason} disabled={solved} onChange={event=>setReason(event.target.value.slice(0,1200))} rows={4} maxLength={1200}
-        placeholder={t({ar:'بناءً على الوثيقة الأولى والوثيقة الثانية... أستنتج أن... لأن...',en:'Based on the first and second sources, I conclude that... because...'})}
-        className="mt-2 w-full resize-y rounded-xl border-2 border-slate-300 bg-white p-4 text-sm leading-7 text-slate-900 focus:border-sky-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"/>
-      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{reason.trim().length}/1200 · {t({ar:'25 حرفًا على الأقل',en:'At least 25 characters'})}</p>
-      {issues.length>0 && <div role="alert" className="mt-4 rounded-xl border border-rose-300 bg-rose-50 p-4 text-sm text-rose-950 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-100">
-        <strong className="font-black">{t({ar:'الملف يحتاج إلى مراجعة:',en:'Review these parts of your case file:'})}</strong>
-        <ul className="mt-2 list-inside list-disc space-y-2">{issues.map((issue,i)=><li key={i}>{issue}</li>)}</ul>
-      </div>}
-      {!solved?<button type="button" onClick={verify} className="mt-5 w-full rounded-xl bg-gradient-to-r from-sky-800 to-emerald-700 px-5 py-4 text-base font-black text-white shadow-md hover:brightness-110 focus-visible:outline focus-visible:outline-4 focus-visible:outline-sky-400">
-        {t({ar:'اعتماد تقرير التحقيق ومطابقة الأدلة',en:'Verify the investigation report'})}
-      </button>:<div role="status" aria-live="polite" className="mt-5 rounded-2xl border-2 border-emerald-400 bg-emerald-50 p-5 text-emerald-950 dark:border-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-100">
-        <h4 className="text-lg font-black">{t({ar:'تم إغلاق القضية بالأدلة!',en:'Case resolved with evidence!'})}</h4>
-        <p className="mt-2 text-sm leading-8">{t(caseFile.conclusion)}</p>
-        <p className="mt-3 text-xs font-bold">{t({ar:'احتُفظ باستنتاجك في جلسة اللعب فقط، وسُجّل إنجاز القضية في حساب المتصفح.',en:'Your written reasoning remains in this play session; case completion is saved in browser progress.'})}</p>
-      </div>}
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-        <button type="button" onClick={()=>selectCase(index-1)} disabled={index===0} className="rounded-xl bg-slate-100 px-4 py-3 text-sm font-black text-slate-900 disabled:opacity-30 dark:bg-slate-800 dark:text-white">{t({ar:'القضية السابقة',en:'Previous case'})}</button>
-        <Link to="/saqr-national-identity/books" className="rounded-xl border border-emerald-600 px-4 py-3 text-sm font-black text-emerald-800 dark:text-emerald-300">{t({ar:'ابحث في كتب الهوية بالمكتبة',en:'Search the school heritage collection'})}</Link>
-        {index<heritageInvestigations.length-1?<button type="button" onClick={()=>selectCase(index+1)} className="rounded-xl bg-emerald-700 px-4 py-3 text-sm font-black text-white">{t({ar:'القضية التالية',en:'Next case'})}</button>:<button type="button" onClick={onBack} className="rounded-xl bg-emerald-700 px-4 py-3 text-sm font-black text-white">{t({ar:'إلى التحديات',en:'Challenges'})}</button>}
-      </div>
+          <nav className="hd-steps" aria-label={t({ ar: 'مراحل التحقيق', en: 'Investigation stages' })}>
+            {stages.map((item, position) =>
+              <button type="button" key={item} aria-current={stage === item ? 'step' : undefined}
+                className={'hd-step ' + (stage === item ? 'hd-step-active ' : '') + (position < stepPosition || solved ? 'hd-step-visited' : '')}
+                onClick={() => setStage(item)}>
+                <span className="hd-step-icon"><MarkIcon name={stageIcons[item]} size={21}/></span>
+                <span className="hd-step-text"><small>{t({ ar: 'المرحلة', en: 'STAGE' })} {position + 1}</small><strong>{t(stageNames[item])}</strong></span>
+                {position < stages.length - 1 && <span className="hd-step-connector" aria-hidden="true"/>}
+              </button>
+            )}
+          </nav>
+
+          <div key={stage} className="hd-stage hd-stage-reveal">
+            {stage === 'brief' && <div className="hd-brief-layout">
+              <div className="hd-brief-card">
+                <div className="hd-card-head"><span className="hd-round-icon"><MarkIcon name="folder" size={25}/></span><div><span className="hd-kicker">{t({ ar: 'ملف سري • البلاغ الوارد', en: 'INCOMING CASE REPORT' })}</span><h3>{t({ ar: 'ما الحقيقة وراء هذا البلاغ؟', en: 'What is the truth?' })}</h3></div></div>
+                <div className="hd-claim"><span className="hd-claim-label">{t({ ar: 'قيد التحقيق • ليس حقيقة مثبتة', en: 'UNDER INVESTIGATION • NOT A VERIFIED FACT' })}</span><p>{t(caseFile.allegation)}</p><div className="hd-claim-stamp" aria-hidden="true">?</div></div>
+                <p className="hd-brief-story">{t(caseFile.briefing)}</p>
+                <button type="button" className="hd-cta" onClick={() => setStage('evidence')}><MarkIcon name="lens" size={23}/>{t({ ar: 'ابدأ فحص مسرح الأدلة', en: 'Enter the evidence lab' })}<span className="hd-cta-arrow"><MarkIcon name="arrow" size={21}/></span></button>
+              </div>
+              <div className="hd-brief-side">
+                <div className="hd-brief-compass"><span className="hd-compass-center"><MarkIcon name="lens" size={53}/></span><span className="hd-compass-orbit"/></div>
+                <h4>{t({ ar: 'مهمتك كمحقق', en: 'YOUR MISSION' })}</h4>
+                <div className="hd-mission-tasks">
+                  <span><MarkIcon name="lens" size={19}/>{t({ ar: 'افحص 3 مستندات', en: 'Inspect 3 records' })}</span>
+                  <span><MarkIcon name="folder" size={19}/>{t({ ar: 'ثبّت دليلين موثوقين', en: 'Pin 2 reliable sources' })}</span>
+                  <span><MarkIcon name="seal" size={19}/>{t({ ar: 'استبعد الخبر المضلل', en: 'Reject the unsourced claim' })}</span>
+                </div>
+              </div>
+            </div>}
+
+            {stage === 'evidence' && <div className="hd-evidence-stage">
+              <div className="hd-section-title"><div><span className="hd-kicker">{t({ ar: 'المرحلة الثانية • معمل الأدلة', en: 'EVIDENCE LAB' })}</span><h3>{t({ ar: 'افتح المظاريف... واربط الخيوط', en: 'Open the files. Connect the clues.' })}</h3><p>{t({ ar: 'اضغط على كل ملف لفحص تفاصيله ومصدره، ثم قرر هل تثبته كدليل أم تستبعده.', en: 'Open each file and inspect its source, then pin it as evidence or reject it.' })}</p></div><div className="hd-counter">{inspected.length} / 3 <small>{t({ ar: 'تم فحصها', en: 'INSPECTED' })}</small></div></div>
+
+              <div className="hd-evidence-wall">
+                <div className="hd-evidence-grid">
+                  {caseFile.evidence.map((item, position) => {
+                    const isProof = proof.includes(item.id);
+                    const isRejected = rejected === item.id;
+                    const isOpen = expanded === item.id;
+                    const isInspected = inspected.includes(item.id);
+                    return <button type="button" key={item.id} onClick={() => inspect(item.id)} aria-pressed={isOpen}
+                      className={'hd-document ' + (isOpen ? 'hd-document-active ' : '') + (isProof ? 'hd-document-pinned ' : '') + (isRejected ? 'hd-document-rejected ' : '')}>
+                      <span className="hd-document-pin"/><span className="hd-document-number">{t({ ar: 'قرينة', en: 'CLUE' })} {String(position + 1).padStart(2, '0')}</span>
+                      <span className="hd-document-illustration"><MarkIcon name={isInspected ? 'file' : 'lock'} size={39}/></span>
+                      <strong>{t(item.title)}</strong><span className="hd-document-publisher">{isInspected ? t(item.publisher) : t({ ar: 'اضغط للكشف عن المحتوى', en: 'Tap to unseal this file' })}</span>
+                      <span className="hd-document-bottom">{isProof ? t({ ar: 'مثبّت على اللوحة', en: 'PINNED' }) : isRejected ? t({ ar: 'مستبعد', en: 'REJECTED' }) : isInspected ? t({ ar: 'تم فتح الملف', en: 'INSPECTED' }) : t({ ar: 'ملف مغلق', en: 'SEALED' })}<MarkIcon name={isInspected ? 'check' : 'lens'} size={17}/></span>
+                    </button>;
+                  })}
+                </div>
+                <div className="hd-dossier" aria-live="polite">
+                  {selectedEvidence ? <>
+                    <span className="hd-kicker">{t({ ar: 'تحت العدسة', en: 'UNDER THE LENS' })}</span>
+                    <h4>{t(selectedEvidence.title)}</h4>
+                    <p className="hd-dossier-summary">{t(selectedEvidence.summary)}</p>
+                    <div className="hd-dossier-source"><span>{t({ ar: 'جهة النشر المذكورة', en: 'ATTRIBUTED SOURCE' })}</span><strong>{t(selectedEvidence.publisher)}</strong>
+                      {selectedEvidence.url ? <a href={selectedEvidence.url} target="_blank" rel="noopener noreferrer">{t({ ar: 'راجع المصدر الرسمي الأصلي', en: 'Verify original official source' })}<MarkIcon name="arrow" size={17}/></a> : <small>{t({ ar: 'لا يوجد رابط أو سجل أصلي؛ هذه بطاقة افتراضية للتدريب وليست وثيقة تاريخية.', en: 'No original source exists. This is a fictional practice card, not an archival record.' })}</small>}
+                    </div>
+                    <div className="hd-dossier-actions">
+                      <button type="button" disabled={solved || (!proof.includes(selectedEvidence.id) && proof.length >= 2)} aria-pressed={proof.includes(selectedEvidence.id)} className={'hd-action-proof ' + (proof.includes(selectedEvidence.id) ? 'hd-action-selected' : '')} onClick={() => toggleProof(selectedEvidence.id)}><MarkIcon name="check" size={20}/>{proof.includes(selectedEvidence.id) ? t({ ar: 'إزالة من لوحة الإثبات', en: 'Unpin evidence' }) : t({ ar: 'ثبّت كدليل', en: 'Pin as evidence' })}</button>
+                      <button type="button" disabled={solved} aria-pressed={rejected === selectedEvidence.id} className={'hd-action-reject ' + (rejected === selectedEvidence.id ? 'hd-action-selected' : '')} onClick={() => markUnreliable(selectedEvidence.id)}>{rejected === selectedEvidence.id ? t({ ar: 'إلغاء الاستبعاد', en: 'Undo rejection' }) : t({ ar: 'استبعد لغياب المصدر', en: 'Reject as unreliable' })}</button>
+                    </div>
+                  </> : <div className="hd-dossier-idle"><div className="hd-dossier-orbit"><MarkIcon name="lens" size={64}/></div><strong>{t({ ar: 'العدسة جاهزة', en: 'MAGNIFIER READY' })}</strong><p>{t({ ar: 'اختر أحد المظاريف الثلاثة من اللوحة لبدء فحص الدليل.', en: 'Select one of the three envelopes to inspect its contents.' })}</p></div>}
+                </div>
+              </div>
+
+              <div className="hd-connections"><div className="hd-connections-title"><MarkIcon name="folder" size={25}/><div><h4>{t({ ar: 'لوحة ربط الخيوط', en: 'EVIDENCE CONNECTION BOARD' })}</h4><small>{t({ ar: 'دليلان موثوقان + ادعاء واحد مستبعد', en: 'Two dependable records + one discarded claim' })}</small></div></div>
+                <div className="hd-connection-slots">
+                  {[0, 1].map(position => <div key={position} className={'hd-connection-slot ' + (proof[position] ? 'hd-connection-filled' : '')}><span>{t({ ar: 'دليل', en: 'PROOF' })} {position + 1}</span><strong>{proof[position] ? t(caseFile.evidence.find(item => item.id === proof[position])!.title) : t({ ar: 'بانتظار التثبيت', en: 'Awaiting evidence' })}</strong></div>)}
+                  <div className={'hd-connection-slot hd-connection-discard ' + (rejected ? 'hd-connection-filled' : '')}><span>{t({ ar: 'ادعاء مستبعد', en: 'DISCARDED' })}</span><strong>{rejected ? t(caseFile.evidence.find(item => item.id === rejected)!.title) : t({ ar: 'بانتظار الاستبعاد', en: 'Nothing rejected yet' })}</strong></div>
+                </div>
+              </div>
+
+              {libraryBook && <div className="hd-library">
+                <button type="button" aria-expanded={showBook} onClick={() => setShowBook(value => !value)}><MarkIcon name="book" size={22}/>{t({ ar: 'افتح ملحق مكتبة صقر (اختياري)', en: 'Explore a library book (optional)' })}<span>{showBook ? '−' : '+'}</span></button>
+                {showBook && <div className="hd-library-body"><strong>{libraryBook.title} — {libraryBook.author}</strong><p>{t({ ar: 'الرف', en: 'Shelf' })} {libraryBook.shelf} · {t({ ar: 'الصف', en: 'Row' })} — {t(libraryBook.task)}</p><small>{t({ ar: 'للاستزادة فقط؛ الكتاب ليس اقتباسًا موثقًا من صفحات تم فحصها.', en: 'Optional reading only; not a verified quotation from pages we inspected.' })}</small><Link to="/saqr-national-identity/books">{t({ ar: 'فهرس كتب الهوية', en: 'Heritage library' })}</Link></div>}
+              </div>}
+              <div className="hd-stage-bottom"><span>{evidenceReady ? t({ ar: 'لوحة الأدلة مكتملة مبدئيًا', en: 'Evidence board assembled' }) : t({ ar: 'افحص 3 قرائن، ثبّت 2، واستبعد 1', en: 'Inspect 3, pin 2, reject 1' })}</span><button type="button" className="hd-cta" onClick={nextStage}>{t({ ar: caseFile.timeline ? 'إلى خط الأحداث' : 'إلى كشف الحقيقة', en: caseFile.timeline ? 'Reconstruct the timeline' : 'Review the finding' })}<MarkIcon name="arrow" size={19}/></button></div>
+            </div>}
+
+            {stage === 'timeline' && caseFile.timeline && <div className="hd-time-stage">
+              <div className="hd-section-title"><div><span className="hd-kicker">{t({ ar: 'أعد بناء ما حدث', en: 'REBUILD THE CHRONOLOGY' })}</span><h3>{t({ ar: 'التواريخ مبعثرة... رتبها بنفسك', en: 'The dates are scattered. Put them in order.' })}</h3><p>{t({ ar: 'حرّك البطاقات بالأسهم من الحدث الأقدم إلى الأحدث. ارجع إلى الوثائق عند الحاجة.', en: 'Use the arrows to move events from earliest to latest. Recheck your records when needed.' })}</p></div><div className="hd-counter"><MarkIcon name="clock" size={30}/></div></div>
+              <div className="hd-time-track">
+                {ordered.map((id, position) => <div key={id} className="hd-time-event">
+                  <span className="hd-time-node">{String(position + 1).padStart(2, '0')}</span>
+                  <div className="hd-time-event-card"><strong>{t(caseFile.timeline!.find(item => item.id === id)!.label)}</strong><div className="hd-time-controls">
+                    <button type="button" disabled={solved || position === 0} onClick={() => setOrdered(items => move(items, position, position - 1))} aria-label={t({ ar: 'حرّك الحدث إلى موضع أقدم', en: 'Move event earlier' })}>↑</button>
+                    <button type="button" disabled={solved || position === ordered.length - 1} onClick={() => setOrdered(items => move(items, position, position + 1))} aria-label={t({ ar: 'حرّك الحدث إلى موضع أحدث', en: 'Move event later' })}>↓</button>
+                  </div></div>
+                </div>)}
+              </div>
+              <div className="hd-stage-bottom"><button type="button" className="hd-secondary" onClick={() => setStage('evidence')}>{t({ ar: 'ارجع للأدلة', en: 'Back to evidence' })}</button><button type="button" className="hd-cta" onClick={() => setStage('verdict')}>{t({ ar: 'واجه الحقيقة', en: 'Issue a finding' })}<MarkIcon name="arrow" size={19}/></button></div>
+            </div>}
+
+            {stage === 'verdict' && <div className="hd-verdict-stage">
+              {!solved ? <>
+                <div className="hd-section-title"><div><span className="hd-kicker">{t({ ar: 'المرحلة الأخيرة • غرفة القرار', en: 'THE FINAL CHAMBER' })}</span><h3>{t({ ar: 'الأدلة أمامك... ما حكمك؟', en: 'The evidence is in. What is your verdict?' })}</h3><p>{t({ ar: 'اختر الختم المناسب، وسجل ملاحظة قصيرة تربط قرارك بالمصادر. ليس امتحان كتابة.', en: 'Choose a finding and leave a brief case note citing the evidence.' })}</p></div><div className="hd-counter"><MarkIcon name="seal" size={31}/></div></div>
+                <div className="hd-verdict-layout"><div className="hd-verdict-report"><span className="hd-kicker">{t({ ar: 'البلاغ الأصلي', en: 'ORIGINAL CLAIM' })}</span><p>{t(caseFile.allegation)}</p><div className="hd-verdict-checks">
+                  <span className={inspected.length === 3 ? 'hd-check-done' : ''}><MarkIcon name="check" size={16}/>{t({ ar: 'فحص المستندات', en: 'Records inspected' })} {inspected.length}/3</span>
+                  <span className={officialCount === 2 ? 'hd-check-done' : ''}><MarkIcon name="check" size={16}/>{t({ ar: 'الأدلة الموثوقة', en: 'Reliable evidence' })} {officialCount}/2</span>
+                  <span className={rejected ? 'hd-check-done' : ''}><MarkIcon name="check" size={16}/>{t({ ar: 'الادعاء المستبعد', en: 'Unsourced claim' })}</span>
+                  {caseFile.timeline && <span className={chronologicalDone ? 'hd-check-done' : ''}><MarkIcon name="clock" size={16}/>{t({ ar: 'ترتيب الأحداث', en: 'Chronology' })}</span>}
+                </div></div>
+                <div className="hd-verdict-options" role="group" aria-label={t({ ar: 'القرار النهائي', en: 'Final verdict' })}>
+                  {verdicts.map(item => <button key={item.id} type="button" aria-pressed={verdict === item.id} onClick={() => { setVerdict(item.id); setIssues([]); }}
+                    className={'hd-verdict-choice hd-verdict-' + item.id + (verdict === item.id ? ' hd-verdict-choice-selected' : '')}>
+                    <span className="hd-verdict-graphic"><MarkIcon name="seal" size={34}/></span><strong>{t(item.label)}</strong><small>{t(item.tag)}</small>
+                  </button>)}
+                </div></div>
+                <div className="hd-detective-note"><div className="hd-note-head"><MarkIcon name="file" size={23}/><div><strong>{t({ ar: 'ملاحظة المحقق', en: "DETECTIVE'S NOTE" })}</strong><small>{t(caseFile.reasoningPrompt)}</small></div></div><textarea id="hd-reason" value={reason} maxLength={1200} rows={3}
+                  onChange={event => { setReason(event.target.value.slice(0, 1200)); setIssues([]); }}
+                  aria-label={t({ ar: 'سجل ملاحظتك', en: 'Write your case note' })}
+                  placeholder={t({ ar: 'اكتشفت أن... والدليل من مصدر... لأن...', en: 'I discovered that... The evidence from... shows...' })}/><span className="hd-note-count">{reason.trim().length} / 25 {t({ ar: 'حرفًا للحد الأدنى', en: 'characters minimum' })}</span></div>
+                {issues.length > 0 && <div role="alert" className="hd-issues"><strong>{t({ ar: 'المحقق يحتاج يراجع شوية خيوط:', en: 'A few clues need a second look:' })}</strong><ul>{issues.map((issue, position) => <li key={position}>{issue}</li>)}</ul><button type="button" className="hd-secondary" onClick={() => setStage('evidence')}>{t({ ar: 'ارجع لمعمل الأدلة', en: 'Review the records' })}</button></div>}
+                <button type="button" className="hd-cta hd-final-cta" onClick={verify}><MarkIcon name="seal" size={27}/>{t({ ar: 'اكشف الحقيقة وأغلق القضية', en: 'Reveal the truth and close the case' })}<MarkIcon name="arrow" size={22}/></button>
+              </> : <div className="hd-success" role="status" aria-live="polite"><div className="hd-success-sparks" aria-hidden="true"/><span className="hd-success-medal"><MarkIcon name="seal" size={79}/></span><span className="hd-kicker">{t({ ar: 'المهمة أُنجزت', en: 'MISSION ACCOMPLISHED' })}</span><h3>{t({ ar: 'تم كشف الحقيقة!', en: 'The truth is uncovered!' })}</h3><p>{t(caseFile.conclusion)}</p><small>{t({ ar: 'سُجل إنجاز القضية. تظل ملاحظة المحقق في جلسة اللعب الحالية فقط.', en: 'Case completion saved. Your case note remains in this play session only.' })}</small></div>}
+                <div className="hd-stage-bottom"><button type="button" className="hd-secondary" onClick={() => setSelectedCase(null)}>{t({ ar: 'العودة لغرفة القضايا', en: 'Return to case room' })}</button>{selectedCase < heritageInvestigations.length - 1 && <button type="button" className="hd-cta" onClick={() => openCase(selectedCase + 1)}>{t({ ar: 'القضية التالية', en: 'Next investigation' })}<MarkIcon name="arrow" size={19}/></button>}</div>
+              </div>}
+          </div>
+        </div>
+      )}
     </section>
-  </section>;
+  );
 };
 export default HeritageDetectiveGame;
