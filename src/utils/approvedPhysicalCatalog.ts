@@ -1,5 +1,6 @@
 import { bookData, type Book } from '../../api/bookData';
 import { supabase } from './supabase';
+import { physicalReadingCatalog } from './readingPassport';
 
 export type ApprovedPhysicalCorrection = {
   catalog_id:string;title:string;author:string;shelf:number;row_number:number;
@@ -27,6 +28,14 @@ export function applyApprovedPhysicalCorrections(rows:ApprovedPhysicalCorrection
     if(correction.publisher)book.publisher=correction.publisher;
     if(correction.reading_tier)book.level=correction.reading_tier;
     changed++;
+  }
+  // Reading passports and Saqr's reading-context index hold cached records.
+  // Update their existing objects in place so saved/completed book keys remain stable.
+  const current=new Map(bookData.map(book=>['physical:'+book.id,book]));
+  for(const entry of physicalReadingCatalog){
+    const book=current.get(entry.key);
+    if(!book)continue;
+    entry.title=book.title;entry.author=book.author;entry.shelf=book.shelf;entry.row=book.row;
   }
   return changed;
 }
