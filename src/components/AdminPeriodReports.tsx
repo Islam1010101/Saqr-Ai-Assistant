@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { supabase } from '../utils/supabase';
 import { printA4Html } from '../utils/printA4Html';
+import { ResponsiveContainer, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, Legend, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 
 type Row = Record<string, any>;
 type Props = { isAr: boolean; students: Row[]; teachers: Row[]; logs: Row[]; loans: Row[]; lessons: Row[] };
@@ -87,6 +88,33 @@ export default function AdminPeriodReports({isAr,students,teachers,logs,loans,le
       englishOpens:views.filter(x=>String(x.language||'').toLowerCase().startsWith('en')).length
     };
   },[students,teachers,logs,loans,lessons,views,range.start,range.end]);
+  const visual = useMemo(()=>{
+    const acceptedLoans=loans.filter(x=>within(x.borrow_date||x.created_at||x.requested_at,range.start,range.end)&&accepted.has(status(x.status)));
+    const studentIds=new Set(students.map(x=>String(x.student_id||x.id||'').toLowerCase()));
+    const teacherIds=new Set(teachers.map(x=>String(x.teacher_id||x.id||'').toLowerCase()));
+    const category=[
+      {name:l('الدخول','Logins'),students:metrics.studentVisits,teachers:metrics.teacherVisits},
+      {name:l('الاستعارات','Borrowings'),students:metrics.loansStudent,teachers:metrics.loansTeacher}
+    ];
+    const buckets=new Map<string,{date:string;logins:number;borrowings:number;plans:number;opens:number}>();
+    const span=Math.round((new Date(range.end+'T00:00:00').getTime()-new Date(range.start+'T00:00:00').getTime())/86400000);
+    const bucket=(v:unknown)=>{
+      const date=datePart(v);if(!date)return '';
+      if(span>95)return date.slice(0,7);
+      if(span>35){const d=new Date(date+'T00:00:00');d.setDate(d.getDate()-((d.getDay()+6)%7));return iso(d);}
+      return date;
+    };
+    const increment=(date:unknown,key:'logins'|'borrowings'|'plans'|'opens')=>{if(!within(date,range.start,range.end))return;const label=bucket(date);const old=buckets.get(label)||{date:label,logins:0,borrowings:0,plans:0,opens:0};old[key]++;buckets.set(label,old);};
+    logs.forEach(x=>increment(x.login_time,'logins'));
+    acceptedLoans.forEach(x=>increment(x.borrow_date||x.created_at||x.requested_at,'borrowings'));
+    lessons.forEach(x=>increment(x.created_at,'plans'));
+    if(viewState==='ready')views.forEach(x=>increment(x.viewed_at,'opens'));
+    const trends=[...buckets.values()].sort((a,b)=>a.date.localeCompare(b.date));
+    const distribution=[{name:l('الطلاب','Students'),value:metrics.loansStudent},{name:l('المعلمون','Teachers'),value:metrics.loansTeacher},{name:l('غير محدد','Unknown'),value:metrics.loansUnclassified}].filter(x=>x.value>0);
+    const topBooks=new Map<string,number>();if(viewState==='ready')views.forEach(x=>{const name=String(x.book_title||'').trim();if(name)topBooks.set(name,(topBooks.get(name)||0)+1)});
+    const popular=[...topBooks.entries()].sort((a,b)=>b[1]-a[1]).slice(0,5).map(([name,count])=>({name:name.length>28?name.slice(0,28)+'…':name,count}));
+    return {category,trends,distribution,popular};
+  },[loans,logs,lessons,views,students,teachers,range.start,range.end,viewState,metrics,isAr]);
   const rows=[
     [l('الطلاب المسجلون حاليًا','Currently registered students'),metrics.studentCount],
     [l('المعلمون المسجلون حاليًا','Currently registered teachers'),metrics.teacherCount],
@@ -124,7 +152,13 @@ export default function AdminPeriodReports({isAr,students,teachers,logs,loans,le
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
       {[[l('الطلاب النشطون','Active students'),metrics.studentActive],[l('المعلمون النشطون','Active teachers'),metrics.teacherActive],[l('الإعارات المعتمدة','Approved loans'),metrics.loansStudent+metrics.loansTeacher],[l('التحاضير المسجلة','Lesson plans'),metrics.lessons]].map(([label,value])=><div key={String(label)} className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-3"><strong className="block text-2xl text-emerald-700 dark:text-emerald-300">{value}</strong><span className="text-xs">{label}</span></div>)}
     </div>
-    <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="bg-slate-50 dark:bg-slate-800"><th className="text-start p-3">{l('المؤشر','Metric')}</th><th className="text-start p-3">{l('العدد','Count')}</th></tr></thead><tbody>{rows.map(([name,value])=><tr key={name} className="border-b border-slate-100 dark:border-slate-800"><td className="p-3">{name}</td><td className="p-3 font-bold tabular-nums">{value}</td></tr>)}</tbody></table></div>
+    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-5">
+      <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-4"><h4 className="font-bold text-sm mb-4">{l('نشاط الطلاب والمعلمين','Students vs. teachers')}</h4><div className="h-64" dir="ltr"><ResponsiveContainer width="100%" height="100%"><BarChart data={visual.category}><CartesianGrid strokeDasharray="3 3" vertical={false}/><XAxis dataKey="name" tick={{fontSize:11}}/><YAxis allowDecimals={false} tick={{fontSize:11}}/><Tooltip/><Legend/><Bar name={l('الطلاب','Students')} dataKey="students" fill="#0891b2" radius={[4,4,0,0]}/><Bar name={l('المعلمون','Teachers')} dataKey="teachers" fill="#059669" radius={[4,4,0,0]}/></BarChart></ResponsiveContainer></div></div>
+      <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-4"><h4 className="font-bold text-sm mb-4">{l('اتجاه النشاط خلال الفترة','Activity trend')}</h4><div className="h-64" dir="ltr">{visual.trends.length?<ResponsiveContainer width="100%" height="100%"><LineChart data={visual.trends}><CartesianGrid strokeDasharray="3 3" vertical={false}/><XAxis dataKey="date" tick={{fontSize:10}} minTickGap={24}/><YAxis allowDecimals={false} tick={{fontSize:11}}/><Tooltip/><Legend/><Line type="monotone" name={l('دخول','Logins')} dataKey="logins" stroke="#0891b2" strokeWidth={2} dot={false}/><Line type="monotone" name={l('إعارات','Loans')} dataKey="borrowings" stroke="#e5a346" strokeWidth={2} dot={false}/><Line type="monotone" name={l('تحاضير','Preparations')} dataKey="plans" stroke="#059669" strokeWidth={2} dot={false}/>{viewState==='ready'&&<Line type="monotone" name={l('فتح كتب','Book opens')} dataKey="opens" stroke="#8b5cf6" strokeWidth={2} dot={false}/>}</LineChart></ResponsiveContainer>:<p className="text-sm text-slate-500">{l('لا توجد سجلات للفترة','No records for this range')}</p>}</div></div>
+      <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-4"><h4 className="font-bold text-sm mb-4">{l('توزيع الاستعارات','Loan distribution')}</h4><div className="h-56" dir="ltr">{visual.distribution.length?<ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={visual.distribution} dataKey="value" nameKey="name" innerRadius={48} outerRadius={75} label>{visual.distribution.map((v,i)=><Cell key={v.name} fill={['#0891b2','#059669','#94a3b8'][i%3]}/>)}</Pie><Tooltip/><Legend/></PieChart></ResponsiveContainer>:<p className="text-sm text-slate-500">{l('لا توجد إعارات معتمدة','No approved loans')}</p>}</div></div>
+      <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-4"><h4 className="font-bold text-sm mb-4">{l('الكتب الرقمية الأكثر فتحًا','Most opened digital books')}</h4>{viewState==='ready'&&visual.popular.length?<div className="space-y-3">{visual.popular.map((item,i)=><div key={item.name}><div className="flex justify-between gap-2 text-xs mb-1"><span>{item.name}</span><b>{item.count}</b></div><div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden"><div className="h-full bg-teal-500 rounded-full" style={{width:(item.count/visual.popular[0].count*100)+'%'}}/></div></div>)}</div>:<p className="text-sm text-slate-500">{viewState==='loading'?l('جاري التحميل','Loading'):l('لا توجد بيانات قراءة رقمية متاحة','No digital view records available')}</p>}</div>
+    </div>
+    <details className="border border-slate-200 dark:border-slate-700 rounded-xl"><summary className="cursor-pointer p-3 font-bold text-sm">{l('عرض جدول الأرقام التفصيلي','Show detailed figures')}</summary><div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="bg-slate-50 dark:bg-slate-800"><th className="text-start p-3">{l('المؤشر','Metric')}</th><th className="text-start p-3">{l('العدد','Count')}</th></tr></thead><tbody>{rows.map(([name,value])=><tr key={name} className="border-b border-slate-100 dark:border-slate-800"><td className="p-3">{name}</td><td className="p-3 font-bold tabular-nums">{value}</td></tr>)}</tbody></table></div></details>
     <p className="text-xs text-slate-500 mt-4">{l('مهم: أعداد الطلاب والمعلمين المسجلين حالية؛ مرات فتح الكتب ليست قراءات مكتملة. يعتمد التاريخ على السجلات المتاحة، وليس استنتاجًا لبيانات لم تُسجل. الفصل هنا ثلاثة أشهر تقويمية؛ ويمكن اختيار تواريخ الفصل الدراسي الفعلية من «فترة مخصصة».','Note: registered user counts are current, not historical; book opens are not completed reads. Historical results depend on retained records. Quarter means three calendar months; use a custom range for academic terms.')}</p>
   </section>;
 }
