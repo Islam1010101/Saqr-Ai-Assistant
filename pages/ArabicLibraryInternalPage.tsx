@@ -8,6 +8,8 @@ import { useReadingPassport, digitalBookKey } from '../src/utils/readingPassport
 import DigitalBookRating from '../src/components/DigitalBookRating';
 import DigitalLibraryDialog from '../src/components/DigitalLibraryDialog';
 import DigitalBookReader from '../src/components/DigitalBookReader';
+import NewCatalogDigitalReader from '../src/components/NewCatalogDigitalReader';
+import {useAdminCatalogRevision} from '../src/utils/liveCatalogAdditions';
 /** Keep the much larger page manifest out of the initial library bundle. */
 const VerifiedArabicPhotoBookReader = React.lazy(() => import('../src/components/VerifiedArabicPhotoBookReader'));
 /** Load only the selected new series photo manifest; keep the main library bundle small. */
@@ -192,6 +194,7 @@ const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void
     const ageGroup = book?.reviewedAgeGroup || book?.readingAudience ? ageLabels[(book.reviewedAgeGroup || book.readingAudience)!] : '';
 
     if (!book) return null;
+    if (readerOpen && String(book.id).startsWith('EFIPS_ADD_')) return <NewCatalogDigitalReader title={book.title} source={book.driveLink} locale={locale} onBack={()=>setReaderOpen(false)} onClose={onClose}/>;
     // Drive folder URLs are storage references for completed image books, not reader links.
     // Let all verified images open inside the same in-site reader as the English library.
     const isPhotoOnlyBook = /^(?:AR_PH_|AR_NG_|NI_PH_)/.test(String(book.id));
@@ -403,6 +406,7 @@ type ArabicLibraryPageProps = {
 };
 
 const ArabicLibraryInternalPage: React.FC<ArabicLibraryPageProps> = ({ books = ARABIC_LIBRARY_DATABASE, pageTitle, atmosphere = 'arabic' }) => {
+    const catalogRevision = useAdminCatalogRevision();
     // تعيين الإنجليزية كلغة افتراضية عند فتح الصفحة مباشرة
     const { locale, dir } = useLanguage();
     const [currentLocale, setCurrentLocale] = useState(locale || 'en');
@@ -415,7 +419,7 @@ const ArabicLibraryInternalPage: React.FC<ArabicLibraryPageProps> = ({ books = A
 
     const t = (key: keyof typeof translations.en) => translations[currentLocale as 'ar' | 'en']?.[key] as string;
     const isAr = currentLocale === 'ar';
-    const hasAudio = useMemo(() => books.some(book => !!book.audioId), [books]);
+    const hasAudio = useMemo(() => books.some(book => !!book.audioId), [books,catalogRevision]);
     
     const [searchTerm, setSearchTerm] = useState('');
     const [subjectFilter, setSubjectFilter] = useState('all');
@@ -435,17 +439,17 @@ const ArabicLibraryInternalPage: React.FC<ArabicLibraryPageProps> = ({ books = A
       if(!match)return;
       setSelectedBook(match);
       setAutoOpenBookId(id);
-    },[location.search,books]);
+    },[location.search,books,catalogRevision]);
     const readingProgress = useDigitalReadingProgress(books, 'ar');
     const booksInProgress = useMemo(()=>books.filter(b=>readingProgress.has(digitalBookKey('ar',b)))
-      .sort((a,b)=>(readingProgress.get(digitalBookKey('ar',b))?.lastReadAt || 0)-(readingProgress.get(digitalBookKey('ar',a))?.lastReadAt || 0)).slice(0,8),[books,readingProgress]);
+      .sort((a,b)=>(readingProgress.get(digitalBookKey('ar',b))?.lastReadAt || 0)-(readingProgress.get(digitalBookKey('ar',a))?.lastReadAt || 0)).slice(0,8),[books,readingProgress,catalogRevision]);
     const [visibleCount, setVisibleCount] = useState(12); // تغيير ليكون العدد متوافق مع الموبايل
 
     const filters = useMemo(() => ({
         subjects: [...new Set(books.map(b => b.subject))].filter(s => s !== "Unknown").sort(),
         authors: [...new Set(books.map(b => b.author))].filter(a => a !== 'Unknown Author').sort(),
         series: [...new Set(books.map(b=>b.series).filter((x):x is string=>!!x))].sort(),
-    }), [books]);
+    }), [books,catalogRevision]);
 
     useEffect(() => {
         setVisibleCount(12);
@@ -470,7 +474,7 @@ const ArabicLibraryInternalPage: React.FC<ArabicLibraryPageProps> = ({ books = A
  ? (a.seriesOrder??9999)-(b.seriesOrder??9999) || a.title.localeCompare(b.title,currentLocale)
  : a.title.localeCompare(b.title,currentLocale));
         return result;
-    }, [books, searchTerm, subjectFilter, authorFilter, seriesFilter, audienceFilter, audioOnly, sortBy, currentLocale]);
+    }, [books, searchTerm, subjectFilter, authorFilter, seriesFilter, audienceFilter, audioOnly, sortBy, currentLocale,catalogRevision]);
 
     return (
         <div dir={dir} className="efips-letter-library efips-letter-ar w-full min-h-screen bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300">
