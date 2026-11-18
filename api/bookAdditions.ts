@@ -1,5 +1,5 @@
 /**
- * Physical-book additions transcribed from EFIPS Book1.xlsx (64 supplied rows).
+ * Physical-book additions transcribed from EFIPS Book1.xlsx (64 supplied rows), plus librarian-supplied records.
  * Append only: existing catalog IDs, borrowings and saved-book keys stay stable.
  * ISBNs are source-provided, not edition-verified; invalid entries are omitted.
  */
@@ -67,7 +67,8 @@ const sourceRows = [
   ["محمد بن زايد والتعليم","مركز الإمارات للدراسات والبحوث الاستراتيجية",41,2,"9789948242598"],
   ["رواية الاعتراف","علي أبو ريش",33,3,"9789948376330"],
   ["محمد بن زايد رجل السلام الأول","سلطان حميد الجسمي",41,2,"9789948449195"],
-  ["الآن سيصدقون","ريم محمد",41,9,"9789948247623"]
+  ["الآن سيصدقون","ريم محمد",41,9,"9789948247623"],
+  ["Dracula","Bram Stoker",14,2,"9781405076722"]
 ] as const;
 
 export type AddedPhysicalBook = {
