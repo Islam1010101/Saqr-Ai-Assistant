@@ -837,6 +837,23 @@ const AdminDashboard: React.FC = () => {
                      {activeSection!=='overview' && <button type="button" onClick={()=>switchAdminSection('overview')} className="rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2.5 bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-300 text-xs font-black hover:border-emerald-400 transition-colors">{isAr?'العودة للرئيسية':'Back to overview'}</button>}
                  </div>
                 {activeSection === 'overview' && <>
+                <AdminExecutiveCharts
+                    isAr={isAr}
+                    physical={physicalCatalogCount}
+                    arabic={arabicDigitalCoreCount}
+                    english={englishDigitalCount}
+                    nationalDigital={nationalDigitalCount}
+                    logins={loginActivity}
+                    operations={libraryImpact}
+                    digitalAvailable={digitalBookReadStatsAvailable}
+                    onNavigate={section=>switchAdminSection(section)}
+                />
+                <details className="efips-admin-section-details lg:col-span-4 rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 text-xs font-black text-slate-700 dark:text-slate-200">
+                        <span className="flex items-center gap-2"><OutlineIcon name="graduation-cap" className="h-4 w-4 text-emerald-700 dark:text-emerald-300"/>{isAr?'مؤشرات الحسابات والتسجيل ـ التفاصيل الكاملة':'Account and sign-in statistics — full details'}</span>
+                        <svg className="efips-admin-caret h-4 w-4 shrink-0 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                    </summary>
+                    <div className="px-3 pb-3 sm:px-4">
                 <section id="admin-overview" className="efips-panel lg:col-span-4 bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/70 p-5 md:p-7 rounded-3xl shadow-sm scroll-mt-24">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5"><h2 className="text-lg md:text-xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-3"><span className="w-10 h-10 rounded-2xl bg-rose-50 dark:bg-rose-900/30 text-rose-600 flex items-center justify-center"><OutlineIcon name="grid" className="h-5 w-5" /></span>{t('statsTitle')}</h2><span className="text-xs font-bold text-slate-500 dark:text-slate-400">{isAr ? 'ملخص حسابات المستخدمين المسجلة' : 'Registered user account overview'}</span></div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -846,16 +863,18 @@ const AdminDashboard: React.FC = () => {
                         </div>)}
                     </div>
                 </section>
+                    </div>
+                </details>
 
                 <section className="lg:col-span-4 rounded-[1.75rem] border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-900 p-4 sm:p-6 shadow-sm" aria-labelledby="admin-shortcuts-title">
                     <div className="flex items-center justify-between gap-3 mb-4">
                         <div><h3 id="admin-shortcuts-title" className="text-base sm:text-lg font-black text-slate-900 dark:text-white">{isAr?'اختصارات المهام اليومية':'Daily shortcuts'}</h3>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{isAr?'ادخل مباشرة للقسم المطلوب بدل تصفح كل التقارير':'Jump straight to the task you need'}</p></div>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-7 gap-3">
+                    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
                         {overviewShortcuts.map((item)=><button key={item.label} type="button" onClick={()=>switchAdminSection(item.section,item.tab)}
-                            className="group min-w-0 text-start rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/50 px-3 py-4 sm:p-4 hover:border-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-500 transition-colors">
-                            <div className="flex items-center justify-between mb-3"><span className="w-9 h-9 inline-flex items-center justify-center rounded-xl bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-300"><OutlineIcon name={item.icon} className="h-5 w-5"/></span><span className="text-xl font-black text-slate-900 dark:text-white tabular-nums">{formatCatalogCount(item.count)}</span></div>
+                            className="efips-admin-shortcut group min-w-0 text-start rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/50 px-3 py-3.5 sm:p-4 hover:border-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-500">
+                            <div className="flex items-center justify-between mb-3"><span className="w-9 h-9 inline-flex items-center justify-center rounded-xl bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-300"><OutlineIcon name={item.icon} className="h-5 w-5"/></span>{item.count!==undefined&&<span className="text-xl font-black text-slate-900 dark:text-white tabular-nums">{formatCatalogCount(item.count)}</span>}</div>
                             <div className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-100">{item.label}</div>
                             <div className="text-[11px] mt-1 text-slate-500 dark:text-slate-400">{item.caption}</div>
                         </button>)}
@@ -970,6 +989,12 @@ const AdminDashboard: React.FC = () => {
 
                 </>}
                 {activeSection === 'overview' && <>
+                <details className="efips-admin-section-details lg:col-span-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 text-xs font-black text-slate-700 dark:text-slate-200">
+                        <span className="flex items-center gap-2"><OutlineIcon name="activity" className="h-4 w-4 text-emerald-700 dark:text-emerald-300"/>{isAr?'تفاصيل أثر المكتبة ونشاط القرّاء ـ عرض جميع المؤشرات':'Library impact and reader activity — all indicators'}</span>
+                        <svg className="efips-admin-caret h-4 w-4 shrink-0 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                    </summary>
+                    <div className="space-y-4 px-3 pb-4 sm:px-4">
                 <section className="efips-panel lg:col-span-4 rounded-3xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/70 p-5 md:p-6 shadow-sm">
                     <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                         <div>
@@ -1021,6 +1046,8 @@ const AdminDashboard: React.FC = () => {
                         }):<p className="text-xs font-bold text-slate-400 py-8 text-center">{isAr?'لا توجد سجلات دخول بعد':'No sign-in activity recorded yet'}</p>}
                     </div>
                 </section>
+                    </div>
+                </details>
                 </>}
                 {activeSection === 'reports' && <>
                   <AdminPeriodReports isAr={isAr} students={studentsList} teachers={teachersList} logs={loginActivity} loans={allBorrowingRecords} lessons={lessonReportsList} />
