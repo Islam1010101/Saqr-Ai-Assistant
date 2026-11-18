@@ -696,6 +696,9 @@ const AdminDashboard: React.FC = () => {
     const dashboardSections: Array<{id:AdminSection;label:string;description:string;icon:IconName}> = [
         {id:'overview',label:isAr?'الرئيسية':'Overview',description:isAr?'المؤشرات والاختصارات':'Key metrics & shortcuts',icon:'grid'},
         {id:'reports',label:isAr?'التقارير الدورية':'Periodic reports',description:isAr?'شهري وفصلي وطباعة PDF':'Monthly, quarterly & PDF',icon:'printer'},
+        {id:'analytics',label:isAr?'التحليلات':'Analytics',description:isAr?'رسوم وتحليلات تفصيلية':'Charts & detailed insights',icon:'chart'},
+        {id:'attendance',label:isAr?'الحضور والحصص':'Attendance',description:isAr?'زيارات المكتبة والحصص':'Visits & class sessions',icon:'calendar'},
+        {id:'reading',label:isAr?'القراءة':'Reading',description:isAr?'تحديات القراءة والمستويات':'Reading progress & challenges',icon:'trophy'},
         {id:'library',label:isAr?'المقتنيات والكتب':'Books & catalog',description:isAr?'الكتب الورقية والرقمية':'Physical & digital books',icon:'library'},
         {id:'add-books',label:isAr?'إضافة الكتب':'Add books',description:isAr?'ورقي ورقمي واستيراد Excel':'Physical, digital & Excel',icon:'book-open'},
         {id:'children',label:isAr?'مستويات الأطفال':'Children levels',description:isAr?'مراجعة تصنيف القراءة':'Reading level reviews',icon:'book-open'},
