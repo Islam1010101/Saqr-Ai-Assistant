@@ -244,7 +244,7 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                     'Title: '+book.title,
                     'Author: '+(book.author||'Not recorded'),
                     'Catalog subject: '+(book.subject||'Not recorded'),
-                    'Shelf: '+book.shelf+', Row: '+book.row,
+                    'Shelf: '+(book.shelf>0?book.shelf:'not recorded')+', Row: '+(book.row>0?book.row:'not recorded'),
                     'Recorded description: '+(verifiedCatalogDescription(book.summary)?book.summary:'Not verified in the library catalog')
                 ].join('\n');
                 const response=await fetch('/api/chat',{
@@ -280,6 +280,10 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
     // إرسال طلب الاستعارة للأدمن كطلب معلق، مع إظهار أي سبب يمنع الحفظ.
     const handleBorrowRequest = async () => {
         if (!book) return;
+        if(book.shelf<=0||book.row<=0){
+          alert(locale==='ar'?'مكان الكتاب قيد التوثيق؛ لا يمكن طلب استعارته قبل تحديده.':'Location is pending; borrowing is unavailable until verified.');
+          return;
+        }
 
         if (!currentUser) {
             alert(locale === 'ar'
@@ -383,11 +387,11 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                     <div className="grid grid-cols-2 gap-4 md:gap-6 mb-8">
                         <div className="bg-amber-50 dark:bg-slate-700 p-5 rounded-[2rem] border-4 border-amber-200 dark:border-slate-600 shadow-sm">
                             <p className="text-xs font-black text-amber-600 dark:text-amber-400 uppercase mb-2">{t('shelf')}</p>
-                            <p className="text-4xl font-black text-slate-800 dark:text-white">{book.shelf}</p>
+                            <p className="text-4xl font-black text-slate-800 dark:text-white">{book.shelf>0?book.shelf:(locale==='ar'?'غير محدد':'Not set')}</p>
                         </div>
                         <div className="bg-emerald-50 dark:bg-slate-700 p-5 rounded-[2rem] border-4 border-emerald-200 dark:border-slate-600 shadow-sm">
                             <p className="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase mb-2">{t('row')}</p>
-                            <p className="text-4xl font-black text-slate-800 dark:text-white">{book.row}</p>
+                            <p className="text-4xl font-black text-slate-800 dark:text-white">{book.row>0?book.row:(locale==='ar'?'غير محدد':'Not set')}</p>
                         </div>
                         <div className="col-span-2 bg-sky-50 dark:bg-slate-700 p-5 rounded-[2rem] border-4 border-sky-200 dark:border-slate-600 shadow-sm flex flex-col items-center justify-center">
                             <p className="text-xs font-black text-sky-600 dark:text-sky-400 uppercase mb-2">{t('subjectLabel')}</p>
@@ -415,8 +419,9 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                         </div>
                     ) : null}
 
+                    {(book.shelf<=0||book.row<=0) && <p className="mb-3 text-sm text-amber-700 dark:text-amber-300">{locale==='ar'?'موقع الكتاب قيد التوثيق، لذلك الاستعارة غير متاحة حاليًا.':'Book location pending verification; borrowing is not yet available.'}</p>}
                     <div className="flex flex-col md:flex-row gap-4">
-                        {currentUser && requestStatus !== 'success' && (
+                        {currentUser && requestStatus !== 'success' && book.shelf>0 && book.row>0 && (
                             <button 
                                 onClick={handleBorrowRequest} 
                                 disabled={requestStatus === 'loading'}
@@ -525,12 +530,12 @@ const BookCard = React.memo(({ book, onClick, t, locale }: { book: Book; onClick
           <div className="flex gap-4">
               <div className="text-center">
                 <p className="text-[9px] text-amber-500 font-black uppercase">{t('shelf')}</p>
-                <p className="text-sm font-black text-slate-800 dark:text-white leading-none mt-1">{book.shelf}</p>
+                <p className="text-sm font-black text-slate-800 dark:text-white leading-none mt-1">{book.shelf>0?book.shelf:(locale==='ar'?'غير محدد':'Not set')}</p>
               </div>
               <div className="w-px h-6 bg-slate-200 dark:bg-slate-700" />
               <div className="text-center">
                 <p className="text-[9px] text-emerald-500 font-black uppercase">{t('row')}</p>
-                <p className="text-sm font-black text-slate-800 dark:text-white leading-none mt-1">{book.row}</p>
+                <p className="text-sm font-black text-slate-800 dark:text-white leading-none mt-1">{book.row>0?book.row:(locale==='ar'?'غير محدد':'Not set')}</p>
               </div>
           </div>
           <div className="w-8 h-8 rounded-full bg-sky-100 dark:bg-sky-900 text-sky-600 dark:text-sky-400 flex items-center justify-center">
@@ -596,14 +601,14 @@ const SearchPage: React.FC = () => {
     const filters = useMemo(() => ({
         subjects: [...new Set(bookData.map(b => b.subject))].filter(s => s !== "Unknown").sort((a, b) => getLocalizedSubject(a, currentLocale).localeCompare(getLocalizedSubject(b, currentLocale), currentLocale)),
         authors: [...new Set(bookData.map(b => b.author))].filter(a => a !== 'Unknown Author').sort(),
-        shelves: [...new Set(bookData.map(b => b.shelf.toString()))].sort((a, b) => parseInt(a) - parseInt(b))
+        shelves: [...new Set(bookData.filter(b=>b.shelf>0).map(b => b.shelf.toString()))].sort((a, b) => parseInt(a) - parseInt(b))
     }), [currentLocale]);
 
     const filteredBooks = useMemo(() => {
         const term = debouncedSearchTerm.trim();
         let result = bookData.filter(b => {
             const matchesTerm = matchesCatalogQuery(term, b.title, b.author, b.subject,
-                getLocalizedSubject(b.subject, 'ar'), getLocalizedSubject(b.subject, 'en'), b.isbn ?? '');
+                getLocalizedSubject(b.subject, 'ar'), getLocalizedSubject(b.subject, 'en'), b.isbn ?? '', ...(b.barcodes??[]));
             const matchesSub = subjectFilter === 'all' || b.subject === subjectFilter;
             const matchesAuth = authorFilter === 'all' || b.author === authorFilter;
             const matchesShelf = shelfFilter === 'all' || b.shelf.toString() === shelfFilter;

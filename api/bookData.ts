@@ -1,4 +1,5 @@
 import {shelf22SourceRecords} from './shelf22Catalog.ts';
+import {mergeOrisonWorkbookCatalog} from './orisonWorkbookCatalog.ts';
 import {shelf40Books} from './shelf40Catalog.ts';
 import {shelf30SourceRecords} from './shelf30Catalog.ts';
 import {uploadedLibraryBooks} from './uploadedCatalog20261028.ts';
@@ -32,6 +33,10 @@ export type Book = {
   year?: number;
   pages?: number;
   needsReview?: boolean;
+  /** Per-copy accession barcodes from librarian inventories. */
+  barcodes?: string[];
+  /** Imported record awaits an approved shelf and row. */
+  locationPending?: boolean;
 };
 
 // 2. البيانات الخام
@@ -3927,8 +3932,9 @@ for(const [titleKey,record] of extendedGrouped){
 // Keep verified reviews unchanged. Where only a title/author/subject is known,
  // provide a language-matched, explicitly provisional catalogue description.
  // This updates what Saqr and the public index read from one canonical array.
-export const bookData:Book[]=[...preOrisonCatalog,...importedOrisonBooks,...importedExtendedOrisonBooks]
-  .map(book=>isPhysicalCatalogPlaceholder(book.summary)
+export const bookData:Book[]=mergeOrisonWorkbookCatalog(
+  [...preOrisonCatalog,...importedOrisonBooks,...importedExtendedOrisonBooks],inferredSubject
+).map(book=>isPhysicalCatalogPlaceholder(book.summary)
     ? {...book,summary:physicalCatalogSummary({
         title:book.title,author:book.author,
         subject:getLocalizedSubject(book.subject,book.language==='AR'?'ar':'en'),
@@ -3942,7 +3948,7 @@ export function findInCatalog(q: string): Book[] {
   if (!query) return [];
 
   const results = bookData.filter((b) => {
-    const text = `${b.title} ${b.author} ${b.subject}`.toLowerCase();
+    const text = `${b.title} ${b.author} ${b.subject} ${b.isbn||''} ${(b.barcodes||[]).join(' ')}`.toLowerCase();
     return text.includes(query);
   });
 

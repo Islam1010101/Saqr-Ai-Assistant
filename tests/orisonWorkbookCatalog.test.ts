@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict';
+import {orisonWorkbookRows} from '../src/data/orisonWorkbook20261118.ts';
+import {mergeOrisonWorkbookCatalog} from '../api/orisonWorkbookCatalog.ts';
+import type {Book} from '../api/bookData.ts';
+assert.equal(orisonWorkbookRows.length,878);
+assert.equal(new Set(orisonWorkbookRows.map(r=>r[1])).size,878);
+assert.ok(orisonWorkbookRows.some(r=>r[0]==='البرق واكتشاف النار'),'Original Arabic titles must be preserved');
+const original:Book={id:'keep-id',title:'Artful Animals',author:'Unknown Author',shelf:14,row:2,
+  language:'EN',subject:'Children’s Stories',summary:'Existing librarian-approved summary'};
+const merged=mergeOrisonWorkbookCatalog([original],()=>'General Knowledge');
+const kept=merged.find(b=>b.id==='keep-id');
+assert.ok(kept);
+assert.equal(kept.shelf,14);assert.equal(kept.row,2);
+assert.equal(kept.summary,original.summary);assert.equal(kept.subject,original.subject);
+assert.equal(kept.isbn,'0361011431');
+assert.ok(kept.barcodes?.includes('00037416'));
+assert.ok(merged.some(b=>b.locationPending===true&&b.shelf===0&&b.row===0));
+assert.equal(new Set(merged.map(b=>b.id)).size,merged.length);
+assert.deepEqual([original.shelf,original.row,original.author],[14,2,'Unknown Author']);
+console.log('ORISON_WORKBOOK_RECONCILIATION_OK',merged.length);
