@@ -12,6 +12,7 @@ import AdminOrisonInventoryReview from '../src/components/AdminOrisonInventoryRe
 import AdminCatalogManager from '../src/components/AdminCatalogManager';
 import {useAdminCatalogRevision} from '../src/utils/liveCatalogAdditions';
 import AdminSaqrProviderMetrics from '../src/components/AdminSaqrProviderMetrics';
+import AdminExecutiveCharts from '../src/components/AdminExecutiveCharts';
 import AdminUserFeaturePermissions from '../src/components/AdminUserFeaturePermissions';
 import {nationalIdentityBooks} from '../src/utils/nationalIdentityCatalog';
 import { bookData } from '../api/bookData';
@@ -187,6 +188,7 @@ const AdminDashboard: React.FC = () => {
     const [lessonReportsList, setLessonReportsList] = useState<any[]>([]);
     const [activeTab, setActiveTab] = useState<'students' | 'teachers' | 'borrowings' | 'pending' | 'reports'>('pending');
     const [activeSection, setActiveSection] = useState<AdminSection>('overview');
+    const [sectionSearch, setSectionSearch] = useState('');
     const [showReadingReport, setShowReadingReport] = useState(false);
     const [expandedReports, setExpandedReports] = useState({reading:false,attendance:false,insights:false,providers:false});
     const [searchQuery, setSearchQuery] = useState('');
@@ -705,13 +707,23 @@ const AdminDashboard: React.FC = () => {
         {id:'orison',label:isAr?'كتب بانتظار الموقع':'Books awaiting location',description:isAr?'مراجعة الجرد وتحديد الرف والصف':'Review imported books and set shelf / row',icon:'book-open'},
         {id:'management',label:isAr?'الإدارة والسجلات':'Management',description:isAr?'المستخدمون والطلبات والاستعارات':'Users, requests & loans',icon:'users'}
     ];
+    // Only presentational grouping; all original dashboard sections still exist.
+    const navigationGroups: Array<{key:string;label:string;sections:AdminSection[]}> = [
+        {key:'insights',label:isAr?'الرئيسية والتقارير':'Overview & reports',sections:['overview','analytics','reports']},
+        {key:'operations',label:isAr?'التشغيل اليومي':'Daily operations',sections:['management','attendance','reading']},
+        {key:'catalog',label:isAr?'الفهرسة والمراجعة':'Catalog & reviews',sections:['library','add-books','children','orison']}
+    ];
+    const normalizedSectionQuery = sectionSearch.trim().toLocaleLowerCase();
+    const matchingSection = (section:{label:string;description:string}) =>
+        !normalizedSectionQuery || (section.label+' '+section.description).toLocaleLowerCase().includes(normalizedSectionQuery);
+
     const switchAdminSection = (section: AdminSection, tab?: 'students' | 'teachers' | 'borrowings' | 'pending' | 'reports') => {
         if (tab) { setActiveTab(tab); setSearchQuery(''); }
         setActiveSection(section);
         window.scrollTo({top:0,behavior:'smooth'});
     };
     const currentSection = dashboardSections.find(item=>item.id===activeSection)!;
-    const overviewShortcuts: Array<{label:string;count:number;caption:string;icon:IconName;section:AdminSection;tab?:'students'|'teachers'|'borrowings'|'pending'|'reports'}> = [
+    const overviewShortcuts: Array<{label:string;count?:number;caption:string;icon:IconName;section:AdminSection;tab?:'students'|'teachers'|'borrowings'|'pending'|'reports'}> = [
         {label:isAr?'مركز التقارير':'Reports center',count:lessonReportsList.length,caption:isAr?'الرسوم والإحصائيات':'Charts & statistics',icon:'chart',section:'reports'},
         {label:isAr?'الطلبات المعلقة':'Pending requests',count:pendingRequestsList.length,caption:isAr?'مراجعة واعتماد':'Review & approve',icon:'clock',section:'management',tab:'pending'},
         {label:isAr?'الإعارات الحالية':'Current loans',count:borrowingsList.length,caption:isAr?'المتابعة والإرجاع':'Manage returns',icon:'book-open',section:'management',tab:'borrowings'},
@@ -720,10 +732,15 @@ const AdminDashboard: React.FC = () => {
         {label:isAr?'فهرس المكتبة':'Library catalog',count:allCatalogCount,caption:isAr?'الورقي والرقمي':'Print & digital',icon:'library',section:'library'},
         {label:isAr?'إضافة كتاب جديد':'Add a book',count:allCatalogCount,caption:isAr?'ورقي / رقمي / Excel':'Print / digital / Excel',icon:'book-open',section:'add-books'},
         {label:isAr?'تحضيرات المعلمين':'Lesson reports',count:lessonReportsList.length,caption:isAr?'سجلات التحضير':'Teaching activity',icon:'clipboard-list',section:'management',tab:'reports'}
+        {label:isAr?'التحليلات التفصيلية':'Analytics',caption:isAr?'رسوم وبيانات النشاط':'Activity charts',icon:'chart',section:'analytics'},
+        {label:isAr?'الحضور وجدول الحصص':'Attendance',caption:isAr?'الحصص والزيارات':'Sessions & visits',icon:'calendar',section:'attendance'},
+        {label:isAr?'تحديات القراءة':'Reading progress',caption:isAr?'تقرير القراءة':'Reading activities',icon:'trophy',section:'reading'},
+        {label:isAr?'مراجعة مستويات الأطفال':'Children review',caption:isAr?'التوثيق والاعتماد':'Review & validation',icon:'clipboard-list',section:'children'},
+        {label:isAr?'الجرد الناقص':'Inventory review',caption:isAr?'تحديد مكان الكتب':'Missing shelf locations',icon:'library',section:'orison'}
     ];
 
     return (
-        <div dir={dir} className="efips-admin min-h-[100dvh] bg-white dark:bg-black text-slate-800 dark:text-slate-100 font-sans p-3 sm:p-5 lg:p-8 pb-24 transition-colors duration-300 relative isolate">
+        <div dir={dir} className="efips-admin min-h-[100dvh] bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans p-3 sm:p-5 lg:p-6 pb-24 transition-colors duration-300 relative isolate">
             <style>{`@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
                 .efips-admin,.efips-admin * {font-family:'Cairo',sans-serif!important}
                 .efips-admin {scroll-behavior:smooth}
@@ -732,9 +749,17 @@ const AdminDashboard: React.FC = () => {
                 .efips-admin .efips-metric:before {content:'';position:absolute;inset:0 auto auto 0;width:100%;height:4px;background:linear-gradient(90deg,#0d9488,#38bdf8,#f59e0b);opacity:.7}
                 .efips-admin .efips-column {transform-origin:bottom;animation:efips-column-rise .75s ease-out both}
                 .efips-admin a,.efips-admin button {touch-action:manipulation}
+                .efips-admin .efips-admin-chart-card {animation:efips-chart-enter .5s cubic-bezier(.2,.7,.2,1) both}
+                .efips-admin .efips-admin-shortcut {transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease,background-color .2s ease}
+                .efips-admin .efips-admin-shortcut:hover {transform:translateY(-3px);box-shadow:0 14px 26px -23px rgba(5,116,101,.7)}
+                .efips-admin .efips-admin-sidebar button {transition:background-color .18s ease,color .18s ease,border-color .18s ease}
+                .efips-admin .efips-admin-sidebar button:focus-visible,.efips-admin .efips-admin-shortcut:focus-visible {outline:2px solid #0d9488;outline-offset:3px}
+                .efips-admin .efips-admin-section-details[open]>summary .efips-admin-caret {transform:rotate(180deg)}
+                @keyframes efips-chart-enter {from {opacity:.2;transform:translateY(10px)}to {opacity:1;transform:translateY(0)}}
+
                 @keyframes efips-panel-enter {from {opacity:0;transform:translateY(13px)}to {opacity:1;transform:translateY(0)}}
                 @keyframes efips-column-rise {from {transform:scaleY(.15)}to {transform:scaleY(1)}}
-                @media (prefers-reduced-motion:reduce) {.efips-admin .efips-panel,.efips-admin .efips-column {animation:none!important}.efips-admin * {scroll-behavior:auto!important}}
+                @media (prefers-reduced-motion:reduce) {.efips-admin .efips-panel,.efips-admin .efips-column,.efips-admin .efips-admin-chart-card {animation:none!important}.efips-admin * {scroll-behavior:auto!important}}
             `}</style>
             <header className="efips-panel max-w-7xl mx-auto flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 mb-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-4 sm:p-5 rounded-2xl shadow-sm">
                 <div><h1 className="text-2xl md:text-4xl font-black bg-gradient-to-r from-emerald-700 via-teal-600 to-sky-500 bg-clip-text text-transparent">{t('title')}</h1><p className="text-slate-500 dark:text-slate-400 font-bold text-xs md:text-sm mt-1">{t('welcome')} <span className="text-slate-900 dark:text-white font-black">{adminName}</span> | {t('subtitle')}</p></div>
