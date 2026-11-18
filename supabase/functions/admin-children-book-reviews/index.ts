@@ -19,7 +19,11 @@ Deno.serve(async(req:Request)=>{
   if(!catalogUrl||!catalogSecret)return respond(503,{error:"Service unavailable"});
   const db=createClient(catalogUrl,catalogSecret,{auth:{persistSession:false,autoRefreshToken:false}});
   const {data,error}=await db.from("efips_children_book_reviews").select("catalog_id,title,author,shelf,row_number,isbn,publisher,reading_tier,original_title,original_author,original_shelf,original_row").eq("decision","approved").limit(5000);
-  return error?respond(503,{error:"Catalog corrections unavailable"}):respond(200,{ok:true,records:data});
+  if(error)return respond(503,{error:"Catalog corrections unavailable"});
+  const imported=await db.from("efips_orison_book_reviews")
+    .select("source_key,title,author,isbn,barcodes,publisher,shelf,row_number")
+    .eq("decision","approved").limit(5000);
+  return imported.error?respond(503,{error:"Approved imports unavailable"}):respond(200,{ok:true,records:data,imports:imported.data});
  }
  const token=req.headers.get("authorization")?.match(/^Bearer\s+(.+)$/i)?.[1];
  if(!token)return respond(401,{error:"Verified administrator sign-in required"});
@@ -37,6 +41,26 @@ Deno.serve(async(req:Request)=>{
  if(body.action==="list"){
   const {data,error}=await admin.from("efips_children_book_reviews").select("*").order("reviewed_at",{ascending:false}).limit(5000);
   return error?respond(503,{error:"Review records unavailable"}):respond(200,{ok:true,records:data});
+ }
+ if(body.action==="import_list"){
+   const {data,error}=await admin.from("efips_orison_book_reviews").select("*").order("reviewed_at",{ascending:false}).limit(5000);
+   return error?respond(503,{error:"Import review records unavailable"}):respond(200,{ok:true,records:data});
+ }
+ if(body.action==="import_save"){
+   const r=body.record||{},source_key=text(r.source_key,90),title=text(r.title),author=text(r.author),decision=text(r.decision,20);
+   const shelf=r.shelf===null||r.shelf===undefined||r.shelf===""?null:Number(r.shelf);
+   const row=r.row_number===null||r.row_number===undefined||r.row_number===""?null:Number(r.row_number);
+   const validLoc=(n:number|null)=>n===null||(Number.isInteger(n)&&n>=1&&n<=999);
+   const barcodes=Array.isArray(r.barcodes)?[...new Set(r.barcodes.map((v:unknown)=>text(v,24)))]:[];
+   if(!/^orison-xlsx-20261118-[0-9]{5,12}$/.test(source_key)||!title||!author||
+      !["pending","approved","rejected"].includes(decision)||!validLoc(shelf)||!validLoc(row)||
+      (decision==="approved"&&(shelf===null||row===null))||barcodes.length<1||barcodes.length>100||
+      barcodes.some((b:string)=>!/^\d{5,12}$/.test(b)))return respond(400,{error:"Invalid review or missing approved location"});
+   const payload={source_key,title,author,isbn:text(r.isbn,32),barcodes,
+      publisher:text(r.publisher),shelf,row_number:row,decision,notes:text(r.notes,1000),
+      reviewed_by:email,reviewed_at:new Date().toISOString()};
+   const {data,error}=await admin.from("efips_orison_book_reviews").upsert(payload,{onConflict:"source_key"}).select("*").single();
+   return error?respond(503,{error:"Import review save failed"}):respond(200,{ok:true,record:data});
  }
  if(body.action==="lookup"){
   const title=text(body.title,160),author=text(body.author,120),isbn=text(body.isbn,32).replace(/[^0-9Xx]/g,"");
