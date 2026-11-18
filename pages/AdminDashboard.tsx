@@ -731,7 +731,7 @@ const AdminDashboard: React.FC = () => {
         {label:isAr?'إدارة المعلمين':'Teachers',count:stats.teachers,caption:isAr?'البريد والصلاحيات':'Emails & roles',icon:'users',section:'management',tab:'teachers'},
         {label:isAr?'فهرس المكتبة':'Library catalog',count:allCatalogCount,caption:isAr?'الورقي والرقمي':'Print & digital',icon:'library',section:'library'},
         {label:isAr?'إضافة كتاب جديد':'Add a book',count:allCatalogCount,caption:isAr?'ورقي / رقمي / Excel':'Print / digital / Excel',icon:'book-open',section:'add-books'},
-        {label:isAr?'تحضيرات المعلمين':'Lesson reports',count:lessonReportsList.length,caption:isAr?'سجلات التحضير':'Teaching activity',icon:'clipboard-list',section:'management',tab:'reports'}
+        {label:isAr?'تحضيرات المعلمين':'Lesson reports',count:lessonReportsList.length,caption:isAr?'سجلات التحضير':'Teaching activity',icon:'clipboard-list',section:'management',tab:'reports'},
         {label:isAr?'التحليلات التفصيلية':'Analytics',caption:isAr?'رسوم وبيانات النشاط':'Activity charts',icon:'chart',section:'analytics'},
         {label:isAr?'الحضور وجدول الحصص':'Attendance',caption:isAr?'الحصص والزيارات':'Sessions & visits',icon:'calendar',section:'attendance'},
         {label:isAr?'تحديات القراءة':'Reading progress',caption:isAr?'تقرير القراءة':'Reading activities',icon:'trophy',section:'reading'},
