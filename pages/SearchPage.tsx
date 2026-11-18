@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { bookData, getLocalizedSubject, type Book } from '../api/bookData';
+import {useAdminCatalogRevision} from '../src/utils/liveCatalogAdditions';
 import { literaryGenreSubjectNames } from '../src/utils/literaryGenreCatalog';
 import { useReadingPassport, physicalBookKey } from '../src/utils/readingPassport'; 
 import { useLanguage } from '../App';
@@ -543,6 +544,7 @@ const BookCard = React.memo(({ book, onClick, t, locale }: { book: Book; onClick
 
 // --- 5. Main Component: SearchPage ---
 const SearchPage: React.FC = () => {
+    const catalogRevision = useAdminCatalogRevision();
     // اللغة الافتراضية
     const { locale, dir } = useLanguage();
     const [currentLocale, setCurrentLocale] = useState(locale || 'en');
@@ -597,7 +599,7 @@ const SearchPage: React.FC = () => {
         subjects: [...new Set(bookData.map(b => b.subject))].filter(s => s !== "Unknown").sort((a, b) => getLocalizedSubject(a, currentLocale).localeCompare(getLocalizedSubject(b, currentLocale), currentLocale)),
         authors: [...new Set(bookData.map(b => b.author))].filter(a => a !== 'Unknown Author').sort(),
         shelves: [...new Set(bookData.map(b => b.shelf.toString()))].sort((a, b) => parseInt(a) - parseInt(b))
-    }), [currentLocale]);
+    }), [currentLocale,catalogRevision]);
 
     const filteredBooks = useMemo(() => {
         const term = debouncedSearchTerm.trim();
@@ -613,7 +615,7 @@ const SearchPage: React.FC = () => {
         });
 
         return result;
-    }, [debouncedSearchTerm, subjectFilter, authorFilter, shelfFilter, audienceFilter, readingTierFilter, currentLocale]);
+    }, [debouncedSearchTerm, subjectFilter, authorFilter, shelfFilter, audienceFilter, readingTierFilter, currentLocale,catalogRevision]);
 
     const displayedCount = shelfFilter === '22' ? shelf22VisibleCount : visibleCount;
     useEffect(() => {
