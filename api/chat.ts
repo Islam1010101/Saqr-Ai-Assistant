@@ -3355,6 +3355,7 @@ function isSaqrApiLibrarySearch(text:string):boolean{
 }
 
 type ApiCorrection = {catalog_id:string;title:string;author:string;shelf:number;row_number:number;original_title:string;original_author:string;original_shelf:number;original_row:number};
+type ApprovedOrisonForChat = {source_key:string;title:string;author:string;shelf:number;row_number:number};
 async function approvedCatalogForChat():Promise<typeof localBookData> {
   // This local fallback is used only when the admin corrections endpoint cannot be contacted.
   // The browser catalogue uses the canonical IDs to avoid ambiguity.
@@ -3368,7 +3369,7 @@ async function approvedCatalogForChat():Promise<typeof localBookData> {
       signal:AbortSignal.timeout(2400)
     });
     if(!response.ok)return localBookData;
-    const data=await response.json() as {records?:ApiCorrection[]};
+    const data=await response.json() as {records?:ApiCorrection[];imports?:ApprovedOrisonForChat[]};
     if(!Array.isArray(data.records))return localBookData;
     const updated=localBookData.map(book=>({...book}));
     // Legacy server list has no canonical book ID. Match exact ORIGINAL title/author/location,
@@ -3380,6 +3381,17 @@ async function approvedCatalogForChat():Promise<typeof localBookData> {
         book.shelf===correction.original_shelf&&book.row===correction.original_row?[i]:[]);
       if(indexes.length!==1)continue;
       updated[indexes[0]]={...updated[indexes[0]],title:correction.title,author:correction.author,shelf:correction.shelf,row:correction.row_number};
+    }
+    // Only librarian-approved imports with both verified physical coordinates
+    // may appear in Saqr's server-side book search.
+    for(const entry of (Array.isArray(data.imports)?data.imports:[])){
+      if(!/^orison-xlsx-20261118-\d{5,12}$/.test(entry.source_key)||
+         !String(entry.title||'').trim()||!String(entry.author||'').trim()||
+         !Number.isInteger(entry.shelf)||entry.shelf<1||
+         !Number.isInteger(entry.row_number)||entry.row_number<1)continue;
+      if(updated.some(b=>b.title.toLocaleLowerCase()===entry.title.toLocaleLowerCase()&&
+        b.author.toLocaleLowerCase()===entry.author.toLocaleLowerCase()))continue;
+      updated.push({title:entry.title,author:entry.author,shelf:entry.shelf,row:entry.row_number});
     }
     return updated;
   }catch{return localBookData;}
