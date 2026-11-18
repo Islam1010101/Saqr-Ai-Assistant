@@ -12,6 +12,7 @@ import AdminOrisonInventoryReview from '../src/components/AdminOrisonInventoryRe
 import AdminCatalogManager from '../src/components/AdminCatalogManager';
 import {useAdminCatalogRevision} from '../src/utils/liveCatalogAdditions';
 import AdminSaqrProviderMetrics from '../src/components/AdminSaqrProviderMetrics';
+import AdminExecutiveCharts from '../src/components/AdminExecutiveCharts';
 import AdminUserFeaturePermissions from '../src/components/AdminUserFeaturePermissions';
 import {nationalIdentityBooks} from '../src/utils/nationalIdentityCatalog';
 import { bookData } from '../api/bookData';
@@ -187,6 +188,7 @@ const AdminDashboard: React.FC = () => {
     const [lessonReportsList, setLessonReportsList] = useState<any[]>([]);
     const [activeTab, setActiveTab] = useState<'students' | 'teachers' | 'borrowings' | 'pending' | 'reports'>('pending');
     const [activeSection, setActiveSection] = useState<AdminSection>('overview');
+    const [sectionSearch, setSectionSearch] = useState('');
     const [showReadingReport, setShowReadingReport] = useState(false);
     const [expandedReports, setExpandedReports] = useState({reading:false,attendance:false,insights:false,providers:false});
     const [searchQuery, setSearchQuery] = useState('');
@@ -705,13 +707,23 @@ const AdminDashboard: React.FC = () => {
         {id:'orison',label:isAr?'كتب بانتظار الموقع':'Books awaiting location',description:isAr?'مراجعة الجرد وتحديد الرف والصف':'Review imported books and set shelf / row',icon:'book-open'},
         {id:'management',label:isAr?'الإدارة والسجلات':'Management',description:isAr?'المستخدمون والطلبات والاستعارات':'Users, requests & loans',icon:'users'}
     ];
+    // Only presentational grouping; all original dashboard sections still exist.
+    const navigationGroups: Array<{key:string;label:string;sections:AdminSection[]}> = [
+        {key:'insights',label:isAr?'الرئيسية والتقارير':'Overview & reports',sections:['overview','analytics','reports']},
+        {key:'operations',label:isAr?'التشغيل اليومي':'Daily operations',sections:['management','attendance','reading']},
+        {key:'catalog',label:isAr?'الفهرسة والمراجعة':'Catalog & reviews',sections:['library','add-books','children','orison']}
+    ];
+    const normalizedSectionQuery = sectionSearch.trim().toLocaleLowerCase();
+    const matchingSection = (section:{label:string;description:string}) =>
+        !normalizedSectionQuery || (section.label+' '+section.description).toLocaleLowerCase().includes(normalizedSectionQuery);
+
     const switchAdminSection = (section: AdminSection, tab?: 'students' | 'teachers' | 'borrowings' | 'pending' | 'reports') => {
         if (tab) { setActiveTab(tab); setSearchQuery(''); }
         setActiveSection(section);
         window.scrollTo({top:0,behavior:'smooth'});
     };
     const currentSection = dashboardSections.find(item=>item.id===activeSection)!;
-    const overviewShortcuts: Array<{label:string;count:number;caption:string;icon:IconName;section:AdminSection;tab?:'students'|'teachers'|'borrowings'|'pending'|'reports'}> = [
+    const overviewShortcuts: Array<{label:string;count?:number;caption:string;icon:IconName;section:AdminSection;tab?:'students'|'teachers'|'borrowings'|'pending'|'reports'}> = [
         {label:isAr?'مركز التقارير':'Reports center',count:lessonReportsList.length,caption:isAr?'الرسوم والإحصائيات':'Charts & statistics',icon:'chart',section:'reports'},
         {label:isAr?'الطلبات المعلقة':'Pending requests',count:pendingRequestsList.length,caption:isAr?'مراجعة واعتماد':'Review & approve',icon:'clock',section:'management',tab:'pending'},
         {label:isAr?'الإعارات الحالية':'Current loans',count:borrowingsList.length,caption:isAr?'المتابعة والإرجاع':'Manage returns',icon:'book-open',section:'management',tab:'borrowings'},
@@ -719,11 +731,16 @@ const AdminDashboard: React.FC = () => {
         {label:isAr?'إدارة المعلمين':'Teachers',count:stats.teachers,caption:isAr?'البريد والصلاحيات':'Emails & roles',icon:'users',section:'management',tab:'teachers'},
         {label:isAr?'فهرس المكتبة':'Library catalog',count:allCatalogCount,caption:isAr?'الورقي والرقمي':'Print & digital',icon:'library',section:'library'},
         {label:isAr?'إضافة كتاب جديد':'Add a book',count:allCatalogCount,caption:isAr?'ورقي / رقمي / Excel':'Print / digital / Excel',icon:'book-open',section:'add-books'},
-        {label:isAr?'تحضيرات المعلمين':'Lesson reports',count:lessonReportsList.length,caption:isAr?'سجلات التحضير':'Teaching activity',icon:'clipboard-list',section:'management',tab:'reports'}
+        {label:isAr?'تحضيرات المعلمين':'Lesson reports',count:lessonReportsList.length,caption:isAr?'سجلات التحضير':'Teaching activity',icon:'clipboard-list',section:'management',tab:'reports'},
+        {label:isAr?'التحليلات التفصيلية':'Analytics',caption:isAr?'رسوم وبيانات النشاط':'Activity charts',icon:'chart',section:'analytics'},
+        {label:isAr?'الحضور وجدول الحصص':'Attendance',caption:isAr?'الحصص والزيارات':'Sessions & visits',icon:'calendar',section:'attendance'},
+        {label:isAr?'تحديات القراءة':'Reading progress',caption:isAr?'تقرير القراءة':'Reading activities',icon:'trophy',section:'reading'},
+        {label:isAr?'مراجعة مستويات الأطفال':'Children review',caption:isAr?'التوثيق والاعتماد':'Review & validation',icon:'clipboard-list',section:'children'},
+        {label:isAr?'الجرد الناقص':'Inventory review',caption:isAr?'تحديد مكان الكتب':'Missing shelf locations',icon:'library',section:'orison'}
     ];
 
     return (
-        <div dir={dir} className="efips-admin min-h-[100dvh] bg-white dark:bg-black text-slate-800 dark:text-slate-100 font-sans p-3 sm:p-5 lg:p-8 pb-24 transition-colors duration-300 relative isolate">
+        <div dir={dir} className="efips-admin min-h-[100dvh] bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans p-3 sm:p-5 lg:p-6 pb-24 transition-colors duration-300 relative isolate">
             <style>{`@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
                 .efips-admin,.efips-admin * {font-family:'Cairo',sans-serif!important}
                 .efips-admin {scroll-behavior:smooth}
@@ -732,40 +749,111 @@ const AdminDashboard: React.FC = () => {
                 .efips-admin .efips-metric:before {content:'';position:absolute;inset:0 auto auto 0;width:100%;height:4px;background:linear-gradient(90deg,#0d9488,#38bdf8,#f59e0b);opacity:.7}
                 .efips-admin .efips-column {transform-origin:bottom;animation:efips-column-rise .75s ease-out both}
                 .efips-admin a,.efips-admin button {touch-action:manipulation}
+                .efips-admin .efips-admin-chart-card {animation:efips-chart-enter .5s cubic-bezier(.2,.7,.2,1) both}
+                .efips-admin .efips-admin-shortcut {transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease,background-color .2s ease}
+                .efips-admin .efips-admin-shortcut:hover {transform:translateY(-3px);box-shadow:0 14px 26px -23px rgba(5,116,101,.7)}
+                .efips-admin .efips-admin-sidebar button {transition:background-color .18s ease,color .18s ease,border-color .18s ease}
+                .efips-admin .efips-admin-sidebar button:focus-visible,.efips-admin .efips-admin-shortcut:focus-visible {outline:2px solid #0d9488;outline-offset:3px}
+                .efips-admin .efips-admin-section-details[open]>summary .efips-admin-caret {transform:rotate(180deg)}
+                @keyframes efips-chart-enter {from {opacity:.2;transform:translateY(10px)}to {opacity:1;transform:translateY(0)}}
+
                 @keyframes efips-panel-enter {from {opacity:0;transform:translateY(13px)}to {opacity:1;transform:translateY(0)}}
                 @keyframes efips-column-rise {from {transform:scaleY(.15)}to {transform:scaleY(1)}}
-                @media (prefers-reduced-motion:reduce) {.efips-admin .efips-panel,.efips-admin .efips-column {animation:none!important}.efips-admin * {scroll-behavior:auto!important}}
+                @media (prefers-reduced-motion:reduce) {.efips-admin .efips-panel,.efips-admin .efips-column,.efips-admin .efips-admin-chart-card {animation:none!important}.efips-admin * {scroll-behavior:auto!important}}
             `}</style>
-            <header className="efips-panel max-w-7xl mx-auto flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 mb-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-4 sm:p-5 rounded-2xl shadow-sm">
-                <div><h1 className="text-2xl md:text-4xl font-black bg-gradient-to-r from-emerald-700 via-teal-600 to-sky-500 bg-clip-text text-transparent">{t('title')}</h1><p className="text-slate-500 dark:text-slate-400 font-bold text-xs md:text-sm mt-1">{t('welcome')} <span className="text-slate-900 dark:text-white font-black">{adminName}</span> | {t('subtitle')}</p></div>
-                <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full lg:w-auto justify-start lg:justify-end">
-                    <button type="button" onClick={() => void fetchRealDashboardData()} className="px-4 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95 flex items-center gap-2"><OutlineIcon name="refresh" />{isAr ? 'تحديث البيانات' : 'Refresh Data'}</button>
-                    <button type="button" onClick={handlePrintDashboardReport} className="px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95 flex items-center gap-2"><OutlineIcon name="printer" />{t('printPdfBtn')}</button>
-                    <button type="button" onClick={toggleTheme} className="px-4 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm shadow-inner transition-all flex items-center gap-2"><OutlineIcon name={theme === 'light' ? 'moon' : 'sun'} />{theme === 'light' ? 'Dark' : 'Light'}</button>
-                    <Link to="/home" className="px-6 py-3 bg-slate-900 dark:bg-slate-800 text-white hover:bg-slate-800 border border-slate-700 rounded-2xl font-bold text-sm transition-all shadow-md text-center">{t('backToHome')}</Link>
+            <header className="efips-panel relative isolate mx-auto mb-4 flex max-w-[1600px] flex-col gap-4 overflow-hidden rounded-[1.65rem] border border-emerald-900/20 bg-gradient-to-l from-[#064d48] via-[#086860] to-[#0f726f] p-4 text-white shadow-[0_16px_35px_-30px_rgba(4,73,65,.8)] sm:p-5 lg:flex-row lg:items-center lg:justify-between">
+                <svg viewBox="0 0 320 130" preserveAspectRatio="xMidYMid slice" className="pointer-events-none absolute inset-y-0 end-0 h-full w-[300px] opacity-[.075]" aria-hidden="true">
+                    <path d="M10 110C70 10 135 145 190 25S285 140 325 10" fill="none" stroke="white" strokeWidth="2"/>
+                    <circle cx="225" cy="30" r="64" fill="none" stroke="white" strokeWidth="12"/>
+                    <circle cx="260" cy="107" r="40" fill="none" stroke="white" strokeWidth="10"/>
+                </svg>
+                <div className="relative flex min-w-0 items-center gap-3">
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/10 shadow-inner"><OutlineIcon name="grid" className="h-6 w-6 text-white"/></span>
+                    <div className="min-w-0">
+                        <div className="text-[10px] font-bold tracking-wider text-emerald-100/80">EFIPS LIBRARY · ADMIN</div>
+                        <h1 className="mt-0.5 text-xl font-black leading-tight sm:text-2xl">{t('title')}</h1>
+                        <p className="mt-1 truncate text-[11px] text-emerald-100/90 sm:text-xs">{t('welcome')} <strong className="font-black text-white">{adminName}</strong> · {t('subtitle')}</p>
+                    </div>
+                </div>
+                <div className="relative flex w-full flex-wrap items-center gap-2 lg:w-auto lg:justify-end">
+                    <button type="button" onClick={() => void fetchRealDashboardData()} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"><OutlineIcon name="refresh" className="h-4 w-4"/>{isAr ? 'تحديث' : 'Refresh'}</button>
+                    <button type="button" onClick={handlePrintDashboardReport} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-white px-3 py-2 text-xs font-black text-emerald-900 transition-colors hover:bg-emerald-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"><OutlineIcon name="printer" className="h-4 w-4"/>{t('printPdfBtn')}</button>
+                    <button type="button" onClick={toggleTheme} aria-label={theme === 'light' ? 'Dark mode' : 'Light mode'} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-3 py-2 text-xs font-bold text-white hover:bg-white/20"><OutlineIcon name={theme === 'light' ? 'moon' : 'sun'} className="h-4 w-4"/><span>{theme === 'light' ? 'Dark' : 'Light'}</span></button>
+                    <Link to="/home" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-xs font-bold text-white hover:bg-white/20"><OutlineIcon name="return" className="h-4 w-4"/>{t('backToHome')}</Link>
                 </div>
             </header>
 
-             <nav aria-label={isAr ? 'أقسام لوحة الإدارة' : 'Dashboard sections'} className="sticky top-2 z-40 max-w-7xl mx-auto mb-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg shadow-sm px-3 py-2">
-                 <div className="hidden sm:flex items-center justify-between gap-2 mb-2 px-1">
-                     <span className="font-black text-sm text-slate-800 dark:text-slate-100">{isAr ? 'مركز التحكم' : 'Command Center'}</span>
-                     <span className="text-[11px] sm:text-xs font-bold text-slate-500 dark:text-slate-400">{isAr ? 'اختر القسم الذي تريد العمل عليه' : 'Open only the section you need'}</span>
+             <nav aria-label={isAr ? 'أقسام لوحة الإدارة' : 'Dashboard sections'} className="sticky top-2 z-40 mx-auto mb-4 max-w-[1600px] rounded-2xl border border-slate-200 bg-white/95 px-3 py-2 shadow-sm backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/95 xl:hidden">
+                 <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                     <label htmlFor="efips-admin-mobile-search" className="text-xs font-black text-slate-700 dark:text-slate-200">{isAr ? 'الانتقال السريع' : 'Quick navigation'}</label>
+                     <input id="efips-admin-mobile-search" type="search" value={sectionSearch} onChange={event=>setSectionSearch(event.target.value)}
+                         placeholder={isAr ? 'ابحث عن قسم...' : 'Find a section...'} className="min-h-9 w-40 flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 text-xs text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white sm:max-w-64"/>
                  </div>
                  <div className="flex gap-1.5 overflow-x-auto overscroll-x-contain pb-1 scrollbar-thin">
-                     {dashboardSections.map(item=><button type="button" key={item.id} aria-pressed={activeSection===item.id}
+                     {dashboardSections.filter(matchingSection).map(item=><button type="button" key={item.id} aria-pressed={activeSection===item.id}
                          onClick={()=>switchAdminSection(item.id)}
-                         className={`shrink-0 rounded-xl border px-3 py-2 flex items-center justify-center gap-1.5 text-center transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-500 ${activeSection===item.id ? 'bg-emerald-700 text-white border-emerald-700 shadow-md shadow-emerald-700/15' : 'bg-slate-50 dark:bg-slate-800/70 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:border-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30'}`}>
+                         className={`shrink-0 rounded-xl border px-3 py-2.5 flex items-center justify-center gap-1.5 text-center transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-500 ${activeSection===item.id ? 'bg-emerald-700 text-white border-emerald-700 shadow-md shadow-emerald-700/15' : 'bg-slate-50 dark:bg-slate-800/70 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:border-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30'}`}>
                          <OutlineIcon name={item.icon} className="h-4 w-4 shrink-0"/><span className="text-xs font-bold whitespace-nowrap">{item.label}</span>
                      </button>)}
+                     {!dashboardSections.some(matchingSection) && <span className="px-3 py-2 text-xs text-slate-500">{isAr?'لا توجد أقسام مطابقة':'No matching sections'}</span>}
                  </div>
              </nav>
-            <main className="relative max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="mx-auto max-w-[1600px] xl:grid xl:grid-cols-[248px_minmax(0,1fr)] xl:items-start xl:gap-5">
+                <aside className="efips-admin-sidebar sticky top-5 hidden min-w-0 max-h-[calc(100dvh-2.5rem)] overflow-y-auto rounded-[1.5rem] border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-900 xl:block" aria-label={isAr?'قائمة إدارة المكتبة':'Library administration navigation'}>
+                    <div className="rounded-xl bg-emerald-50 p-3 dark:bg-emerald-950/40">
+                        <div className="flex items-center gap-2 text-sm font-black text-emerald-900 dark:text-emerald-200"><OutlineIcon name="grid" className="h-4 w-4"/>{isAr?'مركز التحكم':'Command center'}</div>
+                        <p className="mt-1 text-[11px] leading-5 text-emerald-800/75 dark:text-emerald-200/75">{isAr?'كل أقسام الإدارة بدون ازدحام':'Every admin tool, neatly grouped'}</p>
+                    </div>
+                    <label htmlFor="efips-admin-sidebar-search" className="mt-4 block text-[11px] font-bold text-slate-500 dark:text-slate-400">{isAr?'ابحث عن مهمة':'Find a task'}</label>
+                    <div className="relative mt-1.5">
+                        <OutlineIcon name="search" className="pointer-events-none absolute start-3 top-2.5 h-4 w-4 text-slate-400"/>
+                        <input id="efips-admin-sidebar-search" type="search" value={sectionSearch} onChange={event=>setSectionSearch(event.target.value)}
+                            placeholder={isAr?'اسم القسم...':'Section name...'}
+                            className="min-h-10 w-full rounded-xl border border-slate-200 bg-slate-50 py-2 ps-10 pe-3 text-xs text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"/>
+                    </div>
+                    <div className="mt-4 space-y-4">
+                        {navigationGroups.map(group=>{
+                            const matches=dashboardSections.filter(item=>group.sections.includes(item.id)&&matchingSection(item));
+                            return matches.length?<div key={group.key}>
+                                <p className="mb-1.5 px-2 text-[10px] font-black tracking-wide text-slate-400 dark:text-slate-500">{group.label}</p>
+                                <div className="space-y-1">{matches.map(item=><button type="button" key={item.id}
+                                    aria-current={activeSection===item.id?'page':undefined}
+                                    onClick={()=>switchAdminSection(item.id)}
+                                    className={`group flex w-full items-center gap-2.5 rounded-xl border px-2.5 py-2.5 text-start ${activeSection===item.id?'border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/55 dark:text-emerald-200':'border-transparent text-slate-600 hover:border-slate-200 hover:bg-slate-50 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:bg-slate-800'}`}>
+                                    <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg ${activeSection===item.id?'bg-emerald-600 text-white':'bg-slate-100 text-emerald-700 dark:bg-slate-800 dark:text-emerald-300'}`}><OutlineIcon name={item.icon} className="h-4 w-4"/></span>
+                                    <span className="min-w-0 flex-1"><span className="block truncate text-xs font-bold">{item.label}</span><span className="mt-0.5 block truncate text-[10px] opacity-65">{item.description}</span></span>
+                                    {item.id==='management'&&pendingRequestsList.length>0&&<span className="rounded-md bg-amber-100 px-1.5 py-0.5 text-[10px] font-black text-amber-800 dark:bg-amber-900/50 dark:text-amber-200">{pendingRequestsList.length}</span>}
+                                </button>)}</div>
+                            </div>:null;
+                        })}
+                        {!dashboardSections.some(matchingSection)&&<p className="px-2 py-4 text-center text-xs text-slate-500">{isAr?'لا توجد أقسام مطابقة':'No matching sections'}</p>}
+                    </div>
+                    <button type="button" onClick={()=>switchAdminSection('add-books')} className="mt-5 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 px-3 py-2.5 text-xs font-black text-white hover:bg-emerald-800"><OutlineIcon name="book-open" className="h-4 w-4"/>{isAr?'إضافة كتاب جديد':'Add a book'}</button>
+                </aside>
+                <main className="relative min-w-0 grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-5">
                  <div className="lg:col-span-4 flex flex-wrap items-start justify-between gap-3 px-1" aria-live="polite">
                      <div><h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">{currentSection.label}</h2>
                          <p className="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 mt-1">{currentSection.description}</p></div>
                      {activeSection!=='overview' && <button type="button" onClick={()=>switchAdminSection('overview')} className="rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2.5 bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-300 text-xs font-black hover:border-emerald-400 transition-colors">{isAr?'العودة للرئيسية':'Back to overview'}</button>}
                  </div>
                 {activeSection === 'overview' && <>
+                <AdminExecutiveCharts
+                    isAr={isAr}
+                    physical={physicalCatalogCount}
+                    arabic={arabicDigitalCoreCount}
+                    english={englishDigitalCount}
+                    nationalDigital={nationalDigitalCount}
+                    logins={loginActivity}
+                    operations={libraryImpact}
+                    digitalAvailable={digitalBookReadStatsAvailable}
+                    onNavigate={section=>switchAdminSection(section)}
+                />
+                <details className="efips-admin-section-details lg:col-span-4 rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 text-xs font-black text-slate-700 dark:text-slate-200">
+                        <span className="flex items-center gap-2"><OutlineIcon name="graduation-cap" className="h-4 w-4 text-emerald-700 dark:text-emerald-300"/>{isAr?'مؤشرات الحسابات والتسجيل ـ التفاصيل الكاملة':'Account and sign-in statistics — full details'}</span>
+                        <svg className="efips-admin-caret h-4 w-4 shrink-0 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                    </summary>
+                    <div className="px-3 pb-3 sm:px-4">
                 <section id="admin-overview" className="efips-panel lg:col-span-4 bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/70 p-5 md:p-7 rounded-3xl shadow-sm scroll-mt-24">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5"><h2 className="text-lg md:text-xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-3"><span className="w-10 h-10 rounded-2xl bg-rose-50 dark:bg-rose-900/30 text-rose-600 flex items-center justify-center"><OutlineIcon name="grid" className="h-5 w-5" /></span>{t('statsTitle')}</h2><span className="text-xs font-bold text-slate-500 dark:text-slate-400">{isAr ? 'ملخص حسابات المستخدمين المسجلة' : 'Registered user account overview'}</span></div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -775,16 +863,18 @@ const AdminDashboard: React.FC = () => {
                         </div>)}
                     </div>
                 </section>
+                    </div>
+                </details>
 
                 <section className="lg:col-span-4 rounded-[1.75rem] border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-900 p-4 sm:p-6 shadow-sm" aria-labelledby="admin-shortcuts-title">
                     <div className="flex items-center justify-between gap-3 mb-4">
                         <div><h3 id="admin-shortcuts-title" className="text-base sm:text-lg font-black text-slate-900 dark:text-white">{isAr?'اختصارات المهام اليومية':'Daily shortcuts'}</h3>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{isAr?'ادخل مباشرة للقسم المطلوب بدل تصفح كل التقارير':'Jump straight to the task you need'}</p></div>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-7 gap-3">
+                    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
                         {overviewShortcuts.map((item)=><button key={item.label} type="button" onClick={()=>switchAdminSection(item.section,item.tab)}
-                            className="group min-w-0 text-start rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/50 px-3 py-4 sm:p-4 hover:border-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-500 transition-colors">
-                            <div className="flex items-center justify-between mb-3"><span className="w-9 h-9 inline-flex items-center justify-center rounded-xl bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-300"><OutlineIcon name={item.icon} className="h-5 w-5"/></span><span className="text-xl font-black text-slate-900 dark:text-white tabular-nums">{formatCatalogCount(item.count)}</span></div>
+                            className="efips-admin-shortcut group min-w-0 text-start rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/50 px-3 py-3.5 sm:p-4 hover:border-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-500">
+                            <div className="flex items-center justify-between mb-3"><span className="w-9 h-9 inline-flex items-center justify-center rounded-xl bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-300"><OutlineIcon name={item.icon} className="h-5 w-5"/></span>{item.count!==undefined&&<span className="text-xl font-black text-slate-900 dark:text-white tabular-nums">{formatCatalogCount(item.count)}</span>}</div>
                             <div className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-100">{item.label}</div>
                             <div className="text-[11px] mt-1 text-slate-500 dark:text-slate-400">{item.caption}</div>
                         </button>)}
@@ -899,6 +989,12 @@ const AdminDashboard: React.FC = () => {
 
                 </>}
                 {activeSection === 'overview' && <>
+                <details className="efips-admin-section-details lg:col-span-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 text-xs font-black text-slate-700 dark:text-slate-200">
+                        <span className="flex items-center gap-2"><OutlineIcon name="activity" className="h-4 w-4 text-emerald-700 dark:text-emerald-300"/>{isAr?'تفاصيل أثر المكتبة ونشاط القرّاء ـ عرض جميع المؤشرات':'Library impact and reader activity — all indicators'}</span>
+                        <svg className="efips-admin-caret h-4 w-4 shrink-0 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                    </summary>
+                    <div className="space-y-4 px-3 pb-4 sm:px-4">
                 <section className="efips-panel lg:col-span-4 rounded-3xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/70 p-5 md:p-6 shadow-sm">
                     <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                         <div>
@@ -950,6 +1046,8 @@ const AdminDashboard: React.FC = () => {
                         }):<p className="text-xs font-bold text-slate-400 py-8 text-center">{isAr?'لا توجد سجلات دخول بعد':'No sign-in activity recorded yet'}</p>}
                     </div>
                 </section>
+                    </div>
+                </details>
                 </>}
                 {activeSection === 'reports' && <>
                   <AdminPeriodReports isAr={isAr} students={studentsList} teachers={teachersList} logs={loginActivity} loans={allBorrowingRecords} lessons={lessonReportsList} />
@@ -1087,6 +1185,7 @@ const AdminDashboard: React.FC = () => {
                 </table></div></section>
             </>}
                 </main>
+            </div>
 
             {modalMode && <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in"><div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-8 rounded-[2.5rem] shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto scrollbar-thin">
                 <h3 className="text-lg md:text-xl font-black mb-6 text-slate-900 dark:text-white">{modalMode === 'addStudent' ? t('modalAddStudent') : modalMode === 'addTeacher' ? t('modalAddTeacher') : modalMode === 'editStudent' ? t('modalEditStudent') : modalMode === 'editTeacher' ? t('modalEditTeacher') : t('modalAddBorrow')}</h3>
