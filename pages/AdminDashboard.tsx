@@ -761,27 +761,41 @@ const AdminDashboard: React.FC = () => {
                 @keyframes efips-column-rise {from {transform:scaleY(.15)}to {transform:scaleY(1)}}
                 @media (prefers-reduced-motion:reduce) {.efips-admin .efips-panel,.efips-admin .efips-column,.efips-admin .efips-admin-chart-card {animation:none!important}.efips-admin * {scroll-behavior:auto!important}}
             `}</style>
-            <header className="efips-panel max-w-7xl mx-auto flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 mb-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-4 sm:p-5 rounded-2xl shadow-sm">
-                <div><h1 className="text-2xl md:text-4xl font-black bg-gradient-to-r from-emerald-700 via-teal-600 to-sky-500 bg-clip-text text-transparent">{t('title')}</h1><p className="text-slate-500 dark:text-slate-400 font-bold text-xs md:text-sm mt-1">{t('welcome')} <span className="text-slate-900 dark:text-white font-black">{adminName}</span> | {t('subtitle')}</p></div>
-                <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full lg:w-auto justify-start lg:justify-end">
-                    <button type="button" onClick={() => void fetchRealDashboardData()} className="px-4 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95 flex items-center gap-2"><OutlineIcon name="refresh" />{isAr ? 'تحديث البيانات' : 'Refresh Data'}</button>
-                    <button type="button" onClick={handlePrintDashboardReport} className="px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95 flex items-center gap-2"><OutlineIcon name="printer" />{t('printPdfBtn')}</button>
-                    <button type="button" onClick={toggleTheme} className="px-4 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm shadow-inner transition-all flex items-center gap-2"><OutlineIcon name={theme === 'light' ? 'moon' : 'sun'} />{theme === 'light' ? 'Dark' : 'Light'}</button>
-                    <Link to="/home" className="px-6 py-3 bg-slate-900 dark:bg-slate-800 text-white hover:bg-slate-800 border border-slate-700 rounded-2xl font-bold text-sm transition-all shadow-md text-center">{t('backToHome')}</Link>
+            <header className="efips-panel relative isolate mx-auto mb-4 flex max-w-[1600px] flex-col gap-4 overflow-hidden rounded-[1.65rem] border border-emerald-900/20 bg-gradient-to-l from-[#064d48] via-[#086860] to-[#0f726f] p-4 text-white shadow-[0_16px_35px_-30px_rgba(4,73,65,.8)] sm:p-5 lg:flex-row lg:items-center lg:justify-between">
+                <svg viewBox="0 0 320 130" preserveAspectRatio="xMidYMid slice" className="pointer-events-none absolute inset-y-0 end-0 h-full w-[300px] opacity-[.075]" aria-hidden="true">
+                    <path d="M10 110C70 10 135 145 190 25S285 140 325 10" fill="none" stroke="white" strokeWidth="2"/>
+                    <circle cx="225" cy="30" r="64" fill="none" stroke="white" strokeWidth="12"/>
+                    <circle cx="260" cy="107" r="40" fill="none" stroke="white" strokeWidth="10"/>
+                </svg>
+                <div className="relative flex min-w-0 items-center gap-3">
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/10 shadow-inner"><OutlineIcon name="grid" className="h-6 w-6 text-white"/></span>
+                    <div className="min-w-0">
+                        <div className="text-[10px] font-bold tracking-wider text-emerald-100/80">EFIPS LIBRARY · ADMIN</div>
+                        <h1 className="mt-0.5 text-xl font-black leading-tight sm:text-2xl">{t('title')}</h1>
+                        <p className="mt-1 truncate text-[11px] text-emerald-100/90 sm:text-xs">{t('welcome')} <strong className="font-black text-white">{adminName}</strong> · {t('subtitle')}</p>
+                    </div>
+                </div>
+                <div className="relative flex w-full flex-wrap items-center gap-2 lg:w-auto lg:justify-end">
+                    <button type="button" onClick={() => void fetchRealDashboardData()} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"><OutlineIcon name="refresh" className="h-4 w-4"/>{isAr ? 'تحديث' : 'Refresh'}</button>
+                    <button type="button" onClick={handlePrintDashboardReport} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-white px-3 py-2 text-xs font-black text-emerald-900 transition-colors hover:bg-emerald-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"><OutlineIcon name="printer" className="h-4 w-4"/>{t('printPdfBtn')}</button>
+                    <button type="button" onClick={toggleTheme} aria-label={theme === 'light' ? 'Dark mode' : 'Light mode'} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-3 py-2 text-xs font-bold text-white hover:bg-white/20"><OutlineIcon name={theme === 'light' ? 'moon' : 'sun'} className="h-4 w-4"/><span>{theme === 'light' ? 'Dark' : 'Light'}</span></button>
+                    <Link to="/home" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-xs font-bold text-white hover:bg-white/20"><OutlineIcon name="return" className="h-4 w-4"/>{t('backToHome')}</Link>
                 </div>
             </header>
 
-             <nav aria-label={isAr ? 'أقسام لوحة الإدارة' : 'Dashboard sections'} className="sticky top-2 z-40 max-w-7xl mx-auto mb-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg shadow-sm px-3 py-2">
-                 <div className="hidden sm:flex items-center justify-between gap-2 mb-2 px-1">
-                     <span className="font-black text-sm text-slate-800 dark:text-slate-100">{isAr ? 'مركز التحكم' : 'Command Center'}</span>
-                     <span className="text-[11px] sm:text-xs font-bold text-slate-500 dark:text-slate-400">{isAr ? 'اختر القسم الذي تريد العمل عليه' : 'Open only the section you need'}</span>
+             <nav aria-label={isAr ? 'أقسام لوحة الإدارة' : 'Dashboard sections'} className="sticky top-2 z-40 mx-auto mb-4 max-w-[1600px] rounded-2xl border border-slate-200 bg-white/95 px-3 py-2 shadow-sm backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/95 xl:hidden">
+                 <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                     <label htmlFor="efips-admin-mobile-search" className="text-xs font-black text-slate-700 dark:text-slate-200">{isAr ? 'الانتقال السريع' : 'Quick navigation'}</label>
+                     <input id="efips-admin-mobile-search" type="search" value={sectionSearch} onChange={event=>setSectionSearch(event.target.value)}
+                         placeholder={isAr ? 'ابحث عن قسم...' : 'Find a section...'} className="min-h-9 w-40 flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 text-xs text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white sm:max-w-64"/>
                  </div>
                  <div className="flex gap-1.5 overflow-x-auto overscroll-x-contain pb-1 scrollbar-thin">
-                     {dashboardSections.map(item=><button type="button" key={item.id} aria-pressed={activeSection===item.id}
+                     {dashboardSections.filter(matchingSection).map(item=><button type="button" key={item.id} aria-pressed={activeSection===item.id}
                          onClick={()=>switchAdminSection(item.id)}
-                         className={`shrink-0 rounded-xl border px-3 py-2 flex items-center justify-center gap-1.5 text-center transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-500 ${activeSection===item.id ? 'bg-emerald-700 text-white border-emerald-700 shadow-md shadow-emerald-700/15' : 'bg-slate-50 dark:bg-slate-800/70 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:border-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30'}`}>
+                         className={`shrink-0 rounded-xl border px-3 py-2.5 flex items-center justify-center gap-1.5 text-center transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-500 ${activeSection===item.id ? 'bg-emerald-700 text-white border-emerald-700 shadow-md shadow-emerald-700/15' : 'bg-slate-50 dark:bg-slate-800/70 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:border-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30'}`}>
                          <OutlineIcon name={item.icon} className="h-4 w-4 shrink-0"/><span className="text-xs font-bold whitespace-nowrap">{item.label}</span>
                      </button>)}
+                     {!dashboardSections.some(matchingSection) && <span className="px-3 py-2 text-xs text-slate-500">{isAr?'لا توجد أقسام مطابقة':'No matching sections'}</span>}
                  </div>
              </nav>
             <main className="relative max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
