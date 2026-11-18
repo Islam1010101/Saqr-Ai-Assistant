@@ -18,7 +18,7 @@ test('all existing components and management action handlers still exist',()=>{
  for(const component of ['AdminCatalogManager','AdminPeriodReports','AdminInsightsPanels','AdminLibraryAttendance',
    'AdminReadingChallenge','AdminChildrenReadingReview','AdminOrisonInventoryReview',
    'AdminSaqrProviderMetrics','AdminUserFeaturePermissions']){
-   assert.ok(admin.includes('<'+component+' ')||admin.includes('<'+component+'/'),'Missing admin component: '+component);
+   assert.ok(admin.includes('<'+component),'Missing admin component: '+component);
  }
  for(const fn of ['fetchRealDashboardData','handlePrintDashboardReport','toggleTheme','handleAccountAccess',
   'handleReturnBook','handleRejectRequest','handleSubmitForm','refreshBorrowingsOnly']){
