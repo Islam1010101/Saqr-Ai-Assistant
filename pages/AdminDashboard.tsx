@@ -798,7 +798,39 @@ const AdminDashboard: React.FC = () => {
                      {!dashboardSections.some(matchingSection) && <span className="px-3 py-2 text-xs text-slate-500">{isAr?'لا توجد أقسام مطابقة':'No matching sections'}</span>}
                  </div>
              </nav>
-            <main className="relative max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="mx-auto max-w-[1600px] xl:grid xl:grid-cols-[248px_minmax(0,1fr)] xl:items-start xl:gap-5">
+                <aside className="efips-admin-sidebar sticky top-5 hidden min-w-0 max-h-[calc(100dvh-2.5rem)] overflow-y-auto rounded-[1.5rem] border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-900 xl:block" aria-label={isAr?'قائمة إدارة المكتبة':'Library administration navigation'}>
+                    <div className="rounded-xl bg-emerald-50 p-3 dark:bg-emerald-950/40">
+                        <div className="flex items-center gap-2 text-sm font-black text-emerald-900 dark:text-emerald-200"><OutlineIcon name="grid" className="h-4 w-4"/>{isAr?'مركز التحكم':'Command center'}</div>
+                        <p className="mt-1 text-[11px] leading-5 text-emerald-800/75 dark:text-emerald-200/75">{isAr?'كل أقسام الإدارة بدون ازدحام':'Every admin tool, neatly grouped'}</p>
+                    </div>
+                    <label htmlFor="efips-admin-sidebar-search" className="mt-4 block text-[11px] font-bold text-slate-500 dark:text-slate-400">{isAr?'ابحث عن مهمة':'Find a task'}</label>
+                    <div className="relative mt-1.5">
+                        <OutlineIcon name="search" className="pointer-events-none absolute start-3 top-2.5 h-4 w-4 text-slate-400"/>
+                        <input id="efips-admin-sidebar-search" type="search" value={sectionSearch} onChange={event=>setSectionSearch(event.target.value)}
+                            placeholder={isAr?'اسم القسم...':'Section name...'}
+                            className="min-h-10 w-full rounded-xl border border-slate-200 bg-slate-50 py-2 ps-10 pe-3 text-xs text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"/>
+                    </div>
+                    <div className="mt-4 space-y-4">
+                        {navigationGroups.map(group=>{
+                            const matches=dashboardSections.filter(item=>group.sections.includes(item.id)&&matchingSection(item));
+                            return matches.length?<div key={group.key}>
+                                <p className="mb-1.5 px-2 text-[10px] font-black tracking-wide text-slate-400 dark:text-slate-500">{group.label}</p>
+                                <div className="space-y-1">{matches.map(item=><button type="button" key={item.id}
+                                    aria-current={activeSection===item.id?'page':undefined}
+                                    onClick={()=>switchAdminSection(item.id)}
+                                    className={`group flex w-full items-center gap-2.5 rounded-xl border px-2.5 py-2.5 text-start ${activeSection===item.id?'border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/55 dark:text-emerald-200':'border-transparent text-slate-600 hover:border-slate-200 hover:bg-slate-50 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:bg-slate-800'}`}>
+                                    <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg ${activeSection===item.id?'bg-emerald-600 text-white':'bg-slate-100 text-emerald-700 dark:bg-slate-800 dark:text-emerald-300'}`}><OutlineIcon name={item.icon} className="h-4 w-4"/></span>
+                                    <span className="min-w-0 flex-1"><span className="block truncate text-xs font-bold">{item.label}</span><span className="mt-0.5 block truncate text-[10px] opacity-65">{item.description}</span></span>
+                                    {item.id==='management'&&pendingRequestsList.length>0&&<span className="rounded-md bg-amber-100 px-1.5 py-0.5 text-[10px] font-black text-amber-800 dark:bg-amber-900/50 dark:text-amber-200">{pendingRequestsList.length}</span>}
+                                </button>)}</div>
+                            </div>:null;
+                        })}
+                        {!dashboardSections.some(matchingSection)&&<p className="px-2 py-4 text-center text-xs text-slate-500">{isAr?'لا توجد أقسام مطابقة':'No matching sections'}</p>}
+                    </div>
+                    <button type="button" onClick={()=>switchAdminSection('add-books')} className="mt-5 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 px-3 py-2.5 text-xs font-black text-white hover:bg-emerald-800"><OutlineIcon name="book-open" className="h-4 w-4"/>{isAr?'إضافة كتاب جديد':'Add a book'}</button>
+                </aside>
+                <main className="relative min-w-0 grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-5">
                  <div className="lg:col-span-4 flex flex-wrap items-start justify-between gap-3 px-1" aria-live="polite">
                      <div><h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">{currentSection.label}</h2>
                          <p className="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 mt-1">{currentSection.description}</p></div>
@@ -1126,6 +1158,7 @@ const AdminDashboard: React.FC = () => {
                 </table></div></section>
             </>}
                 </main>
+            </div>
 
             {modalMode && <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in"><div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-8 rounded-[2.5rem] shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto scrollbar-thin">
                 <h3 className="text-lg md:text-xl font-black mb-6 text-slate-900 dark:text-white">{modalMode === 'addStudent' ? t('modalAddStudent') : modalMode === 'addTeacher' ? t('modalAddTeacher') : modalMode === 'editStudent' ? t('modalEditStudent') : modalMode === 'editTeacher' ? t('modalEditTeacher') : t('modalAddBorrow')}</h3>
