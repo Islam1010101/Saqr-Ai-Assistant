@@ -34,7 +34,8 @@ export const samePhysicalHolding=(candidate:{
 },records:ReadonlyArray<{title:string;author:string;isbn?:string;shelf:number;row:number}> = bookData)=>{
  const title=normalized(candidate.title),author=normalized(candidate.author),isbn=isbnKey(candidate.isbn);
  return records.some(b=>b.shelf===candidate.cabinet&&b.row===candidate.shelf_row&&
-  ((isbn&&isbn===isbnKey(b.isbn))||(title===normalized(b.title)&&author===normalized(b.author))));
+  (isbn&&isbnKey(b.isbn)?isbn===isbnKey(b.isbn):
+   title===normalized(b.title)&&author===normalized(b.author)));
 };
 const dropOld=()=>{
  for(let i=bookData.length-1;i>=0;i--)if(activePhysical.has(bookData[i].id))bookData.splice(i,1);
