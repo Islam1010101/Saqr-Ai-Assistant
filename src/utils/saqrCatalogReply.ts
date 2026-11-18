@@ -60,7 +60,7 @@ export function renderSaqrCatalogAnswer(question:string,matches:SaqrBookMatch[],
     for(const [i,book] of items.entries()){
       const title=escapeMd(book.title),author=escapeMd(book.author|| (ar?'غير مسجل':'Not recorded'));
       const source=kind==='physical'
-        ? (book.shelf>0&&book.row>0 ? (ar?'الرف':'Shelf')+': '+book.shelf+' — '+(ar?'الصف':'Row')+': '+book.row : (ar?'مكان الكتاب قيد التحديد':'Book location not yet recorded'))
+        ? (ar?'الرف':'Shelf')+': '+(book.shelf ?? (ar?'غير مسجل':'Not recorded'))+' — '+(ar?'الصف':'Row')+': '+(book.row ?? (ar?'غير مسجل':'Not recorded'))
         : (saqrDigitalReadAction(book,locale) ||
           (digitalLink(book.driveLink)
             ? '['+(ar?'مصدر الكتاب':'Book source')+']('+digitalLink(book.driveLink)+')'

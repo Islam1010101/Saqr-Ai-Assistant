@@ -20,6 +20,8 @@ const isbnValue=(raw:string):string=>{
   if(s.length===12&&valid13('0'+s))s='0'+s;
   return valid10(s)||valid13(s)?s:'';
 };
+export type OrisonPendingReview={source_key:string;title:string;author:string;isbn:string;barcodes:string[];review_reason:'unlocated'|'ambiguous'};
+export let orisonWorkbookPending:OrisonPendingReview[]=[];
 type Group={title:string;author:string;isbn:string;barcodes:Set<string>};
 export function mergeOrisonWorkbookCatalog(
   original:Book[],inferSubject:(title:string,author:string,topic:string,shelf:number)=>string
@@ -31,6 +33,7 @@ export function mergeOrisonWorkbookCatalog(
   };
   output.forEach((b,i)=>{add(byTitle,norm(b.title),i);add(byIsbn,isbnValue(b.isbn||''),i);});
   const groups=new Map<string,Group>();
+  const pending:OrisonPendingReview[]=[];
   for(const [title,barcode,rawAuthor,rawIsbn] of orisonWorkbookRows){
     const key=norm(title),isbn=isbnValue(rawIsbn);
     if(!key||!barcode)continue;
@@ -47,8 +50,9 @@ export function mergeOrisonWorkbookCatalog(
     const exactAuthor=titles.filter(i=>norm(output[i].author)===norm(group.author));
     let match:number|undefined;
     if(exactIsbn.length===1)match=exactIsbn[0];
-    else if(exactAuthor.length===1&&(!isbns.length||isbns.includes(exactAuthor[0])))match=exactAuthor[0];
-    else if(titles.length===1&&(!isbns.length||isbns.includes(titles[0])))match=titles[0];
+    else if(exactAuthor.length===1&&(!group.isbn||!output[exactAuthor[0]].isbn||isbnValue(output[exactAuthor[0]].isbn||'')===group.isbn))match=exactAuthor[0];
+    else if(titles.length===1&&(!group.isbn||!output[titles[0]].isbn||isbnValue(output[titles[0]].isbn||'')===group.isbn)&&
+      (missingAuthor(output[titles[0]].author)||missingAuthor(group.author)))match=titles[0];
     if(match!==undefined){
       const old=output[match],next:Book={...old};
       next.barcodes=[...new Set([...(old.barcodes||[]),...group.barcodes])];
@@ -56,19 +60,11 @@ export function mergeOrisonWorkbookCatalog(
       if(missingAuthor(old.author)&&!missingAuthor(group.author))next.author=group.author;
       output[match]=next;continue;
     }
-    // Conflicting title/edition is held in raw provenance, never silently duplicated.
-    if(titles.length||isbns.length)continue;
-    const barcodes=[...group.barcodes],author=group.author,lang=/[\u0600-\u06ff]/.test(group.title)?'AR':'EN';
-    const entry:Book={
-      id:'orison-xlsx-20261118-'+barcodes[0],title:group.title,author,
-      shelf:0,row:0,locationPending:true,needsReview:true,
-      language:lang,subject:inferSubject(group.title,author,'',0),level:'General',
-      summary:lang==='AR'?'كتاب ورقي مسجل في الجرد. موقعه وملخص محتواه لم يوثقا بعد.':
-        'Physical inventory entry; shelf, row and synopsis have not yet been verified.',
-      barcodes,copies:barcodes.length,
-      ...(group.isbn?{isbn:group.isbn,isbnStatus:'candidate' as const}:{})
-    };
-    const i=output.length;output.push(entry);add(byTitle,key,i);if(group.isbn)add(byIsbn,group.isbn,i);
+    const barcodes=[...group.barcodes];
+    pending.push({source_key:'orison-xlsx-20261118-'+barcodes[0],title:group.title,
+      author:group.author,isbn:group.isbn,barcodes,
+      review_reason:titles.length||isbns.length?'ambiguous':'unlocated'});
   }
+  orisonWorkbookPending=pending;
   return output;
 }
