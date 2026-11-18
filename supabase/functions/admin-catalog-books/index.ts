@@ -28,7 +28,7 @@ const https=(v:unknown):string=>{
 type Input=Record<string,unknown>;
 const fingerprint=(v:Record<string,any>):string=>v.kind==="digital"
  ?"d:"+v.language+":"+norm(v.book_url.split("?")[0])
- :"p:"+norm(v.title)+":"+norm(v.author)+":"+(v.cabinet??"pending")+":"+(v.shelf_row??"pending");
+ :"p:"+norm(v.title)+":"+norm(v.author)+":"+text(v.isbn)+":"+(v.cabinet??"pending")+":"+(v.shelf_row??"pending");
 function makeRecord(v:Input,uid:string,source:"manual"|"excel",forced?:"physical"|"digital"){
  const kind=forced||(v.kind==="digital"?"digital":"physical");
  const title=text(v.title),author=text(v.author,200);
