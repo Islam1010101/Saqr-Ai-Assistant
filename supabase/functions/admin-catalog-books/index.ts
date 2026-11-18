@@ -69,7 +69,8 @@ function extractRows(lines:unknown[][]){
  const positions=Object.fromEntries(Object.entries(aliases).map(([k,a])=>[k,headers.findIndex(x=>a.includes(x))]));
  if(positions.title<0||positions.author<0)throw Error("EXCEL_NEEDS_TITLE_AUTHOR_HEADERS");
  const result:Input[]=[];
- for(const fields of lines.slice(1,1001)){
+ if(lines.length>5001)throw Error("FILE_TOO_MANY_ROWS");
+ for(const fields of lines.slice(1,5001)){
   const get=(k:string)=>positions[k]>=0?fields[positions[k]]??"":"";
   if(!text(get("title")))continue;
   result.push({title:text(get("title")),author:text(get("author")),isbn:text(get("isbn")),
@@ -99,6 +100,7 @@ async function parseFile(body:Input):Promise<Input[]>{
  if(name.endsWith(".csv")){
   const source=text(body.csv_text,1500000);
   if(!source)throw Error("EMPTY_SHEET");
+  if(String(body.csv_text??"").length>1500000)throw Error("FILE_TOO_LARGE");
   return extractRows(parseCsv(source));
  }
  if(!name.endsWith(".xlsx"))throw Error("EXCEL_XLSX_OR_CSV_ONLY");
@@ -110,9 +112,10 @@ async function parseFile(body:Input):Promise<Input[]>{
  const workbook=new ExcelJS.Workbook();
  await workbook.xlsx.load(bytes as any);
  const sheet=workbook.worksheets[0];if(!sheet)throw Error("EMPTY_SHEET");
+ if(sheet.rowCount>5001)throw Error('FILE_TOO_MANY_ROWS');
  const values:unknown[][]=[];
  sheet.eachRow({includeEmpty:false},(r:any)=>{
-  if(values.length>1000)return;
+  if(values.length>5000)return;
   const cells:unknown[]=[];
   for(let i=1;i<=Math.min(r.cellCount,45);i++)cells.push(r.getCell(i).text||"");
   values.push(cells);
@@ -193,7 +196,7 @@ Deno.serve(async(req:Request)=>{
  }catch(e){
   const err=e as {message?:string;code?:string};
   const message=err?.message||"";
-  if(/^(TITLE_REQUIRED|DIGITAL_REQUIRED_FIELDS|PHYSICAL_REQUIRED_FIELDS|EMPTY_SHEET|FILE_TOO_LARGE|EXCEL_NEEDS_TITLE_AUTHOR_HEADERS|EXCEL_XLSX_OR_CSV_ONLY|IMPORT_BATCH_TOO_LARGE|PENDING_PHYSICAL_NOT_FOUND|LOCATION_AUTHOR_REQUIRED|INVALID_RECORD_ID)$/.test(message))
+  if(/^(TITLE_REQUIRED|DIGITAL_REQUIRED_FIELDS|PHYSICAL_REQUIRED_FIELDS|EMPTY_SHEET|FILE_TOO_LARGE|FILE_TOO_MANY_ROWS|EXCEL_NEEDS_TITLE_AUTHOR_HEADERS|EXCEL_XLSX_OR_CSV_ONLY|IMPORT_BATCH_TOO_LARGE|PENDING_PHYSICAL_NOT_FOUND|LOCATION_AUTHOR_REQUIRED|INVALID_RECORD_ID)$/.test(message))
     return respond(400,{ok:false,error:message});
   console.error("Admin catalog action failed",{code:err?.code||"UNKNOWN"});
   return respond(500,{ok:false,error:"CATALOG_OPERATION_FAILED"});
