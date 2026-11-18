@@ -151,8 +151,8 @@ export default function AdminCatalogManager({isAr}:{isAr:boolean}){
    <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
     <div><h3 className="font-bold text-lg sm:text-xl">{t('إضافة كتب للفهرس وعقل صقر','Add books to the catalog and Saqr')}</h3>
      <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">{t(
-      'الكتب المكتملة تُعتمد مباشرة، والورقي غير محدد الموقع يُحفظ للمراجعة فقط.',
-      'Complete records go live; unlocated physical holdings are held for review.')}</p></div>
+      'السجلات المستوفية للبيانات تُعتمد مباشرة، والورقي غير محدد الموقع يُحفظ للمراجعة فقط.',
+      'Records with complete metadata go live; unlocated physical holdings are held for review.')}</p></div>
     <button type="button" className={secondary} disabled={busy} onClick={()=>void refresh().catch(e=>setError(String(e.message)))}>
      {icon('refresh')}{t('تحديث','Refresh')}</button>
    </div>
@@ -190,6 +190,10 @@ export default function AdminCatalogManager({isAr}:{isAr:boolean}){
        </select></label>
       {field('subject',t('الموضوع / التصنيف','Subject / category'),true)}
       {field('book_url',t('رابط الكتاب (HTTPS)','Book URL (HTTPS)'),true,'url')}
+      <p className="md:col-span-2 text-xs text-amber-700 dark:text-amber-300">
+       {t('مهم: تأكد أن رابط الكتاب كامل ومتاح لطلاب ومعلمي المدرسة. حفظ الرابط لا يعني التحقق من اكتمال صفحات الكتاب.',
+        'Make sure the complete book is shared with school users. Saving a link does not verify that every page is available.')}
+      </p>
       <label className="flex items-center gap-2 text-sm font-bold py-2">
        <input type="checkbox" checked={audio} onChange={e=>setAudio(e.target.checked)} className="w-4 h-4 accent-emerald-700"/>
        {t('يوجد ملخص صوتي','Audio summary available')}</label>
