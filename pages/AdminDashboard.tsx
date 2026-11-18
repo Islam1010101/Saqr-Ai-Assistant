@@ -8,6 +8,7 @@ import AdminLibraryAttendance from '../src/components/AdminLibraryAttendance';
 import AdminInsightsPanels from '../src/components/AdminInsightsPanels';
 import AdminPeriodReports from '../src/components/AdminPeriodReports';
 import AdminChildrenReadingReview from '../src/components/AdminChildrenReadingReview';
+import AdminOrisonInventoryReview from '../src/components/AdminOrisonInventoryReview';
 import AdminSaqrProviderMetrics from '../src/components/AdminSaqrProviderMetrics';
 import AdminUserFeaturePermissions from '../src/components/AdminUserFeaturePermissions';
 import {nationalIdentityBooks} from '../src/utils/nationalIdentityCatalog';
@@ -152,7 +153,7 @@ const buildBilingualBorrowEmail = (userName: string, bookName: string, borrowDat
 
 const SearchSvg = () => <OutlineIcon name="search" className="h-5 w-5 text-amber-500" />;
 
-type AdminSection = 'overview' | 'reports' | 'library' | 'analytics' | 'attendance' | 'reading' | 'children' | 'management';
+type AdminSection = 'overview' | 'reports' | 'library' | 'analytics' | 'attendance' | 'reading' | 'children' | 'orison' | 'management';
 
 const AdminDashboard: React.FC = () => {
     const { locale, dir } = useLanguage();
@@ -693,6 +694,7 @@ const AdminDashboard: React.FC = () => {
         {id:'reports',label:isAr?'التقارير الدورية':'Periodic reports',description:isAr?'شهري وفصلي وطباعة PDF':'Monthly, quarterly & PDF',icon:'printer'},
         {id:'library',label:isAr?'المقتنيات والكتب':'Books & catalog',description:isAr?'الكتب الورقية والرقمية':'Physical & digital books',icon:'library'},
         {id:'children',label:isAr?'مستويات الأطفال':'Children levels',description:isAr?'مراجعة تصنيف القراءة':'Reading level reviews',icon:'book-open'},
+        {id:'orison',label:isAr?'كتب بانتظار الموقع':'Books awaiting location',description:isAr?'مراجعة الجرد وتحديد الرف والصف':'Review imported books and set shelf / row',icon:'book-open'},
         {id:'management',label:isAr?'الإدارة والسجلات':'Management',description:isAr?'المستخدمون والطلبات والاستعارات':'Users, requests & loans',icon:'users'}
     ];
     const switchAdminSection = (section: AdminSection, tab?: 'students' | 'teachers' | 'borrowings' | 'pending' | 'reports') => {
@@ -867,6 +869,7 @@ const AdminDashboard: React.FC = () => {
 
                 </>}
                 {activeSection === 'children' && <AdminChildrenReadingReview isAr={isAr} />}
+                {activeSection === 'orison' && <AdminOrisonInventoryReview isAr={isAr} />}
 
                 {activeSection === 'reading' && <>
                 <section className="lg:col-span-4 rounded-3xl border border-emerald-200 dark:border-emerald-900/70 bg-gradient-to-r from-emerald-50 via-white to-sky-50 dark:from-emerald-950/30 dark:via-black dark:to-sky-950/20 shadow-sm p-5 md:p-6">
