@@ -1,5 +1,5 @@
 import React, {useEffect, useMemo, useState} from 'react';
-import {orisonWorkbookPending, type OrisonPendingReview} from '../../api/orisonWorkbookCatalog';
+import {orisonWorkbookPending, type OrisonPendingReview} from '../data/orisonWorkbookCatalog';
 import {supabase} from '../utils/supabase';
 
 type Edit={

@@ -1,5 +1,5 @@
-import type {Book} from './bookData.ts';
-import {orisonWorkbookRows} from '../src/data/orisonWorkbook20261118.ts';
+import type {Book} from '../../api/bookData.ts';
+import {orisonWorkbookRows} from './orisonWorkbook20261118.ts';
 
 /** Add missing catalog entries and fill only blank, unambiguous metadata.
  * Existing IDs, physical locations, classifications, descriptions and loan keys stay intact.

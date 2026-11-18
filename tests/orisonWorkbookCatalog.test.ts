@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {mergeOrisonWorkbookCatalog,orisonWorkbookPending} from '../api/orisonWorkbookCatalog.ts';
+import {mergeOrisonWorkbookCatalog,orisonWorkbookPending} from '../src/data/orisonWorkbookCatalog.ts';
 import {orisonWorkbookRows} from '../src/data/orisonWorkbook20261118.ts';
 assert.equal(orisonWorkbookRows.length,878);
 const base=[{id:'keep',title:'Artful Animals',author:'Unknown Author',subject:'Children’s Stories',shelf:14,row:2,language:'EN' as const,summary:'Original'}];

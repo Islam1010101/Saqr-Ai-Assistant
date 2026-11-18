@@ -1,5 +1,5 @@
 import {shelf22SourceRecords} from './shelf22Catalog.ts';
-import {mergeOrisonWorkbookCatalog} from './orisonWorkbookCatalog.ts';
+import {mergeOrisonWorkbookCatalog} from '../src/data/orisonWorkbookCatalog.ts';
 import {shelf40Books} from './shelf40Catalog.ts';
 import {shelf30SourceRecords} from './shelf30Catalog.ts';
 import {uploadedLibraryBooks} from './uploadedCatalog20261028.ts';
