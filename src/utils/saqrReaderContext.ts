@@ -10,7 +10,7 @@ const catalogByKey=()=>new Map<string,ReadingBook>(([
  ...ARABIC_LIBRARY_DATABASE.map(b=>({key:'digital:ar:'+b.id,title:b.title,author:b.author,subject:b.subject,format:'ar' as const,href:b.driveLink})),
  ...NATIONAL_IDENTITY_DIGITAL_BOOKS.map(b=>({key:'digital:ar:'+b.id,title:b.title,author:b.author,subject:b.subject,format:'ar' as const,href:b.driveLink})),
  ...ENGLISH_LIBRARY_DATABASE.map(b=>({key:'digital:en:'+b.id,title:b.title,author:b.author,subject:b.subject,format:'en' as const,href:b.driveLink}))
-] as ReadingBook[]).map(book=>[book.key,book]));
+] as ReadingBook[]).map((book):[string,ReadingBook]=>[book.key,book]));
 const compact=(v:unknown)=>String(v??'').trim();
 export type BorrowingRecord={title:string;due:string};
 export type ReaderShelf={borrowed:BorrowingRecord[];saved:ReadingBook[];completed:ReadingBook[];goal:number};
