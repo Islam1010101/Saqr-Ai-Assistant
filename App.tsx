@@ -14,6 +14,7 @@ import SaqrAccessibilityToolbar from './src/components/saqrLearning/SaqrAccessib
 import { getSaqrLearningAccess } from './src/utils/saqrLearningAccess';
 import AdminDashboard from './pages/AdminDashboard';
 import { syncApprovedPhysicalCatalog } from './src/utils/approvedPhysicalCatalog';
+import {refreshAdminCatalogAdditions} from './src/utils/liveCatalogAdditions';
 
 import SearchPage from './pages/SearchPage';
 import SmartSearchPage from './pages/SmartSearchPage';
@@ -737,6 +738,15 @@ const App: React.FC = () => {
     refresh();
     window.addEventListener('efips-catalog-approved-changed',refresh);
     return ()=>{active=false;window.removeEventListener('efips-catalog-approved-changed',refresh);};
+  },[]);
+  // Approved catalog additions are appended in memory. Never remount other pages
+  // or change Google login and Saqr behavior while these records load.
+  useEffect(()=>{
+    const refresh=()=>{void refreshAdminCatalogAdditions().catch(error=>
+      console.warn('Optional catalog additions unavailable; original library remains intact',error));};
+    refresh();
+    window.addEventListener('efips-admin-catalog-changed',refresh);
+    return()=>window.removeEventListener('efips-admin-catalog-changed',refresh);
   },[]);
   return (
     <ApplicationErrorBoundary>
