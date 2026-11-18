@@ -3,13 +3,14 @@ import {ARABIC_LIBRARY_DATABASE,ENGLISH_LIBRARY_DATABASE} from '../../api/digita
 import {bookData} from '../../api/bookData';
 import {NATIONAL_IDENTITY_DIGITAL_BOOKS} from '../../api/nationalIdentityDigitalBooks';
 
-const catalogs:ReadingBook[]=[
+// Rebuild the lightweight key lookup when a user asks about saved books.
+ // The administrator can add approved holdings after this module is loaded.
+const catalogByKey=()=>new Map<string,ReadingBook>(([
  ...physicalReadingCatalog,
  ...ARABIC_LIBRARY_DATABASE.map(b=>({key:'digital:ar:'+b.id,title:b.title,author:b.author,subject:b.subject,format:'ar' as const,href:b.driveLink})),
  ...NATIONAL_IDENTITY_DIGITAL_BOOKS.map(b=>({key:'digital:ar:'+b.id,title:b.title,author:b.author,subject:b.subject,format:'ar' as const,href:b.driveLink})),
  ...ENGLISH_LIBRARY_DATABASE.map(b=>({key:'digital:en:'+b.id,title:b.title,author:b.author,subject:b.subject,format:'en' as const,href:b.driveLink}))
-];
-const byKey=new Map(catalogs.map(x=>[x.key,x]));
+] as ReadingBook[]).map(book=>[book.key,book]));
 const compact=(v:unknown)=>String(v??'').trim();
 export type BorrowingRecord={title:string;due:string};
 export type ReaderShelf={borrowed:BorrowingRecord[];saved:ReadingBook[];completed:ReadingBook[];goal:number};
@@ -18,6 +19,7 @@ export function readingShelfFromDevice(storageKey:string,store:{getItem(key:stri
  let data:any=null;
  try{data=JSON.parse(store.getItem(storageKey)||'null');}catch{}
  const keys=(v:unknown)=>Array.isArray(v)?[...new Set(v.filter((x):x is string=>typeof x==='string'))].slice(0,40):[];
+ const byKey=catalogByKey();
  return {saved:keys(data?.saved).map(k=>byKey.get(k)).filter((v):v is ReadingBook=>!!v),
  completed:keys(data?.completed).map(k=>byKey.get(k)).filter((v):v is ReadingBook=>!!v),
  goal:Number.isFinite(Number(data?.goal))?Math.max(1,Math.min(20,Number(data.goal))):3};
