@@ -7,6 +7,8 @@ import { supabase } from '../src/utils/supabase';
 import { useReadingPassport, digitalBookKey } from '../src/utils/readingPassport';
 import DigitalBookRating from '../src/components/DigitalBookRating';
 import DigitalLibraryDialog from '../src/components/DigitalLibraryDialog';
+import NewCatalogDigitalReader from '../src/components/NewCatalogDigitalReader';
+import {useAdminCatalogRevision} from '../src/utils/liveCatalogAdditions';
 const EnglishPhotoBookReader = React.lazy(() => import('../src/components/EnglishPhotoBookReader'));
 import { useDigitalReadingProgress } from '../src/utils/useDigitalReadingProgress';
 import { pdfProgressPercent, type PdfReadingState } from '../src/utils/pdfReadingState';
@@ -209,6 +211,7 @@ const BookModal: React.FC<{ book: DigitalLibraryBook | null; onClose: () => void
     const ageGroup = book?.reviewedAgeGroup || book?.readingAudience ? ageLabels[(book.reviewedAgeGroup || book.readingAudience)!] : '';
 
     if (!book) return null;
+    if (readerOpen && String(book.id).startsWith('EFIPS_ADD_')) return <NewCatalogDigitalReader title={book.title} source={book.driveLink} locale={locale} onBack={()=>setReaderOpen(false)} onClose={onClose}/>;
     if (readerOpen) return <React.Suspense fallback={
         <DigitalLibraryDialog title={book.title} variant="reader" onClose={onClose}>
             <section className="efips-book-reader flex items-center justify-center p-8" role="status">
@@ -356,6 +359,7 @@ const BookCard = React.memo(({ book, onClick, t, progress }: { book: DigitalLibr
 
 // --- 5. Main Component: EnglishLibraryInternalPage ---
 const EnglishLibraryInternalPage: React.FC = () => {
+    const catalogRevision = useAdminCatalogRevision();
     // تعيين الإنجليزية كلغة افتراضية عند فتح الصفحة مباشرة
     const { locale, dir } = useLanguage();
     const [currentLocale, setCurrentLocale] = useState(locale || 'en');
@@ -390,16 +394,16 @@ const EnglishLibraryInternalPage: React.FC = () => {
       setResumeBookId(id);
       if(matching.requiresSchoolGoogleAccess)
         window.history.replaceState(null,'',window.location.pathname+'#/digital-library/english');
-    },[location.search]);
+    },[location.search,catalogRevision]);
     const readingProgress = useDigitalReadingProgress(ENGLISH_LIBRARY_DATABASE,'en');
-    const booksInProgress = useMemo(()=>ENGLISH_LIBRARY_DATABASE.filter(b=>readingProgress.has(digitalBookKey('en',b))).sort((a,b)=>(readingProgress.get(digitalBookKey('en',b))?.lastReadAt||0)-(readingProgress.get(digitalBookKey('en',a))?.lastReadAt||0)).slice(0,8),[readingProgress]);
+    const booksInProgress = useMemo(()=>ENGLISH_LIBRARY_DATABASE.filter(b=>readingProgress.has(digitalBookKey('en',b))).sort((a,b)=>(readingProgress.get(digitalBookKey('en',b))?.lastReadAt||0)-(readingProgress.get(digitalBookKey('en',a))?.lastReadAt||0)).slice(0,8),[readingProgress,catalogRevision]);
     const [visibleCount, setVisibleCount] = useState(12); // تغيير ليكون العدد متوافق مع الموبايل
 
     const filters = useMemo(() => ({
         subjects: [...new Set(ENGLISH_LIBRARY_DATABASE.map(b => b.subject))].filter(s => s !== "Unknown").sort(),
         authors: [...new Set(ENGLISH_LIBRARY_DATABASE.map(b => b.author))].filter(a => a !== 'Unknown Author').sort(),
         series: [...new Set(ENGLISH_LIBRARY_DATABASE.map(b=>b.series).filter((x):x is string=>!!x))].sort(),
-    }), []);
+    }), [catalogRevision]);
 
     useEffect(() => {
         setVisibleCount(12);
@@ -422,7 +426,7 @@ const EnglishLibraryInternalPage: React.FC = () => {
         else if (sortBy === 'audio') result = [...result].sort((a, b) => (b.audioId ? 1 : 0) - (a.audioId ? 1 : 0));
         else result = [...result].sort((a,b)=>a.series&&a.series===b.series?(a.seriesOrder??9999)-(b.seriesOrder??9999)||a.title.localeCompare(b.title,currentLocale):a.title.localeCompare(b.title,currentLocale));
         return result;
-    }, [searchTerm, subjectFilter, authorFilter, seriesFilter, audienceFilter, audioOnly, sortBy, currentLocale]);
+    }, [searchTerm, subjectFilter, authorFilter, seriesFilter, audienceFilter, audioOnly, sortBy, currentLocale,catalogRevision]);
 
     return (
         <div dir={dir} className="efips-letter-library efips-letter-en w-full min-h-screen bg-[#f8fafc] dark:bg-slate-950 font-sans relative overflow-x-hidden transition-colors duration-300">

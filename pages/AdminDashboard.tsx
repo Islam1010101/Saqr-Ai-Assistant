@@ -9,6 +9,8 @@ import AdminInsightsPanels from '../src/components/AdminInsightsPanels';
 import AdminPeriodReports from '../src/components/AdminPeriodReports';
 import AdminChildrenReadingReview from '../src/components/AdminChildrenReadingReview';
 import AdminOrisonInventoryReview from '../src/components/AdminOrisonInventoryReview';
+import AdminCatalogManager from '../src/components/AdminCatalogManager';
+import {useAdminCatalogRevision} from '../src/utils/liveCatalogAdditions';
 import AdminSaqrProviderMetrics from '../src/components/AdminSaqrProviderMetrics';
 import AdminUserFeaturePermissions from '../src/components/AdminUserFeaturePermissions';
 import {nationalIdentityBooks} from '../src/utils/nationalIdentityCatalog';
@@ -153,11 +155,13 @@ const buildBilingualBorrowEmail = (userName: string, bookName: string, borrowDat
 
 const SearchSvg = () => <OutlineIcon name="search" className="h-5 w-5 text-amber-500" />;
 
-type AdminSection = 'overview' | 'reports' | 'library' | 'analytics' | 'attendance' | 'reading' | 'children' | 'orison' | 'management';
+type AdminSection = 'overview' | 'reports' | 'library' | 'analytics' | 'attendance' | 'reading' | 'children' | 'orison' | 'management' | 'add-books';
 
 const AdminDashboard: React.FC = () => {
     const { locale, dir } = useLanguage();
     const { theme, toggleTheme } = useTheme();
+    // Subscribe to approved holdings without changing the existing dashboard logic.
+    useAdminCatalogRevision();
     const isAr = locale === 'ar';
     const t = (key: keyof typeof translations.ar) => translations[locale as 'ar' | 'en'][key];
 
@@ -692,7 +696,11 @@ const AdminDashboard: React.FC = () => {
     const dashboardSections: Array<{id:AdminSection;label:string;description:string;icon:IconName}> = [
         {id:'overview',label:isAr?'الرئيسية':'Overview',description:isAr?'المؤشرات والاختصارات':'Key metrics & shortcuts',icon:'grid'},
         {id:'reports',label:isAr?'التقارير الدورية':'Periodic reports',description:isAr?'شهري وفصلي وطباعة PDF':'Monthly, quarterly & PDF',icon:'printer'},
+        {id:'analytics',label:isAr?'التحليلات':'Analytics',description:isAr?'رسوم وتحليلات تفصيلية':'Charts & detailed insights',icon:'chart'},
+        {id:'attendance',label:isAr?'الحضور والحصص':'Attendance',description:isAr?'زيارات المكتبة والحصص':'Visits & class sessions',icon:'calendar'},
+        {id:'reading',label:isAr?'القراءة':'Reading',description:isAr?'تحديات القراءة والمستويات':'Reading progress & challenges',icon:'trophy'},
         {id:'library',label:isAr?'المقتنيات والكتب':'Books & catalog',description:isAr?'الكتب الورقية والرقمية':'Physical & digital books',icon:'library'},
+        {id:'add-books',label:isAr?'إضافة الكتب':'Add books',description:isAr?'ورقي ورقمي واستيراد Excel':'Physical, digital & Excel',icon:'book-open'},
         {id:'children',label:isAr?'مستويات الأطفال':'Children levels',description:isAr?'مراجعة تصنيف القراءة':'Reading level reviews',icon:'book-open'},
         {id:'orison',label:isAr?'كتب بانتظار الموقع':'Books awaiting location',description:isAr?'مراجعة الجرد وتحديد الرف والصف':'Review imported books and set shelf / row',icon:'book-open'},
         {id:'management',label:isAr?'الإدارة والسجلات':'Management',description:isAr?'المستخدمون والطلبات والاستعارات':'Users, requests & loans',icon:'users'}
@@ -710,6 +718,7 @@ const AdminDashboard: React.FC = () => {
         {label:isAr?'إدارة الطلاب':'Students',count:stats.students,caption:isAr?'الحسابات والصلاحيات':'Accounts & access',icon:'graduation-cap',section:'management',tab:'students'},
         {label:isAr?'إدارة المعلمين':'Teachers',count:stats.teachers,caption:isAr?'البريد والصلاحيات':'Emails & roles',icon:'users',section:'management',tab:'teachers'},
         {label:isAr?'فهرس المكتبة':'Library catalog',count:allCatalogCount,caption:isAr?'الورقي والرقمي':'Print & digital',icon:'library',section:'library'},
+        {label:isAr?'إضافة كتاب جديد':'Add a book',count:allCatalogCount,caption:isAr?'ورقي / رقمي / Excel':'Print / digital / Excel',icon:'book-open',section:'add-books'},
         {label:isAr?'تحضيرات المعلمين':'Lesson reports',count:lessonReportsList.length,caption:isAr?'سجلات التحضير':'Teaching activity',icon:'clipboard-list',section:'management',tab:'reports'}
     ];
 
@@ -868,6 +877,7 @@ const AdminDashboard: React.FC = () => {
                 </section>
 
                 </>}
+                {activeSection === 'add-books' && <AdminCatalogManager isAr={isAr} />}
                 {activeSection === 'children' && <AdminChildrenReadingReview isAr={isAr} />}
                 {activeSection === 'orison' && <AdminOrisonInventoryReview isAr={isAr} />}
 
