@@ -42,6 +42,28 @@ Deno.serve(async(req:Request)=>{
   return res(200,{ok:true});
  }
 
+ // Read-only availability for authenticated school users. Return NO borrower details.
+ if(action==="availability"){
+  const studentMatch=/^([0-9]{6,7})@falcon-school\.com$/.exec(email);
+  if(studentMatch){
+   const {data:student,error:studentErr}=await admin.from("students").select("student_id").eq("student_id",studentMatch[1]).maybeSingle();
+   if(studentErr||!student)return res(403,{error:"School reader required"});
+  }else{
+   const {data:reader,error:readerErr}=await admin.from("efips_google_staff_accounts").select("teacher_id").eq("email",email).maybeSingle();
+   if(readerErr||!reader)return res(403,{error:"School reader required"});
+  }
+  const active:{book_name:string;book_shelf:string|null;book_row:string|null}[]=[];
+  let complete=false;
+  for(let offset=0;offset<10000;offset+=500){
+   const {data,error:loanError}=await admin.from("borrowings").select("book_name,book_shelf,book_row").eq("status","active").order("id",{ascending:true}).range(offset,offset+499);
+   if(loanError)return res(503,{error:"Availability unavailable"});
+   active.push(...(data||[]));
+   if((data||[]).length<500){complete=true;break;}
+  }
+  if(!complete)return res(503,{error:"Availability exceeds supported size"});
+  return res(200,{ok:true,active});
+ }
+
  const {data:staff}=await admin.from("efips_google_staff_accounts").select("teacher_id,role").eq("email",email).maybeSingle();
  if(staff?.role!=="admin")return res(403,{error:"Admin required"});
  if(action==="directory"){

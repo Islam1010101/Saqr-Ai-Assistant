@@ -7,6 +7,7 @@ import { useLanguage } from '../App';
 import { matchesCatalogQuery } from '../src/utils/catalogTextSearch';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../src/utils/supabase';
+import { getPhysicalLoanBadge, normalizedBookTitle, type PublicActiveLoan } from '../src/utils/physicalLoanAvailability';
 import { classifyBookAudience, type BookAudience } from '../api/bookAudience';
 import { isPhysicalCatalogMetadataNote, isPhysicalCatalogPlaceholder, physicalCatalogSummary } from '../src/utils/physicalCatalogSummaries20261113';
 import { getChildReadingReference, type ChildReadingTier } from '../src/utils/childrenReadingReferences';
@@ -62,7 +63,8 @@ const translations = {
     requestBorrow: "طلب استعارة",
     borrowPending: "جاري الإرسال...",
     borrowSuccessMsg: "✅ تم إرسال الطلب لإدارة المكتبة! سيصلك إشعار عند التأكيد.",
-    alreadyRequested: "عذراً، لديك طلب استعارة أو إعارة نشطة لهذا الكتاب بالفعل!"
+    alreadyRequested: "عذراً، لديك طلب استعارة أو إعارة نشطة لهذا الكتاب بالفعل!",
+    onLoan: "مُعار خارج المكتبة", loanedCopy: "توجد نسخة مُعارة",
   },
   en: {
     pageTitle: "Library Book Catalog",
@@ -103,7 +105,8 @@ const translations = {
     requestBorrow: "Request Borrow",
     borrowPending: "Sending...",
     borrowSuccessMsg: "✅ Request sent to Library Admin! You'll be notified upon confirmation.",
-    alreadyRequested: "You already have an active or pending request for this book!"
+    alreadyRequested: "You already have an active or pending request for this book!",
+    onLoan: "Checked out", loanedCopy: "A copy is checked out",
   }
 };
 
@@ -218,7 +221,7 @@ const catalogSummary=(book:Book):string=>{
     });
 };
 // --- 3. Component: BookModal ---
-const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = ({ book, onClose, t }) => {
+const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any; loanBadge: 'out'|'some'|null }> = ({ book, onClose, t, loanBadge }) => {
     const { locale, dir } = useLanguage();
     const [aiContent, setAiContent] = useState({ summary: '', genre: '' });
     const [loading, setLoading] = useState(false);
@@ -280,7 +283,7 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
     },[book,locale,analysisAttempt]);
     // إرسال طلب الاستعارة للأدمن كطلب معلق، مع إظهار أي سبب يمنع الحفظ.
     const handleBorrowRequest = async () => {
-        if (!book) return;
+        if (!book || loanBadge === 'out') return;
 
         if (!currentUser) {
             alert(locale === 'ar'
@@ -366,6 +369,7 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                 <div className="p-8 md:p-12 overflow-y-auto scrollbar-thin text-center flex-1">
                     
                     <h2 className="text-3xl md:text-4xl text-slate-900 dark:text-white font-black leading-tight mb-4 tracking-tight" dir="ltr">{book.title}</h2>
+                    {loanBadge && <p role="status" className="mx-auto mb-5 w-fit rounded-xl border border-rose-300 bg-rose-50 dark:bg-rose-950/50 px-4 py-2 text-sm font-black text-rose-800 dark:text-rose-200">{t(loanBadge === 'out' ? 'onLoan' : 'loanedCopy')}</p>}
                     
                     <div className="flex items-center justify-center gap-2 text-lg text-emerald-600 dark:text-emerald-400 font-bold mb-8 bg-emerald-50 dark:bg-emerald-900/20 w-fit mx-auto px-6 py-2 rounded-full">
                         <UserIcon /> {book.author}
@@ -420,10 +424,10 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
                         {currentUser && requestStatus !== 'success' && (
                             <button 
                                 onClick={handleBorrowRequest} 
-                                disabled={requestStatus === 'loading'}
+                                disabled={requestStatus === 'loading' || loanBadge === 'out'}
                                 className="flex-1 bg-amber-500 text-white font-black text-lg py-4 md:py-5 rounded-[2rem] hover:-translate-y-1 active:translate-y-2 border-b-8 border-amber-700 active:border-b-0 transition-all shadow-md uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0 disabled:border-b-8"
                             >
-                                {requestStatus === 'loading' ? t('borrowPending') : t('requestBorrow')}
+                                {loanBadge === 'out' ? t('onLoan') : requestStatus === 'loading' ? t('borrowPending') : t('requestBorrow')}
                             </button>
                         )}
                         <button onClick={onClose} className={`${currentUser && requestStatus !== 'success' ? 'flex-1' : 'w-full'} bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-black text-lg py-4 md:py-5 rounded-[2rem] hover:-translate-y-1 active:translate-y-2 border-b-8 border-slate-700 dark:border-slate-300 active:border-b-0 transition-all shadow-md uppercase tracking-widest`}>
@@ -437,7 +441,7 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
 };
 
 // --- 4. Component: BookCard (2D Flat Design) ---
-const BookCard = React.memo(({ book, onClick, t, locale }: { book: Book; onClick: () => void; t: any; locale: string }) => {
+const BookCard = React.memo(({ book, onClick, t, locale, loanBadge }: { book: Book; onClick: () => void; t: any; locale: string; loanBadge: 'out'|'some'|null }) => {
   const { data: passport, toggleSaved } = useReadingPassport();
   const readingKey = physicalBookKey(book);
   const isSaved = passport.saved.includes(readingKey);
@@ -459,6 +463,7 @@ const BookCard = React.memo(({ book, onClick, t, locale }: { book: Book; onClick
       {/* تصميم البطاقة الثنائية الأبعاد */}
       <div className={`w-full h-full relative rounded-[2rem] border-4 shadow-lg bg-gradient-to-br ${colorClass} transition-all duration-500 transform group-hover:-translate-y-3 group-hover:shadow-2xl overflow-hidden flex flex-col`}>
         
+        {loanBadge && <div role="status" className="absolute top-[92px] start-3 z-30 rounded-xl border border-rose-200 bg-rose-950/95 px-3 py-1.5 text-[11px] font-black text-white shadow-lg">{t(loanBadge === 'out' ? 'onLoan' : 'loanedCopy')}</div>}
         {/* تأثير انعكاس الزجاج الخفيف */}
         <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-black/10 pointer-events-none z-10"></div>
         <div className="absolute top-0 left-0 w-full h-1/2 bg-white/10 skew-y-12 pointer-events-none"></div>
@@ -563,6 +568,48 @@ const SearchPage: React.FC = () => {
     const [audienceFilter, setAudienceFilter] = useState<BookAudience | 'all'>('all');
     const [readingTierFilter, setReadingTierFilter] = useState<ChildReadingTier | 'all'>('all');
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+
+    const [activeLoans, setActiveLoans] = useState<PublicActiveLoan[]>([]);
+    const titleCounts = useMemo(() => {
+        const counts = new Map<string, number>();
+        bookData.forEach(book => {
+            const key = normalizedBookTitle(book.title);
+            counts.set(key, (counts.get(key) || 0) + 1);
+        });
+        return counts;
+    }, [catalogRevision]);
+
+    // Verified Edge Function returns only active titles and locations; no borrower details.
+    useEffect(() => {
+        let mounted = true;
+        const refresh = async () => {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session?.access_token) return;
+                const { data, error } = await supabase.functions.invoke('admin-verified-library', {
+                    body: { action: 'availability' },
+                    headers: { Authorization: 'Bearer ' + session.access_token }
+                });
+                if (error || !data?.ok || !Array.isArray(data.active)) throw error || new Error('Availability unavailable');
+                if (mounted) setActiveLoans(data.active as PublicActiveLoan[]);
+            } catch (error) {
+                console.warn('Catalog loan availability refresh failed:', error);
+            }
+        };
+        void refresh();
+        const onFocus = () => { void refresh(); };
+        const onVisibility = () => { if (document.visibilityState === 'visible') void refresh(); };
+        window.addEventListener('focus', onFocus);
+        document.addEventListener('visibilitychange', onVisibility);
+        const interval = window.setInterval(() => { void refresh(); }, 60000);
+        return () => {
+            mounted = false;
+            window.clearInterval(interval);
+            window.removeEventListener('focus', onFocus);
+            document.removeEventListener('visibilitychange', onVisibility);
+        };
+    }, []);
+
     const [visibleCount, setVisibleCount] = useState(12);
     // Cabinet 22 has 268 titles: load its results progressively without altering other shelves.
     const [shelf22VisibleCount, setShelf22VisibleCount] = useState(24);
@@ -758,6 +805,7 @@ const SearchPage: React.FC = () => {
                                 book={book} 
                                 t={t}
                                 locale={currentLocale} 
+                                loanBadge={getPhysicalLoanBadge(book, activeLoans, titleCounts)}
                                 onClick={() => {
                                     setSelectedBook(book); 
                                 }} 
@@ -790,7 +838,7 @@ const SearchPage: React.FC = () => {
                     </div>
                 )}
 
-                <BookModal book={selectedBook} onClose={() => setSelectedBook(null)} t={t} />
+                <BookModal book={selectedBook} onClose={() => setSelectedBook(null)} t={t} loanBadge={selectedBook ? getPhysicalLoanBadge(selectedBook, activeLoans, titleCounts) : null} />
 
             </div>
 

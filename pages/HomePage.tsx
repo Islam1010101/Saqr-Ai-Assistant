@@ -348,9 +348,11 @@ const HomePage: React.FC = () => {
             ].includes(status);
         };
 
+        const isNotifiableBorrowing = (row: any) => isActiveBorrowing(row) || ['pending','requested','awaiting_approval'].includes(normalizeValue(row?.status).replace(/[\s-]+/g,'_'));
+
         const fetchBorrowings = async () => {
             const role = normalizeValue(userType);
-            if (!userData || !role || role === 'admin') {
+            if (!userData || !['student','teacher','admin'].includes(role)) {
                 if (mounted) setBorrowedBooks([]);
                 return;
             }
@@ -384,7 +386,7 @@ const HomePage: React.FC = () => {
                         }
 
                         (data || []).forEach((row: any, index: number) => {
-                            if (!isActiveBorrowing(row)) return;
+                            if (!isNotifiableBorrowing(row)) return;
                             const key = String(row.id ?? `${row.user_id}-${row.book_name}-${row.return_date}-${index}`);
                             found.set(key, row);
                         });
@@ -407,7 +409,7 @@ const HomePage: React.FC = () => {
                     } else {
                         const ownerFields = /^(user_id|teacher_id|student_id|borrower_id|member_id|employee_id|staff_id|user_name|teacher_name|student_name|borrower_name|borrower|email|username|name)$/i;
                         (data || []).forEach((row: any, index: number) => {
-                            if (!isActiveBorrowing(row)) return;
+                            if (!isNotifiableBorrowing(row)) return;
                             const belongsToUser = Object.entries(row).some(([field, value]) =>
                                 ownerFields.test(field) && identities.has(normalizeValue(value))
                             );
@@ -814,6 +816,7 @@ const HomePage: React.FC = () => {
                                         {borrowedBooks.map((book) => {
                                             const bookTitle = book.book_name || book.book_title || book.title || book.name;
                                             const returnDate = book.return_date || book.due_date || book.expected_return_date;
+                                            const isPending = ['pending','requested','awaiting_approval'].includes(String(book.status ?? '').trim().toLowerCase().replace(/[\s-]+/g,'_'));
                                             const validReturnDate = Boolean(returnDate && Number.isFinite(new Date(`${returnDate}T12:00:00`).getTime()));
 
                                             return (
@@ -825,8 +828,8 @@ const HomePage: React.FC = () => {
                                                         <h4 className="font-black text-slate-900 dark:text-white text-base sm:text-lg leading-snug break-words">{bookTitle || (isAr ? 'كتاب بدون عنوان' : 'Untitled book')}</h4>
                                                     </div>
                                                 </div>
-                                                <BorrowingReturnStatus returnDate={returnDate} isAr={isAr} returnLabel={t('borrowReturn')} />
-                                                {validReturnDate && (
+                                                {isPending ? <div role="status" className="rounded-xl border border-sky-200 bg-sky-50 dark:bg-sky-950/40 px-3.5 py-3 font-bold text-sm text-sky-800 dark:text-sky-200">{isAr ? 'طلب استعارة قيد الموافقة' : 'Borrowing request awaiting approval'}</div> : <BorrowingReturnStatus returnDate={returnDate} isAr={isAr} returnLabel={t('borrowReturn')} />}
+                                                {!isPending && validReturnDate && (
                                                     <a
                                                         href={createGoogleCalendarLink(bookTitle || (isAr ? 'كتاب مستعار' : 'Borrowed book'), returnDate)}
                                                         target="_blank"
