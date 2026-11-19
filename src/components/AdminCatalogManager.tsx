@@ -1,4 +1,5 @@
 import React,{useEffect,useMemo,useState} from 'react';
+import {FunctionsHttpError} from '@supabase/supabase-js';
 import {supabase} from '../utils/supabase';
 import {bookData} from '../../api/bookData';
 import {ARABIC_LIBRARY_DATABASE,ENGLISH_LIBRARY_DATABASE} from '../../api/digitalBookData';
@@ -21,6 +22,42 @@ const icon=(name:'book'|'upload'|'cloud'|'check'|'refresh')=>{
 const control='w-full min-w-0 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500';
 const primary='inline-flex justify-center items-center gap-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 px-5 py-3 text-white text-sm font-bold';
 const secondary='inline-flex justify-center items-center gap-2 rounded-xl border border-slate-300 dark:border-slate-600 px-4 py-2.5 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800';
+/** Keep backend validation and authorization exactly as before; show its
+ * actionable message instead of the generic FunctionsHttpError wrapper.
+ */
+const catalogErrorText=(code:string,isAr:boolean)=>{
+ const translations:Record<string,[string,string]>={
+  TITLE_REQUIRED:['ادخل عنوان الكتاب.','Enter the book title.'],
+  AUTHOR_REQUIRED:['ادخل اسم المؤلف.','Enter the author name.'],
+  ISBN_REQUIRED:['ادخل رقم ISBN الخاص بالكتاب.','Enter the book ISBN.'],
+  INVALID_ISBN:['رقم ISBN غير صحيح. تأكد أنه ISBN من 10 أو 13 خانة، وليس الباركود التجاري UPC المكوّن من 12 خانة.','Invalid ISBN: enter a valid 10- or 13-character ISBN, not a 12-digit UPC barcode.'],
+  CABINET_NUMBER_REQUIRED:['ادخل رقم الدولاب الصحيح (رقم موجب بدون كسور).','Enter a valid positive whole-number cabinet number.'],
+  SHELF_ROW_REQUIRED:['ادخل رقم الرف أو الصف الصحيح (رقم موجب بدون كسور).','Enter a valid positive whole-number shelf/row number.'],
+  SUBJECT_REQUIRED:['ادخل الموضوع أو التصنيف الخاص بالكتاب الرقمي.','Enter the digital book subject or category.'],
+  DIGITAL_BOOK_HTTPS_URL_REQUIRED:['أدخل رابطًا صحيحًا يبدأ بـ https:// للكتاب الرقمي.','Enter a valid digital book URL starting with https://.'],
+  AUDIO_HTTPS_URL_REQUIRED:['رابط الملخص الصوتي غير صحيح؛ يجب أن يبدأ بـ https://.','Enter a valid audio summary URL starting with https://.'],
+  PHYSICAL_REQUIRED_FIELDS:['راجع اسم المؤلف ورقم ISBN الصحيح ورقم الدولاب والرف.','Check the author, valid ISBN, cabinet and shelf row.'],
+  DIGITAL_REQUIRED_FIELDS:['راجع اسم المؤلف والموضوع ورابط الكتاب والملخص الصوتي إن وُجد.','Check the author, subject, book link and optional audio link.'],
+  VERIFIED_SCHOOL_GOOGLE_REQUIRED:['يجب تسجيل الدخول بحساب Google المدرسي المعتمد.','Sign in using your verified school Google account.'],
+  AUTH_REQUIRED:['انتهت جلسة الدخول؛ أعد تسجيل الدخول بحساب الأدمن.','Your session has expired; sign in as admin again.'],
+  ADMIN_REQUIRED:['هذه العملية متاحة للأدمن فقط.','This action is restricted to administrators.'],
+  ADMIN_PROFILE_UNAVAILABLE:['تعذّر التحقق من حساب الأدمن المرتبط بسجل المعلمين.','Your administrator profile could not be verified.'],
+  DIRECTORY_UNAVAILABLE:['تعذّر الاتصال بدليل الحسابات المدرسية حاليًا.','The school account directory is temporarily unavailable.'],
+  ORIGIN_NOT_ALLOWED:['تعذّر التحقق من عنوان المنصة. افتح الموقع الرسمي وأعد المحاولة.','Open the official library website and try again.'],
+  CATALOG_OPERATION_FAILED:['تعذّرت إضافة الكتاب بسبب خطأ في الخدمة. حاول مرة أخرى.','The book service could not complete this request. Try again.'],
+  EMPTY_SHEET:['ملف Excel فارغ.','The spreadsheet is empty.'],
+  FILE_TOO_LARGE:['الملف كبير جدًا؛ الحد الأقصى 2.5 ميجابايت.','The file is too large; maximum 2.5 MB.'],
+  FILE_TOO_MANY_ROWS:['ملف Excel يحتوي على أكثر من 5000 صف.','The spreadsheet exceeds 5,000 rows.'],
+  EXCEL_NEEDS_TITLE_AUTHOR_HEADERS:['لازم الملف يحتوي على عمود عنوان الكتاب واسم المؤلف.','The spreadsheet needs title and author columns.'],
+  EXCEL_XLSX_OR_CSV_ONLY:['استخدم ملف Excel بصيغة XLSX أو CSV.','Upload an XLSX or CSV file.'],
+  IMPORT_BATCH_TOO_LARGE:['عدد الكتب كبير جدًا في الدفعة الواحدة.','Too many books in one import batch.'],
+  PENDING_PHYSICAL_NOT_FOUND:['الكتاب المعلق غير موجود أو سبق اعتماده.','This pending book is missing or was already approved.'],
+  LOCATION_AUTHOR_REQUIRED:['راجع عنوان الكتاب والمؤلف ومكانه قبل اعتماده.','Complete the author and book location before approval.']
+ };
+ const localized=translations[code];
+ return localized?(isAr?localized[0]:localized[1]):code;
+};
+
 export default function AdminCatalogManager({isAr}:{isAr:boolean}){
  const [mode,setMode]=useState<Mode>('physical');
  const [form,setForm]=useState<Draft>(empty);
@@ -40,7 +77,20 @@ export default function AdminCatalogManager({isAr}:{isAr:boolean}){
   const {data,error}=await supabase.functions.invoke('admin-catalog-books',{
    body,headers:{Authorization:'Bearer '+session.access_token}
   });
-  if(error||!data?.ok)throw Error(String(data?.error||error?.message||'Catalog request failed'));
+  if(error){
+   let backendCode:string|undefined;
+   // Supabase puts the service's JSON error payload in FunctionsHttpError.context,
+   // not in the data argument when the status is 400/403/500.
+   if(error instanceof FunctionsHttpError){
+    try{
+     const response=error.context as Response;
+     const payload=await response.clone().json();
+     if(typeof payload?.error==='string')backendCode=payload.error;
+    }catch{/* Fall back to the original network error without leaking tokens. */}
+   }
+   throw Error(catalogErrorText(backendCode||error.message||'Catalog request failed',isAr));
+  }
+  if(!data?.ok)throw Error(catalogErrorText(String(data?.error||'Catalog request failed'),isAr));
   return data;
  };
  const refresh=async()=>{
