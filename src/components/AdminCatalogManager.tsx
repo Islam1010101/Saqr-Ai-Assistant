@@ -229,7 +229,11 @@ export default function AdminCatalogManager({isAr}:{isAr:boolean}){
      {field('title',t('عنوان الكتاب','Book title'),true)}
      {field('author',t('اسم المؤلف','Author'),true)}
      {mode==='physical'?<>
-      {field('isbn','ISBN',true)}
+      {field('isbn',t('ISBN (اختياري)','ISBN (optional)'))}
+      <p className="md:col-span-2 -mt-1 text-xs text-slate-500 dark:text-slate-400">
+       {t('لو الكتاب ملوش ISBN، سيبه فاضي. لو موجود لازم يكون ISBN صحيحًا من 10 أو 13 خانة، مش باركود UPC.',
+        'Leave ISBN blank if the book has none. A supplied number must be a valid ISBN-10 or ISBN-13, not a UPC barcode.')}
+      </p>
       {field('cabinet',t('رقم الدولاب (Shelf)','Cabinet number (Shelf)'),true,'number')}
       {field('shelf_row',t('رقم الرف / الصف (Row)','Shelf row (Row)'),true,'number')}
       {field('subject',t('الموضوع (اختياري)','Subject (optional)'))}
