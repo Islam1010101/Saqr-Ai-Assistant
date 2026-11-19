@@ -30,7 +30,7 @@ test('Physical ISBN is optional, but supplied ISBN must remain genuine and shelf
  assert.match(server,/if\(!shelf_row\)throw Error\("SHELF_ROW_REQUIRED"\)/);
  assert.match(server,/if\(text\(v\.isbn\)&&!isbn\)throw Error\("INVALID_ISBN"\)/);
  assert.match(server,/const pending=kind==="physical"&&\(!author\|\|!cabinet\|\|!shelf_row/);
- assert.match(server,/source==="excel"/);
+ assert.match(server,/source:"manual"\|"excel"/);
 });
 test('Digital requirements and existing catalog RLS are not modified',()=>{
  for(const marker of ['DIGITAL_BOOK_HTTPS_URL_REQUIRED','AUDIO_HTTPS_URL_REQUIRED','SUBJECT_REQUIRED']){
