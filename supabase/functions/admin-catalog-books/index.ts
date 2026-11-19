@@ -40,10 +40,21 @@ function makeRecord(v:Input,uid:string,source:"manual"|"excel",forced?:"physical
  const book_url=kind==="digital"?https(v.book_url):"";
  const audio_url=kind==="digital"?https(v.audio_url):"";
  const subject=text(v.subject,160)||(language==="ar"?"غير مصنف":"Unclassified");
- if(kind==="digital"&&(!author||!text(v.subject,160)||!book_url||(text(v.audio_url)&&!audio_url)))
-  throw Error("DIGITAL_REQUIRED_FIELDS");
- if(source==="manual"&&kind==="physical"&&(!author||!isbn||!cabinet||!shelf_row))
-  throw Error("PHYSICAL_REQUIRED_FIELDS");
+ // Keep original location requirements and ISBN checksum checks. A physical
+ // holding without an ISBN is valid library stock if title, author and location
+ // are known; never invent a missing ISBN or accept UPC as an ISBN.
+ if(kind==="digital"){
+  if(!author)throw Error("AUTHOR_REQUIRED");
+  if(!text(v.subject,160))throw Error("SUBJECT_REQUIRED");
+  if(!book_url)throw Error("DIGITAL_BOOK_HTTPS_URL_REQUIRED");
+  if(text(v.audio_url)&&!audio_url)throw Error("AUDIO_HTTPS_URL_REQUIRED");
+ }
+ if(source==="manual"&&kind==="physical"){
+  if(!author)throw Error("AUTHOR_REQUIRED");
+  if(!cabinet)throw Error("CABINET_NUMBER_REQUIRED");
+  if(!shelf_row)throw Error("SHELF_ROW_REQUIRED");
+  if(text(v.isbn)&&!isbn)throw Error("INVALID_ISBN");
+ }
  const pending=kind==="physical"&&(!author||!cabinet||!shelf_row||(!!text(v.isbn)&&!isbn));
  const record={
   kind,status:pending?"pending":"approved",language,title,author,isbn,cabinet,shelf_row,
@@ -196,7 +207,7 @@ Deno.serve(async(req:Request)=>{
  }catch(e){
   const err=e as {message?:string;code?:string};
   const message=err?.message||"";
-  if(/^(TITLE_REQUIRED|DIGITAL_REQUIRED_FIELDS|PHYSICAL_REQUIRED_FIELDS|EMPTY_SHEET|FILE_TOO_LARGE|FILE_TOO_MANY_ROWS|EXCEL_NEEDS_TITLE_AUTHOR_HEADERS|EXCEL_XLSX_OR_CSV_ONLY|IMPORT_BATCH_TOO_LARGE|PENDING_PHYSICAL_NOT_FOUND|LOCATION_AUTHOR_REQUIRED|INVALID_RECORD_ID)$/.test(message))
+  if(/^(TITLE_REQUIRED|AUTHOR_REQUIRED|ISBN_REQUIRED|INVALID_ISBN|CABINET_NUMBER_REQUIRED|SHELF_ROW_REQUIRED|SUBJECT_REQUIRED|DIGITAL_BOOK_HTTPS_URL_REQUIRED|AUDIO_HTTPS_URL_REQUIRED|DIGITAL_REQUIRED_FIELDS|PHYSICAL_REQUIRED_FIELDS|EMPTY_SHEET|FILE_TOO_LARGE|FILE_TOO_MANY_ROWS|EXCEL_NEEDS_TITLE_AUTHOR_HEADERS|EXCEL_XLSX_OR_CSV_ONLY|IMPORT_BATCH_TOO_LARGE|PENDING_PHYSICAL_NOT_FOUND|LOCATION_AUTHOR_REQUIRED|INVALID_RECORD_ID)$/.test(message))
     return respond(400,{ok:false,error:message});
   console.error("Admin catalog action failed",{code:err?.code||"UNKNOWN"});
   return respond(500,{ok:false,error:"CATALOG_OPERATION_FAILED"});
