@@ -289,7 +289,7 @@ const BookModal: React.FC<{ book: Book | null; onClose: () => void; t: any }> = 
             return;
         }
 
-        if (userType !== 'student' && userType !== 'teacher') {
+        if (userType !== 'student' && userType !== 'teacher' && userType !== 'admin') {
             alert(locale === 'ar'
                 ? 'نوع الحساب غير معروف. سجّل الخروج ثم الدخول مرة أخرى.'
                 : 'Account type is missing or invalid. Please sign out and sign in again.');

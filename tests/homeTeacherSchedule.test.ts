@@ -27,11 +27,18 @@ assert.deepEqual(getTeacherLibrarySlots(rows,' hr045 ').map(s=>s.id),
   ['Monday_3','Monday_4','الثلاثاء_1','الخميس_8']);
 const homepage=readFileSync('pages/HomePage.tsx','utf8');
 const schedule=readFileSync('pages/SchedulePage.tsx','utf8');
-assert.ok(homepage.includes("userType === 'teacher' && teacherSchedule.length > 0"),
-  'Section only visible for teachers with real saved bookings');
+assert.ok(homepage.includes("const canSeeOwnLibrarySchedule = userType === 'teacher' || userType === 'admin'") &&
+  homepage.includes("canSeeOwnLibrarySchedule && teacherSchedule.length > 0") &&
+  homepage.includes("if (!canSeeOwnLibrarySchedule || !teacherId)"),
+  'Only teacher and admin accounts with their own saved bookings display schedule cards');
 assert.ok(homepage.includes(".from('library_schedule')") && homepage.includes(".eq('user_id', teacherId)"),
   'Homepage reads only selected teacher slots from the shared booking table');
 assert.ok(homepage.includes('getTeacherLibrarySlots('));
+const catalog = readFileSync('pages/SearchPage.tsx','utf8');
+assert.ok(catalog.includes("if (userType !== 'student' && userType !== 'teacher' && userType !== 'admin')"),
+  'Only student, teacher, and admin accounts may request borrowings');
+assert.ok(catalog.includes("const userId = userType === 'student' ? currentUser.student_id : currentUser.teacher_id;"),
+  'Staff borrowing continues to use the existing school teacher ID');
 assert.ok(homepage.includes("table: 'library_schedule'"),
   'Schedule should respond to booking/deletion updates');
 assert.ok(homepage.includes("window.addEventListener('focus', onFocus)"));

@@ -314,6 +314,7 @@ const HomePage: React.FC = () => {
     const [userType, setUserType] = useState(() => {
         return localStorage.getItem('user_type') || null;
     });
+    const canSeeOwnLibrarySchedule = userType === 'teacher' || userType === 'admin';
 
     const [bursts, setBursts] = useState<BurstItem[]>([]);
     const [showBubble, setShowBubble] = useState(false);
@@ -445,7 +446,7 @@ const HomePage: React.FC = () => {
         let latestRequest = 0;
         const teacherId = String(userData?.teacher_id ?? '').trim();
 
-        if (userType !== 'teacher' || !teacherId) {
+        if (!canSeeOwnLibrarySchedule || !teacherId) {
             setTeacherSchedule([]);
             return () => { mounted = false; };
         }
@@ -719,7 +720,7 @@ const HomePage: React.FC = () => {
                 </RevealSection>
 
                 {/* This section exists only for teachers with saved library periods. */}
-                {userType === 'teacher' && teacherSchedule.length > 0 && (
+                {canSeeOwnLibrarySchedule && teacherSchedule.length > 0 && (
                     <RevealSection delay={150}>
                         <section
                             aria-labelledby="homepage-teacher-schedule-title"
