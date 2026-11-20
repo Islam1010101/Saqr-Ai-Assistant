@@ -16,7 +16,7 @@ export default function AdminUserFeaturePermissions({email,name,isAr}:{
  const [notice,setNotice]=useState('');
  const send=async(body:object)=>{
   const {data:{session}}=await supabase.auth.getSession();
-  if(!session?.access_token)throw Error(isAr?'يرجى إعادة تسجيل دخول الأدمن':'Admin login required');
+  if(!session?.access_token)throw Error(isAr?'يرجى إعادة تسجيل الدخول بحساب مدير النظام':'Admin login required');
   const {data,error}=await supabase.functions.invoke('efips-feature-access',{
    body,headers:{Authorization:'Bearer '+session.access_token}
   });
@@ -59,12 +59,12 @@ export default function AdminUserFeaturePermissions({email,name,isAr}:{
       <h2 className="text-xl font-black text-emerald-900 dark:text-emerald-100">{isAr?'صلاحيات الخدمات والتحديات':'Individual service & challenge access'}</h2>
       <p className="mt-1 text-sm font-bold text-slate-700 dark:text-slate-200">{name}</p>
       <p dir="ltr" className="text-start text-xs text-slate-500 dark:text-slate-400">{email}</p>
-      <p className="mt-2 text-xs font-semibold leading-6 text-slate-600 dark:text-slate-300">{isAr?'المنح أو المنع هنا لا يغيّر دور المستخدم (أدمن / معلم / طالب) أو يمنح صلاحيات الإدارة.':'Allow/deny never changes the user’s student/teacher/admin role or grants admin control.'}</p>
+      <p className="mt-2 text-xs font-semibold leading-6 text-slate-600 dark:text-slate-300">{isAr?'تعديل إتاحة الخدمات هنا لا يغيّر دور المستخدم (مدير نظام أو معلم أو طالب)، ولا يمنحه صلاحيات الإدارة.':'Allow/deny never changes the user’s student/teacher/admin role or grants admin control.'}</p>
      </div>
      <button type="button" onClick={()=>setOpen(false)} aria-label={isAr?'إغلاق':'Close'}
       className="grid size-11 shrink-0 place-items-center rounded-full border border-slate-300 text-xl font-black text-slate-700 dark:border-slate-600 dark:text-white">×</button>
     </header>
-    {loading&&<p role="status" className="py-5 text-sm font-bold">{isAr?'جاري تحميل صلاحيات المستخدم...':'Loading verified permissions...'}</p>}
+    {loading&&<p role="status" className="py-5 text-sm font-bold">{isAr?'جارٍ تحميل صلاحيات المستخدم...':'Loading verified permissions...'}</p>}
     {error&&<p role="alert" className="mb-3 rounded-xl border border-rose-300 bg-rose-50 p-3 text-sm font-bold text-rose-800 dark:bg-rose-950 dark:text-rose-200">{error}</p>}
     {notice&&<p role="status" className="mb-3 rounded-xl border border-emerald-300 bg-emerald-50 p-3 text-sm font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">{notice}</p>}
     {record&&groups.map(group=><div key={group} className="mb-4 rounded-2xl border border-slate-200 p-3 dark:border-slate-700">

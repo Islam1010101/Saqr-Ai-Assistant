@@ -146,7 +146,7 @@ export default function AdminPeriodReports({isAr,students,teachers,logs,loans,le
       {period==='custom'&&<><label className="text-xs font-bold flex flex-col gap-1">{l('من','From')}<input className={input} type="date" value={customStart} onChange={e=>setCustomStart(e.target.value)}/></label><label className="text-xs font-bold flex flex-col gap-1">{l('إلى','To')}<input className={input} type="date" value={customEnd} onChange={e=>setCustomEnd(e.target.value)}/></label></>}
       <span className="text-xs text-slate-500 pb-2">{range.start} — {range.end}</span>
     </div>
-    {viewState==='loading'&&<p className="text-sm text-slate-500 mb-3">{l('جاري تحميل سجلات فتح الكتب…','Loading book open records…')}</p>}
+    {viewState==='loading'&&<p className="text-sm text-slate-500 mb-3">{l('جارٍ تحميل سجلات فتح الكتب…','Loading book open records…')}</p>}
     {viewState==='error'&&<p className="text-sm text-amber-700 mb-3">{l('تعذرت قراءة سجل فتح الكتب؛ الأرقام الأخرى معروضة دون تقدير هذه القراءة.','Book view history unavailable; other metrics are shown without estimating opens.')} {errorMessage}</p>}
     {viewState==='partial'&&<p className="text-sm text-amber-700 mb-3">{l('تجاوز السجل حد 20 ألف عملية للفترة؛ لن نطبع تقريرًا ناقصًا.','More than 20,000 views in the period; printing is blocked to avoid an incomplete report.')}</p>}
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">

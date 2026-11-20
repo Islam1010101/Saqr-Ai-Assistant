@@ -34,28 +34,28 @@ const secondary='inline-flex justify-center items-center gap-2 rounded-xl border
  */
 const catalogErrorText=(code:string,isAr:boolean)=>{
  const translations:Record<string,[string,string]>={
-  TITLE_REQUIRED:['ادخل عنوان الكتاب.','Enter the book title.'],
-  AUTHOR_REQUIRED:['ادخل اسم المؤلف.','Enter the author name.'],
-  ISBN_REQUIRED:['ادخل رقم ISBN الخاص بالكتاب.','Enter the book ISBN.'],
+  TITLE_REQUIRED:['أدخل عنوان الكتاب.','Enter the book title.'],
+  AUTHOR_REQUIRED:['أدخل اسم المؤلف.','Enter the author name.'],
+  ISBN_REQUIRED:['أدخل رقم ISBN الخاص بالكتاب.','Enter the book ISBN.'],
   INVALID_ISBN:['رقم ISBN غير صحيح. تأكد أنه ISBN من 10 أو 13 خانة، وليس الباركود التجاري UPC المكوّن من 12 خانة.','Invalid ISBN: enter a valid 10- or 13-character ISBN, not a 12-digit UPC barcode.'],
-  CABINET_NUMBER_REQUIRED:['ادخل رقم الدولاب الصحيح (رقم موجب بدون كسور).','Enter a valid positive whole-number cabinet number.'],
-  SHELF_ROW_REQUIRED:['ادخل رقم الرف أو الصف الصحيح (رقم موجب بدون كسور).','Enter a valid positive whole-number shelf/row number.'],
-  SUBJECT_REQUIRED:['ادخل الموضوع أو التصنيف الخاص بالكتاب الرقمي.','Enter the digital book subject or category.'],
+  CABINET_NUMBER_REQUIRED:['أدخل رقم الدولاب الصحيح (رقم موجب بدون كسور).','Enter a valid positive whole-number cabinet number.'],
+  SHELF_ROW_REQUIRED:['أدخل رقم الرف أو الصف الصحيح (رقم موجب بدون كسور).','Enter a valid positive whole-number shelf/row number.'],
+  SUBJECT_REQUIRED:['أدخل الموضوع أو التصنيف الخاص بالكتاب الرقمي.','Enter the digital book subject or category.'],
   DIGITAL_BOOK_HTTPS_URL_REQUIRED:['أدخل رابطًا صحيحًا يبدأ بـ https:// للكتاب الرقمي.','Enter a valid digital book URL starting with https://.'],
   AUDIO_HTTPS_URL_REQUIRED:['رابط الملخص الصوتي غير صحيح؛ يجب أن يبدأ بـ https://.','Enter a valid audio summary URL starting with https://.'],
   PHYSICAL_REQUIRED_FIELDS:['راجع اسم المؤلف ورقم ISBN الصحيح ورقم الدولاب والرف.','Check the author, valid ISBN, cabinet and shelf row.'],
   DIGITAL_REQUIRED_FIELDS:['راجع اسم المؤلف والموضوع ورابط الكتاب والملخص الصوتي إن وُجد.','Check the author, subject, book link and optional audio link.'],
   VERIFIED_SCHOOL_GOOGLE_REQUIRED:['يجب تسجيل الدخول بحساب Google المدرسي المعتمد.','Sign in using your verified school Google account.'],
-  AUTH_REQUIRED:['انتهت جلسة الدخول؛ أعد تسجيل الدخول بحساب الأدمن.','Your session has expired; sign in as admin again.'],
-  ADMIN_REQUIRED:['هذه العملية متاحة للأدمن فقط.','This action is restricted to administrators.'],
-  ADMIN_PROFILE_UNAVAILABLE:['تعذّر التحقق من حساب الأدمن المرتبط بسجل المعلمين.','Your administrator profile could not be verified.'],
+  AUTH_REQUIRED:['انتهت جلسة الدخول؛ يُرجى إعادة تسجيل الدخول بحساب مدير النظام.','Your session has expired; sign in as admin again.'],
+  ADMIN_REQUIRED:['هذه العملية متاحة لمدير النظام فقط.','This action is restricted to administrators.'],
+  ADMIN_PROFILE_UNAVAILABLE:['تعذّر التحقق من حساب مدير النظام المرتبط بسجل المعلمين.','Your administrator profile could not be verified.'],
   DIRECTORY_UNAVAILABLE:['تعذّر الاتصال بدليل الحسابات المدرسية حاليًا.','The school account directory is temporarily unavailable.'],
   ORIGIN_NOT_ALLOWED:['تعذّر التحقق من عنوان المنصة. افتح الموقع الرسمي وأعد المحاولة.','Open the official library website and try again.'],
   CATALOG_OPERATION_FAILED:['تعذّرت إضافة الكتاب بسبب خطأ في الخدمة. حاول مرة أخرى.','The book service could not complete this request. Try again.'],
   EMPTY_SHEET:['ملف Excel فارغ.','The spreadsheet is empty.'],
   FILE_TOO_LARGE:['الملف كبير جدًا؛ الحد الأقصى 2.5 ميجابايت.','The file is too large; maximum 2.5 MB.'],
   FILE_TOO_MANY_ROWS:['ملف Excel يحتوي على أكثر من 5000 صف.','The spreadsheet exceeds 5,000 rows.'],
-  EXCEL_NEEDS_TITLE_AUTHOR_HEADERS:['لازم الملف يحتوي على عمود عنوان الكتاب واسم المؤلف.','The spreadsheet needs title and author columns.'],
+  EXCEL_NEEDS_TITLE_AUTHOR_HEADERS:['يجب أن يحتوي الملف على عمودين لعنوان الكتاب واسم المؤلف.','The spreadsheet needs title and author columns.'],
   EXCEL_XLSX_OR_CSV_ONLY:['استخدم ملف Excel بصيغة XLSX أو CSV.','Upload an XLSX or CSV file.'],
   IMPORT_BATCH_TOO_LARGE:['عدد الكتب كبير جدًا في الدفعة الواحدة.','Too many books in one import batch.'],
   PENDING_PHYSICAL_NOT_FOUND:['الكتاب المعلق غير موجود أو سبق اعتماده.','This pending book is missing or was already approved.'],
@@ -97,7 +97,7 @@ export default function AdminCatalogManager({isAr}:{isAr:boolean}){
  const update=(field:TextDraftField,value:string)=>setForm(old=>({...old,[field]:value}));
  const service=async(body:Record<string,unknown>)=>{
   const {data:{session}}=await supabase.auth.getSession();
-  if(!session?.access_token)throw Error(t('سجّل دخول الأدمن باستخدام Google أولًا.','Verified Google admin sign-in required.'));
+  if(!session?.access_token)throw Error(t('يرجى تسجيل الدخول أولًا باستخدام حساب Google المعتمد لمدير النظام.','Verified Google admin sign-in required.'));
   const {data,error}=await supabase.functions.invoke('admin-catalog-books',{
    body,headers:{Authorization:'Bearer '+session.access_token}
   });
@@ -340,7 +340,7 @@ export default function AdminCatalogManager({isAr}:{isAr:boolean}){
      {mode==='physical'?<>
       {field('isbn',t('ISBN (اختياري)','ISBN (optional)'))}
       <p className="md:col-span-2 -mt-1 text-xs text-slate-500 dark:text-slate-400">
-       {t('لو الكتاب ملوش ISBN، سيبه فاضي. لو موجود لازم يكون ISBN صحيحًا من 10 أو 13 خانة، مش باركود UPC.',
+       {t('إذا لم يكن للكتاب رقم ISBN، فاترك الحقل فارغًا. وإذا توفر، يجب إدخال رقم ISBN صحيح من 10 أو 13 خانة، وليس رمز UPC الشريطي.',
         'Leave ISBN blank if the book has none. A supplied number must be a valid ISBN-10 or ISBN-13, not a UPC barcode.')}
       </p>
       {field('cabinet',t('رقم الدولاب (Shelf)','Cabinet number (Shelf)'),true,'number')}
@@ -462,7 +462,7 @@ export default function AdminCatalogManager({isAr}:{isAr:boolean}){
     <div>
      <h3 className="text-lg font-bold">{t('تعديل وحذف الكتب الرقمية','Edit and remove digital books')}</h3>
      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t(
-      'عدّل بيانات أي كتاب في المكتبات الثلاث، أو أضف رابط ملخص صوتي أو امسحه، أو احذف الكتاب من الفهارس ونتائج صقر.',
+      'يمكنك تعديل بيانات الكتب في المكتبات الرقمية الثلاث، وإضافة رابط ملخص صوتي أو إزالته، وحذف الكتب من الفهارس النشطة ونتائج بحث صقر.',
       'Edit any title in the three libraries, add/remove an audio summary link, or delete the book from active catalogs and Saqr search.'
      )}</p>
     </div>
@@ -496,7 +496,7 @@ export default function AdminCatalogManager({isAr}:{isAr:boolean}){
         <span>{name==='title'?t('العنوان','Title'):name==='author'?t('المؤلف','Author'):
           name==='subject'?t('الموضوع','Subject'):name==='publisher'?t('دار النشر','Publisher'):
           name==='bio'?t('نبذة المؤلف','Author bio'):name==='book_url'?t('رابط قراءة الكتاب','Reading URL'):
-          t('رابط الملخص الصوتي (امسحه لإزالة الصوت)','Audio summary URL (clear to remove)')}</span>
+          t('رابط الملخص الصوتي (اتركه فارغًا لإزالة الصوت)','Audio summary URL (clear to remove)')}</span>
         <input className={control} required={['title','author','subject','book_url'].includes(name)}
          type={name==='book_url'?'url':'text'} dir={name==='book_url'||name==='audio_url'?'ltr':'auto'}
          value={digitalEdit[name]} onChange={e=>setDigitalEdit(old=>old?{...old,[name]:e.target.value}:old)}/>

@@ -22,25 +22,25 @@ import { NATIONAL_IDENTITY_DIGITAL_BOOKS } from '../api/nationalIdentityDigitalB
 
 const translations = {
     ar: {
-        title: 'مركز القيادة الموحد', subtitle: 'نظام إدارة المكتبة الذكية (EFIPS)', welcome: 'مرحباً بك أستاذ', backToHome: 'العودة للرئيسية',
+        title: 'لوحة إدارة المكتبة', subtitle: 'نظام إدارة مكتبة صقر الإمارات (EFIPS)', welcome: 'مرحبًا بك،', backToHome: 'العودة للرئيسية',
         statsTitle: 'إحصائيات النظام الحية', totalStudents: 'إجمالي الطلاب', totalTeachers: 'إجمالي المعلمين', studentLogins: 'طلاب قاموا بالدخول', teacherLogins: 'معلمون قاموا بالدخول',
         topBooksTitle: 'أكثر الكتب طلباً وقراءة في المكتبة', arabicBooks: 'المكتبة العربية الرقمية', englishBooks: 'المكتبة الإنجليزية الرقمية',
         digitalReadAnalyticsTitle: 'أكثر الكتب قراءة في المكتبات الرقمية', digitalReadCount: 'مرات الفتح / القراءة', noDigitalReads: 'لا توجد قراءات رقمية مسجلة لهذا القسم حتى الآن.',
         digitalReadsSetupRequired: 'تعذرت قراءة إحصائيات الكتب من جدول book_views. تحقق من صلاحيات قراءة الجدول في Supabase.', studentManagement: 'إدارة الطلاب', teacherManagement: 'إدارة المعلمين',
         borrowManagement: 'الإعارات النشطة', pendingRequests: 'طلبات معلقة', aiReports: 'تقارير التحضير الذكي', addStudentBtn: 'إضافة طالب جديد', addTeacherBtn: 'إضافة معلم جديد',
-        addBorrowBtn: 'تسجيل إعارة مباشرة', editIdBtn: 'تعديل', saveBtn: 'حفظ التغييرات', cancelBtn: 'إلغاء', approveBtn: 'تأكيد الإعارة وإرسال الإيميل', rejectBtn: 'رفض',
+        addBorrowBtn: 'تسجيل إعارة مباشرة', editIdBtn: 'تعديل', saveBtn: 'حفظ التغييرات', cancelBtn: 'إلغاء', approveBtn: 'اعتماد الإعارة وإرسال البريد الإلكتروني', rejectBtn: 'رفض',
         printPdfBtn: 'طباعة أو تنزيل التقرير (PDF)', colId: 'الرقم التعريفي', colName: 'الاسم', colGrade: 'الصف', colPoints: 'النقاط', colActions: 'الإجراءات',
         colBook: 'الكتاب المستعار', colEmail: 'البريد الإلكتروني', colDate: 'تاريخ الإرجاع', colReqDate: 'تاريخ الطلب', colTopic: 'موضوع الدرس', colType: 'نوع التحضير', colReportDate: 'تاريخ التحضير',
         modalAddStudent: 'إضافة طالب جديد', modalAddTeacher: 'إضافة معلم جديد', modalEditStudent: 'تعديل بيانات الطالب', modalEditTeacher: 'تعديل بيانات المعلم', modalAddBorrow: 'تسجيل إعارة جديدة',
-        accessDenied: 'عذراً، هذه الصفحة مخصصة لمدير النظام فقط.', loading: 'جاري تحليل البيانات الحية...', searchPlaceholder: 'ابحث بالاسم أو الرقم أو الإيميل أو الموضوع...', noResults: 'لا توجد نتائج مطابقة.'
+        accessDenied: 'عذراً، هذه الصفحة مخصصة لمدير النظام فقط.', loading: 'جارٍ تحميل بيانات لوحة الإدارة...', searchPlaceholder: 'ابحث بالاسم أو الرقم التعريفي أو البريد الإلكتروني أو الموضوع...', noResults: 'لا توجد نتائج مطابقة.'
     },
     en: {
-        title: 'Command Center', subtitle: 'Smart Library Management System', welcome: 'Welcome', backToHome: 'Back to Home',
+        title: 'Library Administration', subtitle: 'EFIPS Smart Library Management', welcome: 'Welcome,', backToHome: 'Back to Home',
         statsTitle: 'Live Statistics', totalStudents: 'Total Students', totalTeachers: 'Total Teachers', studentLogins: 'Students Logged In', teacherLogins: 'Teachers Logged In',
         topBooksTitle: 'Most Popular & Read Library Books', arabicBooks: 'Arabic Digital Library', englishBooks: 'English Digital Library',
         digitalReadAnalyticsTitle: 'Most-Read Digital Library Books', digitalReadCount: 'Opens / Reads', noDigitalReads: 'No digital book reads have been recorded for this section yet.',
-        digitalReadsSetupRequired: 'Could not read book analytics from book_views. Check the table read permissions in Supabase.', studentManagement: 'Student Management', teacherManagement: 'Teacher Management',
-        borrowManagement: 'Active Borrowings', pendingRequests: 'Pending Requests', aiReports: 'Smart Planning Reports', addStudentBtn: 'Add New Student', addTeacherBtn: 'Add New Teacher',
+        digitalReadsSetupRequired: 'Could not read book analytics from book_views. Check the table read permissions in Supabase.', studentManagement: 'Student Accounts', teacherManagement: 'Teacher Accounts',
+        borrowManagement: 'Active Loans', pendingRequests: 'Pending Requests', aiReports: 'Smart Planning Reports', addStudentBtn: 'Add New Student', addTeacherBtn: 'Add New Teacher',
         addBorrowBtn: 'Direct Borrowing', editIdBtn: 'Edit', saveBtn: 'Save Changes', cancelBtn: 'Cancel', approveBtn: 'Approve & Send Email', rejectBtn: 'Reject',
         printPdfBtn: 'Print / Download PDF Report', colId: 'ID Number', colName: 'Name', colGrade: 'Grade', colPoints: 'Points', colActions: 'Actions',
         colBook: 'Borrowed Book', colEmail: 'Email', colDate: 'Return Date', colReqDate: 'Request Date', colTopic: 'Lesson Topic', colType: 'Plan Type', colReportDate: 'Prep Date',
@@ -49,11 +49,12 @@ const translations = {
     }
 };
 
-type IconName = 'search' | 'refresh' | 'printer' | 'moon' | 'sun' | 'grid' | 'graduation-cap' | 'users' | 'trend-up' | 'activity' | 'chart' | 'trophy' | 'book-open' | 'library' | 'clock' | 'clipboard-list' | 'check' | 'x' | 'mail' | 'calendar' | 'user' | 'file-text' | 'return';
+type IconName = 'chevron-right' | 'search' | 'refresh' | 'printer' | 'moon' | 'sun' | 'grid' | 'graduation-cap' | 'users' | 'trend-up' | 'activity' | 'chart' | 'trophy' | 'book-open' | 'library' | 'clock' | 'clipboard-list' | 'check' | 'x' | 'mail' | 'calendar' | 'user' | 'file-text' | 'return';
 
 const OutlineIcon: React.FC<{ name: IconName; className?: string }> = ({ name, className = 'h-5 w-5' }) => {
     const common = { className, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, 'aria-hidden': true as const, focusable: false as const };
     switch (name) {
+        case 'chevron-right': return <svg {...common}><path d="m9 18 6-6-6-6" /></svg>;
         case 'search': return <svg {...common}><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>;
         case 'refresh': return <svg {...common}><path d="M20 7v5h-5M4 17v-5h5" /><path d="M5.6 9A7 7 0 0 1 17.4 6L20 12M4 12l2.6 6A7 7 0 0 0 18.4 15" /></svg>;
         case 'printer': return <svg {...common}><path d="M6 9V3h12v6" /><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" /><path d="M6 14h12v7H6zM18 12h.01" /></svg>;
@@ -468,7 +469,7 @@ const AdminDashboard: React.FC = () => {
         setAccessBusy(email); setBorrowingsError(''); setBorrowingsNotice('');
         try {
             const { data: { session } } = await supabase.auth.getSession();
-            if (!session?.access_token) throw new Error(isAr ? 'يرجى إعادة تسجيل الدخول بحساب الأدمن.' : 'Admin Google sign-in required.');
+            if (!session?.access_token) throw new Error(isAr ? 'يرجى إعادة تسجيل الدخول بحساب مدير النظام.' : 'Admin Google sign-in required.');
             const { data, error } = await supabase.functions.invoke('admin-verified-library', {
                 body: { action: 'access', email, change, role },
                 headers: { Authorization: 'Bearer ' + session.access_token }
@@ -488,7 +489,7 @@ const AdminDashboard: React.FC = () => {
         setBorrowingsNotice('');
         try {
             const { data: { session } } = await supabase.auth.getSession();
-            if (!session?.access_token) throw new Error(isAr ? 'يرجى تسجيل دخول الأدمن باستخدام Google مرة أخرى.' : 'Please sign in with the admin Google account again.');
+            if (!session?.access_token) throw new Error(isAr ? 'يرجى تسجيل الدخول مرة أخرى بحساب Google المعتمد لمدير النظام.' : 'Please sign in with the admin Google account again.');
             const { data, error } = await supabase.functions.invoke('admin-verified-library', {
                 body: { action: 'approve', borrowing_id: item.id },
                 headers: { Authorization: 'Bearer ' + session.access_token }
@@ -633,14 +634,14 @@ const AdminDashboard: React.FC = () => {
                     ? String(formData.student_id).trim() + '@falcon-school.com'
                     : newUserEmail.trim().toLowerCase();
                 const { data: { session } } = await supabase.auth.getSession();
-                if (!session?.access_token) throw new Error(isAr ? 'سجّل الدخول بحساب أدمن Google.' : 'Admin Google sign-in required.');
+                if (!session?.access_token) throw new Error(isAr ? 'يرجى تسجيل الدخول بحساب مدير النظام المدرسي.' : 'Admin Google sign-in required.');
                 const { data, error } = await supabase.functions.invoke('admin-verified-library', {
                     body: { action: 'create-user', user_type: type, email: requestedEmail,
                         name_ar: formData.name_ar, name_en: formData.name_en || formData.name_ar, grade: formData.grade },
                     headers: { Authorization: 'Bearer ' + session.access_token }
                 });
                 if (error || !data?.ok) throw new Error(data?.error || 'Unable to create account');
-                setBorrowingsNotice(isAr ? `تم إضافة حساب ${requestedEmail}، ويحتاج إلى حساب Google مدرسي فعّال للدخول.` : `Account ${requestedEmail} added. A provisioned school Google account is required for sign-in.`);
+                setBorrowingsNotice(isAr ? `تمت إضافة الحساب ${requestedEmail}، ويحتاج إلى حساب Google مدرسي فعّال للدخول.` : `Account ${requestedEmail} added. A provisioned school Google account is required for sign-in.`);
             } else if (modalMode === 'editStudent') {
                 const { error } = await supabase.from('students').update({ student_id: formData.student_id.trim(), name_ar: formData.name_ar, name_en: formData.name_en || formData.name_ar, grade: formData.grade }).eq('id', selectedItem.id);
                 if (error) throw error;
@@ -658,7 +659,7 @@ const AdminDashboard: React.FC = () => {
                 if (error || !data?.ok) throw new Error(data?.error || 'Could not register direct borrowing.');
                 setBorrowingsNotice(data.emailSent
                     ? (isAr ? `تم تسجيل الإعارة وإرسال البريد إلى ${data.email}.` : `Borrowing registered and email sent to ${data.email}.`)
-                    : (isAr ? 'تم تسجيل الإعارة، لكن البريد الإلكتروني لم يتأكد إرساله.' : 'Borrowing registered but email delivery is not confirmed.'));
+                    : (isAr ? 'تم تسجيل الإعارة، لكن لم يتم تأكيد إرسال البريد الإلكتروني.' : 'Borrowing registered but email delivery is not confirmed.'));
             }
             setModalMode(null); setSelectedItem(null);
             await fetchRealDashboardData(false);
@@ -696,22 +697,23 @@ const AdminDashboard: React.FC = () => {
     const ringLength = 2 * Math.PI * 38;
     const formatCatalogCount = (count: number) => count.toLocaleString(isAr ? 'ar-EG' : 'en-US');
     const dashboardSections: Array<{id:AdminSection;label:string;description:string;icon:IconName}> = [
-        {id:'overview',label:isAr?'الرئيسية':'Overview',description:isAr?'المؤشرات والاختصارات':'Key metrics & shortcuts',icon:'grid'},
-        {id:'reports',label:isAr?'التقارير الدورية':'Periodic reports',description:isAr?'شهري وفصلي وطباعة PDF':'Monthly, quarterly & PDF',icon:'printer'},
-        {id:'analytics',label:isAr?'التحليلات':'Analytics',description:isAr?'رسوم وتحليلات تفصيلية':'Charts & detailed insights',icon:'chart'},
-        {id:'attendance',label:isAr?'الحضور والحصص':'Attendance',description:isAr?'زيارات المكتبة والحصص':'Visits & class sessions',icon:'calendar'},
-        {id:'reading',label:isAr?'القراءة':'Reading',description:isAr?'تحديات القراءة والمستويات':'Reading progress & challenges',icon:'trophy'},
-        {id:'library',label:isAr?'المقتنيات والكتب':'Books & catalog',description:isAr?'الكتب الورقية والرقمية':'Physical & digital books',icon:'library'},
-        {id:'add-books',label:isAr?'إضافة الكتب':'Add books',description:isAr?'ورقي ورقمي واستيراد Excel':'Physical, digital & Excel',icon:'book-open'},
-        {id:'children',label:isAr?'مستويات الأطفال':'Children levels',description:isAr?'مراجعة تصنيف القراءة':'Reading level reviews',icon:'book-open'},
-        {id:'orison',label:isAr?'كتب بانتظار الموقع':'Books awaiting location',description:isAr?'مراجعة الجرد وتحديد الرف والصف':'Review imported books and set shelf / row',icon:'book-open'},
-        {id:'management',label:isAr?'الإدارة والسجلات':'Management',description:isAr?'المستخدمون والطلبات والاستعارات':'Users, requests & loans',icon:'users'}
+        {id:'overview',label:isAr?'نظرة عامة':'Overview',description:isAr?'ملخص المؤشرات والمهام ذات الأولوية':'Key metrics and priority actions',icon:'grid'},
+        {id:'reports',label:isAr?'التقارير الدورية':'Periodic Reports',description:isAr?'التقارير الشهرية والفصلية والطباعة':'Monthly, quarterly, and printable reports',icon:'printer'},
+        {id:'analytics',label:isAr?'التحليلات والرسوم':'Analytics & Charts',description:isAr?'تحليل الاستخدام والإعارات وأداء صقر':'Usage, loans, and Saqr performance',icon:'chart'},
+        {id:'attendance',label:isAr?'الحضور والحصص':'Attendance & Classes',description:isAr?'متابعة زيارات المكتبة والحصص':'Library visits and class attendance',icon:'calendar'},
+        {id:'reading',label:isAr?'تحدي القراءة':'Reading Challenge',description:isAr?'نتائج القراءة الشهرية للطلاب والمعلمين':'Monthly student and teacher reading results',icon:'trophy'},
+        {id:'library',label:isAr?'المقتنيات والقراءات':'Collection & Reading',description:isAr?'الفهارس الورقية والرقمية والكتب الأكثر استخدامًا':'Physical and digital collections and popular titles',icon:'library'},
+        {id:'add-books',label:isAr?'إدارة بيانات الكتب':'Book Catalog Management',description:isAr?'إضافة الكتب وتعديلها وحذفها واستيرادها':'Add, edit, remove, and import books',icon:'book-open'},
+        {id:'children',label:isAr?'مراجعة كتب الأطفال':'Children’s Book Review',description:isAr?'توثيق بيانات الكتب ومستويات القراءة':'Book verification and reading levels',icon:'graduation-cap'},
+        {id:'orison',label:isAr?'مراجعة الجرد':'Inventory Review',description:isAr?'استكمال مواقع الكتب ومراجعة سجلات الجرد':'Missing locations and inventory verification',icon:'clipboard-list'},
+        {id:'management',label:isAr?'المستخدمون والإعارات':'Accounts & Loans',description:isAr?'الحسابات وطلبات الاستعارة وسجلات التحضير':'Accounts, borrowing requests, and lesson plans',icon:'users'}
     ];
     // Only presentational grouping; all original dashboard sections still exist.
-    const navigationGroups: Array<{key:string;label:string;sections:AdminSection[]}> = [
-        {key:'insights',label:isAr?'الرئيسية والتقارير':'Overview & reports',sections:['overview','analytics','reports']},
-        {key:'operations',label:isAr?'التشغيل اليومي':'Daily operations',sections:['management','attendance','reading']},
-        {key:'catalog',label:isAr?'الفهرسة والمراجعة':'Catalog & reviews',sections:['library','add-books','children','orison']}
+    const navigationGroups: Array<{key:string;label:string;description:string;sections:AdminSection[]}> = [
+        {key:'insights',label:isAr?'المتابعة والتقارير':'Insights & Reports',description:isAr?'البيانات والنتائج':'Performance and outcomes',sections:['overview','analytics','reports']},
+        {key:'operations',label:isAr?'إدارة العمليات':'Daily Operations',description:isAr?'الحسابات والأنشطة':'Accounts and activities',sections:['management','attendance','reading']},
+        {key:'catalog',label:isAr?'الفهارس والمقتنيات':'Library Collections',description:isAr?'محتوى المكتبة':'Catalog and holdings',sections:['library','add-books']},
+        {key:'reviews',label:isAr?'التوثيق والمراجعة':'Verification & Review',description:isAr?'الكتب التي تحتاج متابعة':'Books requiring review',sections:['children','orison']}
     ];
     const normalizedSectionQuery = sectionSearch.trim().toLocaleLowerCase();
     const matchingSection = (section:{label:string;description:string}) =>
@@ -724,25 +726,94 @@ const AdminDashboard: React.FC = () => {
     };
     const currentSection = dashboardSections.find(item=>item.id===activeSection)!;
     const overviewShortcuts: Array<{label:string;count?:number;caption:string;icon:IconName;section:AdminSection;tab?:'students'|'teachers'|'borrowings'|'pending'|'reports'}> = [
-        {label:isAr?'مركز التقارير':'Reports center',count:lessonReportsList.length,caption:isAr?'الرسوم والإحصائيات':'Charts & statistics',icon:'chart',section:'reports'},
+        {label:isAr?'التقارير الدورية':'Periodic Reports',caption:isAr?'شهري وفصلي وملفات PDF':'Monthly, quarterly, and PDF',icon:'printer',section:'reports'},
         {label:isAr?'الطلبات المعلقة':'Pending requests',count:pendingRequestsList.length,caption:isAr?'مراجعة واعتماد':'Review & approve',icon:'clock',section:'management',tab:'pending'},
         {label:isAr?'الإعارات الحالية':'Current loans',count:borrowingsList.length,caption:isAr?'المتابعة والإرجاع':'Manage returns',icon:'book-open',section:'management',tab:'borrowings'},
         {label:isAr?'إدارة الطلاب':'Students',count:stats.students,caption:isAr?'الحسابات والصلاحيات':'Accounts & access',icon:'graduation-cap',section:'management',tab:'students'},
         {label:isAr?'إدارة المعلمين':'Teachers',count:stats.teachers,caption:isAr?'البريد والصلاحيات':'Emails & roles',icon:'users',section:'management',tab:'teachers'},
         {label:isAr?'فهرس المكتبة':'Library catalog',count:allCatalogCount,caption:isAr?'الورقي والرقمي':'Print & digital',icon:'library',section:'library'},
-        {label:isAr?'إضافة كتاب جديد':'Add a book',count:allCatalogCount,caption:isAr?'ورقي / رقمي / Excel':'Print / digital / Excel',icon:'book-open',section:'add-books'},
+        {label:isAr?'إضافة الكتب وتعديلها':'Manage Books',caption:isAr?'إضافة وتعديل وحذف واستيراد':'Add, edit, remove, and import',icon:'book-open',section:'add-books'},
         {label:isAr?'تحضيرات المعلمين':'Lesson reports',count:lessonReportsList.length,caption:isAr?'سجلات التحضير':'Teaching activity',icon:'clipboard-list',section:'management',tab:'reports'},
         {label:isAr?'التحليلات التفصيلية':'Analytics',caption:isAr?'رسوم وبيانات النشاط':'Activity charts',icon:'chart',section:'analytics'},
         {label:isAr?'الحضور وجدول الحصص':'Attendance',caption:isAr?'الحصص والزيارات':'Sessions & visits',icon:'calendar',section:'attendance'},
         {label:isAr?'تحديات القراءة':'Reading progress',caption:isAr?'تقرير القراءة':'Reading activities',icon:'trophy',section:'reading'},
         {label:isAr?'مراجعة مستويات الأطفال':'Children review',caption:isAr?'التوثيق والاعتماد':'Review & validation',icon:'clipboard-list',section:'children'},
-        {label:isAr?'الجرد الناقص':'Inventory review',caption:isAr?'تحديد مكان الكتب':'Missing shelf locations',icon:'library',section:'orison'}
+        {label:isAr?'مراجعة سجلات الجرد':'Inventory Review',caption:isAr?'تحديد مكان الكتب':'Missing shelf locations',icon:'library',section:'orison'}
+    ];
+
+    const sectionGroup = navigationGroups.find(group=>group.sections.includes(activeSection));
+    const relatedSectionIds: Partial<Record<AdminSection,AdminSection[]>> = {
+        reports:['analytics','reading'],
+        analytics:['reports','management'],
+        management:['attendance','reading','reports'],
+        attendance:['management','reports'],
+        reading:['reports','attendance'],
+        library:['add-books','children','orison'],
+        'add-books':['library','children','orison'],
+        children:['add-books','library'],
+        orison:['add-books','library'],
+    };
+    const relatedSections=(relatedSectionIds[activeSection]||[])
+        .map(id=>dashboardSections.find(item=>item.id===id))
+        .filter((item):item is typeof dashboardSections[number]=>Boolean(item));
+    const priorityActions: Array<{
+        key:string;title:string;description:string;value:number;
+        icon:IconName;section:AdminSection;tab?:'pending'|'borrowings';
+        accent:string;surface:string;track:string;bar:string;
+    }> = [
+        {key:'pending',title:isAr?'طلبات استعارة قيد الاعتماد':'Borrowing Requests Pending Approval',
+         description:isAr?'تحتاج مراجعة إدارة المكتبة':'Awaiting library staff review',
+         value:libraryImpact.pending,icon:'clock',section:'management',tab:'pending',
+         accent:'text-amber-700 dark:text-amber-300',surface:'border-amber-200/70 bg-amber-50/60 dark:border-amber-900/60 dark:bg-amber-950/20',
+         track:'bg-amber-100 dark:bg-amber-950/70',bar:'bg-amber-500'},
+        {key:'overdue',title:isAr?'إعارات تجاوزت موعد الإرجاع':'Overdue Book Loans',
+         description:isAr?'تحتاج متابعة سجلات الإرجاع':'Review outstanding returns',
+         value:libraryImpact.overdue,icon:'return',section:'management',tab:'borrowings',
+         accent:'text-rose-700 dark:text-rose-300',surface:'border-rose-200/70 bg-rose-50/60 dark:border-rose-900/60 dark:bg-rose-950/20',
+         track:'bg-rose-100 dark:bg-rose-950/70',bar:'bg-rose-500'},
+        {key:'active',title:isAr?'الإعارات النشطة':'Active Book Loans',
+         description:isAr?'متابعة الاستعارات ومواعيد الإرجاع':'Track active loans and due dates',
+         value:libraryImpact.active,icon:'book-open',section:'management',tab:'borrowings',
+         accent:'text-emerald-800 dark:text-emerald-300',surface:'border-emerald-200/70 bg-emerald-50/60 dark:border-emerald-900/60 dark:bg-emerald-950/20',
+         track:'bg-emerald-100 dark:bg-emerald-950/70',bar:'bg-emerald-500'},
+    ];
+    const highestPriority = Math.max(...priorityActions.map(item=>item.value),1);
+    const shortcutGroups: Array<{
+        key:string;title:string;description:string;icon:IconName;
+        items:typeof overviewShortcuts;
+    }> = [
+        {key:'operations',title:isAr?'المهام اليومية':'Daily Operations',
+         description:isAr?'الإعارات والطلبات والحضور والتحضير':'Loans, requests, attendance, and lesson plans',
+         icon:'clock',items:overviewShortcuts.filter(item=>
+          (item.section==='management'&&['pending','borrowings','reports'].includes(item.tab||''))||
+           item.section==='attendance')},
+        {key:'catalog',title:isAr?'المقتنيات والفهرسة':'Collections & Catalog',
+         description:isAr?'إدارة الكتب والمراجعة والتوثيق':'Book records, imports, and verification',
+         icon:'library',items:overviewShortcuts.filter(item=>
+          ['library','add-books','children','orison'].includes(item.section))},
+        {key:'reports',title:isAr?'التحليل والتقارير':'Insights & Reports',
+         description:isAr?'متابعة الأداء والقراءة وإعداد التقارير':'Performance, reading, and reports',
+         icon:'chart',items:overviewShortcuts.filter(item=>
+          ['reports','analytics','reading'].includes(item.section))},
+        {key:'people',title:isAr?'حسابات المستخدمين':'User Accounts',
+         description:isAr?'الوصول إلى بيانات الطلاب والمعلمين':'Student and teacher administration',
+         icon:'users',items:overviewShortcuts.filter(item=>
+          item.section==='management'&&['students','teachers'].includes(item.tab||''))}
     ];
 
     return (
-        <div dir={dir} className="efips-admin min-h-[100dvh] bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans p-3 sm:p-5 lg:p-6 pb-24 transition-colors duration-300 relative isolate">
+        <div dir={dir} lang={isAr?'ar':'en-US'} className="efips-admin min-h-[100dvh] bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans p-3 sm:p-5 lg:p-6 pb-24 transition-colors duration-300 relative isolate">
             <style>{`@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
                 .efips-admin,.efips-admin * {font-family:'Cairo',sans-serif!important}
+                .efips-admin[lang="en-US"],.efips-admin[lang="en-US"] * {font-family:Inter,'Segoe UI',system-ui,sans-serif!important}
+                .efips-admin .efips-admin-sidebar {scrollbar-width:thin;scrollbar-color:rgba(13,148,136,.3) transparent}
+                .efips-admin .efips-admin-priority {transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease}
+                .efips-admin .efips-admin-priority:hover {transform:translateY(-2px);box-shadow:0 16px 32px -26px rgba(13,104,93,.5)}
+                .efips-admin .efips-admin-shortcut-compact {min-height:105px}
+                .efips-admin .efips-admin-tab {transition:background-color .18s ease,transform .18s ease}
+                .efips-admin .efips-admin-tab:hover {transform:translateY(-1px)}
+                .efips-admin .efips-admin-jump:focus-visible,.efips-admin .efips-admin-priority:focus-visible {outline:2px solid #0d9488;outline-offset:3px}
+                .efips-admin .efips-admin-section-header {box-shadow:0 9px 25px -25px rgba(15,118,110,.45)}
                 .efips-admin {scroll-behavior:smooth}
                 .efips-admin .efips-panel {animation:efips-panel-enter .65s ease-out both;transition:box-shadow .3s ease,border-color .3s ease}
                 .efips-admin .efips-panel:hover {border-color:rgba(16,185,129,.30)}
@@ -751,7 +822,7 @@ const AdminDashboard: React.FC = () => {
                 .efips-admin a,.efips-admin button {touch-action:manipulation}
                 .efips-admin .efips-admin-chart-card {animation:efips-chart-enter .5s cubic-bezier(.2,.7,.2,1) both}
                 .efips-admin .efips-admin-shortcut {transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease,background-color .2s ease}
-                .efips-admin .efips-admin-shortcut:hover {transform:translateY(-3px);box-shadow:0 14px 26px -23px rgba(5,116,101,.7)}
+                .efips-admin .efips-admin-shortcut:hover {transform:translateY(-2px);box-shadow:0 14px 26px -23px rgba(5,116,101,.7)}
                 .efips-admin .efips-admin-sidebar button {transition:background-color .18s ease,color .18s ease,border-color .18s ease}
                 .efips-admin .efips-admin-sidebar button:focus-visible,.efips-admin .efips-admin-shortcut:focus-visible {outline:2px solid #0d9488;outline-offset:3px}
                 .efips-admin .efips-admin-section-details[open]>summary .efips-admin-caret {transform:rotate(180deg)}
@@ -759,7 +830,7 @@ const AdminDashboard: React.FC = () => {
 
                 @keyframes efips-panel-enter {from {opacity:0;transform:translateY(13px)}to {opacity:1;transform:translateY(0)}}
                 @keyframes efips-column-rise {from {transform:scaleY(.15)}to {transform:scaleY(1)}}
-                @media (prefers-reduced-motion:reduce) {.efips-admin .efips-panel,.efips-admin .efips-column,.efips-admin .efips-admin-chart-card {animation:none!important}.efips-admin * {scroll-behavior:auto!important}}
+                @media (prefers-reduced-motion:reduce) {.efips-admin .efips-panel,.efips-admin .efips-column,.efips-admin .efips-admin-chart-card {animation:none!important}.efips-admin .efips-admin-priority,.efips-admin .efips-admin-shortcut,.efips-admin .efips-admin-tab {transform:none!important;transition:none!important}.efips-admin * {scroll-behavior:auto!important}}
             `}</style>
             <header className="efips-panel relative isolate mx-auto mb-4 flex max-w-[1600px] flex-col gap-4 overflow-hidden rounded-[1.65rem] border border-emerald-900/20 bg-gradient-to-l from-[#064d48] via-[#086860] to-[#0f726f] p-4 text-white shadow-[0_16px_35px_-30px_rgba(4,73,65,.8)] sm:p-5 lg:flex-row lg:items-center lg:justify-between">
                 <svg viewBox="0 0 320 130" preserveAspectRatio="xMidYMid slice" className="pointer-events-none absolute inset-y-0 end-0 h-full w-[300px] opacity-[.075]" aria-hidden="true">
@@ -768,7 +839,7 @@ const AdminDashboard: React.FC = () => {
                     <circle cx="260" cy="107" r="40" fill="none" stroke="white" strokeWidth="10"/>
                 </svg>
                 <div className="relative flex min-w-0 items-center gap-3">
-                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/10 shadow-inner"><OutlineIcon name="grid" className="h-6 w-6 text-white"/></span>
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/10 shadow-inner"><OutlineIcon name="library" className="h-6 w-6 text-white"/></span>
                     <div className="min-w-0">
                         <div className="text-[10px] font-bold tracking-wider text-emerald-100/80">EFIPS LIBRARY · ADMIN</div>
                         <h1 className="mt-0.5 text-xl font-black leading-tight sm:text-2xl">{t('title')}</h1>
@@ -778,31 +849,72 @@ const AdminDashboard: React.FC = () => {
                 <div className="relative flex w-full flex-wrap items-center gap-2 lg:w-auto lg:justify-end">
                     <button type="button" onClick={() => void fetchRealDashboardData()} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"><OutlineIcon name="refresh" className="h-4 w-4"/>{isAr ? 'تحديث' : 'Refresh'}</button>
                     <button type="button" onClick={handlePrintDashboardReport} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-white px-3 py-2 text-xs font-black text-emerald-900 transition-colors hover:bg-emerald-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"><OutlineIcon name="printer" className="h-4 w-4"/>{t('printPdfBtn')}</button>
-                    <button type="button" onClick={toggleTheme} aria-label={theme === 'light' ? 'Dark mode' : 'Light mode'} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-3 py-2 text-xs font-bold text-white hover:bg-white/20"><OutlineIcon name={theme === 'light' ? 'moon' : 'sun'} className="h-4 w-4"/><span>{theme === 'light' ? 'Dark' : 'Light'}</span></button>
+                    <button type="button" onClick={toggleTheme} aria-label={isAr ? (theme==='light'?'تفعيل الوضع الداكن':'تفعيل الوضع الفاتح') : (theme==='light'?'Switch to dark mode':'Switch to light mode')} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-3 py-2 text-xs font-bold text-white hover:bg-white/20"><OutlineIcon name={theme === 'light' ? 'moon' : 'sun'} className="h-4 w-4"/><span>{isAr?(theme==='light'?'داكن':'فاتح'):(theme==='light'?'Dark':'Light')}</span></button>
                     <Link to="/home" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-xs font-bold text-white hover:bg-white/20"><OutlineIcon name="return" className="h-4 w-4"/>{t('backToHome')}</Link>
                 </div>
             </header>
 
-             <nav aria-label={isAr ? 'أقسام لوحة الإدارة' : 'Dashboard sections'} className="sticky top-2 z-40 mx-auto mb-4 max-w-[1600px] rounded-2xl border border-slate-200 bg-white/95 px-3 py-2 shadow-sm backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/95 xl:hidden">
-                 <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                     <label htmlFor="efips-admin-mobile-search" className="text-xs font-black text-slate-700 dark:text-slate-200">{isAr ? 'الانتقال السريع' : 'Quick navigation'}</label>
-                     <input id="efips-admin-mobile-search" type="search" value={sectionSearch} onChange={event=>setSectionSearch(event.target.value)}
-                         placeholder={isAr ? 'ابحث عن قسم...' : 'Find a section...'} className="min-h-9 w-40 flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 text-xs text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white sm:max-w-64"/>
+             <nav aria-label={isAr ? 'التنقل في لوحة الإدارة' : 'Dashboard navigation'} className="sticky top-2 z-40 mx-auto mb-4 max-w-[1600px] rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-sm backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/95 xl:hidden">
+                 <div className="flex flex-wrap items-end justify-between gap-2.5">
+                     <label className="min-w-[165px] flex-1 space-y-1">
+                         <span className="block text-[11px] font-bold text-slate-500 dark:text-slate-400">{isAr?'الانتقال إلى أحد الأقسام':'Go to a section'}</span>
+                         <select value={activeSection} onChange={event=>switchAdminSection(event.target.value as AdminSection)}
+                             aria-label={isAr?'اختر قسم الإدارة':'Choose a dashboard section'}
+                             className="min-h-11 w-full rounded-xl border border-emerald-200 bg-emerald-50 px-3 text-sm font-bold text-emerald-900 outline-none focus:ring-2 focus:ring-emerald-500 dark:border-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-100">
+                             {navigationGroups.map(group=><optgroup key={group.key} label={group.label}>
+                                 {dashboardSections.filter(item=>group.sections.includes(item.id)).map(item=>
+                                     <option key={item.id} value={item.id}>{item.label}</option>)}
+                             </optgroup>)}
+                         </select>
+                     </label>
+                     <div className="flex items-center gap-1.5 pb-0.5">
+                         {([
+                             {section:'management' as AdminSection,tab:'pending' as const,icon:'clock' as IconName,label:isAr?'الطلبات':'Requests',count:pendingRequestsList.length},
+                             {section:'reports' as AdminSection,icon:'printer' as IconName,label:isAr?'التقارير':'Reports'},
+                             {section:'add-books' as AdminSection,icon:'book-open' as IconName,label:isAr?'الكتب':'Books'}
+                         ]).map(item=><button key={item.label} type="button"
+                             onClick={()=>switchAdminSection(item.section,'tab' in item ? item.tab : undefined)}
+                             className="efips-admin-jump relative flex min-h-11 items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-2.5 text-xs font-bold text-slate-700 hover:border-emerald-300 hover:text-emerald-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:text-emerald-200">
+                             <OutlineIcon name={item.icon} className="h-4 w-4"/><span className="hidden sm:inline">{item.label}</span>
+                             {'count' in item&&item.count>0&&<span className="rounded-md bg-amber-100 px-1.5 text-[10px] text-amber-800 dark:bg-amber-900/50 dark:text-amber-200">{item.count}</span>}
+                         </button>)}
+                     </div>
                  </div>
-                 <div className="flex gap-1.5 overflow-x-auto overscroll-x-contain pb-1 scrollbar-thin">
-                     {dashboardSections.filter(matchingSection).map(item=><button type="button" key={item.id} aria-pressed={activeSection===item.id}
-                         onClick={()=>switchAdminSection(item.id)}
-                         className={`shrink-0 rounded-xl border px-3 py-2.5 flex items-center justify-center gap-1.5 text-center transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-500 ${activeSection===item.id ? 'bg-emerald-700 text-white border-emerald-700 shadow-md shadow-emerald-700/15' : 'bg-slate-50 dark:bg-slate-800/70 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:border-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30'}`}>
-                         <OutlineIcon name={item.icon} className="h-4 w-4 shrink-0"/><span className="text-xs font-bold whitespace-nowrap">{item.label}</span>
-                     </button>)}
-                     {!dashboardSections.some(matchingSection) && <span className="px-3 py-2 text-xs text-slate-500">{isAr?'لا توجد أقسام مطابقة':'No matching sections'}</span>}
-                 </div>
+                 <details className="mt-2.5 rounded-xl border border-slate-100 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-800/30">
+                     <summary className="flex min-h-9 cursor-pointer items-center gap-2 px-3 text-[11px] font-bold text-slate-600 dark:text-slate-300">
+                         <OutlineIcon name="search" className="h-3.5 w-3.5"/>{isAr?'البحث عن قسم أو مهمة':'Search sections and tasks'}
+                     </summary>
+                     <div className="border-t border-slate-200 p-2 dark:border-slate-700">
+                         <label htmlFor="efips-admin-mobile-search" className="sr-only">{isAr?'ابحث عن القسم':'Find a section'}</label>
+                         <input id="efips-admin-mobile-search" type="search" value={sectionSearch} onChange={event=>setSectionSearch(event.target.value)}
+                             placeholder={isAr?'ابحث بالاسم أو الوظيفة...':'Search by name or function...'}
+                             className="min-h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white"/>
+                         <div className="mt-2 grid max-h-40 grid-cols-2 gap-1.5 overflow-auto">
+                             {dashboardSections.filter(matchingSection).map(item=><button type="button" key={item.id}
+                                 onClick={()=>switchAdminSection(item.id)}
+                                 className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white p-2 text-start text-[11px] font-bold text-slate-700 hover:border-emerald-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                                 <OutlineIcon name={item.icon} className="h-3.5 w-3.5 shrink-0"/>{item.label}
+                             </button>)}
+                             {!dashboardSections.some(matchingSection)&&<span className="col-span-2 p-3 text-center text-xs text-slate-500">{isAr?'لا توجد نتائج مطابقة.':'No matching sections.'}</span>}
+                         </div>
+                     </div>
+                 </details>
              </nav>
-            <div className="mx-auto max-w-[1600px] xl:grid xl:grid-cols-[248px_minmax(0,1fr)] xl:items-start xl:gap-5">
+            <div className="mx-auto max-w-[1600px] xl:grid xl:grid-cols-[272px_minmax(0,1fr)] xl:items-start xl:gap-5">
                 <aside className="efips-admin-sidebar sticky top-5 hidden min-w-0 max-h-[calc(100dvh-2.5rem)] overflow-y-auto rounded-[1.5rem] border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-900 xl:block" aria-label={isAr?'قائمة إدارة المكتبة':'Library administration navigation'}>
-                    <div className="rounded-xl bg-emerald-50 p-3 dark:bg-emerald-950/40">
-                        <div className="flex items-center gap-2 text-sm font-black text-emerald-900 dark:text-emerald-200"><OutlineIcon name="grid" className="h-4 w-4"/>{isAr?'مركز التحكم':'Command center'}</div>
-                        <p className="mt-1 text-[11px] leading-5 text-emerald-800/75 dark:text-emerald-200/75">{isAr?'كل أقسام الإدارة بدون ازدحام':'Every admin tool, neatly grouped'}</p>
+                    <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-3 dark:border-emerald-900/70 dark:bg-emerald-950/40">
+                        <div className="flex items-center gap-2 text-sm font-bold text-emerald-900 dark:text-emerald-200"><OutlineIcon name="library" className="h-4 w-4"/>{isAr?'فهرس أدوات الإدارة':'Administration Directory'}</div>
+                        <p className="mt-1 text-[11px] leading-5 text-emerald-800/75 dark:text-emerald-200/75">{isAr?'الأقسام مصنفة بحسب طبيعة العمل':'Tools grouped by task and function'}</p>
+                        <div className="mt-3 grid grid-cols-2 gap-2">
+                            <button type="button" onClick={()=>switchAdminSection('management','pending')} className="efips-admin-jump rounded-lg border border-amber-200 bg-white/85 p-2 text-start dark:border-amber-900/40 dark:bg-slate-900/75">
+                                <span className="block text-lg font-bold tabular-nums text-amber-800 dark:text-amber-300">{formatCatalogCount(libraryImpact.pending)}</span>
+                                <span className="block text-[10px] text-slate-600 dark:text-slate-400">{isAr?'طلبات معلقة':'Pending Requests'}</span>
+                            </button>
+                            <button type="button" onClick={()=>switchAdminSection('management','borrowings')} className="efips-admin-jump rounded-lg border border-rose-200 bg-white/85 p-2 text-start dark:border-rose-900/40 dark:bg-slate-900/75">
+                                <span className="block text-lg font-bold tabular-nums text-rose-800 dark:text-rose-300">{formatCatalogCount(libraryImpact.overdue)}</span>
+                                <span className="block text-[10px] text-slate-600 dark:text-slate-400">{isAr?'إعارات متأخرة':'Overdue Loans'}</span>
+                            </button>
+                        </div>
                     </div>
                     <label htmlFor="efips-admin-sidebar-search" className="mt-4 block text-[11px] font-bold text-slate-500 dark:text-slate-400">{isAr?'ابحث عن مهمة':'Find a task'}</label>
                     <div className="relative mt-1.5">
@@ -815,11 +927,14 @@ const AdminDashboard: React.FC = () => {
                         {navigationGroups.map(group=>{
                             const matches=dashboardSections.filter(item=>group.sections.includes(item.id)&&matchingSection(item));
                             return matches.length?<div key={group.key}>
-                                <p className="mb-1.5 px-2 text-[10px] font-black tracking-wide text-slate-400 dark:text-slate-500">{group.label}</p>
+                                <div className="mb-1.5 flex items-baseline justify-between gap-2 px-2">
+                                    <p className={'text-[11px] font-bold '+(group.sections.includes(activeSection)?'text-emerald-800 dark:text-emerald-300':'text-slate-500 dark:text-slate-400')}>{group.label}</p>
+                                    <span className="text-[10px] text-slate-400 dark:text-slate-500">{group.description}</span>
+                                </div>
                                 <div className="space-y-1">{matches.map(item=><button type="button" key={item.id}
                                     aria-current={activeSection===item.id?'page':undefined}
                                     onClick={()=>switchAdminSection(item.id)}
-                                    className={`group flex w-full items-center gap-2.5 rounded-xl border px-2.5 py-2.5 text-start ${activeSection===item.id?'border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/55 dark:text-emerald-200':'border-transparent text-slate-600 hover:border-slate-200 hover:bg-slate-50 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:bg-slate-800'}`}>
+                                    className={`group efips-admin-jump flex w-full items-center gap-2.5 rounded-xl border px-2.5 py-2.5 text-start ${activeSection===item.id?'border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/55 dark:text-emerald-200':'border-transparent text-slate-600 hover:border-slate-200 hover:bg-slate-50 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:bg-slate-800'}`}>
                                     <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg ${activeSection===item.id?'bg-emerald-600 text-white':'bg-slate-100 text-emerald-700 dark:bg-slate-800 dark:text-emerald-300'}`}><OutlineIcon name={item.icon} className="h-4 w-4"/></span>
                                     <span className="min-w-0 flex-1"><span className="block truncate text-xs font-bold">{item.label}</span><span className="mt-0.5 block truncate text-[10px] opacity-65">{item.description}</span></span>
                                     {item.id==='management'&&pendingRequestsList.length>0&&<span className="rounded-md bg-amber-100 px-1.5 py-0.5 text-[10px] font-black text-amber-800 dark:bg-amber-900/50 dark:text-amber-200">{pendingRequestsList.length}</span>}
@@ -828,15 +943,64 @@ const AdminDashboard: React.FC = () => {
                         })}
                         {!dashboardSections.some(matchingSection)&&<p className="px-2 py-4 text-center text-xs text-slate-500">{isAr?'لا توجد أقسام مطابقة':'No matching sections'}</p>}
                     </div>
-                    <button type="button" onClick={()=>switchAdminSection('add-books')} className="mt-5 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 px-3 py-2.5 text-xs font-black text-white hover:bg-emerald-800"><OutlineIcon name="book-open" className="h-4 w-4"/>{isAr?'إضافة كتاب جديد':'Add a book'}</button>
+                    <button type="button" onClick={()=>switchAdminSection('add-books')} className="mt-5 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 px-3 py-2.5 text-xs font-black text-white hover:bg-emerald-800"><OutlineIcon name="book-open" className="h-4 w-4"/>{isAr?'إدارة بيانات الكتب':'Manage Books'}</button>
                 </aside>
                 <main className="relative min-w-0 grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-5">
-                 <div className="lg:col-span-4 flex flex-wrap items-start justify-between gap-3 px-1" aria-live="polite">
-                     <div><h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">{currentSection.label}</h2>
-                         <p className="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 mt-1">{currentSection.description}</p></div>
-                     {activeSection!=='overview' && <button type="button" onClick={()=>switchAdminSection('overview')} className="rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2.5 bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-300 text-xs font-black hover:border-emerald-400 transition-colors">{isAr?'العودة للرئيسية':'Back to overview'}</button>}
-                 </div>
+                 <section className="efips-admin-section-header lg:col-span-4 min-w-0 rounded-2xl border border-slate-200/90 bg-white/95 px-4 py-4 dark:border-slate-700 dark:bg-slate-900/90 sm:px-5" aria-label={isAr?'القسم الحالي':'Current section'}>
+                     <div className="flex flex-wrap items-center justify-between gap-3">
+                         <div className="flex min-w-0 items-start gap-3">
+                             <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-emerald-50 text-emerald-800 dark:bg-emerald-950/55 dark:text-emerald-200">
+                                 <OutlineIcon name={currentSection.icon} className="h-5 w-5"/>
+                             </span>
+                             <div className="min-w-0">
+                                 <p className="text-[10px] font-bold tracking-wide text-emerald-800 dark:text-emerald-300">
+                                     {isAr?'لوحة الإدارة':'Administration'} <span className="mx-1 text-slate-300 dark:text-slate-600">/</span>{sectionGroup?.label}
+                                 </p>
+                                 <h2 className="mt-0.5 text-lg font-bold leading-tight text-slate-900 dark:text-white sm:text-xl" aria-live="polite">{currentSection.label}</h2>
+                                 <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">{currentSection.description}</p>
+                             </div>
+                         </div>
+                         {activeSection!=='overview' && <button type="button" onClick={()=>switchAdminSection('overview')}
+                             className="efips-admin-jump inline-flex min-h-10 items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-[11px] font-bold text-emerald-800 transition-colors hover:border-emerald-300 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-800 dark:text-emerald-200">
+                             <OutlineIcon name="grid" className="h-4 w-4"/>{isAr?'نظرة عامة':'Overview'}
+                         </button>}
+                     </div>
+                     {relatedSections.length>0 && <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-slate-100 pt-3 dark:border-slate-800">
+                         <span className="me-1 text-[11px] font-bold text-slate-500 dark:text-slate-400">{isAr?'أقسام ذات صلة:':'Related sections:'}</span>
+                         {relatedSections.map(item=><button key={item.id} type="button" onClick={()=>switchAdminSection(item.id)}
+                             className="efips-admin-jump inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 transition-colors hover:border-emerald-300 hover:text-emerald-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:text-emerald-200">
+                             <OutlineIcon name={item.icon} className="h-3.5 w-3.5"/>{item.label}
+                         </button>)}
+                     </div>}
+                 </section>
                 {activeSection === 'overview' && <>
+                <section className="lg:col-span-4 rounded-[1.5rem] border border-slate-200/90 bg-white px-4 py-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:px-5 sm:py-5" aria-labelledby="efips-admin-priority-title">
+                    <div className="mb-3 flex flex-wrap items-center justify-between gap-2.5">
+                        <div className="flex items-center gap-2.5">
+                            <span className="grid h-9 w-9 place-items-center rounded-xl bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"><OutlineIcon name="activity" className="h-5 w-5"/></span>
+                            <div><h3 id="efips-admin-priority-title" className="text-sm font-bold text-slate-900 dark:text-white sm:text-base">{isAr?'متابعة العمليات ذات الأولوية':'Priority Operations'}</h3>
+                                <p className="text-[11px] text-slate-500 dark:text-slate-400">{isAr?'قيم فعلية من سجلات الإعارة الحالية':'Current figures from actual borrowing records'}</p></div>
+                        </div>
+                        <button type="button" onClick={()=>switchAdminSection('management','pending')} className="efips-admin-jump inline-flex min-h-9 items-center gap-1 rounded-lg px-2 text-xs font-bold text-emerald-700 hover:bg-emerald-50 dark:text-emerald-300 dark:hover:bg-emerald-950/30">
+                            {isAr?'فتح إدارة الإعارات':'Open Loan Management'}<OutlineIcon name="chevron-right" className={'h-3.5 w-3.5 '+(isAr?'rotate-180':'')}/>
+                        </button>
+                    </div>
+                    <div className="grid gap-2.5 sm:grid-cols-3">
+                        {priorityActions.map(item=><button key={item.key} type="button" onClick={()=>switchAdminSection(item.section,item.tab)}
+                            className={['efips-admin-priority','flex min-w-0 flex-col rounded-2xl border p-3.5 text-start sm:p-4',item.surface].join(' ')}
+                            aria-label={item.title+': '+formatCatalogCount(item.value)+'. '+item.description}>
+                            <div className="flex w-full items-start justify-between gap-2">
+                                <span className={['grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white/80 shadow-sm dark:bg-slate-900',item.accent].join(' ')}><OutlineIcon name={item.icon} className="h-4 w-4"/></span>
+                                <strong className={['text-2xl font-bold tabular-nums',item.accent].join(' ')}>{formatCatalogCount(item.value)}</strong>
+                            </div>
+                            <span className="mt-2 text-xs font-bold leading-5 text-slate-800 dark:text-slate-100">{item.title}</span>
+                            <span className="mt-0.5 text-[11px] leading-5 text-slate-500 dark:text-slate-400">{item.description}</span>
+                            <span className={['mt-3 block h-1.5 w-full overflow-hidden rounded-full',item.track].join(' ')}>
+                                <span className={['block h-full rounded-full',item.bar].join(' ')} style={{width:item.value>0?Math.max(4,item.value/highestPriority*100)+'%':'0%'}}/>
+                            </span>
+                        </button>)}
+                    </div>
+                </section>
                 <AdminExecutiveCharts
                     isAr={isAr}
                     physical={physicalCatalogCount}
@@ -866,18 +1030,38 @@ const AdminDashboard: React.FC = () => {
                     </div>
                 </details>
 
-                <section className="lg:col-span-4 rounded-[1.75rem] border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-900 p-4 sm:p-6 shadow-sm" aria-labelledby="admin-shortcuts-title">
-                    <div className="flex items-center justify-between gap-3 mb-4">
-                        <div><h3 id="admin-shortcuts-title" className="text-base sm:text-lg font-black text-slate-900 dark:text-white">{isAr?'اختصارات المهام اليومية':'Daily shortcuts'}</h3>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{isAr?'ادخل مباشرة للقسم المطلوب بدل تصفح كل التقارير':'Jump straight to the task you need'}</p></div>
+                <section className="lg:col-span-4 rounded-[1.75rem] border border-slate-200/90 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-5" aria-labelledby="admin-shortcuts-title">
+                    <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex items-center gap-2.5">
+                            <span className="grid h-10 w-10 place-items-center rounded-xl bg-emerald-50 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300"><OutlineIcon name="grid" className="h-5 w-5"/></span>
+                            <div>
+                                <h3 id="admin-shortcuts-title" className="text-base font-bold text-slate-900 dark:text-white">{isAr?'اختصارات منظمة حسب المهمة':'Task-Based Shortcuts'}</h3>
+                                <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">{isAr?'اختر نوع المهمة للوصول مباشرة إلى أداتها':'Choose a task to open its administration tool'}</p>
+                            </div>
+                        </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-                        {overviewShortcuts.map((item)=><button key={item.label} type="button" onClick={()=>switchAdminSection(item.section,item.tab)}
-                            className="efips-admin-shortcut group min-w-0 text-start rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/50 px-3 py-3.5 sm:p-4 hover:border-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-500">
-                            <div className="flex items-center justify-between mb-3"><span className="w-9 h-9 inline-flex items-center justify-center rounded-xl bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-300"><OutlineIcon name={item.icon} className="h-5 w-5"/></span>{item.count!==undefined&&<span className="text-xl font-black text-slate-900 dark:text-white tabular-nums">{formatCatalogCount(item.count)}</span>}</div>
-                            <div className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-100">{item.label}</div>
-                            <div className="text-[11px] mt-1 text-slate-500 dark:text-slate-400">{item.caption}</div>
-                        </button>)}
+                    <div className="space-y-4">
+                        {shortcutGroups.map(group=><div key={group.key} className="rounded-2xl border border-slate-200/90 bg-slate-50/50 p-3.5 dark:border-slate-800 dark:bg-slate-950/25 sm:p-4">
+                            <div className="mb-3 flex items-center gap-2.5">
+                                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white text-emerald-700 shadow-sm dark:bg-slate-800 dark:text-emerald-300"><OutlineIcon name={group.icon} className="h-4 w-4"/></span>
+                                <div className="min-w-0">
+                                    <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">{group.title}</h4>
+                                    <p className="text-[11px] leading-5 text-slate-500 dark:text-slate-400">{group.description}</p>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 2xl:grid-cols-4">
+                                {group.items.map(item=><button type="button" key={item.label} onClick={()=>switchAdminSection(item.section,item.tab)}
+                                    className="efips-admin-shortcut efips-admin-shortcut-compact group flex min-w-0 flex-col rounded-xl border border-slate-200 bg-white p-3 text-start hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-emerald-950/30">
+                                    <div className="flex w-full items-center justify-between gap-2">
+                                        <span className="grid h-8 w-8 place-items-center rounded-lg bg-emerald-50 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300"><OutlineIcon name={item.icon} className="h-4 w-4"/></span>
+                                        {item.count!==undefined?<span className="text-base font-bold tabular-nums text-slate-900 dark:text-slate-100">{formatCatalogCount(item.count)}</span>:
+                                         <OutlineIcon name="chevron-right" className={'h-4 w-4 text-slate-400 '+(isAr?'rotate-180':'')}/>}
+                                    </div>
+                                    <span className="mt-2 text-xs font-bold text-slate-800 dark:text-slate-100">{item.label}</span>
+                                    <span className="mt-0.5 text-[11px] leading-5 text-slate-500 dark:text-slate-400">{item.caption}</span>
+                                </button>)}
+                            </div>
+                        </div>)}
                     </div>
                 </section>
                 </>}
@@ -1052,7 +1236,7 @@ const AdminDashboard: React.FC = () => {
                 {activeSection === 'reports' && <>
                   <AdminPeriodReports isAr={isAr} students={studentsList} teachers={teachersList} logs={loginActivity} loans={allBorrowingRecords} lessons={lessonReportsList} />
                   <section className="lg:col-span-4 grid grid-cols-1 gap-3">
-                    <h3 className="text-base font-black text-slate-800 dark:text-slate-100">{isAr?'باقي التقارير في مكان واحد':'All other reports in one place'}</h3>
+                    <h3 className="text-base font-black text-slate-800 dark:text-slate-100">{isAr?'التقارير الإضافية':'All other reports in one place'}</h3>
                     <details id="admin-unified-reading" onToggle={e=>{const open=e.currentTarget.open;setExpandedReports(old=>({...old,reading:open}));}} className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
                       <summary className="cursor-pointer px-4 py-4 font-bold text-sm text-emerald-700 dark:text-emerald-300">{isAr?'إنجاز الكتب وتحدي القراءة — طلاب ومعلمون':'Completed books & reading challenge — students and teachers'}</summary>
                       <div className="p-3 pt-0"><p className="text-xs text-slate-500 mb-3">{isAr?'التقرير الموثق مستقل عن مرات فتح الكتاب، وله اختيار شهره الخاص.':'Verified completions are separate from book opens and have their own month selector.'}</p>{expandedReports.reading && <AdminReadingChallenge isAr={isAr}/>}</div>
@@ -1136,7 +1320,7 @@ const AdminDashboard: React.FC = () => {
                         <button type="button" onClick={() => { setActiveTab('reports'); setSearchQuery(''); }} className={`px-5 py-3 rounded-2xl font-black text-xs md:text-sm transition-all flex items-center gap-2 ${activeTab === 'reports' ? 'bg-emerald-500 text-white shadow-md' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}><OutlineIcon name="clipboard-list" />{t('aiReports')} ({lessonReportsList.length})</button>
                     </div>
                     <div className="w-full xl:w-auto flex flex-wrap items-center gap-2 justify-end xl:shrink-0">
-                        {(activeTab === 'pending' || activeTab === 'borrowings') && <button type="button" disabled={isRefreshingBorrowings} onClick={() => void refreshBorrowingsOnly(undefined, undefined, false, true)} className="px-5 py-3 bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all flex items-center gap-2"><OutlineIcon name="refresh" className="h-4 w-4" />{isRefreshingBorrowings ? (isAr ? 'جاري التحديث...' : 'Refreshing...') : (isAr ? 'تحديث الطلبات' : 'Refresh Requests')}</button>}
+                        {(activeTab === 'pending' || activeTab === 'borrowings') && <button type="button" disabled={isRefreshingBorrowings} onClick={() => void refreshBorrowingsOnly(undefined, undefined, false, true)} className="px-5 py-3 bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all flex items-center gap-2"><OutlineIcon name="refresh" className="h-4 w-4" />{isRefreshingBorrowings ? (isAr ? 'جارٍ التحديث...' : 'Refreshing...') : (isAr ? 'تحديث الطلبات' : 'Refresh Requests')}</button>}
                         {activeTab === 'students' && <button type="button" onClick={() => { setNewUserEmail(''); setFormData(emptyForm()); setModalMode('addStudent'); }} className="w-full md:w-auto px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all text-center">{t('addStudentBtn')}</button>}
                         {activeTab === 'teachers' && <button type="button" onClick={() => { setNewUserEmail(''); setFormData({ ...emptyForm(), grade: '' }); setModalMode('addTeacher'); }} className="w-full md:w-auto px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all text-center">{t('addTeacherBtn')}</button>}
                         {activeTab === 'borrowings' && <button type="button" onClick={() => { setFormData({ ...emptyForm(), grade: '' }); setModalMode('addBorrow'); }} className="w-full md:w-auto px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl font-black text-xs md:text-sm shadow-md transition-all text-center">{t('addBorrowBtn')}</button>}
@@ -1157,7 +1341,7 @@ const AdminDashboard: React.FC = () => {
                         {activeTab === 'borrowings' && <td className="p-3.5 text-xs md:text-sm font-bold text-amber-600 dark:text-amber-400">{item.return_date || '-'}</td>}
                         {activeTab === 'pending' && <td className="p-3.5 text-xs md:text-sm text-slate-500">{item.borrow_date ? String(item.borrow_date).slice(0, 10) : (item.created_at ? new Date(item.created_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US') : '-')}</td>}
                         {activeTab === 'reports' && <td className="p-3.5 font-bold text-xs md:text-sm text-slate-800 dark:text-slate-100">{item.lesson_topic}</td>}{activeTab === 'reports' && <td className="p-3.5 text-center font-black text-xs md:text-sm text-indigo-600 dark:text-indigo-400">{item.plan_type}</td>}{activeTab === 'reports' && <td className="p-3.5 text-xs md:text-sm text-slate-500">{item.created_at ? new Date(item.created_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US') : '-'}</td>}
-                        {activeTab !== 'reports' && <td className="p-3.5"><div className="flex flex-wrap items-center justify-center gap-2">{activeTab === 'borrowings' ? <button type="button" disabled={processingRowId === item.id} onClick={() => void handleReturnBook(item.id)} className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white rounded-xl font-bold text-xs shadow-sm transition-all flex items-center gap-1"><OutlineIcon name="return" className="h-3.5 w-3.5" />{isAr ? 'إرجاع الكتاب' : 'Return Book'}</button> : activeTab === 'pending' ? <><button type="button" disabled={processingRowId === item.id} onClick={() => void handleInstantApprove(item)} className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white rounded-xl font-bold text-xs shadow-sm transition-all flex items-center gap-1"><OutlineIcon name="check" className="h-3.5 w-3.5" />{processingRowId === item.id ? (isAr ? 'جاري التأكيد...' : 'Approving...') : t('approveBtn')}</button><button type="button" disabled={processingRowId === item.id} onClick={() => void handleRejectRequest(item.id)} className="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 disabled:opacity-50 text-white rounded-xl font-bold text-xs shadow-sm transition-all flex items-center gap-1"><OutlineIcon name="x" className="h-3.5 w-3.5" />{t('rejectBtn')}</button></> : <>
+                        {activeTab !== 'reports' && <td className="p-3.5"><div className="flex flex-wrap items-center justify-center gap-2">{activeTab === 'borrowings' ? <button type="button" disabled={processingRowId === item.id} onClick={() => void handleReturnBook(item.id)} className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white rounded-xl font-bold text-xs shadow-sm transition-all flex items-center gap-1"><OutlineIcon name="return" className="h-3.5 w-3.5" />{isAr ? 'إرجاع الكتاب' : 'Return Book'}</button> : activeTab === 'pending' ? <><button type="button" disabled={processingRowId === item.id} onClick={() => void handleInstantApprove(item)} className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white rounded-xl font-bold text-xs shadow-sm transition-all flex items-center gap-1"><OutlineIcon name="check" className="h-3.5 w-3.5" />{processingRowId === item.id ? (isAr ? 'جارٍ التأكيد...' : 'Approving...') : t('approveBtn')}</button><button type="button" disabled={processingRowId === item.id} onClick={() => void handleRejectRequest(item.id)} className="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 disabled:opacity-50 text-white rounded-xl font-bold text-xs shadow-sm transition-all flex items-center gap-1"><OutlineIcon name="x" className="h-3.5 w-3.5" />{t('rejectBtn')}</button></> : <>
                           <button type="button" onClick={() => { setSelectedItem(item); setFormData({ ...emptyForm(), student_id: item.student_id || '', teacher_id: item.teacher_id || '', name_ar: item.name_ar || '', name_en: item.name_en || '', grade: item.grade || '', points: item.points || 0 }); setModalMode(activeTab === 'students' ? 'editStudent' : 'editTeacher'); }} className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs shadow-sm transition-all">{t('editIdBtn')}</button>
                           {(() => {
                               const email = activeTab === 'students'
@@ -1190,16 +1374,16 @@ const AdminDashboard: React.FC = () => {
             {modalMode && <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in"><div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-8 rounded-[2.5rem] shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto scrollbar-thin">
                 <h3 className="text-lg md:text-xl font-black mb-6 text-slate-900 dark:text-white">{modalMode === 'addStudent' ? t('modalAddStudent') : modalMode === 'addTeacher' ? t('modalAddTeacher') : modalMode === 'editStudent' ? t('modalEditStudent') : modalMode === 'editTeacher' ? t('modalEditTeacher') : t('modalAddBorrow')}</h3>
                 <form onSubmit={handleSubmitForm} className="space-y-4">
-                    {(modalMode === 'addStudent' || modalMode === 'editStudent') && <><div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">{t('colId')}</label><input type="text" value={formData.student_id} onChange={e => setFormData({ ...formData, student_id: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-mono" required /></div><div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">الاسم بالعربي</label><input type="text" value={formData.name_ar} onChange={e => setFormData({ ...formData, name_ar: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm" required /></div><div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">الاسم بالإنجليزية</label><input type="text" value={formData.name_en} onChange={e => setFormData({ ...formData, name_en: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm" /></div><div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">{t('colGrade')}</label><input type="text" value={formData.grade} onChange={e => setFormData({ ...formData, grade: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm" /></div></>}
+                    {(modalMode === 'addStudent' || modalMode === 'editStudent') && <><div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">{t('colId')}</label><input type="text" value={formData.student_id} onChange={e => setFormData({ ...formData, student_id: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-mono" required /></div><div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">{isAr?'الاسم باللغة العربية':'Arabic Name'}</label><input type="text" value={formData.name_ar} onChange={e => setFormData({ ...formData, name_ar: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm" required /></div><div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">{isAr?'الاسم باللغة الإنجليزية':'English Name'}</label><input type="text" value={formData.name_en} onChange={e => setFormData({ ...formData, name_en: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm" /></div><div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">{t('colGrade')}</label><input type="text" value={formData.grade} onChange={e => setFormData({ ...formData, grade: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm" /></div></>}
                     {modalMode === 'addTeacher' && <div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">{isAr ? 'البريد الإلكتروني المدرسي' : 'School Google email'}</label><input type="email" required value={newUserEmail} onChange={e => setNewUserEmail(e.target.value)} placeholder="teacher@falcon-school.com" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm" /></div>}
-                    {(modalMode === 'addTeacher' || modalMode === 'editTeacher') && <><div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">{t('colId')} (مثال: PASS123)</label><input type="text" value={modalMode === 'addTeacher' ? (isAr ? 'يُنشأ تلقائيًا' : 'Generated automatically') : formData.teacher_id} disabled={modalMode === 'addTeacher'} onChange={e => setFormData({ ...formData, teacher_id: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-mono uppercase" required /></div><div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">الاسم بالعربي</label><input type="text" value={formData.name_ar} onChange={e => setFormData({ ...formData, name_ar: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm" required /></div><div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">الاسم بالإنجليزية</label><input type="text" value={formData.name_en} onChange={e => setFormData({ ...formData, name_en: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm" /></div></>}
+                    {(modalMode === 'addTeacher' || modalMode === 'editTeacher') && <><div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">{t('colId')} {isAr?'(مثال: PASS123)':'(e.g., PASS123)'}</label><input type="text" value={modalMode === 'addTeacher' ? (isAr ? 'يُنشأ تلقائيًا' : 'Generated automatically') : formData.teacher_id} disabled={modalMode === 'addTeacher'} onChange={e => setFormData({ ...formData, teacher_id: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-mono uppercase" required /></div><div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">{isAr?'الاسم باللغة العربية':'Arabic Name'}</label><input type="text" value={formData.name_ar} onChange={e => setFormData({ ...formData, name_ar: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm" required /></div><div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">{isAr?'الاسم باللغة الإنجليزية':'English Name'}</label><input type="text" value={formData.name_en} onChange={e => setFormData({ ...formData, name_en: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm" /></div></>}
                     {modalMode === 'addBorrow' && <><div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">نوع المستعير</label><select value={formData.user_type} onChange={e => { const type = e.target.value; setFormData({ ...formData, user_type: type, user_email: type === 'student' && formData.user_id ? `${formData.user_id.trim()}@falcon-school.com` : '' }); }} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold"><option value="student">طالب</option><option value="teacher">معلم</option></select></div>
                         <div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">الرقم التعريفي (ID)</label><input type="text" value={formData.user_id} onChange={e => { const id = e.target.value; setFormData({ ...formData, user_id: id, user_email: formData.user_type === 'student' ? (id ? `${id.trim()}@falcon-school.com` : '') : formData.user_email }); }} className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-mono bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white" required /></div>
                         <div className="text-xs font-bold leading-6 text-emerald-700 dark:text-emerald-300">{isAr ? 'سيُستخدم بريد Google المدرسي المسجّل للمستعير تلقائيًا دون إدخال عنوان يدوي.' : 'The borrower’s approved school Google email will be used automatically.'}</div>
                         <div><label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">عنوان الكتاب</label><input type="text" value={formData.book_name} onChange={e => setFormData({ ...formData, book_name: e.target.value })} className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white" required /></div>
                         <div><label className="block text-sm font-black text-amber-600 dark:text-amber-400 mb-1">تاريخ الإرجاع الإلزامي (مدة الاستعارة: {previewDurationDays} يوماً)</label><input type="date" value={formData.return_date} min={previewBorrowDate} onChange={e => setFormData({ ...formData, return_date: e.target.value })} className="w-full px-4 py-3 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border-4 border-amber-300 dark:border-amber-600 focus:border-amber-500 rounded-2xl font-black outline-none transition-colors" required /></div>
                     </>}
-                    <div className="flex gap-3 pt-4"><button type="button" onClick={() => setModalMode(null)} className="flex-1 py-3 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-2xl font-bold text-sm">{t('cancelBtn')}</button><button type="submit" disabled={isSubmitting} className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white rounded-2xl font-black text-sm shadow-md">{isSubmitting ? (isAr ? 'جاري التنفيذ...' : 'Processing...') : t('saveBtn')}</button></div>
+                    <div className="flex gap-3 pt-4"><button type="button" onClick={() => setModalMode(null)} className="flex-1 py-3 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-2xl font-bold text-sm">{t('cancelBtn')}</button><button type="submit" disabled={isSubmitting} className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white rounded-2xl font-black text-sm shadow-md">{isSubmitting ? (isAr ? 'جارٍ التنفيذ...' : 'Processing...') : t('saveBtn')}</button></div>
                 </form>
             </div></div>}
         </div>

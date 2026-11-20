@@ -59,7 +59,7 @@ export default function AdminSaqrProviderMetrics({isAr}:{isAr:boolean}){
         </span>
         <h3 id="saqr-provider-metrics" className="text-lg font-black text-slate-900 dark:text-white">{isAr?'مراقبة خدمات صقر الذكية':'Saqr AI Provider Monitor'}</h3>
       </div>
-      <p className="text-xs mt-2 text-slate-500 dark:text-slate-400">{isAr?'مراقبة فعلية للطلبات المنفذة عبر Groq وCloudflare، للأدمن فقط.':'Verified request activity across Groq and Cloudflare. Admin only.'}</p></div>
+      <p className="text-xs mt-2 text-slate-500 dark:text-slate-400">{isAr?'متابعة فعلية للطلبات المنفذة عبر Groq وCloudflare، ومخصصة لمدير النظام فقط.':'Verified request activity across Groq and Cloudflare. Admin only.'}</p></div>
       <div className="flex flex-wrap gap-2 items-center">
         <div className="flex gap-1 rounded-xl bg-slate-100 dark:bg-slate-800 p-1" role="group" aria-label={isAr?'نطاق التقرير':'Report period'}>
           {(['last7d','last30d'] as Range[]).map(period=><button type="button" key={period} aria-pressed={range===period}
@@ -70,7 +70,7 @@ export default function AdminSaqrProviderMetrics({isAr}:{isAr:boolean}){
         <button type="button" onClick={()=>void fetchMetrics()} className="rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:border-emerald-400">{isAr?'تحديث':'Refresh'}</button>
       </div>
     </div>
-    {loading && !data?<div className="py-12 text-center text-sm text-slate-500">{isAr?'جاري قراءة الإحصائيات...':'Loading provider metrics...'}</div>:
+    {loading && !data?<div className="py-12 text-center text-sm text-slate-500">{isAr?'جارٍ تحميل إحصائيات المزوّدين...':'Loading provider metrics...'}</div>:
       unavailable && !data?<div className="border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/20 rounded-2xl p-4 text-sm font-bold text-amber-800 dark:text-amber-200" role="status">
         {isAr?'تعذر قراءة إحصائيات المزوّدين. تأكد من دخولك بحساب مدير النظام المخوّل أو اتصال قاعدة البيانات.':'Unable to read provider metrics. Check approved administrator access or database connectivity.'}
       </div>:
