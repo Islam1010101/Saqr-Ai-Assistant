@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { compareCatalogTitles } from '../src/utils/catalogTitleSort';
 import { bookData, getLocalizedSubject, type Book } from '../api/bookData';
 import {useAdminCatalogRevision} from '../src/utils/liveCatalogAdditions';
 import { literaryGenreSubjectNames } from '../src/utils/literaryGenreCatalog';
@@ -661,7 +662,7 @@ const SearchPage: React.FC = () => {
             return matchesTerm && matchesSub && matchesAuth && matchesShelf && matchesAudience && matchesReadingTier;
         });
 
-        return result;
+        return result.sort((a,b)=>compareCatalogTitles(a.title,b.title,currentLocale));
     }, [debouncedSearchTerm, subjectFilter, authorFilter, shelfFilter, audienceFilter, readingTierFilter, currentLocale,catalogRevision]);
 
     const displayedCount = shelfFilter === '22' ? shelf22VisibleCount : visibleCount;

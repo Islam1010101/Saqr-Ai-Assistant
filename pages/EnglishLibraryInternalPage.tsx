@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { compareCatalogTitles } from '../src/utils/catalogTitleSort';
 import { useLanguage } from '../App';
 import { matchesCatalogQuery } from '../src/utils/catalogTextSearch';
 import LibraryLetterAtmosphere from '../src/components/LibraryLetterAtmosphere';
@@ -424,7 +425,7 @@ const EnglishLibraryInternalPage: React.FC = () => {
         if (sortBy === 'author') result = [...result].sort((a, b) => a.author.localeCompare(b.author, currentLocale));
         else if (sortBy === 'subject') result = [...result].sort((a, b) => a.subject.localeCompare(b.subject, currentLocale));
         else if (sortBy === 'audio') result = [...result].sort((a, b) => (b.audioId ? 1 : 0) - (a.audioId ? 1 : 0));
-        else result = [...result].sort((a,b)=>a.series&&a.series===b.series?(a.seriesOrder??9999)-(b.seriesOrder??9999)||a.title.localeCompare(b.title,currentLocale):a.title.localeCompare(b.title,currentLocale));
+        else result = [...result].sort((a,b)=>compareCatalogTitles(a.title,b.title,'en'));
         return result;
     }, [searchTerm, subjectFilter, authorFilter, seriesFilter, audienceFilter, audioOnly, sortBy, currentLocale,catalogRevision]);
 

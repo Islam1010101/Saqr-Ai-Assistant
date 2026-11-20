@@ -1,4 +1,5 @@
 import React,{useMemo,useState} from 'react';
+import { compareCatalogTitles } from '../utils/catalogTitleSort';
 import {searchNationalIdentityBooks} from '../utils/nationalIdentityCatalog';
 import {useAdminCatalogRevision} from '../utils/liveCatalogAdditions';
 const FlagBook=()=> <svg viewBox="0 0 64 64" width="52" height="52" fill="none" aria-hidden="true"><rect x="9" y="7" width="46" height="51" rx="5" fill="#fff" stroke="#08794A" strokeWidth="3"/><path d="M10 9h11v47H10" fill="#d82534"/><path d="M21 9h33v15H21" fill="#08874C"/><path d="M21 41h33v15H21" fill="#141414"/></svg>;
@@ -6,7 +7,8 @@ export default function NationalIdentityBookCorner({lang}:{lang:'ar'|'en'}){
  const ar=lang==='ar';
  const [query,setQuery]=useState('');
  const [showAll,setShowAll]=useState(false);
- const books=useMemo(()=>searchNationalIdentityBooks(query),[query]);
+ const catalogRevision=useAdminCatalogRevision();
+ const books=useMemo(()=>[...searchNationalIdentityBooks(query)].sort((a,b)=>compareCatalogTitles(a.title,b.title,lang)),[query,lang,catalogRevision]);
  const displayed=query.trim()||showAll?books:books.slice(0,12);
  return <section className="mt-8 rounded-[2rem] border-2 border-emerald-700/30 dark:border-emerald-600/40 overflow-hidden bg-[#F9FBF7] dark:bg-[#0C1511]" aria-label={ar?'جناح الهوية الوطنية':'National Identity Pavilion'}>
    <div className="flex h-2" aria-hidden="true"><span className="w-1/4 bg-red-600"/><span className="w-1/4 bg-emerald-600"/><span className="w-1/4 bg-white"/><span className="w-1/4 bg-black"/></div>
