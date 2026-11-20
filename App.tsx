@@ -734,7 +734,7 @@ const App: React.FC = () => {
   const lastApprovedCount=useRef(0);
   useEffect(()=>{
     let active=true;
-    const refresh=()=>{void syncApprovedPhysicalCatalog().then(count=>{if(active&&(count>0||lastApprovedCount.current>0)){lastApprovedCount.current=count;setCatalogRevision(value=>value+1);}}).catch(error=>console.warn('Approved catalog sync unavailable; using unchanged school catalog',error));};
+    const refresh=()=>{void syncApprovedPhysicalCatalog().then(count=>{if(active){void refreshAdminCatalogAdditions().catch(error=>console.warn('Physical book metadata overlay unavailable',error));}if(active&&(count>0||lastApprovedCount.current>0)){lastApprovedCount.current=count;setCatalogRevision(value=>value+1);}}).catch(error=>console.warn('Approved catalog sync unavailable; using unchanged school catalog',error));};
     refresh();
     window.addEventListener('efips-catalog-approved-changed',refresh);
     return ()=>{active=false;window.removeEventListener('efips-catalog-approved-changed',refresh);};

@@ -1,5 +1,6 @@
 import React,{useMemo,useState} from 'react';
 import {searchNationalIdentityBooks} from '../utils/nationalIdentityCatalog';
+import {useAdminCatalogRevision} from '../utils/liveCatalogAdditions';
 const FlagBook=()=> <svg viewBox="0 0 64 64" width="52" height="52" fill="none" aria-hidden="true"><rect x="9" y="7" width="46" height="51" rx="5" fill="#fff" stroke="#08794A" strokeWidth="3"/><path d="M10 9h11v47H10" fill="#d82534"/><path d="M21 9h33v15H21" fill="#08874C"/><path d="M21 41h33v15H21" fill="#141414"/></svg>;
 export default function NationalIdentityBookCorner({lang}:{lang:'ar'|'en'}){
  const ar=lang==='ar';

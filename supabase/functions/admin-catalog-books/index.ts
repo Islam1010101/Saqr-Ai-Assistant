@@ -4,6 +4,7 @@ import {createClient} from "npm:@supabase/supabase-js@2.58.0";
 // Independent administration endpoint. It never edits original catalogs,
 // login, user permissions, Saqr prompt, or other service functions.
 const table="efips_admin_catalog_books";
+const editTable="efips_admin_physical_edits";
 const originAllowed=(v:string|null):boolean=>!!v&&(v==="https://www.efipslibrary.com"||
  v==="https://efipslibrary.com"||/^https:\/\/[a-z0-9-]+\.vercel\.app$/.test(v));
 const text=(v:unknown,max=240)=>String(v??"").trim().slice(0,max);
@@ -58,6 +59,7 @@ function makeRecord(v:Input,uid:string,source:"manual"|"excel",forced?:"physical
  const pending=kind==="physical"&&(!author||!cabinet||!shelf_row||(!!text(v.isbn)&&!isbn));
  const record={
   kind,status:pending?"pending":"approved",language,title,author,isbn,cabinet,shelf_row,
+  national_identity:v.national_identity===true||(kind==="digital"&&v.language==="national"),
   subject,book_url,audio_url,summary:text(v.summary,2000),source,
   review_note:pending?"Verify missing author, location or ISBN against physical copy":"",
   created_by:uid
@@ -193,6 +195,31 @@ Deno.serve(async(req:Request)=>{
    if(error)throw error;
    return respond(200,{ok:true,added:data?.length||0,pending:(data||[]).filter(r=>r.status==="pending").length,invalid});
   }
+
+  if(action==="edit_physical"){
+   const id=text(body.catalog_id,180);
+   if(!id||id!==text(body.catalog_id,1000))throw Error("INVALID_RECORD_ID");
+   const input=(body.book||{}) as Input;
+   const next=makeRecord(input,user.id,"manual","physical");
+   const values={title:next.title,author:next.author,isbn:next.isbn,
+    cabinet:next.cabinet,shelf_row:next.shelf_row,national_identity:next.national_identity};
+   const added=/^efips-added-([a-f0-9]{32})$/i.exec(id);
+   if(added){
+    const hex=added[1].toLowerCase();
+    const uuid=[hex.slice(0,8),hex.slice(8,12),hex.slice(12,16),hex.slice(16,20),hex.slice(20)].join("-");
+    const {data:record,error:foundError}=await admin.from(table).select("id,kind,status").eq("id",uuid).maybeSingle();
+    if(foundError||!record||record.kind!=="physical"||record.status!=="approved")throw Error("PHYSICAL_RECORD_NOT_FOUND");
+    const {data:updated,error}=await admin.from(table).update({...values,language:next.language,source_fingerprint:next.source_fingerprint})
+     .eq("id",uuid).eq("kind","physical").eq("status","approved").select("id").maybeSingle();
+    if(error?.code==="23505")throw Error("DUPLICATE_PHYSICAL_HOLDING");
+    if(error||!updated)throw Error("PHYSICAL_EDIT_FAILED");
+    return respond(200,{ok:true,updated:true});
+   }
+   if(id.startsWith("efips-added-"))throw Error("INVALID_RECORD_ID");
+   const {error}=await admin.from(editTable).upsert({catalog_id:id,...values,edited_at:new Date().toISOString()},{onConflict:"catalog_id"});
+   if(error)throw Error("PHYSICAL_EDIT_FAILED");
+   return respond(200,{ok:true,updated:true});
+  }
   if(action==="approve_pending"){
    const id=text(body.id,60);
    if(!/^[0-9a-f-]{36}$/i.test(id))throw Error("INVALID_RECORD_ID");
@@ -207,7 +234,7 @@ Deno.serve(async(req:Request)=>{
  }catch(e){
   const err=e as {message?:string;code?:string};
   const message=err?.message||"";
-  if(/^(TITLE_REQUIRED|AUTHOR_REQUIRED|ISBN_REQUIRED|INVALID_ISBN|CABINET_NUMBER_REQUIRED|SHELF_ROW_REQUIRED|SUBJECT_REQUIRED|DIGITAL_BOOK_HTTPS_URL_REQUIRED|AUDIO_HTTPS_URL_REQUIRED|DIGITAL_REQUIRED_FIELDS|PHYSICAL_REQUIRED_FIELDS|EMPTY_SHEET|FILE_TOO_LARGE|FILE_TOO_MANY_ROWS|EXCEL_NEEDS_TITLE_AUTHOR_HEADERS|EXCEL_XLSX_OR_CSV_ONLY|IMPORT_BATCH_TOO_LARGE|PENDING_PHYSICAL_NOT_FOUND|LOCATION_AUTHOR_REQUIRED|INVALID_RECORD_ID)$/.test(message))
+  if(/^(TITLE_REQUIRED|AUTHOR_REQUIRED|ISBN_REQUIRED|INVALID_ISBN|CABINET_NUMBER_REQUIRED|SHELF_ROW_REQUIRED|SUBJECT_REQUIRED|DIGITAL_BOOK_HTTPS_URL_REQUIRED|AUDIO_HTTPS_URL_REQUIRED|DIGITAL_REQUIRED_FIELDS|PHYSICAL_REQUIRED_FIELDS|EMPTY_SHEET|FILE_TOO_LARGE|FILE_TOO_MANY_ROWS|EXCEL_NEEDS_TITLE_AUTHOR_HEADERS|EXCEL_XLSX_OR_CSV_ONLY|IMPORT_BATCH_TOO_LARGE|PENDING_PHYSICAL_NOT_FOUND|LOCATION_AUTHOR_REQUIRED|INVALID_RECORD_ID|PHYSICAL_RECORD_NOT_FOUND|DUPLICATE_PHYSICAL_HOLDING|PHYSICAL_EDIT_FAILED|PHYSICAL_REQUIRED_FIELDS)$/.test(message))
     return respond(400,{ok:false,error:message});
   console.error("Admin catalog action failed",{code:err?.code||"UNKNOWN"});
   return respond(500,{ok:false,error:"CATALOG_OPERATION_FAILED"});

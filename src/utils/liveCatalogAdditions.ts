@@ -3,6 +3,8 @@ import {supabase} from './supabase';
 import {bookData,type Book} from '../../api/bookData';
 import {ARABIC_LIBRARY_DATABASE,ENGLISH_LIBRARY_DATABASE,type DigitalLibraryBook} from '../../api/digitalBookData';
 import {physicalReadingCatalog} from './readingPassport';
+import {NATIONAL_IDENTITY_DIGITAL_BOOKS} from '../../api/nationalIdentityDigitalBooks';
+import {refreshNationalIdentityBooks} from './nationalIdentityCatalog';
 
 /**
  * A read-only overlay of admin-approved holdings. It never replaces original
@@ -12,11 +14,12 @@ import {physicalReadingCatalog} from './readingPassport';
 export type AdminCatalogHolding={
  id:string;kind:'physical'|'digital';status:'approved'|'pending';language:'ar'|'en';
  title:string;author:string;isbn:string;cabinet:number|null;shelf_row:number|null;
- subject:string;book_url:string;audio_url:string;summary:string;created_at:string;
+ subject:string;book_url:string;audio_url:string;summary:string;created_at:string;national_identity?:boolean;
 };
 const activePhysical=new Set<string>();
 const activeArabic=new Set<string>();
 const activeEnglish=new Set<string>();
+const activeNationalDigital=new Set<string>();
 const listeners=new Set<()=>void>();
 let revision=0;
 let inflight:Promise<number>|null=null;
@@ -43,7 +46,8 @@ const dropOld=()=>{
   physicalReadingCatalog[i].key.replace(/^physical:/,'')))physicalReadingCatalog.splice(i,1);
  for(let i=ARABIC_LIBRARY_DATABASE.length-1;i>=0;i--)if(activeArabic.has(String(ARABIC_LIBRARY_DATABASE[i].id)))ARABIC_LIBRARY_DATABASE.splice(i,1);
  for(let i=ENGLISH_LIBRARY_DATABASE.length-1;i>=0;i--)if(activeEnglish.has(String(ENGLISH_LIBRARY_DATABASE[i].id)))ENGLISH_LIBRARY_DATABASE.splice(i,1);
- activePhysical.clear();activeArabic.clear();activeEnglish.clear();
+ for(let i=NATIONAL_IDENTITY_DIGITAL_BOOKS.length-1;i>=0;i--)if(activeNationalDigital.has(String(NATIONAL_IDENTITY_DIGITAL_BOOKS[i].id)))NATIONAL_IDENTITY_DIGITAL_BOOKS.splice(i,1);
+ activePhysical.clear();activeArabic.clear();activeEnglish.clear();activeNationalDigital.clear();
 };
 const noninventedSummary=(h:AdminCatalogHolding)=>
  h.summary?.trim() || (h.language==='ar'
@@ -59,11 +63,12 @@ export function applyApprovedAdminHoldings(holdings:ReadonlyArray<AdminCatalogHo
   if(h.kind==='physical'){
    if(!Number.isInteger(h.cabinet)||!Number.isInteger(h.shelf_row)||Number(h.cabinet)<1||Number(h.shelf_row)<1)continue;
    if(samePhysicalHolding({title:h.title,author:h.author,isbn:h.isbn,cabinet:h.cabinet,shelf_row:h.shelf_row}))continue;
-   const book:Book={
+   const book:Book&{nationalIdentity?:boolean}={
     id:'efips-added-'+suffix,title:h.title,author:h.author,subject:h.subject||'Unclassified',
     isbn:h.isbn||undefined,isbnStatus:h.isbn?'candidate':undefined,
     shelf:Number(h.cabinet),row:Number(h.shelf_row),language:h.language==='ar'?'AR':'EN',
-    summary:noninventedSummary(h),needsReview:true,copies:1
+    summary:noninventedSummary(h),needsReview:true,copies:1,
+    nationalIdentity:h.national_identity===true
    };
    bookData.push(book);activePhysical.add(book.id);
    physicalReadingCatalog.push({
@@ -71,7 +76,7 @@ export function applyApprovedAdminHoldings(holdings:ReadonlyArray<AdminCatalogHo
     format:'physical',href:'/search',shelf:book.shelf,row:book.row
    });
   }else if(h.kind==='digital'&&/^https:\/\//i.test(h.book_url)){
-   const books=h.language==='ar'?ARABIC_LIBRARY_DATABASE:ENGLISH_LIBRARY_DATABASE;
+   const books=h.national_identity===true?NATIONAL_IDENTITY_DIGITAL_BOOKS:(h.language==='ar'?ARABIC_LIBRARY_DATABASE:ENGLISH_LIBRARY_DATABASE);
    const duplicate=books.some(book=>String(book.driveLink).split('?')[0]===String(h.book_url).split('?')[0]);
    if(duplicate)continue;
    const id='EFIPS_ADD_'+suffix;
@@ -83,21 +88,61 @@ export function applyApprovedAdminHoldings(holdings:ReadonlyArray<AdminCatalogHo
     readingAudience:undefined
    };
    books.push(book);
-   (h.language==='ar'?activeArabic:activeEnglish).add(id);
+   (h.national_identity===true?activeNationalDigital:(h.language==='ar'?activeArabic:activeEnglish)).add(id);
   }else continue;
   added++;
  }
+ refreshNationalIdentityBooks();
  notify();
  return added;
 }
+
+export type AdminPhysicalEdit={
+ catalog_id:string;title:string;author:string;isbn:string;cabinet:number;shelf_row:number;
+ national_identity:boolean;
+};
+/** Small metadata-only overlays for existing printed books. They keep original book IDs stable. */
+export function applyAdminPhysicalEdits(rows:ReadonlyArray<AdminPhysicalEdit>):number{
+ const byId=new Map(bookData.map(book=>[book.id,book]));
+ let changed=0;
+ for(const edit of rows){
+  if(!edit.catalog_id||edit.catalog_id.startsWith('efips-added-')||
+     !edit.title?.trim()||!edit.author?.trim()||
+     !Number.isInteger(edit.cabinet)||edit.cabinet<1||
+     !Number.isInteger(edit.shelf_row)||edit.shelf_row<1)continue;
+  const book=byId.get(edit.catalog_id) as (Book&{nationalIdentity?:boolean})|undefined;
+  if(!book)continue;
+  book.title=edit.title;book.author=edit.author;
+  book.shelf=edit.cabinet;book.row=edit.shelf_row;
+  book.isbn=edit.isbn||undefined;
+  book.isbnStatus=edit.isbn?'candidate':undefined;
+  book.nationalIdentity=edit.national_identity===true;
+  const readingEntry=physicalReadingCatalog.find(entry=>entry.key==='physical:'+book.id);
+  if(readingEntry){
+   readingEntry.title=book.title;readingEntry.author=book.author;
+   readingEntry.shelf=book.shelf;readingEntry.row=book.row;
+  }
+  changed++;
+ }
+ refreshNationalIdentityBooks();
+ notify();
+ return changed;
+}
+
 export function refreshAdminCatalogAdditions():Promise<number>{
  if(inflight)return inflight;
  inflight=(async()=>{
   const {data,error}=await supabase.from('efips_admin_catalog_books')
-   .select('id,kind,status,language,title,author,isbn,cabinet,shelf_row,subject,book_url,audio_url,summary,created_at')
+   .select('id,kind,status,language,title,author,isbn,cabinet,shelf_row,subject,book_url,audio_url,summary,created_at,national_identity')
    .eq('status','approved').order('created_at',{ascending:true}).limit(5000);
   if(error)throw error;
-  return applyApprovedAdminHoldings((data||[]) as AdminCatalogHolding[]);
+  const count=applyApprovedAdminHoldings((data||[]) as AdminCatalogHolding[]);
+  const edits=await supabase.from('efips_admin_physical_edits')
+   .select('catalog_id,title,author,isbn,cabinet,shelf_row,national_identity')
+   .order('edited_at',{ascending:true}).limit(10000);
+  if(edits.error)throw edits.error;
+  applyAdminPhysicalEdits((edits.data||[]) as AdminPhysicalEdit[]);
+  return count;
  })().finally(()=>{inflight=null;});
  return inflight;
 }

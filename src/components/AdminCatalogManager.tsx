@@ -2,12 +2,16 @@ import React,{useEffect,useMemo,useState} from 'react';
 import {FunctionsHttpError} from '@supabase/supabase-js';
 import {supabase} from '../utils/supabase';
 import {bookData} from '../../api/bookData';
+import {NATIONAL_IDENTITY_DIGITAL_BOOKS} from '../../api/nationalIdentityDigitalBooks';
+import {isNationalIdentityBook} from '../utils/nationalIdentityCatalog';
 import {ARABIC_LIBRARY_DATABASE,ENGLISH_LIBRARY_DATABASE} from '../../api/digitalBookData';
-import {samePhysicalHolding,refreshAdminCatalogAdditions,type AdminCatalogHolding} from '../utils/liveCatalogAdditions';
+import {samePhysicalHolding,refreshAdminCatalogAdditions,useAdminCatalogRevision,type AdminCatalogHolding} from '../utils/liveCatalogAdditions';
 
 type Mode='physical'|'digital'|'excel';
-type Draft={title:string;author:string;isbn:string;cabinet:string;shelf_row:string;subject:string;language:'ar'|'en';book_url:string;audio_url:string;summary:string};
-const empty=():Draft=>({title:'',author:'',isbn:'',cabinet:'',shelf_row:'',subject:'',language:'ar',book_url:'',audio_url:'',summary:''});
+type Draft={title:string;author:string;isbn:string;cabinet:string;shelf_row:string;subject:string;language:'ar'|'en'|'national';national_identity:boolean;book_url:string;audio_url:string;summary:string};
+type TextDraftField=Exclude<keyof Draft,'national_identity'>;
+type PhysicalEdit=Pick<Draft,'title'|'author'|'isbn'|'cabinet'|'shelf_row'|'national_identity'>;
+const empty=():Draft=>({title:'',author:'',isbn:'',cabinet:'',shelf_row:'',subject:'',language:'ar',national_identity:false,book_url:'',audio_url:'',summary:''});
 type RecordRow=AdminCatalogHolding&{source:string;review_note:string};
 const icon=(name:'book'|'upload'|'cloud'|'check'|'refresh')=>{
  const paths={
@@ -52,7 +56,10 @@ const catalogErrorText=(code:string,isAr:boolean)=>{
   EXCEL_XLSX_OR_CSV_ONLY:['استخدم ملف Excel بصيغة XLSX أو CSV.','Upload an XLSX or CSV file.'],
   IMPORT_BATCH_TOO_LARGE:['عدد الكتب كبير جدًا في الدفعة الواحدة.','Too many books in one import batch.'],
   PENDING_PHYSICAL_NOT_FOUND:['الكتاب المعلق غير موجود أو سبق اعتماده.','This pending book is missing or was already approved.'],
-  LOCATION_AUTHOR_REQUIRED:['راجع عنوان الكتاب والمؤلف ومكانه قبل اعتماده.','Complete the author and book location before approval.']
+  LOCATION_AUTHOR_REQUIRED:['راجع عنوان الكتاب والمؤلف ومكانه قبل اعتماده.','Complete the author and book location before approval.'],
+  PHYSICAL_RECORD_NOT_FOUND:['لم نعثر على هذا السجل لاعتماد التعديل.','The selected physical book record was not found.'],
+  DUPLICATE_PHYSICAL_HOLDING:['هناك كتاب مطابق بالفعل في نفس الموقع.','A matching book already exists at that location.'],
+  PHYSICAL_EDIT_FAILED:['تعذّر حفظ التعديلات. حاول مرة أخرى.','Could not save changes. Try again.']
  };
  const localized=translations[code];
  return localized?(isAr?localized[0]:localized[1]):code;
@@ -60,6 +67,10 @@ const catalogErrorText=(code:string,isAr:boolean)=>{
 
 export default function AdminCatalogManager({isAr}:{isAr:boolean}){
  const [mode,setMode]=useState<Mode>('physical');
+ const catalogRevision=useAdminCatalogRevision();
+ const [editSearch,setEditSearch]=useState('');
+ const [editingId,setEditingId]=useState('');
+ const [physicalEdit,setPhysicalEdit]=useState<PhysicalEdit|null>(null);
  const [form,setForm]=useState<Draft>(empty);
  const [audio,setAudio]=useState(false);
  const [records,setRecords]=useState<RecordRow[]>([]);
@@ -70,7 +81,7 @@ export default function AdminCatalogManager({isAr}:{isAr:boolean}){
  const [file,setFile]=useState<File|null>(null);
  const [progress,setProgress]=useState('');
  const t=(ar:string,en:string)=>isAr?ar:en;
- const update=(field:keyof Draft,value:string)=>setForm(old=>({...old,[field]:value}));
+ const update=(field:TextDraftField,value:string)=>setForm(old=>({...old,[field]:value}));
  const service=async(body:Record<string,unknown>)=>{
   const {data:{session}}=await supabase.auth.getSession();
   if(!session?.access_token)throw Error(t('سجّل دخول الأدمن باستخدام Google أولًا.','Verified Google admin sign-in required.'));
@@ -113,13 +124,14 @@ export default function AdminCatalogManager({isAr}:{isAr:boolean}){
    if(samePhysicalHolding({title:form.title,author:form.author,isbn:form.isbn,cabinet,shelf_row})){
     setError(t('الكتاب موجود بالفعل في نفس الدولاب والرف.','A matching book already exists in this cabinet and row.'));return;
    }
-  }else if(mode==='digital'&&([...ARABIC_LIBRARY_DATABASE,...ENGLISH_LIBRARY_DATABASE].some(
+  }else if(mode==='digital'&&([...ARABIC_LIBRARY_DATABASE,...ENGLISH_LIBRARY_DATABASE,...NATIONAL_IDENTITY_DIGITAL_BOOKS].some(
     b=>String(b.driveLink).split('?')[0]===form.book_url.split('?')[0]))){
     setError(t('رابط هذا الكتاب موجود بالفعل في المكتبة.','This book link is already in the digital library.'));return;
   }
   setBusy(true);
   try{
-   const book={...form,cabinet:form.cabinet,shelf_row:form.shelf_row,audio_url:audio?form.audio_url:''};
+   const book={...form,cabinet:form.cabinet,shelf_row:form.shelf_row,audio_url:audio?form.audio_url:'',
+    national_identity:mode==='physical'?form.national_identity:form.language==='national'};
    const result=await service({action:mode==='physical'?'add_physical':'add_digital',book});
    if(!result.added)throw Error(t('الكتاب موجود مسبقًا في قائمة الإضافات.','This book was already added.'));
    await notifyCatalog();
@@ -171,6 +183,40 @@ export default function AdminCatalogManager({isAr}:{isAr:boolean}){
   }catch(err){setError(String((err as Error).message||err));setProgress('');}
   finally{setBusy(false);}
  };
+ const physicalMatches=useMemo(()=>{
+  const needle=editSearch.trim().normalize('NFKC').toLocaleLowerCase();
+  if(!needle)return [];
+  return bookData.filter(book=>
+   [book.title,book.author,book.isbn||'',String(book.shelf),String(book.row)]
+    .some(value=>String(value).normalize('NFKC').toLocaleLowerCase().includes(needle))
+  ).slice(0,40);
+ },[editSearch,catalogRevision,records]);
+ const startPhysicalEdit=(book:(typeof bookData)[number])=>{
+  setEditingId(book.id);
+  setPhysicalEdit({
+   title:book.title,author:book.author,isbn:book.isbn||'',
+   cabinet:String(book.shelf),shelf_row:String(book.row),
+   national_identity:isNationalIdentityBook(book)
+  });
+  setError('');setNotice('');
+ };
+ const savePhysicalEdit=async()=>{
+  if(!physicalEdit||!editingId)return;
+  const cabinet=Number(physicalEdit.cabinet),shelf_row=Number(physicalEdit.shelf_row);
+  if(samePhysicalHolding({
+   title:physicalEdit.title,author:physicalEdit.author,isbn:physicalEdit.isbn,cabinet,shelf_row
+  },bookData.filter(book=>book.id!==editingId))){
+   setError(t('يوجد كتاب مطابق في نفس الموقع.','A matching book already exists at this location.'));return;
+  }
+  setBusy(true);setError('');setNotice('');
+  try{
+   await service({action:'edit_physical',catalog_id:editingId,book:physicalEdit});
+   await notifyCatalog();await refresh();
+   setEditingId('');setPhysicalEdit(null);
+   setNotice(t('تم تحديث بيانات الكتاب في الفهرس وأقسام الهوية المرتبطة به.','Book metadata and its identity catalog listing were updated.'));
+  }catch(err){setError(String((err as Error).message||err));}
+  finally{setBusy(false);}
+ };
  const pending=useMemo(()=>records.filter(item=>item.status==='pending'),[records]);
  const approved=records.filter(item=>item.status==='approved');
  const stats=[
@@ -179,7 +225,7 @@ export default function AdminCatalogManager({isAr}:{isAr:boolean}){
   {label:t('الإنجليزي الرقمي','English digital'),value:approved.filter(item=>item.kind==='digital'&&item.language==='en').length},
   {label:t('بانتظار المراجعة','Needs review'),value:pending.length}
  ];
- const field=(name:keyof Draft,label:string,required=false,type='text')=>
+ const field=(name:TextDraftField,label:string,required=false,type='text')=>
   <label key={name} className="block space-y-1.5 min-w-0"><span className="text-sm font-bold">{label}</span>
    <input className={control} type={type} value={form[name]} required={required} min={type==='number'?1:undefined}
     onChange={e=>update(name,e.target.value)} dir={name==='isbn'||name.endsWith('url')?'ltr':'auto'}/>
@@ -237,10 +283,15 @@ export default function AdminCatalogManager({isAr}:{isAr:boolean}){
       {field('cabinet',t('رقم الدولاب (Shelf)','Cabinet number (Shelf)'),true,'number')}
       {field('shelf_row',t('رقم الرف / الصف (Row)','Shelf row (Row)'),true,'number')}
       {field('subject',t('الموضوع (اختياري)','Subject (optional)'))}
+      <label className="md:col-span-2 flex items-center gap-3 rounded-xl border border-emerald-200 dark:border-emerald-800 p-3 text-sm font-bold">
+       <input type="checkbox" checked={form.national_identity} onChange={e=>setForm(old=>({...old,national_identity:e.target.checked}))} className="h-5 w-5 accent-emerald-700"/>
+       {t('إضافة إلى فهرس الهوية الوطنية (دولاب الهوية ودليل الهوية)','Add to National Identity collection and directory')}
+      </label>
      </>:<>
       <label className="space-y-1.5"><span className="text-sm font-bold">{t('لغة الكتاب','Book language')}</span>
        <select className={control} value={form.language} onChange={e=>update('language',e.target.value)}>
         <option value="ar">{t('عربي','Arabic')}</option><option value="en">{t('إنجليزي','English')}</option>
+        <option value="national">{t('الهوية الوطنية','National Identity')}</option>
        </select></label>
       {field('subject',t('الموضوع / التصنيف','Subject / category'),true)}
       {field('book_url',t('رابط الكتاب (HTTPS)','Book URL (HTTPS)'),true,'url')}
@@ -279,7 +330,7 @@ export default function AdminCatalogManager({isAr}:{isAr:boolean}){
     <div className="space-y-3 max-h-[560px] overflow-auto">
      {pending.map(item=>{
       const draft=edits[item.id]||{...empty(),...item,cabinet:String(item.cabinet||''),shelf_row:String(item.shelf_row||'')};
-      const edit=(name:keyof Draft,value:string)=>setEdits(old=>({...old,[item.id]:{...draft,[name]:value}}));
+      const edit=(name:TextDraftField,value:string)=>setEdits(old=>({...old,[item.id]:{...draft,[name]:value}}));
       return <div key={item.id} className="border border-slate-200 dark:border-slate-700 rounded-2xl p-3 sm:p-4 bg-slate-50 dark:bg-slate-800/50">
        <div className="font-bold mb-2" dir="auto">{item.title}</div>
        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
@@ -288,11 +339,55 @@ export default function AdminCatalogManager({isAr}:{isAr:boolean}){
           <input className={control} type={name==='cabinet'||name==='shelf_row'?'number':'text'} value={draft[name]}
            onChange={e=>edit(name,e.target.value)}/></label>)}
        </div>
+       <label className="flex items-center gap-2 mt-3 text-xs font-bold">
+        <input type="checkbox" checked={draft.national_identity===true}
+         onChange={e=>setEdits(old=>({...old,[item.id]:{...draft,national_identity:e.target.checked}}))} className="h-4 w-4 accent-emerald-700"/>
+        {t('إضافة إلى فهرس الهوية الوطنية','Add to National Identity catalog')}
+       </label>
        <button type="button" className={primary+' mt-3'} disabled={busy} onClick={()=>void approve(item)}>
         {icon('check')}{t('اعتماد وإضافة للفهرس','Approve and add to catalog')}</button>
       </div>;
      })}
     </div>}
+  </div>
+  <div className="rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 sm:p-6 shadow-sm space-y-4">
+   <div><h3 className="text-lg font-bold">{t('تعديل بيانات الكتب الورقية','Edit physical catalog books')}</h3>
+    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t('ابحث عن أي كتاب ورقي مسجل، ثم عدّل بياناته أو أضفه إلى فهرس الهوية. لن يُحذف السجل الأصلي.','Find an existing physical title to correct its details or flag it for the identity collection without deleting the original.')}</p></div>
+   <label className="block space-y-1.5 text-sm font-bold">
+    <span>{t('ابحث بالعنوان أو المؤلف أو ISBN أو الموقع','Search title, author, ISBN or location')}</span>
+    <input type="search" className={control} value={editSearch} onChange={e=>setEditSearch(e.target.value)}
+     placeholder={t('اكتب اسم الكتاب المراد تعديله...','Enter a book to edit...')}/>
+   </label>
+   {editSearch.trim()&&<div className="max-h-52 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-2" aria-label={t('نتائج البحث عن الكتب','Matching physical books')}>
+    {physicalMatches.map(book=><button type="button" key={book.id} onClick={()=>startPhysicalEdit(book)}
+      className={'text-start p-3 rounded-xl border text-sm hover:border-emerald-500 '+(editingId===book.id?'border-emerald-700 bg-emerald-50 dark:bg-emerald-950/40':'border-slate-200 dark:border-slate-700')}>
+      <span className="block font-bold" dir="auto">{book.title}</span>
+      <span className="block text-xs text-slate-500" dir="auto">{book.author} · {t('دولاب','Cabinet')} {book.shelf} · {t('صف','Row')} {book.row}</span>
+    </button>)}
+    {!physicalMatches.length&&<p className="text-sm text-slate-500">{t('لا توجد كتب مطابقة.','No matching physical books.')}</p>}
+   </div>}
+   {physicalEdit&&<form className="space-y-3 border-t border-slate-200 dark:border-slate-700 pt-4"
+     onSubmit={e=>{e.preventDefault();void savePhysicalEdit();}}>
+     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+      {(['title','author','isbn','cabinet','shelf_row'] as const).map(fieldName=>
+       <label key={fieldName} className="text-xs font-bold space-y-1">
+        <span>{fieldName==='title'?t('العنوان','Title'):fieldName==='author'?t('المؤلف','Author'):fieldName==='cabinet'?t('الدولاب','Cabinet'):fieldName==='shelf_row'?t('الصف','Row'):'ISBN'}</span>
+        <input className={control} required={fieldName!=='isbn'} type={fieldName==='cabinet'||fieldName==='shelf_row'?'number':'text'}
+          min={fieldName==='cabinet'||fieldName==='shelf_row'?1:undefined}
+          value={physicalEdit[fieldName]}
+          onChange={e=>setPhysicalEdit(old=>old?{...old,[fieldName]:e.target.value}:old)}/>
+       </label>)}
+     </div>
+     <label className="flex items-center gap-2 rounded-xl border border-emerald-200 dark:border-emerald-800 p-3 text-sm font-bold">
+      <input type="checkbox" checked={physicalEdit.national_identity} className="h-5 w-5 accent-emerald-700"
+       onChange={e=>setPhysicalEdit(old=>old?{...old,national_identity:e.target.checked}:old)}/>
+      {t('إظهار في دولاب الهوية الوطنية ودليلها','Show in National Identity collection and directory')}
+     </label>
+     <div className="flex flex-wrap gap-2">
+      <button type="submit" className={primary} disabled={busy}>{icon('check')}{busy?t('جار الحفظ...','Saving...'):t('حفظ التعديلات','Save changes')}</button>
+      <button type="button" className={secondary} disabled={busy} onClick={()=>{setEditingId('');setPhysicalEdit(null)}}>{t('إلغاء','Cancel')}</button>
+     </div>
+    </form>}
   </div>
  </section>;
 }
