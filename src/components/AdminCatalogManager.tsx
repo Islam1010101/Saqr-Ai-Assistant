@@ -4,6 +4,7 @@ import {supabase} from '../utils/supabase';
 import {bookData} from '../../api/bookData';
 import {NATIONAL_IDENTITY_DIGITAL_BOOKS} from '../../api/nationalIdentityDigitalBooks';
 import {isNationalIdentityBook} from '../utils/nationalIdentityCatalog';
+import {originalPhysicalBookSource} from '../utils/originalCatalogSource';
 import {ARABIC_LIBRARY_DATABASE,ENGLISH_LIBRARY_DATABASE} from '../../api/digitalBookData';
 import {samePhysicalHolding,refreshAdminCatalogAdditions,useAdminCatalogRevision,type AdminCatalogHolding} from '../utils/liveCatalogAdditions';
 
@@ -11,6 +12,8 @@ type Mode='physical'|'digital'|'excel';
 type Draft={title:string;author:string;isbn:string;cabinet:string;shelf_row:string;subject:string;language:'ar'|'en'|'national';national_identity:boolean;book_url:string;audio_url:string;summary:string};
 type TextDraftField=Exclude<keyof Draft,'national_identity'>;
 type PhysicalEdit=Pick<Draft,'title'|'author'|'isbn'|'cabinet'|'shelf_row'|'national_identity'>;
+type DigitalScope='ar'|'en'|'national';
+type DigitalEdit={title:string;author:string;subject:string;publisher:string;bio:string;summary:string;book_url:string;audio_url:string};
 const empty=():Draft=>({title:'',author:'',isbn:'',cabinet:'',shelf_row:'',subject:'',language:'ar',national_identity:false,book_url:'',audio_url:'',summary:''});
 type RecordRow=AdminCatalogHolding&{source:string;review_note:string};
 const icon=(name:'book'|'upload'|'cloud'|'check'|'refresh')=>{
@@ -59,7 +62,13 @@ const catalogErrorText=(code:string,isAr:boolean)=>{
   LOCATION_AUTHOR_REQUIRED:['راجع عنوان الكتاب والمؤلف ومكانه قبل اعتماده.','Complete the author and book location before approval.'],
   PHYSICAL_RECORD_NOT_FOUND:['لم نعثر على هذا السجل لاعتماد التعديل.','The selected physical book record was not found.'],
   DUPLICATE_PHYSICAL_HOLDING:['هناك كتاب مطابق بالفعل في نفس الموقع.','A matching book already exists at that location.'],
-  PHYSICAL_EDIT_FAILED:['تعذّر حفظ التعديلات. حاول مرة أخرى.','Could not save changes. Try again.']
+  PHYSICAL_EDIT_FAILED:['تعذّر حفظ التعديلات. حاول مرة أخرى.','Could not save changes. Try again.'],
+  DIGITAL_RECORD_NOT_FOUND:['الكتاب الرقمي غير موجود في المكتبة المختارة.','Digital book not found in the selected collection.'],
+  DIGITAL_EDIT_FAILED:['تعذّر تحديث الكتاب الرقمي.','Could not update digital book.'],
+  DUPLICATE_DIGITAL_HOLDING:['الرابط مستخدم بالفعل في سجل كتاب آخر.','Another book already uses this link.'],
+  BOOK_HAS_ACTIVE_LOAN:['لا يمكن حذف كتاب له استعارة نشطة أو طلب استعارة معلّق. سجّل الإرجاع أو أنهِ الطلب أولًا.','Cannot delete a book with an active or pending loan. Close that loan first.'],
+  BOOK_DELETE_FAILED:['تعذّر حذف الكتاب من السجلات.','Book deletion failed.'],
+  BOOK_NOT_FOUND:['لم نتمكن من العثور على هذا السجل.','Book record not found.']
  };
  const localized=translations[code];
  return localized?(isAr?localized[0]:localized[1]):code;
@@ -71,6 +80,10 @@ export default function AdminCatalogManager({isAr}:{isAr:boolean}){
  const [editSearch,setEditSearch]=useState('');
  const [editingId,setEditingId]=useState('');
  const [physicalEdit,setPhysicalEdit]=useState<PhysicalEdit|null>(null);
+ const [digitalScope,setDigitalScope]=useState<DigitalScope>('ar');
+ const [digitalSearch,setDigitalSearch]=useState('');
+ const [digitalEditingId,setDigitalEditingId]=useState('');
+ const [digitalEdit,setDigitalEdit]=useState<DigitalEdit|null>(null);
  const [form,setForm]=useState<Draft>(empty);
  const [audio,setAudio]=useState(false);
  const [records,setRecords]=useState<RecordRow[]>([]);
@@ -217,12 +230,62 @@ export default function AdminCatalogManager({isAr}:{isAr:boolean}){
   }catch(err){setError(String((err as Error).message||err));}
   finally{setBusy(false);}
  };
+
+ const catalogDigitalBooks=useMemo(()=>digitalScope==='ar'?ARABIC_LIBRARY_DATABASE:
+  digitalScope==='en'?ENGLISH_LIBRARY_DATABASE:NATIONAL_IDENTITY_DIGITAL_BOOKS,[digitalScope,catalogRevision]);
+ const digitalMatches=useMemo(()=>{
+  const q=digitalSearch.normalize('NFKC').trim().toLocaleLowerCase();
+  return q?catalogDigitalBooks.filter(book=>
+   [book.title,book.author,book.subject,String(book.id)].some(value=>
+    String(value).normalize('NFKC').toLocaleLowerCase().includes(q))
+  ).slice(0,40):[];
+ },[catalogDigitalBooks,digitalSearch,catalogRevision,records]);
+ const startDigitalEdit=(book:(typeof ARABIC_LIBRARY_DATABASE)[number])=>{
+  setDigitalEditingId(String(book.id));
+  setDigitalEdit({
+   title:book.title,author:book.author,subject:book.subject,
+   publisher:book.publisher||'',bio:book.bio||'',summary:book.summary||'',
+   book_url:book.driveLink,audio_url:book.audioId||''
+  });
+  setError('');setNotice('');
+ };
+ const saveDigitalEdit=async()=>{
+  if(!digitalEdit||!digitalEditingId)return;
+  setBusy(true);setError('');setNotice('');
+  try{
+   await service({action:'edit_digital',library:digitalScope,book_id:digitalEditingId,book:digitalEdit});
+   await notifyCatalog();await refresh();
+   setDigitalEditingId('');setDigitalEdit(null);
+   setNotice(t('تم تحديث الكتاب وملخصه الصوتي في المكتبة وعقل صقر.','Book information and audio summary updated across the library and Saqr.'));
+  }catch(err){setError(String((err as Error).message||err));}
+  finally{setBusy(false);}
+ };
+ const deleteCatalogBook=async(library:'physical'|DigitalScope,book:{
+  id:string|number;title:string;author:string;shelf?:number;row?:number;
+ })=>{
+  if(!window.confirm(t(
+   'هل أنت متأكد من حذف «'+book.title+'» نهائيًا من الفهرس ونتائج صقر؟ لن يمكن التراجع عن هذا الإجراء. سجلات الاستعارات والقراءة التاريخية ستبقى لحماية التقارير.',
+   'Permanently remove "'+book.title+'" from library catalogs and Saqr results? This cannot be undone. Historical loan and reading records will be retained.'
+  )))return;
+  setBusy(true);setError('');setNotice('');
+  try{
+   const original=library==='physical'?originalPhysicalBookSource.get(String(book.id)):undefined;
+   await service({action:'delete_book',library,book_id:String(book.id),title:book.title,author:book.author,
+    source_title:original?.title||book.title,source_author:original?.author||book.author,
+    source_shelf:original?.shelf??book.shelf,source_row:original?.row??book.row});
+   await notifyCatalog();await refresh();
+   if(library==='physical'){setEditingId('');setPhysicalEdit(null);}
+   else {setDigitalEditingId('');setDigitalEdit(null);}
+   setNotice(t('حُذف الكتاب من الفهرس النشط وبحث صقر، مع الاحتفاظ بسجلات الأنشطة السابقة.','Book removed from active catalogs and Saqr search; historical activity preserved.'));
+  }catch(err){setError(String((err as Error).message||err));}
+  finally{setBusy(false);}
+ };
  const pending=useMemo(()=>records.filter(item=>item.status==='pending'),[records]);
  const approved=records.filter(item=>item.status==='approved');
  const stats=[
   {label:t('الورقي المضاف','Physical added'),value:approved.filter(item=>item.kind==='physical').length},
-  {label:t('العربي الرقمي','Arabic digital'),value:approved.filter(item=>item.kind==='digital'&&item.language==='ar').length},
-  {label:t('الإنجليزي الرقمي','English digital'),value:approved.filter(item=>item.kind==='digital'&&item.language==='en').length},
+  {label:t('العربي الرقمي','Arabic digital'),value:approved.filter(item=>item.kind==='digital'&&item.language==='ar'&&!item.national_identity).length},
+  {label:t('الإنجليزي الرقمي','English digital'),value:approved.filter(item=>item.kind==='digital'&&item.language==='en'&&!item.national_identity).length},
   {label:t('بانتظار المراجعة','Needs review'),value:pending.length}
  ];
  const field=(name:TextDraftField,label:string,required=false,type='text')=>
@@ -386,8 +449,78 @@ export default function AdminCatalogManager({isAr}:{isAr:boolean}){
      <div className="flex flex-wrap gap-2">
       <button type="submit" className={primary} disabled={busy}>{icon('check')}{busy?t('جار الحفظ...','Saving...'):t('حفظ التعديلات','Save changes')}</button>
       <button type="button" className={secondary} disabled={busy} onClick={()=>{setEditingId('');setPhysicalEdit(null)}}>{t('إلغاء','Cancel')}</button>
+      <button type="button" className="rounded-xl border border-rose-400 px-4 py-2.5 text-sm font-bold text-rose-700 dark:text-rose-300 disabled:opacity-50"
+       disabled={busy} onClick={()=>{
+        const actual=bookData.find(book=>book.id===editingId);
+        if(actual)void deleteCatalogBook('physical',actual);
+       }}>{t('حذف الكتاب نهائيًا','Permanently delete book')}</button>
      </div>
     </form>}
   </div>
+
+   <div className="rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 sm:p-6 shadow-sm space-y-4">
+    <div>
+     <h3 className="text-lg font-bold">{t('تعديل وحذف الكتب الرقمية','Edit and remove digital books')}</h3>
+     <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t(
+      'عدّل بيانات أي كتاب في المكتبات الثلاث، أو أضف رابط ملخص صوتي أو امسحه، أو احذف الكتاب من الفهارس ونتائج صقر.',
+      'Edit any title in the three libraries, add/remove an audio summary link, or delete the book from active catalogs and Saqr search.'
+     )}</p>
+    </div>
+    <label className="block space-y-1.5 text-sm font-bold">
+     <span>{t('اختر المكتبة الرقمية','Digital collection')}</span>
+     <select className={control} value={digitalScope} onChange={e=>{
+      setDigitalScope(e.target.value as DigitalScope);setDigitalEditingId('');setDigitalEdit(null);
+     }}>
+      <option value="ar">{t('العربية','Arabic')}</option>
+      <option value="en">{t('الإنجليزية','English')}</option>
+      <option value="national">{t('الهوية الوطنية','National Identity')}</option>
+     </select>
+    </label>
+    <label className="block space-y-1.5 text-sm font-bold">
+     <span>{t('ابحث عن كتاب رقمي موجود','Find an existing digital book')}</span>
+     <input type="search" className={control} value={digitalSearch} onChange={e=>setDigitalSearch(e.target.value)}
+      placeholder={t('العنوان أو المؤلف أو الموضوع...','Title, author or subject...')}/>
+    </label>
+    {digitalSearch.trim()&&<div className="max-h-60 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-2">
+     {digitalMatches.map(book=><button key={book.id} type="button" onClick={()=>startDigitalEdit(book)}
+      className={'rounded-xl border p-3 text-start text-sm hover:border-emerald-500 '+(digitalEditingId===String(book.id)?'border-emerald-700 bg-emerald-50 dark:bg-emerald-950/40':'border-slate-200 dark:border-slate-700')}>
+      <span className="block font-bold" dir="auto">{book.title}</span>
+      <span className="block text-xs text-slate-500" dir="auto">{book.author} · {book.subject}</span>
+     </button>)}
+     {!digitalMatches.length&&<p className="text-sm text-slate-500">{t('لا توجد نتائج.','No matches found.')}</p>}
+    </div>}
+    {digitalEdit&&<form onSubmit={e=>{e.preventDefault();void saveDigitalEdit();}} className="space-y-3 border-t border-slate-200 dark:border-slate-700 pt-4">
+     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      {(['title','author','subject','publisher','bio','book_url','audio_url'] as const).map(name=>
+       <label key={name} className="text-xs font-bold space-y-1">
+        <span>{name==='title'?t('العنوان','Title'):name==='author'?t('المؤلف','Author'):
+          name==='subject'?t('الموضوع','Subject'):name==='publisher'?t('دار النشر','Publisher'):
+          name==='bio'?t('نبذة المؤلف','Author bio'):name==='book_url'?t('رابط قراءة الكتاب','Reading URL'):
+          t('رابط الملخص الصوتي (امسحه لإزالة الصوت)','Audio summary URL (clear to remove)')}</span>
+        <input className={control} required={['title','author','subject','book_url'].includes(name)}
+         type={name==='book_url'?'url':'text'} dir={name==='book_url'||name==='audio_url'?'ltr':'auto'}
+         value={digitalEdit[name]} onChange={e=>setDigitalEdit(old=>old?{...old,[name]:e.target.value}:old)}/>
+       </label>)}
+     </div>
+     <label className="block text-xs font-bold space-y-1">
+      <span>{t('ملخص الكتاب','Book synopsis')}</span>
+      <textarea className={control} rows={4} value={digitalEdit.summary}
+       onChange={e=>setDigitalEdit(old=>old?{...old,summary:e.target.value}:old)}/>
+     </label>
+     <p className="text-xs text-amber-700 dark:text-amber-300">{t(
+      'ضع رابطًا صوتيًا مباشرًا HTTPS أو مسارًا موجودًا داخل /audio/، أو امسح الحقل لإزالة الملخص. تغيير رابط القراءة لكتاب مصوّر قد يتطلب مراجعة صفحات نسخته.',
+      'Provide a direct HTTPS audio URL or an existing /audio/ path, or clear it to remove audio. Changing a photo-edition link may require reviewing the page manifest.'
+     )}</p>
+     <div className="flex flex-wrap gap-2">
+      <button type="submit" className={primary} disabled={busy}>{icon('check')}{busy?t('جار الحفظ...','Saving...'):t('حفظ بيانات الكتاب','Save book changes')}</button>
+      <button type="button" className={secondary} disabled={busy} onClick={()=>{setDigitalEditingId('');setDigitalEdit(null)}}>{t('إلغاء','Cancel')}</button>
+      <button type="button" className="rounded-xl border border-rose-400 px-4 py-2.5 text-sm font-bold text-rose-700 dark:text-rose-300 disabled:opacity-50"
+       disabled={busy} onClick={()=>{
+        const actual=catalogDigitalBooks.find(book=>String(book.id)===digitalEditingId);
+        if(actual)void deleteCatalogBook(digitalScope,actual);
+       }}>{t('حذف الكتاب نهائيًا','Permanently delete book')}</button>
+     </div>
+    </form>}
+   </div>
  </section>;
 }

@@ -15,6 +15,7 @@ export type AdminCatalogHolding={
  id:string;kind:'physical'|'digital';status:'approved'|'pending';language:'ar'|'en';
  title:string;author:string;isbn:string;cabinet:number|null;shelf_row:number|null;
  subject:string;book_url:string;audio_url:string;summary:string;created_at:string;national_identity?:boolean;
+ publisher?:string;bio?:string;
 };
 const activePhysical=new Set<string>();
 const activeArabic=new Set<string>();
@@ -84,7 +85,8 @@ export function applyApprovedAdminHoldings(holdings:ReadonlyArray<AdminCatalogHo
     id,title:h.title,author:h.author,subject:h.subject||'Unclassified',
     driveLink:h.book_url,audioId:h.audio_url||undefined,
     summary:noninventedSummary(h),
-    bio:h.language==='ar'?'لم تُوثق نبذة المؤلف بعد.':'Author biography not yet verified.',
+    publisher:h.publisher||undefined,
+    bio:h.bio||(h.language==='ar'?'لم تُوثق نبذة المؤلف بعد.':'Author biography not yet verified.'),
     readingAudience:undefined
    };
    books.push(book);
@@ -129,11 +131,53 @@ export function applyAdminPhysicalEdits(rows:ReadonlyArray<AdminPhysicalEdit>):n
  return changed;
 }
 
+
+export type AdminCatalogControl={
+ library:'physical'|'ar'|'en'|'national';book_id:string;action:'update'|'delete';
+ title:string;author:string;subject:string;publisher:string;bio:string;
+ summary:string;book_url:string;audio_url:string;
+};
+
+/** Apply published corrections and permanent exclusions in all active catalog arrays.
+ * Book IDs remain stable. Historical loans/reading logs are not deleted.
+ */
+export function applyAdminCatalogControls(rows:ReadonlyArray<AdminCatalogControl>):number{
+ let affected=0;
+ for(const row of rows){
+  const books=row.library==='physical'?bookData:
+   row.library==='ar'?ARABIC_LIBRARY_DATABASE:
+   row.library==='en'?ENGLISH_LIBRARY_DATABASE:NATIONAL_IDENTITY_DIGITAL_BOOKS;
+  const index=books.findIndex(book=>String(book.id)===row.book_id);
+  if(index<0)continue;
+  if(row.action==='delete'){
+   books.splice(index,1);
+   if(row.library==='physical'){
+    for(let i=physicalReadingCatalog.length-1;i>=0;i--)
+     if(physicalReadingCatalog[i].key==='physical:'+row.book_id)physicalReadingCatalog.splice(i,1);
+   }
+   affected++;
+   continue;
+  }
+  if(row.action!=='update'||row.library==='physical')continue;
+  const book=books[index] as DigitalLibraryBook;
+  if(!row.title?.trim()||!row.author?.trim()||!row.subject?.trim()||
+     !/^https:\/\//i.test(row.book_url))continue;
+  book.title=row.title;book.author=row.author;book.subject=row.subject;
+  book.publisher=row.publisher||undefined;
+  book.bio=row.bio;book.summary=row.summary;
+  book.driveLink=row.book_url;book.audioId=row.audio_url||undefined;
+  affected++;
+ }
+ refreshNationalIdentityBooks();
+ notify();
+ return affected;
+}
+
 export function refreshAdminCatalogAdditions():Promise<number>{
  if(inflight)return inflight;
  inflight=(async()=>{
   const {data,error}=await supabase.from('efips_admin_catalog_books')
-   .select('id,kind,status,language,title,author,isbn,cabinet,shelf_row,subject,book_url,audio_url,summary,created_at,national_identity')
+   .select('id,kind,status,language,title,author,isbn,cabinet,shelf_row,subject,book_url,audio_url,summary,created_at,national_identity,publisher,bio')
    .eq('status','approved').order('created_at',{ascending:true}).limit(5000);
   if(error)throw error;
   const count=applyApprovedAdminHoldings((data||[]) as AdminCatalogHolding[]);
@@ -142,6 +186,11 @@ export function refreshAdminCatalogAdditions():Promise<number>{
    .order('edited_at',{ascending:true}).limit(10000);
   if(edits.error)throw edits.error;
   applyAdminPhysicalEdits((edits.data||[]) as AdminPhysicalEdit[]);
+  const controls=await supabase.from('efips_admin_catalog_controls')
+   .select('library,book_id,action,title,author,subject,publisher,bio,summary,book_url,audio_url')
+   .order('updated_at',{ascending:true}).limit(15000);
+  if(controls.error)throw controls.error;
+  applyAdminCatalogControls((controls.data||[]) as AdminCatalogControl[]);
   return count;
  })().finally(()=>{inflight=null;});
  return inflight;

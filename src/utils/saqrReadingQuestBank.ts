@@ -1,5 +1,6 @@
 import {bookData,type Book} from '../../api/bookData.ts';
-import {ENGLISH_LIBRARY_DATABASE} from '../../api/digitalBookData.ts';
+import {ARABIC_LIBRARY_DATABASE,ENGLISH_LIBRARY_DATABASE} from '../../api/digitalBookData.ts';
+import {NATIONAL_IDENTITY_DIGITAL_BOOKS} from '../../api/nationalIdentityDigitalBooks.ts';
 import {digitalReadingChallengeBooks} from './saqrReadingQuestDigitalBank.ts';
 /** Curated school-library reading bank. Every record must match a real EFIPS
  * physical holding and link to an inspected full text, teaching guide, or
@@ -38,7 +39,15 @@ const gatsbyAsDigital:ReadingBook[] = gatsbyPrint&&gatsbyDigital?[{
 
 export const getRoleReadingBooks=(role:ReadingRole,locale:ReadingLocale)=>
   [...readingChallengeBooks,...digitalReadingChallengeBooks,...gatsbyAsDigital]
-    .filter(entry=>entry.role===role&&entry.locale===locale);
+    .filter(entry=>{
+      if(entry.role!==role||entry.locale!==locale)return false;
+      if(entry.key.startsWith('digital:en:'))
+        return ENGLISH_LIBRARY_DATABASE.some(book=>String(book.id)===String(entry.book.id));
+      if(entry.key.startsWith('digital:ar:'))
+        return [...ARABIC_LIBRARY_DATABASE,...NATIONAL_IDENTITY_DIGITAL_BOOKS]
+          .some(book=>String(book.id)===String(entry.book.id));
+      return bookData.some(book=>book.id===entry.book.id);
+    });
 export const shuffleReading=<T,>(values:readonly T[],random:()=>number=Math.random):T[]=>{
  const result=[...values];
  for(let i=result.length-1;i>0;i--){

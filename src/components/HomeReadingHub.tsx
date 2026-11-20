@@ -8,8 +8,10 @@ import { digitalBookKey, physicalReadingCatalog, type ReadingBook, useReadingPas
 import { bookData, getLocalizedSubject } from '../../api/bookData';
 import { classifyBookAudience } from '../../api/bookAudience';
 import { NATIONAL_IDENTITY_DIGITAL_BOOKS } from '../../api/nationalIdentityDigitalBooks';
+import {useAdminCatalogRevision} from '../utils/liveCatalogAdditions';
 
-const digitalCatalog: ReadingBook[] = [
+const liveReadingCatalog = (): ReadingBook[] => [
+  ...physicalReadingCatalog,
   ...ARABIC_LIBRARY_DATABASE.map(book => ({
     key: digitalBookKey('ar', book), title: book.title, author: book.author,
     subject: book.subject, format: 'ar' as const, href: book.driveLink
@@ -23,8 +25,6 @@ const digitalCatalog: ReadingBook[] = [
     subject: book.subject, format: 'en' as const, href: book.driveLink
   }))
 ];
-const catalog = [...physicalReadingCatalog, ...digitalCatalog];
-const catalogByKey = new Map(catalog.map(book => [book.key, book]));
 
 // Respect the language of each book (including physical copies), not the reader's name.
 const physicalBookLanguages = new Map<string, 'ar' | 'en'>(
@@ -176,6 +176,9 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
   const { locale, dir } = useLanguage();
   const ar = locale === 'ar';
   const { data, toggleSaved, toggleCompleted, setGoal } = useReadingPassport();
+  const catalogRevision=useAdminCatalogRevision();
+  const catalog=useMemo(liveReadingCatalog,[catalogRevision]);
+  const catalogByKey=useMemo(()=>new Map(catalog.map(book=>[book.key,book])),[catalog]);
   const [category, setCategory] = useState<'all'|'physical'|'digital'>('all');
   const [tab, setTab] = useState<'saved'|'suggested'>('suggested');
   const [pickerOpen,setPickerOpen] = useState(false);
@@ -206,8 +209,8 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
     };
   }, [completedModalOpen]);
   const profile = useMemo(getSchoolProfile, []);
-  const savedBooks = useMemo(()=>data.saved.map(key=>catalogByKey.get(key)).filter((b):b is ReadingBook=>!!b),[data.saved]);
-  const completedBooks = useMemo(()=>data.completed.map(key=>catalogByKey.get(key)).filter((b):b is ReadingBook=>!!b),[data.completed]);
+  const savedBooks = useMemo(()=>data.saved.map(key=>catalogByKey.get(key)).filter((b):b is ReadingBook=>!!b),[data.saved,catalogByKey]);
+  const completedBooks = useMemo(()=>data.completed.map(key=>catalogByKey.get(key)).filter((b):b is ReadingBook=>!!b),[data.completed,catalogByKey]);
   const preferredSubjects = useMemo(()=>{
     const count = new Map<string,number>();
     [...savedBooks,...completedBooks].forEach(book=>count.set(book.subject,(count.get(book.subject)||0)+1));
@@ -277,7 +280,7 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
       }
     }
     return selected;
-  },[category,data.completed,data.saved,preferredSubjects,profile.grade,profile.role,locale,savedBooks,completedBooks,ar]);
+  },[category,data.completed,data.saved,preferredSubjects,profile.grade,profile.role,locale,savedBooks,completedBooks,ar,catalog]);
   const today = new Date();
   const monthKey = today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0');
   // Use one source for both the challenge counter and the completed-books popup.
@@ -287,7 +290,7 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
     .map(key => ({ key, book: catalogByKey.get(key), finishedOn: data.completedOn[key] }))
     .sort((a,b) => b.finishedOn.localeCompare(a.finishedOn) ||
       (a.book?.title || a.key).localeCompare(b.book?.title || b.key, locale)),
-    [data.completed, data.completedOn, monthKey, locale]);
+    [data.completed, data.completedOn, monthKey, locale,catalogByKey]);
   const count = monthlyCompleted.length;
   const progress = Math.min(100,Math.round(count/data.goal*100));
   const monthTitle = new Intl.DateTimeFormat(ar ? 'ar-AE' : 'en-US',
@@ -295,8 +298,8 @@ const HomeReadingHub: React.FC<{ variant?: 'challenge' | 'books' }> = ({ variant
   const dateLabel = (date: string) => new Intl.DateTimeFormat(ar ? 'ar-AE' : 'en-US',
     { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(date + 'T12:00:00'));
   const visible = suggestions;
-  const readingList = useMemo(()=>Array.from(new Set([...data.saved,...monthlyCompleted.map(item=>item.key)])).map(key=>catalogByKey.get(key)).filter((b):b is ReadingBook=>!!b),[data.saved,monthlyCompleted]);
-  const pickerBooks = useMemo(()=>catalog.filter(b=>(b.title+' '+b.author).toLocaleLowerCase().includes(pickerQuery.toLocaleLowerCase())).slice(0,50),[pickerQuery]);
+  const readingList = useMemo(()=>Array.from(new Set([...data.saved,...monthlyCompleted.map(item=>item.key)])).map(key=>catalogByKey.get(key)).filter((b):b is ReadingBook=>!!b),[data.saved,monthlyCompleted,catalogByKey]);
+  const pickerBooks = useMemo(()=>catalog.filter(b=>(b.title+' '+b.author).toLocaleLowerCase().includes(pickerQuery.toLocaleLowerCase())).slice(0,50),[pickerQuery,catalog]);
   const card=(book:ReadingBook,inModal:boolean)=>{
     const saved=data.saved.includes(book.key), finished=data.completed.includes(book.key);
     return <article key={book.key} className={'group relative min-w-0 rounded-[1.75rem] border-4 bg-gradient-to-br '+bookGradient(book)+' p-4 sm:p-5 text-white shadow-lg transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl active:scale-[.99] flex flex-col gap-3 min-h-[220px]'}>

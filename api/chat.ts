@@ -3397,6 +3397,41 @@ async function approvedCatalogForChat():Promise<typeof localBookData> {
   }catch{return localBookData;}
 }
 
+
+/** Match original physical holdings in the legacy server index by stable source
+ * bibliographic coordinates. Deleted books must not be suggested by Saqr.
+ * This server-side list has no canonical IDs, so ambiguous matches are left untouched.
+ */
+async function withoutDeletedSaqrShelves(books:typeof localBookData):Promise<typeof localBookData>{
+  const anon=process.env.SUPABASE_ANON_KEY?.trim()||process.env.VITE_SUPABASE_ANON_KEY?.trim();
+  if(!anon)return books;
+  try{
+    const response=await fetch(
+      'https://mgbzzgnprbddajyfieop.supabase.co/rest/v1/efips_admin_catalog_controls'+
+      '?select=title,author,source_title,source_author,source_shelf,source_row&library=eq.physical&action=eq.delete',
+      {headers:{apikey:anon,authorization:'Bearer '+anon},signal:AbortSignal.timeout(2000)}
+    );
+    if(!response.ok)return books;
+    const rows=await response.json() as Array<{
+      title:string;author:string;source_title:string;source_author:string;source_shelf:number|null;source_row:number|null
+    }>;
+    if(!Array.isArray(rows)||!rows.length)return books;
+    const norm=(v:unknown)=>String(v??'').normalize('NFKC').trim().toLocaleLowerCase();
+    const remaining=books.slice();
+    for(const deleted of rows){
+      const matches=remaining.flatMap((b,i)=>{
+        const sameLocation=b.shelf===deleted.source_shelf&&b.row===deleted.source_row;
+        const original=sameLocation&&norm(b.title)===norm(deleted.source_title)&&
+          norm(b.author)===norm(deleted.source_author);
+        const amended=sameLocation&&norm(b.title)===norm(deleted.title)&&norm(b.author)===norm(deleted.author);
+        return original||amended?[i]:[];
+      });
+      if(matches.length===1)remaining.splice(matches[0],1);
+    }
+    return remaining;
+  }catch{return books;}
+}
+
 function findBooks(q: string, books:typeof localBookData=localBookData) {
   const query = (q || '').toLowerCase().trim();
   if (!query) return [];
@@ -3488,7 +3523,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Do NOT import frontend-only TypeScript helpers in this serverless module.
     const catalogRequested = typeof catalogueIntent === 'boolean'
       ? catalogueIntent : isSaqrApiLibrarySearch(userMsg);
-    const found = catalogRequested ? findBooks(userMsg,await approvedCatalogForChat()) : [];
+    const found = catalogRequested ? findBooks(userMsg,await withoutDeletedSaqrShelves(await approvedCatalogForChat())) : [];
     
     // تجهيز السياق
     const context = !catalogRequested

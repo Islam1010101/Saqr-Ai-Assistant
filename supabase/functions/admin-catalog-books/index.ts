@@ -5,6 +5,7 @@ import {createClient} from "npm:@supabase/supabase-js@2.58.0";
 // login, user permissions, Saqr prompt, or other service functions.
 const table="efips_admin_catalog_books";
 const editTable="efips_admin_physical_edits";
+const controlTable="efips_admin_catalog_controls";
 const originAllowed=(v:string|null):boolean=>!!v&&(v==="https://www.efipslibrary.com"||
  v==="https://efipslibrary.com"||/^https:\/\/[a-z0-9-]+\.vercel\.app$/.test(v));
 const text=(v:unknown,max=240)=>String(v??"").trim().slice(0,max);
@@ -60,7 +61,7 @@ function makeRecord(v:Input,uid:string,source:"manual"|"excel",forced?:"physical
  const record={
   kind,status:pending?"pending":"approved",language,title,author,isbn,cabinet,shelf_row,
   national_identity:v.national_identity===true||(kind==="digital"&&v.language==="national"),
-  subject,book_url,audio_url,summary:text(v.summary,2000),source,
+  subject,book_url,audio_url,summary:text(v.summary,2000),publisher:text(v.publisher,200),bio:text(v.bio,2000),source,
   review_note:pending?"Verify missing author, location or ISBN against physical copy":"",
   created_by:uid
  };
@@ -220,6 +221,83 @@ Deno.serve(async(req:Request)=>{
    if(error)throw Error("PHYSICAL_EDIT_FAILED");
    return respond(200,{ok:true,updated:true});
   }
+
+  // Edits and removals use stable catalog IDs. Only this verified-admin route can write them.
+  if(action==="edit_digital"){
+   const library=text(body.library,20),id=text(body.book_id,190);
+   if(!["ar","en","national"].includes(library)||!/^[A-Za-z0-9_.:-]{1,190}$/.test(id))throw Error("INVALID_RECORD_ID");
+   const book=(body.book||{}) as Input;
+   const title=text(book.title),author=text(book.author,200),subject=text(book.subject,160);
+   const publisher=text(book.publisher,200),bio=text(book.bio,2000),summary=text(book.summary,2000);
+   const link=https(book.book_url),audio=text(book.audio_url,2000);
+   if(!title)throw Error("TITLE_REQUIRED");
+   if(!author)throw Error("AUTHOR_REQUIRED");
+   if(!subject)throw Error("SUBJECT_REQUIRED");
+   if(!link)throw Error("DIGITAL_BOOK_HTTPS_URL_REQUIRED");
+   // Existing audio files may use the site's same-origin /audio/*.mp3 links.
+   if(audio&&!https(audio)&&!/^\/audio\/[^?#\s<>]+\.mp3(?:\?[^#\s<>]*)?$/i.test(audio))throw Error("AUDIO_HTTPS_URL_REQUIRED");
+   const update={title,author,subject,publisher,bio,summary,book_url:link,audio_url:audio};
+   const existing=/^EFIPS_ADD_([a-f0-9]{32})$/i.exec(id);
+   if(existing){
+    const hex=existing[1].toLowerCase();
+    const uuid=[hex.slice(0,8),hex.slice(8,12),hex.slice(12,16),hex.slice(16,20),hex.slice(20)].join("-");
+    const {data:record,error:findErr}=await admin.from(table).select("id,kind,status,language,national_identity").eq("id",uuid).maybeSingle();
+    const originalCollection=record?.national_identity?"national":record?.language;
+    if(findErr||!record||record.kind!=="digital"||record.status!=="approved"||originalCollection!==library)throw Error("DIGITAL_RECORD_NOT_FOUND");
+    const finger="d:"+record.language+":"+norm(link.split("?")[0]);
+    const {data:changed,error}=await admin.from(table).update({...update,source_fingerprint:finger})
+     .eq("id",uuid).eq("kind","digital").eq("status","approved").select("id").maybeSingle();
+    if(error?.code==="23505")throw Error("DUPLICATE_DIGITAL_HOLDING");
+    if(error||!changed)throw Error("DIGITAL_EDIT_FAILED");
+    return respond(200,{ok:true,updated:true});
+   }
+   if(id.startsWith("EFIPS_ADD_"))throw Error("DIGITAL_RECORD_NOT_FOUND");
+   const {error}=await admin.from(controlTable).upsert({
+    library,book_id:id,action:"update",...update,updated_at:new Date().toISOString()
+   },{onConflict:"library,book_id"});
+   if(error)throw Error("DIGITAL_EDIT_FAILED");
+   return respond(200,{ok:true,updated:true});
+  }
+  if(action==="delete_book"){
+   const library=text(body.library,20),id=text(body.book_id,190);
+   if(!["physical","ar","en","national"].includes(library)||!/^[A-Za-z0-9_.:-]{1,190}$/.test(id))throw Error("INVALID_RECORD_ID");
+   const title=text(body.title),author=text(body.author,200);
+   if(!title)throw Error("TITLE_REQUIRED");
+   // Preserve current loans and borrowers' reading history; block removal of an outstanding physical loan.
+   if(library==="physical"){
+    const {data:open,error:loanErr}=await admin.from("borrowings").select("id").eq("book_name",title)
+      .in("status",["active","pending"]).limit(1);
+    if(loanErr)throw Error("CATALOG_OPERATION_FAILED");
+    if(open?.length)throw Error("BOOK_HAS_ACTIVE_LOAN");
+   }
+   const addedPhysical=/^efips-added-([a-f0-9]{32})$/i.exec(id);
+   const addedDigital=/^EFIPS_ADD_([a-f0-9]{32})$/i.exec(id);
+   const match=library==="physical"?addedPhysical:addedDigital;
+   if(match){
+    const hex=match[1].toLowerCase();
+    const uuid=[hex.slice(0,8),hex.slice(8,12),hex.slice(12,16),hex.slice(16,20),hex.slice(20)].join("-");
+    const {data:record,error:findErr}=await admin.from(table)
+      .select("id,kind,status,language,national_identity").eq("id",uuid).maybeSingle();
+    const kind=library==="physical"?"physical":"digital";
+    const collection=record?.kind==="physical"?"physical":record?.national_identity?"national":record?.language;
+    if(findErr||!record||record.kind!==kind||record.status!=="approved"||collection!==library)throw Error("BOOK_NOT_FOUND");
+    const {data:removed,error}=await admin.from(table).delete()
+      .eq("id",uuid).eq("kind",kind).eq("status","approved").select("id").maybeSingle();
+    if(error||!removed)throw Error("BOOK_DELETE_FAILED");
+    return respond(200,{ok:true,deleted:true});
+   }
+   if(id.startsWith("efips-added-")||id.startsWith("EFIPS_ADD_"))throw Error("BOOK_NOT_FOUND");
+   const sourceShelf=library==="physical"?positive(body.source_shelf):null;
+   const sourceRow=library==="physical"?positive(body.source_row):null;
+   const {error}=await admin.from(controlTable).upsert({
+    library,book_id:id,action:"delete",title,author,source_title:text(body.source_title||title),
+    source_author:text(body.source_author||author,200),source_shelf:sourceShelf,source_row:sourceRow,
+    updated_at:new Date().toISOString()
+   },{onConflict:"library,book_id"});
+   if(error)throw Error("BOOK_DELETE_FAILED");
+   return respond(200,{ok:true,deleted:true});
+  }
+
   if(action==="approve_pending"){
    const id=text(body.id,60);
    if(!/^[0-9a-f-]{36}$/i.test(id))throw Error("INVALID_RECORD_ID");
@@ -234,7 +312,7 @@ Deno.serve(async(req:Request)=>{
  }catch(e){
   const err=e as {message?:string;code?:string};
   const message=err?.message||"";
-  if(/^(TITLE_REQUIRED|AUTHOR_REQUIRED|ISBN_REQUIRED|INVALID_ISBN|CABINET_NUMBER_REQUIRED|SHELF_ROW_REQUIRED|SUBJECT_REQUIRED|DIGITAL_BOOK_HTTPS_URL_REQUIRED|AUDIO_HTTPS_URL_REQUIRED|DIGITAL_REQUIRED_FIELDS|PHYSICAL_REQUIRED_FIELDS|EMPTY_SHEET|FILE_TOO_LARGE|FILE_TOO_MANY_ROWS|EXCEL_NEEDS_TITLE_AUTHOR_HEADERS|EXCEL_XLSX_OR_CSV_ONLY|IMPORT_BATCH_TOO_LARGE|PENDING_PHYSICAL_NOT_FOUND|LOCATION_AUTHOR_REQUIRED|INVALID_RECORD_ID|PHYSICAL_RECORD_NOT_FOUND|DUPLICATE_PHYSICAL_HOLDING|PHYSICAL_EDIT_FAILED|PHYSICAL_REQUIRED_FIELDS)$/.test(message))
+  if(/^(TITLE_REQUIRED|AUTHOR_REQUIRED|ISBN_REQUIRED|INVALID_ISBN|CABINET_NUMBER_REQUIRED|SHELF_ROW_REQUIRED|SUBJECT_REQUIRED|DIGITAL_BOOK_HTTPS_URL_REQUIRED|AUDIO_HTTPS_URL_REQUIRED|DIGITAL_REQUIRED_FIELDS|PHYSICAL_REQUIRED_FIELDS|EMPTY_SHEET|FILE_TOO_LARGE|FILE_TOO_MANY_ROWS|EXCEL_NEEDS_TITLE_AUTHOR_HEADERS|EXCEL_XLSX_OR_CSV_ONLY|IMPORT_BATCH_TOO_LARGE|PENDING_PHYSICAL_NOT_FOUND|LOCATION_AUTHOR_REQUIRED|INVALID_RECORD_ID|PHYSICAL_RECORD_NOT_FOUND|DUPLICATE_PHYSICAL_HOLDING|PHYSICAL_EDIT_FAILED|PHYSICAL_REQUIRED_FIELDS|DIGITAL_RECORD_NOT_FOUND|DUPLICATE_DIGITAL_HOLDING|DIGITAL_EDIT_FAILED|BOOK_HAS_ACTIVE_LOAN|BOOK_NOT_FOUND|BOOK_DELETE_FAILED)$/.test(message))
     return respond(400,{ok:false,error:message});
   console.error("Admin catalog action failed",{code:err?.code||"UNKNOWN"});
   return respond(500,{ok:false,error:"CATALOG_OPERATION_FAILED"});
