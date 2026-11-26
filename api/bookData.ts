@@ -3374,7 +3374,8 @@ const rawBookData = [
 { "title": "The White Stallion", "author": "Elozabeth Shub", "shelf": 30, "row": 2 },
 { "title": "Megan", "author": "Marisa Carroll", "shelf": 15, "row": 2 },
 { "title": "Helping Your PreSchool Child", "author": "Education Publications Center", "shelf": 4, "row": 1 },
-{ "title": "The 10 Funniest People", "author": "Education Publications Center", "shelf": 4, "row": 1 },
+{ "title": "The 10 Funniest People", "author": "Sean Donaghey", "shelf": 12, "row": 3 },
+{ "title": "Conversations with J.K. Rowling", "author": "Lindsey Fraser", "shelf": 20, "row": 3 }
 ];
 
 
